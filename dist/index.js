@@ -2146,8 +2146,16 @@ Mi Nhon Hotel Mui Ne`
         const order = orders2.find((o) => o.specialInstructions === orderId);
         if (order) {
           const updatedOrder = await storage.updateOrderStatus(order.id, status);
-          if (updatedOrder && globalThis.wss) {
-            if (updatedOrder.specialInstructions) {
+          if (updatedOrder) {
+            const io = req.app.get("io");
+            if (io) {
+              io.emit("order_status_update", {
+                orderId: updatedOrder.id,
+                reference: updatedOrder.specialInstructions,
+                status: updatedOrder.status
+              });
+            }
+            if (updatedOrder.specialInstructions && globalThis.wss) {
               globalThis.wss.clients.forEach((client) => {
                 if (client.readyState === 1) {
                   client.send(JSON.stringify({

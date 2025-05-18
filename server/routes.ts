@@ -1159,8 +1159,19 @@ Mi Nhon Hotel Mui Ne`
         if (order) {
           const updatedOrder = await storage.updateOrderStatus(order.id, status);
           // Emit WebSocket cho Guest UI nếu updatedOrder tồn tại
-          if (updatedOrder && globalThis.wss) {
-            if (updatedOrder.specialInstructions) {
+          if (updatedOrder) {
+            // Emit qua socket.io nếu có
+            const io = req.app.get('io');
+            if (io) {
+              // Emit cho tất cả client hoặc theo room (nếu dùng join_room)
+              io.emit('order_status_update', {
+                orderId: updatedOrder.id,
+                reference: updatedOrder.specialInstructions,
+                status: updatedOrder.status
+              });
+            }
+            // Giữ lại emit qua globalThis.wss nếu cần tương thích cũ
+            if (updatedOrder.specialInstructions && globalThis.wss) {
               globalThis.wss.clients.forEach((client) => {
                 if (client.readyState === 1) {
                   client.send(JSON.stringify({
