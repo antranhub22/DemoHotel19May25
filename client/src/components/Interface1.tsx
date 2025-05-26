@@ -10,8 +10,6 @@ import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
-import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
-import OrderSummaryPanel from './OrderSummaryPanel';
 
 interface Interface1Props {
   isActive: boolean;
@@ -27,10 +25,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     activeOrders,
     language,
-    setLanguage,
-    callSummary,
-    setOrderSummary,
-    orderSummary
+    setLanguage
   } = useAssistant();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -41,7 +36,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
-  const [showOrderSummary, setShowOrderSummary] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -67,38 +61,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setCurrentInterface('interface1');
   }, [setCurrentInterface]);
 
-  // Handler for Next button - End call and show summary popup
+  // Handler for Next button - End call and proceed to interface3
   const handleNext = useCallback(() => {
-    setIsCallStarted(false);
-    setShowOrderSummary(true);
-    if (callSummary && callSummary.content) {
-      const parsed = parseSummaryToOrderDetails(callSummary.content);
-      setOrderSummary({
-        orderType: parsed.orderType || '',
-        deliveryTime: parsed.deliveryTime || 'asap',
-        roomNumber: parsed.roomNumber || '',
-        guestName: parsed.guestName || '',
-        guestEmail: parsed.guestEmail || '',
-        guestPhone: parsed.guestPhone || '',
-        specialInstructions: parsed.specialInstructions || '',
-        items: parsed.items || [],
-        totalAmount: parsed.totalAmount || 0
-      });
+    if (language === 'fr') {
+      setCurrentInterface('interface3fr');
     } else {
-      // Nếu không có dữ liệu AI, tạo orderSummary mẫu để panel luôn hiển thị
-      setOrderSummary({
-        orderType: '',
-        deliveryTime: 'asap',
-        roomNumber: '',
-        guestName: '',
-        guestEmail: '',
-        guestPhone: '',
-        specialInstructions: '',
-        items: [],
-        totalAmount: 0
-      });
+      setCurrentInterface('interface3');
     }
-  }, [callSummary, setOrderSummary]);
+  }, [setCurrentInterface, language]);
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
@@ -247,185 +217,161 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </h2>
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
-        <div className="w-full flex flex-row items-start justify-center gap-6 mt-8">
-          {/* Khối Realtime Conversation bên trái */}
-          {isCallStarted && (
-            <div style={{width: 340, minHeight: 420}}>
-              <RealtimeConversationPopup isOpen={true} onClose={() => {}} />
-            </div>
-          )}
-          {/* Nút Call ở giữa */}
-          <div className="flex flex-col items-center justify-center" style={{minWidth: 220}}>
-            {/* Main Call Button với hiệu ứng nâng cao */}
-            <div className="relative mb-4 sm:mb-12 flex items-center justify-center">
-              {!isCallStarted ? (
-                <>
-                  {/* Ripple Animation (luôn hiển thị, mạnh hơn khi hover) */}
-                  <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
-                  <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
-                  {/* Main Button */}
-                  <button 
-                    id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
-                    className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
-                    onClick={() => handleCall(language as any)}
-                    style={{
-                      background: language === 'en' 
-                        ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)' // Tiếng Anh - Blue Lagoon
-                        : language === 'fr' 
-                        ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)' // Tiếng Pháp - Xanh da trời
-                        : language === 'zh' 
-                        ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)' // Tiếng Trung - Đỏ
-                        : language === 'ru' 
-                        ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)' // Tiếng Nga - Tím
-                        : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)', // Tiếng Hàn - Xanh lá
-                      boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
-                      border: '1px solid rgba(255, 255, 255, 0.5)',
-                      transition: 'all 0.3s ease',
-                      transform: 'translateY(0) translateZ(30px)',
-                    }}
-                  >
-                    <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
-                      style={{ 
-                        filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
-                        color: language === 'en' 
-                          ? '#F9BF3B' // Vàng cho tiếng Anh
-                          : language === 'fr' 
-                          ? '#FFFFFF' // Trắng cho tiếng Pháp
-                          : language === 'zh' 
-                          ? '#FFEB3B' // Vàng sáng cho tiếng Trung
-                          : language === 'ru' 
-                          ? '#F48FB1' // Hồng nhạt cho tiếng Nga
-                          : '#4ADE80' // Xanh lá sáng cho tiếng Hàn
-                      }}
-                    >mic</span>
-                    {language === 'fr' ? (
-                      <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
-                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                      >{t('press_to_call', language)}</span>
-                    ) : language === 'ru' || language === 'ko' ? (
-                      <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
-                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                      >{t('press_to_call', language)}</span>
-                    ) : (
-                      <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                      >{t('press_to_call', language)}</span>
-                    )}
-                    <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
-                  </button>
-                </>
-              ) : (
-                <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
-                  <SiriCallButton
-                    containerId="siri-button"
-                    isListening={!isMuted}
-                    volumeLevel={micLevel}
-                  />
-                  {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
-                  <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
-                    {/* Nút Mute bên trái */}
-                    <button
-                      className="flex items-center justify-center transition-colors"
-                      title={isMuted ? t('unmute', language) : t('mute', language)}
-                      onClick={toggleMute}
-                      style={{fontSize: 22, padding: 0, background: 'none', border: 'none', color: '#d4af37', width: 28, height: 28}}
-                      onMouseOver={e => (e.currentTarget.style.color = '#ffd700')}
-                      onMouseOut={e => (e.currentTarget.style.color = '#d4af37')}
-                    >
-                      <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
-                    </button>
-                    {/* Nút Cancel (chỉ mobile) */}
-                    <button
-                      id="cancelButton"
-                      onClick={handleCancel}
-                      className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
-                      style={{
-                        fontFamily: 'inherit',
-                        letterSpacing: 0.2,
-                        minHeight: 44,
-                        minWidth: 90,
-                        fontSize: 14,
-                        touchAction: 'manipulation',
-                        zIndex: 10
-                      }}
-                    >
-                      <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-                    </button>
-                    {/* Duration ở giữa, luôn căn giữa */}
-                    <div className="flex-1 flex justify-center">
-                      <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
-                        {formatDuration(localDuration)}
-                      </div>
-                    </div>
-                    {/* Nút xác nhận (mobile) */}
-                    <Button
-                      id="confirmButton"
-                      onClick={handleNext}
-                      variant="yellow"
-                      className="flex items-center justify-center sm:hidden text-xs font-bold"
-                      style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
-                    >
-                      <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
-                    </Button>
-                    {/* Nút MicLevel bên phải */}
-                    <div className="w-7 h-7 flex items-center justify-center">
-                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                        <div 
-                          className="w-3 h-3 rounded-full bg-white transition-all duration-200"
-                          style={{
-                            transform: `scale(${1 + (micLevel * 0.5)})`,
-                            opacity: 0.7 + (micLevel * 0.3)
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  {/* Desktop buttons */}
-                  <div className="hidden sm:flex flex-col gap-4 w-full max-w-xs mx-auto mt-4">
-                    <Button
-                      id="endCallButton"
-                      onClick={handleNext}
-                      variant="yellow"
-                      className="w-full flex items-center justify-center space-x-2 text-base sm:text-lg"
-                      style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
-                    >
-                      <span className="material-icons">send</span>
-                      <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
-                    </Button>
-                    <button
-                      id="cancelButtonDesktop"
-                      onClick={handleCancel}
-                      className="w-full bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
-                      style={{
-                        fontFamily: 'inherit',
-                        letterSpacing: 0.2,
-                        minHeight: 56,
-                        minWidth: 120,
-                        touchAction: 'manipulation',
-                        zIndex: 10
-                      }}
-                    >
-                      <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
-                    </button>
+        {/* Main Call Button với hiệu ứng nâng cao */}
+        <div className="relative mb-4 sm:mb-12 flex items-center justify-center">
+          {!isCallStarted ? (
+            <>
+              {/* Ripple Animation (luôn hiển thị, mạnh hơn khi hover) */}
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
+              {/* Main Button */}
+              <button 
+                id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+                className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
+                onClick={() => handleCall(language as any)}
+                style={{
+                  background: language === 'en' 
+                    ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)' // Tiếng Anh - Blue Lagoon
+                    : language === 'fr' 
+                    ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)' // Tiếng Pháp - Xanh da trời
+                    : language === 'zh' 
+                    ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)' // Tiếng Trung - Đỏ
+                    : language === 'ru' 
+                    ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)' // Tiếng Nga - Tím
+                    : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)', // Tiếng Hàn - Xanh lá
+                  boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease',
+                  transform: 'translateY(0) translateZ(30px)',
+                }}
+              >
+                <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
+                  style={{ 
+                    filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                    color: language === 'en' 
+                      ? '#F9BF3B' // Vàng cho tiếng Anh
+                      : language === 'fr' 
+                      ? '#FFFFFF' // Trắng cho tiếng Pháp
+                      : language === 'zh' 
+                      ? '#FFEB3B' // Vàng sáng cho tiếng Trung
+                      : language === 'ru' 
+                      ? '#F48FB1' // Hồng nhạt cho tiếng Nga
+                      : '#4ADE80' // Xanh lá sáng cho tiếng Hàn
+                  }}
+                >mic</span>
+                {language === 'fr' ? (
+                  <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                ) : language === 'ru' || language === 'ko' ? (
+                  <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                ) : (
+                  <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                )}
+                <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
+              </button>
+            </>
+          ) : (
+            <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
+              <SiriCallButton
+                containerId="siri-button"
+                isListening={!isMuted}
+                volumeLevel={micLevel}
+              />
+              {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
+              <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
+                {/* Nút Mute bên trái */}
+                <button
+                  className="flex items-center justify-center transition-colors"
+                  title={isMuted ? t('unmute', language) : t('mute', language)}
+                  onClick={toggleMute}
+                  style={{fontSize: 22, padding: 0, background: 'none', border: 'none', color: '#d4af37', width: 28, height: 28}}
+                  onMouseOver={e => (e.currentTarget.style.color = '#ffd700')}
+                  onMouseOut={e => (e.currentTarget.style.color = '#d4af37')}
+                >
+                  <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
+                </button>
+                {/* Nút Cancel (chỉ mobile) */}
+                <button
+                  id="cancelButton"
+                  onClick={handleCancel}
+                  className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
+                  style={{
+                    fontFamily: 'inherit',
+                    letterSpacing: 0.2,
+                    minHeight: 44,
+                    minWidth: 90,
+                    fontSize: 14,
+                    touchAction: 'manipulation',
+                    zIndex: 10
+                  }}
+                >
+                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                </button>
+                {/* Duration ở giữa, luôn căn giữa */}
+                <div className="flex-1 flex justify-center">
+                  <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
+                    {formatDuration(localDuration)}
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-          {/* Khối Summary bên phải */}
-          {showOrderSummary && (
-            <div style={{width: 400, minHeight: 420}}>
-              <OrderSummaryPanel />
+                {/* Nút xác nhận (mobile) */}
+                <Button
+                  id="confirmButton"
+                  onClick={handleNext}
+                  variant="yellow"
+                  className="flex items-center justify-center sm:hidden text-xs font-bold"
+                  style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
+                >
+                  <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
+                </Button>
+                {/* Nút MicLevel bên phải */}
+                <div className="w-7 h-7 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div 
+                      className="w-3 h-3 rounded-full bg-white transition-all duration-200"
+                      style={{
+                        transform: `scale(${1 + (micLevel * 0.5)})`,
+                        opacity: 0.7 + (micLevel * 0.3)
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Desktop buttons */}
+              <div className="hidden sm:flex flex-col gap-4 w-full max-w-xs mx-auto mt-4">
+                <Button
+                  id="endCallButton"
+                  onClick={handleNext}
+                  variant="yellow"
+                  className="w-full flex items-center justify-center space-x-2 text-base sm:text-lg"
+                  style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
+                >
+                  <span className="material-icons">send</span>
+                  <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
+                </Button>
+                <button
+                  id="cancelButtonDesktop"
+                  onClick={handleCancel}
+                  className="w-full bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
+                  style={{
+                    fontFamily: 'inherit',
+                    letterSpacing: 0.2,
+                    minHeight: 56,
+                    minWidth: 120,
+                    touchAction: 'manipulation',
+                    zIndex: 10
+                  }}
+                >
+                  <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
+                </button>
+              </div>
             </div>
           )}
         </div>
-        {/* Thêm nút mở popup Order Summary, ví dụ đặt cạnh Call button hoặc ở vị trí phù hợp */}
-        <button
-          className="ml-4 px-4 py-2 bg-yellow-400 text-blue-900 rounded-full font-semibold shadow hover:bg-yellow-300 transition"
-          onClick={() => setShowOrderSummary(true)}
-        >
-          {t('order_summary', language)}
-        </button>
         {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
           <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
@@ -629,6 +575,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         )}
       </div>
+
+      {/* Add RealtimeConversationPopup */}
+      <RealtimeConversationPopup 
+        isOpen={showConversation}
+        onClose={() => setShowConversation(false)}
+      />
     </div>
   );
 };
