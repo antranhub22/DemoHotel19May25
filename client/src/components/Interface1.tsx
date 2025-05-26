@@ -11,6 +11,7 @@ import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
+import Interface3 from './Interface3';
 
 interface Interface1Props {
   isActive: boolean;
@@ -37,6 +38,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+  const [showSummaryPopup, setShowSummaryPopup] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -196,6 +198,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   // Log dữ liệu order thực tế để debug
   console.log('ActiveOrders:', activeOrders);
 
+  // Thêm hàm lấy instance vapi
+  const vapi = getVapiInstance();
+
+  // Handler cho nút Cancel
+  const handleCancelVapiCall = () => {
+    if (vapi) vapi.stop();
+    setIsCallStarted(false);
+    setShowConversation(false);
+    setShowSummaryPopup(false);
+    setCurrentInterface('interface1');
+  };
+  // Handler cho nút Confirm
+  const handleConfirmVapiCall = () => {
+    if (vapi) vapi.stop();
+    setIsCallStarted(false);
+    setShowConversation(false);
+    setShowSummaryPopup(true);
+  };
+
   return (
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
@@ -326,6 +347,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                     </div>
                   </div>
                 </div>
+                {/* Hai nút nhỏ Cancel/Confirm dưới hàng Mute/Duration/Volume */}
+                {isCallStarted && (
+                  <div className="flex flex-row justify-between items-center w-full max-w-xs mx-auto mt-2 gap-2">
+                    <button
+                      className="flex-1 py-2 rounded-full bg-white hover:bg-red-100 text-red-700 font-semibold text-sm border border-red-200 shadow transition"
+                      style={{ minWidth: 90, maxWidth: 120 }}
+                      onClick={handleCancelVapiCall}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="flex-1 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-sm shadow transition"
+                      style={{ minWidth: 90, maxWidth: 120 }}
+                      onClick={handleConfirmVapiCall}
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -542,6 +582,21 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         )}
       </div>
+      {/* Popup summary Interface3 */}
+      {showSummaryPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="relative bg-transparent">
+            <button
+              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
+              onClick={() => setShowSummaryPopup(false)}
+              title="Đóng summary"
+            >
+              <span className="material-icons text-gray-600">close</span>
+            </button>
+            <Interface3 isActive={true} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
