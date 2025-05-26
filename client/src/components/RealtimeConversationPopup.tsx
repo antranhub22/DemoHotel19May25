@@ -144,15 +144,25 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       
       {/* Popup */}
       <div 
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-2xl h-[80vh] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
+        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl"
         style={{
-          background: 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          // Responsive: desktop bên trái nút Call, mobile ở giữa
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90vw',
+          maxWidth: 360,
+          height: '70vh',
+          maxHeight: 440,
+          background: 'rgba(255,255,255,0.12)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+          border: '1.5px solid rgba(255,255,255,0.25)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
           <h3 className="text-lg font-semibold text-gray-800">
             {t('realtime_conversation', language)}
           </h3>
@@ -163,7 +173,6 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-
         {/* Conversation Content */}
         <div 
           ref={containerRef}
@@ -233,6 +242,20 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
+      {/* Desktop: popup lệch trái nút Call */}
+      <style>{`
+        @media (min-width: 640px) {
+          .fixed.z-50.overflow-hidden.rounded-2xl.shadow-2xl {
+            left: calc(50% - 260px); /* lệch trái nút Call khoảng 260px */
+            top: 50%;
+            transform: translateY(-50%);
+            width: 340px !important;
+            height: 420px !important;
+            max-width: 340px !important;
+            max-height: 420px !important;
+          }
+        }
+      `}</style>
     </>
   );
 };
