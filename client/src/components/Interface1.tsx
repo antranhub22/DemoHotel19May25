@@ -10,6 +10,7 @@ import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
+import Interface3Popup from './Interface3Popup';
 
 interface Interface1Props {
   isActive: boolean;
@@ -36,6 +37,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+  const [showOrderSummary, setShowOrderSummary] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -372,6 +374,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
           )}
         </div>
+        {/* Thêm nút mở popup Order Summary, ví dụ đặt cạnh Call button hoặc ở vị trí phù hợp */}
+        <button
+          className="ml-4 px-4 py-2 bg-yellow-400 text-blue-900 rounded-full font-semibold shadow hover:bg-yellow-300 transition"
+          onClick={() => setShowOrderSummary(true)}
+        >
+          {t('order_summary', language)}
+        </button>
         {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
           <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
@@ -581,6 +590,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         isOpen={showConversation}
         onClose={() => setShowConversation(false)}
       />
+      <Interface3Popup isOpen={showOrderSummary} onClose={() => setShowOrderSummary(false)} />
     </div>
   );
 };
