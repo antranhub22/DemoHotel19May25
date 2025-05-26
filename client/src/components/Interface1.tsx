@@ -475,7 +475,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
           {/* Mobile: hiển thị dưới nút Call */}
           {showConversation && (
-            <div className="sm:hidden w-full flex-shrink-0 mt-2">
+            <div className="sm:hidden flex-shrink-0 mt-2" style={{ width: '85vw' }}>
               <RealtimeConversationPopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
