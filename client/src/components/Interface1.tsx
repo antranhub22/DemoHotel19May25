@@ -707,14 +707,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         </div>
       )}
-      {/* Mobile: Realtime Conversation overlay, đè lên menu box */}
+      {/* Mobile: Realtime Conversation overlay, bắt đầu từ menu box Tour, width 90vw, căn giữa */}
       {showConversation && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden pointer-events-none">
-          <div className="w-[100vw] max-w-none mb-2 pointer-events-auto" style={{height: '80vh', minHeight: 400}}>
-            <RealtimeConversationPopup 
-              isOpen={showConversation}
-              onClose={() => setShowConversation(false)}
-            />
+        <div className="fixed left-0 right-0 sm:hidden z-50 pointer-events-none flex justify-center" style={{top: 270, bottom: 0}}>
+          <div className="w-[90vw] max-w-none h-full pointer-events-auto flex items-end justify-center">
+            <div style={{width: '90vw', height: '80%', minHeight: 320, margin: '0 auto'}}>
+              <RealtimeConversationPopup 
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+              />
+            </div>
           </div>
         </div>
       )}
