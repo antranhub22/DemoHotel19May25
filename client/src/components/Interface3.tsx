@@ -297,6 +297,12 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         body: JSON.stringify(newOrder)
       });
       if (!res.ok) throw new Error('Failed to create order');
+      setOrder({
+        reference: newOrder.specialInstructions || newOrder.callId,
+        estimatedTime: newOrder.deliveryTime,
+        summary: orderSummary,
+        ...newOrder
+      });
       setCurrentInterface('interface4');
     } catch (err) {
       alert('Failed to send order to reception!');
