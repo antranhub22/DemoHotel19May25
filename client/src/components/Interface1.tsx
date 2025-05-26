@@ -12,6 +12,7 @@ import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
+import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 
 interface Interface1Props {
   isActive: boolean;
@@ -27,7 +28,10 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     activeOrders,
     language,
-    setLanguage
+    setLanguage,
+    callSummary,
+    orderSummary,
+    setOrderSummary
   } = useAssistant();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -214,6 +218,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     if (vapi) vapi.stop();
     setIsCallStarted(false);
     setShowConversation(false);
+    // Nếu chưa có orderSummary, tạo mới từ callSummary
+    if (!orderSummary && callSummary?.content) {
+      const summary = parseSummaryToOrderDetails(callSummary.content);
+      setOrderSummary(summary as any);
+    }
     setShowSummaryPopup(true);
   };
 
