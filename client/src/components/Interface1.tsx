@@ -43,6 +43,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
   const [showSummaryPopup, setShowSummaryPopup] = useState(false);
+  const [showGeneratingPopup, setShowGeneratingPopup] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -223,8 +224,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       const summary = parseSummaryToOrderDetails(callSummary.content);
       setOrderSummary(summary as any);
     }
-    setShowSummaryPopup(true);
+    // Nếu chưa có summary thực sự, show popup Generating
+    if (!callSummary?.content || callSummary.content === 'Generating AI summary of your conversation...') {
+      setShowGeneratingPopup(true);
+    } else {
+      setShowSummaryPopup(true);
+    }
   };
+
+  // Theo dõi callSummary, khi đã có nội dung thực sự thì ẩn popup Generating và show popup summary
+  useEffect(() => {
+    if (
+      showGeneratingPopup &&
+      callSummary?.content &&
+      callSummary.content !== 'Generating AI summary of your conversation...'
+    ) {
+      setShowGeneratingPopup(false);
+      setShowSummaryPopup(true);
+    }
+  }, [callSummary, showGeneratingPopup]);
 
   useEffect(() => {
     if (
@@ -614,6 +632,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               <span className="material-icons text-gray-600">close</span>
             </button>
             <Interface3 isActive={true} />
+          </div>
+        </div>
+      )}
+      {/* Popup thông báo đang sinh summary */}
+      {showGeneratingPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
+            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
+            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
+            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
           </div>
         </div>
       )}
