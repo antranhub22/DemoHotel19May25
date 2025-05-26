@@ -10,6 +10,7 @@ import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
+import ReferencePopup from './ReferencePopup';
 
 interface Interface1Props {
   isActive: boolean;
@@ -331,10 +332,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* Popup mới đối xứng bên phải */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0">
-              <RealtimeConversationPopup 
+              <ReferencePopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
-                isRight
               />
             </div>
           )}
