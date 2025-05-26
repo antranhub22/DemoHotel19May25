@@ -126,10 +126,10 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     return () => cleanupAnimations();
   }, [conversationTurns]);
 
-  // Auto scroll to bottom when new messages arrive
+  // Auto scroll to top when new messages arrive (mới nhất ở trên cùng)
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      containerRef.current.scrollTop = 0;
     }
   }, [conversationTurns]);
 
@@ -159,7 +159,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
           <h3 className="text-lg font-semibold text-gray-800">
-            {t('realtime_conversation', language)}
+            {t('conversation', language)}
           </h3>
           <button
             onClick={onClose}
@@ -178,7 +178,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
               {t('tap_to_speak', language)}
             </div>
           )}
-          {[...conversationTurns].reverse().map((turn, turnIdx) => (
+          {[...conversationTurns].map((turn, turnIdx) => (
             <div key={turn.id} className="mb-4">
               <div className="flex items-start gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
