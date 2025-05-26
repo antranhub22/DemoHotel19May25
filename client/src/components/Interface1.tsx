@@ -63,14 +63,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setCurrentInterface('interface1');
   }, [setCurrentInterface]);
 
-  // Handler for Next button - End call and proceed to interface3
+  // Handler for Next button - End call and show summary popup
   const handleNext = useCallback(() => {
-    if (language === 'fr') {
-      setCurrentInterface('interface3fr');
-    } else {
-      setCurrentInterface('interface3');
-    }
-  }, [setCurrentInterface, language]);
+    setIsCallStarted(false);
+    setShowOrderSummary(true);
+  }, []);
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
