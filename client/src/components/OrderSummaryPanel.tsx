@@ -91,101 +91,23 @@ const OrderSummaryPanel: React.FC = () => {
     }
   }, [serviceRequests, orderSummary, setOrderSummary]);
 
-  // Legacy function to analyze call summary and prepare request items
+  // useEffect phân tích callSummary thành orderSummary (không phụ thuộc vào isActive)
   useEffect(() => {
-    if (callSummary && orderSummary) {
-      const content = callSummary.content;
-      const detectedRoomNumber = extractRoomNumber(content);
-      if (detectedRoomNumber && detectedRoomNumber !== orderSummary.roomNumber) {
-        setOrderSummary({
-          ...orderSummary,
-          roomNumber: detectedRoomNumber
-        });
-      }
-      if (!serviceRequests || serviceRequests.length === 0) {
-        const requestsMatch = content.match(/List of Requests:([\s\S]*?)(?:\n\nSpecial Instructions|\n\nThe conversation)/);
-        if (requestsMatch) {
-          const requestsSection = requestsMatch[1];
-          const requestRegex = /Request (\d+): ([^\n]+)/g;
-          let match;
-          const newItems = [];
-          let id = 1;
-          while ((match = requestRegex.exec(requestsSection)) !== null) {
-            const requestType = match[2].trim();
-            const requestIndex = match.index;
-            const endIndex = requestsSection.indexOf(`Request ${parseInt(match[1]) + 1}:`, requestIndex);
-            const detailsSection = endIndex > -1 
-              ? requestsSection.substring(requestIndex, endIndex)
-              : requestsSection.substring(requestIndex);
-            const detailsRegex = /- ([^:]+): ([^\n]+)/g;
-            let detailsMatch;
-            const details: Record<string, string> = {};
-            while ((detailsMatch = detailsRegex.exec(detailsSection)) !== null) {
-              const key = detailsMatch[1].trim();
-              const value = detailsMatch[2].trim();
-              details[key.toLowerCase()] = value;
-            }
-            let description = '';
-            if (details['service description']) {
-              description += `${details['service description']}`;
-            }
-            if (details['details']) {
-              description += description ? `. ${details['details']}` : details['details'];
-            }
-            if (details['items']) {
-              description += description ? `\nItems: ${details['items']}` : `Items: ${details['items']}`;
-            }
-            if (details['service timing requested']) {
-              description += `\nTiming: ${details['service timing requested']}`;
-            }
-            if (details['destinations']) {
-              description += `\nDestinations: ${details['destinations']}`;
-            }
-            if (!description) {
-              description = `Requested ${requestType} service`;
-            }
-            newItems.push({
-              id: id.toString(),
-              name: requestType,
-              description: description,
-              quantity: 1,
-              price: 10
-            });
-            id++;
-          }
-          if (newItems.length > 0 && (!orderSummary.items || orderSummary.items.length === 0)) {
-            const serviceTypes = newItems.map(item => {
-              const serviceType = item.name.toLowerCase().replace(/\s+/g, '-');
-              return serviceType;
-            }).join(',');
-            const roomNumber = extractRoomNumber(content) || orderSummary.roomNumber;
-            const timingMatch = content.match(/Service Timing Requested:?\s*([^\n]+)/i);
-            const timing = timingMatch ? timingMatch[1] : orderSummary.deliveryTime;
-            let deliveryTime = orderSummary.deliveryTime;
-            if (timing) {
-              if (/soon|immediate|urgent|right now/i.test(timing)) {
-                deliveryTime = 'asap';
-              } else if (/30 minute|half hour/i.test(timing)) {
-                deliveryTime = '30min';
-              } else if (/hour|60 minute/i.test(timing)) {
-                deliveryTime = '1hour';
-              } else if (/schedule|later|specific/i.test(timing)) {
-                deliveryTime = 'specific';
-              }
-            }
-            setOrderSummary({
-              ...orderSummary,
-              items: newItems,
-              orderType: serviceTypes,
-              roomNumber: roomNumber,
-              deliveryTime: deliveryTime,
-              totalAmount: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-            });
-          }
-        }
-      }
+    if (callSummary && callSummary.content) {
+      const parsed = parseSummaryToOrderDetails(callSummary.content);
+      setOrderSummary({
+        orderType: parsed.orderType || '',
+        deliveryTime: parsed.deliveryTime || 'asap',
+        roomNumber: parsed.roomNumber || '',
+        guestName: parsed.guestName || '',
+        guestEmail: parsed.guestEmail || '',
+        guestPhone: parsed.guestPhone || '',
+        specialInstructions: parsed.specialInstructions || '',
+        items: parsed.items || [],
+        totalAmount: parsed.totalAmount || 0
+      });
     }
-  }, [callSummary, orderSummary, serviceRequests, setOrderSummary]);
+  }, [callSummary, setOrderSummary]);
 
   // Handle confirm order
   const handleConfirmOrder = async () => {
@@ -284,7 +206,10 @@ const OrderSummaryPanel: React.FC = () => {
     });
   };
 
-  if (!orderSummary) return null;
+  // Nếu chưa có dữ liệu AI, hiển thị thông báo thay vì panel rỗng
+  if (!orderSummary || !orderSummary.items || orderSummary.items.length === 0) {
+    return <div className="text-center text-gray-500 p-8">Chưa có dữ liệu tổng hợp từ AI</div>;
+  }
 
   return (
     <div className="w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
