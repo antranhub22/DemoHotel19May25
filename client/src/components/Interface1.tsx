@@ -8,6 +8,7 @@ import { initVapi, getVapiInstance } from '@/lib/vapiClient';
 import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
+import RealtimeConversationPopup from './RealtimeConversationPopup';
 
 interface Interface1Props {
   isActive: boolean;
@@ -19,6 +20,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
+  const [showConversation, setShowConversation] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -58,6 +60,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     if (vapi && assistantId) {
       await vapi.start(assistantId);
       setIsCallStarted(true);
+      setShowConversation(true);
     }
   };
 
@@ -421,6 +424,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         )}
       </div>
+
+      {/* Add RealtimeConversationPopup */}
+      <RealtimeConversationPopup 
+        isOpen={showConversation}
+        onClose={() => setShowConversation(false)}
+      />
     </div>
   );
 };
