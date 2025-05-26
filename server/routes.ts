@@ -244,7 +244,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new order
   app.post('/api/orders', async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      const orderData = insertOrderSchema.parse({
+        ...req.body,
+        roomNumber: req.body.roomNumber || 'unknown',
+      });
       const order = await storage.createOrder(orderData);
       // Đồng bộ sang bảng request cho Staff UI
       try {
