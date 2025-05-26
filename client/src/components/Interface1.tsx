@@ -584,22 +584,24 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
         {showOrderConfirm ? (
           <div className="w-full flex justify-center items-center mt-8">
-            <div className="w-[90vw] max-w-7xl flex flex-row gap-6 items-stretch">
-              {/* Khối Realtime Conversation (copy toàn bộ popup cũ) */}
+            <div className="w-[90vw] max-w-7xl flex flex-row gap-6 items-stretch min-h-[400px]">
+              {/* Khối Realtime Conversation */}
               <div className="flex-1 min-w-0 flex items-center">
-                <div className="w-full h-full">
+                <div className="w-full h-full min-h-[300px]">
                   <RealtimeConversationPopup isOpen={true} onClose={() => {}} inline={true} />
                 </div>
               </div>
               {/* Khối Nút Call (to nhất) */}
               <div className="flex-[2] min-w-0 flex items-center justify-center">
-                <div className="w-full h-full flex flex-col items-center justify-center">
+                <div className="w-full h-full flex flex-col items-center justify-center min-h-[300px]">
                   <SiriCallButton containerId="siri-button" isListening={!isMuted} volumeLevel={micLevel} />
                 </div>
               </div>
               {/* Khối Reference */}
               <div className="flex-1 min-w-0 flex items-center">
-                <ReferenceBlock />
+                <div className="w-full h-full min-h-[300px]">
+                  <ReferenceBlock />
+                </div>
               </div>
             </div>
           </div>
