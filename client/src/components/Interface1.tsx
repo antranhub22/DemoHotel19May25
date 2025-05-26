@@ -345,9 +345,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         
         {/* Main Call Button với hiệu ứng nâng cao */}
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
-          {/* Popup realtime conversation bên trái */}
+          {/* Popup realtime conversation bên trái (desktop) */}
           {showConversation && (
-            <div className="block flex-shrink-0" style={{ marginRight: 0 }}>
+            <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
               <RealtimeConversationPopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
@@ -473,6 +473,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </div>
             )}
           </div>
+          {/* Mobile: hiển thị dưới nút Call */}
+          {showConversation && (
+            <div className="sm:hidden w-full flex-shrink-0 mt-2">
+              <RealtimeConversationPopup 
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+              />
+            </div>
+          )}
           {/* Popup mới đối xứng bên phải */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
