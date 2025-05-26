@@ -84,6 +84,19 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         items: parsed.items || [],
         totalAmount: parsed.totalAmount || 0
       });
+    } else {
+      // Nếu không có dữ liệu AI, tạo orderSummary mẫu để panel luôn hiển thị
+      setOrderSummary({
+        orderType: '',
+        deliveryTime: 'asap',
+        roomNumber: '',
+        guestName: '',
+        guestEmail: '',
+        guestPhone: '',
+        specialInstructions: '',
+        items: [],
+        totalAmount: 0
+      });
     }
   }, [callSummary, setOrderSummary]);
 
