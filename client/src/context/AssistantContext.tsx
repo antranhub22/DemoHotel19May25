@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko';
 
-interface AssistantContextType {
+export interface AssistantContextType {
   currentInterface: InterfaceLayer;
   setCurrentInterface: (layer: InterfaceLayer) => void;
   transcripts: Transcript[];

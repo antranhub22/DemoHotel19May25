@@ -10,9 +10,13 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { Link } from 'wouter';
 import { History } from 'lucide-react';
 import InfographicSteps from './InfographicSteps';
+import { FaGlobeAsia } from 'react-icons/fa';
+import { FiChevronDown } from 'react-icons/fi';
+import { t } from '@/i18n';
+import { Language, AssistantContextType } from '@/types';
 
 const VoiceAssistant: React.FC = () => {
-  const { currentInterface, language } = useAssistant();
+  const { currentInterface, language, setLanguage } = useAssistant();
   
   // Initialize WebSocket connection
   useWebSocket();
@@ -40,10 +44,45 @@ const VoiceAssistant: React.FC = () => {
               />
             </div>
           </div>
-          {/* Right: Call History */}
-          <div className="w-10 flex-shrink-0 flex items-center justify-end ml-2 sm:ml-6 mr-1 sm:mr-2">
+          {/* Right: Call History, Refresh, and Language */}
+          <div className="flex items-center gap-2">
+            {/* Refresh Button */}
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center justify-center px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm hover:bg-primary-darker transition-colors"
+              title="Refresh"
+            >
+              <span className="material-icons text-sm sm:text-base mr-1">refresh</span>
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            {/* Language Dropdown */}
+            <div className="flex items-center px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm">
+              <FaGlobeAsia className="text-[#F9BF3B] text-sm sm:text-base mr-1.5" />
+              <div className="relative">
+                <select
+                  value={language}
+                  onChange={e => setLanguage(e.target.value as Language)}
+                  className="appearance-none bg-transparent focus:outline-none transition-all duration-200 pr-6"
+                  style={{
+                    fontWeight: 600,
+                    color: '#fff',
+                    textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                  }}
+                >
+                  <option value="en">🇬🇧 EN</option>
+                  <option value="fr">🇫🇷 FR</option>
+                  <option value="zh">🇨🇳 ZH</option>
+                  <option value="ru">🇷🇺 RU</option>
+                  <option value="ko">🇰🇷 KO</option>
+                </select>
+                <FiChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-[#F9BF3B] pointer-events-none text-sm" />
+              </div>
+            </div>
+
+            {/* Call History */}
             <Link href="/call-history">
-              <a className="flex items-center gap-1 px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm">
+              <a className="flex items-center gap-1 px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm hover:bg-primary-darker transition-colors">
                 <History className="w-4 h-4" />
                 <span className="hidden sm:inline">Call History</span>
               </a>

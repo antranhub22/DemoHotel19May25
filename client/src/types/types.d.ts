@@ -1,24 +1,3 @@
-declare module '@/context/AssistantContext' {
-  export interface AssistantContextType {
-    transcripts: Array<{
-      id: string;
-      role: 'user' | 'assistant';
-      content: string;
-      timestamp: Date;
-    }>;
-    callDetails: any;
-    callDuration: number;
-    endCall: () => void;
-    isMuted: boolean;
-    toggleMute: () => void;
-    setCurrentInterface: (interface: string) => void;
-    micLevel: number;
-    modelOutput: any;
-  }
-
-  export function useAssistant(): AssistantContextType;
-}
-
 declare module '@/services/ReferenceService' {
   export interface ReferenceItem {
     url: string;
