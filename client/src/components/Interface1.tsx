@@ -38,6 +38,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [localDuration, setLocalDuration] = useState(0);
+  const [showOrderCard, setShowOrderCard] = useState(false);
 
   // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
@@ -263,6 +264,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       setShowConversation(false);
     }
   }, [isActive]);
+
+  // Theo dõi activeOrders để hiển thị thẻ Order khi có order mới từ Interface3
+  useEffect(() => {
+    if (activeOrders && activeOrders.length > 0) {
+      setShowOrderCard(true);
+    }
+  }, [activeOrders]);
 
   return (
     <div 
@@ -562,7 +570,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         </div>
         {/* Active orders status panels - thêm hiệu ứng 3D và đường viền sáng */}
-        {activeOrders && activeOrders.length > 0 && (
+        {showOrderCard && activeOrders && activeOrders.length > 0 && (
           <div className="flex flex-col items-center gap-y-4 mb-20 pb-16 w-full px-2 sm:mb-12 sm:pb-8 sm:flex-row sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:justify-start"
             style={{ perspective: '1000px', zIndex: 30 }}
           >
