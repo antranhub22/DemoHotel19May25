@@ -152,7 +152,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   };
 
   // Component hiển thị icon với tooltip
-  const IconWithTooltip = ({ iconName, className }: { iconName: string, className?: string }) => (
+  const IconWithTooltip = ({ iconName, tooltip, className }: { iconName: string, tooltip: string, className?: string }) => (
     <div className="relative flex flex-col items-center justify-center cursor-pointer">
       <span 
         className={`material-icons text-xl sm:text-4xl text-[#F9BF3B] ${className || ''}`} 
@@ -161,10 +161,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       >
         {iconName}
       </span>
-      
       {activeTooltip === iconName && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max max-w-[120px] sm:max-w-[180px] bg-white/90 text-gray-800 text-xs sm:text-sm font-medium py-1 px-2 rounded shadow-lg z-50 pointer-events-none text-center">
-          {t(`icon_${iconName}`, language)}
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max max-w-[160px] sm:max-w-[200px] bg-white/90 text-gray-800 text-xs sm:text-sm font-medium py-1 px-2 rounded shadow-lg z-50 pointer-events-none text-center">
+          {tooltip}
           <div className="absolute w-2 h-2 bg-white/90 transform rotate-45 left-1/2 -translate-x-1/2 top-full -mt-1"></div>
         </div>
       )}
@@ -278,6 +277,49 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   useEffect(() => {
     console.log('showOrderCard changed:', showOrderCard);
   }, [showOrderCard]);
+
+  // Mapping icon và tooltip cho từng panel
+  const toursIcons = [
+    { iconName: 'wb_sunny', tooltip: 'Half Day' },
+    { iconName: 'calendar_today', tooltip: 'Full Day' },
+    { iconName: 'event_note', tooltip: 'Multi Day' },
+    { iconName: 'star', tooltip: 'Special Tours' },
+  ];
+  const busTicketsIcons = [
+    { iconName: 'location_city', tooltip: 'Ho Chi Minh' },
+    { iconName: 'park', tooltip: 'Da Lat' },
+    { iconName: 'beach_access', tooltip: 'Nha Trang' },
+    { iconName: 'waves', tooltip: 'Da Nang' },
+    { iconName: 'directions_boat', tooltip: 'Can Tho' },
+    { iconName: 'directions_bus', tooltip: 'Vung Tau' },
+    { iconName: 'nature_people', tooltip: 'My Tho' },
+  ];
+  const vehicleRentalIcons = [
+    { iconName: 'two_wheeler', tooltip: 'Motorbike' },
+    { iconName: 'drive_eta', tooltip: 'Car with driver' },
+    { iconName: 'directions_car', tooltip: 'Car without Driver' },
+  ];
+  const currencyIcons = [
+    { iconName: 'attach_money', tooltip: 'USD' },
+    { iconName: 'euro', tooltip: 'EUR' },
+    { iconName: 'currency_ruble', tooltip: 'RUB' },
+    { iconName: 'currency_yen', tooltip: 'KWR' },
+    { iconName: 'swap_horiz', tooltip: 'Other' },
+  ];
+  const laundryIcons = [
+    { iconName: 'local_laundry_service', tooltip: 'Standard' },
+    { iconName: 'bolt', tooltip: 'Express' },
+    { iconName: 'dry_cleaning', tooltip: 'Dry Cleaning' },
+    { iconName: 'iron', tooltip: 'Iron Service' },
+    { iconName: 'help', tooltip: 'Special Request' },
+  ];
+  const homestayIcons = [
+    { iconName: 'home', tooltip: 'Under 300.000 VND' },
+    { iconName: 'attach_money', tooltip: '300.000 to 600.000 VND' },
+    { iconName: 'house_siding', tooltip: 'Over 600.000 VND' },
+    { iconName: 'calendar_month', tooltip: 'Long-Rent' },
+    { iconName: 'meeting_room', tooltip: 'Full-House' },
+  ];
 
   return (
     <div 
@@ -443,9 +485,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </div>
         {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
-          <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
+          <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full items-stretch">
             {/* Tours */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -459,14 +501,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Tours</h4>
               <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="wb_sunny" /></li>
-                <li><IconWithTooltip iconName="calendar_today" /></li>
-                <li><IconWithTooltip iconName="event_note" /></li>
-                <li><IconWithTooltip iconName="star" /></li>
+                {toursIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
             {/* Bus Tickets */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[520px] mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -479,18 +520,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Bus Tickets</h4>
-              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="location_city" /></li>
-                <li><IconWithTooltip iconName="park" /></li>
-                <li><IconWithTooltip iconName="beach_access" /></li>
-                <li><IconWithTooltip iconName="waves" /></li>
-                <li><IconWithTooltip iconName="directions_boat" /></li>
-                <li><IconWithTooltip iconName="directions_bus" /></li>
-                <li><IconWithTooltip iconName="nature_people" /></li>
+              <ul className="flex flex-row flex-nowrap gap-2 py-0.5 sm:py-2 justify-center items-center">
+                {busTicketsIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
             {/* Vehicle Rental */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -504,13 +541,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Vehicle Rental</h4>
               <ul className="grid grid-cols-3 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="two_wheeler" /></li>
-                <li><IconWithTooltip iconName="drive_eta" /></li>
-                <li><IconWithTooltip iconName="directions_car" /></li>
+                {vehicleRentalIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
             {/* Currency Exchange */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -524,15 +561,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Currency Exchange</h4>
               <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="attach_money" /></li>
-                <li><IconWithTooltip iconName="euro" /></li>
-                <li><IconWithTooltip iconName="currency_ruble" /></li>
-                <li><IconWithTooltip iconName="currency_yen" /></li>
-                <li><IconWithTooltip iconName="swap_horiz" /></li>
+                {currencyIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
             {/* Laundry Service */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -546,15 +581,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Laundry Service</h4>
               <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="local_laundry_service" /></li>
-                <li><IconWithTooltip iconName="bolt" /></li>
-                <li><IconWithTooltip iconName="dry_cleaning" /></li>
-                <li><IconWithTooltip iconName="iron" /></li>
-                <li><IconWithTooltip iconName="help" /></li>
+                {laundryIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
             {/* HomeStay */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -568,11 +601,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >HomeStay</h4>
               <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="home" /></li>
-                <li><IconWithTooltip iconName="attach_money" /></li>
-                <li><IconWithTooltip iconName="house_siding" /></li>
-                <li><IconWithTooltip iconName="calendar_month" /></li>
-                <li><IconWithTooltip iconName="meeting_room" /></li>
+                {homestayIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
               </ul>
             </div>
           </div>
