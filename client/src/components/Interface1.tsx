@@ -7,16 +7,18 @@ import { ActiveOrder } from '@/types';
 import { initVapi, getVapiInstance } from '@/lib/vapiClient';
 import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
+import SiriCallButton from './SiriCallButton';
 
 interface Interface1Props {
   isActive: boolean;
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
-  const { setCurrentInterface, setTranscripts, setModelOutput, setCallDetails, setCallDuration, setEmailSentForCurrentSession, activeOrders, language, setLanguage } = useAssistant();
+  const { setCurrentInterface, setTranscripts, setModelOutput, setCallDetails, setCallDuration, setEmailSentForCurrentSession, activeOrders, language, setLanguage, isMuted, micLevel } = useAssistant();
   
   // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [isCallStarted, setIsCallStarted] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -55,7 +57,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     const vapi = await initVapi(publicKey);
     if (vapi && assistantId) {
       await vapi.start(assistantId);
-      setCurrentInterface('interface2');
+      setIsCallStarted(true);
     }
   };
 
@@ -150,59 +152,71 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         
         {/* Main Call Button với hiệu ứng nâng cao */}
         <div className="relative mb-4 sm:mb-12 flex items-center justify-center">
-          {/* Ripple Animation (luôn hiển thị, mạnh hơn khi hover) */}
-          <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
-          {/* Main Button */}
-            <button 
-            id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
-            className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
-            onClick={() => handleCall(language as any)}
-            style={{
-              background: language === 'en' 
-                ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)' // Tiếng Anh - Blue Lagoon
-                : language === 'fr' 
-                ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)' // Tiếng Pháp - Xanh da trời
-                : language === 'zh' 
-                ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)' // Tiếng Trung - Đỏ
-                : language === 'ru' 
-                ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)' // Tiếng Nga - Tím
-                : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)', // Tiếng Hàn - Xanh lá
-              boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.5)',
-              transition: 'all 0.3s ease',
-              transform: 'translateY(0) translateZ(30px)',
-            }}
-          >
-            <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
-              style={{ 
-                filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
-                color: language === 'en' 
-                  ? '#F9BF3B' // Vàng cho tiếng Anh
-                  : language === 'fr' 
-                  ? '#FFFFFF' // Trắng cho tiếng Pháp
-                  : language === 'zh' 
-                  ? '#FFEB3B' // Vàng sáng cho tiếng Trung
-                  : language === 'ru' 
-                  ? '#F48FB1' // Hồng nhạt cho tiếng Nga
-                  : '#4ADE80' // Xanh lá sáng cho tiếng Hàn
-              }}
-            >mic</span>
-            {language === 'fr' ? (
-              <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : language === 'ru' || language === 'ko' ? (
-              <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : (
-              <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            )}
-            <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
-            </button>
+          {!isCallStarted ? (
+            <>
+              {/* Ripple Animation (luôn hiển thị, mạnh hơn khi hover) */}
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
+              {/* Main Button */}
+              <button 
+                id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+                className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
+                onClick={() => handleCall(language as any)}
+                style={{
+                  background: language === 'en' 
+                    ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)' // Tiếng Anh - Blue Lagoon
+                    : language === 'fr' 
+                    ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)' // Tiếng Pháp - Xanh da trời
+                    : language === 'zh' 
+                    ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)' // Tiếng Trung - Đỏ
+                    : language === 'ru' 
+                    ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)' // Tiếng Nga - Tím
+                    : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)', // Tiếng Hàn - Xanh lá
+                  boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease',
+                  transform: 'translateY(0) translateZ(30px)',
+                }}
+              >
+                <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
+                  style={{ 
+                    filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                    color: language === 'en' 
+                      ? '#F9BF3B' // Vàng cho tiếng Anh
+                      : language === 'fr' 
+                      ? '#FFFFFF' // Trắng cho tiếng Pháp
+                      : language === 'zh' 
+                      ? '#FFEB3B' // Vàng sáng cho tiếng Trung
+                      : language === 'ru' 
+                      ? '#F48FB1' // Hồng nhạt cho tiếng Nga
+                      : '#4ADE80' // Xanh lá sáng cho tiếng Hàn
+                  }}
+                >mic</span>
+                {language === 'fr' ? (
+                  <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                ) : language === 'ru' || language === 'ko' ? (
+                  <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                ) : (
+                  <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                )}
+                <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
+              </button>
+            </>
+          ) : (
+            <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
+              <SiriCallButton
+                containerId="siri-button-interface1"
+                isListening={!isMuted}
+                volumeLevel={micLevel}
+              />
+            </div>
+          )}
         </div>
         {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
