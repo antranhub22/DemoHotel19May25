@@ -1,36 +1,26 @@
 // Interface1 component - latest version v1.0.1 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '../assets/hotel-exterior.jpeg';
-import { t } from '@/i18n';
+import { t } from '../i18n';
+import { ActiveOrder } from '@/types';
+import { initVapi, getVapiInstance } from '@/lib/vapiClient';
+import { FaGlobeAsia } from 'react-icons/fa';
+import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import InfographicSteps from './InfographicSteps';
 
 interface Interface1Props {
   isActive: boolean;
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
-  const { 
-    setCurrentInterface, 
-    language, 
-    setLanguage,
-    isMuted,
-    micLevel,
-    transcripts,
-    endCall,
-    setEmailSentForCurrentSession,
-    setCallDetails,
-    setTranscripts,
-    setModelOutput,
-    setCallDuration
-  } = useAssistant();
+  const { setCurrentInterface, setTranscripts, setModelOutput, setCallDetails, setCallDuration, setEmailSentForCurrentSession, activeOrders, language, setLanguage, isMuted, micLevel } = useAssistant();
+  
+  // State để lưu trữ tooltip đang hiển thị
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
-  const [showInfographic, setShowInfographic] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -38,45 +28,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Handler for Cancel button - End call and go back to interface1
-  const handleCancel = useCallback(() => {
-    // Call the context's endCall and switch to interface1
-    endCall();
-    setIsCallStarted(false);
-    setShowConversation(false);
-  }, [endCall]);
-
-  // Handler for Next button - End call and proceed to interface3
-  const handleNext = useCallback(() => {
-    // Nếu chưa có hội thoại thì không cho xác nhận
-    if (!transcripts || transcripts.length === 0) {
-      alert(t('need_conversation', language));
-      return;
-    }
-    // Call the context's endCall and switch to interface3
-    endCall();
-    if (language === 'fr') {
-      setCurrentInterface('interface3fr');
-    } else {
-      setCurrentInterface('interface3');
-    }
-  }, [endCall, setCurrentInterface, transcripts, language]);
-
-  const startCall = () => {
-    setIsCallStarted(true);
-    setShowConversation(true);
-    setEmailSentForCurrentSession(false);
-    setCallDetails({
-      startTime: new Date(),
-      endTime: null,
-      duration: 0,
-      status: 'in-progress'
-    });
-    setTranscripts([]);
-    setModelOutput([]);
-    setCallDuration(0);
-  };
 
   // Hàm dùng chung cho mọi ngôn ngữ
   const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko') => {
@@ -184,201 +135,301 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } z-30 overflow-y-auto`} 
+      } z-10 overflow-y-auto`} 
       id="interface1"
       style={{
-        backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
+        backgroundImage: `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+        perspective: '1000px'
       }}
     >
-      <div className="container mx-auto flex flex-col p-2 sm:p-4 md:p-8">
-        <div className="mx-auto w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
-          <div className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
-            <p className="font-poppins font-bold text-xl sm:text-2xl text-blue-900 tracking-wide">{t('hotel_name', language)}</p>
-          </div>
-          <div className="flex flex-col md:flex-row gap-4 sm:gap-10 md:gap-16">
-            {/* Left column: main content */}
-            <div className="md:w-3/4 w-full space-y-3 sm:space-y-4">
-              {/* Mobile: Cancel và Confirm lên trên cùng */}
-              <div className="flex sm:hidden flex-row w-full gap-2 mb-2">
-                <button
-                  id="cancelButton"
-                  onClick={handleCancel}
-                  className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
-                  style={{
-                    fontFamily: 'inherit',
-                    letterSpacing: 0.2,
-                    minHeight: 44,
-                    minWidth: 90,
-                    fontSize: 14,
-                    touchAction: 'manipulation',
-                    zIndex: 10
+      <div className="container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24" 
+        style={{ transform: 'translateZ(20px)', minHeight: 'fit-content' }}
+      >
+        <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
+          style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
+          <span style={{ color: 'red', fontStyle: 'italic', marginRight: 8 }}>Demo</span>{t('hotel_name', language)}
+        </h2>
+        <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
+        
+        {/* Main Call Button với hiệu ứng nâng cao */}
+        <div className="relative mb-4 sm:mb-12 flex items-center justify-center">
+          {!isCallStarted ? (
+            <>
+              {/* Ripple Animation (luôn hiển thị, mạnh hơn khi hover) */}
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
+              {/* Main Button */}
+              <button 
+                id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+                className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
+                onClick={() => handleCall(language as any)}
+                style={{
+                  background: language === 'en' 
+                    ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)' // Tiếng Anh - Blue Lagoon
+                    : language === 'fr' 
+                    ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)' // Tiếng Pháp - Xanh da trời
+                    : language === 'zh' 
+                    ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)' // Tiếng Trung - Đỏ
+                    : language === 'ru' 
+                    ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)' // Tiếng Nga - Tím
+                    : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)', // Tiếng Hàn - Xanh lá
+                  boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                  transition: 'all 0.3s ease',
+                  transform: 'translateY(0) translateZ(30px)',
+                }}
+              >
+                <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
+                  style={{ 
+                    filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                    color: language === 'en' 
+                      ? '#F9BF3B' // Vàng cho tiếng Anh
+                      : language === 'fr' 
+                      ? '#FFFFFF' // Trắng cho tiếng Pháp
+                      : language === 'zh' 
+                      ? '#FFEB3B' // Vàng sáng cho tiếng Trung
+                      : language === 'ru' 
+                      ? '#F48FB1' // Hồng nhạt cho tiếng Nga
+                      : '#4ADE80' // Xanh lá sáng cho tiếng Hàn
                   }}
-                >
-                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-                </button>
-                <Button
-                  id="confirmButton"
-                  onClick={handleNext}
-                  variant="yellow"
-                  className="flex items-center justify-center sm:hidden text-xs font-bold"
-                  style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
-                >
-                  <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
-                </Button>
-              </div>
-              {/* Main content */}
-              <div className="flex flex-col items-center justify-center space-y-4">
-                {!isCallStarted ? (
-                  <button
-                    onClick={startCall}
-                    className="w-full max-w-xs bg-[#d4af37] hover:bg-[#ffd700] text-blue-900 font-bold rounded-full shadow-lg text-lg sm:text-xl transition-colors border border-white/30 flex items-center justify-center py-3 sm:py-4"
-                    style={{ fontFamily: 'inherit', letterSpacing: 0.5 }}
-                  >
-                    <span className="material-icons mr-2 text-lg sm:text-2xl">call</span>
-                    {t('press_to_call', language)}
-                  </button>
+                >mic</span>
+                {language === 'fr' ? (
+                  <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
+                ) : language === 'ru' || language === 'ko' ? (
+                  <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
                 ) : (
-                  <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
-                    <SiriCallButton
-                      containerId="siri-button"
-                      isListening={!isMuted}
-                      volumeLevel={micLevel}
-                    />
-                    {/* Confirm & Cancel buttons dưới SiriCallButton */}
-                    <div className="flex flex-row w-full gap-2 mt-4">
-                      <button
-                        id="cancelButton"
-                        onClick={handleCancel}
-                        className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
-                        style={{
-                          fontFamily: 'inherit',
-                          letterSpacing: 0.2,
-                          minHeight: 44,
-                          minWidth: 90,
-                          fontSize: 14,
-                          touchAction: 'manipulation',
-                          zIndex: 10
-                        }}
-                      >
-                        <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-                      </button>
-                      <Button
-                        id="confirmButton"
-                        onClick={handleNext}
-                        variant="yellow"
-                        className="flex items-center justify-center sm:hidden text-xs font-bold"
-                        style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
-                      >
-                        <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
-                      </Button>
-                    </div>
-                    {/* Desktop version */}
-                    <div className="hidden sm:flex flex-row w-full gap-2 mt-4 justify-center">
-                      <Button
-                        id="endCallButton"
-                        onClick={handleNext}
-                        variant="yellow"
-                        className="w-full md:w-auto flex items-center justify-center space-x-2 text-base sm:text-lg"
-                        style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
-                      >
-                        <span className="material-icons">send</span>
-                        <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
-                      </Button>
-                      <button
-                        id="cancelButtonDesktop"
-                        onClick={handleCancel}
-                        className="w-full md:w-auto bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
-                        style={{
-                          fontFamily: 'inherit',
-                          letterSpacing: 0.2,
-                          minHeight: 56,
-                          minWidth: 120,
-                          touchAction: 'manipulation',
-                          zIndex: 10
-                        }}
-                      >
-                        <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
-                      </button>
-                    </div>
-                  </div>
+                  <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                    style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                  >{t('press_to_call', language)}</span>
                 )}
-              </div>
+                <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
+              </button>
+            </>
+          ) : (
+            <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
+              <SiriCallButton
+                containerId="siri-button-interface1"
+                isListening={!isMuted}
+                volumeLevel={micLevel}
+              />
             </div>
-            {/* Right column: control buttons at top-right (ẩn trên mobile) */}
-            <div className="md:w-1/4 w-full hidden sm:flex md:justify-end justify-center">
-              <div className="flex flex-col items-end space-y-2 sm:space-y-3 w-full md:w-auto">
-                <Button
-                  id="endCallButton"
-                  onClick={handleNext}
-                  variant="yellow"
-                  className="w-full md:w-auto flex items-center justify-center space-x-2 text-base sm:text-lg"
-                  style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
-                >
-                  <span className="material-icons">send</span>
-                  <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
-                </Button>
-                <button
-                  id="cancelButtonDesktop"
-                  onClick={handleCancel}
-                  className="w-full md:w-auto bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
-                  style={{
-                    fontFamily: 'inherit',
-                    letterSpacing: 0.2,
-                    minHeight: 56,
-                    minWidth: 120,
-                    touchAction: 'manipulation',
-                    zIndex: 10
-                  }}
-                >
-                  <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
-                </button>
-              </div>
+          )}
+        </div>
+        {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
+        <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
+          <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
+            {/* Room & Stay */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                }}
+              >{t('room_and_stay', language)}</h4>
+              <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="login" /></li>
+                <li><IconWithTooltip iconName="hourglass_empty" /></li>
+                <li><IconWithTooltip iconName="info" /></li>
+                <li><IconWithTooltip iconName="policy" /></li>
+                <li><IconWithTooltip iconName="wifi" /></li>
+              </ul>
+            </div>
+            {/* Room Services - Áp dụng cùng phong cách cho các panel khác */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                }}
+              >{t('room_services', language)}</h4>
+              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="restaurant" /></li>
+                <li><IconWithTooltip iconName="local_bar" /></li>
+                <li><IconWithTooltip iconName="cleaning_services" /></li>
+                <li><IconWithTooltip iconName="local_laundry_service" /></li>
+                <li><IconWithTooltip iconName="alarm" /></li>
+                <li><IconWithTooltip iconName="add_circle" /></li>
+                <li><IconWithTooltip iconName="build" /></li>
+              </ul>
+            </div>
+            {/* Bookings & Facilities */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                }}
+              >{t('bookings_and_facilities', language)}</h4>
+              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="event_seat" /></li>
+                <li><IconWithTooltip iconName="spa" /></li>
+                <li><IconWithTooltip iconName="fitness_center" /></li>
+                <li><IconWithTooltip iconName="pool" /></li>
+                <li><IconWithTooltip iconName="directions_car" /></li>
+                <li><IconWithTooltip iconName="medical_services" /></li>
+                <li><IconWithTooltip iconName="support_agent" /></li>
+              </ul>
+            </div>
+            {/* Tourism & Exploration */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                }}
+              >{t('tourism_and_exploration', language)}</h4>
+              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="location_on" /></li>
+                <li><IconWithTooltip iconName="local_dining" /></li>
+                <li><IconWithTooltip iconName="directions_bus" /></li>
+                <li><IconWithTooltip iconName="directions_car" /></li>
+                <li><IconWithTooltip iconName="event" /></li>
+                <li><IconWithTooltip iconName="shopping_bag" /></li>
+                <li><IconWithTooltip iconName="map" /></li>
+              </ul>
+            </div>
+            {/* Support */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0,0,0,0.15)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ 
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
+                }}
+              >{t('support_external_services', language)}</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="translate" /></li>
+                <li><IconWithTooltip iconName="rate_review" /></li>
+                <li><IconWithTooltip iconName="report_problem" /></li>
+                <li><IconWithTooltip iconName="luggage" /></li>
+              </ul>
             </div>
           </div>
         </div>
+        {/* Active orders status panels - thêm hiệu ứng 3D và đường viền sáng */}
+        {activeOrders && activeOrders.length > 0 && (
+          <div className="flex flex-col items-center gap-y-4 mb-20 pb-16 w-full px-2 sm:mb-12 sm:pb-8 sm:flex-row sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:justify-start"
+            style={{ perspective: '1000px', zIndex: 30 }}
+          >
+            {[...activeOrders].sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime()).map((o: ActiveOrder) => {
+              const deadline = new Date(o.requestedAt.getTime() + 60 * 60 * 1000);
+              const diffSec = Math.max(Math.ceil((deadline.getTime() - now.getTime()) / 1000), 0);
+              if (diffSec <= 0) return null;
+              const mins = Math.floor(diffSec / 60).toString().padStart(2, '0');
+              const secs = (diffSec % 60).toString().padStart(2, '0');
+              return (
+                <div key={o.reference} 
+                  className="p-2 sm:p-3 text-gray-800 max-w-xs w-[220px] flex-shrink-0 transition-all duration-250 hover:rotate-1 hover:scale-105"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(8px)',
+                    borderRadius: '24px',
+                    boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                    transform: 'translateZ(20px)',
+                    transformStyle: 'preserve-3d',
+                    zIndex: 20,
+                    marginBottom: '8px',
+                    transition: 'all 0.3s ease-in-out'
+                  }}
+                >
+                  {/* Đồng hồ đếm ngược ở trên đầu */}
+                  <div className="flex justify-center items-center mb-1.5">
+                    <span className="font-bold text-lg text-blue-800 bg-blue-50 px-4 py-1.5 rounded-full shadow-sm" 
+                      style={{
+                        borderRadius: '16px',
+                        boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.1)'
+                      }}
+                    >{`${mins}:${secs}`}</span>
+                  </div>
+                  
+                  <p className="text-xs sm:text-sm mb-0.5 px-1.5"><strong>{t('order_ref', language)}:</strong> {o.reference}</p>
+                  <p className="text-xs sm:text-sm mb-0.5 px-1.5"><strong>{t('requested_at', language)}:</strong> {o.requestedAt.toLocaleString('en-US', {timeZone: 'Asia/Ho_Chi_Minh', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</p>
+                  <p className="text-xs sm:text-sm mb-0.5 px-1.5"><strong>{t('estimated_completion', language)}:</strong> {o.estimatedTime}</p>
+                  
+                  {/* Thêm trạng thái - hiển thị theo ngôn ngữ đã chọn */}
+                  <div className="mt-2 flex justify-center">
+                    {(() => {
+                      const style = getStatusStyle(o.status);
+                      // Log để debug
+                      console.log('Order status:', o.status, '->', getStatusTranslationKey(o.status));
+                      return (
+                        <span className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold ${style.bg} ${style.text} w-full text-center shadow-md border border-white/60`}
+                          style={{
+                            borderRadius: '16px',
+                            boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.12)',
+                            transition: 'all 0.2s ease',
+                            letterSpacing: 0.2
+                          }}
+                        >
+                          <span className="material-icons text-base mr-1" style={{marginTop: -2}}>{style.icon}</span>
+                          {t(getStatusTranslationKey(o.status), language)}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Realtime Conversation Popup */}
-      <RealtimeConversationPopup
+      {/* Add RealtimeConversationPopup */}
+      <RealtimeConversationPopup 
         isOpen={showConversation}
         onClose={() => setShowConversation(false)}
       />
-
-      {/* Infographic Popup */}
-      {showInfographic && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={() => setShowInfographic(false)}
-          />
-          <div 
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-2xl h-[80vh] bg-white rounded-2xl shadow-2xl z-50 overflow-hidden"
-            style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {t('how_to_use', language)}
-              </h3>
-              <button
-                onClick={() => setShowInfographic(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-            <div className="p-4 h-[calc(100%-4rem)] overflow-y-auto">
-              <InfographicSteps />
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };
