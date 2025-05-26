@@ -136,20 +136,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-        onClick={onClose}
-      />
-      
       {/* Popup */}
       <div 
-        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl"
+        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl realtime-popup"
         style={{
-          // Responsive: desktop bên trái nút Call, mobile ở giữa
           top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
           width: '90vw',
           maxWidth: 360,
           height: '70vh',
@@ -159,6 +150,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          left: 0,
+          right: 'auto',
+          transform: 'translateY(-50%)',
         }}
       >
         {/* Header */}
@@ -242,11 +236,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
-      {/* Desktop: popup lệch trái nút Call */}
+      {/* Desktop: popup lệch phải nút Call */}
       <style>{`
         @media (min-width: 640px) {
-          .fixed.z-50.overflow-hidden.rounded-2xl.shadow-2xl {
-            left: calc(50% - 260px); /* lệch trái nút Call khoảng 260px */
+          .realtime-popup {
+            left: calc(50% + 260px); /* lệch phải nút Call khoảng 260px */
             top: 50%;
             transform: translateY(-50%);
             width: 340px !important;
