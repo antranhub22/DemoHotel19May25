@@ -473,15 +473,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </div>
             )}
           </div>
-          {/* Mobile: hiển thị dưới nút Call */}
-          {showConversation && (
-            <div className="sm:hidden flex-shrink-0 mt-2" style={{ width: '85vw' }}>
-              <RealtimeConversationPopup 
-                isOpen={showConversation}
-                onClose={() => setShowConversation(false)}
-              />
-            </div>
-          )}
           {/* Popup mới đối xứng bên phải - chỉ hiện trên desktop */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
@@ -713,17 +704,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
             <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
             <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-          </div>
-        </div>
-      )}
-      {/* Mobile: Realtime Conversation overlay, đè lên menu box */}
-      {showConversation && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden pointer-events-none">
-          <div className="w-[85vw] max-w-lg mb-4 pointer-events-auto">
-            <RealtimeConversationPopup 
-              isOpen={showConversation}
-              onClose={() => setShowConversation(false)}
-            />
           </div>
         </div>
       )}
