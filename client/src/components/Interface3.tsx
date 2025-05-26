@@ -276,15 +276,37 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   // Handle confirm order
   const handleConfirmOrder = async () => {
     if (!orderSummary) return;
+    const getValidRoomNumber = () => {
+      if (orderSummary.roomNumber && orderSummary.roomNumber !== 'unknown') return orderSummary.roomNumber;
+      // Thử lấy từ callSummary nếu có
+      if (callSummary && callSummary.content) {
+        const match = callSummary.content.match(/Room Number:?\s*(\w+)/i);
+        if (match && match[1]) return match[1];
+      }
+      return 'unknown';
+    };
+    const validItems = (orderSummary.items && orderSummary.items.length > 0)
+      ? orderSummary.items
+      : [
+          {
+            id: '1',
+            name: 'General Service',
+            description: 'No details provided',
+            quantity: 1,
+            price: 0
+          }
+        ];
+    const validOrderType = orderSummary.orderType || 'Room Service';
+    const validDeliveryTime = orderSummary.deliveryTime || 'asap';
     const orderReference = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
     const now = new Date();
     const newOrder = {
       callId: orderReference,
-      roomNumber: orderSummary.roomNumber || 'unknown',
-      orderType: orderSummary.orderType || 'Room Service',
-      deliveryTime: orderSummary.deliveryTime || now.toISOString(),
+      roomNumber: getValidRoomNumber(),
+      orderType: validOrderType,
+      deliveryTime: validDeliveryTime,
       specialInstructions: orderReference,
-      items: orderSummary.items || [],
+      items: validItems,
       totalAmount: orderSummary.totalAmount || 0,
       status: 'pending',
       createdAt: now.toISOString()
