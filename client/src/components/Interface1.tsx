@@ -347,7 +347,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
           {/* Popup realtime conversation bên trái */}
           {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
+            <div className="block flex-shrink-0" style={{ marginRight: 0 }}>
               <RealtimeConversationPopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
