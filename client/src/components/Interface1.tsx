@@ -10,6 +10,7 @@ import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
+import Interface3CopyForInterface1 from './Interface3CopyForInterface1';
 
 interface Interface1Props {
   isActive: boolean;
@@ -36,6 +37,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -63,12 +65,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
   // Handler for Next button - End call and proceed to interface3
   const handleNext = useCallback(() => {
-    if (language === 'fr') {
-      setCurrentInterface('interface3fr');
-    } else {
-      setCurrentInterface('interface3');
-    }
-  }, [setCurrentInterface, language]);
+    setShowOrderConfirm(true);
+  }, []);
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
@@ -581,6 +579,10 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         isOpen={showConversation}
         onClose={() => setShowConversation(false)}
       />
+
+      {showOrderConfirm && (
+        <Interface3CopyForInterface1 isActive={showOrderConfirm} />
+      )}
     </div>
   );
 };
