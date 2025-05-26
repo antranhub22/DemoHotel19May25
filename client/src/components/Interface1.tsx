@@ -441,10 +441,10 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
           )}
         </div>
-        {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
+        {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
           <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
-            {/* Room & Stay */}
+            {/* Tours */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
@@ -456,20 +456,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               }}
             >
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
-                style={{ 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
-                }}
-              >{t('room_and_stay', language)}</h4>
-              <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="login" /></li>
-                <li><IconWithTooltip iconName="hourglass_empty" /></li>
-                <li><IconWithTooltip iconName="info" /></li>
-                <li><IconWithTooltip iconName="policy" /></li>
-                <li><IconWithTooltip iconName="wifi" /></li>
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Tours</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="wb_sunny" /></li>
+                <li><IconWithTooltip iconName="calendar_today" /></li>
+                <li><IconWithTooltip iconName="event_note" /></li>
+                <li><IconWithTooltip iconName="star" /></li>
               </ul>
             </div>
-            {/* Room Services - Áp dụng cùng phong cách cho các panel khác */}
+            {/* Bus Tickets */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
@@ -481,76 +477,83 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               }}
             >
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
-                style={{ 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
-                }}
-              >{t('room_services', language)}</h4>
-              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="restaurant" /></li>
-                <li><IconWithTooltip iconName="local_bar" /></li>
-                <li><IconWithTooltip iconName="cleaning_services" /></li>
-                <li><IconWithTooltip iconName="local_laundry_service" /></li>
-                <li><IconWithTooltip iconName="alarm" /></li>
-                <li><IconWithTooltip iconName="add_circle" /></li>
-                <li><IconWithTooltip iconName="build" /></li>
-              </ul>
-            </div>
-            {/* Bookings & Facilities */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
-              style={{
-                background: 'rgba(85,154,154,0.7)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '12px',
-                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                transform: 'translateZ(20px)'
-              }}
-            >
-              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
-                style={{ 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
-                }}
-              >{t('bookings_and_facilities', language)}</h4>
-              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="event_seat" /></li>
-                <li><IconWithTooltip iconName="spa" /></li>
-                <li><IconWithTooltip iconName="fitness_center" /></li>
-                <li><IconWithTooltip iconName="pool" /></li>
-                <li><IconWithTooltip iconName="directions_car" /></li>
-                <li><IconWithTooltip iconName="medical_services" /></li>
-                <li><IconWithTooltip iconName="support_agent" /></li>
-              </ul>
-            </div>
-            {/* Tourism & Exploration */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
-              style={{
-                background: 'rgba(85,154,154,0.7)',
-                backdropFilter: 'blur(8px)',
-                borderRadius: '12px',
-                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                transform: 'translateZ(20px)'
-              }}
-            >
-              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
-                style={{ 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
-                }}
-              >{t('tourism_and_exploration', language)}</h4>
-              <ul className="grid grid-cols-7 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="location_on" /></li>
-                <li><IconWithTooltip iconName="local_dining" /></li>
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Bus Tickets</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="location_city" /></li>
+                <li><IconWithTooltip iconName="park" /></li>
+                <li><IconWithTooltip iconName="beach_access" /></li>
+                <li><IconWithTooltip iconName="waves" /></li>
+                <li><IconWithTooltip iconName="directions_boat" /></li>
                 <li><IconWithTooltip iconName="directions_bus" /></li>
-                <li><IconWithTooltip iconName="directions_car" /></li>
-                <li><IconWithTooltip iconName="event" /></li>
-                <li><IconWithTooltip iconName="shopping_bag" /></li>
-                <li><IconWithTooltip iconName="map" /></li>
+                <li><IconWithTooltip iconName="nature_people" /></li>
               </ul>
             </div>
-            {/* Support */}
+            {/* Vehicle Rental */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Vehicle Rental</h4>
+              <ul className="grid grid-cols-3 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="two_wheeler" /></li>
+                <li><IconWithTooltip iconName="drive_eta" /></li>
+                <li><IconWithTooltip iconName="directions_car" /></li>
+              </ul>
+            </div>
+            {/* Currency Exchange */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Currency Exchange</h4>
+              <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="attach_money" /></li>
+                <li><IconWithTooltip iconName="euro" /></li>
+                <li><IconWithTooltip iconName="currency_ruble" /></li>
+                <li><IconWithTooltip iconName="currency_yen" /></li>
+                <li><IconWithTooltip iconName="swap_horiz" /></li>
+              </ul>
+            </div>
+            {/* Laundry Service */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Laundry Service</h4>
+              <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="local_laundry_service" /></li>
+                <li><IconWithTooltip iconName="bolt" /></li>
+                <li><IconWithTooltip iconName="dry_cleaning" /></li>
+                <li><IconWithTooltip iconName="iron" /></li>
+                <li><IconWithTooltip iconName="help" /></li>
+              </ul>
+            </div>
+            {/* HomeStay */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
@@ -562,16 +565,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               }}
             >
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
-                style={{ 
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                  textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)'
-                }}
-              >{t('support_external_services', language)}</h4>
-              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
-                <li><IconWithTooltip iconName="translate" /></li>
-                <li><IconWithTooltip iconName="rate_review" /></li>
-                <li><IconWithTooltip iconName="report_problem" /></li>
-                <li><IconWithTooltip iconName="luggage" /></li>
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >HomeStay</h4>
+              <ul className="grid grid-cols-5 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                <li><IconWithTooltip iconName="home" /></li>
+                <li><IconWithTooltip iconName="attach_money" /></li>
+                <li><IconWithTooltip iconName="house_siding" /></li>
+                <li><IconWithTooltip iconName="calendar_month" /></li>
+                <li><IconWithTooltip iconName="meeting_room" /></li>
               </ul>
             </div>
           </div>
