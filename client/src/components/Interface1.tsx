@@ -509,12 +509,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* 3. Đã có summary: chỉ hiện popup Summary */}
           {showSummaryPopup && (
             <div
-              className="fixed sm:hidden left-0 right-0 bottom-0 z-50 flex items-center justify-center w-full px-2 pb-4"
+              className="block sm:hidden w-full flex items-center justify-center px-2 pt-4 pb-6"
               style={{
-                maxHeight: '90vh',
-                overflowY: 'auto',
-                margin: '0 auto',
                 background: 'none',
+                minHeight: 'unset',
+                maxHeight: 'unset',
               }}
             >
               <div className="w-full max-w-4xl h-auto">
