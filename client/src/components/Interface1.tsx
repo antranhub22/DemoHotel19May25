@@ -255,6 +255,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     }
   }, [callSummary, orderSummary, setOrderSummary]);
 
+  useEffect(() => {
+    if (isActive) {
+      setShowSummaryPopup(false);
+      setShowGeneratingPopup(false);
+    }
+  }, [isActive]);
+
   return (
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
