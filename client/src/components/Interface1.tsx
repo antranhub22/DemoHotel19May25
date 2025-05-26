@@ -507,7 +507,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Bus Tickets */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[520px] mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[700px] mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -520,7 +520,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Bus Tickets</h4>
-              <ul className="flex flex-row flex-nowrap gap-2 py-0.5 sm:py-2 justify-center items-center">
+              <ul className="flex flex-row flex-nowrap gap-4 py-0.5 sm:py-2 justify-center items-center">
                 {busTicketsIcons.map(i => (
                   <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
                 ))}
