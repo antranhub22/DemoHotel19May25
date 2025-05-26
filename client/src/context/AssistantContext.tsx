@@ -424,21 +424,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     .then(data => {
       if (data.success && data.summary && data.summary.content) {
         const summaryContent = data.summary.content;
-        
-            // Batch state updates for summary
-            ReactDOM.unstable_batchedUpdates(() => {
-        const aiSummary: CallSummary = {
-          id: Date.now() as unknown as number,
-          callId: callDetails?.id || `call-${Date.now()}`,
-          content: summaryContent,
-          timestamp: new Date(data.summary.timestamp || Date.now())
-        };
-        setCallSummary(aiSummary);
-        
-        if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
-          setServiceRequests(data.serviceRequests);
-        }
-      });
+        // Batch state updates for summary
+        ReactDOM.unstable_batchedUpdates(() => {
+          const aiSummary: CallSummary = {
+            id: Date.now() as unknown as number,
+            callId: callDetails?.id || `call-${Date.now()}`,
+            content: summaryContent,
+            timestamp: new Date(data.summary.timestamp || Date.now())
+          };
+          setCallSummary(aiSummary);
+          if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
+            setServiceRequests(data.serviceRequests);
+          }
+        });
+      }
     })
     .catch(error => {
       console.error('Error processing summary:', error);
