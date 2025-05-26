@@ -577,18 +577,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </div>
 
         {/* Add RealtimeConversationPopup */}
-        <RealtimeConversationPopup 
-          isOpen={showConversation}
-          onClose={() => setShowConversation(false)}
-        />
+        {!showOrderConfirm && (
+          <></>
+        )}
 
         {showOrderConfirm ? (
           <div className="w-full flex justify-center items-center mt-8">
             <div className="w-[90vw] max-w-7xl flex flex-row gap-6 items-stretch">
-              {/* Khối Realtime Conversation */}
+              {/* Khối Realtime Conversation (copy toàn bộ popup cũ) */}
               <div className="flex-1 min-w-0 flex items-center">
                 <div className="w-full h-full">
-                  <RealtimeConversationPopup isOpen={true} onClose={() => {}} />
+                  <RealtimeConversationPopup isOpen={showConversation || true} onClose={() => setShowConversation(false)} />
                 </div>
               </div>
               {/* Khối Nút Call (to nhất) */}
