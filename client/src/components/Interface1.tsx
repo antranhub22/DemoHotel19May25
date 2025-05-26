@@ -483,19 +483,36 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
           )}
         </div>
-        {/* Popup realtime conversation & reference - chỉ mobile, render dưới nút Call */}
-        {showConversation && (
-          <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2">
-            <RealtimeConversationPopup 
-              isOpen={showConversation}
-              onClose={() => setShowConversation(false)}
-            />
-            <ReferencePopup 
-              isOpen={showConversation}
-              onClose={() => setShowConversation(false)}
-            />
-          </div>
-        )}
+        {/* Popup dưới nút Call trên mobile: chỉ hiển thị 1 trong 3 loại popup */}
+        <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2">
+          {/* 1. Đang gọi: hiện Realtime Conversation + Reference */}
+          {showConversation && !showGeneratingPopup && !showSummaryPopup && (
+            <>
+              <RealtimeConversationPopup 
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+              />
+              <ReferencePopup 
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+              />
+            </>
+          )}
+          {/* 2. Đang sinh summary: chỉ hiện popup Generating */}
+          {showGeneratingPopup && !showSummaryPopup && (
+            <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center w-full max-w-xs">
+              <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
+              <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
+              <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
+            </div>
+          )}
+          {/* 3. Đã có summary: chỉ hiện popup Summary */}
+          {showSummaryPopup && (
+            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+              <Interface3 isActive={true} />
+            </div>
+          )}
+        </div>
         {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
           {/* Hàng trên: Tours, Bus Tickets, Vehicle Rental */}
@@ -693,33 +710,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         )}
       </div>
-      {/* Popup summary Interface3 */}
-      {showSummaryPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="relative bg-transparent w-full h-full flex items-center justify-center">
-            <button
-              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
-              onClick={() => setShowSummaryPopup(false)}
-              title="Đóng summary"
-            >
-              <span className="material-icons text-gray-600">close</span>
-            </button>
-            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
-              <Interface3 isActive={true} />
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Popup thông báo đang sinh summary */}
-      {showGeneratingPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
