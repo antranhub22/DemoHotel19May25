@@ -295,39 +295,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 >
                   <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
                 </button>
-                {/* Nút Cancel (chỉ mobile) */}
-                <button
-                  id="cancelButton"
-                  onClick={handleCancel}
-                  className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
-                  style={{
-                    fontFamily: 'inherit',
-                    letterSpacing: 0.2,
-                    minHeight: 44,
-                    minWidth: 90,
-                    fontSize: 14,
-                    touchAction: 'manipulation',
-                    zIndex: 10
-                  }}
-                >
-                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-                </button>
                 {/* Duration ở giữa, luôn căn giữa */}
                 <div className="flex-1 flex justify-center">
                   <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
                     {formatDuration(localDuration)}
                   </div>
                 </div>
-                {/* Nút xác nhận (mobile) */}
-                <Button
-                  id="confirmButton"
-                  onClick={handleNext}
-                  variant="yellow"
-                  className="flex items-center justify-center sm:hidden text-xs font-bold"
-                  style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
-                >
-                  <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
-                </Button>
                 {/* Nút MicLevel bên phải */}
                 <div className="w-7 h-7 flex items-center justify-center">
                   <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
@@ -340,34 +313,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                     />
                   </div>
                 </div>
-              </div>
-              {/* Desktop buttons */}
-              <div className="hidden sm:flex flex-col gap-4 w-full max-w-xs mx-auto mt-4">
-                <Button
-                  id="endCallButton"
-                  onClick={handleNext}
-                  variant="yellow"
-                  className="w-full flex items-center justify-center space-x-2 text-base sm:text-lg"
-                  style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
-                >
-                  <span className="material-icons">send</span>
-                  <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
-                </Button>
-                <button
-                  id="cancelButtonDesktop"
-                  onClick={handleCancel}
-                  className="w-full bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
-                  style={{
-                    fontFamily: 'inherit',
-                    letterSpacing: 0.2,
-                    minHeight: 56,
-                    minWidth: 120,
-                    touchAction: 'manipulation',
-                    zIndex: 10
-                  }}
-                >
-                  <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
-                </button>
               </div>
             </div>
           )}
