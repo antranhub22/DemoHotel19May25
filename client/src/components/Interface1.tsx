@@ -31,7 +31,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setLanguage,
     callSummary,
     orderSummary,
-    setOrderSummary
+    setOrderSummary,
+    endCall
   } = useAssistant();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -217,8 +218,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   // Handler cho nút Confirm
   const handleConfirmVapiCall = () => {
     if (vapi) vapi.stop();
-    setIsCallStarted(false);
-    setShowConversation(false);
+    endCall();
     // Nếu chưa có orderSummary, tạo mới từ callSummary
     if (!orderSummary && callSummary?.content) {
       const summary = parseSummaryToOrderDetails(callSummary.content);
