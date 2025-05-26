@@ -124,6 +124,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       await vapi.start(assistantId);
       setIsCallStarted(true);
       setShowConversation(true);
+      setShowOrderConfirm(true);
     }
   };
 
@@ -587,7 +588,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               {/* Khối Realtime Conversation (copy toàn bộ popup cũ) */}
               <div className="flex-1 min-w-0 flex items-center">
                 <div className="w-full h-full">
-                  <RealtimeConversationPopup isOpen={showConversation || true} onClose={() => setShowConversation(false)} />
+                  <RealtimeConversationPopup isOpen={true} onClose={() => {}} inline={true} />
                 </div>
               </div>
               {/* Khối Nút Call (to nhất) */}

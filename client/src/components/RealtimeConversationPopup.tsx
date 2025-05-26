@@ -23,9 +23,10 @@ interface ConversationTurn {
 interface RealtimeConversationPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  inline?: boolean;
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose }) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, inline }) => {
   const { transcripts, modelOutput, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{[key: string]: number}>({});
@@ -136,17 +137,25 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-        onClick={onClose}
-      />
-      
+      {/* Backdrop chỉ khi không inline */}
+      {!inline && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          onClick={onClose}
+        />
+      )}
       {/* Popup */}
       <div 
-        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl"
-        style={{
-          // Responsive: desktop bên trái nút Call, mobile ở giữa
+        className={inline ? "w-full h-full rounded-2xl shadow-2xl" : "fixed z-50 overflow-hidden rounded-2xl shadow-2xl"}
+        style={inline ? {
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.12)',
+          backdropFilter: 'blur(18px)',
+          WebkitBackdropFilter: 'blur(18px)',
+          border: '1.5px solid rgba(255,255,255,0.25)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        } : {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
@@ -242,11 +251,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
-      {/* Desktop: popup lệch trái nút Call */}
-      <style>{`
+      {/* Desktop: popup lệch trái nút Call (giữ nguyên style tag nếu cần) */}
+      {!inline && <style>{`
         @media (min-width: 640px) {
           .fixed.z-50.overflow-hidden.rounded-2xl.shadow-2xl {
-            left: calc(50% - 260px); /* lệch trái nút Call khoảng 260px */
+            left: calc(50% - 260px);
             top: 50%;
             transform: translateY(-50%);
             width: 340px !important;
@@ -255,7 +264,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             max-height: 420px !important;
           }
         }
-      `}</style>
+      `}</style>}
     </>
   );
 };
