@@ -488,7 +488,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* Hàng trên: Tours, Bus Tickets, Vehicle Rental */}
           <div className="flex flex-col md:flex-row justify-center gap-3 mb-3 w-full">
             {/* Tours */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -508,7 +508,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Bus Tickets */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[560px] min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[560px] min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -528,7 +528,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Vehicle Rental */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -551,7 +551,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* Hàng dưới: Currency Exchange, Laundry Service, HomeStay */}
           <div className="flex flex-col md:flex-row justify-center gap-3 w-full">
             {/* Currency Exchange */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -571,7 +571,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Laundry Service */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -591,7 +591,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* HomeStay */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[77px] h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
