@@ -138,8 +138,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className="realtime-popup z-50 overflow-hidden rounded-2xl shadow-2xl"
+        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl realtime-popup"
         style={{
+          top: '50%',
           width: '90vw',
           maxWidth: 360,
           height: '70vh',
@@ -149,6 +150,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          left: 0,
+          right: 'auto',
+          transform: 'translateY(-50%)',
         }}
       >
         {/* Header */}
@@ -232,34 +236,17 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
-      {/* Desktop: popup nằm trong flex-row, mobile vẫn fixed */}
+      {/* Desktop: popup lệch phải nút Call */}
       <style>{`
         @media (min-width: 640px) {
           .realtime-popup {
-            position: relative !important;
-            left: unset !important;
-            top: unset !important;
-            right: unset !important;
-            bottom: unset !important;
-            transform: none !important;
+            left: calc(50% + 260px); /* lệch phải nút Call khoảng 260px */
+            top: 50%;
+            transform: translateY(-50%);
             width: 340px !important;
             height: 420px !important;
             max-width: 340px !important;
             max-height: 420px !important;
-            margin: 0 !important;
-          }
-        }
-        @media (max-width: 639px) {
-          .realtime-popup {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            transform: translate(-50%, -50%) !important;
-            width: 90vw !important;
-            max-width: 360px !important;
-            height: 70vh !important;
-            max-height: 440px !important;
-            z-index: 50 !important;
           }
         }
       `}</style>
