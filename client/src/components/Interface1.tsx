@@ -1,5 +1,5 @@
 // Interface1 component - latest version v1.0.1 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '../assets/hotel-exterior.jpeg';
 import { t } from '../i18n';
@@ -9,14 +9,29 @@ import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
+import { Button } from '@/components/ui/button';
 
 interface Interface1Props {
   isActive: boolean;
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
-  const { setCurrentInterface, setTranscripts, setModelOutput, setCallDetails, setCallDuration, setEmailSentForCurrentSession, activeOrders, language, setLanguage, isMuted, micLevel } = useAssistant();
-  
+  const { 
+    setCurrentInterface, 
+    setTranscripts, 
+    setModelOutput, 
+    setCallDetails, 
+    setCallDuration, 
+    setEmailSentForCurrentSession,
+    activeOrders,
+    language,
+    setLanguage
+  } = useAssistant();
+
+  const [isMuted, setIsMuted] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
+  const [localDuration, setLocalDuration] = useState(0);
+
   // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
@@ -28,6 +43,55 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Toggle mute function
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  // Format duration for display
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${secs}`;
+  };
+
+  // Handler for Cancel button - End call and go back to interface1
+  const handleCancel = useCallback(() => {
+    setCurrentInterface('interface1');
+  }, [setCurrentInterface]);
+
+  // Handler for Next button - End call and proceed to interface3
+  const handleNext = useCallback(() => {
+    if (language === 'fr') {
+      setCurrentInterface('interface3fr');
+    } else {
+      setCurrentInterface('interface3');
+    }
+  }, [setCurrentInterface, language]);
+
+  // Local timer as a backup to ensure we always have a working timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    
+    // Only start the timer when this interface is active
+    if (isActive) {
+      console.log('Interface1 is active, starting local timer');
+      setLocalDuration(0);
+      
+      // Start the local timer
+      timer = setInterval(() => {
+        setLocalDuration(prev => prev + 1);
+      }, 1000);
+    }
+    
+    return () => {
+      if (timer) {
+        console.log('Cleaning up local timer in Interface1');
+        clearInterval(timer);
+      }
+    };
+  }, [isActive]);
 
   // Hàm dùng chung cho mọi ngôn ngữ
   const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko') => {
@@ -214,10 +278,97 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           ) : (
             <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
               <SiriCallButton
-                containerId="siri-button-interface1"
+                containerId="siri-button"
                 isListening={!isMuted}
                 volumeLevel={micLevel}
               />
+              {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
+              <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
+                {/* Nút Mute bên trái */}
+                <button
+                  className="flex items-center justify-center transition-colors"
+                  title={isMuted ? t('unmute', language) : t('mute', language)}
+                  onClick={toggleMute}
+                  style={{fontSize: 22, padding: 0, background: 'none', border: 'none', color: '#d4af37', width: 28, height: 28}}
+                  onMouseOver={e => (e.currentTarget.style.color = '#ffd700')}
+                  onMouseOut={e => (e.currentTarget.style.color = '#d4af37')}
+                >
+                  <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
+                </button>
+                {/* Nút Cancel (chỉ mobile) */}
+                <button
+                  id="cancelButton"
+                  onClick={handleCancel}
+                  className="flex items-center justify-center px-3 py-2 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border-2 border-blue-200 shadow transition-colors sm:hidden active:scale-95 active:bg-blue-100"
+                  style={{
+                    fontFamily: 'inherit',
+                    letterSpacing: 0.2,
+                    minHeight: 44,
+                    minWidth: 90,
+                    fontSize: 14,
+                    touchAction: 'manipulation',
+                    zIndex: 10
+                  }}
+                >
+                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                </button>
+                {/* Duration ở giữa, luôn căn giữa */}
+                <div className="flex-1 flex justify-center">
+                  <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
+                    {formatDuration(localDuration)}
+                  </div>
+                </div>
+                {/* Nút xác nhận (mobile) */}
+                <Button
+                  id="confirmButton"
+                  onClick={handleNext}
+                  variant="yellow"
+                  className="flex items-center justify-center sm:hidden text-xs font-bold"
+                  style={{ minHeight: 44, minWidth: 120, fontSize: 14, zIndex: 10 }}
+                >
+                  <span className="material-icons text-lg mr-2">send</span>{t('confirm', language)}
+                </Button>
+                {/* Nút MicLevel bên phải */}
+                <div className="w-7 h-7 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                    <div 
+                      className="w-3 h-3 rounded-full bg-white transition-all duration-200"
+                      style={{
+                        transform: `scale(${1 + (micLevel * 0.5)})`,
+                        opacity: 0.7 + (micLevel * 0.3)
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Desktop buttons */}
+              <div className="hidden sm:flex flex-col gap-4 w-full max-w-xs mx-auto mt-4">
+                <Button
+                  id="endCallButton"
+                  onClick={handleNext}
+                  variant="yellow"
+                  className="w-full flex items-center justify-center space-x-2 text-base sm:text-lg"
+                  style={{ minHeight: 56, minWidth: 220, zIndex: 10 }}
+                >
+                  <span className="material-icons">send</span>
+                  <span className="whitespace-nowrap">{t('confirm_request', language)}</span>
+                </Button>
+                <button
+                  id="cancelButtonDesktop"
+                  onClick={handleCancel}
+                  className="w-full bg-white hover:bg-blue-100 text-blue-900 font-semibold py-3 px-8 rounded-full shadow flex items-center justify-center space-x-2 transition-all duration-200 border-2 border-blue-200 text-base sm:text-lg active:scale-95 active:bg-blue-100"
+                  style={{
+                    fontFamily: 'inherit',
+                    letterSpacing: 0.2,
+                    minHeight: 56,
+                    minWidth: 120,
+                    touchAction: 'manipulation',
+                    zIndex: 10
+                  }}
+                >
+                  <span className="material-icons text-lg mr-2">cancel</span>{t('cancel', language)}
+                </button>
+              </div>
             </div>
           )}
         </div>
