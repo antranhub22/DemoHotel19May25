@@ -1,7 +1,24 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '../i18n';
+
+// Interface cho trạng thái hiển thị của mỗi message
+interface VisibleCharState {
+  [messageId: string]: number;
+}
+
+// Interface cho một turn trong cuộc hội thoại
+interface ConversationTurn {
+  id: string;
+  role: 'user' | 'assistant';
+  timestamp: Date;
+  messages: Array<{
+    id: string;
+    content: string;
+    timestamp: Date;
+  }>;
+}
 
 interface RealtimeConversationPopupProps {
   isOpen: boolean;
@@ -11,13 +28,109 @@ interface RealtimeConversationPopupProps {
 const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose }) => {
   const { transcripts, modelOutput, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationFrames = useRef<{[key: string]: number}>({});
+  
+  // State cho Paint-on effect
+  const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
+  
+  // State để lưu trữ các turns đã được xử lý
+  const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
+
+  // Cleanup function for animations
+  const cleanupAnimations = () => {
+    Object.values(animationFrames.current).forEach(frameId => {
+      cancelAnimationFrame(frameId);
+    });
+    animationFrames.current = {};
+  };
+
+  // Process transcripts into conversation turns
+  useEffect(() => {
+    const sortedTranscripts = [...transcripts].sort((a, b) => 
+      a.timestamp.getTime() - b.timestamp.getTime()
+    );
+
+    const turns: ConversationTurn[] = [];
+    let currentTurn: ConversationTurn | null = null;
+
+    sortedTranscripts.forEach((message) => {
+      if (message.role === 'user') {
+        // Always create a new turn for user messages
+        currentTurn = {
+          id: message.id.toString(),
+          role: 'user',
+          timestamp: message.timestamp,
+          messages: [{ 
+            id: message.id.toString(), 
+            content: message.content,
+            timestamp: message.timestamp 
+          }]
+        };
+        turns.push(currentTurn);
+      } else {
+        // For assistant messages
+        if (!currentTurn || currentTurn.role === 'user') {
+          // Start new assistant turn
+          currentTurn = {
+            id: message.id.toString(),
+            role: 'assistant',
+            timestamp: message.timestamp,
+            messages: []
+          };
+          turns.push(currentTurn);
+        }
+        // Add message to current assistant turn
+        currentTurn.messages.push({
+          id: message.id.toString(),
+          content: message.content,
+          timestamp: message.timestamp
+        });
+      }
+    });
+
+    setConversationTurns(turns);
+  }, [transcripts]);
+
+  // Paint-on animation effect
+  useEffect(() => {
+    // Get all assistant messages from all turns
+    const assistantMessages = conversationTurns
+      .filter(turn => turn.role === 'assistant')
+      .flatMap(turn => turn.messages);
+    
+    assistantMessages.forEach(message => {
+      // Skip if already animated
+      if (visibleChars[message.id] === message.content.length) return;
+      
+      let currentChar = visibleChars[message.id] || 0;
+      const content = message.content;
+      
+      const animate = () => {
+        if (currentChar < content.length) {
+          setVisibleChars(prev => ({
+            ...prev,
+            [message.id]: currentChar + 1
+          }));
+          currentChar++;
+          animationFrames.current[message.id] = requestAnimationFrame(animate);
+        } else {
+          delete animationFrames.current[message.id];
+        }
+      };
+      
+      animationFrames.current[message.id] = requestAnimationFrame(animate);
+    });
+    
+    // Cleanup on unmount or when turns change
+    return () => cleanupAnimations();
+  }, [conversationTurns]);
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [transcripts, modelOutput]);
+  }, [conversationTurns]);
 
   if (!isOpen) return null;
 
@@ -56,36 +169,63 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ref={containerRef}
           className="p-4 h-[calc(100%-4rem)] overflow-y-auto"
         >
-          {transcripts.map((transcript) => (
-            <div key={`transcript-${transcript.id}`} className="mb-4">
-              <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-sm">U</span>
-                </div>
-                <div className="flex-1">
-                  <div className="bg-gray-100 rounded-lg p-3">
-                    <p className="text-gray-800">{transcript.content}</p>
-                  </div>
-                  <span className="text-xs text-gray-500 mt-1 block">
-                    {transcript.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
+          {conversationTurns.length === 0 && (
+            <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
+              {t('tap_to_speak', language)}
             </div>
-          ))}
-
-          {modelOutput.map((output, index) => (
-            <div key={`output-${index}`} className="mb-4">
+          )}
+          {[...conversationTurns].reverse().map((turn, turnIdx) => (
+            <div key={turn.id} className="mb-4">
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-sm">A</span>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: turn.role === 'user' ? '#3B82F6' : '#10B981'
+                  }}
+                >
+                  <span className="text-white text-sm">{turn.role === 'user' ? 'U' : 'A'}</span>
                 </div>
                 <div className="flex-1">
-                  <div className="bg-green-50 rounded-lg p-3">
-                    <p className="text-gray-800">{output}</p>
-                  </div>
+                  {turn.role === 'user' ? (
+                    <div className="bg-gray-100 rounded-lg p-3">
+                      <p className="text-gray-800">{turn.messages[0].content}</p>
+                    </div>
+                  ) : (
+                    <div className="bg-green-50 rounded-lg p-3">
+                      <p
+                        className="text-base md:text-lg font-medium"
+                        style={{
+                          position: 'relative',
+                          background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          fontWeight: 600,
+                          letterSpacing: 0.2,
+                          transition: 'background 0.5s'
+                        }}
+                      >
+                        <span className="inline-flex flex-wrap">
+                          {turn.messages.map((msg, idx) => {
+                            const content = msg.content.slice(0, visibleChars[msg.id] || 0);
+                            return (
+                              <span key={msg.id} style={{ whiteSpace: 'pre' }}>
+                                {content}
+                                {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
+                                {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
+                                  <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
+                                )}
+                              </span>
+                            );
+                          })}
+                        </span>
+                        {/* 3 chấm nhấp nháy khi assistant đang nghe */}
+                        {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
+                          <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
+                        )}
+                      </p>
+                    </div>
+                  )}
                   <span className="text-xs text-gray-500 mt-1 block">
-                    {new Date().toLocaleTimeString()}
+                    {turn.timestamp.toLocaleTimeString()}
                   </span>
                 </div>
               </div>
