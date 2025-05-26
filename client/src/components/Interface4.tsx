@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { t } from '@/i18n';
 
@@ -12,6 +12,16 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   const handleReturnHome = () => {
     setCurrentInterface('interface1');
   };
+  
+  // Auto return to home after 15s if user doesn't click
+  useEffect(() => {
+    if (isActive) {
+      const timer = setTimeout(() => {
+        setCurrentInterface('interface1');
+      }, 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [isActive, setCurrentInterface]);
   
   if (!order) return null;
   
