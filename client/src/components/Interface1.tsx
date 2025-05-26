@@ -443,9 +443,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </div>
         {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
-          <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full items-stretch">
+          <div className="flex flex-col md:flex-row md:flex-wrap justify-center gap-y-2 sm:gap-y-2 md:gap-3 text-left mx-auto w-full">
             {/* Tours */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -466,7 +466,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Bus Tickets */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-[520px] mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -479,7 +479,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
                 style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
               >Bus Tickets</h4>
-              <ul className="flex flex-row flex-nowrap gap-2 py-0.5 sm:py-2 justify-center items-center">
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
                 <li><IconWithTooltip iconName="location_city" /></li>
                 <li><IconWithTooltip iconName="park" /></li>
                 <li><IconWithTooltip iconName="beach_access" /></li>
@@ -490,7 +490,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Vehicle Rental */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -510,7 +510,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Currency Exchange */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -532,7 +532,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* Laundry Service */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
@@ -554,7 +554,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </ul>
             </div>
             {/* HomeStay */}
-            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[110px] h-32 transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[36px] transition-all duration-250 hover:scale-103 hover:-translate-y-1"
               style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
