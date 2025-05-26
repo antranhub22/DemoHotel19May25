@@ -345,7 +345,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         
         {/* Main Call Button với hiệu ứng nâng cao */}
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
-          {/* Popup realtime conversation bên trái (desktop) */}
+          {/* Popup realtime conversation bên trái - chỉ desktop */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
               <RealtimeConversationPopup 
@@ -473,7 +473,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </div>
             )}
           </div>
-          {/* Popup mới đối xứng bên phải - chỉ hiện trên desktop */}
+          {/* Popup reference bên phải - chỉ desktop */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
               <ReferencePopup 
@@ -483,6 +483,19 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
           )}
         </div>
+        {/* Popup realtime conversation & reference - chỉ mobile, render dưới nút Call */}
+        {showConversation && (
+          <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2">
+            <RealtimeConversationPopup 
+              isOpen={showConversation}
+              onClose={() => setShowConversation(false)}
+            />
+            <ReferencePopup 
+              isOpen={showConversation}
+              onClose={() => setShowConversation(false)}
+            />
+          </div>
+        )}
         {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
           {/* Hàng trên: Tours, Bus Tickets, Vehicle Rental */}
@@ -704,19 +717,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
             <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
             <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-          </div>
-        </div>
-      )}
-      {/* Mobile: Realtime Conversation overlay, bắt đầu từ menu box Tour, width 90vw, căn giữa */}
-      {showConversation && (
-        <div className="fixed left-0 right-0 sm:hidden z-50 pointer-events-none flex justify-center" style={{top: 270, bottom: 0}}>
-          <div className="w-[90vw] max-w-none h-full pointer-events-auto flex items-end justify-center">
-            <div style={{width: '90vw', height: '80%', minHeight: 320, margin: '0 auto'}}>
-              <RealtimeConversationPopup 
-                isOpen={showConversation}
-                onClose={() => setShowConversation(false)}
-              />
-            </div>
           </div>
         </div>
       )}
