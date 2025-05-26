@@ -218,7 +218,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}
-        <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full">
+        <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
           {/* Popup realtime conversation bên trái */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0">
@@ -228,8 +228,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               />
             </div>
           )}
-          {/* Nút Call hoặc SiriCallButton */}
-          <div className="flex-1 flex flex-col items-center justify-center">
+          {/* Nút Call luôn ở giữa */}
+          <div className="flex-none flex flex-col items-center justify-center mx-auto" style={{zIndex: 10}}>
             {!isCallStarted ? (
               <>
                 {/* Ripple Animation ... */}
@@ -328,6 +328,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </div>
             )}
           </div>
+          {/* Popup mới đối xứng bên phải */}
+          {showConversation && (
+            <div className="hidden sm:block flex-shrink-0">
+              <RealtimeConversationPopup 
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+                isRight
+              />
+            </div>
+          )}
         </div>
         {/* Services Section - với hiệu ứng Glass Morphism và 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>

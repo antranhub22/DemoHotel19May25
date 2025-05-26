@@ -23,9 +23,10 @@ interface ConversationTurn {
 interface RealtimeConversationPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  isRight?: boolean;
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose }) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight }) => {
   const { transcripts, modelOutput, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{[key: string]: number}>({});
@@ -138,7 +139,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className="relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup"
+        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
         style={{
           width: '90vw',
           maxWidth: 360,
@@ -148,7 +149,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          boxShadow: isRight ? '0 8px 32px rgba(0,0,0,0.18), 8px 0 24px rgba(0,0,0,0.10)' : '0 8px 32px rgba(0,0,0,0.18)',
+          borderTopLeftRadius: isRight ? 24 : 24,
+          borderBottomLeftRadius: isRight ? 24 : 24,
+          borderTopRightRadius: isRight ? 24 : 24,
+          borderBottomRightRadius: isRight ? 24 : 24,
         }}
       >
         {/* Header */}
@@ -240,6 +245,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             height: 420px !important;
             max-width: 340px !important;
             max-height: 420px !important;
+          }
+          .popup-right {
+            /* Có thể thêm hiệu ứng đối xứng nếu muốn */
           }
         }
       `}</style>
