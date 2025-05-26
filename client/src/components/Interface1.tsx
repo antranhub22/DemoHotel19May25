@@ -508,7 +508,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           )}
           {/* 3. Đã có summary: chỉ hiện popup Summary */}
           {showSummaryPopup && (
-            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+            <div className="w-full max-w-4xl h-auto flex items-center justify-center mt-8 mb-2 px-2" style={{paddingTop: '8vh'}}>
               <Interface3 isActive={true} />
             </div>
           )}
