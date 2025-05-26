@@ -344,145 +344,147 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}
-        <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
-          {/* Popup realtime conversation bên trái - chỉ desktop */}
-          {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
-              <RealtimeConversationPopup 
-                isOpen={showConversation}
-                onClose={() => setShowConversation(false)}
-              />
-            </div>
-          )}
-          {/* Nút Call luôn ở giữa */}
-          <div className="flex-none flex flex-col items-center justify-center mx-auto" style={{zIndex: 10}}>
-            {!isCallStarted ? (
-              <>
-                {/* Ripple Animation ... */}
-                <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
-                <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
-                {/* Main Button */}
-                <button 
-                  id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
-                  className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
-                  onClick={() => handleCall(language as any)}
-                  style={{
-                    background: language === 'en' 
-                      ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)'
-                      : language === 'fr' 
-                      ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)'
-                      : language === 'zh' 
-                      ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)'
-                      : language === 'ru' 
-                      ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)'
-                      : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
-                    boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                    transition: 'all 0.3s ease',
-                    transform: 'translateY(0) translateZ(30px)',
-                  }}
-                >
-                  <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
-                    style={{ 
-                      filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
-                      color: language === 'en' 
-                        ? '#F9BF3B'
-                        : language === 'fr' 
-                        ? '#FFFFFF'
-                        : language === 'zh' 
-                        ? '#FFEB3B'
-                        : language === 'ru' 
-                        ? '#F48FB1'
-                        : '#4ADE80'
-                    }}
-                  >mic</span>
-                  {language === 'fr' ? (
-                    <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
-                      style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                    >{t('press_to_call', language)}</span>
-                  ) : language === 'ru' || language === 'ko' ? (
-                    <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
-                      style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                    >{t('press_to_call', language)}</span>
-                  ) : (
-                    <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-                      style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-                    >{t('press_to_call', language)}</span>
-                  )}
-                  <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
-                </button>
-              </>
-            ) : (
-              <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
-                <SiriCallButton
-                  containerId="siri-button"
-                  isListening={!isMuted}
-                  volumeLevel={micLevel}
+        {!(showSummaryPopup && window.innerWidth < 640) && (
+          <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
+            {/* Popup realtime conversation bên trái - chỉ desktop */}
+            {showConversation && (
+              <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
+                <RealtimeConversationPopup 
+                  isOpen={showConversation}
+                  onClose={() => setShowConversation(false)}
                 />
-                {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
-                <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
-                  {/* Nút Mute bên trái */}
-                  <button
-                    className="flex items-center justify-center transition-colors"
-                    title={isMuted ? t('unmute', language) : t('mute', language)}
-                    onClick={toggleMute}
-                    style={{fontSize: 22, padding: 0, background: 'none', border: 'none', color: '#d4af37', width: 28, height: 28}}
-                    onMouseOver={e => (e.currentTarget.style.color = '#ffd700')}
-                    onMouseOut={e => (e.currentTarget.style.color = '#d4af37')}
+              </div>
+            )}
+            {/* Nút Call luôn ở giữa */}
+            <div className="flex-none flex flex-col items-center justify-center mx-auto" style={{zIndex: 10}}>
+              {!isCallStarted ? (
+                <>
+                  {/* Ripple Animation ... */}
+                  <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
+                  {/* Main Button */}
+                  <button 
+                    id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+                    className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
+                    onClick={() => handleCall(language as any)}
+                    style={{
+                      background: language === 'en' 
+                        ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)'
+                        : language === 'fr' 
+                        ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)'
+                        : language === 'zh' 
+                        ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)'
+                        : language === 'ru' 
+                        ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)'
+                        : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
+                      boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
+                      border: '1px solid rgba(255, 255, 255, 0.5)',
+                      transition: 'all 0.3s ease',
+                      transform: 'translateY(0) translateZ(30px)',
+                    }}
                   >
-                    <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
+                    <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
+                      style={{ 
+                        filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                        color: language === 'en' 
+                          ? '#F9BF3B'
+                          : language === 'fr' 
+                          ? '#FFFFFF'
+                          : language === 'zh' 
+                          ? '#FFEB3B'
+                          : language === 'ru' 
+                          ? '#F48FB1'
+                          : '#4ADE80'
+                      }}
+                    >mic</span>
+                    {language === 'fr' ? (
+                      <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    ) : language === 'ru' || language === 'ko' ? (
+                      <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    ) : (
+                      <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    )}
+                    <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
                   </button>
-                  {/* Duration ở giữa, luôn căn giữa */}
-                  <div className="flex-1 flex justify-center">
-                    <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
-                      {formatDuration(localDuration)}
+                </>
+              ) : (
+                <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
+                  <SiriCallButton
+                    containerId="siri-button"
+                    isListening={!isMuted}
+                    volumeLevel={micLevel}
+                  />
+                  {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
+                  <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
+                    {/* Nút Mute bên trái */}
+                    <button
+                      className="flex items-center justify-center transition-colors"
+                      title={isMuted ? t('unmute', language) : t('mute', language)}
+                      onClick={toggleMute}
+                      style={{fontSize: 22, padding: 0, background: 'none', border: 'none', color: '#d4af37', width: 28, height: 28}}
+                      onMouseOver={e => (e.currentTarget.style.color = '#ffd700')}
+                      onMouseOut={e => (e.currentTarget.style.color = '#d4af37')}
+                    >
+                      <span className="material-icons">{isMuted ? 'mic_off' : 'mic'}</span>
+                    </button>
+                    {/* Duration ở giữa, luôn căn giữa */}
+                    <div className="flex-1 flex justify-center">
+                      <div className="text-white text-xs sm:text-sm bg-blue-900/80 rounded-full px-3 sm:px-4 py-1 shadow-lg border border-white/30 flex items-center justify-center" style={{backdropFilter:'blur(2px)'}}>
+                        {formatDuration(localDuration)}
+                      </div>
+                    </div>
+                    {/* Nút MicLevel bên phải */}
+                    <div className="w-7 h-7 flex items-center justify-center">
+                      <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                        <div 
+                          className="w-3 h-3 rounded-full bg-white transition-all duration-200"
+                          style={{
+                            transform: `scale(${1 + (micLevel * 0.5)})`,
+                            opacity: 0.7 + (micLevel * 0.3)
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  {/* Nút MicLevel bên phải */}
-                  <div className="w-7 h-7 flex items-center justify-center">
-                    <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                      <div 
-                        className="w-3 h-3 rounded-full bg-white transition-all duration-200"
-                        style={{
-                          transform: `scale(${1 + (micLevel * 0.5)})`,
-                          opacity: 0.7 + (micLevel * 0.3)
-                        }}
-                      />
+                  {/* Hai nút nhỏ Cancel/Confirm dưới hàng Mute/Duration/Volume */}
+                  {isCallStarted && (
+                    <div className="flex flex-row justify-between items-center w-full max-w-xs mx-auto mt-2 gap-2">
+                      <button
+                        className="flex-1 py-2 rounded-full bg-white hover:bg-red-100 text-red-700 font-semibold text-sm border border-red-200 shadow transition"
+                        style={{ minWidth: 90, maxWidth: 120 }}
+                        onClick={handleCancelVapiCall}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="flex-1 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-sm shadow transition"
+                        style={{ minWidth: 90, maxWidth: 120 }}
+                        onClick={handleConfirmVapiCall}
+                      >
+                        Confirm
+                      </button>
                     </div>
-                  </div>
+                  )}
                 </div>
-                {/* Hai nút nhỏ Cancel/Confirm dưới hàng Mute/Duration/Volume */}
-                {isCallStarted && (
-                  <div className="flex flex-row justify-between items-center w-full max-w-xs mx-auto mt-2 gap-2">
-                    <button
-                      className="flex-1 py-2 rounded-full bg-white hover:bg-red-100 text-red-700 font-semibold text-sm border border-red-200 shadow transition"
-                      style={{ minWidth: 90, maxWidth: 120 }}
-                      onClick={handleCancelVapiCall}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="flex-1 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-sm shadow transition"
-                      style={{ minWidth: 90, maxWidth: 120 }}
-                      onClick={handleConfirmVapiCall}
-                    >
-                      Confirm
-                    </button>
-                  </div>
-                )}
+              )}
+            </div>
+            {/* Popup reference bên phải - chỉ desktop */}
+            {showConversation && (
+              <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
+                <ReferencePopup 
+                  isOpen={showConversation}
+                  onClose={() => setShowConversation(false)}
+                />
               </div>
             )}
           </div>
-          {/* Popup reference bên phải - chỉ desktop */}
-          {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
-              <ReferencePopup 
-                isOpen={showConversation}
-                onClose={() => setShowConversation(false)}
-              />
-            </div>
-          )}
-        </div>
+        )}
         {/* Popup dưới nút Call trên mobile: chỉ hiển thị 1 trong 3 loại popup */}
         <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2">
           {/* 1. Đang gọi: hiện Realtime Conversation + Reference */}
