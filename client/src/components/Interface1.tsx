@@ -290,7 +290,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
           {/* Popup realtime conversation bên trái */}
           {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 0 }}>
+            <div className="hidden sm:block flex-shrink-0" style={{ marginRight: 120 }}>
               <RealtimeConversationPopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
@@ -418,7 +418,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
           {/* Popup mới đối xứng bên phải */}
           {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
+            <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 120 }}>
               <ReferencePopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
@@ -632,25 +632,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div
-            className="relative z-30 overflow-hidden rounded-2xl shadow-2xl"
-            style={{
-              width: '90vw',
-              maxWidth: 360,
-              height: '70vh',
-              maxHeight: 440,
-              background: 'rgba(255,255,255,0.12)',
-              backdropFilter: 'blur(18px)',
-              WebkitBackdropFilter: 'blur(18px)',
-              border: '1.5px solid rgba(255,255,255,0.25)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-              borderRadius: 24,
-              padding: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
+          <div className="relative bg-transparent w-full h-full flex items-center justify-center">
             <button
               className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
               onClick={() => setShowSummaryPopup(false)}
@@ -658,7 +640,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             >
               <span className="material-icons text-gray-600">close</span>
             </button>
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
               <Interface3 isActive={true} />
             </div>
           </div>
