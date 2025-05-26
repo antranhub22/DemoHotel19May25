@@ -297,7 +297,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       >
         <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
           style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
-          <span style={{ color: 'red', fontStyle: 'italic', marginRight: 8 }}>Demo</span>{t('hotel_name', language)}
+          Mi Nhon Hotel Mui Ne
         </h2>
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
