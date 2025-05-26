@@ -511,9 +511,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(data)) {
           setActiveOrders(
             data.map((o: any) => ({
-              ...o,
-              reference: o.specialInstructions || o.reference || '',
+              reference: o.specialInstructions || o.reference || o.callId || '',
               requestedAt: o.createdAt ? new Date(o.createdAt) : new Date(),
+              estimatedTime: o.deliveryTime || '',
+              status: o.status === 'completed' ? 'Hoàn thiện' : (o.status === 'pending' ? 'Đã ghi nhận' : o.status),
+              // Các trường khác nếu cần
+              ...o
             }))
           );
         }
