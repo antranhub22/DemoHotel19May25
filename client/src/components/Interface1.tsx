@@ -508,8 +508,18 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           )}
           {/* 3. Đã có summary: chỉ hiện popup Summary */}
           {showSummaryPopup && (
-            <div className="w-full max-w-4xl h-auto flex items-center justify-center mt-8 mb-2 px-2" style={{paddingTop: '8vh'}}>
-              <Interface3 isActive={true} />
+            <div
+              className="fixed sm:hidden left-0 right-0 bottom-0 z-50 flex items-center justify-center w-full px-2 pb-4"
+              style={{
+                maxHeight: '90vh',
+                overflowY: 'auto',
+                margin: '0 auto',
+                background: 'none',
+              }}
+            >
+              <div className="w-full max-w-4xl h-auto">
+                <Interface3 isActive={true} />
+              </div>
             </div>
           )}
         </div>
