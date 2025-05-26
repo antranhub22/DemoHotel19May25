@@ -387,7 +387,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         timestamp: new Date()
       };
       setCallSummary(noTranscriptSummary);
-      setCurrentInterface('interface3');
       return;
     }
     
@@ -439,23 +438,19 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
           setServiceRequests(data.serviceRequests);
         }
-        
-              setCurrentInterface('interface3');
-            });
-      }
+      });
     })
     .catch(error => {
-          console.error('Error processing summary:', error);
-          // Show error state
-          const errorSummary: CallSummary = {
+      console.error('Error processing summary:', error);
+      // Show error state
+      const errorSummary: CallSummary = {
         id: Date.now() as unknown as number,
         callId: callDetails?.id || `call-${Date.now()}`,
-            content: "An error occurred while generating the call summary.",
+        content: "An error occurred while generating the call summary.",
         timestamp: new Date()
       };
-          setCallSummary(errorSummary);
-    setCurrentInterface('interface3');
-        });
+      setCallSummary(errorSummary);
+    });
       };
       
       // Execute all state updates in one batch
