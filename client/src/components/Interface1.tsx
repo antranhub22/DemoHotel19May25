@@ -710,7 +710,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       {/* Mobile: Realtime Conversation overlay, đè lên menu box */}
       {showConversation && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden pointer-events-none">
-          <div className="w-[85vw] max-w-lg mb-4 pointer-events-auto">
+          <div className="w-[100vw] max-w-none mb-2 pointer-events-auto" style={{height: '80vh', minHeight: 400}}>
             <RealtimeConversationPopup 
               isOpen={showConversation}
               onClose={() => setShowConversation(false)}
