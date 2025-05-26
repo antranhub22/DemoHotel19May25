@@ -10,7 +10,8 @@ import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { Button } from '@/components/ui/button';
-import Interface3Popup from './Interface3Popup';
+import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
+import OrderSummaryPanel from './OrderSummaryPanel';
 
 interface Interface1Props {
   isActive: boolean;
@@ -26,7 +27,10 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     activeOrders,
     language,
-    setLanguage
+    setLanguage,
+    callSummary,
+    setOrderSummary,
+    orderSummary
   } = useAssistant();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -65,13 +69,23 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
   // Handler for Next button - End call and show summary popup
   const handleNext = useCallback(() => {
-    // 1. Kết thúc cuộc gọi
     setIsCallStarted(false);
-    // 2. Mở popup Summary
     setShowOrderSummary(true);
-    // Đảm bảo orderSummary luôn có dữ liệu (nếu cần, có thể set lại dữ liệu mẫu ở đây)
-    // Ví dụ: nếu orderSummary chưa có, có thể tạo một orderSummary mẫu hoặc lấy từ context
-  }, []);
+    if (callSummary && callSummary.content) {
+      const parsed = parseSummaryToOrderDetails(callSummary.content);
+      setOrderSummary({
+        orderType: parsed.orderType || '',
+        deliveryTime: parsed.deliveryTime || 'asap',
+        roomNumber: parsed.roomNumber || '',
+        guestName: parsed.guestName || '',
+        guestEmail: parsed.guestEmail || '',
+        guestPhone: parsed.guestPhone || '',
+        specialInstructions: parsed.specialInstructions || '',
+        items: parsed.items || [],
+        totalAmount: parsed.totalAmount || 0
+      });
+    }
+  }, [callSummary, setOrderSummary]);
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
@@ -388,7 +402,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* Khối Summary bên phải */}
           {showOrderSummary && (
             <div style={{width: 400, minHeight: 420}}>
-              <Interface3Popup isOpen={true} onClose={() => setShowOrderSummary(false)} />
+              <OrderSummaryPanel />
             </div>
           )}
         </div>
