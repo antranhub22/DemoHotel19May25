@@ -482,7 +482,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               />
             </div>
           )}
-          {/* Popup mới đối xứng bên phải */}
+          {/* Popup mới đối xứng bên phải - chỉ hiện trên desktop */}
           {showConversation && (
             <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
               <ReferencePopup 
