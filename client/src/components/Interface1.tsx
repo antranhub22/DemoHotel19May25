@@ -716,6 +716,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         </div>
       )}
+      {/* Mobile: Realtime Conversation overlay, đè lên menu box */}
+      {showConversation && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden pointer-events-none">
+          <div className="w-[85vw] max-w-lg mb-4 pointer-events-auto">
+            <RealtimeConversationPopup 
+              isOpen={showConversation}
+              onClose={() => setShowConversation(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
