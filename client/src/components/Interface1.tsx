@@ -65,8 +65,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
   // Handler for Next button - End call and show summary popup
   const handleNext = useCallback(() => {
+    // 1. Kết thúc cuộc gọi
     setIsCallStarted(false);
+    // 2. Mở popup Summary
     setShowOrderSummary(true);
+    // Đảm bảo orderSummary luôn có dữ liệu (nếu cần, có thể set lại dữ liệu mẫu ở đây)
+    // Ví dụ: nếu orderSummary chưa có, có thể tạo một orderSummary mẫu hoặc lấy từ context
   }, []);
 
   // Local timer as a backup to ensure we always have a working timer
