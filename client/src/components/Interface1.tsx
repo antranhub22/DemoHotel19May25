@@ -226,6 +226,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setShowSummaryPopup(true);
   };
 
+  useEffect(() => {
+    if (
+      callSummary?.content &&
+      callSummary.content !== 'Generating AI summary of your conversation...' &&
+      (!orderSummary || !orderSummary.items || orderSummary.items.length === 0)
+    ) {
+      const summary = parseSummaryToOrderDetails(callSummary.content);
+      setOrderSummary(summary as any);
+    }
+  }, [callSummary, orderSummary, setOrderSummary]);
+
   return (
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
