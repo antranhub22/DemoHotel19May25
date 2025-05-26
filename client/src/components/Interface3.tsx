@@ -276,28 +276,18 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   // Handle confirm order
   const handleConfirmOrder = async () => {
     if (!orderSummary) return;
-    // Generate a random order reference
-    const orderReference = `#ORD-${Math.floor(10000 + Math.random() * 90000)}`;
-    let estimatedDisplayTime;
-    switch (orderSummary.deliveryTime) {
-      case 'asap':
-        estimatedDisplayTime = 'As soon as possible';
-        break;
-      case '30min':
-        estimatedDisplayTime = '30 minutes';
-        break;
-      case '1hour':
-        estimatedDisplayTime = '1 hour';
-        break;
-      default:
-        estimatedDisplayTime = orderSummary.deliveryTime || '15-20 minutes';
-    }
+    const orderReference = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+    const now = new Date();
     const newOrder = {
-      reference: orderReference,
-      estimatedTime: estimatedDisplayTime,
-      summary: orderSummary,
-      requestedAt: new Date(),
-      status: 'Đã ghi nhận'
+      callId: orderReference,
+      roomNumber: orderSummary.roomNumber || 'unknown',
+      orderType: orderSummary.orderType || 'Room Service',
+      deliveryTime: orderSummary.deliveryTime || now.toISOString(),
+      specialInstructions: orderReference,
+      items: orderSummary.items || [],
+      totalAmount: orderSummary.totalAmount || 0,
+      status: 'pending',
+      createdAt: now.toISOString()
     };
     try {
       const API_HOST = import.meta.env.VITE_API_HOST || "https://minhnhotelben.onrender.com";
@@ -307,7 +297,6 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         body: JSON.stringify(newOrder)
       });
       if (!res.ok) throw new Error('Failed to create order');
-      // Không cần addActiveOrder ở client, rely vào polling
       setCurrentInterface('interface4');
     } catch (err) {
       alert('Failed to send order to reception!');
