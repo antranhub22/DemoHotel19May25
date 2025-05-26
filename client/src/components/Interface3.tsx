@@ -276,12 +276,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   // Handle confirm order
   const handleConfirmOrder = async () => {
     if (!orderSummary) return;
-    
     // Generate a random order reference
     const orderReference = `#ORD-${Math.floor(10000 + Math.random() * 90000)}`;
-    
-    // Derive display text for estimated delivery time based on orderSummary
-    let estimatedDisplayTime: string;
+    let estimatedDisplayTime;
     switch (orderSummary.deliveryTime) {
       case 'asap':
         estimatedDisplayTime = 'As soon as possible';
@@ -293,132 +290,28 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         estimatedDisplayTime = '1 hour';
         break;
       default:
-        // Use custom or specific time entered by user
         estimatedDisplayTime = orderSummary.deliveryTime || '15-20 minutes';
     }
-    
-    // Set order data with dynamic estimatedTime
-    setOrder({
+    const newOrder = {
       reference: orderReference,
       estimatedTime: estimatedDisplayTime,
-      summary: orderSummary
-    });
-    
-    // Add to active orders for status panel
-    addActiveOrder({
-      reference: orderReference,
+      summary: orderSummary,
       requestedAt: new Date(),
-      estimatedTime: estimatedDisplayTime,
       status: 'Đã ghi nhận'
-    });
-    
-    // Check if email has already been sent for this session
-    if (emailSentForCurrentSession) {
-      console.log('Email already sent for this session. Skipping duplicate email sending.');
+    };
+    try {
+      const API_HOST = import.meta.env.VITE_API_HOST || "https://minhnhotelben.onrender.com";
+      const res = await fetch(`${API_HOST}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrder)
+      });
+      if (!res.ok) throw new Error('Failed to create order');
+      // Không cần addActiveOrder ở client, rely vào polling
       setCurrentInterface('interface4');
-      return;
+    } catch (err) {
+      alert('Failed to send order to reception!');
     }
-    
-    // Only send email from English interface if Vietnamese interface is not active
-    // This prevents duplicate emails when both components are rendered
-    const isVietnameseActive = document.querySelector('[data-interface="interface3vi"]')?.getAttribute('data-active') === 'true';
-    
-    if (!isVietnameseActive) {
-      // Send email with the order summary
-      try {
-        console.log('Sending email with call summary and service requests...');
-        // Translate summary to Vietnamese for email
-        let summaryForEmail = callSummary?.content || '';
-        try {
-          summaryForEmail = await translateToVietnamese(summaryForEmail);
-        } catch (e) {
-          console.error('Failed to translate summary for email:', e);
-        }
-        // Log the translated summary so you can inspect its content
-        console.log('Translated summary for email (Vietnamese):', summaryForEmail);
-        
-        // Format call duration if available - ensure we have valid values even on mobile
-        const formattedDuration = callDuration ? 
-          `${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}` : 
-          '0:00';
-          
-        console.log('Call duration for email:', formattedDuration);
-        
-        // Ensure we have a valid callId for both desktop and mobile
-        const generatedCallId = `call-${Date.now()}`;
-        const currentCallId = callDetails?.id || generatedCallId;
-        
-        console.log('Using callId for email:', currentCallId);
-        console.log('Call summary content:', callSummary?.content || 'No summary available');
-        
-        console.log('Preparing email request payload...');
-        const emailPayload = {
-          toEmail: 'tuans2@gmail.com', // Default email recipient
-          callDetails: {
-            callId: currentCallId,
-            roomNumber: orderSummary.roomNumber || 'unknown',
-            summary: summaryForEmail || 'No summary available',
-            timestamp: callSummary?.timestamp || new Date(),
-            duration: formattedDuration,
-            serviceRequests: orderSummary.items.map(item => item.name),
-            orderReference: orderReference,
-            note: note // User-provided additional notes
-          }
-        };
-        console.log('Email payload prepared:', JSON.stringify(emailPayload));
-        
-        // Use a timeout to ensure the request is properly sent on mobile
-        // Phát hiện thiết bị di động ngay từ đầu
-        const isMobile = /iPhone|iPad|iPod|Android|Mobile|webOS|BlackBerry/i.test(navigator.userAgent);
-        console.log('Device type detected:', isMobile ? 'MOBILE' : 'DESKTOP');
-            
-        setTimeout(async () => {
-          try {
-            // Chọn endpoint phù hợp với loại thiết bị
-            const endpoint = isMobile ? '/api/mobile-call-summary-email' : '/api/send-call-summary-email';
-            console.log(`Using ${isMobile ? 'mobile' : 'standard'} endpoint for email: ${endpoint}`);
-            
-            // Thêm timestamp để tránh cache trên thiết bị di động
-            const requestUrl = isMobile ? `${endpoint}?_=${Date.now()}` : endpoint;
-            
-            console.log('Sending email request to server...');
-            const response = await fetch(requestUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache', 
-                'Expires': '0',
-                'X-Device-Type': isMobile ? 'mobile' : 'desktop'
-              },
-              body: JSON.stringify(emailPayload),
-              cache: 'no-cache',
-              credentials: 'same-origin',
-            });
-            
-            if (!response.ok) {
-              throw new Error(`Server responded with status: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            console.log('Email sent with order confirmation:', result);
-            
-            // Mark that email has been sent for this session to prevent duplicates
-            setEmailSentForCurrentSession(true);
-          } catch (innerError) {
-            console.error('Failed to send email in timeout:', innerError);
-          }
-        }, isMobile ? 50 : 500); // Giảm thời gian timeout cho thiết bị di động
-
-      } catch (error) {
-        console.error('Failed to send email:', error);
-      }
-    } else {
-      console.log('Vietnamese interface is active, skipping email send from English interface');
-    }
-    
-    // Navigate to confirmation screen
-    setCurrentInterface('interface4');
   };
   
   // Function to add note to the displayed summary
