@@ -267,10 +267,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
   // Theo dõi activeOrders để hiển thị thẻ Order khi có order mới từ Interface3
   useEffect(() => {
+    console.log('activeOrders changed:', activeOrders);
     if (activeOrders && activeOrders.length > 0) {
+      console.log('Setting showOrderCard to true');
       setShowOrderCard(true);
     }
   }, [activeOrders]);
+
+  // Thêm useEffect để debug showOrderCard
+  useEffect(() => {
+    console.log('showOrderCard changed:', showOrderCard);
+  }, [showOrderCard]);
 
   return (
     <div 
