@@ -623,7 +623,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="relative bg-transparent">
+          <div className="relative bg-transparent w-full h-full flex items-center justify-center">
             <button
               className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
               onClick={() => setShowSummaryPopup(false)}
@@ -631,7 +631,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             >
               <span className="material-icons text-gray-600">close</span>
             </button>
-            <Interface3 isActive={true} />
+            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+              <Interface3 isActive={true} />
+            </div>
           </div>
         </div>
       )}
