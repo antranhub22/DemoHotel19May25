@@ -246,6 +246,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const orderData = insertOrderSchema.parse(req.body);
       const order = await storage.createOrder(orderData);
+      // Đồng bộ sang bảng request cho Staff UI
+      try {
+        await db.insert(requestTable).values({
+          room_number: order.roomNumber || orderData.roomNumber || 'unknown',
+          orderId: order.callId || orderData.callId,
+          guestName: 'Guest',
+          request_content: Array.isArray(orderData.items) && orderData.items.length > 0
+            ? orderData.items.map(i => `${i.name} x${i.quantity}`).join(', ')
+            : orderData.orderType || 'Service Request',
+          status: 'Đã ghi nhận',
+          created_at: new Date(),
+          updatedAt: new Date()
+        });
+      } catch (syncErr) {
+        console.error('Failed to sync order to request table:', syncErr);
+      }
       res.status(201).json(order);
     } catch (error) {
       if (error instanceof z.ZodError) {
