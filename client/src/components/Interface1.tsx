@@ -259,6 +259,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     if (isActive) {
       setShowSummaryPopup(false);
       setShowGeneratingPopup(false);
+      setIsCallStarted(false);
+      setShowConversation(false);
     }
   }, [isActive]);
 
