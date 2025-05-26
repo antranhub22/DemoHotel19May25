@@ -138,9 +138,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className="fixed z-50 overflow-hidden rounded-2xl shadow-2xl realtime-popup"
+        className="relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup"
         style={{
-          top: '50%',
           width: '90vw',
           maxWidth: 360,
           height: '70vh',
@@ -150,9 +149,6 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          left: 0,
-          right: 'auto',
-          transform: 'translateY(-50%)',
         }}
       >
         {/* Header */}
@@ -240,9 +236,6 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       <style>{`
         @media (min-width: 640px) {
           .realtime-popup {
-            left: calc(50% + 260px); /* lệch phải nút Call khoảng 260px */
-            top: 50%;
-            transform: translateY(-50%);
             width: 340px !important;
             height: 420px !important;
             max-width: 340px !important;
