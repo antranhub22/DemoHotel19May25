@@ -36,14 +36,14 @@ const VoiceAssistant: React.FC = () => {
           {/* Right: Call History, Refresh, Language, and Infographic */}
           <div className="flex items-center gap-2">
             {/* Refresh Button */}
-            <button
+            {/* <button
               onClick={() => window.location.reload()}
               className="flex items-center justify-center px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm hover:bg-primary-darker transition-colors"
               title="Refresh"
             >
               <span className="material-icons text-sm sm:text-base mr-1">refresh</span>
               <span className="hidden sm:inline">Refresh</span>
-            </button>
+            </button> */}
 
             {/* Language Dropdown */}
             <div className="flex items-center px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm">

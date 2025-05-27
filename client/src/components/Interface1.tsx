@@ -380,7 +380,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       >
         {/* Header chính với logo và tên khách sạn */}
         <div className="w-full flex flex-row items-center justify-center sm:justify-start mb-2">
-          <img src="/assets/minhon-logo.jpg" alt="Mi Nhon Hotel Logo" className="h-12 w-12 sm:h-16 sm:w-16 object-contain mr-3" />
+          {/* <img src="/assets/minhon-logo.jpg" alt="Mi Nhon Hotel Logo" className="h-12 w-12 sm:h-16 sm:w-16 object-contain mr-3" /> */}
           <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 text-left"
             style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
             Mi Nhon Hotel Mui Ne
