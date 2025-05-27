@@ -10,6 +10,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { Link } from 'wouter';
 import { History, Info, X } from 'lucide-react';
 import InfographicSteps from './InfographicSteps';
+import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import { t } from '@/i18n';
 import { Language, AssistantContextType } from '@/types';
@@ -46,6 +47,7 @@ const VoiceAssistant: React.FC = () => {
 
             {/* Language Dropdown */}
             <div className="flex items-center px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm">
+              <FaGlobeAsia className="text-[#F9BF3B] text-sm sm:text-base mr-1.5" />
               <div className="relative">
                 <select
                   value={language}
