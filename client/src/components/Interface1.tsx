@@ -330,6 +330,38 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     { iconName: 'meeting_room', tooltip: 'Full-House' },
   ];
 
+  // Icon và tooltip cho các dịch vụ mới
+  const localTourismIcons = [
+    { iconName: 'map', tooltip: 'Area Map' },
+    { iconName: 'place', tooltip: 'Attractions' },
+    { iconName: 'directions_walk', tooltip: 'Walking Tour' },
+    { iconName: 'info', tooltip: 'Tourist Info' },
+  ];
+  const roomServiceIcons = [
+    { iconName: 'restaurant', tooltip: 'Order Food' },
+    { iconName: 'local_cafe', tooltip: 'Beverages' },
+    { iconName: 'breakfast_dining', tooltip: 'Breakfast' },
+    { iconName: 'room_service', tooltip: 'Other Requests' },
+  ];
+  const housekeepingIcons = [
+    { iconName: 'cleaning_services', tooltip: 'Cleaning' },
+    { iconName: 'local_laundry_service', tooltip: 'Laundry' },
+    { iconName: 'bathtub', tooltip: 'Bathroom' },
+    { iconName: 'king_bed', tooltip: 'Bedding' },
+  ];
+  const guestFeedbackIcons = [
+    { iconName: 'rate_review', tooltip: 'Review' },
+    { iconName: 'feedback', tooltip: 'Feedback' },
+    { iconName: 'star_rate', tooltip: 'Rate Us' },
+    { iconName: 'question_answer', tooltip: 'Q&A' },
+  ];
+  const localSouvenirIcons = [
+    { iconName: 'shopping_bag', tooltip: 'Souvenir Shop' },
+    { iconName: 'local_florist', tooltip: 'Handicraft' },
+    { iconName: 'redeem', tooltip: 'Gift' },
+    { iconName: 'storefront', tooltip: 'Local Product' },
+  ];
+
   return (
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
@@ -507,7 +539,110 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         )}
         {/* Services Section - Glass Morphism & 3D */}
         <div className="text-center w-full max-w-5xl mb-10 sm:mb-8" style={{ perspective: '1000px' }}>
-          {/* Hàng trên: Tours, Bus Tickets, Vehicle Rental */}
+          {/* Hàng trên cùng: 5 dịch vụ mới */}
+          <div className="flex flex-col md:flex-row justify-center gap-3 mb-3 w-full">
+            {/* Local Tourism Info */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Local Tourism Info</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                {localTourismIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
+              </ul>
+            </div>
+            {/* Room Service */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Room Service</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                {roomServiceIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
+              </ul>
+            </div>
+            {/* Housekeeping */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Housekeeping</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                {housekeepingIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
+              </ul>
+            </div>
+            {/* Guest Feedbacks */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Guest Feedbacks</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                {guestFeedbackIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
+              </ul>
+            </div>
+            {/* Local Souvenir */}
+            <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
+              style={{
+                background: 'rgba(85,154,154,0.7)',
+                backdropFilter: 'blur(8px)',
+                borderRadius: '12px',
+                boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                transform: 'translateZ(20px)'
+              }}
+            >
+              <h4 className="font-medium text-amber-400 pb-0 mb-0.5 text-xs sm:text-sm"
+                style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >Local Souvenir</h4>
+              <ul className="grid grid-cols-4 gap-0 sm:gap-2 py-0.5 sm:py-2">
+                {localSouvenirIcons.map(i => (
+                  <li key={i.iconName}><IconWithTooltip iconName={i.iconName} tooltip={i.tooltip} /></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {/* Hàng dưới: Tours, Bus Tickets, Vehicle Rental */}
           <div className="flex flex-col md:flex-row justify-center gap-3 mb-3 w-full">
             {/* Tours */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
