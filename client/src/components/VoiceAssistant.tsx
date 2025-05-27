@@ -117,24 +117,12 @@ const VoiceAssistant: React.FC = () => {
 
       {/* Interface Layers Container */}
       <div className="relative w-full h-full" id="interfaceContainer">
-        <Interface1 
-          isActive={currentInterface === 'interface1'} 
-        />
-        <Interface2 
-          isActive={currentInterface === 'interface2'} 
-        />
-        <Interface3 
-          isActive={currentInterface === 'interface3'} 
-        />
-        <Interface3Vi 
-          isActive={currentInterface === 'interface3vi'} 
-        />
-        <Interface3Fr 
-          isActive={currentInterface === 'interface3fr'} 
-        />
-        <Interface4 
-          isActive={currentInterface === 'interface4'} 
-        />
+        {currentInterface === 'interface1' && <Interface1 isActive={true} />}
+        {currentInterface === 'interface2' && <Interface2 isActive={true} />}
+        {currentInterface === 'interface3' && <Interface3 isActive={true} />}
+        {currentInterface === 'interface3vi' && <Interface3Vi isActive={true} />}
+        {currentInterface === 'interface3fr' && <Interface3Fr isActive={true} />}
+        {currentInterface === 'interface4' && <Interface4 isActive={true} />}
       </div>
     </div>
   );
