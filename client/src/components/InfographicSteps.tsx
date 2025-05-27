@@ -49,7 +49,7 @@ const steps = [
               <div
                 className={`flex items-center justify-center rounded-full shadow-lg mb-0.5 transition-all duration-300 ${
                   idx + 1 === currentStep
-                    ? (language === 'zh' ? 'bg-[#E3B448] text-[#9B6E46] border-2 border-[#E3B448]' : 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]')
+                    ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
                     : 'bg-white/30 text-white border border-gray-200'
                 }`}
                 style={{
@@ -61,8 +61,8 @@ const steps = [
                 <span className="material-icons">{step.icon}</span>
               </div>
               <div className="text-center">
-                <div className={`font-semibold font-poppins mb-0 text-[11px] sm:text-[10px] ${idx + 1 === currentStep ? (language === 'zh' ? 'text-[#9B6E46]' : 'text-blue-900') : 'text-gray-700'}`}>{step.title}</div>
-                <div className={`font-light text-[9px] sm:text-[8px] ${idx + 1 === currentStep ? (language === 'zh' ? 'text-[#9B6E46]' : 'text-blue-800') : 'text-gray-600'} hidden md:block`}>{step.desc}</div>
+                <div className={`font-semibold font-poppins mb-0 text-[11px] sm:text-[10px] ${idx + 1 === currentStep ? 'text-blue-900' : 'text-gray-700'}`}>{step.title}</div>
+                <div className={`font-light text-[9px] sm:text-[8px] ${idx + 1 === currentStep ? 'text-blue-800' : 'text-gray-600'} hidden md:block`}>{step.desc}</div>
               </div>
             </div>
             {idx < steps.length - 1 && (
@@ -92,7 +92,7 @@ const steps = [
           <div
             className={`flex items-center justify-center rounded-full shadow-lg mb-2 transition-all duration-300 ${
               idx + 1 === currentStep
-                ? (language === 'zh' ? 'bg-[#E3B448] text-[#9B6E46] border-2 border-[#E3B448]' : 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]')
+                ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
                 : 'bg-white/30 text-white border border-gray-200'
             }`}
             style={{
@@ -106,12 +106,12 @@ const steps = [
           <div className="text-center">
             <div
               className={`font-semibold font-poppins mb-1 ${compact ? 'text-xs' : 'text-base'} ${
-                idx + 1 === currentStep ? (language === 'zh' ? 'text-[#9B6E46]' : 'text-blue-900') : 'text-gray-700'
+                idx + 1 === currentStep ? 'text-blue-900' : 'text-gray-700'
               }`}
             >
               {step.title}
             </div>
-            <div className={`font-light ${compact ? 'text-[10px]' : 'text-sm'} ${idx + 1 === currentStep ? (language === 'zh' ? 'text-[#9B6E46]' : 'text-blue-800') : 'text-gray-600'}`}>{step.desc}</div>
+            <div className={`font-light ${compact ? 'text-[10px]' : 'text-sm'} ${idx + 1 === currentStep ? 'text-blue-800' : 'text-gray-600'}`}>{step.desc}</div>
           </div>
           {idx < steps.length - 1 && (
             <div className={`mx-auto my-1 rounded-full ${compact ? 'w-0.5 h-4' : 'w-1 h-8'} bg-gradient-to-b from-[#d4af37]/80 to-transparent`} />

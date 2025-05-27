@@ -9,16 +9,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: ({ language }) => language === 'zh'
-          ? 'bg-gradient-to-tr from-[#E3B448] to-[#EAC46F] text-white hover:brightness-110 hover:shadow-lg'
-          : 'bg-gradient-to-tr from-[#4e5ab7] to-[#3f51b5] text-white hover:brightness-110 hover:shadow-lg',
+        default: "bg-gradient-to-tr from-[#4e5ab7] to-[#3f51b5] text-white hover:brightness-110 hover:shadow-lg",
         yellow: "bg-gradient-to-b from-[#ffe066] to-[#ffd700] text-blue-900 border-2 border-[#d4af37] shadow-xl hover:brightness-105 hover:shadow-2xl text-shadow-white",
-        outline: ({ language }) => language === 'zh'
-          ? 'border-2 border-[#E3B448] bg-white text-[#E3B448] hover:bg-[#FFF8E7]'
-          : 'border-2 border-[#4e5ab7] bg-white text-[#4e5ab7] hover:bg-[#f5f7fa]',
-        secondary: ({ language }) => language === 'zh'
-          ? 'bg-white text-[#E3B448] border border-[#E3B448] hover:bg-[#FFF8E7]'
-          : 'bg-white text-[#4e5ab7] border border-[#4e5ab7] hover:bg-[#e8eaf6]',
+        outline: "border-2 border-[#4e5ab7] bg-white text-[#4e5ab7] hover:bg-[#f5f7fa]",
+        secondary: "bg-white text-[#4e5ab7] border border-[#4e5ab7] hover:bg-[#e8eaf6]",
         destructive: "bg-red-500 text-white hover:bg-red-600",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",

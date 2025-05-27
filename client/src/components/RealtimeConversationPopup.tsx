@@ -199,9 +199,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
                         className="text-base md:text-lg font-medium"
                         style={{
                           position: 'relative',
-                          background: language === 'zh'
-                            ? 'linear-gradient(90deg, #E3B448, #EAC46F, #CB9E25, #9B6E46, #FFF8E7)'
-                            : 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
+                          background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           fontWeight: 600,
