@@ -507,7 +507,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                       style={{ minWidth: 90, maxWidth: 120 }}
                       onClick={handleConfirmVapiCall}
                     >
-                      Confirm
+                      {t('confirm_request', language)}
                     </button>
                   </div>
                 )}
@@ -516,7 +516,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
           {/* Popup reference bên phải - chỉ desktop */}
           {showConversation && (
-            <div className="hidden sm:block flex-shrink-0" style={{ marginLeft: 0 }}>
+            <div className="hidden sm:block flex-shrink-0 text-gray-800" style={{ marginLeft: 0 }}>
               <ReferencePopup 
                 isOpen={showConversation}
                 onClose={() => setShowConversation(false)}
@@ -526,7 +526,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </div>
         {/* Popup realtime conversation & reference - chỉ mobile, render dưới nút Call */}
         {showConversation && (
-          <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2">
+          <div className="block sm:hidden w-full flex flex-col items-center gap-2 mb-2 text-gray-800">
             <RealtimeConversationPopup 
               isOpen={showConversation}
               onClose={() => setShowConversation(false)}
