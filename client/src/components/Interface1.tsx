@@ -13,8 +13,6 @@ import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
-import { createPortal } from 'react-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Interface1Props {
   isActive: boolean;
@@ -322,8 +320,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     { iconName: 'calendar_month', tooltip: 'Long-Rent' },
     { iconName: 'meeting_room', tooltip: 'Full-House' },
   ];
-
-  const isMobile = useIsMobile();
 
   return (
     <div 
@@ -716,26 +712,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       )}
       {/* Popup thông báo đang sinh summary */}
       {showGeneratingPopup && (
-        isMobile
-          ? createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-                  <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-                  <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-                  <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-                </div>
-              </div>,
-              document.body
-            )
-          : (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-                  <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-                  <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-                  <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-                </div>
-              </div>
-            )
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
+            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
+            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
+            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
+          </div>
+        </div>
       )}
     </div>
   );
