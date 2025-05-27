@@ -229,8 +229,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     } else {
       setShowSummaryPopup(true);
     }
+  };
 
-    // Gọi endCall() sau cùng
+  // Hàm đóng popup summary, sẽ gọi endCall() tại đây
+  const handleCloseSummaryPopup = () => {
+    setShowSummaryPopup(false);
+    setShowGeneratingPopup(false);
     endCall();
   };
 
@@ -512,15 +516,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           )}
           {/* 3. Đã có summary: chỉ hiện popup Summary */}
           {showSummaryPopup && (
-            <div
-              className="block sm:hidden w-full flex items-center justify-center px-2 pt-4 pb-6"
-              style={{
-                background: 'none',
-                minHeight: 'unset',
-                maxHeight: 'unset',
-              }}
-            >
-              <div className="w-full max-w-4xl h-auto">
+            <div className="hidden sm:block w-full flex items-center justify-center px-2 pt-4 pb-6">
+              <div className="w-full max-w-4xl h-auto relative">
+                <button
+                  className="absolute top-2 right-2 bg-white text-blue-900 rounded-full px-3 py-1 shadow hover:bg-blue-100 z-50"
+                  onClick={handleCloseSummaryPopup}
+                >
+                  Close
+                </button>
                 <Interface3 isActive={true} />
               </div>
             </div>
