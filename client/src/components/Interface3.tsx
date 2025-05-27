@@ -344,9 +344,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   
   return (
     <div
-      className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
+      className={`w-full transition-opacity duration-500 ${
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } z-30 overflow-y-auto`}
+      } z-30`}
       id="interface3"
       style={{
         backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
