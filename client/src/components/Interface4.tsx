@@ -16,10 +16,8 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   if (!order) return null;
   
   return (
-    <div className={`w-full transition-opacity duration-500 ${
-      isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-    } bg-neutral z-40`} id="interface4">
-      <div className="container mx-auto flex flex-col items-start sm:items-center justify-center pt-50 sm:pt-0 p-3 sm:p-5 text-center h-full">
+    <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" id="interface4">
+      <div className="container mx-auto flex flex-col items-center justify-center pt-50 sm:pt-0 p-3 sm:p-5 text-center h-auto">
         <div className="w-full max-w-xs sm:max-w-md bg-white rounded-lg shadow-lg p-4 sm:p-8">
           {/* Success Animation */}
           <div className="mb-4 sm:mb-6 flex justify-center">
