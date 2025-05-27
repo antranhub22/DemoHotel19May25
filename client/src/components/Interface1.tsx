@@ -46,6 +46,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [showConversation, setShowConversation] = useState(false);
   const [showSummaryPopup, setShowSummaryPopup] = useState(false);
   const [showGeneratingPopup, setShowGeneratingPopup] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   
   // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
@@ -216,19 +217,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setCurrentInterface('interface1');
   };
   // Handler cho nút Confirm
-  const handleConfirmVapiCall = () => {
-    if (vapi) vapi.stop();
-    endCall();
-    // Nếu chưa có orderSummary, tạo mới từ callSummary
-    if (!orderSummary && callSummary?.content) {
-      const summary = parseSummaryToOrderDetails(callSummary.content);
-      setOrderSummary(summary as any);
-    }
-    // Nếu chưa có summary thực sự, show popup Generating
-    if (!callSummary?.content || callSummary.content === 'Generating AI summary of your conversation...') {
-      setShowGeneratingPopup(true);
-    } else {
-      setShowSummaryPopup(true);
+  const handleConfirmVapiCall = async () => {
+    if (!isCallStarted || !vapi) return;
+    setIsConfirming(true);
+    try {
+      vapi.stop();
+      endCall();
+      // Nếu chưa có orderSummary, tạo mới từ callSummary
+      if (!orderSummary && callSummary?.content) {
+        const summary = parseSummaryToOrderDetails(callSummary.content);
+        setOrderSummary(summary as any);
+      }
+      // Nếu chưa có summary thực sự, show popup Generating
+      if (!callSummary?.content || callSummary.content === 'Generating AI summary of your conversation...') {
+        setShowGeneratingPopup(true);
+      } else {
+        setShowSummaryPopup(true);
+      }
+    } catch (error) {
+      console.error('Error ending call:', error);
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -325,16 +334,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } z-10 overflow-y-auto`} 
+      } z-30 overflow-y-auto`} 
       id="interface1"
       style={{
-        backgroundImage: `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
+        backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        perspective: '1000px'
+        fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
       }}
     >
-      <div className="container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24" 
+      <div className={`container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24 ${isConfirming ? 'opacity-5' : 'opacity-100'} transition-opacity duration-300`} 
         style={{ transform: 'translateZ(20px)', minHeight: 'fit-content' }}
       >
         <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
@@ -693,6 +702,21 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </div>
         )}
       </div>
+      {/* Popup Generating */}
+      {showGeneratingPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="relative bg-white/90 rounded-2xl shadow-xl p-6 sm:p-8 max-w-md w-full mx-4">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-100 flex items-center justify-center">
+                <span className="material-icons text-blue-600 text-3xl sm:text-4xl animate-spin">sync</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-blue-900 text-center">{t('generating_summary', language)}</h3>
+              <p className="text-gray-600 text-sm sm:text-base text-center">{t('generating_summary_desc', language)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
@@ -707,16 +731,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             <div className="w-full max-w-4xl h-auto flex items-center justify-center">
               <Interface3 isActive={true} />
             </div>
-          </div>
-        </div>
-      )}
-      {/* Popup thông báo đang sinh summary */}
-      {showGeneratingPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
           </div>
         </div>
       )}
