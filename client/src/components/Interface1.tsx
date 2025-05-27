@@ -325,7 +325,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      } z-10 overflow-y-auto`} 
+      } ${(showGeneratingPopup || showSummaryPopup) ? 'opacity-0 pointer-events-none' : ''} z-10 overflow-y-auto`} 
       id="interface1"
       style={{
         backgroundImage: `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
@@ -712,7 +712,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       )}
       {/* Popup thông báo đang sinh summary */}
       {showGeneratingPopup && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-center mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
