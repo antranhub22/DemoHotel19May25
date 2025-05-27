@@ -701,7 +701,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       {showSummaryPopup && (
         isMobile
           ? createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
                 <div className="relative bg-transparent w-full h-full flex items-center justify-center">
                   <button
                     className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
@@ -718,7 +718,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               document.body
             )
           : (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
                 <div className="relative bg-transparent w-full h-full flex items-center justify-center">
                   <button
                     className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
