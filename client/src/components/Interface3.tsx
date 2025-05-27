@@ -430,7 +430,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                   {/* Ghi chú in nghiêng dưới cùng */}
                   <div className="text-center mt-2 mb-1">
                     <span className="italic text-sm" style={{color:'#2563eb', background:'#e0f2fe', borderRadius: '6px', padding: '4px 12px', display: 'inline-block', fontWeight: 500}}>
-                      Please Press <b style={{fontWeight:700, color:'#1d4ed8'}}>Send To Reception</b> To Complete Your Request
+                      Please Press <b style={{fontWeight:700, color:'#1d4ed8'}}>{t('send_to_reception', language)}</b> To Complete Your Request
                     </span>
                   </div>
                 </div>

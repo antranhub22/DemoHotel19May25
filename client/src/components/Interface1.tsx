@@ -437,19 +437,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                         : '#4ADE80'
               }}
             >mic</span>
-            {language === 'fr' ? (
-              <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : language === 'ru' || language === 'ko' ? (
-              <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : (
-              <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            )}
+            <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+              style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+            >{t('press_to_call', language)}</span>
             <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
             </button>
               </>
