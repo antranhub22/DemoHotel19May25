@@ -9,10 +9,9 @@ import { Button } from './ui/button';
 
 interface Interface3Props {
   isActive: boolean;
-  summaryOnly?: boolean;
 }
 
-const Interface3: React.FC<Interface3Props> = ({ isActive, summaryOnly }) => {
+const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   const { 
     orderSummary, 
     setOrderSummary, 
@@ -343,124 +342,6 @@ const Interface3: React.FC<Interface3Props> = ({ isActive, summaryOnly }) => {
   
   if (!orderSummary) return null;
   
-  const boxContent = (
-    <div className="mx-auto w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
-      <div className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
-        <p className="font-poppins font-bold text-xl sm:text-2xl text-blue-900 tracking-wide">{t('order_summary', language)}</p>
-      </div>
-      <div className="flex flex-col md:flex-row gap-4 sm:gap-10 md:gap-16">
-        {/* Left column: summary, notes, room number */}
-        <div className="md:w-3/4 w-full space-y-3 sm:space-y-4">
-          {/* Mobile: Cancel và Send to Reception lên trên cùng */}
-          <div className="flex sm:hidden flex-row w-full gap-2 mb-2">
-            <button className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => setCurrentInterface('interface1')}>
-              <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-            </button>
-            <Button
-              onClick={handleConfirmOrder}
-              variant="yellow"
-              className="flex-1 flex items-center justify-center space-x-2 text-xs font-bold sm:hidden"
-              style={{ minHeight: 44, minWidth: 120, zIndex: 10 }}
-            >
-              <span className="material-icons">send</span>
-              <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
-            </Button>
-          </div>
-          {/* Mobile: Add Note, Room, Vietnamese, textarea lên trên summary */}
-          <div className="flex flex-col gap-2 mb-2 sm:hidden">
-            <div className="flex flex-row w-full gap-2">
-              <button className="h-10 px-3 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs font-semibold shadow transition-colors flex-1" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
-              <div className="flex items-center space-x-2 w-full justify-center">
-                <label className="text-xs text-gray-600 font-medium">{t('room_number', language)}</label>
-                <input type="text" placeholder={t('enter_room_number', language)} className="w-16 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
-              </div>
-              <button className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => setCurrentInterface('interface3vi')}>
-                <span className="material-icons text-base">language</span>
-              </button>
-            </div>
-            <textarea placeholder={t('enter_notes', language)} className="w-full p-2 border border-white/30 rounded-xl text-xs bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
-          </div>
-          {/* AI-generated Call Summary Container */}
-          {callSummary && (
-            <div id="summary-container" className="mb-3 sm:mb-4">
-              <div className="p-3 sm:p-5 bg-white/80 rounded-xl shadow border border-white/30 mb-3 sm:mb-4 relative" style={{backdropFilter:'blur(2px)'}}>
-                <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2 text-blue-800">{t('summary', language)}</h3>
-                <div className="text-sm sm:text-base leading-relaxed text-gray-800 whitespace-pre-line" style={{fontWeight: 400}}>
-                  {/* Custom summary formatting */}
-                  {(() => {
-                    const lines = (callSummary.content || '').split('\n');
-                    // Lọc bỏ dòng Next Step và xử lý Guest's Name
-                    return lines.filter(line => !/^Next Step:/i.test(line) && !/Please Press Send To Reception/i.test(line)).map((line, idx) => {
-                      // Loại bỏ phần (used for Guest with a confirmed reservation)
-                      if (/^Guest's Name/i.test(line)) {
-                        const cleaned = line.replace(/\s*\(used for Guest with a confirmed reservation\)/i, '');
-                        return <div key={idx}><b>{cleaned}</b></div>;
-                      }
-                      if (/^Room Number:/i.test(line)) return <div key={idx}><b>{line}</b></div>;
-                      if (/^REQUEST \d+:/i.test(line)) return <div key={idx} className="mt-3 mb-1"><b>{line}</b></div>;
-                      if (/^• Service Timing:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                      if (/^• Order Details:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                      if (/^• Special Requirements:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                      // Lùi dòng cho nội dung con của Order Details
-                      if (/^• [^-].+/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
-                      if (/^\s*[-•]/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
-                      if (/^\s*$/.test(line)) return <div key={idx} style={{height:8}}></div>;
-                      return <div key={idx}>{line}</div>;
-                    });
-                  })()}
-                </div>
-                <div className="mt-2 sm:mt-3 flex justify-end">
-                  <div className="text-xs text-gray-500">
-                    {t('generated_at', language)} {new Date(callSummary.timestamp).toLocaleTimeString()}
-                  </div>
-                </div>
-              </div>
-              {/* Ghi chú in nghiêng dưới cùng */}
-              <div className="text-center mt-2 mb-1">
-                <span className="italic text-sm" style={{color:'#2563eb', background:'#e0f2fe', borderRadius: '6px', padding: '4px 12px', display: 'inline-block', fontWeight: 500}}>
-                  Please Press <b style={{fontWeight:700, color:'#1d4ed8'}}>Send To Reception</b> To Complete Your Request
-                </span>
-              </div>
-            </div>
-          )}
-          {/* Desktop: Additional Notes, Room Number, and Actions (giữ nguyên) */}
-          <div className="hidden sm:flex flex-row items-center gap-2 h-10">
-            <button className="h-10 px-3 sm:px-4 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs sm:text-sm font-semibold shadow transition-colors" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
-            <div className="flex items-center space-x-2 w-full justify-center">
-              <label className="text-xs sm:text-base text-gray-600 font-medium">{t('room_number', language)}</label>
-              <input type="text" placeholder={t('enter_room_number', language)} className="w-16 sm:w-32 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs sm:text-base" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
-            </div>
-            <button className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => setCurrentInterface('interface3vi')}>
-              <span className="material-icons text-base">language</span>
-            </button>
-          </div>
-          <textarea placeholder={t('enter_notes', language)} className="hidden sm:block w-full p-2 sm:p-3 border border-white/30 rounded-xl mb-3 sm:mb-4 text-xs sm:text-sm bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
-        </div>
-        {/* Right column: control buttons at top-right (ẩn trên mobile) */}
-        <div className="md:w-1/4 w-full hidden sm:flex md:justify-end justify-center">
-          <div className="flex flex-col items-end space-y-2 sm:space-y-3 w-full md:w-auto">
-            <Button
-              onClick={handleConfirmOrder}
-              variant="yellow"
-              className="w-full md:w-auto flex items-center justify-center space-x-2 text-xs sm:text-sm font-bold"
-              style={{ minHeight: 44, minWidth: 160, zIndex: 10 }}
-            >
-              <span className="material-icons">send</span>
-              <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
-            </Button>
-            <button className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => setCurrentInterface('interface1')}>
-              <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (summaryOnly) {
-    return boxContent;
-  }
-
   return (
     <div
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
@@ -475,7 +356,117 @@ const Interface3: React.FC<Interface3Props> = ({ isActive, summaryOnly }) => {
       }}
     >
       <div className="container mx-auto flex flex-col p-2 sm:p-4 md:p-8">
-        {boxContent}
+        <div className="mx-auto w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
+          <div className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
+            <p className="font-poppins font-bold text-xl sm:text-2xl text-blue-900 tracking-wide">{t('order_summary', language)}</p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-4 sm:gap-10 md:gap-16">
+            {/* Left column: summary, notes, room number */}
+            <div className="md:w-3/4 w-full space-y-3 sm:space-y-4">
+              {/* Mobile: Cancel và Send to Reception lên trên cùng */}
+              <div className="flex sm:hidden flex-row w-full gap-2 mb-2">
+                <button className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => setCurrentInterface('interface1')}>
+                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                </button>
+                <Button
+                  onClick={handleConfirmOrder}
+                  variant="yellow"
+                  className="flex-1 flex items-center justify-center space-x-2 text-xs font-bold sm:hidden"
+                  style={{ minHeight: 44, minWidth: 120, zIndex: 10 }}
+                >
+                  <span className="material-icons">send</span>
+                  <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
+                </Button>
+              </div>
+              {/* Mobile: Add Note, Room, Vietnamese, textarea lên trên summary */}
+              <div className="flex flex-col gap-2 mb-2 sm:hidden">
+                <div className="flex flex-row w-full gap-2">
+                  <button className="h-10 px-3 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs font-semibold shadow transition-colors flex-1" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
+                  <div className="flex items-center space-x-2 w-full justify-center">
+                    <label className="text-xs text-gray-600 font-medium">{t('room_number', language)}</label>
+                    <input type="text" placeholder={t('enter_room_number', language)} className="w-16 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
+                  </div>
+                  <button className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => setCurrentInterface('interface3vi')}>
+                    <span className="material-icons text-base">language</span>
+                  </button>
+                </div>
+                <textarea placeholder={t('enter_notes', language)} className="w-full p-2 border border-white/30 rounded-xl text-xs bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
+              </div>
+              {/* AI-generated Call Summary Container */}
+              {callSummary && (
+                <div id="summary-container" className="mb-3 sm:mb-4">
+                  <div className="p-3 sm:p-5 bg-white/80 rounded-xl shadow border border-white/30 mb-3 sm:mb-4 relative" style={{backdropFilter:'blur(2px)'}}>
+                    <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2 text-blue-800">{t('summary', language)}</h3>
+                    <div className="text-sm sm:text-base leading-relaxed text-gray-800 whitespace-pre-line" style={{fontWeight: 400}}>
+                      {/* Custom summary formatting */}
+                      {(() => {
+                        const lines = (callSummary.content || '').split('\n');
+                        // Lọc bỏ dòng Next Step và xử lý Guest's Name
+                        return lines.filter(line => !/^Next Step:/i.test(line) && !/Please Press Send To Reception/i.test(line)).map((line, idx) => {
+                          // Loại bỏ phần (used for Guest with a confirmed reservation)
+                          if (/^Guest's Name/i.test(line)) {
+                            const cleaned = line.replace(/\s*\(used for Guest with a confirmed reservation\)/i, '');
+                            return <div key={idx}><b>{cleaned}</b></div>;
+                          }
+                          if (/^Room Number:/i.test(line)) return <div key={idx}><b>{line}</b></div>;
+                          if (/^REQUEST \d+:/i.test(line)) return <div key={idx} className="mt-3 mb-1"><b>{line}</b></div>;
+                          if (/^• Service Timing:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
+                          if (/^• Order Details:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
+                          if (/^• Special Requirements:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
+                          // Lùi dòng cho nội dung con của Order Details
+                          if (/^• [^-].+/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
+                          if (/^\s*[-•]/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
+                          if (/^\s*$/.test(line)) return <div key={idx} style={{height:8}}></div>;
+                          return <div key={idx}>{line}</div>;
+                        });
+                      })()}
+                    </div>
+                    <div className="mt-2 sm:mt-3 flex justify-end">
+                      <div className="text-xs text-gray-500">
+                        {t('generated_at', language)} {new Date(callSummary.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Ghi chú in nghiêng dưới cùng */}
+                  <div className="text-center mt-2 mb-1">
+                    <span className="italic text-sm" style={{color:'#2563eb', background:'#e0f2fe', borderRadius: '6px', padding: '4px 12px', display: 'inline-block', fontWeight: 500}}>
+                      Please Press <b style={{fontWeight:700, color:'#1d4ed8'}}>Send To Reception</b> To Complete Your Request
+                    </span>
+                  </div>
+                </div>
+              )}
+              {/* Desktop: Additional Notes, Room Number, and Actions (giữ nguyên) */}
+              <div className="hidden sm:flex flex-row items-center gap-2 h-10">
+                <button className="h-10 px-3 sm:px-4 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs sm:text-sm font-semibold shadow transition-colors" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
+                <div className="flex items-center space-x-2 w-full justify-center">
+                  <label className="text-xs sm:text-base text-gray-600 font-medium">{t('room_number', language)}</label>
+                  <input type="text" placeholder={t('enter_room_number', language)} className="w-16 sm:w-32 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs sm:text-base" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
+                </div>
+                <button className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => setCurrentInterface('interface3vi')}>
+                  <span className="material-icons text-base">language</span>
+                </button>
+              </div>
+              <textarea placeholder={t('enter_notes', language)} className="hidden sm:block w-full p-2 sm:p-3 border border-white/30 rounded-xl mb-3 sm:mb-4 text-xs sm:text-sm bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
+            </div>
+            {/* Right column: control buttons at top-right (ẩn trên mobile) */}
+            <div className="md:w-1/4 w-full hidden sm:flex md:justify-end justify-center">
+              <div className="flex flex-col items-end space-y-2 sm:space-y-3 w-full md:w-auto">
+                <Button
+                  onClick={handleConfirmOrder}
+                  variant="yellow"
+                  className="w-full md:w-auto flex items-center justify-center space-x-2 text-xs sm:text-sm font-bold"
+                  style={{ minHeight: 44, minWidth: 160, zIndex: 10 }}
+                >
+                  <span className="material-icons">send</span>
+                  <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
+                </Button>
+                <button className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => setCurrentInterface('interface1')}>
+                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

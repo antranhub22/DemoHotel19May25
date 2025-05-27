@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
-import OrderSummaryBox from './OrderSummaryBox';
 
 interface Interface1Props {
   isActive: boolean;
@@ -718,9 +717,18 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
 
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
-        <div className="w-full max-w-4xl flex justify-center pt-50 sm:pt-0">
-          <div className="w-full bg-white rounded-2xl shadow-xl max-h-[80vh] overflow-y-auto">
-            <Interface3 isActive={true} summaryOnly={true} />
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-sm">
+          <div className="relative w-full h-full flex items-start justify-center">
+            <button
+              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
+              onClick={() => setShowSummaryPopup(false)}
+              title="Đóng summary"
+            >
+              <span className="material-icons text-gray-600">close</span>
+            </button>
+            <div className="w-full max-w-4xl max-h-screen overflow-y-auto flex justify-center pt-80 sm:pt-0">
+              <Interface3 isActive={true} />
+            </div>
           </div>
         </div>
       )}
