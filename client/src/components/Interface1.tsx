@@ -344,7 +344,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}
-        {!(showSummaryPopup && window.innerWidth < 640) && (
+        {(!showSummaryPopup || window.innerWidth >= 640) && (
           <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
             {/* Popup realtime conversation bên trái - chỉ desktop */}
             {showConversation && (
@@ -454,7 +454,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                   </div>
                   {/* Hai nút nhỏ Cancel/Confirm dưới hàng Mute/Duration/Volume */}
                   {isCallStarted && (
-                    <div className="flex flex-row justify-between items-center w-full max-w-xs mx-auto mt-2 gap-2" style={{ position: 'relative', zIndex: 40 }}>
+                    <div className="flex flex-row justify-between items-center w-full max-w-xs mx-auto mt-2 gap-2" style={{ position: 'relative', zIndex: 60 }}>
                       <button
                         className="flex-1 py-2 rounded-full bg-white hover:bg-red-100 text-red-700 font-semibold text-sm border border-red-200 shadow transition"
                         style={{ minWidth: 90, maxWidth: 120 }}
@@ -464,7 +464,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                       </button>
                       <button
                         className="flex-1 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-sm shadow transition"
-                        style={{ minWidth: 90, maxWidth: 120, zIndex: 50 }}
+                        style={{ minWidth: 90, maxWidth: 120, zIndex: 70 }}
                         onClick={handleConfirmVapiCall}
                       >
                         Confirm
