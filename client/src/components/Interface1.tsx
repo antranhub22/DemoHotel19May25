@@ -726,7 +726,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             >
               <span className="material-icons text-gray-600">close</span>
             </button>
-            <div className="w-full max-w-4xl max-h-screen overflow-y-auto flex justify-center pt-8 sm:pt-0">
+            <div className="w-full max-w-4xl max-h-screen overflow-y-auto flex justify-center pt-32 sm:pt-0">
               <Interface3 isActive={true} />
             </div>
           </div>
