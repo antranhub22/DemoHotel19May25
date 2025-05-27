@@ -335,8 +335,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         backgroundImage: `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        perspective: '1000px',
-        pointerEvents: isMobile && showSummaryPopup ? 'none' : 'auto',
+        perspective: '1000px'
       }}
     >
       <div className="container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24" 
@@ -700,40 +699,20 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       </div>
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
-        isMobile
-          ? createPortal(
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-                <div className="relative bg-transparent w-full h-full flex items-center justify-center">
-                  <button
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
-                    onClick={() => setShowSummaryPopup(false)}
-                    title="Đóng summary"
-                  >
-                    <span className="material-icons text-gray-600">close</span>
-                  </button>
-                  <div className="w-full max-w-4xl h-auto flex items-center justify-center">
-                    <Interface3 isActive={true} />
-                  </div>
-                </div>
-              </div>,
-              document.body
-            )
-          : (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" style={{ pointerEvents: 'auto' }}>
-                <div className="relative bg-transparent w-full h-full flex items-center justify-center">
-                  <button
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
-                    onClick={() => setShowSummaryPopup(false)}
-                    title="Đóng summary"
-                  >
-                    <span className="material-icons text-gray-600">close</span>
-                  </button>
-                  <div className="w-full max-w-4xl h-auto flex items-center justify-center">
-                    <Interface3 isActive={true} />
-                  </div>
-                </div>
-              </div>
-            )
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="relative bg-transparent w-full h-full flex items-center justify-center">
+            <button
+              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
+              onClick={() => setShowSummaryPopup(false)}
+              title="Đóng summary"
+            >
+              <span className="material-icons text-gray-600">close</span>
+            </button>
+            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+              <Interface3 isActive={true} />
+            </div>
+          </div>
+        </div>
       )}
       {/* Popup thông báo đang sinh summary */}
       {showGeneratingPopup && (
