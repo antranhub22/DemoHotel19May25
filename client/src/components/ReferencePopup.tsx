@@ -1,4 +1,4 @@
-import React from 'react';
+import { createPortal } from 'react-dom';
 
 interface ReferencePopupProps {
   isOpen: boolean;
@@ -7,10 +7,12 @@ interface ReferencePopupProps {
 
 const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
-  return (
+  return createPortal(
     <div 
-      className="relative z-30 overflow-hidden rounded-2xl shadow-2xl reference-popup"
+      className="fixed z-[9999] overflow-hidden rounded-2xl shadow-2xl reference-popup"
       style={{
+        top: 40,
+        right: 40,
         width: '90vw',
         maxWidth: 360,
         height: '70vh',
@@ -20,6 +22,7 @@ const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
         WebkitBackdropFilter: 'blur(18px)',
         border: '1.5px solid rgba(255,255,255,0.25)',
         boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        borderRadius: 24,
       }}
     >
       {/* Header */}
@@ -48,7 +51,8 @@ const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
           }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 };
 

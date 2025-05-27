@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '../i18n';
+import { createPortal } from 'react-dom';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -135,107 +136,104 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   if (!isOpen) return null;
 
-  return (
-    <>
-      {/* Popup */}
-      <div 
-        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
-        style={{
-          width: '90vw',
-          maxWidth: 360,
-          height: '70vh',
-          maxHeight: 440,
-          background: 'rgba(255,255,255,0.12)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-          border: '1.5px solid rgba(255,255,255,0.25)',
-          boxShadow: isRight ? '0 8px 32px rgba(0,0,0,0.18), 8px 0 24px rgba(0,0,0,0.10)' : '0 8px 32px rgba(0,0,0,0.18)',
-          borderTopLeftRadius: isRight ? 24 : 24,
-          borderBottomLeftRadius: isRight ? 24 : 24,
-          borderTopRightRadius: isRight ? 24 : 24,
-          borderBottomRightRadius: isRight ? 24 : 24,
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
-          <h3 className="text-lg font-semibold text-gray-800">
-            Conversation
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
-        </div>
-        {/* Conversation Content */}
-        <div 
-          ref={containerRef}
-          className="p-4 h-[calc(100%-4rem)] overflow-y-auto"
+  return createPortal(
+    <div 
+      className={`fixed z-[9999] overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
+      style={{
+        top: 40,
+        left: isRight ? 'unset' : 40,
+        right: isRight ? 40 : 'unset',
+        width: '90vw',
+        maxWidth: 360,
+        height: '70vh',
+        maxHeight: 440,
+        background: 'rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(18px)',
+        WebkitBackdropFilter: 'blur(18px)',
+        border: '1.5px solid rgba(255,255,255,0.25)',
+        boxShadow: isRight ? '0 8px 32px rgba(0,0,0,0.18), 8px 0 24px rgba(0,0,0,0.10)' : '0 8px 32px rgba(0,0,0,0.18)',
+        borderRadius: 24,
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
+        <h3 className="text-lg font-semibold text-gray-800">
+          Conversation
+        </h3>
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
         >
-          {conversationTurns.length === 0 && (
-            <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
-              {t('tap_to_speak', language)}
-            </div>
-          )}
-          {conversationTurns.map((turn, turnIdx) => (
-            <div key={turn.id} className="mb-4">
-              <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: turn.role === 'user' ? '#3B82F6' : '#10B981'
-                  }}
-                >
-                  <span className="text-white text-sm">{turn.role === 'user' ? 'U' : 'A'}</span>
-                </div>
-                <div className="flex-1">
-                  {turn.role === 'user' ? (
-                    <div className="bg-gray-100 rounded-lg p-3">
-                      <p className="text-gray-800">{turn.messages[0].content}</p>
-                    </div>
-                  ) : (
-                    <div className="bg-green-50 rounded-lg p-3">
-                      <p
-                        className="text-base md:text-lg font-medium"
-                        style={{
-                          position: 'relative',
-                          background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: 600,
-                          letterSpacing: 0.2,
-                          transition: 'background 0.5s'
-                        }}
-                      >
-                        <span className="inline-flex flex-wrap">
-                          {turn.messages.map((msg, idx) => {
-                            const content = msg.content.slice(0, visibleChars[msg.id] || 0);
-                            return (
-                              <span key={msg.id} style={{ whiteSpace: 'pre' }}>
-                                {content}
-                                {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
-                                {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
-                                  <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
-                                )}
-                              </span>
-                            );
-                          })}
-                        </span>
-                        {/* 3 chấm nhấp nháy khi assistant đang nghe */}
-                        {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
-                          <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  <span className="text-xs text-gray-500 mt-1 block">
-                    {turn.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      </div>
+      {/* Conversation Content */}
+      <div 
+        ref={containerRef}
+        className="p-4 h-[calc(100%-4rem)] overflow-y-auto"
+      >
+        {conversationTurns.length === 0 && (
+          <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
+            {t('tap_to_speak', language)}
+          </div>
+        )}
+        {conversationTurns.map((turn, turnIdx) => (
+          <div key={turn.id} className="mb-4">
+            <div className="flex items-start gap-2">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: turn.role === 'user' ? '#3B82F6' : '#10B981'
+                }}
+              >
+                <span className="text-white text-sm">{turn.role === 'user' ? 'U' : 'A'}</span>
+              </div>
+              <div className="flex-1">
+                {turn.role === 'user' ? (
+                  <div className="bg-gray-100 rounded-lg p-3">
+                    <p className="text-gray-800">{turn.messages[0].content}</p>
+                  </div>
+                ) : (
+                  <div className="bg-green-50 rounded-lg p-3">
+                    <p
+                      className="text-base md:text-lg font-medium"
+                      style={{
+                        position: 'relative',
+                        background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        fontWeight: 600,
+                        letterSpacing: 0.2,
+                        transition: 'background 0.5s'
+                      }}
+                    >
+                      <span className="inline-flex flex-wrap">
+                        {turn.messages.map((msg, idx) => {
+                          const content = msg.content.slice(0, visibleChars[msg.id] || 0);
+                          return (
+                            <span key={msg.id} style={{ whiteSpace: 'pre' }}>
+                              {content}
+                              {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
+                              {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
+                                <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </span>
+                      {/* 3 chấm nhấp nháy khi assistant đang nghe */}
+                      {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
+                        <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+                <span className="text-xs text-gray-500 mt-1 block">
+                  {turn.timestamp.toLocaleTimeString()}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
       {/* Desktop: popup lệch phải nút Call */}
       <style>{`
@@ -251,7 +249,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           }
         }
       `}</style>
-    </>
+    </div>,
+    document.body
   );
 };
 
