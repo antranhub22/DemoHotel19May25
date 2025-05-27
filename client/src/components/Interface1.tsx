@@ -217,25 +217,21 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   };
   // Handler cho nút Confirm
   const handleConfirmVapiCall = () => {
-    console.log('Desktop - Confirm button clicked');
-    console.log('Desktop - Before vapi.stop() - vapi:', vapi);
     if (vapi) vapi.stop();
-    console.log('Desktop - After vapi.stop()');
-    console.log('Desktop - Before endCall() - callSummary:', callSummary);
-    endCall();
-    console.log('Desktop - After endCall() - callSummary:', callSummary);
+
+    // Thực hiện các thao tác với state trước khi endCall()
     if (!orderSummary && callSummary?.content) {
-      console.log('Desktop - Creating orderSummary from callSummary');
       const summary = parseSummaryToOrderDetails(callSummary.content);
       setOrderSummary(summary as any);
     }
     if (!callSummary?.content || callSummary.content === 'Generating AI summary of your conversation...') {
-      console.log('Desktop - Setting showGeneratingPopup to true');
       setShowGeneratingPopup(true);
     } else {
-      console.log('Desktop - Setting showSummaryPopup to true');
       setShowSummaryPopup(true);
     }
+
+    // Gọi endCall() sau cùng
+    endCall();
   };
 
   // Theo dõi callSummary, khi đã có nội dung thực sự thì ẩn popup Generating và show popup summary
