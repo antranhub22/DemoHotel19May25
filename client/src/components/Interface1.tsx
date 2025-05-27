@@ -378,11 +378,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       <div className={`container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24 ${isConfirming ? 'opacity-5' : 'opacity-100'} transition-opacity duration-300`} 
         style={{ transform: 'translateZ(20px)', minHeight: 'fit-content' }}
       >
-        <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
-          style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
-          <span className="text-red-600 font-bold mr-2">building</span>Mi Nhon Hotel Mui Ne
-        </h2>
-        <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
+        {/* Header chính với logo và tên khách sạn */}
+        <div className="w-full flex flex-row items-center justify-center sm:justify-start mb-2">
+          <img src="/assets/minhon-logo.jpg" alt="Mi Nhon Hotel Logo" className="h-12 w-12 sm:h-16 sm:w-16 object-contain mr-3" />
+          <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 text-left"
+            style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
+            Mi Nhon Hotel Mui Ne
+          </h2>
+        </div>
+        {/* Dòng chữ giới thiệu AI voice assistant */}
+        <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">Speak Multi-Language With Our AI-Voice Assistant</p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
