@@ -39,7 +39,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [micLevel, setMicLevel] = useState(0);
   const [localDuration, setLocalDuration] = useState(0);
   const [showOrderCard, setShowOrderCard] = useState(false);
-  
+
   // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
@@ -339,7 +339,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       >
         <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
           style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
-          HaiLy Travel Agency
+          Mi Nhon Hotel Mui Ne
         </h2>
         <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">{t('hotel_subtitle', language)}</p>
         
@@ -360,58 +360,58 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               {!isCallStarted ? (
                 <>
                   {/* Ripple Animation ... */}
-          <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
-          {/* Main Button */}
-            <button 
-            id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
-            className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
-            onClick={() => handleCall(language as any)}
-            style={{
-              background: language === 'en' 
+                  <div className="absolute inset-0 rounded-full border-4 border-amber-400 animate-[ripple_1.5s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-80 opacity-60"></div>
+                  <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
+                  {/* Main Button */}
+                  <button 
+                    id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+                    className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
+                    onClick={() => handleCall(language as any)}
+                    style={{
+                      background: language === 'en' 
                         ? 'linear-gradient(180deg, rgba(85,154,154,0.9) 0%, rgba(85,154,154,0.9) 100%)'
-                : language === 'fr' 
+                        : language === 'fr' 
                         ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)'
-                : language === 'zh' 
+                        : language === 'zh' 
                         ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)'
-                : language === 'ru' 
+                        : language === 'ru' 
                         ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)'
                         : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
-              boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.5)',
-              transition: 'all 0.3s ease',
-              transform: 'translateY(0) translateZ(30px)',
-            }}
-          >
-            <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
-              style={{ 
-                filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
-                color: language === 'en' 
+                      boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
+                      border: '1px solid rgba(255, 255, 255, 0.5)',
+                      transition: 'all 0.3s ease',
+                      transform: 'translateY(0) translateZ(30px)',
+                    }}
+                  >
+                    <span className="material-icons text-4xl sm:text-6xl lg:text-7xl mb-2 text-[#F9BF3B] transition-all duration-300 group-hover:scale-110" 
+                      style={{ 
+                        filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))',
+                        color: language === 'en' 
                           ? '#F9BF3B'
-                  : language === 'fr' 
+                          : language === 'fr' 
                           ? '#FFFFFF'
-                  : language === 'zh' 
+                          : language === 'zh' 
                           ? '#FFEB3B'
-                  : language === 'ru' 
+                          : language === 'ru' 
                           ? '#F48FB1'
                           : '#4ADE80'
-              }}
-            >mic</span>
-            {language === 'fr' ? (
-              <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : language === 'ru' || language === 'ko' ? (
-              <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            ) : (
-              <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-              >{t('press_to_call', language)}</span>
-            )}
-            <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
-            </button>
+                      }}
+                    >mic</span>
+                    {language === 'fr' ? (
+                      <span className="text-sm sm:text-lg lg:text-2xl font-bold text-white px-2 text-center"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    ) : language === 'ru' || language === 'ko' ? (
+                      <span className="text-sm sm:text-lg lg:text-xl font-bold text-white px-2 text-center"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    ) : (
+                      <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                        style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+                      >{t('press_to_call', language)}</span>
+                    )}
+                    <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
+                  </button>
                 </>
               ) : (
                 <div className="relative flex flex-col items-center justify-center mb-1 sm:mb-6 w-full max-w-xs mx-auto">
@@ -550,7 +550,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
             {/* Bus Tickets */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-[560px] min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
-                style={{ 
+              style={{
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
