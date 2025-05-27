@@ -356,7 +356,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
               </div>
             )}
             {/* Nút Call luôn ở giữa */}
-            <div className="flex-none flex flex-col items-center justify-center mx-auto" style={{zIndex: 10}}>
+            <div className="flex-none flex flex-col items-center justify-center mx-auto">
               {!isCallStarted ? (
                 <>
                   {/* Ripple Animation ... */}
@@ -464,7 +464,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                       </button>
                       <button
                         className="flex-1 py-2 rounded-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold text-sm shadow transition"
-                        style={{ minWidth: 90, maxWidth: 120 }}
+                        style={{ minWidth: 90, maxWidth: 120, zIndex: 30 }}
                         onClick={handleConfirmVapiCall}
                       >
                         Confirm
