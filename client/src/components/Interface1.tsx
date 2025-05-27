@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
+import { createPortal } from 'react-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Interface1Props {
   isActive: boolean;
@@ -320,6 +322,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     { iconName: 'calendar_month', tooltip: 'Long-Rent' },
     { iconName: 'meeting_room', tooltip: 'Full-House' },
   ];
+
+  const isMobile = useIsMobile();
 
   return (
     <div 
@@ -695,30 +699,63 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       </div>
       {/* Popup summary Interface3 */}
       {showSummaryPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="relative bg-transparent w-full h-full flex items-center justify-center">
-            <button
-              className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
-              onClick={() => setShowSummaryPopup(false)}
-              title="Đóng summary"
-            >
-              <span className="material-icons text-gray-600">close</span>
-            </button>
-            <div className="w-full max-w-4xl h-auto flex items-center justify-center">
-              <Interface3 isActive={true} />
-            </div>
-          </div>
-        </div>
+        isMobile
+          ? createPortal(
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+                <div className="relative bg-transparent w-full h-full flex items-center justify-center">
+                  <button
+                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
+                    onClick={() => setShowSummaryPopup(false)}
+                    title="Đóng summary"
+                  >
+                    <span className="material-icons text-gray-600">close</span>
+                  </button>
+                  <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+                    <Interface3 isActive={true} />
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )
+          : (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+                <div className="relative bg-transparent w-full h-full flex items-center justify-center">
+                  <button
+                    className="absolute top-2 right-2 z-10 p-2 bg-white/80 rounded-full shadow hover:bg-white"
+                    onClick={() => setShowSummaryPopup(false)}
+                    title="Đóng summary"
+                  >
+                    <span className="material-icons text-gray-600">close</span>
+                  </button>
+                  <div className="w-full max-w-4xl h-auto flex items-center justify-center">
+                    <Interface3 isActive={true} />
+                  </div>
+                </div>
+              </div>
+            )
       )}
       {/* Popup thông báo đang sinh summary */}
       {showGeneratingPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
-          </div>
-        </div>
+        isMobile
+          ? createPortal(
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
+                  <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
+                  <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
+                  <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
+                </div>
+              </div>,
+              document.body
+            )
+          : (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
+                  <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
+                  <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
+                  <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
+                </div>
+              </div>
+            )
       )}
     </div>
   );
