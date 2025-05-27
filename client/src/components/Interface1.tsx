@@ -335,7 +335,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       }}
     >
       <div className="container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24"
-        style={{ transform: 'translateZ(20px)', minHeight: 'fit-content', zIndex: 1000 }}
+        style={{
+          transform: 'translateZ(20px)',
+          minHeight: 'fit-content',
+          zIndex: typeof window !== 'undefined' && window.innerWidth >= 640 ? 1000 : undefined
+        }}
       >
         <h2 className="font-poppins font-bold text-2xl sm:text-3xl lg:text-4xl text-amber-400 mb-2 text-center"
           style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}>
