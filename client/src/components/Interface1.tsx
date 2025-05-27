@@ -373,7 +373,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                         : language === 'fr' 
                         ? 'linear-gradient(180deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)'
                         : language === 'zh' 
-                        ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)'
+                        ? 'linear-gradient(180deg, #E3B448 0%, #EAC46F 100%)'
                         : language === 'ru' 
                         ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)'
                         : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
@@ -391,7 +391,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                           : language === 'fr' 
                           ? '#FFFFFF'
                           : language === 'zh' 
-                          ? '#FFEB3B'
+                          ? '#E3B448'
                           : language === 'ru' 
                           ? '#F48FB1'
                           : '#4ADE80'
@@ -531,7 +531,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* Tours */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-64 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
@@ -551,7 +551,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* Bus Tickets */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-[560px] min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
@@ -571,7 +571,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* Vehicle Rental */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-64 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
@@ -594,7 +594,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* Currency Exchange */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
@@ -614,7 +614,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* Laundry Service */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.15)',
@@ -634,7 +634,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             {/* HomeStay */}
             <div className="p-0.5 py-0 pb-[3px] sm:p-2 w-4/5 mx-auto md:w-64 mb-4 sm:mb-0 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
-                background: 'rgba(85,154,154,0.7)',
+                background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
                 boxShadow: '0px 10px 25px rgba(0,0,0,0.15)',

@@ -23,13 +23,14 @@ const CATEGORIES = [
 
 interface ReferenceProps {
   references: ReferenceItem[];
+  language: string;
 }
 
 interface DocContents {
   [key: string]: string;
 }
 
-const Reference = ({ references }: ReferenceProps): JSX.Element => {
+const Reference = ({ references, language }: ReferenceProps): JSX.Element => {
   const [docContents, setDocContents] = useState<DocContents>({});
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
@@ -172,7 +173,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
 
   // Main render
   return (
-    <div className="w-full sm:max-w-5xl mx-auto mt-2 mb-2 px-2 py-3 rounded-2xl" style={{ background: 'rgba(85,154,154,0.85)', minHeight: 260 }}>
+    <div className="w-full sm:max-w-5xl mx-auto mt-2 mb-2 px-2 py-3 rounded-2xl" style={{ background: language === 'zh' ? 'rgba(227,180,72,0.85)' : 'rgba(85,154,154,0.85)', minHeight: 260 }}>
       {/* Lightbox modal */}
       {lightboxImg && (
         <div
@@ -200,7 +201,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
       <div className="flex items-center mb-4 px-2">
         <div className="flex items-center px-3 py-2 sm:py-1.5 gap-2 transition-all duration-300 mx-auto sm:mx-0"
           style={{
-            background: 'linear-gradient(135deg, #79DBDC 0%, #559A9A 100%)',
+            background: language === 'zh' ? 'linear-gradient(135deg, #EAC46F 0%, #E3B448 100%)' : 'linear-gradient(135deg, #79DBDC 0%, #559A9A 100%)',
             boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)', 
             borderRadius: '8px',
             minWidth: '150px',
@@ -208,7 +209,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
             width: 'auto',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-          <FaBookOpen className="text-[#F9BF3B] text-xl mr-1.5"
+          <FaBookOpen className={language === 'zh' ? 'text-[#E3B448] text-xl mr-1.5' : 'text-[#F9BF3B] text-xl mr-1.5'}
             style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))' }}
           />
           <label className="mr-2 font-semibold font-sans text-white whitespace-nowrap text-sm sm:text-base">Category:</label>
