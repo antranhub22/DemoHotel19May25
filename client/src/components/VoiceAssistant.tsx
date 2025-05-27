@@ -24,7 +24,7 @@ const VoiceAssistant: React.FC = () => {
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
       {/* Header Bar */}
-      <header className="w-full bg-primary text-white p-4 shadow-md">
+      <header className={`w-full ${language === 'zh' ? 'bg-[#E3B448]' : 'bg-primary'} text-white p-4 shadow-md`}>
         <div className="container mx-auto flex items-center justify-between px-2">
           {/* Left: Logo */}
           <div className="w-16 flex-shrink-0 flex items-center justify-start ml-1 sm:ml-4 mr-2 sm:mr-6">

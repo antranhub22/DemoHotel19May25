@@ -155,7 +155,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const IconWithTooltip = ({ iconName, tooltip, className }: { iconName: string, tooltip: string, className?: string }) => (
     <div className="relative flex flex-col items-center justify-center cursor-pointer">
       <span 
-        className={`material-icons text-xl sm:text-4xl text-[#F9BF3B] ${className || ''}`} 
+        className={`material-icons text-xl sm:text-4xl ${language === 'zh' ? 'text-[#0D9488]' : 'text-[#F9BF3B]'} ${className || ''}`}
         style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))' }}
         onClick={() => handleIconClick(iconName)}
       >
@@ -328,7 +328,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       } z-10 overflow-y-auto`} 
       id="interface1"
       style={{
-        backgroundImage: `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
+        backgroundImage: language === 'zh'
+          ? `linear-gradient(rgba(227,180,72,0.85), rgba(234,196,111,0.7)), url(${hotelImage})`
+          : `linear-gradient(rgba(26, 35, 126, 0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         perspective: '1000px'
