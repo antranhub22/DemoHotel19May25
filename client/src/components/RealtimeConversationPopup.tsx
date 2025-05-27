@@ -139,10 +139,10 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
+        className={`realtime-popup-popupfixed relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
         style={{
-          width: '90vw',
-          maxWidth: 360,
+          width: 320,
+          maxWidth: 340,
           height: '70vh',
           maxHeight: 440,
           background: 'rgba(255,255,255,0.12)',
@@ -155,6 +155,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           borderTopRightRadius: isRight ? 24 : 24,
           borderBottomRightRadius: isRight ? 24 : 24,
           pointerEvents: 'none',
+          position: 'fixed',
+          left: isRight ? 'unset' : 32,
+          right: isRight ? 32 : 'unset',
+          top: 100,
+          zIndex: 30,
         }}
       >
         <div style={{ pointerEvents: 'auto', height: '100%' }}>
