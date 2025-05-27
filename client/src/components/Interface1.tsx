@@ -712,11 +712,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       )}
       {/* Popup thông báo đang sinh summary */}
       {showGeneratingPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white/90 rounded-2xl shadow-xl px-8 py-6 flex flex-col items-center">
-            <span className="material-icons text-5xl text-blue-400 mb-2 animate-spin">autorenew</span>
-            <div className="text-lg font-semibold text-blue-900 mb-1">Generating your summary...</div>
-            <div className="text-sm text-gray-600">Please wait a moment while we process your conversation.</div>
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center justify-center mb-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+            <p className="text-center text-gray-700">Generating your summary...</p>
           </div>
         </div>
       )}
