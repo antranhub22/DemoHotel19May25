@@ -571,7 +571,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
           </div>
           {/* Hàng dưới: Currency Exchange, Laundry Service, HomeStay */}
-          <div className="flex flex-col md:flex-row justify-center gap-3 w-full">
+          <div className="flex flex-col md:flex-row justify-center gap-3 w-full mb-8">
             {/* Currency Exchange */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
               style={{
@@ -636,9 +636,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         </div>
         {/* Active orders status panels - thêm hiệu ứng 3D và đường viền sáng */}
         {showOrderCard && activeOrders && activeOrders.length > 0 && (
-          <div className="flex flex-col items-center gap-y-4 mb-20 pb-16 w-full px-2 sm:mb-12 sm:pb-8 sm:flex-row sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:justify-start"
-            style={{ perspective: '1000px', zIndex: 30 }}
-          >
+          <div className="flex flex-col items-center gap-y-4 mb-20 pb-16 w-full px-2 sm:mb-12 sm:pb-8 sm:flex-row sm:flex-nowrap sm:gap-x-4 sm:overflow-x-auto sm:justify-start mt-4">
             {[...activeOrders].sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime()).map((o: ActiveOrder) => {
               const deadline = new Date(o.requestedAt.getTime() + 60 * 60 * 1000);
               const diffSec = Math.max(Math.ceil((deadline.getTime() - now.getTime()) / 1000), 0);
