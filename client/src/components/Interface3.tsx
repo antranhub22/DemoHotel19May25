@@ -314,7 +314,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     try {
       const API_HOST = import.meta.env.VITE_API_HOST || "https://minhnhotelben.onrender.com";
       const res = await fetch(`${API_HOST}/api/orders`, {
-        method: 'POST',
+              method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrder)
       });
