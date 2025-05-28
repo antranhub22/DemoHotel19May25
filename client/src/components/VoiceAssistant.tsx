@@ -27,9 +27,8 @@ const VoiceAssistant: React.FC = () => {
       {/* Header Bar */}
       <header className="w-full bg-primary text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center justify-between px-2">
-          {/* Left: Logo and Hotel Name */}
-          <div className="flex items-center justify-start ml-1 sm:ml-4 mr-2 sm:mr-6 gap-3 min-w-fit">
-            <img src="/assets/references/images/minhon-logo.jpg" alt="Minhon Logo" className="h-10 sm:h-14 w-auto rounded-lg shadow-md bg-white/80 p-1" />
+          {/* Left: Hotel Name only, no logo */}
+          <div className="flex items-center justify-start ml-1 sm:ml-4 mr-2 sm:mr-6 min-w-fit">
             <span className="font-poppins font-bold text-xl sm:text-2xl lg:text-3xl text-white whitespace-nowrap" style={{ textShadow: '0px 1px 2px rgba(0,0,0,0.18)' }}>
               Mi Nhon Hotel Mui Ne
             </span>
