@@ -383,7 +383,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       >
         {/* Header chính với logo và tên khách sạn */}
         <div className="w-full flex flex-row items-center justify-start mb-2">
-          <img src="/assets/minhon-logo.jpg" alt="Mi Nhon Hotel Logo" className="h-12 w-12 sm:h-16 sm:w-16 object-contain mr-3" style={{ filter: 'brightness(0) invert(1)' }} />
+          {/* Logo removed as requested */}
         </div>
         {/* Dòng chữ giới thiệu AI voice assistant */}
         <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
