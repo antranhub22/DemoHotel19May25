@@ -386,7 +386,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           {/* Logo removed as requested */}
         </div>
         {/* Dòng chữ giới thiệu AI voice assistant */}
-        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
+        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-green-400 via-blue-500 via-indigo-500 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
           Speak Multiple Languages with Our AI Voice Assistant
         </p>
         
