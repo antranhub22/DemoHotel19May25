@@ -386,7 +386,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           <img src="/assets/minhon-logo.jpg" alt="Mi Nhon Hotel Logo" className="h-12 w-12 sm:h-16 sm:w-16 object-contain mr-3" style={{ filter: 'brightness(0) invert(1)' }} />
         </div>
         {/* Dòng chữ giới thiệu AI voice assistant */}
-        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold pb-[5px]" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
+        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
           Speak Multiple Languages with Our AI Voice Assistant
         </p>
         
@@ -447,9 +447,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                               : '#4ADE80'
               }}
             >mic</span>
-            <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
-              style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
-            >{t('press_to_call', language)}</span>
+              <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
+                style={{ textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)' }}
+              >{t('press_to_call', language)}</span>
             <span className="absolute w-full h-full rounded-full pointer-events-none"></span>
             </button>
               </>
@@ -583,7 +583,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
             {/* Housekeeping */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
-              style={{
+                style={{ 
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
@@ -623,7 +623,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
             {/* Local Souvenir */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-48 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
-              style={{
+                style={{ 
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',
@@ -729,7 +729,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
             </div>
             {/* Laundry Service */}
             <div className="p-0.5 py-0 sm:p-2 w-4/5 mx-auto md:w-64 mb-2 sm:mb-0 min-h-[38px] h-[45px] sm:min-h-[77px] sm:h-[90px] transition-all duration-250 hover:scale-103 hover:-translate-y-1 flex flex-col justify-between"
-              style={{
+                style={{ 
                 background: 'rgba(85,154,154,0.7)',
                 backdropFilter: 'blur(8px)',
                 borderRadius: '12px',

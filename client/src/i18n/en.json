@@ -89,8 +89,5 @@
   "icon_translate": "Translation Services",
   "icon_rate_review": "Leave a Review",
   "icon_report_problem": "Report an Issue",
-  "icon_luggage": "Luggage Services",
-
-  "generating_summary": "Loading your summary ...",
-  "generating_summary_desc": ""
+  "icon_luggage": "Luggage Services"
 } 

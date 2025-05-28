@@ -25,7 +25,7 @@ const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
         <h3 className="text-lg font-semibold text-gray-800">
-          Reference
+          reference
         </h3>
         <button
           onClick={onClose}
