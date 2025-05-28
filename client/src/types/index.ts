@@ -1,4 +1,4 @@
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko';
+export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
 export interface Transcript {
   id: number;

@@ -64,6 +64,7 @@ const VoiceAssistant: React.FC = () => {
                   <option value="zh">🇨🇳 ZH</option>
                   <option value="ru">🇷🇺 RU</option>
                   <option value="ko">🇰🇷 KO</option>
+                  <option value="vi">🇻🇳 VI</option>
                 </select>
                 <FiChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-[#F9BF3B] pointer-events-none text-sm" />
               </div>

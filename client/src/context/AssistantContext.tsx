@@ -5,7 +5,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import ReactDOM from 'react-dom';
 
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko';
+export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
 export interface AssistantContextType {
   currentInterface: InterfaceLayer;
@@ -152,7 +152,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
               : language === 'ko'
                 ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
-                : import.meta.env.VITE_VAPI_PUBLIC_KEY;
+                : language === 'vi'
+                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
+                  : import.meta.env.VITE_VAPI_PUBLIC_KEY;
         if (!publicKey) {
           throw new Error('Vapi public key is not configured');
         }
@@ -314,7 +316,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
             : language === 'ko'
               ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
-              : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+              : language === 'vi'
+                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+                : import.meta.env.VITE_VAPI_ASSISTANT_ID;
       if (!assistantId) {
         console.error('Assistant ID not configured');
         return;

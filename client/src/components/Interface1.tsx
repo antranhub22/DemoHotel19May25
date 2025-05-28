@@ -105,7 +105,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   }, [isActive]);
 
   // Hàm dùng chung cho mọi ngôn ngữ
-  const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko') => {
+  const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
     setEmailSentForCurrentSession(false);
     setCallDetails({
       id: `call-${Date.now()}`,
@@ -130,6 +130,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     } else if (lang === 'ko') {
       publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_KO;
       assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_KO;
+    } else if (lang === 'vi') {
+      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_VI;
+      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_VI;
     }
     const vapi = await initVapi(publicKey);
     if (vapi && assistantId) {
@@ -409,7 +412,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           <div className="absolute inset-0 rounded-full border-4 border-amber-400/70 animate-[ripple_2s_linear_infinite] pointer-events-none transition-opacity duration-300 group-hover:opacity-60 opacity-40"></div>
           {/* Main Button */}
             <button 
-            id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : 'Ko'}`}
+            id={`vapiButton${language === 'en' ? 'En' : language === 'fr' ? 'Fr' : language === 'zh' ? 'Zh' : language === 'ru' ? 'Ru' : language === 'ko' ? 'Ko' : 'Vi'}`}
             className="group relative w-36 h-36 sm:w-40 sm:h-40 lg:w-56 lg:h-56 rounded-full font-poppins font-bold flex flex-col items-center justify-center overflow-hidden hover:translate-y-[-2px] hover:shadow-[0px_12px_20px_rgba(0,0,0,0.2)]"
             onClick={() => handleCall(language as any)}
             style={{
@@ -421,7 +424,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                       ? 'linear-gradient(180deg, rgba(220, 38, 38, 0.9) 0%, rgba(185, 28, 28, 0.9) 100%)'
                 : language === 'ru' 
                       ? 'linear-gradient(180deg, rgba(79, 70, 229, 0.9) 0%, rgba(67, 56, 202, 0.9) 100%)'
-                      : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
+                      : language === 'ko' 
+                            ? 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)'
+                            : 'linear-gradient(180deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%)',
               boxShadow: '0px 12px 24px rgba(0, 0, 0, 0.25), 0px 6px 12px rgba(0, 0, 0, 0.15), inset 0px 1px 0px rgba(255, 255, 255, 0.3)',
               border: '1px solid rgba(255, 255, 255, 0.5)',
               transition: 'all 0.3s ease',
@@ -439,7 +444,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                         ? '#FFEB3B'
                   : language === 'ru' 
                         ? '#F48FB1'
-                        : '#4ADE80'
+                        : language === 'ko' 
+                              ? '#4ADE80'
+                              : '#4ADE80'
               }}
             >mic</span>
             <span className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-nowrap text-white"
