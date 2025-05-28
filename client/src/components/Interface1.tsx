@@ -390,7 +390,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
           </h2>
         </div>
         {/* Dòng chữ giới thiệu AI voice assistant */}
-        <p className="text-xs sm:text-lg lg:text-xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto">Speak Multiple Languages with Our AI Voice Assistant</p>
+        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
+          Speak Multiple Languages with Our AI Voice Assistant
+        </p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}
         <div className="flex flex-row items-start justify-center gap-4 mb-4 sm:mb-12 w-full relative">
