@@ -844,7 +844,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
                 <span className="material-icons text-blue-600 text-3xl sm:text-4xl animate-spin">sync</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-blue-900 text-center">{t('generating_your_summary', language)}</h3>
-              <p className="text-gray-600 text-sm sm:text-base text-center">{t('generating_summary_desc', language)}</p>
+              {/* <p className="text-gray-600 text-sm sm:text-base text-center">{t('generating_summary_desc', language)}</p> */}
             </div>
           </div>
         </div>
