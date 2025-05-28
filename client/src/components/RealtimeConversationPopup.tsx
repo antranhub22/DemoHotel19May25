@@ -181,13 +181,6 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           {conversationTurns.map((turn, turnIdx) => (
             <div key={turn.id} className="mb-4">
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: turn.role === 'user' ? '#3B82F6' : '#10B981'
-                  }}
-                >
-                  <span className="text-white text-sm">{turn.role === 'user' ? 'U' : 'A'}</span>
-                </div>
                 <div className="flex-1">
                   {turn.role === 'user' ? (
                     <div className="bg-gray-100 rounded-lg p-3">
