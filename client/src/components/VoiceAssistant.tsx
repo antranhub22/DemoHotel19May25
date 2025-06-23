@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import Interface1 from './Interface1';
 import Interface2 from './Interface2';
@@ -13,17 +13,32 @@ import InfographicSteps from './InfographicSteps';
 import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import { t } from '@/i18n';
-import { Language, AssistantContextType } from '@/types';
+import { Language } from '@/types';
+import WelcomePopup from './WelcomePopup';
 
 const VoiceAssistant: React.FC = () => {
   const { currentInterface, language, setLanguage } = useAssistant();
   const [showInfographic, setShowInfographic] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
   // Initialize WebSocket connection
   useWebSocket();
 
+  useEffect(() => {
+    const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');
+    if (!hasSeenPopup) {
+      setShowWelcomePopup(true);
+      localStorage.setItem('hasSeenWelcomePopup', 'true');
+    }
+  }, []);
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+  };
+
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
+      {showWelcomePopup && <WelcomePopup onClose={() => setShowWelcomePopup(false)} />}
       {/* Header Bar */}
       <header className="w-full bg-primary text-white p-4 shadow-md">
         <div className="container mx-auto flex items-center justify-between px-2">
@@ -54,7 +69,7 @@ const VoiceAssistant: React.FC = () => {
               <div className="relative">
                 <select
                   value={language}
-                  onChange={e => setLanguage(e.target.value as Language)}
+                  onChange={e => handleLanguageChange(e.target.value as Language)}
                   className="appearance-none bg-transparent focus:outline-none transition-all duration-200 pr-6"
                   style={{
                     fontWeight: 600,
@@ -121,12 +136,12 @@ const VoiceAssistant: React.FC = () => {
 
       {/* Interface Layers Container */}
       <div className="relative w-full h-full" id="interfaceContainer">
-        {currentInterface === 'interface1' && <Interface1 isActive={true} />}
-        {currentInterface === 'interface2' && <Interface2 isActive={true} />}
-        {currentInterface === 'interface3' && <Interface3 isActive={true} />}
-        {currentInterface === 'interface3vi' && <Interface3Vi isActive={true} />}
-        {currentInterface === 'interface3fr' && <Interface3Fr isActive={true} />}
-        {currentInterface === 'interface4' && <Interface4 isActive={true} />}
+        <Interface1 isActive={currentInterface === 'interface1'} />
+        <Interface2 isActive={currentInterface === 'interface2'} />
+        <Interface3 isActive={currentInterface === 'interface3'} />
+        <Interface3Vi isActive={currentInterface === 'interface3vi'} />
+        <Interface3Fr isActive={currentInterface === 'interface3fr'} />
+        <Interface4 isActive={currentInterface === 'interface4'} />
       </div>
     </div>
   );
