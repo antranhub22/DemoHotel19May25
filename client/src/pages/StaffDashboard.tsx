@@ -260,21 +260,29 @@ const StaffDashboard: React.FC = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-blue-900 text-center">Staff Request Management</h2>
         </div>
 
-        {/* Nút Refresh */}
-        <div className="flex justify-between mb-4">
-          <button
-            onClick={handleDeleteAllRequests}
-            disabled={isDeleting || requests.length === 0}
-            className={`w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-semibold ${(isDeleting || requests.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isDeleting ? 'Đang xóa...' : 'Xóa tất cả Requests'}
-          </button>
-          <button
-            onClick={fetchRequests}
-            className="w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
-          >
-            Refresh
-          </button>
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center mb-4">
+            <button
+                onClick={() => navigate('/analytics')}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
+            >
+                View Analytics
+            </button>
+            <div className="flex gap-4">
+                <button
+                    onClick={handleDeleteAllRequests}
+                    disabled={isDeleting || requests.length === 0}
+                    className={`bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition ${(isDeleting || requests.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    {isDeleting ? 'Deleting...' : 'Delete All Requests'}
+                </button>
+                <button
+                    onClick={fetchRequests}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
+                >
+                    Refresh
+                </button>
+            </div>
         </div>
 
         {/* Filters */}

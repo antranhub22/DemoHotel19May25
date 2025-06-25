@@ -23,6 +23,7 @@ import { request as requestTable } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
+import { getAnalyticsOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 
 // Initialize OpenAI client 
 const openai = new OpenAI({
@@ -1269,6 +1270,34 @@ Mi Nhon Hotel Mui Ne`
       res.json({ success: true, deletedCount: deleted });
     } catch (error) {
       handleApiError(res, error, 'Error deleting all orders');
+    }
+  });
+
+  // Analytics routes
+  app.get('/api/analytics/overview', verifyJWT, async (req, res) => {
+    try {
+      const data = await getAnalyticsOverview();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch analytics overview');
+    }
+  });
+
+  app.get('/api/analytics/service-distribution', verifyJWT, async (req, res) => {
+    try {
+      const data = await getServiceDistribution();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch service distribution');
+    }
+  });
+
+  app.get('/api/analytics/hourly-activity', verifyJWT, async (req, res) => {
+    try {
+      const data = await getHourlyActivity();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch hourly activity');
     }
   });
 
