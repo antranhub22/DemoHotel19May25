@@ -410,14 +410,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Đồng bộ sang bảng request cho Staff UI
       try {
         await db.insert(requestTable).values({
-          room_number: order.roomNumber || orderData.roomNumber || 'unknown',
-          orderId: order.callId || orderData.callId,
+          roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
+          orderId: (order as any).id?.toString() || `ORD-${Date.now()}`, // Use order ID instead of non-existent callId
           guestName: 'Guest',
-          request_content: Array.isArray(orderData.items) && orderData.items.length > 0
-            ? orderData.items.map(i => `${i.name} x${i.quantity}`).join(', ')
-            : orderData.orderType || 'Service Request',
+          requestContent: Array.isArray((orderData as any).items) && (orderData as any).items.length > 0
+            ? (orderData as any).items.map((i: any) => `${i.name || 'Item'} x${i.quantity || 1}`).join(', ')
+            : (orderData as any).orderType || (order as any).requestContent || 'Service Request',
           status: 'Đã ghi nhận',
-          created_at: new Date(),
+          createdAt: new Date(),
           updatedAt: new Date()
         });
       } catch (syncErr) {
@@ -478,12 +478,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // Emit WebSocket notification cho tất cả client
     if (globalThis.wss) {
-      if (updatedOrder.specialInstructions) {
+      if (updatedOrder.orderId) { // Use orderId instead of non-existent specialInstructions
         globalThis.wss.clients.forEach((client) => {
           if (client.readyState === 1) {
             client.send(JSON.stringify({
               type: 'order_status_update',
-              reference: updatedOrder.specialInstructions,
+              reference: updatedOrder.orderId, // Use orderId as reference
               status: updatedOrder.status
             }));
           }
