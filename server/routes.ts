@@ -25,9 +25,9 @@ import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
 import { getAnalyticsOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 
-// Initialize OpenAI client 
+// Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
-  apiKey: process.env.VITE_OPENAI_API_KEY
+  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev'
 });
 
 // Define WebSocket client interface
@@ -63,7 +63,7 @@ function parseStaffAccounts(envStr: string | undefined): { username: string, pas
 }
 
 const STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
 
 // Dummy request data
 let requestList: StaffRequest[] = [
