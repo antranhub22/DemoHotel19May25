@@ -48,6 +48,11 @@ export interface AssistantContextType {
   setLanguage: (lang: Language) => void;
   hotelConfig: HotelConfiguration | null;
   setHotelConfig: (config: HotelConfiguration | null) => void;
+  // Multi-tenant support
+  tenantId: string | null;
+  setTenantId: (tenantId: string | null) => void;
+  tenantConfig: any | null;
+  setTenantConfig: (config: any | null) => void;
 }
 
 const initialOrderSummary: OrderSummary = {
@@ -114,6 +119,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [modelOutput, setModelOutput] = useState<string[]>([]);
   const [language, setLanguage] = useState<Language>('en');
   const [hotelConfig, setHotelConfig] = useState<HotelConfiguration | null>(null);
+  // Multi-tenant support
+  const [tenantId, setTenantId] = useState<string | null>(null);
+  const [tenantConfig, setTenantConfig] = useState<any | null>(null);
 
   // Wrapper functions with debug logging
   const debugSetCurrentInterface = (layer: InterfaceLayer) => {
@@ -613,6 +621,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     setLanguage,
     hotelConfig,
     setHotelConfig,
+    // Multi-tenant support
+    tenantId,
+    setTenantId,
+    tenantConfig,
+    setTenantConfig,
   };
 
   return (

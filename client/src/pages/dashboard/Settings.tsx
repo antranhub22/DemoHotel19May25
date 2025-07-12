@@ -24,7 +24,8 @@ import {
   CreditCard,
   Users,
   Database,
-  Wifi
+  Wifi,
+  Bot
 } from 'lucide-react';
 
 // Mock hotel settings data
