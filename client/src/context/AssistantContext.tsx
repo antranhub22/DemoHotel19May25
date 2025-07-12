@@ -5,9 +5,9 @@ import { apiRequest } from '@/lib/queryClient';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import ReactDOM from 'react-dom';
 
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko';
+export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
-interface AssistantContextType {
+export interface AssistantContextType {
   currentInterface: InterfaceLayer;
   setCurrentInterface: (layer: InterfaceLayer) => void;
   transcripts: Transcript[];
@@ -18,7 +18,7 @@ interface AssistantContextType {
   callDetails: CallDetails | null;
   setCallDetails: (details: CallDetails) => void;
   order: Order | null;
-  setOrder: (order: Order) => void;
+  setOrder: (order: Order | null) => void;
   callDuration: number;
   setCallDuration: (duration: number) => void;
   isMuted: boolean;
@@ -111,6 +111,21 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [modelOutput, setModelOutput] = useState<string[]>([]);
   const [language, setLanguage] = useState<Language>('en');
 
+  // Wrapper functions with debug logging
+  const debugSetCurrentInterface = (layer: InterfaceLayer) => {
+    console.log('🔄 AssistantContext: setCurrentInterface called with:', layer);
+    console.log('🔄 Previous interface:', currentInterface);
+    setCurrentInterface(layer);
+    console.log('✅ AssistantContext: setCurrentInterface completed');
+  };
+
+  const debugSetOrder = (newOrder: Order | null) => {
+    console.log('🗑️ AssistantContext: setOrder called with:', newOrder);
+    console.log('🗑️ Previous order:', order);
+    setOrder(newOrder);
+    console.log('✅ AssistantContext: setOrder completed');
+  };
+
   // Persist activeOrders to localStorage whenever it changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -120,6 +135,19 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       console.error('Failed to persist activeOrders to localStorage');
     }
   }, [activeOrders]);
+
+  // Debug: Track currentInterface changes
+  useEffect(() => {
+    console.log('🎯 AssistantContext: currentInterface changed to:', currentInterface);
+    console.log('🎯 Timestamp:', new Date().toISOString());
+  }, [currentInterface]);
+
+  // Debug: Track order changes
+  useEffect(() => {
+    console.log('📦 AssistantContext: order changed to:', order);
+    console.log('📦 Order reference:', order?.reference);
+    console.log('📦 Timestamp:', new Date().toISOString());
+  }, [order]);
 
   const addActiveOrder = (order: ActiveOrder) => {
     setActiveOrders(prev => [...prev, {
@@ -152,7 +180,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
               : language === 'ko'
                 ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
-                : import.meta.env.VITE_VAPI_PUBLIC_KEY;
+                : language === 'vi'
+                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
+                  : import.meta.env.VITE_VAPI_PUBLIC_KEY;
         if (!publicKey) {
           throw new Error('Vapi public key is not configured');
         }
@@ -314,7 +344,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
             : language === 'ko'
               ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
-              : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+              : language === 'vi'
+                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+                : import.meta.env.VITE_VAPI_ASSISTANT_ID;
       if (!assistantId) {
         console.error('Assistant ID not configured');
         return;
@@ -387,7 +419,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         timestamp: new Date()
       };
       setCallSummary(noTranscriptSummary);
-      setCurrentInterface('interface3');
       return;
     }
     
@@ -425,7 +456,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     .then(data => {
       if (data.success && data.summary && data.summary.content) {
         const summaryContent = data.summary.content;
-        
             // Batch state updates for summary
             ReactDOM.unstable_batchedUpdates(() => {
         const aiSummary: CallSummary = {
@@ -435,12 +465,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           timestamp: new Date(data.summary.timestamp || Date.now())
         };
         setCallSummary(aiSummary);
-        
         if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
           setServiceRequests(data.serviceRequests);
         }
-        
-              setCurrentInterface('interface3');
             });
       }
     })
@@ -454,7 +481,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         timestamp: new Date()
       };
           setCallSummary(errorSummary);
-    setCurrentInterface('interface3');
         });
       };
       
@@ -517,9 +543,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         if (Array.isArray(data)) {
           setActiveOrders(
             data.map((o: any) => ({
-              ...o,
-              reference: o.specialInstructions || o.reference || '',
+              reference: o.specialInstructions || o.reference || o.callId || '',
               requestedAt: o.createdAt ? new Date(o.createdAt) : new Date(),
+              estimatedTime: o.deliveryTime || '',
+              status: o.status === 'completed' ? 'Hoàn thiện' : (o.status === 'pending' ? 'Đã ghi nhận' : o.status),
+              // Các trường khác nếu cần
+              ...o
             }))
           );
         }
@@ -538,7 +567,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   const value: AssistantContextType = {
     currentInterface,
-    setCurrentInterface,
+    setCurrentInterface: debugSetCurrentInterface,
     transcripts,
     setTranscripts,
     addTranscript,
@@ -547,7 +576,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     callDetails,
     setCallDetails,
     order,
-    setOrder,
+    setOrder: debugSetOrder,
     callDuration,
     setCallDuration,
     isMuted,

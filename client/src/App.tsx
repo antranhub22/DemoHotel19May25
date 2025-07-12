@@ -9,6 +9,8 @@ import EmailTester from "@/components/EmailTester";
 import { useWebSocket } from '@/hooks/useWebSocket';
 import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
+import StaffDashboard from './pages/StaffDashboard';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 
 // Lazy-loaded components
 const CallHistory = React.lazy(() => import('@/pages/CallHistory'));
@@ -49,6 +51,8 @@ function Router() {
         <Route path="/call-details/:callId" component={CallDetails} />
         <Route path="/email-test" component={EmailTestPage} />
         <Route path="/staff" component={StaffPage} />
+        <Route path="/staff/dashboard" component={StaffDashboard} />
+        <Route path="/analytics" component={AnalyticsDashboard} />
         <Route path="/" component={VoiceAssistant} />
         <Route component={NotFound} />
       </Switch>

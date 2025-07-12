@@ -50,19 +50,22 @@ const steps = [
                 className={`flex items-center justify-center rounded-full shadow-lg mb-0.5 transition-all duration-300 ${
                   idx + 1 === currentStep
                     ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
+                    : idx + 1 === 2 || idx + 1 === 3
+                    ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
                     : 'bg-white/30 text-white border border-gray-200'
                 }`}
                 style={{
                   width: 22,
                   height: 22,
                   fontSize: 13,
+                  boxShadow: idx + 1 === 2 || idx + 1 === 3 ? '0 0 0 2px #d4af37' : undefined
                 }}
               >
                 <span className="material-icons">{step.icon}</span>
               </div>
               <div className="text-center">
-                <div className={`font-semibold font-poppins mb-0 text-[10px] ${idx + 1 === currentStep ? 'text-white' : 'text-white/70'}`}>{step.title}</div>
-                <div className="font-light text-[8px] text-white/80 hidden md:block">{step.desc}</div>
+                <div className={`font-semibold font-poppins mb-0 text-[10px] ${idx + 1 === currentStep ? 'text-[#d4af37]' : 'text-[#d4af37]/70'} ${idx + 1 === 2 || idx + 1 === 3 ? 'font-extrabold text-base' : ''}`}>{step.title}</div>
+                <div className={`font-light text-[8px] ${idx + 1 === 2 || idx + 1 === 3 ? 'text-base text-[#b48a19]' : 'text-[#d4af37]/80'} hidden md:block`}>{step.desc}</div>
               </div>
             </div>
             {idx < steps.length - 1 && (
@@ -93,25 +96,29 @@ const steps = [
             className={`flex items-center justify-center rounded-full shadow-lg mb-2 transition-all duration-300 ${
               idx + 1 === currentStep
                 ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
+                : idx + 1 === 2 || idx + 1 === 3
+                ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
                 : 'bg-white/30 text-white border border-gray-200'
             }`}
             style={{
               width: compact ? 32 : 48,
               height: compact ? 32 : 48,
               fontSize: compact ? 18 : 28,
+              boxShadow: idx + 1 === 2 || idx + 1 === 3 ? '0 0 0 2px #d4af37' : undefined
             }}
           >
             <span className="material-icons">{step.icon}</span>
           </div>
           <div className="text-center">
             <div
-              className={`font-semibold font-poppins mb-1 ${compact ? 'text-xs' : 'text-base'} ${
-                idx + 1 === currentStep ? 'text-white' : 'text-white/70'
-              }`}
+              className={`font-semibold font-poppins mb-1 ${compact ? 'text-xs' : idx + 1 === 2 || idx + 1 === 3 ? 'text-lg' : 'text-base'} ${
+                idx + 1 === currentStep ? 'text-[#d4af37]' : 'text-[#d4af37]/70'
+              } ${idx + 1 === 2 || idx + 1 === 3 ? 'font-extrabold' : ''}`}
+              style={idx + 1 === 2 || idx + 1 === 3 ? { letterSpacing: 0.5 } : {}}
             >
               {step.title}
             </div>
-            <div className={`font-light ${compact ? 'text-[10px]' : 'text-sm'} text-white/80`}>{step.desc}</div>
+            <div className={`font-light ${compact ? 'text-[10px]' : idx + 1 === 2 || idx + 1 === 3 ? 'text-base' : 'text-sm'} ${idx + 1 === 2 || idx + 1 === 3 ? 'text-[#b48a19]' : 'text-[#d4af37]/80'}`}>{step.desc}</div>
           </div>
           {idx < steps.length - 1 && (
             <div className={`mx-auto my-1 rounded-full ${compact ? 'w-0.5 h-4' : 'w-1 h-8'} bg-gradient-to-b from-[#d4af37]/80 to-transparent`} />

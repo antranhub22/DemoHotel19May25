@@ -19,14 +19,16 @@ import { Staff } from './models/Staff';
 import { Request as StaffRequest } from './models/Request';
 import { Message as StaffMessage } from './models/Message';
 import { db } from '../src/db';
-import { request as requestTable } from '../src/db/schema';
+import { request as requestTable, call, transcript } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
+import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
+import { seedDevelopmentData } from './seed';
 
-// Initialize OpenAI client 
+// Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
-  apiKey: process.env.VITE_OPENAI_API_KEY
+  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev'
 });
 
 // Define WebSocket client interface
@@ -62,7 +64,7 @@ function parseStaffAccounts(envStr: string | undefined): { username: string, pas
 }
 
 const STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
-const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
 
 // Dummy request data
 let requestList: StaffRequest[] = [
@@ -143,6 +145,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
               role: data.role,
               content: data.content
             });
+            
+            // Auto-create call record if it doesn't exist
+            try {
+              const existingCall = await db.select().from(call).where(eq(call.callIdVapi, data.callId)).limit(1);
+              if (existingCall.length === 0) {
+                // Extract room number from content if possible
+                const roomMatch = data.content.match(/room (\d+)/i) || data.content.match(/phòng (\d+)/i);
+                const roomNumber = roomMatch ? roomMatch[1] : null;
+                
+                // Determine language from content
+                const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(data.content);
+                const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(data.content) && !hasVietnamese;
+                let language = 'en';
+                if (hasVietnamese) language = 'vi';
+                else if (hasFrench) language = 'fr';
+                
+                await db.insert(call).values({
+                  callIdVapi: data.callId,
+                  roomNumber: roomNumber,
+                  duration: 0, // Will be updated when call ends
+                  language: language,
+                  createdAt: new Date()
+                });
+                
+                console.log(`Auto-created call record for ${data.callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+              }
+            } catch (callError) {
+              console.error('Error creating call record:', callError);
+            }
             
             // Store transcript in database
             await storage.addTranscript(validatedData);
@@ -244,8 +275,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new order
   app.post('/api/orders', async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      const orderData = insertOrderSchema.parse({
+        ...req.body,
+        roomNumber: req.body.roomNumber || 'unknown',
+      });
       const order = await storage.createOrder(orderData);
+      // Đồng bộ sang bảng request cho Staff UI
+      try {
+        await db.insert(requestTable).values({
+          room_number: order.roomNumber || orderData.roomNumber || 'unknown',
+          orderId: order.callId || orderData.callId,
+          guestName: 'Guest',
+          request_content: Array.isArray(orderData.items) && orderData.items.length > 0
+            ? orderData.items.map(i => `${i.name} x${i.quantity}`).join(', ')
+            : orderData.orderType || 'Service Request',
+          status: 'Đã ghi nhận',
+          created_at: new Date(),
+          updatedAt: new Date()
+        });
+      } catch (syncErr) {
+        console.error('Failed to sync order to request table:', syncErr);
+      }
       res.status(201).json(order);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -347,6 +397,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Handle call end event from Vapi to update call duration
+  app.post('/api/call-end', async (req, res) => {
+    try {
+      const { callId, duration } = req.body;
+      
+      if (!callId) {
+        return res.status(400).json({ error: 'Call ID is required' });
+      }
+      
+      // Update call duration in database
+      const existingCall = await db.select().from(call).where(eq(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length > 0) {
+        await db.update(call)
+          .set({ duration: duration || 0 })
+          .where(eq(call.callIdVapi, callId));
+        
+        console.log(`Updated call duration for ${callId}: ${duration || 0} seconds`);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      handleApiError(res, error, 'Error updating call duration');
+    }
+  });
+
   // Store call summary from Vapi or generate with OpenAI
   app.post('/api/store-summary', async (req, res) => {
     try {
@@ -1026,6 +1101,63 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
+  // Test endpoint to simulate transcript creation
+  app.post('/api/test-transcript', async (req, res) => {
+    try {
+      const { callId, role, content } = req.body;
+      
+      if (!callId || !role || !content) {
+        return res.status(400).json({ error: 'callId, role, and content are required' });
+      }
+      
+      // Auto-create call record if it doesn't exist
+      const existingCall = await db.select().from(call).where(eq(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length === 0) {
+        // Extract room number from content if possible
+        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
+        const roomNumber = roomMatch ? roomMatch[1] : null;
+        
+        // Determine language from content
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
+        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
+        let language = 'en';
+        if (hasVietnamese) language = 'vi';
+        else if (hasFrench) language = 'fr';
+        
+        await db.insert(call).values({
+          callIdVapi: callId,
+          roomNumber: roomNumber,
+          duration: 0,
+          language: language,
+          createdAt: Date.now()
+        });
+        
+        console.log(`Test: Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+      }
+      
+      // Get call ID for transcript
+      let callDbId;
+      if (existingCall.length > 0) {
+        callDbId = existingCall[0].id;
+      } else {
+        const newCall = await db.select({ id: call.id }).from(call).where(eq(call.callIdVapi, callId)).limit(1);
+        callDbId = newCall[0]?.id;
+      }
+      
+      // Store transcript in database directly
+      await db.insert(transcript).values({
+        call_id: callDbId,
+        role,
+        content,
+        timestamp: Date.now()
+      });
+      
+      res.json({ success: true, message: 'Test transcript created successfully' });
+    } catch (error) {
+      handleApiError(res, error, 'Error creating test transcript');
+    }
+  });
+
   // Get references for a specific call
   app.get('/api/references/:callId', async (req, res) => {
     try {
@@ -1252,6 +1384,39 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, error, 'Error deleting all orders');
     }
   });
+
+  // Analytics routes
+  app.get('/api/analytics/overview', verifyJWT, async (req, res) => {
+    try {
+      const data = await getOverview();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch analytics overview');
+    }
+  });
+
+  app.get('/api/analytics/service-distribution', verifyJWT, async (req, res) => {
+    try {
+      const data = await getServiceDistribution();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch service distribution');
+    }
+  });
+
+  app.get('/api/analytics/hourly-activity', verifyJWT, async (req, res) => {
+    try {
+      const data = await getHourlyActivity();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, 'Failed to fetch hourly activity');
+    }
+  });
+
+  // Seed development data if needed
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(seedDevelopmentData, 1000); // Delay to ensure DB is ready
+  }
 
   return httpServer;
 }

@@ -5,8 +5,8 @@ interface JwtPayload {
   [key: string]: any;
 }
 
-// Fallback JWT secret for development
-const FALLBACK_JWT_SECRET = 'minhon_mui_ne_development_secret_key';
+// Fallback JWT secret for development - must match routes.ts
+const FALLBACK_JWT_SECRET = 'dev-secret-key-for-testing';
 
 export function verifyJWT(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
