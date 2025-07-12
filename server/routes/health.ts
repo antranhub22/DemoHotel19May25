@@ -2,6 +2,8 @@ import { Request, Response, Router } from 'express';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { runAutoDbFix } from '../startup/auto-database-fix';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
 
@@ -180,6 +182,76 @@ router.get('/health/environment', async (req: Request, res: Response) => {
       'Configure API keys for full functionality'
     ] : []
   });
+});
+
+// Build assets health check
+router.get('/health/assets', async (req: Request, res: Response) => {
+  try {
+    const distPath = path.resolve(import.meta.dirname || process.cwd(), "..", "dist/public");
+    const indexHtmlPath = path.resolve(distPath, "index.html");
+    const assetsPath = path.resolve(distPath, "assets");
+    
+    // Check if build directory exists
+    if (!fs.existsSync(distPath)) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Build directory not found',
+        distPath,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Check if index.html exists
+    if (!fs.existsSync(indexHtmlPath)) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'index.html not found',
+        indexHtmlPath,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Read index.html to check referenced assets
+    const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
+    const assetMatches = indexHtml.match(/\/assets\/[^"']+/g) || [];
+    
+    // Check if assets directory exists
+    if (!fs.existsSync(assetsPath)) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Assets directory not found',
+        assetsPath,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // List actual assets
+    const actualAssets = fs.readdirSync(assetsPath);
+    
+    // Check if referenced assets exist
+    const missingAssets = [];
+    for (const assetPath of assetMatches) {
+      const assetName = path.basename(assetPath);
+      if (!actualAssets.includes(assetName)) {
+        missingAssets.push(assetName);
+      }
+    }
+    
+    res.json({
+      status: missingAssets.length === 0 ? 'healthy' : 'missing_assets',
+      buildPath: distPath,
+      referencedAssets: assetMatches.map(a => path.basename(a)),
+      actualAssets: actualAssets.filter(f => f.endsWith('.js') || f.endsWith('.css')),
+      missingAssets,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 export default router; 
