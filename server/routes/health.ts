@@ -255,4 +255,36 @@ router.get('/health/assets', async (req: Request, res: Response) => {
   }
 });
 
+// Manual database setup endpoint
+router.post('/health/setup-database', async (req: Request, res: Response) => {
+  try {
+    console.log('🔧 Manual database setup triggered via API...');
+    
+    // Read SQL setup file
+    const sqlFile = path.resolve(__dirname, '../scripts/setup-database.sql');
+    const sql = fs.readFileSync(sqlFile, 'utf8');
+    
+    // Execute SQL directly on database
+    const result = await db.execute(sql);
+    
+    console.log('✅ Database setup completed successfully!');
+    
+    res.json({
+      status: 'success',
+      message: 'Database setup completed successfully',
+      result: result,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Database setup API error:', error);
+    res.status(500).json({
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: 'Database setup failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 export default router; 
