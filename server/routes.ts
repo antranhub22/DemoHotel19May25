@@ -25,6 +25,7 @@ import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
 import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 import { seedDevelopmentData } from './seed';
+import dashboardRoutes from './routes/dashboard';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -1558,6 +1559,13 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, error, 'Failed to fetch hourly activity');
     }
   });
+
+  // ============================================
+  // SaaS Dashboard API Routes
+  // ============================================
+  
+  // Mount dashboard routes with proper prefix
+  app.use('/api/dashboard', dashboardRoutes);
 
   // Seed development data if needed
   if (process.env.NODE_ENV === 'development') {
