@@ -94,7 +94,13 @@ export function serveStatic(app: Express) {
   }));
 
   // fall through to index.html for SPA routing; ensure no-cache of HTML
-  app.use("*", (_req, res) => {
+  // BUT exclude API routes to avoid serving HTML instead of JSON
+  app.use("*", (req, res) => {
+    // Don't intercept API routes
+    if (req.originalUrl.startsWith('/api/') || req.originalUrl.startsWith('/ws/')) {
+      return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
