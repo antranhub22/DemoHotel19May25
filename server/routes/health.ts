@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
+import { runAutoDbFix } from '../startup/auto-database-fix';
 
 const router = Router();
 
@@ -25,6 +26,36 @@ router.get('/health', async (req: Request, res: Response) => {
     res.status(500).json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Manual database fix trigger
+router.post('/health/fix-database', async (req: Request, res: Response) => {
+  try {
+    console.log('🔧 Manual database fix triggered via API...');
+    
+    const success = await runAutoDbFix();
+    
+    if (success) {
+      res.json({
+        status: 'success',
+        message: 'Database fix completed successfully',
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      res.status(500).json({
+        status: 'failed',
+        message: 'Database fix failed - check server logs',
+        timestamp: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: 'Manual database fix failed',
       timestamp: new Date().toISOString()
     });
   }
@@ -105,7 +136,8 @@ router.get('/health/database', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
       schema_checks: schemaChecks,
       recommendations: allHealthy ? [] : [
-        'Run database auto-fix: npm run db:fix-production',
+        'Run manual fix: POST /api/health/fix-database',
+        'Or run: npm run db:fix-production',
         'Check environment variables: DATABASE_URL',
         'Verify database migrations are complete'
       ]
