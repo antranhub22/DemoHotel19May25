@@ -8,6 +8,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
+// Fixed CSP configuration - v1.1
+
 const app = express();
 
 // ============================================
