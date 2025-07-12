@@ -1380,6 +1380,91 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
+  // ============================================
+  // Auth API Routes (for client compatibility)
+  // ============================================
+
+  // Auth login route (matches client expectations)
+  app.post('/api/auth/login', async (req, res) => {
+    const { email, password } = req.body;
+    console.log(`Auth login attempt: ${email}`);
+    
+    try {
+      // 1. Extract tenant from subdomain or host
+      const tenantId = await extractTenantFromRequest(req);
+      console.log(`🏨 Tenant identified for auth login: ${tenantId}`);
+      
+      // 2. Try to find staff in database with tenant association (using email as username)
+      let staffUser = await findStaffInDatabase(email, password, tenantId);
+      
+      // 3. Fallback to environment variables and hardcoded accounts (for backward compatibility)
+      if (!staffUser) {
+        staffUser = await findStaffInFallback(email, password, tenantId);
+      }
+      
+      if (!staffUser) {
+        console.log('Auth login failed: Invalid credentials or tenant access denied');
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // 4. Generate JWT with tenant and role information
+      const token = jwt.sign(
+        { 
+          username: staffUser.username, 
+          tenantId: staffUser.tenantId,
+          role: staffUser.role,
+          permissions: staffUser.permissions || []
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '1d' }
+      );
+      
+      console.log(`✅ Auth login successful for ${email} at tenant ${tenantId}`);
+      res.json({ 
+        token, 
+        user: {
+          username: staffUser.username,
+          email: staffUser.username, // Use username as email for client compatibility
+          role: staffUser.role,
+          tenantId: staffUser.tenantId
+        },
+        tenant: {
+          id: staffUser.tenantId,
+          name: 'Mi Nhon Hotel', // Default tenant name
+          subdomain: 'minhonmuine'
+        }
+      });
+    } catch (error) {
+      console.error('Auth login error:', error);
+      res.status(500).json({ error: 'Internal server error during auth login' });
+    }
+  });
+
+  // Auth me route (get current user info)
+  app.get('/api/auth/me', verifyJWT, async (req, res) => {
+    try {
+      console.log('Auth me request for user:', req.user);
+      
+      const user = {
+        username: req.user.username,
+        email: req.user.username, // Use username as email for client compatibility
+        role: req.user.role,
+        tenantId: req.user.tenantId
+      };
+      
+      const tenant = {
+        id: req.user.tenantId,
+        name: 'Mi Nhon Hotel', // Default tenant name
+        subdomain: 'minhonmuine'
+      };
+      
+      res.json({ user, tenant });
+    } catch (error) {
+      console.error('Auth me error:', error);
+      res.status(500).json({ error: 'Internal server error during auth me' });
+    }
+  });
+
   // Lấy danh sách request
   app.get('/api/staff/requests', verifyJWT, async (req, res) => {
     console.log('API /api/staff/requests called');
