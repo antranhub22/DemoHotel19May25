@@ -50,6 +50,11 @@ export class AutoDatabaseFixer {
     } catch (error) {
       console.error('❌ Auto database fix failed:', error instanceof Error ? error.message : String(error));
       
+      // Log the full error for debugging
+      if (error instanceof Error) {
+        console.error('❌ Full error stack:', error.stack);
+      }
+      
       // Don't crash the server, just log the error
       console.log('⚠️ Server will continue with potentially broken database');
       return false;
@@ -111,17 +116,31 @@ export class AutoDatabaseFixer {
   }
 
   private async performAutoFix(): Promise<void> {
-    // Step 1: Create missing tables
-    await this.createMissingTables();
-    
-    // Step 2: Create Mi Nhon tenant
-    await this.createMiNhonTenant();
-    
-    // Step 3: Create default staff accounts
-    await this.createDefaultStaffAccounts();
-    
-    // Step 4: Update existing data
-    await this.updateExistingData();
+    try {
+      // Step 1: Create missing tables
+      console.log('🔧 Step 1: Creating missing tables...');
+      await this.createMissingTables();
+      console.log('✅ Step 1 completed');
+      
+      // Step 2: Create Mi Nhon tenant
+      console.log('🔧 Step 2: Creating Mi Nhon tenant...');
+      await this.createMiNhonTenant();
+      console.log('✅ Step 2 completed');
+      
+      // Step 3: Create default staff accounts
+      console.log('🔧 Step 3: Creating default staff accounts...');
+      await this.createDefaultStaffAccounts();
+      console.log('✅ Step 3 completed');
+      
+      // Step 4: Update existing data
+      console.log('🔧 Step 4: Updating existing data...');
+      await this.updateExistingData();
+      console.log('✅ Step 4 completed');
+      
+    } catch (error) {
+      console.error('❌ Auto-fix step failed:', error instanceof Error ? error.message : String(error));
+      throw error; // Re-throw to be caught by the main function
+    }
   }
 
   private async createMissingTables(): Promise<void> {

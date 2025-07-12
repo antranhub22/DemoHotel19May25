@@ -49,11 +49,12 @@ router.post('/health/fix-database', async (req: Request, res: Response) => {
     } else {
       res.status(500).json({
         status: 'failed',
-        message: 'Database fix failed - check server logs',
+        message: 'Database fix failed - check server logs for details',
         timestamp: new Date().toISOString()
       });
     }
   } catch (error) {
+    console.error('❌ Database fix API error:', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
