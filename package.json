@@ -56,6 +56,7 @@
     "test:final-integration": "tsx scripts/final-integration-test.ts",
     "test:api-connectivity": "tsx scripts/test-api-connectivity.ts",
     "test:database-fix": "tsx scripts/test-database-fix.ts",
+    "db:setup": "tsx scripts/run-manual-db-setup.ts",
     "db:fix-production": "tsx scripts/fix-production-database.ts",
     "db:auto-fix": "tsx scripts/fix-production-database.ts"
   },
