@@ -276,7 +276,6 @@ export class AutoDatabaseFixer {
   private async createDefaultStaffAccounts(): Promise<void> {
     const defaultStaff = [
       {
-        id: 'admin-mi-nhon',
         tenant_id: 'mi-nhon-hotel',
         username: 'admin@hotel.com',
         password: 'StrongPassword123',
@@ -285,7 +284,6 @@ export class AutoDatabaseFixer {
         email: 'admin@hotel.com'
       },
       {
-        id: 'manager-mi-nhon',
         tenant_id: 'mi-nhon-hotel',
         username: 'manager@hotel.com',
         password: 'StrongPassword456',
@@ -297,11 +295,10 @@ export class AutoDatabaseFixer {
 
     for (const staff of defaultStaff) {
       await this.db.execute(sql`
-        INSERT INTO staff (id, tenant_id, username, password, role, name, email)
-        VALUES (${staff.id}, ${staff.tenant_id}, ${staff.username}, ${staff.password}, 
+        INSERT INTO staff (tenant_id, username, password, role, name, email)
+        VALUES (${staff.tenant_id}, ${staff.username}, ${staff.password}, 
                 ${staff.role}, ${staff.name}, ${staff.email})
-        ON CONFLICT (id) DO UPDATE SET
-          username = EXCLUDED.username,
+        ON CONFLICT (username) DO UPDATE SET
           password = EXCLUDED.password,
           role = EXCLUDED.role,
           name = EXCLUDED.name,
