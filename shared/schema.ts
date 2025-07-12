@@ -1,90 +1,186 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { relations } from "drizzle-orm";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// Re-export schema tables from the main database schema
+export { 
+  tenants, 
+  hotelProfiles, 
+  call, 
+  transcript, 
+  request, 
+  message, 
+  staff 
+} from "../src/db/schema";
+
+import { 
+  tenants, 
+  hotelProfiles, 
+  call, 
+  transcript, 
+  request, 
+  message, 
+  staff 
+} from "../src/db/schema";
+
+// ============================================
+// Multi-tenancy Schema Definitions
+// ============================================
+
+// Tenant schema
+export const insertTenantSchema = createInsertSchema(tenants, {
+  hotelName: z.string().min(1, "Hotel name is required"),
+  subdomain: z.string().min(1, "Subdomain is required").regex(/^[a-z0-9-]+$/, "Subdomain must contain only lowercase letters, numbers, and hyphens"),
+  subscriptionPlan: z.enum(["trial", "basic", "premium", "enterprise"]).default("trial"),
+  subscriptionStatus: z.enum(["active", "inactive", "expired", "cancelled"]).default("active"),
+}).pick({
+  hotelName: true,
+  subdomain: true,
+  customDomain: true,
+  subscriptionPlan: true,
+  subscriptionStatus: true,
+  trialEndsAt: true,
+  maxVoices: true,
+  maxLanguages: true,
+  voiceCloning: true,
+  multiLocation: true,
+  whiteLabel: true,
+  dataRetentionDays: true,
+  monthlyCallLimit: true
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const selectTenantSchema = createSelectSchema(tenants);
+
+// Hotel Profile schema
+export const insertHotelProfileSchema = createInsertSchema(hotelProfiles, {
+  tenantId: z.string().uuid("Invalid tenant ID"),
+  researchData: z.any().optional(),
+  assistantConfig: z.any().optional(),
+  servicesConfig: z.any().optional(),
+  knowledgeBase: z.string().optional(),
+  systemPrompt: z.string().optional()
+}).pick({
+  tenantId: true,
+  researchData: true,
+  assistantConfig: true,
+  vapiAssistantId: true,
+  servicesConfig: true,
+  knowledgeBase: true,
+  systemPrompt: true
 });
 
-export const transcripts = pgTable("transcript", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  role: text("role").notNull(),
-  content: text("content").notNull(),
-  timestamp: timestamp("timestamp").defaultNow().notNull(),
+export const selectHotelProfileSchema = createSelectSchema(hotelProfiles);
+
+// ============================================
+// Updated Existing Schema with tenant_id
+// ============================================
+
+// Call schema (updated with tenant_id)
+export const insertCallSchema = createInsertSchema(call, {
+  callIdVapi: z.string().min(1, "Call ID is required"),
+  tenantId: z.string().uuid("Invalid tenant ID").optional()
+}).pick({
+  callIdVapi: true,
+  roomNumber: true,
+  language: true,
+  serviceType: true,
+  duration: true,
+  tenantId: true
 });
 
-export const insertTranscriptSchema = createInsertSchema(transcripts).pick({
+// Transcript schema (updated with tenant_id)
+export const insertTranscriptSchema = createInsertSchema(transcript, {
+  callId: z.string().min(1, "Call ID is required"),
+  role: z.string().min(1, "Role is required"),
+  content: z.string().min(1, "Content is required"),
+  tenantId: z.string().uuid("Invalid tenant ID").optional()
+}).pick({
   callId: true,
   role: true,
   content: true,
+  tenantId: true
 });
 
-export const orders = pgTable("orders", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  roomNumber: text("room_number").notNull(),
-  orderType: text("order_type").notNull(),
-  deliveryTime: text("delivery_time").notNull(),
-  specialInstructions: text("special_instructions"),
-  items: jsonb("items").notNull(),
-  totalAmount: integer("total_amount").notNull(),
-  status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+// Request schema (updated with tenant_id)
+export const insertRequestSchema = createInsertSchema(request, {
+  tenantId: z.string().uuid("Invalid tenant ID").optional()
+}).pick({
+  roomNumber: true,
+  orderId: true,
+  requestContent: true,
+  status: true,
+  tenantId: true
 });
 
-export const callSummaries = pgTable("call_summaries", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  content: text("content").notNull(),
-  timestamp: timestamp("timestamp").defaultNow().notNull(),
-  roomNumber: text("room_number"),
-  duration: text("duration"),
-});
-
-export const insertCallSummarySchema = createInsertSchema(callSummaries).pick({
-  callId: true,
+// Message schema (updated with tenant_id)
+export const insertMessageSchema = createInsertSchema(message, {
+  requestId: z.number().int().positive("Invalid request ID"),
+  sender: z.string().min(1, "Sender is required"),
+  content: z.string().min(1, "Content is required"),
+  tenantId: z.string().uuid("Invalid tenant ID").optional()
+}).pick({
+  requestId: true,
+  sender: true,
   content: true,
-  timestamp: true,
-  roomNumber: true,
-  duration: true,
+  tenantId: true
 });
 
-export const insertOrderSchema = createInsertSchema(orders).pick({
-  callId: true,
-  roomNumber: true,
-  orderType: true,
-  deliveryTime: true,
-  specialInstructions: true,
-  items: true,
-  totalAmount: true,
+// Staff schema (updated with tenant_id)
+export const insertStaffSchema = createInsertSchema(staff, {
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  tenantId: z.string().uuid("Invalid tenant ID").optional()
+}).pick({
+  username: true,
+  password: true,
+  role: true,
+  tenantId: true
 });
 
-// Define relations between tables
-export const transcriptsRelations = relations(transcripts, ({ many }) => ({
-  orders: many(orders),
-}));
+// ============================================
+// Backwards Compatibility (deprecated but maintained)
+// ============================================
 
-export const ordersRelations = relations(orders, ({ many }) => ({
-  transcripts: many(transcripts),
-}));
+// Legacy schemas for backwards compatibility
+export const users = staff; // Map users to staff table
+export const transcripts = transcript; // Singular to plural mapping
+export const orders = request; // Map orders to request table
+export const callSummaries = call; // Map callSummaries to call table
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export const insertUserSchema = insertStaffSchema;
+export const insertOrderSchema = insertRequestSchema;
+export const insertCallSummarySchema = insertCallSchema;
+
+// ============================================
+// TypeScript Types
+// ============================================
+
+// Multi-tenancy types
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
+export type Tenant = typeof tenants.$inferSelect;
+
+export type InsertHotelProfile = z.infer<typeof insertHotelProfileSchema>;
+export type HotelProfile = typeof hotelProfiles.$inferSelect;
+
+// Updated existing types with tenant_id
+export type InsertCall = z.infer<typeof insertCallSchema>;
+export type Call = typeof call.$inferSelect;
 
 export type InsertTranscript = z.infer<typeof insertTranscriptSchema>;
-export type Transcript = typeof transcripts.$inferSelect;
+export type Transcript = typeof transcript.$inferSelect;
 
-export type InsertOrder = z.infer<typeof insertOrderSchema>;
-export type Order = typeof orders.$inferSelect;
+export type InsertRequest = z.infer<typeof insertRequestSchema>;
+export type Request = typeof request.$inferSelect;
 
-export type InsertCallSummary = z.infer<typeof insertCallSummarySchema>;
-export type CallSummary = typeof callSummaries.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof message.$inferSelect;
+
+export type InsertStaff = z.infer<typeof insertStaffSchema>;
+export type Staff = typeof staff.$inferSelect;
+
+// Backwards compatibility types (deprecated)
+export type User = Staff;
+export type InsertUser = InsertStaff;
+export type Order = Request;
+export type InsertOrder = InsertRequest;
+export type CallSummary = Call;
+export type InsertCallSummary = InsertCall;
