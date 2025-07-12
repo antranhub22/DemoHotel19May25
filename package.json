@@ -39,7 +39,17 @@
     "test:integration:pre-deploy": "tsx scripts/run-integration-tests.ts pre-deploy",
     "test:integration:all": "tsx scripts/run-integration-tests.ts all",
     "test:integration:validate": "tsx scripts/run-integration-tests.ts validate",
-    "test:integration:matrix": "tsx scripts/run-integration-tests.ts matrix"
+    "test:integration:matrix": "tsx scripts/run-integration-tests.ts matrix",
+    
+    "env:validate": "tsx scripts/validate-environment.ts validate",
+    "env:validate-saas": "tsx scripts/validate-environment.ts validate-saas",
+    "env:status": "tsx scripts/validate-environment.ts status",
+    "env:test-apis": "tsx scripts/validate-environment.ts test-apis",
+    "env:test-db": "tsx scripts/validate-environment.ts test-db",
+    "env:health": "tsx scripts/validate-environment.ts health",
+    "env:template": "tsx scripts/validate-environment.ts template",
+    "env:generate": "tsx scripts/validate-environment.ts generate",
+    "env:jwt-secret": "tsx scripts/generate-jwt-secret.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
