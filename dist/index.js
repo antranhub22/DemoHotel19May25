@@ -1554,7 +1554,7 @@ if (!DATABASE_URL2 && !isProduction2) {
 // server/routes.ts
 init_schema();
 import { eq as eq6, and as and4 } from "drizzle-orm";
-import { sql as sql4 } from "drizzle-orm";
+import { sql as sql6 } from "drizzle-orm";
 
 // src/api/staff.ts
 init_schema();
@@ -4205,6 +4205,395 @@ router.delete("/reset-assistant", requireFeature("apiAccess"), async (req, res) 
 });
 var dashboard_default = router;
 
+// server/routes/health.ts
+import { Router } from "express";
+import { sql as sql5 } from "drizzle-orm";
+
+// server/startup/auto-database-fix.ts
+import { drizzle as drizzle3 } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { sql as sql4 } from "drizzle-orm";
+var AutoDatabaseFixer = class {
+  db;
+  client;
+  constructor() {
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      console.log("\u26A0\uFE0F DATABASE_URL not found, skipping auto-fix");
+      return;
+    }
+    this.client = postgres(databaseUrl);
+    this.db = drizzle3(this.client);
+  }
+  async autoFixDatabase() {
+    if (!this.client) {
+      console.log("\u26A0\uFE0F Database connection not available, skipping auto-fix");
+      return false;
+    }
+    try {
+      console.log("\u{1F50D} Checking database schema...");
+      const needsFix = await this.checkIfDatabaseNeedsFix();
+      if (!needsFix) {
+        console.log("\u2705 Database schema is up to date");
+        return true;
+      }
+      console.log("\u{1F6E0}\uFE0F Auto-fixing database schema...");
+      await this.performAutoFix();
+      console.log("\u2705 Database auto-fix completed successfully");
+      return true;
+    } catch (error) {
+      console.error("\u274C Auto database fix failed:", error instanceof Error ? error.message : String(error));
+      console.log("\u26A0\uFE0F Server will continue with potentially broken database");
+      return false;
+    }
+  }
+  async checkIfDatabaseNeedsFix() {
+    try {
+      const tenantsResult = await this.db.execute(sql4`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = 'tenants'
+        )
+      `);
+      const tenantsExists = tenantsResult[0]?.exists || false;
+      if (!tenantsExists) {
+        console.log("\u{1F4CB} Missing tenants table - needs fix");
+        return true;
+      }
+      const tenantIdResult = await this.db.execute(sql4`
+        SELECT EXISTS (
+          SELECT FROM information_schema.columns 
+          WHERE table_name = 'transcript' AND column_name = 'tenant_id'
+        )
+      `);
+      const tenantIdExists = tenantIdResult[0]?.exists || false;
+      if (!tenantIdExists) {
+        console.log("\u{1F4CB} Missing tenant_id column - needs fix");
+        return true;
+      }
+      const miNhonResult = await this.db.execute(sql4`
+        SELECT EXISTS (
+          SELECT FROM tenants WHERE id = 'mi-nhon-hotel'
+        )
+      `);
+      const miNhonExists = miNhonResult[0]?.exists || false;
+      if (!miNhonExists) {
+        console.log("\u{1F4CB} Missing Mi Nhon tenant - needs fix");
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log("\u{1F4CB} Database check failed, assuming needs fix:", error instanceof Error ? error.message : String(error));
+      return true;
+    }
+  }
+  async performAutoFix() {
+    await this.createMissingTables();
+    await this.createMiNhonTenant();
+    await this.createDefaultStaffAccounts();
+    await this.updateExistingData();
+  }
+  async createMissingTables() {
+    await this.db.execute(sql4`
+      CREATE TABLE IF NOT EXISTS tenants (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        domain TEXT,
+        subdomain TEXT,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        subscription_plan TEXT DEFAULT 'trial',
+        subscription_status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await this.db.execute(sql4`
+      CREATE TABLE IF NOT EXISTS hotel_profiles (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT,
+        address TEXT,
+        phone TEXT,
+        email TEXT,
+        website TEXT,
+        amenities TEXT[],
+        policies TEXT[],
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    const tables = ["transcript", "request", "message", "call", "staff"];
+    for (const table of tables) {
+      try {
+        await this.db.execute(sql4`
+          ALTER TABLE ${sql4.identifier(table)} 
+          ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE
+        `);
+      } catch (error) {
+      }
+    }
+  }
+  async createMiNhonTenant() {
+    const miNhonTenant = {
+      id: "mi-nhon-hotel",
+      name: "Mi Nhon Hotel",
+      domain: "minhonmuine.talk2go.online",
+      subdomain: "minhonmuine",
+      email: "info@minhonhotel.com",
+      phone: "+84 252 3847 007",
+      address: "97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam",
+      subscription_plan: "premium",
+      subscription_status: "active"
+    };
+    await this.db.execute(sql4`
+      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      VALUES (${miNhonTenant.id}, ${miNhonTenant.name}, ${miNhonTenant.domain}, ${miNhonTenant.subdomain}, 
+              ${miNhonTenant.email}, ${miNhonTenant.phone}, ${miNhonTenant.address}, 
+              ${miNhonTenant.subscription_plan}, ${miNhonTenant.subscription_status})
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        domain = EXCLUDED.domain,
+        subdomain = EXCLUDED.subdomain,
+        email = EXCLUDED.email,
+        phone = EXCLUDED.phone,
+        address = EXCLUDED.address,
+        subscription_plan = EXCLUDED.subscription_plan,
+        subscription_status = EXCLUDED.subscription_status,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    await this.db.execute(sql4`
+      INSERT INTO hotel_profiles (id, tenant_id, name, description, address, phone, email, website, amenities, policies)
+      VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel', 
+              'A beautiful beachfront hotel in Mui Ne, Vietnam',
+              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
+              '+84 252 3847 007', 'info@minhonhotel.com', 'https://minhonhotel.com',
+              ARRAY['Pool', 'Restaurant', 'Free WiFi', 'Beach Access', 'Spa'],
+              ARRAY['Check-in: 2:00 PM', 'Check-out: 12:00 PM', 'No smoking'])
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        description = EXCLUDED.description,
+        address = EXCLUDED.address,
+        phone = EXCLUDED.phone,
+        email = EXCLUDED.email,
+        website = EXCLUDED.website,
+        amenities = EXCLUDED.amenities,
+        policies = EXCLUDED.policies,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+  }
+  async createDefaultStaffAccounts() {
+    const defaultStaff = [
+      {
+        id: "admin-mi-nhon",
+        tenant_id: "mi-nhon-hotel",
+        username: "admin@hotel.com",
+        password: "StrongPassword123",
+        role: "admin",
+        name: "Administrator",
+        email: "admin@hotel.com"
+      },
+      {
+        id: "manager-mi-nhon",
+        tenant_id: "mi-nhon-hotel",
+        username: "manager@hotel.com",
+        password: "StrongPassword456",
+        role: "manager",
+        name: "Hotel Manager",
+        email: "manager@hotel.com"
+      }
+    ];
+    for (const staff2 of defaultStaff) {
+      await this.db.execute(sql4`
+        INSERT INTO staff (id, tenant_id, username, password, role, name, email)
+        VALUES (${staff2.id}, ${staff2.tenant_id}, ${staff2.username}, ${staff2.password}, 
+                ${staff2.role}, ${staff2.name}, ${staff2.email})
+        ON CONFLICT (id) DO UPDATE SET
+          username = EXCLUDED.username,
+          password = EXCLUDED.password,
+          role = EXCLUDED.role,
+          name = EXCLUDED.name,
+          email = EXCLUDED.email,
+          updated_at = CURRENT_TIMESTAMP
+      `);
+    }
+  }
+  async updateExistingData() {
+    const miNhonTenantId = "mi-nhon-hotel";
+    const tables = ["transcript", "request", "message", "staff"];
+    for (const table of tables) {
+      try {
+        await this.db.execute(sql4`
+          UPDATE ${sql4.identifier(table)} 
+          SET tenant_id = ${miNhonTenantId} 
+          WHERE tenant_id IS NULL
+        `);
+      } catch (error) {
+      }
+    }
+  }
+  async cleanup() {
+    if (this.client) {
+      await this.client.end();
+    }
+  }
+};
+async function runAutoDbFix() {
+  const fixer = new AutoDatabaseFixer();
+  const success = await fixer.autoFixDatabase();
+  await fixer.cleanup();
+  return success;
+}
+
+// server/routes/health.ts
+var router2 = Router();
+router2.get("/health", async (req, res) => {
+  try {
+    await db.execute(sql5`SELECT 1`);
+    res.json({
+      status: "healthy",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      version: process.version
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "unhealthy",
+      error: error instanceof Error ? error.message : "Unknown error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  }
+});
+router2.post("/health/fix-database", async (req, res) => {
+  try {
+    console.log("\u{1F527} Manual database fix triggered via API...");
+    const success = await runAutoDbFix();
+    if (success) {
+      res.json({
+        status: "success",
+        message: "Database fix completed successfully",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    } else {
+      res.status(500).json({
+        status: "failed",
+        message: "Database fix failed - check server logs",
+        timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: error instanceof Error ? error.message : "Unknown error",
+      message: "Manual database fix failed",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  }
+});
+router2.get("/health/database", async (req, res) => {
+  try {
+    const schemaChecks = {
+      database_connection: false,
+      tenants_table: false,
+      hotel_profiles_table: false,
+      tenant_id_columns: false,
+      mi_nhon_tenant: false,
+      staff_accounts: false
+    };
+    await db.execute(sql5`SELECT 1`);
+    schemaChecks.database_connection = true;
+    const tenantsResult = await db.execute(sql5`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'tenants'
+      )
+    `);
+    schemaChecks.tenants_table = tenantsResult[0]?.exists || false;
+    const profilesResult = await db.execute(sql5`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'hotel_profiles'
+      )
+    `);
+    schemaChecks.hotel_profiles_table = profilesResult[0]?.exists || false;
+    const tenantIdResult = await db.execute(sql5`
+      SELECT EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_name = 'transcript' AND column_name = 'tenant_id'
+      )
+    `);
+    schemaChecks.tenant_id_columns = tenantIdResult[0]?.exists || false;
+    if (schemaChecks.tenants_table) {
+      const miNhonResult = await db.execute(sql5`
+        SELECT EXISTS (
+          SELECT FROM tenants WHERE id = 'mi-nhon-hotel'
+        )
+      `);
+      schemaChecks.mi_nhon_tenant = miNhonResult[0]?.exists || false;
+    }
+    const staffResult = await db.execute(sql5`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'staff'
+      )
+    `);
+    if (staffResult[0]?.exists) {
+      const staffCountResult = await db.execute(sql5`
+        SELECT COUNT(*) as count FROM staff WHERE tenant_id = 'mi-nhon-hotel'
+      `);
+      schemaChecks.staff_accounts = (staffCountResult[0]?.count || 0) > 0;
+    }
+    const allHealthy = Object.values(schemaChecks).every((check) => check === true);
+    res.json({
+      status: allHealthy ? "healthy" : "needs_attention",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+      schema_checks: schemaChecks,
+      recommendations: allHealthy ? [] : [
+        "Run manual fix: POST /api/health/fix-database",
+        "Or run: npm run db:fix-production",
+        "Check environment variables: DATABASE_URL",
+        "Verify database migrations are complete"
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: error instanceof Error ? error.message : "Unknown error",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  }
+});
+router2.get("/health/environment", async (req, res) => {
+  const envChecks = {
+    database_url: !!process.env.DATABASE_URL,
+    node_env: process.env.NODE_ENV,
+    port: process.env.PORT || "default",
+    jwt_secret: !!process.env.JWT_SECRET,
+    openai_api_key: !!process.env.VITE_OPENAI_API_KEY,
+    vapi_public_key: !!process.env.VITE_VAPI_PUBLIC_KEY,
+    cors_origin: process.env.CORS_ORIGIN || "not_set",
+    client_url: process.env.CLIENT_URL || "not_set"
+  };
+  const criticalMissing = [];
+  if (!envChecks.database_url) criticalMissing.push("DATABASE_URL");
+  if (!envChecks.jwt_secret) criticalMissing.push("JWT_SECRET");
+  res.json({
+    status: criticalMissing.length === 0 ? "healthy" : "missing_critical_vars",
+    timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+    environment_checks: envChecks,
+    critical_missing: criticalMissing,
+    recommendations: criticalMissing.length > 0 ? [
+      "Set missing environment variables in your deployment platform",
+      "Generate JWT secret: npm run env:jwt-secret",
+      "Configure API keys for full functionality"
+    ] : []
+  });
+});
+var health_default = router2;
+
 // server/routes.ts
 var openai2 = new OpenAI2({
   apiKey: process.env.VITE_OPENAI_API_KEY || "sk-placeholder-for-dev"
@@ -5203,7 +5592,7 @@ Mi Nhon Hotel Mui Ne`
     console.log("Authorization header:", req.headers.authorization);
     try {
       console.log("Checking database connection before querying requests...");
-      const dbTest = await db2.execute(sql4`SELECT 1`);
+      const dbTest = await db2.execute(sql6`SELECT 1`);
       console.log("Database connection test:", dbTest);
       console.log("Fetching requests from database...");
       const dbRequests = await db2.select().from(request);
@@ -5343,6 +5732,7 @@ Mi Nhon Hotel Mui Ne`
     }
   });
   app2.use("/api/dashboard", dashboard_default);
+  app2.use("/api", health_default);
   if (process.env.NODE_ENV === "development") {
     setTimeout(seedDevelopmentData, 1e3);
   }
@@ -5604,6 +5994,12 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
   const io = setupSocket(server);
   app.set("io", io);
+  if (process.env.AUTO_DB_FIX !== "false") {
+    console.log("\u{1F527} Running auto database fix...");
+    await runAutoDbFix();
+  } else {
+    console.log("\u26A0\uFE0F Auto database fix disabled by environment variable");
+  }
   app.use((err, _req, res, _next) => {
     const status = err.status || err.statusCode || 500;
     const message2 = err.message || "Internal Server Error";
