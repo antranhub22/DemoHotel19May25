@@ -723,11 +723,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pass through orderReference for each summary
       const mapped = summaries.map(s => ({
         id: s.id,
-        callId: s.callId,
+        callId: (s as any).callIdVapi || (s as any).callId || 'unknown', // Use callIdVapi instead of callId
         roomNumber: s.roomNumber,
-        content: s.content,
-        timestamp: s.timestamp,
-        duration: s.duration
+        content: (s as any).requestContent || (s as any).content || 'No content', // Handle missing content
+        timestamp: s.createdAt || s.startTime || new Date(), // Use createdAt instead of timestamp
+        duration: s.duration || 0
       }));
       res.json({
         success: true,
@@ -1091,13 +1091,10 @@ Mi Nhon Hotel Mui Ne`
           console.log('Đã lưu request thành công vào database với ID:', orderReference);
           // Bổ sung: Lưu order vào bảng orders
           await storage.createOrder({
-            callId: callDetails.callId || 'unknown',
             roomNumber: callDetails.roomNumber,
-            orderType: 'Room Service',
-            deliveryTime: new Date(callDetails.timestamp || Date.now()).toISOString(),
-            specialInstructions: callDetails.orderReference || orderReference,
-            items: [],
-            totalAmount: 0
+            orderId: callDetails.orderReference || orderReference,
+            requestContent: 'Call Summary: ' + (callDetails.summary || 'No summary').substring(0, 200) + '...',
+            status: 'Đã ghi nhận'
           });
           console.log('Đã lưu order vào bảng orders');
         } catch (dbError) {
@@ -1520,9 +1517,9 @@ Mi Nhon Hotel Mui Ne`
       // Đồng bộ status sang order nếu có orderId
       const orderId = result[0].orderId;
       if (orderId) {
-        // Tìm order theo specialInstructions (orderReference)
+        // Tìm order theo orderId (orderReference)
         const orders = await storage.getAllOrders({});
-        const order = orders.find(o => o.specialInstructions === orderId);
+        const order = orders.find((o: any) => o.orderId === orderId);
         if (order) {
           const updatedOrder = await storage.updateOrderStatus(order.id, status);
           // Emit WebSocket cho Guest UI nếu updatedOrder tồn tại
@@ -1533,17 +1530,17 @@ Mi Nhon Hotel Mui Ne`
               // Emit cho tất cả client hoặc theo room (nếu dùng join_room)
               io.emit('order_status_update', {
                 orderId: updatedOrder.id,
-                reference: updatedOrder.specialInstructions,
+                reference: (updatedOrder as any).orderId, // Use orderId instead of specialInstructions
                 status: updatedOrder.status
               });
             }
             // Giữ lại emit qua globalThis.wss nếu cần tương thích cũ
-            if (updatedOrder.specialInstructions && globalThis.wss) {
+            if ((updatedOrder as any).orderId && globalThis.wss) {
               globalThis.wss.clients.forEach((client) => {
                 if (client.readyState === 1) {
                   client.send(JSON.stringify({
                     type: 'order_status_update',
-                    reference: updatedOrder.specialInstructions,
+                    reference: (updatedOrder as any).orderId, // Use orderId instead of specialInstructions
                     status: updatedOrder.status
                   }));
                 }
