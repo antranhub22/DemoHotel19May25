@@ -54,7 +54,8 @@
     "deploy:staging:dry-run": "tsx scripts/deploy-multi-tenant.ts staging --dry-run",
     "deploy:production:dry-run": "tsx scripts/deploy-multi-tenant.ts production --dry-run",
     "test:final-integration": "tsx scripts/final-integration-test.ts",
-    "db:fix-production": "tsx scripts/fix-production-database.ts"
+    "db:fix-production": "tsx scripts/fix-production-database.ts",
+    "db:auto-fix": "tsx scripts/fix-production-database.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",

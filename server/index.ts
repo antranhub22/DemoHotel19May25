@@ -3,6 +3,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupSocket } from './socket';
+import { runAutoDbFix } from './startup/auto-database-fix';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -136,6 +137,14 @@ app.use((req, res, next) => {
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
+
+  // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)
+  if (process.env.AUTO_DB_FIX !== 'false') {
+    console.log('🔧 Running auto database fix...');
+    await runAutoDbFix();
+  } else {
+    console.log('⚠️ Auto database fix disabled by environment variable');
+  }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

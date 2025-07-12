@@ -26,6 +26,7 @@ import { deleteAllRequests } from '../src/api/staff';
 import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
+import healthRoutes from './routes/health';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -1568,6 +1569,13 @@ Mi Nhon Hotel Mui Ne`
   
   // Mount dashboard routes with proper prefix
   app.use('/api/dashboard', dashboardRoutes);
+
+  // ============================================
+  // Health Check API Routes
+  // ============================================
+  
+  // Mount health check routes
+  app.use('/api', healthRoutes);
 
   // Seed development data if needed
   if (process.env.NODE_ENV === 'development') {
