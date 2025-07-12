@@ -45,7 +45,14 @@
     "env:health": "tsx scripts/validate-environment.ts health",
     "env:template": "tsx scripts/validate-environment.ts template",
     "env:generate": "tsx scripts/validate-environment.ts generate",
-    "env:jwt-secret": "tsx scripts/generate-jwt-secret.ts"
+    "env:jwt-secret": "tsx scripts/generate-jwt-secret.ts",
+    "validate:deployment": "tsx scripts/deployment-validator.ts",
+    "validate:deployment:staging": "tsx scripts/deployment-validator.ts staging",
+    "validate:deployment:production": "tsx scripts/deployment-validator.ts production",
+    "deploy:staging": "tsx scripts/deploy-multi-tenant.ts staging",
+    "deploy:production": "tsx scripts/deploy-multi-tenant.ts production",
+    "deploy:staging:dry-run": "tsx scripts/deploy-multi-tenant.ts staging --dry-run",
+    "deploy:production:dry-run": "tsx scripts/deploy-multi-tenant.ts production --dry-run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
