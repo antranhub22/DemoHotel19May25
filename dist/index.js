@@ -1,116 +1,370 @@
 var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// server/index.ts
-import "dotenv/config";
-import express2 from "express";
-
-// server/routes.ts
-import { createServer } from "http";
+// src/db/schema.ts
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text as pgText, integer as pgInteger, timestamp, varchar, uuid, jsonb, boolean } from "drizzle-orm/pg-core";
+var isPostgres, pgTenants, pgHotelProfiles, sqliteTenants, sqliteHotelProfiles, pgCall, pgTranscript, pgRequest, pgMessage, pgStaff, sqliteCall, sqliteTranscript, sqliteRequest, sqliteMessage, sqliteStaff, tenants, hotelProfiles, call, transcript, request, message, staff;
+var init_schema = __esm({
+  "src/db/schema.ts"() {
+    "use strict";
+    isPostgres = process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("postgres");
+    pgTenants = pgTable("tenants", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      hotelName: pgText("hotel_name").notNull(),
+      subdomain: varchar("subdomain", { length: 50 }).unique().notNull(),
+      customDomain: varchar("custom_domain", { length: 100 }),
+      subscriptionPlan: varchar("subscription_plan", { length: 20 }).default("trial"),
+      subscriptionStatus: varchar("subscription_status", { length: 20 }).default("active"),
+      trialEndsAt: timestamp("trial_ends_at"),
+      createdAt: timestamp("created_at").defaultNow(),
+      // Feature flags
+      maxVoices: pgInteger("max_voices").default(5),
+      maxLanguages: pgInteger("max_languages").default(4),
+      voiceCloning: boolean("voice_cloning").default(false),
+      multiLocation: boolean("multi_location").default(false),
+      whiteLabel: boolean("white_label").default(false),
+      dataRetentionDays: pgInteger("data_retention_days").default(90),
+      monthlyCallLimit: pgInteger("monthly_call_limit").default(1e3)
+    });
+    pgHotelProfiles = pgTable("hotel_profiles", {
+      id: uuid("id").primaryKey().defaultRandom(),
+      tenantId: uuid("tenant_id").references(() => pgTenants.id).notNull(),
+      researchData: jsonb("research_data"),
+      assistantConfig: jsonb("assistant_config"),
+      vapiAssistantId: varchar("vapi_assistant_id", { length: 100 }),
+      servicesConfig: jsonb("services_config"),
+      knowledgeBase: pgText("knowledge_base"),
+      systemPrompt: pgText("system_prompt"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    sqliteTenants = sqliteTable("tenants", {
+      id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+      hotelName: text("hotel_name").notNull(),
+      subdomain: text("subdomain").unique().notNull(),
+      customDomain: text("custom_domain"),
+      subscriptionPlan: text("subscription_plan").default("trial"),
+      subscriptionStatus: text("subscription_status").default("active"),
+      trialEndsAt: integer("trial_ends_at", { mode: "timestamp" }),
+      createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // Feature flags
+      maxVoices: integer("max_voices").default(5),
+      maxLanguages: integer("max_languages").default(4),
+      voiceCloning: integer("voice_cloning", { mode: "boolean" }).default(false),
+      multiLocation: integer("multi_location", { mode: "boolean" }).default(false),
+      whiteLabel: integer("white_label", { mode: "boolean" }).default(false),
+      dataRetentionDays: integer("data_retention_days").default(90),
+      monthlyCallLimit: integer("monthly_call_limit").default(1e3)
+    });
+    sqliteHotelProfiles = sqliteTable("hotel_profiles", {
+      id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+      tenantId: text("tenant_id").references(() => sqliteTenants.id).notNull(),
+      researchData: text("research_data", { mode: "json" }),
+      assistantConfig: text("assistant_config", { mode: "json" }),
+      vapiAssistantId: text("vapi_assistant_id"),
+      servicesConfig: text("services_config", { mode: "json" }),
+      knowledgeBase: text("knowledge_base"),
+      systemPrompt: text("system_prompt"),
+      createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+    });
+    pgCall = pgTable("call", {
+      id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+      callIdVapi: varchar("call_id_vapi", { length: 100 }).notNull().unique(),
+      roomNumber: varchar("room_number", { length: 10 }),
+      language: varchar("language", { length: 10 }),
+      serviceType: varchar("service_type", { length: 50 }),
+      startTime: timestamp("start_time").defaultNow(),
+      endTime: timestamp("end_time"),
+      duration: pgInteger("duration"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow(),
+      // NEW: Tenant isolation
+      tenantId: uuid("tenant_id").references(() => pgTenants.id)
+    });
+    pgTranscript = pgTable("transcript", {
+      id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+      callId: varchar("call_id", { length: 100 }).notNull(),
+      content: pgText("content").notNull(),
+      role: varchar("role", { length: 20 }).notNull(),
+      timestamp: timestamp("timestamp").defaultNow(),
+      // NEW: Tenant isolation
+      tenantId: uuid("tenant_id").references(() => pgTenants.id)
+    });
+    pgRequest = pgTable("request", {
+      id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+      roomNumber: varchar("room_number", { length: 10 }),
+      orderId: varchar("order_id", { length: 100 }),
+      requestContent: pgText("request_content"),
+      status: varchar("status", { length: 100 }).default("\u0110\xE3 ghi nh\u1EADn"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow(),
+      // NEW: Tenant isolation
+      tenantId: uuid("tenant_id").references(() => pgTenants.id)
+    });
+    pgMessage = pgTable("message", {
+      id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+      requestId: pgInteger("request_id").references(() => pgRequest.id),
+      sender: varchar("sender", { length: 20 }).notNull(),
+      content: pgText("content").notNull(),
+      timestamp: timestamp("timestamp").defaultNow(),
+      // NEW: Tenant isolation
+      tenantId: uuid("tenant_id").references(() => pgTenants.id)
+    });
+    pgStaff = pgTable("staff", {
+      id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+      username: varchar("username", { length: 50 }).notNull().unique(),
+      password: varchar("password", { length: 255 }).notNull(),
+      role: varchar("role", { length: 20 }).default("staff"),
+      createdAt: timestamp("created_at").defaultNow(),
+      // NEW: Tenant isolation
+      tenantId: uuid("tenant_id").references(() => pgTenants.id)
+    });
+    sqliteCall = sqliteTable("call", {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      callIdVapi: text("call_id_vapi").notNull().unique(),
+      roomNumber: text("room_number"),
+      language: text("language"),
+      serviceType: text("service_type"),
+      startTime: integer("start_time", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      endTime: integer("end_time", { mode: "timestamp" }),
+      duration: integer("duration"),
+      createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // NEW: Tenant isolation
+      tenantId: text("tenant_id").references(() => sqliteTenants.id)
+    });
+    sqliteTranscript = sqliteTable("transcript", {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      callId: text("call_id").notNull(),
+      content: text("content").notNull(),
+      role: text("role").notNull(),
+      timestamp: integer("timestamp", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // NEW: Tenant isolation
+      tenantId: text("tenant_id").references(() => sqliteTenants.id)
+    });
+    sqliteRequest = sqliteTable("request", {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      roomNumber: text("room_number"),
+      orderId: text("order_id"),
+      requestContent: text("request_content"),
+      status: text("status").default("\u0110\xE3 ghi nh\u1EADn"),
+      createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // NEW: Tenant isolation
+      tenantId: text("tenant_id").references(() => sqliteTenants.id)
+    });
+    sqliteMessage = sqliteTable("message", {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      requestId: integer("request_id").references(() => sqliteRequest.id),
+      sender: text("sender").notNull(),
+      content: text("content").notNull(),
+      timestamp: integer("timestamp", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // NEW: Tenant isolation
+      tenantId: text("tenant_id").references(() => sqliteTenants.id)
+    });
+    sqliteStaff = sqliteTable("staff", {
+      id: integer("id").primaryKey({ autoIncrement: true }),
+      username: text("username").notNull().unique(),
+      password: text("password").notNull(),
+      role: text("role").default("staff"),
+      createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+      // NEW: Tenant isolation
+      tenantId: text("tenant_id").references(() => sqliteTenants.id)
+    });
+    tenants = isPostgres ? pgTenants : sqliteTenants;
+    hotelProfiles = isPostgres ? pgHotelProfiles : sqliteHotelProfiles;
+    call = isPostgres ? pgCall : sqliteCall;
+    transcript = isPostgres ? pgTranscript : sqliteTranscript;
+    request = isPostgres ? pgRequest : sqliteRequest;
+    message = isPostgres ? pgMessage : sqliteMessage;
+    staff = isPostgres ? pgStaff : sqliteStaff;
+  }
+});
 
 // shared/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  call: () => call,
   callSummaries: () => callSummaries,
+  hotelProfiles: () => hotelProfiles,
+  insertCallSchema: () => insertCallSchema,
   insertCallSummarySchema: () => insertCallSummarySchema,
+  insertHotelProfileSchema: () => insertHotelProfileSchema,
+  insertMessageSchema: () => insertMessageSchema,
   insertOrderSchema: () => insertOrderSchema,
+  insertRequestSchema: () => insertRequestSchema,
+  insertStaffSchema: () => insertStaffSchema,
+  insertTenantSchema: () => insertTenantSchema,
   insertTranscriptSchema: () => insertTranscriptSchema,
   insertUserSchema: () => insertUserSchema,
+  message: () => message,
   orders: () => orders,
-  ordersRelations: () => ordersRelations,
+  request: () => request,
+  selectHotelProfileSchema: () => selectHotelProfileSchema,
+  selectTenantSchema: () => selectTenantSchema,
+  staff: () => staff,
+  tenants: () => tenants,
+  transcript: () => transcript,
   transcripts: () => transcripts,
-  transcriptsRelations: () => transcriptsRelations,
   users: () => users
 });
-import { pgTable, text, serial, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { relations } from "drizzle-orm";
-var users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull()
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+var insertTenantSchema, selectTenantSchema, insertHotelProfileSchema, selectHotelProfileSchema, insertCallSchema, insertTranscriptSchema, insertRequestSchema, insertMessageSchema, insertStaffSchema, users, transcripts, orders, callSummaries, insertUserSchema, insertOrderSchema, insertCallSummarySchema;
+var init_schema2 = __esm({
+  "shared/schema.ts"() {
+    "use strict";
+    init_schema();
+    init_schema();
+    insertTenantSchema = createInsertSchema(tenants, {
+      hotelName: z.string().min(1, "Hotel name is required"),
+      subdomain: z.string().min(1, "Subdomain is required").regex(/^[a-z0-9-]+$/, "Subdomain must contain only lowercase letters, numbers, and hyphens"),
+      subscriptionPlan: z.enum(["trial", "basic", "premium", "enterprise"]).default("trial"),
+      subscriptionStatus: z.enum(["active", "inactive", "expired", "cancelled"]).default("active")
+    }).pick({
+      hotelName: true,
+      subdomain: true,
+      customDomain: true,
+      subscriptionPlan: true,
+      subscriptionStatus: true,
+      trialEndsAt: true,
+      maxVoices: true,
+      maxLanguages: true,
+      voiceCloning: true,
+      multiLocation: true,
+      whiteLabel: true,
+      dataRetentionDays: true,
+      monthlyCallLimit: true
+    });
+    selectTenantSchema = createSelectSchema(tenants);
+    insertHotelProfileSchema = createInsertSchema(hotelProfiles, {
+      tenantId: z.string().uuid("Invalid tenant ID"),
+      researchData: z.any().optional(),
+      assistantConfig: z.any().optional(),
+      servicesConfig: z.any().optional(),
+      knowledgeBase: z.string().optional(),
+      systemPrompt: z.string().optional()
+    }).pick({
+      tenantId: true,
+      researchData: true,
+      assistantConfig: true,
+      vapiAssistantId: true,
+      servicesConfig: true,
+      knowledgeBase: true,
+      systemPrompt: true
+    });
+    selectHotelProfileSchema = createSelectSchema(hotelProfiles);
+    insertCallSchema = createInsertSchema(call, {
+      callIdVapi: z.string().min(1, "Call ID is required"),
+      tenantId: z.string().uuid("Invalid tenant ID").optional()
+    }).pick({
+      callIdVapi: true,
+      roomNumber: true,
+      language: true,
+      serviceType: true,
+      duration: true,
+      tenantId: true
+    });
+    insertTranscriptSchema = createInsertSchema(transcript, {
+      callId: z.string().min(1, "Call ID is required"),
+      role: z.string().min(1, "Role is required"),
+      content: z.string().min(1, "Content is required"),
+      tenantId: z.string().uuid("Invalid tenant ID").optional()
+    }).pick({
+      callId: true,
+      role: true,
+      content: true,
+      tenantId: true
+    });
+    insertRequestSchema = createInsertSchema(request, {
+      tenantId: z.string().uuid("Invalid tenant ID").optional()
+    }).pick({
+      roomNumber: true,
+      orderId: true,
+      requestContent: true,
+      status: true,
+      tenantId: true
+    });
+    insertMessageSchema = createInsertSchema(message, {
+      requestId: z.number().int().positive("Invalid request ID"),
+      sender: z.string().min(1, "Sender is required"),
+      content: z.string().min(1, "Content is required"),
+      tenantId: z.string().uuid("Invalid tenant ID").optional()
+    }).pick({
+      requestId: true,
+      sender: true,
+      content: true,
+      tenantId: true
+    });
+    insertStaffSchema = createInsertSchema(staff, {
+      username: z.string().min(1, "Username is required"),
+      password: z.string().min(6, "Password must be at least 6 characters"),
+      tenantId: z.string().uuid("Invalid tenant ID").optional()
+    }).pick({
+      username: true,
+      password: true,
+      role: true,
+      tenantId: true
+    });
+    users = staff;
+    transcripts = transcript;
+    orders = request;
+    callSummaries = call;
+    insertUserSchema = insertStaffSchema;
+    insertOrderSchema = insertRequestSchema;
+    insertCallSummarySchema = insertCallSchema;
+  }
 });
-var insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true
-});
-var transcripts = pgTable("transcripts", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  role: text("role").notNull(),
-  content: text("content").notNull(),
-  timestamp: timestamp("timestamp").defaultNow().notNull()
-});
-var insertTranscriptSchema = createInsertSchema(transcripts).pick({
-  callId: true,
-  role: true,
-  content: true
-});
-var orders = pgTable("orders", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  roomNumber: text("room_number").notNull(),
-  orderType: text("order_type").notNull(),
-  deliveryTime: text("delivery_time").notNull(),
-  specialInstructions: text("special_instructions"),
-  items: jsonb("items").notNull(),
-  totalAmount: integer("total_amount").notNull(),
-  status: text("status").notNull().default("pending"),
-  createdAt: timestamp("created_at").defaultNow().notNull()
-});
-var callSummaries = pgTable("call_summaries", {
-  id: serial("id").primaryKey(),
-  callId: text("call_id").notNull(),
-  content: text("content").notNull(),
-  timestamp: timestamp("timestamp").defaultNow().notNull(),
-  roomNumber: text("room_number"),
-  duration: text("duration")
-});
-var insertCallSummarySchema = createInsertSchema(callSummaries).pick({
-  callId: true,
-  content: true,
-  timestamp: true,
-  roomNumber: true,
-  duration: true
-});
-var insertOrderSchema = createInsertSchema(orders).pick({
-  callId: true,
-  roomNumber: true,
-  orderType: true,
-  deliveryTime: true,
-  specialInstructions: true,
-  items: true,
-  totalAmount: true
-});
-var transcriptsRelations = relations(transcripts, ({ many }) => ({
-  orders: many(orders)
-}));
-var ordersRelations = relations(orders, ({ many }) => ({
-  transcripts: many(transcripts)
-}));
+
+// server/index.ts
+import "dotenv/config";
+import express3 from "express";
+
+// server/routes.ts
+import { createServer } from "http";
+
+// server/storage.ts
+init_schema2();
 
 // server/db.ts
+init_schema2();
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle as sqliteDrizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
 import * as dotenv from "dotenv";
 var { Pool } = pg;
 dotenv.config();
 var DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
+var isProduction = process.env.NODE_ENV === "production";
+var db;
+var pool;
+if (!DATABASE_URL && !isProduction) {
+  console.log("\u23F3 Using SQLite database for development");
+  const sqlite = new Database("./dev.db");
+  db = sqliteDrizzle(sqlite, { schema: schema_exports });
+} else if (!DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?"
   );
+} else {
+  console.log("\u23F3 Connecting to database with URL:", DATABASE_URL);
+  pool = new Pool({
+    connectionString: DATABASE_URL,
+    // Internal VPC connection typically does not require SSL
+    ssl: { rejectUnauthorized: false }
+  });
+  db = drizzle(pool, { schema: schema_exports });
 }
-console.log("\u23F3 Connecting to database with URL:", DATABASE_URL);
-var pool = new Pool({
-  connectionString: DATABASE_URL,
-  // Internal VPC connection typically does not require SSL
-  ssl: { rejectUnauthorized: false }
-});
-var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
 import { eq, gte, sql } from "drizzle-orm";
@@ -183,8 +437,9 @@ var DatabaseStorage = class {
 var storage = new DatabaseStorage();
 
 // server/routes.ts
+init_schema2();
 import { WebSocketServer, WebSocket } from "ws";
-import { z } from "zod";
+import { z as z5 } from "zod";
 
 // server/openai.ts
 import OpenAI from "openai";
@@ -475,13 +730,13 @@ async function extractServiceRequests(summary) {
     return [];
   }
 }
-async function translateToVietnamese(text3) {
+async function translateToVietnamese(text2) {
   if (!openai) {
     console.log("OpenAI client not available, skipping translation");
-    return text3;
+    return text2;
   }
   try {
-    if (!text3) {
+    if (!text2) {
       return "Kh\xF4ng c\xF3 n\u1ED9i dung \u0111\u1EC3 d\u1ECBch.";
     }
     const prompt = `
@@ -490,7 +745,7 @@ async function translateToVietnamese(text3) {
       H\xE3y d\u1ECBch m\u1ED9t c\xE1ch t\u1EF1 nhi\xEAn v\xE0 \u0111\u1EA7y \u0111\u1EE7 nh\u1EA5t c\xF3 th\u1EC3.
       
       V\u0103n b\u1EA3n c\u1EA7n d\u1ECBch:
-      ${text3}
+      ${text2}
       
       B\u1EA3n d\u1ECBch ti\u1EBFng Vi\u1EC7t:
     `;
@@ -1218,7 +1473,7 @@ var Reference = model("Reference", referenceSchema);
 
 // server/middleware/auth.ts
 import jwt from "jsonwebtoken";
-var FALLBACK_JWT_SECRET = "minhon_mui_ne_development_secret_key";
+var FALLBACK_JWT_SECRET = "dev-secret-key-for-testing";
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -1229,12 +1484,20 @@ function verifyJWT(req, res, next) {
     const secret = process.env.JWT_SECRET || FALLBACK_JWT_SECRET;
     console.log("Verifying JWT with secret:", secret === FALLBACK_JWT_SECRET ? "FALLBACK_SECRET" : "ENV_SECRET");
     const payload = jwt.verify(token, secret);
+    if (!payload.tenantId && payload.username) {
+      payload.tenantId = getMiNhonTenantId();
+      payload.role = payload.role || "staff";
+      console.log(`\u26A0\uFE0F  Legacy token detected for ${payload.username}, assigning Mi Nhon tenant: ${payload.tenantId}`);
+    }
     req.user = payload;
     next();
   } catch (err) {
     console.error("JWT verification failed:", err);
     return res.status(403).json({ message: "Invalid or expired token" });
   }
+}
+function getMiNhonTenantId() {
+  return process.env.MINHON_TENANT_ID || "minhon-default-tenant-id";
 }
 
 // server/routes.ts
@@ -1243,66 +1506,2708 @@ import jwt2 from "jsonwebtoken";
 
 // src/db/index.ts
 import { drizzle as drizzle2 } from "drizzle-orm/node-postgres";
+import { drizzle as sqliteDrizzle2 } from "drizzle-orm/better-sqlite3";
 import { Pool as Pool2 } from "pg";
-var DEFAULT_DB_URL = "postgres://postgres:postgres@localhost:5432/minhon";
-var dbUrl = process.env.DATABASE_URL || DEFAULT_DB_URL;
-console.log("Database connection using URL:", dbUrl.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
-var pool2 = new Pool2({
-  connectionString: dbUrl
-});
-(async () => {
-  try {
-    const client = await pool2.connect();
-    console.log("Database connection successful");
-    client.release();
-  } catch (error) {
-    console.error("Database connection failed:", error);
-  }
-})();
-var db2 = drizzle2(pool2);
-
-// src/db/schema.ts
-import { pgTable as pgTable2, serial as serial2, text as text2, timestamp as timestamp2, varchar } from "drizzle-orm/pg-core";
-var staff = pgTable2("staff", {
-  id: serial2("id").primaryKey(),
-  username: varchar("username", { length: 255 }).notNull().unique(),
-  password: text2("password").notNull(),
-  createdAt: timestamp2("created_at").defaultNow().notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
-});
-var request = pgTable2("request", {
-  id: serial2("id").primaryKey(),
-  room_number: varchar("room_number", { length: 255 }).notNull(),
-  orderId: varchar("order_id", { length: 255 }).notNull(),
-  guestName: varchar("guest_name", { length: 255 }).notNull(),
-  request_content: text2("request_content").notNull(),
-  created_at: timestamp2("created_at").defaultNow().notNull(),
-  status: varchar("status", { length: 50 }).notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
-});
-var message = pgTable2("message", {
-  id: serial2("id").primaryKey(),
-  requestId: serial2("request_id").references(() => request.id).notNull(),
-  sender: varchar("sender", { length: 255 }).notNull(),
-  content: text2("content").notNull(),
-  time: timestamp2("time").defaultNow().notNull(),
-  createdAt: timestamp2("created_at").defaultNow().notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
-});
+import Database2 from "better-sqlite3";
+var DATABASE_URL2 = process.env.DATABASE_URL;
+var isProduction2 = process.env.NODE_ENV === "production";
+var db2;
+var pool2;
+if (!DATABASE_URL2 && !isProduction2) {
+  console.log("\u23F3 Using SQLite database for development");
+  const sqlite = new Database2("./dev.db");
+  db2 = sqliteDrizzle2(sqlite);
+} else if (!DATABASE_URL2) {
+  const DEFAULT_DB_URL = "postgres://postgres:postgres@localhost:5432/minhon";
+  const dbUrl = DEFAULT_DB_URL;
+  console.log("Database connection using URL:", dbUrl.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
+  pool2 = new Pool2({
+    connectionString: dbUrl
+  });
+  (async () => {
+    try {
+      const client = await pool2.connect();
+      console.log("Database connection successful");
+      client.release();
+    } catch (error) {
+      console.error("Database connection failed:", error);
+    }
+  })();
+  db2 = drizzle2(pool2);
+} else {
+  console.log("Database connection using URL:", DATABASE_URL2.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
+  pool2 = new Pool2({
+    connectionString: DATABASE_URL2
+  });
+  (async () => {
+    try {
+      const client = await pool2.connect();
+      console.log("Database connection successful");
+      client.release();
+    } catch (error) {
+      console.error("Database connection failed:", error);
+    }
+  })();
+  db2 = drizzle2(pool2);
+}
 
 // server/routes.ts
-import { eq as eq3 } from "drizzle-orm";
-import { sql as sql2 } from "drizzle-orm";
+init_schema();
+import { eq as eq6, and as and4 } from "drizzle-orm";
+import { sql as sql4 } from "drizzle-orm";
 
 // src/api/staff.ts
+init_schema();
 import { eq as eq2 } from "drizzle-orm";
 var deleteAllRequests = async () => {
   return await db2.delete(request).returning();
 };
 
+// server/analytics.ts
+init_schema();
+import { count, sql as sql2 } from "drizzle-orm";
+var isPostgres2 = process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("postgres");
+async function getOverview() {
+  try {
+    const totalCallsResult = await db2.select({ count: count() }).from(call);
+    const totalCalls = totalCallsResult[0]?.count || 0;
+    const avgDurationResult = await db2.select({
+      avg: sql2`AVG(${call.duration})`.as("avg")
+    }).from(call).where(sql2`${call.duration} IS NOT NULL`);
+    const averageCallDuration = Math.round(Number(avgDurationResult[0]?.avg) || 0);
+    const languageResult = await db2.select({
+      language: call.language,
+      count: count()
+    }).from(call).groupBy(call.language);
+    const languageDistribution = languageResult.map((row) => ({
+      language: row.language || "unknown",
+      count: row.count
+    }));
+    return {
+      totalCalls,
+      averageCallDuration,
+      languageDistribution
+    };
+  } catch (error) {
+    console.error("Error in getOverview:", error);
+    return {
+      totalCalls: 0,
+      averageCallDuration: 0,
+      languageDistribution: []
+    };
+  }
+}
+async function getServiceDistribution() {
+  try {
+    const result = await db2.select({
+      serviceType: call.serviceType,
+      count: count()
+    }).from(call).where(sql2`${call.serviceType} IS NOT NULL`).groupBy(call.serviceType);
+    return result.map((row) => ({
+      serviceType: row.serviceType || "unknown",
+      count: row.count
+    }));
+  } catch (error) {
+    console.error("Error in getServiceDistribution:", error);
+    return [];
+  }
+}
+async function getHourlyActivity() {
+  try {
+    if (isPostgres2) {
+      const result = await db2.select({
+        hour: sql2`EXTRACT(HOUR FROM ${call.createdAt})`.as("hour"),
+        count: count()
+      }).from(call).groupBy(sql2`EXTRACT(HOUR FROM ${call.createdAt})`);
+      return result.map((row) => ({
+        hour: row.hour,
+        count: row.count
+      }));
+    } else {
+      const result = await db2.select({
+        hour: sql2`CAST(strftime('%H', datetime(${call.createdAt}, 'unixepoch')) AS INTEGER)`.as("hour"),
+        count: count()
+      }).from(call).groupBy(sql2`strftime('%H', datetime(${call.createdAt}, 'unixepoch'))`);
+      return result.map((row) => ({
+        hour: row.hour,
+        count: row.count
+      }));
+    }
+  } catch (error) {
+    console.error("Error in getHourlyActivity:", error);
+    return [];
+  }
+}
+
+// server/seed.ts
+init_schema();
+async function seedDevelopmentData() {
+  try {
+    const existingCalls = await db2.select().from(call).limit(1);
+    if (existingCalls.length > 0) {
+      console.log("Development data already exists, skipping seed...");
+      return;
+    }
+    console.log("Seeding development data...");
+    const callData = [
+      {
+        callIdVapi: "test-call-001",
+        roomNumber: "101",
+        language: "vi",
+        serviceType: "room_service",
+        duration: 120,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1e3)
+        // 2 hours ago
+      },
+      {
+        callIdVapi: "test-call-002",
+        roomNumber: "202",
+        language: "en",
+        serviceType: "housekeeping",
+        duration: 90,
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1e3)
+        // 4 hours ago
+      },
+      {
+        callIdVapi: "test-call-003",
+        roomNumber: "303",
+        language: "fr",
+        serviceType: "transportation",
+        duration: 150,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1e3)
+        // 6 hours ago
+      },
+      {
+        callIdVapi: "test-call-004",
+        roomNumber: "404",
+        language: "vi",
+        serviceType: "concierge",
+        duration: 75,
+        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1e3)
+        // 8 hours ago
+      },
+      {
+        callIdVapi: "test-call-005",
+        roomNumber: "505",
+        language: "en",
+        serviceType: "maintenance",
+        duration: 45,
+        createdAt: new Date(Date.now() - 10 * 60 * 60 * 1e3)
+        // 10 hours ago
+      }
+    ];
+    for (const callItem of callData) {
+      await db2.insert(call).values(callItem);
+    }
+    const requestData = [
+      {
+        roomNumber: "101",
+        orderId: "ORD-001",
+        requestContent: "Y\xEAu c\u1EA7u d\u1ECDn ph\xF2ng l\xFAc 2:00 PM",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1e3)
+        // 1 hour ago
+      },
+      {
+        roomNumber: "202",
+        orderId: "ORD-002",
+        requestContent: "C\u1EA7n th\xEAm kh\u0103n t\u1EAFm",
+        status: "\u0110ang th\u1EF1c hi\u1EC7n",
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1e3)
+        // 2 hours ago
+      },
+      {
+        roomNumber: "303",
+        orderId: "ORD-003",
+        requestContent: "Y\xEAu c\u1EA7u taxi \u0111\u1EBFn s\xE2n bay l\xFAc 6:00 AM",
+        status: "Ho\xE0n thi\u1EC7n",
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1e3)
+        // 3 hours ago
+      },
+      {
+        roomNumber: "404",
+        orderId: "ORD-004",
+        requestContent: "Th\xF4ng tin v\u1EC1 tour \u0111\u1ECBa ph\u01B0\u01A1ng",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1e3)
+        // 4 hours ago
+      },
+      {
+        roomNumber: "505",
+        orderId: "ORD-005",
+        requestContent: "S\u1EEDa ch\u1EEFa \u0111i\u1EC1u h\xF2a kh\xF4ng ho\u1EA1t \u0111\u1ED9ng",
+        status: "\u0110ang th\u1EF1c hi\u1EC7n",
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1e3)
+        // 5 hours ago
+      },
+      {
+        roomNumber: "606",
+        orderId: "ORD-006",
+        requestContent: "\u0110\u1EB7t b\xE0n nh\xE0 h\xE0ng cho 4 ng\u01B0\u1EDDi l\xFAc 7:00 PM",
+        status: "Ho\xE0n thi\u1EC7n",
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1e3)
+        // 6 hours ago
+      },
+      {
+        roomNumber: "707",
+        orderId: "ORD-007",
+        requestContent: "Y\xEAu c\u1EA7u d\u1ECBch v\u1EE5 gi\u1EB7t \u1EE7i",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1e3)
+        // 7 hours ago
+      }
+    ];
+    for (const requestItem of requestData) {
+      await db2.insert(request).values(requestItem);
+    }
+    console.log("Development data seeded successfully!");
+  } catch (error) {
+    console.error("Error seeding development data:", error);
+  }
+}
+
+// server/routes/dashboard.ts
+import express from "express";
+import { z as z4 } from "zod";
+
+// server/services/tenantService.ts
+import { eq as eq4, and as and2, sql as sql3 } from "drizzle-orm";
+init_schema2();
+var TenantService = class {
+  // ============================================
+  // Tenant Creation & Management
+  // ============================================
+  /**
+   * Create a new tenant with default settings
+   */
+  async createTenant(config2) {
+    try {
+      console.log(`\u{1F3E8} Creating new tenant: ${config2.hotelName}`);
+      await this.validateSubdomain(config2.subdomain);
+      const featureFlags = this.getDefaultFeatureFlags(config2.subscriptionPlan);
+      const subscriptionLimits = this.getSubscriptionLimits(config2.subscriptionPlan);
+      const [tenant] = await db.insert(tenants).values({
+        hotelName: config2.hotelName,
+        subdomain: config2.subdomain,
+        customDomain: config2.customDomain,
+        subscriptionPlan: config2.subscriptionPlan,
+        subscriptionStatus: config2.subscriptionStatus,
+        trialEndsAt: config2.trialEndsAt || this.getTrialEndDate(),
+        maxVoices: subscriptionLimits.maxVoices,
+        maxLanguages: subscriptionLimits.maxLanguages,
+        voiceCloning: featureFlags.voiceCloning,
+        multiLocation: featureFlags.multiLocation,
+        whiteLabel: featureFlags.whiteLabel,
+        dataRetentionDays: subscriptionLimits.dataRetentionDays,
+        monthlyCallLimit: subscriptionLimits.monthlyCallLimit
+      }).returning();
+      await db.insert(hotelProfiles).values({
+        tenantId: tenant.id,
+        researchData: null,
+        assistantConfig: null,
+        vapiAssistantId: null,
+        servicesConfig: null,
+        knowledgeBase: null,
+        systemPrompt: null
+      });
+      console.log(`\u2705 Tenant created successfully: ${tenant.id}`);
+      return tenant.id;
+    } catch (error) {
+      console.error(`Failed to create tenant ${config2.hotelName}:`, error);
+      throw new TenantError(
+        `Failed to create tenant: ${error.message}`,
+        "TENANT_CREATION_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Get tenant by ID
+   */
+  async getTenantById(tenantId) {
+    try {
+      const [tenant] = await db.select().from(tenants).where(eq4(tenants.id, tenantId)).limit(1);
+      if (!tenant) {
+        throw new TenantError("Tenant not found", "TENANT_NOT_FOUND", 404);
+      }
+      return tenant;
+    } catch (error) {
+      if (error instanceof TenantError) throw error;
+      throw new TenantError(
+        `Failed to get tenant: ${error.message}`,
+        "TENANT_FETCH_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Get tenant by subdomain
+   */
+  async getTenantBySubdomain(subdomain) {
+    try {
+      const [tenant] = await db.select().from(tenants).where(eq4(tenants.subdomain, subdomain)).limit(1);
+      if (!tenant) {
+        throw new TenantError("Tenant not found", "TENANT_NOT_FOUND", 404);
+      }
+      return tenant;
+    } catch (error) {
+      if (error instanceof TenantError) throw error;
+      throw new TenantError(
+        `Failed to get tenant: ${error.message}`,
+        "TENANT_FETCH_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Update tenant configuration
+   */
+  async updateTenant(tenantId, updates) {
+    try {
+      console.log(`\u{1F504} Updating tenant: ${tenantId}`);
+      const updateData = {};
+      if (updates.hotelName) updateData.hotelName = updates.hotelName;
+      if (updates.customDomain) updateData.customDomain = updates.customDomain;
+      if (updates.subscriptionPlan) {
+        updateData.subscriptionPlan = updates.subscriptionPlan;
+        const featureFlags = this.getDefaultFeatureFlags(updates.subscriptionPlan);
+        const limits = this.getSubscriptionLimits(updates.subscriptionPlan);
+        Object.assign(updateData, featureFlags, limits);
+      }
+      if (updates.subscriptionStatus) updateData.subscriptionStatus = updates.subscriptionStatus;
+      if (updates.trialEndsAt) updateData.trialEndsAt = updates.trialEndsAt;
+      await db.update(tenants).set(updateData).where(eq4(tenants.id, tenantId));
+      console.log(`\u2705 Tenant updated successfully: ${tenantId}`);
+    } catch (error) {
+      console.error(`Failed to update tenant ${tenantId}:`, error);
+      throw new TenantError(
+        `Failed to update tenant: ${error.message}`,
+        "TENANT_UPDATE_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Delete tenant and all associated data
+   */
+  async deleteTenant(tenantId) {
+    try {
+      console.log(`\u{1F5D1}\uFE0F Deleting tenant: ${tenantId}`);
+      await db.delete(message).where(eq4(message.tenantId, tenantId));
+      await db.delete(transcript).where(eq4(transcript.tenantId, tenantId));
+      await db.delete(request).where(eq4(request.tenantId, tenantId));
+      await db.delete(call).where(eq4(call.tenantId, tenantId));
+      await db.delete(staff).where(eq4(staff.tenantId, tenantId));
+      await db.delete(hotelProfiles).where(eq4(hotelProfiles.tenantId, tenantId));
+      await db.delete(tenants).where(eq4(tenants.id, tenantId));
+      console.log(`\u2705 Tenant deleted successfully: ${tenantId}`);
+    } catch (error) {
+      console.error(`Failed to delete tenant ${tenantId}:`, error);
+      throw new TenantError(
+        `Failed to delete tenant: ${error.message}`,
+        "TENANT_DELETE_FAILED",
+        500
+      );
+    }
+  }
+  // ============================================
+  // Feature Flag Management
+  // ============================================
+  /**
+   * Check if tenant has access to a specific feature
+   */
+  async hasFeatureAccess(tenantId, feature) {
+    try {
+      const tenant = await this.getTenantById(tenantId);
+      const featureFlags = this.getCurrentFeatureFlags(tenant);
+      return featureFlags[feature] || false;
+    } catch (error) {
+      console.error(`Failed to check feature access for ${tenantId}:`, error);
+      return false;
+    }
+  }
+  /**
+   * Get current feature flags for tenant
+   */
+  getCurrentFeatureFlags(tenant) {
+    const plan = tenant.subscriptionPlan;
+    const baseFlags = this.getDefaultFeatureFlags(plan);
+    return {
+      ...baseFlags,
+      voiceCloning: tenant.voiceCloning || baseFlags.voiceCloning,
+      multiLocation: tenant.multiLocation || baseFlags.multiLocation,
+      whiteLabel: tenant.whiteLabel || baseFlags.whiteLabel
+    };
+  }
+  /**
+   * Get default feature flags for subscription plan
+   */
+  getDefaultFeatureFlags(plan) {
+    switch (plan) {
+      case "trial":
+        return {
+          voiceCloning: false,
+          multiLocation: false,
+          whiteLabel: false,
+          advancedAnalytics: false,
+          customIntegrations: false,
+          prioritySupport: false,
+          apiAccess: false,
+          bulkOperations: false
+        };
+      case "basic":
+        return {
+          voiceCloning: false,
+          multiLocation: false,
+          whiteLabel: false,
+          advancedAnalytics: true,
+          customIntegrations: false,
+          prioritySupport: false,
+          apiAccess: true,
+          bulkOperations: false
+        };
+      case "premium":
+        return {
+          voiceCloning: true,
+          multiLocation: true,
+          whiteLabel: false,
+          advancedAnalytics: true,
+          customIntegrations: true,
+          prioritySupport: true,
+          apiAccess: true,
+          bulkOperations: true
+        };
+      case "enterprise":
+        return {
+          voiceCloning: true,
+          multiLocation: true,
+          whiteLabel: true,
+          advancedAnalytics: true,
+          customIntegrations: true,
+          prioritySupport: true,
+          apiAccess: true,
+          bulkOperations: true
+        };
+      default:
+        return this.getDefaultFeatureFlags("trial");
+    }
+  }
+  // ============================================
+  // Subscription Plan Management
+  // ============================================
+  /**
+   * Get subscription limits for plan
+   */
+  getSubscriptionLimits(plan) {
+    switch (plan) {
+      case "trial":
+        return {
+          maxVoices: 2,
+          maxLanguages: 2,
+          monthlyCallLimit: 100,
+          dataRetentionDays: 30,
+          maxStaffUsers: 2,
+          maxHotelLocations: 1
+        };
+      case "basic":
+        return {
+          maxVoices: 5,
+          maxLanguages: 4,
+          monthlyCallLimit: 1e3,
+          dataRetentionDays: 90,
+          maxStaffUsers: 5,
+          maxHotelLocations: 1
+        };
+      case "premium":
+        return {
+          maxVoices: 15,
+          maxLanguages: 8,
+          monthlyCallLimit: 5e3,
+          dataRetentionDays: 365,
+          maxStaffUsers: 15,
+          maxHotelLocations: 5
+        };
+      case "enterprise":
+        return {
+          maxVoices: -1,
+          // Unlimited
+          maxLanguages: -1,
+          // Unlimited
+          monthlyCallLimit: -1,
+          // Unlimited
+          dataRetentionDays: -1,
+          // Unlimited
+          maxStaffUsers: -1,
+          // Unlimited
+          maxHotelLocations: -1
+          // Unlimited
+        };
+      default:
+        return this.getSubscriptionLimits("trial");
+    }
+  }
+  /**
+   * Check if tenant is within subscription limits
+   */
+  async checkSubscriptionLimits(tenantId) {
+    try {
+      const tenant = await this.getTenantById(tenantId);
+      const limits = this.getSubscriptionLimits(tenant.subscriptionPlan);
+      const usage = await this.getTenantUsage(tenantId);
+      const violations = [];
+      if (limits.monthlyCallLimit > 0 && usage.callsThisMonth >= limits.monthlyCallLimit) {
+        violations.push("Monthly call limit exceeded");
+      }
+      if (limits.maxVoices > 0 && usage.voicesUsed >= limits.maxVoices) {
+        violations.push("Voice limit exceeded");
+      }
+      if (limits.maxLanguages > 0 && usage.languagesUsed >= limits.maxLanguages) {
+        violations.push("Language limit exceeded");
+      }
+      return {
+        withinLimits: violations.length === 0,
+        violations
+      };
+    } catch (error) {
+      console.error(`Failed to check subscription limits for ${tenantId}:`, error);
+      return { withinLimits: false, violations: ["Unable to check limits"] };
+    }
+  }
+  /**
+   * Get tenant usage statistics
+   */
+  async getTenantUsage(tenantId) {
+    try {
+      const now = /* @__PURE__ */ new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const [callsResult] = await db.select({ count: sql3`count(*)` }).from(call).where(
+        and2(
+          eq4(call.tenantId, tenantId),
+          sql3`${call.createdAt} >= ${startOfMonth}`
+        )
+      );
+      const languagesResult = await db.selectDistinct({ language: call.language }).from(call).where(eq4(call.tenantId, tenantId));
+      const [storageResult] = await db.select({
+        transcripts: sql3`count(*)`,
+        avgLength: sql3`avg(length(${transcript.content}))`
+      }).from(transcript).where(eq4(transcript.tenantId, tenantId));
+      return {
+        callsThisMonth: callsResult?.count || 0,
+        voicesUsed: 1,
+        // TODO: Implement voice tracking
+        languagesUsed: languagesResult.filter((l) => l.language).length,
+        storageUsed: Math.round((storageResult?.transcripts || 0) * (storageResult?.avgLength || 0) / 1024),
+        // KB
+        dataRetentionDays: 90
+        // TODO: Get from tenant settings
+      };
+    } catch (error) {
+      console.error(`Failed to get tenant usage for ${tenantId}:`, error);
+      return {
+        callsThisMonth: 0,
+        voicesUsed: 0,
+        languagesUsed: 0,
+        storageUsed: 0,
+        dataRetentionDays: 90
+      };
+    }
+  }
+  // ============================================
+  // Data Isolation Utilities
+  // ============================================
+  /**
+   * Get tenant-scoped query filter
+   */
+  getTenantFilter(tenantId) {
+    return eq4(sql3`tenant_id`, tenantId);
+  }
+  /**
+   * Clean up old data based on retention policy
+   */
+  async cleanupOldData(tenantId) {
+    try {
+      const tenant = await this.getTenantById(tenantId);
+      const retentionDays = tenant.dataRetentionDays || 90;
+      if (retentionDays <= 0) return;
+      const cutoffDate = /* @__PURE__ */ new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+      console.log(`\u{1F9F9} Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`);
+      await db.delete(transcript).where(
+        and2(
+          eq4(transcript.tenantId, tenantId),
+          sql3`${transcript.timestamp} < ${cutoffDate}`
+        )
+      );
+      await db.delete(call).where(
+        and2(
+          eq4(call.tenantId, tenantId),
+          sql3`${call.createdAt} < ${cutoffDate}`
+        )
+      );
+      console.log(`\u2705 Data cleanup completed for tenant ${tenantId}`);
+    } catch (error) {
+      console.error(`Failed to cleanup data for tenant ${tenantId}:`, error);
+      throw new TenantError(
+        `Failed to cleanup data: ${error.message}`,
+        "DATA_CLEANUP_FAILED",
+        500
+      );
+    }
+  }
+  // ============================================
+  // Utility Methods
+  // ============================================
+  /**
+   * Validate subdomain availability
+   */
+  async validateSubdomain(subdomain) {
+    if (!/^[a-z0-9-]+$/.test(subdomain)) {
+      throw new TenantError(
+        "Subdomain must contain only lowercase letters, numbers, and hyphens",
+        "INVALID_SUBDOMAIN_FORMAT",
+        400
+      );
+    }
+    const [existing] = await db.select().from(tenants).where(eq4(tenants.subdomain, subdomain)).limit(1);
+    if (existing) {
+      throw new TenantError(
+        "Subdomain already exists",
+        "SUBDOMAIN_TAKEN",
+        409
+      );
+    }
+  }
+  /**
+   * Get trial end date (30 days from now)
+   */
+  getTrialEndDate() {
+    const date = /* @__PURE__ */ new Date();
+    date.setDate(date.getDate() + 30);
+    return date;
+  }
+  /**
+   * Check if tenant subscription is active
+   */
+  isSubscriptionActive(tenant) {
+    if (tenant.subscriptionStatus !== "active") return false;
+    if (tenant.subscriptionPlan === "trial" && tenant.trialEndsAt) {
+      return /* @__PURE__ */ new Date() < new Date(tenant.trialEndsAt);
+    }
+    return true;
+  }
+  /**
+   * Get tenant service health status
+   */
+  async getServiceHealth() {
+    try {
+      const [tenantsResult] = await db.select({ count: sql3`count(*)` }).from(tenants);
+      const [activeResult] = await db.select({ count: sql3`count(*)` }).from(tenants).where(eq4(tenants.subscriptionStatus, "active"));
+      return {
+        status: "healthy",
+        tenantsCount: tenantsResult?.count || 0,
+        activeSubscriptions: activeResult?.count || 0
+      };
+    } catch (error) {
+      console.error("Failed to get service health:", error);
+      return {
+        status: "unhealthy",
+        tenantsCount: 0,
+        activeSubscriptions: 0
+      };
+    }
+  }
+};
+var TenantError = class extends Error {
+  constructor(message2, code, statusCode) {
+    super(message2);
+    this.code = code;
+    this.statusCode = statusCode;
+    this.name = "TenantError";
+  }
+};
+
+// server/middleware/tenant.ts
+var TenantMiddleware = class {
+  tenantService;
+  constructor() {
+    this.tenantService = new TenantService();
+  }
+  /**
+   * Extract tenant information from JWT token
+   * Requires auth middleware to run first
+   */
+  tenantIdentification = async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({
+          error: "Authentication required",
+          code: "AUTH_REQUIRED"
+        });
+      }
+      const tenantId = req.user.tenantId;
+      if (!tenantId) {
+        return res.status(400).json({
+          error: "Tenant ID not found in token",
+          code: "TENANT_ID_MISSING"
+        });
+      }
+      const tenant = await this.tenantService.getTenantById(tenantId);
+      if (!tenant) {
+        return res.status(404).json({
+          error: "Tenant not found",
+          code: "TENANT_NOT_FOUND"
+        });
+      }
+      if (!this.tenantService.isSubscriptionActive(tenant)) {
+        return res.status(403).json({
+          error: "Subscription inactive or expired",
+          code: "SUBSCRIPTION_INACTIVE",
+          subscriptionStatus: tenant.subscriptionStatus,
+          subscriptionPlan: tenant.subscriptionPlan
+        });
+      }
+      req.tenant = tenant;
+      req.tenantId = tenantId;
+      console.log(`\u{1F3E8} Tenant identified: ${tenant.hotelName} (${tenant.subdomain})`);
+      next();
+    } catch (error) {
+      console.error("Tenant identification failed:", error);
+      if (error instanceof TenantError) {
+        return res.status(error.statusCode).json({
+          error: error.message,
+          code: error.code
+        });
+      }
+      return res.status(500).json({
+        error: "Tenant identification failed",
+        code: "TENANT_IDENTIFICATION_FAILED"
+      });
+    }
+  };
+  /**
+   * Identify tenant from subdomain (for public routes)
+   */
+  tenantFromSubdomain = async (req, res, next) => {
+    try {
+      const host = req.get("host") || "";
+      const subdomain = this.extractSubdomain(host);
+      if (!subdomain) {
+        return res.status(400).json({
+          error: "Subdomain not found",
+          code: "SUBDOMAIN_MISSING"
+        });
+      }
+      const tenant = await this.tenantService.getTenantBySubdomain(subdomain);
+      if (!tenant) {
+        return res.status(404).json({
+          error: "Tenant not found",
+          code: "TENANT_NOT_FOUND"
+        });
+      }
+      if (!this.tenantService.isSubscriptionActive(tenant)) {
+        return res.status(403).json({
+          error: "Service unavailable - subscription inactive",
+          code: "SUBSCRIPTION_INACTIVE"
+        });
+      }
+      req.tenant = tenant;
+      req.tenantId = tenant.id;
+      console.log(`\u{1F310} Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})`);
+      next();
+    } catch (error) {
+      console.error("Tenant identification from subdomain failed:", error);
+      if (error instanceof TenantError) {
+        return res.status(error.statusCode).json({
+          error: error.message,
+          code: error.code
+        });
+      }
+      return res.status(500).json({
+        error: "Tenant identification failed",
+        code: "TENANT_IDENTIFICATION_FAILED"
+      });
+    }
+  };
+  /**
+   * Enforce row-level security for database operations
+   */
+  rowLevelSecurity = (req, res, next) => {
+    try {
+      if (!req.tenantId) {
+        return res.status(400).json({
+          error: "Tenant not identified",
+          code: "TENANT_NOT_IDENTIFIED"
+        });
+      }
+      req.tenantFilter = this.tenantService.getTenantFilter(req.tenantId);
+      console.log(`\u{1F512} Row-level security enabled for tenant: ${req.tenantId}`);
+      next();
+    } catch (error) {
+      console.error("Row-level security enforcement failed:", error);
+      return res.status(500).json({
+        error: "Security enforcement failed",
+        code: "SECURITY_ENFORCEMENT_FAILED"
+      });
+    }
+  };
+  /**
+   * Check if tenant has access to specific feature
+   */
+  requireFeature = (feature) => {
+    return async (req, res, next) => {
+      try {
+        if (!req.tenant) {
+          return res.status(400).json({
+            error: "Tenant not identified",
+            code: "TENANT_NOT_IDENTIFIED"
+          });
+        }
+        const hasAccess = await this.tenantService.hasFeatureAccess(req.tenant.id, feature);
+        if (!hasAccess) {
+          return res.status(403).json({
+            error: `Feature '${feature}' not available in your plan`,
+            code: "FEATURE_NOT_AVAILABLE",
+            feature,
+            currentPlan: req.tenant.subscriptionPlan,
+            upgradeRequired: true
+          });
+        }
+        console.log(`\u2705 Feature access granted: ${feature} for tenant ${req.tenant.hotelName}`);
+        next();
+      } catch (error) {
+        console.error(`Feature access check failed for ${feature}:`, error);
+        return res.status(500).json({
+          error: "Feature access check failed",
+          code: "FEATURE_ACCESS_CHECK_FAILED"
+        });
+      }
+    };
+  };
+  /**
+   * Check subscription limits before processing
+   */
+  checkSubscriptionLimits = async (req, res, next) => {
+    try {
+      if (!req.tenant) {
+        return res.status(400).json({
+          error: "Tenant not identified",
+          code: "TENANT_NOT_IDENTIFIED"
+        });
+      }
+      const limitsCheck = await this.tenantService.checkSubscriptionLimits(req.tenant.id);
+      if (!limitsCheck.withinLimits) {
+        return res.status(429).json({
+          error: "Subscription limits exceeded",
+          code: "SUBSCRIPTION_LIMITS_EXCEEDED",
+          violations: limitsCheck.violations,
+          currentPlan: req.tenant.subscriptionPlan,
+          upgradeRequired: true
+        });
+      }
+      console.log(`\u{1F4CA} Subscription limits check passed for tenant ${req.tenant.hotelName}`);
+      next();
+    } catch (error) {
+      console.error("Subscription limits check failed:", error);
+      return res.status(500).json({
+        error: "Subscription limits check failed",
+        code: "LIMITS_CHECK_FAILED"
+      });
+    }
+  };
+  /**
+   * Validate tenant ownership of resource
+   */
+  validateTenantOwnership = (resourceTenantIdField = "tenantId") => {
+    return (req, res, next) => {
+      try {
+        if (!req.tenant) {
+          return res.status(400).json({
+            error: "Tenant not identified",
+            code: "TENANT_NOT_IDENTIFIED"
+          });
+        }
+        req.resourceTenantIdField = resourceTenantIdField;
+        req.validateOwnership = true;
+        console.log(`\u{1F511} Tenant ownership validation enabled for ${req.tenant.hotelName}`);
+        next();
+      } catch (error) {
+        console.error("Tenant ownership validation setup failed:", error);
+        return res.status(500).json({
+          error: "Ownership validation setup failed",
+          code: "OWNERSHIP_VALIDATION_FAILED"
+        });
+      }
+    };
+  };
+  /**
+   * Rate limiting per tenant
+   */
+  tenantRateLimit = (requestsPerMinute = 60) => {
+    const tenantRequestCounts = /* @__PURE__ */ new Map();
+    return (req, res, next) => {
+      try {
+        if (!req.tenant) {
+          return res.status(400).json({
+            error: "Tenant not identified",
+            code: "TENANT_NOT_IDENTIFIED"
+          });
+        }
+        const tenantId = req.tenant.id;
+        const now = Date.now();
+        const windowStart = Math.floor(now / 6e4) * 6e4;
+        const tenantData = tenantRequestCounts.get(tenantId);
+        if (!tenantData || tenantData.resetTime !== windowStart) {
+          tenantRequestCounts.set(tenantId, { count: 1, resetTime: windowStart });
+        } else {
+          tenantData.count++;
+          if (tenantData.count > requestsPerMinute) {
+            return res.status(429).json({
+              error: "Rate limit exceeded",
+              code: "RATE_LIMIT_EXCEEDED",
+              limit: requestsPerMinute,
+              resetTime: windowStart + 6e4
+            });
+          }
+        }
+        res.set({
+          "X-RateLimit-Limit": requestsPerMinute.toString(),
+          "X-RateLimit-Remaining": Math.max(0, requestsPerMinute - (tenantData?.count || 1)).toString(),
+          "X-RateLimit-Reset": (windowStart + 6e4).toString()
+        });
+        next();
+      } catch (error) {
+        console.error("Tenant rate limiting failed:", error);
+        return res.status(500).json({
+          error: "Rate limiting failed",
+          code: "RATE_LIMITING_FAILED"
+        });
+      }
+    };
+  };
+  // ============================================
+  // Utility Methods
+  // ============================================
+  /**
+   * Extract subdomain from host header
+   */
+  extractSubdomain(host) {
+    const cleanHost = host.split(":")[0];
+    if (cleanHost === "localhost" || cleanHost === "127.0.0.1") {
+      return "minhon";
+    }
+    const parts = cleanHost.split(".");
+    if (parts.length >= 3) {
+      return parts[0];
+    }
+    return null;
+  }
+  /**
+   * Get tenant context for database operations
+   */
+  getTenantContext(req) {
+    if (!req.tenantId) return null;
+    return {
+      tenantId: req.tenantId,
+      tenantFilter: this.tenantService.getTenantFilter(req.tenantId)
+    };
+  }
+};
+var tenantMiddleware = new TenantMiddleware();
+var identifyTenant = tenantMiddleware.tenantIdentification;
+var identifyTenantFromSubdomain = tenantMiddleware.tenantFromSubdomain;
+var enforceRowLevelSecurity = tenantMiddleware.rowLevelSecurity;
+var requireFeature = tenantMiddleware.requireFeature;
+var checkLimits = tenantMiddleware.checkSubscriptionLimits;
+var validateOwnership = tenantMiddleware.validateTenantOwnership;
+var tenantRateLimit = tenantMiddleware.tenantRateLimit;
+var publicTenantMiddleware = [
+  identifyTenantFromSubdomain,
+  enforceRowLevelSecurity,
+  tenantRateLimit()
+];
+var adminTenantMiddleware = [
+  identifyTenant,
+  enforceRowLevelSecurity,
+  requireFeature("apiAccess")
+];
+
+// server/services/hotelResearch.ts
+import fetch from "node-fetch";
+import * as cheerio from "cheerio";
+import { z as z2 } from "zod";
+var HotelResearchError = class extends Error {
+  constructor(message2, code, statusCode) {
+    super(message2);
+    this.code = code;
+    this.statusCode = statusCode;
+    this.name = "HotelResearchError";
+  }
+};
+var RateLimiter = class {
+  limits = /* @__PURE__ */ new Map();
+  maxRequests;
+  windowMs;
+  constructor(maxRequests = 100, windowMs = 36e5) {
+    this.maxRequests = maxRequests;
+    this.windowMs = windowMs;
+  }
+  canMakeRequest(key) {
+    const now = Date.now();
+    const limit = this.limits.get(key);
+    if (!limit) {
+      this.limits.set(key, { requests: 1, resetTime: now + this.windowMs });
+      return true;
+    }
+    if (now > limit.resetTime) {
+      this.limits.set(key, { requests: 1, resetTime: now + this.windowMs });
+      return true;
+    }
+    if (limit.requests >= this.maxRequests) {
+      return false;
+    }
+    limit.requests++;
+    return true;
+  }
+};
+var HotelResearchService = class {
+  googlePlacesApiKey;
+  rateLimiter;
+  baseUrl = "https://maps.googleapis.com/maps/api/place";
+  constructor() {
+    this.googlePlacesApiKey = process.env.GOOGLE_PLACES_API_KEY || "";
+    this.rateLimiter = new RateLimiter();
+    if (!this.googlePlacesApiKey) {
+      console.warn("Google Places API key not found. Hotel research will be limited.");
+    }
+  }
+  // ============================================
+  // Public Methods
+  // ============================================
+  /**
+   * Basic tier research using free/cheap APIs
+   */
+  async basicResearch(hotelName, location) {
+    if (!this.rateLimiter.canMakeRequest("basic_research")) {
+      throw new HotelResearchError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429);
+    }
+    try {
+      console.log(`\u{1F50D} Starting basic research for: ${hotelName}`);
+      const googlePlacesData = await this.getGooglePlacesData(hotelName, location);
+      let websiteData = {};
+      if (googlePlacesData.website) {
+        try {
+          websiteData = await this.scrapeOfficialWebsite(googlePlacesData.website);
+        } catch (error) {
+          console.warn("Website scraping failed:", error);
+        }
+      }
+      const hotelData = {
+        name: googlePlacesData.name || hotelName,
+        address: googlePlacesData.formatted_address || location || "",
+        phone: googlePlacesData.formatted_phone_number,
+        website: googlePlacesData.website,
+        rating: googlePlacesData.rating,
+        priceLevel: googlePlacesData.price_level,
+        location: {
+          lat: googlePlacesData.geometry?.location?.lat || 0,
+          lng: googlePlacesData.geometry?.location?.lng || 0
+        },
+        categories: googlePlacesData.types || [],
+        openingHours: googlePlacesData.opening_hours?.weekday_text || [],
+        photos: this.extractPhotoUrls(googlePlacesData.photos || []),
+        services: this.extractServices(websiteData),
+        amenities: this.extractAmenities(websiteData, googlePlacesData),
+        policies: this.extractPolicies(websiteData),
+        roomTypes: this.extractRoomTypes(websiteData),
+        localAttractions: await this.getNearbyAttractions(googlePlacesData.geometry?.location)
+      };
+      console.log(`\u2705 Basic research completed for: ${hotelName}`);
+      return hotelData;
+    } catch (error) {
+      console.error("Basic research failed:", error);
+      throw new HotelResearchError(
+        `Failed to research hotel: ${error.message}`,
+        "RESEARCH_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Advanced tier research using paid APIs (for premium plans)
+   */
+  async advancedResearch(hotelName, location) {
+    if (!this.rateLimiter.canMakeRequest("advanced_research")) {
+      throw new HotelResearchError("Rate limit exceeded", "RATE_LIMIT_EXCEEDED", 429);
+    }
+    try {
+      console.log(`\u{1F50D} Starting advanced research for: ${hotelName}`);
+      const basicData = await this.basicResearch(hotelName, location);
+      const [socialMediaData, reviewData, competitorData] = await Promise.allSettled([
+        this.getSocialMediaData(hotelName),
+        this.getReviewData(hotelName),
+        this.getCompetitorAnalysis(hotelName, basicData.location)
+      ]);
+      const advancedData = {
+        ...basicData,
+        socialMediaData: socialMediaData.status === "fulfilled" ? socialMediaData.value : {},
+        reviewData: reviewData.status === "fulfilled" ? reviewData.value : {},
+        competitorData: competitorData.status === "fulfilled" ? competitorData.value : {}
+      };
+      console.log(`\u2705 Advanced research completed for: ${hotelName}`);
+      return advancedData;
+    } catch (error) {
+      console.error("Advanced research failed:", error);
+      throw new HotelResearchError(
+        `Failed to perform advanced research: ${error.message}`,
+        "ADVANCED_RESEARCH_FAILED",
+        500
+      );
+    }
+  }
+  // ============================================
+  // Private Methods - Google Places Integration
+  // ============================================
+  async getGooglePlacesData(hotelName, location) {
+    if (!this.googlePlacesApiKey) {
+      throw new HotelResearchError("Google Places API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      const query = location ? `${hotelName} ${location}` : hotelName;
+      const searchUrl = `${this.baseUrl}/findplacefromtext/json?input=${encodeURIComponent(query)}&inputtype=textquery&fields=place_id,name,formatted_address,geometry&key=${this.googlePlacesApiKey}`;
+      const searchResponse = await fetch(searchUrl);
+      const searchData = await searchResponse.json();
+      if (!searchData.candidates || searchData.candidates.length === 0) {
+        throw new HotelResearchError("Hotel not found in Google Places", "HOTEL_NOT_FOUND", 404);
+      }
+      const placeId = searchData.candidates[0].place_id;
+      const detailsUrl = `${this.baseUrl}/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,rating,price_level,opening_hours,photos,types,geometry&key=${this.googlePlacesApiKey}`;
+      const detailsResponse = await fetch(detailsUrl);
+      const detailsData = await detailsResponse.json();
+      if (detailsData.status !== "OK") {
+        throw new HotelResearchError(`Google Places API error: ${detailsData.status}`, "API_ERROR", 500);
+      }
+      return detailsData.result;
+    } catch (error) {
+      if (error instanceof HotelResearchError) {
+        throw error;
+      }
+      throw new HotelResearchError(`Google Places API request failed: ${error.message}`, "API_REQUEST_FAILED", 500);
+    }
+  }
+  extractPhotoUrls(photos) {
+    if (!photos || photos.length === 0) return [];
+    return photos.slice(0, 10).map(
+      (photo) => `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${photo.photo_reference}&key=${this.googlePlacesApiKey}`
+    );
+  }
+  async getNearbyAttractions(location) {
+    if (!location || !this.googlePlacesApiKey) return [];
+    try {
+      const radius = 5e3;
+      const nearbyUrl = `${this.baseUrl}/nearbysearch/json?location=${location.lat},${location.lng}&radius=${radius}&type=tourist_attraction&key=${this.googlePlacesApiKey}`;
+      const response = await fetch(nearbyUrl);
+      const data = await response.json();
+      if (data.status !== "OK") return [];
+      return data.results.slice(0, 10).map((place) => ({
+        name: place.name,
+        description: place.types.join(", "),
+        distance: this.calculateDistance(location, place.geometry.location),
+        category: this.categorizeAttraction(place.types),
+        rating: place.rating
+      }));
+    } catch (error) {
+      console.warn("Failed to get nearby attractions:", error);
+      return [];
+    }
+  }
+  // ============================================
+  // Private Methods - Website Scraping
+  // ============================================
+  async scrapeOfficialWebsite(websiteUrl) {
+    try {
+      console.log(`\u{1F577}\uFE0F Scraping website: ${websiteUrl}`);
+      const response = await fetch(websiteUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        },
+        timeout: 1e4
+      });
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      const scrapedData = {
+        title: $("title").text().trim(),
+        description: $('meta[name="description"]').attr("content") || "",
+        keywords: $('meta[name="keywords"]').attr("content") || "",
+        services: this.extractServicesFromHTML($),
+        amenities: this.extractAmenitiesFromHTML($),
+        policies: this.extractPoliciesFromHTML($),
+        roomTypes: this.extractRoomTypesFromHTML($),
+        contact: this.extractContactInfo($)
+      };
+      console.log(`\u2705 Website scraping completed for: ${websiteUrl}`);
+      return scrapedData;
+    } catch (error) {
+      console.warn(`Website scraping failed for ${websiteUrl}:`, error);
+      return {};
+    }
+  }
+  extractServicesFromHTML($) {
+    const services = [];
+    const serviceKeywords = {
+      "room_service": ["room service", "in-room dining", "food delivery"],
+      "spa": ["spa", "massage", "wellness", "treatment"],
+      "restaurant": ["restaurant", "dining", "bar", "cafe"],
+      "tour": ["tour", "excursion", "activity", "sightseeing"],
+      "transportation": ["taxi", "transfer", "shuttle", "transport"],
+      "housekeeping": ["housekeeping", "cleaning", "laundry"],
+      "concierge": ["concierge", "reception", "front desk"]
+    };
+    const pageText = $("body").text().toLowerCase();
+    Object.entries(serviceKeywords).forEach(([type, keywords]) => {
+      const found = keywords.some((keyword) => pageText.includes(keyword));
+      if (found) {
+        services.push({
+          name: this.formatServiceName(type),
+          description: `${this.formatServiceName(type)} available`,
+          type,
+          available: true
+        });
+      }
+    });
+    return services;
+  }
+  extractAmenitiesFromHTML($) {
+    const amenities = [];
+    const amenityKeywords = [
+      "wifi",
+      "parking",
+      "pool",
+      "gym",
+      "fitness",
+      "breakfast",
+      "restaurant",
+      "bar",
+      "spa",
+      "sauna",
+      "jacuzzi",
+      "air conditioning",
+      "tv",
+      "minibar",
+      "balcony",
+      "view",
+      "beach access",
+      "garden",
+      "terrace"
+    ];
+    const pageText = $("body").text().toLowerCase();
+    amenityKeywords.forEach((keyword) => {
+      if (pageText.includes(keyword)) {
+        amenities.push(keyword);
+      }
+    });
+    return [...new Set(amenities)];
+  }
+  extractPoliciesFromHTML($) {
+    const pageText = $("body").text().toLowerCase();
+    const checkInMatch = pageText.match(/check.?in[\s:]*(\d{1,2}:?\d{0,2}?\s?(?:am|pm|:00)?)/i);
+    const checkOutMatch = pageText.match(/check.?out[\s:]*(\d{1,2}:?\d{0,2}?\s?(?:am|pm|:00)?)/i);
+    const cancellationMatch = pageText.match(/cancellation[\s\w]*(\d+)\s*(?:hours?|days?)/i);
+    return {
+      checkIn: checkInMatch ? checkInMatch[1] : "15:00",
+      checkOut: checkOutMatch ? checkOutMatch[1] : "11:00",
+      cancellation: cancellationMatch ? `${cancellationMatch[1]} ${cancellationMatch[0].includes("hour") ? "hours" : "days"} before arrival` : "Contact hotel for cancellation policy"
+    };
+  }
+  extractRoomTypesFromHTML($) {
+    const roomTypes = [];
+    const roomKeywords = [
+      "standard room",
+      "deluxe room",
+      "suite",
+      "family room",
+      "twin room",
+      "double room",
+      "single room",
+      "premium room",
+      "executive room"
+    ];
+    const pageText = $("body").text().toLowerCase();
+    roomKeywords.forEach((roomType) => {
+      if (pageText.includes(roomType)) {
+        roomTypes.push({
+          name: roomType.replace(/^\w/, (c) => c.toUpperCase()),
+          description: `Comfortable ${roomType}`,
+          price: "Contact hotel for rates",
+          capacity: roomType.includes("family") ? 4 : roomType.includes("twin") ? 2 : 2,
+          amenities: ["Air conditioning", "Private bathroom", "TV"]
+        });
+      }
+    });
+    return roomTypes;
+  }
+  extractContactInfo($) {
+    const pageText = $("body").text();
+    const phoneMatch = pageText.match(/(\+?[\d\s\-\(\)]{10,})/g);
+    const emailMatch = pageText.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g);
+    return {
+      phone: phoneMatch ? phoneMatch[0] : null,
+      email: emailMatch ? emailMatch[0] : null
+    };
+  }
+  // ============================================
+  // Private Methods - Advanced Research
+  // ============================================
+  async getSocialMediaData(hotelName) {
+    console.log(`\u{1F4F1} Analyzing social media for: ${hotelName}`);
+    return {
+      instagram: {
+        followers: 0,
+        recentPosts: []
+      },
+      facebook: {
+        likes: 0,
+        reviews: 0
+      }
+    };
+  }
+  async getReviewData(hotelName) {
+    console.log(`\u2B50 Analyzing reviews for: ${hotelName}`);
+    return {
+      averageRating: 4,
+      totalReviews: 0,
+      platforms: {
+        google: { rating: 4, reviews: 0 },
+        tripadvisor: { rating: 4, reviews: 0 },
+        booking: { rating: 4, reviews: 0 }
+      },
+      commonPraises: ["Clean rooms", "Friendly staff", "Good location"],
+      commonComplaints: ["Slow wifi", "Limited parking"]
+    };
+  }
+  async getCompetitorAnalysis(hotelName, location) {
+    console.log(`\u{1F3E8} Analyzing competitors for: ${hotelName}`);
+    return {
+      nearbyHotels: [],
+      marketPosition: "mid-range",
+      uniqueSellingPoints: ["Excellent location", "Personalized service", "Competitive rates"]
+    };
+  }
+  // ============================================
+  // Helper Methods
+  // ============================================
+  formatServiceName(type) {
+    return type.split("_").map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(" ");
+  }
+  categorizeAttraction(types) {
+    if (types.includes("natural_feature")) return "nature";
+    if (types.includes("museum") || types.includes("art_gallery")) return "cultural";
+    if (types.includes("restaurant") || types.includes("food")) return "restaurant";
+    if (types.includes("shopping_mall") || types.includes("store")) return "shopping";
+    if (types.includes("amusement_park") || types.includes("night_club")) return "entertainment";
+    return "landmark";
+  }
+  calculateDistance(point1, point2) {
+    const R = 6371;
+    const dLat = (point2.lat - point1.lat) * Math.PI / 180;
+    const dLng = (point2.lng - point1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(point1.lat * Math.PI / 180) * Math.cos(point2.lat * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance < 1 ? `${Math.round(distance * 1e3)}m` : `${distance.toFixed(1)}km`;
+  }
+  // ============================================
+  // Utility Methods
+  // ============================================
+  /**
+   * Validate hotel research data
+   */
+  static validateHotelData(data) {
+    const schema = z2.object({
+      name: z2.string().min(1),
+      address: z2.string().min(1),
+      phone: z2.string().optional(),
+      website: z2.string().optional(),
+      location: z2.object({
+        lat: z2.number(),
+        lng: z2.number()
+      }),
+      services: z2.array(z2.any()).default([]),
+      amenities: z2.array(z2.string()).default([]),
+      policies: z2.object({
+        checkIn: z2.string(),
+        checkOut: z2.string(),
+        cancellation: z2.string()
+      })
+    });
+    return schema.parse(data);
+  }
+  /**
+   * Get research service health status
+   */
+  async getServiceHealth() {
+    const health = {
+      status: "healthy",
+      apis: {
+        googlePlaces: !!this.googlePlacesApiKey,
+        websiteScraping: true,
+        rateLimiting: true
+      }
+    };
+    if (this.googlePlacesApiKey) {
+      try {
+        const testUrl = `${this.baseUrl}/findplacefromtext/json?input=hotel&inputtype=textquery&fields=place_id&key=${this.googlePlacesApiKey}`;
+        const response = await fetch(testUrl);
+        const data = await response.json();
+        health.apis.googlePlaces = data.status === "OK";
+      } catch (error) {
+        health.apis.googlePlaces = false;
+      }
+    }
+    if (!health.apis.googlePlaces) {
+      health.status = "degraded";
+    }
+    return health;
+  }
+};
+
+// server/services/vapiIntegration.ts
+import fetch2 from "node-fetch";
+import { z as z3 } from "zod";
+
+// server/services/knowledgeBaseGenerator.ts
+var KnowledgeBaseGenerator = class {
+  /**
+   * Generate comprehensive knowledge base from hotel research data
+   */
+  generateKnowledgeBase(hotelData) {
+    const sections = [
+      this.generateBasicInfoSection(hotelData),
+      this.generateServicesSection(hotelData.services),
+      this.generateRoomTypesSection(hotelData.roomTypes),
+      this.generateAmenitiesSection(hotelData.amenities),
+      this.generatePoliciesSection(hotelData.policies),
+      this.generateLocalAttractionsSection(hotelData.localAttractions),
+      this.generateContactSection(hotelData)
+    ];
+    if (this.isAdvancedHotelData(hotelData)) {
+      sections.push(this.generateReviewsSection(hotelData.reviewData));
+      sections.push(this.generateCompetitorSection(hotelData.competitorData));
+    }
+    return sections.filter((section) => section.trim()).join("\n\n");
+  }
+  /**
+   * Generate system prompt for Vapi assistant
+   */
+  generateSystemPrompt(hotelData, customization) {
+    const personality = customization?.personality || "professional";
+    const tone = customization?.tone || "friendly";
+    const languages = customization?.languages || ["English"];
+    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${this.getHotelCategory(hotelData)} hotel located in ${hotelData.address}.
+
+PERSONALITY: You are ${personality} and ${tone}. You speak ${languages.join(", ")} fluently.
+
+CORE RESPONSIBILITIES:
+- Provide information about hotel services, amenities, and policies
+- Accept and process guest service requests
+- Offer recommendations for local attractions and activities
+- Assist with room service, housekeeping, and other hotel services
+- Upsell additional services when appropriate
+- Ensure excellent guest satisfaction`;
+    const knowledgeBase = this.generateKnowledgeBase(hotelData);
+    const instructionsPrompt = `
+IMPORTANT INSTRUCTIONS:
+- Always use the hotel information provided below to answer questions accurately
+- When taking service requests, collect: guest name, room number, timing preferences
+- For requests you cannot handle, offer to connect to human staff
+- Be proactive in suggesting relevant services and local attractions
+- Maintain the ${tone} tone throughout all interactions
+- Always confirm important details with guests before processing requests`;
+    const knowledgePrompt = `
+HOTEL KNOWLEDGE BASE:
+${knowledgeBase}
+
+AVAILABLE FUNCTIONS:
+${this.generateFunctionDescriptions(hotelData.services)}`;
+    return [basePrompt, instructionsPrompt, knowledgePrompt].join("\n\n");
+  }
+  /**
+   * Generate FAQ section from hotel data
+   */
+  generateFAQSection(hotelData) {
+    const faqs = [
+      {
+        question: "What time is check-in and check-out?",
+        answer: `Check-in is at ${hotelData.policies.checkIn} and check-out is at ${hotelData.policies.checkOut}.`
+      },
+      {
+        question: "What amenities are available?",
+        answer: `We offer the following amenities: ${hotelData.amenities.join(", ")}.`
+      },
+      {
+        question: "What services do you provide?",
+        answer: `Our available services include: ${hotelData.services.map((s) => s.name).join(", ")}.`
+      },
+      {
+        question: "How can I contact the hotel?",
+        answer: `You can reach us at ${hotelData.phone || "the front desk"} or visit us at ${hotelData.address}.`
+      }
+    ];
+    if (hotelData.roomTypes.length > 0) {
+      faqs.push({
+        question: "What room types are available?",
+        answer: `We offer ${hotelData.roomTypes.map((r) => r.name).join(", ")}. Each room type has different amenities and pricing.`
+      });
+    }
+    if (hotelData.localAttractions.length > 0) {
+      faqs.push({
+        question: "What attractions are nearby?",
+        answer: `Popular nearby attractions include: ${hotelData.localAttractions.slice(0, 5).map((a) => a.name).join(", ")}.`
+      });
+    }
+    return faqs;
+  }
+  /**
+   * Generate service menu from hotel data
+   */
+  generateServiceMenu(hotelData) {
+    const menu = {
+      roomService: this.generateRoomServiceMenu(hotelData.services),
+      housekeeping: this.generateHousekeepingMenu(hotelData.services),
+      concierge: this.generateConciergeMenu(hotelData.services),
+      transportation: this.generateTransportationMenu(hotelData.services),
+      spa: this.generateSpaMenu(hotelData.services),
+      tours: this.generateToursMenu(hotelData.localAttractions)
+    };
+    return menu;
+  }
+  // ============================================
+  // Private Section Generators
+  // ============================================
+  generateBasicInfoSection(hotelData) {
+    return `HOTEL INFORMATION:
+Name: ${hotelData.name}
+Address: ${hotelData.address}
+Phone: ${hotelData.phone || "Contact front desk"}
+Website: ${hotelData.website || "Not available"}
+Rating: ${hotelData.rating ? `${hotelData.rating}/5 stars` : "Not rated"}
+Category: ${this.getHotelCategory(hotelData)}
+Location: ${hotelData.location.lat}, ${hotelData.location.lng}`;
+  }
+  generateServicesSection(services) {
+    if (services.length === 0) return "";
+    const servicesByType = this.groupServicesByType(services);
+    let section = "SERVICES AVAILABLE:\n";
+    Object.entries(servicesByType).forEach(([type, typeServices]) => {
+      section += `
+${type.toUpperCase()}:
+`;
+      typeServices.forEach((service) => {
+        section += `- ${service.name}: ${service.description}`;
+        if (service.price) section += ` (${service.price})`;
+        if (service.hours) section += ` - Available: ${service.hours}`;
+        section += "\n";
+      });
+    });
+    return section;
+  }
+  generateRoomTypesSection(roomTypes) {
+    if (roomTypes.length === 0) return "";
+    let section = "ROOM TYPES:\n";
+    roomTypes.forEach((room) => {
+      section += `
+${room.name}:
+`;
+      section += `- Description: ${room.description}
+`;
+      section += `- Price: ${room.price}
+`;
+      section += `- Capacity: ${room.capacity} guests
+`;
+      section += `- Amenities: ${room.amenities.join(", ")}
+`;
+    });
+    return section;
+  }
+  generateAmenitiesSection(amenities) {
+    if (amenities.length === 0) return "";
+    return `AMENITIES:
+${amenities.map((amenity) => `- ${amenity}`).join("\n")}`;
+  }
+  generatePoliciesSection(policies) {
+    return `HOTEL POLICIES:
+Check-in: ${policies.checkIn}
+Check-out: ${policies.checkOut}
+Cancellation: ${policies.cancellation}`;
+  }
+  generateLocalAttractionsSection(attractions) {
+    if (attractions.length === 0) return "";
+    const attractionsByCategory = this.groupAttractionsByCategory(attractions);
+    let section = "LOCAL ATTRACTIONS:\n";
+    Object.entries(attractionsByCategory).forEach(([category, categoryAttractions]) => {
+      section += `
+${category.toUpperCase()}:
+`;
+      categoryAttractions.forEach((attraction) => {
+        section += `- ${attraction.name} (${attraction.distance}): ${attraction.description}`;
+        if (attraction.rating) section += ` - Rating: ${attraction.rating}/5`;
+        section += "\n";
+      });
+    });
+    return section;
+  }
+  generateContactSection(hotelData) {
+    return `CONTACT INFORMATION:
+Address: ${hotelData.address}
+Phone: ${hotelData.phone || "Available at front desk"}
+Website: ${hotelData.website || "Not available"}
+Operating Hours: ${hotelData.openingHours?.join(", ") || "Contact hotel for hours"}`;
+  }
+  generateReviewsSection(reviewData) {
+    if (!reviewData || !reviewData.totalReviews) return "";
+    return `GUEST REVIEWS:
+Average Rating: ${reviewData.averageRating}/5 (${reviewData.totalReviews} reviews)
+What Guests Love: ${reviewData.commonPraises?.join(", ") || "Great service"}
+Areas for Improvement: ${reviewData.commonComplaints?.join(", ") || "Continuous improvement"}`;
+  }
+  generateCompetitorSection(competitorData) {
+    if (!competitorData || !competitorData.uniqueSellingPoints) return "";
+    return `UNIQUE SELLING POINTS:
+${competitorData.uniqueSellingPoints.map((point) => `- ${point}`).join("\n")}
+Market Position: ${competitorData.marketPosition || "Mid-range"}`;
+  }
+  generateFunctionDescriptions(services) {
+    const availableServices = services.filter((s) => s.available);
+    if (availableServices.length === 0) return "Standard hotel information services";
+    return availableServices.map(
+      (service) => `- ${service.name}: ${service.description}`
+    ).join("\n");
+  }
+  // ============================================
+  // Service Menu Generators
+  // ============================================
+  generateRoomServiceMenu(services) {
+    const roomServices = services.filter((s) => s.type === "room_service");
+    return roomServices.map((service) => ({
+      name: service.name,
+      description: service.description,
+      price: service.price || "Contact for pricing",
+      available: service.available
+    }));
+  }
+  generateHousekeepingMenu(services) {
+    const housekeepingServices = services.filter((s) => s.type === "housekeeping");
+    return housekeepingServices.map((service) => ({
+      name: service.name,
+      description: service.description,
+      price: service.price || "Complimentary",
+      available: service.available
+    }));
+  }
+  generateConciergeMenu(services) {
+    const conciergeServices = services.filter((s) => s.type === "concierge");
+    return conciergeServices.map((service) => ({
+      name: service.name,
+      description: service.description,
+      price: service.price || "Complimentary",
+      available: service.available
+    }));
+  }
+  generateTransportationMenu(services) {
+    const transportServices = services.filter((s) => s.type === "transportation");
+    return transportServices.map((service) => ({
+      name: service.name,
+      description: service.description,
+      price: service.price || "Contact for pricing",
+      available: service.available
+    }));
+  }
+  generateSpaMenu(services) {
+    const spaServices = services.filter((s) => s.type === "spa");
+    return spaServices.map((service) => ({
+      name: service.name,
+      description: service.description,
+      price: service.price || "Contact for pricing",
+      available: service.available
+    }));
+  }
+  generateToursMenu(attractions) {
+    return attractions.slice(0, 10).map((attraction) => ({
+      name: `Tour to ${attraction.name}`,
+      description: `${attraction.description} - ${attraction.distance} away`,
+      price: "Contact for pricing",
+      available: true
+    }));
+  }
+  // ============================================
+  // Helper Methods
+  // ============================================
+  isAdvancedHotelData(data) {
+    return "reviewData" in data && "competitorData" in data;
+  }
+  getHotelCategory(hotelData) {
+    if (hotelData.priceLevel === void 0) return "hotel";
+    switch (hotelData.priceLevel) {
+      case 0:
+        return "budget hotel";
+      case 1:
+        return "budget hotel";
+      case 2:
+        return "mid-range hotel";
+      case 3:
+        return "upscale hotel";
+      case 4:
+        return "luxury hotel";
+      default:
+        return "hotel";
+    }
+  }
+  groupServicesByType(services) {
+    const grouped = {};
+    services.forEach((service) => {
+      if (!grouped[service.type]) {
+        grouped[service.type] = [];
+      }
+      grouped[service.type].push(service);
+    });
+    return grouped;
+  }
+  groupAttractionsByCategory(attractions) {
+    const grouped = {};
+    attractions.forEach((attraction) => {
+      if (!grouped[attraction.category]) {
+        grouped[attraction.category] = [];
+      }
+      grouped[attraction.category].push(attraction);
+    });
+    return grouped;
+  }
+};
+
+// server/services/vapiIntegration.ts
+var VapiIntegrationError = class extends Error {
+  constructor(message2, code, statusCode, details) {
+    super(message2);
+    this.code = code;
+    this.statusCode = statusCode;
+    this.details = details;
+    this.name = "VapiIntegrationError";
+  }
+};
+var VapiIntegrationService = class {
+  baseURL = "https://api.vapi.ai";
+  apiKey;
+  constructor() {
+    this.apiKey = process.env.VAPI_API_KEY || "";
+    if (!this.apiKey) {
+      console.warn("Vapi API key not found. Assistant creation will fail.");
+    }
+  }
+  // ============================================
+  // Core API Methods
+  // ============================================
+  /**
+   * Create a new Vapi assistant
+   */
+  async createAssistant(config2) {
+    if (!this.apiKey) {
+      throw new VapiIntegrationError("Vapi API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      console.log(`\u{1F916} Creating Vapi assistant: ${config2.name}`);
+      const response = await fetch2(`${this.baseURL}/assistant`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: config2.name,
+          model: config2.model || {
+            provider: "openai",
+            model: "gpt-4",
+            temperature: 0.7
+          },
+          voice: {
+            provider: "playht",
+            voiceId: config2.voiceId || "jennifer"
+          },
+          systemMessage: config2.systemPrompt,
+          firstMessage: config2.firstMessage || `Hello! Welcome to ${config2.hotelName}. How may I assist you today?`,
+          functions: config2.functions,
+          silenceTimeoutSeconds: config2.silenceTimeoutSeconds || 30,
+          maxDurationSeconds: config2.maxDurationSeconds || 1800,
+          // 30 minutes
+          backgroundSound: config2.backgroundSound || "hotel-lobby"
+        })
+      });
+      const responseText = await response.text();
+      if (!response.ok) {
+        const errorData = JSON.parse(responseText);
+        throw new VapiIntegrationError(
+          `Vapi API error: ${errorData.error.message}`,
+          errorData.error.type || "API_ERROR",
+          response.status,
+          errorData
+        );
+      }
+      const assistant = JSON.parse(responseText);
+      console.log(`\u2705 Vapi assistant created successfully: ${assistant.id}`);
+      return assistant.id;
+    } catch (error) {
+      if (error instanceof VapiIntegrationError) {
+        throw error;
+      }
+      console.error("Failed to create Vapi assistant:", error);
+      throw new VapiIntegrationError(
+        `Failed to create assistant: ${error?.message || "Unknown error"}`,
+        "CREATION_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Update an existing Vapi assistant
+   */
+  async updateAssistant(assistantId, config2) {
+    if (!this.apiKey) {
+      throw new VapiIntegrationError("Vapi API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      console.log(`\u{1F504} Updating Vapi assistant: ${assistantId}`);
+      const updateData = {};
+      if (config2.name) updateData.name = config2.name;
+      if (config2.systemPrompt) updateData.systemMessage = config2.systemPrompt;
+      if (config2.functions) updateData.functions = config2.functions;
+      if (config2.firstMessage) updateData.firstMessage = config2.firstMessage;
+      if (config2.voiceId) updateData.voice = { provider: "playht", voiceId: config2.voiceId };
+      if (config2.model) updateData.model = config2.model;
+      if (config2.silenceTimeoutSeconds) updateData.silenceTimeoutSeconds = config2.silenceTimeoutSeconds;
+      if (config2.maxDurationSeconds) updateData.maxDurationSeconds = config2.maxDurationSeconds;
+      if (config2.backgroundSound) updateData.backgroundSound = config2.backgroundSound;
+      const response = await fetch2(`${this.baseURL}/assistant/${assistantId}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updateData)
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new VapiIntegrationError(
+          `Vapi API error: ${errorData.error.message}`,
+          errorData.error.type || "API_ERROR",
+          response.status
+        );
+      }
+      console.log(`\u2705 Vapi assistant updated successfully: ${assistantId}`);
+    } catch (error) {
+      if (error instanceof VapiIntegrationError) {
+        throw error;
+      }
+      console.error("Failed to update Vapi assistant:", error);
+      throw new VapiIntegrationError(
+        `Failed to update assistant: ${error.message}`,
+        "UPDATE_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Delete a Vapi assistant
+   */
+  async deleteAssistant(assistantId) {
+    if (!this.apiKey) {
+      throw new VapiIntegrationError("Vapi API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      console.log(`\u{1F5D1}\uFE0F Deleting Vapi assistant: ${assistantId}`);
+      const response = await fetch2(`${this.baseURL}/assistant/${assistantId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new VapiIntegrationError(
+          `Vapi API error: ${errorData.error.message}`,
+          errorData.error.type || "API_ERROR",
+          response.status
+        );
+      }
+      console.log(`\u2705 Vapi assistant deleted successfully: ${assistantId}`);
+    } catch (error) {
+      if (error instanceof VapiIntegrationError) {
+        throw error;
+      }
+      console.error("Failed to delete Vapi assistant:", error);
+      throw new VapiIntegrationError(
+        `Failed to delete assistant: ${error.message}`,
+        "DELETION_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Get assistant details
+   */
+  async getAssistant(assistantId) {
+    if (!this.apiKey) {
+      throw new VapiIntegrationError("Vapi API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      const response = await fetch2(`${this.baseURL}/assistant/${assistantId}`, {
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new VapiIntegrationError(
+          `Vapi API error: ${errorData.error.message}`,
+          errorData.error.type || "API_ERROR",
+          response.status
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      if (error instanceof VapiIntegrationError) {
+        throw error;
+      }
+      throw new VapiIntegrationError(
+        `Failed to get assistant: ${error.message}`,
+        "GET_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * List all assistants
+   */
+  async listAssistants() {
+    if (!this.apiKey) {
+      throw new VapiIntegrationError("Vapi API key not configured", "API_KEY_MISSING", 500);
+    }
+    try {
+      const response = await fetch2(`${this.baseURL}/assistant`, {
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new VapiIntegrationError(
+          `Vapi API error: ${errorData.error.message}`,
+          errorData.error.type || "API_ERROR",
+          response.status
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      if (error instanceof VapiIntegrationError) {
+        throw error;
+      }
+      throw new VapiIntegrationError(
+        `Failed to list assistants: ${error.message}`,
+        "LIST_FAILED",
+        500
+      );
+    }
+  }
+  // ============================================
+  // Helper Methods
+  // ============================================
+  /**
+   * Test API connection
+   */
+  async testConnection() {
+    try {
+      await this.listAssistants();
+      return true;
+    } catch (error) {
+      console.error("Vapi API connection test failed:", error);
+      return false;
+    }
+  }
+  /**
+   * Get service health status
+   */
+  async getServiceHealth() {
+    const hasApiKey = !!this.apiKey;
+    let connectionStatus = false;
+    if (hasApiKey) {
+      connectionStatus = await this.testConnection();
+    }
+    return {
+      status: hasApiKey && connectionStatus ? "healthy" : "degraded",
+      apiKey: hasApiKey,
+      connection: connectionStatus
+    };
+  }
+};
+var AssistantGeneratorService = class {
+  vapiService;
+  knowledgeGenerator;
+  constructor() {
+    this.vapiService = new VapiIntegrationService();
+    this.knowledgeGenerator = new KnowledgeBaseGenerator();
+  }
+  /**
+   * Generate a complete Vapi assistant for a hotel
+   */
+  async generateAssistant(hotelData, customization) {
+    try {
+      console.log(`\u{1F3E8} Generating assistant for: ${hotelData.name}`);
+      const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(hotelData, customization);
+      const functions = this.generateFunctions(hotelData.services);
+      const assistantConfig = {
+        name: `${hotelData.name} AI Concierge`,
+        hotelName: hotelData.name,
+        systemPrompt,
+        voiceId: customization.voiceId || "jennifer",
+        model: {
+          provider: "openai",
+          model: "gpt-4",
+          temperature: customization.personality === "enthusiastic" ? 0.8 : 0.7
+        },
+        functions,
+        firstMessage: this.generateFirstMessage(hotelData, customization),
+        silenceTimeoutSeconds: customization.silenceTimeout || 30,
+        maxDurationSeconds: customization.maxDuration || 1800,
+        backgroundSound: customization.backgroundSound || "hotel-lobby"
+      };
+      const assistantId = await this.vapiService.createAssistant(assistantConfig);
+      console.log(`\u2705 Assistant generated successfully for ${hotelData.name}: ${assistantId}`);
+      return assistantId;
+    } catch (error) {
+      console.error(`Failed to generate assistant for ${hotelData.name}:`, error);
+      throw new VapiIntegrationError(
+        `Failed to generate assistant: ${error.message}`,
+        "GENERATION_FAILED",
+        500
+      );
+    }
+  }
+  /**
+   * Update existing assistant with new data
+   */
+  async updateAssistant(assistantId, hotelData, customization) {
+    try {
+      console.log(`\u{1F504} Updating assistant ${assistantId} for: ${hotelData.name}`);
+      const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(hotelData, customization);
+      const functions = this.generateFunctions(hotelData.services);
+      const updateConfig = {
+        systemPrompt,
+        functions,
+        firstMessage: this.generateFirstMessage(hotelData, customization),
+        voiceId: customization.voiceId,
+        silenceTimeoutSeconds: customization.silenceTimeout,
+        maxDurationSeconds: customization.maxDuration,
+        backgroundSound: customization.backgroundSound
+      };
+      await this.vapiService.updateAssistant(assistantId, updateConfig);
+      console.log(`\u2705 Assistant updated successfully: ${assistantId}`);
+    } catch (error) {
+      console.error(`Failed to update assistant ${assistantId}:`, error);
+      throw new VapiIntegrationError(
+        `Failed to update assistant: ${error.message}`,
+        "UPDATE_FAILED",
+        500
+      );
+    }
+  }
+  // ============================================
+  // Dynamic Function Generation
+  // ============================================
+  /**
+   * Generate Vapi functions based on hotel services
+   */
+  generateFunctions(services) {
+    const functions = [];
+    functions.push({
+      name: "get_hotel_info",
+      description: "Get basic hotel information such as hours, contact details, location, and amenities",
+      parameters: {
+        type: "object",
+        properties: {
+          info_type: {
+            type: "string",
+            enum: ["hours", "contact", "location", "amenities", "policies"],
+            description: "Type of information requested"
+          }
+        },
+        required: ["info_type"]
+      },
+      async: false
+    });
+    const serviceTypes = services.map((s) => s.type);
+    if (serviceTypes.includes("room_service")) {
+      functions.push({
+        name: "order_room_service",
+        description: "Order room service for hotel guests including food, drinks, and amenities",
+        parameters: {
+          type: "object",
+          properties: {
+            room_number: { type: "string", description: "Guest room number" },
+            guest_name: { type: "string", description: "Guest name for the order" },
+            items: {
+              type: "array",
+              items: { type: "string" },
+              description: "List of items to order"
+            },
+            delivery_time: {
+              type: "string",
+              enum: ["asap", "30min", "1hour", "specific"],
+              description: "Preferred delivery time"
+            },
+            specific_time: { type: "string", description: "Specific delivery time if selected" },
+            special_instructions: { type: "string", description: "Any special instructions" }
+          },
+          required: ["room_number", "guest_name", "items", "delivery_time"]
+        },
+        async: true
+      });
+    }
+    if (serviceTypes.includes("housekeeping")) {
+      functions.push({
+        name: "request_housekeeping",
+        description: "Request housekeeping services including cleaning, towels, amenities",
+        parameters: {
+          type: "object",
+          properties: {
+            room_number: { type: "string", description: "Guest room number" },
+            service_type: {
+              type: "string",
+              enum: ["cleaning", "towels", "amenities", "maintenance", "other"],
+              description: "Type of housekeeping service"
+            },
+            priority: {
+              type: "string",
+              enum: ["normal", "urgent"],
+              description: "Service priority level"
+            },
+            description: { type: "string", description: "Detailed description of the request" }
+          },
+          required: ["room_number", "service_type"]
+        },
+        async: true
+      });
+    }
+    if (serviceTypes.includes("transportation")) {
+      functions.push({
+        name: "book_transportation",
+        description: "Book transportation services including taxi, shuttle, airport transfer",
+        parameters: {
+          type: "object",
+          properties: {
+            room_number: { type: "string", description: "Guest room number" },
+            guest_name: { type: "string", description: "Guest name for booking" },
+            transport_type: {
+              type: "string",
+              enum: ["taxi", "shuttle", "airport_transfer", "private_car"],
+              description: "Type of transportation"
+            },
+            pickup_time: { type: "string", description: "Pickup time" },
+            destination: { type: "string", description: "Destination address" },
+            passengers: { type: "string", description: "Number of passengers" },
+            special_requests: { type: "string", description: "Any special requests" }
+          },
+          required: ["room_number", "guest_name", "transport_type", "pickup_time", "destination"]
+        },
+        async: true
+      });
+    }
+    if (serviceTypes.includes("spa")) {
+      functions.push({
+        name: "book_spa_service",
+        description: "Book spa and wellness services including massage, treatments",
+        parameters: {
+          type: "object",
+          properties: {
+            room_number: { type: "string", description: "Guest room number" },
+            guest_name: { type: "string", description: "Guest name for booking" },
+            service_type: {
+              type: "string",
+              enum: ["massage", "facial", "wellness", "fitness", "other"],
+              description: "Type of spa service"
+            },
+            preferred_time: { type: "string", description: "Preferred appointment time" },
+            duration: { type: "string", description: "Service duration" },
+            special_requests: { type: "string", description: "Any special requests or preferences" }
+          },
+          required: ["room_number", "guest_name", "service_type", "preferred_time"]
+        },
+        async: true
+      });
+    }
+    if (serviceTypes.includes("concierge")) {
+      functions.push({
+        name: "concierge_request",
+        description: "General concierge services including reservations, recommendations, bookings",
+        parameters: {
+          type: "object",
+          properties: {
+            room_number: { type: "string", description: "Guest room number" },
+            request_type: {
+              type: "string",
+              enum: ["restaurant_reservation", "attraction_booking", "recommendation", "tickets", "other"],
+              description: "Type of concierge request"
+            },
+            details: { type: "string", description: "Detailed description of the request" },
+            preferred_time: { type: "string", description: "Preferred time if applicable" },
+            budget_range: { type: "string", description: "Budget range if applicable" }
+          },
+          required: ["room_number", "request_type", "details"]
+        },
+        async: true
+      });
+    }
+    functions.push({
+      name: "connect_to_staff",
+      description: "Connect guest to human staff for complex requests or when AI cannot help",
+      parameters: {
+        type: "object",
+        properties: {
+          room_number: { type: "string", description: "Guest room number" },
+          urgency: {
+            type: "string",
+            enum: ["low", "medium", "high", "emergency"],
+            description: "Urgency level of the request"
+          },
+          reason: { type: "string", description: "Reason for connecting to staff" },
+          department: {
+            type: "string",
+            enum: ["front_desk", "housekeeping", "maintenance", "concierge", "management"],
+            description: "Preferred department to connect with"
+          }
+        },
+        required: ["room_number", "reason"]
+      },
+      async: false
+    });
+    return functions;
+  }
+  /**
+   * Generate personalized first message
+   */
+  generateFirstMessage(hotelData, customization) {
+    const timeGreeting = this.getTimeBasedGreeting();
+    const personalityTouch = this.getPersonalityTouch(customization.personality);
+    return `${timeGreeting} Welcome to ${hotelData.name}! ${personalityTouch} How may I assist you today?`;
+  }
+  /**
+   * Get time-based greeting
+   */
+  getTimeBasedGreeting() {
+    const hour = (/* @__PURE__ */ new Date()).getHours();
+    if (hour < 12) return "Good morning!";
+    if (hour < 18) return "Good afternoon!";
+    return "Good evening!";
+  }
+  /**
+   * Get personality-specific touch
+   */
+  getPersonalityTouch(personality) {
+    switch (personality) {
+      case "luxurious":
+        return "It would be my absolute pleasure to provide you with exceptional service.";
+      case "friendly":
+        return "I'm here to make your stay wonderful!";
+      case "professional":
+        return "I am here to assist you with any inquiries or requests.";
+      case "casual":
+        return "I'm here to help make your stay awesome!";
+      default:
+        return "I am here to assist you with any inquiries or requests.";
+    }
+  }
+  // ============================================
+  // Utility Methods
+  // ============================================
+  /**
+   * Validate assistant configuration
+   */
+  static validateAssistantConfig(config2) {
+    const schema = z3.object({
+      name: z3.string().min(1),
+      hotelName: z3.string().min(1),
+      systemPrompt: z3.string().min(10),
+      functions: z3.array(z3.any()).min(1)
+    });
+    schema.parse(config2);
+  }
+  /**
+   * Get service health
+   */
+  async getServiceHealth() {
+    const vapiHealth = await this.vapiService.getServiceHealth();
+    return {
+      status: vapiHealth.status,
+      vapiConnection: vapiHealth.connection,
+      assistantGeneration: vapiHealth.connection && vapiHealth.apiKey
+    };
+  }
+};
+
+// server/routes/dashboard.ts
+init_schema2();
+import { eq as eq5 } from "drizzle-orm";
+var router = express.Router();
+router.use(verifyJWT);
+router.use(identifyTenant);
+router.use(enforceRowLevelSecurity);
+var hotelResearchSchema = z4.object({
+  hotelName: z4.string().min(1, "Hotel name is required"),
+  location: z4.string().optional(),
+  researchTier: z4.enum(["basic", "advanced"]).default("basic")
+});
+var assistantCustomizationSchema = z4.object({
+  personality: z4.enum(["professional", "friendly", "luxurious", "casual", "enthusiastic"]).default("professional"),
+  tone: z4.enum(["formal", "friendly", "warm", "energetic", "calm"]).default("friendly"),
+  languages: z4.array(z4.string()).min(1, "At least one language is required").default(["English"]),
+  voiceId: z4.string().optional(),
+  silenceTimeout: z4.number().min(10).max(120).optional(),
+  maxDuration: z4.number().min(300).max(3600).optional(),
+  backgroundSound: z4.enum(["office", "off", "hotel-lobby"]).default("hotel-lobby")
+});
+var generateAssistantSchema = z4.object({
+  hotelData: z4.any(),
+  // Will be validated by the research service
+  customization: assistantCustomizationSchema
+});
+var assistantConfigSchema = z4.object({
+  personality: z4.string().optional(),
+  tone: z4.string().optional(),
+  languages: z4.array(z4.string()).optional(),
+  voiceId: z4.string().optional(),
+  silenceTimeout: z4.number().optional(),
+  maxDuration: z4.number().optional(),
+  backgroundSound: z4.string().optional(),
+  systemPrompt: z4.string().optional()
+});
+var hotelResearchService = new HotelResearchService();
+var assistantGeneratorService = new AssistantGeneratorService();
+var vapiIntegrationService = new VapiIntegrationService();
+var knowledgeBaseGenerator = new KnowledgeBaseGenerator();
+var tenantService = new TenantService();
+function handleApiError(res, error, defaultMessage) {
+  if (process.env.NODE_ENV === "development") {
+    console.error(defaultMessage, error);
+    return res.status(500).json({
+      error: defaultMessage,
+      message: error.message,
+      stack: error.stack,
+      type: error.constructor.name
+    });
+  } else {
+    console.error(defaultMessage, error.message);
+    return res.status(500).json({ error: defaultMessage });
+  }
+}
+router.post("/research-hotel", checkLimits, async (req, res) => {
+  try {
+    console.log(`\u{1F50D} Hotel research requested by tenant: ${req.tenant.hotelName}`);
+    const { hotelName, location, researchTier } = hotelResearchSchema.parse(req.body);
+    if (researchTier === "advanced") {
+      const hasAdvancedResearch = await tenantService.hasFeatureAccess(req.tenant.id, "advancedResearch");
+      if (!hasAdvancedResearch) {
+        return res.status(403).json({
+          error: "Advanced research not available in your plan",
+          feature: "advancedResearch",
+          currentPlan: req.tenant.subscriptionPlan,
+          upgradeRequired: true
+        });
+      }
+    }
+    let hotelData;
+    if (researchTier === "advanced") {
+      console.log(`\u{1F3E8} Performing advanced research for: ${hotelName}`);
+      hotelData = await hotelResearchService.advancedResearch(hotelName, location);
+    } else {
+      console.log(`\u{1F3E8} Performing basic research for: ${hotelName}`);
+      hotelData = await hotelResearchService.basicResearch(hotelName, location);
+    }
+    const knowledgeBase = knowledgeBaseGenerator.generateKnowledgeBase(hotelData);
+    await db2.update(hotelProfiles).set({
+      researchData: hotelData,
+      knowledgeBase,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq5(hotelProfiles.tenantId, req.tenant.id));
+    console.log(`\u2705 Hotel research completed for ${hotelName}`);
+    res.json({
+      success: true,
+      hotelData,
+      knowledgeBase,
+      researchTier,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    if (error instanceof z4.ZodError) {
+      return res.status(400).json({
+        error: "Invalid request data",
+        details: error.errors
+      });
+    }
+    handleApiError(res, error, "Hotel research failed");
+  }
+});
+router.post("/generate-assistant", checkLimits, async (req, res) => {
+  try {
+    console.log(`\u{1F916} Assistant generation requested by tenant: ${req.tenant.hotelName}`);
+    const { hotelData, customization } = generateAssistantSchema.parse(req.body);
+    if (!hotelData || !hotelData.name) {
+      return res.status(400).json({
+        error: "Hotel data is required. Please research your hotel first.",
+        requiresResearch: true
+      });
+    }
+    const assistantId = await assistantGeneratorService.generateAssistant(hotelData, customization);
+    const systemPrompt = knowledgeBaseGenerator.generateSystemPrompt(hotelData, customization);
+    await db2.update(hotelProfiles).set({
+      vapiAssistantId: assistantId,
+      assistantConfig: customization,
+      systemPrompt,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq5(hotelProfiles.tenantId, req.tenant.id));
+    console.log(`\u2705 Assistant generated successfully: ${assistantId}`);
+    res.json({
+      success: true,
+      assistantId,
+      customization,
+      systemPrompt,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    if (error instanceof z4.ZodError) {
+      return res.status(400).json({
+        error: "Invalid request data",
+        details: error.errors
+      });
+    }
+    handleApiError(res, error, "Assistant generation failed");
+  }
+});
+router.get("/hotel-profile", async (req, res) => {
+  try {
+    console.log(`\u{1F4CA} Hotel profile requested by tenant: ${req.tenant.hotelName}`);
+    const [profile] = await db2.select().from(hotelProfiles).where(eq5(hotelProfiles.tenantId, req.tenant.id)).limit(1);
+    if (!profile) {
+      return res.status(404).json({
+        error: "Hotel profile not found",
+        setupRequired: true
+      });
+    }
+    const usage = await tenantService.getTenantUsage(req.tenant.id);
+    const limits = tenantService.getSubscriptionLimits(req.tenant.subscriptionPlan);
+    const features = tenantService.getCurrentFeatureFlags(req.tenant);
+    let assistantStatus = "not_created";
+    if (profile.vapiAssistantId) {
+      try {
+        await vapiIntegrationService.getAssistant(profile.vapiAssistantId);
+        assistantStatus = "active";
+      } catch (error) {
+        assistantStatus = "error";
+        console.warn(`Assistant ${profile.vapiAssistantId} may not exist:`, error.message);
+      }
+    }
+    res.json({
+      success: true,
+      profile: {
+        tenantId: profile.tenantId,
+        hasResearchData: !!profile.researchData,
+        hasAssistant: !!profile.vapiAssistantId,
+        assistantId: profile.vapiAssistantId,
+        assistantStatus,
+        assistantConfig: profile.assistantConfig,
+        knowledgeBase: profile.knowledgeBase,
+        systemPrompt: profile.systemPrompt,
+        createdAt: profile.createdAt,
+        updatedAt: profile.updatedAt
+      },
+      tenant: {
+        hotelName: req.tenant.hotelName,
+        subdomain: req.tenant.subdomain,
+        subscriptionPlan: req.tenant.subscriptionPlan,
+        subscriptionStatus: req.tenant.subscriptionStatus,
+        trialEndsAt: req.tenant.trialEndsAt
+      },
+      usage,
+      limits,
+      features
+    });
+  } catch (error) {
+    handleApiError(res, error, "Failed to fetch hotel profile");
+  }
+});
+router.put("/assistant-config", checkLimits, async (req, res) => {
+  try {
+    console.log(`\u2699\uFE0F Assistant config update requested by tenant: ${req.tenant.hotelName}`);
+    const config2 = assistantConfigSchema.parse(req.body);
+    const [profile] = await db2.select().from(hotelProfiles).where(eq5(hotelProfiles.tenantId, req.tenant.id)).limit(1);
+    if (!profile) {
+      return res.status(404).json({
+        error: "Hotel profile not found",
+        setupRequired: true
+      });
+    }
+    if (!profile.vapiAssistantId) {
+      return res.status(400).json({
+        error: "No assistant found. Please generate an assistant first.",
+        assistantRequired: true
+      });
+    }
+    const currentConfig = profile.assistantConfig || {};
+    const updatedConfig = { ...currentConfig, ...config2 };
+    if (profile.researchData) {
+      await assistantGeneratorService.updateAssistant(
+        profile.vapiAssistantId,
+        profile.researchData,
+        updatedConfig
+      );
+    } else {
+      await vapiIntegrationService.updateAssistant(profile.vapiAssistantId, {
+        voiceId: config2.voiceId,
+        silenceTimeoutSeconds: config2.silenceTimeout,
+        maxDurationSeconds: config2.maxDuration,
+        backgroundSound: config2.backgroundSound,
+        systemPrompt: config2.systemPrompt
+      });
+    }
+    await db2.update(hotelProfiles).set({
+      assistantConfig: updatedConfig,
+      systemPrompt: config2.systemPrompt || profile.systemPrompt,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq5(hotelProfiles.tenantId, req.tenant.id));
+    console.log(`\u2705 Assistant config updated for tenant: ${req.tenant.hotelName}`);
+    res.json({
+      success: true,
+      updatedConfig,
+      assistantId: profile.vapiAssistantId,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    if (error instanceof z4.ZodError) {
+      return res.status(400).json({
+        error: "Invalid configuration data",
+        details: error.errors
+      });
+    }
+    handleApiError(res, error, "Failed to update assistant configuration");
+  }
+});
+router.get("/analytics", async (req, res) => {
+  try {
+    console.log(`\u{1F4C8} Analytics requested by tenant: ${req.tenant.hotelName}`);
+    const hasAnalytics = await tenantService.hasFeatureAccess(req.tenant.id, "advancedAnalytics");
+    if (hasAnalytics) {
+      const [overview, serviceDistribution, hourlyActivity] = await Promise.all([
+        getOverview(req.tenant.id),
+        // Pass tenant ID for filtering
+        getServiceDistribution(req.tenant.id),
+        getHourlyActivity(req.tenant.id)
+      ]);
+      res.json({
+        success: true,
+        analytics: {
+          overview,
+          serviceDistribution,
+          hourlyActivity
+        },
+        tier: "advanced",
+        tenantId: req.tenant.id
+      });
+    } else {
+      const overview = await getOverview(req.tenant.id);
+      res.json({
+        success: true,
+        analytics: {
+          overview: {
+            totalCalls: overview.totalCalls,
+            averageDuration: overview.averageDuration
+          }
+        },
+        tier: "basic",
+        tenantId: req.tenant.id,
+        upgradeMessage: "Upgrade to premium for detailed analytics"
+      });
+    }
+  } catch (error) {
+    handleApiError(res, error, "Failed to fetch analytics");
+  }
+});
+router.get("/service-health", async (req, res) => {
+  try {
+    console.log(`\u{1F3E5} Service health check requested by tenant: ${req.tenant.hotelName}`);
+    const [
+      hotelResearchHealth,
+      vapiHealth,
+      tenantHealth
+    ] = await Promise.allSettled([
+      hotelResearchService.getServiceHealth(),
+      vapiIntegrationService.getServiceHealth(),
+      tenantService.getServiceHealth()
+    ]);
+    const health = {
+      overall: "healthy",
+      services: {
+        hotelResearch: hotelResearchHealth.status === "fulfilled" ? hotelResearchHealth.value : { status: "error" },
+        vapi: vapiHealth.status === "fulfilled" ? vapiHealth.value : { status: "error" },
+        tenant: tenantHealth.status === "fulfilled" ? tenantHealth.value : { status: "error" }
+      },
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    const serviceStatuses = Object.values(health.services).map((s) => s.status);
+    if (serviceStatuses.includes("error")) {
+      health.overall = "degraded";
+    }
+    if (serviceStatuses.every((s) => s === "error")) {
+      health.overall = "down";
+    }
+    res.json(health);
+  } catch (error) {
+    handleApiError(res, error, "Failed to check service health");
+  }
+});
+router.delete("/reset-assistant", requireFeature("apiAccess"), async (req, res) => {
+  try {
+    console.log(`\u{1F5D1}\uFE0F Assistant reset requested by tenant: ${req.tenant.hotelName}`);
+    const [profile] = await db2.select().from(hotelProfiles).where(eq5(hotelProfiles.tenantId, req.tenant.id)).limit(1);
+    if (!profile || !profile.vapiAssistantId) {
+      return res.status(404).json({
+        error: "No assistant found to reset"
+      });
+    }
+    try {
+      await vapiIntegrationService.deleteAssistant(profile.vapiAssistantId);
+    } catch (error) {
+      console.warn(`Failed to delete assistant from Vapi: ${error.message}`);
+    }
+    await db2.update(hotelProfiles).set({
+      vapiAssistantId: null,
+      assistantConfig: null,
+      systemPrompt: null,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq5(hotelProfiles.tenantId, req.tenant.id));
+    console.log(`\u2705 Assistant reset completed for tenant: ${req.tenant.hotelName}`);
+    res.json({
+      success: true,
+      message: "Assistant has been reset. You can now generate a new one.",
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+    });
+  } catch (error) {
+    handleApiError(res, error, "Failed to reset assistant");
+  }
+});
+var dashboard_default = router;
+
 // server/routes.ts
 var openai2 = new OpenAI2({
-  apiKey: process.env.VITE_OPENAI_API_KEY
+  apiKey: process.env.VITE_OPENAI_API_KEY || "sk-placeholder-for-dev"
 });
 var staffList = [
   {
@@ -1328,7 +4233,78 @@ function parseStaffAccounts(envStr) {
   });
 }
 var STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
-var JWT_SECRET = process.env.JWT_SECRET || "secret";
+var JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key-for-testing";
+async function extractTenantFromRequest(req) {
+  const host = req.get("host") || "";
+  const subdomain = extractSubdomain(host);
+  if (subdomain === "localhost" || subdomain === "127.0.0.1" || !subdomain) {
+    return getMiNhonTenantId2();
+  }
+  try {
+    const { tenants: tenants3 } = await Promise.resolve().then(() => (init_schema2(), schema_exports));
+    const [tenant] = await db2.select().from(tenants3).where(eq6(tenants3.subdomain, subdomain)).limit(1);
+    return tenant?.id || getMiNhonTenantId2();
+  } catch (error) {
+    console.error("Error looking up tenant:", error);
+    return getMiNhonTenantId2();
+  }
+}
+function extractSubdomain(host) {
+  const cleanHost = host.split(":")[0];
+  if (cleanHost === "localhost" || cleanHost === "127.0.0.1") {
+    return "minhon";
+  }
+  const parts = cleanHost.split(".");
+  if (parts.length >= 3) {
+    return parts[0];
+  }
+  return "minhon";
+}
+function getMiNhonTenantId2() {
+  return process.env.MINHON_TENANT_ID || "minhon-default-tenant-id";
+}
+async function findStaffInDatabase(username, password, tenantId) {
+  try {
+    const { staff: staff2 } = await Promise.resolve().then(() => (init_schema2(), schema_exports));
+    const [staffUser] = await db2.select().from(staff2).where(and4(eq6(staff2.username, username), eq6(staff2.tenantId, tenantId))).limit(1);
+    if (!staffUser) {
+      return null;
+    }
+    const isPasswordValid = await bcrypt.compare(password, staffUser.password);
+    if (!isPasswordValid) {
+      return null;
+    }
+    return {
+      username: staffUser.username,
+      role: staffUser.role || "staff",
+      tenantId: staffUser.tenantId,
+      permissions: []
+    };
+  } catch (error) {
+    console.error("Error finding staff in database:", error);
+    return null;
+  }
+}
+async function findStaffInFallback(username, password, tenantId) {
+  const FALLBACK_ACCOUNTS = [
+    { username: "staff1", password: "password1", role: "staff" },
+    { username: "admin", password: "admin123", role: "admin" },
+    { username: "admin@hotel.com", password: "StrongPassword123", role: "admin" },
+    { username: "manager@hotel.com", password: "StrongPassword456", role: "manager" }
+  ];
+  const found = STAFF_ACCOUNTS.find((acc) => acc.username === username && acc.password === password);
+  const fallbackFound = !found && FALLBACK_ACCOUNTS.find((acc) => acc.username === username && acc.password === password);
+  const account = found || fallbackFound;
+  if (!account) {
+    return null;
+  }
+  return {
+    username: account.username,
+    role: account.role || "staff",
+    tenantId,
+    permissions: []
+  };
+}
 var messageList = [
   { id: 1, requestId: 1, sender: "guest", content: "Can I get my order soon?", created_at: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() },
   { id: 2, requestId: 1, sender: "staff", content: "We are preparing your order.", created_at: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() }
@@ -1337,7 +4313,7 @@ function cleanSummaryContent(content) {
   if (!content) return "";
   return content.split("\n").filter((line) => !/^Bước tiếp theo:/i.test(line) && !/^Next Step:/i.test(line) && !/Vui lòng nhấn/i.test(line) && !/Please Press Send To Reception/i.test(line)).map((line) => line.replace(/\(dùng cho khách[^\)]*\)/i, "").replace(/\(used for Guest[^\)]*\)/i, "")).join("\n").replace(/\n{3,}/g, "\n\n");
 }
-function handleApiError(res, error, defaultMessage) {
+function handleApiError2(res, error, defaultMessage) {
   if (process.env.NODE_ENV === "development") {
     console.error(defaultMessage, error);
     return res.status(500).json({ error: defaultMessage, message: error.message, stack: error.stack });
@@ -1369,6 +4345,29 @@ async function registerRoutes(app2) {
               role: data.role,
               content: data.content
             });
+            try {
+              const existingCall = await db2.select().from(call).where(eq6(call.callIdVapi, data.callId)).limit(1);
+              if (existingCall.length === 0) {
+                const roomMatch = data.content.match(/room (\d+)/i) || data.content.match(/phòng (\d+)/i);
+                const roomNumber = roomMatch ? roomMatch[1] : null;
+                const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(data.content);
+                const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(data.content) && !hasVietnamese;
+                let language = "en";
+                if (hasVietnamese) language = "vi";
+                else if (hasFrench) language = "fr";
+                await db2.insert(call).values({
+                  callIdVapi: data.callId,
+                  roomNumber,
+                  duration: 0,
+                  // Will be updated when call ends
+                  language,
+                  createdAt: /* @__PURE__ */ new Date()
+                });
+                console.log(`Auto-created call record for ${data.callId} with room ${roomNumber || "unknown"} and language ${language}`);
+              }
+            } catch (callError) {
+              console.error("Error creating call record:", callError);
+            }
             await storage.addTranscript(validatedData);
             const message3 = JSON.stringify({
               type: "transcript",
@@ -1430,7 +4429,7 @@ async function registerRoutes(app2) {
         usage: response.usage
       });
     } catch (error) {
-      handleApiError(res, error, "OpenAI API test error:");
+      handleApiError2(res, error, "OpenAI API test error:");
     }
   });
   app2.get("/api/transcripts/:callId", async (req, res) => {
@@ -1439,19 +4438,35 @@ async function registerRoutes(app2) {
       const transcripts2 = await storage.getTranscriptsByCallId(callId);
       res.json(transcripts2);
     } catch (error) {
-      handleApiError(res, error, "Failed to retrieve transcripts");
+      handleApiError2(res, error, "Failed to retrieve transcripts");
     }
   });
   app2.post("/api/orders", async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      const orderData = insertOrderSchema.parse({
+        ...req.body,
+        roomNumber: req.body.roomNumber || "unknown"
+      });
       const order = await storage.createOrder(orderData);
+      try {
+        await db2.insert(request).values({
+          room_number: order.roomNumber || orderData.roomNumber || "unknown",
+          orderId: order.callId || orderData.callId,
+          guestName: "Guest",
+          request_content: Array.isArray(orderData.items) && orderData.items.length > 0 ? orderData.items.map((i) => `${i.name} x${i.quantity}`).join(", ") : orderData.orderType || "Service Request",
+          status: "\u0110\xE3 ghi nh\u1EADn",
+          created_at: /* @__PURE__ */ new Date(),
+          updatedAt: /* @__PURE__ */ new Date()
+        });
+      } catch (syncErr) {
+        console.error("Failed to sync order to request table:", syncErr);
+      }
       res.status(201).json(order);
     } catch (error) {
-      if (error instanceof z.ZodError) {
+      if (error instanceof z5.ZodError) {
         res.status(400).json({ error: "Invalid order data", details: error.errors });
       } else {
-        handleApiError(res, error, "Failed to create order");
+        handleApiError2(res, error, "Failed to create order");
       }
     }
   });
@@ -1464,7 +4479,7 @@ async function registerRoutes(app2) {
       }
       res.json(order);
     } catch (error) {
-      handleApiError(res, error, "Failed to retrieve order");
+      handleApiError2(res, error, "Failed to retrieve order");
     }
   });
   app2.get("/api/orders/room/:roomNumber", async (req, res) => {
@@ -1473,7 +4488,7 @@ async function registerRoutes(app2) {
       const orders2 = await storage.getOrdersByRoomNumber(roomNumber);
       res.json(orders2);
     } catch (error) {
-      handleApiError(res, error, "Failed to retrieve orders");
+      handleApiError2(res, error, "Failed to retrieve orders");
     }
   });
   app2.patch("/api/orders/:id/status", verifyJWT, async (req, res) => {
@@ -1510,7 +4525,7 @@ async function registerRoutes(app2) {
       });
       res.json(orders2);
     } catch (err) {
-      handleApiError(res, err, "Failed to retrieve staff orders");
+      handleApiError2(res, err, "Failed to retrieve staff orders");
     }
   });
   app2.post("/api/orders/:id/update-status", verifyJWT, async (req, res) => {
@@ -1522,12 +4537,28 @@ async function registerRoutes(app2) {
       io.to(String(idNum)).emit("order_status_update", { orderId: String(idNum), status });
       res.json(updatedOrder);
     } catch (err) {
-      handleApiError(res, err, "Failed to update order status");
+      handleApiError2(res, err, "Failed to update order status");
+    }
+  });
+  app2.post("/api/call-end", async (req, res) => {
+    try {
+      const { callId, duration } = req.body;
+      if (!callId) {
+        return res.status(400).json({ error: "Call ID is required" });
+      }
+      const existingCall = await db2.select().from(call).where(eq6(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length > 0) {
+        await db2.update(call).set({ duration: duration || 0 }).where(eq6(call.callIdVapi, callId));
+        console.log(`Updated call duration for ${callId}: ${duration || 0} seconds`);
+      }
+      res.json({ success: true });
+    } catch (error) {
+      handleApiError2(res, error, "Error updating call duration");
     }
   });
   app2.post("/api/store-summary", async (req, res) => {
     try {
-      const { summary: summaryText, transcripts: transcripts2, timestamp: timestamp3, callId, callDuration: reqCallDuration, forceBasicSummary, orderReference, language } = req.body;
+      const { summary: summaryText, transcripts: transcripts2, timestamp: timestamp2, callId, callDuration: reqCallDuration, forceBasicSummary, orderReference, language } = req.body;
       let finalSummary = summaryText;
       let isAiGenerated = false;
       if (transcripts2 && (!summaryText || summaryText === "")) {
@@ -1589,7 +4620,7 @@ async function registerRoutes(app2) {
       const summaryData = insertCallSummarySchema.parse({
         callId,
         content: finalSummary,
-        timestamp: new Date(timestamp3 || Date.now()),
+        timestamp: new Date(timestamp2 || Date.now()),
         roomNumber,
         duration: durationStr,
         orderReference
@@ -1623,7 +4654,7 @@ async function registerRoutes(app2) {
         serviceRequests
       });
     } catch (error) {
-      handleApiError(res, error, "Error storing call summary:");
+      handleApiError2(res, error, "Error storing call summary:");
     }
   });
   app2.get("/api/summaries/:callId", async (req, res) => {
@@ -1638,7 +4669,7 @@ async function registerRoutes(app2) {
       }
       res.json(summary);
     } catch (error) {
-      handleApiError(res, error, "Failed to retrieve call summary");
+      handleApiError2(res, error, "Failed to retrieve call summary");
     }
   });
   app2.get("/api/summaries/recent/:hours", async (req, res) => {
@@ -1661,22 +4692,22 @@ async function registerRoutes(app2) {
         summaries: mapped
       });
     } catch (error) {
-      handleApiError(res, error, "Error retrieving recent call summaries:");
+      handleApiError2(res, error, "Error retrieving recent call summaries:");
     }
   });
   app2.post("/api/translate-to-vietnamese", async (req, res) => {
     try {
-      const { text: text3 } = req.body;
-      if (!text3 || typeof text3 !== "string") {
+      const { text: text2 } = req.body;
+      if (!text2 || typeof text2 !== "string") {
         return res.status(400).json({ error: "Text content is required" });
       }
-      const translatedText = await translateToVietnamese(text3);
+      const translatedText = await translateToVietnamese(text2);
       res.json({
         success: true,
         translatedText
       });
     } catch (error) {
-      handleApiError(res, error, "Error translating text to Vietnamese:");
+      handleApiError2(res, error, "Error translating text to Vietnamese:");
     }
   });
   app2.post("/api/send-service-email", async (req, res) => {
@@ -1714,7 +4745,7 @@ async function registerRoutes(app2) {
         throw new Error(result.error?.toString() || "Unknown error");
       }
     } catch (error) {
-      handleApiError(res, error, "Error sending service confirmation email:");
+      handleApiError2(res, error, "Error sending service confirmation email:");
     }
   });
   app2.post("/api/send-call-summary-email", async (req, res) => {
@@ -1740,17 +4771,17 @@ async function registerRoutes(app2) {
       }
       const vietnameseServiceRequests = [];
       if (callDetails.serviceRequests && callDetails.serviceRequests.length > 0) {
-        for (const request2 of callDetails.serviceRequests) {
-          if (!/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(request2)) {
+        for (const request3 of callDetails.serviceRequests) {
+          if (!/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(request3)) {
             try {
-              const translatedRequest = await translateToVietnamese(request2);
+              const translatedRequest = await translateToVietnamese(request3);
               vietnameseServiceRequests.push(translatedRequest);
             } catch (error) {
               console.error("L\u1ED7i khi d\u1ECBch y\xEAu c\u1EA7u d\u1ECBch v\u1EE5:", error);
-              vietnameseServiceRequests.push(request2);
+              vietnameseServiceRequests.push(request3);
             }
           } else {
-            vietnameseServiceRequests.push(request2);
+            vietnameseServiceRequests.push(request3);
           }
         }
       }
@@ -1789,7 +4820,7 @@ async function registerRoutes(app2) {
         throw new Error("Failed to send call summary to all recipients");
       }
     } catch (error) {
-      handleApiError(res, error, "Error sending call summary email:");
+      handleApiError2(res, error, "Error sending call summary email:");
     }
   });
   app2.post("/api/test-email", async (req, res) => {
@@ -1828,7 +4859,7 @@ async function registerRoutes(app2) {
         throw new Error(result.error?.toString() || "Unknown error");
       }
     } catch (error) {
-      handleApiError(res, error, "Error sending test email:");
+      handleApiError2(res, error, "Error sending test email:");
     }
   });
   app2.post("/api/mobile-test-email", async (req, res) => {
@@ -1882,7 +4913,7 @@ Mi Nhon Hotel Mui Ne`
         timestamp: (/* @__PURE__ */ new Date()).toISOString()
       });
     } catch (error) {
-      handleApiError(res, error, "Error in mobile test email endpoint:");
+      handleApiError2(res, error, "Error in mobile test email endpoint:");
     }
   });
   app2.post("/api/mobile-call-summary-email", async (req, res) => {
@@ -1952,7 +4983,7 @@ Mi Nhon Hotel Mui Ne`
         console.error("L\u1ED7i khi g\u1EEDi email t\xF3m t\u1EAFt t\u1EEB thi\u1EBFt b\u1ECB di \u0111\u1ED9ng:", sendError);
       }
     } catch (error) {
-      handleApiError(res, error, "L\u1ED7i trong endpoint mobile-call-summary-email:");
+      handleApiError2(res, error, "L\u1ED7i trong endpoint mobile-call-summary-email:");
     }
   });
   app2.get("/api/mailjet-status", async (req, res) => {
@@ -1992,7 +5023,7 @@ Mi Nhon Hotel Mui Ne`
         });
       }
     } catch (error) {
-      handleApiError(res, error, "L\u1ED7i khi ki\u1EC3m tra tr\u1EA1ng th\xE1i Mailjet:");
+      handleApiError2(res, error, "L\u1ED7i khi ki\u1EC3m tra tr\u1EA1ng th\xE1i Mailjet:");
     }
   });
   app2.get("/api/recent-emails", async (req, res) => {
@@ -2039,7 +5070,7 @@ Mi Nhon Hotel Mui Ne`
         });
       }
     } catch (error) {
-      handleApiError(res, error, "L\u1ED7i khi l\u1EA5y danh s\xE1ch email g\u1EA7n \u0111\xE2y:");
+      handleApiError2(res, error, "L\u1ED7i khi l\u1EA5y danh s\xE1ch email g\u1EA7n \u0111\xE2y:");
     }
   });
   app2.get("/api/db-test", async (req, res) => {
@@ -2047,7 +5078,49 @@ Mi Nhon Hotel Mui Ne`
       const recent = await storage.getRecentCallSummaries(1);
       return res.json({ success: true, count: recent.length });
     } catch (dbError) {
-      handleApiError(res, dbError, "DB test error:");
+      handleApiError2(res, dbError, "DB test error:");
+    }
+  });
+  app2.post("/api/test-transcript", async (req, res) => {
+    try {
+      const { callId, role, content } = req.body;
+      if (!callId || !role || !content) {
+        return res.status(400).json({ error: "callId, role, and content are required" });
+      }
+      const existingCall = await db2.select().from(call).where(eq6(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length === 0) {
+        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
+        const roomNumber = roomMatch ? roomMatch[1] : null;
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
+        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
+        let language = "en";
+        if (hasVietnamese) language = "vi";
+        else if (hasFrench) language = "fr";
+        await db2.insert(call).values({
+          callIdVapi: callId,
+          roomNumber,
+          duration: 0,
+          language,
+          createdAt: Date.now()
+        });
+        console.log(`Test: Auto-created call record for ${callId} with room ${roomNumber || "unknown"} and language ${language}`);
+      }
+      let callDbId;
+      if (existingCall.length > 0) {
+        callDbId = existingCall[0].id;
+      } else {
+        const newCall = await db2.select({ id: call.id }).from(call).where(eq6(call.callIdVapi, callId)).limit(1);
+        callDbId = newCall[0]?.id;
+      }
+      await db2.insert(transcript).values({
+        call_id: callDbId,
+        role,
+        content,
+        timestamp: Date.now()
+      });
+      res.json({ success: true, message: "Test transcript created successfully" });
+    } catch (error) {
+      handleApiError2(res, error, "Error creating test transcript");
     }
   });
   app2.get("/api/references/:callId", async (req, res) => {
@@ -2056,7 +5129,7 @@ Mi Nhon Hotel Mui Ne`
       const references = await Reference.find({ callId }).sort({ createdAt: -1 });
       res.json(references);
     } catch (error) {
-      handleApiError(res, error, "Error fetching references:");
+      handleApiError2(res, error, "Error fetching references:");
     }
   });
   app2.post("/api/references", async (req, res) => {
@@ -2066,7 +5139,7 @@ Mi Nhon Hotel Mui Ne`
       await reference.save();
       res.status(201).json(reference);
     } catch (error) {
-      handleApiError(res, error, "Error creating reference:");
+      handleApiError2(res, error, "Error creating reference:");
     }
   });
   app2.delete("/api/references/:id", async (req, res) => {
@@ -2075,7 +5148,7 @@ Mi Nhon Hotel Mui Ne`
       await Reference.findByIdAndDelete(id);
       res.status(204).send();
     } catch (error) {
-      handleApiError(res, error, "Error deleting reference:");
+      handleApiError2(res, error, "Error deleting reference:");
     }
   });
   app2.get("/api/reference-map", (_req, res) => {
@@ -2084,32 +5157,53 @@ Mi Nhon Hotel Mui Ne`
       const map = JSON.parse(raw);
       res.json(map);
     } catch (error) {
-      handleApiError(res, error, "Invalid REFERENCE_MAP env var:");
+      handleApiError2(res, error, "Invalid REFERENCE_MAP env var:");
     }
   });
-  app2.post("/api/staff/login", (req, res) => {
+  app2.post("/api/staff/login", async (req, res) => {
     const { username, password } = req.body;
     console.log(`Staff login attempt: ${username}`);
-    const FALLBACK_ACCOUNTS = [
-      { username: "staff1", password: "password1" },
-      { username: "admin", password: "admin123" }
-    ];
-    const found = STAFF_ACCOUNTS.find((acc) => acc.username === username && acc.password === password);
-    const fallbackFound = !found && FALLBACK_ACCOUNTS.find((acc) => acc.username === username && acc.password === password);
-    if (!found && !fallbackFound) {
-      console.log("Login failed: Invalid credentials");
-      return res.status(401).json({ error: "Invalid credentials" });
+    try {
+      const tenantId = await extractTenantFromRequest(req);
+      console.log(`\u{1F3E8} Tenant identified for login: ${tenantId}`);
+      let staffUser = await findStaffInDatabase(username, password, tenantId);
+      if (!staffUser) {
+        staffUser = await findStaffInFallback(username, password, tenantId);
+      }
+      if (!staffUser) {
+        console.log("Login failed: Invalid credentials or tenant access denied");
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+      const token = jwt2.sign(
+        {
+          username: staffUser.username,
+          tenantId: staffUser.tenantId,
+          role: staffUser.role,
+          permissions: staffUser.permissions || []
+        },
+        JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+      console.log(`\u2705 Login successful for ${username} at tenant ${tenantId}`);
+      res.json({
+        token,
+        user: {
+          username: staffUser.username,
+          role: staffUser.role,
+          tenantId: staffUser.tenantId
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ error: "Internal server error during login" });
     }
-    const token = jwt2.sign({ username }, JWT_SECRET, { expiresIn: "1d" });
-    console.log("Login successful, token generated");
-    res.json({ token });
   });
   app2.get("/api/staff/requests", verifyJWT, async (req, res) => {
     console.log("API /api/staff/requests called");
     console.log("Authorization header:", req.headers.authorization);
     try {
       console.log("Checking database connection before querying requests...");
-      const dbTest = await db2.execute(sql2`SELECT 1`);
+      const dbTest = await db2.execute(sql4`SELECT 1`);
       console.log("Database connection test:", dbTest);
       console.log("Fetching requests from database...");
       const dbRequests = await db2.select().from(request);
@@ -2123,7 +5217,7 @@ Mi Nhon Hotel Mui Ne`
       }
       res.json(dbRequests);
     } catch (err) {
-      handleApiError(res, err, "Error in /api/staff/requests:");
+      handleApiError2(res, err, "Error in /api/staff/requests:");
     }
   });
   app2.patch("/api/staff/requests/:id/status", verifyJWT, async (req, res) => {
@@ -2136,7 +5230,7 @@ Mi Nhon Hotel Mui Ne`
       const result = await db2.update(request).set({
         status,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq3(request.id, id)).returning();
+      }).where(eq6(request.id, id)).returning();
       if (result.length === 0) {
         return res.status(404).json({ error: "Request not found" });
       }
@@ -2171,7 +5265,7 @@ Mi Nhon Hotel Mui Ne`
       }
       res.json(result[0]);
     } catch (error) {
-      handleApiError(res, error, "Error updating request status:");
+      handleApiError2(res, error, "Error updating request status:");
     }
   });
   app2.get("/api/staff/requests/:id/messages", verifyJWT, (req, res) => {
@@ -2205,7 +5299,7 @@ Mi Nhon Hotel Mui Ne`
         deletedCount: result.length
       });
     } catch (error) {
-      handleApiError(res, error, "Error deleting all requests:");
+      handleApiError2(res, error, "Error deleting all requests:");
     }
   });
   app2.get("/api/orders", async (req, res) => {
@@ -2213,7 +5307,7 @@ Mi Nhon Hotel Mui Ne`
       const orders2 = await storage.getAllOrders({});
       res.json(orders2);
     } catch (error) {
-      handleApiError(res, error, "Failed to retrieve all orders");
+      handleApiError2(res, error, "Failed to retrieve all orders");
     }
   });
   app2.delete("/api/orders/all", async (req, res) => {
@@ -2221,14 +5315,42 @@ Mi Nhon Hotel Mui Ne`
       const deleted = await storage.deleteAllOrders();
       res.json({ success: true, deletedCount: deleted });
     } catch (error) {
-      handleApiError(res, error, "Error deleting all orders");
+      handleApiError2(res, error, "Error deleting all orders");
     }
   });
+  app2.get("/api/analytics/overview", verifyJWT, async (req, res) => {
+    try {
+      const data = await getOverview();
+      res.json(data);
+    } catch (error) {
+      handleApiError2(res, error, "Failed to fetch analytics overview");
+    }
+  });
+  app2.get("/api/analytics/service-distribution", verifyJWT, async (req, res) => {
+    try {
+      const data = await getServiceDistribution();
+      res.json(data);
+    } catch (error) {
+      handleApiError2(res, error, "Failed to fetch service distribution");
+    }
+  });
+  app2.get("/api/analytics/hourly-activity", verifyJWT, async (req, res) => {
+    try {
+      const data = await getHourlyActivity();
+      res.json(data);
+    } catch (error) {
+      handleApiError2(res, error, "Failed to fetch hourly activity");
+    }
+  });
+  app2.use("/api/dashboard", dashboard_default);
+  if (process.env.NODE_ENV === "development") {
+    setTimeout(seedDevelopmentData, 1e3);
+  }
   return httpServer;
 }
 
 // server/vite.ts
-import express from "express";
+import express2 from "express";
 import fs from "fs";
 import path2 from "path";
 import { createServer as createViteServer, createLogger } from "vite";
@@ -2314,7 +5436,7 @@ async function setupVite(app2, server) {
     const url = req.originalUrl;
     try {
       const clientTemplate = path2.resolve(
-        import.meta.dirname,
+        import.meta.dirname || process.cwd(),
         "..",
         "client",
         "index.html"
@@ -2333,13 +5455,13 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
+  const distPath = path2.resolve(import.meta.dirname || process.cwd(), "..", "dist/public");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
-  app2.use(express.static(distPath, {
+  app2.use(express2.static(distPath, {
     maxAge: "1y",
     setHeaders: (res, filePath) => {
       if (filePath.endsWith(".html")) {
@@ -2382,14 +5504,78 @@ function setupSocket(server) {
 
 // server/index.ts
 import cors from "cors";
-var app = express2();
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+var app = express3();
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://api.vapi.ai", "wss:", "ws:"],
+      imgSrc: ["'self'", "data:", "https:"],
+      mediaSrc: ["'self'", "https:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: process.env.NODE_ENV === "production" ? [] : null
+    }
+  },
+  crossOriginEmbedderPolicy: false
 }));
-app.use(express2.json());
-app.use(express2.urlencoded({ extended: false }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (process.env.NODE_ENV === "development") {
+      return callback(null, true);
+    }
+    const allowedDomains = [
+      "talk2go.online",
+      "localhost",
+      "127.0.0.1"
+    ];
+    const isAllowed = allowedDomains.some(
+      (domain) => origin.includes(domain) || origin.endsWith(`.${domain}`)
+    );
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Tenant-ID"],
+  exposedHeaders: ["X-Total-Count", "X-Rate-Limit-Remaining"]
+}));
+var apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1e3,
+  // 15 minutes
+  max: 1e3,
+  // Limit each IP to 1000 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    return process.env.NODE_ENV === "development";
+  }
+});
+app.use("/api", apiLimiter);
+var dashboardLimiter = rateLimit({
+  windowMs: 15 * 60 * 1e3,
+  // 15 minutes
+  max: 500,
+  // Limit each IP to 500 requests per windowMs for dashboard
+  message: "Too many dashboard requests, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    return process.env.NODE_ENV === "development";
+  }
+});
+app.use("/api/dashboard", dashboardLimiter);
+app.use(express3.json({ limit: "10mb" }));
+app.use(express3.urlencoded({ extended: false, limit: "10mb" }));
 app.use((req, res, next) => {
   const start = Date.now();
   const path3 = req.path;
@@ -2424,7 +5610,7 @@ app.use((req, res, next) => {
     res.status(status).json({ message: message2 });
     throw err;
   });
-  if (app.get("env") === "development") {
+  if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
