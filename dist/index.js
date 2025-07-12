@@ -5904,7 +5904,16 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-      connectSrc: ["'self'", "https://api.openai.com", "https://api.vapi.ai", "wss:", "ws:"],
+      connectSrc: [
+        "'self'",
+        "https://api.openai.com",
+        "https://api.vapi.ai",
+        "https://minhonmuine.talk2go.online",
+        "https://*.talk2go.online",
+        "https://*.onrender.com",
+        "wss:",
+        "ws:"
+      ],
       imgSrc: ["'self'", "data:", "https:"],
       mediaSrc: ["'self'", "https:"],
       objectSrc: ["'none'"],
