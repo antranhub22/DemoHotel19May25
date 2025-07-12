@@ -20,7 +20,7 @@ import { Request as StaffRequest } from './models/Request';
 import { Message as StaffMessage } from './models/Message';
 import { db } from '../src/db';
 import { request as requestTable, call, transcript } from '../src/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
 import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
@@ -65,6 +65,129 @@ function parseStaffAccounts(envStr: string | undefined): { username: string, pas
 
 const STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
+
+// ============================================
+// Multi-tenant Authentication Helper Functions
+// ============================================
+
+/**
+ * Extract tenant ID from request (subdomain or host)
+ */
+async function extractTenantFromRequest(req: Request): Promise<string> {
+  const host = req.get('host') || '';
+  const subdomain = extractSubdomain(host);
+  
+  // For development, default to Mi Nhon Hotel
+  if (subdomain === 'localhost' || subdomain === '127.0.0.1' || !subdomain) {
+    return getMiNhonTenantId();
+  }
+  
+  // In production, lookup tenant by subdomain
+  try {
+    const { tenants } = await import('../shared/schema');
+    const [tenant] = await db.select().from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
+    return tenant?.id || getMiNhonTenantId();
+  } catch (error) {
+    console.error('Error looking up tenant:', error);
+    return getMiNhonTenantId();
+  }
+}
+
+/**
+ * Extract subdomain from host header
+ */
+function extractSubdomain(host: string): string {
+  const cleanHost = host.split(':')[0];
+  
+  // For development
+  if (cleanHost === 'localhost' || cleanHost === '127.0.0.1') {
+    return 'minhon';
+  }
+  
+  // For production domains like subdomain.talk2go.online
+  const parts = cleanHost.split('.');
+  if (parts.length >= 3) {
+    return parts[0];
+  }
+  
+  return 'minhon';
+}
+
+/**
+ * Get Mi Nhon Hotel tenant ID (for backward compatibility)
+ */
+function getMiNhonTenantId(): string {
+  return process.env.MINHON_TENANT_ID || 'minhon-default-tenant-id';
+}
+
+/**
+ * Find staff in database with tenant association
+ */
+async function findStaffInDatabase(username: string, password: string, tenantId: string): Promise<any> {
+  try {
+    const { staff } = await import('../shared/schema');
+    
+    // Look up staff by username and tenant
+    const [staffUser] = await db
+      .select()
+      .from(staff)
+      .where(and(eq(staff.username, username), eq(staff.tenantId, tenantId)))
+      .limit(1);
+    
+    if (!staffUser) {
+      return null;
+    }
+    
+    // Verify password (assuming bcrypt hashing)
+    const isPasswordValid = await bcrypt.compare(password, staffUser.password);
+    
+    if (!isPasswordValid) {
+      return null;
+    }
+    
+    return {
+      username: staffUser.username,
+      role: staffUser.role || 'staff',
+      tenantId: staffUser.tenantId,
+      permissions: []
+    };
+  } catch (error) {
+    console.error('Error finding staff in database:', error);
+    return null;
+  }
+}
+
+/**
+ * Find staff in fallback accounts (for backward compatibility)
+ */
+async function findStaffInFallback(username: string, password: string, tenantId: string): Promise<any> {
+  // Hard-coded fallback accounts for when database is unavailable
+  const FALLBACK_ACCOUNTS = [
+    { username: 'staff1', password: 'password1', role: 'staff' },
+    { username: 'admin', password: 'admin123', role: 'admin' }
+  ];
+  
+  // Try from environment variable first
+  const found = STAFF_ACCOUNTS.find(acc => acc.username === username && acc.password === password);
+  
+  // If not found, try from fallback accounts
+  const fallbackFound = !found && FALLBACK_ACCOUNTS.find(acc => acc.username === username && acc.password === password);
+  
+  const account = found || fallbackFound;
+  
+  if (!account) {
+    return null;
+  }
+  
+  // For fallback accounts, always associate with the requesting tenant
+  // This ensures backward compatibility with existing Mi Nhon accounts
+  return {
+    username: account.username,
+    role: (account as any).role || 'staff',
+    tenantId: tenantId,
+    permissions: []
+  };
+}
 
 // Dummy request data
 let requestList: StaffRequest[] = [
@@ -1203,31 +1326,54 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-  // Staff login route
-  app.post('/api/staff/login', (req, res) => {
+  // Staff login route with tenant support
+  app.post('/api/staff/login', async (req, res) => {
     const { username, password } = req.body;
     console.log(`Staff login attempt: ${username}`);
     
-    // Hard-coded fallback accounts for when database is unavailable
-    const FALLBACK_ACCOUNTS = [
-      { username: 'staff1', password: 'password1' },
-      { username: 'admin', password: 'admin123' }
-    ];
-    
-    // Try from environment variable first
-    const found = STAFF_ACCOUNTS.find(acc => acc.username === username && acc.password === password);
-    
-    // If not found, try from fallback accounts
-    const fallbackFound = !found && FALLBACK_ACCOUNTS.find(acc => acc.username === username && acc.password === password);
-    
-    if (!found && !fallbackFound) {
-      console.log('Login failed: Invalid credentials');
-      return res.status(401).json({ error: 'Invalid credentials' });
+    try {
+      // 1. Extract tenant from subdomain or host
+      const tenantId = await extractTenantFromRequest(req);
+      console.log(`🏨 Tenant identified for login: ${tenantId}`);
+      
+      // 2. Try to find staff in database with tenant association
+      let staffUser = await findStaffInDatabase(username, password, tenantId);
+      
+      // 3. Fallback to environment variables and hardcoded accounts (for backward compatibility)
+      if (!staffUser) {
+        staffUser = await findStaffInFallback(username, password, tenantId);
+      }
+      
+      if (!staffUser) {
+        console.log('Login failed: Invalid credentials or tenant access denied');
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      
+      // 4. Generate JWT with tenant and role information
+      const token = jwt.sign(
+        { 
+          username: staffUser.username, 
+          tenantId: staffUser.tenantId,
+          role: staffUser.role,
+          permissions: staffUser.permissions || []
+        }, 
+        JWT_SECRET, 
+        { expiresIn: '1d' }
+      );
+      
+      console.log(`✅ Login successful for ${username} at tenant ${tenantId}`);
+      res.json({ 
+        token, 
+        user: {
+          username: staffUser.username,
+          role: staffUser.role,
+          tenantId: staffUser.tenantId
+        }
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: 'Internal server error during login' });
     }
-    
-    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1d' });
-    console.log('Login successful, token generated');
-    res.json({ token });
   });
 
   // Lấy danh sách request
