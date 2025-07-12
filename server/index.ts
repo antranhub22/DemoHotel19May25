@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-// Fixed CSP configuration - v1.3 - CRITICAL API routing fix deployed
+// Fixed CSP configuration - v1.4 - Fixed auto database fix - staff table creation
 
 const app = express();
 
