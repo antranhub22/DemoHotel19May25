@@ -29,7 +29,17 @@
     "test:hotel-research:errors": "tsx scripts/run-hotel-research-test.ts errors",
     "test:hotel-research:all": "tsx scripts/run-hotel-research-test.ts all",
     "test:hotel-research:validate": "tsx scripts/run-hotel-research-test.ts validate",
-    "test:hotel-research:demo": "tsx scripts/demo-hotel-research-test.ts"
+    "test:hotel-research:demo": "tsx scripts/demo-hotel-research-test.ts",
+    
+    "test:integration": "tsx scripts/run-integration-tests.ts",
+    "test:integration:mock": "tsx scripts/run-integration-tests.ts scenario mock",
+    "test:integration:production": "tsx scripts/run-integration-tests.ts scenario production",
+    "test:integration:development": "tsx scripts/run-integration-tests.ts scenario development",
+    "test:integration:compatibility": "tsx scripts/run-integration-tests.ts compatibility",
+    "test:integration:pre-deploy": "tsx scripts/run-integration-tests.ts pre-deploy",
+    "test:integration:all": "tsx scripts/run-integration-tests.ts all",
+    "test:integration:validate": "tsx scripts/run-integration-tests.ts validate",
+    "test:integration:matrix": "tsx scripts/run-integration-tests.ts matrix"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
