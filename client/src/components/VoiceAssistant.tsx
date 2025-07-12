@@ -21,6 +21,11 @@ const VoiceAssistant: React.FC = () => {
   const [showInfographic, setShowInfographic] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   
+  // Debug logging for currentInterface changes
+  useEffect(() => {
+    console.log('🔄 Current interface changed to:', currentInterface);
+  }, [currentInterface]);
+  
   // Initialize WebSocket connection
   useWebSocket();
 
@@ -35,6 +40,19 @@ const VoiceAssistant: React.FC = () => {
   const handleLanguageChange = (lang: Language) => {
     setLanguage(lang);
   };
+
+  console.log('🎯 VoiceAssistant render - currentInterface:', currentInterface);
+
+  // Debug log interface states
+  const interfaceStates = {
+    interface1: currentInterface === 'interface1',
+    interface2: currentInterface === 'interface2',
+    interface3: currentInterface === 'interface3',
+    interface3vi: currentInterface === 'interface3vi',
+    interface3fr: currentInterface === 'interface3fr',
+    interface4: currentInterface === 'interface4'
+  };
+  console.log('🔍 Interface rendering states:', interfaceStates);
 
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">

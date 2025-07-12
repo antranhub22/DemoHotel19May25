@@ -7,13 +7,28 @@ interface Interface4Props {
 }
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
-  const { order, setCurrentInterface, language } = useAssistant();
+  const { order, setCurrentInterface, language, setOrder } = useAssistant();
   
   const handleReturnHome = () => {
+    console.log('🏠 Return to Home button clicked');
+    console.log('Current interface before:', isActive);
+    console.log('Order exists:', !!order);
+    
+    // Xóa order để đảm bảo dialog không hiển thị lại
+    setOrder(null);
     setCurrentInterface('interface1');
+    
+    console.log('✅ Order cleared and setCurrentInterface("interface1") called');
   };
   
-  if (!order) return null;
+  // Debug logging
+  console.log('Interface4 render:', { isActive, hasOrder: !!order });
+  
+  // Chỉ hiển thị khi isActive là true VÀ có order
+  if (!isActive || !order) {
+    console.log('❌ Interface4 not rendering - isActive:', isActive, 'hasOrder:', !!order);
+    return null;
+  }
   
   return (
     <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" id="interface4">
@@ -38,7 +53,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
           </div>
           {/* Return to Home Button */}
           <button 
-            className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-amber-400 text-primary-dark rounded-lg font-poppins font-medium text-sm sm:text-base"
+            className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-amber-400 text-primary-dark rounded-lg font-poppins font-medium text-sm sm:text-base hover:bg-amber-500 transition-colors"
             onClick={handleReturnHome}
           >
             {t('return_to_home', language)}

@@ -18,7 +18,7 @@ export interface AssistantContextType {
   callDetails: CallDetails | null;
   setCallDetails: (details: CallDetails) => void;
   order: Order | null;
-  setOrder: (order: Order) => void;
+  setOrder: (order: Order | null) => void;
   callDuration: number;
   setCallDuration: (duration: number) => void;
   isMuted: boolean;
