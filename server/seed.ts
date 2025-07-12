@@ -1,42 +1,125 @@
 import { db } from '../src/db';
-import { request, call, transcript } from '../src/db/schema';
+import { call, request } from '../src/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function seedDevelopmentData() {
-  const DATABASE_URL = process.env.DATABASE_URL;
-  const isProduction = process.env.NODE_ENV === 'production';
-  const useSQLite = !DATABASE_URL && !isProduction;
-
-  if (!useSQLite) {
-    console.log('Skipping seed data - not using SQLite');
-    return;
-  }
-
   try {
+    // Check if data already exists
+    const existingCalls = await db.select().from(call).limit(1);
+    
+    if (existingCalls.length > 0) {
+      console.log('Development data already exists, skipping seed...');
+      return;
+    }
+
     console.log('Seeding development data...');
-
-    // Insert dummy calls
-    const callsData = [
-      { call_id_vapi: 'call-1', room_number: '101', duration: 120, language: 'en' },
-      { call_id_vapi: 'call-2', room_number: '102', duration: 95, language: 'vi' },
-      { call_id_vapi: 'call-3', room_number: '103', duration: 180, language: 'en' },
-      { call_id_vapi: 'call-4', room_number: '104', duration: 65, language: 'fr' },
-      { call_id_vapi: 'call-5', room_number: '105', duration: 145, language: 'en' },
+    
+    // Seed call data
+    const callData = [
+      {
+        callIdVapi: 'test-call-001',
+        roomNumber: '101',
+        language: 'vi',
+        serviceType: 'room_service',
+        duration: 120,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+      },
+      {
+        callIdVapi: 'test-call-002',
+        roomNumber: '202',
+        language: 'en',
+        serviceType: 'housekeeping',
+        duration: 90,
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+      },
+      {
+        callIdVapi: 'test-call-003',
+        roomNumber: '303',
+        language: 'fr',
+        serviceType: 'transportation',
+        duration: 150,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
+      },
+      {
+        callIdVapi: 'test-call-004',
+        roomNumber: '404',
+        language: 'vi',
+        serviceType: 'concierge',
+        duration: 75,
+        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) // 8 hours ago
+      },
+      {
+        callIdVapi: 'test-call-005',
+        roomNumber: '505',
+        language: 'en',
+        serviceType: 'maintenance',
+        duration: 45,
+        createdAt: new Date(Date.now() - 10 * 60 * 60 * 1000) // 10 hours ago
+      }
     ];
 
-    await db.insert(call).values(callsData).execute();
+    // Insert calls
+    for (const callItem of callData) {
+      await db.insert(call).values(callItem);
+    }
 
-    // Insert dummy requests
-    const requestsData = [
-      { room_number: '101', orderId: 'ORD-001', guestName: 'John Doe', request_content: 'Room service - 2 hamburgers', service_type: 'room_service', status: 'completed' },
-      { room_number: '102', orderId: 'ORD-002', guestName: 'Jane Smith', request_content: 'Laundry service', service_type: 'laundry', status: 'pending' },
-      { room_number: '103', orderId: 'ORD-003', guestName: 'Bob Johnson', request_content: 'Spa booking at 3 PM', service_type: 'spa', status: 'completed' },
-      { room_number: '104', orderId: 'ORD-004', guestName: 'Alice Brown', request_content: 'Tour booking - Red Sand Dunes', service_type: 'tour', status: 'pending' },
-      { room_number: '105', orderId: 'ORD-005', guestName: 'Charlie Wilson', request_content: 'Restaurant reservation', service_type: 'restaurant', status: 'completed' },
-      { room_number: '106', orderId: 'ORD-006', guestName: 'Diana Lee', request_content: 'Airport transfer', service_type: 'transport', status: 'pending' },
-      { room_number: '107', orderId: 'ORD-007', guestName: 'Frank Miller', request_content: 'Room cleaning', service_type: 'housekeeping', status: 'completed' },
+    // Seed request data
+    const requestData = [
+      {
+        roomNumber: '101',
+        orderId: 'ORD-001',
+        requestContent: 'Yêu cầu dọn phòng lúc 2:00 PM',
+        status: 'Đã ghi nhận',
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
+      },
+      {
+        roomNumber: '202',
+        orderId: 'ORD-002',
+        requestContent: 'Cần thêm khăn tắm',
+        status: 'Đang thực hiện',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+      },
+      {
+        roomNumber: '303',
+        orderId: 'ORD-003',
+        requestContent: 'Yêu cầu taxi đến sân bay lúc 6:00 AM',
+        status: 'Hoàn thiện',
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago
+      },
+      {
+        roomNumber: '404',
+        orderId: 'ORD-004',
+        requestContent: 'Thông tin về tour địa phương',
+        status: 'Đã ghi nhận',
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+      },
+      {
+        roomNumber: '505',
+        orderId: 'ORD-005',
+        requestContent: 'Sửa chữa điều hòa không hoạt động',
+        status: 'Đang thực hiện',
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
+      },
+      {
+        roomNumber: '606',
+        orderId: 'ORD-006',
+        requestContent: 'Đặt bàn nhà hàng cho 4 người lúc 7:00 PM',
+        status: 'Hoàn thiện',
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago
+      },
+      {
+        roomNumber: '707',
+        orderId: 'ORD-007',
+        requestContent: 'Yêu cầu dịch vụ giặt ủi',
+        status: 'Đã ghi nhận',
+        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1000) // 7 hours ago
+      }
     ];
 
-    await db.insert(request).values(requestsData).execute();
+    // Insert requests
+    for (const requestItem of requestData) {
+      await db.insert(request).values(requestItem);
+    }
 
     console.log('Development data seeded successfully!');
   } catch (error) {

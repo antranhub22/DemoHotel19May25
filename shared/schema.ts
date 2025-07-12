@@ -14,7 +14,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
-export const transcripts = pgTable("transcripts", {
+export const transcripts = pgTable("transcript", {
   id: serial("id").primaryKey(),
   callId: text("call_id").notNull(),
   role: text("role").notNull(),

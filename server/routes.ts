@@ -19,11 +19,11 @@ import { Staff } from './models/Staff';
 import { Request as StaffRequest } from './models/Request';
 import { Message as StaffMessage } from './models/Message';
 import { db } from '../src/db';
-import { request as requestTable } from '../src/db/schema';
+import { request as requestTable, call, transcript } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
-import { getAnalyticsOverview, getServiceDistribution, getHourlyActivity } from './analytics';
+import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 import { seedDevelopmentData } from './seed';
 
 // Initialize OpenAI client with fallback for development
@@ -145,6 +145,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
               role: data.role,
               content: data.content
             });
+            
+            // Auto-create call record if it doesn't exist
+            try {
+              const existingCall = await db.select().from(call).where(eq(call.callIdVapi, data.callId)).limit(1);
+              if (existingCall.length === 0) {
+                // Extract room number from content if possible
+                const roomMatch = data.content.match(/room (\d+)/i) || data.content.match(/phòng (\d+)/i);
+                const roomNumber = roomMatch ? roomMatch[1] : null;
+                
+                // Determine language from content
+                const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(data.content);
+                const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(data.content) && !hasVietnamese;
+                let language = 'en';
+                if (hasVietnamese) language = 'vi';
+                else if (hasFrench) language = 'fr';
+                
+                await db.insert(call).values({
+                  callIdVapi: data.callId,
+                  roomNumber: roomNumber,
+                  duration: 0, // Will be updated when call ends
+                  language: language,
+                  createdAt: new Date()
+                });
+                
+                console.log(`Auto-created call record for ${data.callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+              }
+            } catch (callError) {
+              console.error('Error creating call record:', callError);
+            }
             
             // Store transcript in database
             await storage.addTranscript(validatedData);
@@ -368,6 +397,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Handle call end event from Vapi to update call duration
+  app.post('/api/call-end', async (req, res) => {
+    try {
+      const { callId, duration } = req.body;
+      
+      if (!callId) {
+        return res.status(400).json({ error: 'Call ID is required' });
+      }
+      
+      // Update call duration in database
+      const existingCall = await db.select().from(call).where(eq(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length > 0) {
+        await db.update(call)
+          .set({ duration: duration || 0 })
+          .where(eq(call.callIdVapi, callId));
+        
+        console.log(`Updated call duration for ${callId}: ${duration || 0} seconds`);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      handleApiError(res, error, 'Error updating call duration');
+    }
+  });
+
   // Store call summary from Vapi or generate with OpenAI
   app.post('/api/store-summary', async (req, res) => {
     try {
@@ -1047,6 +1101,63 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
+  // Test endpoint to simulate transcript creation
+  app.post('/api/test-transcript', async (req, res) => {
+    try {
+      const { callId, role, content } = req.body;
+      
+      if (!callId || !role || !content) {
+        return res.status(400).json({ error: 'callId, role, and content are required' });
+      }
+      
+      // Auto-create call record if it doesn't exist
+      const existingCall = await db.select().from(call).where(eq(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length === 0) {
+        // Extract room number from content if possible
+        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
+        const roomNumber = roomMatch ? roomMatch[1] : null;
+        
+        // Determine language from content
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
+        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
+        let language = 'en';
+        if (hasVietnamese) language = 'vi';
+        else if (hasFrench) language = 'fr';
+        
+        await db.insert(call).values({
+          callIdVapi: callId,
+          roomNumber: roomNumber,
+          duration: 0,
+          language: language,
+          createdAt: Date.now()
+        });
+        
+        console.log(`Test: Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+      }
+      
+      // Get call ID for transcript
+      let callDbId;
+      if (existingCall.length > 0) {
+        callDbId = existingCall[0].id;
+      } else {
+        const newCall = await db.select({ id: call.id }).from(call).where(eq(call.callIdVapi, callId)).limit(1);
+        callDbId = newCall[0]?.id;
+      }
+      
+      // Store transcript in database directly
+      await db.insert(transcript).values({
+        call_id: callDbId,
+        role,
+        content,
+        timestamp: Date.now()
+      });
+      
+      res.json({ success: true, message: 'Test transcript created successfully' });
+    } catch (error) {
+      handleApiError(res, error, 'Error creating test transcript');
+    }
+  });
+
   // Get references for a specific call
   app.get('/api/references/:callId', async (req, res) => {
     try {
@@ -1277,7 +1388,7 @@ Mi Nhon Hotel Mui Ne`
   // Analytics routes
   app.get('/api/analytics/overview', verifyJWT, async (req, res) => {
     try {
-      const data = await getAnalyticsOverview();
+      const data = await getOverview();
       res.json(data);
     } catch (error) {
       handleApiError(res, error, 'Failed to fetch analytics overview');

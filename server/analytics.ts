@@ -1,81 +1,117 @@
 import { db } from '../src/db';
-import { request, call, transcript } from '../src/db/schema';
-import { count, avg, sql } from 'drizzle-orm';
+import { call, transcript, request } from '../src/db/schema';
+import { desc, eq, count, sql } from 'drizzle-orm';
 
-const DATABASE_URL = process.env.DATABASE_URL;
-const isProduction = process.env.NODE_ENV === 'production';
-const useSQLite = !DATABASE_URL && !isProduction;
+const isPostgres = process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('postgres');
 
-// 1. Tổng quan hoạt động
-export async function getAnalyticsOverview() {
+export async function getOverview() {
   try {
-    const totalCallsResult = await db.select({ value: count() }).from(call);
-    const avgDurationResult = await db.select({ value: avg(call.duration) }).from(call);
-    
-    // Phân bổ ngôn ngữ (Giả sử có cột 'language' trong bảng 'call')
-    const languageDistributionResult = await db.select({
+    // Get total calls
+    const totalCallsResult = await db.select({ count: count() }).from(call);
+    const totalCalls = totalCallsResult[0]?.count || 0;
+
+    // Get average call duration
+    const avgDurationResult = await db.select({ 
+      avg: sql`AVG(${call.duration})`.as('avg') 
+    }).from(call).where(sql`${call.duration} IS NOT NULL`);
+    const averageCallDuration = Math.round(Number(avgDurationResult[0]?.avg) || 0);
+
+    // Get language distribution
+    const languageResult = await db.select({ 
       language: call.language,
       count: count()
     }).from(call).groupBy(call.language);
+    
+    const languageDistribution = languageResult.map((row: { language: string | null; count: number }) => ({
+      language: row.language || 'unknown',
+      count: row.count
+    }));
 
     return {
-      totalCalls: totalCallsResult[0]?.value || 0,
-      averageCallDuration: parseFloat(avgDurationResult[0]?.value || '0').toFixed(2),
-      languageDistribution: languageDistributionResult,
+      totalCalls,
+      averageCallDuration,
+      languageDistribution
     };
   } catch (error) {
-    console.error('Error in getAnalyticsOverview:', error);
+    console.error('Error in getOverview:', error);
     return {
       totalCalls: 0,
-      averageCallDuration: '0',
-      languageDistribution: [],
+      averageCallDuration: 0,
+      languageDistribution: []
     };
   }
 }
 
-// 2. Phân loại dịch vụ phổ biến
 export async function getServiceDistribution() {
   try {
     const result = await db.select({
-      serviceType: request.service_type,
+      serviceType: call.serviceType,
       count: count()
-    }).from(request)
-      .groupBy(request.service_type)
-      .orderBy(sql`count DESC`)
-      .limit(10);
-    return result;
+    })
+    .from(call)
+    .where(sql`${call.serviceType} IS NOT NULL`)
+    .groupBy(call.serviceType);
+    
+    return result.map((row: { serviceType: string | null; count: number }) => ({
+      serviceType: row.serviceType || 'unknown',
+      count: row.count
+    }));
   } catch (error) {
     console.error('Error in getServiceDistribution:', error);
     return [];
   }
 }
 
-// 3. Hoạt động theo giờ
 export async function getHourlyActivity() {
   try {
-    let result;
-    
-    if (useSQLite) {
-      // SQLite uses strftime() function
-      result = await db.select({
-        hour: sql`CAST(strftime('%H', created_at) AS INTEGER)`,
+    if (isPostgres) {
+      // PostgreSQL version
+      const result = await db.select({
+        hour: sql`EXTRACT(HOUR FROM ${call.createdAt})`.as('hour'),
         count: count()
-      }).from(request)
-        .groupBy(sql`strftime('%H', created_at)`)
-        .orderBy(sql`hour`);
+      })
+      .from(call)
+      .groupBy(sql`EXTRACT(HOUR FROM ${call.createdAt})`);
+      
+      return result.map((row: { hour: number; count: number }) => ({
+        hour: row.hour,
+        count: row.count
+      }));
     } else {
-      // PostgreSQL uses EXTRACT() function
-      result = await db.select({
-        hour: sql`EXTRACT(hour FROM created_at)`,
+      // SQLite version
+      const result = await db.select({
+        hour: sql`CAST(strftime('%H', datetime(${call.createdAt}, 'unixepoch')) AS INTEGER)`.as('hour'),
         count: count()
-      }).from(request)
-        .groupBy(sql`EXTRACT(hour FROM created_at)`)
-        .orderBy(sql`hour`);
+      })
+      .from(call)
+      .groupBy(sql`strftime('%H', datetime(${call.createdAt}, 'unixepoch'))`);
+      
+      return result.map((row: { hour: number; count: number }) => ({
+        hour: row.hour,
+        count: row.count
+      }));
     }
-
-    return result;
   } catch (error) {
     console.error('Error in getHourlyActivity:', error);
+    return [];
+  }
+}
+
+export async function getLanguageDistribution() {
+  try {
+    const result = await db.select({
+      language: call.language,
+      count: count()
+    })
+    .from(call)
+    .groupBy(call.language);
+    
+    return result.map((row: { language: string | null; count: number }) => ({
+      language: row.language || 'unknown',
+      count: row.count
+    }));
+  } catch (error) {
+    console.error('Error in getLanguageDistribution:', error);
     return [];
   }
 } 
