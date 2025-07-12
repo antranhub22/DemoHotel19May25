@@ -261,7 +261,7 @@ router.post('/health/setup-database', async (req: Request, res: Response) => {
     console.log('🔧 Manual database setup triggered via API...');
     
     // Read SQL setup file
-    const sqlFile = path.resolve(__dirname, '../scripts/setup-database.sql');
+    const sqlFile = path.resolve(__dirname, '../../scripts/setup-database.sql');
     const sql = fs.readFileSync(sqlFile, 'utf8');
     
     // Execute SQL directly on database
