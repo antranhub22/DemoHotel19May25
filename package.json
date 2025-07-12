@@ -18,8 +18,18 @@
     "migration:test:pre-deploy": "tsx scripts/run-migration-test.ts pre-deploy",
     "migration:run": "tsx migrations/test-migration.ts",
     "migration:verify": "tsx scripts/run-migration-test.ts scenario smoke",
-    "migration:demo": "tsx scripts/demo-migration-test.ts"
-    "migration:demo": "tsx scripts/demo-migration-test.ts"
+    "migration:demo": "tsx scripts/demo-migration-test.ts",
+    
+    "test:hotel-research": "tsx scripts/run-hotel-research-test.ts",
+    "test:hotel-research:mock": "tsx scripts/run-hotel-research-test.ts scenario mock",
+    "test:hotel-research:production": "tsx scripts/run-hotel-research-test.ts scenario production",
+    "test:hotel-research:development": "tsx scripts/run-hotel-research-test.ts scenario development",
+    "test:hotel-research:quick": "tsx scripts/run-hotel-research-test.ts quick",
+    "test:hotel-research:api": "tsx scripts/run-hotel-research-test.ts api",
+    "test:hotel-research:errors": "tsx scripts/run-hotel-research-test.ts errors",
+    "test:hotel-research:all": "tsx scripts/run-hotel-research-test.ts all",
+    "test:hotel-research:validate": "tsx scripts/run-hotel-research-test.ts validate",
+    "test:hotel-research:demo": "tsx scripts/demo-hotel-research-test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
