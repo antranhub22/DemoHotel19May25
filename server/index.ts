@@ -8,7 +8,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
-// Fixed CSP configuration - v1.4 - Fixed auto database fix - staff table creation
+// Fixed CSP configuration - v1.5 - FORCE REBUILD with embedded database setup
 
 const app = express();
 
