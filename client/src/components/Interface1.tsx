@@ -1,4 +1,4 @@
-// Interface1 component - latest version v1.0.1 
+// Interface1 component - Multi-tenant version v2.0.0
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '../assets/hotel-exterior.jpeg';
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
+import { getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 
 interface Interface1Props {
   isActive: boolean;
@@ -32,7 +33,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     callSummary,
     orderSummary,
     setOrderSummary,
-    endCall
+    endCall,
+    hotelConfig
   } = useAssistant();
 
   const [isMuted, setIsMuted] = useState(false);
@@ -104,8 +106,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     };
   }, [isActive]);
 
-  // Hàm dùng chung cho mọi ngôn ngữ
+  // Hàm dùng chung cho mọi ngôn ngữ - Now uses hotel configuration
   const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
+    if (!hotelConfig) {
+      console.error('Hotel configuration not loaded');
+      return;
+    }
+
     setEmailSentForCurrentSession(false);
     setCallDetails({
       id: `call-${Date.now()}`,
@@ -116,24 +123,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setTranscripts([]);
     setModelOutput([]);
     setCallDuration(0);
-    let publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-    let assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID;
-    if (lang === 'fr') {
-      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_FR;
-      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_FR;
-    } else if (lang === 'zh') {
-      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH;
-      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH;
-    } else if (lang === 'ru') {
-      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_RU;
-      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_RU;
-    } else if (lang === 'ko') {
-      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_KO;
-      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_KO;
-    } else if (lang === 'vi') {
-      publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY_VI;
-      assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID_VI;
+    
+    // Use hotel configuration for Vapi keys
+    const publicKey = getVapiPublicKeyByLanguage(lang, hotelConfig);
+    const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
+    
+    if (!publicKey || !assistantId) {
+      console.error('Vapi configuration not available for language:', lang);
+      return;
     }
+    
     const vapi = await initVapi(publicKey);
     if (vapi && assistantId) {
       await vapi.start(assistantId);
@@ -365,6 +364,18 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     { iconName: 'storefront', tooltip: 'Local Product' },
   ];
 
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-30 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
@@ -372,10 +383,10 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       } z-30 overflow-y-auto`} 
       id="interface1"
       style={{
-        backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
+        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
       }}
     >
       <div className={`container mx-auto flex flex-col items-center justify-start text-white p-3 pt-6 sm:p-5 sm:pt-10 lg:pt-16 overflow-visible pb-32 sm:pb-24 ${isConfirming ? 'opacity-5' : 'opacity-100'} transition-opacity duration-300`} 
@@ -385,9 +396,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
         <div className="w-full flex flex-row items-center justify-start mb-2">
           {/* Logo removed as requested */}
         </div>
-        {/* Dòng chữ giới thiệu AI voice assistant */}
-        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-green-400 via-blue-500 via-indigo-500 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: 'Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
-          Speak Multiple Languages with Our AI Voice Assistant
+        {/* Dynamic hotel greeting with AI voice assistant */}
+        <p className="text-2xl sm:text-4xl lg:text-5xl text-center max-w-full mb-4 truncate sm:whitespace-nowrap overflow-x-auto font-[Dancing_Script,cursive] font-bold bg-gradient-to-r from-red-500 via-orange-400 via-yellow-400 via-green-400 via-blue-500 via-indigo-500 to-purple-600 bg-clip-text text-transparent" style={{ fontFamily: hotelConfig.branding.fonts.primary + ', Dancing Script, Poppins, cursive', letterSpacing: 1 }}>
+          {hotelConfig.features.multiLanguage 
+            ? t('speak_multiple_languages', language) 
+            : `Welcome to ${hotelConfig.hotelName} - AI Voice Assistant`}
         </p>
         
         {/* Main Call Button với hiệu ứng nâng cao */}

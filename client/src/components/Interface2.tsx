@@ -6,6 +6,7 @@ import { referenceService, ReferenceItem } from '@/services/ReferenceService';
 import InfographicSteps from './InfographicSteps';
 import { t } from '@/i18n';
 import { Button } from './ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface Interface2Props {
   isActive: boolean;
@@ -39,7 +40,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     setCurrentInterface,
     micLevel,
     modelOutput,
-    language
+    language,
+    hotelConfig
   } = useAssistant();
   
   // State cho Paint-on effect
@@ -199,6 +201,18 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     const secs = (seconds % 60).toString().padStart(2, '0');
     return `${minutes}:${secs}`;
   };
+
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
@@ -237,9 +251,10 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
       } z-20 overflow-y-auto`} id="interface2"
       style={{
-        backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url('/assets/courtyard.jpeg')`,
+        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99), url('/assets/courtyard.jpeg')`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundPosition: 'center',
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
       }}
     >
       <div className="container mx-auto flex flex-col md:flex-row p-2 h-full gap-2">
