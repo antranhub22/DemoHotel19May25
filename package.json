@@ -8,7 +8,18 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "migrate": "drizzle-kit push",
     "start": "npm run migrate && NODE_ENV=production node dist/index.js",
-    "check": "tsc"
+    "check": "tsc",
+    
+    "migration:test": "tsx scripts/run-migration-test.ts",
+    "migration:test:dry-run": "tsx scripts/run-migration-test.ts scenario dryRun",
+    "migration:test:production": "tsx scripts/run-migration-test.ts scenario production",
+    "migration:test:development": "tsx scripts/run-migration-test.ts scenario development",
+    "migration:test:all": "tsx scripts/run-migration-test.ts all",
+    "migration:test:pre-deploy": "tsx scripts/run-migration-test.ts pre-deploy",
+    "migration:run": "tsx migrations/test-migration.ts",
+    "migration:verify": "tsx scripts/run-migration-test.ts scenario smoke",
+    "migration:demo": "tsx scripts/demo-migration-test.ts"
+    "migration:demo": "tsx scripts/demo-migration-test.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.37.0",
