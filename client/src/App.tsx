@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import VoiceAssistant from "@/components/VoiceAssistant";
 import { AssistantProvider } from "@/context/AssistantContext";
 import { AuthProvider, useAuth, useTenantDetection } from "@/context/AuthContext";
+import { HotelProvider } from "@/context/HotelContext";
 import NotFound from "@/pages/not-found";
 import EmailTester from "@/components/EmailTester";
 import { useWebSocket } from '@/hooks/useWebSocket';
@@ -12,6 +13,7 @@ import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import HotelConfigDemo from './components/HotelConfigDemo';
 
 // Dashboard pages
 import { 
@@ -245,6 +247,9 @@ function Router() {
         <Route path="/staff" component={StaffPage} />
         <Route path="/staff/dashboard" component={StaffDashboard} />
         <Route path="/analytics" component={AnalyticsDashboard} />
+        
+        {/* Hotel Configuration Demo */}
+        <Route path="/hotel-config-demo" component={HotelConfigDemo} />
 
         {/* ============================================ */}
         {/* AUTHENTICATION ROUTES */}
@@ -341,12 +346,14 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AssistantProvider>
-          <ErrorBoundary>
-            <Router />
-            <Toaster />
-          </ErrorBoundary>
-        </AssistantProvider>
+        <HotelProvider>
+          <AssistantProvider>
+            <ErrorBoundary>
+              <Router />
+              <Toaster />
+            </ErrorBoundary>
+          </AssistantProvider>
+        </HotelProvider>
       </AuthProvider>
     </BrowserRouter>
   );
