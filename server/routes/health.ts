@@ -255,24 +255,103 @@ router.get('/health/assets', async (req: Request, res: Response) => {
   }
 });
 
-// Manual database setup endpoint
+// Simple database setup endpoint
 router.post('/health/setup-database', async (req: Request, res: Response) => {
   try {
-    console.log('🔧 Manual database setup triggered via API...');
+    console.log('🔧 Simple database setup triggered via API...');
     
-    // Read SQL setup file
-    const sqlFile = path.resolve(__dirname, '../../scripts/setup-database.sql');
-    const sql = fs.readFileSync(sqlFile, 'utf8');
+    // Step 1: Create tenants table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS tenants (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        domain TEXT,
+        subdomain TEXT,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        subscription_plan TEXT DEFAULT 'trial',
+        subscription_status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     
-    // Execute SQL directly on database
-    const result = await db.execute(sql);
+    // Step 2: Create hotel_profiles table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS hotel_profiles (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        description TEXT,
+        address TEXT,
+        phone TEXT,
+        email TEXT,
+        website TEXT,
+        amenities TEXT[],
+        policies TEXT[],
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Step 3: Create staff table if it doesn't exist
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS staff (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'staff',
+        name VARCHAR(100),
+        email VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    // Step 4: Add tenant_id columns to existing tables
+    try {
+      await db.execute(sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+      await db.execute(sql`ALTER TABLE transcript ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+      await db.execute(sql`ALTER TABLE request ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+      await db.execute(sql`ALTER TABLE message ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+      await db.execute(sql`ALTER TABLE call ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+    } catch (columnError) {
+      console.log('Some columns may already exist:', columnError);
+    }
+    
+    // Step 5: Insert Mi Nhon tenant
+    await db.execute(sql`
+      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
+              'info@minhonhotel.com', '+84 252 3847 007', 
+              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
+              'premium', 'active')
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        domain = EXCLUDED.domain,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    
+    // Step 6: Insert default staff accounts
+    await db.execute(sql`
+      INSERT INTO staff (username, password, role, name, email, tenant_id)
+      VALUES ('admin@hotel.com', 'StrongPassword123', 'admin', 'Administrator', 'admin@hotel.com', 'mi-nhon-hotel')
+      ON CONFLICT (username) DO UPDATE SET
+        password = EXCLUDED.password,
+        role = EXCLUDED.role,
+        tenant_id = EXCLUDED.tenant_id,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    
+    // Step 7: Update existing records to associate with Mi Nhon tenant
+    await db.execute(sql`UPDATE staff SET tenant_id = 'mi-nhon-hotel' WHERE tenant_id IS NULL`);
     
     console.log('✅ Database setup completed successfully!');
     
     res.json({
       status: 'success',
       message: 'Database setup completed successfully',
-      result: result,
       timestamp: new Date().toISOString()
     });
     
