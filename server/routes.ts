@@ -165,7 +165,9 @@ async function findStaffInFallback(username: string, password: string, tenantId:
   // Hard-coded fallback accounts for when database is unavailable
   const FALLBACK_ACCOUNTS = [
     { username: 'staff1', password: 'password1', role: 'staff' },
-    { username: 'admin', password: 'admin123', role: 'admin' }
+    { username: 'admin', password: 'admin123', role: 'admin' },
+    { username: 'admin@hotel.com', password: 'StrongPassword123', role: 'admin' },
+    { username: 'manager@hotel.com', password: 'StrongPassword456', role: 'manager' }
   ];
   
   // Try from environment variable first
