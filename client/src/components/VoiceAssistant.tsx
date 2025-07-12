@@ -54,6 +54,15 @@ const VoiceAssistant: React.FC = () => {
   };
   console.log('🔍 Interface rendering states:', interfaceStates);
 
+  // Additional debug for Interface4
+  useEffect(() => {
+    if (currentInterface === 'interface4') {
+      console.log('🎯 Interface4 is now active - VoiceAssistant level');
+    } else if (currentInterface === 'interface1') {
+      console.log('🏠 Interface1 is now active - VoiceAssistant level');
+    }
+  }, [currentInterface]);
+
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
       {showWelcomePopup && <WelcomePopup onClose={() => setShowWelcomePopup(false)} />}

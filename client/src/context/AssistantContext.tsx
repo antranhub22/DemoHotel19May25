@@ -111,6 +111,21 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [modelOutput, setModelOutput] = useState<string[]>([]);
   const [language, setLanguage] = useState<Language>('en');
 
+  // Wrapper functions with debug logging
+  const debugSetCurrentInterface = (layer: InterfaceLayer) => {
+    console.log('🔄 AssistantContext: setCurrentInterface called with:', layer);
+    console.log('🔄 Previous interface:', currentInterface);
+    setCurrentInterface(layer);
+    console.log('✅ AssistantContext: setCurrentInterface completed');
+  };
+
+  const debugSetOrder = (newOrder: Order | null) => {
+    console.log('🗑️ AssistantContext: setOrder called with:', newOrder);
+    console.log('🗑️ Previous order:', order);
+    setOrder(newOrder);
+    console.log('✅ AssistantContext: setOrder completed');
+  };
+
   // Persist activeOrders to localStorage whenever it changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -120,6 +135,19 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       console.error('Failed to persist activeOrders to localStorage');
     }
   }, [activeOrders]);
+
+  // Debug: Track currentInterface changes
+  useEffect(() => {
+    console.log('🎯 AssistantContext: currentInterface changed to:', currentInterface);
+    console.log('🎯 Timestamp:', new Date().toISOString());
+  }, [currentInterface]);
+
+  // Debug: Track order changes
+  useEffect(() => {
+    console.log('📦 AssistantContext: order changed to:', order);
+    console.log('📦 Order reference:', order?.reference);
+    console.log('📦 Timestamp:', new Date().toISOString());
+  }, [order]);
 
   const addActiveOrder = (order: ActiveOrder) => {
     setActiveOrders(prev => [...prev, {
@@ -539,7 +567,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   const value: AssistantContextType = {
     currentInterface,
-    setCurrentInterface,
+    setCurrentInterface: debugSetCurrentInterface,
     transcripts,
     setTranscripts,
     addTranscript,
@@ -548,7 +576,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     callDetails,
     setCallDetails,
     order,
-    setOrder,
+    setOrder: debugSetOrder,
     callDuration,
     setCallDuration,
     isMuted,

@@ -9,20 +9,49 @@ interface Interface4Props {
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   const { order, setCurrentInterface, language, setOrder } = useAssistant();
   
+  // Clear console for clean debugging when Interface4 mounts
+  React.useEffect(() => {
+    if (isActive) {
+      console.clear();
+      console.log('🎬 === Interface4 Debug Session Started ===');
+      console.log('🎬 Interface4 mounted with isActive:', isActive);
+      console.log('🎬 Order:', order);
+    }
+  }, [isActive]);
+  
   const handleReturnHome = () => {
     console.log('🏠 Return to Home button clicked');
     console.log('Current interface before:', isActive);
     console.log('Order exists:', !!order);
     
-    // Xóa order để đảm bảo dialog không hiển thị lại
-    setOrder(null);
-    setCurrentInterface('interface1');
-    
-    console.log('✅ Order cleared and setCurrentInterface("interface1") called');
+    try {
+      // Xóa order để đảm bảo dialog không hiển thị lại
+      console.log('🗑️ Clearing order...');
+      setOrder(null);
+      
+      console.log('🔄 Setting interface to interface1...');
+      setCurrentInterface('interface1');
+      
+      console.log('✅ Order cleared and setCurrentInterface("interface1") called');
+      
+      // Force re-render bằng cách wait một chút
+      setTimeout(() => {
+        console.log('⏰ Delayed check - Current interface should be interface1');
+        console.log('⏰ Order should be null:', !order);
+      }, 100);
+      
+    } catch (error) {
+      console.error('❌ Error in handleReturnHome:', error);
+    }
   };
   
   // Debug logging
-  console.log('Interface4 render:', { isActive, hasOrder: !!order });
+  console.log('🔍 Interface4 render:', { 
+    isActive, 
+    hasOrder: !!order, 
+    orderReference: order?.reference,
+    timestamp: new Date().toISOString()
+  });
   
   // Chỉ hiển thị khi isActive là true VÀ có order
   if (!isActive || !order) {
@@ -31,7 +60,16 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   }
   
   return (
-    <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" id="interface4">
+    <div 
+      className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" 
+      id="interface4"
+      onClick={(e) => {
+        // Đảm bảo click vào background không gây lỗi
+        if (e.target === e.currentTarget) {
+          console.log('🖱️ Background clicked - not closing dialog');
+        }
+      }}
+    >
       <div className="container mx-auto flex flex-col items-center justify-center pt-50 sm:pt-0 p-3 sm:p-5 text-center h-auto">
         <div className="w-full max-w-xs sm:max-w-md bg-white rounded-lg shadow-lg p-4 sm:p-8">
           {/* Success Animation */}
@@ -53,10 +91,34 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
           </div>
           {/* Return to Home Button */}
           <button 
-            className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-amber-400 text-primary-dark rounded-lg font-poppins font-medium text-sm sm:text-base hover:bg-amber-500 transition-colors"
+            className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-amber-400 text-primary-dark rounded-lg font-poppins font-medium text-sm sm:text-base hover:bg-amber-500 transition-colors cursor-pointer"
             onClick={handleReturnHome}
+            onMouseDown={() => console.log('🖱️ Mouse down on Return to Home button')}
+            onMouseUp={() => console.log('🖱️ Mouse up on Return to Home button')}
+            style={{ 
+              zIndex: 9999,
+              position: 'relative',
+              pointerEvents: 'auto'
+            }}
           >
             {t('return_to_home', language)}
+          </button>
+          
+          {/* Debug: Test button to force interface change */}
+          <button 
+            className="w-full mt-2 px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-lg font-poppins font-medium text-xs opacity-50 hover:opacity-100"
+            onClick={() => {
+              console.log('🔧 DEBUG: Force interface change button clicked');
+              setCurrentInterface('interface1');
+              console.log('🔧 DEBUG: setCurrentInterface called directly');
+            }}
+            style={{ 
+              zIndex: 9999,
+              position: 'relative',
+              pointerEvents: 'auto'
+            }}
+          >
+            DEBUG: Force to Interface1
           </button>
         </div>
       </div>
