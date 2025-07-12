@@ -366,4 +366,13 @@ router.post('/health/setup-database', async (req: Request, res: Response) => {
   }
 });
 
+// Test endpoint to verify routes are working
+router.get('/health/test', async (req: Request, res: Response) => {
+  res.json({
+    status: 'success',
+    message: 'Test endpoint is working',
+    timestamp: new Date().toISOString()
+  });
+});
+
 export default router; 
