@@ -24,6 +24,7 @@ import { eq } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '../src/api/staff';
 import { getAnalyticsOverview, getServiceDistribution, getHourlyActivity } from './analytics';
+import { seedDevelopmentData } from './seed';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -1300,6 +1301,11 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, error, 'Failed to fetch hourly activity');
     }
   });
+
+  // Seed development data if needed
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(seedDevelopmentData, 1000); // Delay to ensure DB is ready
+  }
 
   return httpServer;
 }
