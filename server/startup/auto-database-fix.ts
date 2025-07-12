@@ -1,9 +1,5 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
 import { sql } from 'drizzle-orm';
-import { tenants, hotelProfiles, staff } from '../../src/db/schema';
-
-const { Pool } = pg;
+import { db } from '../db';
 
 // ============================================
 // Auto Database Fix on Server Startup
@@ -11,24 +7,14 @@ const { Pool } = pg;
 
 export class AutoDatabaseFixer {
   private db: any;
-  private pool: any;
 
   constructor() {
-    const databaseUrl = process.env.DATABASE_URL;
-    if (!databaseUrl) {
-      console.log('⚠️ DATABASE_URL not found, skipping auto-fix');
-      return;
-    }
-
-    this.pool = new Pool({
-      connectionString: databaseUrl,
-      ssl: { rejectUnauthorized: false }
-    });
-    this.db = drizzle(this.pool);
+    // Use the existing database connection from the server
+    this.db = db;
   }
 
   async autoFixDatabase(): Promise<boolean> {
-    if (!this.pool) {
+    if (!this.db) {
       console.log('⚠️ Database connection not available, skipping auto-fix');
       return false;
     }
@@ -345,9 +331,7 @@ export class AutoDatabaseFixer {
   }
 
   async cleanup(): Promise<void> {
-    if (this.pool) {
-      await this.pool.end();
-    }
+    // No cleanup needed - using shared database connection
   }
 }
 
