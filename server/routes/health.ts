@@ -33,32 +33,92 @@ router.get('/health', async (req: Request, res: Response) => {
   }
 });
 
-// Manual database fix trigger
+// Manual database fix trigger - now includes simple setup
 router.post('/health/fix-database', async (req: Request, res: Response) => {
   try {
     console.log('🔧 Manual database fix triggered via API...');
     
-    const success = await runAutoDbFix();
+    // Simple database setup directly in endpoint
+    console.log('🔧 Step 1: Creating tenants table...');
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS tenants (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        domain TEXT,
+        subdomain TEXT,
+        email TEXT,
+        phone TEXT,
+        address TEXT,
+        subscription_plan TEXT DEFAULT 'trial',
+        subscription_status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     
-    if (success) {
-      res.json({
-        status: 'success',
-        message: 'Database fix completed successfully',
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      res.status(500).json({
-        status: 'failed',
-        message: 'Database fix failed - check server logs for details',
-        timestamp: new Date().toISOString()
-      });
+    console.log('🔧 Step 2: Creating staff table...');
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS staff (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'staff',
+        name VARCHAR(100),
+        email VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    console.log('🔧 Step 3: Adding tenant_id columns...');
+    try {
+      await db.execute(sql`ALTER TABLE staff ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+      await db.execute(sql`ALTER TABLE transcript ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE`);
+    } catch (columnError) {
+      console.log('Some columns may already exist:', columnError);
     }
+    
+    console.log('🔧 Step 4: Inserting Mi Nhon tenant...');
+    await db.execute(sql`
+      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
+              'info@minhonhotel.com', '+84 252 3847 007', 
+              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
+              'premium', 'active')
+      ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        domain = EXCLUDED.domain,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    
+    console.log('🔧 Step 5: Creating admin account...');
+    await db.execute(sql`
+      INSERT INTO staff (username, password, role, name, email, tenant_id)
+      VALUES ('admin@hotel.com', 'StrongPassword123', 'admin', 'Administrator', 'admin@hotel.com', 'mi-nhon-hotel')
+      ON CONFLICT (username) DO UPDATE SET
+        password = EXCLUDED.password,
+        role = EXCLUDED.role,
+        tenant_id = EXCLUDED.tenant_id,
+        updated_at = CURRENT_TIMESTAMP
+    `);
+    
+    console.log('🔧 Step 6: Updating existing records...');
+    await db.execute(sql`UPDATE staff SET tenant_id = 'mi-nhon-hotel' WHERE tenant_id IS NULL`);
+    
+    console.log('✅ Database setup completed successfully!');
+    
+    res.json({
+      status: 'success',
+      message: 'Database setup completed successfully - you can now login with admin@hotel.com:StrongPassword123',
+      timestamp: new Date().toISOString()
+    });
+    
   } catch (error) {
-    console.error('❌ Database fix API error:', error);
+    console.error('❌ Database setup API error:', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Manual database fix failed',
+      message: 'Database setup failed',
       timestamp: new Date().toISOString()
     });
   }
