@@ -160,17 +160,53 @@ export class AutoDatabaseFixer {
       )
     `);
 
-    // Add tenant_id columns to existing tables
-    const tables = ['transcript', 'request', 'message', 'call', 'staff'];
+    // Create staff table if it doesn't exist
+    await this.db.execute(sql`
+      CREATE TABLE IF NOT EXISTS staff (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'staff',
+        name VARCHAR(100),
+        email VARCHAR(100),
+        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Check and add tenant_id columns to existing tables (only if they exist)
+    const tables = ['transcript', 'request', 'message', 'call'];
     
     for (const table of tables) {
       try {
-        await this.db.execute(sql`
-          ALTER TABLE ${sql.identifier(table)} 
-          ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE
+        // First check if table exists
+        const tableExists = await this.db.execute(sql`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_name = ${table}
+          )
         `);
+        
+        if (tableExists[0]?.exists) {
+          // Check if tenant_id column exists
+          const columnExists = await this.db.execute(sql`
+            SELECT EXISTS (
+              SELECT FROM information_schema.columns 
+              WHERE table_name = ${table} AND column_name = 'tenant_id'
+            )
+          `);
+          
+          if (!columnExists[0]?.exists) {
+            await this.db.execute(sql`
+              ALTER TABLE ${sql.identifier(table)} 
+              ADD COLUMN tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE
+            `);
+            console.log(`✅ Added tenant_id column to ${table} table`);
+          }
+        }
       } catch (error) {
-        // Column might already exist, ignore error
+        console.log(`⚠️ Could not modify ${table} table:`, error instanceof Error ? error.message : String(error));
       }
     }
   }
