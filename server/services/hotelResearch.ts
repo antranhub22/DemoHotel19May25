@@ -197,7 +197,7 @@ export class HotelResearchService {
         try {
           websiteData = await this.scrapeOfficialWebsite(googlePlacesData.website);
         } catch (error) {
-          console.warn('Website scraping failed:', error);
+          console.warn('Website scraping failed:', (error as any).message || error);
         }
       }
 
@@ -226,9 +226,9 @@ export class HotelResearchService {
       console.log(`✅ Basic research completed for: ${hotelName}`);
       return hotelData;
     } catch (error) {
-      console.error('Basic research failed:', error);
+      console.error('Basic research failed:', (error as any).message || error);
       throw new HotelResearchError(
-        `Failed to research hotel: ${error.message}`,
+        `Failed to research hotel: ${(error as any).message || error}`,
         'RESEARCH_FAILED',
         500
       );
@@ -266,9 +266,9 @@ export class HotelResearchService {
       console.log(`✅ Advanced research completed for: ${hotelName}`);
       return advancedData;
     } catch (error) {
-      console.error('Advanced research failed:', error);
+      console.error('Advanced research failed:', (error as any).message || error);
       throw new HotelResearchError(
-        `Failed to perform advanced research: ${error.message}`,
+        `Failed to perform advanced research: ${(error as any).message || error}`,
         'ADVANCED_RESEARCH_FAILED',
         500
       );
@@ -291,28 +291,27 @@ export class HotelResearchService {
       const searchResponse = await fetch(searchUrl);
       const searchData = await searchResponse.json();
 
-      if (!searchData.candidates || searchData.candidates.length === 0) {
+      const searchDataAny = searchData as any;
+      if (!searchDataAny.candidates || searchDataAny.candidates.length === 0) {
         throw new HotelResearchError('Hotel not found in Google Places', 'HOTEL_NOT_FOUND', 404);
       }
 
-      const placeId = searchData.candidates[0].place_id;
+      const placeId = searchDataAny.candidates[0].place_id;
       
       // Get detailed information
       const detailsUrl = `${this.baseUrl}/details/json?place_id=${placeId}&fields=name,formatted_address,formatted_phone_number,website,rating,price_level,opening_hours,photos,types,geometry&key=${this.googlePlacesApiKey}`;
       
       const detailsResponse = await fetch(detailsUrl);
       const detailsData = await detailsResponse.json();
-
-      if (detailsData.status !== 'OK') {
-        throw new HotelResearchError(`Google Places API error: ${detailsData.status}`, 'API_ERROR', 500);
+      if ((detailsData as any).status !== 'OK') {
+        throw new HotelResearchError(`Google Places API error: ${(detailsData as any).status}`, 'API_ERROR', 500);
       }
-
-      return detailsData.result;
+      return (detailsData as any).result;
     } catch (error) {
       if (error instanceof HotelResearchError) {
         throw error;
       }
-      throw new HotelResearchError(`Google Places API request failed: ${error.message}`, 'API_REQUEST_FAILED', 500);
+      throw new HotelResearchError(`Google Places API request failed: ${(error as any).message || error}`, 'API_REQUEST_FAILED', 500);
     }
   }
 
@@ -334,9 +333,10 @@ export class HotelResearchService {
       const response = await fetch(nearbyUrl);
       const data = await response.json();
 
-      if (data.status !== 'OK') return [];
+      const dataAny = data as any;
+      if (dataAny.status !== 'OK') return [];
 
-      return data.results.slice(0, 10).map((place: any) => ({
+      return dataAny.results.slice(0, 10).map((place: any) => ({
         name: place.name,
         description: place.types.join(', '),
         distance: this.calculateDistance(location, place.geometry.location),
@@ -344,7 +344,7 @@ export class HotelResearchService {
         rating: place.rating
       }));
     } catch (error) {
-      console.warn('Failed to get nearby attractions:', error);
+      console.warn('Failed to get nearby attractions:', (error as any).message || error);
       return [];
     }
   }
@@ -360,8 +360,7 @@ export class HotelResearchService {
       const response = await fetch(websiteUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        },
-        timeout: 10000
+        }
       });
 
       const html = await response.text();
@@ -382,7 +381,7 @@ export class HotelResearchService {
       console.log(`✅ Website scraping completed for: ${websiteUrl}`);
       return scrapedData;
     } catch (error) {
-      console.warn(`Website scraping failed for ${websiteUrl}:`, error);
+      console.warn(`Website scraping failed for ${websiteUrl}:`, (error as any).message || error);
       return {};
     }
   }
@@ -435,7 +434,7 @@ export class HotelResearchService {
       }
     });
 
-    return [...new Set(amenities)]; // Remove duplicates
+    return Array.from(new Set(amenities)); // Remove duplicates
   }
 
   private extractPoliciesFromHTML($: cheerio.CheerioAPI): HotelPolicies {
@@ -602,10 +601,19 @@ export class HotelResearchService {
         checkIn: z.string(),
         checkOut: z.string(),
         cancellation: z.string()
-      })
+      }),
+      categories: z.array(z.string()).default([]),
+      roomTypes: z.array(z.any()).default([]),
+      localAttractions: z.array(z.any()).default([])
     });
 
-    return schema.parse(data);
+    // Bổ sung property nếu thiếu
+    const dataAny = data as any;
+    if (!dataAny.categories) dataAny.categories = [];
+    if (!dataAny.roomTypes) dataAny.roomTypes = [];
+    if (!dataAny.localAttractions) dataAny.localAttractions = [];
+
+    return schema.parse(dataAny);
   }
 
   /**
@@ -627,7 +635,8 @@ export class HotelResearchService {
         const testUrl = `${this.baseUrl}/findplacefromtext/json?input=hotel&inputtype=textquery&fields=place_id&key=${this.googlePlacesApiKey}`;
         const response = await fetch(testUrl);
         const data = await response.json();
-        health.apis.googlePlaces = data.status === 'OK';
+        const dataAny = data as any;
+        health.apis.googlePlaces = dataAny.status === 'OK';
       } catch (error) {
         health.apis.googlePlaces = false;
       }
@@ -638,5 +647,29 @@ export class HotelResearchService {
     }
 
     return health;
+  }
+
+  // Public wrappers for amenities, policies, roomTypes extraction
+  public extractAmenities(data: any, googlePlacesData?: any): string[] {
+    // Ưu tiên lấy từ data nếu có, fallback sang Google Places nếu không
+    if (data && data.amenities && Array.isArray(data.amenities)) return data.amenities;
+    if (googlePlacesData && googlePlacesData.amenities && Array.isArray(googlePlacesData.amenities)) return googlePlacesData.amenities;
+    return [];
+  }
+
+  public extractPolicies(data: any): HotelPolicies {
+    if (data && data.policies) return data.policies;
+    // Fallback mặc định
+    return { checkIn: '', checkOut: '', cancellation: '' };
+  }
+
+  public extractRoomTypes(data: any): RoomType[] {
+    if (data && data.roomTypes && Array.isArray(data.roomTypes)) return data.roomTypes;
+    return [];
+  }
+
+  public extractServices(data: any): HotelService[] {
+    if (data && data.services && Array.isArray(data.services)) return data.services;
+    return [];
   }
 } 

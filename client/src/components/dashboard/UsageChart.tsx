@@ -167,9 +167,10 @@ const SimpleBarChart = ({
                     'text-xs flex items-center gap-1',
                     getTrendInfo(item.change)?.color
                   )}>
-                    {getTrendInfo(item.change)?.icon && 
-                      React.createElement(getTrendInfo(item.change)!.icon, { className: 'h-3 w-3' })
-                    }
+                    {(() => {
+                      const trendInfo = getTrendInfo(item.change);
+                      return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-3 w-3' });
+                    })()}
                     {getTrendInfo(item.change)?.sign}{Math.abs(item.change)}%
                   </span>
                 )}
@@ -254,9 +255,10 @@ const ProgressChart = ({
             'text-sm flex items-center justify-center gap-1',
             getTrendInfo(primaryItem.change)?.color
           )}>
-            {getTrendInfo(primaryItem.change)?.icon && 
-              React.createElement(getTrendInfo(primaryItem.change)!.icon, { className: 'h-4 w-4' })
-            }
+            {(() => {
+              const trendInfo = getTrendInfo(primaryItem.change);
+              return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-4 w-4' });
+            })()}
             <span>
               {getTrendInfo(primaryItem.change)?.sign}{Math.abs(primaryItem.change)}% so với tháng trước
             </span>
@@ -349,9 +351,10 @@ const MetricDisplay = ({
               'text-xs flex items-center justify-center gap-1',
               getTrendInfo(item.change)?.color
             )}>
-              {getTrendInfo(item.change)?.icon && 
-                React.createElement(getTrendInfo(item.change)!.icon, { className: 'h-3 w-3' })
-              }
+              {(() => {
+                const trendInfo = getTrendInfo(item.change);
+                return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-3 w-3' });
+              })()}
               {getTrendInfo(item.change)?.sign}{Math.abs(item.change)}%
             </div>
           )}

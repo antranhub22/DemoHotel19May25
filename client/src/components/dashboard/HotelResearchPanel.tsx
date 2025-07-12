@@ -234,7 +234,7 @@ const HotelInfoDisplay = ({
 }: {
   data: HotelData;
   editable?: boolean;
-  onEdit?: () => void;
+  onEdit?: (data: HotelData) => void;
   onSave?: (data: HotelData) => void;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -628,7 +628,7 @@ export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
           <HotelInfoDisplay
             data={data}
             editable={editable}
-            onEdit={onEdit}
+            onEdit={onEdit ? () => onEdit(data) : undefined}
             onSave={onSave}
           />
         </div>

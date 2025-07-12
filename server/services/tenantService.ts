@@ -108,7 +108,7 @@ export class TenantService {
     } catch (error) {
       console.error(`Failed to create tenant ${config.hotelName}:`, error);
       throw new TenantError(
-        `Failed to create tenant: ${error.message}`,
+        `Failed to create tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_CREATION_FAILED',
         500
       );
@@ -134,7 +134,7 @@ export class TenantService {
     } catch (error) {
       if (error instanceof TenantError) throw error;
       throw new TenantError(
-        `Failed to get tenant: ${error.message}`,
+        `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_FETCH_FAILED',
         500
       );
@@ -160,7 +160,7 @@ export class TenantService {
     } catch (error) {
       if (error instanceof TenantError) throw error;
       throw new TenantError(
-        `Failed to get tenant: ${error.message}`,
+        `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_FETCH_FAILED',
         500
       );
@@ -198,7 +198,7 @@ export class TenantService {
     } catch (error) {
       console.error(`Failed to update tenant ${tenantId}:`, error);
       throw new TenantError(
-        `Failed to update tenant: ${error.message}`,
+        `Failed to update tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_UPDATE_FAILED',
         500
       );
@@ -225,7 +225,7 @@ export class TenantService {
     } catch (error) {
       console.error(`Failed to delete tenant ${tenantId}:`, error);
       throw new TenantError(
-        `Failed to delete tenant: ${error.message}`,
+        `Failed to delete tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_DELETE_FAILED',
         500
       );
@@ -443,7 +443,7 @@ export class TenantService {
       return {
         callsThisMonth: callsResult?.count || 0,
         voicesUsed: 1, // TODO: Implement voice tracking
-        languagesUsed: languagesResult.filter(l => l.language).length,
+        languagesUsed: languagesResult.filter((l: any) => l.language).length,
         storageUsed: Math.round((storageResult?.transcripts || 0) * (storageResult?.avgLength || 0) / 1024), // KB
         dataRetentionDays: 90 // TODO: Get from tenant settings
       };
@@ -509,7 +509,7 @@ export class TenantService {
     } catch (error) {
       console.error(`Failed to cleanup data for tenant ${tenantId}:`, error);
       throw new TenantError(
-        `Failed to cleanup data: ${error.message}`,
+        `Failed to cleanup data: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'DATA_CLEANUP_FAILED',
         500
       );

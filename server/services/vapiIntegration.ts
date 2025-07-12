@@ -165,7 +165,7 @@ export class VapiIntegrationService {
       
       console.error('Failed to create Vapi assistant:', error);
       throw new VapiIntegrationError(
-        `Failed to create assistant: ${error?.message || 'Unknown error'}`,
+        `Failed to create assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'CREATION_FAILED',
         500
       );
@@ -205,7 +205,7 @@ export class VapiIntegrationService {
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json();
+        const errorData: VapiError = await response.json() as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -221,7 +221,7 @@ export class VapiIntegrationService {
       
       console.error('Failed to update Vapi assistant:', error);
       throw new VapiIntegrationError(
-        `Failed to update assistant: ${error.message}`,
+        `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'UPDATE_FAILED',
         500
       );
@@ -247,7 +247,7 @@ export class VapiIntegrationService {
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json();
+        const errorData: VapiError = await response.json() as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -263,7 +263,7 @@ export class VapiIntegrationService {
       
       console.error('Failed to delete Vapi assistant:', error);
       throw new VapiIntegrationError(
-        `Failed to delete assistant: ${error.message}`,
+        `Failed to delete assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'DELETION_FAILED',
         500
       );
@@ -286,7 +286,7 @@ export class VapiIntegrationService {
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json();
+        const errorData: VapiError = await response.json() as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -294,14 +294,14 @@ export class VapiIntegrationService {
         );
       }
 
-      return await response.json();
+      return await response.json() as VapiResponse;
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
       
       throw new VapiIntegrationError(
-        `Failed to get assistant: ${error.message}`,
+        `Failed to get assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GET_FAILED',
         500
       );
@@ -324,7 +324,7 @@ export class VapiIntegrationService {
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json();
+        const errorData: VapiError = await response.json() as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -332,14 +332,14 @@ export class VapiIntegrationService {
         );
       }
 
-      return await response.json();
+      return await response.json() as VapiResponse[];
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
       
       throw new VapiIntegrationError(
-        `Failed to list assistants: ${error.message}`,
+        `Failed to list assistants: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'LIST_FAILED',
         500
       );
@@ -423,7 +423,7 @@ export class AssistantGeneratorService {
         model: {
           provider: 'openai',
           model: 'gpt-4',
-          temperature: customization.personality === 'enthusiastic' ? 0.8 : 0.7
+          temperature: customization.personality === 'friendly' ? 0.8 : 0.7
         },
         functions,
         firstMessage: this.generateFirstMessage(hotelData, customization),
@@ -440,7 +440,7 @@ export class AssistantGeneratorService {
     } catch (error) {
       console.error(`Failed to generate assistant for ${hotelData.name}:`, error);
       throw new VapiIntegrationError(
-        `Failed to generate assistant: ${error.message}`,
+        `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GENERATION_FAILED',
         500
       );
@@ -477,7 +477,7 @@ export class AssistantGeneratorService {
     } catch (error) {
       console.error(`Failed to update assistant ${assistantId}:`, error);
       throw new VapiIntegrationError(
-        `Failed to update assistant: ${error.message}`,
+        `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'UPDATE_FAILED',
         500
       );
