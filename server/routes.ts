@@ -723,10 +723,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pass through orderReference for each summary
       const mapped = summaries.map(s => ({
         id: s.id,
-        callId: (s as any).callIdVapi || (s as any).callId || 'unknown', // Use callIdVapi instead of callId
+        callId: (s as any).callIdVapi || (s as any).orderId || 'unknown', // Use callIdVapi or orderId instead of callId
         roomNumber: s.roomNumber,
-        content: (s as any).requestContent || (s as any).content || 'No content', // Handle missing content
-        timestamp: s.createdAt || s.startTime || new Date(), // Use createdAt instead of timestamp
+        content: (s as any).requestContent || 'No content', // Use requestContent property
+        timestamp: s.createdAt || new Date(), // Use createdAt property
         duration: s.duration || 0
       }));
       res.json({
@@ -882,11 +882,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const cleanedSummary = cleanSummaryContent(vietnameseSummary);
           await db.insert(requestTable).values({
-            room_number: callDetails.roomNumber,
+            roomNumber: callDetails.roomNumber, // Fixed property name
             orderId: callDetails.orderReference || orderReference,
-            guestName: callDetails.guestName || 'Guest',
-            request_content: cleanedSummary,
-            created_at: new Date(),
+            requestContent: cleanedSummary, // Fixed property name
+            createdAt: new Date(), // Fixed property name
             status: 'Đã ghi nhận',
             updatedAt: new Date()
           });
@@ -1080,11 +1079,10 @@ Mi Nhon Hotel Mui Ne`
           console.log('Lưu request từ thiết bị di động vào database...');
           const cleanedSummary = cleanSummaryContent(callDetails.summary);
           await db.insert(requestTable).values({
-            room_number: callDetails.roomNumber,
+            roomNumber: callDetails.roomNumber, // Fixed property name
             orderId: callDetails.orderReference || orderReference,
-            guestName: callDetails.guestName || 'Guest',
-            request_content: cleanedSummary,
-            created_at: new Date(),
+            requestContent: cleanedSummary, // Fixed property name
+            createdAt: new Date(), // Fixed property name
             status: 'Đã ghi nhận',
             updatedAt: new Date()
           });
@@ -1253,7 +1251,7 @@ Mi Nhon Hotel Mui Ne`
           roomNumber: roomNumber,
           duration: 0,
           language: language,
-          createdAt: Date.now()
+          createdAt: new Date() // Fixed property name - use Date instead of timestamp number
         });
         
         console.log(`Test: Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);
@@ -1270,10 +1268,10 @@ Mi Nhon Hotel Mui Ne`
       
       // Store transcript in database directly
       await db.insert(transcript).values({
-        call_id: callDbId,
+        callId: callId, // Fixed property name - use callId instead of call_id
         role,
         content,
-        timestamp: Date.now()
+        timestamp: new Date() // Fixed property name - use Date instead of timestamp number
       });
       
       res.json({ success: true, message: 'Test transcript created successfully' });
