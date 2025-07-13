@@ -1,3 +1,7 @@
+/* ========================================
+   GLOBAL STYLES & RESET
+   ======================================== */
+
 /* Material Icons */
 @import url('https://fonts.googleapis.com/css2?family=Material+Icons&display=swap');
 /* Poppins font */
@@ -7,6 +11,10 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import component styles */
+@import './styles/components.css';
+@import './styles/animations.css';
+
 @layer base {
   * {
     @apply border-border;
@@ -14,5 +22,23 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
   }
 }

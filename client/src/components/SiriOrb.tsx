@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import '@/styles/siri-orb.css';
+// Siri orb styles are now imported in the main CSS file
 
 interface SiriOrbProps {
   micLevel: number;

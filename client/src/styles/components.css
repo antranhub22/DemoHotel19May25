@@ -1,0 +1,253 @@
+/* ========================================
+   COMPONENT-SPECIFIC STYLES
+   ======================================== */
+
+/* ========================================
+   SIRI ORB ANIMATIONS
+   ======================================== */
+
+.siri-orb {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 65%, rgba(255,255,255,0) 100%);
+  box-shadow: 0 0 60px rgba(255,255,255,0.1);
+  animation: siri-pulse 2s ease-out infinite;
+}
+
+.siri-orb::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #0A84FF,
+    #30D158,
+    #FFD60A,
+    #FF375F,
+    #BF5AF2,
+    #0A84FF
+  );
+  animation: siri-rotate 4s linear infinite;
+  filter: blur(8px);
+  opacity: 0.8;
+}
+
+.siri-orb::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.siri-wave {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+  transform-origin: center;
+}
+
+.siri-wave-1 { animation: siri-wave 2s ease-out infinite; }
+.siri-wave-2 { animation: siri-wave 2s ease-out infinite 0.4s; }
+.siri-wave-3 { animation: siri-wave 2s ease-out infinite 0.8s; }
+
+.siri-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: white;
+  text-align: center;
+}
+
+@keyframes siri-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes siri-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 30px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes siri-wave {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* ========================================
+   TRANSCRIPT DISPLAY
+   ======================================== */
+
+.transcriptContainer {
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin: 1rem 0;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transcriptStatus {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.transcriptText {
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: #333;
+  min-height: 3rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+/* ========================================
+   HOTEL INTERFACE STYLES
+   ======================================== */
+
+.hotel-interface {
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  position: relative;
+}
+
+.hotel-interface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(121, 219, 220, 0.8) 0%, rgba(85, 154, 154, 0.6) 100%);
+  z-index: 1;
+}
+
+.hotel-interface-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ========================================
+   SERVICE PANELS
+   ======================================== */
+
+.service-panel {
+  background: rgba(85, 154, 154, 0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transform: translateZ(20px);
+  transition: all 0.25s ease;
+}
+
+.service-panel:hover {
+  transform: translateZ(20px) scale(1.03) translateY(-1px);
+}
+
+/* ========================================
+   DASHBOARD STYLES
+   ======================================== */
+
+.dashboard-layout {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.dashboard-sidebar {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   STAFF DASHBOARD
+   ======================================== */
+
+.staff-dashboard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.staff-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+@media (max-width: 768px) {
+  .siri-orb {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .service-panel {
+    margin: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .dashboard-card {
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .siri-orb {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .hotel-interface {
+    padding: 0.5rem;
+  }
+} 

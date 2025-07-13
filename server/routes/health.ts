@@ -1,4 +1,6 @@
-import { Request, Response, Router } from 'express';
+import { Router, Request, Response } from 'express';
+import OpenAI from 'openai';
+import { translateToVietnamese } from '../openai';
 import { db } from '../db';
 import { sql } from 'drizzle-orm';
 import { runAutoDbFix } from '../startup/auto-database-fix';
@@ -433,6 +435,79 @@ router.get('/health/test', async (req: Request, res: Response) => {
     message: 'Test endpoint is working',
     timestamp: new Date().toISOString()
   });
+});
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev'
+});
+
+// Helper function for error handling
+function handleApiError(res: Response, error: any, defaultMessage: string) {
+  console.error(defaultMessage, error);
+  res.status(500).json({ 
+    error: defaultMessage,
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+  });
+}
+
+// Test OpenAI API endpoint
+router.post('/test-openai', async (req, res) => {
+  try {
+    const { message } = req.body;
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: message || "Hello, give me a quick test response." }],
+      max_tokens: 30
+    });
+    
+    res.json({ 
+      success: true, 
+      message: response.choices[0].message.content,
+      model: response.model,
+      usage: response.usage
+    });
+  } catch (error: any) {
+    handleApiError(res, error, "OpenAI API test error:");
+  }
+});
+
+// Database test endpoint
+router.get('/db-test', async (req, res) => {
+  try {
+    // Test database connection
+    const { db } = await import('../../src/db');
+    await db.execute(sql`SELECT 1`);
+    
+    res.json({ 
+      success: true, 
+      message: 'Database connection successful',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    handleApiError(res, error, 'Database connection failed');
+  }
+});
+
+// Translate to Vietnamese endpoint
+router.post('/translate-to-vietnamese', async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+    
+    const translatedText = await translateToVietnamese(text);
+    
+    res.json({
+      success: true,
+      original: text,
+      translated: translatedText
+    });
+  } catch (error) {
+    handleApiError(res, error, 'Translation failed');
+  }
 });
 
 export default router; 
