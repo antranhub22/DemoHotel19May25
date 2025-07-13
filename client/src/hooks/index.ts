@@ -11,5 +11,4 @@ export { useIsMobile } from './use-mobile';
 export { useToast } from './use-toast';
 
 // Hotel configuration hook
-export { useHotelConfig } from './useHotelConfig';
 export { useHotelConfiguration } from './useHotelConfiguration'; 
