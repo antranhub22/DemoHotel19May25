@@ -13,20 +13,10 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 
-<<<<<<< HEAD
 // Trust proxy for deployment on Render/Heroku/etc
 app.set('trust proxy', 1);
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-=======
-// ============================================
 // Security Middleware
-// ============================================
-
-// Basic security headers
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -51,7 +41,6 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false
->>>>>>> DASHBOARD-MASTER
 }));
 
 // Enhanced CORS configuration for SaaS dashboard
