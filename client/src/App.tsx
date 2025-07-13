@@ -7,13 +7,11 @@ import { AssistantProvider } from "@/context/AssistantContext";
 import { AuthProvider, useAuth, useTenantDetection } from "@/context/AuthContext";
 import { HotelProvider } from "@/context/HotelContext";
 import NotFound from "@/pages/not-found";
-import EmailTester from "@/components/EmailTester";
 import { useWebSocket } from '@/hooks/useWebSocket';
 import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import HotelConfigDemo from './components/HotelConfigDemo';
 
 // Dashboard pages
 import { 
@@ -110,7 +108,6 @@ const EmailTestPage = () => {
             Quay lại Trang Chính
           </Link>
         </div>
-        <EmailTester />
       </div>
     </div>
   );
@@ -251,34 +248,15 @@ function Router() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
-        {/* ============================================ */}
-        {/* EXISTING MI NHON ROUTES (Backward Compatibility) */}
-        {/* ============================================ */}
-        
-        {/* Main voice assistant - works for Mi Nhon and subdomains */}
         <Route path="/" component={VoiceAssistant} />
-        
-        {/* Mi Nhon specific routes */}
         <Route path="/call-history" component={CallHistory} />
         <Route path="/call-details/:callId" component={CallDetails} />
         <Route path="/email-test" component={EmailTestPage} />
         <Route path="/staff" component={StaffPage} />
         <Route path="/staff/dashboard" component={StaffDashboard} />
         <Route path="/analytics" component={AnalyticsDashboard} />
-        
-        {/* Hotel Configuration Demo */}
-        <Route path="/hotel-config-demo" component={HotelConfigDemo} />
-
-        {/* ============================================ */}
-        {/* AUTHENTICATION ROUTES */}
-        {/* ============================================ */}
-        
         <Route path="/login" component={LoginPage} />
         <Route path="/unauthorized" component={UnauthorizedPage} />
-
-        {/* ============================================ */}
-        {/* PROTECTED DASHBOARD ROUTES */}
-        {/* ============================================ */}
         
         <Route path="/dashboard">
           <ProtectedRoute requireAuth={true}>
@@ -320,7 +298,6 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        {/* Premium Routes */}
         <Route path="/dashboard/billing">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
@@ -342,10 +319,6 @@ function Router() {
             </DashboardLayout>
           </ProtectedRoute>
         </Route>
-
-        {/* ============================================ */}
-        {/* FALLBACK ROUTES */}
-        {/* ============================================ */}
         
         <Route component={NotFound} />
       </Switch>

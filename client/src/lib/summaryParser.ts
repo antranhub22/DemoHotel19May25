@@ -3,6 +3,13 @@
  */
 
 import { OrderSummary, OrderItem } from '@/types';
+import { 
+  extractRoomNumber as extractRoomNumberShared, 
+  extractSpecialInstructions as extractSpecialInstructionsShared, 
+  extractDeliveryTime as extractDeliveryTimeShared, 
+  extractTotalAmount as extractTotalAmountShared,
+  removeSimilarItems
+} from './sharedUtils';
 
 /**
  * Defines regex patterns to extract service information from summary text
@@ -36,15 +43,31 @@ const PATTERNS = {
   // Other category - will be used for unmatched requests
   other: /currency\s*exchange|money\s*change|exchange\s*money|foreign\s*currency|bus\s*ticket|train\s*ticket|sell|purchase|buy/i,
   
+  // Item extraction
+  items: /items?[:\s]*([^\.]+)/i,
+  
+  // Request patterns
+  request: /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^\.;]+)/gi,
+  
+  // Bullet points
+  bullets: /(?:^|\n)[-•*]\s*([^\n]+)/g,
+  
+  // Sentences
+  sentences: /\.(?:\s|$)/,
+  
+  // Delivery time patterns
   deliveryTime: {
     asap: /as\s*soon\s*as\s*possible|right\s*away|immediately|asap/i,
     thirtyMin: /30\s*min|half\s*an\s*hour|30\s*minutes/i,
     oneHour: /(?:1|one)\s*hour|60\s*minutes/i,
     specific: /specific\s*time|scheduled|later|tomorrow|tonight|afternoon|evening|morning/i,
   },
+  
+  // Special instructions
   specialInstructions: /special(?:\s+instructions?|(?:\s+notes?)|(?:\s+requests?))(?:\s*:)?\s*([^\.]+)/i,
-  items: /(?:ordered|requested|asked for|items|item)(?:\s*:)?\s*([^\.]+)/i,
-  totalAmount: /(?:total(?:\s+amount)?|cost|price|charge)(?:\s*:)?\s*\$?\s*([0-9]+(?:\.[0-9]{1,2})?)/i,
+  
+  // Total amount
+  totalAmount: /(?:total(?:\s+amount)?|cost|price|charge)(?:\s*:)?\s*\$?\s*([0-9]+(?:\.[0-9]{1,2})?)/i
 };
 
 /**
@@ -170,7 +193,7 @@ function extractItems(summary: string): OrderItem[] {
   let allItems: OrderItem[] = [];
   
   // First look for bulleted items (most reliable format from AI)
-  const bulletItems = summary.match(/(?:^|\n)[-•*]\s*([^\n]+)/g);
+  const bulletItems = summary.match(PATTERNS.bullets);
   if (bulletItems && bulletItems.length > 0) {
     const parsedItems = bulletItems.map((item, index) => {
       // Remove the bullet and trim
@@ -183,7 +206,7 @@ function extractItems(summary: string): OrderItem[] {
   
   // Look for request patterns to find all requests in the summary
   {
-    const requestItems = summary.match(/(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^\.;]+)/gi);
+    const requestItems = summary.match(PATTERNS.request);
     if (requestItems && requestItems.length > 0) {
       const parsedItems = requestItems.map((item, index) => {
         // Remove the request prefix
@@ -210,7 +233,7 @@ function extractItems(summary: string): OrderItem[] {
   
   // Final fallback: Split the entire summary by sentences and look for potential requests
   if (allItems.length === 0) {
-    const sentences = summary.split(/\.(?:\s|$)/);
+    const sentences = summary.split(PATTERNS.sentences);
     for (let i = 0; i < sentences.length; i++) {
       const sentence = sentences[i].trim();
       // Only process sentences that look like they might contain a request
@@ -224,32 +247,8 @@ function extractItems(summary: string): OrderItem[] {
     }
   }
   
-  // Remove duplicates and similar items by comparing names
-  const uniqueItems: OrderItem[] = [];
-  const nameMap = new Map<string, boolean>();
-  
-  for (const item of allItems) {
-    // Normalize name for comparison (lowercase, remove extra spaces)
-    const normalizedName = item.name.toLowerCase().replace(/\s+/g, ' ').trim();
-    
-    // Check if we already have a very similar item
-    let isDuplicate = false;
-    // Convert Map entries to array and then iterate
-    const existingNames = Array.from(nameMap.keys());
-    for (const existingName of existingNames) {
-      // If names are 80% similar or more, consider them duplicates
-      if (stringSimilarity(normalizedName, existingName) > 0.8) {
-        isDuplicate = true;
-        break;
-      }
-    }
-    
-    // Add to unique items if not a duplicate
-    if (!isDuplicate) {
-      nameMap.set(normalizedName, true);
-      uniqueItems.push(item);
-    }
-  }
+  // Remove duplicates using shared utility
+  const uniqueItems = removeSimilarItems(allItems, 0.8);
   
   // Ensure we have unique item IDs
   return uniqueItems.map((item, index) => ({
@@ -397,18 +396,18 @@ function extractTotalAmount(summary: string, items: OrderItem[]): number {
 export function parseSummaryToOrderDetails(summary: string): Partial<OrderSummary> {
   if (!summary) return {};
   
-  // Extract individual components
-  const roomNumber = extractRoomNumber(summary) || '';
+  // Extract individual components using shared utilities
+  const roomNumber = extractRoomNumberShared(summary) || '';
   const orderType = determineOrderType(summary);
-  const deliveryTime = determineDeliveryTime(summary);
-  const specialInstructions = extractSpecialInstructions(summary);
+  const deliveryTime = extractDeliveryTimeShared(summary) || '';
+  const specialInstructions = extractSpecialInstructionsShared(summary) || '';
   const items = extractItems(summary);
-  const totalAmount = extractTotalAmount(summary, items);
+  const totalAmount = extractTotalAmountShared(summary) || 0;
   
   return {
     roomNumber,
     orderType,
-    deliveryTime,
+    deliveryTime: deliveryTime as "asap" | "30min" | "1hour" | "specific" | undefined,
     guestName: '',
     guestEmail: '',
     guestPhone: '',

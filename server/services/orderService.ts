@@ -35,7 +35,7 @@ export class OrderService {
    */
   static async getOrderById(orderId: string): Promise<any> {
     try {
-      const order = await storage.getOrderById(orderId);
+      const order = await storage.getOrderById(parseInt(orderId));
       
       if (!order) {
         throw new Error('Order not found');
@@ -69,7 +69,7 @@ export class OrderService {
         throw new Error('Status is required');
       }
       
-      const updatedOrder = await storage.updateOrderStatus(orderId, status);
+      const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
       
       if (!updatedOrder) {
         throw new Error('Order not found');
@@ -85,12 +85,27 @@ export class OrderService {
   /**
    * Get all orders
    */
-  static async getAllOrders(): Promise<any[]> {
+  static async getAllOrders(): Promise<any> {
     try {
-      return await storage.getAllOrders();
+      const allOrders = await storage.getAllOrders({});
+      
+      const totalOrders = allOrders.length;
+      const ordersByStatus = allOrders.reduce((acc: any, order: any) => {
+        const status = order.status || 'unknown';
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {});
+      
+      return {
+        totalOrders,
+        ordersByStatus,
+        averageOrderValue: totalOrders > 0 
+          ? allOrders.reduce((sum: number, order: any) => sum + (order.totalAmount || 0), 0) / totalOrders 
+          : 0
+      };
     } catch (error) {
-      console.error('Error getting all orders:', error);
-      throw new Error('Failed to retrieve orders');
+      console.error('Error getting order statistics:', error);
+      throw new Error('Failed to get order statistics');
     }
   }
 
@@ -144,7 +159,7 @@ export class OrderService {
    */
   static async getOrderStatistics(): Promise<any> {
     try {
-      const allOrders = await storage.getAllOrders();
+      const allOrders = await storage.getAllOrders({});
       
       const totalOrders = allOrders.length;
       const ordersByStatus = allOrders.reduce((acc: any, order: any) => {

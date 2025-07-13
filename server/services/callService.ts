@@ -138,7 +138,7 @@ export class CallService {
         totalCalls: totalCalls.length,
         totalTranscripts: totalTranscripts.length,
         averageDuration: totalCalls.length > 0 
-          ? totalCalls.reduce((sum, c) => sum + (c.duration || 0), 0) / totalCalls.length 
+          ? totalCalls.reduce((sum: number, c: any) => sum + (c.duration || 0), 0) / totalCalls.length 
           : 0
       };
     } catch (error) {

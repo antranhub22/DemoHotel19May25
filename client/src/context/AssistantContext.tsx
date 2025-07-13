@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { initVapi, getVapiInstance, FORCE_BASIC_SUMMARY, apiRequest, parseSummaryToOrderDetails } from '@/lib';
 import { Transcript, OrderSummary, CallDetails, Order, InterfaceLayer, CallSummary, ServiceRequest, ActiveOrder } from '@/types';
-import { initVapi, getVapiInstance, FORCE_BASIC_SUMMARY } from '@/lib/vapiClient';
-import { apiRequest } from '@/lib/queryClient';
-import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import ReactDOM from 'react-dom';
 import { HotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 
@@ -261,10 +259,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       ...transcript,
       id: Date.now() as unknown as number,
       callId: callDetails?.id || `call-${Date.now()}`,
-      timestamp: new Date()
+      timestamp: new Date(),
+      tenantId: tenantId || 'default'
     };
     setTranscripts(prev => [...prev, newTranscript]);
-  }, [callDetails?.id]);
+  }, [callDetails?.id, tenantId]);
 
   // Initialize Vapi when component mounts
   useEffect(() => {
@@ -322,7 +321,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 role: 'assistant',
                 content: outputContent,
                 timestamp: new Date(),
-                isModelOutput: true
+                isModelOutput: true,
+                tenantId: tenantId || 'default'
               };
               console.log('Adding new transcript for model output:', newTranscript);
               setTranscripts(prev => {
@@ -343,7 +343,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               callId: callDetails?.id || `call-${Date.now()}`,
               role: 'user',
               content: message.content || message.transcript || '',
-              timestamp: new Date()
+              timestamp: new Date(),
+              tenantId: tenantId || 'default'
             };
             setTranscripts(prev => [...prev, newTranscript]);
           }
@@ -363,7 +364,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         vapi.stop();
       }
     };
-  }, [language, hotelConfig]);
+  }, [language, hotelConfig, tenantId]);
 
   useEffect(() => {
     if (currentInterface === 'interface2') {
@@ -421,8 +422,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       setCallDetails({
         id: callId,
         roomNumber: '',
-        duration: '0',
-        category: ''
+        duration: '',
+        category: '',
+        language: 'en'
       });
       
       // Clear previous transcripts and model outputs
@@ -481,7 +483,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error starting call:', error);
     }
-  }, [language, hotelConfig]);
+  }, [language, hotelConfig, tenantId]);
 
   // End call function
   const endCall = useCallback(() => {
@@ -519,7 +521,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         id: Date.now() as unknown as number,
         callId: callDetails?.id || `call-${Date.now()}`,
         content: "Call was too short to generate a summary. Please try a more detailed conversation.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        tenantId: tenantId || 'default'
       };
       setCallSummary(noTranscriptSummary);
       return;
@@ -530,7 +533,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       id: Date.now() as unknown as number,
       callId: callDetails?.id || `call-${Date.now()}`,
       content: "Generating AI summary of your conversation...",
-      timestamp: new Date()
+      timestamp: new Date(),
+      tenantId: tenantId || 'default'
     };
     setCallSummary(loadingSummary);
     
@@ -547,7 +551,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         callId: callDetails?.id || `call-${Date.now()}`,
         callDuration: formattedDuration,
         forceBasicSummary: FORCE_BASIC_SUMMARY,
-        language
+        language,
+        tenantId: tenantId || 'default'
       }),
     })
     .then(response => {
@@ -565,7 +570,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           id: Date.now() as unknown as number,
           callId: callDetails?.id || `call-${Date.now()}`,
           content: summaryContent,
-          timestamp: new Date(data.summary.timestamp || Date.now())
+          timestamp: new Date(data.summary.timestamp || Date.now()),
+          tenantId: tenantId || 'default'
         };
         setCallSummary(aiSummary);
         if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
@@ -581,7 +587,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         id: Date.now() as unknown as number,
         callId: callDetails?.id || `call-${Date.now()}`,
             content: "An error occurred while generating the call summary.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        tenantId: tenantId || 'default'
       };
           setCallSummary(errorSummary);
         });
@@ -594,7 +601,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       console.error('Error in endCall:', error);
       setCurrentInterface('interface1');
     }
-  }, [callTimer, callDuration, transcripts, callDetails, setCallSummary, setCurrentInterface, setServiceRequests, language]);
+  }, [callTimer, callDuration, transcripts, callDetails, setCallSummary, setCurrentInterface, setServiceRequests, language, tenantId]);
 
   // Function to translate text to Vietnamese
   const translateToVietnamese = async (text: string): Promise<string> => {

@@ -1,5 +1,4 @@
 import nodemailer from 'nodemailer';
-import Mailjet from 'node-mailjet';
 
 // Tạo một transporter test luôn trả về thành công (cho môi trường phát triển)
 // Để khi gửi email bị lỗi, ứng dụng vẫn hoạt động bình thường
@@ -24,74 +23,23 @@ const createTestTransporter = () => {
   };
 };
 
-// Cấu hình Mailjet
-export const createMailjetTransporter = () => {
-  // Nếu không có thông tin đăng nhập Mailjet
-  if (!process.env.MAILJET_API_KEY || !process.env.MAILJET_SECRET_KEY) {
-    console.warn('MAILJET_API_KEY hoặc MAILJET_SECRET_KEY không được cấu hình - sử dụng test transporter');
-    return createTestTransporter();
-  }
-
-  console.log('Sử dụng cấu hình Mailjet');
-  
-  try {
-    // Tạo một wrapper cho Mailjet để sử dụng như nodemailer
-    const mailjet = Mailjet.apiConnect(
-      process.env.MAILJET_API_KEY,
-      process.env.MAILJET_SECRET_KEY
-    );
-    
-    // Trả về một đối tượng giống như nodemailer transporter
-    return {
-      sendMail: async (mailOptions: any) => {
-        const { from, to, subject, html, text } = mailOptions;
-        
-        const data = {
-          Messages: [
-            {
-              From: {
-                Email: "tuan.ctw@gmail.com",
-                Name: 'Mi Nhon Hotel - Voice Assistant'
-              },
-              To: [
-                {
-                  Email: to,
-                  Name: 'Tuan Nguyen'
-                }
-              ],
-              Subject: subject,
-              TextPart: text || 'Nội dung email từ Mi Nhon Hotel Mui Ne',
-              HTMLPart: html || '',
-              CustomID: `minhon-hotel-${Date.now()}`
-            }
-          ]
-        };
-        
-        try {
-          const result = await mailjet.post('send', { version: 'v3.1' }).request(data as any);
-          // Type assertion để tránh lỗi TypeScript
-          const response = result.body as any;
-          return {
-            messageId: response.Messages[0].To[0].MessageID || `mailjet-${Date.now()}`,
-            response: 'Email sent successfully with Mailjet'
-          };
-        } catch (error) {
-          console.error('Lỗi khi gửi email qua Mailjet:', error);
-          throw error;
-        }
-      }
-    };
-  } catch (error) {
-    console.error('Lỗi khi tạo Mailjet transporter:', error);
-    // Nếu có lỗi, sử dụng test transporter để tránh ứng dụng bị dừng
-    return createTestTransporter();
-  }
-};
-
 // Cấu hình transporter cho email
 export const createTransporter = () => {
-  // Sử dụng Mailjet làm dịch vụ gửi email mặc định
-  return createMailjetTransporter();
+  // Sử dụng nodemailer với Gmail SMTP hoặc test transporter
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    console.warn('GMAIL_USER hoặc GMAIL_PASS không được cấu hình - sử dụng test transporter');
+    return createTestTransporter();
+  }
+
+  console.log('Sử dụng cấu hình Gmail SMTP');
+  
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
+    }
+  });
 };
 
 // Gửi email xác nhận đặt dịch vụ
@@ -128,7 +76,7 @@ export const sendServiceConfirmation = async (
       </div>
     `;
 
-    console.log('Gửi email với Mailjet');
+    console.log('Gửi email với Gmail SMTP');
     
     // Tạo bản ghi log
     const emailLog = {
@@ -167,7 +115,7 @@ export const sendServiceConfirmation = async (
       
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
-      console.error('Lỗi khi gửi email qua Mailjet:', emailError);
+      console.error('Lỗi khi gửi email qua Gmail SMTP:', emailError);
       
       // Cập nhật log
       emailLog.status = 'failed';
@@ -236,7 +184,7 @@ export const sendCallSummary = async (
       </div>
     `;
 
-    console.log('Gửi email tóm tắt với Mailjet');
+    console.log('Gửi email tóm tắt với Gmail SMTP');
     
     // Tạo bản ghi log
     const emailLog = {
@@ -278,7 +226,7 @@ export const sendCallSummary = async (
       
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
-      console.error('Lỗi khi gửi email tóm tắt qua Mailjet:', emailError);
+      console.error('Lỗi khi gửi email tóm tắt qua Gmail SMTP:', emailError);
       
       // Cập nhật log
       emailLog.status = 'failed';

@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
-    const order = await storage.getOrderById(orderId);
+    const order = await storage.getOrderById(parseInt(orderId));
     
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -90,7 +90,7 @@ router.patch('/:id/status', verifyJWT, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Status is required' });
     }
     
-    const updatedOrder = await storage.updateOrderStatus(orderId, status);
+    const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
     
     if (!updatedOrder) {
       return res.status(404).json({ error: 'Order not found' });
@@ -112,7 +112,7 @@ router.post('/:id/update-status', verifyJWT, async (req: Request, res: Response)
       return res.status(400).json({ error: 'Status is required' });
     }
     
-    const updatedOrder = await storage.updateOrderStatus(orderId, status);
+    const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
     
     if (!updatedOrder) {
       return res.status(404).json({ error: 'Order not found' });
@@ -137,7 +137,7 @@ router.post('/:id/update-status', verifyJWT, async (req: Request, res: Response)
 // Get all orders
 router.get('/', async (req, res) => {
   try {
-    const orders = await storage.getAllOrders();
+    const orders = await storage.getAllOrders({});
     res.json(orders);
   } catch (error) {
     handleApiError(res, error, 'Failed to retrieve orders');

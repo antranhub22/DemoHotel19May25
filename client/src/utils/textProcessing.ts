@@ -1,18 +1,10 @@
 import { englishDictionary } from './dictionary/englishDictionary';
 import dictionaryData from './dictionary/dictionary.json';
+import { normalizeText } from '../lib/sharedUtils';
 
 interface ProcessTextResult {
   words: string[];
   positions: number[];
-}
-
-// Chuẩn hóa text: lowercase, tách dấu câu, loại bỏ khoảng trắng dư thừa
-function normalizeText(text: string): string {
-  return text
-    .replace(/([.,!?;:()"'-])/g, ' $1 ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase();
 }
 
 // Tạo set từ điển và tính maxPhraseLength
@@ -72,8 +64,7 @@ export function processText(text: string): ProcessTextResult {
   return { words, positions };
 }
 
-// Thêm khoảng trắng thông minh giữa các từ
+// Hàm applySmartSpacing
 export function applySmartSpacing(words: string[]): string {
-  if (words.length === 0) return '';
   return words.join(' ');
 } 

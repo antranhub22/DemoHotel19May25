@@ -45,7 +45,8 @@ export function useWebSocket() {
           assistant.addTranscript({
             callId: data.callId,
             role: data.role,
-            content: data.content
+            content: data.content,
+            tenantId: 'default'
           });
         }
         // Handle order status update (realtime from staff UI)

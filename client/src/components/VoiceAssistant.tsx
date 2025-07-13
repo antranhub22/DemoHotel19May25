@@ -3,8 +3,6 @@ import { useAssistant } from '@/context/AssistantContext';
 import Interface1 from './Interface1';
 import Interface2 from './Interface2';
 import Interface3 from './Interface3';
-import Interface3Vi from './Interface3Vi';
-import Interface3Fr from './Interface3Fr';
 import Interface4 from './Interface4';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Link } from 'wouter';
@@ -254,8 +252,6 @@ const VoiceAssistant: React.FC = () => {
         <Interface1 isActive={currentInterface === 'interface1'} />
         <Interface2 isActive={currentInterface === 'interface2'} />
         <Interface3 isActive={currentInterface === 'interface3'} />
-        <Interface3Vi isActive={currentInterface === 'interface3vi'} />
-        <Interface3Fr isActive={currentInterface === 'interface3fr'} />
         <Interface4 isActive={currentInterface === 'interface4'} />
       </div>
     </div>

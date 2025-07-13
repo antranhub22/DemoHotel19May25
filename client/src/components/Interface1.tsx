@@ -100,8 +100,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
     setCallDetails({
       id: `call-${Date.now()}`,
       roomNumber: '',
-      duration: '0',
-      category: ''
+      duration: '',
+      category: '',
+      language: 'en'
     });
     setTranscripts([]);
     setModelOutput([]);
