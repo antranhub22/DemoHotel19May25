@@ -353,22 +353,30 @@ function Router() {
 }
 
 // ============================================
+// Main App Content (WebSocket + ErrorBoundary)
+// ============================================
+
+function AppContent() {
+  useWebSocket();
+  return (
+    <ErrorBoundary>
+      <Router />
+      <Toaster />
+    </ErrorBoundary>
+  );
+}
+
+// ============================================
 // Main App Component
 // ============================================
 
 function App() {
-  // Initialize WebSocket globally to keep connection across routes
-  useWebSocket();
-  
   return (
     <BrowserRouter>
       <AuthProvider>
         <HotelProvider>
           <AssistantProvider>
-            <ErrorBoundary>
-              <Router />
-              <Toaster />
-            </ErrorBoundary>
+            <AppContent />
           </AssistantProvider>
         </HotelProvider>
       </AuthProvider>
