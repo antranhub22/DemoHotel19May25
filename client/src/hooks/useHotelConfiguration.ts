@@ -145,8 +145,8 @@ export const useHotelConfiguration = () => {
             logoUrl: hotelData.branding.logo,
             primaryColor: hotelData.branding.primaryColor,
             headerText: hotelData.name,
-            vapiPublicKey: '',
-            vapiAssistantId: '',
+            vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
+            vapiAssistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
             branding: {
               ...hotelData.branding,
               colors: {
@@ -209,13 +209,14 @@ export const getVapiPublicKeyByLanguage = (language: string, config: HotelConfig
         return import.meta.env.VITE_VAPI_PUBLIC_KEY_KO || config.vapiPublicKey;
       case 'vi':
         return import.meta.env.VITE_VAPI_PUBLIC_KEY_VI || config.vapiPublicKey;
+      case 'en':
       default:
-        return config.vapiPublicKey;
+        return import.meta.env.VITE_VAPI_PUBLIC_KEY || config.vapiPublicKey;
     }
   }
   
   // For other tenants, use the single assistant
-  return config.vapiPublicKey;
+  return config.vapiPublicKey || import.meta.env.VITE_VAPI_PUBLIC_KEY;
 };
 
 export const getVapiAssistantIdByLanguage = (language: string, config: HotelConfiguration): string => {
@@ -232,11 +233,12 @@ export const getVapiAssistantIdByLanguage = (language: string, config: HotelConf
         return import.meta.env.VITE_VAPI_ASSISTANT_ID_KO || config.vapiAssistantId;
       case 'vi':
         return import.meta.env.VITE_VAPI_ASSISTANT_ID_VI || config.vapiAssistantId;
+      case 'en':
       default:
-        return config.vapiAssistantId;
+        return import.meta.env.VITE_VAPI_ASSISTANT_ID || config.vapiAssistantId;
     }
   }
   
   // For other tenants, use the single assistant
-  return config.vapiAssistantId;
+  return config.vapiAssistantId || import.meta.env.VITE_VAPI_ASSISTANT_ID;
 }; 

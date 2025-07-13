@@ -98,6 +98,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       return;
     }
 
+    console.log('[DEBUG] Starting call with language:', lang);
+    console.log('[DEBUG] Hotel config:', hotelConfig);
+
     setEmailSentForCurrentSession(false);
     setCallDetails({
       id: `call-${Date.now()}`,
@@ -114,16 +117,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     const publicKey = getVapiPublicKeyByLanguage(lang, hotelConfig);
     const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
     
+    console.log('[DEBUG] Vapi configuration:', { publicKey, assistantId, lang });
+    
     if (!publicKey || !assistantId) {
       console.error('Vapi configuration not available for language:', lang);
       return;
     }
     
-    const vapi = await initVapi(publicKey);
-    if (vapi && assistantId) {
-      await vapi.start(assistantId);
-      setIsCallStarted(true);
-      setShowConversation(true);
+    try {
+      console.log('[DEBUG] Initializing Vapi with public key:', publicKey);
+      const vapi = await initVapi(publicKey);
+      if (vapi && assistantId) {
+        console.log('[DEBUG] Starting Vapi call with assistant ID:', assistantId);
+        await vapi.start(assistantId);
+        setIsCallStarted(true);
+        setShowConversation(true);
+        console.log('[DEBUG] Vapi call started successfully');
+      }
+    } catch (error) {
+      console.error('[DEBUG] Error starting Vapi call:', error);
     }
   };
 
