@@ -122,22 +122,20 @@ const getMiNhonDefaultConfig = (): HotelConfig => ({
 
 // Hotel identifier extraction utilities
 const extractHotelIdentifier = (): { type: 'default' | 'subdomain' | 'custom', identifier: string } => {
-  const hostname = window.location.hostname
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  const hostname = window.location.hostname;
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
   
-  // Default Mi Nhon Hotel (localhost or minhon domain)
-  if (isLocalhost || hostname.includes('minhon') || hostname.includes('localhost')) {
-    return { type: 'default', identifier: 'mi-nhon-hotel' }
+  // Chỉ trả về default cho localhost
+  if (isLocalhost) {
+    return { type: 'default', identifier: 'mi-nhon-hotel' };
   }
-  
   // Subdomain detection (format: hotel.talk2go.online)
-  const parts = hostname.split('.')
+  const parts = hostname.split('.');
   if (parts.length >= 3 && parts[parts.length - 2] === 'talk2go' && parts[parts.length - 1] === 'online') {
-    return { type: 'subdomain', identifier: parts[0] }
+    return { type: 'subdomain', identifier: parts[0] };
   }
-  
   // Custom domain
-  return { type: 'custom', identifier: hostname }
+  return { type: 'custom', identifier: hostname };
 }
 
 // API call to load hotel configuration
