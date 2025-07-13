@@ -7,6 +7,7 @@ import InfographicSteps from './InfographicSteps';
 import { t } from '@/i18n';
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 
 interface Interface2Props {
   isActive: boolean;
@@ -41,9 +42,11 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     setCurrentInterface,
     micLevel,
     modelOutput,
-    language,
-    hotelConfig
+    language
   } = useAssistant();
+
+  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
+  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
   const animationFrames = useRef<{[key: string]: number}>({});
   const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
@@ -194,13 +197,25 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   };
 
   // Early return if hotel config is not loaded
-  if (!hotelConfig) {
-    console.log('[DEBUG] Interface2 render:', { hotelConfig });
+  if (configLoading || !hotelConfig) {
+    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if config failed to load
+  if (configError) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-gray-600">{configError}</p>
         </div>
       </div>
     );

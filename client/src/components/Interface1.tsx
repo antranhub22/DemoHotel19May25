@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
-import { getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
+import { useHotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 
 interface Interface1Props {
   isActive?: boolean;
@@ -34,9 +34,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     callSummary,
     orderSummary,
     setOrderSummary,
-    endCall,
-    hotelConfig
+    endCall
   } = useAssistant();
+
+  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
+  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
 
   const [isMuted, setIsMuted] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
@@ -349,13 +351,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   ];
 
   // Early return if hotel config is not loaded
-  if (!hotelConfig) {
-    console.log('[DEBUG] Interface1 render:', { hotelConfig });
+  if (configLoading || !hotelConfig) {
+    console.log('[DEBUG] Interface1 render:', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-30 bg-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if config failed to load
+  if (configError) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-30 bg-gray-100">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-gray-600">{configError}</p>
         </div>
       </div>
     );

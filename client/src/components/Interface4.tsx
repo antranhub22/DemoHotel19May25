@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { t } from '@/i18n';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 
 interface Interface4Props {
   isActive: boolean;
@@ -8,7 +9,11 @@ interface Interface4Props {
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
-  const { order, setCurrentInterface, language, setOrder, hotelConfig } = useAssistant();
+  const { order, setCurrentInterface, language, setOrder } = useAssistant();
+
+  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
+  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
+
   // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Clear console for clean debugging when Interface4 mounts
@@ -57,12 +62,24 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   console.log('[DEBUG] Interface4 render:', { hotelConfig });
   
   // Early return if hotel config is not loaded
-  if (!hotelConfig) {
+  if (configLoading || !hotelConfig) {
     return (
       <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-center justify-center bg-black/30 backdrop-blur-sm">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-white text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if config failed to load
+  if (configError) {
+    return (
+      <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-white">{configError}</p>
         </div>
       </div>
     );

@@ -7,6 +7,7 @@ import { parseSummaryToOrderDetails, extractRoomNumber } from '@/lib/summaryPars
 import { t } from '@/i18n';
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 
 interface Interface3Props {
   isActive: boolean;
@@ -28,21 +29,36 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     addActiveOrder,
     translateToVietnamese,
-    language,
-    hotelConfig
+    language
   } = useAssistant();
+
+  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
+  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
+
   const [groupedRequests, setGroupedRequests] = useState<Record<string, ServiceRequest[]>>({});
   const [note, setNote] = useState('');
   // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // Early return if hotel config is not loaded
-  if (!hotelConfig) {
-    console.log('[DEBUG] Interface3 render:', { hotelConfig });
+  if (configLoading || !hotelConfig) {
+    console.log('[DEBUG] Interface3 render:', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if config failed to load
+  if (configError) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-gray-600">{configError}</p>
         </div>
       </div>
     );
