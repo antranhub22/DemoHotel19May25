@@ -6,12 +6,14 @@ import InfographicSteps from './InfographicSteps';
 import { parseSummaryToOrderDetails, extractRoomNumber } from '@/lib/summaryParser';
 import { t } from '@/i18n';
 import { Button } from './ui/button';
+import { AlertCircle } from 'lucide-react';
 
 interface Interface3Props {
   isActive: boolean;
 }
 
 const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     orderSummary, 
     setOrderSummary, 
@@ -26,13 +28,24 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     addActiveOrder,
     translateToVietnamese,
-    language
+    language,
+    hotelConfig
   } = useAssistant();
-  
-  // Local state for grouping service requests by type
   const [groupedRequests, setGroupedRequests] = useState<Record<string, ServiceRequest[]>>({});
-  // State for user-provided additional notes
   const [note, setNote] = useState('');
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
+
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
   
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
@@ -349,10 +362,10 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       } z-30`}
       id="interface3"
       style={{
-        backgroundImage: `linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6)), url(${hotelImage})`,
+        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
       }}
     >
       <div className="container mx-auto flex flex-col p-2 sm:p-4 md:p-8">
