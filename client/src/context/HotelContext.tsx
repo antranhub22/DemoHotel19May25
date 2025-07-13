@@ -232,14 +232,10 @@ export const useHotelTheme = () => {
 
 export const useHotelFeatures = () => {
   const { hasFeature } = useHotel()
-  
   return {
     hasFeature,
     isMultiLanguage: hasFeature('multiLanguage'),
     hasCallHistory: hasFeature('callHistory'),
-    hasRoomService: hasFeature('roomService'),
-    hasConcierge: hasFeature('concierge'),
-    hasVoiceCloning: hasFeature('voiceCloning'),
     hasAnalytics: hasFeature('analytics')
   }
 }
