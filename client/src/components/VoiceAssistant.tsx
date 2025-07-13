@@ -39,7 +39,7 @@ const VoiceAssistant: React.FC = () => {
   }, [config, hotelConfig, setHotelConfig]);
   
   // Initialize WebSocket connection
-  useWebSocket();
+  // useWebSocket(); // This line is removed as per the edit hint.
 
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');
