@@ -211,11 +211,9 @@ const VoiceAssistant: React.FC = () => {
 
             {/* Call History - Show only if feature is enabled */}
             {config.features.callHistory && (
-              <Link href="/call-history">
-                <a className="flex items-center gap-1 px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm hover:bg-primary-darker transition-colors">
-                  <History className="w-4 h-4" />
-                  <span className="hidden sm:inline">Call History</span>
-                </a>
+              <Link href="/call-history" className="flex items-center gap-1 px-2 py-1 rounded bg-primary-dark text-white text-xs sm:text-sm hover:bg-primary-darker transition-colors">
+                <History className="w-4 h-4" />
+                <span className="hidden sm:inline">Call History</span>
               </Link>
             )}
           </div>
