@@ -12,6 +12,7 @@ import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import Interface1 from '@/components/Interface1';
 
 // Dashboard pages
 import { 
@@ -249,6 +250,7 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
         <Route path="/" component={VoiceAssistant} />
+        <Route path="/interface1" component={() => <Interface1 />} />
         <Route path="/call-history" component={CallHistory} />
         <Route path="/call-details/:callId" component={CallDetails} />
         <Route path="/email-test" component={EmailTestPage} />

@@ -16,10 +16,10 @@ import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import { getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 
 interface Interface1Props {
-  isActive: boolean;
+  isActive?: boolean;
 }
 
-const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
+const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     setCurrentInterface, 
