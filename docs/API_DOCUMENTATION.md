@@ -1,1284 +1,1112 @@
-# 🚀 API Documentation - Hotel Voice Assistant Platform
+# API Documentation
 
-## Multi-Tenant SaaS API Reference
+## Table of Contents
+1. [Overview](#overview)
+2. [Authentication](#authentication)
+3. [Base URL](#base-url)
+4. [Error Handling](#error-handling)
+5. [Endpoints](#endpoints)
+6. [WebSocket Events](#websocket-events)
+7. [Rate Limiting](#rate-limiting)
+8. [Examples](#examples)
 
-Welcome to the comprehensive API documentation for the Hotel Voice Assistant Platform. This documentation covers all endpoints, authentication methods, and integration examples for the multi-tenant SaaS system.
+## Overview
 
----
+The Hotel Assistant API provides RESTful endpoints for managing hotel operations, voice calls, orders, and analytics. All endpoints support multi-tenancy and require proper authentication.
 
-## 📋 Table of Contents
+### API Versioning
+- Current Version: `v1`
+- Base URL: `https://api.hotelassistant.com/v1`
+- Content-Type: `application/json`
 
-1. [Authentication](#authentication)
-2. [Base URLs & Environments](#base-urls--environments)
-3. [Hotel Management API](#hotel-management-api)
-4. [Assistant Configuration API](#assistant-configuration-api)
-5. [Analytics & Reporting API](#analytics--reporting-api)
-6. [Tenant Management API](#tenant-management-api)
-7. [WebSocket API](#websocket-api)
-8. [Webhooks](#webhooks)
-9. [Error Handling](#error-handling)
-10. [Rate Limiting](#rate-limiting)
-11. [SDKs & Examples](#sdks--examples)
-
----
-
-## 🔐 Authentication
+## Authentication
 
 ### JWT Token Authentication
+All API endpoints require authentication via JWT tokens.
 
-All API requests require a valid JWT token in the Authorization header:
-
+#### Login
 ```http
-Authorization: Bearer <jwt_token>
-```
-
-### Obtaining Access Token
-
-```http
-POST /api/auth/login
+POST /auth/login
 Content-Type: application/json
 
 {
-  "email": "user@hotel.com",
-  "password": "secure_password"
+  "username": "admin",
+  "password": "password123",
+  "tenantId": "optional-tenant-id"
 }
 ```
 
-**Response:**
+#### Response
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "user-123",
-    "email": "user@hotel.com",
-    "tenantId": "tenant-456",
-    "role": "admin"
-  },
-  "expiresIn": 3600
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "role": "admin",
+      "tenantId": "tenant-uuid"
+    },
+    "tenant": {
+      "id": "tenant-uuid",
+      "hotelName": "Mi Nhon Hotel",
+      "subscriptionPlan": "premium",
+      "subscriptionStatus": "active"
+    }
+  }
 }
+```
+
+#### Using the Token
+Include the token in the Authorization header:
+```http
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### Token Refresh
-
 ```http
-POST /api/auth/refresh
-Authorization: Bearer <jwt_token>
-```
+POST /auth/refresh
+Content-Type: application/json
 
-**Response:**
-```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "expiresIn": 3600
+  "token": "refresh-token"
 }
 ```
 
----
-
-## 🌐 Base URLs & Environments
-
-### Production
-```
-https://api.talk2go.online
-```
+## Base URL
 
 ### Development
 ```
-https://api-dev.talk2go.online
+http://localhost:3000
 ```
 
-### Staging
+### Production
 ```
-https://api-staging.talk2go.online
-```
-
----
-
-## 🏨 Hotel Management API
-
-### 1. Hotel Research & Onboarding
-
-#### Research Hotel Information
-```http
-POST /api/dashboard/research-hotel
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "hotelName": "Grand Plaza Hotel",
-  "location": "New York, NY",
-  "researchDepth": "basic"
-}
+https://api.hotelassistant.com
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "basicInfo": {
-      "name": "Grand Plaza Hotel",
-      "address": "123 Main Street, New York, NY 10001",
-      "phone": "+1 (555) 123-4567",
-      "website": "https://grandplaza.com",
-      "rating": 4.5,
-      "category": "luxury",
-      "googlePlaceId": "ChIJN1t_tDeuEmsRUsoyG83frY4"
-    },
-    "services": [
-      {
-        "id": "restaurant",
-        "name": "Fine Dining Restaurant",
-        "description": "Award-winning Italian cuisine",
-        "hours": "6:00 PM - 11:00 PM",
-        "phone": "+1 (555) 123-4567 ext. 1234"
-      },
-      {
-        "id": "spa",
-        "name": "Luxury Spa",
-        "description": "Full-service spa and wellness center",
-        "hours": "9:00 AM - 8:00 PM",
-        "phone": "+1 (555) 123-4567 ext. 5678"
-      }
-    ],
-    "amenities": [
-      "swimming_pool",
-      "fitness_center",
-      "free_wifi",
-      "parking",
-      "concierge"
-    ],
-    "localAttractions": [
-      {
-        "name": "Times Square",
-        "distance": "0.5 miles",
-        "walkTime": "5 minutes",
-        "description": "Famous commercial intersection"
-      }
-    ],
-    "policies": {
-      "checkIn": "3:00 PM",
-      "checkOut": "11:00 AM",
-      "cancellation": "24 hours",
-      "pets": "allowed",
-      "smoking": "prohibited"
-    }
-  }
-}
-```
+## Error Handling
 
-#### Get Hotel Profile
-```http
-GET /api/dashboard/hotel-profile
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "hotel-123",
-    "tenantId": "tenant-456",
-    "researchData": { /* Research data object */ },
-    "assistantConfig": { /* Assistant configuration */ },
-    "vapiAssistantId": "asst_abc123",
-    "servicesConfig": { /* Services configuration */ },
-    "knowledgeBase": "Generated knowledge base content...",
-    "systemPrompt": "You are the AI concierge for...",
-    "createdAt": "2024-01-15T10:30:00Z",
-    "updatedAt": "2024-01-20T14:45:00Z"
-  }
-}
-```
-
-#### Update Hotel Information
-```http
-PUT /api/dashboard/hotel-profile
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "basicInfo": {
-    "name": "Grand Plaza Hotel",
-    "address": "123 Main Street, New York, NY 10001",
-    "phone": "+1 (555) 123-4567",
-    "website": "https://grandplaza.com",
-    "email": "info@grandplaza.com"
-  },
-  "services": [
-    {
-      "id": "restaurant",
-      "name": "Fine Dining Restaurant",
-      "description": "Award-winning Italian cuisine",
-      "hours": "6:00 PM - 11:00 PM",
-      "phone": "+1 (555) 123-4567 ext. 1234",
-      "enabled": true
-    }
-  ],
-  "policies": {
-    "checkIn": "3:00 PM",
-    "checkOut": "11:00 AM",
-    "cancellation": "24 hours"
-  }
-}
-```
-
-### 2. Room Management
-
-#### Get Room Types
-```http
-GET /api/dashboard/rooms
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "room-standard-king",
-      "name": "Standard King Room",
-      "description": "Comfortable king-size bed with city view",
-      "basePrice": 129.00,
-      "currency": "USD",
-      "amenities": ["wifi", "tv", "air_conditioning"],
-      "maxOccupancy": 2,
-      "size": "300 sq ft",
-      "images": ["room1.jpg", "room2.jpg"]
-    }
-  ]
-}
-```
-
-#### Add/Update Room Type
-```http
-POST /api/dashboard/rooms
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "name": "Deluxe Suite",
-  "description": "Spacious suite with separate living area",
-  "basePrice": 299.00,
-  "currency": "USD",
-  "amenities": ["wifi", "tv", "minibar", "balcony"],
-  "maxOccupancy": 4,
-  "size": "600 sq ft"
-}
-```
-
----
-
-## 🤖 Assistant Configuration API
-
-### 1. Generate Assistant
-
-#### Create New Assistant
-```http
-POST /api/dashboard/generate-assistant
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "hotelData": {
-    "name": "Grand Plaza Hotel",
-    "services": [/* services array */],
-    "amenities": [/* amenities array */],
-    "policies": {/* policies object */}
-  },
-  "customization": {
-    "personality": "friendly",
-    "voiceId": "sarah-professional",
-    "languages": ["en-US", "es-ES", "fr-FR"],
-    "tone": "professional",
-    "brandName": "Grand Plaza AI Concierge"
-  }
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "assistantId": "asst_abc123",
-    "vapiAssistantId": "vapi_xyz789",
-    "generatedPrompt": "You are the AI concierge for Grand Plaza Hotel...",
-    "knowledgeBase": "Generated knowledge base content...",
-    "estimatedSetupTime": "3-5 minutes",
-    "status": "generating"
-  }
-}
-```
-
-#### Get Assistant Configuration
-```http
-GET /api/dashboard/assistant-config
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "assistantId": "asst_abc123",
-    "vapiAssistantId": "vapi_xyz789",
-    "personality": "friendly",
-    "voiceId": "sarah-professional",
-    "languages": ["en-US", "es-ES", "fr-FR"],
-    "systemPrompt": "You are the AI concierge...",
-    "functions": [
-      {
-        "name": "order_room_service",
-        "description": "Order room service for guests",
-        "parameters": {/* function parameters */}
-      }
-    ],
-    "status": "active",
-    "lastUpdated": "2024-01-20T14:45:00Z"
-  }
-}
-```
-
-#### Update Assistant Configuration
-```http
-PUT /api/dashboard/assistant-config
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "personality": "professional",
-  "voiceId": "michael-warm",
-  "languages": ["en-US", "es-ES", "fr-FR", "de-DE"],
-  "customPrompt": "Additional instructions for the assistant...",
-  "functions": [
-    {
-      "name": "book_spa_appointment",
-      "enabled": true,
-      "parameters": {/* updated parameters */}
-    }
-  ]
-}
-```
-
-### 2. Voice Configuration
-
-#### Get Available Voices
-```http
-GET /api/dashboard/voices
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "sarah-professional",
-      "name": "Sarah",
-      "description": "Professional Female, US accent",
-      "language": "en-US",
-      "gender": "female",
-      "style": "professional",
-      "previewUrl": "https://audio.talk2go.online/voices/sarah-preview.mp3"
-    },
-    {
-      "id": "michael-warm",
-      "name": "Michael",
-      "description": "Warm Male, British accent",
-      "language": "en-GB",
-      "gender": "male",
-      "style": "warm",
-      "previewUrl": "https://audio.talk2go.online/voices/michael-preview.mp3"
-    }
-  ]
-}
-```
-
-#### Test Voice Configuration
-```http
-POST /api/dashboard/test-voice
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "voiceId": "sarah-professional",
-  "text": "Hello, welcome to Grand Plaza Hotel. How may I assist you today?",
-  "language": "en-US"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "audioUrl": "https://audio.talk2go.online/test/generated-audio.mp3",
-    "duration": 4.2,
-    "expiresAt": "2024-01-20T15:00:00Z"
-  }
-}
-```
-
----
-
-## 📊 Analytics & Reporting API
-
-### 1. Usage Analytics
-
-#### Get Dashboard Metrics
-```http
-GET /api/dashboard/metrics
-Authorization: Bearer <jwt_token>
-Query Parameters:
-- startDate: 2024-01-01
-- endDate: 2024-01-31
-- granularity: daily|weekly|monthly
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "totalCalls": 4247,
-    "successfulCalls": 3993,
-    "successRate": 0.940,
-    "averageCallDuration": 154.2,
-    "guestSatisfaction": 4.7,
-    "topLanguages": [
-      {"language": "en-US", "percentage": 65.2},
-      {"language": "es-ES", "percentage": 20.1},
-      {"language": "fr-FR", "percentage": 10.3}
-    ],
-    "topRequestTypes": [
-      {"type": "room_service", "count": 1487, "percentage": 35.0},
-      {"type": "hotel_info", "count": 1062, "percentage": 25.0},
-      {"type": "local_recommendations", "count": 849, "percentage": 20.0}
-    ],
-    "hourlyDistribution": [
-      {"hour": 0, "calls": 12},
-      {"hour": 1, "calls": 8},
-      /* ... */
-      {"hour": 23, "calls": 15}
-    ]
-  }
-}
-```
-
-#### Get Conversation Analytics
-```http
-GET /api/dashboard/conversations
-Authorization: Bearer <jwt_token>
-Query Parameters:
-- page: 1
-- limit: 50
-- startDate: 2024-01-01
-- endDate: 2024-01-31
-- language: en-US
-- rating: 5
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "conversations": [
-      {
-        "id": "conv-123",
-        "startTime": "2024-01-20T14:30:00Z",
-        "endTime": "2024-01-20T14:33:45Z",
-        "duration": 225,
-        "language": "en-US",
-        "guestRating": 5,
-        "resolved": true,
-        "requestType": "room_service",
-        "transcript": "Guest: I'd like to order room service...",
-        "summary": "Guest ordered room service for room 204"
-      }
-    ],
-    "pagination": {
-      "page": 1,
-      "limit": 50,
-      "total": 1247,
-      "pages": 25
-    }
-  }
-}
-```
-
-### 2. Performance Analytics
-
-#### Get Performance Metrics
-```http
-GET /api/dashboard/performance
-Authorization: Bearer <jwt_token>
-Query Parameters:
-- period: 7d|30d|90d|1y
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "responseTime": {
-      "average": 0.85,
-      "p95": 1.2,
-      "p99": 2.1
-    },
-    "resolution": {
-      "firstCallResolution": 0.89,
-      "escalationRate": 0.11,
-      "averageResolutionTime": 142.3
-    },
-    "quality": {
-      "understandingAccuracy": 0.96,
-      "responseRelevance": 0.94,
-      "taskCompletion": 0.91
-    },
-    "trends": [
-      {
-        "date": "2024-01-20",
-        "calls": 156,
-        "successRate": 0.94,
-        "satisfaction": 4.8
-      }
-    ]
-  }
-}
-```
-
-### 3. Custom Reports
-
-#### Generate Custom Report
-```http
-POST /api/dashboard/reports
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "reportType": "performance",
-  "dateRange": {
-    "start": "2024-01-01",
-    "end": "2024-01-31"
-  },
-  "metrics": [
-    "totalCalls",
-    "successRate",
-    "guestSatisfaction",
-    "languageDistribution"
-  ],
-  "groupBy": "daily",
-  "format": "pdf",
-  "includeCharts": true
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "reportId": "report-456",
-    "status": "generating",
-    "estimatedTime": "2-3 minutes",
-    "downloadUrl": null
-  }
-}
-```
-
-#### Get Report Status
-```http
-GET /api/dashboard/reports/{reportId}
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "reportId": "report-456",
-    "status": "completed",
-    "downloadUrl": "https://reports.talk2go.online/report-456.pdf",
-    "generatedAt": "2024-01-20T15:30:00Z",
-    "expiresAt": "2024-01-27T15:30:00Z"
-  }
-}
-```
-
----
-
-## 🏢 Tenant Management API
-
-### 1. Tenant Information
-
-#### Get Tenant Details
-```http
-GET /api/dashboard/tenant
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "tenant-456",
-    "hotelName": "Grand Plaza Hotel",
-    "subdomain": "grandplaza",
-    "customDomain": "assistant.grandplaza.com",
-    "subscriptionPlan": "professional",
-    "subscriptionStatus": "active",
-    "trialEndsAt": null,
-    "features": {
-      "maxVoices": 20,
-      "maxLanguages": 6,
-      "voiceCloning": true,
-      "multiLocation": false,
-      "whiteLabel": true,
-      "dataRetentionDays": 90,
-      "monthlyCallLimit": 5000
-    },
-    "usage": {
-      "callsThisMonth": 2847,
-      "callsUsedPercentage": 56.9,
-      "languagesActive": 4,
-      "dataStorageUsed": "2.4 GB"
-    },
-    "createdAt": "2024-01-01T00:00:00Z"
-  }
-}
-```
-
-#### Update Tenant Settings
-```http
-PUT /api/dashboard/tenant
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "hotelName": "Grand Plaza Hotel & Spa",
-  "customDomain": "concierge.grandplaza.com",
-  "settings": {
-    "timezone": "America/New_York",
-    "currency": "USD",
-    "language": "en-US",
-    "notifications": {
-      "emailReports": true,
-      "systemAlerts": true,
-      "guestFeedback": true
-    }
-  }
-}
-```
-
-### 2. Subscription Management
-
-#### Get Subscription Details
-```http
-GET /api/dashboard/subscription
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "plan": "professional",
-    "status": "active",
-    "currentPeriodStart": "2024-01-01T00:00:00Z",
-    "currentPeriodEnd": "2024-02-01T00:00:00Z",
-    "renewalDate": "2024-02-01T00:00:00Z",
-    "cancelAtPeriodEnd": false,
-    "trialEnd": null,
-    "features": {
-      "monthlyCalls": 5000,
-      "languages": 6,
-      "voiceCloning": true,
-      "prioritySupport": true,
-      "customBranding": true
-    },
-    "billing": {
-      "amount": 9900,
-      "currency": "USD",
-      "interval": "month",
-      "paymentMethod": "card",
-      "lastPayment": "2024-01-01T00:00:00Z",
-      "nextPayment": "2024-02-01T00:00:00Z"
-    }
-  }
-}
-```
-
-#### Update Subscription
-```http
-PUT /api/dashboard/subscription
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "plan": "enterprise",
-  "billingInterval": "annual"
-}
-```
-
-### 3. User Management
-
-#### Get Team Members
-```http
-GET /api/dashboard/users
-Authorization: Bearer <jwt_token>
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "user-123",
-      "email": "john@grandplaza.com",
-      "name": "John Smith",
-      "role": "admin",
-      "status": "active",
-      "lastLogin": "2024-01-20T14:30:00Z",
-      "permissions": [
-        "manage_assistant",
-        "view_analytics",
-        "manage_users",
-        "manage_billing"
-      ],
-      "createdAt": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
-#### Invite User
-```http
-POST /api/dashboard/users/invite
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "email": "sarah@grandplaza.com",
-  "name": "Sarah Johnson",
-  "role": "manager",
-  "permissions": [
-    "manage_assistant",
-    "view_analytics"
-  ]
-}
-```
-
----
-
-## 🔌 WebSocket API
-
-### Real-time Updates
-
-#### Connection
-```javascript
-const ws = new WebSocket('wss://api.talk2go.online/ws');
-
-// Send authentication
-ws.onopen = function() {
-  ws.send(JSON.stringify({
-    type: 'auth',
-    token: 'your-jwt-token'
-  }));
-};
-
-// Listen for real-time updates
-ws.onmessage = function(event) {
-  const data = JSON.parse(event.data);
-  console.log('Received:', data);
-};
-```
-
-#### Event Types
-
-**New Conversation:**
-```json
-{
-  "type": "conversation_started",
-  "data": {
-    "conversationId": "conv-123",
-    "language": "en-US",
-    "startTime": "2024-01-20T14:30:00Z",
-    "guestInfo": {
-      "room": "204",
-      "preferredLanguage": "en-US"
-    }
-  }
-}
-```
-
-**Conversation Ended:**
-```json
-{
-  "type": "conversation_ended",
-  "data": {
-    "conversationId": "conv-123",
-    "duration": 145,
-    "resolved": true,
-    "rating": 5,
-    "summary": "Guest ordered room service"
-  }
-}
-```
-
-**System Alert:**
-```json
-{
-  "type": "system_alert",
-  "data": {
-    "level": "warning",
-    "message": "High call volume detected",
-    "timestamp": "2024-01-20T14:30:00Z"
-  }
-}
-```
-
-#### Subscribing to Events
-```javascript
-// Subscribe to specific event types
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  events: ['conversation_started', 'conversation_ended', 'system_alert']
-}));
-```
-
----
-
-## 🪝 Webhooks
-
-### Webhook Configuration
-
-#### Register Webhook
-```http
-POST /api/dashboard/webhooks
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-
-{
-  "url": "https://your-hotel.com/webhook",
-  "events": [
-    "conversation.ended",
-    "order.placed",
-    "feedback.received"
-  ],
-  "secret": "your-webhook-secret"
-}
-```
-
-### Webhook Events
-
-#### Conversation Ended
-```json
-{
-  "event": "conversation.ended",
-  "timestamp": "2024-01-20T14:33:45Z",
-  "data": {
-    "conversationId": "conv-123",
-    "tenantId": "tenant-456",
-    "duration": 225,
-    "language": "en-US",
-    "resolved": true,
-    "rating": 5,
-    "transcript": "Guest: I'd like to order room service...",
-    "summary": "Guest ordered room service for room 204",
-    "actions": [
-      {
-        "type": "order_placed",
-        "orderId": "order-789",
-        "items": ["Caesar Salad", "Grilled Salmon"]
-      }
-    ]
-  }
-}
-```
-
-#### Order Placed
-```json
-{
-  "event": "order.placed",
-  "timestamp": "2024-01-20T14:32:00Z",
-  "data": {
-    "orderId": "order-789",
-    "conversationId": "conv-123",
-    "tenantId": "tenant-456",
-    "guest": {
-      "room": "204",
-      "name": "John Doe"
-    },
-    "items": [
-      {
-        "name": "Caesar Salad",
-        "quantity": 1,
-        "price": 12.99
-      },
-      {
-        "name": "Grilled Salmon",
-        "quantity": 1,
-        "price": 28.99
-      }
-    ],
-    "total": 41.98,
-    "currency": "USD",
-    "deliveryTime": "2024-01-20T15:00:00Z",
-    "specialInstructions": "No croutons on salad"
-  }
-}
-```
-
-#### Feedback Received
-```json
-{
-  "event": "feedback.received",
-  "timestamp": "2024-01-20T14:35:00Z",
-  "data": {
-    "conversationId": "conv-123",
-    "tenantId": "tenant-456",
-    "rating": 5,
-    "comment": "The AI assistant was very helpful and professional!",
-    "categories": {
-      "helpfulness": 5,
-      "accuracy": 5,
-      "speed": 4,
-      "voice_quality": 5
-    }
-  }
-}
-```
-
-### Webhook Verification
-
-Verify webhook signatures using the secret:
-
-```javascript
-const crypto = require('crypto');
-
-function verifyWebhook(payload, signature, secret) {
-  const hmac = crypto.createHmac('sha256', secret);
-  const digest = hmac.update(payload).digest('hex');
-  const expected = `sha256=${digest}`;
-  
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
-}
-```
-
----
-
-## ⚠️ Error Handling
-
-### Standard Error Response Format
-
+### Error Response Format
 ```json
 {
   "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid request parameters",
-    "details": {
-      "field": "hotelName",
-      "reason": "Hotel name is required"
-    },
-    "timestamp": "2024-01-20T14:30:00Z",
-    "requestId": "req-abc123"
-  }
+  "error": "Error message",
+  "status": 400,
+  "timestamp": "2024-01-01T00:00:00.000Z"
 }
 ```
+
+### HTTP Status Codes
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `422` - Validation Error
+- `500` - Internal Server Error
 
 ### Common Error Codes
+```json
+{
+  "AUTH_001": "Invalid credentials",
+  "AUTH_002": "Token expired",
+  "AUTH_003": "Insufficient permissions",
+  "VAL_001": "Missing required field",
+  "VAL_002": "Invalid email format",
+  "DB_001": "Database connection error",
+  "EXT_001": "External service unavailable"
+}
+```
 
-| Code | HTTP Status | Description |
-|------|-------------|-------------|
-| `INVALID_TOKEN` | 401 | JWT token is invalid or expired |
-| `INSUFFICIENT_PERMISSIONS` | 403 | User lacks required permissions |
-| `TENANT_NOT_FOUND` | 404 | Tenant does not exist |
-| `VALIDATION_ERROR` | 400 | Request validation failed |
-| `RATE_LIMIT_EXCEEDED` | 429 | API rate limit exceeded |
-| `SUBSCRIPTION_EXPIRED` | 402 | Subscription has expired |
-| `FEATURE_NOT_AVAILABLE` | 403 | Feature not available in current plan |
-| `ASSISTANT_GENERATION_FAILED` | 500 | Failed to generate assistant |
-| `VAPI_API_ERROR` | 502 | Error communicating with Vapi API |
-| `INTERNAL_SERVER_ERROR` | 500 | Unexpected server error |
+## Endpoints
 
-### Error Handling Best Practices
+### Authentication
 
-```javascript
-// Example error handling
-try {
-  const response = await fetch('/api/dashboard/hotel-profile', {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+#### POST /auth/login
+Authenticate user and get access token.
+
+**Request Body:**
+```json
+{
+  "username": "string",
+  "password": "string",
+  "tenantId": "string (optional)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "string",
+    "user": {
+      "id": "number",
+      "username": "string",
+      "role": "admin|staff|manager",
+      "tenantId": "string"
+    },
+    "tenant": {
+      "id": "string",
+      "hotelName": "string",
+      "subscriptionPlan": "string",
+      "subscriptionStatus": "string"
     }
+  }
+}
+```
+
+#### POST /auth/refresh
+Refresh access token.
+
+**Request Body:**
+```json
+{
+  "token": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "string",
+    "expiresIn": "number"
+  }
+}
+```
+
+### Calls
+
+#### POST /calls/start
+Start a new voice call.
+
+**Request Body:**
+```json
+{
+  "roomNumber": "string",
+  "language": "en|fr|zh|ru|ko|vi",
+  "serviceType": "string (optional)",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "callId": "string",
+    "vapiCallId": "string",
+    "roomNumber": "string",
+    "language": "string",
+    "startTime": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### POST /calls/end
+End an active call.
+
+**Request Body:**
+```json
+{
+  "callId": "string",
+  "duration": "number",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "callId": "string",
+    "endTime": "2024-01-01T00:00:00.000Z",
+    "duration": "number"
+  }
+}
+```
+
+#### GET /calls/:id
+Get call details.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "callIdVapi": "string",
+    "roomNumber": "string",
+    "language": "string",
+    "serviceType": "string",
+    "duration": "number",
+    "startTime": "2024-01-01T00:00:00.000Z",
+    "endTime": "2024-01-01T00:00:00.000Z",
+    "tenantId": "string"
+  }
+}
+```
+
+#### GET /calls
+Get paginated list of calls.
+
+**Query Parameters:**
+- `page` (number, default: 1)
+- `limit` (number, default: 20)
+- `sortBy` (string, default: "startTime")
+- `sortOrder` (string, default: "desc")
+- `roomNumber` (string, optional)
+- `language` (string, optional)
+- `serviceType` (string, optional)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "callIdVapi": "string",
+      "roomNumber": "string",
+      "language": "string",
+      "serviceType": "string",
+      "duration": "number",
+      "startTime": "2024-01-01T00:00:00.000Z",
+      "endTime": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "totalPages": 5,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+### Transcripts
+
+#### POST /transcripts
+Save a transcript entry.
+
+**Request Body:**
+```json
+{
+  "callId": "string",
+  "role": "user|assistant",
+  "content": "string",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "number",
+    "callId": "string",
+    "role": "string",
+    "content": "string",
+    "timestamp": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### GET /transcripts/:callId
+Get transcripts for a specific call.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "number",
+      "callId": "string",
+      "role": "string",
+      "content": "string",
+      "timestamp": "2024-01-01T00:00:00.000Z",
+      "isModelOutput": "boolean"
+    }
+  ]
+}
+```
+
+### Orders/Requests
+
+#### POST /orders
+Create a new order/request.
+
+**Request Body:**
+```json
+{
+  "roomNumber": "string",
+  "orderId": "string",
+  "requestContent": "string",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "number",
+    "roomNumber": "string",
+    "orderId": "string",
+    "requestContent": "string",
+    "status": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### GET /orders
+Get paginated list of orders.
+
+**Query Parameters:**
+- `page` (number, default: 1)
+- `limit` (number, default: 20)
+- `status` (string, optional)
+- `roomNumber` (string, optional)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "number",
+      "roomNumber": "string",
+      "orderId": "string",
+      "requestContent": "string",
+      "status": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 50,
+    "totalPages": 3,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+#### PATCH /orders/:orderId/status
+Update order status.
+
+**Request Body:**
+```json
+{
+  "status": "pending|in-progress|completed|cancelled",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "number",
+    "orderId": "string",
+    "status": "string",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### Messages
+
+#### POST /messages
+Send a message for an order.
+
+**Request Body:**
+```json
+{
+  "requestId": "number",
+  "sender": "string",
+  "content": "string",
+  "tenantId": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "number",
+    "requestId": "number",
+    "sender": "string",
+    "content": "string",
+    "timestamp": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### GET /messages/:requestId
+Get messages for a specific request.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "number",
+      "requestId": "number",
+      "sender": "string",
+      "content": "string",
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Hotel Management
+
+#### POST /hotel/research
+Research hotel information.
+
+**Request Body:**
+```json
+{
+  "hotelName": "string",
+  "location": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "name": "string",
+    "address": "string",
+    "phone": "string",
+    "email": "string",
+    "website": "string",
+    "description": "string",
+    "amenities": ["string"],
+    "roomTypes": [
+      {
+        "name": "string",
+        "description": "string",
+        "price": "number",
+        "capacity": "number",
+        "amenities": ["string"]
+      }
+    ],
+    "services": [
+      {
+        "name": "string",
+        "description": "string",
+        "category": "string",
+        "price": "number",
+        "availability": "string"
+      }
+    ],
+    "policies": {
+      "checkIn": "string",
+      "checkOut": "string",
+      "cancellation": "string",
+      "pets": "boolean",
+      "smoking": "boolean"
+    }
+  }
+}
+```
+
+#### POST /hotel/generate-assistant
+Generate AI assistant configuration.
+
+**Request Body:**
+```json
+{
+  "hotelData": {
+    "name": "string",
+    "address": "string",
+    "phone": "string",
+    "email": "string",
+    "website": "string",
+    "description": "string",
+    "amenities": ["string"],
+    "roomTypes": ["object"],
+    "services": ["object"],
+    "policies": "object"
+  },
+  "customization": {
+    "voice": {
+      "gender": "male|female",
+      "accent": "string",
+      "speed": "number"
+    },
+    "personality": {
+      "tone": "professional|friendly|formal|casual",
+      "style": "string",
+      "language": "string"
+    },
+    "capabilities": {
+      "languages": ["string"],
+      "services": ["string"],
+      "features": ["string"]
+    }
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "assistantId": "string",
+    "config": "object",
+    "knowledgeBase": "string",
+    "systemPrompt": "string"
+  }
+}
+```
+
+#### GET /hotel/profile/:tenantId
+Get hotel profile.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "tenantId": "string",
+    "researchData": "object",
+    "assistantConfig": "object",
+    "servicesConfig": "object",
+    "knowledgeBase": "string",
+    "systemPrompt": "string",
+    "vapiAssistantId": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### PUT /hotel/config/:tenantId
+Update hotel configuration.
+
+**Request Body:**
+```json
+{
+  "assistantConfig": "object",
+  "servicesConfig": "object",
+  "knowledgeBase": "string (optional)",
+  "systemPrompt": "string (optional)"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "tenantId": "string",
+    "assistantConfig": "object",
+    "servicesConfig": "object",
+    "knowledgeBase": "string",
+    "systemPrompt": "string",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+### Analytics
+
+#### GET /analytics/:tenantId
+Get analytics overview.
+
+**Query Parameters:**
+- `startDate` (string, optional)
+- `endDate` (string, optional)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "overview": {
+      "totalCalls": "number",
+      "averageDuration": "number",
+      "totalOrders": "number",
+      "averageOrderValue": "number"
+    },
+    "languageDistribution": {
+      "en": "number",
+      "fr": "number",
+      "zh": "number",
+      "ru": "number",
+      "ko": "number",
+      "vi": "number"
+    },
+    "serviceTypeDistribution": [
+      {
+        "type": "string",
+        "count": "number",
+        "percentage": "number"
+      }
+    ],
+    "hourlyActivity": [
+      {
+        "hour": "number",
+        "calls": "number",
+        "orders": "number"
+      }
+    ]
+  }
+}
+```
+
+#### GET /analytics/:tenantId/service-distribution
+Get service type distribution.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "type": "string",
+      "count": "number",
+      "percentage": "number"
+    }
+  ]
+}
+```
+
+#### GET /analytics/:tenantId/hourly-activity
+Get hourly activity data.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "hour": "number",
+      "calls": "number",
+      "orders": "number"
+    }
+  ]
+}
+```
+
+### Health
+
+#### GET /health
+Basic health check.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+#### GET /health/detailed
+Detailed health check with service status.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "database": {
+      "status": "healthy|degraded|down",
+      "responseTime": "number",
+      "lastCheck": "2024-01-01T00:00:00.000Z"
+    },
+    "vapi": {
+      "status": "healthy|degraded|down",
+      "responseTime": "number",
+      "lastCheck": "2024-01-01T00:00:00.000Z"
+    },
+    "openai": {
+      "status": "healthy|degraded|down",
+      "responseTime": "number",
+      "lastCheck": "2024-01-01T00:00:00.000Z"
+    },
+    "email": {
+      "status": "healthy|degraded|down",
+      "responseTime": "number",
+      "lastCheck": "2024-01-01T00:00:00.000Z"
+    }
+  }
+}
+```
+
+## WebSocket Events
+
+### Connection
+```javascript
+const socket = io('ws://localhost:3000', {
+  auth: {
+    token: 'jwt-token'
+  }
+});
+```
+
+### Client to Server Events
+
+#### init
+Initialize connection with tenant context.
+```javascript
+socket.emit('init', {
+  tenantId: 'tenant-uuid',
+  roomNumber: '101', // optional
+  language: 'en' // optional
+});
+```
+
+#### transcript
+Send transcript data.
+```javascript
+socket.emit('transcript', {
+  content: 'Hello, I need room service',
+  role: 'user' // 'user' | 'assistant'
+});
+```
+
+#### call_end
+End call with duration.
+```javascript
+socket.emit('call_end', {
+  callId: 'call-uuid',
+  duration: 300 // seconds
+});
+```
+
+### Server to Client Events
+
+#### transcript
+Receive transcript updates.
+```javascript
+socket.on('transcript', (data) => {
+  console.log('Transcript:', data);
+  // {
+  //   content: 'Hello, I need room service',
+  //   role: 'user',
+  //   timestamp: '2024-01-01T00:00:00.000Z',
+  //   callId: 'call-uuid'
+  // }
+});
+```
+
+#### order_status_update
+Receive order status updates.
+```javascript
+socket.on('order_status_update', (data) => {
+  console.log('Order update:', data);
+  // {
+  //   orderId: 'order-uuid',
+  //   reference: 'REF123',
+  //   status: 'in-progress',
+  //   timestamp: '2024-01-01T00:00:00.000Z',
+  //   roomNumber: '101'
+  // }
+});
+```
+
+#### call_end
+Receive call end notification.
+```javascript
+socket.on('call_end', (data) => {
+  console.log('Call ended:', data);
+  // {
+  //   callId: 'call-uuid',
+  //   duration: 300,
+  //   timestamp: '2024-01-01T00:00:00.000Z'
+  // }
+});
+```
+
+#### error
+Receive error notifications.
+```javascript
+socket.on('error', (data) => {
+  console.error('Error:', data);
+  // {
+  //   message: 'Error message',
+  //   code: 'ERROR_CODE',
+  //   timestamp: '2024-01-01T00:00:00.000Z'
+  // }
+});
+```
+
+## Rate Limiting
+
+### Limits
+- **Authentication**: 5 requests per minute
+- **API Calls**: 100 requests per minute
+- **WebSocket**: 1000 messages per minute
+- **File Upload**: 10 files per hour
+
+### Headers
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1640995200
+```
+
+### Rate Limit Exceeded
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded",
+  "status": 429,
+  "retryAfter": 60
+}
+```
+
+## Examples
+
+### JavaScript/TypeScript
+
+#### Using Fetch
+```javascript
+const login = async (username, password) => {
+  const response = await fetch('/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
   });
   
-  if (!response.ok) {
-    const error = await response.json();
-    
-    switch (error.error.code) {
-      case 'INVALID_TOKEN':
-        // Redirect to login
-        break;
-      case 'SUBSCRIPTION_EXPIRED':
-        // Show upgrade modal
-        break;
-      case 'RATE_LIMIT_EXCEEDED':
-        // Retry after delay
-        break;
-      default:
-        // Show generic error
-        break;
-    }
-  }
+  const data = await response.json();
+  return data;
+};
+
+const getCalls = async (token, params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  const response = await fetch(`/calls?${queryString}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
   
   const data = await response.json();
-  // Handle success
-} catch (error) {
-  console.error('Network error:', error);
-}
+  return data;
+};
 ```
 
----
-
-## 🚦 Rate Limiting
-
-### Rate Limits by Plan
-
-| Plan | Requests/Hour | Burst Limit |
-|------|---------------|-------------|
-| Trial | 100 | 20 |
-| Basic | 1,000 | 100 |
-| Professional | 5,000 | 500 |
-| Enterprise | 50,000 | 5,000 |
-
-### Rate Limit Headers
-
-```http
-X-RateLimit-Limit: 1000
-X-RateLimit-Remaining: 999
-X-RateLimit-Reset: 1642694400
-Retry-After: 60
-```
-
-### Rate Limiting Best Practices
-
+#### Using Axios
 ```javascript
-// Implement exponential backoff
-async function apiCall(url, options, retries = 3) {
-  try {
-    const response = await fetch(url, options);
-    
-    if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After');
-      const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, retries) * 1000;
-      
-      if (retries > 0) {
-        await new Promise(resolve => setTimeout(resolve, delay));
-        return apiCall(url, options, retries - 1);
-      }
-    }
-    
-    return response;
-  } catch (error) {
-    throw error;
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://api.hotelassistant.com',
+  timeout: 10000,
+});
+
+// Add auth interceptor
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-}
-```
-
----
-
-## 🛠️ SDKs & Examples
-
-### JavaScript SDK
-
-#### Installation
-```bash
-npm install @talk2go/hotel-assistant-sdk
-```
-
-#### Usage
-```javascript
-import { HotelAssistantSDK } from '@talk2go/hotel-assistant-sdk';
-
-const sdk = new HotelAssistantSDK({
-  apiKey: 'your-api-key',
-  environment: 'production' // or 'development'
+  return config;
 });
 
-// Research hotel
-const hotelData = await sdk.hotels.research({
-  name: 'Grand Plaza Hotel',
-  location: 'New York, NY'
-});
-
-// Generate assistant
-const assistant = await sdk.assistants.create({
-  hotelData,
-  customization: {
-    personality: 'friendly',
-    voiceId: 'sarah-professional',
-    languages: ['en-US', 'es-ES']
-  }
-});
-
-// Get analytics
-const metrics = await sdk.analytics.getMetrics({
-  startDate: '2024-01-01',
-  endDate: '2024-01-31'
-});
-```
-
-### Python SDK
-
-#### Installation
-```bash
-pip install talk2go-hotel-assistant
-```
-
-#### Usage
-```python
-from talk2go import HotelAssistantClient
-
-client = HotelAssistantClient(
-    api_key="your-api-key",
-    environment="production"
-)
-
-# Research hotel
-hotel_data = client.hotels.research(
-    name="Grand Plaza Hotel",
-    location="New York, NY"
-)
-
-# Generate assistant
-assistant = client.assistants.create(
-    hotel_data=hotel_data,
-    customization={
-        "personality": "friendly",
-        "voice_id": "sarah-professional",
-        "languages": ["en-US", "es-ES"]
-    }
-)
-
-# Get analytics
-metrics = client.analytics.get_metrics(
-    start_date="2024-01-01",
-    end_date="2024-01-31"
-)
-```
-
-### PHP SDK
-
-#### Installation
-```bash
-composer require talk2go/hotel-assistant-php
-```
-
-#### Usage
-```php
-<?php
-use Talk2Go\HotelAssistant\Client;
-
-$client = new Client([
-    'api_key' => 'your-api-key',
-    'environment' => 'production'
-]);
-
-// Research hotel
-$hotelData = $client->hotels()->research([
-    'name' => 'Grand Plaza Hotel',
-    'location' => 'New York, NY'
-]);
-
-// Generate assistant
-$assistant = $client->assistants()->create([
-    'hotel_data' => $hotelData,
-    'customization' => [
-        'personality' => 'friendly',
-        'voice_id' => 'sarah-professional',
-        'languages' => ['en-US', 'es-ES']
-    ]
-]);
-
-// Get analytics
-$metrics = $client->analytics()->getMetrics([
-    'start_date' => '2024-01-01',
-    'end_date' => '2024-01-31'
-]);
+const callsApi = {
+  start: (data) => api.post('/calls/start', data),
+  end: (data) => api.post('/calls/end', data),
+  get: (id) => api.get(`/calls/${id}`),
+  list: (params) => api.get('/calls', { params }),
+};
 ```
 
 ### cURL Examples
 
-#### Research Hotel
+#### Login
 ```bash
-curl -X POST https://api.talk2go.online/api/dashboard/research-hotel \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "hotelName": "Grand Plaza Hotel",
-    "location": "New York, NY"
+    "username": "admin",
+    "password": "password123"
+  }'
+```
+
+#### Start Call
+```bash
+curl -X POST http://localhost:3000/calls/start \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "roomNumber": "101",
+    "language": "en",
+    "serviceType": "room-service",
+    "tenantId": "tenant-uuid"
   }'
 ```
 
 #### Get Analytics
 ```bash
-curl -X GET "https://api.talk2go.online/api/dashboard/metrics?startDate=2024-01-01&endDate=2024-01-31" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X GET "http://localhost:3000/analytics/tenant-uuid?startDate=2024-01-01&endDate=2024-01-31" \
+  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-#### Update Assistant
-```bash
-curl -X PUT https://api.talk2go.online/api/dashboard/assistant-config \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "personality": "professional",
-    "voiceId": "michael-warm",
-    "languages": ["en-US", "es-ES", "fr-FR"]
-  }'
+### Python
+
+#### Using requests
+```python
+import requests
+
+class HotelAssistantAPI:
+    def __init__(self, base_url, token=None):
+        self.base_url = base_url
+        self.token = token
+        self.session = requests.Session()
+        
+    def login(self, username, password):
+        response = self.session.post(
+            f"{self.base_url}/auth/login",
+            json={"username": username, "password": password}
+        )
+        data = response.json()
+        if data["success"]:
+            self.token = data["data"]["token"]
+            self.session.headers["Authorization"] = f"Bearer {self.token}"
+        return data
+    
+    def start_call(self, room_number, language, service_type=None):
+        response = self.session.post(
+            f"{self.base_url}/calls/start",
+            json={
+                "roomNumber": room_number,
+                "language": language,
+                "serviceType": service_type,
+                "tenantId": "tenant-uuid"
+            }
+        )
+        return response.json()
+    
+    def get_analytics(self, tenant_id, start_date=None, end_date=None):
+        params = {}
+        if start_date:
+            params["startDate"] = start_date
+        if end_date:
+            params["endDate"] = end_date
+            
+        response = self.session.get(
+            f"{self.base_url}/analytics/{tenant_id}",
+            params=params
+        )
+        return response.json()
+
+# Usage
+api = HotelAssistantAPI("http://localhost:3000")
+login_result = api.login("admin", "password123")
+analytics = api.get_analytics("tenant-uuid")
 ```
 
----
+### Postman Collection
 
-## 🔗 Additional Resources
+Import this collection into Postman:
 
-### Documentation Links
-- [Getting Started Guide](https://docs.talk2go.online/getting-started)
-- [Authentication Guide](https://docs.talk2go.online/authentication)
-- [Webhooks Guide](https://docs.talk2go.online/webhooks)
-- [SDKs Repository](https://github.com/talk2go/sdks)
-
-### Support
-- **Email**: api-support@talk2go.online
-- **Documentation**: https://docs.talk2go.online
-- **Status Page**: https://status.talk2go.online
-- **Community**: https://community.talk2go.online
-
-### Changelog
-- **v2.0.0** (2024-01-20): Multi-tenant support, new analytics endpoints
-- **v1.5.0** (2024-01-10): Webhooks, real-time updates
-- **v1.0.0** (2024-01-01): Initial API release
-
----
-
-*This API documentation is regularly updated. For the latest version, please visit our [documentation portal](https://docs.talk2go.online).*
-
-**Last Updated:** January 2024  
-**API Version:** 2.0  
-**Support:** api-support@talk2go.online 
+```json
+{
+  "info": {
+    "name": "Hotel Assistant API",
+    "description": "API collection for Hotel Assistant",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calls",
+      "item": [
+        {
+          "name": "Start Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomNumber\": \"101\",\n  \"language\": \"en\",\n  \"serviceType\": \"room-service\",\n  \"tenantId\": \"tenant-uuid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/calls/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["calls", "start"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+``` 
