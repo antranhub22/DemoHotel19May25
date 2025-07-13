@@ -20,7 +20,33 @@ interface Interface1Props {
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
-  // --- HOOKS DECLARATIONS ---
+  // Get hotel config first for early return
+  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
+  
+  // Early return BEFORE other hooks to avoid hook order issues
+  if (configLoading || !hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (configError) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-gray-600">{configError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- HOOKS DECLARATIONS - AFTER early returns ---
   const { 
     setCurrentInterface, 
     setTranscripts, 
@@ -31,8 +57,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     language,
     setLanguage
   } = useAssistant();
-
-  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
 
   // Local state hooks
   const [isMuted, setIsMuted] = useState(false);
@@ -139,30 +163,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       }
     };
   }, [isActive]);
-
-  // Loading state
-  if (configLoading || !hotelConfig) {
-    return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (configError) {
-    return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
-        <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
-          <p className="text-gray-600">{configError}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}>
