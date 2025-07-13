@@ -79,8 +79,10 @@ export const useAuth = () => {
 // ============================================
 
 type MyJwtPayload = {
-  user: AuthUser;
-  tenant: TenantData;
+  username: string;
+  tenantId: string;
+  role: string;
+  permissions: string[];
   [key: string]: any;
 };
 
@@ -103,10 +105,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('[DEBUG] AuthProvider - decoding token');
       const decoded = jwtDecode<MyJwtPayload>(token);
-      console.log('[DEBUG] AuthProvider - token decoded:', { user: decoded.user, tenant: decoded.tenant });
+      console.log('[DEBUG] AuthProvider - token decoded:', decoded);
       
-      setUser(decoded.user);
-      setTenant(decoded.tenant);
+      // Tạo user object từ token payload
+      const userFromToken: AuthUser = {
+        id: decoded.username, // Use username as id
+        name: decoded.username,
+        email: decoded.username,
+        tenantId: decoded.tenantId,
+        role: decoded.role as 'admin' | 'manager' | 'staff'
+      };
+      
+      // Tạo tenant object từ token payload
+      const tenantFromToken: TenantData = {
+        id: decoded.tenantId,
+        hotelName: 'Mi Nhon Hotel', // Default name
+        subdomain: 'minhonmuine',
+        subscriptionPlan: 'premium',
+        subscriptionStatus: 'active'
+      };
+      
+      setUser(userFromToken);
+      setTenant(tenantFromToken);
     } catch (error) {
       console.log('[DEBUG] AuthProvider - token decode error:', error);
       localStorage.removeItem('token');
@@ -133,8 +153,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Giải mã token để lấy user/tenant
       const decoded = jwtDecode<MyJwtPayload>(data.token);
-      setUser(decoded.user);
-      setTenant(decoded.tenant);
+      
+      // Tạo user object từ token payload
+      const userFromToken: AuthUser = {
+        id: decoded.username,
+        name: decoded.username,
+        email: decoded.username,
+        tenantId: decoded.tenantId,
+        role: decoded.role as 'admin' | 'manager' | 'staff'
+      };
+      
+      // Tạo tenant object từ token payload
+      const tenantFromToken: TenantData = {
+        id: decoded.tenantId,
+        hotelName: 'Mi Nhon Hotel', // Default name
+        subdomain: 'minhonmuine',
+        subscriptionPlan: 'premium',
+        subscriptionStatus: 'active'
+      };
+      
+      setUser(userFromToken);
+      setTenant(tenantFromToken);
     } catch (err: any) {
       localStorage.removeItem('token');
       setUser(null);
