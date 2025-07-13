@@ -367,7 +367,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       } z-30 overflow-y-auto`} 
       id="interface1"
       style={{
-        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99), url(${hotelImage})`,
+        backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'

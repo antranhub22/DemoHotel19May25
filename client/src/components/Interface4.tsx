@@ -87,7 +87,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
         <div className="w-full max-w-xs sm:max-w-md bg-white rounded-lg shadow-lg p-4 sm:p-8" style={{ fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif' }}>
           {/* Success Animation */}
           <div className="mb-4 sm:mb-6 flex justify-center">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: hotelConfig.branding.colors.primary }}>
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: hotelConfig?.branding?.colors?.primary || '#1e40af' }}>
               <span className="material-icons text-white text-4xl sm:text-5xl">check</span>
             </div>
           </div>

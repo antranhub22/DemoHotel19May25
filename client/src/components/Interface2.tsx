@@ -242,7 +242,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
       } z-20 overflow-y-auto`} id="interface2"
       style={{
-        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99), url('/assets/courtyard.jpeg')`,
+        backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url('/assets/courtyard.jpeg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'

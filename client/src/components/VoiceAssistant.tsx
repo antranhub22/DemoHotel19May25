@@ -129,7 +129,7 @@ const VoiceAssistant: React.FC = () => {
       )}
       
       {/* Header Bar */}
-      <header className="w-full bg-primary text-white p-4 shadow-md" style={{ backgroundColor: config.branding.colors.primary }}>
+      <header className="w-full bg-primary text-white p-4 shadow-md" style={{ backgroundColor: config?.branding?.colors?.primary || '#1e40af' }}>
         <div className="container mx-auto flex items-center justify-between px-2">
           {/* Left: Logo and Hotel Name */}
           <div className="flex items-center justify-start ml-1 sm:ml-4 mr-2 sm:mr-6 gap-3 min-w-fit">
