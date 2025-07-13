@@ -27,7 +27,7 @@ async function quickDatabaseFix() {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS tenants (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         domain TEXT,
         subdomain TEXT,
         email TEXT,
@@ -46,7 +46,7 @@ async function quickDatabaseFix() {
       CREATE TABLE IF NOT EXISTS hotel_profiles (
         id TEXT PRIMARY KEY,
         tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         description TEXT,
         address TEXT,
         phone TEXT,

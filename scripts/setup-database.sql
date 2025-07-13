@@ -5,7 +5,7 @@
 -- Step 1: Create tenants table
 CREATE TABLE IF NOT EXISTS tenants (
     id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
+    hotel_name TEXT NOT NULL,
     domain TEXT,
     subdomain TEXT,
     email TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 CREATE TABLE IF NOT EXISTS hotel_profiles (
     id TEXT PRIMARY KEY,
     tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
+    hotel_name TEXT NOT NULL,
     description TEXT,
     address TEXT,
     phone TEXT,
@@ -92,13 +92,13 @@ ALTER TABLE message ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(i
 ALTER TABLE call ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE;
 
 -- Step 5: Insert Mi Nhon tenant
-INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
 VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
         'info@minhonhotel.com', '+84 252 3847 007', 
         '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
         'premium', 'active')
 ON CONFLICT (id) DO UPDATE SET
-    name = EXCLUDED.name,
+    hotel_name = EXCLUDED.hotel_name,
     domain = EXCLUDED.domain,
     subdomain = EXCLUDED.subdomain,
     email = EXCLUDED.email,
@@ -109,7 +109,7 @@ ON CONFLICT (id) DO UPDATE SET
     updated_at = CURRENT_TIMESTAMP;
 
 -- Step 6: Insert hotel profile
-INSERT INTO hotel_profiles (id, tenant_id, name, description, address, phone, email, website, amenities, policies)
+INSERT INTO hotel_profiles (id, tenant_id, hotel_name, description, address, phone, email, website, amenities, policies)
 VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel', 
         'A beautiful beachfront hotel in Mui Ne, Vietnam',
         '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
@@ -117,7 +117,7 @@ VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel',
         ARRAY['Pool', 'Restaurant', 'Free WiFi', 'Beach Access', 'Spa'],
         ARRAY['Check-in: 2:00 PM', 'Check-out: 12:00 PM', 'No smoking'])
 ON CONFLICT (id) DO UPDATE SET
-    name = EXCLUDED.name,
+    hotel_name = EXCLUDED.hotel_name,
     description = EXCLUDED.description,
     address = EXCLUDED.address,
     phone = EXCLUDED.phone,

@@ -139,7 +139,7 @@ export class AutoDatabaseFixer {
     await this.db.execute(sql`
       CREATE TABLE IF NOT EXISTS tenants (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         domain TEXT,
         subdomain TEXT,
         email TEXT,
@@ -157,7 +157,7 @@ export class AutoDatabaseFixer {
       CREATE TABLE IF NOT EXISTS hotel_profiles (
         id TEXT PRIMARY KEY,
         tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         description TEXT,
         address TEXT,
         phone TEXT,
