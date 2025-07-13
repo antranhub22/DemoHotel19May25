@@ -1684,6 +1684,53 @@ Mi Nhon Hotel Mui Ne`
       if (!subdomain) {
         return res.status(400).json({ error: 'Missing subdomain' });
       }
+      
+      // Fallback config cho minhonmuine
+      if (subdomain === 'minhonmuine') {
+        return res.json({
+          id: 'minhon-hotel-mui-ne',
+          name: 'Mi Nhon Hotel Mui Ne',
+          subdomain: 'minhonmuine',
+          customDomain: null,
+          branding: {
+            primaryColor: '#2E7D32',
+            secondaryColor: '#FFC107',
+            accentColor: '#FF6B6B',
+            logo: '/assets/haily-logo1.jpg',
+            primaryFont: 'Inter',
+            secondaryFont: 'Roboto'
+          },
+          contact: {
+            phone: '+84 252 123 456',
+            email: 'info@minhonhotel.com',
+            address: 'Mui Ne Beach, Phan Thiet, Vietnam',
+            website: 'https://minhonhotel.com'
+          },
+          features: {
+            multiLanguage: true,
+            callHistory: true,
+            roomService: true,
+            concierge: true,
+            voiceCloning: false,
+            analytics: true
+          },
+          services: [],
+          supportedLanguages: ['en', 'vi', 'fr', 'zh', 'ru', 'ko'],
+          vapiConfig: {
+            publicKeys: {},
+            assistantIds: {}
+          },
+          timezone: 'Asia/Ho_Chi_Minh',
+          currency: 'VND',
+          location: {
+            city: 'Phan Thiet',
+            country: 'Vietnam',
+            latitude: 10.9280,
+            longitude: 108.1020
+          }
+        });
+      }
+      
       // Lấy tenant theo subdomain
       const service = new TenantService();
       const tenant = await service.getTenantBySubdomain(subdomain);
