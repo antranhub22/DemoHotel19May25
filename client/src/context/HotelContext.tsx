@@ -152,6 +152,7 @@ interface HotelProviderProps {
 }
 
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children, fallback }) => {
+  console.log('[DEBUG] HotelProvider render');
   const hotelConfigHook = useHotelConfig()
   const { config, loading, error, isDefaultConfig, reload, clearError, updateConfig } = hotelConfigHook
   

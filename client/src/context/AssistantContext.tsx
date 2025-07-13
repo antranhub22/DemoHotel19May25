@@ -86,6 +86,7 @@ const initialOrderSummary: OrderSummary = {
 const AssistantContext = createContext<AssistantContextType | undefined>(undefined);
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
+  console.log('[DEBUG] AssistantProvider render');
   const [currentInterface, setCurrentInterface] = useState<InterfaceLayer>('interface1');
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);

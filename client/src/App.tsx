@@ -242,6 +242,7 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
+  console.log('[DEBUG] Router render', { tenantInfo, isAuthenticated });
 
   if (!tenantInfo) {
     return <LoadingFallback />;
@@ -357,6 +358,7 @@ function Router() {
 // ============================================
 
 function AppContent() {
+  console.log('[DEBUG] AppContent render');
   useWebSocket();
   return (
     <ErrorBoundary>
@@ -371,6 +373,7 @@ function AppContent() {
 // ============================================
 
 function App() {
+  console.log('[DEBUG] App render');
   return (
     <BrowserRouter>
       <AuthProvider>

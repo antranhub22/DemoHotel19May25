@@ -78,6 +78,7 @@ export const useAuth = () => {
 // ============================================
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  console.log('[DEBUG] AuthProvider render');
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
