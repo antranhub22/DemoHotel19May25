@@ -45,7 +45,7 @@ router.post('/health/fix-database', async (req: Request, res: Response) => {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS tenants (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         domain TEXT,
         subdomain TEXT,
         email TEXT,
@@ -82,14 +82,20 @@ router.post('/health/fix-database', async (req: Request, res: Response) => {
     
     console.log('🔧 Step 4: Inserting Mi Nhon tenant...');
     await db.execute(sql`
-      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
       VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
               'info@minhonhotel.com', '+84 252 3847 007', 
               '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
               'premium', 'active')
       ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
+        hotel_name = EXCLUDED.hotel_name,
         domain = EXCLUDED.domain,
+        subdomain = EXCLUDED.subdomain,
+        email = EXCLUDED.email,
+        phone = EXCLUDED.phone,
+        address = EXCLUDED.address,
+        subscription_plan = EXCLUDED.subscription_plan,
+        subscription_status = EXCLUDED.subscription_status,
         updated_at = CURRENT_TIMESTAMP
     `);
     
@@ -326,7 +332,7 @@ router.post('/health/setup-database', async (req: Request, res: Response) => {
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS tenants (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
+        hotel_name TEXT NOT NULL,
         domain TEXT,
         subdomain TEXT,
         email TEXT,
@@ -384,14 +390,20 @@ router.post('/health/setup-database', async (req: Request, res: Response) => {
     
     // Step 5: Insert Mi Nhon tenant
     await db.execute(sql`
-      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
       VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
               'info@minhonhotel.com', '+84 252 3847 007', 
               '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
               'premium', 'active')
       ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
+        hotel_name = EXCLUDED.hotel_name,
         domain = EXCLUDED.domain,
+        subdomain = EXCLUDED.subdomain,
+        email = EXCLUDED.email,
+        phone = EXCLUDED.phone,
+        address = EXCLUDED.address,
+        subscription_plan = EXCLUDED.subscription_plan,
+        subscription_status = EXCLUDED.subscription_status,
         updated_at = CURRENT_TIMESTAMP
     `);
     

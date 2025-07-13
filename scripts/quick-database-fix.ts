@@ -78,13 +78,13 @@ async function quickDatabaseFix() {
     // Step 4: Create Mi Nhon tenant
     console.log('🏨 Creating Mi Nhon Hotel tenant...');
     await db.execute(sql`
-      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
       VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
               'info@minhonhotel.com', '+84 252 3847 007', 
               '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
               'premium', 'active')
       ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
+        hotel_name = EXCLUDED.hotel_name,
         domain = EXCLUDED.domain,
         subdomain = EXCLUDED.subdomain,
         email = EXCLUDED.email,

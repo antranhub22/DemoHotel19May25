@@ -224,7 +224,7 @@ export class AutoDatabaseFixer {
   private async createMiNhonTenant(): Promise<void> {
     const miNhonTenant = {
       id: 'mi-nhon-hotel',
-      name: 'Mi Nhon Hotel',
+      hotel_name: 'Mi Nhon Hotel',
       domain: 'minhonmuine.talk2go.online',
       subdomain: 'minhonmuine',
       email: 'info@minhonhotel.com',
@@ -235,12 +235,12 @@ export class AutoDatabaseFixer {
     };
 
     await this.db.execute(sql`
-      INSERT INTO tenants (id, name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
-      VALUES (${miNhonTenant.id}, ${miNhonTenant.name}, ${miNhonTenant.domain}, ${miNhonTenant.subdomain}, 
+      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
+      VALUES (${miNhonTenant.id}, ${miNhonTenant.hotel_name}, ${miNhonTenant.domain}, ${miNhonTenant.subdomain}, 
               ${miNhonTenant.email}, ${miNhonTenant.phone}, ${miNhonTenant.address}, 
               ${miNhonTenant.subscription_plan}, ${miNhonTenant.subscription_status})
       ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
+        hotel_name = EXCLUDED.hotel_name,
         domain = EXCLUDED.domain,
         subdomain = EXCLUDED.subdomain,
         email = EXCLUDED.email,
