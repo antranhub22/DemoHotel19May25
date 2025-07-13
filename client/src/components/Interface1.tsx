@@ -98,9 +98,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
     
     console.log('[Interface1] Vapi configuration:', { publicKey, assistantId, lang });
+    console.log('[Interface1] Environment check:', {
+      VITE_VAPI_PUBLIC_KEY: import.meta.env.VITE_VAPI_PUBLIC_KEY,
+      VITE_VAPI_ASSISTANT_ID: import.meta.env.VITE_VAPI_ASSISTANT_ID,
+      publicKeyLength: publicKey?.length || 0,
+      assistantIdLength: assistantId?.length || 0
+    });
     
     if (!publicKey || !assistantId) {
       console.error('[Interface1] Vapi configuration not available for language:', lang);
+      console.error('[Interface1] Missing keys:', { publicKey: !!publicKey, assistantId: !!assistantId });
+      
+      // For testing purposes, skip Vapi and go directly to Interface2
+      if (import.meta.env.DEV || !publicKey || !assistantId) {
+        console.log('[Interface1] Skipping Vapi call, going directly to Interface2 for testing');
+        setLanguage(lang);
+        setIsCallStarted(true);
+        setShowConversation(true);
+        setCurrentInterface('interface2');
+        return;
+      }
+      
       alert(`Vapi configuration not available for language: ${lang}`);
       return;
     }
@@ -231,6 +249,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mr-2"
               >
                 Test Call ({language})
+              </button>
+              <button
+                onClick={() => {
+                  console.log('[Interface1] Direct Interface2 test');
+                  setCurrentInterface('interface2');
+                }}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
+              >
+                Go to Interface2
               </button>
               <button
                 onClick={() => {
