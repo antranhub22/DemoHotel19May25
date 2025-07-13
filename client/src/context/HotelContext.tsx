@@ -153,42 +153,60 @@ interface HotelProviderProps {
 
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children, fallback }) => {
   console.log('[DEBUG] HotelProvider render');
-  
-  const [hotelConfig, setHotelConfig] = useState<HotelConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log('[DEBUG] HotelProvider useEffect - fetching config');
-    const fetchConfig = async () => {
-      try {
-        console.log('[DEBUG] HotelProvider - fetching from API');
-        const response = await fetch('/api/hotel/config');
-        if (response.ok) {
-          const config = await response.json();
-          console.log('[DEBUG] HotelProvider - config fetched:', config);
-          setHotelConfig(config);
-        } else {
-          console.log('[DEBUG] HotelProvider - API error, using fallback');
-          setHotelConfig(fallback);
-        }
-      } catch (err) {
-        console.log('[DEBUG] HotelProvider - fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load hotel config');
-        setHotelConfig(fallback);
-      } finally {
-        console.log('[DEBUG] HotelProvider - setting loading false');
-        setLoading(false);
-      }
-    };
+  // Sử dụng hook useHotelConfig để lấy đúng context value
+  const hotelConfigHook = useHotelConfig();
+  const {
+    config,
+    loading,
+    error,
+    isDefaultConfig,
+    reload,
+    clearError,
+    updateConfig
+  } = hotelConfigHook;
 
-    fetchConfig();
-  }, [fallback]);
+  // Helper functions sử dụng config hiện tại
+  const getVapiPublicKey = (language: string) => getVapiPublicKeyByLanguage(config, language);
+  const getVapiAssistantId = (language: string) => getVapiAssistantIdByLanguage(config, language);
+  const hasFeatureFn = (feature: keyof HotelConfig['features']) => hasFeature(config, feature);
+  const getSupportedLanguagesFn = () => getSupportedLanguages(config);
+  const getAvailableServicesFn = (category?: string) => getAvailableServices(config, category);
+  const getThemeColors = () => ({
+    primary: config?.branding.primaryColor || '#2E7D32',
+    secondary: config?.branding.secondaryColor || '#FFC107',
+    accent: config?.branding.accentColor || '#FF6B6B'
+  });
+  const getFontFamilies = () => ({
+    primary: config?.branding.primaryFont || 'Inter',
+    secondary: config?.branding.secondaryFont || 'Roboto'
+  });
+  const getContactInfo = () => config?.contact || null;
+  const getLocation = () => config?.location || null;
+  const getTimezone = () => config?.timezone || 'UTC';
+  const getCurrency = () => config?.currency || 'USD';
 
-  console.log('[DEBUG] HotelProvider state:', { hotelConfig, loading, error });
-  
   return (
-    <HotelContext.Provider value={{ hotelConfig, loading, error, setHotelConfig }}>
+    <HotelContext.Provider value={{
+      config,
+      loading,
+      error,
+      isDefaultConfig,
+      reload,
+      clearError,
+      updateConfig,
+      getVapiPublicKey,
+      getVapiAssistantId,
+      hasFeature: hasFeatureFn,
+      getSupportedLanguages: getSupportedLanguagesFn,
+      getAvailableServices: getAvailableServicesFn,
+      getThemeColors,
+      getFontFamilies,
+      getContactInfo,
+      getLocation,
+      getTimezone,
+      getCurrency
+    }}>
       {children}
     </HotelContext.Provider>
   );
