@@ -48,13 +48,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   // --- CALLBACKS ---
   const handleCall = useCallback(async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
+    console.log('[Interface1] handleCall called with language:', lang);
+    
     if (!hotelConfig) {
-      console.error('Hotel configuration not loaded');
+      console.error('[Interface1] Hotel configuration not loaded');
       return;
     }
 
-    console.log('[DEBUG] Starting call with language:', lang);
-    console.log('[DEBUG] Hotel config:', hotelConfig);
+    console.log('[Interface1] Starting call with language:', lang);
+    console.log('[Interface1] Hotel config:', hotelConfig);
 
     setEmailSentForCurrentSession(false);
     setCallDetails({
@@ -71,27 +73,41 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     const publicKey = getVapiPublicKeyByLanguage(lang, hotelConfig);
     const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
     
-    console.log('[DEBUG] Vapi configuration:', { publicKey, assistantId, lang });
+    console.log('[Interface1] Vapi configuration:', { publicKey, assistantId, lang });
     
     if (!publicKey || !assistantId) {
-      console.error('Vapi configuration not available for language:', lang);
+      console.error('[Interface1] Vapi configuration not available for language:', lang);
+      alert(`Vapi configuration not available for language: ${lang}`);
       return;
     }
     
     try {
-      console.log('[DEBUG] Initializing Vapi with public key:', publicKey);
+      console.log('[Interface1] Initializing Vapi with public key:', publicKey);
+      setLanguage(lang); // Set language before starting call
+      
       const vapi = await initVapi(publicKey);
       if (vapi && assistantId) {
-        console.log('[DEBUG] Starting Vapi call with assistant ID:', assistantId);
-        await vapi.start(assistantId);
+        console.log('[Interface1] Starting Vapi call with assistant ID:', assistantId);
+        
+        // Set call started state immediately
         setIsCallStarted(true);
         setShowConversation(true);
-        console.log('[DEBUG] Vapi call started successfully');
+        
+        await vapi.start(assistantId);
+        console.log('[Interface1] Vapi call started successfully');
+      } else {
+        console.error('[Interface1] Failed to get Vapi instance or assistant ID');
+        setIsCallStarted(false);
+        setShowConversation(false);
       }
     } catch (error) {
-      console.error('[DEBUG] Error starting Vapi call:', error);
+      console.error('[Interface1] Error starting Vapi call:', error);
+      setIsCallStarted(false);
+      setShowConversation(false);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      alert(`Error starting call: ${errorMessage}`);
     }
-  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration]);
+  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage]);
 
   const handleIconClick = useCallback((iconName: string) => {
     setActiveTooltip(activeTooltip === iconName ? null : iconName);
@@ -201,6 +217,19 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 setShowConversation(false);
               }}
             />
+            
+            {/* Test Button for debugging */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  console.log('[Interface1] Test button clicked!');
+                  handleCall(language);
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Test Call ({language})
+              </button>
+            </div>
           </div>
 
           {/* Service Categories Grid */}
