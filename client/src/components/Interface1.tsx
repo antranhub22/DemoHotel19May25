@@ -95,6 +95,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         
         await vapi.start(assistantId);
         console.log('[Interface1] Vapi call started successfully');
+        
+        // Chuyển sang Interface2 ngay sau khi call thành công
+        setCurrentInterface('interface2');
       } else {
         console.error('[Interface1] Failed to get Vapi instance or assistant ID');
         setIsCallStarted(false);
@@ -107,7 +110,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       alert(`Error starting call: ${errorMessage}`);
     }
-  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage]);
+  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage, setCurrentInterface]);
 
   const handleIconClick = useCallback((iconName: string) => {
     setActiveTooltip(activeTooltip === iconName ? null : iconName);
