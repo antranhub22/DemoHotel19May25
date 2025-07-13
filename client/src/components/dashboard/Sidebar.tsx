@@ -231,10 +231,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-semibold text-lg">Mi Nhon Hotel</div>
-              <div className="text-xs text-gray-500">Hoạt động</div>
+              <div className="font-semibold text-lg">{tenantData.hotelName}</div>
+              <div className="text-xs text-gray-500">{tenantData.subscriptionStatus === 'active' ? 'Hoạt động' : 'Hết hạn'}</div>
             </div>
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs ml-2">Cao cấp</span>
+            <SubscriptionBadge plan={tenantData.subscriptionPlan} status={tenantData.subscriptionStatus} />
           </div>
           {/* Nút chuyển sang giao diện khách */}
           <Link

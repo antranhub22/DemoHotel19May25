@@ -189,6 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setTenant(null);
     localStorage.removeItem('token');
+    window.location.href = '/login';
   }, []);
 
   console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
