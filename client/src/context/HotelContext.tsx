@@ -93,69 +93,13 @@ class HotelErrorBoundary extends React.Component<
   }
 }
 
-// Loading component
-const HotelConfigLoader: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { config, isLoading, error, reload } = useHotelConfiguration();
-  const loading = isLoading;
-  const clearError = () => {};
-  const isDefaultConfig = false;
-  const updateConfig = () => {};
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-500 mb-4" />
-          <p className="text-gray-600">Loading hotel configuration...</p>
-        </div>
-      </div>
-    )
-  }
-  
-  if (error && !config) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Configuration Error
-          </h2>
-          <p className="text-gray-600 mb-4">
-            {error}
-          </p>
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => clearError()}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
-            >
-              Dismiss
-            </button>
-            <button
-              onClick={() => reload()}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-            >
-              <RefreshCw className="w-4 h-4 inline mr-2" />
-              Retry
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  
-  return <>{children}</>
-}
-
-// Hotel context provider
 interface HotelProviderProps {
-  children: ReactNode
-  fallback?: ReactNode
+  children: React.ReactNode;
 }
 
-export const HotelProvider: React.FC<HotelProviderProps> = ({ children, fallback }) => {
-  console.log('[DEBUG] HotelProvider render');
-
-  // Sử dụng hook useHotelConfig để lấy đúng context value
+// Xóa hoàn toàn HotelConfigLoader và mọi logic liên quan đến loading/error ở cấp context
+// Trong HotelProvider, chỉ cần:
+export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const hotelConfigHook = useHotelConfiguration();
   const {
     config,
