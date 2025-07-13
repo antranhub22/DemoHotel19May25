@@ -1674,5 +1674,70 @@ Mi Nhon Hotel Mui Ne`
     setTimeout(seedDevelopmentData, 1000); // Delay to ensure DB is ready
   }
 
+  // ============================================
+  // Public API: Get hotel config by subdomain
+  // ============================================
+  app.get('/api/hotels/by-subdomain/:subdomain', async (req, res) => {
+    try {
+      const { subdomain } = req.params;
+      if (!subdomain) {
+        return res.status(400).json({ error: 'Missing subdomain' });
+      }
+      // Lấy tenant theo subdomain
+      const tenantService = require('./services/tenantService');
+      const service = new tenantService.TenantService();
+      const tenant = await service.getTenantBySubdomain(subdomain);
+      if (!tenant) {
+        return res.status(404).json({ error: 'Tenant not found' });
+      }
+      // Trả về thông tin hotel config cơ bản
+      res.json({
+        id: tenant.id,
+        name: tenant.hotelName,
+        subdomain: tenant.subdomain,
+        customDomain: tenant.customDomain,
+        branding: {
+          primaryColor: '#2E7D32',
+          secondaryColor: '#FFC107',
+          accentColor: '#FF6B6B',
+          logo: '/assets/haily-logo1.jpg',
+          primaryFont: 'Inter',
+          secondaryFont: 'Roboto'
+        },
+        contact: {
+          phone: tenant.phone || '',
+          email: tenant.email || '',
+          address: tenant.address || '',
+          website: tenant.website || ''
+        },
+        features: {
+          multiLanguage: true,
+          callHistory: true,
+          roomService: true,
+          concierge: true,
+          voiceCloning: false,
+          analytics: true
+        },
+        services: [],
+        supportedLanguages: ['en', 'vi', 'fr'],
+        vapiConfig: {
+          publicKeys: {},
+          assistantIds: {}
+        },
+        timezone: 'Asia/Ho_Chi_Minh',
+        currency: 'VND',
+        location: {
+          city: 'Phan Thiet',
+          country: 'Vietnam',
+          latitude: 10.9280,
+          longitude: 108.1020
+        }
+      });
+    } catch (error) {
+      console.error('Error in /api/hotels/by-subdomain:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   return httpServer;
 }
