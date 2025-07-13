@@ -102,7 +102,7 @@ export const useHotelConfiguration = () => {
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { currentTenant } = useTenantDetection();
+  const tenantInfo = useTenantDetection();
 
   const extractHotelIdentifier = (): { type: 'default' | 'subdomain' | 'custom', identifier: string } => {
     const hostname = window.location.hostname;
@@ -127,7 +127,7 @@ export const useHotelConfiguration = () => {
       const { type, identifier } = extractHotelIdentifier();
       
       // Fallback config for minhonmuine
-      if (identifier === 'minhonmuine') {
+      if (identifier === 'minhonmuine' || (tenantInfo && tenantInfo.isMiNhon)) {
         const fallbackConfig: HotelConfiguration = {
           hotelName: 'Mi Nhon Hotel Mui Ne',
           logoUrl: '/assets/haily-logo1.jpg',
@@ -248,7 +248,7 @@ export const useHotelConfiguration = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentTenant]);
+  }, [tenantInfo]);
 
   useEffect(() => {
     fetchHotelConfiguration();
@@ -259,7 +259,7 @@ export const useHotelConfiguration = () => {
     isLoading,
     error,
     reload: fetchHotelConfiguration,
-    isMiNhon: false
+    isMiNhon: tenantInfo?.isMiNhon || false
   };
 };
 
