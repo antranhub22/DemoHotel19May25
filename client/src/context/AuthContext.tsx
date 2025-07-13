@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import jwtDecode, { JwtPayload } from 'jwt-decode';
 
 // ============================================
 // Types & Interfaces
@@ -79,240 +80,56 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   console.log('[DEBUG] AuthProvider render');
+  
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get authentication token
-  const getToken = () => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('auth_token') || localStorage.getItem('staff_token');
-  };
-
-  // Refresh auth function
-  const refreshAuth = async () => {
-    if (isLoading) return;
-    setIsLoading(true);
-
-    const token = getToken();
+  useEffect(() => {
+    console.log('[DEBUG] AuthProvider useEffect - checking token');
+    const token = localStorage.getItem('token');
     if (!token) {
-      setUser(null);
-      setTenant(null);
+      console.log('[DEBUG] AuthProvider - no token found, setting loading false');
       setIsLoading(false);
       return;
     }
 
     try {
-      // Since /api/auth/me doesn't exist, we'll validate the token locally
-      // Try to decode the JWT token to get user info
-      const tokenParts = token.split('.');
-      if (tokenParts.length === 3) {
-        const payload = JSON.parse(atob(tokenParts[1]));
-        
-        // Check if token is expired
-        if (payload.exp && payload.exp < Date.now() / 1000) {
-          // Token is expired, clear storage
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('staff_token');
-          setUser(null);
-          setTenant(null);
-          setIsLoading(false);
-          return;
-        }
-
-        // Set user data from token payload
-        setUser({
-          id: payload.tenantId,
-          name: payload.username,
-          email: payload.username,
-          tenantId: payload.tenantId,
-          role: payload.role,
-        });
-        setTenant({
-          id: payload.tenantId,
-          hotelName: 'Mi Nhon Hotel',
-          subdomain: 'minhonmuine',
-          subscriptionPlan: 'premium',
-          subscriptionStatus: 'active',
-          features: {
-            voiceCloning: true,
-            multiLocation: true,
-            whiteLabel: true,
-            advancedAnalytics: true,
-            apiAccess: true
-          },
-          limits: {
-            maxCalls: 10000,
-            maxAssistants: 10,
-            maxLanguages: 10,
-            dataRetentionDays: 365
-          },
-          usage: {
-            totalCalls: 0,
-            currentMonth: 0,
-            remainingCalls: 10000
-          }
-        });
-      } else {
-        // Invalid token format
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('staff_token');
-        setUser(null);
-        setTenant(null);
-      }
+      console.log('[DEBUG] AuthProvider - decoding token');
+      const decoded = jwtDecode(token) as JwtPayload;
+      console.log('[DEBUG] AuthProvider - token decoded:', { user: decoded.user, tenant: decoded.tenant });
+      
+      setUser(decoded.user);
+      setTenant(decoded.tenant);
     } catch (error) {
-      console.error('Token validation failed:', error);
-      // Clear tokens on validation error
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('staff_token');
-      setUser(null);
-      setTenant(null);
+      console.log('[DEBUG] AuthProvider - token decode error:', error);
+      localStorage.removeItem('token');
     } finally {
+      console.log('[DEBUG] AuthProvider - setting loading false');
       setIsLoading(false);
     }
-  };
-
-  // Login function
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      // Use the existing /api/staff/login endpoint that works
-      const response = await fetch('/api/staff/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username: email, password }), // Server expects username, not email
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('auth_token', data.token);
-        setUser({
-          id: data.user.tenantId,
-          name: data.user.username,
-          email: data.user.username,
-          tenantId: data.user.tenantId,
-          role: data.user.role,
-        });
-        setTenant({
-          id: data.user.tenantId,
-          hotelName: 'Mi Nhon Hotel',
-          subdomain: 'minhonmuine',
-          subscriptionPlan: 'premium',
-          subscriptionStatus: 'active',
-          features: {
-            voiceCloning: true,
-            multiLocation: true,
-            whiteLabel: true,
-            advancedAnalytics: true,
-            apiAccess: true
-          },
-          limits: {
-            maxCalls: 10000,
-            maxAssistants: 10,
-            maxLanguages: 10,
-            dataRetentionDays: 365
-          },
-          usage: {
-            totalCalls: 0,
-            currentMonth: 0,
-            remainingCalls: 10000
-          }
-        });
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || error.error || 'Đăng nhập thất bại');
-      }
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('staff_token');
-    setUser(null);
-    setTenant(null);
-    
-    // Redirect to main page
-    window.location.href = '/';
-  };
-
-  // Feature access checker
-  const hasFeature = (feature: string): boolean => {
-    if (!tenant || !tenant.features) return false;
-    return tenant.features[feature as keyof typeof tenant.features] || false;
-  };
-
-  // Role checker
-  const hasRole = (role: 'admin' | 'manager' | 'staff'): boolean => {
-    if (!user) return false;
-    
-    const roleHierarchy = {
-      'staff': 1,
-      'manager': 2,
-      'admin': 3
-    };
-    
-    const userLevel = roleHierarchy[user.role];
-    const requiredLevel = roleHierarchy[role];
-    
-    return userLevel >= requiredLevel;
-  };
-
-  // Limits checker
-  const isWithinLimits = (limitType: string): boolean => {
-    if (!tenant || !tenant.limits || !tenant.usage) return false;
-    
-    switch (limitType) {
-      case 'calls':
-        return tenant.usage.currentMonth < tenant.limits.maxCalls;
-      case 'assistants':
-        // This would need to be implemented based on actual usage data
-        return true;
-      case 'languages':
-        // This would need to be implemented based on actual usage data
-        return true;
-      default:
-        return true;
-    }
-  };
-
-  // Initialize auth on mount
-  useEffect(() => {
-    refreshAuth();
   }, []);
 
-  // Periodic token refresh (every 10 minutes)
-  useEffect(() => {
-    if (!user) return;
+  const login = useCallback((userData: AuthUser, tenantData: TenantData) => {
+    console.log('[DEBUG] AuthProvider login called:', { user: userData, tenant: tenantData });
+    setUser(userData);
+    setTenant(tenantData);
+  }, []);
 
-    const interval = setInterval(() => {
-      refreshAuth();
-    }, 10 * 60 * 1000); // 10 minutes
+  const logout = useCallback(() => {
+    console.log('[DEBUG] AuthProvider logout called');
+    setUser(null);
+    setTenant(null);
+    localStorage.removeItem('token');
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [user]);
-
-  const value: AuthContextType = {
-    user,
-    tenant,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    logout,
-    refreshAuth,
-    hasFeature,
-    hasRole,
-    isWithinLimits
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
+  
+  return (
+    <AuthContext.Provider value={{ user, tenant, isLoading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 // ============================================

@@ -151,16 +151,102 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // Debug: Track currentInterface changes
   useEffect(() => {
-    console.log('🎯 AssistantContext: currentInterface changed to:', currentInterface);
-    console.log('🎯 Timestamp:', new Date().toISOString());
+    console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
+    console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
   }, [currentInterface]);
 
   // Debug: Track order changes
   useEffect(() => {
-    console.log('📦 AssistantContext: order changed to:', order);
-    console.log('📦 Order reference:', order?.reference);
-    console.log('📦 Timestamp:', new Date().toISOString());
+    console.log('[DEBUG] AssistantProvider useEffect - order changed to:', order);
+    console.log('[DEBUG] AssistantProvider - order reference:', order?.reference);
+    console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
   }, [order]);
+
+  // Debug: Track activeOrders changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - activeOrders changed:', activeOrders.length);
+    console.log('[DEBUG] AssistantProvider - activeOrders:', activeOrders);
+  }, [activeOrders]);
+
+  // Debug: Track hotelConfig changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - hotelConfig changed:', hotelConfig ? 'loaded' : 'null');
+  }, [hotelConfig]);
+
+  // Debug: Track language changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - language changed to:', language);
+  }, [language]);
+
+  // Debug: Track callDetails changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - callDetails changed:', callDetails ? 'active' : 'null');
+  }, [callDetails]);
+
+  // Debug: Track transcripts changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - transcripts count:', transcripts.length);
+  }, [transcripts]);
+
+  // Debug: Track orderSummary changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - orderSummary changed:', orderSummary ? 'has summary' : 'null');
+  }, [orderSummary]);
+
+  // Debug: Track callSummary changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - callSummary changed:', callSummary ? 'has summary' : 'null');
+  }, [callSummary]);
+
+  // Debug: Track serviceRequests changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - serviceRequests count:', serviceRequests.length);
+  }, [serviceRequests]);
+
+  // Debug: Track modelOutput changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - modelOutput count:', modelOutput.length);
+  }, [modelOutput]);
+
+  // Debug: Track micLevel changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - micLevel:', micLevel);
+  }, [micLevel]);
+
+  // Debug: Track isMuted changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - isMuted:', isMuted);
+  }, [isMuted]);
+
+  // Debug: Track callDuration changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - callDuration:', callDuration);
+  }, [callDuration]);
+
+  // Debug: Track emailSentForCurrentSession changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - emailSentForCurrentSession:', emailSentForCurrentSession);
+  }, [emailSentForCurrentSession]);
+
+  // Debug: Track requestReceivedAt changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - requestReceivedAt:', requestReceivedAt);
+  }, [requestReceivedAt]);
+
+  // Debug: Track vietnameseSummary changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - vietnameseSummary:', vietnameseSummary ? 'has summary' : 'null');
+  }, [vietnameseSummary]);
+
+  // Debug: Track tenantId changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - tenantId:', tenantId);
+  }, [tenantId]);
+
+  // Debug: Track tenantConfig changes
+  useEffect(() => {
+    console.log('[DEBUG] AssistantProvider useEffect - tenantConfig:', tenantConfig ? 'loaded' : 'null');
+  }, [tenantConfig]);
 
   const addActiveOrder = (order: ActiveOrder) => {
     setActiveOrders(prev => [...prev, {

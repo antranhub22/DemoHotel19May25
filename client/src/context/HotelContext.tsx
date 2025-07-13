@@ -153,104 +153,46 @@ interface HotelProviderProps {
 
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children, fallback }) => {
   console.log('[DEBUG] HotelProvider render');
-  const hotelConfigHook = useHotelConfig()
-  const { config, loading, error, isDefaultConfig, reload, clearError, updateConfig } = hotelConfigHook
   
-  // Memoized helper functions
-  const getVapiPublicKey = useCallback((language: string) => {
-    return getVapiPublicKeyByLanguage(config, language)
-  }, [config])
-  
-  const getVapiAssistantId = useCallback((language: string) => {
-    return getVapiAssistantIdByLanguage(config, language)
-  }, [config])
-  
-  const hasFeatureCheck = useCallback((feature: keyof HotelConfig['features']) => {
-    return hasFeature(config, feature)
-  }, [config])
-  
-  const getSupportedLanguagesCallback = useCallback(() => {
-    return getSupportedLanguages(config)
-  }, [config])
-  
-  const getAvailableServicesCallback = useCallback((category?: string) => {
-    return getAvailableServices(config, category)
-  }, [config])
-  
-  const getThemeColors = useCallback(() => {
-    return {
-      primary: config?.branding.primaryColor || '#2E7D32',
-      secondary: config?.branding.secondaryColor || '#FFC107',
-      accent: config?.branding.accentColor || '#FF6B6B'
-    }
-  }, [config])
-  
-  const getFontFamilies = useCallback(() => {
-    return {
-      primary: config?.branding.primaryFont || 'Inter',
-      secondary: config?.branding.secondaryFont || 'Roboto'
-    }
-  }, [config])
-  
-  const getContactInfo = useCallback(() => {
-    return config?.contact || null
-  }, [config])
-  
-  const getLocation = useCallback(() => {
-    return config?.location || null
-  }, [config])
-  
-  const getTimezone = useCallback(() => {
-    return config?.timezone || 'UTC'
-  }, [config])
-  
-  const getCurrency = useCallback(() => {
-    return config?.currency || 'USD'
-  }, [config])
-  
-  // Context value
-  const contextValue: HotelContextValue = {
-    // Configuration state
-    config,
-    loading,
-    error,
-    isDefaultConfig,
-    
-    // Configuration management
-    reload,
-    clearError,
-    updateConfig,
-    
-    // Helper functions
-    getVapiPublicKey,
-    getVapiAssistantId,
-    hasFeature: hasFeatureCheck,
-    getSupportedLanguages: getSupportedLanguagesCallback,
-    getAvailableServices: getAvailableServicesCallback,
-    
-    // Theme utilities
-    getThemeColors,
-    getFontFamilies,
-    
-    // Contact information
-    getContactInfo,
-    
-    // Location utilities
-    getLocation,
-    getTimezone,
-    getCurrency
-  }
+  const [hotelConfig, setHotelConfig] = useState<HotelConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('[DEBUG] HotelProvider useEffect - fetching config');
+    const fetchConfig = async () => {
+      try {
+        console.log('[DEBUG] HotelProvider - fetching from API');
+        const response = await fetch('/api/hotel/config');
+        if (response.ok) {
+          const config = await response.json();
+          console.log('[DEBUG] HotelProvider - config fetched:', config);
+          setHotelConfig(config);
+        } else {
+          console.log('[DEBUG] HotelProvider - API error, using fallback');
+          setHotelConfig(fallback);
+        }
+      } catch (err) {
+        console.log('[DEBUG] HotelProvider - fetch error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load hotel config');
+        setHotelConfig(fallback);
+      } finally {
+        console.log('[DEBUG] HotelProvider - setting loading false');
+        setLoading(false);
+      }
+    };
+
+    fetchConfig();
+  }, [fallback]);
+
+  console.log('[DEBUG] HotelProvider state:', { hotelConfig, loading, error });
   
   return (
-    <HotelErrorBoundary fallback={fallback}>
-      <HotelContext.Provider value={contextValue}>
-        <HotelConfigLoader>
-          {children}
-        </HotelConfigLoader>
-      </HotelContext.Provider>
-    </HotelErrorBoundary>
-  )
-}
+    <HotelContext.Provider value={{ hotelConfig, loading, error, setHotelConfig }}>
+      {children}
+    </HotelContext.Provider>
+  );
+};
 
 // Custom hook to use hotel context
 export const useHotel = (): HotelContextValue => {
