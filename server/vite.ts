@@ -27,22 +27,16 @@ export async function setupVite(app: Express, server: Server) {
 
   // Add CSP middleware
   app.use((req, res, next) => {
-    // CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
-    // CSP headers
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self' https://*.onrender.com; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com https://*.vapi.ai https://api.vapi.ai https://*.onrender.com; " +
-      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://*.onrender.com wss://*.onrender.com https://demohotel19may25.onrender.com; " +
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
-      "img-src 'self' data: blob: https://*.daily.co https://unpkg.com https://*.onrender.com; " +
-      "media-src 'self' blob: https://*.daily.co https://*.onrender.com; " +
-      "frame-src 'self' https://*.daily.co https://*.onrender.com; " +
+      "img-src 'self' data: blob: https://*.daily.co https://unpkg.com; " +
+      "media-src 'self' blob: https://*.daily.co; " +
+      "frame-src 'self' https://*.daily.co; " +
       "worker-src 'self' blob:; " +
       "object-src 'none';"
     );
@@ -103,14 +97,14 @@ export function serveStatic(app: Express) {
   app.use((req, res, next) => {
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self' https://*.onrender.com; " +
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com https://*.vapi.ai https://api.vapi.ai https://*.onrender.com; " +
-      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://*.onrender.com wss://*.onrender.com https://demohotel19may25.onrender.com; " +
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
-      "img-src 'self' data: blob: https://*.daily.co https://unpkg.com https://*.onrender.com; " +
-      "media-src 'self' blob: https://*.daily.co https://*.onrender.com; " +
-      "frame-src 'self' https://*.daily.co https://*.onrender.com; " +
+      "img-src 'self' data: blob: https://*.daily.co https://unpkg.com; " +
+      "media-src 'self' blob: https://*.daily.co; " +
+      "frame-src 'self' https://*.daily.co; " +
       "worker-src 'self' blob:; " +
       "object-src 'none';"
     );
