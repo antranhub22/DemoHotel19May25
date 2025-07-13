@@ -6,7 +6,5 @@ import { queryClient } from "./lib/queryClient";
 import { AssistantProvider } from "./context/AssistantContext";
 
 createRoot(document.getElementById("root")!).render(
-  <QueryClientProvider client={queryClient}>
-    <App />
-  </QueryClientProvider>
+  <App />
 );
