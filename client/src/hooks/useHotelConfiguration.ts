@@ -145,7 +145,18 @@ export const useHotelConfiguration = () => {
           headerText: hotelData.name,
           vapiPublicKey: '',
           vapiAssistantId: '',
-          branding: hotelData.branding,
+          branding: {
+            ...hotelData.branding,
+            colors: {
+              primary: hotelData.branding.primaryColor || '#2E7D32',
+              secondary: hotelData.branding.secondaryColor || '#FFC107',
+              accent: hotelData.branding.accentColor || '#FF6B6B',
+            },
+            fonts: {
+              primary: hotelData.branding.PrimaryFont || 'Inter',
+              secondary: hotelData.branding.SecondaryFont || 'Roboto',
+            }
+          },
           features: hotelData.features,
           services: hotelData.services,
           supportedLanguages: hotelData.supportedLanguages
