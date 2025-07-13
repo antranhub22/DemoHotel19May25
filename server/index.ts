@@ -6,6 +6,10 @@ import { setupSocket } from './socket';
 import cors from 'cors';
 
 const app = express();
+
+// Trust proxy for deployment on Render/Heroku/etc
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

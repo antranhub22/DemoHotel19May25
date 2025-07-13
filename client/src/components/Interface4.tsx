@@ -56,10 +56,9 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   // Chỉ hiển thị khi isActive là true VÀ có order
   if (!isActive || !order) {
     console.log('❌ Interface4 not rendering - isActive:', isActive, 'hasOrder:', !!order);
-    return null;
   }
   
-  return (
+  return (!isActive || !order) ? null : (
     <div 
       className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" 
       id="interface4"

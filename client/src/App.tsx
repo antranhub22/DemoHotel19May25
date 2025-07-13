@@ -60,16 +60,22 @@ function Router() {
   );
 }
 
-function App() {
+function AppContent() {
   // Initialize WebSocket globally to keep connection across routes
   useWebSocket();
   return (
+    <ErrorBoundary>
+      <Router />
+      <Toaster />
+    </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
     <BrowserRouter>
       <AssistantProvider>
-        <ErrorBoundary>
-          <Router />
-          <Toaster />
-        </ErrorBoundary>
+        <AppContent />
       </AssistantProvider>
     </BrowserRouter>
   );

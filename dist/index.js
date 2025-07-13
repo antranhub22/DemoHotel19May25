@@ -37,7 +37,7 @@ var insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true
 });
-var transcripts = pgTable("transcripts", {
+var transcripts = pgTable("transcript", {
   id: serial("id").primaryKey(),
   callId: text("call_id").notNull(),
   role: text("role").notNull(),
@@ -95,22 +95,32 @@ var ordersRelations = relations(orders, ({ many }) => ({
 // server/db.ts
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle as sqliteDrizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
 import * as dotenv from "dotenv";
 var { Pool } = pg;
 dotenv.config();
 var DATABASE_URL = process.env.DATABASE_URL;
-if (!DATABASE_URL) {
+var isProduction = process.env.NODE_ENV === "production";
+var db;
+var pool;
+if (!DATABASE_URL && !isProduction) {
+  console.log("\u23F3 Using SQLite database for development");
+  const sqlite = new Database("./dev.db");
+  db = sqliteDrizzle(sqlite, { schema: schema_exports });
+} else if (!DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?"
   );
+} else {
+  console.log("\u23F3 Connecting to database with URL:", DATABASE_URL);
+  pool = new Pool({
+    connectionString: DATABASE_URL,
+    // Internal VPC connection typically does not require SSL
+    ssl: { rejectUnauthorized: false }
+  });
+  db = drizzle(pool, { schema: schema_exports });
 }
-console.log("\u23F3 Connecting to database with URL:", DATABASE_URL);
-var pool = new Pool({
-  connectionString: DATABASE_URL,
-  // Internal VPC connection typically does not require SSL
-  ssl: { rejectUnauthorized: false }
-});
-var db = drizzle(pool, { schema: schema_exports });
 
 // server/storage.ts
 import { eq, gte, sql } from "drizzle-orm";
@@ -1218,7 +1228,7 @@ var Reference = model("Reference", referenceSchema);
 
 // server/middleware/auth.ts
 import jwt from "jsonwebtoken";
-var FALLBACK_JWT_SECRET = "minhon_mui_ne_development_secret_key";
+var FALLBACK_JWT_SECRET = "dev-secret-key-for-testing";
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -1243,56 +1253,146 @@ import jwt2 from "jsonwebtoken";
 
 // src/db/index.ts
 import { drizzle as drizzle2 } from "drizzle-orm/node-postgres";
+import { drizzle as sqliteDrizzle2 } from "drizzle-orm/better-sqlite3";
 import { Pool as Pool2 } from "pg";
-var DEFAULT_DB_URL = "postgres://postgres:postgres@localhost:5432/minhon";
-var dbUrl = process.env.DATABASE_URL || DEFAULT_DB_URL;
-console.log("Database connection using URL:", dbUrl.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
-var pool2 = new Pool2({
-  connectionString: dbUrl
-});
-(async () => {
-  try {
-    const client = await pool2.connect();
-    console.log("Database connection successful");
-    client.release();
-  } catch (error) {
-    console.error("Database connection failed:", error);
-  }
-})();
-var db2 = drizzle2(pool2);
+import Database2 from "better-sqlite3";
+var DATABASE_URL2 = process.env.DATABASE_URL;
+var isProduction2 = process.env.NODE_ENV === "production";
+var db2;
+var pool2;
+if (!DATABASE_URL2 && !isProduction2) {
+  console.log("\u23F3 Using SQLite database for development");
+  const sqlite = new Database2("./dev.db");
+  db2 = sqliteDrizzle2(sqlite);
+} else if (!DATABASE_URL2) {
+  const DEFAULT_DB_URL = "postgres://postgres:postgres@localhost:5432/minhon";
+  const dbUrl = DEFAULT_DB_URL;
+  console.log("Database connection using URL:", dbUrl.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
+  pool2 = new Pool2({
+    connectionString: dbUrl
+  });
+  (async () => {
+    try {
+      const client = await pool2.connect();
+      console.log("Database connection successful");
+      client.release();
+    } catch (error) {
+      console.error("Database connection failed:", error);
+    }
+  })();
+  db2 = drizzle2(pool2);
+} else {
+  console.log("Database connection using URL:", DATABASE_URL2.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"));
+  pool2 = new Pool2({
+    connectionString: DATABASE_URL2
+  });
+  (async () => {
+    try {
+      const client = await pool2.connect();
+      console.log("Database connection successful");
+      client.release();
+    } catch (error) {
+      console.error("Database connection failed:", error);
+    }
+  })();
+  db2 = drizzle2(pool2);
+}
 
 // src/db/schema.ts
-import { pgTable as pgTable2, serial as serial2, text as text2, timestamp as timestamp2, varchar } from "drizzle-orm/pg-core";
-var staff = pgTable2("staff", {
-  id: serial2("id").primaryKey(),
-  username: varchar("username", { length: 255 }).notNull().unique(),
-  password: text2("password").notNull(),
-  createdAt: timestamp2("created_at").defaultNow().notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
+import { sqliteTable, text as text2, integer as integer2 } from "drizzle-orm/sqlite-core";
+import { pgTable as pgTable2, text as pgText, integer as pgInteger, timestamp as timestamp2, varchar } from "drizzle-orm/pg-core";
+var isPostgres = process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("postgres");
+var pgCall = pgTable2("call", {
+  id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+  callIdVapi: varchar("call_id_vapi", { length: 100 }).notNull().unique(),
+  roomNumber: varchar("room_number", { length: 10 }),
+  language: varchar("language", { length: 10 }),
+  serviceType: varchar("service_type", { length: 50 }),
+  startTime: timestamp2("start_time").defaultNow(),
+  endTime: timestamp2("end_time"),
+  duration: pgInteger("duration"),
+  createdAt: timestamp2("created_at").defaultNow(),
+  updatedAt: timestamp2("updated_at").defaultNow()
 });
-var request = pgTable2("request", {
-  id: serial2("id").primaryKey(),
-  room_number: varchar("room_number", { length: 255 }).notNull(),
-  orderId: varchar("order_id", { length: 255 }).notNull(),
-  guestName: varchar("guest_name", { length: 255 }).notNull(),
-  request_content: text2("request_content").notNull(),
-  created_at: timestamp2("created_at").defaultNow().notNull(),
-  status: varchar("status", { length: 50 }).notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
+var pgTranscript = pgTable2("transcript", {
+  id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+  callId: varchar("call_id", { length: 100 }).notNull(),
+  content: pgText("content").notNull(),
+  role: varchar("role", { length: 20 }).notNull(),
+  timestamp: timestamp2("timestamp").defaultNow()
 });
-var message = pgTable2("message", {
-  id: serial2("id").primaryKey(),
-  requestId: serial2("request_id").references(() => request.id).notNull(),
-  sender: varchar("sender", { length: 255 }).notNull(),
+var pgRequest = pgTable2("request", {
+  id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+  roomNumber: varchar("room_number", { length: 10 }),
+  orderId: varchar("order_id", { length: 100 }),
+  requestContent: pgText("request_content"),
+  status: varchar("status", { length: 100 }).default("\u0110\xE3 ghi nh\u1EADn"),
+  createdAt: timestamp2("created_at").defaultNow(),
+  updatedAt: timestamp2("updated_at").defaultNow()
+});
+var pgMessage = pgTable2("message", {
+  id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+  requestId: pgInteger("request_id").references(() => pgRequest.id),
+  sender: varchar("sender", { length: 20 }).notNull(),
+  content: pgText("content").notNull(),
+  timestamp: timestamp2("timestamp").defaultNow()
+});
+var pgStaff = pgTable2("staff", {
+  id: pgInteger("id").primaryKey().generatedAlwaysAsIdentity(),
+  username: varchar("username", { length: 50 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
+  role: varchar("role", { length: 20 }).default("staff"),
+  createdAt: timestamp2("created_at").defaultNow()
+});
+var sqliteCall = sqliteTable("call", {
+  id: integer2("id").primaryKey({ autoIncrement: true }),
+  callIdVapi: text2("call_id_vapi").notNull().unique(),
+  roomNumber: text2("room_number"),
+  language: text2("language"),
+  serviceType: text2("service_type"),
+  startTime: integer2("start_time", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  endTime: integer2("end_time", { mode: "timestamp" }),
+  duration: integer2("duration"),
+  createdAt: integer2("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer2("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+var sqliteTranscript = sqliteTable("transcript", {
+  id: integer2("id").primaryKey({ autoIncrement: true }),
+  callId: text2("call_id").notNull(),
   content: text2("content").notNull(),
-  time: timestamp2("time").defaultNow().notNull(),
-  createdAt: timestamp2("created_at").defaultNow().notNull(),
-  updatedAt: timestamp2("updated_at").defaultNow().notNull()
+  role: text2("role").notNull(),
+  timestamp: integer2("timestamp", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
 });
+var sqliteRequest = sqliteTable("request", {
+  id: integer2("id").primaryKey({ autoIncrement: true }),
+  roomNumber: text2("room_number"),
+  orderId: text2("order_id"),
+  requestContent: text2("request_content"),
+  status: text2("status").default("\u0110\xE3 ghi nh\u1EADn"),
+  createdAt: integer2("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date()),
+  updatedAt: integer2("updated_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+var sqliteMessage = sqliteTable("message", {
+  id: integer2("id").primaryKey({ autoIncrement: true }),
+  requestId: integer2("request_id").references(() => sqliteRequest.id),
+  sender: text2("sender").notNull(),
+  content: text2("content").notNull(),
+  timestamp: integer2("timestamp", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+var sqliteStaff = sqliteTable("staff", {
+  id: integer2("id").primaryKey({ autoIncrement: true }),
+  username: text2("username").notNull().unique(),
+  password: text2("password").notNull(),
+  role: text2("role").default("staff"),
+  createdAt: integer2("created_at", { mode: "timestamp" }).$defaultFn(() => /* @__PURE__ */ new Date())
+});
+var call = isPostgres ? pgCall : sqliteCall;
+var transcript = isPostgres ? pgTranscript : sqliteTranscript;
+var request = isPostgres ? pgRequest : sqliteRequest;
 
 // server/routes.ts
-import { eq as eq3 } from "drizzle-orm";
-import { sql as sql2 } from "drizzle-orm";
+import { eq as eq4 } from "drizzle-orm";
+import { sql as sql3 } from "drizzle-orm";
 
 // src/api/staff.ts
 import { eq as eq2 } from "drizzle-orm";
@@ -1300,9 +1400,210 @@ var deleteAllRequests = async () => {
   return await db2.delete(request).returning();
 };
 
+// server/analytics.ts
+import { count, sql as sql2 } from "drizzle-orm";
+var isPostgres2 = process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("postgres");
+async function getOverview() {
+  try {
+    const totalCallsResult = await db2.select({ count: count() }).from(call);
+    const totalCalls = totalCallsResult[0]?.count || 0;
+    const avgDurationResult = await db2.select({
+      avg: sql2`AVG(${call.duration})`.as("avg")
+    }).from(call).where(sql2`${call.duration} IS NOT NULL`);
+    const averageCallDuration = Math.round(Number(avgDurationResult[0]?.avg) || 0);
+    const languageResult = await db2.select({
+      language: call.language,
+      count: count()
+    }).from(call).groupBy(call.language);
+    const languageDistribution = languageResult.map((row) => ({
+      language: row.language || "unknown",
+      count: row.count
+    }));
+    return {
+      totalCalls,
+      averageCallDuration,
+      languageDistribution
+    };
+  } catch (error) {
+    console.error("Error in getOverview:", error);
+    return {
+      totalCalls: 0,
+      averageCallDuration: 0,
+      languageDistribution: []
+    };
+  }
+}
+async function getServiceDistribution() {
+  try {
+    const result = await db2.select({
+      serviceType: call.serviceType,
+      count: count()
+    }).from(call).where(sql2`${call.serviceType} IS NOT NULL`).groupBy(call.serviceType);
+    return result.map((row) => ({
+      serviceType: row.serviceType || "unknown",
+      count: row.count
+    }));
+  } catch (error) {
+    console.error("Error in getServiceDistribution:", error);
+    return [];
+  }
+}
+async function getHourlyActivity() {
+  try {
+    if (isPostgres2) {
+      const result = await db2.select({
+        hour: sql2`EXTRACT(HOUR FROM ${call.createdAt})`.as("hour"),
+        count: count()
+      }).from(call).groupBy(sql2`EXTRACT(HOUR FROM ${call.createdAt})`);
+      return result.map((row) => ({
+        hour: row.hour,
+        count: row.count
+      }));
+    } else {
+      const result = await db2.select({
+        hour: sql2`CAST(strftime('%H', datetime(${call.createdAt}, 'unixepoch')) AS INTEGER)`.as("hour"),
+        count: count()
+      }).from(call).groupBy(sql2`strftime('%H', datetime(${call.createdAt}, 'unixepoch'))`);
+      return result.map((row) => ({
+        hour: row.hour,
+        count: row.count
+      }));
+    }
+  } catch (error) {
+    console.error("Error in getHourlyActivity:", error);
+    return [];
+  }
+}
+
+// server/seed.ts
+async function seedDevelopmentData() {
+  try {
+    const existingCalls = await db2.select().from(call).limit(1);
+    if (existingCalls.length > 0) {
+      console.log("Development data already exists, skipping seed...");
+      return;
+    }
+    console.log("Seeding development data...");
+    const callData = [
+      {
+        callIdVapi: "test-call-001",
+        roomNumber: "101",
+        language: "vi",
+        serviceType: "room_service",
+        duration: 120,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1e3)
+        // 2 hours ago
+      },
+      {
+        callIdVapi: "test-call-002",
+        roomNumber: "202",
+        language: "en",
+        serviceType: "housekeeping",
+        duration: 90,
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1e3)
+        // 4 hours ago
+      },
+      {
+        callIdVapi: "test-call-003",
+        roomNumber: "303",
+        language: "fr",
+        serviceType: "transportation",
+        duration: 150,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1e3)
+        // 6 hours ago
+      },
+      {
+        callIdVapi: "test-call-004",
+        roomNumber: "404",
+        language: "vi",
+        serviceType: "concierge",
+        duration: 75,
+        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1e3)
+        // 8 hours ago
+      },
+      {
+        callIdVapi: "test-call-005",
+        roomNumber: "505",
+        language: "en",
+        serviceType: "maintenance",
+        duration: 45,
+        createdAt: new Date(Date.now() - 10 * 60 * 60 * 1e3)
+        // 10 hours ago
+      }
+    ];
+    for (const callItem of callData) {
+      await db2.insert(call).values(callItem);
+    }
+    const requestData = [
+      {
+        roomNumber: "101",
+        orderId: "ORD-001",
+        requestContent: "Y\xEAu c\u1EA7u d\u1ECDn ph\xF2ng l\xFAc 2:00 PM",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1e3)
+        // 1 hour ago
+      },
+      {
+        roomNumber: "202",
+        orderId: "ORD-002",
+        requestContent: "C\u1EA7n th\xEAm kh\u0103n t\u1EAFm",
+        status: "\u0110ang th\u1EF1c hi\u1EC7n",
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1e3)
+        // 2 hours ago
+      },
+      {
+        roomNumber: "303",
+        orderId: "ORD-003",
+        requestContent: "Y\xEAu c\u1EA7u taxi \u0111\u1EBFn s\xE2n bay l\xFAc 6:00 AM",
+        status: "Ho\xE0n thi\u1EC7n",
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1e3)
+        // 3 hours ago
+      },
+      {
+        roomNumber: "404",
+        orderId: "ORD-004",
+        requestContent: "Th\xF4ng tin v\u1EC1 tour \u0111\u1ECBa ph\u01B0\u01A1ng",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1e3)
+        // 4 hours ago
+      },
+      {
+        roomNumber: "505",
+        orderId: "ORD-005",
+        requestContent: "S\u1EEDa ch\u1EEFa \u0111i\u1EC1u h\xF2a kh\xF4ng ho\u1EA1t \u0111\u1ED9ng",
+        status: "\u0110ang th\u1EF1c hi\u1EC7n",
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1e3)
+        // 5 hours ago
+      },
+      {
+        roomNumber: "606",
+        orderId: "ORD-006",
+        requestContent: "\u0110\u1EB7t b\xE0n nh\xE0 h\xE0ng cho 4 ng\u01B0\u1EDDi l\xFAc 7:00 PM",
+        status: "Ho\xE0n thi\u1EC7n",
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1e3)
+        // 6 hours ago
+      },
+      {
+        roomNumber: "707",
+        orderId: "ORD-007",
+        requestContent: "Y\xEAu c\u1EA7u d\u1ECBch v\u1EE5 gi\u1EB7t \u1EE7i",
+        status: "\u0110\xE3 ghi nh\u1EADn",
+        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1e3)
+        // 7 hours ago
+      }
+    ];
+    for (const requestItem of requestData) {
+      await db2.insert(request).values(requestItem);
+    }
+    console.log("Development data seeded successfully!");
+  } catch (error) {
+    console.error("Error seeding development data:", error);
+  }
+}
+
 // server/routes.ts
 var openai2 = new OpenAI2({
-  apiKey: process.env.VITE_OPENAI_API_KEY
+  apiKey: process.env.VITE_OPENAI_API_KEY || "sk-placeholder-for-dev"
 });
 var staffList = [
   {
@@ -1328,7 +1629,7 @@ function parseStaffAccounts(envStr) {
   });
 }
 var STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
-var JWT_SECRET = process.env.JWT_SECRET || "secret";
+var JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key-for-testing";
 var messageList = [
   { id: 1, requestId: 1, sender: "guest", content: "Can I get my order soon?", created_at: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() },
   { id: 2, requestId: 1, sender: "staff", content: "We are preparing your order.", created_at: /* @__PURE__ */ new Date(), updatedAt: /* @__PURE__ */ new Date() }
@@ -1369,6 +1670,29 @@ async function registerRoutes(app2) {
               role: data.role,
               content: data.content
             });
+            try {
+              const existingCall = await db2.select().from(call).where(eq4(call.callIdVapi, data.callId)).limit(1);
+              if (existingCall.length === 0) {
+                const roomMatch = data.content.match(/room (\d+)/i) || data.content.match(/phòng (\d+)/i);
+                const roomNumber = roomMatch ? roomMatch[1] : null;
+                const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(data.content);
+                const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(data.content) && !hasVietnamese;
+                let language = "en";
+                if (hasVietnamese) language = "vi";
+                else if (hasFrench) language = "fr";
+                await db2.insert(call).values({
+                  callIdVapi: data.callId,
+                  roomNumber,
+                  duration: 0,
+                  // Will be updated when call ends
+                  language,
+                  createdAt: /* @__PURE__ */ new Date()
+                });
+                console.log(`Auto-created call record for ${data.callId} with room ${roomNumber || "unknown"} and language ${language}`);
+              }
+            } catch (callError) {
+              console.error("Error creating call record:", callError);
+            }
             await storage.addTranscript(validatedData);
             const message3 = JSON.stringify({
               type: "transcript",
@@ -1444,8 +1768,24 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/orders", async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      const orderData = insertOrderSchema.parse({
+        ...req.body,
+        roomNumber: req.body.roomNumber || "unknown"
+      });
       const order = await storage.createOrder(orderData);
+      try {
+        await db2.insert(request).values({
+          room_number: order.roomNumber || orderData.roomNumber || "unknown",
+          orderId: order.callId || orderData.callId,
+          guestName: "Guest",
+          request_content: Array.isArray(orderData.items) && orderData.items.length > 0 ? orderData.items.map((i) => `${i.name} x${i.quantity}`).join(", ") : orderData.orderType || "Service Request",
+          status: "\u0110\xE3 ghi nh\u1EADn",
+          created_at: /* @__PURE__ */ new Date(),
+          updatedAt: /* @__PURE__ */ new Date()
+        });
+      } catch (syncErr) {
+        console.error("Failed to sync order to request table:", syncErr);
+      }
       res.status(201).json(order);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1523,6 +1863,22 @@ async function registerRoutes(app2) {
       res.json(updatedOrder);
     } catch (err) {
       handleApiError(res, err, "Failed to update order status");
+    }
+  });
+  app2.post("/api/call-end", async (req, res) => {
+    try {
+      const { callId, duration } = req.body;
+      if (!callId) {
+        return res.status(400).json({ error: "Call ID is required" });
+      }
+      const existingCall = await db2.select().from(call).where(eq4(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length > 0) {
+        await db2.update(call).set({ duration: duration || 0 }).where(eq4(call.callIdVapi, callId));
+        console.log(`Updated call duration for ${callId}: ${duration || 0} seconds`);
+      }
+      res.json({ success: true });
+    } catch (error) {
+      handleApiError(res, error, "Error updating call duration");
     }
   });
   app2.post("/api/store-summary", async (req, res) => {
@@ -1740,17 +2096,17 @@ async function registerRoutes(app2) {
       }
       const vietnameseServiceRequests = [];
       if (callDetails.serviceRequests && callDetails.serviceRequests.length > 0) {
-        for (const request2 of callDetails.serviceRequests) {
-          if (!/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(request2)) {
+        for (const request3 of callDetails.serviceRequests) {
+          if (!/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(request3)) {
             try {
-              const translatedRequest = await translateToVietnamese(request2);
+              const translatedRequest = await translateToVietnamese(request3);
               vietnameseServiceRequests.push(translatedRequest);
             } catch (error) {
               console.error("L\u1ED7i khi d\u1ECBch y\xEAu c\u1EA7u d\u1ECBch v\u1EE5:", error);
-              vietnameseServiceRequests.push(request2);
+              vietnameseServiceRequests.push(request3);
             }
           } else {
-            vietnameseServiceRequests.push(request2);
+            vietnameseServiceRequests.push(request3);
           }
         }
       }
@@ -2050,6 +2406,48 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, dbError, "DB test error:");
     }
   });
+  app2.post("/api/test-transcript", async (req, res) => {
+    try {
+      const { callId, role, content } = req.body;
+      if (!callId || !role || !content) {
+        return res.status(400).json({ error: "callId, role, and content are required" });
+      }
+      const existingCall = await db2.select().from(call).where(eq4(call.callIdVapi, callId)).limit(1);
+      if (existingCall.length === 0) {
+        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
+        const roomNumber = roomMatch ? roomMatch[1] : null;
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
+        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
+        let language = "en";
+        if (hasVietnamese) language = "vi";
+        else if (hasFrench) language = "fr";
+        await db2.insert(call).values({
+          callIdVapi: callId,
+          roomNumber,
+          duration: 0,
+          language,
+          createdAt: Date.now()
+        });
+        console.log(`Test: Auto-created call record for ${callId} with room ${roomNumber || "unknown"} and language ${language}`);
+      }
+      let callDbId;
+      if (existingCall.length > 0) {
+        callDbId = existingCall[0].id;
+      } else {
+        const newCall = await db2.select({ id: call.id }).from(call).where(eq4(call.callIdVapi, callId)).limit(1);
+        callDbId = newCall[0]?.id;
+      }
+      await db2.insert(transcript).values({
+        call_id: callDbId,
+        role,
+        content,
+        timestamp: Date.now()
+      });
+      res.json({ success: true, message: "Test transcript created successfully" });
+    } catch (error) {
+      handleApiError(res, error, "Error creating test transcript");
+    }
+  });
   app2.get("/api/references/:callId", async (req, res) => {
     try {
       const { callId } = req.params;
@@ -2109,7 +2507,7 @@ Mi Nhon Hotel Mui Ne`
     console.log("Authorization header:", req.headers.authorization);
     try {
       console.log("Checking database connection before querying requests...");
-      const dbTest = await db2.execute(sql2`SELECT 1`);
+      const dbTest = await db2.execute(sql3`SELECT 1`);
       console.log("Database connection test:", dbTest);
       console.log("Fetching requests from database...");
       const dbRequests = await db2.select().from(request);
@@ -2136,7 +2534,7 @@ Mi Nhon Hotel Mui Ne`
       const result = await db2.update(request).set({
         status,
         updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq3(request.id, id)).returning();
+      }).where(eq4(request.id, id)).returning();
       if (result.length === 0) {
         return res.status(404).json({ error: "Request not found" });
       }
@@ -2224,6 +2622,33 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, error, "Error deleting all orders");
     }
   });
+  app2.get("/api/analytics/overview", verifyJWT, async (req, res) => {
+    try {
+      const data = await getOverview();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, "Failed to fetch analytics overview");
+    }
+  });
+  app2.get("/api/analytics/service-distribution", verifyJWT, async (req, res) => {
+    try {
+      const data = await getServiceDistribution();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, "Failed to fetch service distribution");
+    }
+  });
+  app2.get("/api/analytics/hourly-activity", verifyJWT, async (req, res) => {
+    try {
+      const data = await getHourlyActivity();
+      res.json(data);
+    } catch (error) {
+      handleApiError(res, error, "Failed to fetch hourly activity");
+    }
+  });
+  if (process.env.NODE_ENV === "development") {
+    setTimeout(seedDevelopmentData, 1e3);
+  }
   return httpServer;
 }
 
@@ -2314,7 +2739,7 @@ async function setupVite(app2, server) {
     const url = req.originalUrl;
     try {
       const clientTemplate = path2.resolve(
-        import.meta.dirname,
+        import.meta.dirname || process.cwd(),
         "..",
         "client",
         "index.html"
@@ -2333,7 +2758,7 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
+  const distPath = path2.resolve(import.meta.dirname || process.cwd(), "public");
   if (!fs.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
@@ -2383,6 +2808,7 @@ function setupSocket(server) {
 // server/index.ts
 import cors from "cors";
 var app = express2();
+app.set("trust proxy", 1);
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
