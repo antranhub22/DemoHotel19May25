@@ -7,8 +7,6 @@ import { AssistantProvider } from "./context/AssistantContext";
 
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
-    <AssistantProvider>
-      <App />
-    </AssistantProvider>
+    <App />
   </QueryClientProvider>
 );
