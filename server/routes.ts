@@ -26,6 +26,7 @@ import { getOverview, getServiceDistribution, getHourlyActivity } from './analyt
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
+import { TenantService } from './services/tenantService.js';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -1684,8 +1685,7 @@ Mi Nhon Hotel Mui Ne`
         return res.status(400).json({ error: 'Missing subdomain' });
       }
       // Lấy tenant theo subdomain
-      const tenantService = require('./services/tenantService');
-      const service = new tenantService.TenantService();
+      const service = new TenantService();
       const tenant = await service.getTenantBySubdomain(subdomain);
       if (!tenant) {
         return res.status(404).json({ error: 'Tenant not found' });
