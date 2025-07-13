@@ -99,6 +99,7 @@ const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
 // ============================================
 
 export const useHotelConfiguration = () => {
+  console.log('[DEBUG] useHotelConfiguration hook called');
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -119,10 +120,12 @@ export const useHotelConfiguration = () => {
   };
 
   const loadConfiguration = useCallback(async () => {
+    console.log('[DEBUG] loadConfiguration called');
     try {
       setIsLoading(true);
       setError(null);
       const { type, identifier } = extractHotelIdentifier();
+      console.log('[DEBUG] extractHotelIdentifier', { type, identifier });
       if (type === 'default') {
         setConfig(MI_NHON_DEFAULT_CONFIG);
         return;
@@ -130,9 +133,11 @@ export const useHotelConfiguration = () => {
       if (type === 'subdomain') {
         // Gọi API public lấy config
         const endpoint = `/api/hotels/by-subdomain/${identifier}`;
+        console.log('[DEBUG] Fetching hotel config from', endpoint);
         const response = await fetch(endpoint);
         if (!response.ok) throw new Error('Failed to load hotel configuration');
         const hotelData = await response.json();
+        console.log('[DEBUG] hotelData', hotelData);
         setConfig({
           hotelName: hotelData.name,
           logoUrl: hotelData.branding.logo,
