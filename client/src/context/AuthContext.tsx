@@ -116,12 +116,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Remove or comment out the login function if not used, or update its type to match your usage
-  // const login = useCallback((userData: AuthUser, tenantData: TenantData) => {
-  //   console.log('[DEBUG] AuthProvider login called:', { user: userData, tenant: tenantData });
-  //   setUser(userData);
-  //   setTenant(tenantData);
-  // }, []);
+  const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        throw new Error('Sai tài khoản hoặc mật khẩu');
+      }
+      const data = await res.json();
+      if (!data.token) throw new Error('Không nhận được token từ server');
+      localStorage.setItem('token', data.token);
+
+      // Giải mã token để lấy user/tenant
+      const decoded = jwtDecode<MyJwtPayload>(data.token);
+      setUser(decoded.user);
+      setTenant(decoded.tenant);
+    } catch (err: any) {
+      localStorage.removeItem('token');
+      setUser(null);
+      setTenant(null);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const logout = useCallback(() => {
     console.log('[DEBUG] AuthProvider logout called');
@@ -137,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       user,
       tenant,
       isLoading,
-      login: async () => {}, // dummy async login
+      login, // dùng hàm login thực tế
       logout,
       isAuthenticated: !!user,
       refreshAuth: async () => {}, // dummy async refreshAuth
