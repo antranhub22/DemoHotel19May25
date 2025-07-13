@@ -350,6 +350,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   // Early return if hotel config is not loaded
   if (!hotelConfig) {
+    console.log('[DEBUG] Interface1 render:', { hotelConfig });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-30 bg-gray-100">
         <div className="text-center">

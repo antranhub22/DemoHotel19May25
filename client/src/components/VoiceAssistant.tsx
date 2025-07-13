@@ -110,6 +110,7 @@ const VoiceAssistant: React.FC = () => {
     ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(lang)
   );
 
+  console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig });
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
       {showWelcomePopup && <WelcomePopup onClose={() => setShowWelcomePopup(false)} />}
