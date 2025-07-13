@@ -134,34 +134,39 @@ export const useHotelConfiguration = () => {
         // Gọi API public lấy config
         const endpoint = `/api/hotels/by-subdomain/${identifier}`;
         console.log('[DEBUG] Fetching hotel config from', endpoint);
-        const response = await fetch(endpoint);
-        if (!response.ok) throw new Error('Failed to load hotel configuration');
-        const hotelData = await response.json();
-        console.log('[DEBUG] hotelData', hotelData);
-        setConfig({
-          hotelName: hotelData.name,
-          logoUrl: hotelData.branding.logo,
-          primaryColor: hotelData.branding.primaryColor,
-          headerText: hotelData.name,
-          vapiPublicKey: '',
-          vapiAssistantId: '',
-          branding: {
-            ...hotelData.branding,
-            colors: {
-              primary: hotelData.branding.primaryColor || '#2E7D32',
-              secondary: hotelData.branding.secondaryColor || '#FFC107',
-              accent: hotelData.branding.accentColor || '#FF6B6B',
+        try {
+          const response = await fetch(endpoint);
+          console.log('[DEBUG] fetch response', response);
+          if (!response.ok) throw new Error('Failed to load hotel configuration');
+          const hotelData = await response.json();
+          console.log('[DEBUG] hotelData', hotelData);
+          setConfig({
+            hotelName: hotelData.name,
+            logoUrl: hotelData.branding.logo,
+            primaryColor: hotelData.branding.primaryColor,
+            headerText: hotelData.name,
+            vapiPublicKey: '',
+            vapiAssistantId: '',
+            branding: {
+              ...hotelData.branding,
+              colors: {
+                primary: hotelData.branding.primaryColor || '#2E7D32',
+                secondary: hotelData.branding.secondaryColor || '#FFC107',
+                accent: hotelData.branding.accentColor || '#FF6B6B',
+              },
+              fonts: {
+                primary: hotelData.branding.PrimaryFont || 'Inter',
+                secondary: hotelData.branding.SecondaryFont || 'Roboto',
+              }
             },
-            fonts: {
-              primary: hotelData.branding.PrimaryFont || 'Inter',
-              secondary: hotelData.branding.SecondaryFont || 'Roboto',
-            }
-          },
-          features: hotelData.features,
-          services: hotelData.services,
-          supportedLanguages: hotelData.supportedLanguages
-        });
-        return;
+            features: hotelData.features,
+            services: hotelData.services,
+            supportedLanguages: hotelData.supportedLanguages
+          });
+          return;
+        } catch (err) {
+          console.error('[DEBUG] fetch hotel config error', err);
+        }
       }
       // Nếu là custom domain hoặc fallback, dùng config mặc định
       setConfig(MI_NHON_DEFAULT_CONFIG);
