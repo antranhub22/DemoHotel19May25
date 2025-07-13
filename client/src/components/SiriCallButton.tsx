@@ -5,12 +5,16 @@ interface SiriCallButtonProps {
   isListening: boolean;
   volumeLevel: number;
   containerId: string;
+  onCallStart?: () => Promise<void>;
+  onCallEnd?: () => void;
 }
 
 const SiriCallButton: React.FC<SiriCallButtonProps> = ({ 
   isListening, 
   volumeLevel,
-  containerId 
+  containerId,
+  onCallStart,
+  onCallEnd
 }) => {
   const buttonRef = useRef<SiriButton | null>(null);
 
@@ -18,14 +22,30 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     // Initialize SiriButton
     buttonRef.current = new SiriButton(containerId);
 
+    // Add click handlers
+    const element = document.getElementById(containerId);
+    if (element) {
+      element.addEventListener('click', async () => {
+        if (!isListening && onCallStart) {
+          await onCallStart();
+        } else if (isListening && onCallEnd) {
+          onCallEnd();
+        }
+      });
+    }
+
     // Cleanup on unmount
     return () => {
       if (buttonRef.current) {
         buttonRef.current.cleanup();
         buttonRef.current = null;
       }
+      const element = document.getElementById(containerId);
+      if (element) {
+        element.removeEventListener('click', () => {});
+      }
     };
-  }, [containerId]);
+  }, [containerId, isListening, onCallStart, onCallEnd]);
 
   useEffect(() => {
     // Update listening state
