@@ -26,6 +26,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import Sidebar from '@/components/dashboard/Sidebar';
+import { useAuth } from '@/context/AuthContext';
 
 // Types
 interface TenantData {
@@ -206,11 +208,12 @@ const UserMenu = ({ tenant }: { tenant: TenantData }) => (
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [location] = useLocation();
-  
+  const { tenant, logout } = useAuth();
+
   // Get all navigation items including conditional ones
   const allNavItems = [
     ...navigationItems,
-    ...getConditionalNavItems(mockTenant.subscriptionPlan)
+    ...getConditionalNavItems(tenant?.subscriptionPlan || mockTenant.subscriptionPlan)
   ];
 
   return (
@@ -222,91 +225,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
-      {/* Sidebar */}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo and close button */}
-          <div className="flex items-center justify-between p-6 border-b">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Building2 className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold">Talk2Go</h1>
-                <p className="text-sm text-muted-foreground">SaaS Dashboard</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          {/* Hotel info */}
-          <div className="p-6 border-b bg-gray-50 dark:bg-gray-900">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h2 className="font-semibold text-gray-900 dark:text-white">
-                  {mockTenant.hotelName}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {mockTenant.subscriptionStatus === 'active' ? 'Hoạt động' : 'Hết hạn'}
-                </p>
-              </div>
-              <SubscriptionBadge 
-                plan={mockTenant.subscriptionPlan} 
-                status={mockTenant.subscriptionStatus}
-              />
-            </div>
-            
-            {/* Trial warning */}
-            {mockTenant.subscriptionPlan === 'trial' && mockTenant.remainingDays && (
-              <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  <strong>Còn {mockTenant.remainingDays} ngày</strong> dùng thử
-                </p>
-                <Link href="/dashboard/billing">
-                  <Button size="sm" className="mt-2 w-full">
-                    Nâng cấp ngay
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </div>
-          
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
-            {allNavItems.map((item) => (
-              <NavItem
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                description={item.description}
-                isActive={location === item.href}
-              />
-            ))}
-          </nav>
-          
-          {/* Footer */}
-          <div className="p-4 border-t">
-            <p className="text-xs text-center text-muted-foreground">
-              © 2024 Talk2Go. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </aside>
-      
+      {/* Sidebar dùng component chuẩn */}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} tenantData={tenant || mockTenant} />
       {/* Main content */}
       <div className="lg:ml-80">
         {/* Top header */}
@@ -330,7 +250,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 </p>
               </div>
             </div>
-            
             <div className="flex items-center gap-4">
               {/* Notifications */}
               <Button variant="ghost" size="icon" className="relative">
@@ -339,13 +258,44 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   2
                 </span>
               </Button>
-              
-              {/* User menu */}
-              <UserMenu tenant={mockTenant} />
+              {/* User menu sửa để gọi logout */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="" alt={(tenant || mockTenant).hotelName} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {(tenant || mockTenant).hotelName.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end">
+                  <DropdownMenuLabel className="flex flex-col">
+                    <div className="font-medium">{(tenant || mockTenant).hotelName}</div>
+                    <div className="text-xs text-muted-foreground">
+                      ID: {(tenant || mockTenant).id}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Cài đặt tài khoản
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Trợ giúp
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Đăng xuất
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
-        
         {/* Page content */}
         <main className="p-6">
           {children}
