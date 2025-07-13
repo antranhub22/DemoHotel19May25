@@ -147,7 +147,225 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   return (
     <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}>
-      {/* Your existing JSX */}
+      {/* Main Interface Content */}
+      <div 
+        className="relative w-full h-full overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url(${hotelImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+        }}
+      >
+        {/* Header with time and date */}
+        <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-white z-20">
+          <div className="text-left">
+            <div className="text-lg font-semibold">
+              {currentTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })}
+            </div>
+            <div className="text-sm opacity-90">
+              {currentTime.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex flex-col items-center justify-center h-full p-4">
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              {t('speak_multiple_languages', language)}
+            </h1>
+            <p className="text-xl text-white/90 mb-8" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+              {t('tap_to_speak', language)}
+            </p>
+          </div>
+
+          {/* Voice Assistant Button */}
+          <div className="mb-12">
+            <SiriCallButton
+              containerId="main-siri-button"
+              isListening={isCallStarted}
+              volumeLevel={micLevel}
+              onCallStart={() => handleCall(language)}
+              onCallEnd={() => {
+                setIsCallStarted(false);
+                setShowConversation(false);
+              }}
+            />
+          </div>
+
+          {/* Service Categories Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full max-w-6xl">
+            {/* Local Tourism Info */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('tourism')}>
+              <div className="text-4xl mb-2">🏖️</div>
+              <h3 className="text-white font-semibold text-sm">{t('local_tourism_info', language)}</h3>
+              {activeTooltip === 'tourism' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('tourism_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Room Service */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('room_service')}>
+              <div className="text-4xl mb-2">🍽️</div>
+              <h3 className="text-white font-semibold text-sm">{t('room_service', language)}</h3>
+              {activeTooltip === 'room_service' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('room_service_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Housekeeping */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('housekeeping')}>
+              <div className="text-4xl mb-2">🧹</div>
+              <h3 className="text-white font-semibold text-sm">{t('housekeeping', language)}</h3>
+              {activeTooltip === 'housekeeping' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('housekeeping_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Guest Feedback */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('feedback')}>
+              <div className="text-4xl mb-2">💬</div>
+              <h3 className="text-white font-semibold text-sm">{t('guest_feedback', language)}</h3>
+              {activeTooltip === 'feedback' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('feedback_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Local Souvenir */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('souvenir')}>
+              <div className="text-4xl mb-2">🎁</div>
+              <h3 className="text-white font-semibold text-sm">{t('local_souvenir', language)}</h3>
+              {activeTooltip === 'souvenir' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('souvenir_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Tours */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('tours')}>
+              <div className="text-4xl mb-2">🚌</div>
+              <h3 className="text-white font-semibold text-sm">{t('tours', language)}</h3>
+              {activeTooltip === 'tours' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('tours_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Bus Tickets */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('bus_tickets')}>
+              <div className="text-4xl mb-2">🎫</div>
+              <h3 className="text-white font-semibold text-sm">{t('bus_tickets', language)}</h3>
+              {activeTooltip === 'bus_tickets' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('bus_tickets_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Vehicle Rental */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('vehicle_rental')}>
+              <div className="text-4xl mb-2">🏍️</div>
+              <h3 className="text-white font-semibold text-sm">{t('vehicle_rental', language)}</h3>
+              {activeTooltip === 'vehicle_rental' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('vehicle_rental_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Currency Exchange */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('currency_exchange')}>
+              <div className="text-4xl mb-2">💱</div>
+              <h3 className="text-white font-semibold text-sm">{t('currency_exchange', language)}</h3>
+              {activeTooltip === 'currency_exchange' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('currency_exchange_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Laundry Service */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('laundry')}>
+              <div className="text-4xl mb-2">👕</div>
+              <h3 className="text-white font-semibold text-sm">{t('laundry_service', language)}</h3>
+              {activeTooltip === 'laundry' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('laundry_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* HomeStay */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
+                 onClick={() => handleIconClick('homestay')}>
+              <div className="text-4xl mb-2">🏠</div>
+              <h3 className="text-white font-semibold text-sm">{t('homestay', language)}</h3>
+              {activeTooltip === 'homestay' && (
+                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                  {t('homestay_tooltip', language)}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Language Selection Buttons */}
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            {['en', 'fr', 'zh', 'ru', 'ko', 'vi'].map(lang => (
+              <button
+                key={lang}
+                onClick={() => handleCall(lang as 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi')}
+                className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-white font-semibold hover:bg-white/30 transition-all"
+              >
+                {lang === 'en' && '🇬🇧 English'}
+                {lang === 'fr' && '🇫🇷 Français'}
+                {lang === 'zh' && '🇨🇳 中文'}
+                {lang === 'ru' && '🇷🇺 Русский'}
+                {lang === 'ko' && '🇰🇷 한국어'}
+                {lang === 'vi' && '🇻🇳 Tiếng Việt'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Conversation Popup */}
+        {showConversation && (
+          <RealtimeConversationPopup
+            isOpen={showConversation}
+            onClose={() => setShowConversation(false)}
+            isRight={true}
+          />
+        )}
+      </div>
     </div>
   );
 };
