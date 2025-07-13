@@ -228,35 +228,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         {/* Hotel info */}
-        <div className="p-6 border-b bg-gray-50 dark:bg-gray-900">
+        <div className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h2 className="font-semibold text-gray-900 dark:text-white">
-                {tenantData.hotelName}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {tenantData.subscriptionStatus === 'active' ? 'Hoạt động' : 'Hết hạn'}
-              </p>
+            <div>
+              <div className="font-semibold text-lg">Mi Nhon Hotel</div>
+              <div className="text-xs text-gray-500">Hoạt động</div>
             </div>
-            <SubscriptionBadge 
-              plan={tenantData.subscriptionPlan} 
-              status={tenantData.subscriptionStatus}
-            />
+            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs ml-2">Cao cấp</span>
           </div>
-          
-          {/* Trial warning */}
-          {tenantData.subscriptionPlan === 'trial' && tenantData.remainingDays && (
-            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Còn {tenantData.remainingDays} ngày</strong> dùng thử
-              </p>
-              <Link href="/dashboard/billing">
-                <Button size="sm" className="mt-2 w-full">
-                  Nâng cấp ngay
-                </Button>
-              </Link>
-            </div>
-          )}
+          {/* Nút chuyển sang giao diện khách */}
+          <Link
+            href="/interface1"
+            className="block mt-3 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition text-center"
+          >
+            Xem giao diện khách
+          </Link>
         </div>
         
         {/* Navigation */}
