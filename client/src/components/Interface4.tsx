@@ -7,7 +7,9 @@ interface Interface4Props {
 }
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { order, setCurrentInterface, language, setOrder, hotelConfig } = useAssistant();
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Clear console for clean debugging when Interface4 mounts
   React.useEffect(() => {

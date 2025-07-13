@@ -20,6 +20,7 @@ interface Interface1Props {
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     setCurrentInterface, 
     setTranscripts, 
@@ -41,40 +42,28 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
   const [micLevel, setMicLevel] = useState(0);
   const [localDuration, setLocalDuration] = useState(0);
   const [showOrderCard, setShowOrderCard] = useState(false);
-  
-  // State để lưu trữ tooltip đang hiển thị
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
   const [showSummaryPopup, setShowSummaryPopup] = useState(false);
   const [showGeneratingPopup, setShowGeneratingPopup] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
-  
-  // Track current time for countdown calculations
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  // Toggle mute function
   const toggleMute = () => {
     setIsMuted(!isMuted);
   };
-
-  // Format duration for display
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = (seconds % 60).toString().padStart(2, '0');
     return `${minutes}:${secs}`;
   };
-
-  // Handler for Cancel button - End call and go back to interface1
   const handleCancel = useCallback(() => {
     setCurrentInterface('interface1');
   }, [setCurrentInterface]);
-
-  // Handler for Next button - End call and proceed to interface3
   const handleNext = useCallback(() => {
     if (language === 'fr') {
       setCurrentInterface('interface3fr');
@@ -82,22 +71,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       setCurrentInterface('interface3');
     }
   }, [setCurrentInterface, language]);
-
-  // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
-    
-    // Only start the timer when this interface is active
     if (isActive) {
       console.log('Interface1 is active, starting local timer');
       setLocalDuration(0);
-      
-      // Start the local timer
       timer = setInterval(() => {
         setLocalDuration(prev => prev + 1);
       }, 1000);
     }
-    
     return () => {
       if (timer) {
         console.log('Cleaning up local timer in Interface1');
@@ -105,6 +87,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive }) => {
       }
     };
   }, [isActive]);
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // Hàm dùng chung cho mọi ngôn ngữ - Now uses hotel configuration
   const handleCall = async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {

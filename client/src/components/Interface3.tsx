@@ -13,6 +13,7 @@ interface Interface3Props {
 }
 
 const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     orderSummary, 
     setOrderSummary, 
@@ -30,11 +31,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     language,
     hotelConfig
   } = useAssistant();
-  
-  // Local state for grouping service requests by type
   const [groupedRequests, setGroupedRequests] = useState<Record<string, ServiceRequest[]>>({});
-  // State for user-provided additional notes
   const [note, setNote] = useState('');
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // Early return if hotel config is not loaded
   if (!hotelConfig) {

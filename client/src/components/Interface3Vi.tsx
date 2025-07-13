@@ -7,6 +7,7 @@ interface Interface3ViProps {
 }
 
 const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     callSummary, 
     orderSummary, 
@@ -24,8 +25,9 @@ const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
     language,
     hotelConfig
   } = useAssistant();
-  
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [processedSummaryId, setProcessedSummaryId] = useState<string | null>(null);
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // Early return if hotel config is not loaded
   if (!hotelConfig) {
@@ -51,7 +53,6 @@ const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
 
   // Request Vietnamese translation when component becomes active
   // Store the call summary id to prevent unnecessary translation requests
-  const [processedSummaryId, setProcessedSummaryId] = useState<string | null>(null);
   
   useEffect(() => {
     // Only translate if:

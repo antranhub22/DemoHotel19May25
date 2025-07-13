@@ -8,6 +8,7 @@ interface Interface3FrProps {
 }
 
 const Interface3Fr: React.FC<Interface3FrProps> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const {
     callSummary,
     orderSummary,
@@ -22,8 +23,8 @@ const Interface3Fr: React.FC<Interface3FrProps> = ({ isActive }) => {
     language,
     hotelConfig,
   } = useAssistant();
-
   const [note, setNote] = useState('');
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // Early return if hotel config is not loaded
   if (!hotelConfig) {

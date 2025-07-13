@@ -30,6 +30,7 @@ interface ConversationTurn {
 }
 
 const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     transcripts, 
     callDetails,
@@ -43,24 +44,14 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     language,
     hotelConfig
   } = useAssistant();
-  
-  // State cho Paint-on effect
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
   const animationFrames = useRef<{[key: string]: number}>({});
-  
-  // State để lưu trữ các turns đã được xử lý
   const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
-  
-  // Add state for references
   const [references, setReferences] = useState<ReferenceItem[]>([]);
-  
-  // Local duration state for backup timer functionality
   const [localDuration, setLocalDuration] = useState(0);
-  
   const conversationRef = useRef<HTMLDivElement>(null);
-
-  // NEW: State để ẩn/hiện khung realtime conversation
   const [showRealtimeConversation, setShowRealtimeConversation] = useState(true);
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Cleanup function for animations
   const cleanupAnimations = () => {
