@@ -25,6 +25,22 @@ export async function setupVite(app: Express, server: Server) {
     hmr: { server }
   };
 
+  // Add CSP middleware
+  app.use((req, res, next) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: blob: https://*.daily.co; " +
+      "media-src 'self' blob: https://*.daily.co; " +
+      "frame-src 'self' https://*.daily.co; " +
+      "worker-src 'self' blob:;"
+    );
+    next();
+  });
+
   const vite = await createViteServer({
     ...viteConfig,
     configFile: false,
@@ -74,6 +90,22 @@ export function serveStatic(app: Express) {
       `Could not find the build directory: ${distPath}, make sure to build the client first`,
     );
   }
+
+  // Add CSP headers for static files too
+  app.use((req, res, next) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: blob: https://*.daily.co; " +
+      "media-src 'self' blob: https://*.daily.co; " +
+      "frame-src 'self' https://*.daily.co; " +
+      "worker-src 'self' blob:;"
+    );
+    next();
+  });
 
   // Serve static assets; cache hashed assets long-term but always revalidate HTML
   app.use(express.static(distPath, {
