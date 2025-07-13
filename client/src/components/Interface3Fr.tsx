@@ -8,6 +8,7 @@ interface Interface3FrProps {
 }
 
 const Interface3Fr: React.FC<Interface3FrProps> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const {
     callSummary,
     orderSummary,
@@ -20,9 +21,22 @@ const Interface3Fr: React.FC<Interface3FrProps> = ({ isActive }) => {
     callDetails,
     callDuration,
     language,
+    hotelConfig,
   } = useAssistant();
-
   const [note, setNote] = useState('');
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
+
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-30 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Handle input changes
   const handleInputChange = (field: string, value: string | number) => {
@@ -167,10 +181,10 @@ const Interface3Fr: React.FC<Interface3FrProps> = ({ isActive }) => {
       data-interface="interface3fr"
       data-active={isActive.toString()}
       style={{
-        backgroundImage: 'linear-gradient(rgba(26, 35, 126, 0.7), rgba(63, 81, 181, 0.7))',
+        backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif',
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif',
       }}
     >
       <div className="container mx-auto h-full flex flex-col p-2 sm:p-4 md:p-8">

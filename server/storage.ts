@@ -101,7 +101,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getCallSummaryByCallId(callId: string): Promise<CallSummary | undefined> {
-    const result = await db.select().from(callSummaries).where(eq(callSummaries.callId, callId));
+    const result = await db.select().from(callSummaries).where(eq(callSummaries.callIdVapi, callId));
     return result.length > 0 ? result[0] : undefined;
   }
   
@@ -113,8 +113,8 @@ export class DatabaseStorage implements IStorage {
     // Query summaries newer than the calculated timestamp
     return await db.select()
       .from(callSummaries)
-      .where(gte(callSummaries.timestamp, hoursAgo))
-      .orderBy(sql`${callSummaries.timestamp} DESC`);
+      .where(gte(callSummaries.createdAt, hoursAgo))
+      .orderBy(sql`${callSummaries.createdAt} DESC`);
   }
 }
 

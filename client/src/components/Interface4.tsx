@@ -7,7 +7,9 @@ interface Interface4Props {
 }
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
-  const { order, setCurrentInterface, language, setOrder } = useAssistant();
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
+  const { order, setCurrentInterface, language, setOrder, hotelConfig } = useAssistant();
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Clear console for clean debugging when Interface4 mounts
   React.useEffect(() => {
@@ -53,6 +55,18 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
     timestamp: new Date().toISOString()
   });
   
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-center justify-center bg-black/30 backdrop-blur-sm">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Chỉ hiển thị khi isActive là true VÀ có order
   if (!isActive || !order) {
     console.log('❌ Interface4 not rendering - isActive:', isActive, 'hasOrder:', !!order);
@@ -70,10 +84,10 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
       }}
     >
       <div className="container mx-auto flex flex-col items-center justify-center pt-50 sm:pt-0 p-3 sm:p-5 text-center h-auto">
-        <div className="w-full max-w-xs sm:max-w-md bg-white rounded-lg shadow-lg p-4 sm:p-8">
+        <div className="w-full max-w-xs sm:max-w-md bg-white rounded-lg shadow-lg p-4 sm:p-8" style={{ fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif' }}>
           {/* Success Animation */}
           <div className="mb-4 sm:mb-6 flex justify-center">
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-green-500 flex items-center justify-center">
+            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center" style={{ backgroundColor: hotelConfig.branding.colors.primary }}>
               <span className="material-icons text-white text-4xl sm:text-5xl">check</span>
             </div>
           </div>
@@ -90,14 +104,16 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
           </div>
           {/* Return to Home Button */}
           <button 
-            className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-amber-400 text-primary-dark rounded-lg font-poppins font-medium text-sm sm:text-base hover:bg-amber-500 transition-colors cursor-pointer"
+            className="w-full px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-poppins font-medium text-sm sm:text-base transition-colors cursor-pointer"
             onClick={handleReturnHome}
             onMouseDown={() => console.log('🖱️ Mouse down on Return to Home button')}
             onMouseUp={() => console.log('🖱️ Mouse up on Return to Home button')}
             style={{ 
               zIndex: 9999,
               position: 'relative',
-              pointerEvents: 'auto'
+              pointerEvents: 'auto',
+              backgroundColor: hotelConfig.branding.colors.secondary,
+              color: '#ffffff'
             }}
           >
             {t('return_to_home', language)}

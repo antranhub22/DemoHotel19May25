@@ -4,6 +4,7 @@ import { initVapi, getVapiInstance, FORCE_BASIC_SUMMARY } from '@/lib/vapiClient
 import { apiRequest } from '@/lib/queryClient';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import ReactDOM from 'react-dom';
+import { HotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -45,6 +46,13 @@ export interface AssistantContextType {
   addModelOutput: (output: string) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
+  hotelConfig: HotelConfiguration | null;
+  setHotelConfig: (config: HotelConfiguration | null) => void;
+  // Multi-tenant support
+  tenantId: string | null;
+  setTenantId: (tenantId: string | null) => void;
+  tenantConfig: any | null;
+  setTenantConfig: (config: any | null) => void;
 }
 
 const initialOrderSummary: OrderSummary = {
@@ -110,6 +118,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [micLevel, setMicLevel] = useState<number>(0);
   const [modelOutput, setModelOutput] = useState<string[]>([]);
   const [language, setLanguage] = useState<Language>('en');
+  const [hotelConfig, setHotelConfig] = useState<HotelConfiguration | null>(null);
+  // Multi-tenant support
+  const [tenantId, setTenantId] = useState<string | null>(null);
+  const [tenantConfig, setTenantConfig] = useState<any | null>(null);
 
   // Wrapper functions with debug logging
   const debugSetCurrentInterface = (layer: InterfaceLayer) => {
@@ -171,18 +183,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const setupVapi = async () => {
       try {
-        // Lấy publicKey theo ngôn ngữ
-        const publicKey = language === 'fr'
-          ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
-          : language === 'zh'
-            ? import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH
-            : language === 'ru'
-              ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
-              : language === 'ko'
-                ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
-                : language === 'vi'
-                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
-                  : import.meta.env.VITE_VAPI_PUBLIC_KEY;
+        // Use hotel configuration if available, otherwise fallback to environment variables
+        const publicKey = hotelConfig 
+          ? getVapiPublicKeyByLanguage(language, hotelConfig)
+          : language === 'fr'
+            ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
+            : language === 'zh'
+              ? import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH
+              : language === 'ru'
+                ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
+                : language === 'ko'
+                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
+                  : language === 'vi'
+                    ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
+                    : import.meta.env.VITE_VAPI_PUBLIC_KEY;
         if (!publicKey) {
           throw new Error('Vapi public key is not configured');
         }
@@ -262,7 +276,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         vapi.stop();
       }
     };
-  }, []);
+  }, [language, hotelConfig]);
 
   useEffect(() => {
     if (currentInterface === 'interface2') {
@@ -335,18 +349,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Lấy assistantId theo ngôn ngữ
-      const assistantId = language === 'fr'
-        ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
-        : language === 'zh'
-          ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
-          : language === 'ru'
-            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
-            : language === 'ko'
-              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
-              : language === 'vi'
-                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
-                : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+      // Use hotel configuration for assistant ID if available
+      const assistantId = hotelConfig 
+        ? getVapiAssistantIdByLanguage(language, hotelConfig)
+        : language === 'fr'
+          ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
+          : language === 'zh'
+            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
+            : language === 'ru'
+              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
+              : language === 'ko'
+                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
+                : language === 'vi'
+                  ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+                  : import.meta.env.VITE_VAPI_ASSISTANT_ID;
       if (!assistantId) {
         console.error('Assistant ID not configured');
         return;
@@ -378,7 +394,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Error starting call:', error);
     }
-  }, []);
+  }, [language, hotelConfig]);
 
   // End call function
   const endCall = useCallback(() => {
@@ -603,6 +619,13 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     addModelOutput,
     language,
     setLanguage,
+    hotelConfig,
+    setHotelConfig,
+    // Multi-tenant support
+    tenantId,
+    setTenantId,
+    tenantConfig,
+    setTenantConfig,
   };
 
   return (

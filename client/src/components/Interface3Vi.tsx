@@ -7,6 +7,7 @@ interface Interface3ViProps {
 }
 
 const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
+  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
   const { 
     callSummary, 
     orderSummary, 
@@ -21,10 +22,24 @@ const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     callDetails,
     callDuration,
-    language
+    language,
+    hotelConfig
   } = useAssistant();
-  
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [processedSummaryId, setProcessedSummaryId] = useState<string | null>(null);
+  // --- KẾT THÚC DI CHUYỂN HOOK ---
+
+  // Early return if hotel config is not loaded
+  if (!hotelConfig) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Handle input changes
   const handleInputChange = (field: string, value: string | number) => {
@@ -38,7 +53,6 @@ const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
 
   // Request Vietnamese translation when component becomes active
   // Store the call summary id to prevent unnecessary translation requests
-  const [processedSummaryId, setProcessedSummaryId] = useState<string | null>(null);
   
   useEffect(() => {
     // Only translate if:
@@ -294,10 +308,10 @@ const Interface3Vi: React.FC<Interface3ViProps> = ({ isActive }) => {
     <div className={`absolute w-full min-h-screen h-full transition-opacity duration-500 ${
       isActive ? 'opacity-100 active' : 'opacity-0 pointer-events-none'
     } z-30 overflow-y-auto`} id="interface3vi" data-interface="interface3vi" data-active={isActive.toString()} style={{
-      backgroundImage: 'linear-gradient(rgba(85,154,154,0.7), rgba(121, 219, 220, 0.6))',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      fontFamily: 'SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+                              backgroundImage: `linear-gradient(${hotelConfig.branding.colors.primary}CC, ${hotelConfig.branding.colors.secondary}99)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
     }}>
       <div className="container mx-auto h-full flex flex-col p-2 sm:p-4 md:p-8">
         <div className="mx-auto w-full max-w-3xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
