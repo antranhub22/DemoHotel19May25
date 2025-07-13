@@ -35,43 +35,56 @@ interface VapiMessage {
 
 export const initVapi = async (publicKey: string): Promise<Vapi> => {
   try {
+    console.log('[vapiClient] Initializing Vapi with public key:', publicKey);
+    
+    // Always create a new instance to avoid stale connections
     if (vapiInstance) {
-      return vapiInstance;
+      console.log('[vapiClient] Cleaning up existing instance');
+      try {
+        vapiInstance.stop();
+      } catch (e) {
+        console.log('[vapiClient] Error stopping existing instance:', e);
+      }
+      vapiInstance = null;
     }
+    
+    console.log('[vapiClient] Creating new Vapi instance');
     vapiInstance = new Vapi(publicKey);
 
     // Add event listeners
     vapiInstance.on('call-start', () => {
-      console.log('Call started');
+      console.log('[vapiClient] Call started');
     });
 
     vapiInstance.on('call-end', () => {
-      console.log('Call ended');
+      console.log('[vapiClient] Call ended');
     });
 
     vapiInstance.on('speech-start', () => {
-      console.log('Speech started');
+      console.log('[vapiClient] Speech started');
     });
 
     vapiInstance.on('speech-end', () => {
-      console.log('Speech ended');
+      console.log('[vapiClient] Speech ended');
     });
 
     vapiInstance.on('volume-level', (volume) => {
-      console.log(`Volume level: ${volume}`);
+      console.log(`[vapiClient] Volume level: ${volume}`);
     });
 
     vapiInstance.on('message', (message) => {
-      console.log('Message received:', message);
+      console.log('[vapiClient] Message received:', message);
     });
 
     vapiInstance.on('error', (error) => {
-      console.error('Error:', error);
+      console.error('[vapiClient] Error:', error);
     });
 
+    console.log('[vapiClient] Vapi instance created successfully');
     return vapiInstance;
   } catch (error) {
-    console.error('Failed to initialize Vapi:', error);
+    console.error('[vapiClient] Failed to initialize Vapi:', error);
+    vapiInstance = null;
     throw error;
   }
 };
@@ -195,4 +208,16 @@ export const buttonConfig = {
     subtitle: "End the call.",
     icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
   },
+};
+
+export const resetVapi = () => {
+  console.log('[vapiClient] Resetting Vapi instance');
+  if (vapiInstance) {
+    try {
+      vapiInstance.stop();
+    } catch (e) {
+      console.log('[vapiClient] Error stopping instance during reset:', e);
+    }
+    vapiInstance = null;
+  }
 };

@@ -4,7 +4,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '../assets/hotel-exterior.jpeg';
 import { t } from '../i18n';
 import { ActiveOrder } from '@/types';
-import { initVapi, getVapiInstance } from '@/lib/vapiClient';
+import { initVapi, getVapiInstance, resetVapi } from '@/lib/vapiClient';
 import { FaGlobeAsia } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
@@ -225,9 +225,18 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   console.log('[Interface1] Test button clicked!');
                   handleCall(language);
                 }}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mr-2"
               >
                 Test Call ({language})
+              </button>
+              <button
+                onClick={() => {
+                  console.log('[Interface1] Reset Vapi clicked!');
+                  resetVapi();
+                }}
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+              >
+                Reset Vapi
               </button>
             </div>
           </div>
