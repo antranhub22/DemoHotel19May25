@@ -104,134 +104,59 @@ export const useHotelConfiguration = () => {
   const [error, setError] = useState<string | null>(null);
   const tenantInfo = useTenantDetection();
 
+  // Nhận diện subdomain giống useHotelConfig
+  const extractHotelIdentifier = (): { type: 'default' | 'subdomain' | 'custom', identifier: string } => {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (isLocalhost) {
+      return { type: 'default', identifier: 'mi-nhon-hotel' };
+    }
+    const parts = hostname.split('.');
+    if (parts.length >= 3 && parts[parts.length - 2] === 'talk2go' && parts[parts.length - 1] === 'online') {
+      return { type: 'subdomain', identifier: parts[0] };
+    }
+    return { type: 'custom', identifier: hostname };
+  };
+
   const loadConfiguration = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // If no tenant info yet, wait
-      if (!tenantInfo) {
-        return;
-      }
-      
-      // For Mi Nhon Hotel (backward compatibility)
-      if (tenantInfo.isMiNhon) {
-        console.log('🏨 Loading Mi Nhon Hotel configuration (backward compatibility)');
+      const { type, identifier } = extractHotelIdentifier();
+      if (type === 'default') {
         setConfig(MI_NHON_DEFAULT_CONFIG);
         return;
       }
-      
-      // For other tenants, load from API
-      if (tenantInfo.subdomain || tenantInfo.customDomain) {
-        console.log('🏨 Loading tenant configuration for:', tenantInfo.subdomain || tenantInfo.customDomain);
-        
-        try {
-          const dashboardApi = new DashboardApi();
-          const profileResponse = await dashboardApi.getHotelProfile();
-          
-          if (profileResponse.success && profileResponse.profile) {
-            const profile = profileResponse.profile;
-            
-                         // Convert hotel profile to configuration
-             const tenantConfig: HotelConfiguration = {
-               hotelName: profile.researchData.name,
-               logoUrl: '/assets/hotel-default-logo.png',
-               primaryColor: '#1e40af',
-               headerText: profile.researchData.name,
-               
-               vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
-               vapiAssistantId: profile.vapiAssistantId || '',
-               
-               branding: {
-                 logo: '/assets/hotel-default-logo.png',
-                 colors: {
-                   primary: '#1e40af',
-                   secondary: '#d4af37',
-                   accent: '#f59e0b'
-                 },
-                 fonts: {
-                   primary: 'Poppins',
-                   secondary: 'Inter'
-                 }
-               },
-              
-              features: {
-                callHistory: profileResponse.features.advancedAnalytics || true,
-                multiLanguage: profile.assistantConfig.languages?.length > 1 || true,
-                analytics: profileResponse.features.advancedAnalytics || true,
-                customization: profileResponse.features.whiteLabel || true
-              },
-              
-              services: profile.researchData.services?.map(service => ({
-                type: service.type,
-                name: service.name,
-                enabled: true
-              })) || [],
-              
-              supportedLanguages: profile.assistantConfig.languages || ['en']
-            };
-            
-            setConfig(tenantConfig);
-          } else {
-            throw new Error('Hotel profile not found');
-          }
-        } catch (apiError) {
-          console.error('❌ Failed to load tenant configuration:', apiError);
-          
-          // Fallback to basic configuration for error cases
-          const fallbackConfig: HotelConfiguration = {
-            hotelName: tenantInfo.subdomain ? `${tenantInfo.subdomain.charAt(0).toUpperCase()}${tenantInfo.subdomain.slice(1)} Hotel` : 'Hotel',
-            logoUrl: '/assets/hotel-default-logo.png',
-            primaryColor: '#1e40af',
-            headerText: tenantInfo.subdomain ? `${tenantInfo.subdomain.charAt(0).toUpperCase()}${tenantInfo.subdomain.slice(1)} Hotel` : 'Hotel',
-            
-            vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
-            vapiAssistantId: '', // Will need to be created
-            
-            branding: {
-              logo: '/assets/hotel-default-logo.png',
-              colors: {
-                primary: '#1e40af',
-                secondary: '#d4af37',
-                accent: '#f59e0b'
-              },
-              fonts: {
-                primary: 'Poppins',
-                secondary: 'Inter'
-              }
-            },
-            
-            features: {
-              callHistory: false,
-              multiLanguage: false,
-              analytics: false,
-              customization: false
-            },
-            
-            services: [
-              { type: 'concierge', name: 'Concierge', enabled: true }
-            ],
-            
-            supportedLanguages: ['en']
-          };
-          
-          setConfig(fallbackConfig);
-          setError('Configuration loaded with limited features. Please complete hotel setup.');
-        }
+      if (type === 'subdomain') {
+        // Gọi API public lấy config
+        const endpoint = `/api/hotels/by-subdomain/${identifier}`;
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error('Failed to load hotel configuration');
+        const hotelData = await response.json();
+        setConfig({
+          hotelName: hotelData.name,
+          logoUrl: hotelData.branding.logo,
+          primaryColor: hotelData.branding.primaryColor,
+          headerText: hotelData.name,
+          vapiPublicKey: '',
+          vapiAssistantId: '',
+          branding: hotelData.branding,
+          features: hotelData.features,
+          services: hotelData.services,
+          supportedLanguages: hotelData.supportedLanguages
+        });
+        return;
       }
-      
+      // Nếu là custom domain hoặc fallback, dùng config mặc định
+      setConfig(MI_NHON_DEFAULT_CONFIG);
     } catch (err) {
-      console.error('❌ Error loading hotel configuration:', err);
       setError(err instanceof Error ? err.message : 'Failed to load configuration');
-      
-      // Fallback to Mi Nhon configuration on error
       setConfig(MI_NHON_DEFAULT_CONFIG);
     } finally {
       setIsLoading(false);
     }
-  }, [tenantInfo]);
+  }, []);
 
-  // Load configuration when tenant info changes
   useEffect(() => {
     loadConfiguration();
   }, [loadConfiguration]);
@@ -241,7 +166,7 @@ export const useHotelConfiguration = () => {
     isLoading,
     error,
     reload: loadConfiguration,
-    isMiNhon: tenantInfo?.isMiNhon || false
+    isMiNhon: false
   };
 };
 
