@@ -352,34 +352,16 @@ function Router() {
   );
 }
 
-<<<<<<< HEAD
-function AppContent() {
-=======
 // ============================================
 // Main App Component
 // ============================================
 
 function App() {
->>>>>>> DASHBOARD-MASTER
   // Initialize WebSocket globally to keep connection across routes
   useWebSocket();
   
   return (
-    <ErrorBoundary>
-      <Router />
-      <Toaster />
-    </ErrorBoundary>
-  );
-}
-
-function App() {
-  return (
     <BrowserRouter>
-<<<<<<< HEAD
-      <AssistantProvider>
-        <AppContent />
-      </AssistantProvider>
-=======
       <AuthProvider>
         <HotelProvider>
           <AssistantProvider>
@@ -390,7 +372,6 @@ function App() {
           </AssistantProvider>
         </HotelProvider>
       </AuthProvider>
->>>>>>> DASHBOARD-MASTER
     </BrowserRouter>
   );
 }
