@@ -99,11 +99,10 @@ const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
 // ============================================
 
 export const useHotelConfiguration = () => {
-  // console.log('[DEBUG] useHotelConfiguration hook called'); // Removed to reduce noise
+  console.log('[DEBUG] useHotelConfiguration hook called');
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoadingRef, setIsLoadingRef] = useState(false);
   const tenantInfo = useTenantDetection();
 
   // Nhận diện subdomain giống useHotelConfig
@@ -121,20 +120,17 @@ export const useHotelConfiguration = () => {
   };
 
   const loadConfiguration = useCallback(async () => {
-    if (isLoadingRef) {
-      console.log('[DEBUG] loadConfiguration already loading, skipping');
-      return;
-    }
     console.log('[DEBUG] loadConfiguration called');
     try {
-      setIsLoadingRef(true);
       setIsLoading(true);
       setError(null);
       const { type, identifier } = extractHotelIdentifier();
       console.log('[DEBUG] extractHotelIdentifier', { type, identifier });
       if (type === 'default') {
         setConfig(MI_NHON_DEFAULT_CONFIG);
-      } else if (type === 'subdomain') {
+        return;
+      }
+      if (type === 'subdomain') {
         // Gọi API public lấy config
         const endpoint = `/api/hotels/by-subdomain/${identifier}`;
         console.log('[DEBUG] Fetching hotel config from', endpoint);
@@ -167,23 +163,23 @@ export const useHotelConfiguration = () => {
             services: hotelData.services,
             supportedLanguages: hotelData.supportedLanguages
           });
+          return;
         } catch (err) {
           console.error('[DEBUG] fetch hotel config error', err);
           // Fall back to default config on fetch error
           setConfig(MI_NHON_DEFAULT_CONFIG);
+          return;
         }
-      } else {
-        // Nếu là custom domain hoặc fallback, dùng config mặc định
-        setConfig(MI_NHON_DEFAULT_CONFIG);
       }
+      // Nếu là custom domain hoặc fallback, dùng config mặc định
+      setConfig(MI_NHON_DEFAULT_CONFIG);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load configuration');
       setConfig(MI_NHON_DEFAULT_CONFIG);
     } finally {
-      setIsLoadingRef(false);
       setIsLoading(false);
     }
-  }, [isLoadingRef]);
+  }, []);
 
   useEffect(() => {
     loadConfiguration();

@@ -62,7 +62,7 @@ const VoiceAssistant: React.FC = () => {
     ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(lang)
   );
 
-  // console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig }); // Removed to prevent logging noise
+  console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig });
 
   // Loading state - AFTER ALL HOOKS
   if (isLoading || !config) {
@@ -222,16 +222,6 @@ const VoiceAssistant: React.FC = () => {
       
       {/* Interface Layers Container */}
       <div className="relative w-full h-full" id="interfaceContainer">
-        {/* DEBUG PANEL */}
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white p-3 rounded-lg text-sm z-[9999] font-mono">
-          <div className="font-bold">🔍 DEBUG STATE:</div>
-          <div>currentInterface: <span className="font-bold text-yellow-300">{currentInterface}</span></div>
-          <div>interface1: {interfaceStates.interface1 ? 'ACTIVE' : 'inactive'}</div>
-          <div>interface2: {interfaceStates.interface2 ? 'ACTIVE' : 'inactive'}</div>
-          <div>interface3: {interfaceStates.interface3 ? 'ACTIVE' : 'inactive'}</div>
-          <div>Timestamp: {new Date().toLocaleTimeString()}</div>
-        </div>
-        
         <Interface1 isActive={interfaceStates.interface1} />
         <Interface2 isActive={interfaceStates.interface2} />
         <Interface3 isActive={interfaceStates.interface3} />

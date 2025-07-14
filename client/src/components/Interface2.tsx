@@ -230,7 +230,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Early return if hotel config is not loaded
   if (configLoading || !hotelConfig) {
-    // console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading }); // Removed to prevent logging noise
+    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
         <div className="text-center">
@@ -262,17 +262,9 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
         backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url('/assets/courtyard.jpeg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif',
-        backgroundColor: isActive ? 'rgba(0,0,255,0.1)' : 'rgba(255,255,0,0.1)',
-        border: isActive ? '3px solid blue' : '3px solid yellow'
+        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
       }}
     >
-      {/* DEBUG INFO */}
-      <div className="absolute top-4 right-4 bg-black/80 text-white p-2 rounded text-xs z-50">
-        <div>Interface2 isActive: {isActive ? 'TRUE' : 'FALSE'}</div>
-        <div>Timestamp: {new Date().toLocaleTimeString()}</div>
-        <div>Z-index: 20</div>
-      </div>
       <div className="container mx-auto flex flex-col md:flex-row p-2 h-full gap-2">
         {/* Left: Call indicator & Realtime conversation side by side, Reference below */}
         <div className="w-full md:w-3/4 lg:w-2/3 flex flex-col items-center space-y-1 sm:space-y-4 mt-1 min-h-0 overflow-y-auto">

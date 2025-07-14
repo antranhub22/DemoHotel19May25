@@ -100,7 +100,7 @@ interface HotelProviderProps {
 // Xóa hoàn toàn HotelConfigLoader và mọi logic liên quan đến loading/error ở cấp context
 // Trong HotelProvider, chỉ cần:
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
-  // console.log('[DEBUG] HotelProvider rendered'); // Removed to prevent logging noise
+  console.log('[DEBUG] HotelProvider rendered');
   const hotelConfigHook = useHotelConfiguration();
   const {
     config,
