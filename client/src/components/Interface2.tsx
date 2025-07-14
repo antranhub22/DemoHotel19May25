@@ -31,7 +31,7 @@ interface ConversationTurn {
 }
 
 const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
-  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
+  // --- ALL HOOKS MUST BE DECLARED FIRST ---
   const { 
     transcripts, 
     callDetails,
@@ -54,16 +54,55 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   const [localDuration, setLocalDuration] = useState(0);
   const conversationRef = useRef<HTMLDivElement>(null);
   const [showRealtimeConversation, setShowRealtimeConversation] = useState(true);
-  // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Cleanup function for animations
-  const cleanupAnimations = () => {
+  const cleanupAnimations = useCallback(() => {
     Object.values(animationFrames.current).forEach(frameId => {
       cancelAnimationFrame(frameId);
     });
     animationFrames.current = {};
-  };
+  }, []);
+
+  // Handler for Cancel button - End call and go back to interface1
+  const handleCancel = useCallback(() => {
+    // Capture the current duration for the email
+    const finalDuration = callDuration > 0 ? callDuration : localDuration;
+    console.log('Canceling call with duration:', finalDuration);
+    
+    // Call the context's endCall and switch to interface1
+    contextEndCall();
+    setCurrentInterface('interface1');
+  }, [callDuration, localDuration, contextEndCall, setCurrentInterface]);
+
+  // Handler for Next button - End call and proceed to interface3
+  const handleNext = useCallback(() => {
+    // Nếu chưa có hội thoại thì không cho xác nhận
+    if (!transcripts || transcripts.length === 0) {
+      alert(t('need_conversation', language));
+      return;
+    }
+    // Capture the current duration for the email
+    const finalDuration = callDuration > 0 ? callDuration : localDuration;
+    console.log('Ending call with duration:', finalDuration);
+    // Call the context's endCall and switch to interface3, interface3fr (French), hoặc interface3vi (Vietnamese)
+    contextEndCall();
+    if (language === 'fr') {
+      setCurrentInterface('interface3fr');
+    } else if (language === 'vi') {
+      setCurrentInterface('interface3vi');
+    } else {
+      setCurrentInterface('interface3');
+    }
+  }, [callDuration, localDuration, contextEndCall, setCurrentInterface, transcripts, language]);
+
+  // Format duration for display
+  const formatDuration = useCallback((seconds: number) => {
+    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${secs}`;
+  }, []);
   
+  // --- EFFECTS ---
   // Load all references on mount
   useEffect(() => {
     async function loadAllReferences() {
@@ -75,8 +114,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     }
     loadAllReferences();
   }, []);
-  
-  // Process transcripts into conversation turns
+
+  // Update conversation turns when transcripts change
   useEffect(() => {
     const sortedTranscripts = [...transcripts].sort((a, b) => 
       a.timestamp.getTime() - b.timestamp.getTime()
@@ -155,72 +194,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
-  }, [conversationTurns]);
+  }, [conversationTurns, cleanupAnimations, visibleChars]);
 
-  // Handler for Cancel button - End call and go back to interface1
-  const handleCancel = useCallback(() => {
-    // Capture the current duration for the email
-    const finalDuration = callDuration > 0 ? callDuration : localDuration;
-    console.log('Canceling call with duration:', finalDuration);
-    
-    // Call the context's endCall and switch to interface1
-    contextEndCall();
-    setCurrentInterface('interface1');
-  }, [callDuration, localDuration, contextEndCall, setCurrentInterface]);
-
-  // Handler for Next button - End call and proceed to interface3
-  const handleNext = useCallback(() => {
-    // Nếu chưa có hội thoại thì không cho xác nhận
-    if (!transcripts || transcripts.length === 0) {
-      alert(t('need_conversation', language));
-      return;
-    }
-    // Capture the current duration for the email
-    const finalDuration = callDuration > 0 ? callDuration : localDuration;
-    console.log('Ending call with duration:', finalDuration);
-    // Call the context's endCall and switch to interface3, interface3fr (French), hoặc interface3vi (Vietnamese)
-    contextEndCall();
-    if (language === 'fr') {
-      setCurrentInterface('interface3fr');
-    } else if (language === 'vi') {
-      setCurrentInterface('interface3vi');
-    } else {
-      setCurrentInterface('interface3');
-    }
-  }, [callDuration, localDuration, contextEndCall, setCurrentInterface, transcripts, language]);
-  
-  // Format duration for display
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${secs}`;
-  };
-
-  // Early return if hotel config is not loaded
-  if (configLoading || !hotelConfig) {
-    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
-    return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error if config failed to load
-  if (configError) {
-    return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
-        <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
-          <p className="text-gray-600">{configError}</p>
-        </div>
-      </div>
-    );
-  }
-  
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -251,6 +226,32 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
       conversationRef.current.scrollTop = 0;
     }
   }, [conversationTurns, isActive]);
+
+  // --- EARLY RETURNS AFTER ALL HOOKS ---
+  // Early return if hotel config is not loaded
+  if (configLoading || !hotelConfig) {
+    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if config failed to load
+  if (configError) {
+    return (
+      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
+        <div className="text-center">
+          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <p className="text-gray-600">{configError}</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div 

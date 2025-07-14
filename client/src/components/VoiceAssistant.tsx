@@ -15,7 +15,7 @@ import WelcomePopup from './WelcomePopup';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 
 const VoiceAssistant: React.FC = () => {
-  // Hooks declarations
+  // Hooks declarations - ALL HOOKS MUST BE DECLARED FIRST
   const { currentInterface, language, setLanguage, hotelConfig, setHotelConfig } = useAssistant();
   const { config, isLoading, error } = useHotelConfiguration();
   const [showInfographic, setShowInfographic] = useState(false);
@@ -31,7 +31,7 @@ const VoiceAssistant: React.FC = () => {
     interface4: currentInterface === 'interface4'
   }), [currentInterface]);
 
-  // Effects
+  // Effects - ALL EFFECTS MUST BE AFTER HOOKS DECLARATION
   useEffect(() => {
     console.log('🔄 Current interface changed to:', currentInterface);
   }, [currentInterface]);
@@ -56,7 +56,15 @@ const VoiceAssistant: React.FC = () => {
     setLanguage(lang);
   };
 
-  // Loading state
+  // Filter available languages - this can be before render logic
+  const availableLanguages = config?.supportedLanguages || ['en'];
+  const filteredLanguages = availableLanguages.filter(lang => 
+    ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(lang)
+  );
+
+  console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig });
+
+  // Loading state - AFTER ALL HOOKS
   if (isLoading || !config) {
     return (
       <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50 flex items-center justify-center">
@@ -68,7 +76,7 @@ const VoiceAssistant: React.FC = () => {
     );
   }
 
-  // Error state
+  // Error state - AFTER ALL HOOKS
   if (error && !config) {
     return (
       <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50 flex items-center justify-center">
@@ -86,14 +94,6 @@ const VoiceAssistant: React.FC = () => {
       </div>
     );
   }
-
-  // Filter available languages
-  const availableLanguages = config.supportedLanguages || ['en'];
-  const filteredLanguages = availableLanguages.filter(lang => 
-    ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(lang)
-  );
-
-  console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig });
 
   return (
     <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">

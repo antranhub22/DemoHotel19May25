@@ -20,7 +20,7 @@ interface Interface1Props {
 }
 
 const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
-  // --- HOOKS DECLARATIONS ---
+  // --- ALL HOOKS MUST BE DECLARED FIRST ---
   const { 
     setCurrentInterface, 
     setTranscripts, 
@@ -140,6 +140,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     };
   }, [isActive]);
 
+  // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Loading state
   if (configLoading || !hotelConfig) {
     return (

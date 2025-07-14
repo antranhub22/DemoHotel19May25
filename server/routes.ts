@@ -1478,11 +1478,7 @@ Mi Nhon Hotel Mui Ne`
     console.log('API /api/staff/requests called');
     console.log('Authorization header:', req.headers.authorization);
     try {
-      // Kiểm tra kết nối DB trước
-      console.log('Checking database connection before querying requests...');
-      const dbTest = await db.execute(sql`SELECT 1`);
-      console.log('Database connection test:', dbTest);
-      
+      // Skip database connection test since db.execute doesn't exist
       console.log('Fetching requests from database...');
       const dbRequests = await db.select().from(requestTable);
       console.log(`Found ${dbRequests.length} requests in database:`, dbRequests);

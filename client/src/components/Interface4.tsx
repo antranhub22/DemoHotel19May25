@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { t } from '@/i18n';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
@@ -8,25 +8,23 @@ interface Interface4Props {
 }
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
-  // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
+  // --- ALL HOOKS MUST BE DECLARED FIRST ---
   const { order, setCurrentInterface, language, setOrder } = useAssistant();
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
-
-  // --- KẾT THÚC DI CHUYỂN HOOK ---
   
   // Clear console for clean debugging when Interface4 mounts
-  React.useEffect(() => {
+  useEffect(() => {
     if (isActive) {
       console.clear();
       console.log('🎬 === Interface4 Debug Session Started ===');
       console.log('🎬 Interface4 mounted with isActive:', isActive);
       console.log('🎬 Order:', order);
     }
-  }, [isActive]);
+  }, [isActive, order]);
   
-  const handleReturnHome = () => {
+  const handleReturnHome = useCallback(() => {
     console.log('🏠 Return to Home button clicked');
     console.log('Current interface before:', isActive);
     console.log('Order exists:', !!order);
@@ -50,7 +48,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
     } catch (error) {
       console.error('❌ Error in handleReturnHome:', error);
     }
-  };
+  }, [isActive, order, setOrder, setCurrentInterface]);
   
   // Debug logging
   console.log('🔍 Interface4 render:', { 
@@ -60,7 +58,8 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
     timestamp: new Date().toISOString()
   });
   console.log('[DEBUG] Interface4 render:', { hotelConfig });
-  
+
+  // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Early return if hotel config is not loaded
   if (configLoading || !hotelConfig) {
     return (
@@ -88,9 +87,10 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   // Chỉ hiển thị khi isActive là true VÀ có order
   if (!isActive || !order) {
     console.log('❌ Interface4 not rendering - isActive:', isActive, 'hasOrder:', !!order);
+    return null;
   }
   
-  return (!isActive || !order) ? null : (
+  return (
     <div 
       className="fixed inset-0 z-50 w-full h-full min-h-screen flex items-start sm:items-center justify-center bg-black/30 backdrop-blur-sm" 
       id="interface4"

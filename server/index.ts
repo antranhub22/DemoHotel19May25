@@ -27,16 +27,20 @@ app.use(helmet({
       connectSrc: [
         "'self'", 
         "https://api.openai.com", 
-        "https://api.vapi.ai", 
+        "https://api.vapi.ai",
         "https://minhonmuine.talk2go.online",
         "https://*.talk2go.online",
         "https://*.onrender.com",
         "https://demohotel19may25.onrender.com",
+        "https://minhnhotelben.onrender.com",
         "wss:", 
         "ws:",
         "wss://demohotel19may25.onrender.com",
+        "wss://minhnhotelben.onrender.com",
         "ws://localhost:*",
-        "wss://localhost:*"
+        "wss://localhost:*",
+        "http://localhost:*",
+        "https://localhost:*"
       ],
       imgSrc: ["'self'", "data:", "https:"],
       mediaSrc: ["'self'", "https:"],
