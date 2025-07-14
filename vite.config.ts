@@ -17,6 +17,11 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "apps", "client", "src"),
       "@shared": path.resolve(__dirname, "packages", "shared"),
+      "@server": path.resolve(__dirname, "apps", "server"),
+      "@types": path.resolve(__dirname, "packages", "types"),
+      "@config": path.resolve(__dirname, "packages", "config"),
+      "@tools": path.resolve(__dirname, "tools"),
+      "@tests": path.resolve(__dirname, "tests"),
     },
   },
   root: path.resolve(__dirname, "apps", "client"),

@@ -1,14 +1,14 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { verifyJWT } from '../middleware/auth';
-import { TenantService } from '../services/tenantService';
-import { HotelResearchService } from '../services/hotelResearch';
-import { VapiIntegrationService, AssistantGeneratorService } from '../services/vapiIntegration';
-import { KnowledgeBaseGenerator } from '../services/knowledgeBaseGenerator';
-import { tenants, hotelProfiles } from '../../../packages/shared/schema';
-import { db } from '../db';
+import { verifyJWT } from '@server/middleware/auth';
+import { TenantService } from '@server/services/tenantService';
+import { HotelResearchService } from '@server/services/hotelResearch';
+import { VapiIntegrationService, AssistantGeneratorService } from '@server/services/vapiIntegration';
+import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
+import { tenants, hotelProfiles } from '@shared/schema';
+import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
-import { getOverview, getServiceDistribution, getHourlyActivity } from '../analytics';
+import { getOverview, getServiceDistribution, getHourlyActivity } from '@server/analytics';
 
 // ============================================
 // Router Setup

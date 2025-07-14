@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import StaffRequestDetailModal from '../components/StaffRequestDetailModal';
-import StaffMessagePopup from '../components/StaffMessagePopup';
+import StaffRequestDetailModal from '@/components/StaffRequestDetailModal';
+import StaffMessagePopup from '@/components/StaffMessagePopup';
 import { useNavigate } from 'react-router-dom';
 
 const statusOptions = [

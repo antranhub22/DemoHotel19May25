@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { storage } from '../storage';
+import { storage } from '@server/storage';
 import { insertTranscriptSchema } from '@shared/schema';
-import { db } from '../../../packages/shared/db';
-import { call, transcript } from '../../../packages/shared/db';
+import { db } from '@shared/db';
+import { call, transcript } from '@shared/db';
 import { eq } from 'drizzle-orm';
-import { getCurrentTimestamp } from '../../../packages/shared/utils';
+import { getCurrentTimestamp } from '@shared/utils';
 
 const router = Router();
 

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer, WebSocket } from 'ws';
 import { insertTranscriptSchema, insertOrderSchema, insertCallSummarySchema } from "@shared/schema";
-import { dateToString, getCurrentTimestamp } from '../../packages/shared/utils';
+import { dateToString, getCurrentTimestamp } from '@shared/utils';
 import { z } from "zod";
 import { generateCallSummary, generateBasicSummary, extractServiceRequests, translateToVietnamese } from "./openai";
 import OpenAI from "openai";
@@ -18,11 +18,11 @@ import jwt from 'jsonwebtoken';
 import { Staff } from './models/Staff';
 import { Request as StaffRequest } from './models/Request';
 import { Message as StaffMessage } from './models/Message';
-import { db } from '../../packages/shared/db';
-import { request as requestTable, call, transcript } from '../../packages/shared/db';
+import { db } from '@shared/db';
+import { request as requestTable, call, transcript } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
-import { deleteAllRequests } from '../../packages/shared/utils';
+import { deleteAllRequests } from '@shared/utils';
 import { getOverview, getServiceDistribution, getHourlyActivity } from './analytics';
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
@@ -87,7 +87,7 @@ async function extractTenantFromRequest(req: Request): Promise<string> {
   
   // In production, lookup tenant by subdomain
   try {
-    const { tenants } = await import('../../packages/shared/schema');
+    const { tenants } = await import('@shared/schema');
     const [tenant] = await db.select().from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
     return tenant?.id || getMiNhonTenantId();
   } catch (error) {
@@ -128,7 +128,7 @@ function getMiNhonTenantId(): string {
  */
 async function findStaffInDatabase(username: string, password: string, tenantId: string): Promise<any> {
   try {
-    const { staff } = await import('../../packages/shared/schema');
+    const { staff } = await import('@shared/schema');
     
     // Look up staff by username and tenant
     const [staffUser] = await db

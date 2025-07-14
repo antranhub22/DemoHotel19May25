@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { TenantService, TenantError } from '../services/tenantService';
+import { TenantService, TenantError } from '@server/services/tenantService';
 import { eq } from 'drizzle-orm';
 
 // ============================================

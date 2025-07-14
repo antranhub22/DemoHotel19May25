@@ -1,5 +1,4 @@
-import { db } from '../../packages/shared/db';
-import { call, request } from '../../packages/shared/db';
+import { db, call, request } from '@shared/db';
 import { eq } from 'drizzle-orm';
 
 export async function seedDevelopmentData() {

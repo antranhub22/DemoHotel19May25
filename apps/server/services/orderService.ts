@@ -1,7 +1,7 @@
-import { storage } from '../storage';
+import { storage } from '@server/storage';
 import { insertOrderSchema } from '@shared/schema';
-import { db } from '../../../packages/shared/db';
-import { request as requestTable } from '../../../packages/shared/db';
+import { db } from '@shared/db';
+import { request as requestTable } from '@shared/db';
 import { z } from 'zod';
 
 export class OrderService {

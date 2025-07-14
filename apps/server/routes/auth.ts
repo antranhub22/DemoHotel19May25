@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { verifyJWT } from '../middleware/auth';
-import { db } from '../../../packages/shared/db';
-import { staff } from '../../../packages/shared/db';
+import { verifyJWT } from '@server/middleware/auth';
+import { db } from '@shared/db';
+import { staff } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
 
 const router = Router();
@@ -29,7 +29,7 @@ async function extractTenantFromRequest(req: Request): Promise<string> {
   }
   
   try {
-    const { tenants } = await import('../../../packages/shared/schema');
+    const { tenants } = await import('@shared/schema');
     const [tenant] = await db.select().from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
     return tenant?.id || getMiNhonTenantId();
   } catch (error) {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
-import { useHotelConfiguration, HotelConfiguration } from '../hooks/useHotelConfiguration';
+import { useHotelConfiguration, HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
 
 // Hotel context interfaces

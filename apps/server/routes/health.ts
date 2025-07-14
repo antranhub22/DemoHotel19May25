@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import OpenAI from 'openai';
-import { translateToVietnamese } from '../openai';
-import { db } from '../db';
+import { translateToVietnamese } from '@server/openai';
+import { db } from '@server/db';
 import { sql } from 'drizzle-orm';
-import { runAutoDbFix } from '../startup/auto-database-fix';
+import { runAutoDbFix } from '@server/startup/auto-database-fix';
 import fs from 'fs';
 import path from 'path';
 

@@ -1,6 +1,6 @@
 import { englishDictionary } from './dictionary/englishDictionary';
 import dictionaryData from './dictionary/dictionary.json';
-import { normalizeText } from '../lib/sharedUtils';
+import { normalizeText } from '@/lib/sharedUtils';
 
 interface ProcessTextResult {
   words: string[];

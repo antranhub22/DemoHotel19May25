@@ -1,8 +1,8 @@
 // Interface1 component - Multi-tenant version v2.0.0
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
-import hotelImage from '../assets/hotel-exterior.jpeg';
-import { t } from '../i18n';
+import hotelImage from '@/assets/hotel-exterior.jpeg';
+import { t } from '@/i18n';
 import { ActiveOrder } from '@/types';
 import { initVapi, getVapiInstance, resetVapi } from '@/lib/vapiClient';
 import { FaGlobeAsia } from 'react-icons/fa';

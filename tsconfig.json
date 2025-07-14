@@ -18,7 +18,12 @@
     "types": ["node", "vite/client", "react", "react-dom"],
     "paths": {
       "@/*": ["./apps/client/src/*"],
-      "@shared/*": ["./packages/shared/*"]
+      "@shared/*": ["./packages/shared/*"],
+      "@server/*": ["./apps/server/*"],
+      "@types/*": ["./packages/types/*"],
+      "@config/*": ["./packages/config/*"],
+      "@tools/*": ["./tools/*"],
+      "@tests/*": ["./tests/*"]
     }
   }
 }

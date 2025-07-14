@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { ServiceRequest } from '@/types';
-import hotelImage from '../assets/hotel-exterior.jpeg';
+import hotelImage from '@/assets/hotel-exterior.jpeg';
 import InfographicSteps from './InfographicSteps';
 import { parseSummaryToOrderDetails, extractRoomNumber } from '@/lib/summaryParser';
 import { t } from '@/i18n';

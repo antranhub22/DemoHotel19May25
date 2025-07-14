@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { storage } from '../storage';
+import { storage } from '@server/storage';
 import { insertOrderSchema } from '@shared/schema';
-import { verifyJWT } from '../middleware/auth';
-import { db } from '../../../packages/shared/db';
-import { request as requestTable } from '../../../packages/shared/db';
+import { verifyJWT } from '@server/middleware/auth';
+import { db } from '@shared/db';
+import { request as requestTable } from '@shared/db';
 import { z } from 'zod';
 
 const router = Router();
