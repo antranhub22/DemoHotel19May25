@@ -172,7 +172,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   }
 
   return (
-    <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}>
+    <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}
+         style={{ 
+           backgroundColor: isActive ? 'rgba(0,255,0,0.1)' : 'rgba(255,0,0,0.1)',
+           border: isActive ? '3px solid green' : '3px solid red'
+         }}>
+      {/* DEBUG INFO */}
+      <div className="absolute top-20 left-4 bg-black/80 text-white p-2 rounded text-xs z-50">
+        <div>Interface1 isActive: {isActive ? 'TRUE' : 'FALSE'}</div>
+        <div>Timestamp: {new Date().toLocaleTimeString()}</div>
+      </div>
+      
       {/* Main Interface Content */}
       <div 
         className="relative w-full h-full overflow-hidden"

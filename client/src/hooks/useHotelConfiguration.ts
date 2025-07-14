@@ -99,7 +99,7 @@ const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
 // ============================================
 
 export const useHotelConfiguration = () => {
-  console.log('[DEBUG] useHotelConfiguration hook called');
+  // console.log('[DEBUG] useHotelConfiguration hook called'); // Removed to reduce noise
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,6 +120,10 @@ export const useHotelConfiguration = () => {
   };
 
   const loadConfiguration = useCallback(async () => {
+    if (isLoading) {
+      console.log('[DEBUG] loadConfiguration already loading, skipping');
+      return;
+    }
     console.log('[DEBUG] loadConfiguration called');
     try {
       setIsLoading(true);
