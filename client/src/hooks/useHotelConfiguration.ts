@@ -166,6 +166,9 @@ export const useHotelConfiguration = () => {
           return;
         } catch (err) {
           console.error('[DEBUG] fetch hotel config error', err);
+          // Fall back to default config on fetch error
+          setConfig(MI_NHON_DEFAULT_CONFIG);
+          return;
         }
       }
       // Nếu là custom domain hoặc fallback, dùng config mặc định

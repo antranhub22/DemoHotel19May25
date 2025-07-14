@@ -31,7 +31,7 @@ export async function setupVite(app: Express, server: Server) {
       'Content-Security-Policy',
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
-      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://demohotel19may25.onrender.com https://minhnhotelben.onrender.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: blob: https://*.daily.co https://unpkg.com; " +
@@ -100,7 +100,7 @@ export function serveStatic(app: Express) {
       'Content-Security-Policy',
       "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
-      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai; " +
+      "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://demohotel19may25.onrender.com https://minhnhotelben.onrender.com; " +
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "img-src 'self' data: blob: https://*.daily.co https://unpkg.com; " +
