@@ -103,6 +103,7 @@ export const useHotelConfiguration = () => {
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingRef, setIsLoadingRef] = useState(false);
   const tenantInfo = useTenantDetection();
 
   // Nhận diện subdomain giống useHotelConfig
@@ -120,12 +121,13 @@ export const useHotelConfiguration = () => {
   };
 
   const loadConfiguration = useCallback(async () => {
-    if (isLoading) {
+    if (isLoadingRef) {
       console.log('[DEBUG] loadConfiguration already loading, skipping');
       return;
     }
     console.log('[DEBUG] loadConfiguration called');
     try {
+      setIsLoadingRef(true);
       setIsLoading(true);
       setError(null);
       const { type, identifier } = extractHotelIdentifier();
@@ -181,9 +183,10 @@ export const useHotelConfiguration = () => {
       setError(err instanceof Error ? err.message : 'Failed to load configuration');
       setConfig(MI_NHON_DEFAULT_CONFIG);
     } finally {
+      setIsLoadingRef(false);
       setIsLoading(false);
     }
-  }, []);
+  }, [isLoadingRef]);
 
   useEffect(() => {
     loadConfiguration();
