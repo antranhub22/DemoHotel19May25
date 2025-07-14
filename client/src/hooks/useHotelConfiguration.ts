@@ -134,9 +134,7 @@ export const useHotelConfiguration = () => {
       console.log('[DEBUG] extractHotelIdentifier', { type, identifier });
       if (type === 'default') {
         setConfig(MI_NHON_DEFAULT_CONFIG);
-        return;
-      }
-      if (type === 'subdomain') {
+      } else if (type === 'subdomain') {
         // Gọi API public lấy config
         const endpoint = `/api/hotels/by-subdomain/${identifier}`;
         console.log('[DEBUG] Fetching hotel config from', endpoint);
@@ -169,16 +167,15 @@ export const useHotelConfiguration = () => {
             services: hotelData.services,
             supportedLanguages: hotelData.supportedLanguages
           });
-          return;
         } catch (err) {
           console.error('[DEBUG] fetch hotel config error', err);
           // Fall back to default config on fetch error
           setConfig(MI_NHON_DEFAULT_CONFIG);
-          return;
         }
+      } else {
+        // Nếu là custom domain hoặc fallback, dùng config mặc định
+        setConfig(MI_NHON_DEFAULT_CONFIG);
       }
-      // Nếu là custom domain hoặc fallback, dùng config mặc định
-      setConfig(MI_NHON_DEFAULT_CONFIG);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load configuration');
       setConfig(MI_NHON_DEFAULT_CONFIG);
