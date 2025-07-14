@@ -1,5 +1,5 @@
-import { db } from '../src/db';
-import { call, transcript, request } from '../src/db/schema';
+import { db } from '../../packages/shared/db';
+import { call, transcript, request } from '../../packages/shared/db';
 import { desc, eq, count, sql } from 'drizzle-orm';
 
 const isPostgres = process.env.NODE_ENV === 'production' || process.env.DATABASE_URL?.includes('postgres');

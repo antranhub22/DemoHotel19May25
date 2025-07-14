@@ -1,6 +1,6 @@
 import { eq, and, sql } from 'drizzle-orm';
 import { db } from '../db';
-import { tenants, hotelProfiles, staff, call, transcript, request, message } from '../../shared/schema';
+import { tenants, hotelProfiles, staff, call, transcript, request, message } from '../../../packages/shared/schema';
 import { z } from 'zod';
 
 // ============================================

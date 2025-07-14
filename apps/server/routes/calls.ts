@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { storage } from '../storage';
 import { insertTranscriptSchema } from '@shared/schema';
-import { db } from '../../src/db';
-import { call, transcript } from '../../src/db/schema';
+import { db } from '../../../packages/shared/db';
+import { call, transcript } from '../../../packages/shared/db';
 import { eq } from 'drizzle-orm';
 
 const router = Router();

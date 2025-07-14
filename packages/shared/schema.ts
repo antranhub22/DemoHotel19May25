@@ -1,17 +1,7 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Re-export schema tables from the main database schema
-export { 
-  tenants, 
-  hotelProfiles, 
-  call, 
-  transcript, 
-  request, 
-  message, 
-  staff 
-} from "../src/db/schema";
-
+// Import table definitions from database schema
 import { 
   tenants, 
   hotelProfiles, 
@@ -19,8 +9,29 @@ import {
   transcript, 
   request, 
   message, 
-  staff 
-} from "../src/db/schema";
+  staff,
+  // Legacy aliases
+  users,
+  transcripts,
+  orders,
+  callSummaries,
+} from "./db/schema";
+
+// Re-export tables for convenience
+export {
+  tenants,
+  hotelProfiles,
+  call,
+  transcript,
+  request,
+  message,
+  staff,
+  // Legacy aliases
+  users,
+  transcripts,
+  orders,
+  callSummaries,
+};
 
 // ============================================
 // Multi-tenancy Schema Definitions
@@ -28,140 +39,144 @@ import {
 
 // Tenant schema
 export const insertTenantSchema = createInsertSchema(tenants, {
-  hotelName: z.string().min(1, "Hotel name is required"),
-  subdomain: z.string().min(1, "Subdomain is required").regex(/^[a-z0-9-]+$/, "Subdomain must contain only lowercase letters, numbers, and hyphens"),
-  subscriptionPlan: z.enum(["trial", "basic", "premium", "enterprise"]).default("trial"),
-  subscriptionStatus: z.enum(["active", "inactive", "expired", "cancelled"]).default("active"),
-}).pick({
-  hotelName: true,
-  subdomain: true,
-  customDomain: true,
-  subscriptionPlan: true,
-  subscriptionStatus: true,
-  trialEndsAt: true,
-  maxVoices: true,
-  maxLanguages: true,
-  voiceCloning: true,
-  multiLocation: true,
-  whiteLabel: true,
-  dataRetentionDays: true,
-  monthlyCallLimit: true
+  name: z.string().min(1).max(255),
+  subdomain: z.string().min(1).max(63),
+  isActive: z.boolean().optional(),
+  settings: z.any().optional(),
+  tier: z.enum(["free", "premium", "enterprise"]).optional(),
+  maxCalls: z.number().positive().optional(),
+  maxUsers: z.number().positive().optional(),
+  features: z.array(z.string()).optional(),
+  customDomain: z.string().optional(),
+  hotelName: z.string().optional(),
 });
 
-export const selectTenantSchema = createSelectSchema(tenants);
-
-// Hotel Profile schema
+// Hotel profile schema
 export const insertHotelProfileSchema = createInsertSchema(hotelProfiles, {
-  tenantId: z.string().uuid("Invalid tenant ID"),
-  researchData: z.any().optional(),
-  assistantConfig: z.any().optional(),
-  servicesConfig: z.any().optional(),
-  knowledgeBase: z.string().optional(),
-  systemPrompt: z.string().optional()
-}).pick({
-  tenantId: true,
-  researchData: true,
-  assistantConfig: true,
-  vapiAssistantId: true,
-  servicesConfig: true,
-  knowledgeBase: true,
-  systemPrompt: true
+  name: z.string().min(1).max(255),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email().optional(),
+  description: z.string().optional(),
+  amenities: z.array(z.string()).optional(),
+  policies: z.any().optional(),
+  checkInTime: z.string().optional(),
+  checkOutTime: z.string().optional(),
+  roomTypes: z.array(z.any()).optional(),
+  services: z.array(z.string()).optional(),
 });
 
-export const selectHotelProfileSchema = createSelectSchema(hotelProfiles);
-
-// ============================================
-// Updated Existing Schema with tenant_id
-// ============================================
-
-// Call schema (updated with tenant_id)
-export const insertCallSchema = createInsertSchema(call, {
-  callIdVapi: z.string().min(1, "Call ID is required"),
-  tenantId: z.string().uuid("Invalid tenant ID").optional()
-}).pick({
-  callIdVapi: true,
-  roomNumber: true,
-  language: true,
-  serviceType: true,
-  duration: true,
-  tenantId: true
-});
-
-// Transcript schema (updated with tenant_id)
-export const insertTranscriptSchema = createInsertSchema(transcript, {
-  callId: z.string().min(1, "Call ID is required"),
-  role: z.string().min(1, "Role is required"),
-  content: z.string().min(1, "Content is required"),
-  tenantId: z.string().uuid("Invalid tenant ID").optional()
-}).pick({
-  callId: true,
-  role: true,
-  content: true,
-  tenantId: true
-});
-
-// Request schema (updated with tenant_id)
-export const insertRequestSchema = createInsertSchema(request, {
-  tenantId: z.string().uuid("Invalid tenant ID").optional()
-}).pick({
-  roomNumber: true,
-  orderId: true,
-  requestContent: true,
-  status: true,
-  tenantId: true
-});
-
-// Message schema (updated with tenant_id)
-export const insertMessageSchema = createInsertSchema(message, {
-  requestId: z.number().int().positive("Invalid request ID"),
-  sender: z.string().min(1, "Sender is required"),
-  content: z.string().min(1, "Content is required"),
-  tenantId: z.string().uuid("Invalid tenant ID").optional()
-}).pick({
-  requestId: true,
-  sender: true,
-  content: true,
-  tenantId: true
-});
-
-// Staff schema (updated with tenant_id)
+// Staff schema
 export const insertStaffSchema = createInsertSchema(staff, {
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  tenantId: z.string().uuid("Invalid tenant ID").optional()
-}).pick({
-  username: true,
-  password: true,
-  role: true,
-  tenantId: true
+  username: z.string().min(3).max(50),
+  password: z.string().min(6),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  role: z.enum(["admin", "manager", "staff"]).optional(),
+  isActive: z.boolean().optional(),
+});
+
+// Call schema
+export const insertCallSchema = createInsertSchema(call, {
+  callIdVapi: z.string().optional(),
+  assistantId: z.string().optional(),
+  customerId: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  roomNumber: z.string().optional(),
+  language: z.string().optional(),
+  serviceType: z.string().optional(),
+  duration: z.number().positive().optional(),
+  cost: z.number().positive().optional(),
+  summary: z.string().optional(),
+  analysis: z.string().optional(),
+  rating: z.number().min(1).max(5).optional(),
+  status: z.enum(["active", "completed", "failed", "cancelled"]).optional(),
+  type: z.enum(["inbound", "outbound"]).optional(),
+  direction: z.enum(["inbound", "outbound"]).optional(),
+  endReason: z.string().optional(),
+  costBreakdown: z.any().optional(),
+  messages: z.array(z.any()).optional(),
+  artifact: z.any().optional(),
+});
+
+// Transcript schema
+export const insertTranscriptSchema = createInsertSchema(transcript, {
+  role: z.string().optional(),
+  content: z.string().min(1),
+  speaker: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  language: z.string().optional(),
+  emotion: z.string().optional(),
+  sentiment: z.enum(["positive", "negative", "neutral"]).optional(),
+  keywords: z.array(z.string()).optional(),
+  duration: z.number().positive().optional(),
+  wordCount: z.number().positive().optional(),
+});
+
+// Request schema
+export const insertRequestSchema = createInsertSchema(request, {
+  type: z.string().min(1),
+  description: z.string().optional(),
+  roomNumber: z.string().optional(),
+  orderId: z.string().optional(),
+  requestContent: z.string().optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  status: z.enum(["pending", "in_progress", "completed", "cancelled", "Đã ghi nhận"]).optional(),
+  assignedTo: z.string().optional(),
+  guestName: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  urgency: z.enum(["low", "medium", "high", "critical"]).optional(),
+  category: z.string().optional(),
+  subcategory: z.string().optional(),
+  estimatedTime: z.number().positive().optional(),
+  actualTime: z.number().positive().optional(),
+  cost: z.number().positive().optional(),
+  notes: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
+});
+
+// Message schema
+export const insertMessageSchema = createInsertSchema(message, {
+  requestId: z.number().optional(),
+  sender: z.string().optional(),
+  role: z.enum(["user", "assistant", "system", "tool"]),
+  content: z.string().min(1),
+  metadata: z.any().optional(),
+  toolCalls: z.array(z.any()).optional(),
+  functionName: z.string().optional(),
+  functionArgs: z.any().optional(),
+  functionResult: z.string().optional(),
+  isError: z.boolean().optional(),
+  processingTime: z.number().positive().optional(),
+  tokens: z.number().positive().optional(),
+  model: z.string().optional(),
+  temperature: z.number().min(0).max(2).optional(),
+  maxTokens: z.number().positive().optional(),
 });
 
 // ============================================
-// Backwards Compatibility (deprecated but maintained)
+// Order Schema (alias for Request)
 // ============================================
+export const insertOrderSchema = insertRequestSchema;
 
 // Legacy schemas for backwards compatibility
-export const users = staff; // Map users to staff table
-export const transcripts = transcript; // Singular to plural mapping
-export const orders = request; // Map orders to request table
-export const callSummaries = call; // Map callSummaries to call table
-
-export const insertUserSchema = insertStaffSchema;
-export const insertOrderSchema = insertRequestSchema;
 export const insertCallSummarySchema = insertCallSchema;
+export const insertUserSchema = insertStaffSchema;
 
 // ============================================
-// TypeScript Types
+// Inferred Types
 // ============================================
 
-// Multi-tenancy types
+// Tenant types
 export type InsertTenant = z.infer<typeof insertTenantSchema>;
 export type Tenant = typeof tenants.$inferSelect;
 
 export type InsertHotelProfile = z.infer<typeof insertHotelProfileSchema>;
 export type HotelProfile = typeof hotelProfiles.$inferSelect;
 
-// Updated existing types with tenant_id
+// Call types
 export type InsertCall = z.infer<typeof insertCallSchema>;
 export type Call = typeof call.$inferSelect;
 
@@ -177,7 +192,7 @@ export type Message = typeof message.$inferSelect;
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type Staff = typeof staff.$inferSelect;
 
-// Backwards compatibility types (deprecated)
+// Convenience aliases
 export type User = Staff;
 export type InsertUser = InsertStaff;
 export type Order = Request;

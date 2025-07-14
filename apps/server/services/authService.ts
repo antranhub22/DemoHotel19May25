@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Request } from 'express';
-import { db } from '../../src/db';
-import { staff } from '../../src/db/schema';
+import { db } from '../../../packages/shared/db';
+import { staff } from '../../../packages/shared/db';
 import { eq, and } from 'drizzle-orm';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
@@ -31,7 +31,7 @@ export class AuthService {
     }
     
     try {
-      const { tenants } = await import('../../shared/schema');
+      const { tenants } = await import('../../../packages/shared/schema');
       const [tenant] = await db.select().from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
       return tenant?.id || this.getMiNhonTenantId();
     } catch (error) {

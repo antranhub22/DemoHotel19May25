@@ -14,7 +14,7 @@ import {
   printEnvironmentStatus,
   loadEnvironmentConfig,
   EnvironmentValidationError
-} from '../../config/environment';
+} from '../../../packages/config/environment';
 
 // Colors for console output
 const colors = {

@@ -5,7 +5,7 @@ import { TenantService } from '../services/tenantService';
 import { HotelResearchService } from '../services/hotelResearch';
 import { VapiIntegrationService, AssistantGeneratorService } from '../services/vapiIntegration';
 import { KnowledgeBaseGenerator } from '../services/knowledgeBaseGenerator';
-import { tenants, hotelProfiles } from '../../shared/schema';
+import { tenants, hotelProfiles } from '../../../packages/shared/schema';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
 import { getOverview, getServiceDistribution, getHourlyActivity } from '../analytics';

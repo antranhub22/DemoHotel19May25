@@ -1,5 +1,5 @@
-import { db } from '../src/db';
-import { call, request } from '../src/db/schema';
+import { db } from '../../packages/shared/db';
+import { call, request } from '../../packages/shared/db';
 import { eq } from 'drizzle-orm';
 
 export async function seedDevelopmentData() {
