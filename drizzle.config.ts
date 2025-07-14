@@ -9,8 +9,8 @@ let config;
 // Use SQLite for development if no DATABASE_URL is provided
 if (!DATABASE_URL && !isProduction) {
   config = defineConfig({
-    out: "./migrations",
-    schema: "./src/db/schema.ts", 
+    out: "./tools/migrations",
+    schema: "./packages/shared/schema.ts", 
     dialect: "sqlite",
     dbCredentials: {
       url: "./dev.db",
@@ -20,8 +20,8 @@ if (!DATABASE_URL && !isProduction) {
   throw new Error("DATABASE_URL, ensure the database is provisioned");
 } else {
   config = defineConfig({
-    out: "./migrations",
-    schema: "./src/db/schema.ts",
+    out: "./tools/migrations",
+    schema: "./packages/shared/schema.ts",
     dialect: "postgresql",
     dbCredentials: {
       url: DATABASE_URL,

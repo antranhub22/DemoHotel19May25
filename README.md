@@ -1,77 +1,85 @@
-# Mi Nhon Hotel Mui Ne - Voice Assistant
+# DemoHotel19May - Monorepo Structure
 
-A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline guest interactions through an intelligent, minimalist service interface with advanced call management and personalized user experience.
+## 📁 Cấu trúc mới sau Restructure
 
-## Features
+```
+DemoHotel19May/
+├── 📁 apps/                          # Applications
+│   ├── 📁 client/                    # Frontend React app
+│   │   ├── index.html
+│   │   ├── public/
+│   │   └── src/
+│   └── 📁 server/                    # Backend Node.js app
+│       ├── index.ts
+│       ├── routes/
+│       ├── services/
+│       └── models/
+├── 📁 packages/                      # Shared packages
+│   ├── 📁 shared/                    # Shared utilities & types
+│   ├── 📁 types/                     # Type definitions
+│   └── 📁 config/                    # Shared configurations
+├── 📁 tools/                         # Development tools
+│   ├── 📁 scripts/                   # Build scripts
+│   └── 📁 migrations/                # Database migrations
+├── 📁 tests/                         # Test suites
+├── 📁 docs/                          # Documentation
+├── 📁 assets/                        # Static assets
+└── 📁 .infrastructure/               # Infrastructure files
+    ├── docker-compose.yml
+    ├── Dockerfile
+    └── deployment/
+```
 
-- AI-powered voice interface using Vapi.ai
-- Real-time conversation transcription
-- Multiple language support (English and Vietnamese)
-- Automated service request categorization
-- Intuitive, minimalist user interface
-- Call history and order tracking
-- Multiple service requests in a single conversation
+## 🚀 Cải tiến trong cấu trúc mới
 
-## Technology Stack
+### ✅ Lợi ích:
+- **Monorepo structure**: Tách biệt rõ ràng apps và packages
+- **Clean root directory**: Chỉ giữ lại config files cần thiết
+- **Consolidated documentation**: Tất cả docs trong một folder
+- **Logical grouping**: Tools, tests, assets được nhóm hợp lý
+- **Scalable**: Dễ dàng thêm apps/packages mới
 
-- **Frontend**: React, TypeScript, TailwindCSS
-- **Backend**: Express.js, Node.js
-- **Database**: PostgreSQL with Drizzle ORM
-- **AI Services**: OpenAI GPT-4o, Vapi AI
-- **Languages**: TypeScript/JavaScript
+### 🔧 Cập nhật config:
+- **vite.config.ts**: Cập nhật paths cho `apps/client/`
+- **tsconfig.json**: Cập nhật include paths và aliases
+- **tailwind.config.ts**: Cập nhật content paths
+- **drizzle.config.ts**: Cập nhật schema và migration paths
 
-## Getting Started
+## 📦 Development
 
-### Prerequisites
+### Frontend (Client):
+```bash
+# Development
+npm run dev
 
-- Node.js (v18 or higher)
-- PostgreSQL database
-- OpenAI API key
-- Vapi.ai API key and assistant ID
+# Build
+npm run build
+```
 
-### Installation
+### Backend (Server):
+```bash
+# Development
+npm run server:dev
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/your-username/MiNhon-Hotel-MUiNe.git
-   cd MiNhon-Hotel-MUiNe
-   ```
+# Build
+npm run server:build
+```
 
-2. Install dependencies
-   ```bash
-   npm install
-   ```
+## 🗂️ Cấu trúc cũ vs mới
 
-3. Create `.env` file with the following variables:
-   ```
-   DATABASE_URL=your_postgresql_connection_string
-   OPENAI_API_KEY=your_openai_api_key
-   VITE_VAPI_PUBLIC_KEY=your_vapi_public_key
-   VITE_VAPI_ASSISTANT_ID=your_vapi_assistant_id
-   ```
+| Cũ | Mới | Lý do |
+|-----|-----|--------|
+| `client/` | `apps/client/` | Monorepo structure |
+| `server/` | `apps/server/` | Monorepo structure |
+| `shared/` | `packages/shared/` | Shared packages |
+| `config/` | `packages/config/` | Shared configurations |
+| `lib/` | `packages/shared/` | Consolidated utilities |
+| `scripts/` | `tools/scripts/` | Development tools |
+| `migrations/` | `tools/migrations/` | Database tools |
+| `*.md` files | `docs/` | Consolidated documentation |
+| `public/` | `assets/` | Static assets |
+| `docker-*` | `.infrastructure/` | Infrastructure files |
 
-4. Push database schema
-   ```bash
-   npm run db:push
-   ```
+## 🔄 Migration completed on branch: `restructure-repo`
 
-5. Start the development server
-   ```bash
-   npm run dev
-   ```
-
-## Usage
-
-The application provides a simple interface for hotel guests to:
-- Request room service, housekeeping, concierge services, etc.
-- Get information about hotel amenities, local attractions, and more
-- Make special requests or arrangements
-- View conversation summaries in either English or Vietnamese
-
-## License
-
-This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
-
-## Contact
-
-For inquiries, please contact us at [your-email@example.com](mailto:your-email@example.com)
+Backup được tạo tại branch: `backup-before-restructure` 
