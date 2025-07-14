@@ -4,6 +4,7 @@ import { insertTranscriptSchema } from '@shared/schema';
 import { db } from '../../../packages/shared/db';
 import { call, transcript } from '../../../packages/shared/db';
 import { eq } from 'drizzle-orm';
+import { getCurrentTimestamp } from '../../../packages/shared/utils';
 
 const router = Router();
 
@@ -41,7 +42,7 @@ router.post('/call-end', async (req, res) => {
       .update(call)
       .set({ 
         duration: duration || 0,
-        endTime: new Date()
+        endTime: getCurrentTimestamp()
       })
       .where(eq(call.callIdVapi, callId));
     
@@ -95,11 +96,12 @@ router.post('/test-transcript', async (req, res) => {
         else if (hasFrench) language = 'fr';
         
         await db.insert(call).values({
+          id: callId,
           callIdVapi: callId,
           roomNumber: roomNumber,
           duration: 0,
           language: language,
-          createdAt: new Date()
+          createdAt: getCurrentTimestamp()
         });
         
         console.log(`Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);

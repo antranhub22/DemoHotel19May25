@@ -888,8 +888,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const cleanedSummary = cleanSummaryContent(vietnameseSummary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out
             orderId: callDetails.orderReference || orderReference,
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name
@@ -1086,8 +1085,7 @@ Mi Nhon Hotel Mui Ne`
           console.log('Lưu request từ thiết bị di động vào database...');
           const cleanedSummary = cleanSummaryContent(callDetails.summary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out
             orderId: callDetails.orderReference || orderReference,
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name

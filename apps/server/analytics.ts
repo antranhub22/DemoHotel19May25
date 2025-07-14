@@ -73,8 +73,8 @@ export async function getHourlyActivity() {
       .from(call)
       .groupBy(sql`EXTRACT(HOUR FROM ${call.createdAt})`);
       
-      return result.map((row: { hour: number; count: number }) => ({
-        hour: row.hour,
+      return result.map((row: { hour: unknown; count: number }) => ({
+        hour: Number(row.hour),
         count: row.count
       }));
     } else {
@@ -86,8 +86,8 @@ export async function getHourlyActivity() {
       .from(call)
       .groupBy(sql`strftime('%H', datetime(${call.createdAt}, 'unixepoch'))`);
       
-      return result.map((row: { hour: number; count: number }) => ({
-        hour: row.hour,
+      return result.map((row: { hour: unknown; count: number }) => ({
+        hour: Number(row.hour),
         count: row.count
       }));
     }

@@ -35,7 +35,7 @@ export class OrderService {
    */
   static async getOrderById(orderId: string): Promise<any> {
     try {
-      const order = await storage.getOrderById(parseInt(orderId));
+      const order = await storage.getOrderById(orderId);
       
       if (!order) {
         throw new Error('Order not found');
@@ -69,7 +69,7 @@ export class OrderService {
         throw new Error('Status is required');
       }
       
-      const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
+      const updatedOrder = await storage.updateOrderStatus(orderId, status);
       
       if (!updatedOrder) {
         throw new Error('Order not found');
@@ -127,13 +127,15 @@ export class OrderService {
   private static async syncOrderToRequest(order: any, orderData: any): Promise<void> {
     try {
       await db.insert(requestTable).values({
+        id: `REQ-${Date.now()}-${Math.random()}`,
+        type: (orderData as any).orderType || 'service_request',
         roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
         orderId: (order as any).id?.toString() || `ORD-${Date.now()}`,
         guestName: 'Guest',
         requestContent: this.formatRequestContent(orderData),
         status: 'Đã ghi nhận',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     } catch (syncErr) {
       console.error('Failed to sync order to request table:', syncErr);

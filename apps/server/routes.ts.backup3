@@ -888,9 +888,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const cleanedSummary = cleanSummaryContent(vietnameseSummary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
-            orderId: callDetails.orderReference || orderReference,
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out
+            // orderId: callDetails.orderReference || orderReference, // commented out
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name
             status: 'Đã ghi nhận',
@@ -1086,9 +1085,8 @@ Mi Nhon Hotel Mui Ne`
           console.log('Lưu request từ thiết bị di động vào database...');
           const cleanedSummary = cleanSummaryContent(callDetails.summary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
-            orderId: callDetails.orderReference || orderReference,
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out
+            // orderId: callDetails.orderReference || orderReference, // commented out
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name
             status: 'Đã ghi nhận',
@@ -1100,7 +1098,7 @@ Mi Nhon Hotel Mui Ne`
             id: `ORD-${Date.now()}-${Math.random()}`,
             type: 'call_summary',
             roomNumber: callDetails.roomNumber,
-            orderId: callDetails.orderReference || orderReference,
+            // orderId: callDetails.orderReference || orderReference, // commented out
             requestContent: 'Call Summary: ' + (callDetails.summary || 'No summary').substring(0, 200) + '...',
             status: 'Đã ghi nhận'
           });

@@ -3,6 +3,7 @@ import { insertTranscriptSchema } from '@shared/schema';
 import { db } from '../../../packages/shared/db';
 import { call, transcript } from '../../../packages/shared/db';
 import { eq } from 'drizzle-orm';
+import { getCurrentTimestamp } from '../../../packages/shared/utils';
 
 export class CallService {
   /**
@@ -30,7 +31,7 @@ export class CallService {
         .update(call)
         .set({ 
           duration: duration || 0,
-          endTime: new Date()
+          endTime: getCurrentTimestamp()
         })
         .where(eq(call.callIdVapi, callId));
       
@@ -99,11 +100,12 @@ export class CallService {
         const language = this.detectLanguage(content);
         
         await db.insert(call).values({
+          id: callId,
           callIdVapi: callId,
           roomNumber: roomNumber,
           duration: 0,
           language: language,
-          createdAt: new Date()
+          createdAt: getCurrentTimestamp()
         });
         
         console.log(`Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);

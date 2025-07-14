@@ -412,6 +412,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Đồng bộ sang bảng request cho Staff UI
       try {
         await db.insert(requestTable).values({
+            id: `REQ-${Date.now()}-${Math.random()}`,
+            type: 'call_summary',
           id: `REQ-${Date.now()}-${Math.random()}`,
           type: (orderData as any).orderType || 'service_request',
           roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
@@ -888,8 +890,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const cleanedSummary = cleanSummaryContent(vietnameseSummary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
+            id: `REQ-${Date.now()}-${Math.random()}`,
+            type: 'call_summary',
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out due to schema mismatch
             orderId: callDetails.orderReference || orderReference,
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name
@@ -1086,8 +1089,9 @@ Mi Nhon Hotel Mui Ne`
           console.log('Lưu request từ thiết bị di động vào database...');
           const cleanedSummary = cleanSummaryContent(callDetails.summary);
           await db.insert(requestTable).values({
-            // @ts-ignore
-            roomNumber: callDetails.roomNumber, // Fixed property name
+            id: `REQ-${Date.now()}-${Math.random()}`,
+            type: 'call_summary',
+            // roomNumber: callDetails.roomNumber, // Fixed property name - commented out due to schema mismatch
             orderId: callDetails.orderReference || orderReference,
             requestContent: cleanedSummary, // Fixed property name
             createdAt: new Date(), // Fixed property name

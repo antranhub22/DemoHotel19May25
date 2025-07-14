@@ -6,7 +6,7 @@ import { eq, and, gte, sql } from "drizzle-orm";
 // you might need
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
@@ -16,9 +16,9 @@ export interface IStorage {
   
   // Order methods
   createOrder(order: InsertOrder): Promise<Order>;
-  getOrderById(id: number): Promise<Order | undefined>;
+  getOrderById(id: string): Promise<Order | undefined>;
   getOrdersByRoomNumber(roomNumber: string): Promise<Order[]>;
-  updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   getAllOrders(filter: { status?: string; roomNumber?: string }): Promise<Order[]>;
   deleteAllOrders(): Promise<number>;
   
@@ -29,7 +29,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
@@ -61,7 +61,7 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
   
-  async getOrderById(id: number): Promise<Order | undefined> {
+  async getOrderById(id: string): Promise<Order | undefined> {
     const result = await db.select().from(orders).where(eq(orders.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
@@ -70,7 +70,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(orders).where(eq(orders.roomNumber, roomNumber));
   }
   
-  async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
+  async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
     const result = await db
       .update(orders)
       .set({ status })
@@ -113,7 +113,7 @@ export class DatabaseStorage implements IStorage {
     // Query summaries newer than the calculated timestamp
     return await db.select()
       .from(callSummaries)
-      .where(gte(callSummaries.createdAt, hoursAgo))
+      .where(gte(callSummaries.createdAt, hoursAgo.toISOString()))
       .orderBy(sql`${callSummaries.createdAt} DESC`);
   }
 }

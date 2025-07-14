@@ -29,6 +29,8 @@ router.post('/', async (req, res) => {
     // Sync to request table for Staff UI
     try {
       await db.insert(requestTable).values({
+        id: `REQ-${Date.now()}-${Math.random()}`,
+        type: (orderData as any).orderType || 'service_request',
         roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
         orderId: (order as any).id?.toString() || `ORD-${Date.now()}`,
         guestName: 'Guest',
@@ -36,8 +38,8 @@ router.post('/', async (req, res) => {
           ? (orderData as any).items.map((i: any) => `${i.name || 'Item'} x${i.quantity || 1}`).join(', ')
           : (orderData as any).orderType || (order as any).requestContent || 'Service Request',
         status: 'Đã ghi nhận',
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       });
     } catch (syncErr) {
       console.error('Failed to sync order to request table:', syncErr);
@@ -57,7 +59,7 @@ router.post('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const orderId = req.params.id;
-    const order = await storage.getOrderById(parseInt(orderId));
+    const order = await storage.getOrderById(orderId);
     
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -90,7 +92,7 @@ router.patch('/:id/status', verifyJWT, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Status is required' });
     }
     
-    const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
+    const updatedOrder = await storage.updateOrderStatus(orderId, status);
     
     if (!updatedOrder) {
       return res.status(404).json({ error: 'Order not found' });
@@ -112,7 +114,7 @@ router.post('/:id/update-status', verifyJWT, async (req: Request, res: Response)
       return res.status(400).json({ error: 'Status is required' });
     }
     
-    const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), status);
+    const updatedOrder = await storage.updateOrderStatus(orderId, status);
     
     if (!updatedOrder) {
       return res.status(404).json({ error: 'Order not found' });

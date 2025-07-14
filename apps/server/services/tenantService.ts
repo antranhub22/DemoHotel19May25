@@ -584,7 +584,7 @@ export class TenantService {
       const [activeResult] = await db
         .select({ count: sql<number>`count(*)` })
         .from(tenants)
-        .where(eq(tenants.subscriptionStatus, 'active'));
+        .where(eq(tenants.isActive, true));
       
       return {
         status: 'healthy',
