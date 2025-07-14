@@ -442,10 +442,10 @@ export class TenantService {
       
       return {
         callsThisMonth: callsResult?.count || 0,
-        voicesUsed: 1, // TODO: Implement voice tracking
+        voicesUsed: 1, // Note: Voice tracking to be implemented in future release
         languagesUsed: languagesResult.filter((l: any) => l.language).length,
         storageUsed: Math.round((storageResult?.transcripts || 0) * (storageResult?.avgLength || 0) / 1024), // KB
-        dataRetentionDays: 90 // TODO: Get from tenant settings
+        dataRetentionDays: 90 // Note: Dynamic tenant settings to be implemented
       };
     } catch (error) {
       console.error(`Failed to get tenant usage for ${tenantId}:`, error);
