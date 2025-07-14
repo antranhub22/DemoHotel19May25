@@ -87,7 +87,7 @@ type MyJwtPayload = {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('[DEBUG] AuthProvider render');
+  // console.log('[DEBUG] AuthProvider render'); // Removed to prevent logging noise
   
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);

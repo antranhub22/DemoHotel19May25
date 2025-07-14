@@ -240,7 +240,7 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
-  console.log('[DEBUG] Router render', { tenantInfo, isAuthenticated });
+  // console.log('[DEBUG] Router render', { tenantInfo, isAuthenticated }); // Removed to prevent logging noise
 
   if (!tenantInfo) {
     return <LoadingFallback />;
@@ -335,7 +335,7 @@ function Router() {
 // ============================================
 
 function AppContent() {
-  console.log('[DEBUG] AppContent render');
+  // console.log('[DEBUG] AppContent render'); // Removed to prevent logging noise
   useWebSocket();
   return (
     <ErrorBoundary>
@@ -350,7 +350,7 @@ function AppContent() {
 // ============================================
 
 function App() {
-  console.log('[DEBUG] App render');
+  // console.log('[DEBUG] App render'); // Removed to prevent logging noise
   return (
     <BrowserRouter>
       <AuthProvider>

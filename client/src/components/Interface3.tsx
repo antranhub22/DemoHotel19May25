@@ -41,7 +41,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
 
   // Early return if hotel config is not loaded
   if (configLoading || !hotelConfig) {
-    console.log('[DEBUG] Interface3 render:', { hotelConfig, configLoading });
+    // console.log('[DEBUG] Interface3 render:', { hotelConfig, configLoading }); // Removed to prevent logging noise
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">

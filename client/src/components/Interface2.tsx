@@ -230,7 +230,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Early return if hotel config is not loaded
   if (configLoading || !hotelConfig) {
-    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
+    // console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading }); // Removed to prevent logging noise
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
         <div className="text-center">

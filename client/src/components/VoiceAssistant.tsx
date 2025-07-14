@@ -62,7 +62,7 @@ const VoiceAssistant: React.FC = () => {
     ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(lang)
   );
 
-  console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig });
+  // console.log('[DEBUG] VoiceAssistant render:', { isLoading, config, hotelConfig }); // Removed to prevent logging noise
 
   // Loading state - AFTER ALL HOOKS
   if (isLoading || !config) {

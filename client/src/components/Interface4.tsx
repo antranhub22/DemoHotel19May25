@@ -57,7 +57,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
     orderReference: order?.reference,
     timestamp: new Date().toISOString()
   });
-  console.log('[DEBUG] Interface4 render:', { hotelConfig });
+  // console.log('[DEBUG] Interface4 render:', { hotelConfig }); // Removed to prevent logging noise
 
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Early return if hotel config is not loaded
