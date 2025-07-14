@@ -194,7 +194,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
-  }, [conversationTurns, cleanupAnimations, visibleChars]);
+  }, [conversationTurns, cleanupAnimations]); // FIXED: Removed visibleChars from dependencies to prevent infinite loop
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {

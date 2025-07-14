@@ -124,7 +124,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
-  }, [conversationTurns]);
+  }, [conversationTurns]); // NOTE: visibleChars intentionally not included to prevent infinite loop
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
