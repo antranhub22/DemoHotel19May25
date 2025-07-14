@@ -63,6 +63,11 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       </div>
     );
   }
+
+  // Early return if no order summary - moved to top to prevent hook order issues
+  if (!orderSummary) {
+    return null;
+  }
   
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
@@ -369,8 +374,6 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       content: `${callSummary.content}\n\nAdditional Notes:\n${note}`
     });
   };
-  
-  if (!orderSummary) return null;
   
   return (
     <div

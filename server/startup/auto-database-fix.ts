@@ -1,5 +1,5 @@
-import { sql } from 'drizzle-orm';
 import { db } from '../db';
+import { sql } from 'drizzle-orm';
 
 // ============================================
 // Auto Database Fix on Server Startup
@@ -20,86 +20,35 @@ export class AutoDatabaseFixer {
     }
 
     try {
+      console.log('🔧 Running auto database fix...');
       console.log('🔍 Checking database schema...');
       
-      // Check if database needs fixing
       const needsFix = await this.checkIfDatabaseNeedsFix();
-      
       if (!needsFix) {
-        console.log('✅ Database schema is up to date');
+        console.log('✅ Database schema is already up to date');
         return true;
       }
 
       console.log('🛠️ Auto-fixing database schema...');
-      
-      // Auto-fix database
       await this.performAutoFix();
-      
-      console.log('✅ Database auto-fix completed successfully');
+      console.log('✅ Auto database fix completed successfully');
       return true;
-      
     } catch (error) {
       console.error('❌ Auto database fix failed:', error instanceof Error ? error.message : String(error));
-      
-      // Log the full error for debugging
-      if (error instanceof Error) {
-        console.error('❌ Full error stack:', error.stack);
-      }
-      
-      // Don't crash the server, just log the error
-      console.log('⚠️ Server will continue with potentially broken database');
+      console.error('❌ Full error stack:', error instanceof Error ? error.stack : String(error));
       return false;
     }
   }
 
   private async checkIfDatabaseNeedsFix(): Promise<boolean> {
     try {
-      // Check if tenants table exists
-      const tenantsResult = await this.db.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_name = 'tenants'
-        )
+      // Try to query existing tables using Drizzle ORM syntax
+      const result = await this.db.execute(sql`
+        SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tenants', 'staff', 'call', 'transcript', 'request', 'message');
       `);
       
-      const tenantsExists = tenantsResult[0]?.exists || false;
-      
-      if (!tenantsExists) {
-        console.log('📋 Missing tenants table - needs fix');
-        return true;
-      }
-
-      // Check if tenant_id column exists in transcript table
-      const tenantIdResult = await this.db.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM information_schema.columns 
-          WHERE table_name = 'transcript' AND column_name = 'tenant_id'
-        )
-      `);
-      
-      const tenantIdExists = tenantIdResult[0]?.exists || false;
-      
-      if (!tenantIdExists) {
-        console.log('📋 Missing tenant_id column - needs fix');
-        return true;
-      }
-
-      // Check if Mi Nhon tenant exists
-      const miNhonResult = await this.db.execute(sql`
-        SELECT EXISTS (
-          SELECT FROM tenants WHERE id = 'mi-nhon-hotel'
-        )
-      `);
-      
-      const miNhonExists = miNhonResult[0]?.exists || false;
-      
-      if (!miNhonExists) {
-        console.log('📋 Missing Mi Nhon tenant - needs fix');
-        return true;
-      }
-
-      return false;
-      
+      console.log('🔍 Existing tables found:', result.length);
+      return result.length < 6; // We expect 6 tables
     } catch (error) {
       console.log('📋 Database check failed, assuming needs fix:', error instanceof Error ? error.message : String(error));
       return true;
@@ -108,26 +57,19 @@ export class AutoDatabaseFixer {
 
   private async performAutoFix(): Promise<void> {
     try {
-      // Step 1: Create missing tables
       console.log('🔧 Step 1: Creating missing tables...');
       await this.createMissingTables();
-      console.log('✅ Step 1 completed');
-      
-      // Step 2: Create Mi Nhon tenant
-      console.log('🔧 Step 2: Creating Mi Nhon tenant...');
+
+      console.log('🔧 Step 2: Creating MiNhon tenant...');
       await this.createMiNhonTenant();
-      console.log('✅ Step 2 completed');
-      
-      // Step 3: Create default staff accounts
+
       console.log('🔧 Step 3: Creating default staff accounts...');
       await this.createDefaultStaffAccounts();
-      console.log('✅ Step 3 completed');
-      
-      // Step 4: Update existing data
+
       console.log('🔧 Step 4: Updating existing data...');
       await this.updateExistingData();
-      console.log('✅ Step 4 completed');
-      
+
+      console.log('✅ All auto-fix steps completed successfully');
     } catch (error) {
       console.error('❌ Auto-fix step failed:', error instanceof Error ? error.message : String(error));
       throw error; // Re-throw to be caught by the main function
@@ -149,186 +91,225 @@ export class AutoDatabaseFixer {
         subscription_status TEXT DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+      );
     `);
 
-    // Create hotel_profiles table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS hotel_profiles (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-        hotel_name TEXT NOT NULL,
-        description TEXT,
-        address TEXT,
-        phone TEXT,
-        email TEXT,
-        website TEXT,
-        amenities TEXT[],
-        policies TEXT[],
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create staff table if it doesn't exist
+    // Create staff table
     await this.db.execute(sql`
       CREATE TABLE IF NOT EXISTS staff (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) NOT NULL UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        role VARCHAR(20) DEFAULT 'staff',
-        name VARCHAR(100),
-        email VARCHAR(100),
-        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'staff',
+        is_active INTEGER DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+      );
     `);
 
-    // Check and add tenant_id columns to existing tables (only if they exist)
-    const tables = ['transcript', 'request', 'message', 'call'];
-    
-    for (const table of tables) {
-      try {
-        // First check if table exists
-        const tableExists = await this.db.execute(sql`
-          SELECT EXISTS (
-            SELECT FROM information_schema.tables 
-            WHERE table_name = ${table}
-          )
-        `);
-        
-        if (tableExists[0]?.exists) {
-          // Check if tenant_id column exists
-          const columnExists = await this.db.execute(sql`
-            SELECT EXISTS (
-              SELECT FROM information_schema.columns 
-              WHERE table_name = ${table} AND column_name = 'tenant_id'
-            )
-          `);
-          
-          if (!columnExists[0]?.exists) {
-            await this.db.execute(sql`
-              ALTER TABLE ${sql.identifier(table)} 
-              ADD COLUMN tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE
-            `);
-            console.log(`✅ Added tenant_id column to ${table} table`);
-          }
-        }
-      } catch (error) {
-        console.log(`⚠️ Could not modify ${table} table:`, error instanceof Error ? error.message : String(error));
-      }
-    }
+    // Create call table
+    await this.db.execute(sql`
+      CREATE TABLE IF NOT EXISTS call (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL DEFAULT 'minhon',
+        call_id_vapi TEXT UNIQUE,
+        room_number TEXT,
+        language TEXT DEFAULT 'en',
+        service_type TEXT,
+        duration INTEGER DEFAULT 0,
+        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        end_time TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+      );
+    `);
+
+    // Create transcript table
+    await this.db.execute(sql`
+      CREATE TABLE IF NOT EXISTS transcript (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL DEFAULT 'minhon',
+        call_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+        FOREIGN KEY (call_id) REFERENCES call(id)
+      );
+    `);
+
+    // Create request table
+    await this.db.execute(sql`
+      CREATE TABLE IF NOT EXISTS request (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL DEFAULT 'minhon',
+        call_id TEXT,
+        room_number TEXT NOT NULL,
+        order_type TEXT NOT NULL,
+        delivery_time TEXT NOT NULL,
+        special_instructions TEXT,
+        items TEXT,
+        total_amount REAL DEFAULT 0,
+        status TEXT DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+        FOREIGN KEY (call_id) REFERENCES call(id)
+      );
+    `);
+
+    // Create message table
+    await this.db.execute(sql`
+      CREATE TABLE IF NOT EXISTS message (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL DEFAULT 'minhon',
+        request_id TEXT,
+        sender_type TEXT NOT NULL,
+        sender_name TEXT,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_read INTEGER DEFAULT 0,
+        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+        FOREIGN KEY (request_id) REFERENCES request(id)
+      );
+    `);
+
+    console.log('✅ All tables created successfully');
   }
 
   private async createMiNhonTenant(): Promise<void> {
-    const miNhonTenant = {
-      id: 'mi-nhon-hotel',
-      hotel_name: 'Mi Nhon Hotel',
-      domain: 'minhonmuine.talk2go.online',
-      subdomain: 'minhonmuine',
-      email: 'info@minhonhotel.com',
-      phone: '+84 252 3847 007',
-      address: '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
-      subscription_plan: 'premium',
-      subscription_status: 'active'
-    };
+    try {
+      // Check if Mi Nhon tenant already exists
+      const existing = await this.db.execute(sql`
+        SELECT id FROM tenants WHERE id = 'minhon'
+      `);
+      
+      if (existing.length > 0) {
+        console.log('✅ MiNhon tenant already exists');
+        return;
+      }
 
-    await this.db.execute(sql`
-      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
-      VALUES (${miNhonTenant.id}, ${miNhonTenant.hotel_name}, ${miNhonTenant.domain}, ${miNhonTenant.subdomain}, 
-              ${miNhonTenant.email}, ${miNhonTenant.phone}, ${miNhonTenant.address}, 
-              ${miNhonTenant.subscription_plan}, ${miNhonTenant.subscription_status})
-      ON CONFLICT (id) DO UPDATE SET
-        hotel_name = EXCLUDED.hotel_name,
-        domain = EXCLUDED.domain,
-        subdomain = EXCLUDED.subdomain,
-        email = EXCLUDED.email,
-        phone = EXCLUDED.phone,
-        address = EXCLUDED.address,
-        subscription_plan = EXCLUDED.subscription_plan,
-        subscription_status = EXCLUDED.subscription_status,
-        updated_at = CURRENT_TIMESTAMP
-    `);
-
-    // Create hotel profile
-    await this.db.execute(sql`
-      INSERT INTO hotel_profiles (id, tenant_id, name, description, address, phone, email, website, amenities, policies)
-      VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel', 
-              'A beautiful beachfront hotel in Mui Ne, Vietnam',
-              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
-              '+84 252 3847 007', 'info@minhonhotel.com', 'https://minhonhotel.com',
-              ARRAY['Pool', 'Restaurant', 'Free WiFi', 'Beach Access', 'Spa'],
-              ARRAY['Check-in: 2:00 PM', 'Check-out: 12:00 PM', 'No smoking'])
-      ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
-        description = EXCLUDED.description,
-        address = EXCLUDED.address,
-        phone = EXCLUDED.phone,
-        email = EXCLUDED.email,
-        website = EXCLUDED.website,
-        amenities = EXCLUDED.amenities,
-        policies = EXCLUDED.policies,
-        updated_at = CURRENT_TIMESTAMP
-    `);
+      // Create Mi Nhon Hotel tenant
+      await this.db.execute(sql`
+        INSERT INTO tenants (
+          id, 
+          hotel_name, 
+          domain, 
+          subdomain, 
+          email, 
+          phone, 
+          address,
+          subscription_plan,
+          subscription_status
+        ) VALUES (
+          'minhon',
+          'Mi Nhon Hotel',
+          'minhonmuine.talk2go.online',
+          'minhonmuine',
+          'info@minhonhotel.com',
+          '+84 252 3847 007',
+          'Mui Ne, Phan Thiet, Binh Thuan, Vietnam',
+          'enterprise',
+          'active'
+        )
+      `);
+      
+      console.log('✅ MiNhon tenant created successfully');
+    } catch (error) {
+      console.error('❌ Failed to create MiNhon tenant:', error instanceof Error ? error.message : String(error));
+      throw error;
+    }
   }
 
   private async createDefaultStaffAccounts(): Promise<void> {
-    const defaultStaff = [
-      {
-        tenant_id: 'mi-nhon-hotel',
-        username: 'admin@hotel.com',
-        password: 'StrongPassword123',
-        role: 'admin',
-        name: 'Administrator',
-        email: 'admin@hotel.com'
-      },
-      {
-        tenant_id: 'mi-nhon-hotel',
-        username: 'manager@hotel.com',
-        password: 'StrongPassword456',
-        role: 'manager',
-        name: 'Hotel Manager',
-        email: 'manager@hotel.com'
-      }
-    ];
-
-    for (const staff of defaultStaff) {
-      await this.db.execute(sql`
-        INSERT INTO staff (tenant_id, username, password, role, name, email)
-        VALUES (${staff.tenant_id}, ${staff.username}, ${staff.password}, 
-                ${staff.role}, ${staff.name}, ${staff.email})
-        ON CONFLICT (username) DO UPDATE SET
-          password = EXCLUDED.password,
-          role = EXCLUDED.role,
-          name = EXCLUDED.name,
-          email = EXCLUDED.email,
-          updated_at = CURRENT_TIMESTAMP
+    try {
+      // Check if default admin already exists
+      const existing = await this.db.execute(sql`
+        SELECT id FROM staff WHERE email = 'admin@minhonhotel.com'
       `);
+      
+      if (existing.length > 0) {
+        console.log('✅ Default admin account already exists');
+        return;
+      }
+
+      // Create default admin account
+      // In production, this should be a properly hashed password
+      const defaultPasswordHash = '$2b$10$defaultHashForDevelopment'; // This should be replaced with proper bcrypt hash
+      
+      await this.db.execute(sql`
+        INSERT INTO staff (
+          id,
+          tenant_id,
+          name,
+          email,
+          password_hash,
+          role,
+          is_active
+        ) VALUES (
+          'admin-minhon-001',
+          'minhon',
+          'Administrator',
+          'admin@minhonhotel.com',
+          ${defaultPasswordHash},
+          'admin',
+          1
+        )
+      `);
+      
+      console.log('✅ Default admin account created');
+    } catch (error) {
+      console.error('❌ Failed to create default staff accounts:', error instanceof Error ? error.message : String(error));
+      throw error;
     }
   }
 
   private async updateExistingData(): Promise<void> {
-    const miNhonTenantId = 'mi-nhon-hotel';
-
-    // Update existing records with tenant_id
-    const tables = ['transcript', 'request', 'message', 'staff'];
-    
-    for (const table of tables) {
-      try {
-        await this.db.execute(sql`
-          UPDATE ${sql.identifier(table)} 
-          SET tenant_id = ${miNhonTenantId} 
-          WHERE tenant_id IS NULL
-        `);
-      } catch (error) {
-        // Table might not exist, ignore error
-      }
+    try {
+      // Update existing records to have proper tenant_id if they don't
+      console.log('🔄 Updating existing data with tenant_id...');
+      
+      // Update transcripts without tenant_id
+      await this.db.execute(sql`
+        UPDATE transcript 
+        SET tenant_id = 'minhon' 
+        WHERE tenant_id IS NULL OR tenant_id = ''
+      `);
+      
+      // Update requests without tenant_id
+      await this.db.execute(sql`
+        UPDATE request 
+        SET tenant_id = 'minhon' 
+        WHERE tenant_id IS NULL OR tenant_id = ''
+      `);
+      
+      // Update messages without tenant_id
+      await this.db.execute(sql`
+        UPDATE message 
+        SET tenant_id = 'minhon' 
+        WHERE tenant_id IS NULL OR tenant_id = ''
+      `);
+      
+      // Update calls without tenant_id
+      await this.db.execute(sql`
+        UPDATE call 
+        SET tenant_id = 'minhon' 
+        WHERE tenant_id IS NULL OR tenant_id = ''
+      `);
+      
+      console.log('✅ Existing data updated successfully');
+    } catch (error) {
+      console.error('❌ Failed to update existing data:', error instanceof Error ? error.message : String(error));
+      // Don't throw here, as this is not critical for basic functionality
     }
   }
 
   async cleanup(): Promise<void> {
-    // No cleanup needed - using shared database connection
+    // Cleanup method if needed
+    console.log('🧹 AutoDatabaseFixer cleanup completed');
   }
 }
 

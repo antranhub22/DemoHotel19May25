@@ -31,8 +31,12 @@ app.use(helmet({
         "https://minhonmuine.talk2go.online",
         "https://*.talk2go.online",
         "https://*.onrender.com",
+        "https://demohotel19may25.onrender.com",
         "wss:", 
-        "ws:"
+        "ws:",
+        "wss://demohotel19may25.onrender.com",
+        "ws://localhost:*",
+        "wss://localhost:*"
       ],
       imgSrc: ["'self'", "data:", "https:"],
       mediaSrc: ["'self'", "https:"],
