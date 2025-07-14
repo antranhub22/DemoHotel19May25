@@ -48,14 +48,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   // --- CALLBACKS ---
   const handleCall = useCallback(async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
-    console.log('🚀 [Interface1] ===== HANDLE CALL START =====');
     console.log('[Interface1] handleCall called with language:', lang);
     
     if (!hotelConfig) {
-      console.error('❌ [Interface1] Hotel configuration not loaded');
+      console.error('[Interface1] Hotel configuration not loaded');
       return;
     }
-    console.log('✅ [Interface1] Hotel config loaded:', hotelConfig.hotelName);
 
     console.log('[Interface1] Starting call with language:', lang);
     console.log('[Interface1] Hotel config:', hotelConfig);
@@ -84,14 +82,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     }
     
     try {
-      console.log('🔧 [Interface1] Initializing Vapi with public key:', publicKey);
+      console.log('[Interface1] Initializing Vapi with public key:', publicKey);
       setLanguage(lang); // Set language before starting call
-      console.log('🔧 [Interface1] Language set to:', lang);
       
       const vapi = await initVapi(publicKey);
-      console.log('🔧 [Interface1] initVapi returned:', !!vapi);
       if (vapi && assistantId) {
-        console.log('🔧 [Interface1] Starting Vapi call with assistant ID:', assistantId);
+        console.log('[Interface1] Starting Vapi call with assistant ID:', assistantId);
         
         // Set call started state immediately
         setIsCallStarted(true);
@@ -101,9 +97,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         console.log('[Interface1] Vapi call started successfully');
         
         // Chuyển sang Interface2 ngay sau khi call thành công
-        console.log('[Interface1] DEBUG: About to call setCurrentInterface("interface2")');
         setCurrentInterface('interface2');
-        console.log('[Interface1] DEBUG: setCurrentInterface("interface2") completed');
       } else {
         console.error('[Interface1] Failed to get Vapi instance or assistant ID');
         setIsCallStarted(false);
@@ -244,19 +238,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   console.log('[Interface1] Reset Vapi clicked!');
                   resetVapi();
                 }}
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 mr-2"
+                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
               >
                 Reset Vapi
-              </button>
-              <button
-                onClick={() => {
-                  console.log('[Interface1] DEBUG: Force switch to Interface2');
-                  setCurrentInterface('interface2');
-                  console.log('[Interface1] DEBUG: setCurrentInterface called');
-                }}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                DEBUG: Force Interface2
               </button>
             </div>
           </div>
