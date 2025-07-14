@@ -42,13 +42,27 @@ export class AutoDatabaseFixer {
 
   private async checkIfDatabaseNeedsFix(): Promise<boolean> {
     try {
-      // Try to query existing tables using Drizzle ORM syntax
-      const result = await this.db.execute(sql`
-        SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tenants', 'staff', 'call', 'transcript', 'request', 'message');
-      `);
-      
-      console.log('🔍 Existing tables found:', result.length);
-      return result.length < 6; // We expect 6 tables
+      // Check for PostgreSQL first, then fallback to SQLite
+      try {
+        // Try PostgreSQL syntax first
+        const result = await this.db.execute(sql`
+          SELECT table_name FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name IN ('tenants', 'staff', 'call', 'transcript', 'request', 'message');
+        `);
+        
+        console.log('🔍 Existing PostgreSQL tables found:', result.length);
+        return result.length < 6; // We expect 6 tables
+      } catch (pgError) {
+        // If PostgreSQL fails, try SQLite syntax
+        console.log('🔄 PostgreSQL check failed, trying SQLite syntax...');
+        const result = await this.db.execute(sql`
+          SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tenants', 'staff', 'call', 'transcript', 'request', 'message');
+        `);
+        
+        console.log('🔍 Existing SQLite tables found:', result.length);
+        return result.length < 6; // We expect 6 tables
+      }
     } catch (error) {
       console.log('📋 Database check failed, assuming needs fix:', error instanceof Error ? error.message : String(error));
       return true;
@@ -77,107 +91,206 @@ export class AutoDatabaseFixer {
   }
 
   private async createMissingTables(): Promise<void> {
-    // Create tenants table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS tenants (
-        id TEXT PRIMARY KEY,
-        hotel_name TEXT NOT NULL,
-        domain TEXT,
-        subdomain TEXT,
-        email TEXT,
-        phone TEXT,
-        address TEXT,
-        subscription_plan TEXT DEFAULT 'trial',
-        subscription_status TEXT DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    try {
+      // Detect database type by trying a PostgreSQL-specific query
+      let isPostgreSQL = false;
+      try {
+        await this.db.execute(sql`SELECT 1 FROM information_schema.tables LIMIT 1`);
+        isPostgreSQL = true;
+        console.log('🔍 Detected PostgreSQL database');
+      } catch {
+        console.log('🔍 Detected SQLite database');
+      }
 
-    // Create staff table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS staff (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'staff',
-        is_active INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (tenant_id) REFERENCES tenants(id)
-      );
-    `);
+      if (isPostgreSQL) {
+        // PostgreSQL syntax
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS tenants (
+            id TEXT PRIMARY KEY,
+            hotel_name TEXT NOT NULL,
+            domain TEXT,
+            subdomain TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            subscription_plan TEXT DEFAULT 'trial',
+            subscription_status TEXT DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
 
-    // Create call table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS call (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL DEFAULT 'minhon',
-        call_id_vapi TEXT UNIQUE,
-        room_number TEXT,
-        language TEXT DEFAULT 'en',
-        service_type TEXT,
-        duration INTEGER DEFAULT 0,
-        start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        end_time TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (tenant_id) REFERENCES tenants(id)
-      );
-    `);
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS staff (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'staff',
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
 
-    // Create transcript table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS transcript (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL DEFAULT 'minhon',
-        call_id TEXT NOT NULL,
-        role TEXT NOT NULL,
-        content TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-        FOREIGN KEY (call_id) REFERENCES call(id)
-      );
-    `);
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS call (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id_vapi TEXT UNIQUE,
+            room_number TEXT,
+            language TEXT DEFAULT 'en',
+            service_type TEXT,
+            duration INTEGER DEFAULT 0,
+            start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            end_time TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
 
-    // Create request table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS request (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL DEFAULT 'minhon',
-        call_id TEXT,
-        room_number TEXT NOT NULL,
-        order_type TEXT NOT NULL,
-        delivery_time TEXT NOT NULL,
-        special_instructions TEXT,
-        items TEXT,
-        total_amount REAL DEFAULT 0,
-        status TEXT DEFAULT 'pending',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-        FOREIGN KEY (call_id) REFERENCES call(id)
-      );
-    `);
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS transcript (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
 
-    // Create message table
-    await this.db.execute(sql`
-      CREATE TABLE IF NOT EXISTS message (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT NOT NULL DEFAULT 'minhon',
-        request_id TEXT,
-        sender_type TEXT NOT NULL,
-        sender_name TEXT,
-        content TEXT NOT NULL,
-        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        is_read INTEGER DEFAULT 0,
-        FOREIGN KEY (tenant_id) REFERENCES tenants(id),
-        FOREIGN KEY (request_id) REFERENCES request(id)
-      );
-    `);
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS request (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id TEXT,
+            room_number TEXT NOT NULL,
+            order_type TEXT NOT NULL,
+            delivery_time TEXT NOT NULL,
+            special_instructions TEXT,
+            items TEXT,
+            total_amount REAL DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
 
-    console.log('✅ All tables created successfully');
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS message (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            request_id TEXT,
+            sender_type TEXT NOT NULL,
+            sender_name TEXT,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_read INTEGER DEFAULT 0
+          );
+        `);
+      } else {
+        // SQLite syntax (same as before)
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS tenants (
+            id TEXT PRIMARY KEY,
+            hotel_name TEXT NOT NULL,
+            domain TEXT,
+            subdomain TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            subscription_plan TEXT DEFAULT 'trial',
+            subscription_status TEXT DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+        `);
+
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS staff (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            role TEXT NOT NULL DEFAULT 'staff',
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+          );
+        `);
+
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS call (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id_vapi TEXT UNIQUE,
+            room_number TEXT,
+            language TEXT DEFAULT 'en',
+            service_type TEXT,
+            duration INTEGER DEFAULT 0,
+            start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            end_time TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (tenant_id) REFERENCES tenants(id)
+          );
+        `);
+
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS transcript (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id TEXT NOT NULL,
+            role TEXT NOT NULL,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+            FOREIGN KEY (call_id) REFERENCES call(id)
+          );
+        `);
+
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS request (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            call_id TEXT,
+            room_number TEXT NOT NULL,
+            order_type TEXT NOT NULL,
+            delivery_time TEXT NOT NULL,
+            special_instructions TEXT,
+            items TEXT,
+            total_amount REAL DEFAULT 0,
+            status TEXT DEFAULT 'pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+            FOREIGN KEY (call_id) REFERENCES call(id)
+          );
+        `);
+
+        await this.db.execute(sql`
+          CREATE TABLE IF NOT EXISTS message (
+            id TEXT PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'minhon',
+            request_id TEXT,
+            sender_type TEXT NOT NULL,
+            sender_name TEXT,
+            content TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_read INTEGER DEFAULT 0,
+            FOREIGN KEY (tenant_id) REFERENCES tenants(id),
+            FOREIGN KEY (request_id) REFERENCES request(id)
+          );
+        `);
+      }
+
+      console.log('✅ All tables created successfully');
+    } catch (error) {
+      console.error('❌ Failed to create tables:', error instanceof Error ? error.message : String(error));
+      throw error;
+    }
   }
 
   private async createMiNhonTenant(): Promise<void> {
