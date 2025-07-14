@@ -233,10 +233,7 @@ export class PerformanceMonitor {
 
     // Log slow operations
     if (duration > 1000) { // 1 second threshold
-      logger.warn('Slow operation detected', {
-        operation,
-        duration: `${duration.toFixed(2)}ms`,
-      });
+      logger.warn(`Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`);
     }
   }
 
@@ -330,11 +327,7 @@ export class MemoryOptimizer {
     const heapUsed = usage.heapUsed / usage.heapTotal;
 
     if (heapUsed > this.memoryThreshold) {
-      logger.warn('High memory usage detected', {
-        heapUsed: `${(heapUsed * 100).toFixed(2)}%`,
-        heapUsedMB: Math.round(usage.heapUsed / 1024 / 1024),
-        heapTotalMB: Math.round(usage.heapTotal / 1024 / 1024),
-      });
+      logger.warn(`High memory usage detected: ${(heapUsed * 100).toFixed(2)}% (${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB)`);
 
       // Force garbage collection if available
       if (global.gc && Date.now() - this.lastGC > this.GC_INTERVAL) {
@@ -439,12 +432,7 @@ export const performanceMiddleware = (req: any, res: any, next: any) => {
     // Log slow requests
     const duration = performance.now();
     if (duration > 1000) {
-      logger.warn('Slow request detected', {
-        method: req.method,
-        path: req.path,
-        duration: `${duration.toFixed(2)}ms`,
-        statusCode: res.statusCode,
-      });
+      logger.warn(`Slow request detected: ${req.method} ${req.path} took ${duration.toFixed(2)}ms (${res.statusCode})`);
     }
   });
 
