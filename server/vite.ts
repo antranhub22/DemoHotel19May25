@@ -85,7 +85,8 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname || process.cwd(), "..", "dist/public");
+  // Fix: build directory is in project root/dist/public, not ../dist/public from server
+  const distPath = path.resolve(process.cwd(), "dist/public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
