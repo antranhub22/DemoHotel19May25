@@ -30,14 +30,67 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     cssCodeSplit: true,
+    // Optimized chunk splitting for better caching
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return id.toString().split('node_modules/')[1].split('/')[0].toString();
-          }
-        }
-      }
-    }
+        manualChunks: {
+          // Vendor chunks for better caching
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'chart-vendor': ['recharts', 'd3-scale', 'd3-shape'],
+          'utility-vendor': ['axios', 'jwt-decode', 'zod', 'clsx', 'tailwind-merge'],
+          'voice-vendor': ['@vapi-ai/web', '@daily-co/daily-js'],
+        },
+        // Optimized chunk file names
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      },
+    },
+    // Build performance optimizations
+    target: 'esnext',
+    minify: 'esbuild',
+    // Increase chunk size limit for better performance
+    chunkSizeWarningLimit: 1000,
+  },
+  // Development optimizations
+  server: {
+    port: 3000,
+    open: false,
+    hmr: {
+      overlay: false,
+    },
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      'recharts',
+      'axios',
+      'zod',
+    ],
+    exclude: [
+      '@vapi-ai/web',
+      '@daily-co/daily-js',
+    ],
+  },
+  // CSS optimization
+  css: {
+    devSourcemap: false,
+    preprocessorOptions: {
+      scss: {
+        charset: false,
+      },
+    },
+  },
+  // Enable experimental features for better performance
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    target: 'esnext',
+    platform: 'browser',
   },
 });
