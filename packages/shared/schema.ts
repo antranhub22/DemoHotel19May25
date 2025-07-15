@@ -11,7 +11,6 @@ import {
   message, 
   staff,
   call_summaries,
-  callSummaries,
 } from "./db/schema";
 
 // Re-export tables for convenience
@@ -24,7 +23,6 @@ export {
   message,
   staff,
   call_summaries,
-  callSummaries,
 };
 
 // ==============================================================
@@ -39,6 +37,9 @@ export const insertTranscriptSchema = createInsertSchema(transcript);
 export const insertRequestSchema = createInsertSchema(request);
 export const insertMessageSchema = createInsertSchema(message);
 export const insertCallSummarySchema = createInsertSchema(call_summaries);
+
+// Legacy alias for backward compatibility
+export const callSummaries = call_summaries;
 
 // Type exports - Direct from database schema
 export type Tenant = typeof tenants.$inferSelect;

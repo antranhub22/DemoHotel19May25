@@ -191,9 +191,9 @@ router.post('/research-hotel', checkLimits, async (req: Request, res: Response) 
       .set({
         researchData: hotelData,
         knowledgeBase: knowledgeBase,
-        updatedAt: new Date()
+        updated_at: new Date()
       })
-      .where(eq(hotelProfiles.tenantId, req.tenant.id));
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Hotel research completed for ${hotelName}`);
     
@@ -246,9 +246,9 @@ router.post('/generate-assistant', checkLimits, async (req: Request, res: Respon
         vapiAssistantId: assistantId,
         assistantConfig: customization,
         systemPrompt: systemPrompt,
-        updatedAt: new Date()
+        updated_at: new Date()
       })
-      .where(eq(hotelProfiles.tenantId, req.tenant.id));
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant generated successfully: ${assistantId}`);
     
@@ -282,7 +282,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
     const [profile] = await db
       .select()
       .from(hotelProfiles)
-      .where(eq(hotelProfiles.tenantId, req.tenant.id))
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
     
     if (!profile) {
@@ -316,7 +316,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
     res.json({
       success: true,
       profile: {
-        tenantId: profile.tenantId,
+        tenantId: profile.tenant_id,
         hasResearchData: !!profile.researchData,
         hasAssistant: !!profile.vapiAssistantId,
         assistantId: profile.vapiAssistantId,
@@ -325,7 +325,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
         knowledgeBase: profile.knowledgeBase,
         systemPrompt: profile.systemPrompt,
         createdAt: profile.createdAt,
-        updatedAt: profile.updatedAt
+        updated_at: profile.updatedAt
       },
       tenant: {
         hotelName: req.tenant.hotelName,
@@ -358,7 +358,7 @@ router.put('/assistant-config', checkLimits, async (req: Request, res: Response)
     const [profile] = await db
       .select()
       .from(hotelProfiles)
-      .where(eq(hotelProfiles.tenantId, req.tenant.id))
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
     
     if (!profile) {
@@ -402,9 +402,9 @@ router.put('/assistant-config', checkLimits, async (req: Request, res: Response)
       .set({
         assistantConfig: updatedConfig,
         systemPrompt: config.systemPrompt || profile.systemPrompt,
-        updatedAt: new Date()
+        updated_at: new Date()
       })
-      .where(eq(hotelProfiles.tenantId, req.tenant.id));
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant config updated for tenant: ${req.tenant.hotelName}`);
     
@@ -532,7 +532,7 @@ router.delete('/reset-assistant', requireFeature('apiAccess'), async (req: Reque
     const [profile] = await db
       .select()
       .from(hotelProfiles)
-      .where(eq(hotelProfiles.tenantId, req.tenant.id))
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
     
     if (!profile || !profile.vapiAssistantId) {
@@ -554,9 +554,9 @@ router.delete('/reset-assistant', requireFeature('apiAccess'), async (req: Reque
         vapiAssistantId: null,
         assistantConfig: null,
         systemPrompt: null,
-        updatedAt: new Date()
+        updated_at: new Date()
       })
-      .where(eq(hotelProfiles.tenantId, req.tenant.id));
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant reset completed for tenant: ${req.tenant.hotelName}`);
     

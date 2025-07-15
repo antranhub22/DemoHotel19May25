@@ -54,7 +54,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getTranscriptsByCallId(callId: string): Promise<Transcript[]> {
-    return await db.select().from(transcript).where(eq(transcript.callId, callId));
+    return await db.select().from(transcript).where(eq(transcript.call_id, callId));
   }
   
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
@@ -71,7 +71,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getOrdersByRoomNumber(roomNumber: string): Promise<Order[]> {
-    return await db.select().from(request).where(eq(request.roomNumber, roomNumber));
+    return await db.select().from(request).where(eq(request.room_number, roomNumber));
   }
   
   async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
@@ -95,7 +95,7 @@ export class DatabaseStorage implements IStorage {
         whereConditions.push(eq(request.status, filter.status));
       }
       if (filter.roomNumber) {
-        whereConditions.push(eq(request.roomNumber, filter.roomNumber));
+        whereConditions.push(eq(request.room_number, filter.roomNumber));
       }
       
       if (whereConditions.length > 0) {
@@ -123,7 +123,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getCallSummaryByCallId(callId: string): Promise<CallSummary | undefined> {
-    const result = await db.select().from(callSummaries).where(eq(callSummaries.callId, callId));
+    const result = await db.select().from(callSummaries).where(eq(callSummaries.call_id, callId));
     return result.length > 0 ? result[0] : undefined;
   }
   

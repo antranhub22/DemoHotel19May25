@@ -213,12 +213,12 @@ export class TenantService {
       console.log(`🗑️ Deleting tenant: ${tenantId}`);
       
       // Delete in order due to foreign key constraints
-      await db.delete(message).where(eq(message.tenantId, tenantId));
-      await db.delete(transcript).where(eq(transcript.tenantId, tenantId));
-      await db.delete(request).where(eq(request.tenantId, tenantId));
-      await db.delete(call).where(eq(call.tenantId, tenantId));
-      await db.delete(staff).where(eq(staff.tenantId, tenantId));
-      await db.delete(hotelProfiles).where(eq(hotelProfiles.tenantId, tenantId));
+      await db.delete(message).where(eq(message.tenant_id, tenantId));
+      await db.delete(transcript).where(eq(transcript.tenant_id, tenantId));
+      await db.delete(request).where(eq(request.tenant_id, tenantId));
+      await db.delete(call).where(eq(call.tenant_id, tenantId));
+      await db.delete(staff).where(eq(staff.tenant_id, tenantId));
+      await db.delete(hotelProfiles).where(eq(hotelProfiles.tenant_id, tenantId));
       await db.delete(tenants).where(eq(tenants.id, tenantId));
       
       console.log(`✅ Tenant deleted successfully: ${tenantId}`);
@@ -420,8 +420,8 @@ export class TenantService {
         .from(call)
         .where(
           and(
-            eq(call.tenantId, tenantId),
-            sql`${call.createdAt} >= ${startOfMonth}`
+            eq(call.tenant_id, tenantId),
+            sql`${call.created_at} >= ${startOfMonth}`
           )
         );
       
@@ -429,7 +429,7 @@ export class TenantService {
       const languagesResult = await db
         .selectDistinct({ language: call.language })
         .from(call)
-        .where(eq(call.tenantId, tenantId));
+        .where(eq(call.tenant_id, tenantId));
       
       // Get storage usage (approximate)
       const [storageResult] = await db
@@ -438,7 +438,7 @@ export class TenantService {
           avgLength: sql<number>`avg(length(${transcript.content}))`
         })
         .from(transcript)
-        .where(eq(transcript.tenantId, tenantId));
+        .where(eq(transcript.tenant_id, tenantId));
       
       return {
         callsThisMonth: callsResult?.count || 0,
@@ -490,7 +490,7 @@ export class TenantService {
         .delete(transcript)
         .where(
           and(
-            eq(transcript.tenantId, tenantId),
+            eq(transcript.tenant_id, tenantId),
             sql`${transcript.timestamp} < ${cutoffDate}`
           )
         );
@@ -500,8 +500,8 @@ export class TenantService {
         .delete(call)
         .where(
           and(
-            eq(call.tenantId, tenantId),
-            sql`${call.createdAt} < ${cutoffDate}`
+            eq(call.tenant_id, tenantId),
+            sql`${call.created_at} < ${cutoffDate}`
           )
         );
       

@@ -73,7 +73,7 @@ export class AuthService {
       const [staffUser] = await db
         .select()
         .from(staff)
-        .where(and(eq(staff.username, username), eq(staff.tenantId, tenantId)))
+        .where(and(eq(staff.username, username), eq(staff.tenant_id, tenantId)))
         .limit(1);
       
       if (!staffUser) {
@@ -89,7 +89,7 @@ export class AuthService {
       return {
         username: staffUser.username,
         role: staffUser.role || 'staff',
-        tenantId: staffUser.tenantId,
+        tenantId: staffUser.tenant_id,
         permissions: []
       };
     } catch (error) {
@@ -153,7 +153,7 @@ export class AuthService {
       { 
         username: staffUser.username, 
         role: staffUser.role, 
-        tenantId: staffUser.tenantId 
+        tenantId: staffUser.tenant_id 
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -165,7 +165,7 @@ export class AuthService {
       user: {
         username: staffUser.username,
         role: staffUser.role,
-        tenantId: staffUser.tenantId
+        tenantId: staffUser.tenant_id
       }
     };
   }

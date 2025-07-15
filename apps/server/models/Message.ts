@@ -4,5 +4,5 @@ export interface Message {
   sender: 'staff' | 'guest';
   content: string;
   created_at: Date;
-  updatedAt: Date;
+  updated_at: Date;
 } 

@@ -62,7 +62,7 @@ async function findStaffInDatabase(username: string, password: string, tenantId:
     const [staffUser] = await db
       .select()
       .from(staff)
-      .where(and(eq(staff.username, username), eq(staff.tenantId, tenantId)))
+      .where(and(eq(staff.username, username), eq(staff.tenant_id, tenantId)))
       .limit(1);
     
     if (!staffUser) {
@@ -78,7 +78,7 @@ async function findStaffInDatabase(username: string, password: string, tenantId:
     return {
       username: staffUser.username,
       role: staffUser.role || 'staff',
-      tenantId: staffUser.tenantId,
+      tenantId: staffUser.tenant_id,
       permissions: []
     };
   } catch (error) {
@@ -142,7 +142,7 @@ router.post('/staff/login', async (req, res) => {
       { 
         username: staffUser.username, 
         role: staffUser.role, 
-        tenantId: staffUser.tenantId 
+        tenantId: staffUser.tenant_id 
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -154,7 +154,7 @@ router.post('/staff/login', async (req, res) => {
       user: {
         username: staffUser.username,
         role: staffUser.role,
-        tenantId: staffUser.tenantId
+        tenantId: staffUser.tenant_id
       }
     });
   } catch (error) {
@@ -191,7 +191,7 @@ router.post('/auth/login', async (req, res) => {
       { 
         username: staffUser.username, 
         role: staffUser.role, 
-        tenantId: staffUser.tenantId 
+        tenantId: staffUser.tenant_id 
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -203,7 +203,7 @@ router.post('/auth/login', async (req, res) => {
       user: {
         username: staffUser.username,
         role: staffUser.role,
-        tenantId: staffUser.tenantId
+        tenantId: staffUser.tenant_id
       }
     });
   } catch (error) {
@@ -226,7 +226,7 @@ router.get('/auth/me', verifyJWT, async (req, res) => {
       user: {
         username: user.username,
         role: user.role,
-        tenantId: user.tenantId
+        tenantId: user.tenant_id
       }
     });
   } catch (error) {

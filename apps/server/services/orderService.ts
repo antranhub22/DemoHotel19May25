@@ -12,7 +12,7 @@ export class OrderService {
     try {
       const validatedData = insertOrderSchema.parse({
         ...orderData,
-        roomNumber: orderData.roomNumber || 'unknown',
+        roomNumber: orderData.room_number || 'unknown',
       });
       
       const order = await storage.createOrder(validatedData);
@@ -129,13 +129,13 @@ export class OrderService {
       await db.insert(requestTable).values({
         id: `REQ-${Date.now()}-${Math.random()}`,
         type: (orderData as any).orderType || 'service_request',
-        roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
+        roomNumber: (order as any).room_number || (orderData as any).room_number || 'unknown',
         orderId: (order as any).id?.toString() || `ORD-${Date.now()}`,
         guestName: 'Guest',
         requestContent: this.formatRequestContent(orderData),
         status: 'Đã ghi nhận',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updated_at: new Date().toISOString()
       });
     } catch (syncErr) {
       console.error('Failed to sync order to request table:', syncErr);

@@ -157,7 +157,7 @@ router.post('/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        lastLogin: result.user!.lastLogin,
+        last_login: result.user!.lastLogin,
         // Don't include permissions in response for security
         permissionCount: result.user!.permissions.length
       },
@@ -267,9 +267,9 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
         email: user.email,
         displayName: user.displayName,
         role: user.role,
-        tenantId: user.tenantId,
+        tenantId: user.tenant_id,
         avatarUrl: user.avatarUrl,
-        lastLogin: user.lastLogin,
+        last_login: user.lastLogin,
         permissions: user.permissions.map(p => `${p.module}.${p.action}`),
         permissionCount: user.permissions.length
       }
@@ -359,7 +359,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        lastLogin: result.user!.lastLogin,
+        last_login: result.user!.lastLogin,
         permissionCount: result.user!.permissions.length
       },
       token: result.token,
@@ -412,7 +412,7 @@ router.post('/admin/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        lastLogin: result.user!.lastLogin,
+        last_login: result.user!.lastLogin,
         permissionCount: result.user!.permissions.length
       },
       token: result.token,

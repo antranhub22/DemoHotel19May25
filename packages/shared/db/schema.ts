@@ -132,35 +132,4 @@ export const call_summaries = sqliteTable("call_summaries", {
 });
 
 // For backward compatibility (aliases)
-export const callSummaries = call_summaries;
-
-// ==============================================================
-// Zod Validation Schemas
-// ==============================================================
-
-export const insertTenantSchema = createInsertSchema(tenants);
-export const insertHotelProfileSchema = createInsertSchema(hotelProfiles);
-export const insertStaffSchema = createInsertSchema(staff);
-export const insertCallSchema = createInsertSchema(call);
-export const insertTranscriptSchema = createInsertSchema(transcript);
-export const insertRequestSchema = createInsertSchema(request);
-export const insertMessageSchema = createInsertSchema(message);
-export const insertCallSummarySchema = createInsertSchema(call_summaries);
-
-// Type exports
-export type Tenant = typeof tenants.$inferSelect;
-export type InsertTenant = typeof tenants.$inferInsert;
-export type HotelProfile = typeof hotelProfiles.$inferSelect;
-export type InsertHotelProfile = typeof hotelProfiles.$inferInsert;
-export type Staff = typeof staff.$inferSelect;
-export type InsertStaff = typeof staff.$inferInsert;
-export type Call = typeof call.$inferSelect;
-export type InsertCall = typeof call.$inferInsert;
-export type Transcript = typeof transcript.$inferSelect;
-export type InsertTranscript = typeof transcript.$inferInsert;
-export type Request = typeof request.$inferSelect;
-export type InsertRequest = typeof request.$inferInsert;
-export type Message = typeof message.$inferSelect;
-export type InsertMessage = typeof message.$inferInsert;
-export type CallSummary = typeof call_summaries.$inferSelect;
-export type InsertCallSummary = typeof call_summaries.$inferInsert; 
+export const callSummaries = call_summaries; 

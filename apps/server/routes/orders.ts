@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
   try {
     const orderData = insertOrderSchema.parse({
       ...req.body,
-      roomNumber: req.body.roomNumber || 'unknown',
+      roomNumber: req.body.room_number || 'unknown',
     });
     const order = await storage.createOrder(orderData);
     
@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
       await db.insert(requestTable).values({
         id: `REQ-${Date.now()}-${Math.random()}`,
         type: (orderData as any).orderType || 'service_request',
-        roomNumber: (order as any).roomNumber || (orderData as any).roomNumber || 'unknown',
+        roomNumber: (order as any).room_number || (orderData as any).room_number || 'unknown',
         orderId: (order as any).id?.toString() || `ORD-${Date.now()}`,
         guestName: 'Guest',
         requestContent: Array.isArray((orderData as any).items) && (orderData as any).items.length > 0
@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
           : (orderData as any).orderType || (order as any).requestContent || 'Service Request',
         status: 'Đã ghi nhận',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updated_at: new Date().toISOString()
       });
     } catch (syncErr) {
       console.error('Failed to sync order to request table:', syncErr);
@@ -126,7 +126,7 @@ router.post('/:id/update-status', verifyJWT, async (req: Request, res: Response)
       io.emit('orderStatusUpdated', {
         orderId,
         status,
-        updatedAt: new Date()
+        updated_at: new Date()
       });
     }
     

@@ -23,7 +23,7 @@ export interface AuthUser {
   permissions: Permission[];
   tenantId: string;
   avatarUrl: string | null;
-  lastLogin: string | null;
+  last_login: string | null;
 }
 
 export interface JWTPayload {
@@ -75,12 +75,12 @@ export class UnifiedAuthService {
       // Find user in staff table
       const whereConditions = [
         eq(staff.username, username),
-        eq(staff.isActive, true)
+        eq(staff.is_active, true)
       ];
 
       // If tenantId is provided, filter by it
       if (tenantId) {
-        whereConditions.push(eq(staff.tenantId, tenantId));
+        whereConditions.push(eq(staff.tenant_id, tenantId));
       }
 
       const users = await db
@@ -136,9 +136,9 @@ export class UnifiedAuthService {
         displayName: user.displayName || user.username,
         role: user.role as UserRole,
         permissions,
-        tenantId: user.tenantId || 'default',
+        tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatarUrl,
-        lastLogin: user.lastLogin
+        last_login: user.lastLogin
       };
 
       // Generate tokens
@@ -149,8 +149,8 @@ export class UnifiedAuthService {
       await db
         .update(staff)
         .set({ 
-          lastLogin: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .where(eq(staff.id, user.id));
 
@@ -185,7 +185,7 @@ export class UnifiedAuthService {
         .from(staff)
         .where(and(
           eq(staff.id, decoded.userId),
-          eq(staff.isActive, true)
+          eq(staff.is_active, true)
         ))
         .execute();
 
@@ -203,9 +203,9 @@ export class UnifiedAuthService {
         displayName: user.displayName || user.username,
         role: user.role as UserRole,
         permissions: decoded.permissions,
-        tenantId: user.tenantId || 'default',
+        tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatarUrl,
-        lastLogin: user.lastLogin
+        last_login: user.lastLogin
       };
 
     } catch (error) {
@@ -227,7 +227,7 @@ export class UnifiedAuthService {
         .from(staff)
         .where(and(
           eq(staff.id, decoded.userId),
-          eq(staff.isActive, true)
+          eq(staff.is_active, true)
         ))
         .execute();
 
@@ -262,9 +262,9 @@ export class UnifiedAuthService {
         displayName: user.displayName || user.username,
         role: user.role as UserRole,
         permissions,
-        tenantId: user.tenantId || 'default',
+        tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatarUrl,
-        lastLogin: user.lastLogin
+        last_login: user.lastLogin
       };
 
       const newToken = this.generateToken(authUser);
@@ -295,7 +295,7 @@ export class UnifiedAuthService {
       await db
         .update(staff)
         .set({ 
-          updatedAt: new Date().toISOString()
+          updated_at: new Date().toISOString()
         })
         .where(eq(staff.id, userId));
 
@@ -345,9 +345,9 @@ export class UnifiedAuthService {
         displayName: user.displayName || user.username,
         role: user.role as UserRole,
         permissions,
-        tenantId: user.tenantId || 'default',
+        tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatarUrl,
-        lastLogin: user.lastLogin
+        last_login: user.lastLogin
       };
 
     } catch (error) {
@@ -382,7 +382,7 @@ export class UnifiedAuthService {
     const payload: any = {
       userId: user.id,
       username: user.username,
-      tenantId: user.tenantId,
+      tenantId: user.tenant_id,
       role: user.role,
       permissions: user.permissions
     };
@@ -394,7 +394,7 @@ export class UnifiedAuthService {
     const payload: any = {
       userId: user.id,
       username: user.username,
-      tenantId: user.tenantId,
+      tenantId: user.tenant_id,
       role: user.role,
       permissions: user.permissions
     };

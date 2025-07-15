@@ -28,11 +28,11 @@ export function verifyJWT(req: Request, res: Response, next: NextFunction) {
     const payload = jwt.verify(token, secret) as JwtPayload;
     
     // Handle backward compatibility for old tokens without tenant info
-    if (!payload.tenantId && payload.username) {
+    if (!payload.tenant_id && payload.username) {
       // For existing Mi Nhon Hotel staff, use default tenant
-      payload.tenantId = getMiNhonTenantId();
+      payload.tenant_id = getMiNhonTenantId();
       payload.role = payload.role || 'staff';
-      console.log(`⚠️  Legacy token detected for ${payload.username}, assigning Mi Nhon tenant: ${payload.tenantId}`);
+      console.log(`⚠️  Legacy token detected for ${payload.username}, assigning Mi Nhon tenant: ${payload.tenant_id}`);
     }
     
     // Gắn payload lên request để sử dụng ở các middleware/route sau

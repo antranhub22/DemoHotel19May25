@@ -44,12 +44,12 @@ export async function getOverview() {
 export async function getServiceDistribution() {
   try {
     const result = await db.select({
-      serviceType: call.serviceType,
+      serviceType: call.service_type,
       count: count()
     })
     .from(call)
-    .where(sql`${call.serviceType} IS NOT NULL`)
-    .groupBy(call.serviceType);
+    .where(sql`${call.service_type} IS NOT NULL`)
+    .groupBy(call.service_type);
     
     return result.map((row: { serviceType: string | null; count: number }) => ({
       serviceType: row.serviceType || 'unknown',
@@ -66,11 +66,11 @@ export async function getHourlyActivity() {
     if (isPostgres) {
       // PostgreSQL version
       const result = await db.select({
-        hour: sql`EXTRACT(HOUR FROM ${call.createdAt})`.as('hour'),
+        hour: sql`EXTRACT(HOUR FROM ${call.created_at})`.as('hour'),
         count: count()
       })
       .from(call)
-      .groupBy(sql`EXTRACT(HOUR FROM ${call.createdAt})`);
+      .groupBy(sql`EXTRACT(HOUR FROM ${call.created_at})`);
       
       return result.map((row: { hour: unknown; count: number }) => ({
         hour: Number(row.hour),
@@ -79,11 +79,11 @@ export async function getHourlyActivity() {
     } else {
       // SQLite version
       const result = await db.select({
-        hour: sql`CAST(strftime('%H', datetime(${call.createdAt}, 'unixepoch')) AS INTEGER)`.as('hour'),
+        hour: sql`CAST(strftime('%H', datetime(${call.created_at}, 'unixepoch')) AS INTEGER)`.as('hour'),
         count: count()
       })
       .from(call)
-      .groupBy(sql`strftime('%H', datetime(${call.createdAt}, 'unixepoch'))`);
+      .groupBy(sql`strftime('%H', datetime(${call.created_at}, 'unixepoch'))`);
       
       return result.map((row: { hour: unknown; count: number }) => ({
         hour: Number(row.hour),
