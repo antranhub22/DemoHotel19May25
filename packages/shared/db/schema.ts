@@ -9,18 +9,29 @@ import { z } from "zod";
 
 export const tenants = sqliteTable("tenants", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  hotelName: text("hotel_name").notNull(),
   subdomain: text("subdomain").notNull().unique(),
-  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  customDomain: text("custom_domain"),
+  subscriptionPlan: text("subscription_plan").default("trial"),
+  subscriptionStatus: text("subscription_status").default("active"),
+  trialEndsAt: integer("trial_ends_at"),
+  createdAt: integer("created_at"),
+  maxVoices: integer("max_voices").default(5),
+  maxLanguages: integer("max_languages").default(4),
+  voiceCloning: integer("voice_cloning", { mode: "boolean" }).default(false),
+  multiLocation: integer("multi_location", { mode: "boolean" }).default(false),
+  whiteLabel: integer("white_label", { mode: "boolean" }).default(false),
+  dataRetentionDays: integer("data_retention_days").default(90),
+  monthlyCallLimit: integer("monthly_call_limit").default(1000),
+  // Legacy columns that might still exist
+  name: text("name"),
+  updatedAt: text("updated_at"),
   isActive: integer("is_active", { mode: "boolean" }).default(true),
   settings: text("settings", { mode: "json" }),
   tier: text("tier").default("free"),
   maxCalls: integer("max_calls").default(1000),
   maxUsers: integer("max_users").default(10),
   features: text("features", { mode: "json" }),
-  customDomain: text("custom_domain"),
-  hotelName: text("hotel_name"),
 });
 
 export const hotelProfiles = sqliteTable("hotel_profiles", {
@@ -103,22 +114,28 @@ export const transcript = sqliteTable("transcript", {
 });
 
 export const request = sqliteTable("request", {
-  id: text("id").primaryKey(),
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
   tenantId: text("tenant_id").references(() => tenants.id),
   callId: text("call_id").references(() => call.id),
-  type: text("type").notNull(),
+  roomNumber: text("room_number"),
+  orderId: text("order_id"),
+  requestContent: text("request_content"),
+  status: text("status").default("Đã ghi nhận"),
+  createdAt: integer("created_at"),
+  updatedAt: integer("updated_at"),
+  // Additional columns from actual database
   description: text("description"),
-  roomNumber: text("room_number"), // Already exists
-  orderId: text("order_id"), // Added missing field
-  requestContent: text("request_content"), // Added missing field
   priority: text("priority").default("medium"),
-  status: text("status").default("pending"),
   assignedTo: text("assigned_to"),
-  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
   completedAt: text("completed_at"),
-  metadata: text("metadata", { mode: "json" }),
-  customerInfo: text("customer_info", { mode: "json" }),
+  metadata: text("metadata"),
+  type: text("type").default("order"),
+  totalAmount: real("total_amount"),
+  items: text("items"),
+  deliveryTime: text("delivery_time"),
+  specialInstructions: text("special_instructions"),
+  orderType: text("order_type"),
+  // Legacy fields
   guestName: text("guest_name"),
   phoneNumber: text("phone_number"),
   urgency: text("urgency"),
@@ -128,7 +145,7 @@ export const request = sqliteTable("request", {
   actualTime: integer("actual_time"),
   cost: real("cost"),
   notes: text("notes"),
-  attachments: text("attachments", { mode: "json" }),
+  attachments: text("attachments"),
 });
 
 export const message = sqliteTable("message", {
