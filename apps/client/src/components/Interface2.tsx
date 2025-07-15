@@ -44,6 +44,11 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     modelOutput,
     language
   } = useAssistant();
+  
+  // Debug isActive changes
+  useEffect(() => {
+    console.log('🎯 [Interface2] isActive changed to:', isActive);
+  }, [isActive]);
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
@@ -259,6 +264,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
         isActive ? 'opacity-100' : 'opacity-0 pointer-events-none'
       } z-20 overflow-y-auto`} id="interface2"
       style={{
+        display: isActive ? 'block' : 'none', // Force display for debugging
         backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url('/assets/courtyard.jpeg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',

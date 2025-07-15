@@ -34,8 +34,9 @@ const VoiceAssistant: React.FC = () => {
 
   // Effects - ALL EFFECTS MUST BE AFTER HOOKS DECLARATION
   useEffect(() => {
-    console.log('🔄 Current interface changed to:', currentInterface);
-  }, [currentInterface]);
+    console.log('🔄 [VoiceAssistant] Current interface changed to:', currentInterface);
+    console.log('🔄 [VoiceAssistant] Interface states:', interfaceStates);
+  }, [currentInterface, interfaceStates]);
 
   useEffect(() => {
     if (config && config !== hotelConfig) {

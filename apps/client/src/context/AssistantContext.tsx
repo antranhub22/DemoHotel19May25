@@ -85,7 +85,14 @@ const AssistantContext = createContext<AssistantContextType | undefined>(undefin
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
   console.log('[DEBUG] AssistantProvider render');
-  const [currentInterface, setCurrentInterface] = useState<InterfaceLayer>('interface1');
+  const [currentInterface, setCurrentInterfaceState] = useState<InterfaceLayer>('interface1');
+  
+  // Wrapper để debug setCurrentInterface calls
+  const setCurrentInterface = (layer: InterfaceLayer) => {
+    console.log('[AssistantContext] 🔄 setCurrentInterface called:', { from: currentInterface, to: layer });
+    setCurrentInterfaceState(layer);
+    console.log('[AssistantContext] ✅ setCurrentInterface executed:', layer);
+  };
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);

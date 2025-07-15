@@ -75,6 +75,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     
     console.log('[Interface1] Vapi configuration:', { publicKey, assistantId, lang });
     
+    // Development mode: Skip Vapi validation and directly switch interface for testing
+    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+    if ((!publicKey || !assistantId) && isDevelopment) {
+      console.warn('[Interface1] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing');
+      setIsCallStarted(true);
+      setShowConversation(true);
+      setCurrentInterface('interface2');
+      return;
+    }
+    
     if (!publicKey || !assistantId) {
       console.error('[Interface1] Vapi configuration not available for language:', lang);
       alert(`Vapi configuration not available for language: ${lang}`);
@@ -97,7 +107,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         console.log('[Interface1] Vapi call started successfully');
         
         // Chuyển sang Interface2 ngay sau khi call thành công
+        console.log('[Interface1] 🔄 CALLING setCurrentInterface("interface2")');
         setCurrentInterface('interface2');
+        console.log('[Interface1] ✅ setCurrentInterface("interface2") called');
+        
+        // Force re-render để đảm bảo chuyển interface
+        setTimeout(() => {
+          console.log('[Interface1] 🔄 DELAYED setCurrentInterface("interface2") as fallback');
+          setCurrentInterface('interface2');
+        }, 100);
       } else {
         console.error('[Interface1] Failed to get Vapi instance or assistant ID');
         setIsCallStarted(false);
