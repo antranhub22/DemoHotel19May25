@@ -122,7 +122,17 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   // Check permission-based access
   if (requiredPermission) {
-    const [module, action] = requiredPermission.split('.');
+    // Handle both dot notation (standard) and colon notation (legacy)
+    let module: string, action: string;
+    
+    if (requiredPermission.includes(':')) {
+      // Legacy colon notation: "analytics:view_advanced"
+      [module, action] = requiredPermission.split(':');
+    } else {
+      // Standard dot notation: "analytics.view"
+      [module, action] = requiredPermission.split('.');
+    }
+    
     if (!hasPermission(module, action)) {
       return showFallback ? (
         fallback || (

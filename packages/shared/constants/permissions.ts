@@ -6,31 +6,42 @@ export type { UserRole, Permission } from '../types/auth';
 // Permission Matrix - Defines what each role can do
 export const PERMISSION_MATRIX: PermissionMatrix = {
   'hotel-manager': {
-    dashboard: ['view', 'edit'],
-    analytics: ['view', 'export', 'advanced'],
+    dashboard: ['view', 'edit', 'view_client_interface'],
+    analytics: ['view', 'export', 'advanced', 'view_advanced'],
     billing: ['view', 'edit'],
-    staff: ['view', 'edit', 'delete', 'invite'],
+    staff: ['view', 'edit', 'delete', 'invite', 'manage'],
     settings: ['view', 'edit'],
     calls: ['view', 'join', 'transfer', 'end', 'override'],
-    system: ['view'] // Can see basic system info
+    system: ['view', 'monitor'], // Can see basic system info
+    assistant: ['configure', 'manage'],
+    notifications: ['view', 'manage'],
+    requests: ['view', 'manage'],
+    guests: ['view', 'manage'],
+    security: ['view', 'manage'],
+    integrations: ['view', 'manage'],
+    logs: ['view', 'export']
   },
   'front-desk': {
     dashboard: ['view'],
     calls: ['view', 'join', 'transfer', 'end'],
     analytics: ['view_basic'], // Limited analytics
     profile: ['view', 'edit'],
-    guests: ['view', 'edit', 'checkin', 'checkout'],
+    guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
+    requests: ['view', 'manage'], // Can handle guest requests
+    notifications: ['view'], // Can see notifications
     system: [] // No system access
   },
   'it-manager': {
     dashboard: ['view'],
-    system: ['view', 'edit', 'debug', 'restart'],
-    integrations: ['view', 'edit', 'test'],
+    system: ['view', 'edit', 'debug', 'restart', 'monitor'],
+    integrations: ['view', 'edit', 'test', 'manage'],
     logs: ['view', 'export', 'debug'],
     calls: ['view', 'debug'], // Technical call debugging
     analytics: ['view', 'technical'], // System performance analytics
     billing: [], // No billing access
-    staff: [] // No staff management
+    staff: [], // No staff management
+    security: ['view', 'manage'], // IT security access
+    notifications: ['view'] // System notifications
   }
 };
 
