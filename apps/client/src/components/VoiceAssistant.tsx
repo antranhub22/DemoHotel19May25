@@ -44,7 +44,7 @@ const VoiceAssistant: React.FC = () => {
     }
   }, [config, hotelConfig, setHotelConfig]);
 
-  // Set interface based on route
+  // Set interface based on route - but only on initial load, not during normal interface transitions
   useEffect(() => {
     const routeToInterface: { [key: string]: 'interface1' | 'interface2' | 'interface3' | 'interface4' } = {
       '/': 'interface1',
@@ -55,9 +55,15 @@ const VoiceAssistant: React.FC = () => {
     };
 
     const targetInterface = routeToInterface[location];
-    if (targetInterface && targetInterface !== currentInterface) {
-      console.log('🛣️ Route changed to:', location, '-> Setting interface to:', targetInterface);
-      setCurrentInterface(targetInterface);
+    console.log('🛣️ Route detection - Location:', location, 'Current interface:', currentInterface, 'Target interface:', targetInterface);
+    
+    // Only set interface based on route if we're on interface1 or if target interface is interface1
+    // This prevents the route effect from overriding programmatic interface changes (like going from interface1 to interface2)
+    if (targetInterface && (currentInterface === 'interface1' || targetInterface === 'interface1')) {
+      if (targetInterface !== currentInterface) {
+        console.log('🛣️ Route changed to:', location, '-> Setting interface to:', targetInterface);
+        setCurrentInterface(targetInterface);
+      }
     }
   }, [location, currentInterface, setCurrentInterface]);
 

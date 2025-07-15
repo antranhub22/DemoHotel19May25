@@ -86,13 +86,22 @@ export class DatabaseStorage implements IStorage {
   async getAllOrders(filter: { status?: string; roomNumber?: string }): Promise<Order[]> {
     try {
       console.log('🔍 getAllOrders called with filter:', filter);
-      const query = db.select().from(request);
+      
+      let query = db.select().from(request);
+      
+      // Build where conditions properly
+      const whereConditions = [];
       if (filter.status) {
-        query.where(eq(request.status, filter.status));
+        whereConditions.push(eq(request.status, filter.status));
       }
       if (filter.roomNumber) {
-        query.where(eq(request.roomNumber, filter.roomNumber));
+        whereConditions.push(eq(request.roomNumber, filter.roomNumber));
       }
+      
+      if (whereConditions.length > 0) {
+        query = query.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));
+      }
+      
       console.log('🔍 About to execute query...');
       const result = await query;
       console.log('✅ Query executed, result count:', result.length);
