@@ -1,6 +1,10 @@
-import { users, type User, type InsertUser, transcripts, type Transcript, type InsertTranscript, orders, type Order, type InsertOrder, callSummaries, type CallSummary, type InsertCallSummary } from "@shared/schema";
+import { users, type User, type InsertUser, transcripts, type Transcript, type InsertTranscript, request, callSummaries, type CallSummary, type InsertCallSummary } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, sql } from "drizzle-orm";
+
+// Type aliases for backward compatibility
+type Order = typeof request.$inferSelect;
+type InsertOrder = typeof request.$inferInsert;
 
 // modify the interface with any CRUD methods
 // you might need
@@ -54,7 +58,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
-    const result = await db.insert(orders).values({
+    const result = await db.insert(request).values({
       ...insertOrder,
       status: "pending"
     }).returning();
@@ -62,36 +66,36 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getOrderById(id: string): Promise<Order | undefined> {
-    const result = await db.select().from(orders).where(eq(orders.id, id));
+    const result = await db.select().from(request).where(eq(request.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
   
   async getOrdersByRoomNumber(roomNumber: string): Promise<Order[]> {
-    return await db.select().from(orders).where(eq(orders.roomNumber, roomNumber));
+    return await db.select().from(request).where(eq(request.roomNumber, roomNumber));
   }
   
   async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
     const result = await db
-      .update(orders)
+      .update(request)
       .set({ status })
-      .where(eq(orders.id, id))
+      .where(eq(request.id, id))
       .returning();
     return result.length > 0 ? result[0] : undefined;
   }
   
   async getAllOrders(filter: { status?: string; roomNumber?: string }): Promise<Order[]> {
-    const query = db.select().from(orders);
+    const query = db.select().from(request);
     if (filter.status) {
-      query.where(eq(orders.status, filter.status));
+      query.where(eq(request.status, filter.status));
     }
     if (filter.roomNumber) {
-      query.where(eq(orders.roomNumber, filter.roomNumber));
+      query.where(eq(request.roomNumber, filter.roomNumber));
     }
     return await query;
   }
   
   async deleteAllOrders(): Promise<number> {
-    const result = await db.delete(orders);
+    const result = await db.delete(request);
     return result.rowCount || 0;
   }
   

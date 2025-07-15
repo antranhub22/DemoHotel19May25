@@ -1,212 +1,192 @@
 #!/usr/bin/env tsx
 
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { sql } from 'drizzle-orm';
+import Database from 'better-sqlite3';
+import { join } from 'path';
 
-// ============================================
-// Quick Database Fix Script
-// ============================================
-
+/**
+ * Quick database fix for schema issues - SQLite version
+ */
 async function quickDatabaseFix() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    console.error('❌ DATABASE_URL environment variable not set');
-    process.exit(1);
-  }
+  console.log('🔧 Starting quick database schema fix...');
 
-  console.log('🔧 Quick Database Fix Starting...');
-  console.log('🔗 Connecting to database...');
-
-  const client = postgres(databaseUrl);
-  const db = drizzle(client);
+  // Use SQLite database directly
+  const dbPath = join(process.cwd(), 'dev.db');
+  console.log(`🔗 Connecting to SQLite database at: ${dbPath}`);
+  
+  const db = new Database(dbPath);
 
   try {
-    // Step 1: Create tenants table
-    console.log('📋 Creating tenants table...');
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS tenants (
-        id TEXT PRIMARY KEY,
-        hotel_name TEXT NOT NULL,
-        domain TEXT,
-        subdomain TEXT,
-        email TEXT,
-        phone TEXT,
-        address TEXT,
-        subscription_plan TEXT DEFAULT 'trial',
-        subscription_status TEXT DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Step 2: Create hotel_profiles table
-    console.log('📋 Creating hotel_profiles table...');
-    await db.execute(sql`
-      CREATE TABLE IF NOT EXISTS hotel_profiles (
-        id TEXT PRIMARY KEY,
-        tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-        hotel_name TEXT NOT NULL,
-        description TEXT,
-        address TEXT,
-        phone TEXT,
-        email TEXT,
-        website TEXT,
-        amenities TEXT[],
-        policies TEXT[],
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Step 3: Add tenant_id columns to existing tables
-    console.log('📋 Adding tenant_id columns...');
-    const tables = ['transcript', 'request', 'message', 'call', 'staff'];
+    // Fix 1: Add missing columns to tenants table
+    console.log('📋 Step 1: Fixing tenants table...');
     
-    for (const table of tables) {
-      try {
-        await db.execute(sql`
-          ALTER TABLE ${sql.identifier(table)} 
-          ADD COLUMN IF NOT EXISTS tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE
-        `);
-        console.log(`✅ Added tenant_id to ${table} table`);
-      } catch (error) {
-        console.log(`ℹ️ tenant_id column already exists in ${table} table`);
-      }
-    }
+    // Check if tenants table exists, create if not
+    const tenantsTableExists = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type='table' AND name='tenants'
+    `).get();
 
-    // Step 4: Create Mi Nhon tenant
-    console.log('🏨 Creating Mi Nhon Hotel tenant...');
-    await db.execute(sql`
-      INSERT INTO tenants (id, hotel_name, domain, subdomain, email, phone, address, subscription_plan, subscription_status)
-      VALUES ('mi-nhon-hotel', 'Mi Nhon Hotel', 'minhonmuine.talk2go.online', 'minhonmuine', 
-              'info@minhonhotel.com', '+84 252 3847 007', 
-              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam', 
-              'premium', 'active')
-      ON CONFLICT (id) DO UPDATE SET
-        hotel_name = EXCLUDED.hotel_name,
-        domain = EXCLUDED.domain,
-        subdomain = EXCLUDED.subdomain,
-        email = EXCLUDED.email,
-        phone = EXCLUDED.phone,
-        address = EXCLUDED.address,
-        subscription_plan = EXCLUDED.subscription_plan,
-        subscription_status = EXCLUDED.subscription_status,
-        updated_at = CURRENT_TIMESTAMP
-    `);
-
-    // Step 5: Create hotel profile
-    console.log('🏨 Creating Mi Nhon Hotel profile...');
-    await db.execute(sql`
-      INSERT INTO hotel_profiles (id, tenant_id, name, description, address, phone, email, website, amenities, policies)
-      VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel', 
-              'A beautiful beachfront hotel in Mui Ne, Vietnam',
-              '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
-              '+84 252 3847 007', 'info@minhonhotel.com', 'https://minhonhotel.com',
-              ARRAY['Pool', 'Restaurant', 'Free WiFi', 'Beach Access', 'Spa'],
-              ARRAY['Check-in: 2:00 PM', 'Check-out: 12:00 PM', 'No smoking'])
-      ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
-        description = EXCLUDED.description,
-        address = EXCLUDED.address,
-        phone = EXCLUDED.phone,
-        email = EXCLUDED.email,
-        website = EXCLUDED.website,
-        amenities = EXCLUDED.amenities,
-        policies = EXCLUDED.policies,
-        updated_at = CURRENT_TIMESTAMP
-    `);
-
-    // Step 6: Create staff accounts
-    console.log('👥 Creating staff accounts...');
-    const staffAccounts = [
-      {
-        id: 'admin-mi-nhon',
-        tenant_id: 'mi-nhon-hotel',
-        username: 'admin@hotel.com',
-        password: 'StrongPassword123',
-        role: 'admin',
-        name: 'Administrator',
-        email: 'admin@hotel.com'
-      },
-      {
-        id: 'manager-mi-nhon',
-        tenant_id: 'mi-nhon-hotel',
-        username: 'manager@hotel.com',
-        password: 'StrongPassword456',
-        role: 'manager',
-        name: 'Hotel Manager',
-        email: 'manager@hotel.com'
-      }
-    ];
-
-    for (const staff of staffAccounts) {
-      await db.execute(sql`
-        INSERT INTO staff (id, tenant_id, username, password, role, name, email)
-        VALUES (${staff.id}, ${staff.tenant_id}, ${staff.username}, ${staff.password}, 
-                ${staff.role}, ${staff.name}, ${staff.email})
-        ON CONFLICT (id) DO UPDATE SET
-          username = EXCLUDED.username,
-          password = EXCLUDED.password,
-          role = EXCLUDED.role,
-          name = EXCLUDED.name,
-          email = EXCLUDED.email,
-          updated_at = CURRENT_TIMESTAMP
+    if (!tenantsTableExists) {
+      console.log('ℹ️ Creating tenants table...');
+      db.exec(`
+        CREATE TABLE tenants (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          hotel_name TEXT,
+          subdomain TEXT,
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
       `);
-      console.log(`✅ Created staff account: ${staff.username}`);
+      console.log('✅ Created tenants table');
     }
 
-    // Step 7: Update existing data
-    console.log('🔄 Updating existing data with tenant_id...');
-    const miNhonTenantId = 'mi-nhon-hotel';
-
-    // Update existing records
-    const updateTables = ['transcript', 'request', 'message', 'staff'];
-    
-    for (const table of updateTables) {
-      try {
-        const result = await db.execute(sql`
-          UPDATE ${sql.identifier(table)} 
-          SET tenant_id = ${miNhonTenantId} 
-          WHERE tenant_id IS NULL
-        `);
-        console.log(`✅ Updated ${table} table with tenant_id`);
-      } catch (error) {
-        console.log(`ℹ️ Table ${table} update skipped`);
+    // Add 'name' column if it doesn't exist
+    try {
+      db.exec(`ALTER TABLE tenants ADD COLUMN name TEXT`);
+      console.log('✅ Added name column to tenants table');
+    } catch (error: any) {
+      if (error.message?.includes('duplicate column')) {
+        console.log('ℹ️ name column already exists in tenants table');
+      } else {
+        console.log('ℹ️ Skipping name column:', error.message);
       }
     }
 
-    // Step 8: Verify setup
-    console.log('🔍 Verifying database setup...');
+    // Update name column with hotel_name values
+    try {
+      db.exec(`UPDATE tenants SET name = hotel_name WHERE name IS NULL OR name = ''`);
+      console.log('✅ Updated name column with hotel_name values');
+    } catch (error: any) {
+      console.log('ℹ️ Could not update name column:', error.message);
+    }
+
+    // Fix 2: Add missing columns to orders table
+    console.log('📋 Step 2: Fixing orders table...');
     
-    const tenantsCount = await db.execute(sql`SELECT COUNT(*) as count FROM tenants`);
-    console.log(`✅ Tenants table: ${tenantsCount[0]?.count || 0} records`);
+    // Check if orders table exists
+    const ordersTableExists = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type='table' AND name='orders'
+    `).get();
+    
+    if (ordersTableExists) {
+      // Add call_id column if it doesn't exist
+      try {
+        db.exec(`ALTER TABLE orders ADD COLUMN call_id TEXT`);
+        console.log('✅ Added call_id column to orders table');
+      } catch (error: any) {
+        if (error.message?.includes('duplicate column')) {
+          console.log('ℹ️ call_id column already exists in orders table');
+        } else {
+          console.log('ℹ️ Skipping call_id column:', error.message);
+        }
+      }
+    } else {
+      console.log('ℹ️ Orders table does not exist, creating it...');
+      db.exec(`
+        CREATE TABLE orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          call_id TEXT,
+          room_number TEXT NOT NULL,
+          order_type TEXT NOT NULL,
+          delivery_time TEXT NOT NULL,
+          special_instructions TEXT,
+          items TEXT NOT NULL,
+          total_amount INTEGER NOT NULL,
+          status TEXT DEFAULT 'pending',
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('✅ Created orders table with call_id column');
+    }
 
-    const profilesCount = await db.execute(sql`SELECT COUNT(*) as count FROM hotel_profiles`);
-    console.log(`✅ Hotel profiles table: ${profilesCount[0]?.count || 0} records`);
+    // Fix 3: Add missing columns to request table
+    console.log('📋 Step 3: Fixing request table...');
+    
+    // Check if request table exists
+    const requestTableExists = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type='table' AND name='request'
+    `).get();
 
-    const staffCount = await db.execute(sql`SELECT COUNT(*) as count FROM staff WHERE tenant_id = 'mi-nhon-hotel'`);
-    console.log(`✅ Staff accounts: ${staffCount[0]?.count || 0} records`);
+    if (requestTableExists) {
+      try {
+        db.exec(`ALTER TABLE request ADD COLUMN call_id TEXT`);
+        console.log('✅ Added call_id column to request table');
+      } catch (error: any) {
+        if (error.message?.includes('duplicate column')) {
+          console.log('ℹ️ call_id column already exists in request table');
+        } else {
+          console.log('ℹ️ Skipping call_id column in request table:', error.message);
+        }
+      }
+    } else {
+      console.log('ℹ️ Request table does not exist, creating it...');
+      db.exec(`
+        CREATE TABLE request (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          room_number TEXT,
+          order_id TEXT,
+          request_content TEXT,
+          status TEXT DEFAULT 'Đã ghi nhận',
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+          call_id TEXT
+        )
+      `);
+      console.log('✅ Created request table with call_id column');
+    }
 
-    console.log('🎉 Quick Database Fix completed successfully!');
+    // Fix 4: Ensure Mi Nhon tenant exists with correct data
+    console.log('📋 Step 4: Ensuring Mi Nhon tenant exists...');
+    
+    try {
+      const insertTenant = db.prepare(`
+        INSERT OR REPLACE INTO tenants (id, name, hotel_name, subdomain, created_at, updated_at)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `);
+      
+      insertTenant.run('mi-nhon-hotel', 'Mi Nhon Hotel', 'Mi Nhon Hotel', 'minhonmuine');
+      console.log('✅ Mi Nhon tenant ensured in database');
+    } catch (error: any) {
+      console.log('ℹ️ Could not create/update Mi Nhon tenant:', error.message);
+    }
+
+    // Fix 5: Show current database tables
+    console.log('📋 Step 5: Verifying database tables...');
+    const tables = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type='table' ORDER BY name
+    `).all();
+    
+    console.log('✅ Current tables in database:');
+    tables.forEach((table: any) => {
+      console.log(`   - ${table.name}`);
+    });
+
+    console.log('🎉 Quick database fix completed successfully!');
     console.log('');
-    console.log('📋 Test accounts created:');
-    console.log('   Username: admin@hotel.com');
-    console.log('   Password: StrongPassword123');
+    console.log('✅ Fixed issues:');
+    console.log('   - Added missing "name" column to tenants table');
+    console.log('   - Added missing "call_id" column to orders table');
+    console.log('   - Added missing "call_id" column to request table');
+    console.log('   - Ensured Mi Nhon tenant exists');
     console.log('');
-    console.log('   Username: manager@hotel.com');
-    console.log('   Password: StrongPassword456');
+    console.log('🔄 Please restart your server to apply changes.');
 
   } catch (error) {
-    console.error('❌ Quick Database Fix failed:', error);
-    throw error;
+    console.error('❌ Quick database fix failed:', error);
+    process.exit(1);
   } finally {
-    await client.end();
+    db.close();
   }
 }
 
-// Run the fix
-quickDatabaseFix().catch((error) => {
-  console.error('Database fix failed:', error);
-  process.exit(1);
-}); 
+// Run the fix immediately
+quickDatabaseFix()
+  .then(() => {
+    console.log('✅ Database fix completed');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ Database fix failed:', error);
+    process.exit(1);
+  });
+
+export { quickDatabaseFix }; 
