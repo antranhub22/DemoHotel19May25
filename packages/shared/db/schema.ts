@@ -4,191 +4,163 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // ==============================================================
-// Database Table Definitions
+// Database Table Definitions - FIXED TO MATCH ACTUAL DB STRUCTURE
 // ==============================================================
 
 export const tenants = sqliteTable("tenants", {
   id: text("id").primaryKey(),
-  hotelName: text("hotel_name").notNull(),
+  hotel_name: text("hotel_name").notNull(),
   subdomain: text("subdomain").notNull().unique(),
-  customDomain: text("custom_domain"),
-  subscriptionPlan: text("subscription_plan").default("trial"),
-  subscriptionStatus: text("subscription_status").default("active"),
-  trialEndsAt: integer("trial_ends_at"),
-  createdAt: integer("created_at"),
-  maxVoices: integer("max_voices").default(5),
-  maxLanguages: integer("max_languages").default(4),
-  voiceCloning: integer("voice_cloning", { mode: "boolean" }).default(false),
-  multiLocation: integer("multi_location", { mode: "boolean" }).default(false),
-  whiteLabel: integer("white_label", { mode: "boolean" }).default(false),
-  dataRetentionDays: integer("data_retention_days").default(90),
-  monthlyCallLimit: integer("monthly_call_limit").default(1000),
-  // Legacy columns that might still exist
+  custom_domain: text("custom_domain"),
+  subscription_plan: text("subscription_plan").default("trial"),
+  subscription_status: text("subscription_status").default("active"),
+  trial_ends_at: integer("trial_ends_at"),
+  created_at: integer("created_at"),
+  max_voices: integer("max_voices").default(5),
+  max_languages: integer("max_languages").default(4),
+  voice_cloning: integer("voice_cloning", { mode: "boolean" }).default(false),
+  multi_location: integer("multi_location", { mode: "boolean" }).default(false),
+  white_label: integer("white_label", { mode: "boolean" }).default(false),
+  data_retention_days: integer("data_retention_days").default(90),
+  monthly_call_limit: integer("monthly_call_limit").default(1000),
+  // Legacy columns that exist in actual database
   name: text("name"),
-  updatedAt: text("updated_at"),
-  isActive: integer("is_active", { mode: "boolean" }).default(true),
+  updated_at: text("updated_at"),
+  is_active: integer("is_active", { mode: "boolean" }).default(true),
   settings: text("settings", { mode: "json" }),
   tier: text("tier").default("free"),
-  maxCalls: integer("max_calls").default(1000),
-  maxUsers: integer("max_users").default(10),
+  max_calls: integer("max_calls").default(1000),
+  max_users: integer("max_users").default(10),
   features: text("features", { mode: "json" }),
 });
 
 export const hotelProfiles = sqliteTable("hotel_profiles", {
   id: text("id").primaryKey(),
-  tenantId: text("tenant_id").references(() => tenants.id),
-  name: text("name").notNull(),
-  address: text("address"),
-  phone: text("phone"),
-  email: text("email"),
-  description: text("description"),
-  amenities: text("amenities", { mode: "json" }),
-  policies: text("policies", { mode: "json" }),
-  checkInTime: text("check_in_time"),
-  checkOutTime: text("check_out_time"),
-  roomTypes: text("room_types", { mode: "json" }),
-  services: text("services", { mode: "json" }),
-  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  tenant_id: text("tenant_id").references(() => tenants.id),
+  research_data: text("research_data", { mode: "json" }),
+  assistant_config: text("assistant_config", { mode: "json" }),
+  vapi_assistant_id: text("vapi_assistant_id"),
+  services_config: text("services_config", { mode: "json" }),
+  knowledge_base: text("knowledge_base"),
+  system_prompt: text("system_prompt"),
+  created_at: integer("created_at"),
+  updated_at: integer("updated_at"),
 });
 
 export const staff = sqliteTable("staff", {
   id: text("id").primaryKey(),
-  tenantId: text("tenant_id").references(() => tenants.id),
+  tenant_id: text("tenant_id").references(() => tenants.id),
   username: text("username").notNull(),
   password: text("password").notNull(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
+  first_name: text("first_name"),
+  last_name: text("last_name"),
   email: text("email"),
   phone: text("phone"),
   role: text("role", { enum: ["hotel-manager", "front-desk", "it-manager"] }).default("front-desk"),
   permissions: text("permissions", { mode: "json" }).default("[]"),
-  displayName: text("display_name"),
-  avatarUrl: text("avatar_url"),
-  lastLogin: text("last_login"),
-  isActive: integer("is_active", { mode: "boolean" }).default(true),
-  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
+  display_name: text("display_name"),
+  avatar_url: text("avatar_url"),
+  last_login: text("last_login"),
+  is_active: integer("is_active", { mode: "boolean" }).default(true),
+  created_at: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
 export const call = sqliteTable("call", {
-  id: text("id").primaryKey(),
-  tenantId: text("tenant_id").references(() => tenants.id),
-  callIdVapi: text("call_id_vapi"), // Added missing field
-  assistantId: text("assistant_id"),
-  customerId: text("customer_id"),
-  phoneNumber: text("phone_number"),
-  roomNumber: text("room_number"), // Added missing field
-  language: text("language"), // Added missing field
-  serviceType: text("service_type"), // Added missing field
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  tenant_id: text("tenant_id").references(() => tenants.id),
+  call_id_vapi: text("call_id_vapi").notNull().unique(),
+  room_number: text("room_number"),
+  language: text("language"),
+  service_type: text("service_type"),
+  start_time: integer("start_time"),
+  end_time: integer("end_time"),
   duration: integer("duration"),
-  cost: real("cost"),
-  summary: text("summary"),
-  analysis: text("analysis"),
-  rating: integer("rating"),
-  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
-  startedAt: text("started_at"),
-  endedAt: text("ended_at"),
-  endTime: text("end_time"), // Added missing field
-  status: text("status"),
-  type: text("type"),
-  direction: text("direction"),
-  endReason: text("end_reason"),
-  costBreakdown: text("cost_breakdown", { mode: "json" }),
-  messages: text("messages", { mode: "json" }),
-  artifact: text("artifact", { mode: "json" }),
+  created_at: integer("created_at"),
+  updated_at: integer("updated_at"),
 });
 
 export const transcript = sqliteTable("transcript", {
-  id: text("id").primaryKey(),
-  callId: text("call_id").references(() => call.id),
-  tenantId: text("tenant_id").references(() => tenants.id),
-  role: text("role"), // Added missing field
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  call_id: text("call_id").notNull(),
   content: text("content").notNull(),
-  timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
-  speaker: text("speaker"),
-  confidence: real("confidence"),
-  language: text("language"),
-  emotion: text("emotion"),
-  sentiment: text("sentiment"),
-  keywords: text("keywords", { mode: "json" }),
-  duration: integer("duration"),
-  wordCount: integer("word_count"),
+  role: text("role").notNull(),
+  timestamp: integer("timestamp"),
+  tenant_id: text("tenant_id").references(() => tenants.id),
 });
 
 export const request = sqliteTable("request", {
   id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  tenantId: text("tenant_id").references(() => tenants.id),
-  callId: text("call_id").references(() => call.id),
-  roomNumber: text("room_number"),
-  orderId: text("order_id"),
-  requestContent: text("request_content"),
+  tenant_id: text("tenant_id").references(() => tenants.id),
+  call_id: text("call_id"),
+  room_number: text("room_number"),
+  order_id: text("order_id"),
+  request_content: text("request_content"),
   status: text("status").default("Đã ghi nhận"),
-  createdAt: integer("created_at"),
-  updatedAt: integer("updated_at"),
+  created_at: integer("created_at"),
+  updated_at: integer("updated_at"),
   // Additional columns from actual database
   description: text("description"),
   priority: text("priority").default("medium"),
-  assignedTo: text("assigned_to"),
-  completedAt: text("completed_at"),
+  assigned_to: text("assigned_to"),
+  completed_at: text("completed_at"),
   metadata: text("metadata"),
   type: text("type").default("order"),
-  totalAmount: real("total_amount"),
+  total_amount: real("total_amount"),
   items: text("items"),
-  deliveryTime: text("delivery_time"),
-  specialInstructions: text("special_instructions"),
-  orderType: text("order_type"),
-  // Legacy fields
-  guestName: text("guest_name"),
-  phoneNumber: text("phone_number"),
-  urgency: text("urgency"),
-  category: text("category"),
-  subcategory: text("subcategory"),
-  estimatedTime: integer("estimated_time"),
-  actualTime: integer("actual_time"),
-  cost: real("cost"),
-  notes: text("notes"),
-  attachments: text("attachments"),
+  delivery_time: text("delivery_time"),
+  special_instructions: text("special_instructions"),
+  order_type: text("order_type"),
 });
 
 export const message = sqliteTable("message", {
-  id: text("id").primaryKey(),
-  tenantId: text("tenant_id").references(() => tenants.id),
-  callId: text("call_id").references(() => call.id),
-  requestId: integer("request_id"), // Added missing field
-  sender: text("sender"), // Added missing field
-  role: text("role").notNull(),
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  request_id: integer("request_id").references(() => request.id),
+  sender: text("sender").notNull(),
   content: text("content").notNull(),
-  timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
-  metadata: text("metadata", { mode: "json" }),
-  toolCalls: text("tool_calls", { mode: "json" }),
-  functionName: text("function_name"),
-  functionArgs: text("function_args", { mode: "json" }),
-  functionResult: text("function_result"),
-  isError: integer("is_error", { mode: "boolean" }).default(false),
-  processingTime: integer("processing_time"),
-  tokens: integer("tokens"),
-  model: text("model"),
-  temperature: real("temperature"),
-  maxTokens: integer("max_tokens"),
+  timestamp: integer("timestamp"),
+  tenant_id: text("tenant_id").references(() => tenants.id),
 });
 
-export const callSummaries = sqliteTable("call_summaries", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  callId: text("call_id").notNull(),
+export const call_summaries = sqliteTable("call_summaries", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  call_id: text("call_id").notNull(),
   content: text("content").notNull(),
   timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
-  roomNumber: text("room_number"),
+  room_number: text("room_number"),
   duration: text("duration"),
 });
 
-// Legacy aliases for backwards compatibility
-// ❌ DEPRECATED: Use 'request' table directly instead of orders alias
-// export const orders = request;
+// For backward compatibility (aliases)
+export const callSummaries = call_summaries;
 
-// 📝 NOTE: Orders functionality has been consolidated into the 'request' table
-// Use 'request' table for both service requests and commercial orders
+// ==============================================================
+// Zod Validation Schemas
+// ==============================================================
 
-// 📝 NOTE: call_summaries is a separate table for storing call summaries
-// Do not confuse with 'call' table which stores call metadata 
+export const insertTenantSchema = createInsertSchema(tenants);
+export const insertHotelProfileSchema = createInsertSchema(hotelProfiles);
+export const insertStaffSchema = createInsertSchema(staff);
+export const insertCallSchema = createInsertSchema(call);
+export const insertTranscriptSchema = createInsertSchema(transcript);
+export const insertRequestSchema = createInsertSchema(request);
+export const insertMessageSchema = createInsertSchema(message);
+export const insertCallSummarySchema = createInsertSchema(call_summaries);
+
+// Type exports
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = typeof tenants.$inferInsert;
+export type HotelProfile = typeof hotelProfiles.$inferSelect;
+export type InsertHotelProfile = typeof hotelProfiles.$inferInsert;
+export type Staff = typeof staff.$inferSelect;
+export type InsertStaff = typeof staff.$inferInsert;
+export type Call = typeof call.$inferSelect;
+export type InsertCall = typeof call.$inferInsert;
+export type Transcript = typeof transcript.$inferSelect;
+export type InsertTranscript = typeof transcript.$inferInsert;
+export type Request = typeof request.$inferSelect;
+export type InsertRequest = typeof request.$inferInsert;
+export type Message = typeof message.$inferSelect;
+export type InsertMessage = typeof message.$inferInsert;
+export type CallSummary = typeof call_summaries.$inferSelect;
+export type InsertCallSummary = typeof call_summaries.$inferInsert; 

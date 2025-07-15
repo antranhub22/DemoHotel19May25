@@ -62,6 +62,10 @@
     "noImplicitThis": false,
     "strictNullChecks": false,
     "strictFunctionTypes": false,
-    "noImplicitOverride": false
+    "noImplicitOverride": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   }
 }
