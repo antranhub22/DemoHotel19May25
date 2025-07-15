@@ -45,7 +45,9 @@ const VoiceAssistant: React.FC = () => {
     }
   }, [config, hotelConfig, setHotelConfig]);
 
+  // TEMPORARILY DISABLE route effect to test interface switching
   // Set interface based on route - but only for explicit URL navigation, not programmatic changes
+  /*
   useEffect(() => {
     const routeToInterface: { [key: string]: 'interface1' | 'interface2' | 'interface3' | 'interface4' } = {
       '/': 'interface1',
@@ -67,6 +69,7 @@ const VoiceAssistant: React.FC = () => {
       setCurrentInterface(targetInterface);
     }
   }, [location, setCurrentInterface]); // Remove currentInterface from dependencies to avoid loops
+  */
 
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');

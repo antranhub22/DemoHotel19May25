@@ -253,6 +253,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               </button>
               <button
                 onClick={() => {
+                  console.log('[Interface1] FORCE Interface2 clicked!');
+                  setCurrentInterface('interface2');
+                  console.log('[Interface1] setCurrentInterface("interface2") called directly');
+                }}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
+              >
+                FORCE Interface2
+              </button>
+              <button
+                onClick={() => {
                   console.log('[Interface1] Reset Vapi clicked!');
                   resetVapi();
                 }}
