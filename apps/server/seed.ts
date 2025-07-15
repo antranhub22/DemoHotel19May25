@@ -62,10 +62,12 @@ export async function seedDevelopmentData() {
       }
     ];
 
+    // TODO: Fix database schema mismatch - temporarily commented out
     // Insert calls
-    for (const callItem of callData) {
-      await db.insert(call).values(callItem);
-    }
+    // for (const callItem of callData) {
+    //   await db.insert(call).values(callItem);
+    // }
+    console.log('Call seeding skipped due to schema mismatch - needs to be fixed');
 
     // Seed request data
     const requestData = [

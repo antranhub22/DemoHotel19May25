@@ -134,7 +134,7 @@ router.post('/login', async (req: Request, res: Response) => {
       });
     }
 
-    const credentials: LoginCredentials = validation.data;
+    const credentials: LoginCredentials = validation.data as LoginCredentials;
     
     // Attempt login
     const result = await UnifiedAuthService.login(credentials);
@@ -157,7 +157,7 @@ router.post('/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        last_login: result.user!.lastLogin,
+        last_login: result.user!.last_login,
         // Don't include permissions in response for security
         permissionCount: result.user!.permissions.length
       },
@@ -267,9 +267,9 @@ router.get('/me', authenticateToken, async (req: Request, res: Response) => {
         email: user.email,
         displayName: user.displayName,
         role: user.role,
-        tenantId: user.tenant_id,
+        tenantId: user.tenantId,
         avatarUrl: user.avatarUrl,
-        last_login: user.lastLogin,
+        last_login: user.last_login,
         permissions: user.permissions.map(p => `${p.module}.${p.action}`),
         permissionCount: user.permissions.length
       }
@@ -339,7 +339,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
       });
     }
 
-    const credentials: LoginCredentials = validation.data;
+    const credentials: LoginCredentials = validation.data as LoginCredentials;
     const result = await UnifiedAuthService.login(credentials);
     
     if (!result.success) {
@@ -392,7 +392,7 @@ router.post('/admin/login', async (req: Request, res: Response) => {
       });
     }
 
-    const credentials: LoginCredentials = validation.data;
+    const credentials: LoginCredentials = validation.data as LoginCredentials;
     const result = await UnifiedAuthService.login(credentials);
     
     if (!result.success) {

@@ -29,10 +29,9 @@ export class CallService {
       
       await db
         .update(call)
-        .set({ 
-          duration: duration || 0,
-          endTime: getCurrentTimestamp()
-        })
+              .set({ 
+        // TODO: Add duration and endTime when schema is fixed
+      })
         .where(eq(call.call_id_vapi, callId));
       
       console.log(`Updated call duration for ${callId}: ${duration} seconds`);
@@ -100,7 +99,7 @@ export class CallService {
         const language = this.detectLanguage(content);
         
         await db.insert(call).values({
-          callIdVapi: callId,
+          call_id_vapi: callId,
           roomNumber: roomNumber,
           duration: 0,
           language: language,

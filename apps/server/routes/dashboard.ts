@@ -235,10 +235,20 @@ router.post('/generate-assistant', checkLimits, async (req: Request, res: Respon
     }
     
     // Generate assistant
-    const assistantId = await assistantGeneratorService.generateAssistant(hotelData, customization);
+    const assistantId = await assistantGeneratorService.generateAssistant(hotelData, {
+      personality: customization.personality || 'professional',
+      tone: customization.tone || 'friendly',
+      languages: customization.languages || ['en'],
+      ...customization
+    });
     
     // Generate system prompt for storage
-    const systemPrompt = knowledgeBaseGenerator.generateSystemPrompt(hotelData, customization);
+    const systemPrompt = knowledgeBaseGenerator.generateSystemPrompt(hotelData, {
+      personality: customization.personality || 'professional',
+      tone: customization.tone || 'friendly',
+      languages: customization.languages || ['en'],
+      ...customization
+    });
     
     // Update hotel profile with assistant info
     await db.update(hotelProfiles)

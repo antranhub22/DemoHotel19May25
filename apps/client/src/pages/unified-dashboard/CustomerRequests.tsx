@@ -355,7 +355,7 @@ export const CustomerRequests: React.FC = () => {
 
   // Get auth headers
   const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${user?.token}`,
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
   });
 

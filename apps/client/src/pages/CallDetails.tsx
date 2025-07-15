@@ -4,7 +4,8 @@ import { useParams, Link } from 'wouter';
 import { Transcript } from '@/types';
 
 const CallDetails: React.FC = () => {
-  const { callId } = useParams();
+  const params = useParams() as { callId: string };
+  const callId = params.callId;
   const [copying, setCopying] = useState(false);
   
   // Fetch call summary
