@@ -66,7 +66,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getOrderById(id: string): Promise<Order | undefined> {
-    const result = await db.select().from(request).where(eq(request.id, id));
+    const result = await db.select().from(request).where(eq(request.id, parseInt(id)));
     return result.length > 0 ? result[0] : undefined;
   }
   
@@ -78,7 +78,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .update(request)
       .set({ status })
-      .where(eq(request.id, id))
+      .where(eq(request.id, parseInt(id)))
       .returning();
     return result.length > 0 ? result[0] : undefined;
   }

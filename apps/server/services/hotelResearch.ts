@@ -609,11 +609,12 @@ export class HotelResearchService {
 
     // Bổ sung property nếu thiếu
     const dataAny = data as any;
+    if (!dataAny.name) dataAny.name = 'Unknown Hotel';
     if (!dataAny.categories) dataAny.categories = [];
     if (!dataAny.roomTypes) dataAny.roomTypes = [];
     if (!dataAny.localAttractions) dataAny.localAttractions = [];
 
-    return schema.parse(dataAny);
+    return schema.parse(dataAny) as BasicHotelData;
   }
 
   /**

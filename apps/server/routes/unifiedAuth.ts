@@ -359,7 +359,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        last_login: result.user!.lastLogin,
+        last_login: result.user!.last_login,
         permissionCount: result.user!.permissions.length
       },
       token: result.token,
@@ -412,7 +412,7 @@ router.post('/admin/login', async (req: Request, res: Response) => {
         role: result.user!.role,
         tenantId: result.user!.tenantId,
         avatarUrl: result.user!.avatarUrl,
-        last_login: result.user!.lastLogin,
+        last_login: result.user!.last_login,
         permissionCount: result.user!.permissions.length
       },
       token: result.token,
