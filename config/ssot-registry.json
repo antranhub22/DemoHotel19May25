@@ -1,0 +1,341 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "generated": "2024-12-28",
+    "description": "SSOT Registry for Hotel Management System",
+    "automation_scripts": "scripts/",
+    "validation_schemas": "schemas/"
+  },
+  "database": {
+    "schema": {
+      "primary": "packages/shared/db/schema.ts",
+      "secondary": [
+        "tools/migrations/",
+        "packages/shared/types/core.ts",
+        "schemas/dashboard-schema.json"
+      ],
+      "description": "Database structure and relationships",
+      "automation": {
+        "generate_types": "npm run generate:types",
+        "validate": "npm run validate:ssot",
+        "migration_docs": "npm run generate:migration-docs"
+      }
+    },
+    "migrations": {
+      "primary": "tools/migrations/",
+      "secondary": [
+        "packages/shared/db/schema.ts",
+        "tools/scripts/setup-database.sql"
+      ],
+      "description": "Database migration files and scripts",
+      "automation": {
+        "check_breaking": "npm run check:breaking-changes",
+        "generate_guide": "npm run generate:migration-guide"
+      }
+    }
+  },
+  "api": {
+    "routes": {
+      "primary": "apps/server/routes/",
+      "secondary": [
+        "packages/shared/types/api.ts",
+        "schemas/api-schema.json",
+        "docs/API_DOCUMENTATION.md"
+      ],
+      "description": "API endpoints and route definitions",
+      "automation": {
+        "generate_docs": "npm run generate:api-docs",
+        "validate_schema": "npm run validate:api",
+        "runtime_validate": "npm run validate:runtime"
+      }
+    },
+    "services": {
+      "primary": "apps/server/services/",
+      "secondary": [
+        "apps/server/routes/",
+        "packages/shared/types/core.ts"
+      ],
+      "description": "Business logic and service layer",
+      "automation": {
+        "dependency_update": "npm run update:dependencies",
+        "validate_consistency": "npm run validate:ssot"
+      }
+    }
+  },
+  "frontend": {
+    "components": {
+      "primary": "apps/client/src/components/",
+      "secondary": [
+        "packages/shared/types/ui.ts",
+        "apps/client/src/styles/",
+        "schemas/dashboard-schema.json"
+      ],
+      "description": "React components and UI elements",
+      "automation": {
+        "type_check": "npm run type-check",
+        "validate_props": "npm run validate:runtime --components"
+      }
+    },
+    "pages": {
+      "primary": "apps/client/src/pages/",
+      "secondary": [
+        "apps/client/src/components/",
+        "packages/shared/types/api.ts",
+        "apps/client/src/services/"
+      ],
+      "description": "Page components and routing",
+      "automation": {
+        "update_readme": "npm run update:readme"
+      }
+    },
+    "services": {
+      "primary": "apps/client/src/services/",
+      "secondary": [
+        "packages/shared/types/api.ts",
+        "apps/server/routes/",
+        "schemas/api-schema.json"
+      ],
+      "description": "Frontend API clients and business logic",
+      "automation": {
+        "sync_api": "npm run generate:api-docs",
+        "validate_types": "npm run validate:ssot"
+      }
+    }
+  },
+  "configuration": {
+    "environment": {
+      "primary": ".env.example",
+      "secondary": [
+        "packages/config/environment.ts",
+        "apps/server/index.ts",
+        "vite.config.ts"
+      ],
+      "description": "Environment variables and app configuration",
+      "automation": {
+        "sync_changes": "npm run sync:changes",
+        "validate_config": "npm run validate:runtime --config"
+      }
+    },
+    "build": {
+      "primary": "vite.config.ts",
+      "secondary": [
+        "tsconfig.json",
+        "package.json",
+        "postcss.config.js",
+        "tailwind.config.ts"
+      ],
+      "description": "Build configuration and tooling",
+      "automation": {
+        "check_dependencies": "npm run update:dependencies",
+        "validate_build": "npm run build"
+      }
+    }
+  },
+  "types": {
+    "shared": {
+      "primary": "packages/shared/types/",
+      "secondary": [
+        "packages/types/",
+        "apps/client/src/types/",
+        "schemas/"
+      ],
+      "description": "TypeScript type definitions",
+      "automation": {
+        "generate": "npm run generate:types",
+        "validate": "npm run type-check",
+        "sync": "npm run update:dependencies"
+      }
+    },
+    "api": {
+      "primary": "packages/shared/types/api.ts",
+      "secondary": [
+        "apps/server/routes/",
+        "schemas/api-schema.json",
+        "apps/client/src/services/"
+      ],
+      "description": "API request/response type definitions",
+      "automation": {
+        "generate_from_routes": "npm run generate:api-docs",
+        "validate_runtime": "npm run validate:runtime --api"
+      }
+    }
+  },
+  "validation": {
+    "schemas": {
+      "primary": "schemas/",
+      "secondary": [
+        "packages/shared/validation/schemas.ts",
+        "packages/shared/types/"
+      ],
+      "description": "JSON schemas for validation",
+      "automation": {
+        "validate_runtime": "npm run validate:runtime",
+        "check_consistency": "npm run validate:ssot"
+      }
+    },
+    "runtime": {
+      "primary": "scripts/validate-runtime.js",
+      "secondary": [
+        "schemas/",
+        "packages/shared/validation/"
+      ],
+      "description": "Runtime validation and monitoring",
+      "automation": {
+        "run_validation": "npm run validate:runtime",
+        "continuous_monitor": "npm run validate:runtime --continuous"
+      }
+    }
+  },
+  "documentation": {
+    "api": {
+      "primary": "docs/API_DOCUMENTATION.md",
+      "secondary": [
+        "apps/server/routes/",
+        "schemas/api-schema.json"
+      ],
+      "description": "API documentation and specs",
+      "automation": {
+        "generate": "npm run generate:api-docs",
+        "update": "npm run update:readme"
+      }
+    },
+    "architecture": {
+      "primary": "docs/ARCHITECTURE.md",
+      "secondary": [
+        "packages/shared/db/schema.ts",
+        "apps/server/services/",
+        "apps/client/src/"
+      ],
+      "description": "System architecture documentation",
+      "automation": {
+        "update": "npm run update:readme",
+        "changelog": "npm run generate:changelog"
+      }
+    },
+    "deployment": {
+      "primary": "docs/DEPLOYMENT_QUICKSTART.md",
+      "secondary": [
+        ".env.example",
+        "package.json",
+        "deploy-render.sh"
+      ],
+      "description": "Deployment guides and procedures",
+      "automation": {
+        "migration_docs": "npm run generate:migration-docs",
+        "sync_deployment": "npm run sync:changes production"
+      }
+    }
+  },
+  "ci_cd": {
+    "workflows": {
+      "primary": ".github/workflows/ssot-validation.yml",
+      "secondary": [
+        "scripts/validate-ssot.js",
+        "scripts/check-breaking-changes.js"
+      ],
+      "description": "CI/CD pipelines and automation",
+      "automation": {
+        "validate_pr": "Automated via GitHub Actions",
+        "breaking_changes": "Automated via GitHub Actions"
+      }
+    }
+  },
+  "development": {
+    "vscode": {
+      "primary": ".vscode/tasks.json",
+      "secondary": [
+        "scripts/",
+        ".cursorrules"
+      ],
+      "description": "VS Code tasks and development tools",
+      "automation": {
+        "find_ssot": "Ctrl+Shift+P > Tasks: Run Task > Find SSOT",
+        "validate": "Ctrl+Shift+P > Tasks: Run Task > Validate SSOT"
+      }
+    },
+    "watching": {
+      "primary": "scripts/watch-ssot.js",
+      "secondary": [
+        "packages/shared/db/schema.ts",
+        "apps/server/routes/",
+        "schemas/"
+      ],
+      "description": "File watching and auto-updates",
+      "automation": {
+        "start_watch": "npm run watch:ssot",
+        "sync_auto": "Automatic on file changes"
+      }
+    }
+  },
+  "change_scenarios": {
+    "add_new_table": {
+      "primary_change": "packages/shared/db/schema.ts",
+      "secondary_updates": [
+        "Generate types: npm run generate:types",
+        "Update validation: schemas/dashboard-schema.json",
+        "Update API types: packages/shared/types/api.ts",
+        "Generate migration: tools/migrations/",
+        "Update docs: npm run generate:migration-docs"
+      ],
+      "automation_flow": [
+        "npm run generate:types",
+        "npm run validate:ssot",
+        "npm run generate:migration-docs"
+      ]
+    },
+    "modify_api_endpoint": {
+      "primary_change": "apps/server/routes/[route-file].ts",
+      "secondary_updates": [
+        "Update API schema: schemas/api-schema.json",
+        "Update client types: packages/shared/types/api.ts",
+        "Update frontend service: apps/client/src/services/",
+        "Update documentation: docs/API_DOCUMENTATION.md"
+      ],
+      "automation_flow": [
+        "npm run generate:api-docs",
+        "npm run validate:runtime --api",
+        "npm run check:breaking-changes"
+      ]
+    },
+    "add_new_component": {
+      "primary_change": "apps/client/src/components/[component].tsx",
+      "secondary_updates": [
+        "Update component types: packages/shared/types/ui.ts",
+        "Update validation: schemas/dashboard-schema.json",
+        "Update exports: apps/client/src/components/index.ts"
+      ],
+      "automation_flow": [
+        "npm run type-check",
+        "npm run validate:runtime --components"
+      ]
+    },
+    "environment_change": {
+      "primary_change": ".env.example",
+      "secondary_updates": [
+        "Update config types: packages/config/environment.ts",
+        "Update deployment docs: docs/DEPLOYMENT_QUICKSTART.md",
+        "Update server config: apps/server/index.ts"
+      ],
+      "automation_flow": [
+        "npm run sync:changes",
+        "npm run validate:runtime --config"
+      ]
+    },
+    "breaking_schema_change": {
+      "primary_change": "packages/shared/db/schema.ts",
+      "secondary_updates": [
+        "Check breaking changes: npm run check:breaking-changes",
+        "Generate migration guide: npm run generate:migration-guide",
+        "Update all dependent types: npm run generate:types",
+        "Create migration: tools/migrations/",
+        "Update documentation: npm run generate:migration-docs"
+      ],
+      "automation_flow": [
+        "npm run check:breaking-changes",
+        "npm run generate:migration-guide",
+        "npm run generate:migration-docs",
+        "npm run validate:ssot"
+      ]
+    }
+  }
+} 

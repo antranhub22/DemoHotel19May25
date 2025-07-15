@@ -1,0 +1,216 @@
+# SSOT (Single Source of Truth) Guidelines for Hotel Management System
+
+## 🎯 ALWAYS CHECK SSOT FIRST - Use these commands:
+- `npm run find-ssot [keyword]` - Find relevant SSOT files
+- `node scripts/ssot-finder.js` - Interactive SSOT finder
+- `node scripts/what-to-change.js` - Interactive change wizard
+- `npm run validate:ssot` - Validate all consistency
+
+## 📋 PRIMARY SSOT LOCATIONS (Single Source of Truth)
+
+### 🗄️ DATABASE CHANGES
+**PRIMARY**: `packages/shared/db/schema.ts`
+**AUTOMATION**: 
+```bash
+npm run generate:types           # Generate TypeScript types
+npm run check:breaking-changes   # Check for breaking changes  
+npm run validate:ssot            # Validate consistency
+```
+**SECONDARY**: tools/migrations/, packages/shared/types/core.ts, schemas/dashboard-schema.json
+
+### 🔌 API CHANGES  
+**PRIMARY**: `apps/server/routes/[specific-route].ts`
+- `auth.ts` - Authentication routes
+- `calls.ts` - Call management  
+- `orders.ts` - Order/request management
+- `analytics.ts` - Analytics endpoints
+- `dashboard.ts` - Dashboard data
+
+**AUTOMATION**:
+```bash
+npm run generate:api-docs        # Update API documentation
+npm run validate:runtime --api   # Validate API schema
+npm run check:breaking-changes   # For breaking changes
+```
+**SECONDARY**: schemas/api-schema.json, packages/shared/types/api.ts, docs/API_DOCUMENTATION.md
+
+### 🎨 FRONTEND CHANGES
+**PRIMARY**: `apps/client/src/components/[component-directory]/`
+- `ui/` - Reusable UI components
+- `dashboard/` - Dashboard-specific components  
+- `unified-dashboard/` - Unified dashboard components
+
+**AUTOMATION**:
+```bash
+npm run type-check               # TypeScript validation
+npm run validate:runtime --components # Validate component schemas
+```
+**SECONDARY**: packages/shared/types/ui.ts, apps/client/src/components/index.ts
+
+### ⚙️ CONFIGURATION CHANGES
+**PRIMARY**: `.env.example` (environment) or `vite.config.ts` (build)
+**AUTOMATION**:
+```bash
+npm run sync:changes             # Sync to all environments
+npm run validate:runtime --config # Validate configuration
+```
+**SECONDARY**: packages/config/environment.ts, apps/server/index.ts
+
+### 📝 TYPES & VALIDATION
+**PRIMARY**: `packages/shared/types/[specific-type].ts`
+**AUTOMATION**:
+```bash
+npm run generate:types          # Auto-generate from schema
+npm run validate:ssot           # Validate type consistency
+```
+**SECONDARY**: schemas/, packages/types/
+
+## 🏨 HOTEL-SPECIFIC FEATURES
+
+### 🎙️ VOICE ASSISTANT
+**PRIMARY**: `apps/client/src/context/AssistantContext.tsx`
+**SECONDARY**: apps/server/services/vapiIntegration.ts, apps/client/src/components/VoiceAssistant.tsx
+
+### 🛎️ ROOM SERVICE / ORDERS  
+**PRIMARY**: `packages/shared/db/schema.ts` (request table)
+**SECONDARY**: apps/server/routes/orders.ts, apps/client/src/components/EmailForm.tsx
+
+### 🏢 MULTI-TENANT FEATURES
+**PRIMARY**: `packages/shared/db/schema.ts` (tenants table)  
+**SECONDARY**: apps/server/middleware/tenant.ts, apps/server/services/tenantService.ts
+
+### 📊 ANALYTICS & REPORTING
+**PRIMARY**: `apps/server/routes/analytics.ts`
+**SECONDARY**: apps/server/services/analyticsService.ts, apps/client/src/pages/AnalyticsDashboard.tsx
+
+## 🔄 CHANGE PROCESS (MANDATORY)
+
+### 1. Before Making ANY Changes:
+```bash
+# Find the right SSOT files first
+node scripts/what-to-change.js    # Interactive guidance
+# OR
+node scripts/ssot-finder.js       # Find specific files
+```
+
+### 2. Make Changes to PRIMARY file first, then:
+```bash
+npm run validate:ssot              # Validate consistency
+npm run check:breaking-changes     # Check for breaking changes
+```
+
+### 3. Update SECONDARY files as guided by automation
+
+### 4. Before Committing:
+```bash
+npm run validate:ssot              # Final validation
+npm run validate:runtime           # Runtime validation
+npm run type-check                 # TypeScript check
+```
+
+### 5. For Breaking Changes (REQUIRED):
+```bash
+npm run generate:migration-guide   # Generate migration guide
+npm run generate:migration-docs    # Generate migration docs
+```
+
+## 🚨 BREAKING CHANGE RULES
+
+### NEVER deploy breaking changes without:
+1. ✅ Running `npm run check:breaking-changes`
+2. ✅ Running `npm run generate:migration-guide`  
+3. ✅ Running `npm run generate:migration-docs`
+4. ✅ Reviewing generated migration documentation
+5. ✅ Testing migration procedures
+
+### Common Breaking Changes:
+- Removing database columns/tables
+- Changing API endpoint paths/methods
+- Modifying request/response formats
+- Removing environment variables
+- Changing component props interfaces
+
+## 🛠️ AVAILABLE AUTOMATION TOOLS
+
+### Code Generation:
+- `npm run generate:types` - Generate TypeScript types from schema
+- `npm run generate:api-docs` - Generate API documentation
+- `npm run update:readme` - Update README from codebase analysis
+
+### Validation:
+- `npm run validate:ssot` - Validate SSOT consistency  
+- `npm run validate:runtime` - Runtime validation & monitoring
+- `npm run check:breaking-changes` - Detect breaking changes
+
+### Documentation:
+- `npm run generate:changelog` - Generate changelog from git commits
+- `npm run generate:migration-docs` - Generate migration documentation
+- `npm run update:readme` - Update README automatically
+
+### Synchronization:
+- `npm run sync:changes` - Sync changes between environments
+- `npm run watch:ssot` - Start file watcher for auto-updates
+- `npm run update:dependencies` - Update dependent files
+
+## 📱 VS CODE INTEGRATION
+
+### Use Command Palette (Ctrl+Shift+P):
+- "Tasks: Run Task" → "Find SSOT for..."  
+- "Tasks: Run Task" → "Validate SSOT consistency"
+- "Tasks: Run Task" → "Check breaking changes"
+- "Tasks: Run Task" → "Generate types"
+
+## 🔍 QUICK REFERENCE - Common Scenarios
+
+### "I want to add a new database table":
+1. PRIMARY: `packages/shared/db/schema.ts`
+2. RUN: `npm run generate:types`
+3. UPDATE: Create migration in `tools/migrations/`
+4. RUN: `npm run validate:ssot`
+
+### "I want to add a new API endpoint":
+1. PRIMARY: `apps/server/routes/[appropriate-route].ts`
+2. RUN: `npm run generate:api-docs`
+3. UPDATE: Frontend service in `apps/client/src/services/`
+4. RUN: `npm run validate:runtime --api`
+
+### "I want to modify a React component":
+1. PRIMARY: `apps/client/src/components/[component-path]`
+2. UPDATE: Types in `packages/shared/types/ui.ts` if needed
+3. RUN: `npm run type-check`
+
+### "I want to add environment variables":
+1. PRIMARY: `.env.example`
+2. UPDATE: `packages/config/environment.ts`
+3. RUN: `npm run sync:changes`
+
+### "I want to modify voice assistant":
+1. PRIMARY: `apps/client/src/context/AssistantContext.tsx`
+2. UPDATE: `apps/server/services/vapiIntegration.ts`
+3. UPDATE: `apps/client/src/components/VoiceAssistant.tsx`
+
+## ⚠️ IMPORTANT REMINDERS
+
+1. **NEVER** modify generated files directly (they have "auto-generated" comments)
+2. **ALWAYS** update PRIMARY file first, then run automation
+3. **ALWAYS** validate with `npm run validate:ssot` before committing
+4. **ALWAYS** check breaking changes for schema/API modifications
+5. **USE** the interactive tools when unsure: `node scripts/what-to-change.js`
+
+## 🆘 WHEN STUCK
+
+1. Run: `node scripts/what-to-change.js` (interactive guidance)
+2. Run: `node scripts/ssot-finder.js` (find files)
+3. Run: `npm run validate:ssot` (check consistency)
+4. Check: `config/ssot-registry.json` (complete mapping)
+
+## 📚 DOCUMENTATION LOCATIONS
+
+- Architecture: `docs/ARCHITECTURE.md`
+- API Docs: `docs/API_DOCUMENTATION.md` (auto-generated)
+- Deployment: `docs/DEPLOYMENT_QUICKSTART.md`
+- SSOT Registry: `config/ssot-registry.json`
+
+---
+
+**Remember: The goal is CONSISTENCY. Always use SSOT automation to maintain system integrity! 🎯** 
