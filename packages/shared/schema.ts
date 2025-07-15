@@ -13,7 +13,7 @@ import {
   // Legacy aliases
   users,
   transcripts,
-  orders,
+  // orders, // ❌ DEPRECATED: Use 'request' directly
   callSummaries,
 } from "./db/schema";
 
@@ -29,7 +29,7 @@ export {
   // Legacy aliases
   users,
   transcripts,
-  orders,
+  // orders, // ❌ DEPRECATED: Use 'request' directly
   callSummaries,
 };
 
@@ -157,8 +157,9 @@ export const insertMessageSchema = createInsertSchema(message, {
 });
 
 // ============================================
-// Order Schema (alias for Request)
+// Order Schema (CONSOLIDATED into Request Schema)
 // ============================================
+// ✅ Use insertRequestSchema for both orders and requests
 export const insertOrderSchema = insertRequestSchema;
 
 // Legacy schemas for backwards compatibility

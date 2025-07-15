@@ -156,5 +156,9 @@ export const message = sqliteTable("message", {
 // Legacy aliases for backwards compatibility
 export const users = staff;
 export const transcripts = transcript;
-export const orders = request;
+// ❌ DEPRECATED: Use 'request' table directly instead of orders alias
+// export const orders = request;
+
+// 📝 NOTE: Orders functionality has been consolidated into the 'request' table
+// Use 'request' table for both service requests and commercial orders
 export const callSummaries = call; 
