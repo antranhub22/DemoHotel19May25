@@ -1,0 +1,404 @@
+name: SSOT Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'packages/shared/db/schema.ts'
+      - 'packages/shared/validation/schemas.ts'
+      - 'apps/server/routes/**'
+      - 'packages/types/**'
+      - 'scripts/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'packages/shared/db/schema.ts'
+      - 'packages/shared/validation/schemas.ts'
+      - 'apps/server/routes/**'
+      - 'packages/types/**'
+      - 'scripts/**'
+
+jobs:
+  validate-ssot:
+    name: Validate SSOT Consistency
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Check for Breaking Changes
+      id: breaking-changes
+      run: |
+        echo "Checking for breaking changes..."
+        node scripts/check-breaking-changes.js
+        echo "breaking_changes_found=$?" >> $GITHUB_OUTPUT
+
+    - name: Generate Types
+      run: |
+        echo "Generating types from schema..."
+        node scripts/generate-types.js
+
+    - name: Validate SSOT Consistency
+      run: |
+        echo "Validating SSOT consistency..."
+        node scripts/validate-ssot.js
+
+    - name: Generate API Documentation
+      run: |
+        echo "Generating API documentation..."
+        node scripts/generate-api-docs.js
+
+    - name: Check for Uncommitted Changes
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "❌ Generated files are not up to date!"
+          echo "Please run the following commands locally:"
+          echo "  npm run ssot:generate"
+          echo "  npm run ssot:validate"
+          echo ""
+          echo "Changed files:"
+          git status --porcelain
+          exit 1
+        else
+          echo "✅ All generated files are up to date"
+        fi
+
+    - name: Upload Validation Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ssot-validation-report
+        path: |
+          validation-report.json
+          docs/api/**
+          packages/types/**
+        retention-days: 30
+
+    - name: Generate Migration Guide
+      if: steps.breaking-changes.outputs.breaking_changes_found == '1'
+      run: |
+        echo "Breaking changes detected, generating migration guide..."
+        node scripts/generate-migration-guide.js
+
+    - name: Upload Migration Guide
+      if: steps.breaking-changes.outputs.breaking_changes_found == '1'
+      uses: actions/upload-artifact@v4
+      with:
+        name: migration-guide
+        path: migration-guide.md
+        retention-days: 90
+
+    - name: Comment PR with Validation Results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read validation report
+          let validationSummary = '';
+          try {
+            const report = JSON.parse(fs.readFileSync('validation-report.json', 'utf8'));
+            
+            validationSummary = `## 🔍 SSOT Validation Results
+          
+          **Overall Status:** ${report.summary.overallStatus === 'PASSED' ? '✅ PASSED' : '❌ FAILED'}
+          
+          ### Summary
+          - **Errors:** ${report.summary.totalErrors}
+          - **Warnings:** ${report.summary.totalWarnings}
+          - **Suggestions:** ${report.summary.totalSuggestions}
+          
+          ### Coverage
+          - **Database Tables:** ${report.coverage.dbTables}
+          - **Generated Types:** ${report.coverage.generatedTypes}
+          - **API Endpoints:** ${report.coverage.apiEndpoints}
+          - **Validation Schemas:** ${report.coverage.validationSchemas}
+          `;
+          
+            if (report.summary.totalErrors > 0) {
+              validationSummary += `\n### ❌ Errors Found\n`;
+              report.issues.errors.slice(0, 5).forEach((error, i) => {
+                validationSummary += `${i + 1}. **[${error.category}]** ${error.message}\n`;
+              });
+              if (report.issues.errors.length > 5) {
+                validationSummary += `... and ${report.issues.errors.length - 5} more errors\n`;
+              }
+            }
+          
+            if (report.summary.totalWarnings > 0) {
+              validationSummary += `\n### ⚠️ Warnings\n`;
+              report.issues.warnings.slice(0, 3).forEach((warning, i) => {
+                validationSummary += `${i + 1}. **[${warning.category}]** ${warning.message}\n`;
+              });
+              if (report.issues.warnings.length > 3) {
+                validationSummary += `... and ${report.issues.warnings.length - 3} more warnings\n`;
+              }
+            }
+          
+          } catch (error) {
+            validationSummary = `## 🔍 SSOT Validation Results
+          
+          **Status:** ❌ Validation failed to complete
+          **Error:** ${error.message}
+          `;
+          }
+          
+          // Check for breaking changes
+          let breakingChangesInfo = '';
+          if (fs.existsSync('migration-guide.md')) {
+            breakingChangesInfo = `
+          ## 🚨 Breaking Changes Detected
+          
+          This PR contains breaking changes that may affect existing code. Please review the migration guide carefully.
+          
+          📋 [Download Migration Guide](../../actions/runs/${context.runId})
+          `;
+          }
+          
+          const comment = `${validationSummary}${breakingChangesInfo}
+          
+          ---
+          🤖 *Generated by SSOT Validation workflow* | [View full report](../../actions/runs/${context.runId})`;
+          
+          // Find existing comment to update
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const existingComment = comments.find(
+            comment => comment.body.includes('🔍 SSOT Validation Results')
+          );
+          
+          if (existingComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existingComment.id,
+              body: comment
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+          }
+
+  lint-ssot-scripts:
+    name: Lint SSOT Scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Lint SSOT Scripts
+      run: |
+        echo "Linting SSOT automation scripts..."
+        npx eslint scripts/*.js --format=compact
+
+    - name: Check Script Permissions
+      run: |
+        echo "Checking script file permissions..."
+        for script in scripts/*.js; do
+          if [[ ! -x "$script" ]]; then
+            echo "Making $script executable..."
+            chmod +x "$script"
+          fi
+        done
+
+  test-ssot-scripts:
+    name: Test SSOT Scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Test Type Generation
+      run: |
+        echo "Testing type generation script..."
+        node scripts/generate-types.js
+        
+        # Check if types were generated
+        if [[ ! -f "packages/types/database.ts" ]]; then
+          echo "❌ database.ts not generated"
+          exit 1
+        fi
+        
+        if [[ ! -f "packages/types/api.ts" ]]; then
+          echo "❌ api.ts not generated"
+          exit 1
+        fi
+        
+        if [[ ! -f "packages/types/core.ts" ]]; then
+          echo "❌ core.ts not generated"
+          exit 1
+        fi
+        
+        echo "✅ All type files generated successfully"
+
+    - name: Test API Documentation Generation
+      run: |
+        echo "Testing API documentation generation..."
+        node scripts/generate-api-docs.js
+        
+        # Check if documentation was generated
+        if [[ ! -f "docs/api/README.md" ]]; then
+          echo "❌ API documentation not generated"
+          exit 1
+        fi
+        
+        if [[ ! -f "docs/api/openapi.json" ]]; then
+          echo "❌ OpenAPI spec not generated"
+          exit 1
+        fi
+        
+        echo "✅ API documentation generated successfully"
+
+    - name: Test Validation Script
+      run: |
+        echo "Testing SSOT validation script..."
+        # Run validation (allow warnings but not errors)
+        if node scripts/validate-ssot.js; then
+          echo "✅ Validation passed"
+        else
+          echo "❌ Validation failed"
+          exit 1
+        fi
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run npm audit
+      run: |
+        echo "Running security audit..."
+        npm audit --audit-level=moderate
+
+    - name: Scan SSOT Scripts for Security Issues
+      run: |
+        echo "Scanning SSOT scripts for potential security issues..."
+        
+        # Check for dangerous patterns in scripts
+        if grep -r "eval(" scripts/; then
+          echo "❌ Found eval() usage in scripts"
+          exit 1
+        fi
+        
+        if grep -r "exec(" scripts/; then
+          echo "⚠️ Found exec() usage in scripts - please review"
+        fi
+        
+        if grep -r "process\.env\." scripts/ | grep -v "NODE_ENV\|DATABASE_URL"; then
+          echo "⚠️ Found environment variable usage - ensure proper validation"
+        fi
+        
+        echo "✅ Security scan completed"
+
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run Dependencies Update
+      run: |
+        echo "Running SSOT dependencies update..."
+        node scripts/update-dependencies.js
+
+    - name: Commit Updated Files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        if [[ -n $(git status --porcelain) ]]; then
+          git add .
+          git commit -m "chore: auto-update SSOT dependencies [skip ci]"
+          git push
+          echo "✅ Dependencies updated and committed"
+        else
+          echo "✅ No dependency updates needed"
+        fi
+
+    - name: Create Summary
+      run: |
+        echo "## 🔄 SSOT Dependencies Update Summary" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ -f "update-dependencies.log" ]]; then
+          echo "### Update Log" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          head -20 update-dependencies.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [[ -f "update-summary.md" ]]; then
+          echo "### Summary" >> $GITHUB_STEP_SUMMARY
+          cat update-summary.md >> $GITHUB_STEP_SUMMARY
+        fi 

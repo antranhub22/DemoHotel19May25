@@ -1,0 +1,612 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://demohotel.com/schemas/api-schema.json",
+  "title": "Hotel Management API Schema",
+  "description": "Validation schema for API requests and responses in the hotel management system",
+  "type": "object",
+  "definitions": {
+    "apiResponse": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean"
+        },
+        "data": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "array" },
+            { "type": "null" }
+          ]
+        },
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "message": { "type": "string" },
+            "details": { "type": "object" }
+          },
+          "required": ["code", "message"]
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "timestamp": { "type": "string", "format": "date-time" },
+            "requestId": { "type": "string" },
+            "version": { "type": "string" },
+            "pagination": {
+              "type": "object",
+              "properties": {
+                "page": { "type": "number", "minimum": 1 },
+                "limit": { "type": "number", "minimum": 1, "maximum": 100 },
+                "total": { "type": "number", "minimum": 0 },
+                "totalPages": { "type": "number", "minimum": 0 }
+              },
+              "required": ["page", "limit", "total", "totalPages"]
+            }
+          }
+        }
+      },
+      "required": ["success"],
+      "additionalProperties": false
+    },
+    "authRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128
+        },
+        "tenantId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "rememberMe": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["email", "password"],
+      "additionalProperties": false
+    },
+    "authResponse": {
+      "allOf": [
+        { "$ref": "#/definitions/apiResponse" },
+        {
+          "properties": {
+            "data": {
+              "type": "object",
+              "properties": {
+                "token": { "type": "string" },
+                "refreshToken": { "type": "string" },
+                "expiresIn": { "type": "number" },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "email": { "type": "string", "format": "email" },
+                    "firstName": { "type": "string" },
+                    "lastName": { "type": "string" },
+                    "role": { "type": "string" },
+                    "permissions": { "type": "array", "items": { "type": "string" } },
+                    "tenantId": { "type": "string" }
+                  },
+                  "required": ["id", "email", "role", "tenantId"]
+                }
+              },
+              "required": ["token", "user"]
+            }
+          }
+        }
+      ]
+    },
+    "createStaffRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "lastName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "manager", "frontdesk", "maintenance", "housekeeping", "concierge"]
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "dashboard:read", "dashboard:write",
+              "analytics:read", "analytics:write",
+              "staff:read", "staff:write",
+              "calls:read", "calls:write",
+              "settings:read", "settings:write",
+              "voice_assistant:read", "voice_assistant:write"
+            ]
+          },
+          "uniqueItems": true
+        }
+      },
+      "required": ["email", "firstName", "lastName", "role", "password"],
+      "additionalProperties": false
+    },
+    "updateStaffRequest": {
+      "type": "object",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "lastName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "manager", "frontdesk", "maintenance", "housekeeping", "concierge"]
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "dashboard:read", "dashboard:write",
+              "analytics:read", "analytics:write",
+              "staff:read", "staff:write",
+              "calls:read", "calls:write",
+              "settings:read", "settings:write",
+              "voice_assistant:read", "voice_assistant:write"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "isActive": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+    "callsListRequest": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "minimum": 1,
+          "default": 1
+        },
+        "limit": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "missed", "ongoing", "failed"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["inbound", "outbound"]
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "staffId": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["room_service", "maintenance", "complaint", "inquiry", "booking", "concierge"]
+        },
+        "search": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "sortBy": {
+          "type": "string",
+          "enum": ["createdAt", "duration", "status"],
+          "default": "createdAt"
+        },
+        "sortOrder": {
+          "type": "string",
+          "enum": ["asc", "desc"],
+          "default": "desc"
+        }
+      },
+      "additionalProperties": false
+    },
+    "callUpdateRequest": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["room_service", "maintenance", "complaint", "inquiry", "booking", "concierge"]
+              }
+            },
+            "urgency": {
+              "type": "string",
+              "enum": ["low", "medium", "high", "critical"]
+            },
+            "resolved": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "voiceAssistantConfigRequest": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["vapi", "openai", "custom"]
+        },
+        "model": {
+          "type": "string",
+          "enum": ["gpt-4", "gpt-3.5-turbo", "claude-3", "custom"]
+        },
+        "voice": {
+          "type": "string",
+          "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        },
+        "language": {
+          "type": "string",
+          "enum": ["en-US", "vi-VN", "fr-FR", "ko-KR", "ru-RU", "zh-CN"]
+        },
+        "features": {
+          "type": "object",
+          "properties": {
+            "roomService": { "type": "boolean" },
+            "concierge": { "type": "boolean" },
+            "maintenance": { "type": "boolean" },
+            "checkout": { "type": "boolean" },
+            "translation": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "customPrompts": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "additionalProperties": false
+        },
+        "apiKeys": {
+          "type": "object",
+          "properties": {
+            "openai": { "type": "string", "minLength": 1 },
+            "vapi": { "type": "string", "minLength": 1 },
+            "custom": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "analyticsRequest": {
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "yearly"],
+          "default": "daily"
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "totalCalls", "completedCalls", "missedCalls", 
+              "averageDuration", "responseTime", "satisfactionScore",
+              "categories", "trends", "staffPerformance"
+            ]
+          },
+          "default": ["totalCalls", "completedCalls", "missedCalls"]
+        },
+        "groupBy": {
+          "type": "string",
+          "enum": ["day", "week", "month", "staff", "category"],
+          "default": "day"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hotelResearchRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "type": {
+          "type": "string",
+          "enum": ["hotel", "resort", "motel", "inn", "apartment"]
+        },
+        "priceRange": {
+          "type": "string",
+          "enum": ["budget", "mid-range", "luxury", "ultra-luxury"]
+        },
+        "amenities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "wifi", "parking", "pool", "gym", "spa", "restaurant", 
+              "bar", "room_service", "concierge", "business_center",
+              "pet_friendly", "wheelchair_accessible"
+            ]
+          }
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "webhookPayload": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "call.started", "call.completed", "call.missed", "call.failed",
+            "transcript.ready", "staff.created", "staff.updated", "staff.deleted",
+            "settings.updated", "voice_assistant.configured"
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tenantId": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
+        "signature": {
+          "type": "string"
+        }
+      },
+      "required": ["event", "timestamp", "tenantId", "data"],
+      "additionalProperties": false
+    },
+    "errorResponse": {
+      "allOf": [
+        { "$ref": "#/definitions/apiResponse" },
+        {
+          "properties": {
+            "success": { "const": false },
+            "error": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "enum": [
+                    "VALIDATION_ERROR", "AUTHENTICATION_ERROR", "AUTHORIZATION_ERROR",
+                    "NOT_FOUND", "CONFLICT", "RATE_LIMIT_EXCEEDED", "INTERNAL_ERROR",
+                    "SERVICE_UNAVAILABLE", "TIMEOUT", "INVALID_TENANT"
+                  ]
+                },
+                "message": { "type": "string" },
+                "details": {
+                  "type": "object",
+                  "properties": {
+                    "field": { "type": "string" },
+                    "validation": { "type": "string" },
+                    "context": { "type": "object" }
+                  }
+                }
+              },
+              "required": ["code", "message"]
+            }
+          },
+          "required": ["error"]
+        }
+      ]
+    }
+  },
+  "properties": {
+    "auth": {
+      "type": "object",
+      "properties": {
+        "login": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/authRequest" },
+            "response": { "$ref": "#/definitions/authResponse" }
+          }
+        },
+        "logout": {
+          "type": "object",
+          "properties": {
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "refresh": {
+          "type": "object",
+          "properties": {
+            "request": {
+              "type": "object",
+              "properties": {
+                "refreshToken": { "type": "string" }
+              },
+              "required": ["refreshToken"]
+            },
+            "response": { "$ref": "#/definitions/authResponse" }
+          }
+        }
+      }
+    },
+    "staff": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/createStaffRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "update": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/updateStaffRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "list": {
+          "type": "object",
+          "properties": {
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "delete": {
+          "type": "object",
+          "properties": {
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        }
+      }
+    },
+    "calls": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/callsListRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "update": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/callUpdateRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "transcript": {
+          "type": "object",
+          "properties": {
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        }
+      }
+    },
+    "analytics": {
+      "type": "object",
+      "properties": {
+        "dashboard": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/analyticsRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "reports": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/analyticsRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "voiceAssistant": {
+          "type": "object",
+          "properties": {
+            "request": { "$ref": "#/definitions/voiceAssistantConfigRequest" },
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        },
+        "hotel": {
+          "type": "object",
+          "properties": {
+            "response": { "$ref": "#/definitions/apiResponse" }
+          }
+        }
+      }
+    },
+    "webhooks": {
+      "type": "object",
+      "properties": {
+        "payload": { "$ref": "#/definitions/webhookPayload" }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "properties": {
+        "response": { "$ref": "#/definitions/errorResponse" }
+      }
+    }
+  },
+  "additionalProperties": false
+} 
