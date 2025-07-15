@@ -94,11 +94,14 @@ const mapLegacyRole = (legacyRole: string): UserRole => {
   switch (legacyRole) {
     case 'admin':
     case 'manager':
+    case 'hotel-manager':
       return 'hotel-manager';
     case 'staff':
+    case 'front-desk':
       return 'front-desk';
     case 'it':
     case 'tech':
+    case 'it-manager':
       return 'it-manager';
     default:
       return 'front-desk'; // Default fallback
