@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { UserRole, Permission, getPermissionsForRole, hasRolePermission } from '@shared/constants/permissions';
 
 // ============================================
 // Types & Interfaces
@@ -10,7 +11,8 @@ export interface AuthUser {
   name: string;
   email: string;
   tenantId: string;
-  role: 'admin' | 'manager' | 'staff';
+  role: UserRole; // Updated to use UserRole type
+  permissions: Permission[];
   avatar?: string;
 }
 
@@ -52,7 +54,8 @@ export interface AuthContextType {
   logout: () => void;
   refreshAuth: () => Promise<void>;
   hasFeature: (feature: string) => boolean;
-  hasRole: (role: 'admin' | 'manager' | 'staff') => boolean;
+  hasRole: (role: UserRole) => boolean;
+  hasPermission: (module: string, action: string) => boolean;
   isWithinLimits: (limitType: string) => boolean;
 }
 
@@ -86,6 +89,22 @@ type MyJwtPayload = {
   [key: string]: any;
 };
 
+// Map legacy roles to new RBAC roles
+const mapLegacyRole = (legacyRole: string): UserRole => {
+  switch (legacyRole) {
+    case 'admin':
+    case 'manager':
+      return 'hotel-manager';
+    case 'staff':
+      return 'front-desk';
+    case 'it':
+    case 'tech':
+      return 'it-manager';
+    default:
+      return 'front-desk'; // Default fallback
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   console.log('[DEBUG] AuthProvider render');
   
@@ -108,12 +127,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('[DEBUG] AuthProvider - token decoded:', decoded);
       
       // Tạo user object từ token payload
+      const mappedRole = mapLegacyRole(decoded.role);
       const userFromToken: AuthUser = {
         id: decoded.username, // Use username as id
         name: decoded.username,
         email: decoded.username,
         tenantId: decoded.tenantId,
-        role: decoded.role as 'admin' | 'manager' | 'staff'
+        role: mappedRole,
+        permissions: getPermissionsForRole(mappedRole)
       };
       
       // Tạo tenant object từ token payload
@@ -155,12 +176,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const decoded = jwtDecode<MyJwtPayload>(data.token);
       
       // Tạo user object từ token payload
+      const mappedRole = mapLegacyRole(decoded.role);
       const userFromToken: AuthUser = {
         id: decoded.username,
         name: decoded.username,
         email: decoded.username,
         tenantId: decoded.tenantId,
-        role: decoded.role as 'admin' | 'manager' | 'staff'
+        role: mappedRole,
+        permissions: getPermissionsForRole(mappedRole)
       };
       
       // Tạo tenant object từ token payload
@@ -192,6 +215,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.location.href = '/login';
   }, []);
 
+  // Permission checking function
+  const hasPermission = useCallback((module: string, action: string): boolean => {
+    if (!user || !user.permissions) return false;
+    
+    return user.permissions.some(permission => 
+      permission.module === module && 
+      permission.action === action && 
+      permission.allowed
+    );
+  }, [user]);
+
+  // Role checking function
+  const hasRole = useCallback((role: UserRole): boolean => {
+    return user?.role === role;
+  }, [user]);
+
   console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
   
   return (
@@ -204,7 +243,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: !!user,
       refreshAuth: async () => {}, // dummy async refreshAuth
       hasFeature: () => false,
-      hasRole: () => false,
+      hasRole,
+      hasPermission,
       isWithinLimits: () => true
     }}>
       {children}
@@ -277,8 +317,8 @@ export const useTenantDetection = () => {
 // Protected Route Hook
 // ============================================
 
-export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: 'admin' | 'manager' | 'staff') => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: UserRole) => {
+  const { user, isAuthenticated, isLoading, hasRole, hasPermission } = useAuth();
   
   const canAccess = () => {
     if (isLoading) return null; // Still loading
@@ -287,17 +327,10 @@ export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: 'admi
       return false; // Not authenticated
     }
     
-    if (requiredRole && user && user.role !== requiredRole) {
-      const roleHierarchy = {
-        'staff': 1,
-        'manager': 2,
-        'admin': 3
-      };
-      
-      const userLevel = roleHierarchy[user.role];
-      const requiredLevel = roleHierarchy[requiredRole];
-      
-      return userLevel >= requiredLevel;
+    if (requiredRole && user && !hasRole(requiredRole)) {
+      // For new RBAC system, roles are more specific and don't have hierarchy
+      // Each role has specific permissions instead
+      return false;
     }
     
     return true; // Access granted
@@ -307,7 +340,9 @@ export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: 'admi
     canAccess: canAccess(),
     isLoading,
     user,
-    isAuthenticated
+    isAuthenticated,
+    hasRole,
+    hasPermission
   };
 };
 

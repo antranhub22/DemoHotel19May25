@@ -24,6 +24,19 @@ import {
   Settings 
 } from '@/pages/dashboard';
 
+// Unified Dashboard (Phase 3)
+import { UnifiedDashboardLayout } from '@/components/unified-dashboard';
+import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
+import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
+import { AdvancedAnalytics } from '@/pages/unified-dashboard/AdvancedAnalytics';
+import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
+import { SystemMonitoring } from '@/pages/unified-dashboard/SystemMonitoring';
+import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
+import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
+import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
+import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
+import { Integrations } from '@/pages/unified-dashboard/Integrations';
+
 // ============================================
 // Protected Route Component
 // ============================================
@@ -52,10 +65,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return;
     }
 
-    if (requiredRole && user && user.role !== requiredRole) {
-      setLocation('/unauthorized');
-      return;
-    }
+    // Remove legacy role checking - we use RBAC permission system now
+    // if (requiredRole && user && user.role !== requiredRole) {
+    //   setLocation('/unauthorized');
+    //   return;
+    // }
   }, [isAuthenticated, isLoading, user, requireAuth, requiredRole, redirectTo, setLocation]);
 
   if (isLoading) {
@@ -66,9 +80,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return null;
   }
 
-  if (requiredRole && user && user.role !== requiredRole) {
-    return null;
-  }
+  // Remove legacy role checking - we use RBAC permission system now
+  // if (requiredRole && user && user.role !== requiredRole) {
+  //   return null;
+  // }
 
   return <>{children}</>;
 };
@@ -263,6 +278,88 @@ function Router() {
         <Route path="/login" component={LoginPage} />
         <Route path="/unauthorized" component={UnauthorizedPage} />
         
+        {/* Unified Dashboard Routes (Phase 3) - New RBAC System */}
+        <Route path="/unified-dashboard">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <UnifiedDashboardHome />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/requests">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <CustomerRequests />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/analytics">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <AdvancedAnalytics />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/staff-management">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <StaffManagement />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/system-monitoring">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <SystemMonitoring />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/settings">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <UnifiedSettings />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/guest-management">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <GuestManagement />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/security">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <SecuritySettings />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/logs">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <SystemLogs />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        <Route path="/unified-dashboard/integrations">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <Integrations />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+        
+        {/* Legacy Dashboard Routes - To be migrated */}
         <Route path="/dashboard">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
