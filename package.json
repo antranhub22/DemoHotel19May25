@@ -20,7 +20,7 @@
     "dev:server": "tsx watch apps/server/index.ts --port 10000",
     "start": "NODE_ENV=production tsx apps/server/index.ts",
     "start:production": "NODE_ENV=production PORT=10000 tsx apps/server/index.ts",
-    "start:transpile-only": "tsx --transpile-only apps/server/index.ts",
+    "start:transpile-only": "NODE_ENV=development tsx apps/server/index.ts",
     "test": "tsx tools/scripts/test-api-connectivity.ts",
     "test:db": "tsx tools/scripts/test-database-fix.ts",
     "test:build": "npm run build && npm run test",
