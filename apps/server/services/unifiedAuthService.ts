@@ -342,12 +342,12 @@ export class UnifiedAuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName || user.username,
+        displayName: user.display_name || user.username,
         role: user.role as UserRole,
         permissions,
         tenantId: user.tenant_id || 'default',
-        avatarUrl: user.avatarUrl,
-        last_login: user.lastLogin
+        avatarUrl: user.avatar_url,
+        last_login: user.last_login
       };
 
     } catch (error) {
