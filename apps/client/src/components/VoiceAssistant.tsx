@@ -45,7 +45,7 @@ const VoiceAssistant: React.FC = () => {
     }
   }, [config, hotelConfig, setHotelConfig]);
 
-  // Set interface based on route - but only on initial load, not during normal interface transitions
+  // Set interface based on route - but only for explicit URL navigation, not programmatic changes
   useEffect(() => {
     const routeToInterface: { [key: string]: 'interface1' | 'interface2' | 'interface3' | 'interface4' } = {
       '/': 'interface1',
@@ -58,15 +58,15 @@ const VoiceAssistant: React.FC = () => {
     const targetInterface = routeToInterface[location];
     console.log('🛣️ Route detection - Location:', location, 'Current interface:', currentInterface, 'Target interface:', targetInterface);
     
-    // Only set interface based on route if we're on interface1 or if target interface is interface1
-    // This prevents the route effect from overriding programmatic interface changes (like going from interface1 to interface2)
-    if (targetInterface && (currentInterface === 'interface1' || targetInterface === 'interface1')) {
-      if (targetInterface !== currentInterface) {
-        console.log('🛣️ Route changed to:', location, '-> Setting interface to:', targetInterface);
-        setCurrentInterface(targetInterface);
-      }
+    // ONLY set interface based on route if:
+    // 1. We have a target interface from URL
+    // 2. It's different from current interface  
+    // 3. URL actually contains an interface path (not just "/")
+    if (targetInterface && targetInterface !== currentInterface && location !== '/') {
+      console.log('🛣️ Route changed to:', location, '-> Setting interface to:', targetInterface);
+      setCurrentInterface(targetInterface);
     }
-  }, [location, currentInterface, setCurrentInterface]);
+  }, [location, setCurrentInterface]); // Remove currentInterface from dependencies to avoid loops
 
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');
