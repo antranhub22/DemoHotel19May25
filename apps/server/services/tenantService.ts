@@ -131,7 +131,6 @@ export class TenantService {
           trial_ends_at: tenants.trial_ends_at,
           created_at: tenants.created_at,
           updated_at: tenants.updated_at,
-          is_active: tenants.is_active,
           max_voices: tenants.max_voices,
           max_languages: tenants.max_languages,
           voice_cloning: tenants.voice_cloning,
@@ -175,7 +174,6 @@ export class TenantService {
           trial_ends_at: tenants.trial_ends_at,
           created_at: tenants.created_at,
           updated_at: tenants.updated_at,
-          is_active: tenants.is_active,
           max_voices: tenants.max_voices,
           max_languages: tenants.max_languages,
           voice_cloning: tenants.voice_cloning,
@@ -620,7 +618,7 @@ export class TenantService {
       const [activeResult] = await db
         .select({ count: sql<number>`count(*)` })
         .from(tenants)
-        .where(eq(tenants.is_active, true));
+        .where(eq(tenants.subscription_status, 'active'));
       
       return {
         status: 'healthy',
