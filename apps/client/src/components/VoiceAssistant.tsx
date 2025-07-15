@@ -4,7 +4,7 @@ import Interface1 from './Interface1';
 import Interface2 from './Interface2';
 import Interface3 from './Interface3';
 import Interface4 from './Interface4';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { History, Info, X, AlertCircle } from 'lucide-react';
 import InfographicSteps from './InfographicSteps';
 import { FaGlobeAsia } from 'react-icons/fa';
@@ -16,8 +16,9 @@ import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 
 const VoiceAssistant: React.FC = () => {
   // Hooks declarations - ALL HOOKS MUST BE DECLARED FIRST
-  const { currentInterface, language, setLanguage, hotelConfig, setHotelConfig } = useAssistant();
+  const { currentInterface, language, setLanguage, hotelConfig, setHotelConfig, setCurrentInterface } = useAssistant();
   const { config, isLoading, error } = useHotelConfiguration();
+  const [location] = useLocation();
   const [showInfographic, setShowInfographic] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
 
@@ -42,6 +43,23 @@ const VoiceAssistant: React.FC = () => {
       setHotelConfig(config);
     }
   }, [config, hotelConfig, setHotelConfig]);
+
+  // Set interface based on route
+  useEffect(() => {
+    const routeToInterface: { [key: string]: 'interface1' | 'interface2' | 'interface3' | 'interface4' } = {
+      '/': 'interface1',
+      '/interface1': 'interface1',
+      '/interface2': 'interface2',
+      '/interface3': 'interface3',
+      '/interface4': 'interface4'
+    };
+
+    const targetInterface = routeToInterface[location];
+    if (targetInterface && targetInterface !== currentInterface) {
+      console.log('🛣️ Route changed to:', location, '-> Setting interface to:', targetInterface);
+      setCurrentInterface(targetInterface);
+    }
+  }, [location, currentInterface, setCurrentInterface]);
 
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('hasSeenWelcomePopup');

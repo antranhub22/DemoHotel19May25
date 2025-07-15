@@ -250,9 +250,10 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
         <Route path="/" component={VoiceAssistant} />
-        <Route path="/interface1">
-          <Interface1 />
-        </Route>
+        <Route path="/interface1" component={VoiceAssistant} />
+        <Route path="/interface2" component={VoiceAssistant} />
+        <Route path="/interface3" component={VoiceAssistant} />
+        <Route path="/interface4" component={VoiceAssistant} />
         <Route path="/call-history" component={CallHistory} />
         <Route path="/call-details/:callId" component={CallDetails} />
         <Route path="/email-test" component={EmailTestPage} />
