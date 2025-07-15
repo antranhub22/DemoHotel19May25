@@ -382,7 +382,7 @@ export class UnifiedAuthService {
     const payload: any = {
       userId: user.id,
       username: user.username,
-      tenantId: user.tenant_id,
+      tenantId: user.tenantId,
       role: user.role,
       permissions: user.permissions
     };
@@ -394,7 +394,7 @@ export class UnifiedAuthService {
     const payload: any = {
       userId: user.id,
       username: user.username,
-      tenantId: user.tenant_id,
+      tenantId: user.tenantId,
       role: user.role,
       permissions: user.permissions
     };
