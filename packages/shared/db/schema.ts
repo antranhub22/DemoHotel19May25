@@ -153,12 +153,21 @@ export const message = sqliteTable("message", {
   maxTokens: integer("max_tokens"),
 });
 
+export const callSummaries = sqliteTable("call_summaries", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  callId: text("call_id").notNull(),
+  content: text("content").notNull(),
+  timestamp: text("timestamp").default(sql`CURRENT_TIMESTAMP`),
+  roomNumber: text("room_number"),
+  duration: text("duration"),
+});
+
 // Legacy aliases for backwards compatibility
-export const users = staff;
-export const transcripts = transcript;
 // ❌ DEPRECATED: Use 'request' table directly instead of orders alias
 // export const orders = request;
 
 // 📝 NOTE: Orders functionality has been consolidated into the 'request' table
 // Use 'request' table for both service requests and commercial orders
-export const callSummaries = call; 
+
+// 📝 NOTE: call_summaries is a separate table for storing call summaries
+// Do not confuse with 'call' table which stores call metadata 

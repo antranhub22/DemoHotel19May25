@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, transcripts, type Transcript, type InsertTranscript, request, callSummaries, type CallSummary, type InsertCallSummary } from "@shared/schema";
+import { staff, type Staff, type InsertStaff, transcript, type Transcript, type InsertTranscript, request, callSummaries, type CallSummary, type InsertCallSummary } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, gte, sql } from "drizzle-orm";
 
@@ -10,9 +10,9 @@ type InsertOrder = typeof request.$inferInsert;
 // you might need
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<Staff | undefined>;
+  getUserByUsername(username: string): Promise<Staff | undefined>;
+  createUser(user: InsertStaff): Promise<Staff>;
   
   // Transcript methods
   addTranscript(transcript: InsertTranscript): Promise<Transcript>;
@@ -33,28 +33,28 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id));
+  async getUser(id: string): Promise<Staff | undefined> {
+    const result = await db.select().from(staff).where(eq(staff.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
+  async getUserByUsername(username: string): Promise<Staff | undefined> {
+    const result = await db.select().from(staff).where(eq(staff.username, username));
     return result.length > 0 ? result[0] : undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
+  async createUser(insertStaff: InsertStaff): Promise<Staff> {
+    const result = await db.insert(staff).values(insertStaff).returning();
     return result[0];
   }
   
   async addTranscript(insertTranscript: InsertTranscript): Promise<Transcript> {
-    const result = await db.insert(transcripts).values(insertTranscript).returning();
+    const result = await db.insert(transcript).values(insertTranscript).returning();
     return result[0];
   }
   
   async getTranscriptsByCallId(callId: string): Promise<Transcript[]> {
-    return await db.select().from(transcripts).where(eq(transcripts.callId, callId));
+    return await db.select().from(transcript).where(eq(transcript.callId, callId));
   }
   
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
@@ -114,7 +114,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getCallSummaryByCallId(callId: string): Promise<CallSummary | undefined> {
-    const result = await db.select().from(callSummaries).where(eq(callSummaries.callIdVapi, callId));
+    const result = await db.select().from(callSummaries).where(eq(callSummaries.callId, callId));
     return result.length > 0 ? result[0] : undefined;
   }
   
@@ -126,8 +126,8 @@ export class DatabaseStorage implements IStorage {
     // Query summaries newer than the calculated timestamp
     return await db.select()
       .from(callSummaries)
-      .where(gte(callSummaries.createdAt, hoursAgo.toISOString()))
-      .orderBy(sql`${callSummaries.createdAt} DESC`);
+      .where(gte(callSummaries.timestamp, hoursAgo.toISOString()))
+      .orderBy(sql`${callSummaries.timestamp} DESC`);
   }
 }
 

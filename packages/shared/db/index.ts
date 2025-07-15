@@ -1,7 +1,7 @@
 // Database connection and schema exports
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
-import { tenants, hotelProfiles, staff, call, transcript, request, message } from './schema';
+import { tenants, hotelProfiles, staff, call, transcript, request, message, callSummaries } from './schema';
 
 // Create database connection
 const sqlite = new Database('dev.db');
@@ -14,6 +14,7 @@ export const db = drizzle(sqlite, {
     transcript,
     request,
     message,
+    callSummaries,
   },
 });
 
@@ -26,11 +27,8 @@ export {
   transcript,
   request,
   message,
-  // Legacy aliases
-  users,
-  transcripts,
-  orders,
   callSummaries,
+  // Legacy aliases
 } from './schema';
 
 // ============================================

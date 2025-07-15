@@ -11,8 +11,6 @@ import {
   message, 
   staff,
   // Legacy aliases
-  users,
-  transcripts,
   // orders, // ❌ DEPRECATED: Use 'request' directly
   callSummaries,
 } from "./db/schema";
@@ -27,8 +25,6 @@ export {
   message,
   staff,
   // Legacy aliases
-  users,
-  transcripts,
   // orders, // ❌ DEPRECATED: Use 'request' directly
   callSummaries,
 };
@@ -156,6 +152,13 @@ export const insertMessageSchema = createInsertSchema(message, {
   maxTokens: z.number().positive().optional(),
 });
 
+export const insertCallSummarySchema = createInsertSchema(callSummaries, {
+  callId: z.string().min(1),
+  content: z.string().min(1),
+  roomNumber: z.string().optional(),
+  duration: z.string().optional(),
+});
+
 // ============================================
 // Order Schema (CONSOLIDATED into Request Schema)
 // ============================================
@@ -163,8 +166,6 @@ export const insertMessageSchema = createInsertSchema(message, {
 export const insertOrderSchema = insertRequestSchema;
 
 // Legacy schemas for backwards compatibility
-export const insertCallSummarySchema = insertCallSchema;
-export const insertUserSchema = insertStaffSchema;
 
 // ============================================
 // Inferred Types
@@ -190,13 +191,12 @@ export type Request = typeof request.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof message.$inferSelect;
 
+export type InsertCallSummary = z.infer<typeof insertCallSummarySchema>;
+export type CallSummary = typeof callSummaries.$inferSelect;
+
 export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type Staff = typeof staff.$inferSelect;
 
 // Convenience aliases
-export type User = Staff;
-export type InsertUser = InsertStaff;
 export type Order = Request;
 export type InsertOrder = InsertRequest;
-export type CallSummary = Call;
-export type InsertCallSummary = InsertCall;
