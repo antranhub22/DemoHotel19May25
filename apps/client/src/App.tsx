@@ -147,7 +147,8 @@ const LoginPage = () => {
     
     try {
       await login(email, password);
-      setLocation('/dashboard');
+      // Redirect to unified dashboard for all users - it has role-based views
+      setLocation('/unified-dashboard');
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại');
     }
