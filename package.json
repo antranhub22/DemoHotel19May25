@@ -15,6 +15,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:fix-production": "tsx tools/scripts/fix-production-schema.ts",
+    "audit:schema": "tsx tools/scripts/audit-schema-mismatches.ts",
     "deploy": "npm run build:production && npm run db:setup && npm run db:seed",
     "dev": "tsx watch apps/server/index.ts",
     "dev:client": "vite dev --port 3000",
