@@ -86,28 +86,38 @@ export class DatabaseStorage implements IStorage {
   async getAllOrders(filter: { status?: string; roomNumber?: string }): Promise<Order[]> {
     try {
       console.log('🔍 getAllOrders called with filter:', filter);
+      console.log('🔍 Database connection status:', db ? 'Connected' : 'Not connected');
       
       let query = db.select().from(request);
+      console.log('🔍 Base query created');
       
       // Build where conditions properly
       const whereConditions = [];
       if (filter.status) {
         whereConditions.push(eq(request.status, filter.status));
+        console.log('🔍 Added status filter:', filter.status);
       }
       if (filter.roomNumber) {
         whereConditions.push(eq(request.room_number, filter.roomNumber));
+        console.log('🔍 Added room number filter:', filter.roomNumber);
       }
       
       if (whereConditions.length > 0) {
         query = query.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions));
+        console.log('🔍 Where conditions applied');
       }
       
       console.log('🔍 About to execute query...');
       const result = await query;
-      console.log('✅ Query executed, result count:', result.length);
+      console.log('✅ Query executed successfully, result count:', result.length);
+      console.log('✅ First result:', result[0] ? JSON.stringify(result[0], null, 2) : 'No results');
       return result;
     } catch (error) {
-      console.error('❌ getAllOrders error:', error);
+      console.error('❌ getAllOrders error details:');
+      console.error('❌ Error message:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Full error object:', error);
       throw error;
     }
   }
