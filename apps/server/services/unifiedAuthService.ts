@@ -73,20 +73,21 @@ export class UnifiedAuthService {
       console.log(`🔐 Login attempt for user: ${username}`);
 
       // Find user in staff table
-      let userQuery = db
-        .select()
-        .from(staff)
-        .where(and(
-          eq(staff.username, username),
-          eq(staff.isActive, true)
-        ));
+      const whereConditions = [
+        eq(staff.username, username),
+        eq(staff.isActive, true)
+      ];
 
       // If tenantId is provided, filter by it
       if (tenantId) {
-        userQuery = userQuery.where(eq(staff.tenantId, tenantId));
+        whereConditions.push(eq(staff.tenantId, tenantId));
       }
 
-      const users = await userQuery.execute();
+      const users = await db
+        .select()
+        .from(staff)
+        .where(and(...whereConditions))
+        .execute();
       const user = users[0];
 
       if (!user) {

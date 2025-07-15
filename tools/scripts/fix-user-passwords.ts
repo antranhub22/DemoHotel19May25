@@ -1,60 +1,46 @@
 #!/usr/bin/env tsx
 
-import { db } from '../../packages/shared/db/index.js';
-import { staff } from '../../packages/shared/db/schema.js';
-import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import Database from 'better-sqlite3';
+import path from 'path';
+
+// Database connection
+const dbPath = path.join(process.cwd(), 'dev.db');
+const db = new Database(dbPath);
 
 async function fixUserPasswords() {
-  try {
-    console.log('🔧 Fixing user passwords...');
+  console.log('🔧 Fixing password hashes for frontdesk and itmanager users...\n');
+
+  const usersToFix = [
+    { username: 'frontdesk', password: 'frontdesk123' },
+    { username: 'itmanager', password: 'itmanager123' },
+  ];
+
+  for (const user of usersToFix) {
+    console.log(`Fixing password for: ${user.username}`);
     
-    const testUsers = [
-      { username: 'manager', password: 'manager123' },
-      { username: 'frontdesk', password: 'frontdesk123' },
-      { username: 'itmanager', password: 'itmanager123' }
-    ];
+    // Generate new hash
+    const newHash = await bcrypt.hash(user.password, 10);
+    console.log(`📋 New hash: ${newHash.substring(0, 20)}...`);
     
-    for (const userData of testUsers) {
-      console.log(`\n🔐 Updating password for ${userData.username}...`);
+    // Update in database
+    const result = db.prepare('UPDATE staff SET password = ? WHERE username = ?').run(newHash, user.username);
+    
+    if (result.changes > 0) {
+      console.log(`✅ Password updated for ${user.username}`);
       
-      // Generate proper bcrypt hash
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      console.log(`   Generated hash length: ${hashedPassword.length}`);
-      
-      // Update the user's password
-      await db.update(staff)
-        .set({ 
-          password: hashedPassword,
-          updatedAt: new Date().toISOString()
-        })
-        .where(eq(staff.username, userData.username));
-      
-      // Verify the update worked
-      const testHash = await bcrypt.compare(userData.password, hashedPassword);
-      console.log(`   Password verification test: ${testHash ? '✅ PASS' : '❌ FAIL'}`);
-      
-      console.log(`✅ Updated password for: ${userData.username}`);
+      // Test the new hash
+      const testValid = await bcrypt.compare(user.password, newHash);
+      console.log(`🔄 Hash verification test: ${testValid ? '✅ VALID' : '❌ STILL INVALID'}`);
+    } else {
+      console.log(`❌ User ${user.username} not found or not updated`);
     }
     
-    console.log('\n🎉 All user passwords fixed successfully!');
-    console.log('\n📋 Test Credentials (Updated):');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('Hotel Manager: manager / manager123');
-    console.log('Front Desk:    frontdesk / frontdesk123');
-    console.log('IT Manager:    itmanager / itmanager123');
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    
-  } catch (error) {
-    console.error('❌ Error fixing passwords:', error);
-    process.exit(1);
+    console.log('---');
   }
+  
+  console.log('✅ Password fix completed');
+  db.close();
 }
 
-// Run the script
-fixUserPasswords()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error('❌ Script failed:', error);
-    process.exit(1);
-  }); 
+fixUserPasswords().catch(console.error); 
