@@ -1506,7 +1506,7 @@ Mi Nhon Hotel Mui Ne`
   // Cập nhật trạng thái request
   app.patch('/api/staff/requests/:id/status', verifyJWT, async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = parseInt(req.params.id);
       const { status } = req.body;
       
       if (!status) {

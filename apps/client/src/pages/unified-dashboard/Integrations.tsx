@@ -66,7 +66,6 @@ import {
   BarChart3,
   FileText,
   Save,
-  Test,
   Play,
   Pause,
   Download,
@@ -619,7 +618,7 @@ const IntegrationModal = ({
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={handleTest} disabled={loading}>
-              <Test className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-4 w-4 mr-2" />
               Test Connection
             </Button>
             <Button onClick={handleSave} disabled={loading}>
@@ -1087,7 +1086,6 @@ export const Integrations: React.FC = () => {
                       <Switch
                         checked={integration.enabled}
                         onCheckedChange={() => handleToggleIntegration(integration.id)}
-                        size="sm"
                       />
                     </div>
                   </div>

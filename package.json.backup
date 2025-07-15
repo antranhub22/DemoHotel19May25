@@ -4,9 +4,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --noEmit --skipLibCheck || true && vite build",
-    "build:client": "cd apps/client && vite build --mode production",
-    "build:server": "cd apps/server && tsc --noEmit --skipLibCheck || true",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "tsc --noEmit",
     "build:production": "NODE_ENV=production npm run build",
     "build:analyze": "vite build --mode analyze",
     "preview": "vite preview --port 3000",
@@ -27,7 +27,7 @@
     "clean:install": "npm run clean && npm install",
     "typecheck": "tsc --noEmit --project .",
     "lint:check": "eslint apps/client/src apps/server --ext .ts,.tsx",
-    "postinstall": "echo 'Skipping typecheck for deployment'"
+    "postinstall": "npm run typecheck"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
