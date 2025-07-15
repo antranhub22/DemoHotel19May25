@@ -30,7 +30,13 @@ async function extractTenantFromRequest(req: Request): Promise<string> {
   
   try {
     const { tenants } = await import('@shared/schema');
-    const [tenant] = await db.select().from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
+    // Get tenant from subdomain
+    const [tenant] = await db.select({
+      id: tenants.id,
+      hotel_name: tenants.hotel_name,
+      subdomain: tenants.subdomain,
+      subscription_status: tenants.subscription_status
+    }).from(tenants).where(eq(tenants.subdomain, subdomain)).limit(1);
     return tenant?.id || getMiNhonTenantId();
   } catch (error) {
     console.error('Error looking up tenant:', error);
