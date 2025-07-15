@@ -1,8 +1,7 @@
-import * as jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { eq, and } from 'drizzle-orm';
-import { db } from '@server/db';
-import { staff, tenants } from '@shared/schema';
+import { db, staff, tenants } from '@shared/db';
 import { UserRole, Permission, getPermissionsForRole } from '@shared/constants/permissions';
 
 // ============================================

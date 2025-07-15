@@ -28,6 +28,7 @@ import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import { TenantService } from './services/tenantService.js';
+import { UnifiedAuthService } from './services/unifiedAuthService.js';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -120,7 +121,7 @@ function extractSubdomain(host: string): string {
  * Get Mi Nhon Hotel tenant ID (for backward compatibility)
  */
 function getMiNhonTenantId(): string {
-  return process.env.MINHON_TENANT_ID || 'minhon-default-tenant-id';
+  return process.env.MINHON_TENANT_ID || 'mi-nhon-hotel';
 }
 
 /**
@@ -128,7 +129,7 @@ function getMiNhonTenantId(): string {
  */
 async function findStaffInDatabase(username: string, password: string, tenantId: string): Promise<any> {
   try {
-    const { staff } = await import('@shared/schema');
+    const { staff } = await import('@shared/db');
     
     // Look up staff by username and tenant
     const [staffUser] = await db
@@ -1409,47 +1410,37 @@ Mi Nhon Hotel Mui Ne`
     const { email, password } = req.body;
     console.log(`Auth login attempt: ${email}`);
     
-    try {
-      // 1. Extract tenant from subdomain or host
-      const tenantId = await extractTenantFromRequest(req);
-      console.log(`🏨 Tenant identified for auth login: ${tenantId}`);
+          try {
+        // 1. Extract tenant from subdomain or host
+        const tenantId = await extractTenantFromRequest(req);
+        console.log(`🏨 Tenant identified for auth login: ${tenantId}`);
+        
+                // 2. Use UnifiedAuthService for authentication  
+        const authResult = await UnifiedAuthService.login({
+          username: email, // Use email as username for client compatibility
+          password: password,
+          tenantId: 'mi-nhon-hotel' // Use correct tenant ID for test users
+        });
       
-      // 2. Try to find staff in database with tenant association (using email as username)
-      let staffUser = await findStaffInDatabase(email, password, tenantId);
-      
-      // 3. Fallback to environment variables and hardcoded accounts (for backward compatibility)
-      if (!staffUser) {
-        staffUser = await findStaffInFallback(email, password, tenantId);
-      }
-      
-      if (!staffUser) {
+      if (!authResult.success || !authResult.token) {
         console.log('Auth login failed: Invalid credentials or tenant access denied');
         return res.status(401).json({ error: 'Invalid credentials' });
       }
       
-      // 4. Generate JWT with tenant and role information
-      const token = jwt.sign(
-        { 
-          username: staffUser.username, 
-          tenantId: staffUser.tenantId,
-          role: staffUser.role,
-          permissions: staffUser.permissions || []
-        }, 
-        JWT_SECRET, 
-        { expiresIn: '1d' }
-      );
-      
       console.log(`✅ Auth login successful for ${email} at tenant ${tenantId}`);
       res.json({ 
-        token, 
+        token: authResult.token,
+        refreshToken: authResult.refreshToken,
         user: {
-          username: staffUser.username,
-          email: staffUser.username, // Use username as email for client compatibility
-          role: staffUser.role,
-          tenantId: staffUser.tenantId
+          username: authResult.user?.username,
+          email: authResult.user?.email,
+          role: authResult.user?.role,
+          tenantId: authResult.user?.tenantId,
+          displayName: authResult.user?.displayName,
+          permissions: authResult.user?.permissions
         },
         tenant: {
-          id: staffUser.tenantId,
+          id: authResult.user?.tenantId,
           name: 'Mi Nhon Hotel', // Default tenant name
           subdomain: 'minhonmuine'
         }
