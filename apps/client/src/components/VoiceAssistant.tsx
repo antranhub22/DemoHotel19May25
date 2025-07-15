@@ -224,7 +224,7 @@ const VoiceAssistant: React.FC = () => {
       <div className="relative w-full h-full" id="interfaceContainer">
         <Interface1 isActive={interfaceStates.interface1} />
         <Interface2 isActive={interfaceStates.interface2} />
-        <Interface3 isActive={interfaceStates.interface3} />
+        <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
         <Interface4 isActive={interfaceStates.interface4} />
       </div>
     </div>
