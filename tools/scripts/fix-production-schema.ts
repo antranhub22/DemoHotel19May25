@@ -71,24 +71,20 @@ async function fixProductionSchema() {
     // Fix 2: Check tenants table and ensure proper columns exist
     console.log('🔄 Fixing tenants table schema...');
     
-    // Check if name column exists, if not add it
+    // Check if hotel_name column exists (we use hotel_name, not name)
     try {
-      await db.execute(sql`SELECT name FROM tenants LIMIT 1`);
-      console.log('✅ name column exists in tenants table');
+      await db.execute(sql`SELECT hotel_name FROM tenants LIMIT 1`);
+      console.log('✅ hotel_name column exists in tenants table');
     } catch (error: any) {
       if (error.message.includes('does not exist')) {
-        // Try to add name column
+        // Try to add hotel_name column
         try {
-          await db.execute(sql`ALTER TABLE tenants ADD COLUMN name TEXT`);
-          console.log('✅ Added name column to tenants table');
+          await db.execute(sql`ALTER TABLE tenants ADD COLUMN hotel_name TEXT`);
+          console.log('✅ Added hotel_name column to tenants table');
           
-          // Copy hotel_name to name if hotel_name exists
-          try {
-            await db.execute(sql`UPDATE tenants SET name = hotel_name WHERE name IS NULL AND hotel_name IS NOT NULL`);
-            console.log('✅ Copied hotel_name to name column');
-          } catch {}
+          // No need to copy since we use hotel_name directly
         } catch (addError: any) {
-          console.log('ℹ️ Could not add name column:', addError.message);
+          console.log('ℹ️ Could not add hotel_name column:', addError.message);
         }
       }
     }
