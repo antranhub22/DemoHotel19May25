@@ -27,6 +27,7 @@ import { getOverview, getServiceDistribution, getHourlyActivity } from './analyt
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
+import unifiedAuthRoutes from './routes/unifiedAuth';
 import { TenantService } from './services/tenantService.js';
 import { UnifiedAuthService } from './services/unifiedAuthService.js';
 
@@ -1654,6 +1655,13 @@ Mi Nhon Hotel Mui Ne`
       handleApiError(res, error, 'Failed to fetch hourly activity');
     }
   });
+
+  // ============================================
+  // Unified Authentication API Routes
+  // ============================================
+  
+  // Mount unified auth routes (takes precedence over legacy routes)
+  app.use('/api/auth', unifiedAuthRoutes);
 
   // ============================================
   // SaaS Dashboard API Routes
