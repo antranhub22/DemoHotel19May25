@@ -151,7 +151,7 @@ export class UnifiedAuthService {
         .set({ 
           last_login: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .where(eq(staff.id, user.id));
 
       console.log(`✅ Login successful for user: ${username} (role: ${user.role})`);
@@ -200,12 +200,12 @@ export class UnifiedAuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName || user.username,
+        displayName: user.display_name || user.username,
         role: user.role as UserRole,
         permissions: decoded.permissions,
         tenantId: user.tenant_id || 'default',
-        avatarUrl: user.avatarUrl,
-        last_login: user.lastLogin
+        avatarUrl: user.avatar_url,
+        last_login: user.last_login
       };
 
     } catch (error) {
@@ -259,12 +259,12 @@ export class UnifiedAuthService {
         id: user.id,
         username: user.username,
         email: user.email,
-        displayName: user.displayName || user.username,
+        displayName: user.display_name || user.username,
         role: user.role as UserRole,
         permissions,
         tenantId: user.tenant_id || 'default',
-        avatarUrl: user.avatarUrl,
-        last_login: user.lastLogin
+        avatarUrl: user.avatar_url,
+        last_login: user.last_login
       };
 
       const newToken = this.generateToken(authUser);
@@ -296,7 +296,7 @@ export class UnifiedAuthService {
         .update(staff)
         .set({ 
           updated_at: new Date().toISOString()
-        })
+        } as any)
         .where(eq(staff.id, userId));
 
       console.log(`✅ User ${userId} logged out`);
