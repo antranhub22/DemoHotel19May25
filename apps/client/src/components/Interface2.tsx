@@ -8,6 +8,7 @@ import { t } from '@/i18n';
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import TranscriptDisplay from './TranscriptDisplay';
 
 interface Interface2Props {
   isActive: boolean;
@@ -42,7 +43,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     setCurrentInterface,
     micLevel,
     modelOutput,
-    language
+    language,
+    addTranscript // Added addTranscript to useAssistant
   } = useAssistant();
   
   // Debug isActive changes
@@ -59,6 +61,13 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   const [localDuration, setLocalDuration] = useState(0);
   const conversationRef = useRef<HTMLDivElement>(null);
   const [showRealtimeConversation, setShowRealtimeConversation] = useState(true);
+  
+  // Debug conversation state
+  useEffect(() => {
+    console.log('💬 [Interface2] showRealtimeConversation:', showRealtimeConversation);
+    console.log('💬 [Interface2] conversationTurns:', conversationTurns);
+    console.log('💬 [Interface2] transcripts:', transcripts);
+  }, [showRealtimeConversation, conversationTurns, transcripts]);
   
   // Cleanup function for animations
   const cleanupAnimations = useCallback(() => {
@@ -122,6 +131,9 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
   // Update conversation turns when transcripts change
   useEffect(() => {
+    console.log('[Interface2] Transcripts changed:', transcripts);
+    console.log('[Interface2] Transcripts count:', transcripts.length);
+    
     const sortedTranscripts = [...transcripts].sort((a, b) => 
       a.timestamp.getTime() - b.timestamp.getTime()
     );
@@ -130,6 +142,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     let currentTurn: ConversationTurn | null = null;
 
     sortedTranscripts.forEach((message) => {
+      console.log('[Interface2] Processing transcript:', message);
+      
       if (message.role === 'user') {
         // Always create a new turn for user messages
         currentTurn = {
@@ -164,6 +178,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
       }
     });
 
+    console.log('[Interface2] Generated conversation turns:', turns);
     setConversationTurns(turns);
   }, [transcripts]);
 
@@ -390,12 +405,20 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
               </button>
               {/* Display conversation turns */}
               <div className="w-full flex flex-col gap-1 pr-2" style={{overflowY: 'auto', maxHeight: '28vh'}}>
+                {(() => {
+                  console.log('[Interface2] Rendering conversation - conversationTurns.length:', conversationTurns.length);
+                  console.log('[Interface2] showRealtimeConversation:', showRealtimeConversation);
+                  console.log('[Interface2] isActive:', isActive);
+                  return null;
+                })()}
                 {conversationTurns.length === 0 && (
                   <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
                     {t('tap_to_speak', language)}
                   </div>
                 )}
-                {[...conversationTurns].reverse().map((turn, turnIdx) => (
+                {[...conversationTurns].reverse().map((turn, turnIdx) => {
+                  console.log('[Interface2] Rendering turn:', turn, 'Index:', turnIdx);
+                  return (
                   <div key={turn.id} className="mb-1">
                     <div className="flex items-start">
                       <div className="flex-grow">
@@ -440,7 +463,133 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {!showRealtimeConversation && (
+            <div className="text-center">
+              <button 
+                onClick={() => setShowRealtimeConversation(true)}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full text-sm"
+              >
+                Show Conversation
+              </button>
+            </div>
+          )}
+          
+          {/* Debug Panel for Development */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="fixed bottom-4 left-4 bg-black/80 text-white p-4 rounded-lg text-xs max-w-sm z-50">
+              <div className="mb-2 font-bold">Debug Panel</div>
+              <div>Transcripts: {transcripts.length}</div>
+              <div>Turns: {conversationTurns.length}</div>
+              <div>Show Conversation: {showRealtimeConversation ? 'Yes' : 'No'}</div>
+              <div>Is Active: {isActive ? 'Yes' : 'No'}</div>
+              <div className="mt-2 space-x-2">
+                <button 
+                  onClick={() => {
+                    // Add test user transcript
+                    const testTranscript = {
+                      id: Date.now(),
+                      callId: callDetails?.id || 'test-call',
+                      role: 'user' as const,
+                      content: 'Test user message - ' + new Date().toLocaleTimeString(),
+                      timestamp: new Date(),
+                      tenantId: 'test'
+                    };
+                    console.log('Adding test user transcript:', testTranscript);
+                    // Directly add to context
+                    addTranscript(testTranscript);
+                  }}
+                  className="bg-blue-500 px-2 py-1 rounded text-xs"
+                >
+                  Add User
+                </button>
+                <button 
+                  onClick={() => {
+                    // Add test assistant transcript
+                    const testTranscript = {
+                      id: Date.now(),
+                      callId: callDetails?.id || 'test-call',
+                      role: 'assistant' as const,
+                      content: 'Test assistant response - ' + new Date().toLocaleTimeString(),
+                      timestamp: new Date(),
+                      tenantId: 'test'
+                    };
+                    console.log('Adding test assistant transcript:', testTranscript);
+                    // Directly add to context
+                    addTranscript(testTranscript);
+                  }}
+                  className="bg-green-500 px-2 py-1 rounded text-xs"
+                >
+                  Add Assistant
+                </button>
+                <button 
+                  onClick={() => {
+                    // Test WebSocket connection directly
+                    try {
+                      const wsUrl = window.location.origin.replace('http', 'ws') + '/ws';
+                      console.log('Testing WebSocket connection to:', wsUrl);
+                      const ws = new WebSocket(wsUrl);
+                      
+                      ws.onopen = () => {
+                        console.log('✅ WebSocket connection successful');
+                        ws.send(JSON.stringify({
+                          type: 'transcript',
+                          call_id: 'test-call',
+                          role: 'user',
+                          content: 'WebSocket test message - ' + new Date().toLocaleTimeString(),
+                          timestamp: new Date()
+                        }));
+                        ws.close();
+                      };
+                      
+                      ws.onerror = (error) => {
+                        console.error('❌ WebSocket connection failed:', error);
+                      };
+                      
+                      ws.onclose = () => {
+                        console.log('📤 WebSocket connection closed');
+                      };
+                    } catch (error) {
+                      console.error('Error testing WebSocket:', error);
+                    }
+                  }}
+                  className="bg-purple-500 px-2 py-1 rounded text-xs"
+                >
+                  Test WS
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Comparison: Old TranscriptDisplay vs New Implementation */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="w-full mt-4 p-4 bg-white/90 rounded-lg">
+              <h3 className="text-lg font-bold mb-4">Debug: Transcript Systems Comparison</h3>
+              
+              {/* WebSocket TranscriptDisplay */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">1. WebSocket TranscriptDisplay (Old System):</h4>
+                <div className="border p-2 rounded">
+                  <TranscriptDisplay socketUrl={window.location.origin.replace('http', 'ws') + '/ws'} />
+                </div>
+              </div>
+              
+              {/* Current Implementation */}
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">2. VAPI AssistantContext (Current System):</h4>
+                <div className="border p-2 rounded">
+                  <div>Transcripts Count: {transcripts.length}</div>
+                  <div>Conversation Turns: {conversationTurns.length}</div>
+                  {transcripts.map((t, idx) => (
+                    <div key={idx} className="text-sm">
+                      <strong>{t.role}:</strong> {t.content.substring(0, 50)}...
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

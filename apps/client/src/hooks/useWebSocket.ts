@@ -39,9 +39,11 @@ export function useWebSocket() {
     newSocket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log('[useWebSocket] Message received:', data);
         
         // Handle transcript messages
         if (data.type === 'transcript') {
+          console.log('[useWebSocket] Transcript message:', data);
           assistant.addTranscript({
             callId: data.callId,
             role: data.role,
@@ -49,8 +51,15 @@ export function useWebSocket() {
             tenantId: 'default'
           });
         }
+        
+        // Handle connection messages
+        if (data.type === 'connected') {
+          console.log('[useWebSocket] Connected to server:', data.message);
+        }
+        
         // Handle order status update (realtime from staff UI)
         if (data.type === 'order_status_update' && (data.orderId || data.reference) && data.status) {
+          console.log('[useWebSocket] Order status update:', data);
           assistant.setActiveOrders((prevOrders: ActiveOrder[]) => prevOrders.map((order: ActiveOrder) => {
             // So sánh theo reference (mã order)
             const matchByReference = (data.reference && order.reference === data.reference) || (data.orderId && order.reference === data.orderId);

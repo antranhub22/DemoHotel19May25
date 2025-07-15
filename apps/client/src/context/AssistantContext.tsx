@@ -301,6 +301,34 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           setMicLevel(level);
         });
 
+        // Bridge function to send transcripts to WebSocket server
+        const sendTranscriptToWebSocket = (transcript: Transcript) => {
+          try {
+            // Send to WebSocket server for compatibility with old TranscriptDisplay system
+            if (typeof window !== 'undefined' && window.WebSocket) {
+              const wsUrl = window.location.origin.replace('http', 'ws') + '/ws';
+              const ws = new WebSocket(wsUrl);
+              
+              ws.onopen = () => {
+                ws.send(JSON.stringify({
+                  type: 'transcript',
+                  call_id: transcript.callId,
+                  role: transcript.role,
+                  content: transcript.content,
+                  timestamp: transcript.timestamp
+                }));
+                ws.close(); // Close after sending
+              };
+              
+              ws.onerror = (error) => {
+                console.warn('Failed to send transcript to WebSocket:', error);
+              };
+            }
+          } catch (error) {
+            console.warn('Error sending transcript to WebSocket:', error);
+          }
+        };
+
         // Message handler for transcripts and reports
         const handleMessage = async (message: any) => {
           console.log('Raw message received:', message);
@@ -337,23 +365,29 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 console.log('Updated transcripts array:', updated);
                 return updated;
               });
+              
+              // Bridge to WebSocket
+              sendTranscriptToWebSocket(newTranscript);
             } else {
               console.warn('Model output message received but no content found:', message);
             }
           }
           
-          // Only handle user transcripts, ignore assistant transcripts
-          if (message.type === 'transcript' && message.role === 'user') {
-            console.log('Adding user transcript:', message);
+          // Handle ALL transcript messages (both user and assistant)
+          if (message.type === 'transcript') {
+            console.log('Adding transcript:', message);
             const newTranscript: Transcript = {
               id: Date.now() as unknown as number,
               callId: callDetails?.id || `call-${Date.now()}`,
-              role: 'user',
+              role: message.role, // Keep original role (user or assistant)
               content: message.content || message.transcript || '',
               timestamp: new Date(),
               tenantId: tenantId || 'default'
             };
             setTranscripts(prev => [...prev, newTranscript]);
+            
+            // Bridge to WebSocket
+            sendTranscriptToWebSocket(newTranscript);
           }
         };
         
@@ -371,7 +405,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         vapi.stop();
       }
     };
-  }, [language, hotelConfig, tenantId]);
+  }, [language, hotelConfig, tenantId, callDetails?.id]);
 
   useEffect(() => {
     if (currentInterface === 'interface2') {
