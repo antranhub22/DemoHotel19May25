@@ -729,11 +729,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Pass through orderReference for each summary
       const mapped = summaries.map(s => ({
         id: s.id,
-        callId: (s as any).callIdVapi || (s as any).orderId || 'unknown', // Use callIdVapi or orderId instead of callId
+        callId: s.callId || 'unknown', // Use callId field from call_summaries table
         roomNumber: s.roomNumber,
-        content: (s as any).requestContent || 'No content', // Use requestContent property
-        timestamp: s.createdAt || new Date(), // Use createdAt property
-        duration: s.duration || 0
+        content: s.content || 'No content', // Use content field from call_summaries table
+        timestamp: s.timestamp || new Date().toISOString(), // Use timestamp field from call_summaries table
+        duration: s.duration || '0'
       }));
       res.json({
         success: true,
