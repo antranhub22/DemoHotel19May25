@@ -121,7 +121,25 @@ export class TenantService {
   async getTenantById(tenantId: string): Promise<any> {
     try {
       const [tenant] = await db
-        .select()
+        .select({
+          id: tenants.id,
+          hotel_name: tenants.hotel_name,
+          subdomain: tenants.subdomain,
+          custom_domain: tenants.custom_domain,
+          subscription_plan: tenants.subscription_plan,
+          subscription_status: tenants.subscription_status,
+          trial_ends_at: tenants.trial_ends_at,
+          created_at: tenants.created_at,
+          updated_at: tenants.updated_at,
+          is_active: tenants.is_active,
+          max_voices: tenants.max_voices,
+          max_languages: tenants.max_languages,
+          voice_cloning: tenants.voice_cloning,
+          multi_location: tenants.multi_location,
+          white_label: tenants.white_label,
+          data_retention_days: tenants.data_retention_days,
+          monthly_call_limit: tenants.monthly_call_limit
+        })
         .from(tenants)
         .where(eq(tenants.id, tenantId))
         .limit(1);
@@ -147,7 +165,25 @@ export class TenantService {
   async getTenantBySubdomain(subdomain: string): Promise<any> {
     try {
       const [tenant] = await db
-        .select()
+        .select({
+          id: tenants.id,
+          hotel_name: tenants.hotel_name,
+          subdomain: tenants.subdomain,
+          custom_domain: tenants.custom_domain,
+          subscription_plan: tenants.subscription_plan,
+          subscription_status: tenants.subscription_status,
+          trial_ends_at: tenants.trial_ends_at,
+          created_at: tenants.created_at,
+          updated_at: tenants.updated_at,
+          is_active: tenants.is_active,
+          max_voices: tenants.max_voices,
+          max_languages: tenants.max_languages,
+          voice_cloning: tenants.voice_cloning,
+          multi_location: tenants.multi_location,
+          white_label: tenants.white_label,
+          data_retention_days: tenants.data_retention_days,
+          monthly_call_limit: tenants.monthly_call_limit
+        })
         .from(tenants)
         .where(eq(tenants.subdomain, subdomain))
         .limit(1);

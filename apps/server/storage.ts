@@ -88,7 +88,27 @@ export class DatabaseStorage implements IStorage {
       console.log('🔍 getAllOrders called with filter:', filter);
       console.log('🔍 Database connection status:', db ? 'Connected' : 'Not connected');
       
-      let query = db.select().from(request);
+      let query = db.select({
+        id: request.id,
+        room_number: request.room_number,
+        request_content: request.request_content,
+        status: request.status,
+        created_at: request.created_at,
+        order_id: request.order_id,
+        updated_at: request.updated_at,
+        tenant_id: request.tenant_id,
+        description: request.description,
+        priority: request.priority,
+        assigned_to: request.assigned_to,
+        completed_at: request.completed_at,
+        metadata: request.metadata,
+        type: request.type,
+        total_amount: request.total_amount,
+        items: request.items,
+        delivery_time: request.delivery_time,
+        special_instructions: request.special_instructions,
+        order_type: request.order_type
+      }).from(request);
       console.log('🔍 Base query created');
       
       // Build where conditions properly
