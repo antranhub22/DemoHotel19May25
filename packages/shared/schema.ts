@@ -115,3 +115,4 @@ export type DashboardStats = z.infer<typeof DashboardStatsSchema>;
 
 export const UsersSchema = insertStaffSchema; // Deprecated: Use insertStaffSchema
 export const OrdersSchema = insertRequestSchema; // Deprecated: Use insertRequestSchema
+export const insertOrderSchema = insertRequestSchema; // Alias for backward compatibility
