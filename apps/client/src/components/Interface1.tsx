@@ -51,33 +51,47 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   return (
     <InterfaceContainer>
-      {/* Hero Section with Siri Button and Conversation */}
+      {/* Hero Section with 3-Container Layout */}
       <div ref={heroSectionRef} className="relative">
         <InterfaceHeader />
         
-        {/* Main content area with Siri Button centered and Conversation responsive */}
-        <div className="relative flex items-start justify-center min-h-[400px] px-4">
-          {/* Conversation Section - positioned responsively */}
-          <ConversationSection
-            ref={conversationRef}
-            showConversation={showConversation}
-            onClose={handleCallEnd}
-            className="absolute md:left-4 md:top-0 top-full left-1/2 md:transform-none transform -translate-x-1/2 z-20"
-          />
+        {/* 3-Container Layout: Desktop = horizontal, Mobile = vertical */}
+        <div className="flex flex-col md:flex-row min-h-[400px] px-4 gap-4">
           
-          {/* Siri Button Container - centered */}
-          <div className="flex flex-col items-center">
-            <SiriButtonContainer
-              isCallStarted={isCallStarted}
-              micLevel={micLevel}
-              onCallStart={async (lang) => {
-                await handleCallStart(lang);
-              }}
-              onCallEnd={handleCallEnd}
-              onCancel={handleCancel}
-              onConfirm={handleConfirm}
+          {/* Container Trái - Conversation Section */}
+          <div className="flex-1 order-2 md:order-1 flex justify-center items-center pt-8">
+            <ConversationSection
+              ref={conversationRef}
+              showConversation={showConversation}
+              onClose={handleCallEnd}
+              className="w-[85%] z-20"
             />
           </div>
+          
+          {/* Container Giữa - Siri Button - Trung tâm hoàn hảo */}
+          <div className="flex-1 order-1 md:order-2 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
+              <SiriButtonContainer
+                isCallStarted={isCallStarted}
+                micLevel={micLevel}
+                onCallStart={async (lang) => {
+                  await handleCallStart(lang);
+                }}
+                onCallEnd={handleCallEnd}
+                onCancel={handleCancel}
+                onConfirm={handleConfirm}
+              />
+            </div>
+          </div>
+          
+          {/* Container Phải - Trống tạm thời */}
+          <div className="flex-1 order-3 hidden md:flex justify-center items-center pt-8">
+            {/* Để trống tạm thời - có thể thêm features sau */}
+            <div className="w-[85%] h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+              Future Features
+            </div>
+          </div>
+          
         </div>
       </div>
 
