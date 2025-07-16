@@ -279,7 +279,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         {/* Main content area */}
         <div className="flex flex-col items-center justify-center w-full">
           <h1 
-            className="text-4xl md:text-5xl font-bold text-white text-center mb-4"
+            className="text-4xl md:text-5xl font-bold text-white text-center mb-4 hidden md:block"
             style={{ 
               fontFamily: designSystem.fonts.primary,
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
@@ -293,24 +293,29 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </h1>
 
           {/* Siri Button Container */}
-          <div style={{ 
-            marginBottom: designSystem.spacing.xl,
-            marginTop: '1rem',
-            width: '357.5px',
-            height: '357.5px',
-            position: 'relative',
-            zIndex: 10
-          }}>
+          <div 
+            className="flex flex-col items-center"
+            style={{ 
+              marginBottom: designSystem.spacing.xl,
+              marginTop: '1rem',
+              width: '357.5px',
+              height: '357.5px',
+              position: 'relative',
+              zIndex: 10
+            }}
+          >
             <div 
               style={{ 
                 borderRadius: '50%',
                 boxShadow: designSystem.shadows.large,
-                background: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)',
                 width: '100%',
                 height: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
               }}
             >
               <SiriCallButton
@@ -323,6 +328,20 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   setShowConversation(false);
                 }}
               />
+            </div>
+            {/* Tap To Speak text - Only visible on mobile */}
+            <div
+              className="block md:hidden"
+              style={{
+                color: 'white',
+                fontSize: '1rem',
+                fontWeight: '500',
+                marginTop: '1rem',
+                textAlign: 'center',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
+              }}
+            >
+              Tap To Speak
             </div>
           </div>
 
