@@ -1770,7 +1770,7 @@ Mi Nhon Hotel Mui Ne`
           analytics: true
         },
         services: [],
-        supportedLanguages: ['en', 'vi', 'fr'],
+        supportedLanguages: ['en', 'fr', 'zh', 'ru', 'ko', 'vi'],
         vapiConfig: {
           publicKeys: {},
           assistantIds: {}
