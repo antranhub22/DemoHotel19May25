@@ -318,12 +318,22 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </div>
 
           {/* Voice Assistant Button */}
-          <div style={{ marginBottom: designSystem.spacing['2xl'] }}>
+          <div style={{ 
+            marginBottom: designSystem.spacing['2xl'],
+            marginTop: '2rem', // Add top margin for spacing
+            width: '550px', // Match button width
+            height: '550px', // Match button height
+          }}>
             <div 
               style={{ 
                 borderRadius: '50%',
                 boxShadow: designSystem.shadows.large,
-                background: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)'
+                background: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
               <SiriCallButton

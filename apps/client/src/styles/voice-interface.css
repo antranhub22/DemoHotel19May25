@@ -14,7 +14,7 @@
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0.4); }
-  70% { box-shadow: 0 0 0 20px rgba(27, 78, 139, 0); }
+  70% { box-shadow: 0 0 0 50px rgba(27, 78, 139, 0); } /* Increased pulse size */
   100% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0); }
 }
 
@@ -24,11 +24,13 @@
   background: linear-gradient(135deg, #1B4E8B, #3B82F6);
   animation: breathing 3s ease-in-out infinite;
   transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(27, 78, 139, 0.3); /* Added larger shadow */
 }
 
 .voice-button:hover {
   transform: scale(1.02);
   background: linear-gradient(135deg, #2563EB, #1B4E8B);
+  box-shadow: 0 15px 40px rgba(27, 78, 139, 0.4); /* Enhanced hover shadow */
 }
 
 .voice-button:active {
@@ -42,35 +44,35 @@
 
 .waveform-container {
   position: absolute;
-  bottom: -30px;
+  bottom: -75px; /* Adjusted position */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 3px;
-  height: 20px;
+  gap: 7.5px; /* Increased gap */
+  height: 50px; /* Increased height */
 }
 
 .waveform-bar {
-  width: 3px;
+  width: 7.5px; /* Increased width */
   height: 100%;
   background: #1B4E8B;
-  border-radius: 3px;
+  border-radius: 7.5px; /* Increased radius */
   transform-origin: bottom;
 }
 
 .status-indicator {
   position: absolute;
-  top: -30px;
+  top: -75px; /* Adjusted position */
   left: 50%;
   transform: translateX(-50%);
-  padding: 5px 15px;
-  border-radius: 15px;
-  font-size: 14px;
+  padding: 12.5px 37.5px; /* Increased padding */
+  border-radius: 37.5px; /* Increased radius */
+  font-size: 35px; /* Increased font size */
   font-weight: 500;
   color: white;
   background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(12.5px); /* Increased blur */
   transition: all 0.3s ease;
 }
 

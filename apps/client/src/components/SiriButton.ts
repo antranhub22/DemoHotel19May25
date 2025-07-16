@@ -43,12 +43,12 @@ export class SiriButton {
     if (!ctx) throw new Error('Could not get canvas context');
     this.ctx = ctx;
     
-    // Initialize properties
-    this.width = 200;
-    this.height = 200;
+    // Initialize properties with larger dimensions
+    this.width = 500;  // Increased base size
+    this.height = 500; // Increased base size
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = 40;
+    this.radius = 100;  // Increased base radius
     this.ripples = [];
     this.isListening = false;
     this.pulsePhase = 0;
@@ -218,9 +218,9 @@ export class SiriButton {
     if (this.isActive) breath *= 0.95;
     this.ctx.save();
     this.ctx.translate(this.centerX + offsetX, this.centerY + offsetY);
-    this.ctx.scale(breath, breath);
+    this.ctx.scale(breath * 2.5, breath * 2.5); // Scale up the mic icon
     this.ctx.shadowColor = this.isHovered ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.7)';
-    this.ctx.shadowBlur = 16 + 8 * breath + (this.isHovered ? 8 : 0);
+    this.ctx.shadowBlur = 40 + 20 * breath + (this.isHovered ? 20 : 0); // Increased shadow blur
     this.ctx.beginPath();
     this.ctx.moveTo(0, 18);
     this.ctx.arc(0, 0, 18, Math.PI * 0.15, Math.PI * 1.85, false);
@@ -415,9 +415,9 @@ export class SiriButton {
   }
 
   private animate() {
-    // Responsive: update radius based on container size
-    const isMobile = Math.min(this.width, this.height) < 340;
-    this.radius = isMobile ? Math.max(32, Math.min(this.width, this.height) / 2.8) : Math.max(36, Math.min(this.width, this.height) / 5.2);
+    // Responsive: update radius based on container size with larger base size
+    const isMobile = Math.min(this.width, this.height) < 850; // Adjusted threshold
+    this.radius = isMobile ? Math.max(80, Math.min(this.width, this.height) / 2.8) : Math.max(90, Math.min(this.width, this.height) / 5.2);
     // Clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
     // Draw all elements

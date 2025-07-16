@@ -138,8 +138,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       {/* Main Button */}
       <div 
         id={containerId}
-        className={`voice-button ${isListening ? 'listening' : ''} w-[220px] h-[220px] relative rounded-full overflow-visible`}
-        style={{ cursor: 'pointer' }}
+        className={`voice-button ${isListening ? 'listening' : ''} w-[550px] h-[550px] relative rounded-full overflow-visible`}
+        style={{ 
+          cursor: 'pointer',
+          transform: 'translate(-25%, -25%)', // Adjust position to maintain center alignment
+          margin: '25% auto' // Add margin to prevent overlap
+        }}
         onClick={(e) => {
           console.log('[SiriCallButton] Div click detected!');
           // Fallback click handler
