@@ -8,7 +8,7 @@ interface ServiceGridContainerProps {
 export const ServiceGridContainer = forwardRef<HTMLDivElement, ServiceGridContainerProps>(
   ({ className = "" }, ref) => {
     return (
-      <div ref={ref} className={`w-full max-w-full ${className}`}>
+      <div ref={ref} className={`w-full max-w-full hidden md:block ${className}`}>
         <ServiceGrid />
       </div>
     );
