@@ -146,7 +146,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   return (
     <div className="relative flex items-center justify-center">
       {/* Status Indicator */}
-      {status !== 'idle' && (
+      {status !== 'idle' && status !== 'listening' && (
         <div 
           className={`status-indicator ${status} absolute -top-12 left-1/2 transform -translate-x-1/2`}
           style={{
