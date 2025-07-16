@@ -1,0 +1,109 @@
+/* Voice Interface Animations */
+
+@keyframes breathing {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes waveform {
+  0% { transform: scaleY(0.1); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.1); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0.4); }
+  70% { box-shadow: 0 0 0 20px rgba(27, 78, 139, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0); }
+}
+
+.voice-button {
+  position: relative;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1B4E8B, #3B82F6);
+  animation: breathing 3s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.voice-button:hover {
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #2563EB, #1B4E8B);
+}
+
+.voice-button:active {
+  transform: scale(0.98);
+}
+
+.voice-button.listening {
+  animation: pulse 2s infinite;
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+}
+
+.waveform-container {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+}
+
+.waveform-bar {
+  width: 3px;
+  height: 100%;
+  background: #1B4E8B;
+  border-radius: 3px;
+  transform-origin: bottom;
+}
+
+.status-indicator {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.status-indicator.listening {
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.status-indicator.processing {
+  background: rgba(245, 158, 11, 0.9);
+}
+
+.status-indicator.speaking {
+  background: rgba(16, 185, 129, 0.9);
+}
+
+/* Gradient Ring Effect */
+.gradient-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(27, 78, 139, 0.2),
+    rgba(59, 130, 246, 0.4),
+    rgba(27, 78, 139, 0.2)
+  );
+  animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+} 

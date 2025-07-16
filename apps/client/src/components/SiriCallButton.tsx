@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SiriButton } from './SiriButton';
+import '../styles/voice-interface.css';
 
 interface SiriCallButtonProps {
   isListening: boolean;
@@ -18,6 +19,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 }) => {
   const buttonRef = useRef<SiriButton | null>(null);
   const clickHandlerRef = useRef<((event: Event) => void) | null>(null);
+  const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
+  const [waveformBars] = useState(() => Array(12).fill(0));
+
+  // Effect for status changes based on isListening
+  useEffect(() => {
+    if (isListening) {
+      setStatus('listening');
+    } else {
+      setStatus('idle');
+    }
+  }, [isListening]);
 
   useEffect(() => {
     console.log('[SiriCallButton] Initializing with containerId:', containerId);
@@ -33,14 +45,18 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       
       if (!isListening && onCallStart) {
         console.log('[SiriCallButton] Calling onCallStart');
+        setStatus('listening');
         try {
           await onCallStart();
         } catch (error) {
           console.error('[SiriCallButton] Error in onCallStart:', error);
+          setStatus('idle');
         }
       } else if (isListening && onCallEnd) {
         console.log('[SiriCallButton] Calling onCallEnd');
+        setStatus('processing');
         onCallEnd();
+        setTimeout(() => setStatus('idle'), 500);
       }
     };
 
@@ -102,23 +118,63 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
   }, [volumeLevel]);
 
+  // Status text mapping
+  const statusText = {
+    idle: '',
+    listening: 'Listening...',
+    processing: 'Processing...',
+    speaking: 'Speaking...'
+  };
+
   return (
-    <div 
-      id={containerId}
-      className="w-[220px] h-[220px] relative rounded-full overflow-visible"
-      style={{ cursor: 'pointer', borderRadius: '50%' }}
-      onClick={(e) => {
-        console.log('[SiriCallButton] Div click detected!');
-        // Fallback click handler
-        if (!isListening && onCallStart) {
-          console.log('[SiriCallButton] Fallback - calling onCallStart');
-          onCallStart();
-        } else if (isListening && onCallEnd) {
-          console.log('[SiriCallButton] Fallback - calling onCallEnd');
-          onCallEnd();
-        }
-      }}
-    />
+    <div className="relative">
+      {/* Status Indicator */}
+      {status !== 'idle' && (
+        <div className={`status-indicator ${status}`}>
+          {statusText[status]}
+        </div>
+      )}
+
+      {/* Main Button */}
+      <div 
+        id={containerId}
+        className={`voice-button ${isListening ? 'listening' : ''} w-[220px] h-[220px] relative rounded-full overflow-visible`}
+        style={{ cursor: 'pointer' }}
+        onClick={(e) => {
+          console.log('[SiriCallButton] Div click detected!');
+          // Fallback click handler
+          if (!isListening && onCallStart) {
+            console.log('[SiriCallButton] Fallback - calling onCallStart');
+            setStatus('listening');
+            onCallStart();
+          } else if (isListening && onCallEnd) {
+            console.log('[SiriCallButton] Fallback - calling onCallEnd');
+            setStatus('processing');
+            onCallEnd();
+            setTimeout(() => setStatus('idle'), 500);
+          }
+        }}
+      >
+        {/* Gradient Ring Effect */}
+        <div className="gradient-ring" />
+      </div>
+
+      {/* Waveform Animation */}
+      {isListening && (
+        <div className="waveform-container">
+          {waveformBars.map((_, index) => (
+            <div
+              key={index}
+              className="waveform-bar"
+              style={{
+                animation: `waveform ${0.5 + Math.random() * 0.5}s ease-in-out infinite`,
+                animationDelay: `${index * 0.1}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
