@@ -57,7 +57,7 @@ export interface HotelConfiguration {
 const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
   hotelName: 'Mi Nhon Hotel Mui Ne',
   logoUrl: '/assets/references/images/minhon-logo.jpg',
-  primaryColor: '#1e40af',
+  primaryColor: '#1B4E8B',  // Updated to match Interface1's primary color
   headerText: 'Mi Nhon Hotel Mui Ne',
   
   vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
@@ -66,9 +66,9 @@ const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
   branding: {
     logo: '/assets/references/images/minhon-logo.jpg',
     colors: {
-      primary: '#1e40af',
-      secondary: '#d4af37',
-      accent: '#f59e0b'
+      primary: '#1B4E8B',    // Updated to match Interface1's primary color
+      secondary: '#3B82F6',   // Updated to match Interface1's secondary color
+      accent: '#8B5CF6'       // Updated to match Interface1's accent color
     },
     fonts: {
       primary: 'Poppins',
