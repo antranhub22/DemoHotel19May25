@@ -8,13 +8,17 @@ interface SiriButtonContainerProps {
   micLevel: number;
   onCallStart: (lang: Language) => Promise<void>;
   onCallEnd: () => void;
+  onCancel?: () => void;
+  onConfirm?: () => void;
 }
 
 export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   isCallStarted,
   micLevel,
   onCallStart,
-  onCallEnd
+  onCallEnd,
+  onCancel,
+  onConfirm
 }) => {
   return (
     <div 
@@ -58,6 +62,35 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       >
         Tap To Speak
       </div>
+
+      {/* Cancel and Confirm buttons - Show only when call is active */}
+      {isCallStarted && (
+        <div className="flex gap-4 mt-4">
+          {/* Cancel Button */}
+          <button
+            onClick={onCancel}
+            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full font-medium transition-colors duration-200 shadow-lg"
+            style={{
+              minWidth: '100px',
+              fontSize: '0.9rem'
+            }}
+          >
+            Cancel
+          </button>
+
+          {/* Confirm Button */}
+          <button
+            onClick={onConfirm}
+            className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full font-medium transition-colors duration-200 shadow-lg"
+            style={{
+              minWidth: '100px',
+              fontSize: '0.9rem'
+            }}
+          >
+            Confirm
+          </button>
+        </div>
+      )}
     </div>
   );
 }; 

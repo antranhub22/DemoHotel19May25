@@ -1,4 +1,5 @@
 import { useState, useEffect, RefObject } from 'react';
+import { useAssistant } from '@/context/AssistantContext';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { Language } from '@/types/interface1.types';
 
@@ -11,13 +12,32 @@ interface UseConversationStateReturn {
   showConversation: boolean;
   handleCallStart: (lang: Language) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
+  handleCancel: () => void;
+  handleConfirm: () => void;
 }
 
 export const useConversationState = ({ 
   conversationRef 
 }: UseConversationStateProps): UseConversationStateReturn => {
+  // Use AssistantContext for real vapi integration
+  const { 
+    startCall, 
+    endCall, 
+    callDuration,
+    setCurrentInterface,
+    transcripts,
+    setLanguage
+  } = useAssistant();
+  
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+
+  // Sync with AssistantContext call state using callDuration
+  useEffect(() => {
+    const isActive = callDuration > 0;
+    setIsCallStarted(isActive);
+    setShowConversation(isActive || transcripts.length > 0);
+  }, [callDuration, transcripts.length]);
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
@@ -32,18 +52,22 @@ export const useConversationState = ({
     }
   }, [showConversation, conversationRef]);
 
-  const handleCall = async (lang: Language): Promise<{ success: boolean; error?: string }> => {
+  const handleCallStart = async (lang: Language): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Call handling logic here - this would be replaced with actual implementation
-      // For now, we'll simulate the original behavior
-      console.log('Starting call with language:', lang);
+      console.log('🎤 [useConversationState] Starting call with language:', lang);
       
-      // Simulate async call operation
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Set language before starting call
+      setLanguage(lang);
+      
+      // Use AssistantContext startCall method but prevent interface switching
+      await startCall();
+      
+      // Force stay on interface1 instead of switching to interface2
+      setCurrentInterface('interface1');
       
       return { success: true };
     } catch (error) {
-      console.error('Error in handleCall:', error);
+      console.error('❌ [useConversationState] Error in handleCallStart:', error);
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Failed to start call' 
@@ -51,24 +75,53 @@ export const useConversationState = ({
     }
   };
 
-  const handleCallStart = async (lang: Language): Promise<{ success: boolean; error?: string }> => {
-    const result = await handleCall(lang);
-    if (result.success) {
-      setIsCallStarted(true);
-      setShowConversation(true);
-    }
-    return result;
-  };
-
   const handleCallEnd = (): void => {
+    console.log('🛑 [useConversationState] Ending call');
+    
+    // Use AssistantContext endCall method
+    endCall();
+    
+    // Reset local state
     setIsCallStarted(false);
     setShowConversation(false);
+  };
+
+  const handleCancel = (): void => {
+    console.log('❌ [useConversationState] Cancel call - Stop and refresh system');
+    
+    // End the call first
+    endCall();
+    
+    // Force refresh to interface1 (this will trigger full system reset in AssistantContext)
+    setCurrentInterface('interface1');
+    
+    console.log('✅ [useConversationState] System refreshed - all states reset');
+  };
+
+  const handleConfirm = (): void => {
+    console.log('✅ [useConversationState] Confirm call - Stop and prepare summary');
+    
+    // End the call but preserve transcripts for summary
+    endCall();
+    
+    // Reset call state but keep conversation data
+    setIsCallStarted(false);
+    setShowConversation(false);
+    
+    // TODO: Show summary popup (will be implemented later)
+    console.log('🔄 [TODO] Show summary popup for conversation');
+    console.log('📝 [TODO] Conversation data preserved:', { transcriptsCount: transcripts.length });
+    
+    // For now, stay on interface1 (later this will show summary popup)
+    setCurrentInterface('interface1');
   };
 
   return {
     isCallStarted,
     showConversation,
     handleCallStart,
-    handleCallEnd
+    handleCallEnd,
+    handleCancel,
+    handleConfirm
   };
 }; 

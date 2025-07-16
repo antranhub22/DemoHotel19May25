@@ -35,7 +35,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     isCallStarted,
     showConversation,
     handleCallStart,
-    handleCallEnd
+    handleCallEnd,
+    handleCancel,
+    handleConfirm
   } = useInterface1({ isActive });
 
   // Early returns
@@ -59,6 +61,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             await handleCallStart(lang);
           }}
           onCallEnd={handleCallEnd}
+          onCancel={handleCancel}
+          onConfirm={handleConfirm}
         />
       </div>
 

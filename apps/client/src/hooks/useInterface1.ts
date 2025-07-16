@@ -29,6 +29,8 @@ interface UseInterface1Return {
   showConversation: boolean;
   handleCallStart: (lang: any) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
+  handleCancel: () => void;
+  handleConfirm: () => void;
 }
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {

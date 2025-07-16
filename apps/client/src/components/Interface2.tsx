@@ -37,6 +37,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     transcripts, 
     callDetails,
     callDuration,
+    startCall,
     endCall: contextEndCall,
     isMuted,
     toggleMute,
@@ -296,6 +297,18 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
               containerId="siri-button"
               isListening={!isMuted}
               volumeLevel={micLevel}
+              onCallStart={async () => {
+                console.log('🎤 [Interface2] SiriCallButton onCallStart triggered');
+                try {
+                  await startCall();
+                } catch (error) {
+                  console.error('❌ [Interface2] Error in SiriCallButton onCallStart:', error);
+                }
+              }}
+              onCallEnd={() => {
+                console.log('🛑 [Interface2] SiriCallButton onCallEnd triggered');
+                contextEndCall();
+              }}
             />
             {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
             <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">
