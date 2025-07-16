@@ -1,7 +1,11 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
+import hotelImage from '@/assets/hotel-exterior.jpeg';
+import styles from './Interface1.module.css';
 import { t } from '@/i18n';
+import { ActiveOrder } from '@/types';
+import { initVapi, getVapiInstance, resetVapi } from '@/lib/vapiClient';
 import { FaGlobeAsia, FaBed, FaUtensils, FaConciergeBell, FaSwimmingPool, FaSpa, FaGlassMartini, FaTaxi, FaMapMarkedAlt, FaPhoneAlt } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
@@ -58,15 +62,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   // --- MEMOIZED VALUES ---
-  // Removed unused time memo
-  // const currentTime = useMemo(() => new Date(), []);
+  const currentTime = useMemo(() => new Date(), []);
 
   // Enhanced Design System Constants
   const designSystem = {
     colors: {
-      primary: '#1B4E8B',      // Original blue-purple
-      secondary: '#3B82F6',    // Original complementary blue
-      accent: '#8B5CF6',       // Original purple accent
+      primary: '#1B4E8B',      // New modern blue-purple
+      secondary: '#3B82F6',    // Complementary blue
+      accent: '#8B5CF6',       // Purple accent
       surface: 'rgba(255, 255, 255, 0.1)',
       surfaceHover: 'rgba(255, 255, 255, 0.2)',
       text: '#FFFFFF',
@@ -140,15 +143,15 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       console.log('[Interface1] Initializing Vapi with public key:', publicKey);
       setLanguage(lang); // Set language before starting call
       
-      // const vapi = await initVapi(publicKey); // This line was removed as per the edit hint
-      if (/* vapi && */ assistantId) { // This line was removed as per the edit hint
+      const vapi = await initVapi(publicKey);
+      if (vapi && assistantId) {
         console.log('[Interface1] Starting Vapi call with assistant ID:', assistantId);
         
         // Set call started state immediately
         setIsCallStarted(true);
         setShowConversation(true);
         
-        // await vapi.start(assistantId); // This line was removed as per the edit hint
+        await vapi.start(assistantId);
         console.log('[Interface1] Vapi call started successfully');
         
         // Chuyển sang Interface2 ngay sau khi call thành công
@@ -254,28 +257,74 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   }
 
   return (
-    <div 
-      className="relative min-h-screen w-full overflow-x-hidden bg-gray-900"
-      style={{
-        fontFamily: designSystem.fonts.primary,
-        minHeight: '100vh',
-        overflowX: 'hidden',
-        backgroundColor: '#1a1a1a' // Dark background instead of gradient
-      }}
-    >
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Main Content */}
-        <div className="flex flex-col items-center justify-center space-y-8 md:space-y-12">
-          {/* Title - Hidden on mobile */}
+    <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}>
+      {/* Main Interface Content */}
+      <div 
+        className={`relative w-full h-full overflow-y-auto overflow-x-hidden ${styles.scrollbarThin}`}
+        style={{
+          backgroundImage: `linear-gradient(135deg, ${designSystem.colors.primary}DD, ${designSystem.colors.secondary}AA), url(${hotelImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+          fontFamily: designSystem.fonts.primary,
+          WebkitOverflowScrolling: 'touch',
+          scrollBehavior: 'smooth'
+        }}
+      >
+        {/* Header with time and date - Fixed position on mobile */}
+        <div 
+          className="sticky top-0 left-0 right-0 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/50 to-transparent md:absolute md:bg-none"
+          style={{ 
+            padding: `${designSystem.spacing.md} ${designSystem.spacing.md}`,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+        >
+          <div className="text-left">
+            <div 
+              className="font-bold"
+              style={{ 
+                fontSize: '24px',
+                textShadow: designSystem.shadows.subtle,
+                marginBottom: designSystem.spacing.xs
+              }}
+            >
+              {currentTime.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+              })}
+            </div>
+            <div 
+              className="opacity-90"
+              style={{ 
+                fontSize: '16px',
+                textShadow: designSystem.shadows.subtle
+              }}
+            >
+              {currentTime.toLocaleDateString('en-US', { 
+                weekday: 'long',
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Main content area - Scrollable container */}
+        <div className="flex flex-col items-center justify-start w-full min-h-screen pb-20 md:justify-center md:pb-0">
           <h1 
-            className="hidden md:block text-4xl md:text-5xl font-bold text-center text-white mb-8"
+            className="text-4xl md:text-5xl font-bold text-white text-center mb-4 hidden md:block"
             style={{ 
-              textShadow: designSystem.shadows.subtle,
+              fontFamily: designSystem.fonts.primary,
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+              marginTop: '2rem',
+              lineHeight: '1.4',
               maxWidth: '800px',
-              lineHeight: 1.2
+              margin: '2rem auto'
             }}
           >
-            {t('speak_multiple_languages')}
+            Speak Multiple Languages<br/>With Our AI Voice Assistant
           </h1>
 
           {/* Siri Button Container */}
@@ -447,7 +496,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         {/* Scroll to top button - Only visible when scrolled */}
         {showScrollButton && (
           <button
-            className={`fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden`}
+            className={`fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden ${styles.scrollToTopButton}`}
             onClick={() => {
               window.scrollTo({
                 top: 0,
