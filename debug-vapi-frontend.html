@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Vapi Frontend</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .result { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Debug Vapi Language Selection</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: API Endpoints</h3>
+        <button onclick="testAPIEndpoints()">Test All Language APIs</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 2: Frontend Cache</h3>
+        <button onclick="testFrontendCache()">Check Frontend Assets</button>
+        <div id="cache-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Test 3: Language Selection Flow</h3>
+        <button onclick="testLanguageFlow()">Test Language Selection</button>
+        <div id="flow-results"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://demohotel19may25.onrender.com';
+        const LANGUAGES = ['en', 'fr', 'vi', 'zh', 'ru', 'ko'];
+
+        async function testAPIEndpoints() {
+            const resultsDiv = document.getElementById('api-results');
+            resultsDiv.innerHTML = '<p>Testing API endpoints...</p>';
+            
+            const results = [];
+            
+            for (const lang of LANGUAGES) {
+                try {
+                    const response = await fetch(`${BASE_URL}/api/vapi/config/${lang}`);
+                    const data = await response.json();
+                    
+                    const status = data.fallback ? '⚠️ FALLBACK' : '✅ SUCCESS';
+                    const assistantId = data.assistantId ? data.assistantId.substring(0, 8) + '...' : 'NOT SET';
+                    
+                    results.push(`<div class="${data.fallback ? 'error' : 'success'}">${status} ${lang.toUpperCase()}: ${assistantId}</div>`);
+                } catch (error) {
+                    results.push(`<div class="error">❌ ERROR ${lang.toUpperCase()}: ${error.message}</div>`);
+                }
+            }
+            
+            resultsDiv.innerHTML = results.join('');
+        }
+
+        async function testFrontendCache() {
+            const resultsDiv = document.getElementById('cache-results');
+            resultsDiv.innerHTML = '<p>Checking frontend assets...</p>';
+            
+            try {
+                // Check if main app uses new API
+                const response = await fetch(`${BASE_URL}/`);
+                const html = await response.text();
+                
+                // Look for our new API endpoint in the bundled JavaScript
+                const hasNewAPI = html.includes('/api/vapi/config/');
+                
+                const result = hasNewAPI 
+                    ? '<div class="success">✅ Frontend includes new API endpoint</div>'
+                    : '<div class="error">❌ Frontend may be using cached old version</div>';
+                
+                resultsDiv.innerHTML = result + 
+                    '<div class="result">If cached, try: Hard refresh (Ctrl+Shift+R) or Incognito mode</div>';
+                    
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testLanguageFlow() {
+            const resultsDiv = document.getElementById('flow-results');
+            resultsDiv.innerHTML = '<p>Testing language selection flow...</p>';
+            
+            const results = [];
+            
+            // Test if the current page can access the new API
+            try {
+                const response = await fetch(`${BASE_URL}/api/vapi/config/fr`);
+                const data = await response.json();
+                
+                if (data.fallback === false && data.assistantId) {
+                    results.push('<div class="success">✅ API accessible from frontend</div>');
+                    results.push(`<div class="result">French Assistant ID: ${data.assistantId}</div>`);
+                } else {
+                    results.push('<div class="error">❌ API not working properly</div>');
+                }
+            } catch (error) {
+                results.push(`<div class="error">❌ Cannot access API: ${error.message}</div>`);
+            }
+            
+            // Check localStorage for any cached values
+            const cachedData = Object.keys(localStorage)
+                .filter(key => key.includes('vapi') || key.includes('language') || key.includes('assistant'))
+                .map(key => `${key}: ${localStorage.getItem(key)}`)
+                .join(', ');
+                
+            if (cachedData) {
+                results.push(`<div class="result">LocalStorage cache: ${cachedData}</div>`);
+                results.push('<div class="result">Try clearing localStorage if needed</div>');
+            } else {
+                results.push('<div class="result">No relevant localStorage cache found</div>');
+            }
+            
+            resultsDiv.innerHTML = results.join('');
+        }
+
+        // Auto-run tests on page load
+        window.onload = function() {
+            console.log('🔧 Debug page loaded - running automatic tests...');
+            testAPIEndpoints();
+        };
+    </script>
+</body>
+</html> 
