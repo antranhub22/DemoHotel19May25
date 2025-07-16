@@ -353,9 +353,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           <div 
             className="grid w-full max-w-7xl"
             style={{ 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', // Reduced from 200px to 50px
               gap: designSystem.spacing.md,
-              marginBottom: designSystem.spacing.xl
+              marginBottom: designSystem.spacing.xl,
+              transform: 'scale(0.25)', // Scale down to 25%
+              transformOrigin: 'center center'
             }}
           >
             {/* Local Tourism Info */}
@@ -374,7 +376,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🏖️</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('local_tourism_info', language)}</h3>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Local Tourism Info</h3>
               {activeTooltip === 'tourism' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -406,7 +408,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🍽️</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('room_service', language)}</h3>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Room Service</h3>
               {activeTooltip === 'room_service' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -438,7 +440,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🧹</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('housekeeping', language)}</h3>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Housekeeping</h3>
               {activeTooltip === 'housekeeping' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -469,8 +471,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>💬</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('guest_feedback', language)}</h3>
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>📝</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Guest Feedback</h3>
               {activeTooltip === 'feedback' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -662,7 +664,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>👕</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('laundry_service', language)}</h3>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Laundry Service</h3>
               {activeTooltip === 'laundry' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -674,6 +676,38 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   }}
                 >
                   {t('laundry_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Wake-up Call */}
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('wake_up')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>⏰</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Wake-up Call</h3>
+              {activeTooltip === 'wake_up' && (
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
+                  {t('wake_up_tooltip', language)}
                 </div>
               )}
             </div>
@@ -694,7 +728,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🏠</div>
-              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('homestay', language)}</h3>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Homestay Service</h3>
               {activeTooltip === 'homestay' && (
                 <div 
                   className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
@@ -706,6 +740,102 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   }}
                 >
                   {t('homestay_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Restaurant */}
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('restaurant')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🍴</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Restaurant Service</h3>
+              {activeTooltip === 'restaurant' && (
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
+                  {t('restaurant_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Spa */}
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('spa')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>💆</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Spa Service</h3>
+              {activeTooltip === 'spa' && (
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
+                  {t('spa_tooltip', language)}
+                </div>
+              )}
+            </div>
+
+            {/* Transportation */}
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('transportation')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🚗</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>Transportation Service</h3>
+              {activeTooltip === 'transportation' && (
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
+                  {t('transportation_tooltip', language)}
                 </div>
               )}
             </div>
