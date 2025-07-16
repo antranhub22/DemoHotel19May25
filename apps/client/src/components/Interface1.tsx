@@ -67,9 +67,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   // Enhanced Design System Constants
   const designSystem = {
     colors: {
-      primary: '#1B4E8B',      // New modern blue-purple
-      secondary: '#3B82F6',    // Complementary blue
-      accent: '#8B5CF6',       // Purple accent
+      primary: '#1B4E8B',      // Restored to original blue-purple
+      secondary: '#3B82F6',    // Restored to original complementary blue
+      accent: '#8B5CF6',       // Restored to original purple accent
       surface: 'rgba(255, 255, 255, 0.1)',
       surfaceHover: 'rgba(255, 255, 255, 0.2)',
       text: '#FFFFFF',
