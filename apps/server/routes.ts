@@ -312,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             
             // Store transcript in database
-            // await storage.addTranscript(validatedData); // TODO: Fix validation data
+            await storage.addTranscript(validatedData);
             
             // Broadcast transcript to all clients with matching callId
             const message = JSON.stringify({
@@ -405,6 +405,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(transcripts);
     } catch (error) {
       handleApiError(res, error, 'Failed to retrieve transcripts');
+    }
+  });
+  
+  // Save transcript from client (VAPI integration)
+  app.post('/api/transcripts', async (req, res) => {
+    try {
+      const { callId, role, content, tenantId } = req.body;
+      
+      console.log('POST /api/transcripts request body:', req.body);
+      
+      if (!callId || !role || !content) {
+        return res.status(400).json({ 
+          error: 'callId, role, and content are required' 
+        });
+      }
+      
+      // Prepare transcript data for database
+      const transcriptData = {
+        callId,
+        role,
+        content,
+        tenantId: tenantId || 'default',
+        timestamp: Date.now()
+      };
+      
+      console.log('Prepared transcript data:', transcriptData);
+      
+      // Save to database
+      const savedTranscript = await storage.addTranscript(transcriptData);
+      
+      console.log(`Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
+      console.log('Saved transcript result:', savedTranscript);
+      
+      res.json({ 
+        success: true, 
+        data: savedTranscript
+      });
+    } catch (error) {
+      console.error('Error in POST /api/transcripts:', error);
+      console.error('Error stack:', error.stack);
+      handleApiError(res, error, 'Failed to save transcript');
     }
   });
   

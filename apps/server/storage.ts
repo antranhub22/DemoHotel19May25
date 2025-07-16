@@ -48,8 +48,18 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
   
-  async addTranscript(insertTranscript: InsertTranscript): Promise<Transcript> {
-    const result = await db.insert(transcript).values(insertTranscript).returning();
+  async addTranscript(insertTranscript: InsertTranscript | any): Promise<Transcript> {
+    // Fix field mapping: Support both API format (callId) and database format (call_id)
+    const dbTranscript = {
+      call_id: insertTranscript.callId || insertTranscript.call_id,
+      content: insertTranscript.content,
+      role: insertTranscript.role,
+      timestamp: insertTranscript.timestamp || Date.now(),
+      tenant_id: insertTranscript.tenantId || insertTranscript.tenant_id || 'default'
+    };
+    
+    console.log('Inserting transcript into database:', dbTranscript);
+    const result = await db.insert(transcript).values(dbTranscript).returning();
     return result[0];
   }
   

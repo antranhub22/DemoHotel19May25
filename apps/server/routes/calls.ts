@@ -101,7 +101,7 @@ router.post('/test-transcript', async (req, res) => {
     }
     
     // Store transcript in database
-    // await storage.addTranscript(validatedData); // TODO: Fix validation data
+    await storage.addTranscript(validatedData);
     
     console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
     

@@ -1,4 +1,4 @@
-// Interface1 component - Multi-tenant version v2.0.0
+// Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '@/assets/hotel-exterior.jpeg';
@@ -45,6 +45,36 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   // --- MEMOIZED VALUES ---
   const currentTime = useMemo(() => new Date(), []);
+
+  // Enhanced Design System Constants
+  const designSystem = {
+    colors: {
+      primary: '#1B4E8B',      // New modern blue-purple
+      secondary: '#3B82F6',    // Complementary blue
+      accent: '#8B5CF6',       // Purple accent
+      surface: 'rgba(255, 255, 255, 0.1)',
+      surfaceHover: 'rgba(255, 255, 255, 0.2)',
+      text: '#FFFFFF',
+      textSecondary: 'rgba(255, 255, 255, 0.9)'
+    },
+    fonts: {
+      primary: "'Inter', 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    },
+    spacing: {
+      xs: '8px',    // 8px grid base
+      sm: '16px',   // 2 * 8px
+      md: '24px',   // 3 * 8px
+      lg: '32px',   // 4 * 8px
+      xl: '40px',   // 5 * 8px
+      '2xl': '48px' // 6 * 8px
+    },
+    shadows: {
+      subtle: '0 2px 8px rgba(0, 0, 0, 0.1)',
+      card: '0 4px 16px rgba(0, 0, 0, 0.15)',
+      button: '0 2px 12px rgba(27, 78, 139, 0.3)',
+      large: '0 8px 32px rgba(0, 0, 0, 0.2)'
+    }
+  };
 
   // --- CALLBACKS ---
   const handleCall = useCallback(async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
@@ -162,10 +192,19 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   // Loading state
   if (configLoading || !hotelConfig) {
     return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+      <div 
+        className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
+        style={{ 
+          background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.secondary})`,
+          fontFamily: designSystem.fonts.primary
+        }}
+      >
+        <div className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl" style={{ boxShadow: designSystem.shadows.card }}>
+          <div 
+            className="animate-spin rounded-full border-4 border-white/20 border-t-white mx-auto mb-6"
+            style={{ width: '64px', height: '64px' }}
+          ></div>
+          <p className="text-white text-lg font-medium">Loading hotel configuration...</p>
         </div>
       </div>
     );
@@ -174,10 +213,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   // Error state
   if (configError) {
     return (
-      <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
-        <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
-          <p className="text-gray-600">{configError}</p>
+      <div 
+        className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
+        style={{ 
+          background: `linear-gradient(135deg, ${designSystem.colors.primary}, #EF4444)`,
+          fontFamily: designSystem.fonts.primary
+        }}
+      >
+        <div className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl" style={{ boxShadow: designSystem.shadows.card }}>
+          <div className="text-white text-xl font-semibold mb-4">Failed to load hotel configuration</div>
+          <p className="text-white/80">{configError}</p>
         </div>
       </div>
     );
@@ -189,23 +234,39 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
       <div 
         className="relative w-full h-full overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url(${hotelImage})`,
+          backgroundImage: `linear-gradient(135deg, ${designSystem.colors.primary}DD, ${designSystem.colors.secondary}AA), url(${hotelImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+          fontFamily: designSystem.fonts.primary
         }}
       >
         {/* Header with time and date */}
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-white z-20">
+        <div 
+          className="absolute left-0 right-0 flex justify-between items-center text-white z-20"
+          style={{ top: designSystem.spacing.md, padding: `0 ${designSystem.spacing.md}` }}
+        >
           <div className="text-left">
-            <div className="text-lg font-semibold">
+            <div 
+              className="font-bold"
+              style={{ 
+                fontSize: '24px',
+                textShadow: designSystem.shadows.subtle,
+                marginBottom: designSystem.spacing.xs
+              }}
+            >
               {currentTime.toLocaleTimeString('en-US', { 
                 hour: '2-digit', 
                 minute: '2-digit',
                 hour12: false 
               })}
             </div>
-            <div className="text-sm opacity-90">
+            <div 
+              className="opacity-90"
+              style={{ 
+                fontSize: '16px',
+                textShadow: designSystem.shadows.subtle
+              }}
+            >
               {currentTime.toLocaleDateString('en-US', { 
                 weekday: 'long',
                 month: 'long', 
@@ -216,38 +277,75 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col items-center justify-center h-full p-4">
+        <div 
+          className="flex flex-col items-center justify-center h-full"
+          style={{ padding: designSystem.spacing.md }}
+        >
           {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+          <div 
+            className="text-center"
+            style={{ marginBottom: designSystem.spacing.xl }}
+          >
+            <h1 
+              className="font-bold text-white"
+              style={{ 
+                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                textShadow: designSystem.shadows.large,
+                marginBottom: designSystem.spacing.md,
+                lineHeight: '1.1'
+              }}
+            >
               {t('speak_multiple_languages', language)}
             </h1>
-            <p className="text-xl text-white/90 mb-8" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+            <p 
+              className="text-white/90"
+              style={{ 
+                fontSize: '1.25rem',
+                textShadow: designSystem.shadows.subtle,
+                marginBottom: designSystem.spacing.xl
+              }}
+            >
               {t('tap_to_speak', language)}
             </p>
           </div>
 
           {/* Voice Assistant Button */}
-          <div className="mb-12">
-            <SiriCallButton
-              containerId="main-siri-button"
-              isListening={isCallStarted}
-              volumeLevel={micLevel}
-              onCallStart={() => handleCall(language)}
-              onCallEnd={() => {
-                setIsCallStarted(false);
-                setShowConversation(false);
+          <div style={{ marginBottom: designSystem.spacing['2xl'] }}>
+            <div 
+              style={{ 
+                borderRadius: '50%',
+                boxShadow: designSystem.shadows.large,
+                background: 'radial-gradient(circle, rgba(255,255,255,0.1), transparent)'
               }}
-            />
+            >
+              <SiriCallButton
+                containerId="main-siri-button"
+                isListening={isCallStarted}
+                volumeLevel={micLevel}
+                onCallStart={() => handleCall(language)}
+                onCallEnd={() => {
+                  setIsCallStarted(false);
+                  setShowConversation(false);
+                }}
+              />
+            </div>
             
             {/* Test Button for debugging */}
-            <div className="mt-4 text-center">
+            <div 
+              className="text-center"
+              style={{ marginTop: designSystem.spacing.md, gap: designSystem.spacing.sm, display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}
+            >
               <button
                 onClick={() => {
                   console.log('[Interface1] Test button clicked!');
                   handleCall(language);
                 }}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 mr-2"
+                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
+                style={{ 
+                  background: `linear-gradient(135deg, #EF4444, #DC2626)`,
+                  boxShadow: designSystem.shadows.button,
+                  marginRight: designSystem.spacing.xs
+                }}
               >
                 Test Call ({language})
               </button>
@@ -257,7 +355,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   setCurrentInterface('interface2');
                   console.log('[Interface1] setCurrentInterface("interface2") called directly');
                 }}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
+                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
+                style={{ 
+                  background: `linear-gradient(135deg, #10B981, #059669)`,
+                  boxShadow: designSystem.shadows.button,
+                  marginRight: designSystem.spacing.xs
+                }}
               >
                 FORCE Interface2
               </button>
@@ -266,7 +369,11 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   console.log('[Interface1] Reset Vapi clicked!');
                   resetVapi();
                 }}
-                className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
+                style={{ 
+                  background: `linear-gradient(135deg, #F59E0B, #D97706)`,
+                  boxShadow: designSystem.shadows.button
+                }}
               >
                 Reset Vapi
               </button>
@@ -274,134 +381,361 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </div>
 
           {/* Service Categories Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full max-w-6xl">
+          <div 
+            className="grid w-full max-w-7xl"
+            style={{ 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: designSystem.spacing.md,
+              marginBottom: designSystem.spacing.xl
+            }}
+          >
             {/* Local Tourism Info */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('tourism')}>
-              <div className="text-4xl mb-2">🏖️</div>
-              <h3 className="text-white font-semibold text-sm">{t('local_tourism_info', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('tourism')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🏖️</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('local_tourism_info', language)}</h3>
               {activeTooltip === 'tourism' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('tourism_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Room Service */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('room_service')}>
-              <div className="text-4xl mb-2">🍽️</div>
-              <h3 className="text-white font-semibold text-sm">{t('room_service', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('room_service')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🍽️</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('room_service', language)}</h3>
               {activeTooltip === 'room_service' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('room_service_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Housekeeping */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('housekeeping')}>
-              <div className="text-4xl mb-2">🧹</div>
-              <h3 className="text-white font-semibold text-sm">{t('housekeeping', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('housekeeping')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🧹</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('housekeeping', language)}</h3>
               {activeTooltip === 'housekeeping' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('housekeeping_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Guest Feedback */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('feedback')}>
-              <div className="text-4xl mb-2">💬</div>
-              <h3 className="text-white font-semibold text-sm">{t('guest_feedback', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('feedback')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>💬</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('guest_feedback', language)}</h3>
               {activeTooltip === 'feedback' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('feedback_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Local Souvenir */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('souvenir')}>
-              <div className="text-4xl mb-2">🎁</div>
-              <h3 className="text-white font-semibold text-sm">{t('local_souvenir', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('souvenir')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🎁</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('local_souvenir', language)}</h3>
               {activeTooltip === 'souvenir' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('souvenir_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Tours */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('tours')}>
-              <div className="text-4xl mb-2">🚌</div>
-              <h3 className="text-white font-semibold text-sm">{t('tours', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('tours')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🚌</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('tours', language)}</h3>
               {activeTooltip === 'tours' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('tours_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Bus Tickets */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('bus_tickets')}>
-              <div className="text-4xl mb-2">🎫</div>
-              <h3 className="text-white font-semibold text-sm">{t('bus_tickets', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('bus_tickets')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🎫</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('bus_tickets', language)}</h3>
               {activeTooltip === 'bus_tickets' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('bus_tickets_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Vehicle Rental */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('vehicle_rental')}>
-              <div className="text-4xl mb-2">🏍️</div>
-              <h3 className="text-white font-semibold text-sm">{t('vehicle_rental', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('vehicle_rental')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🏍️</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('vehicle_rental', language)}</h3>
               {activeTooltip === 'vehicle_rental' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('vehicle_rental_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Currency Exchange */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('currency_exchange')}>
-              <div className="text-4xl mb-2">💱</div>
-              <h3 className="text-white font-semibold text-sm">{t('currency_exchange', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('currency_exchange')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>💱</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('currency_exchange', language)}</h3>
               {activeTooltip === 'currency_exchange' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('currency_exchange_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* Laundry Service */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('laundry')}>
-              <div className="text-4xl mb-2">👕</div>
-              <h3 className="text-white font-semibold text-sm">{t('laundry_service', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('laundry')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>👕</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('laundry_service', language)}</h3>
               {activeTooltip === 'laundry' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('laundry_tooltip', language)}
                 </div>
               )}
             </div>
 
             {/* HomeStay */}
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/30 transition-all cursor-pointer"
-                 onClick={() => handleIconClick('homestay')}>
-              <div className="text-4xl mb-2">🏠</div>
-              <h3 className="text-white font-semibold text-sm">{t('homestay', language)}</h3>
+            <div 
+              className="text-center hover:scale-105 transition-all duration-300 cursor-pointer"
+              style={{
+                background: designSystem.colors.surface,
+                backdropFilter: 'blur(12px)',
+                borderRadius: '16px',
+                padding: designSystem.spacing.md,
+                boxShadow: designSystem.shadows.card,
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onClick={() => handleIconClick('homestay')}
+              onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+              onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: designSystem.spacing.sm }}>🏠</div>
+              <h3 className="text-white font-semibold" style={{ fontSize: '14px' }}>{t('homestay', language)}</h3>
               {activeTooltip === 'homestay' && (
-                <div className="absolute z-50 mt-2 p-2 bg-black/80 text-white text-xs rounded max-w-xs">
+                <div 
+                  className="absolute z-50 p-3 text-white text-xs rounded-lg max-w-xs"
+                  style={{ 
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                    marginTop: designSystem.spacing.xs,
+                    boxShadow: designSystem.shadows.card
+                  }}
+                >
                   {t('homestay_tooltip', language)}
                 </div>
               )}
@@ -409,12 +743,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </div>
 
           {/* Language Selection Buttons */}
-          <div className="flex flex-wrap justify-center gap-3 mt-8">
+          <div 
+            className="flex flex-wrap justify-center"
+            style={{ gap: designSystem.spacing.sm }}
+          >
             {['en', 'fr', 'zh', 'ru', 'ko', 'vi'].map(lang => (
               <button
                 key={lang}
                 onClick={() => handleCall(lang as 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi')}
-                className="px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-white font-semibold hover:bg-white/30 transition-all"
+                className="text-white font-semibold hover:scale-105 transition-all duration-200"
+                style={{
+                  padding: `${designSystem.spacing.sm} ${designSystem.spacing.md}`,
+                  background: designSystem.colors.surface,
+                  backdropFilter: 'blur(12px)',
+                  borderRadius: '24px',
+                  boxShadow: designSystem.shadows.button,
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
+                onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
               >
                 {lang === 'en' && '🇬🇧 English'}
                 {lang === 'fr' && '🇫🇷 Français'}

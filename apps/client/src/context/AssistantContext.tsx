@@ -269,7 +269,39 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       timestamp: new Date(),
       tenantId: tenantId || 'default'
     };
+    
+    // Add to local state immediately
     setTranscripts(prev => [...prev, newTranscript]);
+    
+    // Send to server database asynchronously
+    const saveToServer = async () => {
+      try {
+        const response = await fetch('/api/transcripts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            callId: newTranscript.callId,
+            role: newTranscript.role,
+            content: newTranscript.content,
+            tenantId: newTranscript.tenantId
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to save transcript: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Transcript saved to database:', data);
+      } catch (error) {
+        console.error('Error saving transcript to server:', error);
+        // Still keep in local state even if server save fails
+      }
+    };
+    
+    saveToServer();
   }, [callDetails?.id, tenantId]);
 
   // Initialize Vapi when component mounts
