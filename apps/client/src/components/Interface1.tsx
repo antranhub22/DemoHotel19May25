@@ -271,14 +271,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   return (
     <div 
-      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth"
+      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30"
       style={{
         fontFamily: designSystem.fonts.primary,
         minHeight: 'calc(100vh - 64px)', // Adjust for main header height
         marginTop: '64px', // Add margin for main header
         overflowX: 'hidden',
         backgroundColor: '#2C3E50', // Match main header color
-        scrollBehavior: 'smooth' // Enable smooth scrolling
       }}
     >
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -465,7 +464,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         {/* Scroll to top button - Only visible when scrolled */}
         {showScrollButton && (
           <button
-            className={`fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden`}
+            className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20 md:hidden opacity-0 animate-fade-in"
             onClick={() => {
               window.scrollTo({
                 top: 0,
