@@ -21,6 +21,19 @@ export * from './api';
 export * from './ui';
 
 // ========================================
+// INTERFACE COMPONENT TYPES
+// ========================================
+
+export * from './interface1-components';
+
+// Interface1 specific types (avoiding conflicts)
+export { 
+  Interface1Props, 
+  ServiceCategory, 
+  SERVICE_CATEGORIES 
+} from './interface1.types';
+
+// ========================================
 // LEGACY TYPES (for backwards compatibility)
 // ========================================
 

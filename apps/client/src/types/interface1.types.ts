@@ -2,16 +2,7 @@ import { ReactNode } from 'react';
 import { IconType } from 'react-icons';
 import { FaBed, FaUtensils, FaConciergeBell, FaSwimmingPool, FaSpa, FaGlassMartini, FaTaxi, FaMapMarkedAlt, FaPhoneAlt } from 'react-icons/fa';
 
-export interface Interface1Props {
-  isActive?: boolean;
-}
-
-export interface ServiceCategory {
-  name: string;
-  icon: IconType;
-  description?: string;
-}
-
+// Core types for Interface1
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
 export interface CallDetails {
@@ -20,6 +11,16 @@ export interface CallDetails {
   duration: string;
   category: string;
   language: string;
+}
+
+export interface Interface1Props {
+  isActive?: boolean;
+}
+
+export interface ServiceCategory {
+  name: string;
+  icon: IconType;
+  description?: string;
 }
 
 // Constants

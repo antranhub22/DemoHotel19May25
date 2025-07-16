@@ -11,4 +11,8 @@ export { useIsMobile } from './use-mobile';
 export { useToast } from './use-toast';
 
 // Hotel configuration hook
-export { useHotelConfiguration } from './useHotelConfiguration'; 
+export { useHotelConfiguration } from './useHotelConfiguration';
+
+// Interface1 behavior hooks
+export { useScrollBehavior } from './useScrollBehavior';
+export { useConversationState } from './useConversationState'; 
