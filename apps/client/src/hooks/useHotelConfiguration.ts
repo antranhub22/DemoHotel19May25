@@ -57,7 +57,7 @@ export interface HotelConfiguration {
 const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
   hotelName: 'Mi Nhon Hotel Mui Ne',
   logoUrl: '/assets/references/images/minhon-logo.jpg',
-  primaryColor: '#1e40af',
+  primaryColor: '#2C3E50',  // Changed to luxury dark blue for main header
   headerText: 'Mi Nhon Hotel Mui Ne',
   
   vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
@@ -66,9 +66,9 @@ const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
   branding: {
     logo: '/assets/references/images/minhon-logo.jpg',
     colors: {
-      primary: '#1e40af',
-      secondary: '#d4af37',
-      accent: '#f59e0b'
+      primary: '#2C3E50',    // Changed to luxury dark blue for main header
+      secondary: '#34495E',   // Changed to lighter dark blue for main header
+      accent: '#E74C3C'       // Changed to coral red accent for main header
     },
     fonts: {
       primary: 'Poppins',
@@ -150,9 +150,9 @@ export const useHotelConfiguration = () => {
             branding: {
               ...hotelData.branding,
               colors: {
-                primary: hotelData.branding.primaryColor || '#2E7D32',
-                secondary: hotelData.branding.secondaryColor || '#FFC107',
-                accent: hotelData.branding.accentColor || '#FF6B6B',
+                primary: hotelData.branding.primaryColor || '#2C3E50',  // Changed to luxury dark blue for main header
+                secondary: hotelData.branding.secondaryColor || '#34495E',
+                accent: hotelData.branding.accentColor || '#E74C3C',
               },
               fonts: {
                 primary: hotelData.branding.PrimaryFont || 'Inter',
