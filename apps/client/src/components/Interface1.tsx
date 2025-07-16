@@ -1,41 +1,62 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { useCallHandler } from '@/hooks/useCallHandler';
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { designSystem } from '@/styles/designSystem';
 import { LoadingState } from './interface1/LoadingState';
 import { ErrorState } from './interface1/ErrorState';
 import { ServiceGrid } from './interface1/ServiceGrid';
 import { SiriButtonContainer } from './interface1/SiriButtonContainer';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
-import { Interface1Props } from '@/types/interface1.types';
-import { designSystem } from '@/styles/designSystem';
+import { ScrollArea } from './ui/scroll-area';
 
-const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
-  // Hooks
-  const { language } = useAssistant();
+interface Interface1Props {
+  isActive: boolean;
+}
+
+export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
+  const { micLevel } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
-  const { handleCall } = useCallHandler();
-  const { showScrollButton, scrollToTop } = useScrollBehavior();
-
-  // Local state
-  const [micLevel, setMicLevel] = useState(0);
   const [isCallStarted, setIsCallStarted] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
 
-  // Effects
+  // Handle scroll behavior
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      setShowScrollButton(scrollY > 200);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Reset scroll position when interface becomes inactive
+  useEffect(() => {
+    if (!isActive) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [isActive]);
+
+  // Auto scroll to conversation when it appears
   useEffect(() => {
     if (showConversation) {
-      scrollToTop();
+      const conversationElement = document.getElementById('conversation-popup');
+      if (conversationElement) {
+        conversationElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }
   }, [showConversation]);
 
-  useEffect(() => {
-    if (!isActive) {
-      scrollToTop();
-    }
-  }, [isActive]);
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCall = async (lang: string) => {
+    // Call handling logic here
+    return { success: true };
+  };
 
   // Early returns
   if (configLoading || !hotelConfig) {
@@ -47,19 +68,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   }
 
   return (
-    <div 
-      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth"
+    <ScrollArea 
+      className="relative min-h-screen w-full scroll-smooth"
       style={{
         fontFamily: designSystem.fonts.primary,
         minHeight: 'calc(100vh - 64px)',
         marginTop: '64px',
-        overflowX: 'hidden',
         backgroundColor: '#2C3E50',
-        scrollBehavior: 'smooth'
       }}
     >
       <div className="container mx-auto px-4 py-8 relative z-10">
-        {/* Main Content */}
         <div className="flex flex-col items-center justify-center space-y-8 md:space-y-12">
           {/* Title - Hidden on mobile */}
           <h1 
@@ -82,8 +100,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 if (result.success) {
                   setIsCallStarted(true);
                   setShowConversation(true);
-                } else if (result.error) {
-                  alert(result.error);
                 }
               });
             }}
@@ -93,24 +109,29 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             }}
           />
 
-          {/* Service Categories Grid */}
-          <ServiceGrid />
+          {/* Service Categories Grid with ScrollArea */}
+          <ScrollArea className="w-full max-h-[60vh] md:max-h-[70vh] px-4">
+            <ServiceGrid />
+          </ScrollArea>
 
           {/* Conversation Popup */}
           {showConversation && (
-            <RealtimeConversationPopup
-              isOpen={showConversation}
-              onClose={() => setShowConversation(false)}
-              isRight={true}
-            />
+            <div id="conversation-popup" className="w-full">
+              <RealtimeConversationPopup
+                isOpen={showConversation}
+                onClose={() => setShowConversation(false)}
+                isRight={true}
+              />
+            </div>
           )}
         </div>
 
-        {/* Scroll to top button */}
+        {/* Scroll to top button - Visible on all screen sizes when scrolled */}
         {showScrollButton && (
           <button
-            className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden"
+            className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20 z-50"
             onClick={scrollToTop}
+            aria-label="Scroll to top"
           >
             <svg 
               className="w-6 h-6 text-white"
@@ -126,8 +147,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </button>
         )}
       </div>
-    </div>
+    </ScrollArea>
   );
 };
-
-export default Interface1;
