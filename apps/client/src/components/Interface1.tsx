@@ -5,7 +5,7 @@ import hotelImage from '@/assets/hotel-exterior.jpeg';
 import { t } from '@/i18n';
 import { ActiveOrder } from '@/types';
 import { initVapi, getVapiInstance, resetVapi } from '@/lib/vapiClient';
-import { FaGlobeAsia } from 'react-icons/fa';
+import { FaGlobeAsia, FaBed, FaUtensils, FaConciergeBell, FaSwimmingPool, FaSpa, FaGlassMartini, FaTaxi, FaMapMarkedAlt, FaPhoneAlt } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import SiriCallButton from './SiriCallButton';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
@@ -14,6 +14,20 @@ import ReferencePopup from './ReferencePopup';
 import Interface3 from './Interface3';
 import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
 import { useHotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
+
+// Service Categories Definition
+const serviceCategories = [
+  { name: 'Room Service', icon: <FaBed /> },
+  { name: 'Restaurant', icon: <FaUtensils /> },
+  { name: 'Concierge', icon: <FaConciergeBell /> },
+  { name: 'Pool & Gym', icon: <FaSwimmingPool /> },
+  { name: 'Spa & Wellness', icon: <FaSpa /> },
+  { name: 'Bar & Lounge', icon: <FaGlassMartini /> },
+  { name: 'Transportation', icon: <FaTaxi /> },
+  { name: 'Local Guide', icon: <FaMapMarkedAlt /> },
+  { name: 'Reception', icon: <FaPhoneAlt /> },
+  { name: 'Guest Services', icon: <FaConciergeBell /> }
+];
 
 interface Interface1Props {
   isActive?: boolean;
