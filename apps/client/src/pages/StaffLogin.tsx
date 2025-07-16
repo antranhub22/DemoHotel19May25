@@ -18,10 +18,10 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
     }
     setError('');
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/staff/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: username, password })
+        body: JSON.stringify({ username, password })
       });
       if (!res.ok) {
         const data = await res.json();

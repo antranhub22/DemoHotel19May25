@@ -206,7 +206,7 @@ export class ApiClient {
   // ========================================
 
   async login(request: LoginRequest): Promise<LoginResponse> {
-    const response = await this.post<LoginResponse['data']>('/auth/login', request);
+    const response = await this.post<LoginResponse['data']>('/staff/login', request);
     return response as LoginResponse;
   }
 
