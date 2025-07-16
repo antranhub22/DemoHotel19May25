@@ -15,4 +15,5 @@ export { useHotelConfiguration } from './useHotelConfiguration';
 
 // Interface1 behavior hooks
 export { useScrollBehavior } from './useScrollBehavior';
-export { useConversationState } from './useConversationState'; 
+export { useConversationState } from './useConversationState';
+export { useInterface1 } from './useInterface1'; 

@@ -1,12 +1,7 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
 
-// React Context & Configuration
-import { useAssistant } from '@/context/AssistantContext';
-import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
-
-// Custom Hooks
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
-import { useConversationState } from '@/hooks/useConversationState';
+// Custom Hook
+import { useInterface1 } from '@/hooks/useInterface1';
 
 // UI Components - States
 import { LoadingState } from './interface1/LoadingState';
@@ -27,33 +22,29 @@ interface Interface1Props {
 }
 
 export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
-  const { micLevel } = useAssistant();
-  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
-  
-  // Custom hooks for behavior management
   const {
+    isLoading,
+    error,
+    micLevel,
     showScrollButton,
     scrollToTop,
     scrollToSection,
     heroSectionRef,
     serviceGridRef,
-    conversationRef
-  } = useScrollBehavior({ isActive });
-  
-  const {
+    conversationRef,
     isCallStarted,
     showConversation,
     handleCallStart,
     handleCallEnd
-  } = useConversationState({ conversationRef });
+  } = useInterface1({ isActive });
 
   // Early returns
-  if (configLoading || !hotelConfig) {
+  if (isLoading) {
     return <LoadingState />;
   }
 
-  if (configError) {
-    return <ErrorState error={configError} />;
+  if (error) {
+    return <ErrorState error={error} />;
   }
 
   return (
