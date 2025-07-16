@@ -18,24 +18,20 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 }) => {
   return (
     <div 
-      className="flex flex-col items-center mt-32 md:mt-4"
+      className="flex flex-col items-center justify-center w-full"
       style={{ 
         marginBottom: designSystem.spacing.xl,
-        width: '357.5px',
-        height: '357.5px',
-        position: 'relative',
         zIndex: designSystem.zIndex.above
       }}
     >
+      {/* Siri Button Container */}
       <div 
+        className="relative flex items-center justify-center"
         style={{ 
+          width: '300px',
+          height: '300px',
           borderRadius: '50%',
           boxShadow: designSystem.shadows.large,
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
           background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -49,15 +45,14 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           onCallEnd={onCallEnd}
         />
       </div>
+      
       {/* Tap To Speak text - Only visible on mobile */}
       <div
-        className="block md:hidden"
+        className="block md:hidden mt-4 text-center"
         style={{
           color: designSystem.colors.text,
           fontSize: '1rem',
           fontWeight: '500',
-          marginTop: '1rem',
-          textAlign: 'center',
           textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
         }}
       >

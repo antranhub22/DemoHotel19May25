@@ -127,10 +127,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center justify-center">
       {/* Status Indicator */}
       {status !== 'idle' && (
-        <div className={`status-indicator ${status}`}>
+        <div className={`status-indicator ${status} absolute -top-12 left-1/2 transform -translate-x-1/2`}>
           {statusText[status]}
         </div>
       )}
@@ -138,13 +138,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       {/* Main Button */}
       <div 
         id={containerId}
-        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-visible`}
+        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-visible flex items-center justify-center`}
         style={{ 
           cursor: 'pointer',
-          width: '357.5px', // 550px * 0.65
-          height: '357.5px', // 550px * 0.65
-          transform: 'translate(-25%, -25%)', // Adjust position to maintain center alignment
-          margin: '25% auto' // Add margin to prevent overlap
+          width: '240px',
+          height: '240px',
         }}
         onClick={(e) => {
           console.log('[SiriCallButton] Div click detected!');
@@ -162,12 +160,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         }}
       >
         {/* Gradient Ring Effect */}
-        <div className="gradient-ring" style={{ transform: 'scale(0.65)' }} />
+        <div className="gradient-ring absolute inset-0" />
       </div>
 
       {/* Waveform Animation */}
       {isListening && (
-        <div className="waveform-container" style={{ transform: 'scale(0.65)' }}>
+        <div className="waveform-container absolute inset-0 flex items-center justify-center">
           {waveformBars.map((_, index) => (
             <div
               key={index}
