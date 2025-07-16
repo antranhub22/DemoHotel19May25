@@ -138,7 +138,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // Status text mapping
   const statusText = {
     idle: '',
-    listening: 'Listening...',
+    listening: '', // Bỏ hiển thị chữ "Listening"
     processing: 'Processing...',
     speaking: 'Speaking...'
   };
