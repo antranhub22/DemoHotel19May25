@@ -9,6 +9,44 @@ import path from 'path';
 
 const router = Router();
 
+// Health check endpoint
+router.get('/', (_req: Request, res: Response) => {
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV
+  });
+});
+
+// Environment variables check endpoint (for debugging deployment)
+router.get('/env-check', (_req: Request, res: Response) => {
+  const requiredVars = [
+    'JWT_SECRET',
+    'DATABASE_URL', 
+    'VITE_OPENAI_API_KEY',
+    'VITE_VAPI_PUBLIC_KEY',
+    'VITE_VAPI_ASSISTANT_ID'
+  ];
+
+  const envStatus = requiredVars.map(varName => ({
+    name: varName,
+    present: !!process.env[varName],
+    length: process.env[varName]?.length || 0,
+    prefix: process.env[varName]?.substring(0, 10) || 'NOT_SET'
+  }));
+
+  const missingVars = envStatus.filter(v => !v.present).map(v => v.name);
+  
+  res.json({
+    status: missingVars.length === 0 ? 'ALL_OK' : 'MISSING_VARS',
+    requiredCount: requiredVars.length,
+    presentCount: envStatus.filter(v => v.present).length,
+    missingVars,
+    details: envStatus,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ============================================
 // Health Check Endpoints
 // ============================================

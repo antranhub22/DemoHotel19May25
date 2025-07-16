@@ -33,7 +33,8 @@
     "typecheck": "tsc --noEmit --skipLibCheck || echo \"TypeScript errors found but continuing...\"",
     "lint:check": "eslint apps/client/src apps/server --ext .ts,.tsx",
     "postinstall": "npm run typecheck || true",
-    "build:safe": "tsc --noEmit --skipLibCheck || echo \"TypeScript check skipped\" && vite build"
+    "build:safe": "tsc --noEmit --skipLibCheck || echo \"TypeScript check skipped\" && vite build",
+    "validate:env": "tsx tools/scripts/validate-environment.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

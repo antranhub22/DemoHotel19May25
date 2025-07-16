@@ -142,11 +142,33 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   });
   const [micLevel, setMicLevel] = useState<number>(0);
   const [modelOutput, setModelOutput] = useState<string[]>([]);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(() => {
+    // Load language from localStorage on init
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('selectedLanguage') as Language;
+      if (savedLanguage && ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(savedLanguage)) {
+        console.log('🌍 [AssistantContext] Loading saved language:', savedLanguage);
+        return savedLanguage;
+      }
+    }
+    console.log('🌍 [AssistantContext] Using default language: en');
+    return 'en';
+  });
   const [hotelConfig, setHotelConfig] = useState<HotelConfiguration | null>(null);
   // Multi-tenant support
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [tenantConfig, setTenantConfig] = useState<any | null>(null);
+
+  // Language setter with persistence
+  const setLanguage = React.useCallback((lang: Language) => {
+    console.log('🌍 [AssistantContext] setLanguage called with:', lang);
+    setLanguageState(lang);
+    // Persist to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('selectedLanguage', lang);
+      console.log('🌍 [AssistantContext] Language saved to localStorage:', lang);
+    }
+  }, []);
 
   // Wrapper functions with debug logging
   const debugSetCurrentInterface = (layer: InterfaceLayer) => {

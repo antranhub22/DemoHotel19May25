@@ -1,26 +1,18 @@
-import { designSystem } from '@/styles/designSystem';
+import React from 'react';
 
-interface InterfaceHeaderProps {
-  title?: string;
-  className?: string;
-}
-
-export const InterfaceHeader = ({ 
-  title = "Speak in Multiple Languages",
-  className = ""
-}: InterfaceHeaderProps): JSX.Element => {
+export const InterfaceHeader: React.FC = () => {
   return (
-    <div className={`text-center space-y-8 ${className}`}>
-      {/* Title - Hidden on mobile */}
+    <div className="w-full flex justify-center items-center py-8">
       <h1 
-        className="hidden md:block text-4xl md:text-5xl font-bold text-center text-white mb-8"
-        style={{ 
-          textShadow: designSystem.shadows.subtle,
-          maxWidth: '800px',
-          lineHeight: 1.2
+        className="text-3xl md:text-4xl font-bold text-white text-center"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 10
         }}
       >
-        {title}
+        Speak in Multiple Languages
       </h1>
     </div>
   );
