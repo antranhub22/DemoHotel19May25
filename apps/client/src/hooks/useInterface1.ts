@@ -2,6 +2,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
+import { useState } from 'react';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -23,6 +24,7 @@ interface UseInterface1Return {
   heroSectionRef: React.RefObject<HTMLDivElement>;
   serviceGridRef: React.RefObject<HTMLDivElement>;
   conversationRef: React.RefObject<HTMLDivElement>;
+  rightPanelRef: React.RefObject<HTMLDivElement>;
   
   // Conversation state
   isCallStarted: boolean;
@@ -31,6 +33,11 @@ interface UseInterface1Return {
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
+  
+  // Right panel state
+  showRightPanel: boolean;
+  handleRightPanelToggle: () => void;
+  handleRightPanelClose: () => void;
 }
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
@@ -43,6 +50,17 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const conversationState = useConversationState({ 
     conversationRef: scrollBehavior.conversationRef 
   });
+  
+  // Right panel state
+  const [showRightPanel, setShowRightPanel] = useState(false);
+  
+  const handleRightPanelToggle = () => {
+    setShowRightPanel(!showRightPanel);
+  };
+  
+  const handleRightPanelClose = () => {
+    setShowRightPanel(false);
+  };
 
   return {
     // Loading & Error states
@@ -57,6 +75,11 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     ...scrollBehavior,
     
     // Conversation state (spread)
-    ...conversationState
+    ...conversationState,
+    
+    // Right panel state
+    showRightPanel,
+    handleRightPanelToggle,
+    handleRightPanelClose
   };
 }; 

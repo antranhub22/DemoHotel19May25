@@ -12,6 +12,7 @@ interface UseScrollBehaviorReturn {
   heroSectionRef: RefObject<HTMLDivElement>;
   serviceGridRef: RefObject<HTMLDivElement>;
   conversationRef: RefObject<HTMLDivElement>;
+  rightPanelRef: RefObject<HTMLDivElement>;
 }
 
 export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScrollBehaviorReturn => {
@@ -21,6 +22,7 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const serviceGridRef = useRef<HTMLDivElement>(null);
   const conversationRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
 
   // Throttle function for performance
   const throttle = (func: Function, delay: number) => {
@@ -113,6 +115,7 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
     scrollToSection,
     heroSectionRef,
     serviceGridRef,
-    conversationRef
+    conversationRef,
+    rightPanelRef
   };
 }; 
