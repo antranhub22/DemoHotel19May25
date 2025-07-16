@@ -3,28 +3,17 @@
  */
 
 // Core components
-export { default as VoiceAssistant } from './VoiceAssistant';
-export { default as ErrorBoundary } from './ErrorBoundary';
-
-// Interface components
-export { default as Interface1 } from './Interface1';
+export { Interface1 } from './Interface1';
 export { default as Interface2 } from './Interface2';
 export { default as Interface3 } from './Interface3';
 export { default as Interface4 } from './Interface4';
-
-// Popup components
-export { default as WelcomePopup } from './WelcomePopup';
 export { default as RealtimeConversationPopup } from './RealtimeConversationPopup';
-export { default as ReferencePopup } from './ReferencePopup';
+export { default as SiriCallButton } from './siri/SiriCallButton';
 export { default as StaffMessagePopup } from './StaffMessagePopup';
 export { default as StaffRequestDetailModal } from './StaffRequestDetailModal';
-
-// UI components
-export { default as SiriCallButton } from './SiriCallButton';
-export { default as SiriOrb } from './SiriOrb';
-export { default as Reference } from './Reference';
-export { default as InfographicSteps } from './InfographicSteps';
 export { default as TranscriptDisplay } from './TranscriptDisplay';
+export { default as VoiceAssistant } from './VoiceAssistant';
+export { default as WelcomePopup } from './WelcomePopup';
 
 // Form components
 export { EmailForm } from './EmailForm';

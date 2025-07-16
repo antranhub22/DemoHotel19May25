@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
-import Interface1 from './Interface1';
+import { Interface1 } from './Interface1';
 import Interface2 from './Interface2';
 import Interface3 from './Interface3';
 import Interface4 from './Interface4';

@@ -12,7 +12,7 @@ import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import Interface1 from '@/components/Interface1';
+import { Interface1 } from '@/components/Interface1';
 
 // Dashboard pages
 import { 

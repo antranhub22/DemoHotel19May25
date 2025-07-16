@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SiriButton } from './SiriButton';
-import '../styles/voice-interface.css';
+import '../../styles/voice-interface.css';
 
 interface SiriCallButtonProps {
   isListening: boolean;

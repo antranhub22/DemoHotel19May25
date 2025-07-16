@@ -6,9 +6,10 @@ import { designSystem } from '@/styles/designSystem';
 import { LoadingState } from './interface1/LoadingState';
 import { ErrorState } from './interface1/ErrorState';
 import { ServiceGrid } from './interface1/ServiceGrid';
-import { SiriButtonContainer } from './interface1/SiriButtonContainer';
+import { SiriButtonContainer } from './siri/SiriButtonContainer';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
 import { ScrollArea } from './ui/scroll-area';
+import { Language } from '@/types/interface1.types';
 
 interface Interface1Props {
   isActive: boolean;
@@ -53,9 +54,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCall = async (lang: string) => {
-    // Call handling logic here
-    return { success: true };
+  const handleCall = async (lang: Language): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Call handling logic here
+      return { success: true };
+    } catch (error) {
+      console.error('Error in handleCall:', error);
+      return { success: false, error: 'Failed to start call' };
+    }
   };
 
   // Early returns
@@ -95,13 +101,12 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           <SiriButtonContainer
             isCallStarted={isCallStarted}
             micLevel={micLevel}
-            onCallStart={(lang) => {
-              handleCall(lang).then(result => {
-                if (result.success) {
-                  setIsCallStarted(true);
-                  setShowConversation(true);
-                }
-              });
+            onCallStart={async (lang) => {
+              const result = await handleCall(lang);
+              if (result.success) {
+                setIsCallStarted(true);
+                setShowConversation(true);
+              }
             }}
             onCallEnd={() => {
               setIsCallStarted(false);

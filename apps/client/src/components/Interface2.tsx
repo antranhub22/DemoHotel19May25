@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import Reference from './Reference';
-import SiriCallButton from './SiriCallButton';
+import SiriCallButton from './siri/SiriCallButton';
 import { referenceService, ReferenceItem } from '@/services/ReferenceService';
 import InfographicSteps from './InfographicSteps';
 import { t } from '@/i18n';

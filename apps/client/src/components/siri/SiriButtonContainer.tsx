@@ -1,12 +1,12 @@
 import React from 'react';
 import { designSystem } from '@/styles/designSystem';
-import SiriCallButton from '../SiriCallButton';
+import SiriCallButton from './SiriCallButton';
 import { Language } from '@/types/interface1.types';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
   micLevel: number;
-  onCallStart: (lang: Language) => void;
+  onCallStart: (lang: Language) => Promise<void>;
   onCallEnd: () => void;
 }
 
@@ -45,7 +45,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           containerId="main-siri-button"
           isListening={isCallStarted}
           volumeLevel={micLevel}
-          onCallStart={onCallStart}
+          onCallStart={() => onCallStart('en')}
           onCallEnd={onCallEnd}
         />
       </div>

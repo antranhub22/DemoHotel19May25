@@ -21,72 +21,75 @@ export const ServiceGrid: React.FC = () => {
         placeItems: 'center'
       }}
     >
-      {SERVICE_CATEGORIES.map((category, index) => (
-        <div
-          key={index}
-          className="relative group w-full h-full"
-          style={{
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: designSystem.borderRadius.xl,
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            transition: designSystem.transitions.normal,
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: '20px',
-            boxShadow: designSystem.shadows.card,
-            overflow: 'hidden'
-          }}
-        >
-          {/* Icon Container */}
-          <div 
-            className="text-white group-hover:scale-110 transition-transform"
+      {SERVICE_CATEGORIES.map((category, index) => {
+        const Icon = category.icon;
+        return (
+          <div
+            key={index}
+            className="relative group w-full h-full"
             style={{
-              fontSize: '3rem',
-              marginBottom: '12px',
-              height: '60px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: designSystem.borderRadius.xl,
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              transition: designSystem.transitions.normal,
+              cursor: 'pointer',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {category.icon}
-          </div>
-
-          {/* Text Container */}
-          <div 
-            className="text-white text-center"
-            style={{
-              fontSize: '18px',
-              fontWeight: '500',
-              lineHeight: '1.4',
-              height: '50px',
-              display: 'flex',
-              alignItems: 'center',
+              flexDirection: 'column',
               justifyContent: 'center',
-              padding: '0 8px'
+              alignItems: 'center',
+              padding: '20px',
+              boxShadow: designSystem.shadows.card,
+              overflow: 'hidden'
             }}
           >
-            {category.name}
-          </div>
-
-          {/* Description Tooltip */}
-          {category.description && (
+            {/* Icon Container */}
             <div 
-              className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-white text-sm text-center"
+              className="text-white group-hover:scale-110 transition-transform"
               style={{
-                borderRadius: designSystem.borderRadius.xl,
-                transition: designSystem.transitions.normal
+                fontSize: '3rem',
+                marginBottom: '12px',
+                height: '60px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
-              {category.description}
+              <Icon size={48} />
             </div>
-          )}
-        </div>
-      ))}
+
+            {/* Text Container */}
+            <div 
+              className="text-white text-center"
+              style={{
+                fontSize: '18px',
+                fontWeight: '500',
+                lineHeight: '1.4',
+                height: '50px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 8px'
+              }}
+            >
+              {category.name}
+            </div>
+
+            {/* Description Tooltip */}
+            {category.description && (
+              <div 
+                className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4 text-white text-sm text-center"
+                style={{
+                  borderRadius: designSystem.borderRadius.xl,
+                  transition: designSystem.transitions.normal
+                }}
+              >
+                {category.description}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }; 
