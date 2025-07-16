@@ -3,6 +3,7 @@ import { initVapi, getVapiInstance, FORCE_BASIC_SUMMARY, apiRequest, parseSummar
 import { Transcript, OrderSummary, CallDetails, Order, InterfaceLayer, CallSummary, ServiceRequest, ActiveOrder } from '@/types';
 import ReactDOM from 'react-dom';
 import { HotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
+import { resetVapi } from '@/lib/vapiClient';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -90,6 +91,24 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   // Wrapper để debug setCurrentInterface calls
   const setCurrentInterface = (layer: InterfaceLayer) => {
     console.log('[AssistantContext] 🔄 setCurrentInterface called:', { from: currentInterface, to: layer });
+    
+    // Reset Vapi when switching back to interface1
+    if (layer === 'interface1') {
+      resetVapi();
+      // Also reset all states
+      setTranscripts([]);
+      setOrderSummary(null);
+      setCallDetails(null);
+      setOrder(null);
+      setCallDuration(0);
+      setCallTimer(null);
+      setIsMuted(false);
+      setCallSummary(null);
+      setServiceRequests([]);
+      setVietnameseSummary(null);
+      setEmailSentForCurrentSession(false);
+    }
+    
     setCurrentInterfaceState(layer);
     console.log('[AssistantContext] ✅ setCurrentInterface executed:', layer);
   };

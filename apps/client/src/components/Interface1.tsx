@@ -279,12 +279,20 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         {/* Main Content */}
         <div 
           className="flex flex-col items-center justify-center h-full"
-          style={{ padding: designSystem.spacing.md }}
+          style={{ 
+            padding: designSystem.spacing.md,
+            paddingTop: 'calc(64px + 2rem)', // Add extra padding for header
+            minHeight: '100vh' // Ensure full height
+          }}
         >
           {/* Title */}
           <div 
             className="text-center"
-            style={{ marginBottom: designSystem.spacing.xl }}
+            style={{ 
+              marginBottom: designSystem.spacing.xl,
+              position: 'relative', // Add relative positioning
+              zIndex: 10 // Ensure text is above other elements
+            }}
           >
             <h1 
               className="font-bold text-white"
@@ -328,55 +336,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                   setShowConversation(false);
                 }}
               />
-            </div>
-            
-            {/* Test Button for debugging */}
-            <div 
-              className="text-center"
-              style={{ marginTop: designSystem.spacing.md, gap: designSystem.spacing.sm, display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}
-            >
-              <button
-                onClick={() => {
-                  console.log('[Interface1] Test button clicked!');
-                  handleCall(language);
-                }}
-                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
-                style={{ 
-                  background: `linear-gradient(135deg, #EF4444, #DC2626)`,
-                  boxShadow: designSystem.shadows.button,
-                  marginRight: designSystem.spacing.xs
-                }}
-              >
-                Test Call ({language})
-              </button>
-              <button
-                onClick={() => {
-                  console.log('[Interface1] FORCE Interface2 clicked!');
-                  setCurrentInterface('interface2');
-                  console.log('[Interface1] setCurrentInterface("interface2") called directly');
-                }}
-                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
-                style={{ 
-                  background: `linear-gradient(135deg, #10B981, #059669)`,
-                  boxShadow: designSystem.shadows.button,
-                  marginRight: designSystem.spacing.xs
-                }}
-              >
-                FORCE Interface2
-              </button>
-              <button
-                onClick={() => {
-                  console.log('[Interface1] Reset Vapi clicked!');
-                  resetVapi();
-                }}
-                className="px-4 py-2 text-white rounded-lg hover:scale-105 transition-all duration-200 font-medium"
-                style={{ 
-                  background: `linear-gradient(135deg, #F59E0B, #D97706)`,
-                  boxShadow: designSystem.shadows.button
-                }}
-              >
-                Reset Vapi
-              </button>
             </div>
           </div>
 

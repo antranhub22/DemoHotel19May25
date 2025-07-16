@@ -136,23 +136,6 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
           >
             {t('return_to_home', language)}
           </button>
-          
-          {/* Debug: Test button to force interface change */}
-          <button 
-            className="w-full mt-2 px-4 sm:px-6 py-2 sm:py-3 bg-red-500 text-white rounded-lg font-poppins font-medium text-xs opacity-50 hover:opacity-100"
-            onClick={() => {
-              console.log('🔧 DEBUG: Force interface change button clicked');
-              setCurrentInterface('interface1');
-              console.log('🔧 DEBUG: setCurrentInterface called directly');
-            }}
-            style={{ 
-              zIndex: 9999,
-              position: 'relative',
-              pointerEvents: 'auto'
-            }}
-          >
-            DEBUG: Force to Interface1
-          </button>
         </div>
       </div>
     </div>

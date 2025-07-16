@@ -142,16 +142,21 @@ const VoiceAssistant: React.FC = () => {
       )}
       
       {/* Header Bar */}
-      <header className="w-full bg-primary text-white p-4 shadow-md" style={{ backgroundColor: config?.branding?.colors?.primary || '#1e40af' }}>
-        <div className="container mx-auto flex items-center justify-between px-2">
+      <header 
+        className="w-full bg-primary text-white shadow-md fixed top-0 left-0 right-0 z-50" 
+        style={{ 
+          backgroundColor: config?.branding?.colors?.primary || '#1e40af',
+          height: '64px' // Fixed height for header
+        }}
+      >
+        <div className="container mx-auto flex items-center justify-between px-2 h-full">
           {/* Left: Logo and Hotel Name */}
           <div className="flex items-center justify-start ml-1 sm:ml-4 mr-2 sm:mr-6 gap-3 min-w-fit">
             <img 
               src={config.branding.logo} 
               alt={`${config.hotelName} Logo`} 
-              className="h-10 sm:h-14 w-auto rounded-lg shadow-md bg-white/80 p-1"
+              className="h-8 sm:h-12 w-auto rounded-lg shadow-md bg-white/80 p-1" // Adjusted logo size
               onError={(e) => {
-                // Fallback to Mi Nhon logo if hotel logo fails to load
                 e.currentTarget.src = '/assets/references/images/minhon-logo.jpg';
               }}
             />
@@ -249,7 +254,14 @@ const VoiceAssistant: React.FC = () => {
       )}
       
       {/* Interface Layers Container */}
-      <div className="relative w-full h-full" id="interfaceContainer">
+      <div 
+        className="relative w-full h-full" 
+        id="interfaceContainer"
+        style={{
+          marginTop: '64px', // Add margin to account for fixed header
+          minHeight: 'calc(100vh - 64px)' // Adjust height to account for header
+        }}
+      >
         <Interface1 isActive={interfaceStates.interface1} />
         <Interface2 isActive={interfaceStates.interface2} />
         <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
