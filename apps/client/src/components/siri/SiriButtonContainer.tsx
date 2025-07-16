@@ -46,9 +46,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         />
       </div>
       
-      {/* Tap To Speak text - Only visible on mobile */}
+      {/* Tap To Speak text - Visible on all devices */}
       <div
-        className="block md:hidden mt-4 text-center"
+        className="block mt-4 text-center"
         style={{
           color: designSystem.colors.text,
           fontSize: '1rem',
