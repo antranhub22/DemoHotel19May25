@@ -322,7 +322,39 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               />
             </div>
           </div>
-          
+
+          {/* Language Selector */}
+          <div 
+            className="flex items-center justify-center gap-4 mb-8"
+            style={{
+              padding: `${designSystem.spacing.md} ${designSystem.spacing.lg}`,
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              backdropFilter: 'blur(8px)',
+              boxShadow: designSystem.shadows.subtle,
+              marginBottom: designSystem.spacing.xl
+            }}
+          >
+            <button
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'en' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
+              onClick={() => setLanguage('en')}
+            >
+              English
+            </button>
+            <button
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'vi' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
+              onClick={() => setLanguage('vi')}
+            >
+              Tiếng Việt
+            </button>
+            <button
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'fr' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
+              onClick={() => setLanguage('fr')}
+            >
+              Français
+            </button>
+          </div>
+
           {/* Service Categories Grid - Adjusted to 2 rows */}
           <div 
             className="grid w-full max-w-7xl mx-auto"
@@ -331,8 +363,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               gridTemplateRows: 'repeat(2, 1fr)',
               gap: designSystem.spacing.lg,
               padding: `${designSystem.spacing.xl} ${designSystem.spacing.lg}`,
-              transformOrigin: 'center center',
-              marginTop: '-1rem',
+              transformOrigin: 'top center',
+              marginTop: '2rem',
               paddingBottom: '4rem',
               position: 'relative',
               left: '50%',
@@ -341,7 +373,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               maxWidth: 'none',
               display: 'grid',
               placeItems: 'center',
-              margin: '0 auto'
+              margin: '0 auto',
+              zIndex: 1
             }}
           >
             {/* Service items with adjusted text styling */}
