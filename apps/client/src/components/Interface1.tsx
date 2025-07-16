@@ -1,283 +1,61 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
-import { t } from '@/i18n';
-import { FaGlobeAsia, FaBed, FaUtensils, FaConciergeBell, FaSwimmingPool, FaSpa, FaGlassMartini, FaTaxi, FaMapMarkedAlt, FaPhoneAlt } from 'react-icons/fa';
-import { FiChevronDown } from 'react-icons/fi';
-import SiriCallButton from './SiriCallButton';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { useCallHandler } from '@/hooks/useCallHandler';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { LoadingState } from './interface1/LoadingState';
+import { ErrorState } from './interface1/ErrorState';
+import { ServiceGrid } from './interface1/ServiceGrid';
+import { SiriButtonContainer } from './interface1/SiriButtonContainer';
 import RealtimeConversationPopup from './RealtimeConversationPopup';
-import { Button } from '@/components/ui/button';
-import ReferencePopup from './ReferencePopup';
-import Interface3 from './Interface3';
-import { parseSummaryToOrderDetails } from '@/lib/summaryParser';
-import { useHotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
-
-// Service Categories Definition
-const serviceCategories = [
-  { name: 'Room Service', icon: <FaBed /> },
-  { name: 'Restaurant', icon: <FaUtensils /> },
-  { name: 'Concierge', icon: <FaConciergeBell /> },
-  { name: 'Pool & Gym', icon: <FaSwimmingPool /> },
-  { name: 'Spa & Wellness', icon: <FaSpa /> },
-  { name: 'Bar & Lounge', icon: <FaGlassMartini /> },
-  { name: 'Transportation', icon: <FaTaxi /> },
-  { name: 'Local Guide', icon: <FaMapMarkedAlt /> },
-  { name: 'Reception', icon: <FaPhoneAlt /> },
-  { name: 'Guest Services', icon: <FaConciergeBell /> }
-];
-
-interface Interface1Props {
-  isActive?: boolean;
-}
+import { Interface1Props } from '@/types/interface1.types';
+import { designSystem } from '@/styles/designSystem';
 
 const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
-  // --- ALL HOOKS MUST BE DECLARED FIRST ---
-  const { 
-    setCurrentInterface, 
-    setTranscripts, 
-    setModelOutput, 
-    setCallDetails, 
-    setCallDuration, 
-    setEmailSentForCurrentSession,
-    language,
-    setLanguage
-  } = useAssistant();
-
+  // Hooks
+  const { language } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
+  const { handleCall } = useCallHandler();
+  const { showScrollButton, scrollToTop } = useScrollBehavior();
 
-  // Local state hooks
-  const [isMuted, setIsMuted] = useState(false);
+  // Local state
   const [micLevel, setMicLevel] = useState(0);
-  const [localDuration, setLocalDuration] = useState(0);
-  const [showOrderCard, setShowOrderCard] = useState(false);
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
 
-  // Add scroll to top button visibility state
-  const [showScrollButton, setShowScrollButton] = useState(false);
-
-  // Enhanced Design System Constants
-  const designSystem = {
-    colors: {
-      primary: '#1B4E8B',      // Original blue-purple
-      secondary: '#3B82F6',    // Original complementary blue
-      accent: '#8B5CF6',       // Original purple accent
-      surface: 'rgba(255, 255, 255, 0.1)',
-      surfaceHover: 'rgba(255, 255, 255, 0.2)',
-      text: '#FFFFFF',
-      textSecondary: 'rgba(255, 255, 255, 0.9)'
-    },
-    fonts: {
-      primary: "'Inter', 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
-    },
-    spacing: {
-      xs: '8px',    // 8px grid base
-      sm: '16px',   // 2 * 8px
-      md: '24px',   // 3 * 8px
-      lg: '32px',   // 4 * 8px
-      xl: '40px',   // 5 * 8px
-      '2xl': '48px' // 6 * 8px
-    },
-    shadows: {
-      subtle: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      card: '0 4px 16px rgba(0, 0, 0, 0.15)',
-      button: '0 2px 12px rgba(27, 78, 139, 0.3)',
-      large: '0 8px 32px rgba(0, 0, 0, 0.2)'
-    }
-  };
-
-  // --- CALLBACKS ---
-  const handleCall = useCallback(async (lang: 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi') => {
-    console.log('[Interface1] handleCall called with language:', lang);
-    
-    if (!hotelConfig) {
-      console.error('[Interface1] Hotel configuration not loaded');
-      return;
-    }
-
-    console.log('[Interface1] Starting call with language:', lang);
-    console.log('[Interface1] Hotel config:', hotelConfig);
-
-    setEmailSentForCurrentSession(false);
-    setCallDetails({
-      id: `call-${Date.now()}`,
-      roomNumber: '',
-      duration: '',
-      category: '',
-      language: 'en'
-    });
-    setTranscripts([]);
-    setModelOutput([]);
-    setCallDuration(0);
-    
-    const publicKey = getVapiPublicKeyByLanguage(lang, hotelConfig);
-    const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
-    
-    console.log('[Interface1] Vapi configuration:', { publicKey, assistantId, lang });
-    
-    // Development mode: Skip Vapi validation and directly switch interface for testing
-    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if ((!publicKey || !assistantId) && isDevelopment) {
-      console.warn('[Interface1] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing');
-      setIsCallStarted(true);
-      setShowConversation(true);
-      setCurrentInterface('interface2');
-      return;
-    }
-    
-    if (!publicKey || !assistantId) {
-      console.error('[Interface1] Vapi configuration not available for language:', lang);
-      alert(`Vapi configuration not available for language: ${lang}`);
-      return;
-    }
-    
-    try {
-      console.log('[Interface1] Initializing Vapi with public key:', publicKey);
-      setLanguage(lang); // Set language before starting call
-      
-      // const vapi = await initVapi(publicKey); // This line was removed as per the edit hint
-      if (/* vapi && */ assistantId) { // This line was removed as per the edit hint
-        console.log('[Interface1] Starting Vapi call with assistant ID:', assistantId);
-        
-        // Set call started state immediately
-        setIsCallStarted(true);
-        setShowConversation(true);
-        
-        // await vapi.start(assistantId); // This line was removed as per the edit hint
-        console.log('[Interface1] Vapi call started successfully');
-        
-        // Chuyển sang Interface2 ngay sau khi call thành công
-        console.log('[Interface1] 🔄 CALLING setCurrentInterface("interface2")');
-        setCurrentInterface('interface2');
-        console.log('[Interface1] ✅ setCurrentInterface("interface2") called');
-        
-        // Force re-render để đảm bảo chuyển interface
-        setTimeout(() => {
-          console.log('[Interface1] 🔄 DELAYED setCurrentInterface("interface2") as fallback');
-          setCurrentInterface('interface2');
-        }, 100);
-      } else {
-        console.error('[Interface1] Failed to get Vapi instance or assistant ID');
-        setIsCallStarted(false);
-        setShowConversation(false);
-      }
-    } catch (error) {
-      console.error('[Interface1] Error starting Vapi call:', error);
-      setIsCallStarted(false);
-      setShowConversation(false);
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      alert(`Error starting call: ${errorMessage}`);
-    }
-  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage, setCurrentInterface]);
-
-  const handleIconClick = useCallback((iconName: string) => {
-    setActiveTooltip(activeTooltip === iconName ? null : iconName);
-    
-    if (activeTooltip !== iconName) {
-      setTimeout(() => {
-        setActiveTooltip(currentTooltip => currentTooltip === iconName ? null : currentTooltip);
-      }, 3000);
-    }
-  }, [activeTooltip]);
-
-  // --- EFFECTS ---
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    if (isActive) {
-      console.log('Interface1 is active, starting local timer');
-      setLocalDuration(0);
-      timer = setInterval(() => {
-        setLocalDuration(prev => prev + 1);
-      }, 1000);
-    }
-    return () => {
-      if (timer) {
-        console.log('Cleaning up local timer in Interface1');
-        clearInterval(timer);
-      }
-    };
-  }, [isActive]);
-
-  // Add scroll event listener
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollButton(window.pageYOffset > 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Add auto scroll effect when showing conversation
+  // Effects
   useEffect(() => {
     if (showConversation) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      scrollToTop();
     }
   }, [showConversation]);
 
-  // Add auto scroll effect when switching interface
   useEffect(() => {
     if (!isActive) {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      scrollToTop();
     }
   }, [isActive]);
 
-  // --- EARLY RETURNS AFTER ALL HOOKS ---
-  // Loading state
+  // Early returns
   if (configLoading || !hotelConfig) {
-    return (
-      <div 
-        className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
-        style={{ 
-          background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.secondary})`,
-          fontFamily: designSystem.fonts.primary
-        }}
-      >
-        <div className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl" style={{ boxShadow: designSystem.shadows.card }}>
-          <div 
-            className="animate-spin rounded-full border-4 border-white/20 border-t-white mx-auto mb-6"
-            style={{ width: '64px', height: '64px' }}
-          ></div>
-          <p className="text-white text-lg font-medium">Loading hotel configuration...</p>
-        </div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
-  // Error state
   if (configError) {
-    return (
-      <div 
-        className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
-        style={{ 
-          background: `linear-gradient(135deg, ${designSystem.colors.primary}, #EF4444)`,
-          fontFamily: designSystem.fonts.primary
-        }}
-      >
-        <div className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl" style={{ boxShadow: designSystem.shadows.card }}>
-          <div className="text-white text-xl font-semibold mb-4">Failed to load hotel configuration</div>
-          <p className="text-white/80">{configError}</p>
-        </div>
-      </div>
-    );
+    return <ErrorState error={configError} />;
   }
 
   return (
     <div 
-      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30"
+      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth"
       style={{
         fontFamily: designSystem.fonts.primary,
-        minHeight: 'calc(100vh - 64px)', // Adjust for main header height
-        marginTop: '64px', // Add margin for main header
+        minHeight: 'calc(100vh - 64px)',
+        marginTop: '64px',
         overflowX: 'hidden',
-        backgroundColor: '#2C3E50', // Match main header color
+        backgroundColor: '#2C3E50',
+        scrollBehavior: 'smooth'
       }}
     >
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -292,185 +70,47 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               lineHeight: 1.2
             }}
           >
-            {t('speak_multiple_languages')}
-            </h1>
+            Speak in Multiple Languages
+          </h1>
 
-          {/* Siri Button Container */}
-          <div 
-            className="flex flex-col items-center mt-32 md:mt-4"
-            style={{ 
-              marginBottom: designSystem.spacing.xl,
-              width: '357.5px',
-              height: '357.5px',
-              position: 'relative',
-              zIndex: 10
+          {/* Siri Button */}
+          <SiriButtonContainer
+            isCallStarted={isCallStarted}
+            micLevel={micLevel}
+            onCallStart={(lang) => {
+              handleCall(lang).then(result => {
+                if (result.success) {
+                  setIsCallStarted(true);
+                  setShowConversation(true);
+                } else if (result.error) {
+                  alert(result.error);
+                }
+              });
             }}
-          >
-            <div 
-              style={{ 
-                borderRadius: '50%',
-                boxShadow: designSystem.shadows.large,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-            <SiriCallButton
-              containerId="main-siri-button"
-              isListening={isCallStarted}
-              volumeLevel={micLevel}
-              onCallStart={() => handleCall(language)}
-              onCallEnd={() => {
-                setIsCallStarted(false);
-                setShowConversation(false);
-              }}
-            />
-            </div>
-            {/* Tap To Speak text - Only visible on mobile */}
-            <div
-              className="block md:hidden"
-              style={{
-                color: 'white',
-                fontSize: '1rem',
-                fontWeight: '500',
-                marginTop: '1rem',
-                textAlign: 'center',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-              }}
-            >
-              Tap To Speak
-            </div>
-          </div>
-
-          {/* Language Selector - Hidden on mobile */}
-          <div 
-            className="hidden md:flex items-center justify-center gap-4 mb-8"
-            style={{
-              padding: `${designSystem.spacing.md} ${designSystem.spacing.lg}`,
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              backdropFilter: 'blur(8px)',
-              boxShadow: designSystem.shadows.subtle,
-              marginBottom: designSystem.spacing.xl
+            onCallEnd={() => {
+              setIsCallStarted(false);
+              setShowConversation(false);
             }}
-          >
-              <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'en' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('en')}
-            >
-              English
-              </button>
-              <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'vi' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('vi')}
-              >
-              Tiếng Việt
-              </button>
-              <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'fr' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('fr')}
-            >
-              Français
-            </button>
-          </div>
-
-          {/* Service Categories Grid - Hidden on mobile */}
-          <div 
-            className="hidden md:grid w-full max-w-7xl mx-auto"
-            style={{ 
-              gridTemplateColumns: 'repeat(5, minmax(280px, 1fr))',
-              gridTemplateRows: 'repeat(2, 180px)',
-              gap: '24px',
-              padding: '32px 24px',
-              transformOrigin: 'top center',
-              marginTop: '2rem',
-              position: 'relative',
-              left: '50%',
-              transform: 'translateX(-50%) scale(0.65)',
-              width: '180%',
-              maxWidth: 'none',
-              placeItems: 'center'
-            }}
-          >
-            {serviceCategories.map((category, index) => (
-              <div
-                key={index}
-                className="relative group"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(10px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  padding: '20px',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  overflow: 'hidden'
-                }}
-              >
-                {/* Icon Container */}
-                <div style={{
-                  fontSize: '3rem',
-                  marginBottom: '12px',
-                  transition: 'transform 0.3s ease',
-                  height: '60px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {category.icon}
-            </div>
-
-                {/* Text Container */}
-                <div style={{
-                  fontSize: '18px',
-                  fontWeight: '500',
-                  color: 'white',
-                  textAlign: 'center',
-                  lineHeight: '1.4',
-                  height: '50px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0 8px'
-                }}>
-                  {category.name}
-            </div>
-          </div>
-            ))}
-        </div>
-
-        {/* Conversation Popup */}
-        {showConversation && (
-          <RealtimeConversationPopup
-            isOpen={showConversation}
-            onClose={() => setShowConversation(false)}
-            isRight={true}
           />
+
+          {/* Service Categories Grid */}
+          <ServiceGrid />
+
+          {/* Conversation Popup */}
+          {showConversation && (
+            <RealtimeConversationPopup
+              isOpen={showConversation}
+              onClose={() => setShowConversation(false)}
+              isRight={true}
+            />
           )}
         </div>
 
-        {/* Scroll to top button - Only visible when scrolled */}
+        {/* Scroll to top button */}
         {showScrollButton && (
           <button
-            className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20 md:hidden opacity-0 animate-fade-in"
-            onClick={() => {
-              window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-              });
-            }}
+            className="fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden"
+            onClick={scrollToTop}
           >
             <svg 
               className="w-6 h-6 text-white"
