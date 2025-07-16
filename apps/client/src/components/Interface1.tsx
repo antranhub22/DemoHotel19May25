@@ -283,10 +283,13 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             style={{ 
               fontFamily: designSystem.fonts.primary,
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-              marginTop: '2rem'
+              marginTop: '2rem',
+              lineHeight: '1.4',
+              maxWidth: '800px',
+              margin: '2rem auto'
             }}
           >
-            Speak Multiple Languages With Our AI Voice Assistant
+            Speak Multiple Languages<br/>With Our AI Voice Assistant
           </h1>
 
           {/* Siri Button Container */}
