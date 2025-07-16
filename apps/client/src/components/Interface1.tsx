@@ -62,7 +62,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   // --- MEMOIZED VALUES ---
-  const currentTime = useMemo(() => new Date(), []);
+  // Removed unused time memo
+  // const currentTime = useMemo(() => new Date(), []);
 
   // Enhanced Design System Constants
   const designSystem = {
@@ -272,6 +273,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         }}
       >
         {/* Header with time and date - Fixed position on mobile */}
+        {/* Removed time and date display
         <div 
           className="sticky top-0 left-0 right-0 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/50 to-transparent md:absolute md:bg-none"
           style={{ 
@@ -310,6 +312,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             </div>
           </div>
         </div>
+        */}
 
         {/* Main content area - Scrollable container */}
         <div className="flex flex-col items-center justify-start w-full min-h-screen pb-20 md:justify-center md:pb-0">
