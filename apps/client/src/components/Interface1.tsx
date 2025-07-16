@@ -286,20 +286,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               marginTop: '2rem'
             }}
           >
-            Voice Assistant
+            Speak Multiple Languages With Our AI Voice Assistant
           </h1>
-          
-          <p 
-            className="text-lg text-white text-center mb-8 max-w-2xl"
-            style={{ 
-              fontFamily: designSystem.fonts.primary,
-              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-              opacity: 0.9,
-              marginBottom: '3rem'
-            }}
-          >
-            Speaking Multi_languages To Serve You Better
-          </p>
 
           {/* Siri Button Container */}
           <div style={{ 
@@ -334,51 +322,26 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
               />
             </div>
           </div>
-
-          {/* Language Selector */}
-          <div 
-            className="flex items-center justify-center gap-4 mb-8"
-            style={{
-              padding: `${designSystem.spacing.md} ${designSystem.spacing.lg}`,
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              backdropFilter: 'blur(8px)',
-              boxShadow: designSystem.shadows.subtle,
-              marginBottom: designSystem.spacing.xl
-            }}
-          >
-            <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'en' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('en')}
-            >
-              English
-            </button>
-            <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'vi' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('vi')}
-            >
-              Tiếng Việt
-            </button>
-            <button
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${language === 'fr' ? 'bg-white text-primary' : 'text-white hover:bg-white/10'}`}
-              onClick={() => setLanguage('fr')}
-            >
-              Français
-            </button>
-          </div>
-
+          
           {/* Service Categories Grid - Adjusted to 2 rows */}
           <div 
-            className="grid w-full max-w-5xl mx-auto"
+            className="grid w-full max-w-7xl mx-auto"
             style={{ 
-              gridTemplateColumns: 'repeat(5, 1fr)', // 5 items per row
-              gridTemplateRows: 'repeat(2, 1fr)', // 2 rows
+              gridTemplateColumns: 'repeat(5, minmax(400px, 1fr))', // Increased minimum width from 200px to 400px
+              gridTemplateRows: 'repeat(2, 1fr)',
               gap: designSystem.spacing.lg,
               padding: `${designSystem.spacing.xl} ${designSystem.spacing.lg}`,
-              transform: 'scale(0.4)', // Adjusted scale for better proportion
-              transformOrigin: 'top center',
+              transformOrigin: 'center center',
               marginTop: '-1rem',
-              paddingBottom: '4rem'
+              paddingBottom: '4rem',
+              position: 'relative',
+              left: '50%',
+              transform: 'translateX(-50%) scale(0.4)', // Keep scale at 0.4
+              width: '200%',
+              maxWidth: 'none',
+              display: 'grid',
+              placeItems: 'center',
+              margin: '0 auto'
             }}
           >
             {/* Service items with adjusted text styling */}
@@ -392,32 +355,33 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 padding: `${designSystem.spacing.md} ${designSystem.spacing.sm}`,
                 boxShadow: designSystem.shadows.card,
                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                aspectRatio: '1/1', // Maintain square aspect ratio
+                aspectRatio: '1/1',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px' // Ensure minimum height
+                minHeight: '400px', // Doubled from 200px
+                width: '100%' // Take full width of grid cell
               }}
               onClick={() => handleIconClick('tourism')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🏖️</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -458,27 +422,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('room_service')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🍽️</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -519,27 +483,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('housekeeping')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🧹</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -580,27 +544,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('feedback')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>📝</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -641,27 +605,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('souvenir')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🎁</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -702,27 +666,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('tours')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🚌</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -763,27 +727,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('bus_tickets')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🎫</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -824,27 +788,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('vehicle_rental')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🏍️</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -885,27 +849,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('currency_exchange')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>💱</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -946,27 +910,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('laundry')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>👕</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1007,27 +971,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('wake_up')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>⏰</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1068,27 +1032,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('homestay')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🏠</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1129,27 +1093,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('restaurant')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🍴</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1190,27 +1154,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('spa')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>💆</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -1251,27 +1215,27 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: '200px'
+                minHeight: '400px' // Doubled from 200px
               }}
               onClick={() => handleIconClick('transportation')}
               onMouseEnter={(e) => e.currentTarget.style.background = designSystem.colors.surfaceHover}
               onMouseLeave={(e) => e.currentTarget.style.background = designSystem.colors.surface}
             >
               <div style={{ 
-                fontSize: '3rem',
-                marginBottom: designSystem.spacing.sm,
-                height: '60px',
+                fontSize: '4rem', // Increased from 3rem
+                marginBottom: designSystem.spacing.md, // Increased spacing
+                height: '120px', // Doubled from 60px
                 display: 'flex',
                 alignItems: 'center'
               }}>🚗</div>
               <h3 
-                className="text-white font-semibold px-2"
+                className="text-white font-semibold px-4" // Increased padding
                 style={{ 
-                  fontSize: '16px',
+                  fontSize: '24px', // Increased from 16px
                   lineHeight: '1.2',
                   wordWrap: 'break-word',
                   width: '100%',
-                  height: '40px',
+                  height: '60px', // Increased from 40px
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
