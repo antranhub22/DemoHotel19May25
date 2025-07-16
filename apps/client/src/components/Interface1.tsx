@@ -291,7 +291,7 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
         </div>
 
         {/* Main content area */}
-        <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex flex-col items-center justify-start w-full h-full md:justify-center">
           <h1 
             className="text-4xl md:text-5xl font-bold text-white text-center mb-4 hidden md:block"
             style={{ 
@@ -308,10 +308,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
           {/* Siri Button Container */}
           <div 
-            className="flex flex-col items-center"
+            className="flex flex-col items-center mt-32 md:mt-4"
             style={{ 
               marginBottom: designSystem.spacing.xl,
-              marginTop: '1rem',
               width: '357.5px',
               height: '357.5px',
               position: 'relative',
@@ -359,9 +358,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             </div>
           </div>
 
-          {/* Language Selector */}
+          {/* Language Selector - Hidden on mobile */}
           <div 
-            className="flex items-center justify-center gap-4 mb-8"
+            className="hidden md:flex items-center justify-center gap-4 mb-8"
             style={{
               padding: `${designSystem.spacing.md} ${designSystem.spacing.lg}`,
               background: 'rgba(255, 255, 255, 0.1)',
@@ -391,22 +390,21 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             </button>
           </div>
 
-          {/* Service Categories Grid - Adjusted to 2 rows */}
+          {/* Service Categories Grid - Hidden on mobile */}
           <div 
-            className="grid w-full max-w-7xl mx-auto"
+            className="hidden md:grid w-full max-w-7xl mx-auto"
             style={{ 
-              gridTemplateColumns: 'repeat(5, minmax(280px, 1fr))', // Optimized width for readability
-              gridTemplateRows: 'repeat(2, 180px)', // Fixed height for consistent layout
-              gap: '24px', // Professional spacing
+              gridTemplateColumns: 'repeat(5, minmax(280px, 1fr))',
+              gridTemplateRows: 'repeat(2, 180px)',
+              gap: '24px',
               padding: '32px 24px',
               transformOrigin: 'top center',
               marginTop: '2rem',
               position: 'relative',
               left: '50%',
-              transform: 'translateX(-50%) scale(0.65)', // Adjusted scale for better visibility
-              width: '180%', // Adjusted to maintain proportions
+              transform: 'translateX(-50%) scale(0.65)',
+              width: '180%',
               maxWidth: 'none',
-              display: 'grid',
               placeItems: 'center'
             }}
           >
