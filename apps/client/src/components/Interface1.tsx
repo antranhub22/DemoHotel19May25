@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import hotelImage from '@/assets/hotel-exterior.jpeg';
+import styles from './Interface1.module.css';
 import { t } from '@/i18n';
 import { ActiveOrder } from '@/types';
 import { initVapi, getVapiInstance, resetVapi } from '@/lib/vapiClient';
@@ -56,6 +57,9 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+
+  // Add scroll to top button visibility state
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // --- MEMOIZED VALUES ---
   const currentTime = useMemo(() => new Date(), []);
@@ -202,6 +206,16 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     };
   }, [isActive]);
 
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollButton(window.pageYOffset > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Loading state
   if (configLoading || !hotelConfig) {
@@ -246,18 +260,25 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     <div className={`absolute w-full h-full transition-opacity duration-300 ${isActive ? 'opacity-100 z-10' : 'opacity-0 -z-10'}`}>
       {/* Main Interface Content */}
       <div 
-        className="relative w-full h-full overflow-hidden"
+        className={`relative w-full h-full overflow-y-auto overflow-x-hidden ${styles.scrollbarThin}`}
         style={{
           backgroundImage: `linear-gradient(135deg, ${designSystem.colors.primary}DD, ${designSystem.colors.secondary}AA), url(${hotelImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          fontFamily: designSystem.fonts.primary
+          backgroundAttachment: 'fixed',
+          fontFamily: designSystem.fonts.primary,
+          WebkitOverflowScrolling: 'touch',
+          scrollBehavior: 'smooth'
         }}
       >
-        {/* Header with time and date */}
+        {/* Header with time and date - Fixed position on mobile */}
         <div 
-          className="absolute left-0 right-0 flex justify-between items-center text-white z-20"
-          style={{ top: designSystem.spacing.md, padding: `0 ${designSystem.spacing.md}` }}
+          className="sticky top-0 left-0 right-0 flex justify-between items-center text-white z-20 bg-gradient-to-b from-black/50 to-transparent md:absolute md:bg-none"
+          style={{ 
+            padding: `${designSystem.spacing.md} ${designSystem.spacing.md}`,
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
         >
           <div className="text-left">
             <div 
@@ -290,8 +311,8 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </div>
         </div>
 
-        {/* Main content area */}
-        <div className="flex flex-col items-center justify-start w-full h-full md:justify-center">
+        {/* Main content area - Scrollable container */}
+        <div className="flex flex-col items-center justify-start w-full min-h-screen pb-20 md:justify-center md:pb-0">
           <h1 
             className="text-4xl md:text-5xl font-bold text-white text-center mb-4 hidden md:block"
             style={{ 
@@ -471,6 +492,31 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             />
           )}
         </div>
+
+        {/* Scroll to top button - Only visible when scrolled */}
+        {showScrollButton && (
+          <button
+            className={`fixed bottom-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-opacity duration-300 hover:bg-white/20 md:hidden ${styles.scrollToTopButton}`}
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+              });
+            }}
+          >
+            <svg 
+              className="w-6 h-6 text-white"
+              fill="none" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth="2" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
