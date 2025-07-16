@@ -12,11 +12,11 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
     if (!showConversation) return null;
 
     return (
-      <div ref={ref} className={`w-full ${className}`}>
+      <div ref={ref} className={`${className}`}>
         <RealtimeConversationPopup
           isOpen={showConversation}
           onClose={onClose}
-          isRight={true}
+          isRight={false}
         />
       </div>
     );

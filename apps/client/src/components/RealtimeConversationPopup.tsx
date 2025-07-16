@@ -141,10 +141,10 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       <div 
         className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
         style={{
-          width: '90vw',
-          maxWidth: 360,
-          height: '70vh',
-          maxHeight: 440,
+          width: '320px',
+          maxWidth: '320px',
+          height: '400px',
+          maxHeight: '400px',
           background: 'rgba(255,255,255,0.12)',
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
@@ -237,17 +237,32 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
-      {/* Desktop: popup lệch phải nút Call */}
+      {/* Responsive styles for left-positioned popup */}
       <style>{`
-        @media (min-width: 640px) {
+        @media (max-width: 768px) {
           .realtime-popup {
-            width: 340px !important;
-            height: 420px !important;
-            max-width: 340px !important;
-            max-height: 420px !important;
+            width: 280px !important;
+            max-width: 280px !important;
+            height: 350px !important;
+            max-height: 350px !important;
           }
-          .popup-right {
-            /* Có thể thêm hiệu ứng đối xứng nếu muốn */
+        }
+        
+        @media (min-width: 769px) {
+          .realtime-popup {
+            width: 320px !important;
+            height: 400px !important;
+            max-width: 320px !important;
+            max-height: 400px !important;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          .realtime-popup {
+            width: 260px !important;
+            max-width: 260px !important;
+            height: 300px !important;
+            max-height: 300px !important;
           }
         }
       `}</style>
