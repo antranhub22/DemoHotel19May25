@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SiriButton } from './SiriButton';
 import '../../styles/voice-interface.css';
+import { Language } from '@/types/interface1.types';
 
 interface SiriCallButtonProps {
   isListening: boolean;
@@ -8,6 +9,13 @@ interface SiriCallButtonProps {
   containerId: string;
   onCallStart?: () => Promise<void>;
   onCallEnd?: () => void;
+  language?: Language;
+  colors?: {
+    primary: string;
+    secondary: string;
+    glow: string;
+    name: string;
+  };
 }
 
 const SiriCallButton: React.FC<SiriCallButtonProps> = ({ 
@@ -15,7 +23,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   volumeLevel,
   containerId,
   onCallStart,
-  onCallEnd
+  onCallEnd,
+  language = 'en',
+  colors
 }) => {
   const buttonRef = useRef<SiriButton | null>(null);
   const clickHandlerRef = useRef<((event: Event) => void) | null>(null);
@@ -34,8 +44,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   useEffect(() => {
     console.log('[SiriCallButton] Initializing with containerId:', containerId);
     
-    // Initialize SiriButton
-    buttonRef.current = new SiriButton(containerId);
+    // Initialize SiriButton with colors
+    buttonRef.current = new SiriButton(containerId, colors);
 
     // Create click handler function
     const clickHandler = async (event: Event) => {
@@ -97,7 +107,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
       clickHandlerRef.current = null;
     };
-  }, [containerId]); // Remove other dependencies to avoid recreating
+  }, [containerId, colors]); // Add colors to dependencies
+
+  // Update colors when language changes
+  useEffect(() => {
+    if (buttonRef.current && colors) {
+      buttonRef.current.updateColors(colors);
+    }
+  }, [colors]);
 
   // Separate effect for updating callbacks
   useEffect(() => {
@@ -130,7 +147,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     <div className="relative flex items-center justify-center">
       {/* Status Indicator */}
       {status !== 'idle' && (
-        <div className={`status-indicator ${status} absolute -top-12 left-1/2 transform -translate-x-1/2`}>
+        <div 
+          className={`status-indicator ${status} absolute -top-12 left-1/2 transform -translate-x-1/2`}
+          style={{
+            color: colors?.primary || '#5DB6B9',
+            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`
+          }}
+        >
           {statusText[status]}
         </div>
       )}
@@ -160,7 +183,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         }}
       >
         {/* Gradient Ring Effect */}
-        <div className="gradient-ring absolute inset-0" />
+        <div 
+          className="gradient-ring absolute inset-0 transition-all duration-300" 
+          style={{
+            background: colors ? `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` : undefined,
+            opacity: 0.6
+          }}
+        />
       </div>
 
       {/* Waveform Animation */}
@@ -172,7 +201,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
               className="waveform-bar"
               style={{
                 animation: `waveform ${0.5 + Math.random() * 0.5}s ease-in-out infinite`,
-                animationDelay: `${index * 0.1}s`
+                animationDelay: `${index * 0.1}s`,
+                backgroundColor: colors?.primary || '#5DB6B9',
+                boxShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`
               }}
             />
           ))}

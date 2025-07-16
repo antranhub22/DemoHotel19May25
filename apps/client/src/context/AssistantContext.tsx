@@ -327,6 +327,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const setupVapi = async () => {
       try {
+        console.log('🔧 [setupVapi] Language changed to:', language);
+        console.log('🔧 [setupVapi] Hotel config available:', !!hotelConfig);
+        
         // Use hotel configuration if available, otherwise fallback to environment variables
         const publicKey = hotelConfig 
           ? getVapiPublicKeyByLanguage(language, hotelConfig)
@@ -341,6 +344,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   : language === 'vi'
                     ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
                     : import.meta.env.VITE_VAPI_PUBLIC_KEY;
+        
+        console.log('🔑 [setupVapi] Selected publicKey for language', language, ':', publicKey ? publicKey.substring(0, 10) + '...' : 'undefined');
+        
         if (!publicKey) {
           throw new Error('Vapi public key is not configured');
         }
@@ -516,7 +522,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         roomNumber: '',
         duration: '',
         category: '',
-        language: 'en'
+        language: language
       });
       
       // Clear previous transcripts and model outputs
@@ -544,6 +550,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 : language === 'vi'
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
                   : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+      
+      console.log('🤖 [startCall] Selected assistantId for language', language, ':', assistantId ? assistantId.substring(0, 10) + '...' : 'undefined');
+      
       if (!assistantId) {
         console.error('Assistant ID not configured');
         return;

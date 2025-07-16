@@ -81,6 +81,9 @@ const VoiceAssistant: React.FC = () => {
 
   // Handlers
   const handleLanguageChange = (lang: Language) => {
+    console.log('🌍 [Language Change] User selected language:', lang);
+    console.log('🌍 [Language Change] Available languages:', filteredLanguages);
+    console.log('🌍 [Language Change] Config supportedLanguages:', config?.supportedLanguages);
     setLanguage(lang);
   };
 

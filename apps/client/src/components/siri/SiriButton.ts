@@ -29,8 +29,27 @@ export class SiriButton {
   private idleFrame: number = 0;
   private lastActiveTime: number = Date.now();
   private idleFlash: number = 0;
+  private colors: {
+    primary: string;
+    secondary: string;
+    glow: string;
+    name: string;
+  };
 
-  constructor(containerId: string) {
+  constructor(containerId: string, colors?: {
+    primary: string;
+    secondary: string;
+    glow: string;
+    name: string;
+  }) {
+    // Set default colors or use provided colors
+    this.colors = colors || {
+      primary: '#5DB6B9',
+      secondary: '#E8B554',
+      glow: 'rgba(93, 182, 185, 0.4)',
+      name: 'English'
+    };
+
     // Create canvas element
     this.canvas = document.createElement('canvas');
     const container = document.getElementById(containerId);
@@ -85,6 +104,16 @@ export class SiriButton {
     });
   }
 
+  // Method to update colors dynamically
+  public updateColors(colors: {
+    primary: string;
+    secondary: string;
+    glow: string;
+    name: string;
+  }) {
+    this.colors = colors;
+  }
+
   private resize() {
     // Get container size
     const container = this.canvas.parentElement;
@@ -108,8 +137,8 @@ export class SiriButton {
   }
 
   private drawTexturePattern() {
-    // Boutique subtle pattern: draw small gold dots in a grid
-    const dotColor = 'rgba(232,181,84,0.18)';
+    // Dynamic texture pattern based on current color
+    const dotColor = this.colors.secondary + '30'; // Add transparency
     const step = 14;
     for (let x = -this.radius; x < this.radius; x += step) {
       for (let y = -this.radius; y < this.radius; y += step) {
@@ -157,15 +186,15 @@ export class SiriButton {
       this.centerX - this.radius * 1.2 + offsetX, this.centerY - this.radius * 1.2 + offsetY,
       gradX + offsetX, gradY + offsetY
     );
-    outerGradient.addColorStop(0, this.isDarkMode ? '#559A9A' : '#5DB6B9');
-    outerGradient.addColorStop(1, this.isDarkMode ? '#559A9A' : '#5DB6B9');
+    outerGradient.addColorStop(0, this.colors.primary);
+    outerGradient.addColorStop(1, this.colors.primary);
     this.ctx.save();
     this.ctx.globalAlpha = 0.85;
     this.ctx.beginPath();
     this.ctx.arc(this.centerX + offsetX, this.centerY + offsetY, this.radius * 1.25, 0, Math.PI * 2);
     this.ctx.strokeStyle = outerGradient;
     this.ctx.lineWidth = 12;
-    this.ctx.shadowColor = this.isHovered ? '#559A9A' : '#559A9A';
+    this.ctx.shadowColor = this.colors.primary;
     this.ctx.shadowBlur = this.isHovered ? 32 : 16;
     this.ctx.stroke();
     this.ctx.restore();
@@ -180,12 +209,12 @@ export class SiriButton {
     this.ctx.filter = 'none';
     this.ctx.restore();
 
-    // Inner gold circle
+    // Inner circle with dynamic color
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(this.centerX + offsetX, this.centerY + offsetY, this.radius * 0.98, 0, Math.PI * 2);
-    this.ctx.fillStyle = this.isDarkMode ? '#bfa133' : '#E8B554';
-    this.ctx.shadowColor = this.isDarkMode ? 'rgba(85,154,154,0.18)' : 'rgba(85,154,154,0.25)';
+    this.ctx.fillStyle = this.colors.secondary;
+    this.ctx.shadowColor = this.colors.glow;
     this.ctx.shadowBlur = 10;
     this.ctx.fill();
     this.ctx.restore();
@@ -264,15 +293,18 @@ export class SiriButton {
   }
 
   private drawPulsingRing() {
-    // Draw pulsing ring when listening
+    // Draw pulsing ring when listening với màu động
     if (this.isListening) {
       const pulseRadius = this.radius + 10 + Math.sin(this.pulsePhase) * 5;
       const volumeBoost = this.volumeLevel * 20;
       
       this.ctx.beginPath();
       this.ctx.arc(this.centerX, this.centerY, pulseRadius + volumeBoost, 0, Math.PI * 2);
-      this.ctx.strokeStyle = 'rgba(33, 150, 243, 0.5)';
+      // Use primary color with transparency
+      this.ctx.strokeStyle = this.colors.primary + '80'; // 50% opacity
       this.ctx.lineWidth = 3;
+      this.ctx.shadowColor = this.colors.glow;
+      this.ctx.shadowBlur = 8;
       this.ctx.stroke();
       
       this.pulsePhase += 0.1;
@@ -281,7 +313,7 @@ export class SiriButton {
 
   private drawWaveform() {
     if (!this.isListening) return;
-    // Draw concentric waveform rings
+    // Draw concentric waveform rings with dynamic colors
     const rings = 4;
     this.waveformPhase += 0.08 + this.volumeLevel * 0.12;
     for (let i = 1; i <= rings; i++) {
@@ -289,9 +321,11 @@ export class SiriButton {
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.arc(this.centerX, this.centerY, baseRadius, 0, Math.PI * 2);
-      this.ctx.strokeStyle = `rgba(232,181,84,${0.18 + 0.08 * (rings-i)})`;
+      // Use secondary color with opacity based on ring position
+      const opacity = (0.18 + 0.08 * (rings-i)).toFixed(2);
+      this.ctx.strokeStyle = this.colors.secondary + Math.floor(255 * parseFloat(opacity)).toString(16).padStart(2, '0');
       this.ctx.lineWidth = 2 + this.volumeLevel * 2;
-      this.ctx.shadowColor = 'rgba(85,154,154,0.22)';
+      this.ctx.shadowColor = this.colors.glow;
       this.ctx.shadowBlur = 8;
       this.ctx.stroke();
       this.ctx.restore();
@@ -325,8 +359,10 @@ export class SiriButton {
       this.ctx.save();
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      this.ctx.fillStyle = `rgba(232,181,84,${p.alpha})`;
-      this.ctx.shadowColor = 'rgba(85,154,154,0.22)';
+      // Use secondary color with particle alpha
+      const alphaHex = Math.floor(255 * p.alpha).toString(16).padStart(2, '0');
+      this.ctx.fillStyle = this.colors.secondary + alphaHex;
+      this.ctx.shadowColor = this.colors.glow;
       this.ctx.shadowBlur = 6;
       this.ctx.fill();
       this.ctx.restore();
@@ -334,9 +370,10 @@ export class SiriButton {
   }
 
   private drawTimeRing() {
-    // Draw thin progress ring around the button
+    // Draw thin progress ring around the button với màu động
     const percent = Math.min(1, this.elapsedTime / this.timeTarget);
-    const color = percent < 0.5 ? '#E8B554' : percent < 1 ? '#d4af37' : '#e53935';
+    // Use dynamic colors based on progress
+    const color = percent < 0.5 ? this.colors.secondary : percent < 1 ? this.colors.primary : '#e53935';
     this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(this.centerX, this.centerY, this.radius * 1.32, -Math.PI/2, -Math.PI/2 + percent * 2 * Math.PI);
@@ -370,7 +407,7 @@ export class SiriButton {
   }
 
   private drawIdleFlash() {
-    // Hiệu ứng nhấp nháy nhẹ khi không hoạt động lâu
+    // Hiệu ứng nhấp nháy nhẹ khi không hoạt động lâu với màu động
     const idleMs = Date.now() - this.lastActiveTime;
     if (idleMs > 6000) {
       this.idleFlash += 0.08;
@@ -379,7 +416,7 @@ export class SiriButton {
       this.ctx.globalAlpha = 0.18 * flash;
       this.ctx.beginPath();
       this.ctx.arc(this.centerX, this.centerY, this.radius * 1.18, 0, Math.PI * 2);
-      this.ctx.fillStyle = '#E8B554';
+      this.ctx.fillStyle = this.colors.secondary;
       this.ctx.filter = 'blur(2.5px)';
       this.ctx.fill();
       this.ctx.filter = 'none';
@@ -390,7 +427,7 @@ export class SiriButton {
   }
 
   private drawVolumeVisualization() {
-    // Visualization sóng âm động quanh nút khi listening
+    // Visualization sóng âm động quanh nút khi listening với màu động
     if (!this.isListening) return;
     const bars = 16;
     const baseR = this.radius * 1.08;
@@ -402,12 +439,15 @@ export class SiriButton {
       const x2 = this.centerX + Math.cos(angle) * (baseR + amp);
       const y2 = this.centerY + Math.sin(angle) * (baseR + amp);
       this.ctx.save();
-      this.ctx.strokeStyle = `rgba(232,181,84,${0.18 + 0.18 * this.volumeLevel})`;
+      // Use secondary color with volume-based opacity
+      const opacity = (0.18 + 0.18 * this.volumeLevel).toFixed(2);
+      const alphaHex = Math.floor(255 * parseFloat(opacity)).toString(16).padStart(2, '0');
+      this.ctx.strokeStyle = this.colors.secondary + alphaHex;
       this.ctx.lineWidth = 2.2;
       this.ctx.beginPath();
       this.ctx.moveTo(x1, y1);
       this.ctx.lineTo(x2, y2);
-      this.ctx.shadowColor = 'rgba(85,154,154,0.22)';
+      this.ctx.shadowColor = this.colors.glow;
       this.ctx.shadowBlur = 6;
       this.ctx.stroke();
       this.ctx.restore();
