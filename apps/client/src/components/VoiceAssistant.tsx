@@ -143,9 +143,9 @@ const VoiceAssistant: React.FC = () => {
       
       {/* Header Bar */}
       <header 
-        className="w-full bg-primary text-white shadow-md fixed top-0 left-0 right-0 z-50" 
+        className="w-full text-white shadow-md fixed top-0 left-0 right-0 z-50" 
         style={{ 
-          backgroundColor: config?.branding?.colors?.primary || '#1e40af',
+          backgroundColor: '#1B4E8B', // Fixed color to match Interface1
           height: '64px' // Fixed height for header
         }}
       >
