@@ -209,6 +209,26 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Add auto scroll effect when showing conversation
+  useEffect(() => {
+    if (showConversation) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [showConversation]);
+
+  // Add auto scroll effect when switching interface
+  useEffect(() => {
+    if (!isActive) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+  }, [isActive]);
+
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Loading state
   if (configLoading || !hotelConfig) {
@@ -251,13 +271,14 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
 
   return (
     <div 
-      className="relative min-h-screen w-full overflow-x-hidden bg-gray-900"
+      className="relative min-h-screen w-full overflow-x-hidden scroll-smooth"
       style={{
         fontFamily: designSystem.fonts.primary,
         minHeight: 'calc(100vh - 64px)', // Adjust for main header height
         marginTop: '64px', // Add margin for main header
         overflowX: 'hidden',
-        backgroundColor: '#1a1a1a' // Dark background instead of gradient
+        backgroundColor: '#2C3E50', // Match main header color
+        scrollBehavior: 'smooth' // Enable smooth scrolling
       }}
     >
       <div className="container mx-auto px-4 py-8 relative z-10">
