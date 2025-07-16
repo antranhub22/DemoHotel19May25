@@ -18,8 +18,10 @@ import {
   HelpCircle,
   User,
   Sun,
-  Moon
+  Moon,
+  ChevronRight
 } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 
 // Types
 interface TopBarProps {
@@ -261,18 +263,55 @@ const Breadcrumb = ({
 }: { 
   title: string; 
   description?: string; 
-}) => (
-  <div>
-    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-      {title}
-    </h1>
-    {description && (
-      <p className="text-sm text-muted-foreground mt-1">
-        {description}
-      </p>
-    )}
-  </div>
-);
+}) => {
+  const [location] = useLocation();
+  const pathSegments = location.substring(1).split('/').filter(Boolean);
+  
+  const getBreadcrumbPath = (index: number) => {
+    return '/' + pathSegments.slice(0, index + 1).join('/');
+  };
+
+  const getSegmentLabel = (segment: string) => {
+    switch (segment) {
+      case 'dashboard': return 'Tổng quan';
+      case 'setup': return 'Thiết lập';
+      case 'analytics': return 'Phân tích';
+      case 'settings': return 'Cài đặt';
+      case 'billing': return 'Thanh toán';
+      case 'team': return 'Nhóm';
+      default: return segment;
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-primary">
+          Trang chủ
+        </Link>
+        {pathSegments.map((segment, index) => (
+          <React.Fragment key={index}>
+            <ChevronRight className="h-4 w-4" />
+            <Link 
+              href={getBreadcrumbPath(index)}
+              className="hover:text-primary"
+            >
+              {getSegmentLabel(segment)}
+            </Link>
+          </React.Fragment>
+        ))}
+      </div>
+      <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+        {title}
+      </h1>
+      {description && (
+        <p className="text-sm text-muted-foreground">
+          {description}
+        </p>
+      )}
+    </div>
+  );
+};
 
 // Main TopBar component
 export const TopBar: React.FC<TopBarProps> = ({
@@ -307,9 +346,9 @@ export const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b shadow-sm">
-      <div className="flex items-center justify-between p-4 lg:px-6">
-        {/* Left section */}
-        <div className="flex items-center gap-4">
+      <div className="grid grid-cols-12 gap-4 p-4 lg:px-6">
+        {/* Left section - spans 4 columns on desktop, full width on mobile */}
+        <div className="col-span-12 lg:col-span-4 flex items-center gap-4">
           {/* Mobile menu button */}
           <Button
             variant="ghost"
@@ -320,17 +359,17 @@ export const TopBar: React.FC<TopBarProps> = ({
             <Menu className="h-5 w-5" />
           </Button>
           
-          {/* Page info */}
+          {/* Page info with breadcrumb */}
           <Breadcrumb 
             title={pageInfo.title} 
             description={pageInfo.description}
           />
         </div>
         
-        {/* Right section */}
-        <div className="flex items-center gap-2">
+        {/* Center section - spans 4 columns, hidden on mobile */}
+        <div className="hidden lg:col-span-4 lg:flex items-center justify-center">
           {/* Subscription status */}
-          <div className="hidden md:flex items-center gap-2 mr-4">
+          <div className="flex items-center gap-2">
             <Badge 
               variant={tenantData.subscriptionStatus === 'active' ? 'default' : 'destructive'}
               className="text-xs"
@@ -340,7 +379,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                tenantData.subscriptionPlan === 'premium' ? 'Cao cấp' : 'Doanh nghiệp'}
             </Badge>
           </div>
-          
+        </div>
+        
+        {/* Right section - spans 4 columns on desktop, full width on mobile */}
+        <div className="col-span-12 lg:col-span-4 flex items-center justify-end gap-2">
           {/* Theme toggle */}
           <ThemeToggle />
           
