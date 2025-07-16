@@ -57,10 +57,6 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   // Add scroll to top button visibility state
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // --- MEMOIZED VALUES ---
-  // Removed unused time memo
-  // const currentTime = useMemo(() => new Date(), []);
-
   // Enhanced Design System Constants
   const designSystem = {
     colors: {
@@ -254,11 +250,12 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
   }
 
   return (
-      <div 
+    <div 
       className="relative min-h-screen w-full overflow-x-hidden bg-gray-900"
-        style={{
+      style={{
         fontFamily: designSystem.fonts.primary,
-        minHeight: '100vh',
+        minHeight: 'calc(100vh - 64px)', // Adjust for main header height
+        marginTop: '64px', // Add margin for main header
         overflowX: 'hidden',
         backgroundColor: '#1a1a1a' // Dark background instead of gradient
       }}
