@@ -26,6 +26,7 @@
     "start:transpile-only": "NODE_ENV=development tsx apps/server/index.ts",
     "test": "tsx tools/scripts/test-api-connectivity.ts",
     "test:db": "tsx tools/scripts/test-database-fix.ts",
+    "test:vapi": "node scripts/test-vapi-languages.js",
     "test:build": "npm run build && npm run test",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:install": "npm run clean && npm install",

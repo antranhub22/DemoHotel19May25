@@ -332,7 +332,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         
         // Use hotel configuration if available, otherwise fallback to environment variables
         const publicKey = hotelConfig 
-          ? getVapiPublicKeyByLanguage(language, hotelConfig)
+          ? await getVapiPublicKeyByLanguage(language, hotelConfig)
           : language === 'fr'
             ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
             : language === 'zh'
@@ -538,7 +538,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
       // Use hotel configuration for assistant ID if available
       const assistantId = hotelConfig 
-        ? getVapiAssistantIdByLanguage(language, hotelConfig)
+        ? await getVapiAssistantIdByLanguage(language, hotelConfig)
         : language === 'fr'
           ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
           : language === 'zh'

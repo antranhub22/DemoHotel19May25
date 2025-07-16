@@ -38,8 +38,8 @@ export const useCallHandler = () => {
     setModelOutput([]);
     setCallDuration(0);
     
-    const publicKey = getVapiPublicKeyByLanguage(lang, hotelConfig);
-    const assistantId = getVapiAssistantIdByLanguage(lang, hotelConfig);
+    const publicKey = await getVapiPublicKeyByLanguage(lang, hotelConfig);
+    const assistantId = await getVapiAssistantIdByLanguage(lang, hotelConfig);
     
     console.log('[useCallHandler] Vapi configuration:', { publicKey, assistantId, lang });
     

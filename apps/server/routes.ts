@@ -1790,5 +1790,60 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
+  // ============================================
+  // Get Vapi Configuration by Language
+  // ============================================
+  app.get('/api/vapi/config/:language', (req: Request, res: Response) => {
+    try {
+      const { language } = req.params;
+      
+      console.log(`[API] Getting Vapi config for language: ${language}`);
+      
+      // Get environment variables for the requested language
+      const getEnvVars = (lang: string) => {
+        const langUpper = lang.toUpperCase();
+        return {
+          publicKey: lang === 'en' 
+            ? process.env.VITE_VAPI_PUBLIC_KEY
+            : process.env[`VITE_VAPI_PUBLIC_KEY_${langUpper}`],
+          assistantId: lang === 'en'
+            ? process.env.VITE_VAPI_ASSISTANT_ID  
+            : process.env[`VITE_VAPI_ASSISTANT_ID_${langUpper}`]
+        };
+      };
+      
+      const config = getEnvVars(language);
+      
+      console.log(`[API] Vapi config for ${language}:`, {
+        publicKey: config.publicKey ? config.publicKey.substring(0, 10) + '...' : 'NOT SET',
+        assistantId: config.assistantId ? config.assistantId.substring(0, 10) + '...' : 'NOT SET'
+      });
+      
+      // Fallback to English if language-specific config not found
+      if (!config.publicKey || !config.assistantId) {
+        console.log(`[API] Language ${language} config not found, falling back to English`);
+        const fallbackConfig = getEnvVars('en');
+        res.json({
+          language,
+          publicKey: fallbackConfig.publicKey || '',
+          assistantId: fallbackConfig.assistantId || '',
+          fallback: true
+        });
+      } else {
+        res.json({
+          language,
+          publicKey: config.publicKey,
+          assistantId: config.assistantId,
+          fallback: false
+        });
+      }
+    } catch (error) {
+      console.error('[API] Error getting Vapi config:', error);
+      res.status(500).json({ error: 'Failed to get Vapi configuration' });
+    }
+  });
+
+
+
   return httpServer;
 }

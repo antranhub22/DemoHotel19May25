@@ -198,23 +198,64 @@ export const useHotelConfiguration = () => {
 // Helper Functions
 // ============================================
 
-export const getVapiPublicKeyByLanguage = (language: string, config: HotelConfiguration): string => {
-  // For Mi Nhon Hotel, use language-specific keys
+// Cache for Vapi configurations to avoid repeated API calls
+const vapiConfigCache: { [key: string]: { publicKey: string; assistantId: string; fallback: boolean } } = {};
+
+const fetchVapiConfig = async (language: string): Promise<{ publicKey: string; assistantId: string; fallback: boolean }> => {
+  // Check cache first
+  if (vapiConfigCache[language]) {
+    return vapiConfigCache[language];
+  }
+
+  try {
+    const response = await fetch(`/api/vapi/config/${language}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Vapi config: ${response.status}`);
+    }
+    
+    const config = await response.json();
+    console.log(`🔧 [fetchVapiConfig] Received config for ${language}:`, {
+      publicKey: config.publicKey ? config.publicKey.substring(0, 10) + '...' : 'NOT SET',
+      assistantId: config.assistantId ? config.assistantId.substring(0, 10) + '...' : 'NOT SET',
+      fallback: config.fallback
+    });
+    
+    // Cache the result
+    vapiConfigCache[language] = config;
+    return config;
+  } catch (error) {
+    console.error(`[fetchVapiConfig] Error fetching Vapi config for ${language}:`, error);
+    
+    // Fallback to build-time environment variables if API fails
+    const fallbackConfig = {
+      publicKey: language === 'en' 
+        ? import.meta.env.VITE_VAPI_PUBLIC_KEY || ''
+        : import.meta.env[`VITE_VAPI_PUBLIC_KEY_${language.toUpperCase()}`] || import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
+      assistantId: language === 'en'
+        ? import.meta.env.VITE_VAPI_ASSISTANT_ID || ''
+        : import.meta.env[`VITE_VAPI_ASSISTANT_ID_${language.toUpperCase()}`] || import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
+      fallback: true
+    };
+    
+    console.log(`[fetchVapiConfig] Using fallback config for ${language}:`, {
+      publicKey: fallbackConfig.publicKey ? fallbackConfig.publicKey.substring(0, 10) + '...' : 'NOT SET',
+      assistantId: fallbackConfig.assistantId ? fallbackConfig.assistantId.substring(0, 10) + '...' : 'NOT SET'
+    });
+    
+    vapiConfigCache[language] = fallbackConfig;
+    return fallbackConfig;
+  }
+};
+
+export const getVapiPublicKeyByLanguage = async (language: string, config: HotelConfiguration): Promise<string> => {
+  // For Mi Nhon Hotel, use language-specific keys from API
   if (config.hotelName === 'Mi Nhon Hotel Mui Ne') {
-    switch (language) {
-      case 'fr':
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY_FR || config.vapiPublicKey;
-      case 'zh':
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH || config.vapiPublicKey;
-      case 'ru':
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY_RU || config.vapiPublicKey;
-      case 'ko':
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY_KO || config.vapiPublicKey;
-      case 'vi':
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY_VI || config.vapiPublicKey;
-      case 'en':
-      default:
-        return import.meta.env.VITE_VAPI_PUBLIC_KEY || config.vapiPublicKey;
+    try {
+      const vapiConfig = await fetchVapiConfig(language);
+      return vapiConfig.publicKey || config.vapiPublicKey;
+    } catch (error) {
+      console.error(`[getVapiPublicKeyByLanguage] Error for ${language}:`, error);
+      return config.vapiPublicKey;
     }
   }
   
@@ -222,23 +263,19 @@ export const getVapiPublicKeyByLanguage = (language: string, config: HotelConfig
   return config.vapiPublicKey || import.meta.env.VITE_VAPI_PUBLIC_KEY;
 };
 
-export const getVapiAssistantIdByLanguage = (language: string, config: HotelConfiguration): string => {
-  // For Mi Nhon Hotel, use language-specific assistant IDs
+export const getVapiAssistantIdByLanguage = async (language: string, config: HotelConfiguration): Promise<string> => {
+  // For Mi Nhon Hotel, use language-specific assistant IDs from API  
   if (config.hotelName === 'Mi Nhon Hotel Mui Ne') {
-    switch (language) {
-      case 'fr':
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID_FR || config.vapiAssistantId;
-      case 'zh':
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH || config.vapiAssistantId;
-      case 'ru':
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID_RU || config.vapiAssistantId;
-      case 'ko':
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID_KO || config.vapiAssistantId;
-      case 'vi':
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID_VI || config.vapiAssistantId;
-      case 'en':
-      default:
-        return import.meta.env.VITE_VAPI_ASSISTANT_ID || config.vapiAssistantId;
+    try {
+      const vapiConfig = await fetchVapiConfig(language);
+      console.log(`🤖 [getVapiAssistantIdByLanguage] Selected assistant for ${language}:`, {
+        assistantId: vapiConfig.assistantId ? vapiConfig.assistantId.substring(0, 10) + '...' : 'NOT SET',
+        fallback: vapiConfig.fallback
+      });
+      return vapiConfig.assistantId || config.vapiAssistantId;
+    } catch (error) {
+      console.error(`[getVapiAssistantIdByLanguage] Error for ${language}:`, error);
+      return config.vapiAssistantId;
     }
   }
   
