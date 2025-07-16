@@ -276,53 +276,39 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div 
-          className="flex flex-col items-center justify-center h-full"
-          style={{ 
-            padding: designSystem.spacing.md,
-            paddingTop: 'calc(64px + 2rem)', // Add extra padding for header
-            minHeight: '100vh' // Ensure full height
-          }}
-        >
-          {/* Title */}
-          <div 
-            className="text-center"
+        {/* Main content area */}
+        <div className="flex flex-col items-center justify-center w-full">
+          <h1 
+            className="text-4xl md:text-5xl font-bold text-white text-center mb-4"
             style={{ 
-              marginBottom: designSystem.spacing.xl,
-              position: 'relative', // Add relative positioning
-              zIndex: 10 // Ensure text is above other elements
+              fontFamily: designSystem.fonts.primary,
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+              marginTop: '2rem'
             }}
           >
-            <h1 
-              className="font-bold text-white"
-              style={{ 
-                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-                textShadow: designSystem.shadows.large,
-                marginBottom: designSystem.spacing.md,
-                lineHeight: '1.1'
-              }}
-            >
-              {t('speak_multiple_languages', language)}
-            </h1>
-            <p 
-              className="text-white/90"
-              style={{ 
-                fontSize: '1.25rem',
-                textShadow: designSystem.shadows.subtle,
-                marginBottom: designSystem.spacing.xl
-              }}
-            >
-              {t('tap_to_speak', language)}
-            </p>
-          </div>
+            Assistant
+          </h1>
+          
+          <p 
+            className="text-lg text-white text-center mb-8 max-w-2xl"
+            style={{ 
+              fontFamily: designSystem.fonts.primary,
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+              opacity: 0.9,
+              marginBottom: '3rem' // Increased margin to prevent overlap
+            }}
+          >
+            Speaking Multi-languages to serve you better
+          </p>
 
-          {/* Voice Assistant Button */}
+          {/* Siri Button Container - Reduced size to 65% */}
           <div style={{ 
             marginBottom: designSystem.spacing['2xl'],
-            marginTop: '2rem', // Add top margin for spacing
-            width: '550px', // Match button width
-            height: '550px', // Match button height
+            marginTop: '1rem',
+            width: '357.5px', // 550px * 0.65
+            height: '357.5px', // 550px * 0.65
+            position: 'relative',
+            zIndex: 10
           }}>
             <div 
               style={{ 
@@ -349,15 +335,17 @@ const Interface1: React.FC<Interface1Props> = ({ isActive = true }) => {
             </div>
           </div>
 
-          {/* Service Categories Grid */}
+          {/* Service Categories Grid - Adjusted for better visibility */}
           <div 
             className="grid w-full max-w-7xl"
             style={{ 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))', // Reduced from 200px to 50px
+              gridTemplateColumns: 'repeat(auto-fit, minmax(50px, 1fr))',
               gap: designSystem.spacing.md,
               marginBottom: designSystem.spacing.xl,
-              transform: 'scale(0.25)', // Scale down to 25%
-              transformOrigin: 'center center'
+              transform: 'scale(0.25)',
+              transformOrigin: 'top center',
+              marginTop: '-2rem', // Move grid up to fill space
+              paddingBottom: '4rem' // Add padding to prevent cutoff
             }}
           >
             {/* Local Tourism Info */}

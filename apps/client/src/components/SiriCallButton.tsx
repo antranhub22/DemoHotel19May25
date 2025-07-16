@@ -138,9 +138,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       {/* Main Button */}
       <div 
         id={containerId}
-        className={`voice-button ${isListening ? 'listening' : ''} w-[550px] h-[550px] relative rounded-full overflow-visible`}
+        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-visible`}
         style={{ 
           cursor: 'pointer',
+          width: '357.5px', // 550px * 0.65
+          height: '357.5px', // 550px * 0.65
           transform: 'translate(-25%, -25%)', // Adjust position to maintain center alignment
           margin: '25% auto' // Add margin to prevent overlap
         }}
@@ -160,12 +162,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         }}
       >
         {/* Gradient Ring Effect */}
-        <div className="gradient-ring" />
+        <div className="gradient-ring" style={{ transform: 'scale(0.65)' }} />
       </div>
 
       {/* Waveform Animation */}
       {isListening && (
-        <div className="waveform-container">
+        <div className="waveform-container" style={{ transform: 'scale(0.65)' }}>
           {waveformBars.map((_, index) => (
             <div
               key={index}
