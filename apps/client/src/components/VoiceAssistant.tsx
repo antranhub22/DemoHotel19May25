@@ -13,6 +13,7 @@ import { t } from '@/i18n';
 import { Language } from '@/types';
 import WelcomePopup from './WelcomePopup';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { PopupProvider, PopupManager } from './popup-system';
 
 const VoiceAssistant: React.FC = () => {
   // Hooks declarations - ALL HOOKS MUST BE DECLARED FIRST
@@ -127,22 +128,23 @@ const VoiceAssistant: React.FC = () => {
   }
 
   return (
-    <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
-      {showWelcomePopup && <WelcomePopup onClose={() => setShowWelcomePopup(false)} />}
-      
-      {/* Configuration Error Banner */}
-      {error && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <AlertCircle className="h-5 w-5 text-yellow-400" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">{error}</p>
+    <PopupProvider>
+      <div className="relative h-screen overflow-hidden font-sans text-gray-800 bg-neutral-50" id="app">
+        {showWelcomePopup && <WelcomePopup onClose={() => setShowWelcomePopup(false)} />}
+        
+        {/* Configuration Error Banner */}
+        {error && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-yellow-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">{error}</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       
       {/* Header Bar */}
       <header 
@@ -270,7 +272,15 @@ const VoiceAssistant: React.FC = () => {
         <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
         <Interface4 isActive={interfaceStates.interface4} />
       </div>
+
+      {/* iOS-style Popup System */}
+      <PopupManager 
+        position="bottom"
+        maxVisible={4}
+        autoCloseDelay={10000} // Auto-close low priority popups after 10s
+      />
     </div>
+    </PopupProvider>
   );
 };
 

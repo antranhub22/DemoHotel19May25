@@ -111,13 +111,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         onScrollToServices={() => scrollToSection('services')}
       />
       
-      {/* Conversation Popup - Fixed overlay ở bottom */}
-      <ConversationSection
-        ref={conversationRef}
-        showConversation={showConversation}
-        onClose={handleCallEnd}
-        className=""
-      />
+      {/* Realtime Conversation now handled by PopupManager */}
     </InterfaceContainer>
   );
 };

@@ -1,0 +1,62 @@
+.popupStack {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.popupStackContainer {
+  max-height: 80vh;
+  overflow: visible;
+}
+
+.popupStackHeader,
+.popupStackMore {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  margin: 0 16px;
+}
+
+@media (max-width: 640px) {
+  .popupStack {
+    left: 0 !important;
+    right: 0;
+    transform: none !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .popupStackContainer {
+    padding: 0 8px !important;
+  }
+
+  .popupStackHeader,
+  .popupStackMore {
+    margin: 0 8px;
+  }
+}
+
+/* Animation classes */
+.popupEnter {
+  opacity: 0;
+}
+
+.popupEnterActive {
+  opacity: 1;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.popupExit {
+  opacity: 1;
+}
+
+.popupExitActive {
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.popupStackActive {
+  /* Styles for active popup container */
+}
+
+.popupStackInactive {
+  /* Styles for inactive popup container */
+} 
