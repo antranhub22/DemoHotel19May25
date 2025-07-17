@@ -79,36 +79,10 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         zIndex: designSystem.zIndex.above
       }}
     >
-      {/* Top Row: Volume Bars + Cancel + Confirm */}
+      {/* Top Row: Cancel + Confirm */}
       {isCallStarted && (
-        <div className="flex items-center justify-between w-full max-w-sm mb-4 px-4">
-          {/* Volume Bars - Left */}
-          <div className="flex items-center gap-1">
-            <span 
-              className="material-icons text-lg mr-2" 
-              style={{ color: currentColors.primary }}
-            >
-              graphic_eq
-            </span>
-            <div className="flex items-end h-6 gap-1">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="transition-all duration-200 ease-out"
-                  style={{
-                    width: '3px',
-                    height: `${8 + Math.round((micLevel/100)*16) * ((i%2)+1)}px`,
-                    backgroundColor: currentColors.primary,
-                    borderRadius: '2px',
-                    boxShadow: `0 0 4px ${currentColors.glow}`,
-                    opacity: 0.7 + (micLevel/100) * 0.3
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Cancel Button - Center */}
+        <div className="flex items-center justify-center gap-4 w-full max-w-sm mb-4 px-4">
+          {/* Cancel Button */}
           <button
             onClick={onCancel}
             className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
@@ -117,7 +91,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
             Cancel
           </button>
 
-          {/* Confirm Button - Right */}
+          {/* Confirm Button */}
           <button
             onClick={onConfirm}
             className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
@@ -141,7 +115,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         🎤 {currentColors.name}
       </div>
 
-      {/* Siri Button Container - Clean without volume visualization */}
+      {/* Siri Button Container với External Volume Bars */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
@@ -154,15 +128,51 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           border: `2px solid ${currentColors.primary}40`,
         }}
       >
-        <SiriCallButton
-          containerId="main-siri-button"
-          isListening={isCallStarted}
-          volumeLevel={micLevel}
-          onCallStart={() => onCallStart(language)}
-          onCallEnd={onCallEnd}
-          language={language}
-          colors={currentColors}
-        />
+        {/* External Volume Bars - Compact và xung quanh button */}
+        {isCallStarted && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {[...Array(16)].map((_, i) => {
+              const angle = (360 / 16) * i;
+              const radians = (angle * Math.PI) / 180;
+              const baseRadius = 95; // Gần hơn với button
+              const barHeight = 6 + Math.round((micLevel/100)*12) * ((i%2)+1); // Nhỏ hơn
+              const x = Math.cos(radians) * baseRadius;
+              const y = Math.sin(radians) * baseRadius;
+              
+              return (
+                <div
+                  key={i}
+                  className="absolute transition-all duration-150 ease-out"
+                  style={{
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
+                    width: '2px', // Mỏng hơn
+                    height: `${barHeight}px`,
+                    backgroundColor: currentColors.primary,
+                    borderRadius: '1px',
+                    boxShadow: `0 0 4px ${currentColors.glow}`,
+                    opacity: 0.7 + (micLevel/100) * 0.3,
+                    transformOrigin: 'center bottom',
+                    zIndex: 1
+                  }}
+                />
+              );
+            })}
+          </div>
+        )}
+
+        <div className="relative z-10">
+          <SiriCallButton
+            containerId="main-siri-button"
+            isListening={isCallStarted}
+            volumeLevel={micLevel}
+            onCallStart={() => onCallStart(language)}
+            onCallEnd={onCallEnd}
+            language={language}
+            colors={currentColors}
+          />
+        </div>
       </div>
       
       {/* Tap To Speak text - Visible only when not calling */}
