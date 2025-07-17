@@ -159,9 +159,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
-          <h3 className="text-base font-semibold text-gray-800">
-            Conversation
-          </h3>
+          <div></div>
           <button
             onClick={onClose}
             className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -182,13 +180,6 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           {conversationTurns.map((turn, turnIdx) => (
             <div key={turn.id} className="mb-2">
               <div className="flex items-start gap-2">
-                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: turn.role === 'user' ? '#3B82F6' : '#10B981'
-                  }}
-                >
-                  <span className="text-white text-xs">{turn.role === 'user' ? 'U' : 'A'}</span>
-                </div>
                 <div className="flex-1">
                   {turn.role === 'user' ? (
                     <div className="bg-gray-100 rounded-lg p-2">

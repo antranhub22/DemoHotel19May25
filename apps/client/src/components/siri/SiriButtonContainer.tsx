@@ -102,19 +102,6 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </div>
       )}
 
-      {/* Language Indicator */}
-      <div
-        className="mb-3 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300"
-        style={{
-          backgroundColor: currentColors.primary,
-          color: 'white',
-          boxShadow: `0 0 20px ${currentColors.glow}`,
-          fontSize: '0.85rem'
-        }}
-      >
-        🎤 {currentColors.name}
-      </div>
-
       {/* Siri Button Container với External Volume Bars */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
