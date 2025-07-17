@@ -164,18 +164,31 @@ export const useConversationState = ({
     console.log('❌ [useConversationState] Canceling call - FULL RESET');
     
     try {
-      // End call immediately
-      endCall();
-      
-      // Reset all local states
+      // Reset local states first to prevent further operations
       setIsCallStarted(false);
       setShowConversation(false);
       setManualCallStarted(false); // Clear manual flag on cancel
+      
+      // End call with error handling  
+      try {
+        endCall();
+        console.log('✅ [useConversationState] endCall() executed successfully');
+      } catch (endCallError) {
+        console.error('⚠️ [useConversationState] endCall() failed but continuing with cancel:', endCallError);
+        // Don't rethrow - we still want to complete the cancel operation
+      }
       
       console.log('✅ [useConversationState] Cancel completed - all states reset');
       console.log('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false');
     } catch (error) {
       console.error('❌ [useConversationState] Error in handleCancel:', error);
+      
+      // Ensure states are reset even if there's an error
+      setIsCallStarted(false);
+      setShowConversation(false);
+      setManualCallStarted(false);
+      
+      console.log('🔄 [useConversationState] Forced state reset after error');
     }
   }, [endCall]);
 

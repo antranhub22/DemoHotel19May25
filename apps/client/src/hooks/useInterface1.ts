@@ -249,19 +249,46 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     });
     
     try {
-      // Clear any active popups first
+      // Clear any active popups first - this should always succeed
       if (conversationPopupId) {
-        console.log('🗑️ [useInterface1] Removing conversation popup:', conversationPopupId);
-        removePopup(conversationPopupId);
-        setConversationPopupId(null);
+        try {
+          console.log('🗑️ [useInterface1] Removing conversation popup:', conversationPopupId);
+          removePopup(conversationPopupId);
+          setConversationPopupId(null);
+          console.log('✅ [useInterface1] Popup removed successfully');
+        } catch (popupError) {
+          console.error('⚠️ [useInterface1] Failed to remove popup but continuing:', popupError);
+          // Force clear the popup ID anyway
+          setConversationPopupId(null);
+        }
       }
       
-      // Use conversation state handler
-      conversationState.handleCancel();
+      // Use conversation state handler with error isolation
+      try {
+        conversationState.handleCancel();
+        console.log('✅ [useInterface1] conversationState.handleCancel() completed');
+      } catch (stateError) {
+        console.error('⚠️ [useInterface1] conversationState.handleCancel() failed:', stateError);
+        // Continue execution - the important thing is that popup is cleared
+      }
       
       console.log('✅ [useInterface1] Cancel completed - staying in Interface1');
     } catch (error) {
       console.error('❌ [useInterface1] Error in handleCancel:', error);
+      
+      // Emergency cleanup - ensure popup is removed even on error
+      if (conversationPopupId) {
+        console.log('🚨 [useInterface1] Emergency popup cleanup');
+        try {
+          removePopup(conversationPopupId);
+        } catch (cleanupError) {
+          console.error('🚨 [useInterface1] Emergency cleanup failed:', cleanupError);
+        }
+        setConversationPopupId(null);
+      }
+      
+      // Show user-friendly message instead of crashing
+      console.log('🔄 [useInterface1] Cancel operation completed with errors but UI state restored');
     }
   }, [conversationState, conversationPopupId, removePopup, transcripts.length]);
 

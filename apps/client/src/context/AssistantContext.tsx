@@ -611,121 +611,162 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // End call function
   const endCall = useCallback(() => {
+    console.log('🛑 [AssistantContext] endCall() called');
+    
     try {
-    const vapi = getVapiInstance();
-    if (vapi) {
-      vapi.stop();
-    }
-    
-      // Batch state updates
-      const updates = () => {
-    // Stop the timer
-    if (callTimer) {
-      clearInterval(callTimer);
-      setCallTimer(null);
-    }
-    
-    // Initialize with default values
-    setOrderSummary(initialOrderSummary);
-    
-    // Format call duration for API
-    const formattedDuration = callDuration ? 
-      `${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}` : 
-      '0:00';
-    
-    // Prepare transcripts for the API
-        const transcriptData = transcripts.map((message: Transcript) => ({
-      role: message.role,
-      content: message.content
-    }));
-    
-    // Check if we have enough transcript data
-    if (transcriptData.length < 2) {
-      const noTranscriptSummary: CallSummary = {
-        id: Date.now() as unknown as number,
-        callId: callDetails?.id || `call-${Date.now()}`,
-        content: "Call was too short to generate a summary. Please try a more detailed conversation.",
-        timestamp: new Date(),
-        tenantId: tenantId || 'default'
-      };
-      setCallSummary(noTranscriptSummary);
-      return;
-    }
-    
-    // Show loading state for summary
-    const loadingSummary: CallSummary = {
-      id: Date.now() as unknown as number,
-      callId: callDetails?.id || `call-${Date.now()}`,
-      content: "Generating AI summary of your conversation...",
-      timestamp: new Date(),
-      tenantId: tenantId || 'default'
-    };
-    setCallSummary(loadingSummary);
-    
-    // Send transcript data to server for OpenAI processing
-    fetch('/api/store-summary', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        summary: '', 
-        transcripts: transcriptData,
-        timestamp: new Date().toISOString(),
-        callId: callDetails?.id || `call-${Date.now()}`,
-        callDuration: formattedDuration,
-        forceBasicSummary: FORCE_BASIC_SUMMARY,
-        language,
-        tenantId: tenantId || 'default'
-      }),
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success && data.summary && data.summary.content) {
-        const summaryContent = data.summary.content;
-            // Batch state updates for summary
-            ReactDOM.unstable_batchedUpdates(() => {
-        const aiSummary: CallSummary = {
-          id: Date.now() as unknown as number,
-          callId: callDetails?.id || `call-${Date.now()}`,
-          content: summaryContent,
-          timestamp: new Date(data.summary.timestamp || Date.now()),
-          tenantId: tenantId || 'default'
-        };
-        setCallSummary(aiSummary);
-        if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
-          setServiceRequests(data.serviceRequests);
+      // Stop VAPI with error handling
+      try {
+        const vapi = getVapiInstance();
+        if (vapi) {
+          console.log('📞 [AssistantContext] Stopping VAPI call...');
+          vapi.stop();
+          console.log('✅ [AssistantContext] VAPI call stopped successfully');
+        } else {
+          console.log('⚠️ [AssistantContext] No VAPI instance to stop');
         }
-            });
+      } catch (vapiError) {
+        console.error('❌ [AssistantContext] Error stopping VAPI:', vapiError);
+        // Continue with cleanup even if VAPI stop fails
       }
-    })
-    .catch(error => {
-          console.error('Error processing summary:', error);
-          // Show error state
-          const errorSummary: CallSummary = {
-        id: Date.now() as unknown as number,
-        callId: callDetails?.id || `call-${Date.now()}`,
-            content: "An error occurred while generating the call summary.",
-        timestamp: new Date(),
-        tenantId: tenantId || 'default'
-      };
-          setCallSummary(errorSummary);
-        });
-      };
+    
+      // Batch state updates with error handling
+      try {
+        // Format call duration for API first
+        const formattedDuration = callDuration ? 
+          `${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}` : 
+          '0:00';
+          
+        const updates = () => {
+          // Stop the timer
+          if (callTimer) {
+            clearInterval(callTimer);
+            setCallTimer(null);
+          }
+          
+          // Initialize with default values
+          setOrderSummary(initialOrderSummary);
+          
+          console.log('✅ [AssistantContext] State cleanup completed');
+        };
+        
+        updates();
+        
+        // Process summary generation if we have transcript data
+        try {
+          const transcriptData = transcripts.map((message: Transcript) => ({
+            role: message.role,
+            content: message.content
+          }));
+          
+          // Check if we have enough transcript data
+          if (transcriptData.length >= 2) {
+            console.log('📝 [AssistantContext] Processing call summary...');
+            
+            // Show loading state for summary
+            const loadingSummary: CallSummary = {
+              id: Date.now() as unknown as number,
+              callId: callDetails?.id || `call-${Date.now()}`,
+              content: "Generating AI summary of your conversation...",
+              timestamp: new Date(),
+              tenantId: tenantId || 'default'
+            };
+            setCallSummary(loadingSummary);
+            
+            // Send transcript data to server for OpenAI processing
+            fetch('/api/store-summary', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                summary: '', 
+                transcripts: transcriptData,
+                timestamp: new Date().toISOString(),
+                callId: callDetails?.id || `call-${Date.now()}`,
+                callDuration: formattedDuration,
+                forceBasicSummary: false,
+                language,
+                tenantId: tenantId || 'default'
+              }),
+            })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.success && data.summary && data.summary.content) {
+                const summaryContent = data.summary.content;
+                const aiSummary: CallSummary = {
+                  id: Date.now() as unknown as number,
+                  callId: callDetails?.id || `call-${Date.now()}`,
+                  content: summaryContent,
+                  timestamp: new Date(data.summary.timestamp || Date.now()),
+                  tenantId: tenantId || 'default'
+                };
+                setCallSummary(aiSummary);
+                if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
+                  setServiceRequests(data.serviceRequests);
+                }
+              }
+            })
+            .catch(error => {
+              console.error('❌ [AssistantContext] Error processing summary:', error);
+              // Show error state
+              const errorSummary: CallSummary = {
+                id: Date.now() as unknown as number,
+                callId: callDetails?.id || `call-${Date.now()}`,
+                content: "An error occurred while generating the call summary.",
+                timestamp: new Date(),
+                tenantId: tenantId || 'default'
+              };
+              setCallSummary(errorSummary);
+            });
+          } else {
+            console.log('⚠️ [AssistantContext] Not enough transcript data for summary');
+            const noTranscriptSummary: CallSummary = {
+              id: Date.now() as unknown as number,
+              callId: callDetails?.id || `call-${Date.now()}`,
+              content: "Call was too short to generate a summary. Please try a more detailed conversation.",
+              timestamp: new Date(),
+              tenantId: tenantId || 'default'
+            };
+            setCallSummary(noTranscriptSummary);
+          }
+        } catch (summaryError) {
+          console.error('❌ [AssistantContext] Error in summary processing:', summaryError);
+          // Don't let summary errors crash the endCall
+        }
+      } catch (cleanupError) {
+        console.error('❌ [AssistantContext] Error during state cleanup:', cleanupError);
+        
+        // Force cleanup critical states
+        try {
+          if (callTimer) {
+            clearInterval(callTimer);
+            setCallTimer(null);
+          }
+        } catch (timerError) {
+          console.error('❌ [AssistantContext] Failed to clear timer:', timerError);
+        }
+      }
       
-      // Execute all state updates in one batch
-      ReactDOM.unstable_batchedUpdates(updates);
-      
+      console.log('✅ [AssistantContext] endCall() completed successfully');
     } catch (error) {
-      console.error('Error in endCall:', error);
-      setCurrentInterface('interface1');
+      console.error('❌ [AssistantContext] Critical error in endCall():', error);
+      
+      // Emergency cleanup
+      try {
+        if (callTimer) {
+          clearInterval(callTimer);
+          setCallTimer(null);
+        }
+      } catch (emergencyError) {
+        console.error('🚨 [AssistantContext] Emergency cleanup failed:', emergencyError);
+      }
     }
-  }, [callTimer, callDuration, transcripts, callDetails, setCallSummary, setCurrentInterface, setServiceRequests, language, tenantId]);
+  }, [getVapiInstance, callTimer, callDuration, setOrderSummary, initialOrderSummary, transcripts, callDetails?.id, tenantId, language, setCallSummary, setServiceRequests]);
 
   // Function to translate text to Vietnamese
   const translateToVietnamese = async (text: string): Promise<string> => {
