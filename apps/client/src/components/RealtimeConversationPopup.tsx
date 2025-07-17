@@ -139,36 +139,40 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''} mx-auto`}
+        className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''} mx-auto animate-slide-up`}
         style={{
           width: '100%',
-          maxWidth: '320px',
-          height: '400px',
-          maxHeight: '400px',
+          maxWidth: '350px',
+          height: '280px',
+          maxHeight: '40vh',
           background: 'rgba(255,255,255,0.12)',
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
-          borderRadius: 24,
+          boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+          marginBottom: 0,
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
-          <h3 className="text-lg font-semibold text-gray-800">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
+          <h3 className="text-base font-semibold text-gray-800">
             Conversation
           </h3>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
         {/* Conversation Content */}
         <div 
           ref={containerRef}
-          className="p-4 h-[calc(100%-4rem)] overflow-y-auto"
+          className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
         >
           {conversationTurns.length === 0 && (
             <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
@@ -176,24 +180,24 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             </div>
           )}
           {conversationTurns.map((turn, turnIdx) => (
-            <div key={turn.id} className="mb-4">
+            <div key={turn.id} className="mb-2">
               <div className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{
                     background: turn.role === 'user' ? '#3B82F6' : '#10B981'
                   }}
                 >
-                  <span className="text-white text-sm">{turn.role === 'user' ? 'U' : 'A'}</span>
+                  <span className="text-white text-xs">{turn.role === 'user' ? 'U' : 'A'}</span>
                 </div>
                 <div className="flex-1">
                   {turn.role === 'user' ? (
-                    <div className="bg-gray-100 rounded-lg p-3">
-                      <p className="text-gray-800">{turn.messages[0].content}</p>
+                    <div className="bg-gray-100 rounded-lg p-2">
+                      <p className="text-gray-800 text-sm">{turn.messages[0].content}</p>
                     </div>
                   ) : (
-                    <div className="bg-green-50 rounded-lg p-3">
+                    <div className="bg-green-50 rounded-lg p-2">
                       <p
-                        className="text-base md:text-lg font-medium"
+                        className="text-sm font-medium"
                         style={{
                           position: 'relative',
                           background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
@@ -225,7 +229,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
                       </p>
                     </div>
                   )}
-                  <span className="text-xs text-gray-500 mt-1 block">
+                  <span className="text-xs text-gray-500 mt-0.5 block">
                     {turn.timestamp.toLocaleTimeString()}
                   </span>
                 </div>
@@ -236,22 +240,43 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       </div>
       {/* Responsive styles for left-positioned popup */}
       <style>{`
+        /* Animation for slide up from bottom */
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        
+        .animate-slide-up {
+          animation: slideUp 0.3s ease-out;
+        }
+        
+        /* Responsive styles for bottom popup */
         @media (max-width: 640px) {
           .realtime-popup {
-            width: 95vw !important;
-            max-width: 280px !important;
-            height: 350px !important;
-            max-height: 70vh !important;
-            margin: 0 auto !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            height: 250px !important;
+            max-height: 35vh !important;
+            margin: 0 !important;
+            border-top-left-radius: 16px !important;
+            border-top-right-radius: 16px !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
           }
         }
         
         @media (min-width: 641px) and (max-width: 768px) {
           .realtime-popup {
-            width: 90vw !important;
-            max-width: 300px !important;
-            height: 380px !important;
-            max-height: 75vh !important;
+            width: 95vw !important;
+            max-width: 400px !important;
+            height: 270px !important;
+            max-height: 38vh !important;
             margin: 0 auto !important;
           }
         }
@@ -259,9 +284,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
         @media (min-width: 769px) {
           .realtime-popup {
             width: 100% !important;
-            max-width: 320px !important;
-            height: 400px !important;
-            max-height: 400px !important;
+            max-width: 350px !important;
+            height: 280px !important;
+            max-height: 40vh !important;
             margin: 0 auto !important;
           }
         }

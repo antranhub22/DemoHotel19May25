@@ -63,18 +63,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         {/* 3-Container Layout: Desktop = horizontal, Mobile = vertical */}
         <div className="flex flex-col md:flex-row min-h-[400px] px-4 gap-8 md:gap-12">
           
-          {/* Container Trái - Conversation Section - Căn giữa mobile, sát trái desktop */}
-          <div className="flex-1 order-2 md:order-1 flex justify-center md:justify-start items-start pt-8 px-2 md:pl-0 md:pr-4">
-            <ConversationSection
-              ref={conversationRef}
-              showConversation={showConversation}
-              onClose={handleCallEnd}
-              className="w-full max-w-sm z-30"
-            />
-          </div>
-          
-          {/* Container Giữa - Siri Button - Trung tâm hoàn hảo */}
-          <div className="flex-1 order-1 md:order-2 flex flex-col items-center justify-center">
+          {/* Container Chính - Siri Button - Trung tâm hoàn hảo */}
+          <div className="flex-1 order-1 flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center">
               <SiriButtonContainer
                 isCallStarted={isCallStarted}
@@ -90,7 +80,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           </div>
           
           {/* Container Phải - Right Panel */}
-          <div className="flex-1 order-3 hidden md:flex justify-end items-start pt-8 pr-0 pl-4">
+          <div className="flex-1 order-2 hidden md:flex justify-end items-start pt-8 pr-0 pl-4">
             <RightPanelSection
               ref={rightPanelRef}
               showPanel={showRightPanel}
@@ -119,6 +109,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         show={showScrollButton}
         onScrollToTop={scrollToTop}
         onScrollToServices={() => scrollToSection('services')}
+      />
+      
+      {/* Conversation Popup - Fixed overlay ở bottom */}
+      <ConversationSection
+        ref={conversationRef}
+        showConversation={showConversation}
+        onClose={handleCallEnd}
+        className=""
       />
     </InterfaceContainer>
   );

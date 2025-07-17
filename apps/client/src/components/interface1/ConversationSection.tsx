@@ -14,17 +14,23 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
     return (
       <div 
         ref={ref} 
-        className={`${className} flex justify-center items-start w-full`}
+        className={`${className}`}
         style={{
-          position: 'relative',
-          zIndex: 30,
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 40,
+          pointerEvents: 'none', // Cho phép click through container
         }}
       >
-        <RealtimeConversationPopup
-          isOpen={showConversation}
-          onClose={onClose}
-          isRight={false}
-        />
+        <div style={{ pointerEvents: 'auto' }}> {/* Chỉ popup mới có thể interact */}
+          <RealtimeConversationPopup
+            isOpen={showConversation}
+            onClose={onClose}
+            isRight={false}
+          />
+        </div>
       </div>
     );
   }
