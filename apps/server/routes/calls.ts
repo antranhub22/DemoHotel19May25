@@ -5,6 +5,7 @@ import { db } from '@shared/db';
 import { call, transcript } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -62,12 +63,17 @@ router.post('/test-transcript', async (req, res) => {
       });
     }
     
-    // Validate transcript data
-    const validatedData = insertTranscriptSchema.parse({
-      callId,
+    // Convert camelCase to snake_case for database schema validation
+    const transcriptDataForValidation = {
+      call_id: callId,
       role,
-      content
-    });
+      content,
+      tenant_id: 'default',
+      timestamp: Date.now()
+    };
+    
+    // Validate with database schema (expects snake_case)
+    const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
     
     // Auto-create call record if it doesn't exist
     try {
@@ -100,8 +106,14 @@ router.post('/test-transcript', async (req, res) => {
       console.error('Error creating call record:', callError);
     }
     
-    // Store transcript in database
-    await storage.addTranscript(validatedData);
+    // Store transcript in database - use camelCase for storage function
+    await storage.addTranscript({
+      callId,
+      role,
+      content,
+      tenantId: 'default',
+      timestamp: Date.now()
+    });
     
     console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
     
@@ -111,10 +123,12 @@ router.post('/test-transcript', async (req, res) => {
       transcript: validatedData
     });
   } catch (error) {
-    if (error instanceof Error && error.message.includes('Zod')) {
+    if (error instanceof z.ZodError) {
+      console.error('Zod validation errors in test-transcript:', error.errors);
       res.status(400).json({ 
         error: 'Invalid transcript data', 
-        details: error.message 
+        details: error.errors,
+        receivedFields: Object.keys(req.body)
       });
     } else {
       handleApiError(res, error, 'Failed to store test transcript');

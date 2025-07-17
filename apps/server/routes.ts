@@ -276,11 +276,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle transcript from Vapi
         if (data.type === 'transcript' && data.call_id && data.role && data.content) {
           try {
-            const validatedData = insertTranscriptSchema.parse({
-              callId: data.call_id,
+            // Convert to database schema format for validation
+            const transcriptDataForValidation = {
+              call_id: data.call_id,
               role: data.role,
-              content: data.content
-            });
+              content: data.content,
+              tenant_id: 'default',
+              timestamp: Date.now()
+            };
+            
+            // Validate with database schema
+            const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
             
             // Auto-create call record if it doesn't exist
             try {
@@ -311,8 +317,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.error('Error creating call record:', callError);
             }
             
-            // Store transcript in database
-            await storage.addTranscript(validatedData);
+            // Store transcript in database - use camelCase for storage function
+            await storage.addTranscript({
+              callId: data.call_id,
+              role: data.role,
+              content: data.content,
+              tenantId: 'default'
+            });
             
             // Broadcast transcript to all clients with matching callId
             const message = JSON.stringify({
@@ -329,7 +340,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             });
           } catch (error) {
-            console.error('Invalid transcript data:', error);
+            console.error('Invalid transcript data from WebSocket:', error);
+            if (error instanceof z.ZodError) {
+              console.error('WebSocket Zod validation errors:', error.errors);
+            }
           }
         }
       } catch (error) {
@@ -421,19 +435,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Prepare transcript data for database
-      const transcriptData = {
-        callId,
+      // Convert camelCase to snake_case for database schema validation
+      const transcriptDataForValidation = {
+        call_id: callId,  // Convert callId to call_id
+        role,
+        content,
+        tenant_id: tenantId || 'default',  // Convert tenantId to tenant_id
+        timestamp: Date.now()
+      };
+      
+      console.log('Converted data for validation:', transcriptDataForValidation);
+      
+      // Validate with database schema (expects snake_case)
+      const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
+      
+      console.log('Validated transcript data:', validatedData);
+      
+      // Save to database - storage.addTranscript already handles field mapping
+      const savedTranscript = await storage.addTranscript({
+        callId,  // Keep original camelCase for storage function
         role,
         content,
         tenantId: tenantId || 'default',
         timestamp: Date.now()
-      };
-      
-      console.log('Prepared transcript data:', transcriptData);
-      
-      // Save to database
-      const savedTranscript = await storage.addTranscript(transcriptData);
+      });
       
       console.log(`Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
       console.log('Saved transcript result:', savedTranscript);
@@ -445,6 +470,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error in POST /api/transcripts:', error);
       console.error('Error stack:', error.stack);
+      
+      if (error instanceof z.ZodError) {
+        console.error('Zod validation errors:', error.errors);
+        return res.status(400).json({ 
+          error: 'Invalid transcript data', 
+          details: error.errors,
+          receivedFields: Object.keys(req.body)
+        });
+      }
+      
       handleApiError(res, error, 'Failed to save transcript');
     }
   });

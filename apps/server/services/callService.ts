@@ -4,6 +4,7 @@ import { db } from '@shared/db';
 import { call, transcript } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
+import { z } from 'zod';
 
 export class CallService {
   /**
@@ -50,18 +51,29 @@ export class CallService {
         throw new Error('Call ID, role, and content are required');
       }
       
-      // Validate transcript data
-      const validatedData = insertTranscriptSchema.parse({
-        callId,
+      // Convert camelCase to snake_case for database schema validation
+      const transcriptDataForValidation = {
+        call_id: callId,
         role,
-        content
-      });
+        content,
+        tenant_id: 'default',
+        timestamp: Date.now()
+      };
+      
+      // Validate with database schema (expects snake_case)
+      const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
       
       // Auto-create call record if it doesn't exist
       await this.ensureCallRecordExists(callId, content);
       
-      // Store transcript in database
-      await storage.addTranscript(validatedData);
+      // Store transcript in database - use camelCase for storage function
+      await storage.addTranscript({
+        callId,
+        role,
+        content,
+        tenantId: 'default',
+        timestamp: Date.now()
+      });
       
       console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
       
@@ -71,8 +83,9 @@ export class CallService {
         transcript: validatedData
       };
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Zod')) {
-        throw new Error(`Invalid transcript data: ${error.message}`);
+      if (error instanceof z.ZodError) {
+        console.error('Zod validation errors in callService:', error.errors);
+        throw new Error(`Invalid transcript data: ${JSON.stringify(error.errors)}`);
       }
       console.error('Error storing test transcript:', error);
       throw new Error('Failed to store test transcript');
