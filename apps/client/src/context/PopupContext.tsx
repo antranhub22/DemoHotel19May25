@@ -7,7 +7,7 @@ export const STANDARD_POPUP_MAX_WIDTH = 350; // px
 export const STANDARD_POPUP_MAX_HEIGHT_VH = 35; // % of viewport height
 
 // Popup types
-export type PopupType = 'conversation' | 'staff' | 'notification' | 'alert' | 'order';
+export type PopupType = 'conversation' | 'staff' | 'notification' | 'alert' | 'order' | 'summary';
 
 export type PopupPriority = 'high' | 'medium' | 'low';
 
@@ -61,13 +61,19 @@ export const POPUP_TYPES = {
   },
   alert: {
     icon: '⚠️',
-    title: 'System Alerts',
+    title: 'Alert',
     color: '#FF3B30',
     bgColor: 'rgba(255, 59, 48, 0.1)',
   },
   order: {
-    icon: '📝',
-    title: 'Order Updates',
+    icon: '🛎️',
+    title: 'Room Service',
+    color: '#5856D6',
+    bgColor: 'rgba(88, 86, 214, 0.1)',
+  },
+  summary: {
+    icon: '📋',
+    title: 'Call Summary',
     color: '#34C759',
     bgColor: 'rgba(52, 199, 89, 0.1)',
   },

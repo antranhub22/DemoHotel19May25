@@ -43,6 +43,7 @@ interface UseInterface1Return {
   // Popup system demo functions
   handleShowConversationPopup: () => void;
   handleShowNotificationDemo: () => void;
+  handleShowSummaryDemo: () => void;
 }
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
@@ -50,8 +51,8 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const { micLevel, transcripts } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
-  // Popup system
-  const { showConversation, showNotification, showAlert, removePopup } = usePopup();
+  // Popup system hooks
+  const { showConversation, showNotification, showSummary, removePopup } = usePopup();
   
   // Behavior hooks
   const scrollBehavior = useScrollBehavior({ isActive });
@@ -121,6 +122,33 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
           title: 'Pool Maintenance',
           priority: 'medium' as const,
           badge: 1 
+        }
+      );
+    });
+  };
+
+  const handleShowSummaryDemo = () => {
+    import('../components/popup-system/DemoPopupContent').then((module) => {
+      const { SummaryPopupContent } = module;
+      showSummary(
+        createElement(SummaryPopupContent),
+        { 
+          title: 'Call Summary',
+          priority: 'high' as const
+        }
+      );
+    }).catch(() => {
+      // Fallback
+      showSummary(
+        createElement('div', { style: { padding: '16px', fontSize: '12px' } }, [
+          createElement('div', { key: 'title', style: { fontWeight: 'bold', marginBottom: '8px' } }, '📋 Call Summary'),
+          createElement('div', { key: 'room' }, 'Room: 101'),
+          createElement('div', { key: 'items' }, 'Items: 3 requests'),
+          createElement('div', { key: 'time', style: { fontSize: '10px', color: '#666', marginTop: '8px' } }, 'Generated at ' + new Date().toLocaleTimeString())
+        ]),
+        { 
+          title: 'Call Summary',
+          priority: 'high' as const
         }
       );
     });
@@ -212,6 +240,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     
     // Popup system demo functions
     handleShowConversationPopup,
-    handleShowNotificationDemo
+    handleShowNotificationDemo,
+    handleShowSummaryDemo
   };
 }; 

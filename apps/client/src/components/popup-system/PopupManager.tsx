@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { PopupStack } from './PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
+import { SummaryPopupContent } from './DemoPopupContent';
 
 interface PopupManagerProps {
   position?: 'top' | 'bottom' | 'center';
@@ -153,12 +154,26 @@ export const usePopup = () => {
     });
   };
 
+  const showSummary = (content?: React.ReactNode, options?: {
+    title?: string;
+    priority?: 'high' | 'medium' | 'low';
+  }) => {
+    return addPopup({
+      type: 'summary',
+      title: options?.title || 'Call Summary',
+      content: content || <SummaryPopupContent />,
+      priority: options?.priority || 'high',
+      isActive: false,
+    });
+  };
+
   return {
     showConversation,
     showStaffMessage,
     showNotification,
     showAlert,
     showOrderUpdate,
+    showSummary,
     removePopup,
     setActivePopup,
   };

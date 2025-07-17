@@ -44,7 +44,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleRightPanelToggle,
     handleRightPanelClose,
     handleShowConversationPopup,
-    handleShowNotificationDemo
+    handleShowNotificationDemo,
+    handleShowSummaryDemo
   } = useInterface1({ isActive });
 
   // Early returns

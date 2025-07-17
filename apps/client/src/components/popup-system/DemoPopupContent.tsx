@@ -1,4 +1,7 @@
 import React from 'react';
+import { useAssistant } from '@/context/AssistantContext';
+import { extractRoomNumber, parseSummaryToOrderDetails } from '@/lib/summaryParser';
+import { t } from '@/i18n';
 
 export const ConversationDemoContent: React.FC = () => {
   return (
@@ -158,6 +161,119 @@ export const AlertDemoContent: React.FC = () => {
           Dismiss
         </button>
       </div>
+    </div>
+  );
+}; 
+
+// Main Summary Popup Component - Uses dual summary system
+export const SummaryPopupContent: React.FC = () => {
+  const { callSummary, serviceRequests, language, callDetails } = useAssistant();
+  
+  // Dual Summary Logic: Vapi.ai (primary) + OpenAI (fallback)
+  const getSummaryData = () => {
+    // Priority 1: Vapi.ai callSummary (real-time, voice-optimized)
+    if (callSummary && callSummary.content) {
+      const roomNumber = extractRoomNumber(callSummary.content);
+      const orderDetails = parseSummaryToOrderDetails(callSummary.content);
+      
+      return {
+        source: 'Vapi.ai',
+        roomNumber: roomNumber || 'Unknown',
+        content: callSummary.content,
+        items: orderDetails.items || [],
+        timestamp: callSummary.timestamp,
+        hasData: true
+      };
+    }
+    
+    // Priority 2: OpenAI serviceRequests (enhanced processing)
+    if (serviceRequests && serviceRequests.length > 0) {
+      const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
+      
+      return {
+        source: 'OpenAI Enhanced',
+        roomNumber,
+        content: serviceRequests.map(req => 
+          `${req.serviceType}: ${req.requestText}`
+        ).join('\n'),
+        items: serviceRequests.map(req => ({
+          name: req.serviceType,
+          description: req.requestText,
+          quantity: 1,
+          price: 10
+        })),
+        timestamp: new Date(),
+        hasData: true
+      };
+    }
+    
+    // Fallback: No summary available
+    return {
+      source: 'No data',
+      roomNumber: callDetails?.roomNumber || 'Unknown',
+      content: 'Call summary not available yet',
+      items: [],
+      timestamp: new Date(),
+      hasData: false
+    };
+  };
+  
+  const summary = getSummaryData();
+  
+  return (
+    <div className="space-y-3">
+      {/* Header with source indicator */}
+      <div className="flex items-center justify-between text-xs">
+        <span className="font-medium text-green-700">📋 {t('summary', language)}</span>
+        <span className="text-gray-500 text-[10px]">{summary.source}</span>
+      </div>
+      
+      {summary.hasData ? (
+        <>
+          {/* Room & Basic Info */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="font-medium text-gray-600">Room:</span>
+              <span className="ml-1 font-semibold text-blue-800">{summary.roomNumber}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Items:</span>
+              <span className="ml-1 font-semibold text-green-700">{summary.items.length}</span>
+            </div>
+          </div>
+          
+          {/* Quick Requests List */}
+          {summary.items.length > 0 && (
+            <div className="space-y-1">
+              <div className="text-[11px] font-medium text-gray-600">Requests:</div>
+              <div className="space-y-1 max-h-16 overflow-y-auto">
+                {summary.items.slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-[10px]">
+                    <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
+                    <span className="text-gray-700 truncate">{item.name}</span>
+                  </div>
+                ))}
+                {summary.items.length > 3 && (
+                  <div className="text-[10px] text-gray-500 italic">
+                    +{summary.items.length - 3} more items...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Timestamp */}
+          <div className="text-[10px] text-gray-400 text-right">
+            {summary.timestamp.toLocaleTimeString()}
+          </div>
+        </>
+      ) : (
+        /* No Data State */
+        <div className="text-center py-2 text-gray-500">
+          <div className="text-xs">⏳ Processing call summary...</div>
+          <div className="text-[10px] mt-1">Please wait a moment</div>
+        </div>
+      )}
     </div>
   );
 }; 
