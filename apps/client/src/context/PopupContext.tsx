@@ -1,4 +1,10 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { MessageSquare, Users, Bell, AlertTriangle, ShoppingCart } from 'lucide-react';
+
+// STANDARD POPUP DIMENSIONS - Không che nút Siri Button
+export const STANDARD_POPUP_HEIGHT = 220; // px
+export const STANDARD_POPUP_MAX_WIDTH = 350; // px
+export const STANDARD_POPUP_MAX_HEIGHT_VH = 35; // % of viewport height
 
 // Popup types
 export type PopupType = 'conversation' | 'staff' | 'notification' | 'alert' | 'order';
@@ -15,6 +21,11 @@ export interface PopupState {
   isActive: boolean;
   badge?: number;
   metadata?: Record<string, any>;
+  actions?: Array<{
+    label: string;
+    action: () => void;
+    variant?: 'primary' | 'secondary' | 'danger';
+  }>;
 }
 
 export interface PopupContextValue {

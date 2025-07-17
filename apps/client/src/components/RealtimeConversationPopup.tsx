@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
+import { STANDARD_POPUP_HEIGHT, STANDARD_POPUP_MAX_WIDTH, STANDARD_POPUP_MAX_HEIGHT_VH } from '@/context/PopupContext';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -142,9 +143,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
         className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''} mx-auto animate-slide-up`}
         style={{
           width: '100%',
-          maxWidth: '350px',
-          height: '280px',
-          maxHeight: '40vh',
+          maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
+          height: `${STANDARD_POPUP_HEIGHT}px`, // STANDARD HEIGHT: Không che Siri Button
+          maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`, // Giảm từ 40vh xuống 35vh
           background: 'rgba(255,255,255,0.12)',
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
