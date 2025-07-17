@@ -62,7 +62,14 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   onConfirm
 }) => {
   const { language } = useAssistant();
-  const currentColors = LANGUAGE_COLORS[language] || LANGUAGE_COLORS['en'];
+
+  // Simple color scheme without LANGUAGE_COLORS dependency
+  const currentColors = {
+    primary: '#5DB6B9',
+    secondary: '#3B82F6',
+    glow: 'rgba(93, 182, 185, 0.4)',
+    name: language.toUpperCase()
+  };
 
   return (
     <div 
@@ -72,6 +79,55 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         zIndex: designSystem.zIndex.above
       }}
     >
+      {/* Top Row: Volume Bars + Cancel + Confirm */}
+      {isCallStarted && (
+        <div className="flex items-center justify-between w-full max-w-sm mb-4 px-4">
+          {/* Volume Bars - Left */}
+          <div className="flex items-center gap-1">
+            <span 
+              className="material-icons text-lg mr-2" 
+              style={{ color: currentColors.primary }}
+            >
+              graphic_eq
+            </span>
+            <div className="flex items-end h-6 gap-1">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="transition-all duration-200 ease-out"
+                  style={{
+                    width: '3px',
+                    height: `${8 + Math.round((micLevel/100)*16) * ((i%2)+1)}px`,
+                    backgroundColor: currentColors.primary,
+                    borderRadius: '2px',
+                    boxShadow: `0 0 4px ${currentColors.glow}`,
+                    opacity: 0.7 + (micLevel/100) * 0.3
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Cancel Button - Center */}
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
+            style={{ minWidth: '80px' }}
+          >
+            Cancel
+          </button>
+
+          {/* Confirm Button - Right */}
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
+            style={{ minWidth: '80px' }}
+          >
+            Confirm
+          </button>
+        </div>
+      )}
+
       {/* Language Indicator */}
       <div
         className="mb-3 px-3 py-1 rounded-full text-sm font-medium transition-all duration-300"
@@ -85,7 +141,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         🎤 {currentColors.name}
       </div>
 
-      {/* Siri Button Container */}
+      {/* Siri Button Container - Clean without volume visualization */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
@@ -109,53 +165,18 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         />
       </div>
       
-      {/* Tap To Speak text - Visible on all devices */}
-      <div
-        className="block mt-4 text-center transition-colors duration-300"
-        style={{
-          color: currentColors.primary,
-          fontSize: '1rem',
-          fontWeight: '600',
-          textShadow: `0 2px 8px ${currentColors.glow}`,
-        }}
-      >
-        Tap To Speak
-      </div>
-
-      {/* Cancel and Confirm buttons - Show only when call is active */}
-      {isCallStarted && (
-        <div className="flex gap-4 mt-4">
-          {/* Cancel Button */}
-          <button
-            onClick={onCancel}
-            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full font-medium transition-colors duration-200 shadow-lg"
-            style={{
-              minWidth: '100px',
-              fontSize: '0.9rem'
-            }}
-          >
-            Cancel
-          </button>
-
-          {/* Confirm Button */}
-          <button
-            onClick={onConfirm}
-            className="px-6 py-2 text-white rounded-full font-medium transition-colors duration-200 shadow-lg"
-            style={{
-              minWidth: '100px',
-              fontSize: '0.9rem',
-              backgroundColor: currentColors.primary,
-              boxShadow: `0 4px 12px ${currentColors.glow}`
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = currentColors.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = currentColors.primary;
-            }}
-          >
-            Confirm
-          </button>
+      {/* Tap To Speak text - Visible only when not calling */}
+      {!isCallStarted && (
+        <div
+          className="block mt-4 text-center transition-colors duration-300"
+          style={{
+            color: currentColors.primary,
+            fontSize: '1rem',
+            fontWeight: '600',
+            textShadow: `0 2px 8px ${currentColors.glow}`,
+          }}
+        >
+          Tap To Speak
         </div>
       )}
     </div>

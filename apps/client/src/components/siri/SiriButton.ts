@@ -469,7 +469,7 @@ export class SiriButton {
     this.drawTimeRing();
     this.drawTimeText();
     this.drawIdleFlash();
-    this.drawVolumeVisualization();
+    // this.drawVolumeVisualization(); // Disabled - moved to external component
     // Add new ripples when listening
     if (this.isListening && Math.random() < (isMobile ? 0.05 : 0.1)) {
       this.ripples.push({
