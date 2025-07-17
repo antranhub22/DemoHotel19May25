@@ -74,6 +74,12 @@ export const useConversationState = ({
 
   const handleCallStart = useCallback(async (lang: Language): Promise<{ success: boolean; error?: string }> => {
     console.log('🎤 [useConversationState] Starting call with language:', lang);
+    console.log('🎤 [useConversationState] Current state before call:', {
+      isCallStarted,
+      manualCallStarted,
+      callDuration,
+      transcriptsCount: transcripts.length
+    });
     
     // Check if we should force VAPI calls in development
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
@@ -84,12 +90,25 @@ export const useConversationState = ({
       forceVapiInDev,
       hasVapiCredentials: !!hasVapiCredentials,
       publicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY ? 'EXISTS' : 'MISSING',
-      assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID ? 'EXISTS' : 'MISSING'
+      assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID ? 'EXISTS' : 'MISSING',
+      // Also check individual language keys
+      publicKey_VI: import.meta.env.VITE_VAPI_PUBLIC_KEY_VI ? 'EXISTS' : 'MISSING',
+      assistantId_VI: import.meta.env.VITE_VAPI_ASSISTANT_ID_VI ? 'EXISTS' : 'MISSING'
     });
+    
+    // DEV MODE: Check if we have ANY VAPI credentials (including language-specific ones)
+    const hasAnyVapiCredentials = import.meta.env.VITE_VAPI_PUBLIC_KEY || 
+                                  import.meta.env.VITE_VAPI_PUBLIC_KEY_VI ||
+                                  import.meta.env.VITE_VAPI_PUBLIC_KEY_FR ||
+                                  import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH ||
+                                  import.meta.env.VITE_VAPI_PUBLIC_KEY_RU ||
+                                  import.meta.env.VITE_VAPI_PUBLIC_KEY_KO;
+    
+    console.log('🔍 [useConversationState] hasAnyVapiCredentials:', !!hasAnyVapiCredentials);
     
     // DEV MODE: Skip actual API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
+    if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
       console.log('🚧 [DEV MODE] Simulating call start - no API calls (no credentials or force flag)');
       console.log('✅ [useConversationState] Setting isCallStarted = true (DEV MODE)');
       setIsCallStarted(true);
@@ -98,12 +117,13 @@ export const useConversationState = ({
     }
     
     // If we have credentials or force flag, proceed with real VAPI call
-    if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
+    if (isDevelopment && (forceVapiInDev || hasAnyVapiCredentials)) {
       console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL - credentials available or forced');
     }
     
     try {
       console.log('📞 [useConversationState] Calling startCall()...');
+      console.log('📞 [useConversationState] About to call startCall with all checks passed');
       await startCall();
       console.log('✅ [useConversationState] startCall() successful, setting isCallStarted = true');
       setIsCallStarted(true);
@@ -112,9 +132,14 @@ export const useConversationState = ({
       // DISABLED: Focus on Interface1 development only
       // setCurrentInterface('interface2');
       
+      console.log('🎯 [useConversationState] Call start completed successfully');
       return { success: true };
     } catch (error) {
       console.error('❌ [useConversationState] Error in startCall():', error);
+      console.error('❌ [useConversationState] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       
       // Don't set isCallStarted to false here - let user manually end call
       // This prevents popup from disappearing immediately
@@ -124,7 +149,7 @@ export const useConversationState = ({
       
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
-  }, [startCall]);
+  }, [startCall, isCallStarted, manualCallStarted, callDuration, transcripts.length]);
 
   const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');

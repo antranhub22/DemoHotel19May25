@@ -140,7 +140,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       removePopup(conversationPopupId);
       setConversationPopupId(null);
     }
-  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, isActive]); // Remove transcripts from deps
+  }, [conversationState.isCallStarted, conversationPopupId, isActive]); // Simplified dependencies
   
   // Separate effect to update badge count when transcripts change
   useEffect(() => {
@@ -153,6 +153,10 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   
   // Effect to restart call when language changes during active call
   useEffect(() => {
+    // TEMPORARILY DISABLED - causing issues
+    console.log('🚫 [useInterface1] Language change restart logic temporarily disabled for debugging');
+    return;
+    
     // Skip the initial mount and only react to actual language changes
     if (isInitialMount.current) {
       isInitialMount.current = false;
