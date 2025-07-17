@@ -54,6 +54,15 @@ export const useConversationState = ({
 
   const handleCallStart = useCallback(async (lang: Language): Promise<{ success: boolean; error?: string }> => {
     console.log('🎤 [useConversationState] Starting call with language:', lang);
+    
+    // DEV MODE: Skip actual API calls 
+    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+    if (isDevelopment) {
+      console.log('🚧 [DEV MODE] Simulating call start - no API calls');
+      setIsCallStarted(true);
+      return { success: true };
+    }
+    
     try {
       await startCall();
       setIsCallStarted(true);
@@ -76,6 +85,15 @@ export const useConversationState = ({
 
   const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');
+    
+    // DEV MODE: Skip API calls
+    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+    if (isDevelopment) {
+      console.log('🚧 [DEV MODE] Simulating call end - no API calls');
+      setIsCallStarted(false);
+      return;
+    }
+    
     endCall();
     setIsCallStarted(false);
     

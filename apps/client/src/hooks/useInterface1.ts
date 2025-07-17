@@ -189,6 +189,31 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       hasServiceRequests: serviceRequests?.length > 0
     });
     
+    // DEV MODE: Skip API calls to prevent server overload
+    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+    if (isDevelopment) {
+      console.log('🚧 [DEV MODE] Skipping API calls - showing demo summary popup');
+      
+      // Clear conversation popup if active
+      if (conversationPopupId) {
+        console.log('🗑️ [useInterface1] Removing conversation popup after confirm');
+        removePopup(conversationPopupId);
+        setConversationPopupId(null);
+      }
+      
+      // Show demo summary popup immediately
+      setTimeout(() => {
+        console.log('📋 [DEV MODE] Showing demo summary popup');
+        const summaryPopupId = showSummary(undefined, { 
+          title: 'Call Summary (Demo)',
+          priority: 'high' 
+        });
+        console.log('✅ [DEV MODE] Demo summary popup created:', summaryPopupId);
+      }, 500);
+      
+      return;
+    }
+    
     try {
       // Use conversation state handler first
       conversationState.handleConfirm();
