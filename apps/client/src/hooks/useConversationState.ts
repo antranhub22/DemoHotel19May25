@@ -52,18 +52,25 @@ export const useConversationState = ({
     }
   }, [showConversation, conversationRef]);
 
-  const handleCallStart = useCallback(async (lang: Language) => {
+  const handleCallStart = useCallback(async (lang: Language): Promise<{ success: boolean; error?: string }> => {
     console.log('🎤 [useConversationState] Starting call with language:', lang);
     try {
-      await startCall(lang);
+      await startCall();
       setIsCallStarted(true);
       
       // DISABLED: Focus on Interface1 development only
       // setCurrentInterface('interface2');
       console.log('📝 [DEV MODE] Staying in Interface1 - Interface2/3/4 disabled');
+      
+      return { success: true };
     } catch (error) {
       console.error('❌ [useConversationState] Error starting call:', error);
       setIsCallStarted(false);
+      
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Failed to start call' 
+      };
     }
   }, [startCall]);
 
@@ -77,35 +84,28 @@ export const useConversationState = ({
     console.log('📝 [DEV MODE] Staying in Interface1 - No interface switching');
   }, [endCall]);
 
-  const handleCancel = (): void => {
-    console.log('❌ [useConversationState] Cancel call - Stop and refresh system');
+  const handleCancel = useCallback(() => {
+    console.log('❌ [useConversationState] Canceling call');
     
-    // End the call first
+    // End call immediately
     endCall();
-    
-    // Force refresh to interface1 (this will trigger full system reset in AssistantContext)
-    setCurrentInterface('interface1');
-    
-    console.log('✅ [useConversationState] System refreshed - all states reset');
-  };
-
-  const handleConfirm = (): void => {
-    console.log('✅ [useConversationState] Confirm call - Stop and prepare summary');
-    
-    // End the call but preserve transcripts for summary
-    endCall();
-    
-    // Reset call state but keep conversation data
     setIsCallStarted(false);
     setShowConversation(false);
     
-    // TODO: Show summary popup (will be implemented later)
-    console.log('🔄 [TODO] Show summary popup for conversation');
-    console.log('📝 [TODO] Conversation data preserved:', { transcriptsCount: transcripts.length });
+    // Reset to initial state - stay in Interface1
+    console.log('📝 [DEV MODE] Call canceled - staying in Interface1');
+  }, [endCall]);
+
+  const handleConfirm = useCallback(() => {
+    console.log('✅ [useConversationState] Confirming call');
     
-    // For now, stay on interface1 (later this will show summary popup)
-    setCurrentInterface('interface1');
-  };
+    // End call and prepare for summary
+    endCall(); 
+    setIsCallStarted(false);
+    
+    // In Interface1 dev mode, we stay here instead of going to Interface2/3
+    console.log('📝 [DEV MODE] Call confirmed - staying in Interface1');
+  }, [endCall]);
 
   return {
     isCallStarted,

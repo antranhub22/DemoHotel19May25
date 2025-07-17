@@ -2,7 +2,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
-import { useState, createElement, useEffect } from 'react';
+import { useState, createElement, useEffect, useCallback } from 'react';
 import { usePopup } from '@/components/popup-system';
 
 interface UseInterface1Props {
@@ -154,6 +154,40 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     });
   };
 
+  // Add specific handlers for SiriButtonContainer Cancel/Confirm
+  const handleCancel = useCallback(() => {
+    console.log('❌ [useInterface1] Cancel button clicked in SiriButtonContainer');
+    
+    // Use conversation state handler
+    conversationState.handleCancel();
+    
+    // Clear any active popups
+    if (conversationPopupId) {
+      removePopup(conversationPopupId);
+      setConversationPopupId(null);
+    }
+    
+    console.log('✅ [useInterface1] Cancel completed - staying in Interface1');
+  }, [conversationState, conversationPopupId, removePopup]);
+
+  const handleConfirm = useCallback(() => {
+    console.log('✅ [useInterface1] Confirm button clicked in SiriButtonContainer');
+    
+    // Use conversation state handler
+    conversationState.handleConfirm();
+    
+    // Auto-show summary popup after confirmation
+    setTimeout(() => {
+      console.log('📋 [useInterface1] Auto-showing summary popup after confirm');
+      showSummary(undefined, { 
+        title: 'Call Summary',
+        priority: 'high' 
+      });
+    }, 1000); // 1s delay for processing
+    
+    console.log('✅ [useInterface1] Confirm completed - summary popup will show');
+  }, [conversationState, showSummary]);
+
   // Auto-show conversation popup when call starts
   useEffect(() => {
     if (conversationState.isCallStarted && !conversationPopupId) {
@@ -232,6 +266,10 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     
     // Conversation state (spread)
     ...conversationState,
+    
+    // Override with Interface1-specific handlers
+    handleCancel,
+    handleConfirm,
     
     // Right panel state
     showRightPanel,

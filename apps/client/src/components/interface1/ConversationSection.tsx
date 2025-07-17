@@ -25,11 +25,11 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
         }}
       >
         <div style={{ pointerEvents: 'auto' }}> {/* Chỉ popup mới có thể interact */}
-          <RealtimeConversationPopup
-            isOpen={showConversation}
-            onClose={onClose}
-            isRight={false}
-          />
+        <RealtimeConversationPopup
+          isOpen={showConversation}
+          onClose={onClose}
+          isRight={false}
+        />
         </div>
       </div>
     );
