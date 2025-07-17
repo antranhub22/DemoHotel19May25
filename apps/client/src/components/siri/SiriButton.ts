@@ -427,6 +427,9 @@ export class SiriButton {
   }
 
   private drawVolumeVisualization() {
+    // DISABLED: Internal volume visualization - using external bars instead
+    return;
+    
     // Visualization sóng âm động quanh nút khi listening với màu động
     if (!this.isListening) return;
     const bars = 16;

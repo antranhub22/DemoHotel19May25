@@ -191,24 +191,6 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           }}
         />
       </div>
-
-      {/* Waveform Animation */}
-      {isListening && (
-        <div className="waveform-container absolute inset-0 flex items-center justify-center">
-          {waveformBars.map((_, index) => (
-            <div
-              key={index}
-              className="waveform-bar"
-              style={{
-                animation: `waveform ${0.5 + Math.random() * 0.5}s ease-in-out infinite`,
-                animationDelay: `${index * 0.1}s`,
-                backgroundColor: colors?.primary || '#5DB6B9',
-                boxShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`
-              }}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
