@@ -1,4 +1,4 @@
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, RefObject, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { Language } from '@/types/interface1.types';
@@ -52,39 +52,30 @@ export const useConversationState = ({
     }
   }, [showConversation, conversationRef]);
 
-  const handleCallStart = async (lang: Language): Promise<{ success: boolean; error?: string }> => {
+  const handleCallStart = useCallback(async (lang: Language) => {
+    console.log('🎤 [useConversationState] Starting call with language:', lang);
     try {
-      console.log('🎤 [useConversationState] Starting call with language:', lang);
+      await startCall(lang);
+      setIsCallStarted(true);
       
-      // Set language before starting call
-      setLanguage(lang);
-      
-      // Use AssistantContext startCall method but prevent interface switching
-      await startCall();
-      
-      // Force stay on interface1 instead of switching to interface2
-      setCurrentInterface('interface1');
-      
-      return { success: true };
+      // DISABLED: Focus on Interface1 development only
+      // setCurrentInterface('interface2');
+      console.log('📝 [DEV MODE] Staying in Interface1 - Interface2/3/4 disabled');
     } catch (error) {
-      console.error('❌ [useConversationState] Error in handleCallStart:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to start call' 
-      };
+      console.error('❌ [useConversationState] Error starting call:', error);
+      setIsCallStarted(false);
     }
-  };
+  }, [startCall]);
 
-  const handleCallEnd = (): void => {
+  const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');
-    
-    // Use AssistantContext endCall method
     endCall();
-    
-    // Reset local state
     setIsCallStarted(false);
-    setShowConversation(false);
-  };
+    
+    // DISABLED: Focus on Interface1 development only  
+    // setCurrentInterface('interface1');
+    console.log('📝 [DEV MODE] Staying in Interface1 - No interface switching');
+  }, [endCall]);
 
   const handleCancel = (): void => {
     console.log('❌ [useConversationState] Cancel call - Stop and refresh system');
