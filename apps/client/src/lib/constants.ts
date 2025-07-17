@@ -262,10 +262,10 @@ export const FEATURE_FLAGS = {
 // ===== POPUP DIMENSIONS =====
 // Chiều cao tiêu chuẩn để không che nút Siri Button (300x300px container)
 export const POPUP_DIMENSIONS = {
-  STANDARD_HEIGHT: 220,        // px - Đủ nội dung, không che Siri Button
+  STANDARD_HEIGHT: 110,        // px - Gọn gàng, không che Siri Button
   MAX_WIDTH: 350,             // px - Phù hợp mobile
   MAX_HEIGHT_VH: 35,          // % - Tối đa 35% viewport height
-  MIN_HEIGHT: 180,            // px - Chiều cao tối thiểu
+  MIN_HEIGHT: 100,            // px - Chiều cao tối thiểu (điều chỉnh cho 110px)
   SIRI_BUTTON_CLEARANCE: 80,  // px - Khoảng cách an toàn từ Siri Button
 } as const;
 

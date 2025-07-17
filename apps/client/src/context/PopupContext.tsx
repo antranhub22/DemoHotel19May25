@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { MessageSquare, Users, Bell, AlertTriangle, ShoppingCart } from 'lucide-react';
 
 // STANDARD POPUP DIMENSIONS - Không che nút Siri Button
-export const STANDARD_POPUP_HEIGHT = 220; // px
+export const STANDARD_POPUP_HEIGHT = 110; // px
 export const STANDARD_POPUP_MAX_WIDTH = 350; // px
 export const STANDARD_POPUP_MAX_HEIGHT_VH = 35; // % of viewport height
 
