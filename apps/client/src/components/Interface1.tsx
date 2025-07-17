@@ -67,7 +67,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         <div className="relative min-h-[400px] px-4">
           
           {/* Container Chính - Siri Button - Trung tâm hoàn toàn màn hình */}
-          <div className="w-full flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
             <div className="flex flex-col items-center justify-center">
               <SiriButtonContainer
                 isCallStarted={isCallStarted}
@@ -83,16 +83,16 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           </div>
           
           {/* Container Phải - Right Panel - Floating Overlay */}
-          <div className="absolute top-8 right-4 hidden md:block w-80 z-20">
+          <div className="absolute top-8 right-4 hidden md:block w-80 z-10 pointer-events-auto">
             <RightPanelSection
               ref={rightPanelRef}
               showPanel={showRightPanel}
               onClose={handleRightPanelClose}
-              className="w-full max-w-sm z-30"
+              className="w-full max-w-sm z-20"
             />
             {/* Test Popup Buttons */}
             {!showRightPanel && (
-              <div className="w-full space-y-4">
+              <div className="w-full space-y-4 pointer-events-auto">
                 {/* Test Popup System */}
                 <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/90 backdrop-blur-sm">
                   <h4 className="text-sm font-semibold text-blue-800 mb-3">🧪 Test Popup System</h4>
@@ -132,8 +132,10 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         </div>
       </div>
 
-      {/* Service Categories Section */}
-      <ServiceGridContainer ref={serviceGridRef} />
+      {/* Service Categories Section - Add margin to prevent overlap */}
+      <div className="mt-16 relative z-10">
+        <ServiceGridContainer ref={serviceGridRef} />
+      </div>
 
       {/* Scroll Controls */}
       <ScrollToTopButton

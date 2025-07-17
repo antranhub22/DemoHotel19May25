@@ -73,10 +73,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center justify-center w-full"
+      className="flex flex-col items-center justify-center w-full relative z-50"
       style={{ 
         marginBottom: designSystem.spacing.xl,
-        zIndex: designSystem.zIndex.above
+        zIndex: 9999, // Ensure highest priority
+        pointerEvents: 'auto'
       }}
     >
       {/* Top Row: Cancel + Confirm */}
