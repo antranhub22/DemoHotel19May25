@@ -59,10 +59,19 @@ export const useConversationState = ({
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
     const hasVapiCredentials = import.meta.env.VITE_VAPI_PUBLIC_KEY && import.meta.env.VITE_VAPI_ASSISTANT_ID;
     
+    console.log('🔍 [useConversationState] Environment check:', {
+      isDevelopment: import.meta.env.DEV,
+      forceVapiInDev,
+      hasVapiCredentials: !!hasVapiCredentials,
+      publicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY ? 'EXISTS' : 'MISSING',
+      assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID ? 'EXISTS' : 'MISSING'
+    });
+    
     // DEV MODE: Skip actual API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
     if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
       console.log('🚧 [DEV MODE] Simulating call start - no API calls (no credentials or force flag)');
+      console.log('✅ [useConversationState] Setting isCallStarted = true (DEV MODE)');
       setIsCallStarted(true);
       return { success: true };
     }
@@ -73,27 +82,30 @@ export const useConversationState = ({
     }
     
     try {
+      console.log('📞 [useConversationState] Calling startCall()...');
       await startCall();
+      console.log('✅ [useConversationState] startCall() successful, setting isCallStarted = true');
       setIsCallStarted(true);
       
       // DISABLED: Focus on Interface1 development only
       // setCurrentInterface('interface2');
-      console.log('📝 [DEV MODE] Staying in Interface1 - Interface2/3/4 disabled');
       
       return { success: true };
     } catch (error) {
-      console.error('❌ [useConversationState] Error starting call:', error);
-      setIsCallStarted(false);
+      console.error('❌ [useConversationState] Error in startCall():', error);
       
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to start call' 
-      };
+      // Don't set isCallStarted to false here - let user manually end call
+      // This prevents popup from disappearing immediately
+      console.log('⚠️ [useConversationState] Call failed but keeping isCallStarted = true for debugging');
+      setIsCallStarted(true); // Keep it true so popup stays visible
+      
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }, [startCall]);
 
   const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');
+    console.log('🔍 [useConversationState] Current isCallStarted state:', isCallStarted);
     
     // Check if we should force VAPI calls in development
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
@@ -103,16 +115,19 @@ export const useConversationState = ({
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
     if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
       console.log('🚧 [DEV MODE] Simulating call end - no API calls');
+      console.log('❌ [useConversationState] Setting isCallStarted = false (DEV MODE)');
       setIsCallStarted(false);
       return;
     }
     
     // If we have credentials or force flag, proceed with real VAPI call end
     if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
-      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL END - credentials available or forced');
+      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL END');
     }
     
+    console.log('📞 [useConversationState] Calling endCall()...');
     endCall();
+    console.log('❌ [useConversationState] Setting isCallStarted = false');
     setIsCallStarted(false);
     
     // DISABLED: Focus on Interface1 development only  

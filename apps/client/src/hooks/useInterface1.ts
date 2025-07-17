@@ -66,13 +66,22 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   
   // Auto-show conversation popup when call starts
   useEffect(() => {
-    if (conversationState.isCallStarted && !conversationPopupId) {
+    console.log('🔍 [useInterface1] Popup effect triggered:', {
+      isCallStarted: conversationState.isCallStarted,
+      conversationPopupId,
+      isActive
+    });
+    
+    if (conversationState.isCallStarted && !conversationPopupId && isActive) {
+      console.log('✅ [useInterface1] Showing conversation popup...');
+      
       import('../components/RealtimeConversationPopup').then((module) => {
         const { default: RealtimeConversationPopup } = module;
         const popupId = showConversation(
           createElement(RealtimeConversationPopup, {
             isOpen: true,
             onClose: () => {
+              console.log('🗑️ [useInterface1] Popup onClose triggered');
               setConversationPopupId(null);
             }
           }),
@@ -82,9 +91,10 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
             badge: transcripts.length > 0 ? transcripts.length : undefined
           }
         );
+        console.log('📱 [useInterface1] Popup created with ID:', popupId);
         setConversationPopupId(popupId);
       }).catch((error) => {
-        console.error('Failed to load RealtimeConversationPopup:', error);
+        console.error('❌ [useInterface1] Failed to load RealtimeConversationPopup:', error);
         // Fallback to basic conversation view
         const popupId = showConversation(
           createElement('div', { 
@@ -115,14 +125,26 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
             badge: transcripts.length > 0 ? transcripts.length : undefined
           }
         );
+        console.log('📱 [useInterface1] Fallback popup created with ID:', popupId);
         setConversationPopupId(popupId);
       });
     } else if (!conversationState.isCallStarted && conversationPopupId) {
-      // Remove popup when call ends
-      removePopup(conversationPopupId);
-      setConversationPopupId(null);
+      // Only remove popup if call actually ended (not if interface changed)
+      console.log('🛑 [useInterface1] Call ended, considering popup removal...');
+      console.log('🔍 [useInterface1] Interface isActive:', isActive);
+      
+      // Don't remove popup immediately - add delay to prevent race conditions
+      setTimeout(() => {
+        if (!conversationState.isCallStarted && conversationPopupId) {
+          console.log('🗑️ [useInterface1] Removing conversation popup after delay');
+          removePopup(conversationPopupId);
+          setConversationPopupId(null);
+        } else {
+          console.log('⚠️ [useInterface1] Popup removal cancelled - call might be active again');
+        }
+      }, 500); // 500ms delay to prevent race conditions
     }
-  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, transcripts]);
+  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, transcripts, isActive]);
   
   const handleRightPanelToggle = () => {
     setShowRightPanel(!showRightPanel);
