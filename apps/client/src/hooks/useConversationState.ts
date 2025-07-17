@@ -85,26 +85,42 @@ export const useConversationState = ({
   }, [endCall]);
 
   const handleCancel = useCallback(() => {
-    console.log('❌ [useConversationState] Canceling call');
+    console.log('❌ [useConversationState] Canceling call - FULL RESET');
     
-    // End call immediately
-    endCall();
-    setIsCallStarted(false);
-    setShowConversation(false);
-    
-    // Reset to initial state - stay in Interface1
-    console.log('📝 [DEV MODE] Call canceled - staying in Interface1');
+    try {
+      // End call immediately
+      endCall();
+      
+      // Reset all local states
+      setIsCallStarted(false);
+      setShowConversation(false);
+      
+      console.log('✅ [useConversationState] Cancel completed - all states reset');
+      console.log('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false');
+    } catch (error) {
+      console.error('❌ [useConversationState] Error in handleCancel:', error);
+    }
   }, [endCall]);
 
   const handleConfirm = useCallback(() => {
-    console.log('✅ [useConversationState] Confirming call');
+    console.log('✅ [useConversationState] Confirming call - PROCESSING SUMMARY');
     
-    // End call and prepare for summary
-    endCall(); 
-    setIsCallStarted(false);
-    
-    // In Interface1 dev mode, we stay here instead of going to Interface2/3
-    console.log('📝 [DEV MODE] Call confirmed - staying in Interface1');
+    try {
+      // End call and prepare for summary  
+      endCall();
+      
+      // Update states
+      setIsCallStarted(false);
+      // Keep showConversation true temporarily for summary processing
+      
+      console.log('✅ [useConversationState] Confirm completed - ready for summary');
+      console.log('📊 [useConversationState] Final state: isCallStarted=false, preparing summary...');
+    } catch (error) {
+      console.error('❌ [useConversationState] Error in handleConfirm:', error);
+      // Fallback reset
+      setIsCallStarted(false);
+      setShowConversation(false);
+    }
   }, [endCall]);
 
   return {

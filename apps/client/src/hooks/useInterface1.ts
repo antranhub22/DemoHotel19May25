@@ -48,7 +48,7 @@ interface UseInterface1Return {
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks
@@ -157,36 +157,70 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   // Add specific handlers for SiriButtonContainer Cancel/Confirm
   const handleCancel = useCallback(() => {
     console.log('❌ [useInterface1] Cancel button clicked in SiriButtonContainer');
+    console.log('📊 [useInterface1] Current state:', { 
+      isCallStarted: conversationState.isCallStarted,
+      conversationPopupId,
+      transcriptsCount: transcripts.length 
+    });
     
-    // Use conversation state handler
-    conversationState.handleCancel();
-    
-    // Clear any active popups
-    if (conversationPopupId) {
-      removePopup(conversationPopupId);
-      setConversationPopupId(null);
+    try {
+      // Clear any active popups first
+      if (conversationPopupId) {
+        console.log('🗑️ [useInterface1] Removing conversation popup:', conversationPopupId);
+        removePopup(conversationPopupId);
+        setConversationPopupId(null);
+      }
+      
+      // Use conversation state handler
+      conversationState.handleCancel();
+      
+      console.log('✅ [useInterface1] Cancel completed - staying in Interface1');
+    } catch (error) {
+      console.error('❌ [useInterface1] Error in handleCancel:', error);
     }
-    
-    console.log('✅ [useInterface1] Cancel completed - staying in Interface1');
-  }, [conversationState, conversationPopupId, removePopup]);
+  }, [conversationState, conversationPopupId, removePopup, transcripts.length]);
 
   const handleConfirm = useCallback(() => {
     console.log('✅ [useInterface1] Confirm button clicked in SiriButtonContainer');
+    console.log('📊 [useInterface1] Current state:', { 
+      isCallStarted: conversationState.isCallStarted,
+      transcriptsCount: transcripts.length,
+      hasCallSummary: !!callSummary,
+      hasServiceRequests: serviceRequests?.length > 0
+    });
     
-    // Use conversation state handler
-    conversationState.handleConfirm();
-    
-    // Auto-show summary popup after confirmation
-    setTimeout(() => {
-      console.log('📋 [useInterface1] Auto-showing summary popup after confirm');
-      showSummary(undefined, { 
-        title: 'Call Summary',
-        priority: 'high' 
-      });
-    }, 1000); // 1s delay for processing
-    
-    console.log('✅ [useInterface1] Confirm completed - summary popup will show');
-  }, [conversationState, showSummary]);
+    try {
+      // Use conversation state handler first
+      conversationState.handleConfirm();
+      
+      // Clear conversation popup if active
+      if (conversationPopupId) {
+        console.log('🗑️ [useInterface1] Removing conversation popup after confirm');
+        removePopup(conversationPopupId);
+        setConversationPopupId(null);
+      }
+      
+      // Auto-show summary popup after confirmation with delay for processing
+      setTimeout(() => {
+        console.log('📋 [useInterface1] Auto-showing summary popup after confirm');
+        console.log('📊 [useInterface1] Summary data available:', {
+          callSummary: !!callSummary,
+          serviceRequests: serviceRequests?.length || 0
+        });
+        
+        const summaryPopupId = showSummary(undefined, { 
+          title: 'Call Summary',
+          priority: 'high' 
+        });
+        
+        console.log('✅ [useInterface1] Summary popup created with ID:', summaryPopupId);
+      }, 1500); // Increased delay for better processing
+      
+      console.log('✅ [useInterface1] Confirm completed - summary popup will show');
+    } catch (error) {
+      console.error('❌ [useInterface1] Error in handleConfirm:', error);
+    }
+  }, [conversationState, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
 
   // Auto-show conversation popup when call starts
   useEffect(() => {
