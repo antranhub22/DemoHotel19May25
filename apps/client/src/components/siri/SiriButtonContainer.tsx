@@ -63,13 +63,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 }) => {
   const { language } = useAssistant();
 
-  // Simple color scheme without LANGUAGE_COLORS dependency
-  const currentColors = {
-    primary: '#5DB6B9',
-    secondary: '#3B82F6',
-    glow: 'rgba(93, 182, 185, 0.4)',
-    name: language.toUpperCase()
-  };
+  // Use LANGUAGE_COLORS mapping based on current language
+  const currentColors = LANGUAGE_COLORS[language as keyof typeof LANGUAGE_COLORS] || LANGUAGE_COLORS['en'];
+  
+  // Debug: Log language and color changes
+  console.log('🎨 [SiriButtonContainer] Language:', language, 'Colors:', currentColors.name, 'Primary:', currentColors.primary);
 
   return (
     <div 
