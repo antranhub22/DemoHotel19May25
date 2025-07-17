@@ -42,7 +42,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleConfirm,
     showRightPanel,
     handleRightPanelToggle,
-    handleRightPanelClose
+    handleRightPanelClose,
+    handleShowConversationPopup,
+    handleShowNotificationDemo
   } = useInterface1({ isActive });
 
   // Early returns
@@ -87,13 +89,35 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               onClose={handleRightPanelClose}
               className="w-full max-w-sm z-30"
             />
-            {/* Placeholder button to show panel when hidden */}
+            {/* Test Popup Buttons */}
             {!showRightPanel && (
-              <div 
-                className="w-full max-w-sm h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
-                onClick={handleRightPanelToggle}
-              >
-                Click to open Right Panel
+              <div className="w-full max-w-sm space-y-4">
+                {/* Test Popup System */}
+                <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                  <h4 className="text-sm font-semibold text-blue-800 mb-3">🧪 Test Popup System</h4>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleShowConversationPopup}
+                      className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
+                    >
+                      🔴 Show Conversation
+                    </button>
+                    <button
+                      onClick={handleShowNotificationDemo}
+                      className="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-medium transition-colors"
+                    >
+                      📢 Show Notification
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Original Right Panel Toggle */}
+                <div 
+                  className="w-full h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                  onClick={handleRightPanelToggle}
+                >
+                  Click to open Right Panel
+                </div>
               </div>
             )}
           </div>
