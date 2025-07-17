@@ -2,8 +2,9 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
-import { useState, createElement, useEffect, useCallback } from 'react';
+import { useState, createElement, useEffect, useCallback, useRef } from 'react';
 import { usePopup } from '@/components/popup-system';
+import { Language } from '@/types/interface1.types';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -48,7 +49,7 @@ interface UseInterface1Return {
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks
@@ -63,6 +64,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   // Right panel state
   const [showRightPanel, setShowRightPanel] = useState(false);
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
+  const isInitialMount = useRef(true);
   
   // Auto-show conversation popup when call starts
   useEffect(() => {
@@ -148,6 +150,36 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       // This is a future enhancement - for now we just log the change
     }
   }, [transcripts.length, conversationPopupId]);
+  
+  // Effect to restart call when language changes during active call
+  useEffect(() => {
+    // Skip the initial mount and only react to actual language changes
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    
+    if (conversationState.isCallStarted && conversationPopupId) {
+      console.log('🔄 [useInterface1] Language changed during active call to:', language);
+      console.log('🔄 [useInterface1] Will restart call with new language assistant');
+      
+      // Restart the call with new language  
+      setTimeout(async () => {
+        try {
+          console.log('🛑 [useInterface1] Stopping current call for language switch...');
+          await conversationState.handleCallEnd();
+          
+          // Brief pause then restart
+          setTimeout(async () => {
+            console.log('🎤 [useInterface1] Restarting call with new language:', language);
+            await conversationState.handleCallStart(language);
+          }, 1000);
+        } catch (error) {
+          console.error('❌ [useInterface1] Error restarting call with new language:', error);
+        }
+      }, 300);
+    }
+  }, [language, conversationState.isCallStarted, conversationPopupId, conversationState.handleCallEnd, conversationState.handleCallStart]); // Include necessary dependencies
   
   const handleRightPanelToggle = () => {
     setShowRightPanel(!showRightPanel);
