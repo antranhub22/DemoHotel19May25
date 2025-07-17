@@ -55,12 +55,21 @@ export const useConversationState = ({
   const handleCallStart = useCallback(async (lang: Language): Promise<{ success: boolean; error?: string }> => {
     console.log('🎤 [useConversationState] Starting call with language:', lang);
     
-    // DEV MODE: Skip actual API calls 
+    // Check if we should force VAPI calls in development
+    const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
+    const hasVapiCredentials = import.meta.env.VITE_VAPI_PUBLIC_KEY && import.meta.env.VITE_VAPI_ASSISTANT_ID;
+    
+    // DEV MODE: Skip actual API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.log('🚧 [DEV MODE] Simulating call start - no API calls');
+    if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
+      console.log('🚧 [DEV MODE] Simulating call start - no API calls (no credentials or force flag)');
       setIsCallStarted(true);
       return { success: true };
+    }
+    
+    // If we have credentials or force flag, proceed with real VAPI call
+    if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
+      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL - credentials available or forced');
     }
     
     try {
@@ -86,12 +95,21 @@ export const useConversationState = ({
   const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');
     
-    // DEV MODE: Skip API calls
+    // Check if we should force VAPI calls in development
+    const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
+    const hasVapiCredentials = import.meta.env.VITE_VAPI_PUBLIC_KEY && import.meta.env.VITE_VAPI_ASSISTANT_ID;
+    
+    // DEV MODE: Skip API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment) {
+    if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
       console.log('🚧 [DEV MODE] Simulating call end - no API calls');
       setIsCallStarted(false);
       return;
+    }
+    
+    // If we have credentials or force flag, proceed with real VAPI call end
+    if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
+      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL END - credentials available or forced');
     }
     
     endCall();
