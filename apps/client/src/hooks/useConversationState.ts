@@ -31,13 +31,33 @@ export const useConversationState = ({
   
   const [isCallStarted, setIsCallStarted] = useState(false);
   const [showConversation, setShowConversation] = useState(false);
+  const [manualCallStarted, setManualCallStarted] = useState(false); // Track manual start
 
   // Sync with AssistantContext call state using callDuration
+  // BUT don't override manual call start until we have confirmation from server
   useEffect(() => {
     const isActive = callDuration > 0;
-    setIsCallStarted(isActive);
-    setShowConversation(isActive || transcripts.length > 0);
-  }, [callDuration, transcripts.length]);
+    console.log('🔄 [useConversationState] callDuration sync:', { callDuration, isActive, manualCallStarted, currentIsCallStarted: isCallStarted });
+    
+    // Only auto-set isCallStarted if:
+    // 1. We have active call duration (real confirmation), OR
+    // 2. We don't have manual start (normal auto-sync)
+    if (isActive) {
+      // Real call is active - sync state
+      console.log('✅ [useConversationState] Real call active - syncing isCallStarted = true');
+      setIsCallStarted(true);
+      setManualCallStarted(false); // Clear manual flag since we have real confirmation
+    } else if (!manualCallStarted) {
+      // No manual start and no active call - set to false
+      console.log('❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false');
+      setIsCallStarted(false);
+    } else {
+      // Manual start in progress - don't override, let it stay true
+      console.log('⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true');
+    }
+    
+    setShowConversation(isActive || transcripts.length > 0 || manualCallStarted);
+  }, [callDuration, transcripts.length, manualCallStarted, isCallStarted]);
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
@@ -73,6 +93,7 @@ export const useConversationState = ({
       console.log('🚧 [DEV MODE] Simulating call start - no API calls (no credentials or force flag)');
       console.log('✅ [useConversationState] Setting isCallStarted = true (DEV MODE)');
       setIsCallStarted(true);
+      setManualCallStarted(true); // Set manual flag when simulating
       return { success: true };
     }
     
@@ -86,6 +107,7 @@ export const useConversationState = ({
       await startCall();
       console.log('✅ [useConversationState] startCall() successful, setting isCallStarted = true');
       setIsCallStarted(true);
+      setManualCallStarted(true); // Set manual flag when real call starts
       
       // DISABLED: Focus on Interface1 development only
       // setCurrentInterface('interface2');
@@ -98,6 +120,7 @@ export const useConversationState = ({
       // This prevents popup from disappearing immediately
       console.log('⚠️ [useConversationState] Call failed but keeping isCallStarted = true for debugging');
       setIsCallStarted(true); // Keep it true so popup stays visible
+      setManualCallStarted(true); // Keep manual flag true on failure
       
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
@@ -117,6 +140,7 @@ export const useConversationState = ({
       console.log('🚧 [DEV MODE] Simulating call end - no API calls');
       console.log('❌ [useConversationState] Setting isCallStarted = false (DEV MODE)');
       setIsCallStarted(false);
+      setManualCallStarted(false); // Clear manual flag when simulating
       return;
     }
     
@@ -129,6 +153,7 @@ export const useConversationState = ({
     endCall();
     console.log('❌ [useConversationState] Setting isCallStarted = false');
     setIsCallStarted(false);
+    setManualCallStarted(false); // Clear manual flag on real end
     
     // DISABLED: Focus on Interface1 development only  
     // setCurrentInterface('interface1');
@@ -145,6 +170,7 @@ export const useConversationState = ({
       // Reset all local states
       setIsCallStarted(false);
       setShowConversation(false);
+      setManualCallStarted(false); // Clear manual flag on cancel
       
       console.log('✅ [useConversationState] Cancel completed - all states reset');
       console.log('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false');
@@ -163,6 +189,7 @@ export const useConversationState = ({
       // Update states
       setIsCallStarted(false);
       // Keep showConversation true temporarily for summary processing
+      setManualCallStarted(false); // Clear manual flag on confirmation
       
       console.log('✅ [useConversationState] Confirm completed - ready for summary');
       console.log('📊 [useConversationState] Final state: isCallStarted=false, preparing summary...');
@@ -171,6 +198,7 @@ export const useConversationState = ({
       // Fallback reset
       setIsCallStarted(false);
       setShowConversation(false);
+      setManualCallStarted(false); // Clear manual flag on fallback
     }
   }, [endCall]);
 

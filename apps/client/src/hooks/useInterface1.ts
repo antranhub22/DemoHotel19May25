@@ -130,21 +130,24 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       });
     } else if (!conversationState.isCallStarted && conversationPopupId) {
       // Only remove popup if call actually ended (not if interface changed)
-      console.log('🛑 [useInterface1] Call ended, considering popup removal...');
+      console.log('🛑 [useInterface1] Call ended, will remove popup after delay to prevent race conditions');
       console.log('🔍 [useInterface1] Interface isActive:', isActive);
       
-      // Don't remove popup immediately - add delay to prevent race conditions
-      setTimeout(() => {
-        if (!conversationState.isCallStarted && conversationPopupId) {
-          console.log('🗑️ [useInterface1] Removing conversation popup after delay');
-          removePopup(conversationPopupId);
-          setConversationPopupId(null);
-        } else {
-          console.log('⚠️ [useInterface1] Popup removal cancelled - call might be active again');
-        }
-      }, 500); // 500ms delay to prevent race conditions
+      // Immediate removal for now - the delay was causing issues
+      console.log('🗑️ [useInterface1] Removing conversation popup immediately');
+      removePopup(conversationPopupId);
+      setConversationPopupId(null);
     }
-  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, transcripts, isActive]);
+  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, isActive]); // Remove transcripts from deps
+  
+  // Separate effect to update badge count when transcripts change
+  useEffect(() => {
+    if (conversationPopupId && transcripts.length > 0) {
+      console.log('🔢 [useInterface1] Updating popup badge count:', transcripts.length);
+      // Note: PopupManager doesn't currently support updating badge count after creation
+      // This is a future enhancement - for now we just log the change
+    }
+  }, [transcripts.length, conversationPopupId]);
   
   const handleRightPanelToggle = () => {
     setShowRightPanel(!showRightPanel);
