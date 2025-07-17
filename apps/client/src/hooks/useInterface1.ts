@@ -64,6 +64,66 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const [showRightPanel, setShowRightPanel] = useState(false);
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
   
+  // Auto-show conversation popup when call starts
+  useEffect(() => {
+    if (conversationState.isCallStarted && !conversationPopupId) {
+      import('../components/RealtimeConversationPopup').then((module) => {
+        const { default: RealtimeConversationPopup } = module;
+        const popupId = showConversation(
+          createElement(RealtimeConversationPopup, {
+            isOpen: true,
+            onClose: () => {
+              setConversationPopupId(null);
+            }
+          }),
+          { 
+            title: 'Voice Assistant',
+            priority: 'high' as const,
+            badge: transcripts.length > 0 ? transcripts.length : undefined
+          }
+        );
+        setConversationPopupId(popupId);
+      }).catch((error) => {
+        console.error('Failed to load RealtimeConversationPopup:', error);
+        // Fallback to basic conversation view
+        const popupId = showConversation(
+          createElement('div', { 
+            style: { 
+              padding: '16px', 
+              height: '400px',
+              overflow: 'auto',
+              fontSize: '14px' 
+            } 
+          }, [
+            createElement('h3', { key: 'title', style: { marginBottom: '12px' } }, 'Voice Conversation'),
+            createElement('div', { key: 'status' }, `Call Status: ${conversationState.isCallStarted ? 'Active' : 'Inactive'}`),
+            ...transcripts.map((transcript, index) => 
+              createElement('div', { 
+                key: index,
+                style: { 
+                  margin: '8px 0',
+                  padding: '8px',
+                  backgroundColor: transcript.role === 'user' ? '#f0f9ff' : '#f9fafb',
+                  borderRadius: '6px'
+                }
+              }, `${transcript.role}: ${transcript.content}`)
+            )
+          ]),
+          { 
+            title: 'Voice Assistant',
+            priority: 'high' as const,
+            badge: transcripts.length > 0 ? transcripts.length : undefined
+          }
+        );
+        setConversationPopupId(popupId);
+      });
+    } else if (!conversationState.isCallStarted && conversationPopupId) {
+      // Remove popup when call ends
+      removePopup(conversationPopupId);
+      setConversationPopupId(null);
+    }
+  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, transcripts]);
+  
   const handleRightPanelToggle = () => {
     setShowRightPanel(!showRightPanel);
   };
@@ -246,62 +306,6 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       console.error('❌ [useInterface1] Error in handleConfirm:', error);
     }
   }, [conversationState, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
-
-  // Auto-show conversation popup when call starts
-  useEffect(() => {
-    if (conversationState.isCallStarted && !conversationPopupId) {
-      console.log('🎤 [useInterface1] Call started, showing conversation popup');
-      
-      // Import và render RealtimeConversationPopup content
-      import('../components/RealtimeConversationPopup').then((module) => {
-        const RealtimeConversationPopup = module.default;
-        
-        const popupId = showConversation(
-          createElement(RealtimeConversationPopup, {
-            isOpen: true,
-            onClose: () => {
-              if (conversationPopupId) {
-                removePopup(conversationPopupId);
-                setConversationPopupId(null);
-              }
-            },
-            isRight: false
-          }),
-          { 
-            title: 'Realtime Conversation',
-            priority: 'high' as const,
-            badge: transcripts.length > 0 ? transcripts.length : undefined
-          }
-        );
-        
-        setConversationPopupId(popupId);
-      }).catch(error => {
-        console.error('Failed to load RealtimeConversationPopup:', error);
-        
-        // Fallback to simple content
-        const popupId = showConversation(
-          createElement('div', { style: { padding: '16px' } }, [
-            createElement('h3', { key: 'title' }, 'Realtime Conversation'),
-            createElement('p', { key: 'content' }, `Active call - ${transcripts.length} messages`)
-          ]),
-          { 
-            title: 'Voice Assistant Active',
-            priority: 'high' as const,
-            badge: transcripts.length > 0 ? transcripts.length : undefined
-          }
-        );
-        
-        setConversationPopupId(popupId);
-      });
-    }
-    
-    // Auto-close conversation popup when call ends
-    if (!conversationState.isCallStarted && conversationPopupId) {
-      console.log('🛑 [useInterface1] Call ended, removing conversation popup');
-      removePopup(conversationPopupId);
-      setConversationPopupId(null);
-    }
-  }, [conversationState.isCallStarted, conversationPopupId, showConversation, removePopup, transcripts.length]);
 
   // Update badge count when transcripts change
   useEffect(() => {
