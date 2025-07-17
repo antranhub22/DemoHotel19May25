@@ -64,10 +64,10 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         <InterfaceHeader />
         
         {/* 3-Container Layout: Desktop = horizontal, Mobile = vertical */}
-        <div className="flex flex-col md:flex-row min-h-[400px] px-4 gap-8 md:gap-12">
+        <div className="relative min-h-[400px] px-4">
           
-          {/* Container Chính - Siri Button - Trung tâm hoàn hảo */}
-          <div className="flex-1 order-1 flex flex-col items-center justify-center">
+          {/* Container Chính - Siri Button - Trung tâm hoàn toàn màn hình */}
+          <div className="w-full flex flex-col items-center justify-center min-h-[400px]">
             <div className="flex flex-col items-center justify-center">
               <SiriButtonContainer
                 isCallStarted={isCallStarted}
@@ -82,8 +82,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             </div>
           </div>
           
-          {/* Container Phải - Right Panel */}
-          <div className="flex-1 order-2 hidden md:flex justify-end items-start pt-8 pr-0 pl-4">
+          {/* Container Phải - Right Panel - Floating Overlay */}
+          <div className="absolute top-8 right-4 hidden md:block w-80 z-20">
             <RightPanelSection
               ref={rightPanelRef}
               showPanel={showRightPanel}
@@ -92,9 +92,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             />
             {/* Test Popup Buttons */}
             {!showRightPanel && (
-              <div className="w-full max-w-sm space-y-4">
+              <div className="w-full space-y-4">
                 {/* Test Popup System */}
-                <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/90 backdrop-blur-sm">
                   <h4 className="text-sm font-semibold text-blue-800 mb-3">🧪 Test Popup System</h4>
                   <div className="space-y-2">
                     <button
@@ -109,12 +109,18 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                     >
                       📢 Show Notification
                     </button>
+                    <button
+                      onClick={handleShowSummaryDemo}
+                      className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium transition-colors"
+                    >
+                      📋 Show Summary
+                    </button>
                   </div>
                 </div>
                 
                 {/* Original Right Panel Toggle */}
                 <div 
-                  className="w-full h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                  className="w-full h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer hover:border-gray-400 hover:bg-gray-50/90 transition-colors backdrop-blur-sm"
                   onClick={handleRightPanelToggle}
                 >
                   Click to open Right Panel
