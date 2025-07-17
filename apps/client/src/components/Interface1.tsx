@@ -63,8 +63,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         {/* 3-Container Layout: Desktop = horizontal, Mobile = vertical */}
         <div className="flex flex-col md:flex-row min-h-[400px] px-4 gap-8 md:gap-12">
           
-          {/* Container Trái - Conversation Section - Sát bên trái */}
-          <div className="flex-1 order-2 md:order-1 flex justify-start items-start pt-8 pl-0 pr-4">
+          {/* Container Trái - Conversation Section - Căn giữa mobile, sát trái desktop */}
+          <div className="flex-1 order-2 md:order-1 flex justify-center md:justify-start items-start pt-8 px-2 md:pl-0 md:pr-4">
             <ConversationSection
               ref={conversationRef}
               showConversation={showConversation}

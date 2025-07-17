@@ -139,9 +139,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     <>
       {/* Popup */}
       <div 
-        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''}`}
+        className={`relative z-30 overflow-hidden rounded-2xl shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''} mx-auto`}
         style={{
-          width: '320px',
+          width: '100%',
           maxWidth: '320px',
           height: '400px',
           maxHeight: '400px',
@@ -149,11 +149,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           backdropFilter: 'blur(18px)',
           WebkitBackdropFilter: 'blur(18px)',
           border: '1.5px solid rgba(255,255,255,0.25)',
-          boxShadow: isRight ? '0 8px 32px rgba(0,0,0,0.18), 8px 0 24px rgba(0,0,0,0.10)' : '0 8px 32px rgba(0,0,0,0.18)',
-          borderTopLeftRadius: isRight ? 24 : 24,
-          borderBottomLeftRadius: isRight ? 24 : 24,
-          borderTopRightRadius: isRight ? 24 : 24,
-          borderBottomRightRadius: isRight ? 24 : 24,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+          borderRadius: 24,
         }}
       >
         {/* Header */}
@@ -239,30 +236,33 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       </div>
       {/* Responsive styles for left-positioned popup */}
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .realtime-popup {
-            width: 280px !important;
+            width: 95vw !important;
             max-width: 280px !important;
             height: 350px !important;
-            max-height: 350px !important;
+            max-height: 70vh !important;
+            margin: 0 auto !important;
+          }
+        }
+        
+        @media (min-width: 641px) and (max-width: 768px) {
+          .realtime-popup {
+            width: 90vw !important;
+            max-width: 300px !important;
+            height: 380px !important;
+            max-height: 75vh !important;
+            margin: 0 auto !important;
           }
         }
         
         @media (min-width: 769px) {
           .realtime-popup {
-            width: 320px !important;
-            height: 400px !important;
+            width: 100% !important;
             max-width: 320px !important;
+            height: 400px !important;
             max-height: 400px !important;
-          }
-        }
-        
-        @media (max-width: 640px) {
-          .realtime-popup {
-            width: 260px !important;
-            max-width: 260px !important;
-            height: 300px !important;
-            max-height: 300px !important;
+            margin: 0 auto !important;
           }
         }
       `}</style>

@@ -14,12 +14,10 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
     return (
       <div 
         ref={ref} 
-        className={`${className} relative`}
+        className={`${className} flex justify-center items-start w-full`}
         style={{
           position: 'relative',
           zIndex: 30,
-          marginRight: '40px', // Tách xa hơn khỏi Siri Button
-          marginLeft: '0px',   // Sát bên trái
         }}
       >
         <RealtimeConversationPopup

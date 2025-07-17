@@ -1,4 +1,6 @@
-#!/usr/bin/env tsx
+\
+#\
+!/usr/bin/env tsx
 
 import Database from 'better-sqlite3';
 import { join } from 'path';
