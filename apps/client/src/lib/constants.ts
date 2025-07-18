@@ -260,18 +260,18 @@ export const FEATURE_FLAGS = {
 } as const; 
 
 // ===== POPUP DIMENSIONS =====
-// Chiều cao tiêu chuẩn để không che nút Siri Button (300x300px container)
+// Chiều cao tiêu chuẩn để không che nút Siri Button (280-320px container)
 export const POPUP_DIMENSIONS = {
-  STANDARD_HEIGHT: 110,        // px - Gọn gàng, không che Siri Button
+  STANDARD_HEIGHT: 140,        // px - Adjusted for display below Siri Button (42px header)
   MAX_WIDTH: 350,             // px - Phù hợp mobile
-  MAX_HEIGHT_VH: 35,          // % - Tối đa 35% viewport height
-  MIN_HEIGHT: 100,            // px - Chiều cao tối thiểu (điều chỉnh cho 110px)
-  SIRI_BUTTON_CLEARANCE: 80,  // px - Khoảng cách an toàn từ Siri Button
+  MAX_HEIGHT_VH: 25,          // % - Reduced to 25% viewport height for mobile
+  MIN_HEIGHT: 120,            // px - Chiều cao tối thiểu (điều chỉnh cho 140px)
+  SIRI_BUTTON_CLEARANCE: 160, // px - Khoảng cách an toàn từ Siri Button (Updated)
 } as const;
 
 // Popup positioning để tránh che nút Siri Button
 export const POPUP_POSITIONING = {
-  BOTTOM_OFFSET: 100,         // px - Offset từ bottom để không che button
+  BOTTOM_OFFSET: 180,         // px - Offset từ bottom để không che button (Updated for 42px header)
   STACK_OFFSET: 12,           // px - Khoảng cách giữa các popup xếp chồng
   SCALE_FACTOR: 0.03,         // Tỷ lệ thu nhỏ cho stacking effect
 } as const; 

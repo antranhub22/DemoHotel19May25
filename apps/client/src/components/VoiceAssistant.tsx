@@ -101,7 +101,7 @@ const VoiceAssistant: React.FC = () => {
       {/* Header Bar */}
       <div 
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 bg-white/10 backdrop-blur-md border-b border-white/20"
-        style={{ height: '64px' }}
+        style={{ height: '42px' }}
       >
         {/* Left: Hotel Logo */}
         <div className="flex items-center gap-3">
@@ -176,8 +176,8 @@ const VoiceAssistant: React.FC = () => {
         className="relative w-full h-full" 
         id="interfaceContainer"
         style={{
-          marginTop: '64px', // Add margin to account for fixed header
-          minHeight: 'calc(100vh - 64px)' // Adjust height to account for header
+          marginTop: '42px', // Add margin to account for fixed header
+          minHeight: 'calc(100vh - 42px)' // Adjust height to account for header
         }}
       >
         <Interface1 isActive={interfaceStates.interface1} />

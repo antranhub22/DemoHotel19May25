@@ -6,8 +6,8 @@ export const INTERFACE_CONSTANTS = {
     BACKGROUND: '#2C3E50'
   },
   SPACING: {
-    CONTAINER_MARGIN_TOP: '64px',
-    MIN_HEIGHT: 'calc(100vh - 64px)'
+    CONTAINER_MARGIN_TOP: '42px',
+    MIN_HEIGHT: 'calc(100vh - 42px)'
   },
   SCROLL_OFFSETS: {
     NEGATIVE_TOP_THRESHOLD: -100,

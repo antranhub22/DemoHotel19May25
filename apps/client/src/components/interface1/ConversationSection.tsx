@@ -29,14 +29,14 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
       );
     }
 
-    // Mobile: Fixed overlay (original behavior)
+    // Mobile: Fixed overlay positioned below Siri Button
     return (
       <div 
         ref={ref} 
         className={`${className}`}
         style={{
           position: 'fixed',
-          bottom: 0,
+          bottom: '160px', // Space from bottom to position below Siri Button Container
           left: 0,
           right: 0,
           zIndex: 40,

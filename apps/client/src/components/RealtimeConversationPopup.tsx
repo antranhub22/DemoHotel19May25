@@ -281,8 +281,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
            .realtime-popup.overlay-layout {
             width: 100vw !important;
             max-width: 100vw !important;
-            height: 250px !important;
-            max-height: 35vh !important;
+            height: 140px !important;
+            max-height: 25vh !important;
             margin: 0 !important;
             border-top-left-radius: 16px !important;
             border-top-right-radius: 16px !important;
