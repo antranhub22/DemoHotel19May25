@@ -75,13 +75,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       style={{ 
         marginBottom: designSystem.spacing.xl,
         zIndex: 9999, // Ensure highest priority
-        pointerEvents: 'auto',
-        // Responsive container
-        maxWidth: '100%',
-        padding: '0 clamp(10px, 5vw, 20px)', // Better responsive padding
-        // Mobile touch optimizations
-        touchAction: 'manipulation',
-        WebkitTapHighlightColor: 'transparent',
+        pointerEvents: 'auto'
       }}
     >
       {/* Top Row: Cancel + Confirm */}
@@ -107,30 +101,27 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </div>
       )}
 
-      {/* Responsive Siri Button Container */}
+      {/* Siri Button Container với External Volume Bars - Responsive sizing */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
-          // Better responsive sizing for smaller screens
-          width: 'clamp(250px, 85vw, 320px)',  
-          height: 'clamp(250px, 85vw, 320px)', 
+          width: 'clamp(280px, 80vw, 320px)',  // Responsive width for mobile/desktop
+          height: 'clamp(280px, 80vw, 320px)', // Responsive height for mobile/desktop
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
           backdropFilter: 'blur(10px)',
           border: `2px solid ${currentColors.primary}40`,
-          margin: '0 auto', // Center in parent
         }}
       >
-        {/* External Volume Bars - Responsive radius */}
+        {/* External Volume Bars - Compact và xung quanh button */}
         {isCallStarted && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             {[...Array(16)].map((_, i) => {
               const angle = (360 / 16) * i;
               const radians = (angle * Math.PI) / 180;
-              // Better responsive radius calculation
-              const baseRadius = Math.min(125, Math.max(100, window.innerWidth * 0.12)); 
-              const barHeight = 8 + Math.round((micLevel/100)*16) * ((i%2)+1);
+              const baseRadius = 110; // Adjusted for new container size
+              const barHeight = 8 + Math.round((micLevel/100)*16) * ((i%2)+1); // Better proportions
               const x = Math.cos(radians) * baseRadius;
               const y = Math.sin(radians) * baseRadius;
               
@@ -142,7 +133,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
-                    width: '3px',
+                    width: '3px', // Slightly wider for better visibility
                     height: `${barHeight}px`,
                     backgroundColor: currentColors.primary,
                     borderRadius: '1.5px',
@@ -157,12 +148,12 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           </div>
         )}
 
-        {/* Canvas Container - Responsive sizing */}
+        {/* Canvas Container - Ensure proper positioning */}
         <div 
           className="relative z-10 flex items-center justify-center"
           style={{
-            width: 'clamp(220px, 75vw, 280px)',
-            height: 'clamp(220px, 75vw, 280px)',
+            width: '280px',
+            height: '280px',
             position: 'relative'
           }}
         >
@@ -184,7 +175,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           className="block mt-4 text-center transition-colors duration-300"
           style={{
             color: currentColors.primary,
-            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)', // Responsive font size
+            fontSize: '1rem',
             fontWeight: '600',
             textShadow: `0 2px 8px ${currentColors.glow}`,
           }}

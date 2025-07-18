@@ -31,7 +31,6 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const cleanupFlagRef = useRef<boolean>(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
   const [canvasReady, setCanvasReady] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Safe cleanup function
   const safeCleanup = useCallback(() => {
@@ -82,10 +81,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     cleanupFlagRef.current = false;
     
     const element = document.getElementById(containerId);
-    if (!element) {
-      console.error('[SiriCallButton] Container element not found:', containerId);
-      return;
-    }
+    if (!element) return;
 
     // Clear existing content
     const existingCanvases = element.querySelectorAll('canvas');
@@ -95,44 +91,29 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     });
 
-    // Add explicit sizing to container for better canvas sizing
-    element.style.width = '100%';
-    element.style.height = '100%';
-    element.style.position = 'relative';
-    element.style.display = 'flex';
-    element.style.alignItems = 'center';
-    element.style.justifyContent = 'center';
-
-    // Initialize SiriButton with delay for proper container sizing
-    const initTimeout = setTimeout(() => {
-      if (!cleanupFlagRef.current) {
-        try {
-          buttonRef.current = new SiriButton(containerId, colors);
-          setCanvasReady(true);
-          console.log('[SiriCallButton] SiriButton initialized successfully');
-        } catch (error) {
-          console.error('[SiriCallButton] Init error:', error);
-          // Retry once with longer delay
-          setTimeout(() => {
-            if (!cleanupFlagRef.current) {
-              try {
-                buttonRef.current = new SiriButton(containerId, colors);
-                setCanvasReady(true);
-                console.log('[SiriCallButton] SiriButton initialized on retry');
-              } catch (retryError) {
-                console.error('[SiriCallButton] Retry failed:', retryError);
-              }
-            }
-          }, 500);
+    // Initialize SiriButton
+    try {
+      buttonRef.current = new SiriButton(containerId, colors);
+      setCanvasReady(true);
+    } catch (error) {
+      console.error('[SiriCallButton] Init error:', error);
+      // Retry once
+      setTimeout(() => {
+        if (!cleanupFlagRef.current) {
+          try {
+            buttonRef.current = new SiriButton(containerId, colors);
+            setCanvasReady(true);
+          } catch (retryError) {
+            console.error('[SiriCallButton] Retry failed:', retryError);
+          }
         }
-      }
-    }, 100);
+      }, 200);
+    }
 
     // Add click handler
     element.addEventListener('click', handleClick);
 
     return () => {
-      clearTimeout(initTimeout);
       element.removeEventListener('click', handleClick);
       safeCleanup();
     };
@@ -159,63 +140,45 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   return (
     <div 
-      ref={containerRef}
       id={containerId}
       className="voice-button"
       style={{ 
-        width: '100%', // Use full width of parent container
-        height: '100%', // Use full height of parent container
+        width: '400px', // Larger size to match SiriButton
+        height: '400px',
         position: 'relative',
         cursor: 'pointer',
         zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '0',
-        background: 'transparent',
-        border: 'none',
-        outline: 'none',
-        // Mobile touch optimizations
-        touchAction: 'manipulation',
-        WebkitTapHighlightColor: 'transparent',
-        userSelect: 'none'
+        maxWidth: '80vw', // Responsive on mobile
+        maxHeight: '80vw'
       }}
     >
-      {/* Loading state with better visibility */}
+      {/* Loading state */}
       {!canvasReady && (
         <div 
           className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
             background: `linear-gradient(135deg, ${colors?.primary || '#5DB6B9'}, ${colors?.secondary || '#E8B554'})`,
             color: 'white',
-            fontSize: 'clamp(32px, 8vw, 48px)', // Responsive emoji size
+            fontSize: '48px',
             boxShadow: `0 0 30px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
-            border: '2px solid rgba(255,255,255,0.1)',
-            zIndex: 10
+            border: '2px solid rgba(255,255,255,0.1)'
           }}
         >
           🎤
         </div>
       )}
       
-      {/* Status indicator - better positioning */}
+      {/* Status indicator */}
       {status !== 'idle' && status !== 'listening' && (
         <div 
           className={`status-indicator ${status}`}
           style={{
             position: 'absolute',
-            top: '-60px',
+            top: '-48px',
             left: '50%',
             transform: 'translateX(-50%)',
             color: colors?.primary || '#5DB6B9',
-            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
-            fontSize: 'clamp(12px, 2.5vw, 14px)', // Responsive font size
-            fontWeight: '600',
-            background: 'rgba(0,0,0,0.8)',
-            padding: '8px 16px',
-            borderRadius: '20px',
-            zIndex: 100,
-            whiteSpace: 'nowrap' // Prevent text wrapping
+            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`
           }}
         >
           {status === 'processing' ? 'Processing...' : 'Speaking...'}

@@ -264,14 +264,14 @@ export const FEATURE_FLAGS = {
 export const POPUP_DIMENSIONS = {
   STANDARD_HEIGHT: 120,        // px - Further reduced for better mobile clearance
   MAX_WIDTH: 350,             // px - Phù hợp mobile
-  MAX_HEIGHT_VH: 18,          // % - Reduced to 18% viewport height for better mobile clearance
+  MAX_HEIGHT_VH: 20,          // % - Further reduced to 20% viewport height for mobile
   MIN_HEIGHT: 100,            // px - Chiều cao tối thiểu (điều chỉnh cho 120px)
-  SIRI_BUTTON_CLEARANCE: 60, // px - Increased clearance for better mobile spacing
+  SIRI_BUTTON_CLEARANCE: 40, // px - Minimal clearance for closest popup positioning
 } as const;
 
 // Popup positioning để tránh che nút Siri Button
 export const POPUP_POSITIONING = {
-  BOTTOM_OFFSET: 80,         // px - Increased offset for better mobile compatibility 
+  BOTTOM_OFFSET: 60,         // px - Minimal offset for closest popup positioning (iPhone compatible)
   STACK_OFFSET: 12,           // px - Khoảng cách giữa các popup xếp chồng
   SCALE_FACTOR: 0.03,         // Tỷ lệ thu nhỏ cho stacking effect
 } as const; 

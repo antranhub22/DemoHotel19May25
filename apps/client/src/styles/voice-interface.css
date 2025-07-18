@@ -14,31 +14,25 @@
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0.4); }
-  70% { box-shadow: 0 0 0 50px rgba(27, 78, 139, 0); }
+  70% { box-shadow: 0 0 0 50px rgba(27, 78, 139, 0); } /* Increased pulse size */
   100% { box-shadow: 0 0 0 0 rgba(27, 78, 139, 0); }
 }
 
 .voice-button {
   position: relative;
   border-radius: 50%;
+  /* Remove background to let canvas show through */
   background: transparent;
+  /* Keep animations and transitions */
   animation: breathing 3s ease-in-out infinite;
   transition: all 0.3s ease;
+  /* Remove box-shadow as canvas handles its own styling */
   box-shadow: none;
-  /* Ensure proper display context */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  /* Remove any margin/padding conflicts */
-  margin: 0 auto;
-  padding: 0;
-  border: none;
-  outline: none;
-  overflow: visible;
 }
 
 .voice-button:hover {
   transform: scale(1.02);
+  /* Remove background override on hover */
   background: transparent;
   box-shadow: none;
 }
@@ -49,6 +43,7 @@
 
 .voice-button.listening {
   animation: pulse 2s infinite;
+  /* Remove background override when listening */
   background: transparent;
 }
 
@@ -58,42 +53,20 @@
   border: none !important;
   outline: none !important;
   display: block !important;
-  z-index: 50 !important;
-  position: absolute !important;
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  -webkit-backface-visibility: hidden !important;
+  z-index: 9999 !important; /* Force canvas to top layer */
+  position: relative !important; /* Create stacking context */
+  image-rendering: -webkit-optimize-contrast !important; /* Crisp edges on webkit */
+  image-rendering: crisp-edges !important; /* Modern browsers */
+  -webkit-backface-visibility: hidden !important; /* Prevent blurry text on Safari */
   -webkit-font-smoothing: antialiased !important;
-  transform: translateZ(0) !important;
-  will-change: transform !important;
-  /* Ensure canvas doesn't get clipped */
-  max-width: none !important;
-  max-height: none !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
+  transform: translateZ(0) !important; /* Force GPU acceleration */
+  will-change: transform !important; /* Hint for browser optimization */
 }
 
-/* Desktop specific optimizations */
-@media (min-width: 768px) {
+/* Mobile optimizations - same canvas behavior as desktop */
+@media (max-width: 768px) {
   .voice-button {
-    /* Ensure consistent sizing on desktop */
-    width: 280px !important;
-    height: 280px !important;
-    min-width: 280px !important;
-    min-height: 280px !important;
-    max-width: 280px !important;
-    max-height: 280px !important;
-  }
-}
-
-/* Mobile optimizations */
-@media (max-width: 767px) {
-  .voice-button {
-    /* Better responsive sizing for mobile */
-    width: min(280px, 75vw) !important;
-    height: min(280px, 75vw) !important;
-    min-width: 180px !important;
-    min-height: 180px !important;
+    /* Ensure no background conflicts on mobile */
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
@@ -105,67 +78,47 @@
   }
 }
 
-/* Extra small mobile screens */
-@media (max-width: 480px) {
-  .voice-button {
-    /* Optimized for very small screens */
-    width: min(250px, 80vw) !important;
-    height: min(250px, 80vw) !important;
-    min-width: 160px !important;
-    min-height: 160px !important;
-  }
-  
-  /* Reduce animations on small screens for better performance */
-  .voice-button {
-    animation: none !important;
-  }
-  
-  .voice-button.listening {
-    animation: pulse 2s infinite !important;
-  }
-}
-
-/* Additional compatibility */
+/* Additional mobile compatibility */
 .voice-button, .voice-button * {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   -webkit-perspective: 1000px;
   perspective: 1000px;
 }
+/* Canvas positioning handled by component styles */
 
 .waveform-container {
   position: absolute;
-  bottom: -75px;
+  bottom: -75px; /* Adjusted position */
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 7.5px;
-  height: 50px;
+  gap: 7.5px; /* Increased gap */
+  height: 50px; /* Increased height */
 }
 
 .waveform-bar {
-  width: 7.5px;
+  width: 7.5px; /* Increased width */
   height: 100%;
   background: #1B4E8B;
-  border-radius: 7.5px;
+  border-radius: 7.5px; /* Increased radius */
   transform-origin: bottom;
 }
 
 .status-indicator {
   position: absolute;
-  top: -75px;
+  top: -75px; /* Adjusted position */
   left: 50%;
   transform: translateX(-50%);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
+  padding: 12.5px 37.5px; /* Increased padding */
+  border-radius: 37.5px; /* Increased radius */
+  font-size: 35px; /* Increased font size */
+  font-weight: 500;
   color: white;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12.5px); /* Increased blur */
   transition: all 0.3s ease;
-  z-index: 100;
 }
 
 .status-indicator.listening {
@@ -180,9 +133,19 @@
   background: rgba(16, 185, 129, 0.9);
 }
 
-/* Remove gradient ring as canvas handles its own effects */
+/* Gradient Ring Effect - Remove background to let canvas show */
 .gradient-ring {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Remove background to let canvas show through */
+  background: transparent;
+  /* Remove animation as canvas handles its own effects */
+  animation: none;
+  z-index: 5; /* Lower than canvas */
 }
 
 @keyframes rotate {
