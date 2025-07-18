@@ -52,7 +52,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
-  // Popup system hooks - ONLY disable auto-conversation popup
+  // Popup system hooks - keep all for demo functions, just disable auto-conversation
   const { showConversation, showNotification, showSummary, removePopup } = usePopup();
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
   
@@ -66,21 +66,8 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const [showRightPanel, setShowRightPanel] = useState(false);
   const isInitialMount = useRef(true);
   
-  // DISABLED: Auto-popup moved to ConversationSection for 4-position layout
-  // Now using ConversationSection component instead of PopupManager for conversation
-  useEffect(() => {
-    console.log('🔍 [useInterface1] Conversation managed by ConversationSection, not PopupManager');
-    // No auto-popup creation - ConversationSection handles conversation display
-  }, [conversationState.isCallStarted, conversationPopupId, isActive]); // Simplified dependencies
-  
-  // Separate effect to update badge count when transcripts change
-  useEffect(() => {
-    if (conversationPopupId && transcripts.length > 0) {
-      console.log('🔢 [useInterface1] Updating popup badge count:', transcripts.length);
-      // Note: PopupManager doesn't currently support updating badge count after creation
-      // This is a future enhancement - for now we just log the change
-    }
-  }, [transcripts.length, conversationPopupId]);
+  // DISABLED: Auto-popup effects - using ConversationSection instead
+  // All conversation popup management moved to ConversationSection component
   
   // Effect to restart call when language changes during active call
   useEffect(() => {

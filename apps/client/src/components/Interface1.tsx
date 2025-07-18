@@ -136,18 +136,16 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             </div>
             
             {/* Mobile: Conversation popup (overlay) */}
-            <div className="block md:hidden">
-              <ConversationSection
-                ref={conversationRef}
-                showConversation={showConversation}
-                onClose={() => {}} // Will be handled by popup context
-                className="fixed bottom-0 left-0 right-0 z-40"
-                isOverlay={true} // Mobile: fixed overlay position
-              />
-            </div>
+            <ConversationSection
+              ref={conversationRef}
+              showConversation={showConversation}
+              onClose={() => {}} // Will be handled by popup context
+              className="fixed bottom-0 left-0 right-0 z-40"
+              isOverlay={true} // Mobile: fixed overlay position
+            />
             
             {/* Mobile: Right panel popup (overlay) */}
-            <div className="block md:hidden absolute top-8 right-4 w-80 z-10 pointer-events-auto">
+            <div className="absolute top-8 right-4 w-80 z-10 pointer-events-auto">
               <RightPanelSection
                 ref={rightPanelRef}
                 showPanel={showRightPanel}
@@ -172,7 +170,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         onScrollToServices={() => scrollToSection('services')}
       />
       
-      {/* Realtime Conversation now handled by PopupManager */}
+      {/* Realtime Conversation now handled by ConversationSection */}
     </InterfaceContainer>
   );
 };
