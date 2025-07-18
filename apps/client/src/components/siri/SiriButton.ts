@@ -92,12 +92,12 @@ export class SiriButton {
     }
     this.ctx = ctx;
     
-    // Initialize properties
-    this.width = 280;
-    this.height = 280;
+    // Initialize with larger default size
+    this.width = 400;
+    this.height = 400;
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = 98;
+    this.radius = 180; // Larger initial radius
     this.ripples = [];
     this.isListening = false;
     this.pulsePhase = 0;
@@ -202,25 +202,29 @@ export class SiriButton {
     const dpr = window.devicePixelRatio || 1;
     console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
     
-    // Use consistent sizing strategy for all devices
-    const size = Math.min(containerWidth, containerHeight, 280);
+    // Calculate optimal size based on container and device
+    const optimalSize = Math.min(containerWidth, containerHeight);
+    const size = Math.min(optimalSize, window.innerWidth * 0.8); // 80% of viewport width max
     
-    // Ensure minimum size
-    const finalSize = Math.max(size, 200); 
+    // Ensure size is between 200px and 400px
+    const finalSize = Math.max(Math.min(size, 400), 200);
     
     console.log('[SiriButton] Resize - Calculated size:', finalSize);
     
     // Update internal dimensions
     this.width = this.height = finalSize;
     
-    // Set canvas actual size (with DPR for crisp rendering)
-    const canvasSize = finalSize * dpr;
-    this.canvas.width = canvasSize;
-    this.canvas.height = canvasSize;
+    // Set physical canvas size with DPR scaling
+    const physicalSize = Math.floor(finalSize * dpr);
+    this.canvas.width = physicalSize;
+    this.canvas.height = physicalSize;
     
-    // Set canvas CSS size (what user sees)
+    // Set display size in CSS pixels
     this.canvas.style.width = `${finalSize}px`;
     this.canvas.style.height = `${finalSize}px`;
+    
+    // Log actual dimensions
+    console.log('[SiriButton] Physical size:', physicalSize, 'CSS size:', finalSize);
     
     console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
     
@@ -237,14 +241,16 @@ export class SiriButton {
     
     // Canvas is ready for rendering
     
-    // Scale context for high DPI displays
+    // Scale context for high DPI with subpixel precision
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
     this.ctx.scale(dpr, dpr);
+    this.ctx.imageSmoothingEnabled = true;
+    this.ctx.imageSmoothingQuality = 'high';
     
     // Update center coordinates and radius proportionally
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = Math.max(60, finalSize * 0.35); // Proportional radius
+    this.radius = Math.max(80, finalSize * 0.45); // Larger proportional radius
     
     console.log('[SiriButton] Canvas center:', this.centerX, this.centerY, 'radius:', this.radius);
     

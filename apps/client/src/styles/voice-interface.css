@@ -55,6 +55,12 @@
   display: block !important;
   z-index: 9999 !important; /* Force canvas to top layer */
   position: relative !important; /* Create stacking context */
+  image-rendering: -webkit-optimize-contrast !important; /* Crisp edges on webkit */
+  image-rendering: crisp-edges !important; /* Modern browsers */
+  -webkit-backface-visibility: hidden !important; /* Prevent blurry text on Safari */
+  -webkit-font-smoothing: antialiased !important;
+  transform: translateZ(0) !important; /* Force GPU acceleration */
+  will-change: transform !important; /* Hint for browser optimization */
 }
 
 /* Mobile optimizations - same canvas behavior as desktop */
