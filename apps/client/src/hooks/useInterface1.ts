@@ -2,7 +2,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
-import { useState, createElement, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
 import { Language } from '@/types/interface1.types';
 
@@ -52,8 +52,9 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
-  // Popup system hooks
+  // Popup system hooks - ONLY disable auto-conversation popup
   const { showConversation, showNotification, showSummary, removePopup } = usePopup();
+  const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
   
   // Behavior hooks
   const scrollBehavior = useScrollBehavior({ isActive });
@@ -63,83 +64,13 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   
   // Right panel state
   const [showRightPanel, setShowRightPanel] = useState(false);
-  const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
   const isInitialMount = useRef(true);
   
-  // Auto-show conversation popup when call starts
+  // DISABLED: Auto-popup moved to ConversationSection for 4-position layout
+  // Now using ConversationSection component instead of PopupManager for conversation
   useEffect(() => {
-    console.log('🔍 [useInterface1] Popup effect triggered:', {
-      isCallStarted: conversationState.isCallStarted,
-      conversationPopupId,
-      isActive
-    });
-    
-    if (conversationState.isCallStarted && !conversationPopupId && isActive) {
-      console.log('✅ [useInterface1] Showing conversation popup...');
-      
-      import('../components/RealtimeConversationPopup').then((module) => {
-        const { default: RealtimeConversationPopup } = module;
-        const popupId = showConversation(
-          createElement(RealtimeConversationPopup, {
-            isOpen: true,
-            onClose: () => {
-              console.log('🗑️ [useInterface1] Popup onClose triggered');
-              setConversationPopupId(null);
-            }
-          }),
-          { 
-            title: 'Voice Assistant',
-            priority: 'high' as const,
-            badge: transcripts.length > 0 ? transcripts.length : undefined
-          }
-        );
-        console.log('📱 [useInterface1] Popup created with ID:', popupId);
-        setConversationPopupId(popupId);
-      }).catch((error) => {
-        console.error('❌ [useInterface1] Failed to load RealtimeConversationPopup:', error);
-        // Fallback to basic conversation view
-        const popupId = showConversation(
-          createElement('div', { 
-            style: { 
-              padding: '16px', 
-              height: '400px',
-              overflow: 'auto',
-              fontSize: '14px' 
-            } 
-          }, [
-            createElement('h3', { key: 'title', style: { marginBottom: '12px' } }, 'Voice Conversation'),
-            createElement('div', { key: 'status' }, `Call Status: ${conversationState.isCallStarted ? 'Active' : 'Inactive'}`),
-            ...transcripts.map((transcript, index) => 
-              createElement('div', { 
-                key: index,
-                style: { 
-                  margin: '8px 0',
-                  padding: '8px',
-                  backgroundColor: transcript.role === 'user' ? '#f0f9ff' : '#f9fafb',
-                  borderRadius: '6px'
-                }
-              }, `${transcript.role}: ${transcript.content}`)
-            )
-          ]),
-          { 
-            title: 'Voice Assistant',
-            priority: 'high' as const,
-            badge: transcripts.length > 0 ? transcripts.length : undefined
-          }
-        );
-        console.log('📱 [useInterface1] Fallback popup created with ID:', popupId);
-        setConversationPopupId(popupId);
-      });
-    } else if (!conversationState.isCallStarted && conversationPopupId) {
-      // Only remove popup if call actually ended (not if interface changed)
-      console.log('🛑 [useInterface1] Call ended, will remove popup after delay to prevent race conditions');
-      console.log('🔍 [useInterface1] Interface isActive:', isActive);
-      
-      // Immediate removal for now - the delay was causing issues
-      console.log('🗑️ [useInterface1] Removing conversation popup immediately');
-      removePopup(conversationPopupId);
-      setConversationPopupId(null);
-    }
+    console.log('🔍 [useInterface1] Conversation managed by ConversationSection, not PopupManager');
+    // No auto-popup creation - ConversationSection handles conversation display
   }, [conversationState.isCallStarted, conversationPopupId, isActive]); // Simplified dependencies
   
   // Separate effect to update badge count when transcripts change
@@ -193,32 +124,10 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     setShowRightPanel(false);
   };
 
-  // Demo popup functions
+  // Demo popup functions - conversation disabled, others active
   const handleShowConversationPopup = () => {
-    import('../components/popup-system/DemoPopupContent').then((module) => {
-      const { ConversationDemoContent } = module;
-      showConversation(
-        createElement(ConversationDemoContent),
-        { 
-          title: 'Voice Assistant Demo',
-          priority: 'high' as const,
-          badge: 1 
-        }
-      );
-    }).catch(() => {
-      // Fallback
-      showConversation(
-        createElement('div', { style: { padding: '16px' } }, [
-          createElement('h3', { key: 'title' }, 'Realtime Conversation Demo'),
-          createElement('p', { key: 'content' }, 'This is the new iOS-style popup system!')
-        ]),
-        { 
-          title: 'Voice Assistant Demo',
-          priority: 'high' as const,
-          badge: 1 
-        }
-      );
-    });
+    console.log('Conversation demo disabled - using ConversationSection instead');
+    // No longer create conversation popup - handled by ConversationSection component
   };
 
   const handleShowNotificationDemo = () => {
