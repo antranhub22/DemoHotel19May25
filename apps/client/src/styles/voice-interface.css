@@ -55,23 +55,13 @@
   display: block !important;
 }
 
-/* Mobile-specific canvas optimizations */
+/* Mobile optimizations - same canvas behavior as desktop */
 @media (max-width: 768px) {
   .voice-button {
     /* Ensure no background conflicts on mobile */
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
-  }
-  
-  .voice-button canvas[data-mobile-canvas="true"] {
-    /* Force canvas visibility on mobile */
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
-    /* Prevent any mobile-specific rendering issues */
-    image-rendering: optimizeQuality;
-    -webkit-font-smoothing: antialiased;
   }
   
   /* Disable hover effects on mobile for better performance */
