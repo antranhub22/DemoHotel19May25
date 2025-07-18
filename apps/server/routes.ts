@@ -277,12 +277,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (data.type === 'transcript' && data.call_id && data.role && data.content) {
           try {
             // Convert to database schema format for validation
+            // Ensure timestamp is within valid range for PostgreSQL
+            const now = Date.now();
+            const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+            
             const transcriptDataForValidation = {
               call_id: data.call_id,
               role: data.role,
               content: data.content,
               tenant_id: 'default',
-              timestamp: Date.now()
+              timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
             };
             
             // Validate with database schema
@@ -322,7 +326,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               callId: data.call_id,
               role: data.role,
               content: data.content,
-              tenantId: 'default'
+              tenantId: 'default',
+              timestamp: Math.floor(validTimestamp / 1000)
             });
             
             // Broadcast transcript to all clients with matching callId
@@ -436,12 +441,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Convert camelCase to snake_case for database schema validation
+      // Ensure timestamp is within valid range for PostgreSQL  
+      const now = Date.now();
+      const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+      
       const transcriptDataForValidation = {
         call_id: callId,  // Convert callId to call_id
         role,
         content,
         tenant_id: tenantId || 'default',  // Convert tenantId to tenant_id
-        timestamp: Date.now()
+        timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
       };
       
       console.log('Converted data for validation:', transcriptDataForValidation);
@@ -457,7 +466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         content,
         tenantId: tenantId || 'default',
-        timestamp: Date.now()
+        timestamp: Math.floor(validTimestamp / 1000)
       });
       
       console.log(`Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
@@ -726,17 +735,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : reqCallDuration;
       }
       
+      // Create call summary data matching schema (snake_case fields, text timestamp)
       const summaryData = insertCallSummarySchema.parse({
-        callId,
+        call_id: callId,  // Convert to snake_case for schema
         content: finalSummary,
-        timestamp: new Date(timestamp || Date.now()),
-        roomNumber,
-        duration: durationStr,
-        orderReference
+        timestamp: new Date(timestamp || Date.now()).toISOString(), // Convert to text string
+        room_number: roomNumber,  // Convert to snake_case for schema
+        duration: durationStr
+        // Remove orderReference - not in schema
       });
       
       // Store in database
-      // const result = await storage.addCallSummary(summaryData); // TODO: Fix validation data
+      try {
+        const result = await storage.addCallSummary(summaryData as any);
+        console.log('Call summary stored successfully:', result);
+      } catch (summaryError) {
+        console.error('Error storing call summary (continuing anyway):', summaryError);
+        // Continue processing even if summary storage fails
+      }
 
       // Analyze the summary to extract structured service requests
       let serviceRequests: any[] = [];

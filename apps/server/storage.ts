@@ -50,11 +50,15 @@ export class DatabaseStorage implements IStorage {
   
   async addTranscript(insertTranscript: InsertTranscript | any): Promise<Transcript> {
     // Fix field mapping: Support both API format (callId) and database format (call_id)
+    // Ensure timestamp is within valid range for PostgreSQL
+    const now = Date.now();
+    const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+    
     const dbTranscript = {
       call_id: insertTranscript.callId || insertTranscript.call_id,
       content: insertTranscript.content,
       role: insertTranscript.role,
-      timestamp: insertTranscript.timestamp || Date.now(),
+      timestamp: insertTranscript.timestamp || Math.floor(validTimestamp / 1000),
       tenant_id: insertTranscript.tenantId || insertTranscript.tenant_id || 'default'
     };
     

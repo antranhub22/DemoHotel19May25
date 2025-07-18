@@ -64,12 +64,16 @@ router.post('/test-transcript', async (req, res) => {
     }
     
     // Convert camelCase to snake_case for database schema validation
+    // Ensure timestamp is within valid range for PostgreSQL
+    const now = Date.now();
+    const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+    
     const transcriptDataForValidation = {
       call_id: callId,
       role,
       content,
       tenant_id: 'default',
-      timestamp: Date.now()
+      timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
     };
     
     // Validate with database schema (expects snake_case)
@@ -112,7 +116,7 @@ router.post('/test-transcript', async (req, res) => {
       role,
       content,
       tenantId: 'default',
-      timestamp: Date.now()
+      timestamp: Math.floor(validTimestamp / 1000)
     });
     
     console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
