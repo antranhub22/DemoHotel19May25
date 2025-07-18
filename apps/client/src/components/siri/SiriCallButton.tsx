@@ -31,6 +31,44 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const clickHandlerRef = useRef<((event: Event) => void) | null>(null);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
   const [waveformBars] = useState(() => Array(12).fill(0));
+  const [debugInfo, setDebugInfo] = useState<string>('');
+
+  // Debug function to check canvas status
+  const checkCanvasStatus = () => {
+    const container = document.getElementById(containerId);
+    const canvas = container?.querySelector('canvas');
+    const info = {
+      containerExists: !!container,
+      containerSize: container ? `${container.clientWidth}x${container.clientHeight}` : 'N/A',
+      canvasExists: !!canvas,
+      canvasSize: canvas ? `${canvas.width}x${canvas.height}` : 'N/A',
+      canvasStyle: canvas ? `${canvas.style.width}x${canvas.style.height}` : 'N/A',
+      canvasVisible: canvas ? canvas.style.display : 'N/A',
+      canvasZIndex: canvas ? canvas.style.zIndex : 'N/A',
+      siriButtonInstance: !!buttonRef.current
+    };
+    
+    const debugText = JSON.stringify(info, null, 2);
+    console.log('[SiriCallButton] Debug info:', info);
+    setDebugInfo(debugText);
+    
+    // Force canvas visibility if it exists but isn't visible
+    if (canvas && canvas.style.display !== 'block') {
+      console.log('[SiriCallButton] Forcing canvas visibility');
+      canvas.style.display = 'block';
+      canvas.style.zIndex = '9999';
+      canvas.style.position = 'absolute';
+      canvas.style.top = '50%';
+      canvas.style.left = '50%';
+      canvas.style.transform = 'translate(-50%, -50%)';
+      canvas.style.background = 'red'; // Temporary red background for debugging
+      
+      // Remove red background after 2 seconds
+      setTimeout(() => {
+        canvas.style.background = 'transparent';
+      }, 2000);
+    }
+  };
 
   // Effect for status changes based on isListening
   useEffect(() => {
@@ -67,6 +105,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         // Initialize SiriButton with colors
         buttonRef.current = new SiriButton(containerId, colors);
         console.log('[SiriCallButton] SiriButton instance created successfully');
+        
+        // Check canvas status after creation
+        setTimeout(() => {
+          checkCanvasStatus();
+        }, 500);
       } catch (error) {
         console.error('[SiriCallButton] Error creating SiriButton:', error);
         // Retry once more after another delay
@@ -74,6 +117,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           try {
             buttonRef.current = new SiriButton(containerId, colors);
             console.log('[SiriCallButton] SiriButton retry successful');
+            setTimeout(() => {
+              checkCanvasStatus();
+            }, 500);
           } catch (retryError) {
             console.error('[SiriCallButton] Retry failed:', retryError);
           }
@@ -184,6 +230,27 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   return (
     <div className="relative flex items-center justify-center w-full h-full">
+      {/* Debug Button - Only show on mobile for testing */}
+      {window.innerWidth < 768 && (
+        <button
+          onClick={checkCanvasStatus}
+          className="absolute top-0 right-0 z-50 bg-red-500 text-white text-xs px-2 py-1 rounded"
+          style={{ fontSize: '10px' }}
+        >
+          Debug Canvas
+        </button>
+      )}
+      
+      {/* Debug Info - Only show on mobile */}
+      {window.innerWidth < 768 && debugInfo && (
+        <div 
+          className="absolute top-6 right-0 z-50 bg-black text-white text-xs p-2 rounded max-w-xs overflow-auto"
+          style={{ fontSize: '8px', maxHeight: '100px' }}
+        >
+          <pre>{debugInfo}</pre>
+        </div>
+      )}
+
       {/* Status Indicator */}
       {status !== 'idle' && status !== 'listening' && (
         <div 
@@ -207,7 +274,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           height: '280px',
           zIndex: 9999,
           pointerEvents: 'auto',
-          position: 'relative'
+          position: 'relative',
+          border: '2px solid rgba(255,0,0,0.3)' // Temporary red border for debugging
         }}
         onClick={(e) => {
           console.log('[SiriCallButton] Div click detected!');

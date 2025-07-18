@@ -62,15 +62,27 @@ export class SiriButton {
     
     // Set canvas styles immediately for proper display
     this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '0';
-    this.canvas.style.left = '0';
+    this.canvas.style.top = '50%';
+    this.canvas.style.left = '50%';
+    this.canvas.style.transform = 'translate(-50%, -50%)';
     this.canvas.style.zIndex = '20';
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
+    this.canvas.style.background = 'transparent';
+    
+    // Add debug attributes
+    this.canvas.setAttribute('data-siri-canvas', 'true');
+    this.canvas.id = `${containerId}-canvas`;
     
     container.appendChild(this.canvas);
     console.log('[SiriButton] Canvas appended to container:', container);
+    
+    // Debug: Check if canvas is in DOM
+    setTimeout(() => {
+      const canvasInDOM = document.getElementById(`${containerId}-canvas`);
+      console.log('[SiriButton] Canvas in DOM check:', !!canvasInDOM, canvasInDOM);
+    }, 100);
     
     // Get context
     const ctx = this.canvas.getContext('2d');
@@ -92,11 +104,21 @@ export class SiriButton {
     this.volumeLevel = 0;
     this.animationFrameId = 0;
 
-    // Set initial canvas size - use setTimeout to ensure container has size
+    // Set initial canvas size - use multiple timeouts for mobile compatibility
     setTimeout(() => {
       this.resize();
       console.log('[SiriButton] Initial resize completed, canvas size:', this.canvas.width, 'x', this.canvas.height);
+      
+      // Force a test draw to ensure canvas is working
+      this.debugDraw();
     }, 100);
+
+    // Additional resize for mobile - sometimes needs more time
+    setTimeout(() => {
+      this.resize();
+      this.debugDraw();
+      console.log('[SiriButton] Secondary resize for mobile compatibility');
+    }, 300);
 
     // Start animation loop
     this.animate();
@@ -127,6 +149,28 @@ export class SiriButton {
     console.log('[SiriButton] Constructor completed successfully');
   }
 
+  // Debug method to test canvas drawing
+  private debugDraw() {
+    console.log('[SiriButton] Debug draw - testing canvas');
+    
+    try {
+      // Clear canvas
+      this.ctx.clearRect(0, 0, this.width, this.height);
+      
+      // Draw a simple test circle to verify canvas is working
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(this.centerX, this.centerY, 50, 0, Math.PI * 2);
+      this.ctx.fillStyle = this.colors.primary;
+      this.ctx.fill();
+      this.ctx.restore();
+      
+      console.log('[SiriButton] Debug draw successful');
+    } catch (error) {
+      console.error('[SiriButton] Debug draw failed:', error);
+    }
+  }
+
   // Method to update colors dynamically
   public updateColors(colors: {
     primary: string;
@@ -146,27 +190,53 @@ export class SiriButton {
       return;
     }
 
-    // Get container dimensions
+    // Get container dimensions - multiple methods for better compatibility
     const containerRect = container.getBoundingClientRect();
     const containerWidth = container.clientWidth || containerRect.width || 280;
     const containerHeight = container.clientHeight || containerRect.height || 280;
     
     console.log('[SiriButton] Resize - Container size:', containerWidth, 'x', containerHeight);
+    console.log('[SiriButton] Resize - Container rect:', containerRect);
+    
+    // Check if we're on mobile
+    const isMobile = window.innerWidth < 768;
+    console.log('[SiriButton] Resize - Mobile detected:', isMobile);
 
     // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
-    const size = Math.min(containerWidth, containerHeight, 280); // Max 280px
+    console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
+    
+    // Use different sizing strategy for mobile vs desktop
+    let size;
+    if (isMobile) {
+      // Mobile: Use viewport-based sizing with minimum
+      const viewportSize = Math.min(window.innerWidth, window.innerHeight);
+      size = Math.min(viewportSize * 0.6, containerWidth, containerHeight, 280);
+    } else {
+      // Desktop: Use container size
+      size = Math.min(containerWidth, containerHeight, 280);
+    }
     
     // Ensure minimum size
     const finalSize = Math.max(size, 200); 
     
+    console.log('[SiriButton] Resize - Calculated size:', finalSize);
+    
+    // Update internal dimensions
     this.width = this.height = finalSize;
-    this.canvas.width = this.canvas.height = finalSize * dpr;
-    this.canvas.style.width = this.canvas.style.height = `${finalSize}px`;
+    
+    // Set canvas actual size (with DPR for crisp rendering)
+    const canvasSize = finalSize * dpr;
+    this.canvas.width = canvasSize;
+    this.canvas.height = canvasSize;
+    
+    // Set canvas CSS size (what user sees)
+    this.canvas.style.width = `${finalSize}px`;
+    this.canvas.style.height = `${finalSize}px`;
     
     console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
     
-    // Ensure canvas visibility
+    // Ensure canvas visibility and positioning
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.position = 'absolute';
@@ -175,8 +245,17 @@ export class SiriButton {
     this.canvas.style.transform = 'translate(-50%, -50%)';
     this.canvas.style.zIndex = '20';
     this.canvas.style.pointerEvents = 'auto';
+    this.canvas.style.background = 'transparent';
     
-    // Scale context
+    // Force a re-render for mobile
+    if (isMobile) {
+      this.canvas.style.opacity = '0';
+      setTimeout(() => {
+        this.canvas.style.opacity = '1';
+      }, 10);
+    }
+    
+    // Scale context for high DPI displays
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
     this.ctx.scale(dpr, dpr);
     
@@ -186,6 +265,11 @@ export class SiriButton {
     this.radius = Math.max(60, finalSize * 0.35); // Proportional radius
     
     console.log('[SiriButton] Canvas center:', this.centerX, this.centerY, 'radius:', this.radius);
+    
+    // Force a test draw after resize
+    setTimeout(() => {
+      this.debugDraw();
+    }, 50);
   }
 
   private drawTexturePattern() {
@@ -527,14 +611,25 @@ export class SiriButton {
     this.radius = Math.max(60, Math.min(this.width, this.height) * 0.35); // Consistent proportional radius
     
     // Clear canvas with full background
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    try {
+      this.ctx.clearRect(0, 0, this.width, this.height);
+    } catch (error) {
+      console.error('[SiriButton] Error clearing canvas:', error);
+      return;
+    }
     
     // Ensure canvas is visible and has proper styling
     if (this.canvas.style.display !== 'block') {
       this.canvas.style.display = 'block';
     }
     
-    // Draw all elements in order
+    // Verify canvas dimensions
+    if (this.canvas.width === 0 || this.canvas.height === 0) {
+      console.warn('[SiriButton] Canvas has zero dimensions, triggering resize');
+      this.resize();
+    }
+    
+    // Draw all elements in order with error handling
     try {
       this.drawBaseCircle();
       this.drawWaveform();
@@ -546,6 +641,8 @@ export class SiriButton {
       this.drawIdleFlash();
     } catch (error) {
       console.error('[SiriButton] Error during drawing:', error);
+      // Fallback: draw simple circle if complex drawing fails
+      this.drawFallbackCircle();
     }
     
     // Add new ripples when listening
@@ -562,6 +659,79 @@ export class SiriButton {
     
     // Request next frame
     this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
+  }
+
+  // Fallback drawing method for when complex drawing fails
+  private drawFallbackCircle() {
+    try {
+      console.log('[SiriButton] Drawing fallback circle');
+      
+      // Clear canvas
+      this.ctx.clearRect(0, 0, this.width, this.height);
+      
+      // Draw simple animated circle
+      this.ctx.save();
+      
+      // Pulsing effect
+      const pulse = 1 + 0.1 * Math.sin(this.pulsePhase);
+      const currentRadius = this.radius * pulse;
+      
+      // Outer glow
+      this.ctx.beginPath();
+      this.ctx.arc(this.centerX, this.centerY, currentRadius + 10, 0, Math.PI * 2);
+      this.ctx.fillStyle = this.colors.glow;
+      this.ctx.fill();
+      
+      // Main circle
+      this.ctx.beginPath();
+      this.ctx.arc(this.centerX, this.centerY, currentRadius, 0, Math.PI * 2);
+      this.ctx.fillStyle = this.colors.primary;
+      this.ctx.fill();
+      
+      // Inner circle
+      this.ctx.beginPath();
+      this.ctx.arc(this.centerX, this.centerY, currentRadius * 0.7, 0, Math.PI * 2);
+      this.ctx.fillStyle = this.colors.secondary;
+      this.ctx.fill();
+      
+      // Draw microphone icon
+      this.drawSimpleMicIcon();
+      
+      this.ctx.restore();
+      
+      console.log('[SiriButton] Fallback circle drawn successfully');
+    } catch (error) {
+      console.error('[SiriButton] Even fallback drawing failed:', error);
+    }
+  }
+
+  // Simple microphone icon for fallback
+  private drawSimpleMicIcon() {
+    try {
+      this.ctx.save();
+      this.ctx.translate(this.centerX, this.centerY);
+      this.ctx.scale(2, 2);
+      
+      // Microphone body
+      this.ctx.beginPath();
+      this.ctx.arc(0, -5, 8, Math.PI * 0.2, Math.PI * 1.8, false);
+      this.ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      this.ctx.fill();
+      
+      // Microphone stand
+      this.ctx.beginPath();
+      this.ctx.rect(-2, 5, 4, 8);
+      this.ctx.fill();
+      
+      // Microphone base
+      this.ctx.beginPath();
+      this.ctx.arc(0, 13, 4, 0, Math.PI, true);
+      this.ctx.fill();
+      
+      this.ctx.restore();
+    } catch (error) {
+      console.error('[SiriButton] Error drawing simple mic icon:', error);
+    }
   }
 
   // Public methods for external control
