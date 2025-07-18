@@ -47,14 +47,39 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     // Clear any existing canvas in the container first
     const element = document.getElementById(containerId);
     if (element) {
-      const existingCanvas = element.querySelector('canvas');
-      if (existingCanvas) {
-        existingCanvas.remove();
-      }
+      // Remove any existing canvas elements
+      const existingCanvases = element.querySelectorAll('canvas');
+      existingCanvases.forEach(canvas => canvas.remove());
+      
+      // Clear any existing content
+      element.innerHTML = '';
+      
+      // Ensure container has proper styling for canvas
+      element.style.position = 'relative';
+      element.style.overflow = 'visible';
+      
+      console.log('[SiriCallButton] Container cleared and ready for canvas');
     }
 
-    // Initialize SiriButton with colors
-    buttonRef.current = new SiriButton(containerId, colors);
+    // Force a slight delay to ensure DOM is ready
+    const initTimer = setTimeout(() => {
+      try {
+        // Initialize SiriButton with colors
+        buttonRef.current = new SiriButton(containerId, colors);
+        console.log('[SiriCallButton] SiriButton instance created successfully');
+      } catch (error) {
+        console.error('[SiriCallButton] Error creating SiriButton:', error);
+        // Retry once more after another delay
+        setTimeout(() => {
+          try {
+            buttonRef.current = new SiriButton(containerId, colors);
+            console.log('[SiriCallButton] SiriButton retry successful');
+          } catch (retryError) {
+            console.error('[SiriCallButton] Retry failed:', retryError);
+          }
+        }, 500);
+      }
+    }, 150);
 
     // Create click handler function
     const clickHandler = async (event: Event) => {
@@ -87,12 +112,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       console.log('[SiriCallButton] Adding click listener to element:', element);
       element.addEventListener('click', clickHandler);
       
-      // Also add to canvas if it exists
-      const canvas = element.querySelector('canvas');
-      if (canvas) {
-        console.log('[SiriCallButton] Adding click listener to canvas');
-        canvas.addEventListener('click', clickHandler);
-      }
+      // Also add to canvas when it exists (delayed)
+      setTimeout(() => {
+        const canvas = element.querySelector('canvas');
+        if (canvas) {
+          console.log('[SiriCallButton] Adding click listener to canvas');
+          canvas.addEventListener('click', clickHandler);
+        }
+      }, 200);
     } else {
       console.error('[SiriCallButton] Container element not found:', containerId);
     }
@@ -100,6 +127,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     // Cleanup on unmount
     return () => {
       console.log('[SiriCallButton] Cleaning up');
+      
+      // Clear timers
+      clearTimeout(initTimer);
+      
       if (buttonRef.current) {
         buttonRef.current.cleanup();
         buttonRef.current = null;
@@ -152,7 +183,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   };
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full h-full">
       {/* Status Indicator */}
       {status !== 'idle' && status !== 'listening' && (
         <div 
@@ -193,7 +224,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           }
         }}
       >
-        {/* Remove gradient-ring div since canvas will handle all visuals */}
+        {/* Canvas will be created by SiriButton class */}
       </div>
     </div>
   );

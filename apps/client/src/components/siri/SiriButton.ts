@@ -50,32 +50,53 @@ export class SiriButton {
       name: 'English'
     };
 
+    console.log('[SiriButton] Creating canvas for container:', containerId, 'with colors:', this.colors);
+
     // Create canvas element
     this.canvas = document.createElement('canvas');
     const container = document.getElementById(containerId);
-    if (!container) throw new Error('Container element not found');
+    if (!container) {
+      console.error('[SiriButton] Container element not found:', containerId);
+      throw new Error('Container element not found');
+    }
+    
+    // Set canvas styles immediately for proper display
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = '0';
+    this.canvas.style.left = '0';
+    this.canvas.style.zIndex = '20';
+    this.canvas.style.pointerEvents = 'auto';
+    this.canvas.style.borderRadius = '50%';
+    this.canvas.style.display = 'block';
     
     container.appendChild(this.canvas);
+    console.log('[SiriButton] Canvas appended to container:', container);
     
     // Get context
     const ctx = this.canvas.getContext('2d');
-    if (!ctx) throw new Error('Could not get canvas context');
+    if (!ctx) {
+      console.error('[SiriButton] Could not get canvas context');
+      throw new Error('Could not get canvas context');
+    }
     this.ctx = ctx;
     
-    // Initialize properties to match container
-    this.width = 280;   // Match SiriCallButton container
-    this.height = 280;  // Match SiriCallButton container
+    // Initialize properties
+    this.width = 280;
+    this.height = 280;
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = 98;   // Proportional to 280px container (280 * 0.35)
+    this.radius = 98;
     this.ripples = [];
     this.isListening = false;
     this.pulsePhase = 0;
     this.volumeLevel = 0;
     this.animationFrameId = 0;
 
-    // Set canvas size
-    this.resize();
+    // Set initial canvas size - use setTimeout to ensure container has size
+    setTimeout(() => {
+      this.resize();
+      console.log('[SiriButton] Initial resize completed, canvas size:', this.canvas.width, 'x', this.canvas.height);
+    }, 100);
 
     // Start animation loop
     this.animate();
@@ -102,6 +123,8 @@ export class SiriButton {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
       this.isDarkMode = e.matches;
     });
+
+    console.log('[SiriButton] Constructor completed successfully');
   }
 
   // Method to update colors dynamically
@@ -112,29 +135,57 @@ export class SiriButton {
     name: string;
   }) {
     this.colors = colors;
+    console.log('[SiriButton] Colors updated:', colors);
   }
 
   private resize() {
     // Get container size
     const container = this.canvas.parentElement;
-    if (!container) return;
+    if (!container) {
+      console.warn('[SiriButton] No container found during resize');
+      return;
+    }
 
-    // Set canvas size to match container size (280x280)
+    // Get container dimensions
+    const containerRect = container.getBoundingClientRect();
+    const containerWidth = container.clientWidth || containerRect.width || 280;
+    const containerHeight = container.clientHeight || containerRect.height || 280;
+    
+    console.log('[SiriButton] Resize - Container size:', containerWidth, 'x', containerHeight);
+
+    // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
-    const size = Math.min(container.clientWidth, container.clientHeight, 280); // Max 280px
-    this.width = this.height = size;
-    this.canvas.width = this.canvas.height = size * dpr;
-    this.canvas.style.width = this.canvas.style.height = `${size}px`;
-    // Ensure canvas is perfectly round
+    const size = Math.min(containerWidth, containerHeight, 280); // Max 280px
+    
+    // Ensure minimum size
+    const finalSize = Math.max(size, 200); 
+    
+    this.width = this.height = finalSize;
+    this.canvas.width = this.canvas.height = finalSize * dpr;
+    this.canvas.style.width = this.canvas.style.height = `${finalSize}px`;
+    
+    console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
+    
+    // Ensure canvas visibility
     this.canvas.style.borderRadius = '50%';
-    this.canvas.style.overflow = 'hidden';
+    this.canvas.style.display = 'block';
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = '50%';
+    this.canvas.style.left = '50%';
+    this.canvas.style.transform = 'translate(-50%, -50%)';
+    this.canvas.style.zIndex = '20';
+    this.canvas.style.pointerEvents = 'auto';
+    
     // Scale context
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
     this.ctx.scale(dpr, dpr);
+    
     // Update center coordinates and radius proportionally
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = Math.max(60, size * 0.35); // Proportional radius
+    this.radius = Math.max(60, finalSize * 0.35); // Proportional radius
+    
+    console.log('[SiriButton] Canvas center:', this.centerX, this.centerY, 'radius:', this.radius);
   }
 
   private drawTexturePattern() {
@@ -459,21 +510,44 @@ export class SiriButton {
   }
 
   private animate() {
+    // Ensure canvas is still visible and properly sized
+    if (!this.canvas || !this.ctx) {
+      console.warn('[SiriButton] Canvas or context missing during animation');
+      return;
+    }
+
+    // Check if canvas is still in DOM
+    if (!this.canvas.parentElement) {
+      console.warn('[SiriButton] Canvas no longer in DOM, stopping animation');
+      return;
+    }
+
     // Responsive: update radius based on container size
     const isMobile = Math.min(this.width, this.height) < 300; // Mobile threshold
     this.radius = Math.max(60, Math.min(this.width, this.height) * 0.35); // Consistent proportional radius
-    // Clear canvas
+    
+    // Clear canvas with full background
     this.ctx.clearRect(0, 0, this.width, this.height);
-    // Draw all elements
-    this.drawBaseCircle();
-    this.drawWaveform();
-    this.drawParticles();
-    this.drawRipples();
-    this.drawPulsingRing();
-    this.drawTimeRing();
-    this.drawTimeText();
-    this.drawIdleFlash();
-    // this.drawVolumeVisualization(); // Disabled - moved to external component
+    
+    // Ensure canvas is visible and has proper styling
+    if (this.canvas.style.display !== 'block') {
+      this.canvas.style.display = 'block';
+    }
+    
+    // Draw all elements in order
+    try {
+      this.drawBaseCircle();
+      this.drawWaveform();
+      this.drawParticles();
+      this.drawRipples();
+      this.drawPulsingRing();
+      this.drawTimeRing();
+      this.drawTimeText();
+      this.drawIdleFlash();
+    } catch (error) {
+      console.error('[SiriButton] Error during drawing:', error);
+    }
+    
     // Add new ripples when listening
     if (this.isListening && Math.random() < (isMobile ? 0.05 : 0.1)) {
       this.ripples.push({
@@ -482,21 +556,22 @@ export class SiriButton {
         speed: 1 + this.volumeLevel * 2
       });
     }
+    
+    // Update animation phase
+    this.pulsePhase += 0.05;
+    
     // Request next frame
     this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
   }
 
+  // Public methods for external control
   public setListening(listening: boolean) {
     this.isListening = listening;
-    if (listening) {
-      // Reset ripples when starting to listen
-      this.ripples = [];
-    }
+    console.log('[SiriButton] Listening state changed to:', listening);
   }
 
   public setVolumeLevel(level: number) {
-    // Clamp volume level between 0 and 1
-    this.volumeLevel = Math.max(0, Math.min(1, level));
+    this.volumeLevel = Math.max(0, Math.min(100, level));
   }
 
   public setTime(seconds: number, target: number = 60) {
@@ -509,13 +584,18 @@ export class SiriButton {
   }
 
   public cleanup() {
-    // Remove event listeners and stop animation
-    window.removeEventListener('resize', this.resize);
+    console.log('[SiriButton] Cleaning up canvas and animation');
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = 0;
     }
     
+    // Remove resize listener
+    window.removeEventListener('resize', this.resize.bind(this));
+    
     // Remove canvas from DOM
-    this.canvas.remove();
+    if (this.canvas && this.canvas.parentElement) {
+      this.canvas.parentElement.removeChild(this.canvas);
+    }
   }
 } 

@@ -101,12 +101,12 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </div>
       )}
 
-      {/* Siri Button Container với External Volume Bars */}
+      {/* Siri Button Container với External Volume Bars - Responsive sizing */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
-          width: '320px',  // Slightly larger to accommodate external bars
-          height: '320px', // Slightly larger to accommodate external bars
+          width: 'clamp(280px, 80vw, 320px)',  // Responsive width for mobile/desktop
+          height: 'clamp(280px, 80vw, 320px)', // Responsive height for mobile/desktop
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
@@ -148,7 +148,15 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           </div>
         )}
 
-        <div className="relative z-10">
+        {/* Canvas Container - Ensure proper positioning */}
+        <div 
+          className="relative z-10 flex items-center justify-center"
+          style={{
+            width: '280px',
+            height: '280px',
+            position: 'relative'
+          }}
+        >
           <SiriCallButton
             containerId="main-siri-button"
             isListening={isCallStarted}
