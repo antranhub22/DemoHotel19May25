@@ -154,6 +154,23 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     try {
       buttonRef.current = new SiriButton(containerId, colors);
       setCanvasReady(true);
+      
+      // 🔧 CRITICAL FIX: Force resize after container is fully setup
+      setTimeout(() => {
+        if (buttonRef.current && !cleanupFlagRef.current) {
+          console.log('🔧 [SiriCallButton] Forcing post-init resize for perfect alignment');
+          window.dispatchEvent(new Event('resize'));
+        }
+      }, 100);
+      
+      // Additional resize for mobile/slower devices
+      setTimeout(() => {
+        if (buttonRef.current && !cleanupFlagRef.current) {
+          console.log('🔧 [SiriCallButton] Final alignment resize');
+          window.dispatchEvent(new Event('resize'));
+        }
+      }, 300);
+      
     } catch (error) {
       console.error('[SiriCallButton] Init error:', error);
       // Retry once
@@ -162,6 +179,15 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           try {
             buttonRef.current = new SiriButton(containerId, colors);
             setCanvasReady(true);
+            
+            // Force resize on retry too
+            setTimeout(() => {
+              if (buttonRef.current && !cleanupFlagRef.current) {
+                console.log('🔧 [SiriCallButton] Retry resize for alignment');
+                window.dispatchEvent(new Event('resize'));
+              }
+            }, 100);
+            
           } catch (retryError) {
             console.error('[SiriCallButton] Retry failed:', retryError);
           }

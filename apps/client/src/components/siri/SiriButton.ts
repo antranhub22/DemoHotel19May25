@@ -245,29 +245,32 @@ export class SiriButton {
     const dpr = window.devicePixelRatio || 1;
     console.log('  🖥️ Device pixel ratio:', dpr);
     
-    // Use the exact container size to ensure perfect alignment
-    const finalSize = Math.min(containerWidth, containerHeight);
+    // 🔧 CRITICAL FIX: Use exact container dimensions, ensure perfect square
+    const finalWidth = containerWidth;
+    const finalHeight = containerHeight;
     
-    console.log('  ✅ Canvas final size:', finalSize);
+    console.log('  ✅ Canvas final dimensions:', finalWidth, 'x', finalHeight);
     
-    // Update internal dimensions
-    this.width = this.height = finalSize;
+    // Update internal dimensions to match container exactly
+    this.width = finalWidth;
+    this.height = finalHeight;
     
     // Set physical canvas size with DPR scaling
-    const physicalSize = Math.floor(finalSize * dpr);
-    this.canvas.width = physicalSize;
-    this.canvas.height = physicalSize;
+    const physicalWidth = Math.floor(finalWidth * dpr);
+    const physicalHeight = Math.floor(finalHeight * dpr);
+    this.canvas.width = physicalWidth;
+    this.canvas.height = physicalHeight;
     
     // Set display size in CSS pixels to exactly match container
-    this.canvas.style.width = `${finalSize}px`;
-    this.canvas.style.height = `${finalSize}px`;
+    this.canvas.style.width = `${finalWidth}px`;
+    this.canvas.style.height = `${finalHeight}px`;
     
     // Log actual dimensions
-    console.log('  🎨 Canvas physical size:', physicalSize);
-    console.log('  🎨 Canvas CSS size:', finalSize);
+    console.log('  🎨 Canvas physical size:', physicalWidth, 'x', physicalHeight);
+    console.log('  🎨 Canvas CSS size:', finalWidth, 'x', finalHeight);
     console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
     
-    // ✅ CRITICAL FIX: Canvas positioning that works with mobile touch
+    // ✅ CRITICAL FIX: Canvas positioning that works with container
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.position = 'absolute';
@@ -297,16 +300,71 @@ export class SiriButton {
     // Update center coordinates and radius proportionally
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = Math.max(80, finalSize * 0.45); // Larger proportional radius
+    
+    // 🔧 CRITICAL FIX: Radius based on smaller dimension for perfect circle fit
+    const minDimension = Math.min(finalWidth, finalHeight);
+    this.radius = Math.max(80, minDimension * 0.35); // Use smaller dimension for perfect fit
     
     console.log('  🎯 Canvas center:', this.centerX, this.centerY);
+    console.log('  🎯 Min dimension for radius:', minDimension);
     console.log('  ⭕ Canvas radius:', this.radius);
-    console.log('  📊 Radius ratio:', (this.radius / finalSize).toFixed(2));
+    console.log('  📊 Radius ratio:', (this.radius / minDimension).toFixed(2));
     
     // Force a test draw after resize
     setTimeout(() => {
       this.debugDraw();
+      // 🔧 CRITICAL: Verify alignment after resize
+      this.verifyAlignment();
     }, 50);
+  }
+
+  // 🔧 NEW: Alignment verification method
+  private verifyAlignment() {
+    const container = document.getElementById(this.canvas.id.replace('-canvas', ''));
+    if (!container) return;
+    
+    const containerRect = container.getBoundingClientRect();
+    const canvasRect = this.canvas.getBoundingClientRect();
+    
+    console.log('🔍 [SiriButton] ALIGNMENT VERIFICATION:');
+    console.log('  📦 Container rect:', {
+      x: containerRect.x.toFixed(2),
+      y: containerRect.y.toFixed(2), 
+      width: containerRect.width.toFixed(2),
+      height: containerRect.height.toFixed(2),
+      centerX: (containerRect.x + containerRect.width/2).toFixed(2),
+      centerY: (containerRect.y + containerRect.height/2).toFixed(2)
+    });
+    console.log('  🎨 Canvas rect:', {
+      x: canvasRect.x.toFixed(2),
+      y: canvasRect.y.toFixed(2),
+      width: canvasRect.width.toFixed(2), 
+      height: canvasRect.height.toFixed(2),
+      centerX: (canvasRect.x + canvasRect.width/2).toFixed(2),
+      centerY: (canvasRect.y + canvasRect.height/2).toFixed(2)
+    });
+    
+    // Calculate alignment offsets
+    const containerCenterX = containerRect.x + containerRect.width/2;
+    const containerCenterY = containerRect.y + containerRect.height/2;
+    const canvasCenterX = canvasRect.x + canvasRect.width/2;
+    const canvasCenterY = canvasRect.y + canvasRect.height/2;
+    
+    const offsetX = canvasCenterX - containerCenterX;
+    const offsetY = canvasCenterY - containerCenterY;
+    
+    console.log('  🎯 Alignment offset:', {
+      x: offsetX.toFixed(2),
+      y: offsetY.toFixed(2),
+      total: Math.sqrt(offsetX*offsetX + offsetY*offsetY).toFixed(2)
+    });
+    
+    // Warning if misaligned
+    if (Math.abs(offsetX) > 1 || Math.abs(offsetY) > 1) {
+      console.warn('⚠️ [SiriButton] Canvas misaligned! Offset:', offsetX.toFixed(2), offsetY.toFixed(2));
+    } else {
+      console.log('✅ [SiriButton] Canvas perfectly aligned!');
+    }
   }
 
   private drawTexturePattern() {
