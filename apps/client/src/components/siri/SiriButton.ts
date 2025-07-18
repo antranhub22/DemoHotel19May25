@@ -755,17 +755,37 @@ export class SiriButton {
 
   public cleanup() {
     console.log('[SiriButton] Cleaning up canvas and animation');
+    
+    // Stop animation first
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = 0;
     }
     
     // Remove resize listener
-    window.removeEventListener('resize', this.resize.bind(this));
+    try {
+      window.removeEventListener('resize', this.resize.bind(this));
+    } catch (error) {
+      console.warn('[SiriButton] Error removing resize listener:', error);
+    }
     
-    // Remove canvas from DOM
-    if (this.canvas && this.canvas.parentElement) {
-      this.canvas.parentElement.removeChild(this.canvas);
+    // Safe canvas removal
+    if (this.canvas) {
+      try {
+        // Check if canvas is still in DOM and has a parent
+        if (this.canvas.parentElement && document.contains(this.canvas)) {
+          this.canvas.parentElement.removeChild(this.canvas);
+          console.log('[SiriButton] Canvas removed successfully');
+        } else {
+          console.log('[SiriButton] Canvas already removed or not in DOM');
+        }
+      } catch (error) {
+        console.warn('[SiriButton] Error removing canvas:', error);
+      }
+      
+      // Clear canvas reference
+      this.canvas = null as any;
+      this.ctx = null as any;
     }
   }
 } 
