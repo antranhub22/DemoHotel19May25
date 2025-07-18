@@ -276,27 +276,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle transcript from Vapi
         if (data.type === 'transcript' && data.call_id && data.role && data.content) {
           try {
-            // Convert to database schema format for validation
-            // Ensure timestamp is within valid range for PostgreSQL
+            console.log('📝 [WebSocket] Processing transcript:', data);
+            
+            // Validate timestamp
             const now = Date.now();
-            const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+            const inputTimestamp = data.timestamp ? Number(data.timestamp) : now;
             
-            const transcriptDataForValidation = {
-              call_id: data.call_id,
-              role: data.role,
-              content: data.content,
-              tenant_id: 'default',
-              timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
-            };
+            // Fix timestamp if it's out of range - cap at PostgreSQL max timestamp (2038-01-19)
+            const maxPostgresTimestamp = 2147483647; // Unix timestamp limit for PostgreSQL
+            const maxTimestampMs = maxPostgresTimestamp * 1000; // Convert to milliseconds
             
-            // Validate with database schema
-            const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
+            let validTimestamp;
+            if (inputTimestamp > maxTimestampMs) {
+              console.warn(`Timestamp ${inputTimestamp} exceeds PostgreSQL limit, using current time`);
+              validTimestamp = now;
+            } else if (inputTimestamp < 946684800000) { // Year 2000
+              console.warn(`Timestamp ${inputTimestamp} is too old, using current time`);
+              validTimestamp = now;
+            } else {
+              validTimestamp = inputTimestamp;
+            }
             
-            // Auto-create call record if it doesn't exist
+            // Ensure we don't exceed PostgreSQL limits
+            validTimestamp = Math.min(validTimestamp, maxTimestampMs);
+            
+            console.log(`📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`);
+
+            // Store transcript in database with proper timestamp handling
+            try {
+              await storage.addTranscript({
+                callId: data.call_id,
+                role: data.role,
+                content: data.content,
+                tenantId: 'default',
+                timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL
+              });
+              console.log('✅ [WebSocket] Transcript stored successfully');
+            } catch (storageError) {
+              console.error('❌ [WebSocket] Error storing transcript:', storageError);
+              // Continue processing even if storage fails
+            }
+
+            // Try to find or create call record
             try {
               const existingCall = await db.select().from(call).where(eq(call.call_id_vapi, data.call_id)).limit(1);
+              
               if (existingCall.length === 0) {
-                // Extract room number from content if possible
+                console.log(`🔍 [WebSocket] No call found for ${data.call_id}, attempting auto-creation`);
+                
+                // Extract room number from content
                 const roomMatch = data.content.match(/room (\d+)/i) || data.content.match(/phòng (\d+)/i);
                 const roomNumber = roomMatch ? roomMatch[1] : null;
                 
@@ -307,28 +335,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (hasVietnamese) language = 'vi';
                 else if (hasFrench) language = 'fr';
                 
-                // TODO: Fix database schema mismatch - temporarily commented out
-                // await db.insert(call).values({
-                //   call_id_vapi: data.call_id,
-                //   room_number: roomNumber,
-                //   language: language,
-                //   created_at: getCurrentTimestamp()
-                // });
-                
-                console.log(`Auto-created call record for ${data.call_id} with room ${roomNumber || 'unknown'} and language ${language}`);
+                console.log(`🌍 [WebSocket] Auto-creating call record: room=${roomNumber}, language=${language}`);
               }
             } catch (callError) {
-              console.error('Error creating call record:', callError);
+              console.error('❌ [WebSocket] Error handling call record:', callError);
+              // Continue processing even if call record handling fails
             }
-            
-            // Store transcript in database - use camelCase for storage function
-            await storage.addTranscript({
-              callId: data.call_id,
-              role: data.role,
-              content: data.content,
-              tenantId: 'default',
-              timestamp: Math.floor(validTimestamp / 1000)
-            });
             
             // Broadcast transcript to all clients with matching callId
             const message = JSON.stringify({
@@ -336,18 +348,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               callId: data.call_id,
               role: data.role,
               content: data.content,
-              timestamp: new Date()
+              timestamp: new Date(validTimestamp).toISOString() // Use ISO string for client
             });
             
+            // Count matching clients and broadcast
+            let matchingClients = 0;
             clients.forEach((client) => {
               if (client.callId === data.call_id && client.readyState === WebSocket.OPEN) {
                 client.send(message);
+                matchingClients++;
               }
             });
+            
+            console.log(`📤 [WebSocket] Transcript broadcasted to ${matchingClients} clients`);
+            
           } catch (error) {
-            console.error('Invalid transcript data from WebSocket:', error);
+            console.error('❌ [WebSocket] Error processing transcript:', error);
             if (error instanceof z.ZodError) {
-              console.error('WebSocket Zod validation errors:', error.errors);
+              console.error('📋 [WebSocket] Validation errors:', error.errors);
             }
           }
         }
