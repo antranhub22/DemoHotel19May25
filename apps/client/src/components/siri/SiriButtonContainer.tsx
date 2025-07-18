@@ -101,7 +101,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </div>
       )}
 
-      {/* Siri Button Container - Clean without External Volume Bars */}
+      {/* Siri Button Container - FIXED: Proper centering during layout changes */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
@@ -117,6 +117,10 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           minHeight: '280px', // Ensure minimum touch target
           cursor: 'pointer', // Show it's clickable
           touchAction: 'manipulation', // Improve touch response
+          // ✅ CRITICAL FIX: Force perfect centering regardless of layout changes
+          position: 'relative',
+          flexShrink: 0, // Prevent container from shrinking
+          alignSelf: 'center', // Self-align to center
         }}
       >
         <SiriCallButton

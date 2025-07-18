@@ -240,17 +240,28 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       
       // CRITICAL FIX: Trigger resize when listening state changes
       // This fixes alignment issues when layout changes (Cancel/Confirm buttons appear)
-      setTimeout(() => {
+      const triggerResize = () => {
         if (buttonRef.current && !cleanupFlagRef.current) {
           console.log('🔧 [SiriCallButton] Triggering resize due to listening state change');
           // Force canvas to recalculate size when layout changes
           const container = document.getElementById(containerId);
           if (container) {
-            // Dispatch resize event to trigger SiriButton.resize()
+            // Multiple resize triggers to ensure proper repositioning
             window.dispatchEvent(new Event('resize'));
+            
+            // Additional resize after layout stabilizes
+            setTimeout(() => {
+              window.dispatchEvent(new Event('resize'));
+              console.log('🔧 [SiriCallButton] Secondary resize for layout stabilization');
+            }, 200);
           }
         }
-      }, 100); // Small delay to let DOM update
+      };
+
+      // Trigger resize immediately and after DOM updates
+      setTimeout(triggerResize, 50);   // Immediate resize
+      setTimeout(triggerResize, 150);  // After layout changes
+      setTimeout(triggerResize, 300);  // Final positioning
     }
   }, [isListening, containerId]);
 
