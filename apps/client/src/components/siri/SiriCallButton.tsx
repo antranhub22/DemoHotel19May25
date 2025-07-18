@@ -124,6 +124,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     canvas.style.zIndex = '30';
     canvas.style.borderRadius = '50%';
     canvas.style.pointerEvents = 'auto';
+    canvas.style.background = 'transparent';
+    canvas.setAttribute('data-mobile-canvas', 'true');
     
     try {
       container.appendChild(canvas);
@@ -162,40 +164,62 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           const breath = 0.85 + 0.15 * Math.sin(pulsePhase * 1.5);
           const currentRadius = baseRadius * breath;
           
-          // Outer glow rings (multiple layers)
-          for (let i = 3; i >= 1; i--) {
+          // Enhanced background with multiple glow layers
+          for (let i = 4; i >= 1; i--) {
             ctx.save();
-            ctx.globalAlpha = 0.1 * (4 - i);
+            ctx.globalAlpha = 0.15 * (5 - i);
             ctx.beginPath();
-            ctx.arc(centerX, centerY, currentRadius + (i * 15), 0, Math.PI * 2);
-            ctx.fillStyle = glowColor;
+            ctx.arc(centerX, centerY, currentRadius + (i * 20), 0, Math.PI * 2);
+            const glowGradient = ctx.createRadialGradient(
+              centerX, centerY, 0,
+              centerX, centerY, currentRadius + (i * 20)
+            );
+            glowGradient.addColorStop(0, primaryColor);
+            glowGradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = glowGradient;
             ctx.fill();
             ctx.restore();
           }
           
-          // Main circle with enhanced gradient
+          // Main circle with glassmorphism effect
           ctx.save();
-          const gradient = ctx.createRadialGradient(
-            centerX - 30, centerY - 30, 0,
+          const mainGradient = ctx.createRadialGradient(
+            centerX - 40, centerY - 40, 0,
             centerX, centerY, currentRadius
           );
-          gradient.addColorStop(0, secondaryColor);
-          gradient.addColorStop(0.4, primaryColor);
-          gradient.addColorStop(1, `${primaryColor}DD`);
-          
-          ctx.fillStyle = gradient;
+          mainGradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+          mainGradient.addColorStop(0.3, secondaryColor);
+          mainGradient.addColorStop(0.7, primaryColor);
+          mainGradient.addColorStop(1, 'rgba(0,0,0,0.1)');
+          ctx.fillStyle = mainGradient;
           ctx.beginPath();
           ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
+          ctx.restore();
+          
+          // Inner glassmorphism highlight
+          ctx.save();
+          ctx.globalAlpha = 0.25;
+          const innerGradient = ctx.createRadialGradient(
+            centerX - 20, centerY - 20, 0,
+            centerX, centerY, currentRadius * 0.7
+          );
+          innerGradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+          innerGradient.addColorStop(0.5, 'rgba(255,255,255,0.3)');
+          innerGradient.addColorStop(1, 'transparent');
+          ctx.fillStyle = innerGradient;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, currentRadius * 0.75, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
           
-          // Glassmorphism effect
+          // Border ring
           ctx.save();
-          ctx.globalAlpha = 0.15;
+          ctx.globalAlpha = 0.6;
+          ctx.strokeStyle = `rgba(255,255,255,0.4)`;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(centerX, centerY, currentRadius * 0.95, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(255,255,255,0.3)';
-          ctx.fill();
+          ctx.arc(centerX, centerY, currentRadius - 2, 0, Math.PI * 2);
+          ctx.stroke();
           ctx.restore();
           
           // Inner highlight (top-left)
@@ -241,51 +265,112 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           ctx.fill();
           ctx.restore();
           
-          // Main microphone icon
-          ctx.fillStyle = 'rgba(255,255,255,0.95)';
-          ctx.shadowColor = 'rgba(255,255,255,0.5)';
-          ctx.shadowBlur = 15;
+          // Enhanced microphone icon with 3D effect
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,0.3)';
+          ctx.shadowBlur = 8;
+          ctx.shadowOffsetY = 2;
+          
+          // Mic body gradient
+          const micGradient = ctx.createLinearGradient(-12, -15, 12, 15);
+          micGradient.addColorStop(0, 'rgba(255,255,255,1)');
+          micGradient.addColorStop(0.5, 'rgba(240,240,240,0.95)');
+          micGradient.addColorStop(1, 'rgba(220,220,220,0.9)');
+          ctx.fillStyle = micGradient;
           
           // Mic body
           ctx.beginPath();
-          ctx.arc(0, -8, 12, Math.PI * 0.15, Math.PI * 1.85, false);
+          ctx.arc(0, -6, 14, Math.PI * 0.15, Math.PI * 1.85, false);
           ctx.fill();
           
-          // Mic stand
+          // Mic stand with gradient
+          const standGradient = ctx.createLinearGradient(-3, 8, 3, 20);
+          standGradient.addColorStop(0, 'rgba(255,255,255,0.95)');
+          standGradient.addColorStop(1, 'rgba(200,200,200,0.9)');
+          ctx.fillStyle = standGradient;
           ctx.beginPath();
           ctx.rect(-3, 8, 6, 12);
           ctx.fill();
           
-          // Mic base
+          // Mic base with gradient
+          const baseGradient = ctx.createRadialGradient(0, 20, 0, 0, 20, 8);
+          baseGradient.addColorStop(0, 'rgba(255,255,255,0.95)');
+          baseGradient.addColorStop(1, 'rgba(180,180,180,0.9)');
+          ctx.fillStyle = baseGradient;
           ctx.beginPath();
           ctx.arc(0, 20, 8, 0, Math.PI, true);
           ctx.fill();
           
-          // Mic details (grille lines)
+          // Enhanced mic grille with 3D effect
           ctx.save();
-          ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-          ctx.lineWidth = 0.5;
-          for (let i = -6; i <= 6; i += 3) {
+          ctx.strokeStyle = 'rgba(100,100,100,0.7)';
+          ctx.lineWidth = 1;
+          ctx.lineCap = 'round';
+          for (let i = -8; i <= 8; i += 4) {
             ctx.beginPath();
-            ctx.moveTo(i, -12);
-            ctx.lineTo(i, -4);
+            ctx.moveTo(i, -14);
+            ctx.lineTo(i, -2);
+            ctx.stroke();
+          }
+          
+          // Add highlight lines
+          ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+          ctx.lineWidth = 0.5;
+          for (let i = -6; i <= 6; i += 4) {
+            ctx.beginPath();
+            ctx.moveTo(i - 0.5, -13);
+            ctx.lineTo(i - 0.5, -3);
             ctx.stroke();
           }
           ctx.restore();
           
+          ctx.restore();
+          
           ctx.restore(); // End microphone drawing
           
-          // Pulsing ring when listening
+          // Enhanced pulsing effects when listening
           if (isListening) {
-            ctx.save();
-            const ringRadius = currentRadius + 20 + 10 * Math.sin(pulsePhase * 3);
-            ctx.globalAlpha = 0.6;
-            ctx.strokeStyle = primaryColor;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.restore();
+            // Multiple pulsing rings with different speeds
+            for (let ring = 0; ring < 3; ring++) {
+              ctx.save();
+              const ringSpeed = 2 + ring * 0.5;
+              const ringRadius = currentRadius + 25 + ring * 15 + 8 * Math.sin(pulsePhase * ringSpeed);
+              const ringAlpha = 0.4 - ring * 0.1;
+              
+              ctx.globalAlpha = ringAlpha;
+              const ringGradient = ctx.createRadialGradient(
+                centerX, centerY, ringRadius - 5,
+                centerX, centerY, ringRadius + 5
+              );
+              ringGradient.addColorStop(0, primaryColor);
+              ringGradient.addColorStop(0.5, secondaryColor);
+              ringGradient.addColorStop(1, 'transparent');
+              
+              ctx.strokeStyle = ringGradient;
+              ctx.lineWidth = 4 - ring;
+              ctx.beginPath();
+              ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.restore();
+            }
+            
+            // Volume level indicator particles
+            if (volumeLevel > 0) {
+              for (let p = 0; p < 8; p++) {
+                ctx.save();
+                const angle = (p / 8) * Math.PI * 2 + pulsePhase;
+                const distance = currentRadius + 40 + (volumeLevel / 100) * 20;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                
+                ctx.globalAlpha = 0.6 + (volumeLevel / 100) * 0.4;
+                ctx.fillStyle = secondaryColor;
+                ctx.beginPath();
+                ctx.arc(x, y, 2 + (volumeLevel / 100) * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+              }
+            }
           }
           
           // Continue animation
@@ -478,14 +563,16 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       {/* Main Button Container */}
       <div 
         id={containerId}
-        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-hidden flex items-center justify-center z-50`}
+        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full flex items-center justify-center z-50`}
         style={{ 
           cursor: 'pointer',
           width: '280px',
           height: '280px',
           zIndex: 9999,
           pointerEvents: 'auto',
-          position: 'relative'
+          position: 'relative',
+          background: 'transparent',
+          overflow: 'visible'
         }}
         onClick={(e) => {
           console.log('[SiriCallButton] Container click detected!');
