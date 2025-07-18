@@ -1,24 +1,51 @@
-# SSOT (Single Source of Truth) Guidelines for Hotel Management System
+# 🏨 Hotel Voice Assistant SaaS Platform - Cursor Rules
 
-## 🎯 ALWAYS CHECK SSOT FIRST - Use these commands:
-- `npm run find-ssot [keyword]` - Find relevant SSOT files
-- `node scripts/ssot-finder.js` - Interactive SSOT finder
-- `node scripts/what-to-change.js` - Interactive change wizard
-- `npm run validate:ssot` - Validate all consistency
+## 📋 PROJECT OVERVIEW
 
-## 📋 PRIMARY SSOT LOCATIONS (Single Source of Truth)
+**DemoHotel19May** là một hệ thống quản lý khách sạn đa thuê bao (multi-tenant SaaS) với AI voice assistant, được xây dựng bằng kiến trúc monorepo hiện đại. Dự án hỗ trợ nhiều khách sạn với voice assistant riêng biệt, tích hợp OpenAI và Vapi.ai.
 
-### 🗄️ DATABASE CHANGES
-**PRIMARY**: `packages/shared/db/schema.ts`
-**AUTOMATION**: 
-```bash
-npm run generate:types           # Generate TypeScript types
-npm run check:breaking-changes   # Check for breaking changes  
-npm run validate:ssot            # Validate consistency
+### 🏗️ KIẾN TRÚC CHÍNH
 ```
-**SECONDARY**: tools/migrations/, packages/shared/types/core.ts, schemas/dashboard-schema.json
+DemoHotel19May/
+├── apps/                    # Applications (client React + server Node.js)
+├── packages/                # Shared code (types, config, utils)
+├── tools/                   # Development tools & scripts
+├── docs/                    # Comprehensive documentation
+├── tests/                   # Test suites
+└── assets/                  # Static assets
+```
 
-### 🔌 API CHANGES  
+---
+
+## 🎯 SSOT (SINGLE SOURCE OF TRUTH) GUIDELINES
+
+### 🛠️ AUTOMATION COMMANDS
+```bash
+# 🔍 Tìm SSOT files trước khi thay đổi
+npm run find-ssot [keyword]        # Tìm files SSOT liên quan
+node scripts/ssot-finder.js        # Interactive SSOT finder  
+node scripts/what-to-change.js     # Interactive change wizard
+
+# ✅ Validation & Generation
+npm run validate:ssot               # Validate tất cả consistency
+npm run generate:types              # Generate TypeScript types
+npm run check:breaking-changes      # Check breaking changes
+npm run validate:runtime            # Runtime validation
+```
+
+### 📋 PRIMARY SSOT LOCATIONS
+
+#### 🗄️ DATABASE CHANGES
+**PRIMARY**: `packages/shared/db/schema.ts`
+**SECONDARY**: tools/migrations/, packages/shared/types/core.ts, schemas/dashboard-schema.json
+**AUTOMATION**:
+```bash
+npm run generate:types              # Generate TypeScript types
+npm run check:breaking-changes      # Check breaking changes  
+npm run validate:ssot               # Validate consistency
+```
+
+#### 🔌 API CHANGES  
 **PRIMARY**: `apps/server/routes/[specific-route].ts`
 - `auth.ts` - Authentication routes
 - `calls.ts` - Call management  
@@ -26,93 +53,111 @@ npm run validate:ssot            # Validate consistency
 - `analytics.ts` - Analytics endpoints
 - `dashboard.ts` - Dashboard data
 
+**SECONDARY**: schemas/api-schema.json, packages/shared/types/api.ts, docs/API_DOCUMENTATION.md
 **AUTOMATION**:
 ```bash
-npm run generate:api-docs        # Update API documentation
-npm run validate:runtime --api   # Validate API schema
-npm run check:breaking-changes   # For breaking changes
+npm run generate:api-docs           # Update API documentation
+npm run validate:runtime --api      # Validate API schema
+npm run check:breaking-changes      # For breaking changes
 ```
-**SECONDARY**: schemas/api-schema.json, packages/shared/types/api.ts, docs/API_DOCUMENTATION.md
 
-### 🎨 FRONTEND CHANGES
+#### 🎨 FRONTEND CHANGES
 **PRIMARY**: `apps/client/src/components/[component-directory]/`
 - `ui/` - Reusable UI components
 - `dashboard/` - Dashboard-specific components  
 - `unified-dashboard/` - Unified dashboard components
 
+**SECONDARY**: packages/shared/types/ui.ts, apps/client/src/components/index.ts
 **AUTOMATION**:
 ```bash
-npm run type-check               # TypeScript validation
+npm run type-check                  # TypeScript validation
 npm run validate:runtime --components # Validate component schemas
 ```
-**SECONDARY**: packages/shared/types/ui.ts, apps/client/src/components/index.ts
 
-### ⚙️ CONFIGURATION CHANGES
-**PRIMARY**: `.env.example` (environment) or `vite.config.ts` (build)
-**AUTOMATION**:
-```bash
-npm run sync:changes             # Sync to all environments
-npm run validate:runtime --config # Validate configuration
-```
+#### ⚙️ CONFIGURATION CHANGES
+**PRIMARY**: `.env.example` (environment) hoặc `vite.config.ts` (build)
 **SECONDARY**: packages/config/environment.ts, apps/server/index.ts
-
-### 📝 TYPES & VALIDATION
-**PRIMARY**: `packages/shared/types/[specific-type].ts`
 **AUTOMATION**:
 ```bash
-npm run generate:types          # Auto-generate from schema
-npm run validate:ssot           # Validate type consistency
+npm run sync:changes                # Sync to all environments
+npm run validate:runtime --config  # Validate configuration
 ```
+
+#### 📝 TYPES & VALIDATION
+**PRIMARY**: `packages/shared/types/[specific-type].ts`
 **SECONDARY**: schemas/, packages/types/
+**AUTOMATION**:
+```bash
+npm run generate:types             # Auto-generate from schema
+npm run validate:ssot              # Validate type consistency
+```
+
+---
 
 ## 🏨 HOTEL-SPECIFIC FEATURES
 
 ### 🎙️ VOICE ASSISTANT
 **PRIMARY**: `apps/client/src/context/AssistantContext.tsx`
-**SECONDARY**: apps/server/services/vapiIntegration.ts, apps/client/src/components/VoiceAssistant.tsx
+**SECONDARY**: 
+- apps/server/services/vapiIntegration.ts
+- apps/client/src/components/VoiceAssistant.tsx
+- apps/client/src/lib/vapiClient.ts
 
 ### 🛎️ ROOM SERVICE / ORDERS  
 **PRIMARY**: `packages/shared/db/schema.ts` (request table)
-**SECONDARY**: apps/server/routes/orders.ts, apps/client/src/components/EmailForm.tsx
+**SECONDARY**: 
+- apps/server/routes/orders.ts
+- apps/client/src/components/EmailForm.tsx
+- apps/server/services/orderService.ts
 
 ### 🏢 MULTI-TENANT FEATURES
 **PRIMARY**: `packages/shared/db/schema.ts` (tenants table)  
-**SECONDARY**: apps/server/middleware/tenant.ts, apps/server/services/tenantService.ts
+**SECONDARY**: 
+- apps/server/middleware/tenant.ts
+- apps/server/services/tenantService.ts
+- apps/client/src/context/AuthContext.tsx
 
 ### 📊 ANALYTICS & REPORTING
 **PRIMARY**: `apps/server/routes/analytics.ts`
-**SECONDARY**: apps/server/services/analyticsService.ts, apps/client/src/pages/AnalyticsDashboard.tsx
+**SECONDARY**: 
+- apps/server/services/analyticsService.ts
+- apps/client/src/pages/AnalyticsDashboard.tsx
+- schemas/dashboard-schema.json
 
-## 🔄 CHANGE PROCESS (MANDATORY)
+---
+
+## 🔄 MANDATORY CHANGE PROCESS
 
 ### 1. Before Making ANY Changes:
 ```bash
-# Find the right SSOT files first
-node scripts/what-to-change.js    # Interactive guidance
+# 🔍 Find the right SSOT files first
+node scripts/what-to-change.js     # Interactive guidance
 # OR
-node scripts/ssot-finder.js       # Find specific files
+node scripts/ssot-finder.js        # Find specific files
 ```
 
 ### 2. Make Changes to PRIMARY file first, then:
 ```bash
-npm run validate:ssot              # Validate consistency
-npm run check:breaking-changes     # Check for breaking changes
+npm run validate:ssot               # Validate consistency
+npm run check:breaking-changes      # Check for breaking changes
 ```
 
 ### 3. Update SECONDARY files as guided by automation
 
 ### 4. Before Committing:
 ```bash
-npm run validate:ssot              # Final validation
-npm run validate:runtime           # Runtime validation
-npm run type-check                 # TypeScript check
+npm run validate:ssot               # Final validation
+npm run validate:runtime            # Runtime validation
+npm run type-check                  # TypeScript check
 ```
 
 ### 5. For Breaking Changes (REQUIRED):
 ```bash
-npm run generate:migration-guide   # Generate migration guide
-npm run generate:migration-docs    # Generate migration docs
+npm run generate:migration-guide    # Generate migration guide
+npm run generate:migration-docs     # Generate migration docs
 ```
+
+---
 
 ## 🚨 BREAKING CHANGE RULES
 
@@ -130,87 +175,524 @@ npm run generate:migration-docs    # Generate migration docs
 - Removing environment variables
 - Changing component props interfaces
 
-## 🛠️ AVAILABLE AUTOMATION TOOLS
+---
 
-### Code Generation:
-- `npm run generate:types` - Generate TypeScript types from schema
-- `npm run generate:api-docs` - Generate API documentation
-- `npm run update:readme` - Update README from codebase analysis
+## 💻 CODING STANDARDS & PATTERNS
 
-### Validation:
-- `npm run validate:ssot` - Validate SSOT consistency  
-- `npm run validate:runtime` - Runtime validation & monitoring
-- `npm run check:breaking-changes` - Detect breaking changes
+### 🎯 TypeScript Standards
+```typescript
+// ✅ GOOD: Use strict types
+interface HotelConfig {
+  id: string;
+  name: string;
+  settings: HotelSettings;
+}
 
-### Documentation:
-- `npm run generate:changelog` - Generate changelog from git commits
-- `npm run generate:migration-docs` - Generate migration documentation
-- `npm run update:readme` - Update README automatically
+// ✅ GOOD: Use proper generics
+function createApiClient<T extends ApiConfig>(config: T): ApiClient<T>
 
-### Synchronization:
-- `npm run sync:changes` - Sync changes between environments
-- `npm run watch:ssot` - Start file watcher for auto-updates
-- `npm run update:dependencies` - Update dependent files
+// ❌ BAD: Avoid 'any' types
+const data: any = response.data;
 
-## 📱 VS CODE INTEGRATION
+// ✅ GOOD: Use proper error handling
+try {
+  const result = await apiCall();
+  return { success: true, data: result };
+} catch (error) {
+  logger.error('API call failed', { error, context });
+  throw new ApiError('Failed to fetch data', error);
+}
+```
 
-### Use Command Palette (Ctrl+Shift+P):
-- "Tasks: Run Task" → "Find SSOT for..."  
-- "Tasks: Run Task" → "Validate SSOT consistency"
-- "Tasks: Run Task" → "Check breaking changes"
-- "Tasks: Run Task" → "Generate types"
+### 🔗 Import Patterns
+```typescript
+// ✅ GOOD: Use absolute imports with aliases
+import { Component } from '@/components';
+import { utils } from '@shared/utils';
+import { service } from '@server/services';
+import { Config } from '@config/app.config';
+import { ApiResponse } from '@types/api';
 
-## 🔍 QUICK REFERENCE - Common Scenarios
+// ❌ BAD: Avoid relative imports
+import { Component } from '../../../components';
+import { utils } from '../../shared/utils';
+```
 
-### "I want to add a new database table":
-1. PRIMARY: `packages/shared/db/schema.ts`
-2. RUN: `npm run generate:types`
-3. UPDATE: Create migration in `tools/migrations/`
-4. RUN: `npm run validate:ssot`
+### 🏗️ Component Architecture
+```typescript
+// ✅ GOOD: Follow this component structure
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
+import type { ComponentProps } from '@types/ui';
 
-### "I want to add a new API endpoint":
-1. PRIMARY: `apps/server/routes/[appropriate-route].ts`
-2. RUN: `npm run generate:api-docs`
-3. UPDATE: Frontend service in `apps/client/src/services/`
-4. RUN: `npm run validate:runtime --api`
+interface Props extends ComponentProps {
+  variant: 'primary' | 'secondary';
+  children: React.ReactNode;
+}
 
-### "I want to modify a React component":
-1. PRIMARY: `apps/client/src/components/[component-path]`
-2. UPDATE: Types in `packages/shared/types/ui.ts` if needed
-3. RUN: `npm run type-check`
+export const MyComponent: React.FC<Props> = ({ 
+  variant, 
+  children, 
+  className, 
+  ...props 
+}) => {
+  return (
+    <div 
+      className={cn(
+        'base-styles',
+        variant === 'primary' && 'primary-styles',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+```
 
-### "I want to add environment variables":
-1. PRIMARY: `.env.example`
-2. UPDATE: `packages/config/environment.ts`
-3. RUN: `npm run sync:changes`
+### 🔄 State Management
+```typescript
+// ✅ GOOD: Use React Context for global state
+export const AssistantContext = createContext<AssistantContextType | undefined>(undefined);
 
-### "I want to modify voice assistant":
-1. PRIMARY: `apps/client/src/context/AssistantContext.tsx`
-2. UPDATE: `apps/server/services/vapiIntegration.ts`
-3. UPDATE: `apps/client/src/components/VoiceAssistant.tsx`
+export const useAssistant = () => {
+  const context = useContext(AssistantContext);
+  if (!context) {
+    throw new Error('useAssistant must be used within AssistantProvider');
+  }
+  return context;
+};
 
-## ⚠️ IMPORTANT REMINDERS
+// ✅ GOOD: Use useState for local state
+const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+```
 
-1. **NEVER** modify generated files directly (they have "auto-generated" comments)
-2. **ALWAYS** update PRIMARY file first, then run automation
-3. **ALWAYS** validate with `npm run validate:ssot` before committing
-4. **ALWAYS** check breaking changes for schema/API modifications
-5. **USE** the interactive tools when unsure: `node scripts/what-to-change.js`
+### 🗄️ Database Patterns
+```typescript
+// ✅ GOOD: Use Drizzle ORM patterns
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  tenantId: text("tenant_id").references(() => tenants.id),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  createdAt: integer("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
 
-## 🆘 WHEN STUCK
+// ✅ GOOD: Always filter by tenant
+const getUsersByTenant = async (tenantId: string) => {
+  return db.select().from(users).where(eq(users.tenantId, tenantId));
+};
+```
 
-1. Run: `node scripts/what-to-change.js` (interactive guidance)
-2. Run: `node scripts/ssot-finder.js` (find files)
-3. Run: `npm run validate:ssot` (check consistency)
-4. Check: `config/ssot-registry.json` (complete mapping)
+### 🔧 API Patterns
+```typescript
+// ✅ GOOD: Use proper validation
+const createUserSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  role: z.enum(['admin', 'staff', 'guest'])
+});
 
-## 📚 DOCUMENTATION LOCATIONS
-
-- Architecture: `docs/ARCHITECTURE.md`
-- API Docs: `docs/API_DOCUMENTATION.md` (auto-generated)
-- Deployment: `docs/DEPLOYMENT_QUICKSTART.md`
-- SSOT Registry: `config/ssot-registry.json`
+// ✅ GOOD: Follow API structure
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const validatedData = createUserSchema.parse(req.body);
+    const tenantId = req.tenant?.id;
+    
+    if (!tenantId) {
+      return res.status(400).json({ error: 'Tenant not found' });
+    }
+    
+    const user = await userService.create({ ...validatedData, tenantId });
+    logger.success('User created', { userId: user.id, tenantId });
+    
+    res.status(201).json({ success: true, data: user });
+  } catch (error) {
+    logger.error('Failed to create user', { error, body: req.body });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+```
 
 ---
 
-**Remember: The goal is CONSISTENCY. Always use SSOT automation to maintain system integrity! 🎯** 
+## 🎨 UI/UX STANDARDS
+
+### 🎭 Component Naming
+```typescript
+// ✅ GOOD: PascalCase for components
+export const VoiceAssistantPanel = () => {};
+export const HotelConfigurationForm = () => {};
+export const StaffDashboardLayout = () => {};
+
+// ✅ GOOD: camelCase for hooks
+export const useHotelConfiguration = () => {};
+export const useVoiceAssistant = () => {};
+export const useMultiTenant = () => {};
+```
+
+### 🎨 Styling Patterns
+```typescript
+// ✅ GOOD: Use Tailwind CSS with cn utility
+import { cn } from '@/lib/utils';
+
+const buttonVariants = {
+  primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+  secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900',
+  danger: 'bg-red-600 hover:bg-red-700 text-white'
+};
+
+export const Button = ({ variant = 'primary', className, ...props }) => (
+  <button 
+    className={cn(
+      'px-4 py-2 rounded-md font-medium transition-colors',
+      buttonVariants[variant],
+      className
+    )}
+    {...props}
+  />
+);
+```
+
+### 🌍 Internationalization
+```typescript
+// ✅ GOOD: Support multiple languages
+export type Language = 'en' | 'vi' | 'fr' | 'zh' | 'ru' | 'ko';
+
+export const translations = {
+  en: { welcome: 'Welcome to Mi Nhon Hotel' },
+  vi: { welcome: 'Chào mừng đến Mi Nhon Hotel' },
+  fr: { welcome: 'Bienvenue à Mi Nhon Hotel' }
+};
+
+// ✅ GOOD: Use language context
+export const useTranslation = (language: Language) => {
+  return translations[language] || translations.en;
+};
+```
+
+---
+
+## 🧪 TESTING REQUIREMENTS
+
+### 🔧 Test Structure
+```typescript
+// ✅ GOOD: Follow test patterns
+describe('HotelService', () => {
+  beforeEach(() => {
+    // Setup test data
+  });
+
+  describe('createHotel', () => {
+    it('should create hotel successfully', async () => {
+      const hotelData = { name: 'Test Hotel', location: 'Test City' };
+      const result = await hotelService.create(hotelData);
+      
+      expect(result.success).toBe(true);
+      expect(result.data.name).toBe(hotelData.name);
+    });
+
+    it('should handle validation errors', async () => {
+      const invalidData = { name: '' }; // Invalid name
+      await expect(hotelService.create(invalidData)).rejects.toThrow();
+    });
+  });
+});
+```
+
+### 📊 Integration Testing
+```bash
+# Run integration tests
+npm run test:integration
+
+# Run specific test suites
+npm run test:hotel-features
+npm run test:voice-assistant
+npm run test:multi-tenant
+```
+
+---
+
+## 🔐 SECURITY GUIDELINES
+
+### 🛡️ Authentication & Authorization
+```typescript
+// ✅ GOOD: Always verify JWT tokens
+export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// ✅ GOOD: Always filter by tenant
+export const enforceRowLevelSecurity = (req: Request, res: Response, next: NextFunction) => {
+  req.tenant = getTenantFromToken(req.user);
+  next();
+};
+```
+
+### 🔒 Data Validation
+```typescript
+// ✅ GOOD: Validate all inputs
+import { z } from 'zod';
+
+export const hotelSchema = z.object({
+  name: z.string().min(1).max(100),
+  location: z.string().min(1).max(200),
+  phone: z.string().regex(/^\+?[\d\s\-\(\)]+$/),
+  email: z.string().email()
+});
+
+// ✅ GOOD: Sanitize user inputs
+export const sanitizeInput = (input: string): string => {
+  return input.trim().replace(/<script[^>]*>.*?<\/script>/gi, '');
+};
+```
+
+---
+
+## 🚀 DEPLOYMENT & ENVIRONMENT
+
+### 🌍 Environment Variables
+```bash
+# Core Settings
+NODE_ENV=production
+PORT=10000
+DATABASE_URL=postgresql://...
+
+# Authentication
+JWT_SECRET=your-super-secret-key
+STAFF_ACCOUNTS=admin:password,staff:password
+
+# AI Services
+VITE_OPENAI_API_KEY=sk-...
+VITE_VAPI_PUBLIC_KEY=pk-...
+VITE_VAPI_ASSISTANT_ID=asst-...
+
+# Multi-language Support
+VITE_VAPI_PUBLIC_KEY_VI=pk-...
+VITE_VAPI_ASSISTANT_ID_VI=asst-...
+
+# SaaS Features
+GOOGLE_PLACES_API_KEY=...
+MAILJET_API_KEY=...
+```
+
+### 📦 Build & Deploy
+```bash
+# Development
+npm run dev                    # Start development servers
+npm run dev:client            # Start only frontend
+npm run dev:server            # Start only backend
+
+# Production Build
+npm run build                 # Build for production
+npm run start                 # Start production server
+npm run preview              # Preview production build
+
+# Deployment
+./deploy-render.sh           # Deploy to Render
+./deploy-build.sh            # Build and deploy
+```
+
+---
+
+## 📚 DOCUMENTATION REQUIREMENTS
+
+### 📝 Code Documentation
+```typescript
+/**
+ * Hotel Research Service
+ * 
+ * Automatically researches hotel information using multiple data sources
+ * including Google Places API, website scraping, and social media.
+ * 
+ * @example
+ * ```typescript
+ * const service = new HotelResearchService();
+ * const hotelData = await service.basicResearch('Mi Nhon Hotel', 'Mui Ne');
+ * ```
+ */
+export class HotelResearchService {
+  /**
+   * Performs basic hotel research using free APIs
+   * 
+   * @param hotelName - Name of the hotel to research
+   * @param location - Optional location for better search results
+   * @returns Promise containing basic hotel information
+   */
+  async basicResearch(hotelName: string, location?: string): Promise<BasicHotelData> {
+    // Implementation...
+  }
+}
+```
+
+### 📖 API Documentation
+```typescript
+/**
+ * @api {post} /api/hotels Create Hotel
+ * @apiName CreateHotel
+ * @apiGroup Hotels
+ * @apiVersion 1.0.0
+ * 
+ * @apiHeader {String} Authorization Bearer token
+ * @apiHeader {String} Content-Type application/json
+ * 
+ * @apiParam {String} name Hotel name (1-100 characters)
+ * @apiParam {String} location Hotel location
+ * @apiParam {String} [description] Hotel description
+ * 
+ * @apiSuccess {Boolean} success Success status
+ * @apiSuccess {Object} data Hotel data
+ * @apiSuccess {String} data.id Hotel ID
+ * @apiSuccess {String} data.name Hotel name
+ * 
+ * @apiError {String} error Error message
+ * @apiError {Number} code Error code
+ */
+```
+
+---
+
+## 🆘 TROUBLESHOOTING WHEN STUCK
+
+### 🔍 Finding the Right Files
+```bash
+# 1. Use interactive guidance
+node scripts/what-to-change.js
+
+# 2. Find specific files
+node scripts/ssot-finder.js
+
+# 3. Check consistency
+npm run validate:ssot
+
+# 4. Check complete mapping
+cat config/ssot-registry.json
+```
+
+### 📚 Key Documentation Files
+- **Architecture**: `docs/ARCHITECTURE.md`
+- **API Docs**: `docs/API_DOCUMENTATION.md` (auto-generated)
+- **Deployment**: `docs/DEPLOYMENT_QUICKSTART.md`
+- **Onboarding**: `docs/ONBOARDING_GUIDE.md`
+- **SSOT Registry**: `config/ssot-registry.json`
+
+### 🎯 Quick Commands Reference
+```bash
+# Development
+npm run dev                    # Start full development
+npm run type-check            # TypeScript validation
+npm run lint:check            # Code linting
+
+# SSOT & Validation
+npm run validate:ssot         # Validate consistency
+npm run find-ssot [keyword]   # Find SSOT files
+npm run check:breaking-changes # Check breaking changes
+
+# Generation & Sync
+npm run generate:types        # Generate types
+npm run generate:api-docs     # Generate API docs
+npm run sync:changes          # Sync between environments
+```
+
+---
+
+## 🎯 SUMMARY
+
+**DemoHotel19May** là một SaaS platform sophisticated với:
+
+- **🏗️ Monorepo Architecture**: apps/, packages/, tools/, docs/
+- **🤖 AI Integration**: OpenAI + Vapi.ai voice assistants
+- **🏢 Multi-tenant**: Isolated data and functionality per hotel
+- **🌍 Multi-language**: 6 languages supported
+- **📊 Analytics**: Comprehensive reporting and dashboards
+- **🎨 Modern UI**: React + TypeScript + Tailwind CSS
+- **🔒 Security**: JWT authentication + RBAC
+- **📱 Real-time**: WebSocket communication
+- **🗄️ Database**: PostgreSQL/SQLite with Drizzle ORM
+
+**🎯 Remember: CONSISTENCY is key. Always use SSOT automation to maintain system integrity!**
+
+---
+
+## ⚡ PERFORMANCE GUIDELINES
+
+### 🚀 Frontend Optimization
+```typescript
+// ✅ GOOD: Use React.memo for expensive components
+export const ExpensiveComponent = React.memo(({ data }) => {
+  return <div>{/* Complex rendering */}</div>;
+});
+
+// ✅ GOOD: Use useMemo for expensive calculations
+const expensiveValue = useMemo(() => {
+  return data.reduce((acc, item) => acc + item.value, 0);
+}, [data]);
+
+// ✅ GOOD: Use lazy loading for routes
+const LazyDashboard = lazy(() => import('@/pages/Dashboard'));
+```
+
+### 🗄️ Database Optimization
+```typescript
+// ✅ GOOD: Use indexes for frequently queried columns
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  tenantId: text("tenant_id").references(() => tenants.id), // Add index
+  email: text("email").notNull().unique(), // Already indexed
+  createdAt: integer("created_at").default(sql`CURRENT_TIMESTAMP`),
+}, (table) => ({
+  tenantIdx: index("users_tenant_idx").on(table.tenantId),
+  emailIdx: index("users_email_idx").on(table.email),
+}));
+
+// ✅ GOOD: Limit query results
+const getRecentCalls = async (tenantId: string, limit = 100) => {
+  return db.select()
+    .from(calls)
+    .where(eq(calls.tenantId, tenantId))
+    .orderBy(desc(calls.createdAt))
+    .limit(limit);
+};
+```
+
+### 🔄 API Optimization
+```typescript
+// ✅ GOOD: Use caching for expensive operations
+import NodeCache from 'node-cache';
+const cache = new NodeCache({ stdTTL: 300 }); // 5 minutes
+
+export const getHotelData = async (hotelId: string) => {
+  const cacheKey = `hotel:${hotelId}`;
+  let hotelData = cache.get(cacheKey);
+  
+  if (!hotelData) {
+    hotelData = await db.select().from(hotels).where(eq(hotels.id, hotelId));
+    cache.set(cacheKey, hotelData);
+  }
+  
+  return hotelData;
+};
+
+// ✅ GOOD: Use compression for API responses
+import compression from 'compression';
+app.use(compression());
+```
+
+---
+
+*🎯 Goal: Maintain consistency, follow SSOT principles, and deliver exceptional hotel management experiences through AI-powered voice assistants!* 
