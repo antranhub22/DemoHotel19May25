@@ -1,5 +1,37 @@
 # 🏨 Hotel Voice Assistant SaaS Platform - Cursor Rules
 
+## 🚨 CRITICAL RULES - ALWAYS FOLLOW FIRST
+
+### 🔒 Code Modification Rules
+- **NEVER modify existing working code unless explicitly asked**
+- **ONLY make changes to files I specifically mention**
+- **ASK before making changes to multiple files**
+- **PRESERVE all existing functionality**
+- **When adding new features, create NEW files when possible**
+- **Always explain what files you plan to modify before making changes**
+
+### 🎨 Code Style Standards
+- **Follow existing code patterns in the project**
+- **Maintain consistent naming conventions**
+- **Keep the same indentation and formatting style**
+- **Use existing import patterns and component structures**
+
+### 🛡️ Safety Rules
+- **Never remove or modify existing functions without confirmation**
+- **Don't change import statements unless necessary**
+- **Preserve existing error handling logic**
+- **Keep existing database schemas intact**
+- **Maintain backward compatibility**
+
+### ⚠️ Before Any Changes
+1. **Read existing code thoroughly**
+2. **Understand current implementation patterns**
+3. **Identify the minimal changes needed**
+4. **Ask for confirmation on major modifications**
+5. **Test changes don't break existing functionality**
+
+---
+
 ## 📋 PROJECT OVERVIEW
 
 **DemoHotel19May** là một hệ thống quản lý khách sạn đa thuê bao (multi-tenant SaaS) với AI voice assistant, được xây dựng bằng kiến trúc monorepo hiện đại. Dự án hỗ trợ nhiều khách sạn với voice assistant riêng biệt, tích hợp OpenAI và Vapi.ai.
@@ -608,6 +640,99 @@ npm run generate:types        # Generate types
 npm run generate:api-docs     # Generate API docs
 npm run sync:changes          # Sync between environments
 ```
+
+---
+
+## 🔧 DEVELOPMENT WORKFLOW & BEST PRACTICES
+
+### 📋 Pre-Development Checklist
+```bash
+# 1. Always check current state first
+git status
+git pull origin main
+
+# 2. Understand the codebase structure
+npm run validate:ssot
+node scripts/what-to-change.js
+
+# 3. Check for any breaking changes
+npm run check:breaking-changes
+
+# 4. Run tests to ensure clean baseline
+npm run test
+npm run type-check
+```
+
+### 🚫 What NOT to Do
+- **❌ Don't modify core files without understanding the full impact**
+- **❌ Don't change database schemas without migration scripts**
+- **❌ Don't remove existing API endpoints without deprecation**
+- **❌ Don't alter authentication logic without security review**
+- **❌ Don't modify shared components without testing all usages**
+- **❌ Don't change environment variables without updating documentation**
+
+### ✅ What TO Do Instead
+- **✅ Create new components alongside existing ones**
+- **✅ Add new API endpoints instead of modifying existing ones**
+- **✅ Use feature flags for new functionality**
+- **✅ Add comprehensive error handling**
+- **✅ Write tests for new code**
+- **✅ Document all changes thoroughly**
+
+### 🔄 Change Implementation Pattern
+```typescript
+// 1. UNDERSTAND: Read existing implementation
+const existingComponent = require('./ExistingComponent');
+
+// 2. EXTEND: Create new functionality
+interface NewFeatureProps extends ExistingComponentProps {
+  newFeature?: boolean;
+}
+
+// 3. ENHANCE: Add backward-compatible improvements
+export const EnhancedComponent: React.FC<NewFeatureProps> = ({ 
+  newFeature = false, 
+  ...existingProps 
+}) => {
+  // Preserve existing behavior
+  if (!newFeature) {
+    return <ExistingComponent {...existingProps} />;
+  }
+  
+  // Add new functionality
+  return (
+    <div>
+      <ExistingComponent {...existingProps} />
+      <NewFeatureComponent />
+    </div>
+  );
+};
+```
+
+### 🧪 Testing Guidelines
+```bash
+# Always test changes thoroughly
+npm run test                     # Unit tests
+npm run test:integration        # Integration tests  
+npm run type-check              # TypeScript validation
+npm run lint:check              # Code linting
+npm run validate:ssot           # SSOT consistency
+npm run validate:runtime        # Runtime validation
+```
+
+### 📝 Documentation Standards
+- **Always update README.md for new features**
+- **Add JSDoc comments for all public functions**
+- **Update API documentation for new endpoints**
+- **Document breaking changes in CHANGELOG.md**
+- **Include examples in code comments**
+
+### 🔐 Security Checklist
+- **Validate all user inputs**
+- **Check authentication on all protected routes**
+- **Ensure tenant isolation in multi-tenant features**
+- **Use environment variables for sensitive data**
+- **Never commit secrets to version control**
 
 ---
 
