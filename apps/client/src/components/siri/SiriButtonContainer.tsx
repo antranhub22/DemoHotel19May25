@@ -105,8 +105,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
-          width: '300px',
-          height: '300px',
+          width: '320px',  // Slightly larger to accommodate external bars
+          height: '320px', // Slightly larger to accommodate external bars
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
@@ -120,8 +120,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
             {[...Array(16)].map((_, i) => {
               const angle = (360 / 16) * i;
               const radians = (angle * Math.PI) / 180;
-              const baseRadius = 95; // Gần hơn với button
-              const barHeight = 6 + Math.round((micLevel/100)*12) * ((i%2)+1); // Nhỏ hơn
+              const baseRadius = 110; // Adjusted for new container size
+              const barHeight = 8 + Math.round((micLevel/100)*16) * ((i%2)+1); // Better proportions
               const x = Math.cos(radians) * baseRadius;
               const y = Math.sin(radians) * baseRadius;
               
@@ -133,11 +133,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
                     left: '50%',
                     top: '50%',
                     transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
-                    width: '2px', // Mỏng hơn
+                    width: '3px', // Slightly wider for better visibility
                     height: `${barHeight}px`,
                     backgroundColor: currentColors.primary,
-                    borderRadius: '1px',
-                    boxShadow: `0 0 4px ${currentColors.glow}`,
+                    borderRadius: '1.5px',
+                    boxShadow: `0 0 6px ${currentColors.glow}`,
                     opacity: 0.7 + (micLevel/100) * 0.3,
                     transformOrigin: 'center bottom',
                     zIndex: 1

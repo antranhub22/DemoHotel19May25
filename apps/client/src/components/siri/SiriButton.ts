@@ -62,12 +62,12 @@ export class SiriButton {
     if (!ctx) throw new Error('Could not get canvas context');
     this.ctx = ctx;
     
-    // Initialize properties with larger dimensions
-    this.width = 500;  // Increased base size
-    this.height = 500; // Increased base size
+    // Initialize properties to match container
+    this.width = 280;   // Match SiriCallButton container
+    this.height = 280;  // Match SiriCallButton container
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = 100;  // Increased base radius
+    this.radius = 98;   // Proportional to 280px container (280 * 0.35)
     this.ripples = [];
     this.isListening = false;
     this.pulsePhase = 0;
@@ -119,9 +119,9 @@ export class SiriButton {
     const container = this.canvas.parentElement;
     if (!container) return;
 
-    // Set canvas size to be a perfect square (use min of width/height)
+    // Set canvas size to match container size (280x280)
     const dpr = window.devicePixelRatio || 1;
-    const size = Math.min(container.clientWidth, container.clientHeight);
+    const size = Math.min(container.clientWidth, container.clientHeight, 280); // Max 280px
     this.width = this.height = size;
     this.canvas.width = this.canvas.height = size * dpr;
     this.canvas.style.width = this.canvas.style.height = `${size}px`;
@@ -131,9 +131,10 @@ export class SiriButton {
     // Scale context
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
     this.ctx.scale(dpr, dpr);
-    // Update center coordinates
+    // Update center coordinates and radius proportionally
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
+    this.radius = Math.max(60, size * 0.35); // Proportional radius
   }
 
   private drawTexturePattern() {
@@ -458,9 +459,9 @@ export class SiriButton {
   }
 
   private animate() {
-    // Responsive: update radius based on container size with larger base size
-    const isMobile = Math.min(this.width, this.height) < 850; // Adjusted threshold
-    this.radius = isMobile ? Math.max(80, Math.min(this.width, this.height) / 2.8) : Math.max(90, Math.min(this.width, this.height) / 5.2);
+    // Responsive: update radius based on container size
+    const isMobile = Math.min(this.width, this.height) < 300; // Mobile threshold
+    this.radius = Math.max(60, Math.min(this.width, this.height) * 0.35); // Consistent proportional radius
     // Clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
     // Draw all elements

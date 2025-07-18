@@ -164,8 +164,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-visible flex items-center justify-center z-50`}
         style={{ 
           cursor: 'pointer',
-          width: '240px',
-          height: '240px',
+          width: '280px',  // Increased to match SiriButtonContainer
+          height: '280px', // Increased to match SiriButtonContainer
           zIndex: 9999,
           pointerEvents: 'auto',
           position: 'relative'
