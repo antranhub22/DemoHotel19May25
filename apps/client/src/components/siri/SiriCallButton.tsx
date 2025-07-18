@@ -61,8 +61,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // Handle click events
   const handleClick = async () => {
+    console.log('🔔 [SiriCallButton] Click/Touch event triggered! isListening:', isListening);
+    
     if (!isListening && onCallStart) {
       setStatus('listening');
+      console.log('🎤 [SiriCallButton] Starting call...');
       try {
         await onCallStart();
       } catch (error) {
@@ -71,6 +74,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     } else if (isListening && onCallEnd) {
       setStatus('processing');
+      console.log('🛑 [SiriCallButton] Ending call...');
       onCallEnd();
       setTimeout(() => setStatus('idle'), 500);
     }
@@ -152,6 +156,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         display: 'flex', // Add flexbox
         alignItems: 'center', // Center vertically
         justifyContent: 'center', // Center horizontally
+        // Mobile touch optimizations
+        touchAction: 'manipulation', // Improve touch responsiveness
+        WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
+        WebkitUserSelect: 'none', // Prevent text selection
+        userSelect: 'none', // Prevent text selection
+        WebkitTouchCallout: 'none', // Disable context menu on long press
       }}
     >
       {/* Loading state */}

@@ -63,18 +63,33 @@
   will-change: transform !important; /* Hint for browser optimization */
 }
 
-/* Mobile optimizations - same canvas behavior as desktop */
+/* Mobile optimizations - Enhanced touch support */
 @media (max-width: 768px) {
   .voice-button {
     /* Ensure no background conflicts on mobile */
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
+    /* Enhanced mobile touch */
+    touch-action: manipulation !important; /* Fast touch response */
+    -webkit-tap-highlight-color: transparent !important; /* Remove tap highlight */
+    -webkit-user-select: none !important; /* Prevent text selection */
+    user-select: none !important;
+    -webkit-touch-callout: none !important; /* Disable context menu */
+    /* Ensure touch target is large enough */
+    min-width: 44px !important; /* iOS minimum touch target */
+    min-height: 44px !important;
   }
   
   /* Disable hover effects on mobile for better performance */
   .voice-button:hover {
     transform: none;
+  }
+  
+  /* Add active state for mobile feedback */
+  .voice-button:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
   }
 }
 
