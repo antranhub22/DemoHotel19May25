@@ -173,7 +173,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
 
   // Add specific handlers for SiriButtonContainer Cancel/Confirm
   const handleCancel = useCallback(() => {
-    console.log('❌ [useInterface1] Cancel button clicked in SiriButtonContainer');
+    console.log('❌ [useInterface1] Cancel button clicked - Returning to Interface1 initial state');
     console.log('📊 [useInterface1] Current state:', { 
       isCallStarted: conversationState.isCallStarted,
       conversationPopupId,
@@ -181,7 +181,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     });
     
     try {
-      // Clear any active popups first - this should always succeed
+      // STEP 1: Clear any active popups first
       if (conversationPopupId) {
         try {
           console.log('🗑️ [useInterface1] Removing conversation popup:', conversationPopupId);
@@ -190,39 +190,62 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
           console.log('✅ [useInterface1] Popup removed successfully');
         } catch (popupError) {
           console.error('⚠️ [useInterface1] Failed to remove popup but continuing:', popupError);
-          // Force clear the popup ID anyway
           setConversationPopupId(null);
         }
       }
       
-      // Use conversation state handler with error isolation
+      // STEP 2: Reset conversation state with error isolation
       try {
         conversationState.handleCancel();
         console.log('✅ [useInterface1] conversationState.handleCancel() completed');
       } catch (stateError) {
         console.error('⚠️ [useInterface1] conversationState.handleCancel() failed:', stateError);
-        // Continue execution - the important thing is that popup is cleared
+        // Continue - the popup cleanup is more important for UI consistency
       }
       
-      console.log('✅ [useInterface1] Cancel completed - staying in Interface1');
+      // STEP 3: Close right panel if open
+      try {
+        setShowRightPanel(false);
+        console.log('✅ [useInterface1] Right panel closed');
+      } catch (panelError) {
+        console.error('⚠️ [useInterface1] Failed to close right panel:', panelError);
+      }
+      
+      // STEP 4: Force scroll to top (return to initial view)
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        console.log('✅ [useInterface1] Scrolled to top');
+      } catch (scrollError) {
+        console.error('⚠️ [useInterface1] Failed to scroll to top:', scrollError);
+      }
+      
+      console.log('✅ [useInterface1] Cancel completed - Interface1 returned to initial state');
     } catch (error) {
-      console.error('❌ [useInterface1] Error in handleCancel:', error);
+      console.error('❌ [useInterface1] Critical error in handleCancel:', error);
       
-      // Emergency cleanup - ensure popup is removed even on error
-      if (conversationPopupId) {
-        console.log('🚨 [useInterface1] Emergency popup cleanup');
-        try {
+      // EMERGENCY CLEANUP - ensure UI is always in clean state
+      try {
+        // Force clear all popups
+        if (conversationPopupId) {
           removePopup(conversationPopupId);
-        } catch (cleanupError) {
-          console.error('🚨 [useInterface1] Emergency cleanup failed:', cleanupError);
+          setConversationPopupId(null);
         }
-        setConversationPopupId(null);
+        
+        // Force close right panel
+        setShowRightPanel(false);
+        
+        // Force scroll to top
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        
+        console.log('🚨 [useInterface1] Emergency cleanup completed');
+      } catch (emergencyError) {
+        console.error('🚨 [useInterface1] Emergency cleanup failed:', emergencyError);
       }
       
-      // Show user-friendly message instead of crashing
-      console.log('🔄 [useInterface1] Cancel operation completed with errors but UI state restored');
+      // Prevent error propagation to avoid crash
+      console.log('🔄 [useInterface1] Cancel operation completed despite errors - UI restored');
     }
-  }, [conversationState, conversationPopupId, removePopup, transcripts.length]);
+  }, [conversationState, conversationPopupId, removePopup, transcripts.length, setShowRightPanel]);
 
   const handleConfirm = useCallback(() => {
     console.log('✅ [useInterface1] Confirm button clicked in SiriButtonContainer');

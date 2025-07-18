@@ -766,7 +766,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         console.error('🚨 [AssistantContext] Emergency cleanup failed:', emergencyError);
       }
     }
-  }, [getVapiInstance, callTimer, callDuration, setOrderSummary, initialOrderSummary, transcripts, callDetails?.id, tenantId, language, setCallSummary, setServiceRequests]);
+  }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language]);
 
   // Function to translate text to Vietnamese
   const translateToVietnamese = async (text: string): Promise<string> => {

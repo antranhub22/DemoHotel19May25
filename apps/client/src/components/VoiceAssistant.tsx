@@ -8,6 +8,8 @@ import { Interface1 } from '@/components/Interface1';
 import Interface2 from '@/components/Interface2';
 import Interface3 from '@/components/Interface3';
 import Interface4 from '@/components/Interface4';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
 import type { Language } from '@/types/interface1.types';
 
 const VoiceAssistant: React.FC = () => {
@@ -180,7 +182,15 @@ const VoiceAssistant: React.FC = () => {
           minHeight: 'calc(100vh - 42px)' // Adjust height to account for header
         }}
       >
-        <Interface1 isActive={interfaceStates.interface1} />
+        <ErrorBoundary
+          fallbackComponent={<Interface1ErrorFallback />}
+          onError={(error, errorInfo) => {
+            console.error('🚨 [VoiceAssistant] Interface1 Error:', error);
+            console.error('🚨 [VoiceAssistant] Error Info:', errorInfo);
+          }}
+        >
+          <Interface1 isActive={interfaceStates.interface1} />
+        </ErrorBoundary>
         <Interface2 isActive={interfaceStates.interface2} />
         <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
         <Interface4 isActive={interfaceStates.interface4} />
