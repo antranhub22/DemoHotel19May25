@@ -355,41 +355,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     if (buttonRef.current && !cleanupFlagRef.current) {
       buttonRef.current.setListening(isListening);
       
-      // CRITICAL FIX: Trigger resize when listening state changes
-      // This fixes alignment issues when layout changes (Cancel/Confirm buttons appear)
+      // 🔧 SIMPLIFIED: Single resize trigger without layout thrashing
       const triggerResize = () => {
         if (buttonRef.current && !cleanupFlagRef.current) {
           console.log('🔧 [SiriCallButton] Triggering resize due to listening state change');
-          // Force canvas to recalculate size when layout changes
-          const container = document.getElementById(containerId);
-          if (container) {
-            // 🔧 ENHANCED: Force container reflow before resize
-            container.style.display = 'none';
-            container.offsetHeight; // Force reflow
-            container.style.display = 'flex';
-            
-            // Multiple resize triggers to ensure proper repositioning
-            window.dispatchEvent(new Event('resize'));
-            
-            // 🔧 NEW: Use requestAnimationFrame for better timing
-            requestAnimationFrame(() => {
-              window.dispatchEvent(new Event('resize'));
-              console.log('🔧 [SiriCallButton] RAF resize for layout stabilization');
-              
-              // One more resize after animation completes
-              setTimeout(() => {
-                window.dispatchEvent(new Event('resize'));
-                console.log('🔧 [SiriCallButton] Final resize after animation');
-              }, 350); // After transition duration
-            });
-          }
+          // Simple resize trigger without forcing display changes
+          window.dispatchEvent(new Event('resize'));
         }
       };
 
-      // Trigger resize immediately and after DOM updates
-      setTimeout(triggerResize, 0);    // Immediate resize
-      setTimeout(triggerResize, 100);  // After DOM update
-      setTimeout(triggerResize, 250);  // After layout stabilizes
+      // 🔧 REDUCED: Only trigger resize after layout settles, no forced reflows
+      setTimeout(triggerResize, 100);  // Single resize after DOM update
     }
   }, [isListening, containerId]);
 

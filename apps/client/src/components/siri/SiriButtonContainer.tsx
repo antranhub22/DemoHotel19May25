@@ -121,8 +121,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
-          width: 'clamp(280px, 80vw, 320px)',  // Responsive width for mobile/desktop
-          height: 'clamp(280px, 80vw, 320px)', // Responsive height for mobile/desktop
+          // 🔧 CRITICAL FIX: More stable sizing for desktop alignment
+          width: 'min(320px, 80vw)',  // Simpler responsive width
+          height: 'min(320px, 80vw)', // Simpler responsive height
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
@@ -131,17 +132,21 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           // Mobile touch optimizations
           minWidth: '280px', // Ensure minimum touch target
           minHeight: '280px', // Ensure minimum touch target
+          // Desktop optimization
+          maxWidth: '320px', // Consistent max size for desktop
+          maxHeight: '320px', // Consistent max size for desktop
           cursor: 'pointer', // Show it's clickable
           touchAction: 'manipulation', // Improve touch response
-          // ✅ CRITICAL FIX: Force perfect centering regardless of layout changes
+          // ✅ CRITICAL FIX: Stable positioning without layout shifts
           position: 'relative',
           flexShrink: 0, // Prevent container from shrinking
           alignSelf: 'center', // Self-align to center
-          // 🔧 NEW: Ensure stable dimensions during layout changes
+          // 🔧 ENHANCED: Prevent layout calculations from affecting alignment
           aspectRatio: '1', // Force perfect square
           margin: '0 auto', // Center horizontally
-          contain: 'layout', // Isolate layout calculations
-          willChange: 'transform', // Optimize for animations
+          contain: 'layout style', // Enhanced containment for stability
+          // 🔧 NEW: Remove potentially problematic properties
+          // willChange: 'transform', // Remove this as it can cause positioning issues
         }}
       >
         <SiriCallButton

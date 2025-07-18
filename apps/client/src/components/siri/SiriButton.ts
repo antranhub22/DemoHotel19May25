@@ -238,7 +238,7 @@ export class SiriButton {
   }
 
   private resize() {
-    console.log('🔍 [SiriButton] RESIZE START - Mobile Debug');
+    console.log('🔍 [SiriButton] RESIZE START - Fixed positioning');
     
     const container = document.getElementById(this.canvas.id.replace('-canvas', ''));
     if (!container) {
@@ -246,138 +246,96 @@ export class SiriButton {
       return;
     }
 
-    // IMPORTANT: Force a reflow to ensure accurate measurements
-    container.offsetHeight; // Trigger reflow
-
-    // Get container dimensions - multiple methods for better compatibility
+    // 🔧 CRITICAL FIX: Get container dimensions more reliably
     const containerRect = container.getBoundingClientRect();
-    const containerWidth = container.clientWidth || containerRect.width || 280;
-    const containerHeight = container.clientHeight || containerRect.height || 280;
     
-    console.log('[SiriButton] 🔍 DEBUG RESIZE:');
-    console.log('  📦 Container:', container.id || container.className);
-    console.log('  📏 ClientWidth:', container.clientWidth);
-    console.log('  📏 ClientHeight:', container.clientHeight); 
-    console.log('  📏 BoundingRect:', containerRect.width, 'x', containerRect.height);
-    console.log('  🎯 Final used size:', containerWidth, 'x', containerHeight);
+    // Force reflow to ensure accurate measurements
+    container.offsetHeight;
     
-    // 🔍 MOBILE DEBUG: Check if dimensions are valid
+    // 🔧 NEW: Use container's actual rendered size instead of responsive calculations
+    const containerWidth = Math.max(containerRect.width, 280); // Minimum fallback
+    const containerHeight = Math.max(containerRect.height, 280); // Minimum fallback
+    
+    console.log('[SiriButton] 🔧 FIXED RESIZE:');
+    console.log('  📦 Container rect:', containerRect.width, 'x', containerRect.height);
+    console.log('  🎯 Used dimensions:', containerWidth, 'x', containerHeight);
+    
+    // Validate dimensions
     if (containerWidth === 0 || containerHeight === 0) {
-      console.error('❌ [SiriButton] Invalid container dimensions on mobile:', {
+      console.error('❌ [SiriButton] Invalid container dimensions:', {
         width: containerWidth,
         height: containerHeight,
-        containerRect,
-        container: container
+        containerRect
       });
       return;
     }
     
-    // Set canvas size to match container size with DPR
-    const dpr = window.devicePixelRatio || 1;
-    console.log('  🖥️ Device pixel ratio:', dpr);
+    // 🔧 CRITICAL FIX: Make canvas slightly smaller than container for perfect fit
+    const CANVAS_PADDING = 4; // Small padding to ensure canvas fits perfectly
+    const finalWidth = containerWidth - CANVAS_PADDING;
+    const finalHeight = containerHeight - CANVAS_PADDING;
     
-    // 🔧 CRITICAL FIX: Use exact container dimensions, ensure perfect square
-    const finalWidth = containerWidth;
-    const finalHeight = containerHeight;
-    
-    console.log('  ✅ Canvas final dimensions:', finalWidth, 'x', finalHeight);
-    
-    // Update internal dimensions to match container exactly
+    // Update internal dimensions
     this.width = finalWidth;
     this.height = finalHeight;
     
-    // Set physical canvas size with DPR scaling
+    // Set physical canvas size with DPR
+    const dpr = window.devicePixelRatio || 1;
     const physicalWidth = Math.floor(finalWidth * dpr);
     const physicalHeight = Math.floor(finalHeight * dpr);
     this.canvas.width = physicalWidth;
     this.canvas.height = physicalHeight;
     
-    // Set display size in CSS pixels to exactly match container
+    // Set display size exactly
     this.canvas.style.width = `${finalWidth}px`;
     this.canvas.style.height = `${finalHeight}px`;
     
-    // Log actual dimensions
-    console.log('  🎨 Canvas physical size:', physicalWidth, 'x', physicalHeight);
-    console.log('  🎨 Canvas CSS size:', finalWidth, 'x', finalHeight);
-    console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
+    console.log('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
+    console.log('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
     
-    // 🔍 MOBILE DEBUG: Verify canvas has proper size
-    if (this.canvas.width === 0 || this.canvas.height === 0) {
-      console.error('❌ [SiriButton] Canvas has zero dimensions after resize!', {
-        canvasWidth: this.canvas.width,
-        canvasHeight: this.canvas.height,
-        finalWidth,
-        finalHeight,
-        physicalWidth,
-        physicalHeight
-      });
-    }
-    
-    // ✅ CRITICAL FIX: Canvas positioning that works with container
-    this.canvas.style.borderRadius = '50%';
-    this.canvas.style.display = 'block';
+    // 🔧 ENHANCED FIX: More stable positioning without multiple transforms
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = '50%';
     this.canvas.style.left = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)'; // Perfect centering
-    this.canvas.style.zIndex = '1'; // Lower than container for touch events
-    this.canvas.style.pointerEvents = 'none'; // Let container handle touch events
+    this.canvas.style.transform = 'translate(-50%, -50%)';
+    this.canvas.style.zIndex = '1';
+    this.canvas.style.pointerEvents = 'none';
+    this.canvas.style.borderRadius = '50%';
+    this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';
-    this.canvas.style.flexShrink = '0'; // Prevent flex shrinking
     
-    // 🔧 ENHANCED FIX: Force reposition after layout changes
-    // Use requestAnimationFrame to ensure DOM has updated
+    // 🔧 CRITICAL FIX: Single, reliable repositioning after layout stabilizes
     requestAnimationFrame(() => {
       if (!this.canvas || !container) return;
       
-      // Re-apply centering styles after layout stabilizes
+      // Verify and reapply positioning once
       this.canvas.style.position = 'absolute';
       this.canvas.style.top = '50%';
       this.canvas.style.left = '50%';
       this.canvas.style.transform = 'translate(-50%, -50%)';
       
-      // Force browser to recalculate styles
+      // Force recalculation
       this.canvas.offsetHeight;
       
-      console.log('[SiriButton] 🔧 Canvas repositioned after layout change');
+      console.log('[SiriButton] 🔧 Canvas positioning finalized');
+      
+      // Verify alignment after positioning
+      setTimeout(() => this.verifyAlignment(), 50);
     });
     
-    // Debug canvas positioning for mobile
-    console.log('[SiriButton] Canvas positioned:', {
-      position: this.canvas.style.position,
-      zIndex: this.canvas.style.zIndex,
-      pointerEvents: this.canvas.style.pointerEvents
-    });
-    
-    // Canvas is ready for rendering
-    
-    // Scale context for high DPI with subpixel precision
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+    // Scale context for high DPI
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.scale(dpr, dpr);
     this.ctx.imageSmoothingEnabled = true;
     this.ctx.imageSmoothingQuality = 'high';
     
-    // Update center coordinates and radius proportionally
+    // Update center coordinates and radius
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    
-    // 🔧 CRITICAL FIX: Radius based on smaller dimension for perfect circle fit
-    const minDimension = Math.min(finalWidth, finalHeight);
-    this.radius = Math.max(80, minDimension * 0.35); // Use smaller dimension for perfect fit
+    this.radius = Math.max(80, Math.min(finalWidth, finalHeight) * 0.35);
     
     console.log('  🎯 Canvas center:', this.centerX, this.centerY);
-    console.log('  🎯 Min dimension for radius:', minDimension);
     console.log('  ⭕ Canvas radius:', this.radius);
-    console.log('  📊 Radius ratio:', (this.radius / minDimension).toFixed(2));
-    
-    // Force a test draw after resize
-    setTimeout(() => {
-      this.debugDraw();
-      // 🔧 CRITICAL: Verify alignment after resize
-      this.verifyAlignment();
-      // 🔧 MOBILE: Force test draw to ensure canvas works
-      this.mobileTestDraw();
-    }, 50);
   }
 
   // 🔧 NEW: Alignment verification method
