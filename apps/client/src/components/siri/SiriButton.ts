@@ -190,26 +190,21 @@ export class SiriButton {
       return;
     }
 
-    // Get container dimensions - multiple methods for better compatibility
+    // Get container dimensions - use consistent sizing
     const containerRect = container.getBoundingClientRect();
     const containerWidth = container.clientWidth || containerRect.width || 280;
     const containerHeight = container.clientHeight || containerRect.height || 280;
     
     console.log('[SiriButton] Resize - Container size:', containerWidth, 'x', containerHeight);
-    console.log('[SiriButton] Resize - Container rect:', containerRect);
     
     // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
     console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
     
-    // Calculate optimal size based on container and device
-    const optimalSize = Math.min(containerWidth, containerHeight);
-    const size = Math.min(optimalSize, window.innerWidth * 0.8); // 80% of viewport width max
+    // Use container size directly for better consistency
+    const finalSize = Math.min(containerWidth, containerHeight);
     
-    // Ensure size is between 200px and 400px
-    const finalSize = Math.max(Math.min(size, 400), 200);
-    
-    console.log('[SiriButton] Resize - Calculated size:', finalSize);
+    console.log('[SiriButton] Resize - Final size:', finalSize);
     
     // Update internal dimensions
     this.width = this.height = finalSize;
@@ -219,27 +214,22 @@ export class SiriButton {
     this.canvas.width = physicalSize;
     this.canvas.height = physicalSize;
     
-    // Set display size in CSS pixels
+    // Set display size in CSS pixels to match container exactly
     this.canvas.style.width = `${finalSize}px`;
     this.canvas.style.height = `${finalSize}px`;
     
-    // Log actual dimensions
-    console.log('[SiriButton] Physical size:', physicalSize, 'CSS size:', finalSize);
+    console.log('[SiriButton] Canvas resized - Physical:', physicalSize, 'Display:', finalSize);
     
-    console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
-    
-    // Ensure canvas visibility and positioning
-    this.canvas.style.borderRadius = '50%';
-    this.canvas.style.display = 'block';
+    // Ensure proper canvas positioning and visibility
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = '50%';
     this.canvas.style.left = '50%';
     this.canvas.style.transform = 'translate(-50%, -50%)';
-    this.canvas.style.zIndex = '50'; // Higher than ConversationSection
-    this.canvas.style.pointerEvents = 'auto';
+    this.canvas.style.borderRadius = '50%';
+    this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';
-    
-    // Canvas is ready for rendering
+    this.canvas.style.zIndex = '50';
+    this.canvas.style.pointerEvents = 'auto';
     
     // Scale context for high DPI with subpixel precision
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
@@ -250,7 +240,7 @@ export class SiriButton {
     // Update center coordinates and radius proportionally
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
-    this.radius = Math.max(80, finalSize * 0.45); // Larger proportional radius
+    this.radius = Math.max(60, finalSize * 0.35); // Consistent proportional radius
     
     console.log('[SiriButton] Canvas center:', this.centerX, this.centerY, 'radius:', this.radius);
     
