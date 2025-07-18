@@ -35,6 +35,19 @@ export class SiriButton {
     glow: string;
     name: string;
   };
+  private resizeTimeout: number | null = null;
+
+  // Debounced resize to prevent excessive calls
+  private debouncedResize() {
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+    
+    this.resizeTimeout = window.setTimeout(() => {
+      this.resize();
+      this.resizeTimeout = null;
+    }, 50);
+  }
 
   constructor(containerId: string, colors?: {
     primary: string;
@@ -124,7 +137,7 @@ export class SiriButton {
     this.animate();
 
     // Add resize listener
-    window.addEventListener('resize', this.resize.bind(this));
+    window.addEventListener('resize', this.debouncedResize.bind(this));
 
     // Add mouse event listeners for hover/active
     if (container) {
@@ -222,6 +235,9 @@ export class SiriButton {
       return;
     }
 
+    // IMPORTANT: Force a reflow to ensure accurate measurements
+    container.offsetHeight; // Trigger reflow
+
     // Get container dimensions - multiple methods for better compatibility
     const containerRect = container.getBoundingClientRect();
     const containerWidth = container.clientWidth || containerRect.width || 280;
@@ -260,16 +276,18 @@ export class SiriButton {
     console.log('  🎨 Canvas CSS size:', finalSize);
     console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
     
-    // Ensure canvas visibility and positioning - perfect center alignment
+    // Ensure canvas visibility and positioning - FORCE perfect center alignment
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
-    this.canvas.style.position = 'relative'; // Use relative positioning
-    this.canvas.style.top = 'auto'; // Remove absolute positioning
-    this.canvas.style.left = 'auto'; // Remove absolute positioning
-    this.canvas.style.transform = 'none'; // Remove transform - flex will center
-    this.canvas.style.zIndex = '50'; // Higher than ConversationSection
+    this.canvas.style.position = 'relative';
+    this.canvas.style.top = 'auto';
+    this.canvas.style.left = 'auto';
+    this.canvas.style.transform = 'none';
+    this.canvas.style.zIndex = '50';
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.background = 'transparent';
+    this.canvas.style.margin = 'auto'; // Force centering
+    this.canvas.style.flexShrink = '0'; // Prevent flex shrinking
     
     // Canvas is ready for rendering
     
@@ -785,7 +803,7 @@ export class SiriButton {
     
     // Remove resize listener
     try {
-      window.removeEventListener('resize', this.resize.bind(this));
+      window.removeEventListener('resize', this.debouncedResize.bind(this));
     } catch (error) {
       console.warn('[SiriButton] Error removing resize listener:', error);
     }

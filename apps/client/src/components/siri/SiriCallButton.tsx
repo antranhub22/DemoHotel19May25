@@ -162,8 +162,22 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   useEffect(() => {
     if (buttonRef.current && !cleanupFlagRef.current) {
       buttonRef.current.setListening(isListening);
+      
+      // CRITICAL FIX: Trigger resize when listening state changes
+      // This fixes alignment issues when layout changes (Cancel/Confirm buttons appear)
+      setTimeout(() => {
+        if (buttonRef.current && !cleanupFlagRef.current) {
+          console.log('🔧 [SiriCallButton] Triggering resize due to listening state change');
+          // Force canvas to recalculate size when layout changes
+          const container = document.getElementById(containerId);
+          if (container) {
+            // Dispatch resize event to trigger SiriButton.resize()
+            window.dispatchEvent(new Event('resize'));
+          }
+        }
+      }, 100); // Small delay to let DOM update
     }
-  }, [isListening]);
+  }, [isListening, containerId]);
 
   useEffect(() => {
     if (buttonRef.current && !cleanupFlagRef.current) {
