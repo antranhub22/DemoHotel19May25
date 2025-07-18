@@ -2,18 +2,14 @@
  * Barrel exports for hooks directory
  */
 
-// Core hooks
-export { useWebSocket } from './useWebSocket';
-export { useTranscriptSocket } from './useTranscriptSocket';
-export { useIsMobile } from './use-mobile';
-
-// Toast hook
-export { useToast } from './use-toast';
-
-// Hotel configuration hook
-export { useHotelConfiguration } from './useHotelConfiguration';
-
-// Interface1 behavior hooks
-export { useScrollBehavior } from './useScrollBehavior';
-export { useConversationState } from './useConversationState';
-export { useInterface1 } from './useInterface1'; 
+export * from './use-mobile';
+export * from './use-toast';
+export * from './useCallHandler';
+export * from './useConversationState';
+export * from './useHotelConfiguration';
+export * from './useInterface1';
+export * from './useScrollBehavior';
+export * from './useTranscriptSocket';
+export * from './useWebSocket';
+// Export only the main hook to avoid conflicts with existing useIsMobile
+export { useSiriResponsiveSize } from './useSiriResponsiveSize'; 

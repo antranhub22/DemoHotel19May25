@@ -3,6 +3,7 @@ import { designSystem } from '@/styles/designSystem';
 import SiriCallButton from './SiriCallButton';
 import { Language } from '@/types/interface1.types';
 import { useAssistant } from '@/context/AssistantContext';
+import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -62,12 +63,14 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   onConfirm
 }) => {
   const { language } = useAssistant();
+  const responsiveSize = useSiriResponsiveSize();
 
   // Use LANGUAGE_COLORS mapping based on current language
   const currentColors = LANGUAGE_COLORS[language as keyof typeof LANGUAGE_COLORS] || LANGUAGE_COLORS['en'];
   
   // Debug: Log language and color changes
   console.log('🎨 [SiriButtonContainer] Language:', language, 'Colors:', currentColors.name, 'Primary:', currentColors.primary);
+  console.log('📏 [SiriButtonContainer] Responsive size:', responsiveSize);
 
   return (
     <div 
@@ -76,7 +79,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         marginBottom: designSystem.spacing.xl,
         zIndex: 9999, // Ensure highest priority
         pointerEvents: 'auto',
-        // 🔧 REVISED: Fixed height to prevent layout shift
+        // 🔧 HYBRID FIX: Fixed height to prevent layout shift
         height: '400px', // Fixed height container
         display: 'flex',
         flexDirection: 'column',
@@ -84,18 +87,20 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         alignItems: 'center',
       }}
     >
-      {/* Top Row: Cancel + Confirm */}
+      {/* Top Row: Cancel + Confirm - FIXED positioning to prevent layout shifts */}
       <div 
         className="flex items-center justify-center gap-4 w-full max-w-sm px-4"
         style={{
-          // 🔧 REVISED: Use margin instead of absolute positioning
-          marginBottom: '20px',
-          height: '40px', // Fixed height for buttons
-          flexShrink: 0,
+          // 🔧 HYBRID FIX: Absolute positioning to prevent layout shifts
+          position: 'absolute',
+          top: '20px',              // Fixed position above Siri button
+          left: '50%',
+          transform: 'translateX(-50%)',
+          height: '40px',           // Fixed height for buttons
           opacity: isCallStarted ? 1 : 0,
-          transition: 'opacity 0.3s ease-in-out',
-          // 🔧 NEW: Keep space even when hidden
           visibility: isCallStarted ? 'visible' : 'hidden',
+          transition: 'opacity 0.3s ease-in-out',
+          zIndex: 1,                // Above container but below outer z-index
         }}
       >
         {/* Cancel Button */}
@@ -117,36 +122,31 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </button>
       </div>
 
-      {/* Siri Button Container - FIXED: Proper centering during layout changes */}
+      {/* Siri Button Container - HYBRID: Desktop fixed + Mobile responsive */}
       <div 
-        className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
+        className="relative transition-all duration-500 ease-in-out"
         style={{ 
-          // 🔧 CRITICAL FIX: More stable sizing for desktop alignment
-          width: 'min(320px, 80vw)',  // Simpler responsive width
-          height: 'min(320px, 80vw)', // Simpler responsive height
+          // 🔧 HYBRID FIX: Use responsive sizing hook
+          width: responsiveSize.width,
+          height: responsiveSize.height,
+          minWidth: responsiveSize.minWidth,
+          minHeight: responsiveSize.minHeight,
+          maxWidth: responsiveSize.maxWidth,
+          maxHeight: responsiveSize.maxHeight,
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
           backdropFilter: 'blur(10px)',
           border: `2px solid ${currentColors.primary}40`,
-          // Mobile touch optimizations
-          minWidth: '280px', // Ensure minimum touch target
-          minHeight: '280px', // Ensure minimum touch target
-          // Desktop optimization
-          maxWidth: '320px', // Consistent max size for desktop
-          maxHeight: '320px', // Consistent max size for desktop
           cursor: 'pointer', // Show it's clickable
           touchAction: 'manipulation', // Improve touch response
-          // ✅ CRITICAL FIX: Stable positioning without layout shifts
+          // ✅ HYBRID FIX: Stable positioning without layout shifts
           position: 'relative',
           flexShrink: 0, // Prevent container from shrinking
           alignSelf: 'center', // Self-align to center
-          // 🔧 ENHANCED: Prevent layout calculations from affecting alignment
           aspectRatio: '1', // Force perfect square
           margin: '0 auto', // Center horizontally
           contain: 'layout style', // Enhanced containment for stability
-          // 🔧 NEW: Remove potentially problematic properties
-          // willChange: 'transform', // Remove this as it can cause positioning issues
         }}
       >
         <SiriCallButton

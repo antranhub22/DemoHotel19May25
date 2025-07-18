@@ -114,15 +114,15 @@ export class SiriButton {
     });
     
     // Set canvas styles immediately for proper display
-    this.canvas.style.position = 'absolute'; // ✅ FIX: Use absolute positioning for perfect centering
-    this.canvas.style.top = '50%'; // ✅ FIX: Center vertically  
-    this.canvas.style.left = '50%'; // ✅ FIX: Center horizontally
-    this.canvas.style.transform = 'translate(-50%, -50%)'; // ✅ FIX: Perfect centering transform
-    this.canvas.style.zIndex = '1'; // Lower than container for proper event flow
-    this.canvas.style.pointerEvents = 'none'; // Let container handle all events
+    // 🔧 HYBRID FIX: Use CSS-only positioning instead of transform conflicts
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.inset = '4px';           // ✅ Perfect centering with 4px padding
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';
+    this.canvas.style.zIndex = '1';            // Lower than container for proper event flow
+    this.canvas.style.pointerEvents = 'none'; // Let container handle all events
+    // ❌ REMOVED: top, left, transform for conflicts elimination
     
     // Add debug attributes
     this.canvas.setAttribute('data-siri-canvas', 'true');
@@ -270,8 +270,8 @@ export class SiriButton {
       return;
     }
     
-    // 🔧 CRITICAL FIX: Make canvas slightly smaller than container for perfect fit
-    const CANVAS_PADDING = 4; // Small padding to ensure canvas fits perfectly
+    // 🔧 HYBRID FIX: Canvas sizing with CSS-only positioning
+    const CANVAS_PADDING = 4; // Small padding for perfect fit within container
     const finalWidth = containerWidth - CANVAS_PADDING;
     const finalHeight = containerHeight - CANVAS_PADDING;
     
@@ -286,42 +286,23 @@ export class SiriButton {
     this.canvas.width = physicalWidth;
     this.canvas.height = physicalHeight;
     
-    // Set display size exactly
-    this.canvas.style.width = `${finalWidth}px`;
-    this.canvas.style.height = `${finalHeight}px`;
+    // 🔧 HYBRID FIX: Use inset positioning - no more complex calculations needed
+    this.canvas.style.width = 'calc(100% - 8px)';  // Container minus padding
+    this.canvas.style.height = 'calc(100% - 8px)'; // Container minus padding
     
     console.log('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
     console.log('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
     
-    // 🔧 ENHANCED FIX: More stable positioning without multiple transforms
+    // 🔧 HYBRID FIX: CSS-only positioning - simple and reliable
     this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '50%';
-    this.canvas.style.left = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
-    this.canvas.style.zIndex = '1';
-    this.canvas.style.pointerEvents = 'none';
+    this.canvas.style.inset = '4px';              // Perfect 4px padding from all sides
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';
+    this.canvas.style.zIndex = '1';
+    this.canvas.style.pointerEvents = 'none';
     
-    // 🔧 CRITICAL FIX: Single, reliable repositioning after layout stabilizes
-    requestAnimationFrame(() => {
-      if (!this.canvas || !container) return;
-      
-      // Verify and reapply positioning once
-      this.canvas.style.position = 'absolute';
-      this.canvas.style.top = '50%';
-      this.canvas.style.left = '50%';
-      this.canvas.style.transform = 'translate(-50%, -50%)';
-      
-      // Force recalculation
-      this.canvas.offsetHeight;
-      
-      console.log('[SiriButton] 🔧 Canvas positioning finalized');
-      
-      // Verify alignment after positioning
-      setTimeout(() => this.verifyAlignment(), 50);
-    });
+    // ✅ NO MORE COMPLEX REPOSITIONING NEEDED - CSS handles it perfectly
     
     // Scale context for high DPI
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);

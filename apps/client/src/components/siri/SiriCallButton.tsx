@@ -392,9 +392,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         cursor: 'pointer',
         zIndex: 10, // Higher than canvas (zIndex: 1)
         borderRadius: '50%', // Match container shape
-        display: 'flex', // Add flexbox
-        alignItems: 'center', // Center vertically
-        justifyContent: 'center', // Center horizontally
+        // 🔧 HYBRID FIX: Remove flexbox centering to prevent conflicts
+        // ❌ REMOVED: display: 'flex', alignItems: 'center', justifyContent: 'center'
         // 🔧 CRITICAL FIX: Ensure container can receive events
         pointerEvents: 'auto', // Explicitly enable pointer events
         background: 'transparent', // Ensure no background blocking
