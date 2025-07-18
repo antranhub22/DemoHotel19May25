@@ -270,7 +270,7 @@ export class SiriButton {
       return;
     }
     
-    // 🔧 HYBRID FIX: Canvas sizing with CSS-only positioning
+    // 🔧 CRITICAL FIX: Canvas sizing with proper dimensions matching
     const CANVAS_PADDING = 4; // Small padding for perfect fit within container
     const finalWidth = containerWidth - CANVAS_PADDING;
     const finalHeight = containerHeight - CANVAS_PADDING;
@@ -286,9 +286,9 @@ export class SiriButton {
     this.canvas.width = physicalWidth;
     this.canvas.height = physicalHeight;
     
-    // 🔧 HYBRID FIX: Use inset positioning - no more complex calculations needed
-    this.canvas.style.width = 'calc(100% - 8px)';  // Container minus padding
-    this.canvas.style.height = 'calc(100% - 8px)'; // Container minus padding
+    // 🔧 CRITICAL FIX: Use exact pixel dimensions to match internal dimensions
+    this.canvas.style.width = `${finalWidth}px`;   // Exact match with this.width
+    this.canvas.style.height = `${finalHeight}px`; // Exact match with this.height
     
     console.log('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
     console.log('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
