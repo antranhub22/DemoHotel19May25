@@ -184,7 +184,7 @@ export const say = (message: string, endCallAfterSpoken?: boolean) => {
 
 export const buttonConfig = {
   position: "top",
-        offset: "320px",
+                 offset: "80px",
   width: "120px",
   height: "120px",
   idle: {
