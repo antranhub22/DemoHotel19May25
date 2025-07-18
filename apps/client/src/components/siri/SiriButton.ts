@@ -101,10 +101,35 @@ export class SiriButton {
     container.appendChild(this.canvas);
     console.log('[SiriButton] Canvas appended to container:', container);
     
-    // Debug: Check if canvas is in DOM
+    // 🔍 ENHANCED DEBUG: Canvas positioning and container relationship
     setTimeout(() => {
       const canvasInDOM = document.getElementById(`${containerId}-canvas`);
-      console.log('[SiriButton] Canvas in DOM check:', !!canvasInDOM, canvasInDOM);
+      console.log('🔍 [SiriButton] POSITIONING DEBUG:');
+      console.log('  📦 Container ID:', containerId);
+      console.log('  📦 Container rect:', container.getBoundingClientRect());
+      console.log('  📦 Container computed style:', {
+        position: getComputedStyle(container).position,
+        width: getComputedStyle(container).width,
+        height: getComputedStyle(container).height,
+        display: getComputedStyle(container).display,
+        flexDirection: getComputedStyle(container).flexDirection,
+        alignItems: getComputedStyle(container).alignItems,
+        justifyContent: getComputedStyle(container).justifyContent
+      });
+      console.log('  🎨 Canvas in DOM:', !!canvasInDOM);
+      if (canvasInDOM) {
+        console.log('  🎨 Canvas rect:', canvasInDOM.getBoundingClientRect());
+        console.log('  🎨 Canvas computed style:', {
+          position: getComputedStyle(canvasInDOM).position,
+          top: getComputedStyle(canvasInDOM).top,
+          left: getComputedStyle(canvasInDOM).left,
+          transform: getComputedStyle(canvasInDOM).transform,
+          width: getComputedStyle(canvasInDOM).width,
+          height: getComputedStyle(canvasInDOM).height,
+          zIndex: getComputedStyle(canvasInDOM).zIndex,
+          pointerEvents: getComputedStyle(canvasInDOM).pointerEvents
+        });
+      }
     }, 100);
     
     // Get context

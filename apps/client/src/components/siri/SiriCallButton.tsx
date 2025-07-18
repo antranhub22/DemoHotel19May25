@@ -297,6 +297,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       console.log('  🎛️ onCallEnd available:', !!onCallEnd);
       console.log('  🎨 Element computed style:', window.getComputedStyle(element).pointerEvents);
 
+      // 🔧 MANUAL TEST: Add click listener for debugging
+      const testClickHandler = (e: MouseEvent) => {
+        console.log('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!');
+        console.log('  🎯 Click target:', e.target);
+        console.log('  🎯 Click coordinates:', e.clientX, e.clientY);
+        console.log('  🎯 Element rect:', element.getBoundingClientRect());
+        console.log('  🎯 onCallStart available:', !!onCallStart);
+      };
+
+      element.addEventListener('click', testClickHandler);
+
       element.addEventListener('mouseenter', handleMouseEnter);
       element.addEventListener('mouseleave', handleMouseLeave);
       element.addEventListener('mousedown', handleMouseDown);
@@ -306,6 +317,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
       return () => {
         console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
+        element.removeEventListener('click', testClickHandler);
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
         element.removeEventListener('mousedown', handleMouseDown);
@@ -366,13 +378,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       style={{ 
         width: '100%', // Use full container width
         height: '100%', // Use full container height
-        position: 'relative', // Change back to relative 
+        position: 'relative', // Relative for absolute canvas positioning
         cursor: 'pointer',
-        zIndex: 50,
+        zIndex: 10, // Higher than canvas (zIndex: 1)
         borderRadius: '50%', // Match container shape
         display: 'flex', // Add flexbox
         alignItems: 'center', // Center vertically
         justifyContent: 'center', // Center horizontally
+        // 🔧 CRITICAL FIX: Ensure container can receive events
+        pointerEvents: 'auto', // Explicitly enable pointer events
+        background: 'transparent', // Ensure no background blocking
+        overflow: 'visible', // Allow canvas to be visible
         // Mobile touch optimizations
         touchAction: 'manipulation', // Improve touch responsiveness
         WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
@@ -381,6 +397,33 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         WebkitTouchCallout: 'none', // Disable context menu on long press
       }}
     >
+      {/* 🔍 DEBUG: Container setup validation */}
+      {process.env.NODE_ENV === 'development' && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              setTimeout(() => {
+                const container = document.getElementById('${containerId}');
+                if (container) {
+                  console.log('🔍 [SiriCallButton] CONTAINER DEBUG:');
+                  console.log('  📦 Container element:', container);
+                  console.log('  📦 Container style.pointerEvents:', container.style.pointerEvents);
+                  console.log('  📦 Container computed pointerEvents:', getComputedStyle(container).pointerEvents);
+                  console.log('  📦 Container zIndex:', getComputedStyle(container).zIndex);
+                  console.log('  📦 Container position:', getComputedStyle(container).position);
+                  console.log('  📦 Container dimensions:', container.getBoundingClientRect());
+                  
+                  // Test click detection
+                  container.addEventListener('click', (e) => {
+                    console.log('🎯 [SiriCallButton] Container received click!', e);
+                  }, { once: true });
+                }
+              }, 500);
+            `
+          }}
+        />
+      )}
+
       {/* Loading state */}
       {!canvasReady && (
         <div 
@@ -390,7 +433,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             color: 'white',
             fontSize: '48px',
             boxShadow: `0 0 30px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
-            border: '2px solid rgba(255,255,255,0.1)'
+            border: '2px solid rgba(255,255,255,0.1)',
+            pointerEvents: 'none' // Don't block container events
           }}
         >
           🎤
@@ -407,7 +451,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             left: '50%',
             transform: 'translateX(-50%)',
             color: colors?.primary || '#5DB6B9',
-            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`
+            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
+            pointerEvents: 'none' // Don't block container events
           }}
         >
           {status === 'processing' ? 'Processing...' : 'Speaking...'}

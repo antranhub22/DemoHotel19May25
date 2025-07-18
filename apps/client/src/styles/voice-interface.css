@@ -23,26 +23,31 @@
   border-radius: 50%;
   /* Remove background to let canvas show through */
   background: transparent;
-  /* Keep animations and transitions */
-  animation: breathing 3s ease-in-out infinite;
+  /* 🔧 CRITICAL FIX: Remove animations that interfere with canvas positioning */
+  /* animation: breathing 3s ease-in-out infinite; */
   transition: all 0.3s ease;
   /* Remove box-shadow as canvas handles its own styling */
   box-shadow: none;
+  /* 🔧 CRITICAL FIX: Ensure container is stable for absolute canvas positioning */
+  transform: none !important; /* Prevent any transform interference */
 }
 
 .voice-button:hover {
-  transform: scale(1.02);
+  /* 🔧 CRITICAL FIX: Remove scale transform that moves canvas */
+  /* transform: scale(1.02); */
   /* Remove background override on hover */
   background: transparent;
   box-shadow: none;
 }
 
 .voice-button:active {
-  transform: scale(0.98);
+  /* 🔧 CRITICAL FIX: Remove scale transform that moves canvas */
+  /* transform: scale(0.98); */
 }
 
 .voice-button.listening {
-  animation: pulse 2s infinite;
+  /* 🔧 CRITICAL FIX: Remove pulse animation that interferes with positioning */
+  /* animation: pulse 2s infinite; */
   /* Remove background override when listening */
   background: transparent;
 }
