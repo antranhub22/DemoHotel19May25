@@ -79,6 +79,10 @@
     /* Ensure touch target is large enough */
     min-width: 44px !important; /* iOS minimum touch target */
     min-height: 44px !important;
+    /* CRITICAL: Ensure proper pointer events for mobile touch */
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 9999 !important;
   }
   
   /* Disable hover effects on mobile for better performance */
@@ -90,6 +94,18 @@
   .voice-button:active {
     transform: scale(0.95) !important;
     transition: transform 0.1s ease !important;
+  }
+
+  /* Ensure canvas doesn't block touch events on mobile */
+  .voice-button canvas {
+    pointer-events: none !important; /* Let container handle touch events */
+    z-index: 1 !important; /* Lower than container */
+  }
+
+  /* Force container to handle touch events */
+  .voice-button[id*="main-siri-button"] {
+    pointer-events: auto !important;
+    z-index: 10000 !important;
   }
 }
 

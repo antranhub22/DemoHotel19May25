@@ -131,32 +131,55 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }, 200);
     }
 
-    // Touch handler functions
-    const handleTouchEnd = (e: TouchEvent) => {
-      console.log('📱 [SiriCallButton] Touch end - triggering click');
-      e.preventDefault(); // Prevent ghost click
-      handleClick(); // Directly trigger click handler
-    };
-    
-    const handleTouchStart = (e: TouchEvent) => {
-      console.log('📱 [SiriCallButton] Touch start detected');
-      e.stopPropagation(); // Don't let it bubble to SiriButton
-    };
+    // Detect if user is on mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                    ('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0);
 
-    // Add click handler
-    element.addEventListener('click', handleClick);
-    
-    // Add touch handlers for mobile - CRITICAL for mobile functionality
-    element.addEventListener('touchend', handleTouchEnd);
-    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobile);
 
-    return () => {
-      element.removeEventListener('click', handleClick);
-      element.removeEventListener('touchend', handleTouchEnd); 
-      element.removeEventListener('touchstart', handleTouchStart);
-      safeCleanup();
-    };
-  }, [containerId, colors]); // Removed handleClick and safeCleanup as they're stable with useCallback
+    if (isMobile) {
+      // Mobile: Use touch events for better responsiveness
+      const handleTouchStart = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] Touch start detected');
+        e.stopPropagation();
+        // Visual feedback only - don't trigger action yet
+      };
+
+      const handleTouchEnd = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] Touch end - triggering click');
+        e.preventDefault(); // Prevent ghost click
+        e.stopPropagation();
+        handleClick(); // Directly trigger click handler
+      };
+
+      // Add touch handlers for mobile - CRITICAL for mobile functionality
+      element.addEventListener('touchstart', handleTouchStart, { passive: true });
+      element.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+      // Clean removal function for mobile
+      return () => {
+        element.removeEventListener('touchstart', handleTouchStart);
+        element.removeEventListener('touchend', handleTouchEnd);
+        safeCleanup();
+      };
+    } else {
+      // Desktop: Use click events as normal
+      const handleDesktopClick = (e: MouseEvent) => {
+        console.log('🖱️ [SiriCallButton] Desktop click detected');
+        e.stopPropagation();
+        handleClick();
+      };
+
+      element.addEventListener('click', handleDesktopClick);
+
+      // Clean removal function for desktop
+      return () => {
+        element.removeEventListener('click', handleDesktopClick);
+        safeCleanup();
+      };
+    }
+  }, [containerId, colors]); // handleClick and safeCleanup are stable with useCallback
 
   // Update SiriButton state
   useEffect(() => {

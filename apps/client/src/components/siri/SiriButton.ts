@@ -139,50 +139,62 @@ export class SiriButton {
     // Add resize listener
     window.addEventListener('resize', this.debouncedResize.bind(this));
 
+    // Detect if user is on mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                    ('ontouchstart' in window) ||
+                    (navigator.maxTouchPoints > 0);
+
     // Add mouse event listeners for hover/active
     if (container) {
-      // Mouse events for desktop
-      container.addEventListener('mouseenter', () => { this.isHovered = true; this.lastActiveTime = Date.now(); });
-      container.addEventListener('mouseleave', () => { this.isHovered = false; this.isActive = false; });
-      container.addEventListener('mousedown', () => { this.isActive = true; this.lastActiveTime = Date.now(); });
-      container.addEventListener('mouseup', () => { this.isActive = false; });
-      container.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        this.mouseX = e.clientX - rect.left;
-        this.mouseY = e.clientY - rect.top;
-        this.lastActiveTime = Date.now();
-      });
-
-      // Touch events for mobile - VISUAL FEEDBACK ONLY (click handled elsewhere)
-      container.addEventListener('touchstart', (e) => { 
-        this.isActive = true; 
-        this.isHovered = true; // Simulate hover for mobile
-        this.lastActiveTime = Date.now();
-        
-        // Get touch position for visual effects only
-        if (e.touches.length > 0) {
+      if (!isMobile) {
+        // Desktop: Full mouse event handling
+        container.addEventListener('mouseenter', () => { this.isHovered = true; this.lastActiveTime = Date.now(); });
+        container.addEventListener('mouseleave', () => { this.isHovered = false; this.isActive = false; });
+        container.addEventListener('mousedown', () => { this.isActive = true; this.lastActiveTime = Date.now(); });
+        container.addEventListener('mouseup', () => { this.isActive = false; });
+        container.addEventListener('mousemove', (e) => {
           const rect = container.getBoundingClientRect();
-          this.mouseX = e.touches[0].clientX - rect.left;
-          this.mouseY = e.touches[0].clientY - rect.top;
-        }
+          this.mouseX = e.clientX - rect.left;
+          this.mouseY = e.clientY - rect.top;
+          this.lastActiveTime = Date.now();
+        });
+        console.log('🖥️ [SiriButton] Desktop mouse events initialized');
+      } else {
+        // Mobile: Minimal touch events for VISUAL FEEDBACK ONLY
+        // Let SiriCallButton handle actual touch functionality
+        container.addEventListener('touchstart', (e) => { 
+          this.isActive = true; 
+          this.isHovered = true; // Simulate hover for mobile
+          this.lastActiveTime = Date.now();
+          
+          // Get touch position for visual effects only
+          if (e.touches.length > 0) {
+            const rect = container.getBoundingClientRect();
+            this.mouseX = e.touches[0].clientX - rect.left;
+            this.mouseY = e.touches[0].clientY - rect.top;
+          }
+          
+          console.log('📱 [SiriButton] Touch start detected at:', this.mouseX, this.mouseY, '(visual only)');
+          // CRITICAL: Don't prevent default or stop propagation
+          // Let SiriCallButton handle the actual touch events
+        }, { passive: true });
         
-        console.log('📱 [SiriButton] Touch start detected at:', this.mouseX, this.mouseY);
-        // Don't prevent default - let click handler work
-      });
-      
-      container.addEventListener('touchend', () => { 
-        this.isActive = false; 
-        // Keep isHovered true briefly for visual feedback
-        setTimeout(() => { this.isHovered = false; }, 200);
-        console.log('📱 [SiriButton] Touch end detected');
-        // Don't prevent default - let click handler work
-      });
-      
-      container.addEventListener('touchcancel', () => { 
-        this.isActive = false; 
-        this.isHovered = false; 
-        console.log('📱 [SiriButton] Touch cancelled');
-      });
+        container.addEventListener('touchend', () => { 
+          this.isActive = false; 
+          // Keep isHovered true briefly for visual feedback
+          setTimeout(() => { this.isHovered = false; }, 200);
+          console.log('📱 [SiriButton] Touch end detected (visual only)');
+          // CRITICAL: Don't prevent default or stop propagation
+        }, { passive: true });
+        
+        container.addEventListener('touchcancel', () => { 
+          this.isActive = false; 
+          this.isHovered = false; 
+          console.log('📱 [SiriButton] Touch cancelled');
+        }, { passive: true });
+
+        console.log('📱 [SiriButton] Mobile touch events initialized (visual feedback only)');
+      }
     }
 
     // Detect dark mode
