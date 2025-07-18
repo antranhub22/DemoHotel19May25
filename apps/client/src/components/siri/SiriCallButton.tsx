@@ -175,12 +175,21 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         console.log('📱 [SiriCallButton] Touch end - triggering action');
       };
 
+      const handleTouchCancel = () => {
+        if (buttonRef.current) {
+          buttonRef.current.setInteractionMode('idle');
+        }
+        console.log('📱 [SiriCallButton] Touch cancelled');
+      };
+
       element.addEventListener('touchstart', handleTouchStart, { passive: true });
       element.addEventListener('touchend', handleTouchEnd, { passive: false });
+      element.addEventListener('touchcancel', handleTouchCancel, { passive: true });
 
       return () => {
         element.removeEventListener('touchstart', handleTouchStart);
         element.removeEventListener('touchend', handleTouchEnd);
+        element.removeEventListener('touchcancel', handleTouchCancel);
         safeCleanup();
       };
     } else {
