@@ -420,52 +420,40 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     }
 
-    // Mobile detection - use fallback for consistent mobile experience
-    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      console.log('[SiriCallButton] Mobile detected - using enhanced fallback canvas');
-      setTimeout(() => {
+    // Try SiriButton first on both mobile and desktop, fallback if needed
+    const initTimer = setTimeout(() => {
+      if (cleanupFlagRef.current) return; // Don't proceed if cleanup started
+      
+      try {
+        buttonRef.current = new SiriButton(containerId, colors);
+        console.log('[SiriCallButton] SiriButton instance created successfully');
+        
+        // Check if canvas was created successfully
+        setTimeout(() => {
+          if (cleanupFlagRef.current) return;
+          
+          const canvas = element?.querySelector('canvas');
+          if (canvas && canvas.width > 0) {
+            setCanvasReady(true);
+            console.log('[SiriCallButton] SiriButton canvas confirmed working');
+          } else {
+            console.log('[SiriCallButton] SiriButton canvas failed, using fallback');
+            createFallbackCanvas();
+          }
+        }, 500);
+        
+      } catch (error) {
+        console.error('[SiriCallButton] SiriButton failed, using fallback:', error);
         if (!cleanupFlagRef.current) {
           createFallbackCanvas();
         }
-      }, 100);
-    } else {
-      // Desktop - try SiriButton first, fallback if needed
-      const initTimer = setTimeout(() => {
-        if (cleanupFlagRef.current) return; // Don't proceed if cleanup started
-        
-        try {
-          buttonRef.current = new SiriButton(containerId, colors);
-          console.log('[SiriCallButton] SiriButton instance created successfully');
-          
-          // Check if canvas was created successfully
-          setTimeout(() => {
-            if (cleanupFlagRef.current) return;
-            
-            const canvas = element?.querySelector('canvas');
-            if (canvas && canvas.width > 0) {
-              setCanvasReady(true);
-              console.log('[SiriCallButton] SiriButton canvas confirmed working');
-            } else {
-              console.log('[SiriCallButton] SiriButton canvas failed, using fallback');
-              createFallbackCanvas();
-            }
-          }, 500);
-          
-        } catch (error) {
-          console.error('[SiriCallButton] SiriButton failed, using fallback:', error);
-          if (!cleanupFlagRef.current) {
-            createFallbackCanvas();
-          }
-        }
-      }, 100);
+      }
+    }, 100);
 
-      // Store timer for cleanup
-      return () => {
-        clearTimeout(initTimer);
-      };
-    }
+    // Store timer for cleanup
+    return () => {
+      clearTimeout(initTimer);
+    };
 
     // Create click handler function
     const clickHandler = async (event: Event) => {

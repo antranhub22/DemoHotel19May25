@@ -36,7 +36,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
         className={`${className}`}
         style={{
           position: 'fixed',
-          bottom: '80px', // Reduced space for closer popup positioning
+          bottom: '40px', // Minimal space for closest popup positioning
           left: 0,
           right: 0,
           zIndex: 40,
