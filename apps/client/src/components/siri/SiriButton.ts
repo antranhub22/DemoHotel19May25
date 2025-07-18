@@ -84,12 +84,12 @@ export class SiriButton {
     }
     
     // Set canvas styles immediately for proper display
-    this.canvas.style.position = 'relative'; // Change from absolute to relative
-    this.canvas.style.top = 'auto'; // Remove absolute positioning
-    this.canvas.style.left = 'auto'; // Remove absolute positioning  
-    this.canvas.style.transform = 'none'; // Remove transform 
-    this.canvas.style.zIndex = '50'; // Higher than ConversationSection
-    this.canvas.style.pointerEvents = 'auto';
+    this.canvas.style.position = 'absolute'; // ✅ FIX: Use absolute positioning for perfect centering
+    this.canvas.style.top = '50%'; // ✅ FIX: Center vertically  
+    this.canvas.style.left = '50%'; // ✅ FIX: Center horizontally
+    this.canvas.style.transform = 'translate(-50%, -50%)'; // ✅ FIX: Perfect centering transform
+    this.canvas.style.zIndex = '1'; // Lower than container for proper event flow
+    this.canvas.style.pointerEvents = 'none'; // Let container handle all events
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';

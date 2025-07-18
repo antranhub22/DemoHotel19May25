@@ -75,40 +75,58 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   }, []);
 
   const handleInteractionEnd = useCallback(async (e: Event) => {
+    console.log('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
+    console.log('  🎯 Event type:', e.type);
+    console.log('  🎯 Event target:', e.target);
+    
     if (buttonRef.current) {
       buttonRef.current.setInteractionMode('idle');
+      console.log('  ✅ Visual state set to idle');
     }
     
     // Business logic - prevent double-firing
     if (isHandlingClick.current) {
-      console.log('🔔 [SiriCallButton] Click already being handled, ignoring...');
+      console.log('🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...');
       return;
     }
     
     isHandlingClick.current = true;
-    console.log('🔔 [SiriCallButton] Interaction end - triggering action! isListening:', isListening);
+    console.log('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
+    console.log('  🎧 isListening:', isListening);
+    console.log('  ✅ onCallStart available:', !!onCallStart);
+    console.log('  ✅ onCallEnd available:', !!onCallEnd);
     
     try {
       if (!isListening && onCallStart) {
         setStatus('listening');
-        console.log('🎤 [SiriCallButton] Starting call...');
+        console.log('🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...');
         try {
           await onCallStart();
+          console.log('🎤 [SiriCallButton] ✅ onCallStart() completed successfully');
         } catch (error) {
-          console.error('[SiriCallButton] Start error:', error);
+          console.error('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
           setStatus('idle');
         }
       } else if (isListening && onCallEnd) {
         setStatus('processing');
-        console.log('🛑 [SiriCallButton] Ending call...');
+        console.log('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
         onCallEnd();
+        console.log('🛑 [SiriCallButton] ✅ onCallEnd() completed');
         setTimeout(() => setStatus('idle'), 500);
+      } else {
+        console.log('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
+        console.log('  🎧 isListening:', isListening);
+        console.log('  🎤 onCallStart available:', !!onCallStart);
+        console.log('  🛑 onCallEnd available:', !!onCallEnd);
       }
     } finally {
       setTimeout(() => {
         isHandlingClick.current = false;
+        console.log('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
       }, 100);
     }
+    
+    console.log('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
   }, [isListening, onCallStart, onCallEnd]);
 
   const handleHover = useCallback((isHovered: boolean) => {
@@ -237,37 +255,57 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         safeCleanup();
       };
     } else {
-      // ✅ DESKTOP: Mouse events with hover support
+      // ✅ DESKTOP: Mouse events with hover support + Enhanced Debug
       const handleMouseEnter = () => {
         handleHover(true);
-        console.log('🖱️ [SiriCallButton] Mouse enter');
+        console.log('🖱️ [SiriCallButton] 🟢 DESKTOP Mouse enter');
       };
       
       const handleMouseLeave = () => {
         handleHover(false);
-        console.log('🖱️ [SiriCallButton] Mouse leave');
+        console.log('🖱️ [SiriCallButton] 🔴 DESKTOP Mouse leave');
       };
       
       const handleMouseDown = (e: MouseEvent) => {
+        console.log('🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:', e.target);
+        console.log('🖱️ [SiriCallButton] 🔽 Element ID:', element.id);
+        console.log('🖱️ [SiriCallButton] 🔽 isHandlingClick before:', isHandlingClick.current);
+        
         const rect = element.getBoundingClientRect();
         handleInteractionStart(e, {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top
         });
-        console.log('🖱️ [SiriCallButton] Mouse down');
+        console.log('🖱️ [SiriCallButton] 🔽 Mouse down completed');
       };
       
       const handleMouseUp = (e: MouseEvent) => {
+        console.log('🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:', e.target);
+        console.log('🖱️ [SiriCallButton] 🔼 onCallStart available:', !!onCallStart);
+        console.log('🖱️ [SiriCallButton] 🔼 isListening state:', isListening);
+        console.log('🖱️ [SiriCallButton] 🔼 isHandlingClick before:', isHandlingClick.current);
+        
         handleInteractionEnd(e);
-        console.log('🖱️ [SiriCallButton] Mouse up - triggering action');
+        console.log('🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed');
       };
+
+      // Enhanced debug for element setup
+      console.log('🖱️ [SiriCallButton] 🎯 DESKTOP EVENT SETUP:');
+      console.log('  📦 Element ID:', element.id);
+      console.log('  📦 Element tagName:', element.tagName);
+      console.log('  🎛️ onCallStart available:', !!onCallStart);
+      console.log('  🎛️ onCallEnd available:', !!onCallEnd);
+      console.log('  🎨 Element computed style:', window.getComputedStyle(element).pointerEvents);
 
       element.addEventListener('mouseenter', handleMouseEnter);
       element.addEventListener('mouseleave', handleMouseLeave);
       element.addEventListener('mousedown', handleMouseDown);
       element.addEventListener('mouseup', handleMouseUp);
 
+      console.log('🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully');
+
       return () => {
+        console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
         element.removeEventListener('mousedown', handleMouseDown);
@@ -275,7 +313,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         safeCleanup();
       };
     }
-  }, [containerId, colors, handleInteractionStart, handleInteractionEnd, handleHover, safeCleanup]);
+  }, [containerId, colors, handleInteractionStart, handleInteractionEnd, handleHover, safeCleanup, onCallStart, isListening]);
 
   // ✅ SYNC visual state with props
   useEffect(() => {
