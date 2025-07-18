@@ -71,35 +71,51 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
   return (
     <div 
-      className="flex flex-col items-center justify-center w-full relative z-50"
+      className="flex flex-col items-center justify-center w-full relative"
       style={{ 
         marginBottom: designSystem.spacing.xl,
         zIndex: 9999, // Ensure highest priority
-        pointerEvents: 'auto'
+        pointerEvents: 'auto',
+        // 🔧 REVISED: Fixed height to prevent layout shift
+        height: '400px', // Fixed height container
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
       {/* Top Row: Cancel + Confirm */}
-      {isCallStarted && (
-        <div className="flex items-center justify-center gap-4 w-full max-w-sm mb-4 px-4">
-          {/* Cancel Button */}
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
-            style={{ minWidth: '80px' }}
-          >
-            Cancel
-          </button>
+      <div 
+        className="flex items-center justify-center gap-4 w-full max-w-sm px-4"
+        style={{
+          // 🔧 REVISED: Use margin instead of absolute positioning
+          marginBottom: '20px',
+          height: '40px', // Fixed height for buttons
+          flexShrink: 0,
+          opacity: isCallStarted ? 1 : 0,
+          transition: 'opacity 0.3s ease-in-out',
+          // 🔧 NEW: Keep space even when hidden
+          visibility: isCallStarted ? 'visible' : 'hidden',
+        }}
+      >
+        {/* Cancel Button */}
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
+          style={{ minWidth: '80px' }}
+        >
+          Cancel
+        </button>
 
-          {/* Confirm Button */}
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
-            style={{ minWidth: '80px' }}
-          >
-            Confirm
-          </button>
-        </div>
-      )}
+        {/* Confirm Button */}
+        <button
+          onClick={onConfirm}
+          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
+          style={{ minWidth: '80px' }}
+        >
+          Confirm
+        </button>
+      </div>
 
       {/* Siri Button Container - FIXED: Proper centering during layout changes */}
       <div 
@@ -121,6 +137,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           position: 'relative',
           flexShrink: 0, // Prevent container from shrinking
           alignSelf: 'center', // Self-align to center
+          // 🔧 NEW: Ensure stable dimensions during layout changes
+          aspectRatio: '1', // Force perfect square
+          margin: '0 auto', // Center horizontally
+          contain: 'layout', // Isolate layout calculations
+          willChange: 'transform', // Optimize for animations
         }}
       >
         <SiriCallButton

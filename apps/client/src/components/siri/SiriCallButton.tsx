@@ -366,22 +366,33 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           // Force canvas to recalculate size when layout changes
           const container = document.getElementById(containerId);
           if (container) {
+            // 🔧 ENHANCED: Force container reflow before resize
+            container.style.display = 'none';
+            container.offsetHeight; // Force reflow
+            container.style.display = 'flex';
+            
             // Multiple resize triggers to ensure proper repositioning
             window.dispatchEvent(new Event('resize'));
             
-            // Additional resize after layout stabilizes
-            setTimeout(() => {
+            // 🔧 NEW: Use requestAnimationFrame for better timing
+            requestAnimationFrame(() => {
               window.dispatchEvent(new Event('resize'));
-              console.log('🔧 [SiriCallButton] Secondary resize for layout stabilization');
-            }, 200);
+              console.log('🔧 [SiriCallButton] RAF resize for layout stabilization');
+              
+              // One more resize after animation completes
+              setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+                console.log('🔧 [SiriCallButton] Final resize after animation');
+              }, 350); // After transition duration
+            });
           }
         }
       };
 
       // Trigger resize immediately and after DOM updates
-      setTimeout(triggerResize, 50);   // Immediate resize
-      setTimeout(triggerResize, 150);  // After layout changes
-      setTimeout(triggerResize, 300);  // Final positioning
+      setTimeout(triggerResize, 0);    // Immediate resize
+      setTimeout(triggerResize, 100);  // After DOM update
+      setTimeout(triggerResize, 250);  // After layout stabilizes
     }
   }, [isListening, containerId]);
 
