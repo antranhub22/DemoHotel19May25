@@ -140,30 +140,29 @@ export class SiriButton {
         this.lastActiveTime = Date.now();
       });
 
-      // Touch events for mobile - CRITICAL for mobile functionality
+      // Touch events for mobile - VISUAL FEEDBACK ONLY (click handled elsewhere)
       container.addEventListener('touchstart', (e) => { 
         this.isActive = true; 
         this.isHovered = true; // Simulate hover for mobile
         this.lastActiveTime = Date.now();
         
-        // Get touch position
+        // Get touch position for visual effects only
         if (e.touches.length > 0) {
           const rect = container.getBoundingClientRect();
           this.mouseX = e.touches[0].clientX - rect.left;
           this.mouseY = e.touches[0].clientY - rect.top;
         }
         
-        // Prevent default touch behaviors that might interfere
-        e.preventDefault(); // Prevent scroll/zoom
-        
         console.log('📱 [SiriButton] Touch start detected at:', this.mouseX, this.mouseY);
-      }, { passive: false });
+        // Don't prevent default - let click handler work
+      });
       
       container.addEventListener('touchend', () => { 
         this.isActive = false; 
         // Keep isHovered true briefly for visual feedback
         setTimeout(() => { this.isHovered = false; }, 200);
         console.log('📱 [SiriButton] Touch end detected');
+        // Don't prevent default - let click handler work
       });
       
       container.addEventListener('touchcancel', () => { 

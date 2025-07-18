@@ -112,6 +112,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
           backdropFilter: 'blur(10px)',
           border: `2px solid ${currentColors.primary}40`,
+          // Mobile touch optimizations
+          minWidth: '280px', // Ensure minimum touch target
+          minHeight: '280px', // Ensure minimum touch target
+          cursor: 'pointer', // Show it's clickable
+          touchAction: 'manipulation', // Improve touch response
         }}
       >
         <SiriCallButton

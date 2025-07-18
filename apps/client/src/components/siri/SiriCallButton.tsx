@@ -114,11 +114,29 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }, 200);
     }
 
+    // Touch handler functions
+    const handleTouchEnd = (e: TouchEvent) => {
+      console.log('📱 [SiriCallButton] Touch end - triggering click');
+      e.preventDefault(); // Prevent ghost click
+      handleClick(); // Directly trigger click handler
+    };
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      console.log('📱 [SiriCallButton] Touch start detected');
+      e.stopPropagation(); // Don't let it bubble to SiriButton
+    };
+
     // Add click handler
     element.addEventListener('click', handleClick);
+    
+    // Add touch handlers for mobile - CRITICAL for mobile functionality
+    element.addEventListener('touchend', handleTouchEnd);
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
 
     return () => {
       element.removeEventListener('click', handleClick);
+      element.removeEventListener('touchend', handleTouchEnd); 
+      element.removeEventListener('touchstart', handleTouchStart);
       safeCleanup();
     };
   }, [containerId, colors, handleClick, safeCleanup]);
