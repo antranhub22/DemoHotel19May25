@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { MessageSquare, Users, Bell, AlertTriangle, ShoppingCart } from 'lucide-react';
 
 // STANDARD POPUP DIMENSIONS - Không che nút Siri Button
-export const STANDARD_POPUP_HEIGHT = 140; // px - Adjusted for mobile display below Siri Button
+export const STANDARD_POPUP_HEIGHT = 120; // px - Further reduced for better mobile clearance
 export const STANDARD_POPUP_MAX_WIDTH = 350; // px
-export const STANDARD_POPUP_MAX_HEIGHT_VH = 25; // % of viewport height - Reduced for mobile
+export const STANDARD_POPUP_MAX_HEIGHT_VH = 20; // % of viewport height - Further reduced for mobile
 
 // Popup types
 export type PopupType = 'conversation' | 'staff' | 'notification' | 'alert' | 'order' | 'summary';

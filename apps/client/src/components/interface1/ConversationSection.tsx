@@ -36,7 +36,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
         className={`${className}`}
         style={{
           position: 'fixed',
-          bottom: '160px', // Space from bottom to position below Siri Button Container
+          bottom: '240px', // Increased space to avoid overlapping with Siri Button
           left: 0,
           right: 0,
           zIndex: 40,

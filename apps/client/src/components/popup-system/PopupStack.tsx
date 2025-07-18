@@ -49,7 +49,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
         zIndex: 1000,
         pointerEvents: 'none',
         ...(position === 'top' && { top: '20px' }),
-        ...(position === 'bottom' && { bottom: '180px' }),
+        ...(position === 'bottom' && { bottom: '260px' }),
         ...(position === 'center' && { 
           top: '50%', 
           transform: 'translate(-50%, -50%)' 
