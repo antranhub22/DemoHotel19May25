@@ -429,6 +429,61 @@ export class SiriButton {
     }
   }
 
+  // 🔧 NEW: Mobile test draw method
+  private mobileTestDraw() {
+    console.log('🔍 [SiriButton] MOBILE TEST DRAW START');
+    
+    if (!this.canvas || !this.ctx) {
+      console.error('❌ [SiriButton] Canvas or context not available for mobile test');
+      return;
+    }
+
+    // Clear canvas
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    
+    // Draw simple test circle to verify canvas works
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.arc(this.centerX, this.centerY, this.radius * 0.8, 0, Math.PI * 2);
+    this.ctx.fillStyle = '#FF0000'; // Red test color
+    this.ctx.fill();
+    this.ctx.strokeStyle = '#00FF00'; // Green border
+    this.ctx.lineWidth = 5;
+    this.ctx.stroke();
+    this.ctx.restore();
+    
+    // Draw test text
+    this.ctx.save();
+    this.ctx.font = '20px Arial';
+    this.ctx.fillStyle = '#FFFFFF';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('MOBILE TEST', this.centerX, this.centerY);
+    this.ctx.restore();
+    
+    console.log('🔍 [SiriButton] MOBILE TEST DRAW COMPLETED');
+    console.log('  🎨 Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
+    console.log('  🎨 Draw area:', this.width, 'x', this.height);
+    console.log('  🎨 Center:', this.centerX, this.centerY);
+    console.log('  🎨 Radius:', this.radius);
+    
+    // Verify canvas is visible after draw
+    setTimeout(() => {
+      const rect = this.canvas.getBoundingClientRect();
+      console.log('🔍 [SiriButton] POST-DRAW VERIFICATION:');
+      console.log('  📦 Canvas visible rect:', rect);
+      console.log('  📦 Canvas has content:', rect.width > 0 && rect.height > 0);
+      
+      // Try to get image data to verify canvas has content
+      try {
+        const imageData = this.ctx.getImageData(0, 0, Math.min(this.width, 100), Math.min(this.height, 100));
+        const hasContent = imageData.data.some(pixel => pixel > 0);
+        console.log('  🎨 Canvas has pixel data:', hasContent);
+      } catch (error) {
+        console.error('  ❌ Failed to get image data:', error);
+      }
+    }, 100);
+  }
+
   private drawTexturePattern() {
     // Dynamic texture pattern based on current color
     const dotColor = this.colors.secondary + '30'; // Add transparency
