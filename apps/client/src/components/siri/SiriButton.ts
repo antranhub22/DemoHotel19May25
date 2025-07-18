@@ -242,17 +242,24 @@ export class SiriButton {
     console.log('  🎨 Canvas CSS size:', finalSize);
     console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
     
-    // ✅ CRITICAL FIX: Ensure canvas always perfectly centered regardless of container changes
+    // ✅ CRITICAL FIX: Canvas positioning that works with mobile touch
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.position = 'absolute';
     this.canvas.style.top = '50%';
     this.canvas.style.left = '50%';
     this.canvas.style.transform = 'translate(-50%, -50%)'; // Perfect centering
-    this.canvas.style.zIndex = '50';
-    this.canvas.style.pointerEvents = 'auto';
+    this.canvas.style.zIndex = '1'; // Lower than container for touch events
+    this.canvas.style.pointerEvents = 'none'; // Let container handle touch events
     this.canvas.style.background = 'transparent';
     this.canvas.style.flexShrink = '0'; // Prevent flex shrinking
+    
+    // Debug canvas positioning for mobile
+    console.log('[SiriButton] Canvas positioned:', {
+      position: this.canvas.style.position,
+      zIndex: this.canvas.style.zIndex,
+      pointerEvents: this.canvas.style.pointerEvents
+    });
     
     // Canvas is ready for rendering
     

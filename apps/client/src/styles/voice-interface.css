@@ -47,14 +47,14 @@
   background: transparent;
 }
 
-/* Ensure canvas is visible and properly positioned */
+/* ✅ FIXED: Canvas styling without positioning conflicts */
 .voice-button canvas {
   background: transparent !important;
   border: none !important;
   outline: none !important;
   display: block !important;
-  z-index: 9999 !important; /* Force canvas to top layer */
-  position: relative !important; /* Create stacking context */
+  z-index: 1 !important; /* Lower than container to allow touch events */
+  /* ❌ REMOVED: position override that conflicts with JS positioning */
   image-rendering: -webkit-optimize-contrast !important; /* Crisp edges on webkit */
   image-rendering: crisp-edges !important; /* Modern browsers */
   -webkit-backface-visibility: hidden !important; /* Prevent blurry text on Safari */
@@ -96,30 +96,41 @@
     transition: transform 0.1s ease !important;
   }
 
-  /* ✅ CRITICAL: Ensure proper event flow on mobile */
+  /* ✅ CRITICAL FIX: Proper mobile touch event flow */
   .voice-button canvas {
-    pointer-events: none !important; /* Let container handle ALL touch events */
+    pointer-events: none !important; /* Canvas doesn't handle events */
     z-index: 1 !important; /* Lower than container */
     background: transparent !important;
   }
 
-  /* ✅ Force container to handle touch events properly */
+  /* ✅ Container MUST handle ALL touch events on mobile */
   .voice-button[id*="main-siri-button"] {
     pointer-events: auto !important;
     z-index: 10000 !important;
     background: transparent !important;
-    /* Enhanced touch area */
+    /* Enhanced touch area for mobile */
     min-width: 280px !important;
     min-height: 280px !important;
+    /* CRITICAL: Ensure touch events reach the container */
+    position: relative !important;
+    overflow: visible !important;
   }
 
-  /* ✅ Ensure no interference from parent containers */
+  /* ✅ ALL children should not interfere with touch events */
   .voice-button[id*="main-siri-button"] * {
-    pointer-events: none !important; /* Only container handles events */
+    pointer-events: none !important; /* Only main container handles events */
   }
 
+  /* ✅ Re-enable for main container (override specificity) */
   .voice-button[id*="main-siri-button"] {
-    pointer-events: auto !important; /* Override for main container */
+    pointer-events: auto !important; /* Main container gets events */
+  }
+
+  /* ✅ Ensure parent containers don't block events */
+  .voice-button {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 5000 !important;
   }
 }
 
