@@ -202,14 +202,10 @@ export class SiriButton {
     const dpr = window.devicePixelRatio || 1;
     console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
     
-    // Calculate optimal size based on container and device
-    const optimalSize = Math.min(containerWidth, containerHeight);
-    const size = Math.min(optimalSize, window.innerWidth * 0.8); // 80% of viewport width max
+    // Use the exact container size to ensure perfect alignment
+    const finalSize = Math.min(containerWidth, containerHeight);
     
-    // Ensure size is between 200px and 400px
-    const finalSize = Math.max(Math.min(size, 400), 200);
-    
-    console.log('[SiriButton] Resize - Calculated size:', finalSize);
+    console.log('[SiriButton] Resize - Final size (exact container match):', finalSize);
     
     // Update internal dimensions
     this.width = this.height = finalSize;
@@ -219,7 +215,7 @@ export class SiriButton {
     this.canvas.width = physicalSize;
     this.canvas.height = physicalSize;
     
-    // Set display size in CSS pixels
+    // Set display size in CSS pixels to exactly match container
     this.canvas.style.width = `${finalSize}px`;
     this.canvas.style.height = `${finalSize}px`;
     
@@ -228,7 +224,7 @@ export class SiriButton {
     
     console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
     
-    // Ensure canvas visibility and positioning
+    // Ensure canvas visibility and positioning - perfect center alignment
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.position = 'absolute';

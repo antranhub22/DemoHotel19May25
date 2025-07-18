@@ -152,8 +152,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         <div 
           className="relative z-10 flex items-center justify-center"
           style={{
-            width: '280px',
-            height: '280px',
+            width: 'clamp(280px, 80vw, 320px)', // Match outer container size
+            height: 'clamp(280px, 80vw, 320px)', // Match outer container size  
             position: 'relative'
           }}
         >

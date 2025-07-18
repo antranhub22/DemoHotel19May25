@@ -143,13 +143,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       id={containerId}
       className="voice-button"
       style={{ 
-        width: '400px', // Larger size to match SiriButton
-        height: '400px',
+        width: '100%', // Use full container width instead of fixed 400px
+        height: '100%', // Use full container height instead of fixed 400px
         position: 'relative',
         cursor: 'pointer',
         zIndex: 50,
-        maxWidth: '80vw', // Responsive on mobile
-        maxHeight: '80vw'
+        aspectRatio: '1 / 1', // Ensure square aspect ratio
+        minWidth: '280px', // Minimum size for usability
+        minHeight: '280px'
       }}
     >
       {/* Loading state */}
