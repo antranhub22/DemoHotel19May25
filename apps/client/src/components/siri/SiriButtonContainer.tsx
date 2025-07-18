@@ -101,7 +101,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         </div>
       )}
 
-      {/* Siri Button Container với External Volume Bars - Responsive sizing */}
+      {/* Siri Button Container - Clean without External Volume Bars */}
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
@@ -114,59 +114,15 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           border: `2px solid ${currentColors.primary}40`,
         }}
       >
-        {/* External Volume Bars - Compact và xung quanh button */}
-        {isCallStarted && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            {[...Array(16)].map((_, i) => {
-              const angle = (360 / 16) * i;
-              const radians = (angle * Math.PI) / 180;
-              const baseRadius = 110; // Adjusted for new container size
-              const barHeight = 8 + Math.round((micLevel/100)*16) * ((i%2)+1); // Better proportions
-              const x = Math.cos(radians) * baseRadius;
-              const y = Math.sin(radians) * baseRadius;
-              
-              return (
-                <div
-                  key={i}
-                  className="absolute transition-all duration-150 ease-out"
-                  style={{
-                    left: '50%',
-                    top: '50%',
-                    transform: `translate(-50%, -50%) translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
-                    width: '3px', // Slightly wider for better visibility
-                    height: `${barHeight}px`,
-                    backgroundColor: currentColors.primary,
-                    borderRadius: '1.5px',
-                    boxShadow: `0 0 6px ${currentColors.glow}`,
-                    opacity: 0.7 + (micLevel/100) * 0.3,
-                    transformOrigin: 'center bottom',
-                    zIndex: 1
-                  }}
-                />
-              );
-            })}
-          </div>
-        )}
-
-        {/* Canvas Container - Ensure proper positioning */}
-        <div 
-          className="relative z-10 flex items-center justify-center"
-          style={{
-            width: 'clamp(280px, 80vw, 320px)', // Match outer container size
-            height: 'clamp(280px, 80vw, 320px)', // Match outer container size  
-            position: 'relative'
-          }}
-        >
-          <SiriCallButton
-            containerId="main-siri-button"
-            isListening={isCallStarted}
-            volumeLevel={micLevel}
-            onCallStart={() => onCallStart(language)}
-            onCallEnd={onCallEnd}
-            language={language}
-            colors={currentColors}
-          />
-        </div>
+        <SiriCallButton
+          containerId="main-siri-button"
+          isListening={isCallStarted}
+          volumeLevel={micLevel}
+          onCallStart={() => onCallStart(language)}
+          onCallEnd={onCallEnd}
+          language={language}
+          colors={currentColors}
+        />
       </div>
       
       {/* Tap To Speak text - Visible only when not calling */}

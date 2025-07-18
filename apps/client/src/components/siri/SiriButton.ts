@@ -195,17 +195,21 @@ export class SiriButton {
     const containerWidth = container.clientWidth || containerRect.width || 280;
     const containerHeight = container.clientHeight || containerRect.height || 280;
     
-    console.log('[SiriButton] Resize - Container size:', containerWidth, 'x', containerHeight);
-    console.log('[SiriButton] Resize - Container rect:', containerRect);
+    console.log('[SiriButton] 🔍 DEBUG RESIZE:');
+    console.log('  📦 Container:', container.id || container.className);
+    console.log('  📏 ClientWidth:', container.clientWidth);
+    console.log('  📏 ClientHeight:', container.clientHeight); 
+    console.log('  📏 BoundingRect:', containerRect.width, 'x', containerRect.height);
+    console.log('  🎯 Final used size:', containerWidth, 'x', containerHeight);
     
     // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
-    console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
+    console.log('  🖥️ Device pixel ratio:', dpr);
     
     // Use the exact container size to ensure perfect alignment
     const finalSize = Math.min(containerWidth, containerHeight);
     
-    console.log('[SiriButton] Resize - Final size (exact container match):', finalSize);
+    console.log('  ✅ Canvas final size:', finalSize);
     
     // Update internal dimensions
     this.width = this.height = finalSize;
@@ -220,9 +224,9 @@ export class SiriButton {
     this.canvas.style.height = `${finalSize}px`;
     
     // Log actual dimensions
-    console.log('[SiriButton] Physical size:', physicalSize, 'CSS size:', finalSize);
-    
-    console.log('[SiriButton] Canvas resized to:', finalSize, 'px, actual:', this.canvas.width, 'x', this.canvas.height);
+    console.log('  🎨 Canvas physical size:', physicalSize);
+    console.log('  🎨 Canvas CSS size:', finalSize);
+    console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
     
     // Ensure canvas visibility and positioning - perfect center alignment
     this.canvas.style.borderRadius = '50%';
@@ -248,7 +252,9 @@ export class SiriButton {
     this.centerY = this.height / 2;
     this.radius = Math.max(80, finalSize * 0.45); // Larger proportional radius
     
-    console.log('[SiriButton] Canvas center:', this.centerX, this.centerY, 'radius:', this.radius);
+    console.log('  🎯 Canvas center:', this.centerX, this.centerY);
+    console.log('  ⭕ Canvas radius:', this.radius);
+    console.log('  📊 Radius ratio:', (this.radius / finalSize).toFixed(2));
     
     // Force a test draw after resize
     setTimeout(() => {
