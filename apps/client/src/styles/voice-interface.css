@@ -95,10 +95,12 @@
     transform: none;
   }
   
-  /* Add active state for mobile feedback */
+  /* ✅ FIX 5: Remove scale transform to prevent canvas misalignment */
   .voice-button:active {
-    transform: scale(0.95) !important;
-    transition: transform 0.1s ease !important;
+    /* Remove scale transform that could move canvas */
+    /* transform: scale(0.95) !important; */
+    transition: opacity 0.1s ease !important;
+    opacity: 0.8 !important; /* Use opacity instead of scale for feedback */
   }
 
   /* ✅ CRITICAL FIX: Proper mobile touch event flow */

@@ -114,9 +114,9 @@ export class SiriButton {
     });
     
     // Set canvas styles immediately for proper display
-    // 🔧 HYBRID FIX: Use CSS-only positioning instead of transform conflicts
+    // 🔧 FIX 2: Use CSS-only positioning with reduced padding
     this.canvas.style.position = 'absolute';
-    this.canvas.style.inset = '4px';           // ✅ Perfect centering with 4px padding
+    this.canvas.style.inset = '2px';           // ✅ Reduced from 4px to 2px for larger canvas
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';
@@ -270,8 +270,8 @@ export class SiriButton {
       return;
     }
     
-    // 🔧 CRITICAL FIX: Canvas sizing with proper dimensions matching
-    const CANVAS_PADDING = 4; // Small padding for perfect fit within container
+    // 🔧 FIX 2: Reduced canvas padding for better mobile display
+    const CANVAS_PADDING = 2; // ✅ Reduced from 4px to 2px for larger canvas area
     const finalWidth = containerWidth - CANVAS_PADDING;
     const finalHeight = containerHeight - CANVAS_PADDING;
     
@@ -293,9 +293,9 @@ export class SiriButton {
     console.log('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
     console.log('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
     
-    // 🔧 HYBRID FIX: CSS-only positioning - simple and reliable
+    // 🔧 FIX 2: CSS-only positioning with reduced padding
     this.canvas.style.position = 'absolute';
-    this.canvas.style.inset = '4px';              // Perfect 4px padding from all sides
+    this.canvas.style.inset = '2px';              // ✅ Reduced to 2px padding from all sides
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
     this.canvas.style.background = 'transparent';

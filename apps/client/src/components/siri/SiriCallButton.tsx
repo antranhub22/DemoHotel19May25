@@ -155,39 +155,23 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       buttonRef.current = new SiriButton(containerId, colors);
       setCanvasReady(true);
       
-      // 🔧 CRITICAL FIX: Force resize after container is fully setup
+      // 🔧 FIX 4: Single resize trigger for better mobile performance
       setTimeout(() => {
         if (buttonRef.current && !cleanupFlagRef.current) {
-          console.log('🔧 [SiriCallButton] Forcing post-init resize for perfect alignment');
+          console.log('🔧 [SiriCallButton] Single resize for mobile compatibility');
           window.dispatchEvent(new Event('resize'));
         }
-      }, 100);
-      
-      // Additional resize for mobile/slower devices
-      setTimeout(() => {
-        if (buttonRef.current && !cleanupFlagRef.current) {
-          console.log('🔧 [SiriCallButton] Final alignment resize');
-          window.dispatchEvent(new Event('resize'));
-        }
-      }, 300);
+      }, 200); // ✅ Single resize call at 200ms instead of multiple triggers
       
     } catch (error) {
       console.error('[SiriCallButton] Init error:', error);
-      // Retry once
+      // ✅ FIX 4: Simplified retry without multiple resize triggers
       setTimeout(() => {
         if (!cleanupFlagRef.current) {
           try {
             buttonRef.current = new SiriButton(containerId, colors);
             setCanvasReady(true);
-            
-            // Force resize on retry too
-            setTimeout(() => {
-              if (buttonRef.current && !cleanupFlagRef.current) {
-                console.log('🔧 [SiriCallButton] Retry resize for alignment');
-                window.dispatchEvent(new Event('resize'));
-              }
-            }, 100);
-            
+            console.log('🔧 [SiriCallButton] Retry successful - no additional resize needed');
           } catch (retryError) {
             console.error('[SiriCallButton] Retry failed:', retryError);
           }
@@ -354,18 +338,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   useEffect(() => {
     if (buttonRef.current && !cleanupFlagRef.current) {
       buttonRef.current.setListening(isListening);
-      
-      // 🔧 SIMPLIFIED: Single resize trigger without layout thrashing
-      const triggerResize = () => {
-        if (buttonRef.current && !cleanupFlagRef.current) {
-          console.log('🔧 [SiriCallButton] Triggering resize due to listening state change');
-          // Simple resize trigger without forcing display changes
-          window.dispatchEvent(new Event('resize'));
-        }
-      };
-
-      // 🔧 REDUCED: Only trigger resize after layout settles, no forced reflows
-      setTimeout(triggerResize, 100);  // Single resize after DOM update
+      // ✅ FIX 4: Remove unnecessary resize on listening state change
+      // Canvas animations handle listening state internally, no resize needed
+      console.log('🔧 [SiriCallButton] Listening state updated without resize trigger');
     }
   }, [isListening, containerId]);
 
@@ -440,7 +415,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           style={{
             background: `linear-gradient(135deg, ${colors?.primary || '#5DB6B9'}, ${colors?.secondary || '#E8B554'})`,
             color: 'white',
-            fontSize: '48px',
+            fontSize: '36px', // ✅ FIX 3: Reduced from 48px to 36px for better mobile fit
             boxShadow: `0 0 30px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
             border: '2px solid rgba(255,255,255,0.1)',
             pointerEvents: 'none' // Don't block container events

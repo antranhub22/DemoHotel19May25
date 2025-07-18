@@ -45,14 +45,14 @@ export const useSiriResponsiveSize = (): SiriSizeConfig => {
       maxHeight: '320px'
     };
   } else {
-    // Mobile: Optimized responsive sizing
+    // 🔧 FIX 1: Mobile responsive sizing optimization
     return {
-      width: 'min(280px, 75vw)',   // Reduced from 80vw to 75vw for better fit
-      height: 'min(280px, 75vw)',  // Smaller size for mobile screens
-      minWidth: '260px',           // Reduced from 280px for small devices
-      minHeight: '260px',          // Better fit for very small screens
-      maxWidth: '280px',           // Consistent max size for mobile
-      maxHeight: '280px'           // Prevent too large on mobile
+      width: 'min(300px, 80vw)',   // ✅ Increased from 75vw to 80vw for better size
+      height: 'min(300px, 80vw)',  // ✅ Increased max from 280px to 300px  
+      minWidth: '240px',           // ✅ Reduced from 260px to 240px for small devices
+      minHeight: '240px',          // ✅ Better fit for very small screens
+      maxWidth: '300px',           // ✅ Increased from 280px to 300px for larger touch target
+      maxHeight: '300px'           // ✅ Consistent larger max size for mobile
     };
   }
 };
