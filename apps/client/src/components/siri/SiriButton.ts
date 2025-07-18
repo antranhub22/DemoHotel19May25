@@ -325,6 +325,23 @@ export class SiriButton {
     this.canvas.style.background = 'transparent';
     this.canvas.style.flexShrink = '0'; // Prevent flex shrinking
     
+    // 🔧 ENHANCED FIX: Force reposition after layout changes
+    // Use requestAnimationFrame to ensure DOM has updated
+    requestAnimationFrame(() => {
+      if (!this.canvas || !container) return;
+      
+      // Re-apply centering styles after layout stabilizes
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.top = '50%';
+      this.canvas.style.left = '50%';
+      this.canvas.style.transform = 'translate(-50%, -50%)';
+      
+      // Force browser to recalculate styles
+      this.canvas.offsetHeight;
+      
+      console.log('[SiriButton] 🔧 Canvas repositioned after layout change');
+    });
+    
     // Debug canvas positioning for mobile
     console.log('[SiriButton] Canvas positioned:', {
       position: this.canvas.style.position,
