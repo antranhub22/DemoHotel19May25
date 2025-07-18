@@ -31,6 +31,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const cleanupFlagRef = useRef<boolean>(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
   const [canvasReady, setCanvasReady] = useState(false);
+  
+  // Prevent double-firing between click and touch events
+  const isHandlingClick = useRef<boolean>(false);
 
   // Safe cleanup function
   const safeCleanup = useCallback(() => {
@@ -59,26 +62,40 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     setCanvasReady(false);
   }, [containerId]);
 
-  // Handle click events
-  const handleClick = async () => {
+  // Handle click events - WRAPPED IN useCallback to prevent memory leaks
+  const handleClick = useCallback(async () => {
+    // Prevent double-firing between click and touch events
+    if (isHandlingClick.current) {
+      console.log('🔔 [SiriCallButton] Click already being handled, ignoring...');
+      return;
+    }
+    
+    isHandlingClick.current = true;
     console.log('🔔 [SiriCallButton] Click/Touch event triggered! isListening:', isListening);
     
-    if (!isListening && onCallStart) {
-      setStatus('listening');
-      console.log('🎤 [SiriCallButton] Starting call...');
-      try {
-        await onCallStart();
-      } catch (error) {
-        console.error('[SiriCallButton] Start error:', error);
-        setStatus('idle');
+    try {
+      if (!isListening && onCallStart) {
+        setStatus('listening');
+        console.log('🎤 [SiriCallButton] Starting call...');
+        try {
+          await onCallStart();
+        } catch (error) {
+          console.error('[SiriCallButton] Start error:', error);
+          setStatus('idle');
+        }
+      } else if (isListening && onCallEnd) {
+        setStatus('processing');
+        console.log('🛑 [SiriCallButton] Ending call...');
+        onCallEnd();
+        setTimeout(() => setStatus('idle'), 500);
       }
-    } else if (isListening && onCallEnd) {
-      setStatus('processing');
-      console.log('🛑 [SiriCallButton] Ending call...');
-      onCallEnd();
-      setTimeout(() => setStatus('idle'), 500);
+    } finally {
+      // Reset flag after a short delay to allow for proper event handling
+      setTimeout(() => {
+        isHandlingClick.current = false;
+      }, 100);
     }
-  };
+  }, [isListening, onCallStart, onCallEnd]); // Proper dependencies
 
   // Initialize SiriButton
   useEffect(() => {
@@ -139,7 +156,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       element.removeEventListener('touchstart', handleTouchStart);
       safeCleanup();
     };
-  }, [containerId, colors, handleClick, safeCleanup]);
+  }, [containerId, colors]); // Removed handleClick and safeCleanup as they're stable with useCallback
 
   // Update SiriButton state
   useEffect(() => {
