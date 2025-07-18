@@ -39,7 +39,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
           bottom: '40px', // Minimal space for closest popup positioning
           left: 0,
           right: 0,
-          zIndex: 40,
+          zIndex: 10, // Lower than SiriButton canvas
           pointerEvents: 'none', // Cho phép click through container
         }}
       >

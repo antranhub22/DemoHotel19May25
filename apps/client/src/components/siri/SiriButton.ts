@@ -65,7 +65,7 @@ export class SiriButton {
     this.canvas.style.top = '50%';
     this.canvas.style.left = '50%';
     this.canvas.style.transform = 'translate(-50%, -50%)';
-    this.canvas.style.zIndex = '20';
+    this.canvas.style.zIndex = '50'; // Higher than ConversationSection
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
@@ -231,7 +231,7 @@ export class SiriButton {
     this.canvas.style.top = '50%';
     this.canvas.style.left = '50%';
     this.canvas.style.transform = 'translate(-50%, -50%)';
-    this.canvas.style.zIndex = '20';
+    this.canvas.style.zIndex = '50'; // Higher than ConversationSection
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.background = 'transparent';
     

@@ -53,6 +53,8 @@
   border: none !important;
   outline: none !important;
   display: block !important;
+  z-index: 9999 !important; /* Force canvas to top layer */
+  position: relative !important; /* Create stacking context */
 }
 
 /* Mobile optimizations - same canvas behavior as desktop */
