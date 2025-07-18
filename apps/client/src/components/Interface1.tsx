@@ -82,18 +82,20 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 />
               </div>
               
-              {/* Column 2: Siri Button (Center) */}
-              <div className="flex flex-col items-center justify-center">
-                <SiriButtonContainer
-                  isCallStarted={isCallStarted}
-                  micLevel={micLevel}
-                  onCallStart={async (lang) => {
-                    await handleCallStart(lang);
-                  }}
-                  onCallEnd={handleCallEnd}
-                  onCancel={handleCancel}
-                  onConfirm={handleConfirm}
-                />
+              {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
+              <div className="flex flex-col items-center justify-center w-full max-w-md">
+                <div className="flex items-center justify-center p-4">
+                  <SiriButtonContainer
+                    isCallStarted={isCallStarted}
+                    micLevel={micLevel}
+                    onCallStart={async (lang) => {
+                      await handleCallStart(lang);
+                    }}
+                    onCallEnd={handleCallEnd}
+                    onCancel={handleCancel}
+                    onConfirm={handleConfirm}
+                  />
+                </div>
               </div>
               
               {/* Column 3: Summary/Right Panel (Right) */}

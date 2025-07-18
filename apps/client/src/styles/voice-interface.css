@@ -21,16 +21,20 @@
 .voice-button {
   position: relative;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1B4E8B, #3B82F6);
+  /* Remove background to let canvas show through */
+  background: transparent;
+  /* Keep animations and transitions */
   animation: breathing 3s ease-in-out infinite;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(27, 78, 139, 0.3); /* Added larger shadow */
+  /* Remove box-shadow as canvas handles its own styling */
+  box-shadow: none;
 }
 
 .voice-button:hover {
   transform: scale(1.02);
-  background: linear-gradient(135deg, #2563EB, #1B4E8B);
-  box-shadow: 0 15px 40px rgba(27, 78, 139, 0.4); /* Enhanced hover shadow */
+  /* Remove background override on hover */
+  background: transparent;
+  box-shadow: none;
 }
 
 .voice-button:active {
@@ -39,7 +43,17 @@
 
 .voice-button.listening {
   animation: pulse 2s infinite;
-  background: linear-gradient(135deg, #EF4444, #DC2626);
+  /* Remove background override when listening */
+  background: transparent;
+}
+
+/* Ensure canvas is visible and properly positioned */
+.voice-button canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .waveform-container {
@@ -88,7 +102,7 @@
   background: rgba(16, 185, 129, 0.9);
 }
 
-/* Gradient Ring Effect */
+/* Gradient Ring Effect - Remove background to let canvas show */
 .gradient-ring {
   position: absolute;
   top: 0;
@@ -96,13 +110,11 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    rgba(27, 78, 139, 0.2),
-    rgba(59, 130, 246, 0.4),
-    rgba(27, 78, 139, 0.2)
-  );
-  animation: rotate 4s linear infinite;
+  /* Remove background to let canvas show through */
+  background: transparent;
+  /* Remove animation as canvas handles its own effects */
+  animation: none;
+  z-index: 5; /* Lower than canvas */
 }
 
 @keyframes rotate {

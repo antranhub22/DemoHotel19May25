@@ -44,6 +44,15 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   useEffect(() => {
     console.log('[SiriCallButton] Initializing with containerId:', containerId);
     
+    // Clear any existing canvas in the container first
+    const element = document.getElementById(containerId);
+    if (element) {
+      const existingCanvas = element.querySelector('canvas');
+      if (existingCanvas) {
+        existingCanvas.remove();
+      }
+    }
+
     // Initialize SiriButton with colors
     buttonRef.current = new SiriButton(containerId, colors);
 
@@ -74,7 +83,6 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     clickHandlerRef.current = clickHandler;
 
     // Add click handler to container element
-    const element = document.getElementById(containerId);
     if (element) {
       console.log('[SiriCallButton] Adding click listener to element:', element);
       element.addEventListener('click', clickHandler);
@@ -158,14 +166,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         </div>
       )}
 
-      {/* Main Button */}
+      {/* Main Button - Canvas will be inserted here by SiriButton class */}
       <div 
         id={containerId}
-        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-visible flex items-center justify-center z-50`}
+        className={`voice-button ${isListening ? 'listening' : ''} relative rounded-full overflow-hidden flex items-center justify-center z-50`}
         style={{ 
           cursor: 'pointer',
-          width: '280px',  // Increased to match SiriButtonContainer
-          height: '280px', // Increased to match SiriButtonContainer
+          width: '280px',
+          height: '280px',
           zIndex: 9999,
           pointerEvents: 'auto',
           position: 'relative'
@@ -185,14 +193,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           }
         }}
       >
-        {/* Gradient Ring Effect */}
-        <div 
-          className="gradient-ring absolute inset-0 transition-all duration-300" 
-          style={{
-            background: colors ? `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})` : undefined,
-            opacity: 0.6
-          }}
-        />
+        {/* Remove gradient-ring div since canvas will handle all visuals */}
       </div>
     </div>
   );
