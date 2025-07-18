@@ -73,15 +73,45 @@ export class SiriButton {
       name: 'English'
     };
 
+    // 🔍 ENHANCED MOBILE DEBUG: Device detection and environment info
+    const deviceInfo = {
+      userAgent: navigator.userAgent,
+      isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+      hasTouch: 'ontouchstart' in window,
+      maxTouchPoints: navigator.maxTouchPoints || 0,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      devicePixelRatio: window.devicePixelRatio || 1
+    };
+
+    console.log('🔍 [SiriButton] MOBILE DEBUG - CONSTRUCTOR START');
+    console.log('  📱 Device Info:', deviceInfo);
+    console.log('  🎨 Container ID:', containerId);
+    console.log('  🌈 Colors:', this.colors);
+
     console.log('[SiriButton] Creating canvas for container:', containerId, 'with colors:', this.colors);
 
     // Create canvas element
     this.canvas = document.createElement('canvas');
     const container = document.getElementById(containerId);
     if (!container) {
-      console.error('[SiriButton] Container element not found:', containerId);
+      console.error('❌ [SiriButton] Container element not found:', containerId);
       throw new Error('Container element not found');
     }
+
+    // 🔍 MOBILE DEBUG: Container verification
+    console.log('🔍 [SiriButton] CONTAINER VERIFICATION:');
+    console.log('  📦 Container found:', !!container);
+    console.log('  📦 Container tag:', container.tagName);
+    console.log('  📦 Container classes:', container.className);
+    console.log('  📦 Container computed style:', {
+      display: getComputedStyle(container).display,
+      position: getComputedStyle(container).position,
+      width: getComputedStyle(container).width,
+      height: getComputedStyle(container).height,
+      visibility: getComputedStyle(container).visibility,
+      opacity: getComputedStyle(container).opacity
+    });
     
     // Set canvas styles immediately for proper display
     this.canvas.style.position = 'absolute'; // ✅ FIX: Use absolute positioning for perfect centering
@@ -96,41 +126,30 @@ export class SiriButton {
     
     // Add debug attributes
     this.canvas.setAttribute('data-siri-canvas', 'true');
+    this.canvas.setAttribute('data-mobile-debug', deviceInfo.isMobile ? 'mobile' : 'desktop');
     this.canvas.id = `${containerId}-canvas`;
     
     container.appendChild(this.canvas);
-    console.log('[SiriButton] Canvas appended to container:', container);
-    
-    // 🔍 ENHANCED DEBUG: Canvas positioning and container relationship
+    console.log('✅ [SiriButton] Canvas appended to container:', container);
+
+    // 🔍 MOBILE DEBUG: Canvas verification after append
     setTimeout(() => {
-      const canvasInDOM = document.getElementById(`${containerId}-canvas`);
-      console.log('🔍 [SiriButton] POSITIONING DEBUG:');
-      console.log('  📦 Container ID:', containerId);
-      console.log('  📦 Container rect:', container.getBoundingClientRect());
-      console.log('  📦 Container computed style:', {
-        position: getComputedStyle(container).position,
-        width: getComputedStyle(container).width,
-        height: getComputedStyle(container).height,
-        display: getComputedStyle(container).display,
-        flexDirection: getComputedStyle(container).flexDirection,
-        alignItems: getComputedStyle(container).alignItems,
-        justifyContent: getComputedStyle(container).justifyContent
+      console.log('🔍 [SiriButton] CANVAS VERIFICATION:');
+      console.log('  🎨 Canvas in DOM:', document.contains(this.canvas));
+      console.log('  🎨 Canvas element:', this.canvas);
+      console.log('  🎨 Canvas parent:', this.canvas.parentElement);
+      console.log('  🎨 Canvas getBoundingClientRect:', this.canvas.getBoundingClientRect());
+      console.log('  🎨 Canvas computed style:', {
+        display: getComputedStyle(this.canvas).display,
+        position: getComputedStyle(this.canvas).position,
+        width: getComputedStyle(this.canvas).width,
+        height: getComputedStyle(this.canvas).height,
+        visibility: getComputedStyle(this.canvas).visibility,
+        opacity: getComputedStyle(this.canvas).opacity,
+        zIndex: getComputedStyle(this.canvas).zIndex,
+        transform: getComputedStyle(this.canvas).transform
       });
-      console.log('  🎨 Canvas in DOM:', !!canvasInDOM);
-      if (canvasInDOM) {
-        console.log('  🎨 Canvas rect:', canvasInDOM.getBoundingClientRect());
-        console.log('  🎨 Canvas computed style:', {
-          position: getComputedStyle(canvasInDOM).position,
-          top: getComputedStyle(canvasInDOM).top,
-          left: getComputedStyle(canvasInDOM).left,
-          transform: getComputedStyle(canvasInDOM).transform,
-          width: getComputedStyle(canvasInDOM).width,
-          height: getComputedStyle(canvasInDOM).height,
-          zIndex: getComputedStyle(canvasInDOM).zIndex,
-          pointerEvents: getComputedStyle(canvasInDOM).pointerEvents
-        });
-      }
-    }, 100);
+    }, 200);
     
     // Get context
     const ctx = this.canvas.getContext('2d');
@@ -219,10 +238,11 @@ export class SiriButton {
   }
 
   private resize() {
-    // Get container size
-    const container = this.canvas.parentElement;
+    console.log('🔍 [SiriButton] RESIZE START - Mobile Debug');
+    
+    const container = document.getElementById(this.canvas.id.replace('-canvas', ''));
     if (!container) {
-      console.warn('[SiriButton] No container found during resize');
+      console.warn('⚠️ [SiriButton] No container found during resize');
       return;
     }
 
@@ -240,6 +260,17 @@ export class SiriButton {
     console.log('  📏 ClientHeight:', container.clientHeight); 
     console.log('  📏 BoundingRect:', containerRect.width, 'x', containerRect.height);
     console.log('  🎯 Final used size:', containerWidth, 'x', containerHeight);
+    
+    // 🔍 MOBILE DEBUG: Check if dimensions are valid
+    if (containerWidth === 0 || containerHeight === 0) {
+      console.error('❌ [SiriButton] Invalid container dimensions on mobile:', {
+        width: containerWidth,
+        height: containerHeight,
+        containerRect,
+        container: container
+      });
+      return;
+    }
     
     // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
@@ -269,6 +300,18 @@ export class SiriButton {
     console.log('  🎨 Canvas physical size:', physicalWidth, 'x', physicalHeight);
     console.log('  🎨 Canvas CSS size:', finalWidth, 'x', finalHeight);
     console.log('  🎨 Canvas actual dimensions:', this.canvas.width, 'x', this.canvas.height);
+    
+    // 🔍 MOBILE DEBUG: Verify canvas has proper size
+    if (this.canvas.width === 0 || this.canvas.height === 0) {
+      console.error('❌ [SiriButton] Canvas has zero dimensions after resize!', {
+        canvasWidth: this.canvas.width,
+        canvasHeight: this.canvas.height,
+        finalWidth,
+        finalHeight,
+        physicalWidth,
+        physicalHeight
+      });
+    }
     
     // ✅ CRITICAL FIX: Canvas positioning that works with container
     this.canvas.style.borderRadius = '50%';
@@ -315,6 +358,8 @@ export class SiriButton {
       this.debugDraw();
       // 🔧 CRITICAL: Verify alignment after resize
       this.verifyAlignment();
+      // 🔧 MOBILE: Force test draw to ensure canvas works
+      this.mobileTestDraw();
     }, 50);
   }
 
@@ -689,6 +734,7 @@ export class SiriButton {
   }
 
   private animate() {
+    console.log('🔍 [SiriButton] ANIMATION START - Mobile Debug');
     // Ensure canvas is still visible and properly sized
     if (!this.canvas || !this.ctx) {
       console.warn('[SiriButton] Canvas or context missing during animation');

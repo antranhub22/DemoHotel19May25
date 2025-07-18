@@ -203,10 +203,25 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
     if (isMobile) {
       // ✅ MOBILE: Touch events with enhanced debugging
+      console.log('📱 [SiriCallButton] 🔥 SETTING UP MOBILE TOUCH EVENTS');
+      console.log('  📱 Element for touch events:', element);
+      console.log('  📱 Element rect:', element.getBoundingClientRect());
+      console.log('  📱 Element computed style:', {
+        position: getComputedStyle(element).position,
+        zIndex: getComputedStyle(element).zIndex,
+        pointerEvents: getComputedStyle(element).pointerEvents,
+        display: getComputedStyle(element).display,
+        width: getComputedStyle(element).width,
+        height: getComputedStyle(element).height
+      });
+      
       const handleTouchStart = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] Touch start detected - target:', e.target);
-        console.log('📱 [SiriCallButton] Touch position:', e.touches[0].clientX, e.touches[0].clientY);
-        console.log('📱 [SiriCallButton] Element rect:', element.getBoundingClientRect());
+        console.log('📱 [SiriCallButton] 🔥 TOUCH START DETECTED!');
+        console.log('  📱 Touch event:', e);
+        console.log('  📱 Touch target:', e.target);
+        console.log('  📱 Touch position:', e.touches[0].clientX, e.touches[0].clientY);
+        console.log('  📱 Element rect:', element.getBoundingClientRect());
+        console.log('  📱 Touches count:', e.touches.length);
         
         const touch = e.touches[0];
         const rect = element.getBoundingClientRect();
@@ -214,65 +229,47 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           x: touch.clientX - rect.left,
           y: touch.clientY - rect.top
         });
+        
+        console.log('  ✅ Touch start handled successfully');
       };
 
       const handleTouchEnd = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] Touch end detected - preventing default');
+        console.log('📱 [SiriCallButton] 🔥 TOUCH END DETECTED!');
+        console.log('  📱 Touch event:', e);
+        console.log('  📱 Touch target:', e.target);
+        console.log('  📱 Changed touches:', e.changedTouches.length);
+        console.log('  📱 Preventing default to avoid ghost clicks');
+        
         e.preventDefault(); // Prevent ghost click
         handleInteractionEnd(e);
+        
+        console.log('  ✅ Touch end handled successfully');
       };
 
-      const handleTouchCancel = () => {
-        console.log('📱 [SiriCallButton] Touch cancelled');
+      const handleTouchCancel = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] ⚠️ TOUCH CANCELLED');
+        console.log('  📱 Touch event:', e);
         if (buttonRef.current) {
           buttonRef.current.setInteractionMode('idle');
         }
       };
 
       // Add events with enhanced logging
-      console.log('📱 [SiriCallButton] Adding touch event listeners to element:', element.id);
+      console.log('📱 [SiriCallButton] 🎯 ADDING TOUCH EVENT LISTENERS');
+      console.log('  📱 Adding to element:', element.id, element.tagName);
+      
+      // Test if element can receive events
+      const testEventHandler = (e: Event) => {
+        console.log('📱 [SiriCallButton] 🧪 TEST EVENT RECEIVED:', e.type);
+      };
+      
+      element.addEventListener('touchstart', testEventHandler, { once: true });
+      
       element.addEventListener('touchstart', handleTouchStart, { passive: true });
       element.addEventListener('touchend', handleTouchEnd, { passive: false });
       element.addEventListener('touchcancel', handleTouchCancel, { passive: true });
       
-             // Debug: Test if element can receive touch events
-       setTimeout(() => {
-         const computedStyle = window.getComputedStyle(element);
-         console.log('📱 [SiriCallButton] Element computed style:');
-         console.log('  - pointerEvents:', computedStyle.pointerEvents);
-         console.log('  - position:', computedStyle.position);
-         console.log('  - zIndex:', computedStyle.zIndex);
-         console.log('  - display:', computedStyle.display);
-         console.log('  - width x height:', computedStyle.width, 'x', computedStyle.height);
-         
-         // Test direct touch event simulation
-         console.log('📱 [SiriCallButton] Testing direct touch simulation...');
-         const testTouchStart = new TouchEvent('touchstart', {
-           touches: [new Touch({
-             identifier: 0,
-             target: element,
-             clientX: 100,
-             clientY: 100
-           })]
-         });
-         
-                   try {
-            element.dispatchEvent(testTouchStart);
-            console.log('📱 [SiriCallButton] ✅ Touch event simulation successful');
-          } catch (error) {
-            console.error('📱 [SiriCallButton] ❌ Touch event simulation failed:', error);
-          }
-          
-          // Final validation: Check if container is properly set up for touch
-          console.log('📱 [SiriCallButton] 🎯 MOBILE TOUCH VALIDATION:');
-          console.log('  ✅ Device detected as mobile:', isMobile);
-          console.log('  ✅ Element ID:', element.id);
-          console.log('  ✅ Touch events added');
-          console.log('  ✅ Container style - pointerEvents:', computedStyle.pointerEvents);
-          console.log('  ✅ Container style - position:', computedStyle.position);
-          console.log('  ✅ Container size:', computedStyle.width, 'x', computedStyle.height);
-          console.log('  🎯 READY FOR MOBILE TOUCH!');
-        }, 100);
+      console.log('📱 [SiriCallButton] ✅ Touch event listeners added successfully');
 
       return () => {
         element.removeEventListener('touchstart', handleTouchStart);
