@@ -96,16 +96,30 @@
     transition: transform 0.1s ease !important;
   }
 
-  /* Ensure canvas doesn't block touch events on mobile */
+  /* ✅ CRITICAL: Ensure proper event flow on mobile */
   .voice-button canvas {
-    pointer-events: none !important; /* Let container handle touch events */
+    pointer-events: none !important; /* Let container handle ALL touch events */
     z-index: 1 !important; /* Lower than container */
+    background: transparent !important;
   }
 
-  /* Force container to handle touch events */
+  /* ✅ Force container to handle touch events properly */
   .voice-button[id*="main-siri-button"] {
     pointer-events: auto !important;
     z-index: 10000 !important;
+    background: transparent !important;
+    /* Enhanced touch area */
+    min-width: 280px !important;
+    min-height: 280px !important;
+  }
+
+  /* ✅ Ensure no interference from parent containers */
+  .voice-button[id*="main-siri-button"] * {
+    pointer-events: none !important; /* Only container handles events */
+  }
+
+  .voice-button[id*="main-siri-button"] {
+    pointer-events: auto !important; /* Override for main container */
   }
 }
 

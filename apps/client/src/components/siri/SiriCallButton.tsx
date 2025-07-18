@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
+import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 import '../../styles/voice-interface.css';
 import { Language } from '@/types/interface1.types';
 
@@ -62,16 +63,30 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     setCanvasReady(false);
   }, [containerId]);
 
-  // Handle click events - WRAPPED IN useCallback to prevent memory leaks
-  const handleClick = useCallback(async () => {
-    // Prevent double-firing between click and touch events
+  // ✅ CENTRALIZED interaction handlers
+  const handleInteractionStart = useCallback((e: Event, position?: { x: number; y: number }) => {
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode('active');
+      if (position) {
+        buttonRef.current.setTouchPosition(position.x, position.y);
+      }
+    }
+    console.log('🎯 [SiriCallButton] Interaction start:', { position });
+  }, []);
+
+  const handleInteractionEnd = useCallback(async (e: Event) => {
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode('idle');
+    }
+    
+    // Business logic - prevent double-firing
     if (isHandlingClick.current) {
       console.log('🔔 [SiriCallButton] Click already being handled, ignoring...');
       return;
     }
     
     isHandlingClick.current = true;
-    console.log('🔔 [SiriCallButton] Click/Touch event triggered! isListening:', isListening);
+    console.log('🔔 [SiriCallButton] Interaction end - triggering action! isListening:', isListening);
     
     try {
       if (!isListening && onCallStart) {
@@ -90,12 +105,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         setTimeout(() => setStatus('idle'), 500);
       }
     } finally {
-      // Reset flag after a short delay to allow for proper event handling
       setTimeout(() => {
         isHandlingClick.current = false;
       }, 100);
     }
-  }, [isListening, onCallStart, onCallEnd]); // Proper dependencies
+  }, [isListening, onCallStart, onCallEnd]);
+
+  const handleHover = useCallback((isHovered: boolean) => {
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode(isHovered ? 'hover' : 'idle');
+    }
+  }, []);
 
   // Initialize SiriButton
   useEffect(() => {
@@ -131,57 +151,80 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }, 200);
     }
 
-    // Detect if user is on mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                    ('ontouchstart' in window) ||
-                    (navigator.maxTouchPoints > 0);
-
+    // ✅ DEVICE-SPECIFIC event setup with centralized handlers
+    const isMobile = isMobileDevice();
+    
+    logDeviceInfo('SiriCallButton');
     console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobile);
 
     if (isMobile) {
-      // Mobile: Use touch events for better responsiveness
+      // ✅ MOBILE: Touch events with visual feedback
       const handleTouchStart = (e: TouchEvent) => {
+        const touch = e.touches[0];
+        const rect = element.getBoundingClientRect();
+        handleInteractionStart(e, {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        });
         console.log('📱 [SiriCallButton] Touch start detected');
-        e.stopPropagation();
-        // Visual feedback only - don't trigger action yet
       };
 
       const handleTouchEnd = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] Touch end - triggering click');
         e.preventDefault(); // Prevent ghost click
-        e.stopPropagation();
-        handleClick(); // Directly trigger click handler
+        handleInteractionEnd(e);
+        console.log('📱 [SiriCallButton] Touch end - triggering action');
       };
 
-      // Add touch handlers for mobile - CRITICAL for mobile functionality
       element.addEventListener('touchstart', handleTouchStart, { passive: true });
       element.addEventListener('touchend', handleTouchEnd, { passive: false });
 
-      // Clean removal function for mobile
       return () => {
         element.removeEventListener('touchstart', handleTouchStart);
         element.removeEventListener('touchend', handleTouchEnd);
         safeCleanup();
       };
     } else {
-      // Desktop: Use click events as normal
-      const handleDesktopClick = (e: MouseEvent) => {
-        console.log('🖱️ [SiriCallButton] Desktop click detected');
-        e.stopPropagation();
-        handleClick();
+      // ✅ DESKTOP: Mouse events with hover support
+      const handleMouseEnter = () => {
+        handleHover(true);
+        console.log('🖱️ [SiriCallButton] Mouse enter');
+      };
+      
+      const handleMouseLeave = () => {
+        handleHover(false);
+        console.log('🖱️ [SiriCallButton] Mouse leave');
+      };
+      
+      const handleMouseDown = (e: MouseEvent) => {
+        const rect = element.getBoundingClientRect();
+        handleInteractionStart(e, {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+        console.log('🖱️ [SiriCallButton] Mouse down');
+      };
+      
+      const handleMouseUp = (e: MouseEvent) => {
+        handleInteractionEnd(e);
+        console.log('🖱️ [SiriCallButton] Mouse up - triggering action');
       };
 
-      element.addEventListener('click', handleDesktopClick);
+      element.addEventListener('mouseenter', handleMouseEnter);
+      element.addEventListener('mouseleave', handleMouseLeave);
+      element.addEventListener('mousedown', handleMouseDown);
+      element.addEventListener('mouseup', handleMouseUp);
 
-      // Clean removal function for desktop
       return () => {
-        element.removeEventListener('click', handleDesktopClick);
+        element.removeEventListener('mouseenter', handleMouseEnter);
+        element.removeEventListener('mouseleave', handleMouseLeave);
+        element.removeEventListener('mousedown', handleMouseDown);
+        element.removeEventListener('mouseup', handleMouseUp);
         safeCleanup();
       };
     }
-  }, [containerId, colors]); // handleClick and safeCleanup are stable with useCallback
+  }, [containerId, colors, handleInteractionStart, handleInteractionEnd, handleHover, safeCleanup]);
 
-  // Update SiriButton state
+  // ✅ SYNC visual state with props
   useEffect(() => {
     if (buttonRef.current && !cleanupFlagRef.current) {
       buttonRef.current.setListening(isListening);

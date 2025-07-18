@@ -37,6 +37,16 @@ export class SiriButton {
   };
   private resizeTimeout: number | null = null;
 
+  // Visual state interface for external control
+  private visualState: {
+    isHovered: boolean;
+    isActive: boolean;
+    mousePosition?: { x: number; y: number };
+  } = {
+    isHovered: false,
+    isActive: false
+  };
+
   // Debounced resize to prevent excessive calls
   private debouncedResize() {
     if (this.resizeTimeout) {
@@ -136,66 +146,10 @@ export class SiriButton {
     // Start animation loop
     this.animate();
 
-    // Add resize listener
+    // Add resize listener only
     window.addEventListener('resize', this.debouncedResize.bind(this));
 
-    // Detect if user is on mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                    ('ontouchstart' in window) ||
-                    (navigator.maxTouchPoints > 0);
-
-    // Add mouse event listeners for hover/active
-    if (container) {
-      if (!isMobile) {
-        // Desktop: Full mouse event handling
-        container.addEventListener('mouseenter', () => { this.isHovered = true; this.lastActiveTime = Date.now(); });
-        container.addEventListener('mouseleave', () => { this.isHovered = false; this.isActive = false; });
-        container.addEventListener('mousedown', () => { this.isActive = true; this.lastActiveTime = Date.now(); });
-        container.addEventListener('mouseup', () => { this.isActive = false; });
-        container.addEventListener('mousemove', (e) => {
-          const rect = container.getBoundingClientRect();
-          this.mouseX = e.clientX - rect.left;
-          this.mouseY = e.clientY - rect.top;
-          this.lastActiveTime = Date.now();
-        });
-        console.log('🖥️ [SiriButton] Desktop mouse events initialized');
-      } else {
-        // Mobile: Minimal touch events for VISUAL FEEDBACK ONLY
-        // Let SiriCallButton handle actual touch functionality
-        container.addEventListener('touchstart', (e) => { 
-          this.isActive = true; 
-          this.isHovered = true; // Simulate hover for mobile
-          this.lastActiveTime = Date.now();
-          
-          // Get touch position for visual effects only
-          if (e.touches.length > 0) {
-            const rect = container.getBoundingClientRect();
-            this.mouseX = e.touches[0].clientX - rect.left;
-            this.mouseY = e.touches[0].clientY - rect.top;
-          }
-          
-          console.log('📱 [SiriButton] Touch start detected at:', this.mouseX, this.mouseY, '(visual only)');
-          // CRITICAL: Don't prevent default or stop propagation
-          // Let SiriCallButton handle the actual touch events
-        }, { passive: true });
-        
-        container.addEventListener('touchend', () => { 
-          this.isActive = false; 
-          // Keep isHovered true briefly for visual feedback
-          setTimeout(() => { this.isHovered = false; }, 200);
-          console.log('📱 [SiriButton] Touch end detected (visual only)');
-          // CRITICAL: Don't prevent default or stop propagation
-        }, { passive: true });
-        
-        container.addEventListener('touchcancel', () => { 
-          this.isActive = false; 
-          this.isHovered = false; 
-          console.log('📱 [SiriButton] Touch cancelled');
-        }, { passive: true });
-
-        console.log('📱 [SiriButton] Mobile touch events initialized (visual feedback only)');
-      }
-    }
+    console.log('[SiriButton] Visual engine initialized - NO EVENT HANDLING (controlled externally)');
 
     // Detect dark mode
     this.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -802,6 +756,44 @@ export class SiriButton {
 
   public getTime() {
     return this.elapsedTime;
+  }
+
+  // ✅ NEW: External visual state control interface
+  public setInteractionMode(mode: 'hover' | 'active' | 'idle'): void {
+    this.visualState.isHovered = mode === 'hover' || mode === 'active';
+    this.visualState.isActive = mode === 'active';
+    
+    // Update internal state for animations
+    this.isHovered = this.visualState.isHovered;
+    this.isActive = this.visualState.isActive;
+    this.lastActiveTime = Date.now();
+    
+    console.log(`[SiriButton] Visual mode changed to: ${mode}`);
+  }
+
+  public setTouchPosition(x: number, y: number): void {
+    this.visualState.mousePosition = { x, y };
+    this.mouseX = x;
+    this.mouseY = y;
+    this.lastActiveTime = Date.now();
+  }
+
+  public updateVisualState(newState: {
+    isHovered?: boolean;
+    isActive?: boolean;
+    mousePosition?: { x: number; y: number };
+  }): void {
+    this.visualState = { ...this.visualState, ...newState };
+    
+    // Sync with internal state
+    if (newState.isHovered !== undefined) this.isHovered = newState.isHovered;
+    if (newState.isActive !== undefined) this.isActive = newState.isActive;
+    if (newState.mousePosition) {
+      this.mouseX = newState.mousePosition.x;
+      this.mouseY = newState.mousePosition.y;
+    }
+    
+    this.lastActiveTime = Date.now();
   }
 
   public cleanup() {
