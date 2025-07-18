@@ -37,36 +37,122 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const checkCanvasStatus = () => {
     const container = document.getElementById(containerId);
     const canvas = container?.querySelector('canvas');
+    const allCanvases = document.querySelectorAll('canvas');
+    
     const info = {
       containerExists: !!container,
       containerSize: container ? `${container.clientWidth}x${container.clientHeight}` : 'N/A',
+      containerStyle: container ? {
+        display: container.style.display || 'default',
+        position: container.style.position || 'default',
+        zIndex: container.style.zIndex || 'default'
+      } : 'N/A',
       canvasExists: !!canvas,
+      canvasCount: allCanvases.length,
       canvasSize: canvas ? `${canvas.width}x${canvas.height}` : 'N/A',
       canvasStyle: canvas ? `${canvas.style.width}x${canvas.style.height}` : 'N/A',
-      canvasVisible: canvas ? canvas.style.display : 'N/A',
+      canvasDisplay: canvas ? canvas.style.display : 'N/A',
       canvasZIndex: canvas ? canvas.style.zIndex : 'N/A',
-      siriButtonInstance: !!buttonRef.current
+      canvasPosition: canvas ? canvas.style.position : 'N/A',
+      siriButtonInstance: !!buttonRef.current,
+      windowSize: `${window.innerWidth}x${window.innerHeight}`,
+      isMobile: window.innerWidth < 768
     };
     
-    const debugText = JSON.stringify(info, null, 2);
+    // Also log to console for easy copying
     console.log('[SiriCallButton] Debug info:', info);
+    console.log('[SiriCallButton] Container element:', container);
+    console.log('[SiriCallButton] Canvas element:', canvas);
+    console.log('[SiriCallButton] All canvases:', allCanvases);
+    
+    // Create readable debug text
+    const debugText = Object.entries(info)
+      .map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`)
+      .join('\n');
+    
     setDebugInfo(debugText);
     
-    // Force canvas visibility if it exists but isn't visible
-    if (canvas && canvas.style.display !== 'block') {
-      console.log('[SiriCallButton] Forcing canvas visibility');
+    // Force canvas visibility and test drawing
+    if (canvas) {
+      console.log('[SiriCallButton] Canvas found - testing visibility');
       canvas.style.display = 'block';
       canvas.style.zIndex = '9999';
       canvas.style.position = 'absolute';
       canvas.style.top = '50%';
       canvas.style.left = '50%';
       canvas.style.transform = 'translate(-50%, -50%)';
-      canvas.style.background = 'red'; // Temporary red background for debugging
+      canvas.style.background = 'rgba(255,0,0,0.5)'; // Semi-transparent red
+      canvas.style.border = '3px solid yellow'; // Yellow border
       
-      // Remove red background after 2 seconds
+      // Try to draw on canvas directly
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        console.log('[SiriCallButton] Drawing test circle on canvas');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'lime';
+        ctx.beginPath();
+        ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Remove visual debugging after 3 seconds
       setTimeout(() => {
         canvas.style.background = 'transparent';
-      }, 2000);
+        canvas.style.border = 'none';
+      }, 3000);
+    } else {
+      console.log('[SiriCallButton] No canvas found - trying to create one manually');
+      
+      // Manual canvas creation for testing
+      if (container) {
+        const testCanvas = document.createElement('canvas');
+        testCanvas.width = 280;
+        testCanvas.height = 280;
+        testCanvas.style.width = '280px';
+        testCanvas.style.height = '280px';
+        testCanvas.style.position = 'absolute';
+        testCanvas.style.top = '50%';
+        testCanvas.style.left = '50%';
+        testCanvas.style.transform = 'translate(-50%, -50%)';
+        testCanvas.style.zIndex = '9999';
+        testCanvas.style.background = 'rgba(0,255,0,0.5)'; // Green background
+        testCanvas.style.border = '3px solid blue'; // Blue border
+        testCanvas.id = 'manual-test-canvas';
+        
+        container.appendChild(testCanvas);
+        
+        // Draw test pattern
+        const ctx = testCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = 'magenta';
+          ctx.beginPath();
+          ctx.arc(140, 140, 60, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = 'white';
+          ctx.font = '16px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('TEST', 140, 145);
+        }
+        
+        console.log('[SiriCallButton] Manual test canvas created');
+        
+        // Remove test canvas after 5 seconds
+        setTimeout(() => {
+          testCanvas.remove();
+        }, 5000);
+      }
+    }
+    
+    // Force SiriButton to recreate if instance exists
+    if (buttonRef.current) {
+      console.log('[SiriCallButton] Forcing SiriButton debug draw');
+      try {
+        // Access the debug method if it exists
+        (buttonRef.current as any).debugDraw?.();
+      } catch (error) {
+        console.log('[SiriCallButton] Debug draw not available:', error);
+      }
     }
   };
 
