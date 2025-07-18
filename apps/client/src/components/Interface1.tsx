@@ -59,74 +59,100 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   return (
     <InterfaceContainer>
-      {/* Hero Section with 3-Container Layout */}
+      {/* Hero Section with 4-Position Layout */}
       <div ref={heroSectionRef} className="relative">
         <InterfaceHeader />
         
-        {/* 3-Container Layout: Desktop = horizontal, Mobile = vertical */}
+        {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
         <div className="relative min-h-[400px] px-4">
           
-          {/* Container Chính - Siri Button - Trung tâm hoàn toàn màn hình */}
-          <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
-            <div className="flex flex-col items-center justify-center">
-              <SiriButtonContainer
-                isCallStarted={isCallStarted}
-                micLevel={micLevel}
-                onCallStart={async (lang) => {
-                  await handleCallStart(lang);
-                }}
-                onCallEnd={handleCallEnd}
-                onCancel={handleCancel}
-                onConfirm={handleConfirm}
-              />
+          {/* Desktop: 4-Position Grid Layout */}
+          <div className="hidden md:block">
+            {/* Row 1: 3-Column Layout - Conversation | Siri | Summary */}
+            <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
+              
+              {/* Column 1: Realtime Conversation (Left) */}
+              <div className="w-full max-w-sm">
+                <ConversationSection
+                  ref={conversationRef}
+                  showConversation={showConversation}
+                  onClose={() => {}} // Will be handled by popup context
+                  className="relative z-40"
+                  isOverlay={false} // Desktop: relative position in grid
+                />
+              </div>
+              
+              {/* Column 2: Siri Button (Center) */}
+              <div className="flex flex-col items-center justify-center">
+                <SiriButtonContainer
+                  isCallStarted={isCallStarted}
+                  micLevel={micLevel}
+                  onCallStart={async (lang) => {
+                    await handleCallStart(lang);
+                  }}
+                  onCallEnd={handleCallEnd}
+                  onCancel={handleCancel}
+                  onConfirm={handleConfirm}
+                />
+              </div>
+              
+              {/* Column 3: Summary/Right Panel (Right) */}
+              <div className="w-full max-w-sm">
+                <RightPanelSection
+                  ref={rightPanelRef}
+                  showPanel={showRightPanel}
+                  onClose={handleRightPanelClose}
+                  className="relative z-30"
+                />
+              </div>
+              
             </div>
+            
+            {/* Row 2: Notification (Center, below Siri) */}
+            <div className="flex justify-center mb-8">
+              <div className="w-full max-w-sm">
+                {/* Placeholder for future Notification popup */}
+                {/* <NotificationSection /> */}
+              </div>
+            </div>
+            
           </div>
           
-          {/* Container Phải - Right Panel - Floating Overlay */}
-          <div className="absolute top-8 right-4 hidden md:block w-80 z-10 pointer-events-auto">
-            <RightPanelSection
-              ref={rightPanelRef}
-              showPanel={showRightPanel}
-              onClose={handleRightPanelClose}
-              className="w-full max-w-sm z-20"
-            />
-            {/* Test Popup Buttons */}
-            {!showRightPanel && (
-              <div className="w-full space-y-4 pointer-events-auto">
-                {/* Test Popup System */}
-                <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50/90 backdrop-blur-sm">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-3">🧪 Test Popup System</h4>
-                  <div className="space-y-2">
-                    <button
-                      onClick={handleShowConversationPopup}
-                      className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
-                    >
-                      🔴 Show Conversation
-                    </button>
-                    <button
-                      onClick={handleShowNotificationDemo}
-                      className="w-full px-3 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm font-medium transition-colors"
-                    >
-                      📢 Show Notification
-                    </button>
-                    <button
-                      onClick={handleShowSummaryDemo}
-                      className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium transition-colors"
-                    >
-                      📋 Show Summary
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Original Right Panel Toggle */}
-                <div 
-                  className="w-full h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm cursor-pointer hover:border-gray-400 hover:bg-gray-50/90 transition-colors backdrop-blur-sm"
-                  onClick={handleRightPanelToggle}
-                >
-                  Click to open Right Panel
-                </div>
+          {/* Mobile: Original center layout with overlay popups */}
+          <div className="block md:hidden">
+            <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
+              <div className="flex flex-col items-center justify-center">
+                <SiriButtonContainer
+                  isCallStarted={isCallStarted}
+                  micLevel={micLevel}
+                  onCallStart={async (lang) => {
+                    await handleCallStart(lang);
+                  }}
+                  onCallEnd={handleCallEnd}
+                  onCancel={handleCancel}
+                  onConfirm={handleConfirm}
+                />
               </div>
-            )}
+            </div>
+            
+            {/* Mobile: Conversation popup (overlay) */}
+            <ConversationSection
+              ref={conversationRef}
+              showConversation={showConversation}
+              onClose={() => {}} // Will be handled by popup context
+              className="fixed bottom-0 left-0 right-0 z-40"
+              isOverlay={true} // Mobile: fixed overlay position
+            />
+            
+            {/* Mobile: Right panel popup (overlay) */}
+            <div className="absolute top-8 right-4 w-80 z-10 pointer-events-auto">
+              <RightPanelSection
+                ref={rightPanelRef}
+                showPanel={showRightPanel}
+                onClose={handleRightPanelClose}
+                className="w-full max-w-sm z-20"
+              />
+            </div>
           </div>
           
         </div>

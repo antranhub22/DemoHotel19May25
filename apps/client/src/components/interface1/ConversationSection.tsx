@@ -5,12 +5,30 @@ interface ConversationSectionProps {
   showConversation: boolean;
   onClose: () => void;
   className?: string;
+  isOverlay?: boolean; // Desktop = false, Mobile = true
 }
 
 export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectionProps>(
-  ({ showConversation, onClose, className = "" }, ref) => {
+  ({ showConversation, onClose, className = "", isOverlay = true }, ref) => {
     if (!showConversation) return null;
 
+    // Desktop: Relative positioned in grid column
+    if (!isOverlay) {
+      return (
+        <div 
+          ref={ref} 
+          className={`${className} relative`}
+        >
+          <RealtimeConversationPopup
+            isOpen={showConversation}
+            onClose={onClose}
+            isRight={false}
+          />
+        </div>
+      );
+    }
+
+    // Mobile: Fixed overlay (original behavior)
     return (
       <div 
         ref={ref} 
