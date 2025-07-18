@@ -174,7 +174,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         margin: '0',
         background: 'transparent',
         border: 'none',
-        outline: 'none'
+        outline: 'none',
+        // Mobile touch optimizations
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent',
+        userSelect: 'none'
       }}
     >
       {/* Loading state with better visibility */}

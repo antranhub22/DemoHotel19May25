@@ -78,7 +78,10 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         pointerEvents: 'auto',
         // Responsive container
         maxWidth: '100%',
-        padding: '0 20px', // Add some padding on mobile
+        padding: '0 clamp(10px, 5vw, 20px)', // Better responsive padding
+        // Mobile touch optimizations
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent',
       }}
     >
       {/* Top Row: Cancel + Confirm */}
@@ -108,9 +111,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       <div 
         className="relative flex items-center justify-center transition-all duration-500 ease-in-out"
         style={{ 
-          // Responsive sizing
-          width: 'min(320px, 90vw)',  
-          height: 'min(320px, 90vw)', 
+          // Better responsive sizing for smaller screens
+          width: 'clamp(250px, 85vw, 320px)',  
+          height: 'clamp(250px, 85vw, 320px)', 
           borderRadius: '50%',
           boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
           background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
@@ -125,8 +128,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
             {[...Array(16)].map((_, i) => {
               const angle = (360 / 16) * i;
               const radians = (angle * Math.PI) / 180;
-              // Responsive radius based on container size
-              const baseRadius = Math.min(120, window.innerWidth * 0.15); 
+              // Better responsive radius calculation
+              const baseRadius = Math.min(125, Math.max(100, window.innerWidth * 0.12)); 
               const barHeight = 8 + Math.round((micLevel/100)*16) * ((i%2)+1);
               const x = Math.cos(radians) * baseRadius;
               const y = Math.sin(radians) * baseRadius;
@@ -158,8 +161,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         <div 
           className="relative z-10 flex items-center justify-center"
           style={{
-            width: 'min(280px, 80vw)',
-            height: 'min(280px, 80vw)',
+            width: 'clamp(220px, 75vw, 280px)',
+            height: 'clamp(220px, 75vw, 280px)',
             position: 'relative'
           }}
         >

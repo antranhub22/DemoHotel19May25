@@ -128,6 +128,7 @@ export class SiriButton {
 
     // Add mouse event listeners for hover/active
     if (container) {
+      // Mouse events for desktop
       container.addEventListener('mouseenter', () => { this.isHovered = true; this.lastActiveTime = Date.now(); });
       container.addEventListener('mouseleave', () => { this.isHovered = false; this.isActive = false; });
       container.addEventListener('mousedown', () => { this.isActive = true; this.lastActiveTime = Date.now(); });
@@ -138,6 +139,30 @@ export class SiriButton {
         this.mouseY = e.clientY - rect.top;
         this.lastActiveTime = Date.now();
       });
+
+      // Touch events for mobile
+      container.addEventListener('touchstart', (e) => { 
+        this.isActive = true; 
+        this.lastActiveTime = Date.now();
+        // Prevent mouse events on touch devices
+        e.preventDefault();
+      }, { passive: false });
+      
+      container.addEventListener('touchend', () => { 
+        this.isActive = false; 
+      });
+      
+      container.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          const rect = container.getBoundingClientRect();
+          this.mouseX = e.touches[0].clientX - rect.left;
+          this.mouseY = e.touches[0].clientY - rect.top;
+          this.lastActiveTime = Date.now();
+        }
+      });
+
+      // Add touch action for better mobile performance
+      container.style.touchAction = 'manipulation';
     }
 
     // Detect dark mode

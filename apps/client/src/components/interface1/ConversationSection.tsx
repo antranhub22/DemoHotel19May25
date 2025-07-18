@@ -36,7 +36,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
         className={`${className}`}
         style={{
           position: 'fixed',
-          bottom: '40px', // Minimal space for closest popup positioning
+          bottom: 'clamp(60px, 15vh, 120px)', // Responsive bottom spacing
           left: 0,
           right: 0,
           zIndex: 10, // Lower than SiriButton canvas

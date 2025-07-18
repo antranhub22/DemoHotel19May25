@@ -89,11 +89,11 @@
 /* Mobile optimizations */
 @media (max-width: 767px) {
   .voice-button {
-    /* Responsive sizing for mobile */
-    width: min(280px, 80vw) !important;
-    height: min(280px, 80vw) !important;
-    min-width: 200px !important;
-    min-height: 200px !important;
+    /* Better responsive sizing for mobile */
+    width: min(280px, 75vw) !important;
+    height: min(280px, 75vw) !important;
+    min-width: 180px !important;
+    min-height: 180px !important;
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
@@ -102,6 +102,26 @@
   /* Disable hover effects on mobile for better performance */
   .voice-button:hover {
     transform: none;
+  }
+}
+
+/* Extra small mobile screens */
+@media (max-width: 480px) {
+  .voice-button {
+    /* Optimized for very small screens */
+    width: min(250px, 80vw) !important;
+    height: min(250px, 80vw) !important;
+    min-width: 160px !important;
+    min-height: 160px !important;
+  }
+  
+  /* Reduce animations on small screens for better performance */
+  .voice-button {
+    animation: none !important;
+  }
+  
+  .voice-button.listening {
+    animation: pulse 2s infinite !important;
   }
 }
 
