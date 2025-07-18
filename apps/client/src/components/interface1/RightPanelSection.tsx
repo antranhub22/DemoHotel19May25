@@ -1,4 +1,5 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
+import { usePopupContext } from '@/context/PopupContext';
 import RightPanelPopup from '../RightPanelPopup';
 
 interface RightPanelSectionProps {
@@ -9,7 +10,19 @@ interface RightPanelSectionProps {
 
 export const RightPanelSection = forwardRef<HTMLDivElement, RightPanelSectionProps>(
   ({ showPanel, onClose, className = "" }, ref) => {
-    if (!showPanel) return null;
+    const { popups } = usePopupContext();
+    const [showSummary, setShowSummary] = useState(false);
+
+    // Listen for summary popups and show them in this desktop panel
+    useEffect(() => {
+      const summaryPopup = popups.find(popup => popup.type === 'summary');
+      setShowSummary(!!summaryPopup);
+    }, [popups]);
+
+    // Show panel if either manually opened OR if there's a summary to display
+    const shouldShowPanel = showPanel || showSummary;
+
+    if (!shouldShowPanel) return null;
 
     return (
       <div 
@@ -23,8 +36,9 @@ export const RightPanelSection = forwardRef<HTMLDivElement, RightPanelSectionPro
         }}
       >
         <RightPanelPopup
-          isOpen={showPanel}
+          isOpen={shouldShowPanel}
           onClose={onClose}
+          showSummary={showSummary}
         />
       </div>
     );

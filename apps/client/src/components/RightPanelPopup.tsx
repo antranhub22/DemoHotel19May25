@@ -1,14 +1,17 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { SummaryPopupContent } from './popup-system/DemoPopupContent';
 
 interface RightPanelPopupProps {
   isOpen: boolean;
   onClose: () => void;
+  showSummary?: boolean; // New prop to control summary display
 }
 
 const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   isOpen,
-  onClose
+  onClose,
+  showSummary = false
 }) => {
   if (!isOpen) return null;
 
@@ -25,7 +28,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-gray-800">
-            Right Panel
+            {showSummary ? 'Call Summary' : 'Right Panel'}
           </h3>
           <button
             onClick={onClose}
@@ -36,24 +39,32 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
           </button>
         </div>
 
-        {/* Content Area - Placeholder */}
-        <div className="flex flex-col items-center justify-center h-48 text-gray-500">
-          <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-            <span className="text-2xl">⚙️</span>
+        {/* Conditional Content */}
+        {showSummary ? (
+          /* Summary Content */
+          <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+            <SummaryPopupContent />
           </div>
-          <p className="text-center text-sm">
-            Panel content will be added here
-          </p>
-          <p className="text-center text-xs mt-2 text-gray-400">
-            Coming soon...
-          </p>
-        </div>
+        ) : (
+          /* Placeholder Content */
+          <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+            <div className="w-16 h-16 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-2xl">⚙️</span>
+            </div>
+            <p className="text-center text-sm">
+              Panel content will be added here
+            </p>
+            <p className="text-center text-xs mt-2 text-gray-400">
+              Coming soon...
+            </p>
+          </div>
+        )}
 
         {/* Footer - Optional */}
         <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex justify-center">
             <span className="text-xs text-gray-400">
-              Right Panel Features
+              {showSummary ? 'Call Summary Panel' : 'Right Panel Features'}
             </span>
           </div>
         </div>

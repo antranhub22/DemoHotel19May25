@@ -7,12 +7,14 @@ interface PopupManagerProps {
   position?: 'top' | 'bottom' | 'center';
   maxVisible?: number;
   autoCloseDelay?: number; // Auto close after X milliseconds
+  isMobile?: boolean; // Filter popups based on mobile/desktop
 }
 
 export const PopupManager: React.FC<PopupManagerProps> = ({
   position = 'bottom',
   maxVisible = 4,
-  autoCloseDelay
+  autoCloseDelay,
+  isMobile = false
 }) => {
   const {
     popups,
@@ -58,14 +60,24 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
     }
   };
 
-  // Don't render if no popups
-  if (popups.length === 0) {
+  // Filter popups based on desktop vs mobile
+  const filteredPopups = popups.filter(popup => {
+    // On desktop, hide summary popups (they appear in grid layout)
+    if (!isMobile && popup.type === 'summary') {
+      return false;
+    }
+    // Show all other popups on both mobile and desktop
+    return true;
+  });
+
+  // Don't render if no filtered popups
+  if (filteredPopups.length === 0) {
     return null;
   }
 
   return (
     <PopupStack
-      popups={popups}
+      popups={filteredPopups}
       activePopup={activePopup}
       maxVisible={maxVisible}
       onPopupSelect={handlePopupSelect}
