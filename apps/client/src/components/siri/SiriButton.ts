@@ -198,24 +198,12 @@ export class SiriButton {
     console.log('[SiriButton] Resize - Container size:', containerWidth, 'x', containerHeight);
     console.log('[SiriButton] Resize - Container rect:', containerRect);
     
-    // Check if we're on mobile
-    const isMobile = window.innerWidth < 768;
-    console.log('[SiriButton] Resize - Mobile detected:', isMobile);
-
     // Set canvas size to match container size with DPR
     const dpr = window.devicePixelRatio || 1;
     console.log('[SiriButton] Resize - Device pixel ratio:', dpr);
     
-    // Use different sizing strategy for mobile vs desktop
-    let size;
-    if (isMobile) {
-      // Mobile: Use viewport-based sizing with minimum
-      const viewportSize = Math.min(window.innerWidth, window.innerHeight);
-      size = Math.min(viewportSize * 0.6, containerWidth, containerHeight, 280);
-    } else {
-      // Desktop: Use container size
-      size = Math.min(containerWidth, containerHeight, 280);
-    }
+    // Use consistent sizing strategy for all devices
+    const size = Math.min(containerWidth, containerHeight, 280);
     
     // Ensure minimum size
     const finalSize = Math.max(size, 200); 
@@ -247,13 +235,7 @@ export class SiriButton {
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.background = 'transparent';
     
-    // Force a re-render for mobile
-    if (isMobile) {
-      this.canvas.style.opacity = '0';
-      setTimeout(() => {
-        this.canvas.style.opacity = '1';
-      }, 10);
-    }
+    // Canvas is ready for rendering
     
     // Scale context for high DPI displays
     this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
@@ -606,8 +588,7 @@ export class SiriButton {
       return;
     }
 
-    // Responsive: update radius based on container size
-    const isMobile = Math.min(this.width, this.height) < 300; // Mobile threshold
+    // Update radius based on container size consistently
     this.radius = Math.max(60, Math.min(this.width, this.height) * 0.35); // Consistent proportional radius
     
     // Clear canvas with full background
@@ -645,8 +626,8 @@ export class SiriButton {
       this.drawFallbackCircle();
     }
     
-    // Add new ripples when listening
-    if (this.isListening && Math.random() < (isMobile ? 0.05 : 0.1)) {
+    // Add new ripples when listening - consistent rate for all devices
+    if (this.isListening && Math.random() < 0.1) {
       this.ripples.push({
         radius: this.radius,
         alpha: 0.4,
