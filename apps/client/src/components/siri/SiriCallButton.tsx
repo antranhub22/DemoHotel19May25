@@ -145,13 +145,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       style={{ 
         width: '100%', // Use full container width
         height: '100%', // Use full container height
-        position: 'absolute', // Absolute positioning within container
-        top: 0,
-        left: 0,
+        position: 'relative', // Change back to relative 
         cursor: 'pointer',
         zIndex: 50,
         borderRadius: '50%', // Match container shape
-        border: '2px solid red', // DEBUG: temporary border to see boundaries
+        display: 'flex', // Add flexbox
+        alignItems: 'center', // Center vertically
+        justifyContent: 'center', // Center horizontally
       }}
     >
       {/* Loading state */}

@@ -61,10 +61,10 @@ export class SiriButton {
     }
     
     // Set canvas styles immediately for proper display
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '50%';
-    this.canvas.style.left = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
+    this.canvas.style.position = 'relative'; // Change from absolute to relative
+    this.canvas.style.top = 'auto'; // Remove absolute positioning
+    this.canvas.style.left = 'auto'; // Remove absolute positioning  
+    this.canvas.style.transform = 'none'; // Remove transform 
     this.canvas.style.zIndex = '50'; // Higher than ConversationSection
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.borderRadius = '50%';
@@ -231,10 +231,10 @@ export class SiriButton {
     // Ensure canvas visibility and positioning - perfect center alignment
     this.canvas.style.borderRadius = '50%';
     this.canvas.style.display = 'block';
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.top = '50%';
-    this.canvas.style.left = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
+    this.canvas.style.position = 'relative'; // Use relative positioning
+    this.canvas.style.top = 'auto'; // Remove absolute positioning
+    this.canvas.style.left = 'auto'; // Remove absolute positioning
+    this.canvas.style.transform = 'none'; // Remove transform - flex will center
     this.canvas.style.zIndex = '50'; // Higher than ConversationSection
     this.canvas.style.pointerEvents = 'auto';
     this.canvas.style.background = 'transparent';
