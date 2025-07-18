@@ -93,7 +93,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    console.log('[SiriCallButton] Creating fallback canvas for mobile');
+    console.log('[SiriCallButton] Creating enhanced fallback canvas for mobile');
     
     // Remove any existing canvas safely
     try {
@@ -107,12 +107,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       console.warn('[SiriCallButton] Error removing existing canvases:', error);
     }
 
-    // Create simple canvas
+    // Create enhanced canvas
     const canvas = document.createElement('canvas');
     const size = 280;
+    const dpr = window.devicePixelRatio || 1;
     
-    canvas.width = size;
-    canvas.height = size;
+    // High DPI setup
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
     canvas.style.width = `${size}px`;
     canvas.style.height = `${size}px`;
     canvas.style.position = 'absolute';
@@ -127,13 +129,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       container.appendChild(canvas);
       fallbackCanvasRef.current = canvas;
 
-      // Draw simple animated Siri button
+      // Enhanced animation with proper scaling
       const ctx = canvas.getContext('2d');
       if (ctx) {
+        // Scale for high DPI
+        ctx.scale(dpr, dpr);
+        
         const centerX = size / 2;
         const centerY = size / 2;
         const baseRadius = size * 0.35;
         let animationId: number;
+        let pulsePhase = 0;
         
         const animate = () => {
           if (cleanupFlagRef.current || !fallbackCanvasRef.current) {
@@ -144,53 +150,101 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           // Clear canvas
           ctx.clearRect(0, 0, size, size);
           
-          // Animated pulse
-          const time = Date.now() * 0.002;
-          const pulse = 1 + 0.1 * Math.sin(time * 2);
-          const currentRadius = baseRadius * pulse;
+          // Update pulse phase
+          pulsePhase += 0.05;
           
           // Get current colors
           const primaryColor = colors?.primary || '#5DB6B9';
           const secondaryColor = colors?.secondary || '#E8B554';
           const glowColor = colors?.glow || 'rgba(93, 182, 185, 0.4)';
           
-          // Outer glow
-          ctx.save();
-          ctx.globalAlpha = 0.3;
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, currentRadius + 20, 0, Math.PI * 2);
-          ctx.fillStyle = glowColor;
-          ctx.fill();
-          ctx.restore();
+          // Animated pulse effect
+          const breath = 0.85 + 0.15 * Math.sin(pulsePhase * 1.5);
+          const currentRadius = baseRadius * breath;
           
-          // Main circle with gradient
+          // Outer glow rings (multiple layers)
+          for (let i = 3; i >= 1; i--) {
+            ctx.save();
+            ctx.globalAlpha = 0.1 * (4 - i);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, currentRadius + (i * 15), 0, Math.PI * 2);
+            ctx.fillStyle = glowColor;
+            ctx.fill();
+            ctx.restore();
+          }
+          
+          // Main circle with enhanced gradient
           ctx.save();
           const gradient = ctx.createRadialGradient(
-            centerX, centerY, 0,
+            centerX - 30, centerY - 30, 0,
             centerX, centerY, currentRadius
           );
           gradient.addColorStop(0, secondaryColor);
-          gradient.addColorStop(1, primaryColor);
+          gradient.addColorStop(0.4, primaryColor);
+          gradient.addColorStop(1, `${primaryColor}DD`);
+          
           ctx.fillStyle = gradient;
           ctx.beginPath();
           ctx.arc(centerX, centerY, currentRadius, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
           
-          // Inner highlight
+          // Glassmorphism effect
           ctx.save();
-          ctx.globalAlpha = 0.3;
+          ctx.globalAlpha = 0.15;
           ctx.beginPath();
-          ctx.arc(centerX, centerY - 20, currentRadius * 0.6, 0, Math.PI * 2);
-          ctx.fillStyle = 'white';
+          ctx.arc(centerX, centerY, currentRadius * 0.95, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
           ctx.fill();
           ctx.restore();
           
-          // Microphone icon
+          // Inner highlight (top-left)
+          ctx.save();
+          ctx.globalAlpha = 0.4;
+          const highlightGradient = ctx.createRadialGradient(
+            centerX - 25, centerY - 25, 0,
+            centerX - 25, centerY - 25, currentRadius * 0.7
+          );
+          highlightGradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+          highlightGradient.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = highlightGradient;
+          ctx.beginPath();
+          ctx.arc(centerX - 15, centerY - 15, currentRadius * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          
+          // Enhanced microphone icon with proper scaling
           ctx.save();
           ctx.translate(centerX, centerY);
-          ctx.scale(2.5, 2.5);
-          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          const micScale = 2.8 * breath; // Scale with breath
+          ctx.scale(micScale, micScale);
+          
+          // Mic shadow
+          ctx.save();
+          ctx.translate(1, 1);
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          
+          // Shadow mic body
+          ctx.beginPath();
+          ctx.arc(0, -8, 12, Math.PI * 0.15, Math.PI * 1.85, false);
+          ctx.fill();
+          
+          // Shadow mic stand
+          ctx.beginPath();
+          ctx.rect(-3, 8, 6, 12);
+          ctx.fill();
+          
+          // Shadow mic base
+          ctx.beginPath();
+          ctx.arc(0, 20, 8, 0, Math.PI, true);
+          ctx.fill();
+          ctx.restore();
+          
+          // Main microphone icon
+          ctx.fillStyle = 'rgba(255,255,255,0.95)';
+          ctx.shadowColor = 'rgba(255,255,255,0.5)';
+          ctx.shadowBlur = 15;
           
           // Mic body
           ctx.beginPath();
@@ -207,7 +261,32 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           ctx.arc(0, 20, 8, 0, Math.PI, true);
           ctx.fill();
           
+          // Mic details (grille lines)
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+          ctx.lineWidth = 0.5;
+          for (let i = -6; i <= 6; i += 3) {
+            ctx.beginPath();
+            ctx.moveTo(i, -12);
+            ctx.lineTo(i, -4);
+            ctx.stroke();
+          }
           ctx.restore();
+          
+          ctx.restore(); // End microphone drawing
+          
+          // Pulsing ring when listening
+          if (isListening) {
+            ctx.save();
+            const ringRadius = currentRadius + 20 + 10 * Math.sin(pulsePhase * 3);
+            ctx.globalAlpha = 0.6;
+            ctx.strokeStyle = primaryColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
           
           // Continue animation
           animationId = requestAnimationFrame(animate);
@@ -215,12 +294,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         
         animate();
         setCanvasReady(true);
-        console.log('[SiriCallButton] Fallback canvas animation started');
+        console.log('[SiriCallButton] Enhanced fallback canvas animation started');
       }
     } catch (error) {
-      console.error('[SiriCallButton] Error creating fallback canvas:', error);
+      console.error('[SiriCallButton] Error creating enhanced fallback canvas:', error);
     }
-  }, [containerId, colors]);
+  }, [containerId, colors, isListening]);
 
   // Effect for status changes based on isListening
   useEffect(() => {
@@ -256,35 +335,52 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     }
 
-    // Try to create SiriButton first
-    const initTimer = setTimeout(() => {
-      if (cleanupFlagRef.current) return; // Don't proceed if cleanup started
-      
-      try {
-        buttonRef.current = new SiriButton(containerId, colors);
-        console.log('[SiriCallButton] SiriButton instance created successfully');
-        
-        // Check if canvas was created successfully
-        setTimeout(() => {
-          if (cleanupFlagRef.current) return;
-          
-          const canvas = element?.querySelector('canvas');
-          if (canvas && canvas.width > 0) {
-            setCanvasReady(true);
-            console.log('[SiriCallButton] SiriButton canvas confirmed working');
-          } else {
-            console.log('[SiriCallButton] SiriButton canvas failed, using fallback');
-            createFallbackCanvas();
-          }
-        }, 500);
-        
-      } catch (error) {
-        console.error('[SiriCallButton] SiriButton failed, using fallback:', error);
+    // Mobile detection - use fallback for consistent mobile experience
+    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      console.log('[SiriCallButton] Mobile detected - using enhanced fallback canvas');
+      setTimeout(() => {
         if (!cleanupFlagRef.current) {
           createFallbackCanvas();
         }
-      }
-    }, 100);
+      }, 100);
+    } else {
+      // Desktop - try SiriButton first, fallback if needed
+      const initTimer = setTimeout(() => {
+        if (cleanupFlagRef.current) return; // Don't proceed if cleanup started
+        
+        try {
+          buttonRef.current = new SiriButton(containerId, colors);
+          console.log('[SiriCallButton] SiriButton instance created successfully');
+          
+          // Check if canvas was created successfully
+          setTimeout(() => {
+            if (cleanupFlagRef.current) return;
+            
+            const canvas = element?.querySelector('canvas');
+            if (canvas && canvas.width > 0) {
+              setCanvasReady(true);
+              console.log('[SiriCallButton] SiriButton canvas confirmed working');
+            } else {
+              console.log('[SiriCallButton] SiriButton canvas failed, using fallback');
+              createFallbackCanvas();
+            }
+          }, 500);
+          
+        } catch (error) {
+          console.error('[SiriCallButton] SiriButton failed, using fallback:', error);
+          if (!cleanupFlagRef.current) {
+            createFallbackCanvas();
+          }
+        }
+      }, 100);
+
+      // Store timer for cleanup
+      return () => {
+        clearTimeout(initTimer);
+      };
+    }
 
     // Create click handler function
     const clickHandler = async (event: Event) => {
@@ -324,7 +420,6 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
     // Cleanup on unmount
     return () => {
-      clearTimeout(initTimer);
       if (element) {
         element.removeEventListener('click', clickHandler);
         const canvas = element.querySelector('canvas');
