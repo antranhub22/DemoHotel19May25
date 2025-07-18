@@ -25,9 +25,10 @@ interface RealtimeConversationPopupProps {
   isOpen: boolean;
   onClose: () => void;
   isRight?: boolean;
+  layout?: 'grid' | 'overlay'; // grid = desktop column, overlay = mobile bottom
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight }) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
   const { transcripts, modelOutput, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{[key: string]: number}>({});
@@ -136,27 +137,45 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   if (!isOpen) return null;
 
+  // Conditional styles based on layout
+  const isGrid = layout === 'grid';
+  const popupStyles = isGrid ? {
+    // Desktop Grid: Normal popup styling
+    width: '100%',
+    maxWidth: '100%', // Fit parent column
+    height: '320px',
+    maxHeight: '320px',
+    background: 'rgba(255,255,255,0.15)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1.5px solid rgba(255,255,255,0.3)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    borderRadius: 16, // Normal border radius
+    marginBottom: 0,
+  } : {
+    // Mobile Overlay: Bottom popup styling
+    width: '100%',
+    maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
+    height: `${STANDARD_POPUP_HEIGHT}px`,
+    maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
+    background: 'rgba(255,255,255,0.12)',
+    backdropFilter: 'blur(18px)',
+    WebkitBackdropFilter: 'blur(18px)',
+    border: '1.5px solid rgba(255,255,255,0.25)',
+    boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    marginBottom: 0,
+  };
+
   return (
     <>
       {/* Popup */}
       <div 
-        className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isRight ? 'popup-right' : ''} mx-auto animate-slide-up`}
-        style={{
-          width: '100%',
-          maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
-          height: `${STANDARD_POPUP_HEIGHT}px`, // STANDARD HEIGHT: Không che Siri Button
-          maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`, // Giảm từ 40vh xuống 35vh
-          background: 'rgba(255,255,255,0.12)',
-          backdropFilter: 'blur(18px)',
-          WebkitBackdropFilter: 'blur(18px)',
-          border: '1.5px solid rgba(255,255,255,0.25)',
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          borderBottomLeftRadius: 0,
-          borderBottomRightRadius: 0,
-          marginBottom: 0,
-        }}
+        className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isRight ? 'popup-right' : ''} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
+        style={popupStyles}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
@@ -230,9 +249,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           ))}
         </div>
       </div>
-      {/* Responsive styles for left-positioned popup */}
+      {/* Conditional styles based on layout */}
       <style>{`
-        /* Animation for slide up from bottom */
+        /* Animation for slide up from bottom - only for overlay */
         @keyframes slideUp {
           from {
             transform: translateY(100%);
@@ -248,9 +267,18 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           animation: slideUp 0.3s ease-out;
         }
         
-        /* Responsive styles for bottom popup */
-        @media (max-width: 640px) {
-          .realtime-popup {
+        /* Grid layout: No responsive overrides - use inline styles */
+        .realtime-popup.grid-layout {
+          /* Grid styling handled by inline styles above */
+        }
+        
+                 /* Overlay layout: Responsive styles for mobile bottom popup */
+         .realtime-popup.overlay-layout {
+           /* Only apply responsive styles to overlay layout */
+         }
+         
+         @media (max-width: 640px) {
+           .realtime-popup.overlay-layout {
             width: 100vw !important;
             max-width: 100vw !important;
             height: 250px !important;
@@ -263,18 +291,18 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           }
         }
         
-        @media (min-width: 641px) and (max-width: 768px) {
-          .realtime-popup {
-            width: 95vw !important;
-            max-width: 400px !important;
-            height: 270px !important;
-            max-height: 38vh !important;
-            margin: 0 auto !important;
-          }
-        }
-        
-        @media (min-width: 769px) {
-          .realtime-popup {
+                  @media (min-width: 641px) and (max-width: 768px) {
+           .realtime-popup.overlay-layout {
+             width: 95vw !important;
+             max-width: 400px !important;
+             height: 270px !important;
+             max-height: 38vh !important;
+             margin: 0 auto !important;
+           }
+         }
+         
+         @media (min-width: 769px) {
+           .realtime-popup.overlay-layout {
             width: 100% !important;
             max-width: 350px !important;
             height: 280px !important;

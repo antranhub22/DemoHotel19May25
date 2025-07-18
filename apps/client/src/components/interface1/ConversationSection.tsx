@@ -23,6 +23,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
             isOpen={showConversation}
             onClose={onClose}
             isRight={false}
+            layout="grid" // Desktop: grid layout styling
           />
         </div>
       );
@@ -47,6 +48,7 @@ export const ConversationSection = forwardRef<HTMLDivElement, ConversationSectio
           isOpen={showConversation}
           onClose={onClose}
           isRight={false}
+          layout="overlay" // Mobile: overlay layout styling
         />
         </div>
       </div>
