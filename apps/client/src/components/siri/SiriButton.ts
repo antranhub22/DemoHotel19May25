@@ -1,4 +1,33 @@
 export class SiriButton {
+  // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control
+  private static DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
+  
+  // 🚨 PHASE 1: EMERGENCY GUARDS - Prevent infinite loops and crashes
+  private resizeInProgress = false;
+  private lastResizeTime = 0;
+  private emergencyStopRequested = false;
+  private maxResizeAttempts = 5;
+  private resizeAttemptCount = 0;
+  private canvasValid = true;
+
+  // 🔧 PHASE 2: Debug utility methods
+  private debug(message: string, ...args: any[]) {
+    if (SiriButton.DEBUG_LEVEL >= 2) {
+      console.log(`[SiriButton] ${message}`, ...args);
+    }
+  }
+
+  private debugWarn(message: string, ...args: any[]) {
+    if (SiriButton.DEBUG_LEVEL >= 1) {
+      console.warn(`[SiriButton] ${message}`, ...args);
+    }
+  }
+
+  private debugError(message: string, ...args: any[]) {
+    // Always show errors, even in production
+    console.error(`[SiriButton] ${message}`, ...args);
+  }
+
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private width: number;
@@ -47,15 +76,97 @@ export class SiriButton {
     isActive: false
   };
 
-  // Debounced resize to prevent excessive calls
+  // 🚨 PHASE 1: EMERGENCY METHODS - Canvas validation and safety
+  private validateCanvas(): boolean {
+    if (!this.canvas || !this.ctx) {
+      this.debugError('Canvas or context invalid');
+      this.canvasValid = false;
+      return false;
+    }
+    
+    if (!this.canvas.parentElement || !document.contains(this.canvas)) {
+      this.debugError('Canvas not in DOM');
+      this.canvasValid = false;
+      return false;
+    }
+    
+    this.canvasValid = true;
+    return true;
+  }
+
+  private emergencyStop(): void {
+    this.debugWarn('🚨 EMERGENCY STOP TRIGGERED');
+    this.emergencyStopRequested = true;
+    
+    try {
+      // Stop animation
+      if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+        this.animationFrameId = 0;
+      }
+      
+      // Clear timeouts
+      if (this.resizeTimeout) {
+        clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = null;
+      }
+      
+      // Reset flags
+      this.resizeInProgress = false;
+      
+      this.debugWarn('🚨 EMERGENCY STOP COMPLETED');
+    } catch (error) {
+      this.debugError('Emergency stop failed:', error);
+    }
+  }
+
+  // 🚨 PHASE 1: SAFE DEBOUNCED RESIZE - Prevent infinite loops
   private debouncedResize() {
+    const now = Date.now();
+    
+    // 🚨 EMERGENCY: Check for resize spam
+    if (this.resizeInProgress) {
+      this.debugWarn('Resize already in progress, skipping');
+      return;
+    }
+    
+    if (now - this.lastResizeTime < 100) {
+      this.debugWarn('Resize too frequent, skipping');
+      return;
+    }
+    
+    // 🚨 EMERGENCY: Check attempt count
+    this.resizeAttemptCount++;
+    if (this.resizeAttemptCount > this.maxResizeAttempts) {
+      this.debugError('Too many resize attempts, triggering emergency stop');
+      this.emergencyStop();
+      return;
+    }
+    
+    this.resizeInProgress = true;
+    this.lastResizeTime = now;
+    
     if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
     }
     
     this.resizeTimeout = window.setTimeout(() => {
-      this.resize();
-      this.resizeTimeout = null;
+      try {
+        if (!this.emergencyStopRequested && this.validateCanvas()) {
+          this.safeResize();
+        }
+      } catch (error) {
+        this.debugError('Debounced resize failed:', error);
+        this.emergencyStop();
+      } finally {
+        this.resizeInProgress = false;
+        this.resizeTimeout = null;
+        
+        // Reset attempt count after successful resize
+        setTimeout(() => {
+          this.resizeAttemptCount = 0;
+        }, 1000);
+      }
     }, 50);
   }
 
@@ -84,27 +195,27 @@ export class SiriButton {
       devicePixelRatio: window.devicePixelRatio || 1
     };
 
-    console.log('🔍 [SiriButton] MOBILE DEBUG - CONSTRUCTOR START');
-    console.log('  📱 Device Info:', deviceInfo);
-    console.log('  🎨 Container ID:', containerId);
-    console.log('  🌈 Colors:', this.colors);
+            this.debug('🔍 [SiriButton] MOBILE DEBUG - CONSTRUCTOR START');
+        this.debug('  📱 Device Info:', deviceInfo);
+        this.debug('  🎨 Container ID:', containerId);
+        this.debug('  🌈 Colors:', this.colors);
 
-    console.log('[SiriButton] Creating canvas for container:', containerId, 'with colors:', this.colors);
+        this.debug('[SiriButton] Creating canvas for container:', containerId, 'with colors:', this.colors);
 
     // Create canvas element
     this.canvas = document.createElement('canvas');
     const container = document.getElementById(containerId);
     if (!container) {
-      console.error('❌ [SiriButton] Container element not found:', containerId);
+      this.debugError('❌ [SiriButton] Container element not found:', containerId);
       throw new Error('Container element not found');
     }
 
     // 🔍 MOBILE DEBUG: Container verification
-    console.log('🔍 [SiriButton] CONTAINER VERIFICATION:');
-    console.log('  📦 Container found:', !!container);
-    console.log('  📦 Container tag:', container.tagName);
-    console.log('  📦 Container classes:', container.className);
-    console.log('  📦 Container computed style:', {
+    this.debug('🔍 [SiriButton] CONTAINER VERIFICATION:');
+    this.debug('  📦 Container found:', !!container);
+    this.debug('  📦 Container tag:', container.tagName);
+    this.debug('  📦 Container classes:', container.className);
+    this.debug('  📦 Container computed style:', {
       display: getComputedStyle(container).display,
       position: getComputedStyle(container).position,
       width: getComputedStyle(container).width,
@@ -130,16 +241,16 @@ export class SiriButton {
     this.canvas.id = `${containerId}-canvas`;
     
     container.appendChild(this.canvas);
-    console.log('✅ [SiriButton] Canvas appended to container:', container);
+    this.debug('✅ [SiriButton] Canvas appended to container:', container);
 
     // 🔍 MOBILE DEBUG: Canvas verification after append
     setTimeout(() => {
-      console.log('🔍 [SiriButton] CANVAS VERIFICATION:');
-      console.log('  🎨 Canvas in DOM:', document.contains(this.canvas));
-      console.log('  🎨 Canvas element:', this.canvas);
-      console.log('  🎨 Canvas parent:', this.canvas.parentElement);
-      console.log('  🎨 Canvas getBoundingClientRect:', this.canvas.getBoundingClientRect());
-      console.log('  🎨 Canvas computed style:', {
+      this.debug('🔍 [SiriButton] CANVAS VERIFICATION:');
+      this.debug('  🎨 Canvas in DOM:', document.contains(this.canvas));
+      this.debug('  🎨 Canvas element:', this.canvas);
+      this.debug('  🎨 Canvas parent:', this.canvas.parentElement);
+      this.debug('  🎨 Canvas getBoundingClientRect:', this.canvas.getBoundingClientRect());
+      this.debug('  🎨 Canvas computed style:', {
         display: getComputedStyle(this.canvas).display,
         position: getComputedStyle(this.canvas).position,
         width: getComputedStyle(this.canvas).width,
@@ -154,7 +265,7 @@ export class SiriButton {
     // Get context
     const ctx = this.canvas.getContext('2d');
     if (!ctx) {
-      console.error('[SiriButton] Could not get canvas context');
+      this.debugError('[SiriButton] Could not get canvas context');
       throw new Error('Could not get canvas context');
     }
     this.ctx = ctx;
@@ -171,10 +282,10 @@ export class SiriButton {
     this.volumeLevel = 0;
     this.animationFrameId = 0;
 
-    // Set initial canvas size - use multiple timeouts for mobile compatibility
+    // 🚨 PHASE 1: SAFE INITIALIZATION - Use safe resize methods
     setTimeout(() => {
-      this.resize();
-      console.log('[SiriButton] Initial resize completed, canvas size:', this.canvas.width, 'x', this.canvas.height);
+      this.safeResize();
+      this.debug('[SiriButton] Initial resize completed, canvas size:', this.canvas.width, 'x', this.canvas.height);
       
       // Force a test draw to ensure canvas is working
       this.debugDraw();
@@ -182,9 +293,9 @@ export class SiriButton {
 
     // Additional resize for mobile - sometimes needs more time
     setTimeout(() => {
-      this.resize();
+      this.safeResize();
       this.debugDraw();
-      console.log('[SiriButton] Secondary resize for mobile compatibility');
+      this.debug('[SiriButton] Secondary resize for mobile compatibility');
     }, 300);
 
     // Start animation loop
@@ -193,7 +304,7 @@ export class SiriButton {
     // Add resize listener only
     window.addEventListener('resize', this.debouncedResize.bind(this));
 
-    console.log('[SiriButton] Visual engine initialized - NO EVENT HANDLING (controlled externally)');
+    this.debug('[SiriButton] Visual engine initialized - NO EVENT HANDLING (controlled externally)');
 
     // Detect dark mode
     this.isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -201,12 +312,12 @@ export class SiriButton {
       this.isDarkMode = e.matches;
     });
 
-    console.log('[SiriButton] Constructor completed successfully');
+    this.debug('[SiriButton] Constructor completed successfully');
   }
 
   // Debug method to test canvas drawing
   private debugDraw() {
-    console.log('[SiriButton] Debug draw - testing canvas');
+    this.debug('[SiriButton] Debug draw - testing canvas');
     
     try {
       // Clear canvas
@@ -220,9 +331,9 @@ export class SiriButton {
       this.ctx.fill();
       this.ctx.restore();
       
-      console.log('[SiriButton] Debug draw successful');
+      this.debug('[SiriButton] Debug draw successful');
     } catch (error) {
-      console.error('[SiriButton] Debug draw failed:', error);
+      this.debugError('[SiriButton] Debug draw failed:', error);
     }
   }
 
@@ -234,15 +345,62 @@ export class SiriButton {
     name: string;
   }) {
     this.colors = colors;
-    console.log('[SiriButton] Colors updated:', colors);
+    this.debug('[SiriButton] Colors updated:', colors);
+  }
+
+  // 🔧 PHASE 2: DEBUG CONTROL - Runtime debug level control
+  public static setDebugLevel(level: 0 | 1 | 2) {
+    SiriButton.DEBUG_LEVEL = level;
+    console.log(`[SiriButton] Debug level set to: ${level} (0: off, 1: errors only, 2: all)`);
+  }
+
+  public static getDebugLevel(): number {
+    return SiriButton.DEBUG_LEVEL;
+  }
+
+  // 🚨 PHASE 1: EMERGENCY CONTROL - Public emergency stop
+  public emergencyStopPublic(): void {
+    this.emergencyStop();
+  }
+
+  // 🚨 PHASE 1: SAFE RESIZE - Try-catch wrapper for resize operations
+  private safeResize(): void {
+    try {
+      this.resize();
+    } catch (error) {
+      this.debugError('🚨 Resize operation failed:', error);
+      this.setDefaultDimensions();
+    }
+  }
+
+  // 🚨 PHASE 1: Set fallback dimensions when resize fails
+  private setDefaultDimensions(): void {
+    try {
+      this.width = 300;
+      this.height = 300;
+      this.centerX = this.width / 2;
+      this.centerY = this.height / 2;
+      this.radius = 100;
+      
+      if (this.canvas) {
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+        this.canvas.style.width = `${this.width}px`;
+        this.canvas.style.height = `${this.height}px`;
+      }
+      
+      this.debugWarn('Using fallback dimensions due to resize failure');
+    } catch (error) {
+      this.debugError('Failed to set default dimensions:', error);
+    }
   }
 
   private resize() {
-    console.log('🔍 [SiriButton] RESIZE START - Fixed positioning');
+    this.debug('🔍 [SiriButton] RESIZE START - Fixed positioning');
     
     const container = document.getElementById(this.canvas.id.replace('-canvas', ''));
     if (!container) {
-      console.warn('⚠️ [SiriButton] No container found during resize');
+      this.debugWarn('⚠️ [SiriButton] No container found during resize');
       return;
     }
 
@@ -256,13 +414,13 @@ export class SiriButton {
     const containerWidth = Math.max(containerRect.width, 280); // Minimum fallback
     const containerHeight = Math.max(containerRect.height, 280); // Minimum fallback
     
-    console.log('[SiriButton] 🔧 FIXED RESIZE:');
-    console.log('  📦 Container rect:', containerRect.width, 'x', containerRect.height);
-    console.log('  🎯 Used dimensions:', containerWidth, 'x', containerHeight);
+    this.debug('[SiriButton] 🔧 FIXED RESIZE:');
+    this.debug('  📦 Container rect:', containerRect.width, 'x', containerRect.height);
+    this.debug('  🎯 Used dimensions:', containerWidth, 'x', containerHeight);
     
     // Validate dimensions
     if (containerWidth === 0 || containerHeight === 0) {
-      console.error('❌ [SiriButton] Invalid container dimensions:', {
+      this.debugError('❌ [SiriButton] Invalid container dimensions:', {
         width: containerWidth,
         height: containerHeight,
         containerRect
@@ -290,8 +448,8 @@ export class SiriButton {
     this.canvas.style.width = `${finalWidth}px`;   // Exact match with this.width
     this.canvas.style.height = `${finalHeight}px`; // Exact match with this.height
     
-    console.log('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
-    console.log('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
+    this.debug('  🎨 Canvas size:', finalWidth, 'x', finalHeight);
+    this.debug('  🎨 Physical size:', physicalWidth, 'x', physicalHeight);
     
     // 🔧 FIX 2: CSS-only positioning with reduced padding
     this.canvas.style.position = 'absolute';
@@ -315,8 +473,8 @@ export class SiriButton {
     this.centerY = this.height / 2;
     this.radius = Math.max(80, Math.min(finalWidth, finalHeight) * 0.35);
     
-    console.log('  🎯 Canvas center:', this.centerX, this.centerY);
-    console.log('  ⭕ Canvas radius:', this.radius);
+    this.debug('  🎯 Canvas center:', this.centerX, this.centerY);
+    this.debug('  ⭕ Canvas radius:', this.radius);
   }
 
   // 🔧 NEW: Alignment verification method
@@ -745,27 +903,29 @@ export class SiriButton {
   }
 
   private animate() {
-    console.log('🔍 [SiriButton] ANIMATION START - Mobile Debug');
-    // Ensure canvas is still visible and properly sized
-    if (!this.canvas || !this.ctx) {
-      console.warn('[SiriButton] Canvas or context missing during animation');
+    // 🚨 PHASE 1: EMERGENCY GUARDS - Check for emergency stop
+    if (this.emergencyStopRequested) {
+      this.debugWarn('Animation stopped due to emergency stop');
       return;
     }
 
-    // Check if canvas is still in DOM
-    if (!this.canvas.parentElement) {
-      console.warn('[SiriButton] Canvas no longer in DOM, stopping animation');
+    this.debug('🔍 [SiriButton] ANIMATION START - Mobile Debug');
+    
+    // 🚨 PHASE 1: CANVAS VALIDATION - Use validation method
+    if (!this.validateCanvas()) {
+      this.debugWarn('Canvas validation failed, stopping animation');
       return;
     }
 
     // Update radius based on container size consistently
     this.radius = Math.max(60, Math.min(this.width, this.height) * 0.35); // Consistent proportional radius
     
-    // Clear canvas with full background
+    // 🚨 PHASE 1: SAFE CANVAS OPERATIONS - Try-catch for all canvas operations
     try {
       this.ctx.clearRect(0, 0, this.width, this.height);
     } catch (error) {
-      console.error('[SiriButton] Error clearing canvas:', error);
+      this.debugError('Error clearing canvas:', error);
+      this.emergencyStop();
       return;
     }
     
@@ -776,11 +936,11 @@ export class SiriButton {
     
     // Verify canvas dimensions
     if (this.canvas.width === 0 || this.canvas.height === 0) {
-      console.warn('[SiriButton] Canvas has zero dimensions, triggering resize');
-      this.resize();
+      this.debugWarn('Canvas has zero dimensions, triggering safe resize');
+      this.safeResize();
     }
     
-    // Draw all elements in order with error handling
+    // 🚨 PHASE 1: SAFE DRAWING OPERATIONS - Try-catch for all drawing
     try {
       this.drawBaseCircle();
       this.drawWaveform();
@@ -791,9 +951,15 @@ export class SiriButton {
       this.drawTimeText();
       this.drawIdleFlash();
     } catch (error) {
-      console.error('[SiriButton] Error during drawing:', error);
-      // Fallback: draw simple circle if complex drawing fails
-      this.drawFallbackCircle();
+      this.debugError('Error during drawing:', error);
+      // 🚨 EMERGENCY: Fallback to simple drawing
+      try {
+        this.drawFallbackCircle();
+      } catch (fallbackError) {
+        this.debugError('Even fallback drawing failed:', fallbackError);
+        this.emergencyStop();
+        return;
+      }
     }
     
     // Add new ripples when listening - consistent rate for all devices
@@ -808,14 +974,16 @@ export class SiriButton {
     // Update animation phase
     this.pulsePhase += 0.05;
     
-    // Request next frame
-    this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
+    // 🚨 PHASE 1: SAFE ANIMATION LOOP - Check emergency stop before next frame
+    if (!this.emergencyStopRequested) {
+      this.animationFrameId = requestAnimationFrame(this.animate.bind(this));
+    }
   }
 
-  // Fallback drawing method for when complex drawing fails
+  // 🚨 PHASE 1: EMERGENCY FALLBACK - Simple drawing when complex drawing fails
   private drawFallbackCircle() {
     try {
-      console.log('[SiriButton] Drawing fallback circle');
+      this.debug('Drawing fallback circle');
       
       // Clear canvas
       this.ctx.clearRect(0, 0, this.width, this.height);
@@ -850,9 +1018,11 @@ export class SiriButton {
       
       this.ctx.restore();
       
-      console.log('[SiriButton] Fallback circle drawn successfully');
+      this.debug('Fallback circle drawn successfully');
     } catch (error) {
-      console.error('[SiriButton] Even fallback drawing failed:', error);
+      this.debugError('Even fallback drawing failed:', error);
+      // Last resort - throw to trigger emergency stop
+      throw error;
     }
   }
 
@@ -943,7 +1113,7 @@ export class SiriButton {
   }
 
   public cleanup() {
-    console.log('[SiriButton] Cleaning up canvas and animation');
+    this.debug('[SiriButton] Cleaning up canvas and animation');
     
     // Stop animation first
     if (this.animationFrameId) {
@@ -977,4 +1147,32 @@ export class SiriButton {
       this.ctx = null as any;
     }
   }
+}
+
+// 🔧 PHASE 2: GLOBAL DEBUG CONTROLS - Available in browser console  
+if (typeof window !== 'undefined') {
+  (window as any).SiriDebugControls = {
+    setLevel: (level: 0 | 1 | 2) => {
+      SiriButton.setDebugLevel(level);
+      console.log(`🔧 Voice debug level set to: ${level}`);
+    },
+    getLevel: () => SiriButton.getDebugLevel(),
+    silent: () => SiriButton.setDebugLevel(0),
+    errorsOnly: () => SiriButton.setDebugLevel(1), 
+    verbose: () => SiriButton.setDebugLevel(2),
+    help: () => {
+      console.log(`
+🔧 SiriDebugControls Help:
+- SiriDebugControls.silent()     -> Turn off all debug logs
+- SiriDebugControls.errorsOnly() -> Show errors + warnings only  
+- SiriDebugControls.verbose()    -> Show all debug logs
+- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)
+- SiriDebugControls.getLevel()   -> Check current level
+      `);
+    }
+  };
+  
+  // Quick shortcuts
+  (window as any).voiceDebugOff = () => SiriButton.setDebugLevel(0);
+  (window as any).voiceDebugOn = () => SiriButton.setDebugLevel(2);
 } 

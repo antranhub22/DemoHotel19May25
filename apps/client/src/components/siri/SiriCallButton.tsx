@@ -28,40 +28,98 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   language = 'en',
   colors
 }) => {
+  // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
+  const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
+  
+  // 🔧 PHASE 2: Debug utility methods
+  const debug = (message: string, ...args: any[]) => {
+    if (DEBUG_LEVEL >= 2) {
+      console.log(`[SiriCallButton] ${message}`, ...args);
+    }
+  };
+
+  const debugWarn = (message: string, ...args: any[]) => {
+    if (DEBUG_LEVEL >= 1) {
+      console.warn(`[SiriCallButton] ${message}`, ...args);
+    }
+  };
+
+  const debugError = (message: string, ...args: any[]) => {
+    // Always show errors, even in production
+    console.error(`[SiriCallButton] ${message}`, ...args);
+  };
+
   const buttonRef = useRef<SiriButton | null>(null);
   const cleanupFlagRef = useRef<boolean>(false);
   const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
   const [canvasReady, setCanvasReady] = useState(false);
   
-  // Prevent double-firing between click and touch events
+  // 🚨 PHASE 1: EMERGENCY GUARDS - Prevent double firing and infinite loops
   const isHandlingClick = useRef<boolean>(false);
+  const initAttemptCount = useRef<number>(0);
+  const maxInitAttempts = 3;
+  const emergencyStopRequested = useRef<boolean>(false);
 
-  // Safe cleanup function
+  // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
     if (cleanupFlagRef.current) return;
     cleanupFlagRef.current = true;
     
-    if (buttonRef.current) {
-      try {
-        buttonRef.current.cleanup();
-      } catch (error) {
-        console.warn('[SiriCallButton] Cleanup error:', error);
-      }
-      buttonRef.current = null;
-    }
-
-    const container = document.getElementById(containerId);
-    if (container) {
-      const canvases = container.querySelectorAll('canvas');
-      canvases.forEach(canvas => {
-        if (canvas.parentElement && document.contains(canvas)) {
-          canvas.parentElement.removeChild(canvas);
+    try {
+      if (buttonRef.current) {
+        try {
+          buttonRef.current.cleanup();
+        } catch (error) {
+          debugWarn('Cleanup error:', error);
         }
-      });
+        buttonRef.current = null;
+      }
+
+      const container = document.getElementById(containerId);
+      if (container) {
+        try {
+          const canvases = container.querySelectorAll('canvas');
+          canvases.forEach(canvas => {
+            if (canvas.parentElement && document.contains(canvas)) {
+              canvas.parentElement.removeChild(canvas);
+            }
+          });
+        } catch (error) {
+          debugError('Failed to remove canvases:', error);
+        }
+      }
+      
+      setCanvasReady(false);
+    } catch (error) {
+      debugError('Safe cleanup failed:', error);
     }
-    
-    setCanvasReady(false);
   }, [containerId]);
+
+  // 🚨 PHASE 1: EMERGENCY STOP - Force stop all operations
+  const emergencyStop = useCallback(() => {
+    debugWarn('🚨 EMERGENCY STOP TRIGGERED');
+    emergencyStopRequested.current = true;
+    
+    try {
+      // Stop SiriButton if exists
+      if (buttonRef.current) {
+        try {
+          if (typeof buttonRef.current.emergencyStopPublic === 'function') {
+            buttonRef.current.emergencyStopPublic();
+          }
+        } catch (error) {
+          debugError('Failed to emergency stop SiriButton:', error);
+        }
+      }
+      
+      // Force cleanup
+      safeCleanup();
+      
+      debugWarn('🚨 EMERGENCY STOP COMPLETED');
+    } catch (error) {
+      debugError('Emergency stop failed:', error);
+    }
+  }, [safeCleanup]);
 
   // ✅ CENTRALIZED interaction handlers
   const handleInteractionStart = useCallback((e: Event, position?: { x: number; y: number }) => {
@@ -71,62 +129,62 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         buttonRef.current.setTouchPosition(position.x, position.y);
       }
     }
-    console.log('🎯 [SiriCallButton] Interaction start:', { position });
+    debug('🎯 [SiriCallButton] Interaction start:', { position });
   }, []);
 
   const handleInteractionEnd = useCallback(async (e: Event) => {
-    console.log('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
-    console.log('  🎯 Event type:', e.type);
-    console.log('  🎯 Event target:', e.target);
+    debug('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
+    debug('  🎯 Event type:', e.type);
+    debug('  🎯 Event target:', e.target);
     
     if (buttonRef.current) {
       buttonRef.current.setInteractionMode('idle');
-      console.log('  ✅ Visual state set to idle');
+      debug('  ✅ Visual state set to idle');
     }
     
     // Business logic - prevent double-firing
     if (isHandlingClick.current) {
-      console.log('🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...');
+      debug('🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...');
       return;
     }
     
     isHandlingClick.current = true;
-    console.log('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
-    console.log('  🎧 isListening:', isListening);
-    console.log('  ✅ onCallStart available:', !!onCallStart);
-    console.log('  ✅ onCallEnd available:', !!onCallEnd);
+    debug('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
+    debug('  🎧 isListening:', isListening);
+    debug('  ✅ onCallStart available:', !!onCallStart);
+    debug('  ✅ onCallEnd available:', !!onCallEnd);
     
     try {
       if (!isListening && onCallStart) {
         setStatus('listening');
-        console.log('🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...');
+        debug('🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...');
         try {
           await onCallStart();
-          console.log('🎤 [SiriCallButton] ✅ onCallStart() completed successfully');
+          debug('🎤 [SiriCallButton] ✅ onCallStart() completed successfully');
         } catch (error) {
-          console.error('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
+          debugError('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
           setStatus('idle');
         }
       } else if (isListening && onCallEnd) {
         setStatus('processing');
-        console.log('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
+        debug('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
         onCallEnd();
-        console.log('🛑 [SiriCallButton] ✅ onCallEnd() completed');
+        debug('🛑 [SiriCallButton] ✅ onCallEnd() completed');
         setTimeout(() => setStatus('idle'), 500);
       } else {
-        console.log('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
-        console.log('  🎧 isListening:', isListening);
-        console.log('  🎤 onCallStart available:', !!onCallStart);
-        console.log('  🛑 onCallEnd available:', !!onCallEnd);
+        debug('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
+        debug('  🎧 isListening:', isListening);
+        debug('  🎤 onCallStart available:', !!onCallStart);
+        debug('  🛑 onCallEnd available:', !!onCallEnd);
       }
     } finally {
       setTimeout(() => {
         isHandlingClick.current = false;
-        console.log('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
+        debug('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
       }, 100);
     }
     
-    console.log('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
+    debug('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
   }, [isListening, onCallStart, onCallEnd]);
 
   const handleHover = useCallback((isHovered: boolean) => {
@@ -135,12 +193,29 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
   }, []);
 
-  // Initialize SiriButton
+  // 🚨 PHASE 1: SAFE INITIALIZATION - Initialize SiriButton with emergency guards
   useEffect(() => {
+    // 🚨 EMERGENCY: Check if emergency stop was requested
+    if (emergencyStopRequested.current) {
+      debugWarn('Skipping initialization due to emergency stop');
+      return;
+    }
+
+    // 🚨 EMERGENCY: Check initialization attempt count
+    initAttemptCount.current++;
+    if (initAttemptCount.current > maxInitAttempts) {
+      debugError('Too many initialization attempts, triggering emergency stop');
+      emergencyStop();
+      return;
+    }
+
     cleanupFlagRef.current = false;
     
     const element = document.getElementById(containerId);
-    if (!element) return;
+    if (!element) {
+      debugWarn('Container element not found:', containerId);
+      return;
+    }
 
     // Clear existing content
     const existingCanvases = element.querySelectorAll('canvas');
@@ -150,33 +225,42 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     });
 
-    // Initialize SiriButton
+    // 🚨 PHASE 1: SAFE INITIALIZATION - Try-catch for SiriButton creation
     try {
       buttonRef.current = new SiriButton(containerId, colors);
       setCanvasReady(true);
       
-      // 🔧 FIX 4: Single resize trigger for better mobile performance
+      // 🔧 FIX 4: Single resize trigger for better mobile performance  
       setTimeout(() => {
-        if (buttonRef.current && !cleanupFlagRef.current) {
-          console.log('🔧 [SiriCallButton] Single resize for mobile compatibility');
+        if (buttonRef.current && !cleanupFlagRef.current && !emergencyStopRequested.current) {
+          debug('🔧 [SiriCallButton] Single resize for mobile compatibility');
           window.dispatchEvent(new Event('resize'));
         }
-      }, 200); // ✅ Single resize call at 200ms instead of multiple triggers
+      }, 200);
       
     } catch (error) {
-      console.error('[SiriCallButton] Init error:', error);
-      // ✅ FIX 4: Simplified retry without multiple resize triggers
-      setTimeout(() => {
-        if (!cleanupFlagRef.current) {
-          try {
-            buttonRef.current = new SiriButton(containerId, colors);
-            setCanvasReady(true);
-            console.log('🔧 [SiriCallButton] Retry successful - no additional resize needed');
-          } catch (retryError) {
-            console.error('[SiriCallButton] Retry failed:', retryError);
+      debugError('Init error:', error);
+      
+      // 🚨 PHASE 1: SAFE RETRY - Limited retry with emergency guards
+      if (initAttemptCount.current < maxInitAttempts) {
+        setTimeout(() => {
+          if (!cleanupFlagRef.current && !emergencyStopRequested.current) {
+            try {
+              buttonRef.current = new SiriButton(containerId, colors);
+              setCanvasReady(true);
+              debug('🔧 [SiriCallButton] Retry successful - no additional resize needed');
+            } catch (retryError) {
+              debugError('Retry failed:', retryError);
+              if (initAttemptCount.current >= maxInitAttempts) {
+                emergencyStop();
+              }
+            }
           }
-        }
-      }, 200);
+        }, 200);
+      } else {
+        debugError('Max init attempts reached, triggering emergency stop');
+        emergencyStop();
+      }
     }
 
     // ✅ DEVICE-SPECIFIC event setup with centralized handlers
