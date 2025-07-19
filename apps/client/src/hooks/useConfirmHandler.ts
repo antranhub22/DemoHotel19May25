@@ -126,8 +126,13 @@ export const useConfirmHandler = ({
       
       // 🔧 STEP 2: End call AFTER showing loading popup
       console.log('🔄 [useConfirmHandler] Step 2: Ending call...');
-      endCall(); // Assuming conversationState has a handleConfirm method
-      console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+      try {
+        endCall();
+        console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+      } catch (endCallError) {
+        console.error('⚠️ [useConfirmHandler] endCall() failed but continuing:', endCallError);
+        // Don't throw - continue with summary generation anyway
+      }
       
       // 🔧 STEP 3: Start polling for summary data
       console.log('🔄 [useConfirmHandler] Step 3: Starting polling for summary data...');
