@@ -13,4 +13,7 @@ export * from './useTranscriptSocket';
 export * from './useWebSocket';
 // Export only the main hook to avoid conflicts with existing useIsMobile
 export { useSiriResponsiveSize } from './useSiriResponsiveSize';
-export { useSimplifiedMobileTouch } from './useSimplifiedMobileTouch'; 
+export { useSimplifiedMobileTouch } from './useSimplifiedMobileTouch';
+export { useCancelHandler } from './useCancelHandler';
+export { useConfirmHandler } from './useConfirmHandler';
+export { useSendToFrontDeskHandler } from './useSendToFrontDeskHandler'; 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { SummaryPopupContent } from './popup-system/DemoPopupContent';
+import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 
 interface RightPanelPopupProps {
   isOpen: boolean;
@@ -13,6 +14,17 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   onClose,
   showSummary = false
 }) => {
+  // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
+  const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
+    onSuccess: () => {
+      alert('✅ Request sent to Front Desk successfully!');
+      onClose();
+    },
+    onError: (error) => {
+      alert(`❌ ${error}`);
+    }
+  });
+
   if (!isOpen) return null;
 
   return (
@@ -48,23 +60,28 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
               <SummaryPopupContent />
             </div>
             
-            {/* ✅ NEW: Action Buttons */}
+            {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}
             <div className="flex gap-3 pt-3 border-t border-gray-100">
               <button
                 onClick={onClose}
-                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  // TODO: Implement send to front desk logic
-                  alert('Request sent to Front Desk!');
-                  onClose();
-                }}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                onClick={handleSendToFrontDesk}
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
               >
-                Send to FrontDesk
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Sending...
+                  </>
+                ) : (
+                  'Send to FrontDesk'
+                )}
               </button>
             </div>
           </div>

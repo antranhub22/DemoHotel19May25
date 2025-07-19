@@ -4,18 +4,19 @@
 
 ```
 apps/client/src/hooks/
-├── useCancelHandler.ts     # ❌ Cancel button logic
-├── useConfirmHandler.ts    # ✅ Confirm button logic  
-└── useInterface1.ts        # 🎯 Main interface hook (uses above)
+├── useCancelHandler.ts              # ❌ Cancel button logic
+├── useConfirmHandler.ts             # ✅ Confirm button logic  
+├── useSendToFrontDeskHandler.ts     # 🏨 Send to FrontDesk logic  
+└── useInterface1.ts                 # 🎯 Main interface hook (uses above)
 ```
 
 ## 🎯 Purpose
 
-**Problem**: Previously, `handleCancel` and `handleConfirm` were inline functions inside `useInterface1.ts`, making them hard to find and modify.
+**Problem**: Previously, button handlers were inline functions inside components, making them hard to find, test, and modify.
 
-**Solution**: Separated into dedicated files for better maintainability.
+**Solution**: Separated into dedicated hooks for better maintainability and reusability.
 
-## 📋 When to Modify Each File
+## 📋 When to Modify Each Hook
 
 ### ❌ Cancel Button Changes → `useCancelHandler.ts`
 **Use cases:**
@@ -44,9 +45,23 @@ apps/client/src/hooks/
 3. Display summary popup with fallbacks
 4. Handle multiple error scenarios
 
+### 🏨 Send to FrontDesk Changes → `useSendToFrontDeskHandler.ts`
+**Use cases:**
+- Change order submission logic
+- Modify data extraction from call summary
+- Update API endpoint or payload format
+- Add/remove order validation steps
+- Change success/error handling
+
+**Current Send to FrontDesk Flow:**
+1. Extract order data from callSummary/serviceRequests
+2. Generate order with unique reference (ORD-XXXXX)
+3. Submit to /api/orders endpoint
+4. Update order state and show success/error
+
 ### 🎯 Integration Changes → `useInterface1.ts`
 **Use cases:**
-- Add new props to either handler
+- Add new props to any handler
 - Change handler dependencies
 - Modify hook initialization
 - Update return values
@@ -64,33 +79,78 @@ const { handleCancel } = useCancelHandler({
 });
 
 const { handleConfirm } = useConfirmHandler({
-  conversationState,
+  endCall,
   transcripts,
   callSummary,
   serviceRequests
 });
+
+// In RightPanelPopup.tsx
+const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
+  onSuccess: () => {
+    alert('✅ Request sent to Front Desk successfully!');
+    onClose();
+  },
+  onError: (error) => {
+    alert(`❌ ${error}`);
+  }
+});
+```
+
+## 🏗️ Hook Pattern
+
+All button handlers follow the same pattern:
+
+```typescript
+interface UseHandlerProps {
+  // Required dependencies
+  param1: Type1;
+  param2: Type2;
+  // Optional callbacks
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
+}
+
+interface UseHandlerReturn {
+  handleAction: () => void;
+  isLoading?: boolean;
+}
+
+export const useHandler = (props: UseHandlerProps): UseHandlerReturn => {
+  // Implementation
+  return { handleAction, isLoading };
+};
 ```
 
 ## 🚀 Benefits
 
 ✅ **Easy to find**: Know exactly where to look for each button's logic
-✅ **Separation of concerns**: Cancel and Confirm have distinct responsibilities  
-✅ **Maintainable**: Each file focuses on one specific behavior
-✅ **Testable**: Can unit test each handler independently
-✅ **Reusable**: Can potentially reuse in other interfaces
+✅ **Reusable**: Same logic can be used in multiple components  
+✅ **Testable**: Each hook can be tested independently
+✅ **Maintainable**: Changes isolated to specific files
+✅ **Type-safe**: Full TypeScript support with proper interfaces
+✅ **Configurable**: Callbacks allow customization per use case
 
-## 🔍 Quick Reference
+## 📍 Usage Locations
 
-| Need to change... | Look in... |
-|-------------------|------------|
-| Cancel behavior | `useCancelHandler.ts` |
-| Confirm behavior | `useConfirmHandler.ts` |
-| Button integration | `useInterface1.ts` |
-| Both buttons' props | `useInterface1.ts` |
+### useCancelHandler
+- `useInterface1.ts` - Interface1 Cancel button
+- Potential: Any component needing cancel functionality
 
-## 📝 Notes
+### useConfirmHandler  
+- `useInterface1.ts` - Interface1 Confirm button
+- Potential: Any component needing call confirmation
 
-- Both handlers maintain the same external API (function signature)
-- All original functionality preserved
-- Error handling and logging maintained in each handler
-- Dependencies injected via props for flexibility 
+### useSendToFrontDeskHandler
+- `RightPanelPopup.tsx` - Summary popup Send to FrontDesk button
+- Potential: Any component needing order submission to front desk
+
+## 🔄 Future Extensions
+
+The pattern can be extended for other actions:
+- `useEmailSummaryHandler.ts` - Email summary functionality
+- `useCallbackRequestHandler.ts` - Request callback functionality  
+- `useServiceRequestHandler.ts` - General service request handling
+- `useNotificationHandler.ts` - Push notification handling
+
+Each new handler should follow the same pattern for consistency. 
