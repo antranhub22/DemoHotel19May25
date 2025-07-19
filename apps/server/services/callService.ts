@@ -70,16 +70,16 @@ export class CallService {
       // Auto-create call record if it doesn't exist
       await this.ensureCallRecordExists(callId, content);
       
-      // Store transcript in database - use camelCase for storage function
+      // Store transcript in database with proper field mapping
       await storage.addTranscript({
-        callId,
+        callId: callId,
         role,
         content,
         tenantId: 'default',
-        timestamp: Math.floor(validTimestamp / 1000)
+        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
       });
-      
-      console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
+
+      console.log('✅ [CallService] Transcript stored successfully');
       
       return {
         success: true,

@@ -2,6 +2,50 @@ import { staff, type Staff, type InsertStaff, transcript, type Transcript, type 
 import { db } from "./db";
 import { eq, and, gte, sql } from "drizzle-orm";
 
+// ✅ TIMESTAMP CONVERSION UTILITIES
+const isPostgreSQL = () => {
+  return !!process.env.DATABASE_URL && process.env.NODE_ENV === 'production';
+};
+
+const convertTimestamp = (timestamp: number | Date | string | null | undefined): any => {
+  if (timestamp === null || timestamp === undefined) {
+    return null;
+  }
+  
+  if (isPostgreSQL()) {
+    // PostgreSQL: Convert to proper Date object
+    if (typeof timestamp === 'number') {
+      // Handle both seconds and milliseconds timestamps
+      const ts = timestamp > 1e12 ? timestamp : timestamp * 1000;
+      return new Date(ts);
+    }
+    if (typeof timestamp === 'string') {
+      return new Date(timestamp);
+    }
+    return timestamp instanceof Date ? timestamp : new Date(timestamp);
+  } else {
+    // SQLite: Keep as integer (Unix timestamp)
+    if (typeof timestamp === 'number') {
+      return timestamp;
+    }
+    if (timestamp instanceof Date) {
+      return Math.floor(timestamp.getTime() / 1000);
+    }
+    if (typeof timestamp === 'string') {
+      return Math.floor(new Date(timestamp).getTime() / 1000);
+    }
+    return Math.floor(Date.now() / 1000);
+  }
+};
+
+const getCurrentTimestamp = (): any => {
+  if (isPostgreSQL()) {
+    return new Date();
+  } else {
+    return Math.floor(Date.now() / 1000);
+  }
+};
+
 // Type aliases for backward compatibility
 type Order = typeof request.$inferSelect;
 type InsertOrder = typeof request.$inferInsert;
@@ -49,58 +93,48 @@ export class DatabaseStorage implements IStorage {
   }
   
   async addTranscript(insertTranscript: InsertTranscript | any): Promise<Transcript> {
-    // Fix field mapping: Support both API format (callId) and database format (call_id)
-    // Ensure timestamp is within valid range for PostgreSQL
-    const now = Date.now();
-    
-    // 🔧 IMPROVED TIMESTAMP HANDLING
-    let timestamp: number;
     try {
-      // Handle different timestamp formats
-      if (typeof insertTranscript.timestamp === 'string') {
-        // Try parsing ISO string
-        const date = new Date(insertTranscript.timestamp);
-        if (isNaN(date.getTime())) {
-          throw new Error('Invalid ISO timestamp');
-        }
-        timestamp = Math.floor(date.getTime() / 1000);
-      } else if (typeof insertTranscript.timestamp === 'number') {
-        // Handle Unix timestamp (seconds or milliseconds)
-        timestamp = insertTranscript.timestamp > 9999999999 
-          ? Math.floor(insertTranscript.timestamp / 1000) // Convert ms to seconds
-          : insertTranscript.timestamp;
-      } else {
-        // Default to current time
-        timestamp = Math.floor(now / 1000);
+      console.log('📝 [DatabaseStorage] Adding transcript:', {
+        callId: insertTranscript.callId || insertTranscript.call_id,
+        role: insertTranscript.role,
+        contentLength: insertTranscript.content?.length,
+        originalTimestamp: insertTranscript.timestamp,
+        timestampType: typeof insertTranscript.timestamp
+      });
+
+      // ✅ FIXED: Use conversion utilities for timestamp
+      const processedTranscript = {
+        call_id: insertTranscript.callId || insertTranscript.call_id,
+        content: insertTranscript.content,
+        role: insertTranscript.role,
+        timestamp: convertTimestamp(insertTranscript.timestamp || Date.now()),
+        tenant_id: insertTranscript.tenant_id || insertTranscript.tenantId || 'default'
+      };
+
+      console.log('📝 [DatabaseStorage] Processed transcript for database:', {
+        ...processedTranscript,
+        timestamp: processedTranscript.timestamp,
+        timestampType: typeof processedTranscript.timestamp
+      });
+
+      const result = await db.insert(transcript).values(processedTranscript).returning();
+      
+      if (result.length === 0) {
+        throw new Error('Failed to insert transcript - no result returned');
       }
-      
-      // Validate timestamp range for PostgreSQL
-      const minTimestamp = -2147483648; // PostgreSQL minimum
-      const maxTimestamp = 2147483647;  // PostgreSQL maximum
-      
-      if (timestamp < minTimestamp || timestamp > maxTimestamp) {
-        console.warn(`⚠️ [WebSocket] Timestamp validation: input=${timestamp}, valid=${maxTimestamp}, seconds=${Math.floor(now/1000)}`);
-        timestamp = Math.floor(now / 1000); // Use current time as fallback
-      }
-      
-      console.log('✅ [WebSocket] Timestamp validation: input=' + insertTranscript.timestamp + ', valid=' + timestamp + ', seconds=' + Math.floor(now/1000));
+
+      console.log('✅ [DatabaseStorage] Transcript added successfully:', {
+        id: result[0].id,
+        callId: result[0].call_id,
+        timestamp: result[0].timestamp
+      });
+
+      return result[0];
     } catch (error) {
-      console.error('❌ [WebSocket] Timestamp parsing error:', error);
-      // Fallback to current time
-      timestamp = Math.floor(now / 1000);
+      console.error('❌ [DatabaseStorage] Error adding transcript:', error);
+      console.error('📋 [DatabaseStorage] Input data:', insertTranscript);
+      throw error;
     }
-    
-    const dbTranscript = {
-      call_id: insertTranscript.callId || insertTranscript.call_id,
-      content: insertTranscript.content,
-      role: insertTranscript.role,
-      timestamp: timestamp,
-      tenant_id: insertTranscript.tenantId || insertTranscript.tenant_id || 'default'
-    };
-    
-    console.log('Inserting transcript into database:', dbTranscript);
-    const result = await db.insert(transcript).values(dbTranscript).returning();
-    return result[0];
   }
   
   async getTranscriptsByCallId(callId: string): Promise<Transcript[]> {
@@ -198,8 +232,37 @@ export class DatabaseStorage implements IStorage {
   }
   
   async addCallSummary(insertCallSummary: InsertCallSummary): Promise<CallSummary> {
-    const result = await db.insert(callSummaries).values(insertCallSummary).returning();
-    return result[0];
+    try {
+      console.log('📝 [DatabaseStorage] Adding call summary:', {
+        callId: insertCallSummary.call_id,
+        content: insertCallSummary.content,
+        hasTimestamp: 'timestamp' in insertCallSummary
+      });
+
+      // ✅ FIXED: call_summaries uses text timestamp with CURRENT_TIMESTAMP default
+      const processedSummary = {
+        call_id: insertCallSummary.call_id,
+        content: insertCallSummary.content,
+        room_number: (insertCallSummary as any).room_number || null,
+        duration: (insertCallSummary as any).duration || null,
+        // For call_summaries, let database handle timestamp with CURRENT_TIMESTAMP
+      };
+
+      console.log('📝 [DatabaseStorage] Processed summary for database:', processedSummary);
+
+      const result = await db.insert(callSummaries).values(processedSummary).returning();
+      
+      console.log('✅ [DatabaseStorage] Call summary added successfully:', {
+        id: result[0].id,
+        callId: result[0].call_id
+      });
+
+      return result[0];
+    } catch (error) {
+      console.error('❌ [DatabaseStorage] Error adding call summary:', error);
+      console.error('📋 [DatabaseStorage] Input data:', insertCallSummary);
+      throw error;
+    }
   }
   
   async getCallSummaryByCallId(callId: string): Promise<CallSummary | undefined> {
@@ -208,15 +271,27 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getRecentCallSummaries(hours: number): Promise<CallSummary[]> {
-    // Calculate the timestamp from 'hours' ago
-    const hoursAgo = new Date();
-    hoursAgo.setHours(hoursAgo.getHours() - hours);
-    
-    // Query summaries newer than the calculated timestamp
-    return await db.select()
-      .from(callSummaries)
-      .where(gte(callSummaries.timestamp, hoursAgo.toISOString()))
-      .orderBy(sql`${callSummaries.timestamp} DESC`);
+    try {
+      // ✅ FIXED: call_summaries uses text timestamp in ISO format
+      const hoursAgo = new Date();
+      hoursAgo.setHours(hoursAgo.getHours() - hours);
+      const timestampThreshold = hoursAgo.toISOString();
+      
+      console.log('🔍 [DatabaseStorage] Getting recent call summaries:', {
+        hours,
+        timestampThreshold,
+        hoursAgo: hoursAgo.toISOString()
+      });
+
+      // Query summaries newer than the calculated timestamp (ISO string comparison)
+      return await db.select()
+        .from(callSummaries)
+        .where(gte(callSummaries.timestamp, timestampThreshold))
+        .orderBy(sql`${callSummaries.timestamp} DESC`);
+    } catch (error) {
+      console.error('❌ [DatabaseStorage] Error getting recent call summaries:', error);
+      throw error;
+    }
   }
 }
 

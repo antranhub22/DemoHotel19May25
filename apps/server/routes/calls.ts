@@ -73,7 +73,7 @@ router.post('/test-transcript', async (req, res) => {
       role,
       content,
       tenant_id: 'default',
-      timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
+      timestamp: validTimestamp // ✅ FIXED: Use raw timestamp for validation
     };
     
     // Validate with database schema (expects snake_case)
@@ -86,40 +86,33 @@ router.post('/test-transcript', async (req, res) => {
         .from(call)
         .where(eq(call.call_id_vapi, callId))
         .limit(1);
-      
+
       if (existingCall.length === 0) {
-        // Extract room number from content if possible
-        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
-        const roomNumber = roomMatch ? roomMatch[1] : null;
+        console.log(`🔍 [API/calls] No call found for ${callId}, skipping auto-creation due to schema mismatch`);
         
-        // Determine language from content
-        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
-        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
-        let language = 'en';
-        if (hasVietnamese) language = 'vi';
-        else if (hasFrench) language = 'fr';
+        // TODO: Fix schema mismatch and re-enable call creation
+        // await db.insert(call).values({
+        //   call_id_vapi: callId,
+        //   start_time: Math.floor(validTimestamp / 1000),
+        //   tenant_id: 'default'
+        // });
         
-        await db.insert(call).values({
-          call_id_vapi: callId,
-          // TODO: Add other fields when schema is fixed
-        });
-        
-        console.log(`Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+        console.log('⚠️ [API/calls] Call record creation skipped');
       }
-    } catch (callError) {
-      console.error('Error creating call record:', callError);
+    } catch (error) {
+      console.error('❌ [API/calls] Error checking call record:', error);
     }
-    
-    // Store transcript in database - use camelCase for storage function
+
+    // Store transcript in database with field mapping
     await storage.addTranscript({
-      callId,
+      callId: callId,
       role,
       content,
       tenantId: 'default',
-      timestamp: Math.floor(validTimestamp / 1000)
+      timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
     });
-    
-    console.log(`Test transcript stored for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
+
+    console.log('✅ [API/calls] Transcript stored successfully');
     
     res.json({ 
       success: true, 

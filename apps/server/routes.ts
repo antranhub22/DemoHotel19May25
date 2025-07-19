@@ -316,25 +316,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`);
 
-            // Store transcript in database with proper timestamp handling
-            try {
-              await storage.addTranscript({
-                callId: data.call_id,
-                role: data.role,
-                content: data.content,
-                tenantId: 'default',
-                timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL
-              });
-              console.log('✅ [WebSocket] Transcript stored successfully');
-            } catch (storageError) {
-              console.error('❌ [WebSocket] Error storing transcript:', storageError);
-              console.error('❌ [WebSocket] Storage error details:', {
-                message: storageError.message,
-                stack: storageError.stack
-              });
-              // Continue processing even if storage fails
-            }
+            // Store transcript in database - storage.addTranscript already handles field mapping
+            const savedTranscript = await storage.addTranscript({
+              callId: data.call_id,
+              role: data.role,
+              content: data.content,
+              tenantId: 'default',
+              timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
+            });
 
+            console.log('✅ [WebSocket] Transcript stored in database');
+            
             // Try to find or create call record
             try {
               const existingCall = await db.select().from(call).where(eq(call.call_id_vapi, data.call_id)).limit(1);
@@ -520,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         content,
         tenantId: tenantId || 'default',
-        timestamp: Math.floor(validTimestamp / 1000)
+        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
       });
       
       console.log(`Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
