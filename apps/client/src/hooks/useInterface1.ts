@@ -76,7 +76,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
  */
 const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks - keep all for demo functions, just disable auto-conversation
@@ -208,7 +208,7 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   });
 
   const { handleConfirm } = useConfirmHandler({
-    endCall: conversationState.handleCallEnd, // ✅ FIXED: Use endCall function directly
+    endCall, // ✅ FIXED: Use AssistantContext.endCall directly
     transcripts,
     callSummary,
     serviceRequests
