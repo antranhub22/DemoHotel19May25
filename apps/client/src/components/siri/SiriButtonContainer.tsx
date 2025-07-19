@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { designSystem } from '@/styles/designSystem';
 import SiriCallButton from './SiriCallButton';
 import { Language } from '@/types/interface1.types';
@@ -66,6 +66,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
+  
+  // ✅ NEW: Prevent accidental restart after Confirm
+  const [isConfirming, setIsConfirming] = useState(false);
 
   // Use LANGUAGE_COLORS mapping based on current language
   const currentColors = LANGUAGE_COLORS[language as keyof typeof LANGUAGE_COLORS] || LANGUAGE_COLORS['en'];
@@ -73,6 +76,56 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   // Debug: Log language and color changes
   console.log('🎨 [SiriButtonContainer] Language:', language, 'Colors:', currentColors.name, 'Primary:', currentColors.primary);
   console.log('📏 [SiriButtonContainer] Responsive size:', responsiveSize);
+
+  // ✅ NEW: Reset confirming state when call ends
+  useEffect(() => {
+    if (!isCallStarted) {
+      setIsConfirming(false);
+    }
+  }, [isCallStarted]);
+
+  // ✅ NEW: Protected onCallStart to prevent restart during/after Confirm
+  const protectedOnCallStart = async (lang: Language) => {
+    if (isConfirming) {
+      console.log('🛡️ [SiriButtonContainer] Call start blocked - confirming in progress');
+      return;
+    }
+    
+    console.log('🎤 [SiriButtonContainer] Starting call normally...');
+    await onCallStart(lang);
+  };
+
+  // ✅ NEW: Enhanced Confirm handler with protection
+  const handleConfirm = () => {
+    console.log('🔵 [SiriButtonContainer] Confirm button clicked');
+    
+    // Set confirming state to prevent restarts
+    setIsConfirming(true);
+    
+    try {
+      if (onConfirm) {
+        console.log('🔵 [SiriButtonContainer] Calling onConfirm...');
+        onConfirm();
+        console.log('✅ [SiriButtonContainer] onConfirm completed successfully');
+      } else {
+        console.warn('⚠️ [SiriButtonContainer] onConfirm is undefined');
+        alert('Confirm function is not available');
+        setIsConfirming(false); // Reset if no onConfirm
+      }
+    } catch (error) {
+      console.error('❌ [SiriButtonContainer] Error in Confirm button:', error);
+      console.error('❌ [SiriButtonContainer] Error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack
+      });
+      
+      setIsConfirming(false); // Reset on error
+      
+      // Prevent error from bubbling up to ErrorBoundary
+      alert('Call completed! There was an issue with the summary. Please check with front desk.');
+    }
+  };
 
   return (
     <div 
@@ -116,29 +169,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
         {/* Confirm Button */}
         <button
-          onClick={() => {
-            console.log('🔵 [SiriButtonContainer] Confirm button clicked');
-            try {
-              if (onConfirm) {
-                console.log('🔵 [SiriButtonContainer] Calling onConfirm...');
-                onConfirm();
-                console.log('✅ [SiriButtonContainer] onConfirm completed successfully');
-              } else {
-                console.warn('⚠️ [SiriButtonContainer] onConfirm is undefined');
-                alert('Confirm function is not available');
-              }
-            } catch (error) {
-              console.error('❌ [SiriButtonContainer] Error in Confirm button:', error);
-              console.error('❌ [SiriButtonContainer] Error details:', {
-                name: error?.name,
-                message: error?.message,
-                stack: error?.stack
-              });
-              
-              // Prevent error from bubbling up to ErrorBoundary
-              alert('Call completed! There was an issue with the summary. Please check with front desk.');
-            }
-          }}
+          onClick={handleConfirm}
           className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
         >
@@ -148,7 +179,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       {/* Siri Button Container - HYBRID: Desktop fixed + Mobile responsive */}
       <div 
-        className={`relative transition-all duration-500 ease-in-out voice-button ${isCallStarted ? 'listening' : ''}`}
+        className={`relative transition-all duration-500 ease-in-out voice-button ${isCallStarted ? 'listening' : ''} ${isConfirming ? 'confirming' : ''}`}
         data-language={language}
         style={{ 
           // 🔧 HYBRID FIX: Use responsive sizing hook
@@ -159,12 +190,19 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           maxWidth: responsiveSize.maxWidth,
           maxHeight: responsiveSize.maxHeight,
           borderRadius: '50%',
-          boxShadow: `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
-          background: `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
+          boxShadow: isConfirming 
+            ? `0 10px 20px rgba(128, 128, 128, 0.3), 0 0 30px rgba(128, 128, 128, 0.2)` // ✅ NEW: Muted glow when confirming
+            : `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
+          background: isConfirming 
+            ? `linear-gradient(135deg, #80808020, #80808010)` // ✅ NEW: Muted background when confirming
+            : `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
           backdropFilter: 'blur(10px)',
-          border: `2px solid ${currentColors.primary}40`,
-          cursor: 'pointer', // Show it's clickable
+          border: isConfirming 
+            ? `2px solid #80808040` // ✅ NEW: Muted border when confirming
+            : `2px solid ${currentColors.primary}40`,
+          cursor: isConfirming ? 'not-allowed' : 'pointer', // ✅ NEW: Show disabled state
           touchAction: 'manipulation', // Improve touch response
+          opacity: isConfirming ? 0.6 : 1, // ✅ NEW: Visual dimming when confirming
           // ✅ HYBRID FIX: Stable positioning without layout shifts
           position: 'relative',
           flexShrink: 0, // Prevent container from shrinking
@@ -178,27 +216,45 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           containerId="main-siri-button"
           isListening={isCallStarted}
           volumeLevel={micLevel}
-          onCallStart={() => onCallStart(language)}
+          onCallStart={() => protectedOnCallStart(language)}
           onCallEnd={onCallEnd}
           language={language}
           colors={currentColors}
         />
       </div>
       
-      {/* Tap To Speak text - Visible only when not calling */}
-      {!isCallStarted && (
-        <div
-          className="block mt-4 text-center transition-colors duration-300"
-          style={{
+      {/* Status text - Shows different messages based on state */}
+      <div
+        className="block mt-4 text-center transition-all duration-300"
+        style={{
+          fontSize: '1rem',
+          fontWeight: '600',
+        }}
+      >
+        {/* ✅ NEW: Different messages based on state */}
+        {isConfirming ? (
+          <div style={{
+            color: '#808080',
+            textShadow: `0 2px 8px rgba(128, 128, 128, 0.3)`,
+          }}>
+            📋 Processing call summary...
+          </div>
+        ) : isCallStarted ? (
+          <div style={{
             color: currentColors.primary,
-            fontSize: '1rem',
-            fontWeight: '600',
             textShadow: `0 2px 8px ${currentColors.glow}`,
-          }}
-        >
-          Tap To Speak
-        </div>
-      )}
+          }}>
+            🎤 Listening... Tap to end call
+          </div>
+        ) : (
+          <div style={{
+            color: currentColors.primary,
+            textShadow: `0 2px 8px ${currentColors.glow}`,
+          }}>
+            Tap To Speak
+          </div>
+        )}
+      </div>
     </div>
   );
 }; 

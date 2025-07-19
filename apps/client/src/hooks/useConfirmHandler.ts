@@ -145,24 +145,33 @@ export const useConfirmHandler = ({
           return;
         }
         
-        // 🔧 STEP 2: End call AFTER showing loading popup with enhanced error handling
-        console.log('🔄 [useConfirmHandler] Step 2: Ending call...');
+        // 🔧 STEP 2: End call IMMEDIATELY to prevent continued conversation
+        console.log('🔄 [useConfirmHandler] Step 2: Ending call immediately...');
         try {
-          // ✅ IMPROVED: Use setTimeout to prevent immediate state conflicts
-          setTimeout(() => {
+          if (isMountedRef.current) {
+            console.log('📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...');
+            endCall();
+            console.log('✅ [useConfirmHandler] Step 2a: Call ended successfully');
+            
+            // ✅ ADDITIONAL: Force Vapi stop as backup to ensure no continued conversation
             try {
-              if (isMountedRef.current) {
-                endCall();
-                console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+              const { getVapiInstance } = await import('@/lib/vapiClient');
+              const vapi = getVapiInstance();
+              if (vapi) {
+                console.log('🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...');
+                vapi.stop();
+                console.log('✅ [useConfirmHandler] Step 2b: Vapi instance force stopped');
+              } else {
+                console.log('⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop');
               }
-            } catch (endCallError) {
-              console.error('⚠️ [useConfirmHandler] endCall() failed:', endCallError);
-              // Don't rethrow - continue with completion message
+            } catch (vapiError) {
+              console.warn('⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:', vapiError);
+              // Continue - not critical for main flow
             }
-          }, 100);
+          }
         } catch (endCallError) {
-          console.error('⚠️ [useConfirmHandler] endCall() setup failed but continuing:', endCallError);
-          // Continue with completion message anyway
+          console.error('⚠️ [useConfirmHandler] endCall() failed:', endCallError);
+          // Don't rethrow - continue with completion message
         }
         
         // 🔧 STEP 3: Show completion message immediately (don't wait for polling)
