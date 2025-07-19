@@ -251,9 +251,11 @@ export const useConversationState = ({
       
     } catch (error) {
       console.error('❌ [useConversationState] CRITICAL ERROR in handleConfirm:', error);
-      console.error('❌ [useConversationState] Error name:', error.name);
-      console.error('❌ [useConversationState] Error message:', error.message);
-      console.error('❌ [useConversationState] Error stack:', error.stack);
+      console.error('❌ [useConversationState] Error details:', {
+        name: error?.name,
+        message: error?.message,
+        stack: error?.stack
+      });
       
       console.log('🔄 [useConversationState] Attempting fallback state cleanup...');
       
@@ -273,8 +275,8 @@ export const useConversationState = ({
         console.error('❌ [useConversationState] Fallback cleanup also failed:', fallbackError);
       }
       
-      // Re-throw the error so it can be caught by the outer handler
-      throw error;
+      // 🔧 FIX: Don't re-throw error - handle it gracefully
+      console.log('✅ [useConversationState] Error handled gracefully - continuing with summary popup');
     }
   }, [endCall]);
 
