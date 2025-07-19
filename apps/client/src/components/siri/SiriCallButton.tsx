@@ -638,7 +638,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             >
               {simplifiedMobileTouch.isEnabled ? '🚀 SIMPLIFIED TOUCH' : '🔧 COMPLEX TOUCH'}
               <button
-                onClick={simplifiedMobileTouch.testCallStart}
+                onClick={async () => {
+                  console.log('🧪 [DEBUG] Manual TEST button clicked');
+                  console.log('🧪 [DEBUG] onCallStart available:', !!onCallStart);
+                  console.log('🧪 [DEBUG] isListening:', isListening);
+                  if (onCallStart) {
+                    try {
+                      console.log('🧪 [DEBUG] Calling onCallStart...');
+                      await onCallStart();
+                      console.log('✅ [DEBUG] onCallStart completed');
+                    } catch (error) {
+                      console.error('❌ [DEBUG] onCallStart failed:', error);
+                    }
+                  }
+                }}
                 style={{
                   marginLeft: '8px',
                   background: 'rgba(255,255,255,0.2)',
@@ -654,6 +667,48 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
               </button>
             </div>
           )}
+
+          {/* 🚨 IMMEDIATE TOUCH DEBUG - Add direct touch logging to container */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                setTimeout(() => {
+                  const container = document.getElementById('${containerId}');
+                  if (container) {
+                    console.log('🔍 [IMMEDIATE DEBUG] Container found:', container);
+                    
+                    // Add direct touch event logging
+                    container.addEventListener('touchstart', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH START on container!', {
+                        target: e.target,
+                        touches: e.touches.length,
+                        position: e.touches[0] ? [e.touches[0].clientX, e.touches[0].clientY] : null
+                      });
+                    });
+                    
+                    container.addEventListener('touchend', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH END on container!', {
+                        target: e.target,
+                        changedTouches: e.changedTouches.length
+                      });
+                    });
+                    
+                    container.addEventListener('click', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] CLICK on container!', {
+                        target: e.target,
+                        clientX: e.clientX,
+                        clientY: e.clientY
+                      });
+                    });
+                    
+                    console.log('✅ [IMMEDIATE DEBUG] Touch event listeners added to container');
+                  } else {
+                    console.error('❌ [IMMEDIATE DEBUG] Container not found:', '${containerId}');
+                  }
+                }, 500);
+              `
+            }}
+          />
         </>
       )}
     </div>

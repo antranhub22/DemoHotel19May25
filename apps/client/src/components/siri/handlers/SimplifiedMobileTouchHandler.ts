@@ -27,11 +27,23 @@ export class SimplifiedMobileTouchHandler {
   }
 
   public initialize(): boolean {
+    console.log('🔧 [SimplifiedMobileTouchHandler] INITIALIZE START', {
+      containerId: this.config.containerId,
+      enabled: this.config.enabled
+    });
+
     this.cleanup(); // Ensure clean state
 
     this.element = document.getElementById(this.config.containerId);
+    console.log('🔧 [SimplifiedMobileTouchHandler] Element lookup result:', {
+      containerId: this.config.containerId,
+      found: !!this.element,
+      element: this.element
+    });
+
     if (!this.element) {
       this.debugError('Container element not found:', this.config.containerId);
+      console.error('🔧 [SimplifiedMobileTouchHandler] ❌ INITIALIZATION FAILED - Element not found');
       return false;
     }
 
@@ -46,6 +58,16 @@ export class SimplifiedMobileTouchHandler {
     
     this.element.addEventListener('touchcancel', this.handleTouchCancel, { 
       passive: true 
+    });
+
+    console.log('🔧 [SimplifiedMobileTouchHandler] ✅ INITIALIZATION SUCCESS', {
+      element: this.element,
+      rect: this.element.getBoundingClientRect(),
+      style: {
+        pointerEvents: getComputedStyle(this.element).pointerEvents,
+        zIndex: getComputedStyle(this.element).zIndex,
+        position: getComputedStyle(this.element).position
+      }
     });
 
     this.debug('Touch handlers initialized successfully', this.element);
@@ -73,7 +95,17 @@ export class SimplifiedMobileTouchHandler {
   }
 
   private handleTouchStart = (e: TouchEvent): void => {
+    console.log('🔥 [SimplifiedMobileTouchHandler] TOUCH START!', {
+      enabled: this.config.enabled,
+      isProcessing: this.isProcessing,
+      touches: e.touches.length
+    });
+
     if (!this.config.enabled || this.isProcessing) {
+      console.log('🔥 [SimplifiedMobileTouchHandler] Touch start IGNORED', {
+        enabled: this.config.enabled,
+        isProcessing: this.isProcessing
+      });
       this.debug('Touch start ignored - disabled or processing');
       return;
     }
@@ -89,6 +121,12 @@ export class SimplifiedMobileTouchHandler {
         y: touch.clientY - rect.top
       };
 
+      console.log('🔥 [SimplifiedMobileTouchHandler] Touch start PROCESSED', {
+        position: this.touchStartPosition,
+        touchCount: e.touches.length,
+        timestamp: this.touchStartTime
+      });
+
       this.debug('Touch start detected', {
         position: this.touchStartPosition,
         touchCount: e.touches.length,
@@ -97,19 +135,36 @@ export class SimplifiedMobileTouchHandler {
 
       // Call interaction start callback
       if (this.callbacks.onInteractionStart && this.touchStartPosition) {
+        console.log('🔥 [SimplifiedMobileTouchHandler] Calling onInteractionStart');
         this.callbacks.onInteractionStart(this.touchStartPosition);
       }
     }
   };
 
   private handleTouchEnd = async (e: TouchEvent): Promise<void> => {
+    console.log('🔥 [SimplifiedMobileTouchHandler] TOUCH END!', {
+      enabled: this.config.enabled,
+      isProcessing: this.isProcessing,
+      changedTouches: e.changedTouches.length
+    });
+
     if (!this.config.enabled) {
+      console.log('🔥 [SimplifiedMobileTouchHandler] Touch end IGNORED - disabled');
       this.debug('Touch end ignored - disabled');
       return;
     }
 
     const touchDuration = Date.now() - this.touchStartTime;
     
+    console.log('🔥 [SimplifiedMobileTouchHandler] Touch end PROCESSING', {
+      duration: touchDuration,
+      touchStartPosition: this.touchStartPosition,
+      isListening: this.config.isListening,
+      isProcessing: this.isProcessing,
+      onCallStartAvailable: !!this.callbacks.onCallStart,
+      onCallEndAvailable: !!this.callbacks.onCallEnd
+    });
+
     this.debug('Touch end detected', {
       duration: touchDuration,
       touchStartPosition: this.touchStartPosition,
@@ -120,17 +175,20 @@ export class SimplifiedMobileTouchHandler {
 
     // Call interaction end callback
     if (this.callbacks.onInteractionEnd) {
+      console.log('🔥 [SimplifiedMobileTouchHandler] Calling onInteractionEnd');
       this.callbacks.onInteractionEnd();
     }
 
     // Only process if it's a valid tap (not too quick, not too long)
     if (touchDuration < 50 || touchDuration > 2000) {
+      console.log('🔥 [SimplifiedMobileTouchHandler] Touch duration INVALID', { duration: touchDuration });
       this.debug('Touch duration invalid, ignoring', { duration: touchDuration });
       return;
     }
 
     // Prevent double processing
     if (this.isProcessing) {
+      console.log('🔥 [SimplifiedMobileTouchHandler] Already processing, IGNORING');
       this.debug('Already processing, ignoring touch end');
       return;
     }
@@ -142,28 +200,36 @@ export class SimplifiedMobileTouchHandler {
       if (!this.config.isListening) {
         // Start call
         if (this.callbacks.onCallStart) {
+          console.log('🟢 [SimplifiedMobileTouchHandler] CALLING onCallStart()');
           this.debug('🟢 CALLING onCallStart()');
           await this.callbacks.onCallStart();
+          console.log('✅ [SimplifiedMobileTouchHandler] onCallStart() completed successfully');
           this.debug('✅ onCallStart() completed successfully');
         } else {
+          console.log('⚠️ [SimplifiedMobileTouchHandler] onCallStart callback NOT AVAILABLE');
           this.debugWarn('onCallStart callback not available');
         }
       } else {
         // End call
         if (this.callbacks.onCallEnd) {
+          console.log('🔴 [SimplifiedMobileTouchHandler] CALLING onCallEnd()');
           this.debug('🔴 CALLING onCallEnd()');
           this.callbacks.onCallEnd();
+          console.log('✅ [SimplifiedMobileTouchHandler] onCallEnd() completed successfully');
           this.debug('✅ onCallEnd() completed successfully');
         } else {
+          console.log('⚠️ [SimplifiedMobileTouchHandler] onCallEnd callback NOT AVAILABLE');
           this.debugWarn('onCallEnd callback not available');
         }
       }
     } catch (error) {
+      console.error('❌ [SimplifiedMobileTouchHandler] Error in touch end handler:', error);
       this.debugError('Error in touch end handler:', error);
     } finally {
       // Reset processing flag after a short delay
       setTimeout(() => {
         this.isProcessing = false;
+        console.log('🔥 [SimplifiedMobileTouchHandler] Processing flag reset');
         this.debug('Processing flag reset');
       }, 100);
     }
