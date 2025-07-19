@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { WebSocketServer, WebSocket } from 'ws';
-import { insertTranscriptSchema, insertOrderSchema, insertCallSummarySchema } from "@shared/schema";
+import { insertTranscriptSchema, insertCallSummarySchema } from "@shared/schema";
 import { dateToString, getCurrentTimestamp } from '@shared/utils';
 import { z } from "zod";
 import { generateCallSummary, generateBasicSummary, extractServiceRequests, translateToVietnamese } from "./openai";
@@ -28,7 +28,7 @@ import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import unifiedAuthRoutes from './routes/unifiedAuth';
-import ordersRoutes from './routes/orders';
+
 import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
 import { UnifiedAuthService } from './services/unifiedAuthService.js';
@@ -547,102 +547,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create new order
-  app.post('/api/orders', async (req, res) => {
-    try {
-      const orderData = insertOrderSchema.parse({
-        ...req.body,
-        roomNumber: req.body.room_number || 'unknown',
-      });
-      const order = await storage.createOrder(orderData);
-      // Đồng bộ sang bảng request cho Staff UI
-      try {
-        await db.insert(requestTable).values({
-          id: `REQ-${Date.now()}-${Math.random()}`,
-          type: (orderData as any).orderType || 'service_request',
-          roomNumber: (order as any).room_number || (orderData as any).room_number || 'unknown',
-          orderId: (order as any).id?.toString() || `ORD-${Date.now()}`, // Use order ID instead of non-existent callId
-          guestName: 'Guest',
-          requestContent: Array.isArray((orderData as any).items) && (orderData as any).items.length > 0
-            ? (orderData as any).items.map((i: any) => `${i.name || 'Item'} x${i.quantity || 1}`).join(', ')
-            : (orderData as any).orderType || (order as any).requestContent || 'Service Request',
-          status: 'Đã ghi nhận',
-          createdAt: getCurrentTimestamp(),
-          updated_at: getCurrentTimestamp()
-        });
-      } catch (syncErr) {
-        console.error('Failed to sync order to request table:', syncErr);
-      }
-      res.status(201).json(order);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ error: 'Invalid order data', details: error.errors });
-      } else {
-        handleApiError(res, error, 'Failed to create order');
-      }
-    }
-  });
+  // REMOVED: Legacy orders endpoint - use /api/request instead
   
   // Get order by ID
-  app.get('/api/orders/:id', async (req, res) => {
-    try {
-      const id = req.params.id;
-      const order = await storage.getOrderById(id);
-      
-      if (!order) {
-        return res.status(404).json({ error: 'Order not found' });
-      }
-      
-      res.json(order);
-    } catch (error) {
-      handleApiError(res, error, 'Failed to retrieve order');
-    }
-  });
   
   // Get orders by room number
-  app.get('/api/orders/room/:roomNumber', async (req, res) => {
-    try {
-      const roomNumber = req.params.roomNumber;
-      const orders = await storage.getOrdersByRoomNumber(roomNumber);
-      res.json(orders);
-    } catch (error) {
-      handleApiError(res, error, 'Failed to retrieve orders');
-    }
-  });
   
   // Update order status
-  app.patch('/api/orders/:id/status', verifyJWT, async (req: Request, res: Response) => {
-    // Get order ID as string
-    const id = req.params.id;
-    const { status } = req.body;
-    
-    if (!status || typeof status !== 'string') {
-      return res.status(400).json({ error: 'Status is required' });
-    }
-    
-    const updatedOrder = await storage.updateOrderStatus(id, status);
-    
-    if (!updatedOrder) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-    
-    // Emit WebSocket notification cho tất cả client
-    if (globalThis.wss) {
-      if (updatedOrder.order_id) { // Use orderId instead of non-existent specialInstructions
-        globalThis.wss.clients.forEach((client) => {
-          if (client.readyState === 1) {
-            client.send(JSON.stringify({
-              type: 'order_status_update',
-              reference: updatedOrder.order_id, // Use orderId instead of specialInstructions
-              status: updatedOrder.status
-            }));
-          }
-        });
-      }
-    }
-    
-    res.json(updatedOrder);
-  });
   
   // Staff: get all orders, optionally filter by status, room, time
   app.get('/api/staff/orders', verifyJWT, async (req: Request, res: Response) => {
@@ -659,20 +570,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Endpoint to update status via POST
-  app.post('/api/orders/:id/update-status', verifyJWT, async (req: Request, res: Response) => {
-    // Get order ID as string
-    const id = req.params.id;
-    const { status } = req.body;
-    try {
-      const updatedOrder = await storage.updateOrderStatus(id, status);
-      // Emit WebSocket notification
-      const io = req.app.get('io');
-      io.to(id).emit('order_status_update', { orderId: id, status });
-      res.json(updatedOrder);
-    } catch (err) {
-      handleApiError(res, err, 'Failed to update order status');
-    }
-  });
   
   // Handle call end event from Vapi to update call duration
   app.post('/api/call-end', async (req, res) => {
@@ -1772,24 +1669,8 @@ Mi Nhon Hotel Mui Ne`
   });
 
   // Get all orders (public, no auth)
-  app.get('/api/orders', async (req, res) => {
-    try {
-      const orders = await storage.getAllOrders({});
-      res.json(orders);
-    } catch (error) {
-      handleApiError(res, error, 'Failed to retrieve all orders');
-    }
-  });
 
   // Xóa tất cả orders (public, không cần xác thực)
-  app.delete('/api/orders/all', async (req, res) => {
-    try {
-      const deleted = await storage.deleteAllOrders();
-      res.json({ success: true, deletedCount: deleted });
-    } catch (error) {
-      handleApiError(res, error, 'Error deleting all orders');
-    }
-  });
 
   // Analytics routes
   app.get('/api/analytics/overview', verifyJWT, async (req, res) => {
@@ -1966,8 +1847,7 @@ Mi Nhon Hotel Mui Ne`
   // Orders & Request API Routes
   // ============================================
   
-  // Mount orders routes (legacy support)
-  app.use('/api/orders', ordersRoutes);
+
   
   // Mount request routes (new unified endpoint)
   app.use('/api/request', requestRoutes);

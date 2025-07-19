@@ -347,7 +347,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       createdAt: now.toISOString()
     };
     try {
-      const res = await fetch(`/api/orders`, {
+              const res = await fetch(`/api/request`, {
               method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrder)

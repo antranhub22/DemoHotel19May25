@@ -56,7 +56,7 @@ apps/client/src/hooks/
 **Current Send to FrontDesk Flow:**
 1. Extract order data from callSummary/serviceRequests
 2. Generate order with unique reference (ORD-XXXXX)
-3. Submit to /api/orders endpoint
+3. Submit to /api/request endpoint
 4. Update order state and show success/error
 
 ### 🎯 Integration Changes → `useInterface1.ts`

@@ -877,7 +877,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     const fetchOrders = async () => {
       try {
         // Use relative URL to call API from same domain
-        const res = await fetch(`/api/orders`);
+        const res = await fetch(`/api/request`);
         if (!res.ok) return;
         const data = await res.json();
         console.log('[AssistantContext] Fetched orders from API:', data);

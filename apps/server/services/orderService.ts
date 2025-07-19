@@ -1,5 +1,5 @@
 import { storage } from '@server/storage';
-import { insertOrderSchema } from '@shared/schema';
+import { insertRequestSchema } from '@shared/schema';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ export class OrderService {
    */
   static async createOrder(orderData: any): Promise<any> {
     try {
-      const validatedData = insertOrderSchema.parse({
+      const validatedData = insertRequestSchema.parse({
         ...orderData,
         roomNumber: orderData.room_number || 'unknown',
       });

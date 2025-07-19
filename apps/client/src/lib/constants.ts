@@ -19,9 +19,9 @@ export const API_ENDPOINTS = {
   CALL_END: '/api/call-end',
   
   // Orders Management
-  ORDERS: '/api/orders',
-  ORDER_BY_ID: '/api/orders/:orderId',
-  UPDATE_ORDER_STATUS: '/api/orders/:orderId/status',
+  REQUESTS: '/api/request',
+  REQUEST_BY_ID: '/api/request/:requestId',
+  UPDATE_REQUEST_STATUS: '/api/request/:requestId/status',
   
   // Messages
   MESSAGES: '/api/messages',
