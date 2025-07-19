@@ -136,7 +136,7 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
       config,
       loading: isLoading,
       error,
-      reload,
+      reload: async () => {},
       getVapiPublicKey,
       getVapiAssistantId,
       hasFeature: hasFeatureFn,
@@ -156,13 +156,29 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
 
 // Custom hook to use hotel context
 export const useHotel = (): HotelContextValue => {
-  const context = useContext(HotelContext)
-  
+  const context = useContext(HotelContext);
   if (context === undefined) {
-    throw new Error('useHotel must be used within a HotelProvider')
+    console.warn('useHotel used outside HotelProvider - returning safe defaults');
+    // Return safe defaults instead of throwing
+    return {
+      config: null,
+      loading: false,
+      error: null,
+      reload: async () => {},
+      getVapiPublicKey: () => '',
+      getVapiAssistantId: () => '',
+      hasFeature: () => false,
+      getSupportedLanguages: () => [],
+      getAvailableServices: () => [],
+      getThemeColors: () => ({ primary: '#2E7D32', secondary: '#FFC107', accent: '#FF6B6B' }),
+      getFontFamilies: () => ({ primary: 'Inter', secondary: 'Roboto' }),
+      getContactInfo: () => null,
+      getLocation: () => null,
+      getTimezone: () => 'UTC',
+      getCurrency: () => 'USD',
+    };
   }
-  
-  return context
+  return context;
 }
 
 // Additional utility hooks

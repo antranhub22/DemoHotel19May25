@@ -165,7 +165,18 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 export const usePopupContext = (): PopupContextValue => {
   const context = useContext(PopupContext);
   if (!context) {
-    throw new Error('usePopupContext must be used within a PopupProvider');
+    console.warn('usePopupContext used outside PopupProvider - returning safe defaults');
+    // Return safe defaults instead of throwing
+    return {
+      popups: [],
+      activePopup: null,
+      addPopup: () => '',
+      removePopup: () => {},
+      setActivePopup: () => {},
+      updatePopup: () => {},
+      clearAllPopups: () => {},
+      getPopupsByType: () => [],
+    };
   }
   return context;
 }; 

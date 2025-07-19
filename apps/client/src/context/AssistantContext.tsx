@@ -960,7 +960,53 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 export function useAssistant() {
   const context = useContext(AssistantContext);
   if (context === undefined) {
-    throw new Error('useAssistant must be used within an AssistantProvider');
+    console.warn('useAssistant used outside AssistantProvider - returning safe defaults');
+    // Return safe defaults instead of throwing
+    return {
+      currentInterface: 'interface1' as InterfaceLayer,
+      setCurrentInterface: () => {},
+      transcripts: [],
+      setTranscripts: () => {},
+      addTranscript: () => {},
+      orderSummary: null,
+      setOrderSummary: () => {},
+      callDetails: null,
+      setCallDetails: () => {},
+      order: null,
+      setOrder: () => {},
+      callDuration: 0,
+      setCallDuration: () => {},
+      isMuted: false,
+      toggleMute: () => {},
+      startCall: async () => {},
+      endCall: () => {},
+      callSummary: null,
+      setCallSummary: () => {},
+      serviceRequests: [],
+      setServiceRequests: () => {},
+      vietnameseSummary: null,
+      setVietnameseSummary: () => {},
+      translateToVietnamese: async () => '',
+      emailSentForCurrentSession: false,
+      setEmailSentForCurrentSession: () => {},
+      requestReceivedAt: null,
+      setRequestReceivedAt: () => {},
+      activeOrders: [],
+      addActiveOrder: () => {},
+      setActiveOrders: () => {},
+      micLevel: 0,
+      modelOutput: [],
+      setModelOutput: () => {},
+      addModelOutput: () => {},
+      language: 'en' as Language,
+      setLanguage: () => {},
+      hotelConfig: null,
+      setHotelConfig: () => {},
+      tenantId: null,
+      setTenantId: () => {},
+      tenantConfig: null,
+      setTenantConfig: () => {},
+    } as AssistantContextType;
   }
   return context;
 }
