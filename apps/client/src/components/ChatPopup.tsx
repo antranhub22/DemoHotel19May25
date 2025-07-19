@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
@@ -33,19 +33,40 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{[key: string]: number}>({});
   
+  // ✅ FIX: Track animation state to prevent re-animation on re-renders
+  const [hasAnimated, setHasAnimated] = useState(false);
+  
   // Conversation states
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
   const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
 
+  // ✅ FIX: Reset animation state when popup opens/closes
+  useEffect(() => {
+    if (isOpen && !hasAnimated) {
+      setHasAnimated(true);
+    } else if (!isOpen) {
+      setHasAnimated(false);
+    }
+  }, [isOpen, hasAnimated]);
+
   const cleanupAnimations = () => {
     Object.values(animationFrames.current).forEach(frameId => {
-      cancelAnimationFrame(frameId);
+      if (frameId) cancelAnimationFrame(frameId);
     });
     animationFrames.current = {};
   };
 
-  // ✅ ORIGINAL WORKING LOGIC: Process transcripts into conversation turns
   useEffect(() => {
+    return cleanupAnimations;
+  }, []);
+
+  // Process transcripts into conversation turns
+  useEffect(() => {
+    if (!transcripts || transcripts.length === 0) {
+      setConversationTurns([]);
+      return;
+    }
+
     const sortedTranscripts = [...transcripts].sort((a, b) => 
       a.timestamp.getTime() - b.timestamp.getTime()
     );
@@ -98,29 +119,27 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
       .flatMap(turn => turn.messages);
     
     assistantMessages.forEach(message => {
-      if (visibleChars[message.id] === message.content.length) return;
-      
-      let currentChar = visibleChars[message.id] || 0;
-      const content = message.content;
-      
-      const animate = () => {
-        if (currentChar < content.length) {
-          setVisibleChars(prev => ({
-            ...prev,
-            [message.id]: currentChar + 1
-          }));
-          currentChar++;
-          animationFrames.current[message.id] = requestAnimationFrame(animate);
-        } else {
-          delete animationFrames.current[message.id];
-        }
-      };
-      
-      animationFrames.current[message.id] = requestAnimationFrame(animate);
+      if (!visibleChars[message.id]) {
+        setVisibleChars(prev => ({ ...prev, [message.id]: 0 }));
+        
+        const paintText = () => {
+          setVisibleChars(prev => {
+            const currentLength = prev[message.id] || 0;
+            if (currentLength < message.content.length) {
+              const frameId = requestAnimationFrame(paintText);
+              animationFrames.current[message.id] = frameId;
+              return { ...prev, [message.id]: currentLength + 1 };
+            } else {
+              delete animationFrames.current[message.id];
+              return prev;
+            }
+          });
+        };
+        
+        setTimeout(paintText, 100);
+      }
     });
-    
-    return () => cleanupAnimations();
-  }, [conversationTurns, visibleChars]);
+  }, [conversationTurns]);
 
   // Auto scroll to bottom when new messages arrive
   useEffect(() => {
@@ -132,7 +151,9 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
   if (!isOpen) return null;
 
   const isGrid = layout === 'grid';
-  const popupStyles = isGrid ? {
+  
+  // ✅ FIX: Memoize styles to prevent recalculation
+  const popupStyles = useMemo(() => isGrid ? {
     // Desktop Grid: Normal popup styling
     width: '100%',
     maxWidth: '100%',
@@ -161,12 +182,12 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     marginBottom: 0,
-  };
+  }, [isGrid]);
 
   // Popup content component
   const PopupContent = () => (
     <div 
-      className={`relative z-30 overflow-hidden shadow-2xl chat-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
+      className={`relative z-30 overflow-hidden shadow-2xl chat-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${!isGrid && hasAnimated ? 'mx-auto animate-slide-up' : 'mx-auto'}`}
       style={popupStyles}
     >
       {/* Header */}
@@ -243,9 +264,19 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
           right: 0,
           zIndex: 40, // Lower than SiriButton canvas
           pointerEvents: 'none', // Allow click-through container
+          // ✅ FIX: Prevent mobile viewport issues
+          transform: 'translateZ(0)', // Force layer creation
+          WebkitTransform: 'translateZ(0)',
         }}
       >
-        <div style={{ pointerEvents: 'auto' }}> {/* Only popup interactive */}
+        <div 
+          style={{ 
+            pointerEvents: 'auto',
+            // ✅ FIX: Ensure content doesn't shift
+            position: 'relative',
+            transform: 'translateZ(0)',
+          }}
+        > 
           <PopupContent />
         </div>
       </div>
@@ -264,9 +295,10 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
         }
         
         .animate-slide-up {
-          animation: slideUp 0.3s ease-out;
+          animation: slideUp 0.3s ease-out forwards;
         }
 
+        /* ✅ FIX: Correct CSS selectors for space-separated classes */
         @media (max-width: 640px) {
           .chat-popup.overlay-layout {
             width: 100vw !important;
@@ -278,7 +310,42 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
             border-top-right-radius: 16px !important;
             border-bottom-left-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
+            /* ✅ FIX: Prevent mobile jerky behavior */
+            position: relative !important;
+            transform: translateZ(0) !important;
+            -webkit-transform: translateZ(0) !important;
           }
+        }
+
+        /* ✅ FIX: Add mobile optimization for smooth rendering */
+        .chat-popup {
+          transform: translateZ(0); /* Force hardware acceleration */
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          -webkit-perspective: 1000;
+          perspective: 1000;
+          /* ✅ FIX: Prevent sub-pixel rendering issues */
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        .chat-popup.overlay-layout {
+          will-change: transform; /* Optimize for animations */
+          /* ✅ FIX: Stabilize mobile rendering */
+          contain: layout style paint;
+        }
+
+        /* ✅ FIX: Prevent layout shift during scroll */
+        .chat-popup .overflow-y-auto {
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+          /* ✅ FIX: Prevent scroll bounce on iOS */
+          overscroll-behavior: contain;
+        }
+
+        /* ✅ FIX: Prevent mobile tap delays */
+        .chat-popup * {
+          touch-action: manipulation;
         }
       `}</style>
     </>

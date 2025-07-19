@@ -84,7 +84,7 @@ export const useConversationState = ({
     } else {
       console.log('✅ [useConversationState] showConversation unchanged - no re-render');
     }
-  }, [transcripts.length, manualCallStarted, showConversation]); // ✅ OPTIMIZED: Removed callDuration
+  }, [transcripts.length, manualCallStarted, callDuration]); // ✅ FIXED: Removed showConversation to prevent dependency loop
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
