@@ -861,14 +861,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         // ignore
       }
     };
-    if (currentInterface === 'interface1' || currentInterface === 'interface2') {
-      fetchOrders();
-      polling = setInterval(fetchOrders, 5000);
-    }
+    // ✅ SIMPLIFIED: Always poll for orders (focus Interface1 only)
+    fetchOrders();
+    polling = setInterval(fetchOrders, 5000);
+    
     return () => {
       if (polling) clearInterval(polling);
     };
-  }, [currentInterface]);
+  }, []); // ✅ REMOVED: currentInterface dependency
 
   const value: AssistantContextType = {
     transcripts,

@@ -24,7 +24,7 @@ export const useConversationState = ({
     startCall, 
     endCall, 
     callDuration,
-    setCurrentInterface,
+    // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
     transcripts,
     setLanguage
   } = useAssistant();

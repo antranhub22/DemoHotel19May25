@@ -397,7 +397,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
             <div className="md:w-3/4 w-full space-y-3 sm:space-y-4">
               {/* Mobile: Cancel và Send to Reception lên trên cùng */}
               <div className="flex sm:hidden flex-row w-full gap-2 mb-2">
-                <button className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => // setCurrentInterface('interface1')}>
+                <button className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => {
+                  // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                }}>
                   <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
                 </button>
                 <Button
@@ -418,7 +420,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                     <label className="text-xs text-gray-600 font-medium">{t('room_number', language)}</label>
                     <input type="text" placeholder={t('enter_room_number', language)} className="w-16 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
                   </div>
-                  <button className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => // setCurrentInterface('interface3vi')}>
+                  <button className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => {
+                    // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                  }}>
                     <span className="material-icons text-base">language</span>
                   </button>
                 </div>
@@ -474,7 +478,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                   <label className="text-xs sm:text-base text-gray-600 font-medium">{t('room_number', language)}</label>
                   <input type="text" placeholder={t('enter_room_number', language)} className="w-16 sm:w-32 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs sm:text-base" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
                 </div>
-                <button className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => // setCurrentInterface('interface3vi')}>
+                <button className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => {
+                  // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                }}>
                   <span className="material-icons text-base">language</span>
                 </button>
               </div>
@@ -492,7 +498,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                   <span className="material-icons">send</span>
                   <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
                 </Button>
-                <button className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => // setCurrentInterface('interface1')}>
+                <button className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => {
+                  // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                }}>
                   <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
                 </button>
               </div>

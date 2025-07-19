@@ -5,7 +5,7 @@ import { ActiveOrder, AssistantContextType } from '@/types';
 export function useWebSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
-  const assistant = useAssistant() as AssistantContextType;
+  const assistant = useAssistant(); // ✅ REMOVED: Type casting (types now match after interface removal)
   const retryRef = useRef(0);
 
   // Initialize WebSocket connection

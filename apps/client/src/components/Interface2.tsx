@@ -87,7 +87,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     // Call the context's endCall and switch to interface1
     contextEndCall();
     // setCurrentInterface('interface1');
-  }, [callDuration, localDuration, contextEndCall, setCurrentInterface]);
+  }, [callDuration, localDuration, contextEndCall]); // ✅ REMOVED: setCurrentInterface dependency
 
   // Handler for Next button - End call and proceed to interface3
   const handleNext = useCallback(() => {
@@ -108,7 +108,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     } else {
       // setCurrentInterface('interface3');
     }
-  }, [callDuration, localDuration, contextEndCall, setCurrentInterface, transcripts, language]);
+  }, [callDuration, localDuration, contextEndCall, transcripts, language]); // ✅ REMOVED: setCurrentInterface dependency
 
   // Format duration for display
   const formatDuration = useCallback((seconds: number) => {

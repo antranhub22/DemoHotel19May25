@@ -9,7 +9,7 @@ interface Interface4Props {
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   // --- ALL HOOKS MUST BE DECLARED FIRST ---
-  const { order, setCurrentInterface, language, setOrder } = useAssistant();
+  const { order, language, setOrder } = useAssistant(); // ✅ REMOVED: setCurrentInterface (focus Interface1 only)
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
@@ -48,7 +48,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
     } catch (error) {
       console.error('❌ Error in handleReturnHome:', error);
     }
-  }, [isActive, order, setOrder, setCurrentInterface]);
+  }, [isActive, order, setOrder]); // ✅ REMOVED: setCurrentInterface dependency
   
   // Debug logging
   console.log('🔍 Interface4 render:', { 
