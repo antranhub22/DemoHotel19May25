@@ -4,7 +4,6 @@ import { Transcript, OrderSummary, CallDetails, Order, InterfaceLayer, CallSumma
 import ReactDOM from 'react-dom';
 import { HotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 import { resetVapi } from '@/lib/vapiClient';
-import { usePopup } from '@/components/popup-system';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -54,6 +53,8 @@ export interface AssistantContextType {
   setTenantId: (tenantId: string | null) => void;
   tenantConfig: any | null;
   setTenantConfig: (config: any | null) => void;
+  // Call end listeners
+  addCallEndListener: (listener: () => void) => (() => void);
 }
 
 const initialOrderSummary: OrderSummary = {
@@ -107,22 +108,16 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   // ✅ NEW: Prevent Vapi reinitialization during endCall
   const [isEndingCall, setIsEndingCall] = useState(false);
   
-  // ✅ NEW: Popup hook for auto-showing summary on call end
-  const { showSummary } = usePopup();
+  // ✅ NEW: Call end event handler for external listeners
+  const [callEndListeners, setCallEndListeners] = useState<(() => void)[]>([]);
   
-  // ✅ DEBUG: Manual test function for call-end (development only)
-  if (typeof window !== 'undefined' && import.meta.env.DEV) {
-    (window as any).testCallEnd = () => {
-      console.log('🧪 [DEBUG] Manual call-end test triggered');
-      const vapi = getVapiInstance();
-      if (vapi && typeof vapi.emit === 'function') {
-        vapi.emit('call-end');
-        console.log('✅ [DEBUG] call-end event emitted manually');
-      } else {
-        console.warn('⚠️ [DEBUG] Cannot emit call-end - no vapi instance or emit method');
-      }
+  // ✅ PUBLIC: Method to register call end listeners
+  const addCallEndListener = useCallback((listener: () => void) => {
+    setCallEndListeners(prev => [...prev, listener]);
+    return () => {
+      setCallEndListeners(prev => prev.filter(l => l !== listener));
     };
-  }
+  }, []);
   
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -489,7 +484,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           }
         });
 
-        // ✅ NEW: Auto-show Summary Popup when call ends
+        // ✅ NEW: Trigger call end listeners when call ends
         vapi.on('call-end', () => {
           console.log('📞 [AssistantContext] Vapi call-end event received');
           console.log('📊 [AssistantContext] Call-end context:', {
@@ -503,23 +498,22 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           try {
             // Brief delay to allow final state updates
             setTimeout(() => {
-              console.log('🔮 [AssistantContext] Auto-showing Summary Popup after call end...');
+              console.log('🔔 [AssistantContext] Triggering call end listeners...');
               
-              // Show summary popup with default content (SummaryPopupContent)
-              showSummary(undefined, {
-                title: 'Call Summary',
-                priority: 'high'
+              // Trigger all registered call end listeners
+              callEndListeners.forEach(listener => {
+                try {
+                  listener();
+                } catch (error) {
+                  console.error('❌ [AssistantContext] Error in call end listener:', error);
+                }
               });
               
-              console.log('✅ [AssistantContext] Summary Popup auto-shown successfully');
+              console.log('✅ [AssistantContext] Call end listeners triggered successfully');
             }, 1000); // 1 second delay to allow state updates
             
           } catch (error) {
-            console.error('❌ [AssistantContext] Error auto-showing summary popup:', error);
-            // Fallback: Simple alert
-            setTimeout(() => {
-              alert('Call completed! Please check your conversation summary.');
-            }, 1000);
+            console.error('❌ [AssistantContext] Error triggering call end listeners:', error);
           }
         });
       } catch (error) {
@@ -1002,6 +996,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     setTenantId,
     tenantConfig,
     setTenantConfig,
+    // Call end listeners
+    addCallEndListener,
   };
 
   return (
@@ -1058,6 +1054,7 @@ export function useAssistant() {
       setTenantId: () => {},
       tenantConfig: null,
       setTenantConfig: () => {},
+      addCallEndListener: () => () => {},
     } as AssistantContextType;
   }
   return context;

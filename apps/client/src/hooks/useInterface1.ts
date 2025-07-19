@@ -63,7 +63,7 @@ interface UseInterface1Return {
  */
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall, addCallEndListener } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks - keep all for demo functions, just disable auto-conversation
@@ -105,6 +105,39 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     setShowingSummary(!!summaryPopup);
   }, [popups]);
+
+  // ✅ AUTO-SUMMARY: Register call end listener for auto-showing summary
+  useEffect(() => {
+    const autoShowSummary = () => {
+      console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
+      
+      try {
+        // Show summary popup with default content
+        showSummary(undefined, {
+          title: 'Call Summary',
+          priority: 'high'
+        });
+        
+        console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
+      } catch (error) {
+        console.error('❌ [useInterface1] Error auto-showing summary popup:', error);
+        // Fallback: Simple alert
+        setTimeout(() => {
+          alert('Call completed! Please check your conversation summary.');
+        }, 500);
+      }
+    };
+
+    // Register call end listener
+    const unregister = addCallEndListener(autoShowSummary);
+    console.log('📞 [useInterface1] Auto-summary listener registered');
+    
+    // Cleanup on unmount
+    return () => {
+      unregister();
+      console.log('🧹 [useInterface1] Auto-summary listener unregistered');
+    };
+  }, [addCallEndListener, showSummary]);
   
   // ✅ DISABLED: Auto-popup effects - using unified ChatPopup instead
   // All conversation popup management moved to ChatPopup component with layout prop
