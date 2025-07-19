@@ -52,13 +52,49 @@ export class DatabaseStorage implements IStorage {
     // Fix field mapping: Support both API format (callId) and database format (call_id)
     // Ensure timestamp is within valid range for PostgreSQL
     const now = Date.now();
-    const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
+    
+    // 🔧 IMPROVED TIMESTAMP HANDLING
+    let timestamp: number;
+    try {
+      // Handle different timestamp formats
+      if (typeof insertTranscript.timestamp === 'string') {
+        // Try parsing ISO string
+        const date = new Date(insertTranscript.timestamp);
+        if (isNaN(date.getTime())) {
+          throw new Error('Invalid ISO timestamp');
+        }
+        timestamp = Math.floor(date.getTime() / 1000);
+      } else if (typeof insertTranscript.timestamp === 'number') {
+        // Handle Unix timestamp (seconds or milliseconds)
+        timestamp = insertTranscript.timestamp > 9999999999 
+          ? Math.floor(insertTranscript.timestamp / 1000) // Convert ms to seconds
+          : insertTranscript.timestamp;
+      } else {
+        // Default to current time
+        timestamp = Math.floor(now / 1000);
+      }
+      
+      // Validate timestamp range for PostgreSQL
+      const minTimestamp = -2147483648; // PostgreSQL minimum
+      const maxTimestamp = 2147483647;  // PostgreSQL maximum
+      
+      if (timestamp < minTimestamp || timestamp > maxTimestamp) {
+        console.warn(`⚠️ [WebSocket] Timestamp validation: input=${timestamp}, valid=${maxTimestamp}, seconds=${Math.floor(now/1000)}`);
+        timestamp = Math.floor(now / 1000); // Use current time as fallback
+      }
+      
+      console.log('✅ [WebSocket] Timestamp validation: input=' + insertTranscript.timestamp + ', valid=' + timestamp + ', seconds=' + Math.floor(now/1000));
+    } catch (error) {
+      console.error('❌ [WebSocket] Timestamp parsing error:', error);
+      // Fallback to current time
+      timestamp = Math.floor(now / 1000);
+    }
     
     const dbTranscript = {
       call_id: insertTranscript.callId || insertTranscript.call_id,
       content: insertTranscript.content,
       role: insertTranscript.role,
-      timestamp: insertTranscript.timestamp || Math.floor(validTimestamp / 1000),
+      timestamp: timestamp,
       tenant_id: insertTranscript.tenantId || insertTranscript.tenant_id || 'default'
     };
     
