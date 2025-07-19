@@ -281,19 +281,88 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
       // Use conversation state handler to end call properly
       conversationState.handleConfirm();
       
-      // 🆕 KEEP CONVERSATION POPUP OPEN for summary viewing
-      // Unlike cancel, we want to keep the popup so user can view summary
-      console.log('✅ [useInterface1Legacy] Keeping conversation popup open for summary viewing');
-      console.log('📋 [useInterface1Legacy] User can now access summary via 📋 Summary tab');
+      // 🆕 CREATE SUMMARY POPUP after call ends and summary is generated
+      console.log('✅ [useInterface1Legacy] Call ended, waiting for summary generation...');
       
-      // 🆕 NO LONGER CREATE SUMMARY POPUP MODAL
-      // Summary is now available via tab in RealtimeConversationPopup
-      console.log('✅ [useInterface1Legacy] Confirm completed - Summary available in conversation popup tab');
+      // Wait for summary to be generated, then show popup
+      setTimeout(() => {
+        if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
+          console.log('📋 [useInterface1Legacy] Showing Summary popup with content:', callSummary.content.substring(0, 50) + '...');
+          
+          // Import and show summary popup
+          import('../components/popup-system/DemoPopupContent').then((module) => {
+            const { SummaryPopupContent } = module;
+            showSummary(
+              createElement(SummaryPopupContent),
+              { 
+                title: 'Call Summary',
+                priority: 'high' as const
+              }
+            );
+          }).catch(() => {
+            // Fallback to simple summary popup
+            showSummary(
+              createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
+                createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+                createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
+                createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
+                  'Generated at ' + callSummary.timestamp.toLocaleTimeString()),
+                serviceRequests && serviceRequests.length > 0 && createElement('div', { key: 'requests' }, [
+                  createElement('h4', { key: 'req-title', style: { marginTop: '16px', marginBottom: '8px' } }, 'Service Requests:'),
+                  createElement('ul', { key: 'req-list', style: { listStyle: 'disc', marginLeft: '20px' } }, 
+                    serviceRequests.map((req, idx) => 
+                      createElement('li', { key: idx }, `${req.serviceType}: ${req.requestText}`)
+                    )
+                  )
+                ])
+              ]),
+              { 
+                title: 'Call Summary',
+                priority: 'high' as const
+              }
+            );
+          });
+        } else {
+          // Summary not ready yet, wait a bit more
+          console.log('⏳ [useInterface1Legacy] Summary not ready, waiting more...');
+          setTimeout(() => {
+            if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
+              console.log('📋 [useInterface1Legacy] Showing delayed Summary popup');
+              showSummary(
+                createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
+                  createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+                  createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
+                  createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
+                    'Generated at ' + callSummary.timestamp.toLocaleTimeString())
+                ]),
+                { 
+                  title: 'Call Summary',
+                  priority: 'high' as const
+                }
+              );
+            } else {
+              console.log('❌ [useInterface1Legacy] Summary still not available, showing fallback');
+              showSummary(
+                createElement('div', { style: { padding: '20px', textAlign: 'center' } }, [
+                  createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+                  createElement('p', { key: 'message' }, 'Summary is being generated. Please check the conversation tab for details.')
+                ]),
+                { 
+                  title: 'Call Summary',
+                  priority: 'medium' as const
+                }
+              );
+            }
+          }, 2000);
+        }
+      }, 1500); // Initial delay to allow summary generation
+      
+      console.log('✅ [useInterface1Legacy] Confirm completed - Summary popup will be shown when ready');
       
     } catch (error) {
       console.error('❌ [useInterface1Legacy] Error in handleConfirm:', error);
     }
-  }, [conversationState, transcripts.length, callSummary, serviceRequests]);
+  }, [conversationState, transcripts.length, callSummary, serviceRequests, showSummary]);
 
   // Update badge count when transcripts change
   useEffect(() => {
