@@ -1,5 +1,4 @@
 import { Language } from '@/types/interface1.types';
-import { useInterface1Refactored } from './useInterface1.refactored';
 
 // Legacy implementation (current working version)
 import { useAssistant } from '@/context/AssistantContext';
@@ -60,21 +59,8 @@ interface UseInterface1Return {
  * Switch via environment variable: VITE_USE_REFACTORED_INTERFACE1=true
  */
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
-  // 🚩 Feature Flag: Choose implementation
-  const useRefactoredVersion = 
-    import.meta.env.VITE_USE_REFACTORED_INTERFACE1 === 'true' ||
-    import.meta.env.NODE_ENV === 'development'; // Enable in development by default
-
-  console.log('🚩 [useInterface1] Feature flag - useRefactoredVersion:', useRefactoredVersion);
-
-  // 🔄 Refactored Implementation
-  if (useRefactoredVersion) {
-    console.log('✨ [useInterface1] Using REFACTORED modular hooks implementation');
-    return useInterface1Refactored({ isActive });
-  }
-
-  // 🏛️ Legacy Implementation (current working version)
-  console.log('🏛️ [useInterface1] Using LEGACY monolithic implementation');
+  // ✅ Single stable implementation
+  console.log('✅ [useInterface1] Using single stable implementation');
   return useInterface1Legacy({ isActive });
 };
 

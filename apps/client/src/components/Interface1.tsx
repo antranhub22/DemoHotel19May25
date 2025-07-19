@@ -1,4 +1,4 @@
-// Interface1 component - Multi-tenant version v2.0.0 - Enhanced Design System
+// Interface1 component - Multi-tenant version v2.0.0 - Single Implementation
 
 // Custom Hook
 import { useInterface1 } from '@/hooks/useInterface1';
