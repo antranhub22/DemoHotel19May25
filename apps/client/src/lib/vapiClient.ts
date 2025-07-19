@@ -1,28 +1,52 @@
-// ✅ REAL VAPI INTEGRATION: Fixed import syntax
-import Vapi from '@vapi-ai/web';
+// 🚀 REAL VAPI INTEGRATION: Dynamic import to fix module issues
+let VapiClass: any = null;
+
+// Dynamically load Vapi to handle module format issues
+const loadVapi = async () => {
+  if (VapiClass) return VapiClass;
+  
+  try {
+    console.log('🔄 [VAPI] Loading Vapi module...');
+    
+    // Try dynamic import first
+    const vapiModule = await import('@vapi-ai/web');
+    VapiClass = vapiModule.default || vapiModule;
+    
+    if (typeof VapiClass === 'function') {
+      console.log('✅ [VAPI] Successfully loaded via dynamic import');
+      return VapiClass;
+    }
+    
+    // If dynamic import doesn't work, try require
+    throw new Error('Dynamic import failed, trying alternative...');
+    
+  } catch (error) {
+    console.warn('⚠️ [VAPI] Dynamic import failed:', error.message);
+    
+    try {
+      // Alternative: Try to access from window if available
+      if (typeof window !== 'undefined' && (window as any).Vapi) {
+        VapiClass = (window as any).Vapi;
+        console.log('✅ [VAPI] Found Vapi on window object');
+        return VapiClass;
+      }
+      
+      throw new Error('No Vapi available');
+    } catch (fallbackError) {
+      console.error('❌ [VAPI] All import methods failed:', fallbackError);
+      throw new Error('Failed to load Vapi: ' + fallbackError.message);
+    }
+  }
+};
 
 // Initialize with environment variable or fallback
-const PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || 'demo';
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY || 'pk_c3e56893-4a8b-45bb-b3d6-b5a2a0edd8f8';
+console.log('[vapiClient] Environment public key:', publicKey);
 
 // Option to force basic summary generation (for testing fallback)
 export const FORCE_BASIC_SUMMARY = false; // Set to true to always use basic summary
 
-// Define message types based on Vapi's API
-type MessageRole = 'system' | 'user' | 'assistant' | 'tool' | 'function';
-
-interface Message {
-  role: MessageRole;
-  content: string;
-}
-
-interface AddMessage {
-  type: 'add-message';
-  message: Message;
-}
-
-let vapiInstance: Vapi | null = null;
+let vapiInstance: any = null;
 
 interface VapiConnectionStatus {
   status: 'connecting' | 'connected' | 'disconnected';
@@ -34,20 +58,22 @@ interface VapiMessage {
   [key: string]: any;
 }
 
-export const initVapi = async (publicKey: string): Promise<Vapi> => {
+export const initVapi = async (publicKey: string): Promise<any> => {
   try {
     console.log('🚀 [REAL VAPI] Initializing with key:', publicKey?.substring(0, 10) + '...');
-    console.log('🚀 [REAL VAPI] Vapi class available:', typeof Vapi);
+    
+    // Load Vapi class dynamically
+    const Vapi = await loadVapi();
+    console.log('🚀 [REAL VAPI] Vapi class loaded:', typeof Vapi);
     
     // Always create a new instance to avoid stale connections
     if (vapiInstance) {
       console.log('[vapiClient] Cleaning up existing instance');
       try {
         vapiInstance.stop();
-      } catch (e) {
-        console.log('[vapiClient] Error stopping existing instance:', e);
+      } catch (error) {
+        console.warn('[vapiClient] Error stopping previous instance:', error);
       }
-      vapiInstance = null;
     }
     
     console.log('🚀 [REAL VAPI] Creating new Vapi instance...');
@@ -71,29 +97,23 @@ export const initVapi = async (publicKey: string): Promise<Vapi> => {
       console.log('[vapiClient] Speech ended');
     });
 
-    vapiInstance.on('volume-level', (volume) => {
-      console.log(`[vapiClient] Volume level: ${volume}`);
+    vapiInstance.on('volume-level', (volume: number) => {
+      console.log('[vapiClient] Volume level:', volume);
     });
 
-    vapiInstance.on('message', (message) => {
+    vapiInstance.on('message', (message: VapiMessage) => {
       console.log('[vapiClient] Message received:', message);
     });
 
-    vapiInstance.on('error', (error) => {
-      console.error('[vapiClient] Error:', error);
+    vapiInstance.on('error', (error: any) => {
+      console.error('[vapiClient] Vapi error:', error);
     });
 
-    console.log('[vapiClient] Vapi instance created successfully');
     return vapiInstance;
   } catch (error) {
     console.error('[vapiClient] Failed to initialize Vapi:', error);
-    vapiInstance = null;
     throw error;
   }
-};
-
-export const getVapiInstance = (): Vapi | null => {
-  return vapiInstance;
 };
 
 export const isVapiInitialized = (): boolean => {
@@ -116,103 +136,49 @@ export const startCall = async (assistantId: string, assistantOverrides?: any) =
   }
 };
 
-export const stopCall = () => {
+export const endCall = async () => {
   if (!vapiInstance) {
-    throw new Error('Vapi not initialized. Call initVapi first.');
+    console.warn('[vapiClient] No Vapi instance to end call');
+    return;
   }
 
   try {
-    vapiInstance.stop();
+    console.log('[vapiClient] Ending call');
+    await vapiInstance.stop();
   } catch (error) {
-    console.error('Failed to stop call:', error);
+    console.error('[vapiClient] Failed to end call:', error);
     throw error;
   }
 };
 
+export const getVapiInstance = (): any => {
+  return vapiInstance;
+};
+
 export const setMuted = (muted: boolean) => {
   if (!vapiInstance) {
-    throw new Error('Vapi not initialized. Call initVapi first.');
+    console.warn('[vapiClient] No Vapi instance to set muted');
+    return;
   }
 
   try {
     vapiInstance.setMuted(muted);
   } catch (error) {
-    console.error('Failed to set mute state:', error);
-    throw error;
+    console.error('[vapiClient] Failed to set muted:', error);
   }
 };
 
-export const isMuted = (): boolean => {
+export const sendMessage = (message: VapiMessage) => {
   if (!vapiInstance) {
-    throw new Error('Vapi not initialized. Call initVapi first.');
+    console.warn('[vapiClient] No Vapi instance to send message');
+    return;
   }
 
   try {
-    return vapiInstance.isMuted();
+    vapiInstance.send(JSON.stringify(message));
   } catch (error) {
-    console.error('Failed to get mute state:', error);
-    throw error;
+    console.error('[vapiClient] Failed to send message:', error);
   }
-};
-
-export const sendMessage = (content: string, role: 'system' | 'user' = 'system') => {
-  if (!vapiInstance) {
-    throw new Error('Vapi not initialized. Call initVapi first.');
-  }
-
-  try {
-    vapiInstance.send({
-      type: 'add-message',
-      message: {
-        role,
-        content
-      }
-    });
-  } catch (error) {
-    console.error('Failed to send message:', error);
-    throw error;
-  }
-};
-
-export const say = (message: string, endCallAfterSpoken?: boolean) => {
-  if (!vapiInstance) {
-    throw new Error('Vapi not initialized. Call initVapi first.');
-  }
-
-  try {
-    vapiInstance.say(message, endCallAfterSpoken);
-  } catch (error) {
-    console.error('Failed to say message:', error);
-    throw error;
-  }
-};
-
-export const buttonConfig = {
-  position: "top",
-                                   offset: "40px",
-  width: "120px",
-  height: "120px",
-  idle: {
-    color: `rgb(93, 254, 202)`,
-    type: "round",
-    title: "Have a quick question?",
-    subtitle: "Talk with our AI assistant",
-    icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone.svg`,
-  },
-  loading: {
-    color: `rgb(93, 124, 202)`,
-    type: "round",
-    title: "Connecting...",
-    subtitle: "Please wait",
-    icon: `https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg`,
-  },
-  active: {
-    color: `rgb(255, 0, 0)`,
-    type: "round",
-    title: "Call is in progress...",
-    subtitle: "End the call.",
-    icon: `https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg`,
-  },
 };
 
 export const resetVapi = () => {
@@ -220,9 +186,21 @@ export const resetVapi = () => {
   if (vapiInstance) {
     try {
       vapiInstance.stop();
-    } catch (e) {
-      console.log('[vapiClient] Error stopping instance during reset:', e);
+    } catch (error) {
+      console.warn('[vapiClient] Error stopping instance during reset:', error);
     }
     vapiInstance = null;
   }
 };
+
+// Auto-initialize with default key if available
+if (publicKey && publicKey !== 'demo') {
+  console.log('[vapiClient] Auto-initializing with environment key');
+  initVapi(publicKey).catch(error => {
+    console.error('[vapiClient] Auto-initialization failed:', error);
+  });
+} else {
+  console.warn('[vapiClient] No valid public key found, manual initialization required');
+}
+
+export { publicKey };
