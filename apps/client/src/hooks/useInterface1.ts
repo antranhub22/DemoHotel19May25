@@ -194,7 +194,7 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     });
   };
 
-  // ✅ Use dedicated handlers for Cancel/Confirm buttons
+  // Get handlers from separate hook modules
   const { handleCancel } = useCancelHandler({
     conversationState,
     conversationPopupId,
@@ -230,12 +230,12 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     // Scroll behavior (spread)
     ...scrollBehavior,
     
-    // Conversation state (spread)
+    // Conversation state (spread) - BUT OVERRIDE handleConfirm
     ...conversationState,
+    handleConfirm, // 🔧 Use new handler from useConfirmHandler
     
     // Override with Interface1-specific handlers
     handleCancel,
-    handleConfirm,
     
     // Right panel state
     showRightPanel,
