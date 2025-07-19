@@ -114,7 +114,29 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
         {/* Confirm Button */}
         <button
-          onClick={onConfirm}
+          onClick={() => {
+            console.log('🔵 [SiriButtonContainer] Confirm button clicked');
+            try {
+              if (onConfirm) {
+                console.log('🔵 [SiriButtonContainer] Calling onConfirm...');
+                onConfirm();
+                console.log('✅ [SiriButtonContainer] onConfirm completed successfully');
+              } else {
+                console.warn('⚠️ [SiriButtonContainer] onConfirm is undefined');
+                alert('Confirm function is not available');
+              }
+            } catch (error) {
+              console.error('❌ [SiriButtonContainer] Error in Confirm button:', error);
+              console.error('❌ [SiriButtonContainer] Error details:', {
+                name: error?.name,
+                message: error?.message,
+                stack: error?.stack
+              });
+              
+              // Prevent error from bubbling up to ErrorBoundary
+              alert('Call completed! There was an issue with the summary. Please check with front desk.');
+            }
+          }}
           className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
         >
