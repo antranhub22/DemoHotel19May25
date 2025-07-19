@@ -224,18 +224,18 @@ export const useConversationState = ({
       // End call and prepare for summary  
       endCall();
       
-      // Update states
+      // Update states - DIFFERENT from Cancel
       setIsCallStarted(false);
-      // Keep showConversation true temporarily for summary processing
+      setShowConversation(true); // 🆕 EXPLICITLY keep conversation visible for summary
       setManualCallStarted(false); // Clear manual flag on confirmation
       
-      console.log('✅ [useConversationState] Confirm completed - ready for summary');
-      console.log('📊 [useConversationState] Final state: isCallStarted=false, preparing summary...');
+      console.log('✅ [useConversationState] Confirm completed - conversation popup kept open for summary');
+      console.log('📊 [useConversationState] Final state: isCallStarted=false, showConversation=true (for summary)');
     } catch (error) {
       console.error('❌ [useConversationState] Error in handleConfirm:', error);
-      // Fallback reset
+      // Fallback - still try to keep conversation open for summary
       setIsCallStarted(false);
-      setShowConversation(false);
+      setShowConversation(true); // Keep open even on error so user can see what happened
       setManualCallStarted(false); // Clear manual flag on fallback
     }
   }, [endCall]);

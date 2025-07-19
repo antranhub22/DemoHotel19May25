@@ -295,22 +295,19 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
       // Use conversation state handler to end call properly
       conversationState.handleConfirm();
       
-      // Clear conversation popup if active (not needed anymore with tabbed interface)
-      if (conversationPopupId) {
-        console.log('🗑️ [useInterface1Legacy] Removing conversation popup after confirm');
-        removePopup(conversationPopupId);
-        setConversationPopupId(null);
-      }
+      // 🆕 KEEP CONVERSATION POPUP OPEN for summary viewing
+      // Unlike cancel, we want to keep the popup so user can view summary
+      console.log('✅ [useInterface1Legacy] Keeping conversation popup open for summary viewing');
+      console.log('📋 [useInterface1Legacy] User can now access summary via 📋 Summary tab');
       
       // 🆕 NO LONGER CREATE SUMMARY POPUP MODAL
       // Summary is now available via tab in RealtimeConversationPopup
       console.log('✅ [useInterface1Legacy] Confirm completed - Summary available in conversation popup tab');
-      console.log('📋 [useInterface1Legacy] Summary data will be displayed in tabbed interface');
       
     } catch (error) {
       console.error('❌ [useInterface1Legacy] Error in handleConfirm:', error);
     }
-  }, [conversationState, conversationPopupId, removePopup, transcripts.length, callSummary, serviceRequests]);
+  }, [conversationState, transcripts.length, callSummary, serviceRequests]);
 
   // Update badge count when transcripts change
   useEffect(() => {
