@@ -1,40 +1,5 @@
-// EMERGENCY FIX: Temporarily disable Vapi import for mobile testing
-// import Vapi from '@vapi-ai/web';
-
-// Mock Vapi class for testing
-class MockVapi {
-  constructor(publicKey: string) {
-    console.log('🧪 [MockVapi] Created with key:', publicKey);
-  }
-  
-  start(assistantId: string) {
-    console.log('🧪 [MockVapi] Start called with assistant:', assistantId);
-    return Promise.resolve();
-  }
-  
-  stop() {
-    console.log('🧪 [MockVapi] Stop called');
-    return Promise.resolve();
-  }
-  
-  send(message: string) {
-    console.log('🧪 [MockVapi] Send called with:', message);
-  }
-  
-  setMuted(muted: boolean) {
-    console.log('🧪 [MockVapi] SetMuted called:', muted);
-  }
-  
-  on(event: string, callback: Function) {
-    console.log('🧪 [MockVapi] Event listener added for:', event);
-  }
-  
-  off(event: string, callback: Function) {
-    console.log('🧪 [MockVapi] Event listener removed for:', event);
-  }
-}
-
-const Vapi = MockVapi;
+// ✅ REAL VAPI INTEGRATION: Fixed import syntax
+import Vapi from '@vapi-ai/web';
 
 // Initialize with environment variable or fallback
 const PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || 'demo';
@@ -57,7 +22,7 @@ interface AddMessage {
   message: Message;
 }
 
-let vapiInstance: any | null = null;
+let vapiInstance: Vapi | null = null;
 
 interface VapiConnectionStatus {
   status: 'connecting' | 'connected' | 'disconnected';
@@ -69,9 +34,10 @@ interface VapiMessage {
   [key: string]: any;
 }
 
-export const initVapi = async (publicKey: string): Promise<any> => {
+export const initVapi = async (publicKey: string): Promise<Vapi> => {
   try {
-    console.log('[vapiClient] Initializing Vapi with public key:', publicKey);
+    console.log('🚀 [REAL VAPI] Initializing with key:', publicKey?.substring(0, 10) + '...');
+    console.log('🚀 [REAL VAPI] Vapi class available:', typeof Vapi);
     
     // Always create a new instance to avoid stale connections
     if (vapiInstance) {
@@ -84,8 +50,9 @@ export const initVapi = async (publicKey: string): Promise<any> => {
       vapiInstance = null;
     }
     
-    console.log('[vapiClient] Creating new Vapi instance');
+    console.log('🚀 [REAL VAPI] Creating new Vapi instance...');
     vapiInstance = new Vapi(publicKey);
+    console.log('✅ [REAL VAPI] Instance created successfully!');
 
     // Add event listeners
     vapiInstance.on('call-start', () => {
@@ -125,7 +92,7 @@ export const initVapi = async (publicKey: string): Promise<any> => {
   }
 };
 
-export const getVapiInstance = (): any | null => {
+export const getVapiInstance = (): Vapi | null => {
   return vapiInstance;
 };
 
@@ -139,10 +106,12 @@ export const startCall = async (assistantId: string, assistantOverrides?: any) =
   }
 
   try {
+    console.log('🚀 [REAL VAPI] Starting call with assistant:', assistantId);
     const call = await vapiInstance.start(assistantId, assistantOverrides);
+    console.log('✅ [REAL VAPI] Call started successfully!', call);
     return call;
   } catch (error) {
-    console.error('Failed to start call:', error);
+    console.error('❌ [REAL VAPI] Failed to start call:', error);
     throw error;
   }
 };
