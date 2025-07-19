@@ -17,7 +17,7 @@ import { ScrollToTopButton } from './interface1/ScrollToTopButton';
 
 // UI Components - Interactive
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
-import { MobileDebugComponent } from './siri/index';
+
 
 interface Interface1Props {
   isActive: boolean;
@@ -60,8 +60,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   return (
     <InterfaceContainer>
-      {/* 🔍 DEBUG: Mobile Debug Component - Show only in development */}
-      {process.env.NODE_ENV === 'development' && <MobileDebugComponent />}
+
       
       {/* Hero Section with 4-Position Layout */}
       <div ref={heroSectionRef} className="relative">
