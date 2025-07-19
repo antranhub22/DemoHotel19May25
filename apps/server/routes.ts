@@ -28,6 +28,8 @@ import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
 import unifiedAuthRoutes from './routes/unifiedAuth';
+import ordersRoutes from './routes/orders';
+import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
 import { UnifiedAuthService } from './services/unifiedAuthService.js';
 
@@ -1960,7 +1962,15 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-
+  // ============================================
+  // Orders & Request API Routes
+  // ============================================
+  
+  // Mount orders routes (legacy support)
+  app.use('/api/orders', ordersRoutes);
+  
+  // Mount request routes (new unified endpoint)
+  app.use('/api/request', requestRoutes);
 
   return httpServer;
 }

@@ -121,26 +121,34 @@ export const useSendToFrontDeskHandler = ({
         createdAt: now.toISOString()
       };
       
-      console.log('📤 [useSendToFrontDeskHandler] Submitting order to /api/orders:', newOrder);
+      console.log('📤 [useSendToFrontDeskHandler] Submitting order to /api/request:', newOrder);
       
-      // ✅ IDENTICAL API call to Interface3
-      const res = await fetch(`/api/orders`, {
+      // ✅ UPDATED: Use /api/request endpoint (unified schema)
+      const res = await fetch(`/api/request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrder)
       });
       
-      if (!res.ok) throw new Error('Failed to create order');
+      if (!res.ok) throw new Error('Failed to create request');
       
-      // ✅ IDENTICAL state update
+      const response = await res.json();
+      
+      // ✅ UPDATED: Handle response from /api/request endpoint
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to create request');
+      }
+      
+      // ✅ UPDATED: Use response data from /api/request
+      const requestData = response.data;
+      
       setOrder({
-        reference: newOrder.specialInstructions || newOrder.callId,
-        estimatedTime: newOrder.deliveryTime,
-        summary: currentOrderSummary,
-        ...newOrder
+        reference: requestData.reference || requestData.orderId,
+        estimatedTime: requestData.estimatedTime || validDeliveryTime,
+        summary: currentOrderSummary
       });
       
-      console.log('✅ [useSendToFrontDeskHandler] Order sent to Front Desk successfully');
+      console.log('✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully');
       
       if (onSuccess) {
         onSuccess();
@@ -149,8 +157,8 @@ export const useSendToFrontDeskHandler = ({
       }
       
     } catch (err) {
-      const errorMsg = 'Failed to send order to Front Desk!';
-      console.error('❌ [useSendToFrontDeskHandler] Failed to send order:', err);
+      const errorMsg = 'Failed to send request to Front Desk!';
+      console.error('❌ [useSendToFrontDeskHandler] Failed to send request:', err);
       
       if (onError) {
         onError(errorMsg);
