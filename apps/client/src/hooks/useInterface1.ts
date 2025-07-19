@@ -214,41 +214,15 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     serviceRequests
   });
 
-  // ✅ FIXED: Track summary popup state - Direct approach
+  // ✅ NEW: Track summary popup state
   const { popups } = usePopupContext();
   const [showingSummary, setShowingSummary] = useState(false);
 
-  // ✅ FIXED: Monitor both popup system AND right panel for summary display
+  // ✅ NEW: Monitor summary popups
   useEffect(() => {
     const summaryPopup = popups.find(popup => popup.type === 'summary');
-    setShowingSummary(!!summaryPopup || showRightPanel);
-    console.log('🔍 [useInterface1] Summary visibility check:', {
-      summaryPopup: !!summaryPopup,
-      showRightPanel,
-      finalShowingSummary: !!summaryPopup || showRightPanel
-    });
-  }, [popups, showRightPanel]);
-
-  // ✅ NEW: Listen for custom summary events
-  useEffect(() => {
-    const handleSummaryStarted = () => {
-      console.log('📡 [useInterface1] Summary started event received - hiding Cancel/Confirm buttons');
-      setShowingSummary(true);
-    };
-
-    const handleSummaryEnded = () => {
-      console.log('📡 [useInterface1] Summary ended event received - showing Cancel/Confirm buttons');
-      setShowingSummary(false);
-    };
-
-    window.addEventListener('summaryStarted', handleSummaryStarted);
-    window.addEventListener('summaryEnded', handleSummaryEnded);
-    
-    return () => {
-      window.removeEventListener('summaryStarted', handleSummaryStarted);
-      window.removeEventListener('summaryEnded', handleSummaryEnded);
-    };
-  }, []);
+    setShowingSummary(!!summaryPopup);
+  }, [popups]);
 
   // Update badge count when transcripts change
   useEffect(() => {

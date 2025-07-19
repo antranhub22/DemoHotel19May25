@@ -70,14 +70,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   // Use LANGUAGE_COLORS mapping based on current language
   const currentColors = LANGUAGE_COLORS[language as keyof typeof LANGUAGE_COLORS] || LANGUAGE_COLORS['en'];
   
-  // Debug: Log language, color changes, and button visibility
+  // Debug: Log language and color changes
   console.log('🎨 [SiriButtonContainer] Language:', language, 'Colors:', currentColors.name, 'Primary:', currentColors.primary);
   console.log('📏 [SiriButtonContainer] Responsive size:', responsiveSize);
-  console.log('👁️ [SiriButtonContainer] Button visibility:', { 
-    isCallStarted, 
-    showingSummary, 
-    shouldShow: isCallStarted && !showingSummary 
-  });
 
   return (
     <div 

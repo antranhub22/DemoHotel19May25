@@ -13,16 +13,6 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   onClose,
   showSummary = false
 }) => {
-  // ✅ NEW: Signal when summary popup is closed
-  const handleClose = () => {
-    if (showSummary) {
-      const event = new CustomEvent('summaryEnded');
-      window.dispatchEvent(event);
-      console.log('📡 [RightPanelPopup] Summary ended event dispatched');
-    }
-    onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -41,7 +31,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
             {showSummary ? 'Call Summary' : 'Right Panel'}
           </h3>
           <button
-            onClick={handleClose}
+            onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             aria-label="Close right panel"
           >
@@ -61,7 +51,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
             {/* ✅ NEW: Action Buttons */}
             <div className="flex gap-3 pt-3 border-t border-gray-100">
               <button
-                onClick={handleClose}
+                onClick={onClose}
                 className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
               >
                 Cancel
@@ -70,7 +60,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
                 onClick={() => {
                   // TODO: Implement send to front desk logic
                   alert('Request sent to Front Desk!');
-                  handleClose();
+                  onClose();
                 }}
                 className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
               >
