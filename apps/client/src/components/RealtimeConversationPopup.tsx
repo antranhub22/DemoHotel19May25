@@ -106,6 +106,18 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       };
     }
     
+    // Priority 3: Show processing state if call ended with transcripts
+    if (transcripts.length >= 2 && callDuration === 0) {
+      return {
+        source: 'Processing',
+        roomNumber: 'Processing...',
+        content: 'AI is analyzing your conversation to generate a summary...',
+        items: [],
+        timestamp: new Date(),
+        hasData: true // Show as "has data" to display processing state
+      };
+    }
+    
     // Fallback: No summary available
     return {
       source: 'No data',
@@ -120,14 +132,27 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
   // 🆕 NEW: Check when to show summary tab
   useEffect(() => {
     const summaryData = getSummaryData();
-    setShowSummaryTab(summaryData.hasData);
-  }, [callSummary, serviceRequests]);
+    console.log('🔍 [RealtimeConversationPopup] Summary data check:', {
+      hasCallSummary: !!callSummary,
+      hasServiceRequests: serviceRequests?.length > 0,
+      summaryDataHasData: summaryData.hasData,
+      transcriptsCount: transcripts.length
+    });
+    
+    // Show summary tab if we have actual data OR if we have enough transcripts for potential summary
+    const shouldShowTab = summaryData.hasData || 
+      (transcripts.length >= 2 && callDuration === 0); // After call ends with transcripts
+    
+    setShowSummaryTab(shouldShowTab);
+    console.log('📋 [RealtimeConversationPopup] Summary tab visibility:', shouldShowTab);
+  }, [callSummary, serviceRequests, transcripts.length, callDuration]);
 
-  // 🆕 NEW: Auto-switch to summary when call ends (optional)
+  // 🆕 NEW: Auto-switch to summary when call ends with data
   useEffect(() => {
     if (callDuration === 0 && showSummaryTab && conversationTurns.length > 0) {
       // Auto switch to summary when call ends and we have data
-      // setTimeout(() => setMode('summary'), 1000); // Commented out - let user choose
+      console.log('🔄 [RealtimeConversationPopup] Auto-switching to summary after call end');
+      setTimeout(() => setMode('summary'), 1500); // Delay to allow processing message to show
     }
   }, [callDuration, showSummaryTab, conversationTurns.length]);
 
@@ -306,10 +331,20 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           </div>
         </>
       ) : (
-        /* No Data State */
+        /* No Data State - Different for Processing vs No Data */
         <div className="text-center py-4 text-gray-500">
-          <div className="text-xs">⏳ Processing call summary...</div>
-          <div className="text-[10px] mt-1">Please wait a moment</div>
+          {data.source === 'Processing' ? (
+            <>
+              <div className="text-xs">🤖 AI Processing your conversation...</div>
+              <div className="text-[10px] mt-1">Generating summary and extracting requests</div>
+              <div className="text-[10px] mt-2 animate-pulse">●●●</div>
+            </>
+          ) : (
+            <>
+              <div className="text-xs">⏳ No summary available yet</div>
+              <div className="text-[10px] mt-1">Complete a conversation to see summary</div>
+            </>
+          )}
         </div>
       )}
     </div>
