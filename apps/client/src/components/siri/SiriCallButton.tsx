@@ -212,7 +212,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       debug('[SiriCallButton] Bypassing SiriButton creation - using mobile visual only');
       setCanvasReady(true); // Set ready immediately for mobile visual
       return () => {
-        // No cleanup needed for mobile visual only
+        // 🛡️ SAFETY: Reset protection flags for mobile
+        isHandlingClick.current = false;
+        debug('🛡️ [SiriCallButton] Mobile cleanup - isHandlingClick reset to false');
       };
     }
 
@@ -231,6 +233,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
 
     cleanupFlagRef.current = false;
+    
+    // 🚨 FIX: Reset emergency stop flag on re-initialization
+    emergencyStopRequested.current = false;
+    debug('🔄 [SiriCallButton] Emergency stop flag reset on re-initialization');
     
     const element = document.getElementById(containerId);
     if (!element) {
@@ -362,6 +368,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
       return () => {
         console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
+        
+        // 🛡️ SAFETY: Reset protection flags
+        isHandlingClick.current = false;
+        debug('🛡️ [SiriCallButton] Desktop cleanup - isHandlingClick reset to false');
+        
         element.removeEventListener('click', testClickHandler);
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
@@ -394,23 +405,66 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
   }, [colors]);
 
-  // Mobile touch handler - triggers voice calls
-  const handleDirectTouch = (e: any) => {
+  // Mobile touch handler - unified with desktop logic
+  const handleDirectTouch = async (e: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('[SiriCallButton] Touch event:', e.type, 'on', containerId);
+      console.log('📱 [SiriCallButton] Mobile touch event:', e.type, 'on', containerId);
+      console.log('📱 [SiriCallButton] Current isListening state:', isListening);
     }
     
-    // Trigger voice call on touch end or click
+    // Handle touch end or click events
     if (e.type === 'touchend' || e.type === 'click') {
-      if (onCallStart) {
-        onCallStart().then(() => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[SiriCallButton] Voice call started successfully');
-          }
-        }).catch((error) => {
-          console.error('[SiriCallButton] Voice call failed:', error);
-        });
+      debug('📱 [SiriCallButton] 🎯 MOBILE INTERACTION END STARTED');
+      debug('  📱 Event type:', e.type);
+      debug('  📱 Event target:', e.target);
+      
+      // 🛡️ UNIFIED: Add same protection as desktop
+      if (isHandlingClick.current) {
+        debug('📱 [SiriCallButton] ⚠️ Mobile touch already being handled, ignoring...');
+        return;
       }
+      
+      isHandlingClick.current = true;
+      debug('📱 [SiriCallButton] 🚀 MOBILE BUSINESS LOGIC STARTING');
+      debug('  🎧 isListening:', isListening);
+      debug('  ✅ onCallStart available:', !!onCallStart);
+      debug('  ✅ onCallEnd available:', !!onCallEnd);
+      
+      try {
+        if (!isListening && onCallStart) {
+          // 🟢 START CALL - with status management
+          setStatus('listening');
+          debug('📱 [SiriCallButton] 🟢 MOBILE - STARTING CALL');
+          try {
+            await onCallStart();
+            debug('📱 [SiriCallButton] ✅ Mobile onCallStart() completed successfully');
+          } catch (error) {
+            debugError('📱 [SiriCallButton] ❌ Mobile onCallStart() error:', error);
+            setStatus('idle');
+          }
+        } else if (isListening && onCallEnd) {
+          // 🔴 END CALL - with status management
+          setStatus('processing');
+          debug('📱 [SiriCallButton] 🔴 MOBILE - ENDING CALL');
+          onCallEnd();
+          debug('📱 [SiriCallButton] ✅ Mobile onCallEnd() completed');
+          setTimeout(() => setStatus('idle'), 500);
+        } else {
+          // 🚨 DEBUG: Log when no action is taken
+          debug('📱 [SiriCallButton] ⚠️ MOBILE NO ACTION TAKEN:');
+          debug('  📱 isListening:', isListening);
+          debug('  📱 onCallStart available:', !!onCallStart);
+          debug('  📱 onCallEnd available:', !!onCallEnd);
+        }
+      } finally {
+        // 🛡️ UNIFIED: Same protection reset as desktop
+        setTimeout(() => {
+          isHandlingClick.current = false;
+          debug('📱 [SiriCallButton] 🔓 Mobile isHandlingClick reset to false');
+        }, 100);
+      }
+      
+      debug('📱 [SiriCallButton] 🎯 MOBILE INTERACTION END COMPLETED');
     }
   };
 

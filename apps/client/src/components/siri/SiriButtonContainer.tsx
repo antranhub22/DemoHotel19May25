@@ -4,6 +4,7 @@ import SiriCallButton from './SiriCallButton';
 import { Language } from '@/types/interface1.types';
 import { useAssistant } from '@/context/AssistantContext';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -76,6 +77,17 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   // Debug: Log language and color changes
   console.log('🎨 [SiriButtonContainer] Language:', language, 'Colors:', currentColors.name, 'Primary:', currentColors.primary);
   console.log('📏 [SiriButtonContainer] Responsive size:', responsiveSize);
+  
+  // 🚨 DEBUG: Tap to End Call Fix Verification
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔧 [SiriButtonContainer] TAP TO END CALL FIXES APPLIED:');
+    console.log('  ✅ Priority 1: Mobile handleDirectTouch has end call logic');
+    console.log('  ✅ Priority 2: Mobile unified with desktop protections');
+    console.log('  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)');
+    console.log('  ✅ Priority 4: MobileTouchDebugger enabled for testing');
+    console.log('  🎯 isCallStarted:', isCallStarted, 'isConfirming:', isConfirming);
+    console.log('  🎯 onCallStart available:', !!onCallStart, 'onCallEnd available:', !!onCallEnd);
+  }
 
   // ✅ NEW: Reset confirming state when call ends
   useEffect(() => {
@@ -107,6 +119,12 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         console.log('🔵 [SiriButtonContainer] Calling onConfirm...');
         onConfirm();
         console.log('✅ [SiriButtonContainer] onConfirm completed successfully');
+        
+        // 🚨 FIX: Reset isConfirming after successful onConfirm
+        setTimeout(() => {
+          setIsConfirming(false);
+          console.log('🔓 [SiriButtonContainer] isConfirming reset after successful confirm');
+        }, 1000); // Give time for onConfirm to complete
       } else {
         console.warn('⚠️ [SiriButtonContainer] onConfirm is undefined');
         alert('Confirm function is not available');
@@ -255,6 +273,17 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           </div>
         )}
       </div>
+
+      {/* 🧪 DEBUG: Mobile Touch Debugger - Development only */}
+      {process.env.NODE_ENV === 'development' && (
+        <MobileTouchDebugger
+          containerId="main-siri-button"
+          onCallStart={() => protectedOnCallStart(language)}
+          onCallEnd={onCallEnd}
+          isListening={isCallStarted}
+          enabled={true}
+        />
+      )}
     </div>
   );
 }; 
