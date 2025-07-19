@@ -244,6 +244,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       return;
     }
 
+    // Enhanced mobile detection and debug
+    const isMobile = isMobileDevice();
+    debug('🎯 [INTERACTION] Setup for device:', isMobile ? 'Mobile' : 'Desktop');
+    debug('🎯 [INTERACTION] Container:', containerId, container.getBoundingClientRect());
+
     const handleContainerInteraction = async (event: Event) => {
       try {
         if (emergencyStopRequested.current) {
@@ -270,13 +275,45 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }
     };
 
-    // Add event listeners
+    // Mobile touch handling
+    const handleTouchStart = (event: TouchEvent) => {
+      debug('📱 [TOUCH] Touch start detected');
+      event.preventDefault(); // Prevent ghost clicks
+      
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('active');
+        
+        const touch = event.touches[0];
+        const rect = container.getBoundingClientRect();
+        buttonRef.current.setTouchPosition(
+          touch.clientX - rect.left,
+          touch.clientY - rect.top
+        );
+      }
+    };
+
+    const handleTouchEnd = async (event: TouchEvent) => {
+      debug('📱 [TOUCH] Touch end detected');
+      event.preventDefault(); // Prevent ghost clicks
+      
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('idle');
+      }
+      
+      await handleContainerInteraction(event);
+    };
+
+    // Add event listeners with proper mobile support
     container.addEventListener('click', handleContainerInteraction);
-    container.addEventListener('touchend', handleContainerInteraction);
+    
+    // Add mobile touch events
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     return () => {
       container.removeEventListener('click', handleContainerInteraction);
-      container.removeEventListener('touchend', handleContainerInteraction);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchend', handleTouchEnd);
     };
   }, [canvasReady, isListening, onCallStart, onCallEnd, containerId, debug, debugWarn, debugError]);
 
@@ -316,8 +353,15 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         overflow: 'hidden',
         cursor: 'pointer',
         touchAction: 'manipulation',
-        background: 'rgba(255, 0, 0, 0.1)', // 🚨 TEMPORARY: Red background for testing
-        border: DEBUG_LEVEL >= 1 ? '2px solid yellow' : 'none'
+        WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
+        WebkitUserSelect: 'none', // Prevent text selection
+        userSelect: 'none',
+        WebkitTouchCallout: 'none', // Disable context menu on long press
+        background: DEBUG_LEVEL >= 1 ? 'rgba(255, 0, 0, 0.1)' : 'transparent', // Debug background
+        border: DEBUG_LEVEL >= 1 ? '2px solid yellow' : 'none',
+        // Mobile touch optimization
+        minHeight: '44px', // iOS minimum touch target
+        minWidth: '44px'
       }}
     >
       {/* Error Injection for Testing - Only in development */}
@@ -332,15 +376,49 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
               };
               
               setTimeout(() => {
-                console.log('🧪 [SiriCallButton] Testing canvas detection...');
-                const canvas = document.querySelector('#${containerId} canvas');
+                console.log('🧪 [SiriCallButton] Testing mobile setup...');
+                const container = document.getElementById('${containerId}');
+                const canvas = container?.querySelector('canvas');
+                
+                console.log('🧪 [SiriCallButton] Container found:', !!container, container);
                 console.log('🧪 [SiriCallButton] Canvas found:', !!canvas, canvas);
-                if (canvas) {
-                  console.log('🧪 [SiriCallButton] Canvas dimensions:', {
-                    width: canvas.width,
-                    height: canvas.height,
-                    style: canvas.style.cssText
+                console.log('🧪 [SiriCallButton] Is mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+                
+                if (container) {
+                  console.log('🧪 [SiriCallButton] Container styles:', {
+                    position: getComputedStyle(container).position,
+                    pointerEvents: getComputedStyle(container).pointerEvents,
+                    touchAction: getComputedStyle(container).touchAction,
+                    cursor: getComputedStyle(container).cursor
                   });
+                  
+                  // Add quick test button for mobile debugging
+                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    const testBtn = document.createElement('button');
+                    testBtn.textContent = '🧪 TEST MOBILE CALL';
+                    testBtn.style.position = 'fixed';
+                    testBtn.style.top = '10px';
+                    testBtn.style.right = '10px';
+                    testBtn.style.zIndex = '99999';
+                    testBtn.style.padding = '10px';
+                    testBtn.style.background = '#4CAF50';
+                    testBtn.style.color = 'white';
+                    testBtn.style.border = 'none';
+                    testBtn.style.borderRadius = '5px';
+                    testBtn.onclick = () => {
+                      console.log('🧪 [MOBILE TEST] Manual test triggered');
+                      if (window.${containerId.replace(/-/g, '_')}_onCallStart) {
+                        window.${containerId.replace(/-/g, '_')}_onCallStart();
+                      }
+                    };
+                    document.body.appendChild(testBtn);
+                    
+                    // Expose onCallStart for testing
+                    window.${containerId.replace(/-/g, '_')}_onCallStart = () => {
+                      const evt = new Event('click');
+                      container.dispatchEvent(evt);
+                    };
+                  }
                 }
               }, 500);
             `
