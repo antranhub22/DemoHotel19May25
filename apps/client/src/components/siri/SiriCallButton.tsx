@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
+import { useSimplifiedMobileTouch } from '@/hooks/useSimplifiedMobileTouch';
 import '../../styles/voice-interface.css';
 import { Language } from '@/types/interface1.types';
 
@@ -59,6 +61,28 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const initAttemptCount = useRef<number>(0);
   const maxInitAttempts = 3;
   const emergencyStopRequested = useRef<boolean>(false);
+
+  // 🚀 EMERGENCY FIX: Simplified Mobile Touch Handler
+  const USE_SIMPLIFIED_MOBILE_TOUCH = true; // Feature flag for testing
+  const simplifiedMobileTouch = useSimplifiedMobileTouch({
+    containerId,
+    isListening,
+    onCallStart,
+    onCallEnd,
+    onInteractionStart: (position) => {
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('active');
+        buttonRef.current.setTouchPosition(position.x, position.y);
+      }
+    },
+    onInteractionEnd: () => {
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('idle');
+      }
+    },
+    enabled: USE_SIMPLIFIED_MOBILE_TOUCH,
+    debugEnabled: DEBUG_LEVEL >= 1
+  });
 
   // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
@@ -269,7 +293,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     logDeviceInfo('SiriCallButton');
     console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobile);
 
-    if (isMobile) {
+    // 🚀 EMERGENCY FIX: Use simplified mobile touch handler if enabled
+    if (isMobile && USE_SIMPLIFIED_MOBILE_TOUCH) {
+      console.log('🚀 [SiriCallButton] Using SIMPLIFIED mobile touch handler');
+      // Simplified handler is already set up via the hook
+      // Just log the status
+      const handlerState = simplifiedMobileTouch.getHandlerState();
+      console.log('🚀 [SiriCallButton] Simplified handler state:', handlerState);
+      
+      return () => {
+        // Cleanup is handled by the hook
+        safeCleanup();
+      };
+    } else if (isMobile) {
       // ✅ MOBILE: Touch events with enhanced debugging
       console.log('📱 [SiriCallButton] 🔥 SETTING UP MOBILE TOUCH EVENTS');
       console.log('  📱 Element for touch events:', element);
@@ -525,6 +561,55 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         >
           {status === 'processing' ? 'Processing...' : 'Speaking...'}
         </div>
+      )}
+
+      {/* 🚨 EMERGENCY DEBUG: Mobile Touch Debugger - Remove after fixing mobile issues */}
+      {process.env.NODE_ENV === 'development' && (
+        <>
+          <MobileTouchDebugger
+            containerId={containerId}
+            onCallStart={onCallStart}
+            onCallEnd={onCallEnd}
+            isListening={isListening}
+            enabled={true}
+          />
+          
+          {/* 🚀 SIMPLIFIED MOBILE TOUCH DEBUG INFO */}
+          {simplifiedMobileTouch.isMobile && (
+            <div
+              style={{
+                position: 'fixed',
+                top: '10px',
+                left: '10px',
+                zIndex: 99997,
+                background: simplifiedMobileTouch.isEnabled ? '#4CAF50' : '#f44336',
+                color: 'white',
+                padding: '8px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+              }}
+            >
+              {simplifiedMobileTouch.isEnabled ? '🚀 SIMPLIFIED TOUCH' : '🔧 COMPLEX TOUCH'}
+              <button
+                onClick={simplifiedMobileTouch.testCallStart}
+                style={{
+                  marginLeft: '8px',
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  cursor: 'pointer'
+                }}
+              >
+                TEST
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

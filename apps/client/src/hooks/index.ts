@@ -12,4 +12,5 @@ export * from './useScrollBehavior';
 export * from './useTranscriptSocket';
 export * from './useWebSocket';
 // Export only the main hook to avoid conflicts with existing useIsMobile
-export { useSiriResponsiveSize } from './useSiriResponsiveSize'; 
+export { useSiriResponsiveSize } from './useSiriResponsiveSize';
+export { useSimplifiedMobileTouch } from './useSimplifiedMobileTouch'; 
