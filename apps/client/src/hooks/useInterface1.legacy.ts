@@ -2,6 +2,9 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
+import { useCancelHandler } from '@/hooks/useCancelHandler';
+import { useConfirmHandler } from '@/hooks/useConfirmHandler';
+import { usePopupContext } from '@/context/PopupContext';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
 import { Language } from '@/types/interface1.types';
@@ -36,6 +39,9 @@ interface UseInterface1Return {
   handleCancel: () => void;
   handleConfirm: () => void;
   
+  // ✅ NEW: Summary popup state
+  showingSummary: boolean;
+  
   // Right panel state
   showRightPanel: boolean;
   handleRightPanelToggle: () => void;
@@ -65,6 +71,32 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   // Right panel state
   const [showRightPanel, setShowRightPanel] = useState(false);
   const isInitialMount = useRef(true);
+  
+  // ✅ NEW: Get dedicated button handlers
+  const { handleCancel } = useCancelHandler({
+    conversationState,
+    conversationPopupId,
+    setConversationPopupId,
+    setShowRightPanel,
+    transcripts
+  });
+
+  const { handleConfirm } = useConfirmHandler({
+    endCall,
+    transcripts,
+    callSummary,
+    serviceRequests
+  });
+
+  // ✅ NEW: Track summary popup state
+  const { popups } = usePopupContext();
+  const [showingSummary, setShowingSummary] = useState(false);
+
+  // ✅ NEW: Monitor summary popups
+  useEffect(() => {
+    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    setShowingSummary(!!summaryPopup);
+  }, [popups]);
   
   // DISABLED: Auto-popup effects - using ConversationSection instead
   // All conversation popup management moved to ConversationSection component
@@ -171,151 +203,6 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     });
   };
 
-  // Add specific handlers for SiriButtonContainer Cancel/Confirm
-  const handleCancel = useCallback(() => {
-    console.log('❌ [useInterface1] Cancel button clicked - Returning to Interface1 initial state');
-    console.log('📊 [useInterface1] Current state:', { 
-      isCallStarted: conversationState.isCallStarted,
-      conversationPopupId,
-      transcriptsCount: transcripts.length 
-    });
-    
-    try {
-      // STEP 1: Clear any active popups first
-      if (conversationPopupId) {
-        try {
-          console.log('🗑️ [useInterface1] Removing conversation popup:', conversationPopupId);
-          removePopup(conversationPopupId);
-          setConversationPopupId(null);
-          console.log('✅ [useInterface1] Popup removed successfully');
-        } catch (popupError) {
-          console.error('⚠️ [useInterface1] Failed to remove popup but continuing:', popupError);
-          setConversationPopupId(null);
-        }
-      }
-      
-      // STEP 2: Reset conversation state with error isolation
-      try {
-        conversationState.handleCancel();
-        console.log('✅ [useInterface1] conversationState.handleCancel() completed');
-      } catch (stateError) {
-        console.error('⚠️ [useInterface1] conversationState.handleCancel() failed:', stateError);
-        // Continue - the popup cleanup is more important for UI consistency
-      }
-      
-      // STEP 3: Close right panel if open
-      try {
-        setShowRightPanel(false);
-        console.log('✅ [useInterface1] Right panel closed');
-      } catch (panelError) {
-        console.error('⚠️ [useInterface1] Failed to close right panel:', panelError);
-      }
-      
-      // STEP 4: Force scroll to top (return to initial view)
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        console.log('✅ [useInterface1] Scrolled to top');
-      } catch (scrollError) {
-        console.error('⚠️ [useInterface1] Failed to scroll to top:', scrollError);
-      }
-      
-      console.log('✅ [useInterface1] Cancel completed - Interface1 returned to initial state');
-    } catch (error) {
-      console.error('❌ [useInterface1] Critical error in handleCancel:', error);
-      
-      // EMERGENCY CLEANUP - ensure UI is always in clean state
-      try {
-        // Force clear all popups
-        if (conversationPopupId) {
-          removePopup(conversationPopupId);
-          setConversationPopupId(null);
-        }
-        
-        // Force close right panel
-        setShowRightPanel(false);
-        
-        // Force scroll to top
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        
-        console.log('🚨 [useInterface1] Emergency cleanup completed');
-      } catch (emergencyError) {
-        console.error('🚨 [useInterface1] Emergency cleanup failed:', emergencyError);
-      }
-      
-      // Prevent error propagation to avoid crash
-      console.log('🔄 [useInterface1] Cancel operation completed despite errors - UI restored');
-    }
-  }, [conversationState, conversationPopupId, removePopup, transcripts.length, setShowRightPanel]);
-
-  const handleConfirm = useCallback(() => {
-    console.log('✅ [useInterface1] Confirm button clicked in SiriButtonContainer');
-    console.log('📊 [useInterface1] Current state:', { 
-      isCallStarted: conversationState.isCallStarted,
-      transcriptsCount: transcripts.length,
-      hasCallSummary: !!callSummary,
-      hasServiceRequests: serviceRequests?.length > 0
-    });
-    
-    // DEV MODE: Skip API calls to prevent server overload
-    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.log('🚧 [DEV MODE] Skipping API calls - showing demo summary popup');
-      
-      // Clear conversation popup if active
-      if (conversationPopupId) {
-        console.log('🗑️ [useInterface1] Removing conversation popup after confirm');
-        removePopup(conversationPopupId);
-        setConversationPopupId(null);
-      }
-      
-      // Show demo summary popup immediately
-      setTimeout(() => {
-        console.log('📋 [DEV MODE] Showing demo summary popup');
-        const summaryPopupId = showSummary(undefined, { 
-          title: 'Call Summary (Demo)',
-          priority: 'high' 
-        });
-        console.log('✅ [DEV MODE] Demo summary popup created:', summaryPopupId);
-      }, 500);
-      
-      return;
-    }
-    
-    try {
-      // 🔧 FIX: Use endCall directly instead of handleConfirm
-      console.log('🔄 [useInterface1] Ending call...');
-      endCall();
-      console.log('✅ [useInterface1] Call ended successfully');
-      
-      // Clear conversation popup if active
-      if (conversationPopupId) {
-        console.log('🗑️ [useInterface1] Removing conversation popup after confirm');
-        removePopup(conversationPopupId);
-        setConversationPopupId(null);
-      }
-      
-      // Auto-show summary popup after confirmation with delay for processing
-      setTimeout(() => {
-        console.log('📋 [useInterface1] Auto-showing summary popup after confirm');
-        console.log('📊 [useInterface1] Summary data available:', {
-          callSummary: !!callSummary,
-          serviceRequests: serviceRequests?.length || 0
-        });
-        
-        const summaryPopupId = showSummary(undefined, { 
-          title: 'Call Summary',
-          priority: 'high' 
-        });
-        
-        console.log('✅ [useInterface1] Summary popup created with ID:', summaryPopupId);
-      }, 1500); // Increased delay for better processing
-      
-      console.log('✅ [useInterface1] Confirm completed - summary popup will show');
-    } catch (error) {
-      console.error('❌ [useInterface1] Error in handleConfirm:', error);
-    }
-  }, [endCall, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
-
   // Update badge count when transcripts change
   useEffect(() => {
     if (conversationPopupId && transcripts.length > 0) {
@@ -336,12 +223,16 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     // Scroll behavior (spread)
     ...scrollBehavior,
     
-    // Conversation state (spread)
-    ...conversationState,
+    // Conversation state - BE EXPLICIT
+    isCallStarted: conversationState.isCallStarted,
+    showConversation: conversationState.showConversation,
+    handleCallStart: conversationState.handleCallStart,
+    handleCallEnd: conversationState.handleCallEnd,
+    handleCancel, // ✅ From useCancelHandler
+    handleConfirm, // ✅ From useConfirmHandler
     
-    // Override with Interface1-specific handlers
-    handleCancel,
-    handleConfirm,
+    // ✅ NEW: Summary popup state
+    showingSummary,
     
     // Right panel state
     showRightPanel,
