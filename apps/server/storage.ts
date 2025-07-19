@@ -102,8 +102,9 @@ export class DatabaseStorage implements IStorage {
         timestampType: typeof insertTranscript.timestamp
       });
 
-      // ✅ FIXED: Use conversion utilities for timestamp
+      // ✅ FIXED: Use conversion utilities for timestamp - ENSURE NO ID FIELD
       const processedTranscript = {
+        // ✅ CRITICAL: Do NOT include id field - let database auto-generate
         call_id: insertTranscript.callId || insertTranscript.call_id,
         content: insertTranscript.content,
         role: insertTranscript.role,
@@ -111,10 +112,16 @@ export class DatabaseStorage implements IStorage {
         tenant_id: insertTranscript.tenant_id || insertTranscript.tenantId || 'default'
       };
 
-      console.log('📝 [DatabaseStorage] Processed transcript for database:', {
+      // ✅ DEBUG: Ensure no ID field leaked through
+      if ('id' in processedTranscript) {
+        console.error('❌ [DatabaseStorage] ID field detected in transcript data - removing!');
+        delete (processedTranscript as any).id;
+      }
+
+      console.log('📝 [DatabaseStorage] Final transcript for database (no ID):', {
         ...processedTranscript,
-        timestamp: processedTranscript.timestamp,
-        timestampType: typeof processedTranscript.timestamp
+        hasIdField: 'id' in processedTranscript,
+        fieldCount: Object.keys(processedTranscript).length
       });
 
       const result = await db.insert(transcript).values(processedTranscript).returning();
