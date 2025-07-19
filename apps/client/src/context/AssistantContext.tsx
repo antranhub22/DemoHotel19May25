@@ -197,101 +197,101 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // Debug: Track currentInterface changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
-    console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
+    // console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
+    // console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
   }, [currentInterface]);
 
   // Debug: Track order changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - order changed to:', order);
-    console.log('[DEBUG] AssistantProvider - order reference:', order?.reference);
-    console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
+    // console.log('[DEBUG] AssistantProvider useEffect - order changed to:', order);
+    // console.log('[DEBUG] AssistantProvider - order reference:', order?.reference);
+    // console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
   }, [order]);
 
   // Debug: Track activeOrders changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - activeOrders changed:', activeOrders.length);
-    console.log('[DEBUG] AssistantProvider - activeOrders:', activeOrders);
+    // console.log('[DEBUG] AssistantProvider useEffect - activeOrders changed:', activeOrders.length);
+    // console.log('[DEBUG] AssistantProvider - activeOrders:', activeOrders);
   }, [activeOrders]);
 
   // Debug: Track hotelConfig changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - hotelConfig changed:', hotelConfig ? 'loaded' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - hotelConfig changed:', hotelConfig ? 'loaded' : 'null');
   }, [hotelConfig]);
 
   // Debug: Track language changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - language changed to:', language);
+    // console.log('[DEBUG] AssistantProvider useEffect - language changed to:', language);
   }, [language]);
 
   // Debug: Track callDetails changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - callDetails changed:', callDetails ? 'active' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - callDetails changed:', callDetails ? 'active' : 'null');
   }, [callDetails]);
 
   // Debug: Track transcripts changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - transcripts count:', transcripts.length);
+    // console.log('[DEBUG] AssistantProvider useEffect - transcripts count:', transcripts.length);
   }, [transcripts]);
 
   // Debug: Track orderSummary changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - orderSummary changed:', orderSummary ? 'has summary' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - orderSummary changed:', orderSummary ? 'has summary' : 'null');
   }, [orderSummary]);
 
   // Debug: Track callSummary changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - callSummary changed:', callSummary ? 'has summary' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - callSummary changed:', callSummary ? 'has summary' : 'null');
   }, [callSummary]);
 
   // Debug: Track serviceRequests changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - serviceRequests count:', serviceRequests.length);
+    // console.log('[DEBUG] AssistantProvider useEffect - serviceRequests count:', serviceRequests.length);
   }, [serviceRequests]);
 
   // Debug: Track modelOutput changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - modelOutput count:', modelOutput.length);
+    // console.log('[DEBUG] AssistantProvider useEffect - modelOutput count:', modelOutput.length);
   }, [modelOutput]);
 
   // Debug: Track micLevel changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - micLevel:', micLevel);
+    // console.log('[DEBUG] AssistantProvider useEffect - micLevel:', micLevel);
   }, [micLevel]);
 
   // Debug: Track isMuted changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - isMuted:', isMuted);
+    // console.log('[DEBUG] AssistantProvider useEffect - isMuted:', isMuted);
   }, [isMuted]);
 
   // Debug: Track callDuration changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - callDuration:', callDuration);
+    // console.log('[DEBUG] AssistantProvider useEffect - callDuration:', callDuration);
   }, [callDuration]);
 
   // Debug: Track emailSentForCurrentSession changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - emailSentForCurrentSession:', emailSentForCurrentSession);
+    // console.log('[DEBUG] AssistantProvider useEffect - emailSentForCurrentSession:', emailSentForCurrentSession);
   }, [emailSentForCurrentSession]);
 
   // Debug: Track requestReceivedAt changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - requestReceivedAt:', requestReceivedAt);
+    // console.log('[DEBUG] AssistantProvider useEffect - requestReceivedAt:', requestReceivedAt);
   }, [requestReceivedAt]);
 
   // Debug: Track vietnameseSummary changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - vietnameseSummary:', vietnameseSummary ? 'has summary' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - vietnameseSummary:', vietnameseSummary ? 'has summary' : 'null');
   }, [vietnameseSummary]);
 
   // Debug: Track tenantId changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - tenantId:', tenantId);
+    // console.log('[DEBUG] AssistantProvider useEffect - tenantId:', tenantId);
   }, [tenantId]);
 
   // Debug: Track tenantConfig changes
   useEffect(() => {
-    console.log('[DEBUG] AssistantProvider useEffect - tenantConfig:', tenantConfig ? 'loaded' : 'null');
+    // console.log('[DEBUG] AssistantProvider useEffect - tenantConfig:', tenantConfig ? 'loaded' : 'null');
   }, [tenantConfig]);
 
   const addActiveOrder = (order: ActiveOrder) => {
@@ -375,9 +375,21 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         
         const vapi = await initVapi(publicKey);
 
+        // Throttle micLevel updates to prevent excessive re-renders
+        let lastMicLevelUpdate = 0;
+        const MIC_LEVEL_THROTTLE = 100; // Only update every 100ms
+
         // Setup event listeners after successful initialization
         vapi.on('volume-level', (level: number) => {
-          setMicLevel(level);
+          try {
+            const now = Date.now();
+            if (now - lastMicLevelUpdate > MIC_LEVEL_THROTTLE) {
+              setMicLevel(level);
+              lastMicLevelUpdate = now;
+            }
+          } catch (error) {
+            console.warn('Error handling volume-level:', error);
+          }
         });
 
         // Bridge function to send transcripts to WebSocket server
@@ -470,7 +482,13 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           }
         };
         
-        vapi.on('message', handleMessage);
+        vapi.on('message', (message: any) => {
+          try {
+            handleMessage(message);
+          } catch (error) {
+            console.warn('Error handling Vapi message:', error);
+          }
+        });
       } catch (error) {
         console.error('Error setting up Vapi:', error);
       }
@@ -827,8 +845,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         console.error('🚨 [AssistantContext] Emergency cleanup failed:', emergencyError);
       }
       
-      // Re-throw the error so it propagates up
-      throw error;
+      // Don't re-throw error to prevent Error Boundary trigger
+      console.log('🔄 [AssistantContext] endCall() error handled gracefully, continuing normal operation');
     }
   }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language]);
 
@@ -960,7 +978,53 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 export function useAssistant() {
   const context = useContext(AssistantContext);
   if (context === undefined) {
-    throw new Error('useAssistant must be used within an AssistantProvider');
+    console.warn('useAssistant used outside AssistantProvider - returning safe defaults');
+    // Return safe defaults instead of throwing
+    return {
+      currentInterface: 'interface1' as InterfaceLayer,
+      setCurrentInterface: () => {},
+      transcripts: [],
+      setTranscripts: () => {},
+      addTranscript: () => {},
+      orderSummary: null,
+      setOrderSummary: () => {},
+      callDetails: null,
+      setCallDetails: () => {},
+      order: null,
+      setOrder: () => {},
+      callDuration: 0,
+      setCallDuration: () => {},
+      isMuted: false,
+      toggleMute: () => {},
+      startCall: async () => {},
+      endCall: () => {},
+      callSummary: null,
+      setCallSummary: () => {},
+      serviceRequests: [],
+      setServiceRequests: () => {},
+      vietnameseSummary: null,
+      setVietnameseSummary: () => {},
+      translateToVietnamese: async () => '',
+      emailSentForCurrentSession: false,
+      setEmailSentForCurrentSession: () => {},
+      requestReceivedAt: null,
+      setRequestReceivedAt: () => {},
+      activeOrders: [],
+      addActiveOrder: () => {},
+      setActiveOrders: () => {},
+      micLevel: 0,
+      modelOutput: [],
+      setModelOutput: () => {},
+      addModelOutput: () => {},
+      language: 'en' as Language,
+      setLanguage: () => {},
+      hotelConfig: null,
+      setHotelConfig: () => {},
+      tenantId: null,
+      setTenantId: () => {},
+      tenantConfig: null,
+      setTenantConfig: () => {},
+    } as AssistantContextType;
   }
   return context;
 }

@@ -9,6 +9,7 @@ import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
+import { usePopupContext } from '@/context/PopupContext';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -39,6 +40,9 @@ interface UseInterface1Return {
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
+  
+  // ✅ NEW: Summary popup state
+  showingSummary: boolean;
   
   // Right panel state
   showRightPanel: boolean;
@@ -72,7 +76,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
  */
 const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks - keep all for demo functions, just disable auto-conversation
@@ -204,11 +208,47 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   });
 
   const { handleConfirm } = useConfirmHandler({
-    conversationState,
+    endCall, // ✅ FIXED: Use AssistantContext.endCall directly
     transcripts,
     callSummary,
     serviceRequests
   });
+
+  // ✅ FIXED: Track summary popup state - Direct approach
+  const { popups } = usePopupContext();
+  const [showingSummary, setShowingSummary] = useState(false);
+
+  // ✅ FIXED: Monitor both popup system AND right panel for summary display
+  useEffect(() => {
+    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    setShowingSummary(!!summaryPopup || showRightPanel);
+    console.log('🔍 [useInterface1] Summary visibility check:', {
+      summaryPopup: !!summaryPopup,
+      showRightPanel,
+      finalShowingSummary: !!summaryPopup || showRightPanel
+    });
+  }, [popups, showRightPanel]);
+
+  // ✅ NEW: Listen for custom summary events
+  useEffect(() => {
+    const handleSummaryStarted = () => {
+      console.log('📡 [useInterface1] Summary started event received - hiding Cancel/Confirm buttons');
+      setShowingSummary(true);
+    };
+
+    const handleSummaryEnded = () => {
+      console.log('📡 [useInterface1] Summary ended event received - showing Cancel/Confirm buttons');
+      setShowingSummary(false);
+    };
+
+    window.addEventListener('summaryStarted', handleSummaryStarted);
+    window.addEventListener('summaryEnded', handleSummaryEnded);
+    
+    return () => {
+      window.removeEventListener('summaryStarted', handleSummaryStarted);
+      window.removeEventListener('summaryEnded', handleSummaryEnded);
+    };
+  }, []);
 
   // Update badge count when transcripts change
   useEffect(() => {
@@ -237,6 +277,9 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     handleCallEnd: conversationState.handleCallEnd,
     handleCancel, // From useCancelHandler
     handleConfirm, // From useConfirmHandler
+    
+    // ✅ NEW: Summary popup state
+    showingSummary,
     
     // Right panel state
     showRightPanel,

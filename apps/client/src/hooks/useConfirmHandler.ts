@@ -3,7 +3,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { usePopup } from '@/components/popup-system';
 
 interface UseConfirmHandlerProps {
-  conversationState: any;
+  endCall: () => void; // ✅ FIXED: Use direct endCall function
   transcripts: any[];
   callSummary: any;
   serviceRequests: any[];
@@ -27,7 +27,7 @@ interface UseConfirmHandlerReturn {
  * @returns handleConfirm function
  */
 export const useConfirmHandler = ({
-  conversationState,
+  endCall,
   transcripts,
   callSummary,
   serviceRequests
@@ -35,17 +35,26 @@ export const useConfirmHandler = ({
   const { showSummary } = usePopup();
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const isPollingRef = useRef(false);
+  
+  // ✅ NEW: Create a custom event to signal summary is starting
+  const signalSummaryStarted = () => {
+    const event = new CustomEvent('summaryStarted');
+    window.dispatchEvent(event);
+    console.log('📡 [useConfirmHandler] Summary started event dispatched');
+  };
 
   const handleConfirm = useCallback(() => {
     console.log('✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer');
     console.log('📊 [useConfirmHandler] Current state:', { 
-      isCallStarted: conversationState.isCallStarted,
       transcriptsCount: transcripts.length,
       hasCallSummary: !!callSummary,
       hasServiceRequests: serviceRequests?.length > 0
     });
     
     try {
+      // 🔧 STEP 0: Signal that summary process is starting
+      signalSummaryStarted();
+      
       // 🔧 STEP 1: Show loading popup BEFORE ending call
       console.log('📋 [useConfirmHandler] Step 1: Showing immediate loading popup...');
       
@@ -127,8 +136,13 @@ export const useConfirmHandler = ({
       
       // 🔧 STEP 2: End call AFTER showing loading popup
       console.log('🔄 [useConfirmHandler] Step 2: Ending call...');
-      conversationState.handleConfirm(); // Assuming conversationState has a handleConfirm method
-      console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+      try {
+        endCall();
+        console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+      } catch (endCallError) {
+        console.error('⚠️ [useConfirmHandler] endCall() failed but continuing:', endCallError);
+        // Don't throw - continue with summary generation anyway
+      }
       
       // 🔧 STEP 3: Start polling for summary data
       console.log('🔄 [useConfirmHandler] Step 3: Starting polling for summary data...');
@@ -387,7 +401,7 @@ export const useConfirmHandler = ({
         alert('Call completed! Please check with front desk for any service requests.');
       }, 100);
     }
-  }, [conversationState, transcripts.length, callSummary, serviceRequests, showSummary]);
+  }, [endCall, transcripts.length, callSummary, serviceRequests, showSummary]);
 
   return {
     handleConfirm

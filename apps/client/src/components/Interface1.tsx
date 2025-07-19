@@ -44,6 +44,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleCallEnd,
     handleCancel,
     handleConfirm,
+    showingSummary,
     showRightPanel,
     handleRightPanelToggle,
     handleRightPanelClose,
@@ -106,6 +107,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                     onCallEnd={handleCallEnd}
                     onCancel={handleCancel}
                     onConfirm={handleConfirm}
+                    showingSummary={showingSummary}
                   />
                 </div>
               </div>
@@ -145,6 +147,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   onCallEnd={handleCallEnd}
                   onCancel={handleCancel}
                   onConfirm={handleConfirm}
+                  showingSummary={showingSummary}
                 />
               </div>
             </div>

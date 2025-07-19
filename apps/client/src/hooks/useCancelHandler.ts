@@ -82,6 +82,15 @@ export const useCancelHandler = ({
         console.error('⚠️ [useCancelHandler] Failed to scroll to top:', scrollError);
       }
       
+      // 🔧 STEP 5: Signal that summary should be hidden (if any)
+      try {
+        const event = new CustomEvent('summaryEnded');
+        window.dispatchEvent(event);
+        console.log('📡 [useCancelHandler] Summary ended event dispatched');
+      } catch (eventError) {
+        console.error('⚠️ [useCancelHandler] Failed to dispatch summary ended event:', eventError);
+      }
+      
       console.log('✅ [useCancelHandler] Cancel completed - Interface1 returned to initial state');
     } catch (error) {
       console.error('❌ [useCancelHandler] Critical error in handleCancel:', error);
