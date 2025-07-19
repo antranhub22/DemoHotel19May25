@@ -49,7 +49,7 @@ interface UseInterface1Return {
 
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks - keep all for demo functions, just disable auto-conversation
@@ -282,8 +282,10 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     }
     
     try {
-      // Use conversation state handler first
-      conversationState.handleConfirm();
+      // 🔧 FIX: Use endCall directly instead of handleConfirm
+      console.log('🔄 [useInterface1] Ending call...');
+      endCall();
+      console.log('✅ [useInterface1] Call ended successfully');
       
       // Clear conversation popup if active
       if (conversationPopupId) {
@@ -312,7 +314,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     } catch (error) {
       console.error('❌ [useInterface1] Error in handleConfirm:', error);
     }
-  }, [conversationState, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
+  }, [endCall, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
 
   // Update badge count when transcripts change
   useEffect(() => {
