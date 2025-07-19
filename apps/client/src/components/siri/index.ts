@@ -6,6 +6,9 @@ export { MobileDebugComponent } from './MobileDebugComponent';
 export { MobileTouchDebugger } from './MobileTouchDebugger';
 export { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 
+// 🚀 PHASE 2: Modular Architecture Components
+export * from './modules';
+
 // Types
 export interface SiriCallButtonProps {
   containerId: string;
