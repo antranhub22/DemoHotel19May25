@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAssistant } from '@/context/AssistantContext';
-import { PopupProvider } from '@/context/PopupContext';
-import { PopupManager } from '@/components/popup-system/PopupManager';
-import WelcomePopup from '@/components/WelcomePopup';
-import { Interface1 } from '@/components/Interface1';
-import Interface2 from '@/components/Interface2';
-import Interface3 from '@/components/Interface3';
-import Interface4 from '@/components/Interface4';
+import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
-import type { Language } from '@/types/interface1.types';
+import { Interface1 } from '@/components/Interface1';
+// ✅ KEEP IMPORTS but disconnect rendering
+// import { Interface2 } from '@/components/Interface2';
+// import { Interface3 } from '@/components/Interface3';  
+// import { Interface4 } from '@/components/Interface4';
+import { useAssistant } from '@/context/AssistantContext';
+import { useAuth } from '@/context/AuthContext';
+import { Language } from '@/types/interface1.types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const VoiceAssistant: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentInterface, setCurrentInterface, language, setLanguage } = useAssistant();
+  // ✅ SIMPLIFIED: Remove interface switching, focus only on Interface1
+  // const { currentInterface, setCurrentInterface, language, setLanguage } = useAssistant();
+  const { language, setLanguage } = useAssistant();
   
   // Language selection state
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
 
-  // Interface states
+  // ✅ SIMPLIFIED: Only Interface1 state needed
   const [interfaceStates, setInterfaceStates] = useState({
-    interface1: false,
+    interface1: true, // Always active for development
     interface2: false,
     interface3: false,
     interface3vi: false,
@@ -42,17 +45,18 @@ const VoiceAssistant: React.FC = () => {
     }
   }, []);
 
-  // Update interface states based on currentInterface
+  // ✅ SIMPLIFIED: Remove interface switching logic
+  // Always keep Interface1 active for development
   useEffect(() => {
     setInterfaceStates({
-      interface1: currentInterface === 'interface1',
-      interface2: currentInterface === 'interface2',
-      interface3: currentInterface === 'interface3',
-      interface3vi: currentInterface === 'interface3vi',
-      interface3fr: currentInterface === 'interface3fr',
-      interface4: currentInterface === 'interface4'
+      interface1: true, // Always active
+      interface2: false,
+      interface3: false,
+      interface3vi: false,
+      interface3fr: false,
+      interface4: false
     });
-  }, [currentInterface]);
+  }, []); // No dependencies - static state
 
   // Language options for the dropdown
   const languageOptions = [
@@ -70,110 +74,54 @@ const VoiceAssistant: React.FC = () => {
     setLanguage(lang);
   };
 
+  const { logout } = useAuth();
+  const isMobile = useIsMobile();
+
   const handleLogout = () => {
-    localStorage.removeItem('staffToken');
-    navigate('/staff/login');
+    logout();
+    navigate('/login');
   };
-
-  // Close welcome popup
-  const handleCloseWelcome = () => {
-    setShowWelcome(false);
-  };
-
-  // Determine if we're on mobile for conditional PopupManager
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <PopupProvider>
-    <div className="relative w-full h-full">
-      {/* Welcome Popup */}
-      {showWelcome && (
-        <WelcomePopup onClose={handleCloseWelcome} />
-      )}
+    <div className="relative w-full h-full min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      {/* Fixed Header */}
+      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 z-50 h-[42px]">
+        <div className="flex justify-between items-center px-4 h-full">
+          {/* Logo/Title */}
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-blue-600 text-lg">Mi Nhon Hotel</span>
+            <span className="hidden sm:inline text-sm text-gray-500">Voice Assistant</span>
+          </div>
 
-      {/* Header Bar */}
-      <div 
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 bg-white/10 backdrop-blur-md border-b border-white/20"
-        style={{ height: '42px' }}
-      >
-        {/* Left: Hotel Logo */}
-        <div className="flex items-center gap-3">
-          <img 
-            src="/public/assets/references/images/minhon-logo.jpg" 
-            alt="Mi Nhon Hotel" 
-            className="w-10 h-10 rounded-lg object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-          <span className="hidden sm:inline text-white font-semibold">Mi Nhon Hotel</span>
-        </div>
-        
-        {/* Center: Interface Info (Optional) */}
-        <div className="hidden md:flex items-center text-white/80 text-sm">
-          Voice Assistant
-        </div>
-        
-        {/* Right: Language & Controls */}
-        <div className="flex items-center gap-2">
-          {/* Language Selector */}
-          <div className="relative">
+          {/* Right Controls */}
+          <div className="flex items-center gap-2">
+            {/* Language Selector */}
             <select
               value={selectedLanguage}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="appearance-none bg-white/20 text-white text-sm px-3 py-1.5 pr-8 rounded-full border border-white/30 focus:outline-none focus:ring-1 focus:ring-white/50 backdrop-blur-sm"
-              style={{ minWidth: '100px' }}
+              className="text-sm bg-white/50 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {languageOptions.map(option => (
-                <option key={option.value} value={option.value} className="text-black">
-                  {option.label}
+                <option key={option.value} value={option.value}>
+                  {option.flag} {option.label.split(' ')[1]}
                 </option>
               ))}
             </select>
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+
+            {location.pathname.includes('/staff') && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 px-3 py-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors text-sm"
+              >
+                🚪 Logout
+              </button>
+            )}
           </div>
-
-          {/* Additional Controls */}
-          <button 
-            onClick={() => setCurrentInterface('interface1')}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors text-sm"
-          >
-            🏠 Steps
-          </button>
-          
-          <button 
-            onClick={() => navigate('/call-history')}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors text-sm"
-          >
-            📞 Call History
-          </button>
-
-          {/* Staff logout if on staff page */}
-          {location.pathname.includes('/staff') && (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1 px-3 py-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors text-sm"
-            >
-              🚪 Logout
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Main Interface Container */}
+      {/* Main Interface Container - Interface1 ONLY */}
       <div 
         className="relative w-full h-full" 
         id="interfaceContainer"
@@ -182,6 +130,7 @@ const VoiceAssistant: React.FC = () => {
           minHeight: 'calc(100vh - 42px)' // Adjust height to account for header
         }}
       >
+        {/* ✅ INTERFACE1 ONLY - Focus Development */}
         <ErrorBoundary
           fallbackComponent={<Interface1ErrorFallback />}
           onError={(error, errorInfo) => {
@@ -191,9 +140,12 @@ const VoiceAssistant: React.FC = () => {
         >
           <Interface1 isActive={interfaceStates.interface1} />
         </ErrorBoundary>
+        
+        {/* ✅ DISCONNECTED: Keep files but don't render 
         <Interface2 isActive={interfaceStates.interface2} />
         <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
         <Interface4 isActive={interfaceStates.interface4} />
+        */}
       </div>
 
       {/* iOS-style Popup System - Only on mobile OR for non-summary popups */}

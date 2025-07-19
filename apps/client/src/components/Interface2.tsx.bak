@@ -86,7 +86,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     
     // Call the context's endCall and switch to interface1
     contextEndCall();
-    // setCurrentInterface('interface1');
+    setCurrentInterface('interface1');
   }, [callDuration, localDuration, contextEndCall, setCurrentInterface]);
 
   // Handler for Next button - End call and proceed to interface3
@@ -102,11 +102,11 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     // Call the context's endCall and switch to interface3, interface3fr (French), hoặc interface3vi (Vietnamese)
     contextEndCall();
     if (language === 'fr') {
-      // setCurrentInterface('interface3fr');
+      setCurrentInterface('interface3fr');
     } else if (language === 'vi') {
-      // setCurrentInterface('interface3vi');
+      setCurrentInterface('interface3vi');
     } else {
-      // setCurrentInterface('interface3');
+      setCurrentInterface('interface3');
     }
   }, [callDuration, localDuration, contextEndCall, setCurrentInterface, transcripts, language]);
 

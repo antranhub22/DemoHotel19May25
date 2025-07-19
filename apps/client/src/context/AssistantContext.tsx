@@ -8,8 +8,9 @@ import { resetVapi } from '@/lib/vapiClient';
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
 export interface AssistantContextType {
-  currentInterface: InterfaceLayer;
-  setCurrentInterface: (layer: InterfaceLayer) => void;
+  // ✅ REMOVED: Interface switching logic (focus Interface1 only)
+  // currentInterface: InterfaceLayer;
+  // setCurrentInterface: (layer: InterfaceLayer) => void;
   transcripts: Transcript[];
   setTranscripts: (transcripts: Transcript[]) => void;
   addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
@@ -86,32 +87,9 @@ const AssistantContext = createContext<AssistantContextType | undefined>(undefin
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
   console.log('[DEBUG] AssistantProvider render');
-  const [currentInterface, setCurrentInterfaceState] = useState<InterfaceLayer>('interface1');
-  
-  // Wrapper để debug setCurrentInterface calls
-  const setCurrentInterface = (layer: InterfaceLayer) => {
-    console.log('[AssistantContext] 🔄 setCurrentInterface called:', { from: currentInterface, to: layer });
-    
-    // Reset Vapi when switching back to interface1
-    if (layer === 'interface1') {
-      resetVapi();
-      // Also reset all states
-      setTranscripts([]);
-      setOrderSummary(null);
-      setCallDetails(null);
-      setOrder(null);
-      setCallDuration(0);
-      setCallTimer(null);
-      setIsMuted(false);
-      setCallSummary(null);
-      setServiceRequests([]);
-      setVietnameseSummary(null);
-      setEmailSentForCurrentSession(false);
-    }
-    
-    setCurrentInterfaceState(layer);
-    console.log('[AssistantContext] ✅ setCurrentInterface executed:', layer);
-  };
+  // ✅ REMOVED: Interface switching logic (focus Interface1 only)
+  // const [currentInterface, setCurrentInterfaceState] = useState<InterfaceLayer>('interface1');
+  // const setCurrentInterface = (layer: InterfaceLayer) => { ... };
   const [transcripts, setTranscripts] = useState<Transcript[]>([]);
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
@@ -170,13 +148,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Wrapper functions with debug logging
-  const debugSetCurrentInterface = (layer: InterfaceLayer) => {
-    console.log('🔄 AssistantContext: setCurrentInterface called with:', layer);
-    console.log('🔄 Previous interface:', currentInterface);
-    setCurrentInterface(layer);
-    console.log('✅ AssistantContext: setCurrentInterface completed');
-  };
+  // ✅ REMOVED: Interface switching debug functions (focus Interface1 only)
 
   const debugSetOrder = (newOrder: Order | null) => {
     console.log('🗑️ AssistantContext: setOrder called with:', newOrder);
@@ -195,11 +167,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     }
   }, [activeOrders]);
 
-  // Debug: Track currentInterface changes
-  useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
-    // console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
-  }, [currentInterface]);
+  // ✅ REMOVED: Interface switching debug logic (focus Interface1 only)
+  // useEffect(() => {
+  //   console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
+  // }, [currentInterface]);
 
   // Debug: Track order changes
   useEffect(() => {
@@ -504,34 +475,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     };
   }, [language, hotelConfig, tenantId, callDetails?.id]);
 
-  useEffect(() => {
-    if (currentInterface === 'interface2') {
-      // Start call timer when in interface2
-      console.log('Starting call duration timer in interface2');
-      const timer = setInterval(() => {
-        setCallDuration(prev => {
-          const newDuration = prev + 1;
-          console.log('Call duration updated:', newDuration);
-          return newDuration;
-        });
-      }, 1000);
-      setCallTimer(timer);
-    } else {
-      // Clear timer when not in interface2
-      if (callTimer) {
-        console.log('Clearing call duration timer when leaving interface2');
-        clearInterval(callTimer);
-        setCallTimer(null);
-      }
-    }
-
-    return () => {
-      if (callTimer) {
-        console.log('Cleaning up call duration timer');
-        clearInterval(callTimer);
-      }
-    };
-  }, [currentInterface, callTimer]);
+  // ✅ REMOVED: Interface2 timer logic (focus Interface1 only)
+  // useEffect(() => {
+  //   if (currentInterface === 'interface2') {
+  //     // Timer logic for interface2...
+  //   }
+  // }, []);
 
   // Format duration for display
   const formatDuration = (seconds: number) => {
@@ -922,8 +871,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   }, [currentInterface]);
 
   const value: AssistantContextType = {
-    currentInterface,
-    setCurrentInterface: debugSetCurrentInterface,
     transcripts,
     setTranscripts,
     addTranscript,
@@ -981,8 +928,6 @@ export function useAssistant() {
     console.warn('useAssistant used outside AssistantProvider - returning safe defaults');
     // Return safe defaults instead of throwing
     return {
-      currentInterface: 'interface1' as InterfaceLayer,
-      setCurrentInterface: () => {},
       transcripts: [],
       setTranscripts: () => {},
       addTranscript: () => {},

@@ -5,7 +5,7 @@ import { Language } from '@/types/interface1.types';
 
 export const useCallHandler = () => {
   const { 
-    // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
+    setCurrentInterface,
     setTranscripts,
     setModelOutput,
     setCallDetails,
@@ -48,7 +48,7 @@ export const useCallHandler = () => {
     if ((!publicKey || !assistantId) && isDevelopment) {
       console.warn('[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing');
       setLanguage(lang);
-      // setCurrentInterface('interface2');
+      setCurrentInterface('interface2');
       return { success: true, isDevelopment: true };
     }
     
@@ -65,9 +65,9 @@ export const useCallHandler = () => {
       if (assistantId) {
         console.log('[useCallHandler] Starting Vapi call with assistant ID:', assistantId);
         
-        console.log('[useCallHandler] 🔄 CALLING // setCurrentInterface("interface2")');
-        // setCurrentInterface('interface2');
-        console.log('[useCallHandler] ✅ // setCurrentInterface("interface2") called');
+        console.log('[useCallHandler] 🔄 CALLING setCurrentInterface("interface2")');
+        setCurrentInterface('interface2');
+        console.log('[useCallHandler] ✅ setCurrentInterface("interface2") called');
         
         return { success: true };
       } else {
@@ -80,7 +80,7 @@ export const useCallHandler = () => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       return { success: false, error: errorMessage };
     }
-  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage]); // Removed setCurrentInterface
+  }, [hotelConfig, setEmailSentForCurrentSession, setCallDetails, setTranscripts, setModelOutput, setCallDuration, setLanguage, setCurrentInterface]);
 
   return { handleCall };
 }; 

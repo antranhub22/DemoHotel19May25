@@ -130,7 +130,7 @@ export const useConversationState = ({
       setManualCallStarted(true); // Set manual flag when real call starts
       
       // DISABLED: Focus on Interface1 development only
-      // // setCurrentInterface('interface2');
+      // setCurrentInterface('interface2');
       
       console.log('🎯 [useConversationState] Call start completed successfully');
       return { success: true };
@@ -181,7 +181,7 @@ export const useConversationState = ({
     setManualCallStarted(false); // Clear manual flag on real end
     
     // DISABLED: Focus on Interface1 development only  
-    // // setCurrentInterface('interface1');
+    // setCurrentInterface('interface1');
     console.log('📝 [DEV MODE] Staying in Interface1 - No interface switching');
   }, [endCall]);
 

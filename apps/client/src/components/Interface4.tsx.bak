@@ -35,9 +35,9 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
       setOrder(null);
       
       console.log('🔄 Setting interface to interface1...');
-      // setCurrentInterface('interface1');
+      setCurrentInterface('interface1');
       
-      console.log('✅ Order cleared and // setCurrentInterface("interface1") called');
+      console.log('✅ Order cleared and setCurrentInterface("interface1") called');
       
       // Force re-render bằng cách wait một chút
       setTimeout(() => {
