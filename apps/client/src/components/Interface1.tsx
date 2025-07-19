@@ -20,7 +20,6 @@ import { SiriButtonContainer } from './siri/SiriButtonContainer';
 
 // New Separate Popups
 import ChatPopup from './ChatPopup';
-import SummaryPopup from './SummaryPopup';
 
 
 interface Interface1Props {
@@ -113,10 +112,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               
               {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
-                <SummaryPopup
-                  isOpen={showConversation && !isCallStarted}
-                  onClose={() => {}}
-                  layout="grid"
+                <RightPanelSection
+                  ref={rightPanelRef}
+                  showPanel={showRightPanel}
+                  onClose={handleRightPanelClose}
+                  className="w-full"
                 />
               </div>
               
