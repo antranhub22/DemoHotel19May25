@@ -43,6 +43,14 @@ interface UseInterface1Return {
   handleRightPanelToggle: () => void;
   handleRightPanelClose: () => void;
   
+  // ✅ NEW: Chat & Summary popup states
+  showChatPopup: boolean;
+  showSummaryPopup: boolean;
+  handleChatPopupClose: () => void;
+  handleSummaryPopupClose: () => void;
+  chatRef: React.RefObject<HTMLDivElement>;
+  summaryRef: React.RefObject<HTMLDivElement>;
+  
   // Popup system demo functions
   handleShowConversationPopup: () => void;
   handleShowNotificationDemo: () => void;
@@ -85,6 +93,18 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   
   // Right panel state
   const [showRightPanel, setShowRightPanel] = useState(false);
+  
+  // ✅ NEW: Chat & Summary popup states
+  const [showChatPopup, setShowChatPopup] = useState(false);
+  const [showSummaryPopup, setShowSummaryPopup] = useState(false);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const summaryRef = useRef<HTMLDivElement>(null);
+
+  // ✅ NEW: Chat popup logic - show during call
+  useEffect(() => {
+    setShowChatPopup(conversationState.isCallStarted);
+  }, [conversationState.isCallStarted]);
+  
   const isInitialMount = useRef(true);
   
   // DISABLED: Auto-popup effects - using ConversationSection instead
@@ -130,6 +150,15 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   
   const handleRightPanelClose = () => {
     setShowRightPanel(false);
+  };
+
+  // ✅ NEW: Chat & Summary popup handlers
+  const handleChatPopupClose = () => {
+    setShowChatPopup(false);
+  };
+
+  const handleSummaryPopupClose = () => {
+    setShowSummaryPopup(false);
   };
 
   // Demo popup functions - conversation disabled, others active
@@ -224,12 +253,14 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
         // Continue - the popup cleanup is more important for UI consistency
       }
       
-      // STEP 3: Close right panel if open
+      // STEP 3: Close right panel and popups if open
       try {
         setShowRightPanel(false);
-        console.log('✅ [useInterface1Legacy] Right panel closed');
+        setShowChatPopup(false);
+        setShowSummaryPopup(false);
+        console.log('✅ [useInterface1Legacy] Right panel and popups closed');
       } catch (panelError) {
-        console.error('⚠️ [useInterface1Legacy] Failed to close right panel:', panelError);
+        console.error('⚠️ [useInterface1Legacy] Failed to close panels:', panelError);
       }
       
       // STEP 4: Force scroll to top (return to initial view)
@@ -278,17 +309,16 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     });
     
     try {
-      // Use conversation state handler to end call properly
+      // Step 1: End call via conversation state
       conversationState.handleConfirm();
       
-      // 🆕 KEEP CONVERSATION POPUP OPEN for summary viewing
-      // Unlike cancel, we want to keep the popup so user can view summary
-      console.log('✅ [useInterface1Legacy] Keeping conversation popup open for summary viewing');
-      console.log('📋 [useInterface1Legacy] User can now access summary via 📋 Summary tab');
+      // Step 2: Show Summary popup after call ends
+      setTimeout(() => {
+        setShowSummaryPopup(true);
+        console.log('📋 [useInterface1Legacy] Summary popup displayed after call end');
+      }, 500); // Small delay to allow call end processing
       
-      // 🆕 NO LONGER CREATE SUMMARY POPUP MODAL
-      // Summary is now available via tab in RealtimeConversationPopup
-      console.log('✅ [useInterface1Legacy] Confirm completed - Summary available in conversation popup tab');
+      console.log('✅ [useInterface1Legacy] Confirm completed - Summary popup will be displayed');
       
     } catch (error) {
       console.error('❌ [useInterface1Legacy] Error in handleConfirm:', error);
@@ -326,6 +356,14 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     showRightPanel,
     handleRightPanelToggle,
     handleRightPanelClose,
+    
+    // ✅ NEW: Chat & Summary popup states
+    showChatPopup,
+    showSummaryPopup,
+    handleChatPopupClose,
+    handleSummaryPopupClose,
+    chatRef,
+    summaryRef,
     
     // Popup system demo functions
     handleShowConversationPopup,

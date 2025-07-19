@@ -13,6 +13,8 @@ import { InterfaceHeader } from './interface1/InterfaceHeader';
 import { ServiceGridContainer } from './interface1/ServiceGridContainer';
 import { ConversationSection } from './interface1/ConversationSection';
 import { RightPanelSection } from './interface1/RightPanelSection';
+import { ChatSection } from './interface1/ChatSection';
+import { SummarySection } from './interface1/SummarySection';
 import { ScrollToTopButton } from './interface1/ScrollToTopButton';
 
 // UI Components - Interactive
@@ -44,6 +46,13 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     showRightPanel,
     handleRightPanelToggle,
     handleRightPanelClose,
+    // ✅ NEW: Chat & Summary popup states
+    showChatPopup,
+    showSummaryPopup,
+    handleChatPopupClose,
+    handleSummaryPopupClose,
+    chatRef,
+    summaryRef,
     handleShowConversationPopup,
     handleShowNotificationDemo,
     handleShowSummaryDemo
@@ -71,16 +80,17 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           
           {/* Desktop: 4-Position Grid Layout */}
           <div className="hidden md:block">
-            {/* Row 1: 3-Column Layout - Right Panel | Siri | Summary */}
+            {/* Row 1: 3-Column Layout - Chat | Siri | Summary */}
             <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
               
-              {/* Column 1: Right Panel (Left) */}
+              {/* Column 1: Chat Popup (Left) */}
               <div className="w-full max-w-sm">
-                <RightPanelSection
-                  ref={rightPanelRef}
-                  showPanel={showRightPanel}
-                  onClose={handleRightPanelClose}
+                <ChatSection
+                  ref={chatRef}
+                  showChat={showChatPopup}
+                  onClose={handleChatPopupClose}
                   className="relative z-30"
+                  isOverlay={false} // Desktop: relative position in grid
                 />
               </div>
               
@@ -100,12 +110,12 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 </div>
               </div>
               
-              {/* Column 3: Summary/Conversation Popup (Right) */}
+              {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
-                <ConversationSection
-                  ref={conversationRef}
-                  showConversation={showConversation}
-                  onClose={() => {}} // Will be handled by popup context
+                <SummarySection
+                  ref={summaryRef}
+                  showSummary={showSummaryPopup}
+                  onClose={handleSummaryPopupClose}
                   className="relative z-40"
                   isOverlay={false} // Desktop: relative position in grid
                 />
@@ -140,24 +150,23 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               </div>
             </div>
             
-            {/* Mobile: Conversation popup (overlay) */}
-            <ConversationSection
-              ref={conversationRef}
-              showConversation={showConversation}
-              onClose={() => {}} // Will be handled by popup context
-              className="fixed bottom-0 left-0 right-0 z-40"
+            {/* Mobile: Chat popup (overlay - base layer) */}
+            <ChatSection
+              ref={chatRef}
+              showChat={showChatPopup}
+              onClose={handleChatPopupClose}
+              className=""
               isOverlay={true} // Mobile: fixed overlay position
             />
             
-            {/* Mobile: Right panel popup (overlay) */}
-            <div className="absolute top-8 right-4 w-80 z-10 pointer-events-auto">
-              <RightPanelSection
-                ref={rightPanelRef}
-                showPanel={showRightPanel}
-                onClose={handleRightPanelClose}
-                className="w-full max-w-sm z-20"
-              />
-            </div>
+            {/* Mobile: Summary popup (overlay - stacked on top, iPhone-style) */}
+            <SummarySection
+              ref={summaryRef}
+              showSummary={showSummaryPopup}
+              onClose={handleSummaryPopupClose}
+              className=""
+              isOverlay={true} // Mobile: fixed overlay position with higher zIndex
+            />
           </div>
           
         </div>
