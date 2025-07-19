@@ -305,81 +305,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     logDeviceInfo('SiriCallButton');
     console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobileDevice_local);
 
-    // Use simplified mobile touch handler on mobile devices
+    // Mobile devices use JSX direct event handlers (handleDirectTouch)
+    // Desktop gets mouse events for hover effects
     if (isMobileDevice_local) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[SiriCallButton] Using simplified mobile touch handler');
+        console.log('[SiriCallButton] Mobile device detected - using direct JSX handlers');
       }
-      // Simplified handler is already set up via the hook
-      // Just log the status
-      const handlerState = simplifiedMobileTouch.handlerState;
-      console.log('🚀 [SiriCallButton] Simplified handler state:', handlerState);
-      
       return () => {
-        // Cleanup is handled by the hook
-        safeCleanup();
-      };
-    } else if (isMobileDevice_local) {
-      // Mobile touch events setup
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[SiriCallButton] Setting up mobile touch events for:', element.id);
-      }
-      
-              const handleTouchStart = (e: TouchEvent) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[SiriCallButton] Touch start detected');
-          }
-        
-        const touch = e.touches[0];
-        const rect = element.getBoundingClientRect();
-        handleInteractionStart(e, {
-          x: touch.clientX - rect.left,
-          y: touch.clientY - rect.top
-        });
-        
-        console.log('  ✅ Touch start handled successfully');
-      };
-
-              const handleTouchEnd = (e: TouchEvent) => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[SiriCallButton] Touch end detected');
-          }
-        
-        e.preventDefault(); // Prevent ghost click
-        handleInteractionEnd(e);
-        
-        console.log('  ✅ Touch end handled successfully');
-      };
-
-      const handleTouchCancel = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] ⚠️ TOUCH CANCELLED');
-        console.log('  📱 Touch event:', e);
-        if (buttonRef.current) {
-          buttonRef.current.setInteractionMode('idle');
-        }
-      };
-
-      // Add events with enhanced logging
-      console.log('📱 [SiriCallButton] 🎯 ADDING TOUCH EVENT LISTENERS');
-      console.log('  📱 Adding to element:', element.id, element.tagName);
-      
-      // Test if element can receive events
-      const testEventHandler = (e: Event) => {
-        console.log('📱 [SiriCallButton] 🧪 TEST EVENT RECEIVED:', e.type);
-      };
-      
-      element.addEventListener('touchstart', testEventHandler, { once: true });
-      
-      element.addEventListener('touchstart', handleTouchStart, { passive: true });
-      element.addEventListener('touchend', handleTouchEnd, { passive: false });
-      element.addEventListener('touchcancel', handleTouchCancel, { passive: true });
-      
-      console.log('📱 [SiriCallButton] ✅ Touch event listeners added successfully');
-
-      return () => {
-        element.removeEventListener('touchstart', handleTouchStart);
-        element.removeEventListener('touchend', handleTouchEnd);
-        element.removeEventListener('touchcancel', handleTouchCancel);
         safeCleanup();
       };
     } else {
@@ -477,21 +409,22 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
   }, [colors]);
 
-  // 🚨 IMMEDIATE DEBUG: Manual event handlers for testing
+  // Mobile touch handler - triggers voice calls
   const handleDirectTouch = (e: any) => {
-    console.log('🎯🎯🎯 TOUCH:', e.type, 'on', containerId);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[SiriCallButton] Touch event:', e.type, 'on', containerId);
+    }
     
-    // Test onCallStart directly
+    // Trigger voice call on touch end or click
     if (e.type === 'touchend' || e.type === 'click') {
-      console.log('🚀🚀🚀 CALLING onCallStart...');
       if (onCallStart) {
         onCallStart().then(() => {
-          console.log('✅✅✅ onCallStart SUCCESS!');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[SiriCallButton] Voice call started successfully');
+          }
         }).catch((error) => {
-          console.error('❌❌❌ onCallStart ERROR:', error);
+          console.error('[SiriCallButton] Voice call failed:', error);
         });
-      } else {
-        console.error('❌❌❌ onCallStart NOT AVAILABLE!');
       }
     }
   };
@@ -500,23 +433,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     <div 
       id={containerId}
       className="voice-button"
-      // 🚨 EMERGENCY: Direct event handlers for testing
+      // Direct event handlers for mobile touch and desktop click
       onTouchStart={handleDirectTouch}
       onTouchEnd={handleDirectTouch}
       onClick={handleDirectTouch}
       style={{ 
-        width: '100%', // Use full container width
-        height: '100%', // Use full container height
-        position: 'relative', // Relative for absolute canvas positioning
+        width: '100%',
+        height: '100%',
+        position: 'relative',
         cursor: 'pointer',
-        zIndex: 10, // Higher than canvas (zIndex: 1)
-        borderRadius: '50%', // Match container shape
-        // 🔧 HYBRID FIX: Remove flexbox centering to prevent conflicts
-        // ❌ REMOVED: display: 'flex', alignItems: 'center', justifyContent: 'center'
-        // 🔧 CRITICAL FIX: Ensure container can receive events
-        pointerEvents: 'auto', // Explicitly enable pointer events
-        background: 'rgba(255, 0, 0, 0.1)', // 🚨 TEMPORARY: Red background for testing
-        overflow: 'visible', // Allow canvas to be visible
+        zIndex: 10,
+        borderRadius: '50%',
+        pointerEvents: 'auto',
+        overflow: 'visible',
         // Mobile touch optimizations
         touchAction: 'manipulation', // Improve touch responsiveness
         WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
@@ -676,47 +605,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             </div>
           )}
 
-          {/* Immediate touch debug script - Development only */}
-          {process.env.NODE_ENV === 'development' && <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                setTimeout(() => {
-                  const container = document.getElementById('${containerId}');
-                  if (container) {
-                    console.log('🔍 [IMMEDIATE DEBUG] Container found:', container);
-                    
-                    // Add direct touch event logging
-                    container.addEventListener('touchstart', (e) => {
-                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH START on container!', {
-                        target: e.target,
-                        touches: e.touches.length,
-                        position: e.touches[0] ? [e.touches[0].clientX, e.touches[0].clientY] : null
-                      });
-                    });
-                    
-                    container.addEventListener('touchend', (e) => {
-                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH END on container!', {
-                        target: e.target,
-                        changedTouches: e.changedTouches.length
-                      });
-                    });
-                    
-                    container.addEventListener('click', (e) => {
-                      console.log('🔥 [IMMEDIATE DEBUG] CLICK on container!', {
-                        target: e.target,
-                        clientX: e.clientX,
-                        clientY: e.clientY
-                      });
-                    });
-                    
-                    console.log('✅ [IMMEDIATE DEBUG] Touch event listeners added to container');
-                  } else {
-                    console.error('❌ [IMMEDIATE DEBUG] Container not found:', '${containerId}');
-                  }
-                }, 500);
-              `
-            }}
-          />}
+
         </>
       )}
     </div>
