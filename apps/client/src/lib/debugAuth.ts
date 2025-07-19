@@ -6,17 +6,22 @@
 import { getAuthToken, getAuthHeaders } from './authHelper';
 
 export const debugAuth = {
-  async testLogin() {
-    console.log('🔐 [DebugAuth] Testing login...');
+  async testLogin(userType = 'manager') {
+    console.log(`🔐 [DebugAuth] Testing login with ${userType}...`);
+    
+    const credentials = {
+      manager: { email: 'manager', password: 'manager123' },
+      frontdesk: { email: 'frontdesk', password: 'frontdesk123' },
+      itmanager: { email: 'itmanager', password: 'itmanager123' }
+    };
+    
+    const cred = credentials[userType as keyof typeof credentials] || credentials.manager;
     
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: 'admin@hotel.com',
-          password: 'admin123'
-        })
+        body: JSON.stringify(cred)
       });
 
       console.log('📋 [DebugAuth] Login response status:', response.status);
@@ -28,6 +33,13 @@ export const debugAuth = {
       } else {
         const error = await response.text();
         console.error('❌ [DebugAuth] Login failed:', error);
+        
+        // Try alternative users if manager fails
+        if (userType === 'manager') {
+          console.log('🔄 [DebugAuth] Manager failed, trying frontdesk...');
+          return await this.testLogin('frontdesk');
+        }
+        
         return null;
       }
     } catch (error) {

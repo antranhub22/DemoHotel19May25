@@ -15,7 +15,8 @@ const initAuth = async () => {
     // Clear any potentially expired tokens first
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
-    console.log('🧹 [Main] Cleared any existing tokens to get fresh ones');
+    localStorage.removeItem('dev_auth_token');
+    console.log('🧹 [Main] Cleared all existing tokens to test new credentials');
     
     const token = await getAuthToken();
     if (token) {

@@ -8,32 +8,39 @@ const DEV_TOKEN_KEY = 'dev_auth_token';
  * Generate a development token for testing
  */
 export const generateDevToken = async (): Promise<string> => {
-  try {
-    // Try to login with default dev credentials
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: 'admin@hotel.com',
-        password: 'admin123'
-      })
-    });
+  const credentials = [
+    { email: 'manager', password: 'manager123' },
+    { email: 'frontdesk', password: 'frontdesk123' },
+    { email: 'itmanager', password: 'itmanager123' }
+  ];
+  
+  for (const cred of credentials) {
+    try {
+      console.log(`🔐 [AuthHelper] Trying login with ${cred.email}...`);
+      
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cred)
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem(DEV_TOKEN_KEY, 'true');
-        console.log('✅ [AuthHelper] Dev token generated and stored');
-        return data.token;
+      if (response.ok) {
+        const data = await response.json();
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem(DEV_TOKEN_KEY, 'true');
+          console.log(`✅ [AuthHelper] Dev token generated with ${cred.email}`);
+          return data.token;
+        }
+      } else {
+        console.warn(`⚠️ [AuthHelper] Login failed for ${cred.email}:`, response.status);
       }
+    } catch (error) {
+      console.warn(`⚠️ [AuthHelper] Error with ${cred.email}:`, error);
     }
-    
-    throw new Error('Failed to generate dev token');
-  } catch (error) {
-    console.error('❌ [AuthHelper] Failed to generate dev token:', error);
-    throw error;
   }
+  
+  throw new Error('Failed to generate dev token with any credentials');
 };
 
 /**
