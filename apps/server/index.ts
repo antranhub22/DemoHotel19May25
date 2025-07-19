@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { setupSocket } from './socket';
 import { runAutoDbFix } from './startup/auto-database-fix';
+import { runProductionMigration } from './startup/production-migration';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -157,6 +158,9 @@ app.use((req, res, next) => {
   const io = setupSocket(server);
   app.set('io', io);
 
+  // Run production migration first (for PostgreSQL schema fixes)
+  await runProductionMigration();
+  
   // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)
   if (process.env.AUTO_DB_FIX !== 'false') {
     console.log('🔧 Running auto database fix...');

@@ -38,7 +38,8 @@
     "validate:architecture": "node scripts/validate-architecture.cjs",
     "validate:all": "npm run validate:architecture && npm run typecheck",
     "guide:change": "node scripts/what-to-change-enhanced.cjs",
-    "check:siri-components": "npm run validate:architecture && echo '✅ Siri components architecture validated'"
+    "check:siri-components": "npm run validate:architecture && echo '✅ Siri components architecture validated'",
+    "fix:production-db": "npx tsx tools/scripts/fix-production-request-table.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
