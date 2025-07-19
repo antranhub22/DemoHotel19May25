@@ -33,20 +33,27 @@ export const useConversationState = ({
   const [showConversation, setShowConversation] = useState(false);
   const [manualCallStarted, setManualCallStarted] = useState(false); // Track manual start
 
-  // Sync with AssistantContext call state using callDuration
-  // BUT don't override manual call start until we have confirmation from server
+  // ✅ FIXED: Auto-sync isCallStarted with call duration and conversation state
   useEffect(() => {
     const isActive = callDuration > 0;
-    console.log('🔄 [useConversationState] callDuration sync:', { callDuration, isActive, manualCallStarted, currentIsCallStarted: isCallStarted });
     
-    // Only auto-set isCallStarted if:
-    // 1. We have active call duration (real confirmation), OR
-    // 2. We don't have manual start (normal auto-sync)
-    if (isActive) {
-      // Real call is active - sync state
-      console.log('✅ [useConversationState] Real call active - syncing isCallStarted = true');
+    console.log('🔄 [useConversationState] Syncing call states:', {
+      callDuration,
+      isActive,
+      isCallStarted,
+      manualCallStarted,
+      transcriptsCount: transcripts.length
+    });
+    
+    // Auto-sync isCallStarted with actual call state
+    if (isActive && !isCallStarted && !manualCallStarted) {
+      // There's an active call but UI shows inactive - sync to active
+      console.log('✅ [useConversationState] Active call detected - syncing isCallStarted = true');
       setIsCallStarted(true);
-      setManualCallStarted(false); // Clear manual flag since we have real confirmation
+    } else if (!isActive && isCallStarted && !manualCallStarted) {
+      // Call ended but UI still shows active - sync to inactive
+      console.log('❌ [useConversationState] Call ended - syncing isCallStarted = false');
+      setIsCallStarted(false);
     } else if (!manualCallStarted) {
       // No manual start and no active call - set to false
       console.log('❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false');
@@ -55,9 +62,29 @@ export const useConversationState = ({
       // Manual start in progress - don't override, let it stay true
       console.log('⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true');
     }
+  }, [callDuration, isCallStarted, manualCallStarted]); // ✅ REMOVED: transcripts.length
+  
+  // ✅ FIXED: Separate useEffect for showConversation to prevent flickering
+  useEffect(() => {
+    const isActive = callDuration > 0;
+    const shouldShowConversation = isActive || transcripts.length > 0 || manualCallStarted;
     
-    setShowConversation(isActive || transcripts.length > 0 || manualCallStarted);
-  }, [callDuration, transcripts.length, manualCallStarted, isCallStarted]);
+    console.log('🔄 [useConversationState] Evaluating showConversation:', {
+      isActive,
+      transcriptsCount: transcripts.length,
+      manualCallStarted,
+      currentShowConversation: showConversation,
+      shouldShowConversation
+    });
+    
+    // ✅ OPTIMIZATION: Only update if value actually changes
+    if (showConversation !== shouldShowConversation) {
+      console.log(`🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`);
+      setShowConversation(shouldShowConversation);
+    } else {
+      console.log('✅ [useConversationState] showConversation unchanged - no re-render');
+    }
+  }, [transcripts.length, manualCallStarted, showConversation]); // ✅ OPTIMIZED: Removed callDuration
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
