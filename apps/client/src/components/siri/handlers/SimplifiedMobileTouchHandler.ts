@@ -27,23 +27,14 @@ export class SimplifiedMobileTouchHandler {
   }
 
   public initialize(): boolean {
-    console.log('🔧 [SimplifiedMobileTouchHandler] INITIALIZE START', {
-      containerId: this.config.containerId,
-      enabled: this.config.enabled
-    });
+    console.log('🔧 INIT Handler for:', this.config.containerId);
 
     this.cleanup(); // Ensure clean state
 
     this.element = document.getElementById(this.config.containerId);
-    console.log('🔧 [SimplifiedMobileTouchHandler] Element lookup result:', {
-      containerId: this.config.containerId,
-      found: !!this.element,
-      element: this.element
-    });
 
     if (!this.element) {
-      this.debugError('Container element not found:', this.config.containerId);
-      console.error('🔧 [SimplifiedMobileTouchHandler] ❌ INITIALIZATION FAILED - Element not found');
+      console.error('❌ Element not found:', this.config.containerId);
       return false;
     }
 
@@ -95,18 +86,10 @@ export class SimplifiedMobileTouchHandler {
   }
 
   private handleTouchStart = (e: TouchEvent): void => {
-    console.log('🔥 [SimplifiedMobileTouchHandler] TOUCH START!', {
-      enabled: this.config.enabled,
-      isProcessing: this.isProcessing,
-      touches: e.touches.length
-    });
+    console.log('👆 TOUCH START');
 
     if (!this.config.enabled || this.isProcessing) {
-      console.log('🔥 [SimplifiedMobileTouchHandler] Touch start IGNORED', {
-        enabled: this.config.enabled,
-        isProcessing: this.isProcessing
-      });
-      this.debug('Touch start ignored - disabled or processing');
+      console.log('❌ Touch ignored - disabled or processing');
       return;
     }
 
@@ -142,15 +125,10 @@ export class SimplifiedMobileTouchHandler {
   };
 
   private handleTouchEnd = async (e: TouchEvent): Promise<void> => {
-    console.log('🔥 [SimplifiedMobileTouchHandler] TOUCH END!', {
-      enabled: this.config.enabled,
-      isProcessing: this.isProcessing,
-      changedTouches: e.changedTouches.length
-    });
+    console.log('👆 TOUCH END');
 
     if (!this.config.enabled) {
-      console.log('🔥 [SimplifiedMobileTouchHandler] Touch end IGNORED - disabled');
-      this.debug('Touch end ignored - disabled');
+      console.log('❌ Touch end ignored - disabled');
       return;
     }
 
@@ -200,14 +178,11 @@ export class SimplifiedMobileTouchHandler {
       if (!this.config.isListening) {
         // Start call
         if (this.callbacks.onCallStart) {
-          console.log('🟢 [SimplifiedMobileTouchHandler] CALLING onCallStart()');
-          this.debug('🟢 CALLING onCallStart()');
+          console.log('🚀🚀🚀 Handler calling onCallStart...');
           await this.callbacks.onCallStart();
-          console.log('✅ [SimplifiedMobileTouchHandler] onCallStart() completed successfully');
-          this.debug('✅ onCallStart() completed successfully');
+          console.log('✅✅✅ Handler onCallStart success!');
         } else {
-          console.log('⚠️ [SimplifiedMobileTouchHandler] onCallStart callback NOT AVAILABLE');
-          this.debugWarn('onCallStart callback not available');
+          console.log('❌❌❌ Handler: onCallStart not available!');
         }
       } else {
         // End call

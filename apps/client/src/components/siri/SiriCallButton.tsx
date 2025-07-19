@@ -32,13 +32,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   colors
 }) => {
   // 🚨 IMMEDIATE DEBUG: Log component render
-  console.log('🔥 [SiriCallButton] COMPONENT RENDER START', {
-    containerId,
-    isListening,
-    onCallStartAvailable: !!onCallStart,
-    onCallEndAvailable: !!onCallEnd,
-    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  });
+  console.log('🔥🔥🔥 [SiriCallButton] ===== MOBILE TOUCH TEST READY =====');
+  console.log('🔥 [SiriCallButton] Container:', containerId, 'onCallStart:', !!onCallStart, 'Mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
   const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
@@ -503,24 +498,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // 🚨 IMMEDIATE DEBUG: Manual event handlers for testing
   const handleDirectTouch = (e: any) => {
-    console.log('🔥 [SiriCallButton] 🎯 DIRECT TOUCH DETECTED!', {
-      type: e.type,
-      target: e.target,
-      containerId: containerId,
-      timestamp: Date.now()
-    });
+    console.log('🎯🎯🎯 TOUCH:', e.type, 'on', containerId);
     
     // Test onCallStart directly
     if (e.type === 'touchend' || e.type === 'click') {
-      console.log('🔥 [SiriCallButton] 🚀 DIRECT TRIGGER onCallStart');
+      console.log('🚀🚀🚀 CALLING onCallStart...');
       if (onCallStart) {
         onCallStart().then(() => {
-          console.log('🔥 [SiriCallButton] ✅ DIRECT onCallStart SUCCESS');
+          console.log('✅✅✅ onCallStart SUCCESS!');
         }).catch((error) => {
-          console.error('🔥 [SiriCallButton] ❌ DIRECT onCallStart ERROR:', error);
+          console.error('❌❌❌ onCallStart ERROR:', error);
         });
       } else {
-        console.error('🔥 [SiriCallButton] ❌ onCallStart NOT AVAILABLE');
+        console.error('❌❌❌ onCallStart NOT AVAILABLE!');
       }
     }
   };
