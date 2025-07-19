@@ -85,6 +85,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     console.log('  ✅ Priority 2: Mobile unified with desktop protections');
     console.log('  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)');
     console.log('  ✅ Priority 4: MobileTouchDebugger enabled for testing');
+    console.log('  🚫 DISABLED: Cancel and Confirm buttons hidden by user request');
     console.log('  🎯 isCallStarted:', isCallStarted, 'isConfirming:', isConfirming);
     console.log('  🎯 onCallStart available:', !!onCallStart, 'onCallEnd available:', !!onCallEnd);
   }
@@ -160,7 +161,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         alignItems: 'center',
       }}
     >
-      {/* Top Row: Cancel + Confirm - FIXED positioning to prevent layout shifts */}
+      {/* Top Row: Cancel + Confirm - DISABLED BY USER REQUEST */}
       <div 
         className="flex items-center justify-center gap-4 w-full max-w-sm px-4"
         style={{
@@ -170,24 +171,28 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           left: '50%',
           transform: 'translateX(-50%)',
           height: '40px',           // Fixed height for buttons
-          opacity: isCallStarted && !showingSummary ? 1 : 0, // ✅ NEW: Hide when summary is showing
-          visibility: isCallStarted && !showingSummary ? 'visible' : 'hidden', // ✅ NEW: Hide when summary is showing
+          // 🚫 DISABLED: Hide Cancel and Confirm buttons completely
+          opacity: 0,
+          visibility: 'hidden',
+          pointerEvents: 'none',    // Disable all interactions
           transition: 'opacity 0.3s ease-in-out',
           zIndex: 1,                // Above container but below outer z-index
         }}
       >
-        {/* Cancel Button */}
+        {/* Cancel Button - DISABLED */}
         <button
           onClick={onCancel}
+          disabled={true}
           className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
         >
           Cancel
         </button>
 
-        {/* Confirm Button */}
+        {/* Confirm Button - DISABLED */}
         <button
           onClick={handleConfirm}
+          disabled={true}
           className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
         >
