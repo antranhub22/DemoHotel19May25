@@ -31,17 +31,20 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({ isOpen, onClose, layout = '
   const [callHasEnded, setCallHasEnded] = useState(false);
   const [showSummaryData, setShowSummaryData] = useState(false);
 
-  // Track when call actually ends (from active to 0)
+  // ✅ ORIGINAL WORKING LOGIC: Track when call actually ends (from active to 0)
   useEffect(() => {
-    const prevDuration = callDuration;
-    
-    if (prevDuration > 0 && callDuration === 0) {
-      console.log('🏁 [SummaryPopup] Call has ended - marking callHasEnded');
+    // Track call ending: if callDuration goes from > 0 to 0, then call ended
+    if (callDuration === 0 && transcripts.length > 0) {
+      // Call ended if we have transcripts (meaning call was active before)
       setCallHasEnded(true);
+      console.log('📞 [SummaryPopup] Call has ended - enabling summary features');
+    } else if (callDuration > 0) {
+      // Call is active - reset ended flag
+      setCallHasEnded(false);
     }
-  }, [callDuration]);
+  }, [callDuration, transcripts.length]);
 
-  // Check when to show summary data
+  // ✅ ORIGINAL WORKING LOGIC: Check when to show summary data
   useEffect(() => {
     const summaryData = getSummaryData();
     console.log('🔍 [SummaryPopup] Summary data check:', {
@@ -49,12 +52,13 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({ isOpen, onClose, layout = '
       hasServiceRequests: serviceRequests?.length > 0,
       summaryDataHasData: summaryData.hasData,
       transcriptsCount: transcripts.length,
-      callHasEnded
+      callHasEnded,
+      callDuration
     });
     
-    // Show summary data if we have actual data OR if call ended with transcripts
+    // Show summary data if we have actual data OR if call has actually ended with transcripts
     const shouldShowData = summaryData.hasData || 
-      (transcripts.length >= 2 && callHasEnded);
+      (transcripts.length >= 2 && callHasEnded); // ✅ Only after call ACTUALLY ends
     
     setShowSummaryData(shouldShowData);
     console.log('📋 [SummaryPopup] Summary data visibility:', shouldShowData);
@@ -84,12 +88,14 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({ isOpen, onClose, layout = '
       return {
         source: 'OpenAI Enhanced',
         roomNumber,
-        content: serviceRequests.map(req => req.requestText).join('; '),
+        content: serviceRequests.map(req => 
+          `${req.serviceType}: ${req.requestText}`
+        ).join('\n'),
         items: serviceRequests.map(req => ({
-          name: req.requestText || 'Service Request',
-          description: req.details?.otherDetails || '',
+          name: req.serviceType,
+          description: req.requestText,
           quantity: 1,
-          price: 0
+          price: 10
         })),
         timestamp: new Date(),
         hasData: true
@@ -108,11 +114,11 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({ isOpen, onClose, layout = '
       };
     }
     
-    // Priority 4: No data state
+    // Fallback: No summary available
     return {
-      source: 'No Data',
-      roomNumber: 'N/A',
-      content: 'No summary available yet',
+      source: 'No data',
+      roomNumber: 'Unknown',
+      content: 'Call summary not available yet',
       items: [],
       timestamp: new Date(),
       hasData: false
