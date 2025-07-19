@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
 import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
-import { MobileTouchDebugger } from './MobileTouchDebugger';
-import { useSimplifiedMobileTouch } from '@/hooks/useSimplifiedMobileTouch';
+
+
 import '../../styles/voice-interface.css';
 import { Language } from '@/types/interface1.types';
 
@@ -68,22 +68,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const maxInitAttempts = 3;
   const emergencyStopRequested = useRef<boolean>(false);
 
-  // Mobile optimization - Always using simplified approach based on testing results
-  
-  const simplifiedMobileTouch = useSimplifiedMobileTouch({
-    containerId,
-    isListening,
-    onCallStart,
-    onCallEnd,
-    onInteractionStart: (position) => {
-      // Mobile visual only mode - no SiriButton updates needed
-    },
-    onInteractionEnd: () => {
-      // Mobile visual only mode - no SiriButton updates needed  
-    },
-    enabled: true, // Always use simplified mobile touch
-    debugEnabled: DEBUG_LEVEL >= 1
-  });
+  // Mobile optimization - Using direct JSX event handlers (handleDirectTouch)
 
   // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
@@ -545,69 +530,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         </div>
       )}
 
-      {/* Debug components - Development only */}
-      {process.env.NODE_ENV === 'development' && (
-        <>
-          <MobileTouchDebugger
-            containerId={containerId}
-            onCallStart={onCallStart}
-            onCallEnd={onCallEnd}
-            isListening={isListening}
-            enabled={true}
-          />
-          
-          {/* Simplified mobile touch debug info - Development only */}
-          {process.env.NODE_ENV === 'development' && simplifiedMobileTouch.isMobile && (
-            <div
-              style={{
-                position: 'fixed',
-                top: '10px',
-                left: '10px',
-                zIndex: 99997,
-                background: simplifiedMobileTouch.isEnabled ? '#4CAF50' : '#f44336',
-                color: 'white',
-                padding: '8px 12px',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-              }}
-            >
-              {simplifiedMobileTouch.isEnabled ? '🚀 SIMPLIFIED TOUCH' : '🔧 COMPLEX TOUCH'}
-              <button
-                onClick={async () => {
-                  console.log('🧪 [DEBUG] Manual TEST button clicked');
-                  console.log('🧪 [DEBUG] onCallStart available:', !!onCallStart);
-                  console.log('🧪 [DEBUG] isListening:', isListening);
-                  if (onCallStart) {
-                    try {
-                      console.log('🧪 [DEBUG] Calling onCallStart...');
-                      await onCallStart();
-                      console.log('✅ [DEBUG] onCallStart completed');
-                    } catch (error) {
-                      console.error('❌ [DEBUG] onCallStart failed:', error);
-                    }
-                  }
-                }}
-                style={{
-                  marginLeft: '8px',
-                  background: 'rgba(255,255,255,0.2)',
-                  border: 'none',
-                  color: 'white',
-                  padding: '2px 6px',
-                  borderRadius: '10px',
-                  fontSize: '10px',
-                  cursor: 'pointer'
-                }}
-              >
-                TEST
-              </button>
-            </div>
-          )}
 
-
-        </>
-      )}
     </div>
   );
 };
