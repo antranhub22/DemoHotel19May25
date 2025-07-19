@@ -230,12 +230,13 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     // Scroll behavior (spread)
     ...scrollBehavior,
     
-    // Conversation state (spread) - BUT OVERRIDE handleConfirm
-    ...conversationState,
-    handleConfirm, // 🔧 Use new handler from useConfirmHandler
-    
-    // Override with Interface1-specific handlers
-    handleCancel,
+    // Conversation state - BE EXPLICIT
+    isCallStarted: conversationState.isCallStarted,
+    showConversation: conversationState.showConversation,
+    handleCallStart: conversationState.handleCallStart,
+    handleCallEnd: conversationState.handleCallEnd,
+    handleCancel, // From useCancelHandler
+    handleConfirm, // From useConfirmHandler
     
     // Right panel state
     showRightPanel,
