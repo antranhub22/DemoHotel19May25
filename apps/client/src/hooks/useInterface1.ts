@@ -9,7 +9,6 @@ import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
-import { usePopupContext } from '@/context/PopupContext';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -40,9 +39,6 @@ interface UseInterface1Return {
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
-  
-  // ✅ NEW: Summary popup state
-  showingSummary: boolean;
   
   // Right panel state
   showRightPanel: boolean;
@@ -76,7 +72,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
  */
 const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, language } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Popup system hooks - keep all for demo functions, just disable auto-conversation
@@ -208,21 +204,11 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   });
 
   const { handleConfirm } = useConfirmHandler({
-    endCall, // ✅ FIXED: Use AssistantContext.endCall directly
+    conversationState,
     transcripts,
     callSummary,
     serviceRequests
   });
-
-  // ✅ NEW: Track summary popup state
-  const { popups } = usePopupContext();
-  const [showingSummary, setShowingSummary] = useState(false);
-
-  // ✅ NEW: Monitor summary popups
-  useEffect(() => {
-    const summaryPopup = popups.find(popup => popup.type === 'summary');
-    setShowingSummary(!!summaryPopup);
-  }, [popups]);
 
   // Update badge count when transcripts change
   useEffect(() => {
@@ -251,9 +237,6 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     handleCallEnd: conversationState.handleCallEnd,
     handleCancel, // From useCancelHandler
     handleConfirm, // From useConfirmHandler
-    
-    // ✅ NEW: Summary popup state
-    showingSummary,
     
     // Right panel state
     showRightPanel,

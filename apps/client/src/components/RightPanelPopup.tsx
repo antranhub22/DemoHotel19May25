@@ -42,31 +42,8 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
         {/* Conditional Content */}
         {showSummary ? (
           /* Summary Content */
-          <div className="space-y-4">
-            {/* Summary Content */}
-            <div className="overflow-y-auto" style={{ maxHeight: '320px' }}>
-              <SummaryPopupContent />
-            </div>
-            
-            {/* ✅ NEW: Action Buttons */}
-            <div className="flex gap-3 pt-3 border-t border-gray-100">
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  // TODO: Implement send to front desk logic
-                  alert('Request sent to Front Desk!');
-                  onClose();
-                }}
-                className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                Send to FrontDesk
-              </button>
-            </div>
+          <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+            <SummaryPopupContent />
           </div>
         ) : (
           /* Placeholder Content */

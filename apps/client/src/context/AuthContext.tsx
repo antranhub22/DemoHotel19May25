@@ -69,24 +69,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Auth Hook
 // ============================================
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    console.warn('useAuth used outside AuthProvider - returning safe defaults');
-    // Return safe defaults instead of throwing
-    return {
-      user: null,
-      tenant: null,
-      isLoading: false,
-      isAuthenticated: false,
-      login: async () => {},
-      logout: () => {},
-      hasPermission: () => false,
-      hasRole: () => false,
-      refreshAuth: async () => {},
-      hasFeature: () => false,
-      isWithinLimits: () => true,
-    };
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
