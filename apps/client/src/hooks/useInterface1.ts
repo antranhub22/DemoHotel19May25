@@ -1,15 +1,13 @@
-import { Language } from '@/types/interface1.types';
-
-// Legacy implementation (current working version)
 import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
+import { usePopupContext } from '@/context/PopupContext';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
-import { usePopupContext } from '@/context/PopupContext';
+import { Language } from '@/types/interface1.types';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -41,7 +39,7 @@ interface UseInterface1Return {
   handleCancel: () => void;
   handleConfirm: () => void;
   
-  // ✅ NEW: Summary popup state
+  // ✅ Summary popup state
   showingSummary: boolean;
   
   // Right panel state
@@ -56,25 +54,14 @@ interface UseInterface1Return {
 }
 
 /**
- * useInterface1 - Main Hook with Feature Flag
+ * useInterface1 - Unified Interface1 Hook
  * 
- * Supports both legacy and refactored implementations:
- * - Legacy: Current working implementation (354 lines monolithic)
- * - Refactored: New modular hooks architecture (5 smaller hooks)
- * 
- * Switch via environment variable: VITE_USE_REFACTORED_INTERFACE1=true
+ * Single source of truth for Interface1 functionality:
+ * - Uses dedicated button handlers (useCancelHandler, useConfirmHandler)
+ * - Integrates all behavior hooks (scroll, conversation, popup)
+ * - Provides comprehensive error handling and state management
  */
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
-  // ✅ Single stable implementation
-  console.log('✅ [useInterface1] Using single stable implementation');
-  return useInterface1Legacy({ isActive });
-};
-
-/**
- * Legacy Implementation - Current Working Version
- * Preserved exactly as-is for safety and fallback
- */
-const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
   const { micLevel, transcripts, callSummary, serviceRequests, language, endCall } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
@@ -93,13 +80,39 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   const [showRightPanel, setShowRightPanel] = useState(false);
   const isInitialMount = useRef(true);
   
+  // ✅ Dedicated button handlers - Single Source of Truth
+  const { handleCancel } = useCancelHandler({
+    conversationState,
+    conversationPopupId,
+    setConversationPopupId,
+    setShowRightPanel,
+    transcripts
+  });
+
+  const { handleConfirm } = useConfirmHandler({
+    endCall,
+    transcripts,
+    callSummary,
+    serviceRequests
+  });
+
+  // ✅ Track summary popup state
+  const { popups } = usePopupContext();
+  const [showingSummary, setShowingSummary] = useState(false);
+
+  // ✅ Monitor summary popups
+  useEffect(() => {
+    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    setShowingSummary(!!summaryPopup);
+  }, [popups]);
+  
   // DISABLED: Auto-popup effects - using ConversationSection instead
   // All conversation popup management moved to ConversationSection component
   
   // Effect to restart call when language changes during active call
   useEffect(() => {
     // TEMPORARILY DISABLED - causing issues
-    console.log('🚫 [useInterface1Legacy] Language change restart logic temporarily disabled for debugging');
+    console.log('🚫 [useInterface1] Language change restart logic temporarily disabled for debugging');
     return;
     
     // Skip the initial mount and only react to actual language changes
@@ -109,22 +122,22 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     }
     
     if (conversationState.isCallStarted && conversationPopupId) {
-      console.log('🔄 [useInterface1Legacy] Language changed during active call to:', language);
-      console.log('🔄 [useInterface1Legacy] Will restart call with new language assistant');
+      console.log('🔄 [useInterface1] Language changed during active call to:', language);
+      console.log('🔄 [useInterface1] Will restart call with new language assistant');
       
       // Restart the call with new language  
       setTimeout(async () => {
         try {
-          console.log('🛑 [useInterface1Legacy] Stopping current call for language switch...');
+          console.log('🛑 [useInterface1] Stopping current call for language switch...');
           await conversationState.handleCallEnd();
           
           // Brief pause then restart
           setTimeout(async () => {
-            console.log('🎤 [useInterface1Legacy] Restarting call with new language:', language);
+            console.log('🎤 [useInterface1] Restarting call with new language:', language);
             await conversationState.handleCallStart(language);
           }, 1000);
         } catch (error) {
-          console.error('❌ [useInterface1Legacy] Error restarting call with new language:', error);
+          console.error('❌ [useInterface1] Error restarting call with new language:', error);
         }
       }, 300);
     }
@@ -198,37 +211,11 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     });
   };
 
-  // Get handlers from separate hook modules
-  const { handleCancel } = useCancelHandler({
-    conversationState,
-    conversationPopupId,
-    setConversationPopupId,
-    setShowRightPanel,
-    transcripts
-  });
-
-  const { handleConfirm } = useConfirmHandler({
-    endCall, // ✅ FIXED: Use AssistantContext.endCall directly
-    transcripts,
-    callSummary,
-    serviceRequests
-  });
-
-  // ✅ NEW: Track summary popup state
-  const { popups } = usePopupContext();
-  const [showingSummary, setShowingSummary] = useState(false);
-
-  // ✅ NEW: Monitor summary popups
-  useEffect(() => {
-    const summaryPopup = popups.find(popup => popup.type === 'summary');
-    setShowingSummary(!!summaryPopup);
-  }, [popups]);
-
   // Update badge count when transcripts change
   useEffect(() => {
     if (conversationPopupId && transcripts.length > 0) {
       // TODO: Update popup badge count
-      console.log(`📊 [useInterface1Legacy] Transcripts updated: ${transcripts.length} messages`);
+      console.log(`📊 [useInterface1] Transcripts updated: ${transcripts.length} messages`);
     }
   }, [transcripts.length, conversationPopupId]);
 
@@ -249,10 +236,10 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     showConversation: conversationState.showConversation,
     handleCallStart: conversationState.handleCallStart,
     handleCallEnd: conversationState.handleCallEnd,
-    handleCancel, // From useCancelHandler
-    handleConfirm, // From useConfirmHandler
+    handleCancel, // ✅ From useCancelHandler
+    handleConfirm, // ✅ From useConfirmHandler
     
-    // ✅ NEW: Summary popup state
+    // ✅ Summary popup state
     showingSummary,
     
     // Right panel state
