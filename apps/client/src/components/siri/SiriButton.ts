@@ -251,7 +251,7 @@ export class SiriButton {
   public emergencyStopPublic(): void {
     this.emergency.triggerEmergencyStop();
     this.animation.stop();
-    this.debug.warn('🚨 [SiriButton] Emergency stop triggered via public API');
+    this.debug.warn('[SiriButton] Emergency stop triggered via public API');
   }
 
   /**
@@ -345,7 +345,7 @@ export class SiriButton {
           this.canvas.parentElement.removeChild(this.canvas);
         this.debug.log('✅ [SiriButton] Canvas removed successfully');
       } catch (error) {
-        this.debug.warn('⚠️ [SiriButton] Error removing canvas:', error);
+        this.debug.warn('[SiriButton] Error removing canvas:', error);
       }
       }
       

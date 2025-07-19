@@ -31,22 +31,23 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   language = 'en',
   colors
 }) => {
-  // 🚨 IMMEDIATE DEBUG: Log component render
-  console.log('🔥🔥🔥 [SiriCallButton] ===== MOBILE TOUCH TEST READY =====');
-  console.log('🔥 [SiriCallButton] Container:', containerId, 'onCallStart:', !!onCallStart, 'Mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  // Component render debug - Development only
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[SiriCallButton] Component render - Container:', containerId, 'onCallStart:', !!onCallStart, 'Mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  }
 
   // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
   const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
   
-  // 🔧 PHASE 2: Debug utility methods
+  // Debug utility methods - Environment aware
   const debug = (message: string, ...args: any[]) => {
-    if (DEBUG_LEVEL >= 2) {
+    if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 2) {
       console.log(`[SiriCallButton] ${message}`, ...args);
     }
   };
 
   const debugWarn = (message: string, ...args: any[]) => {
-    if (DEBUG_LEVEL >= 1) {
+    if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 1) {
       console.warn(`[SiriCallButton] ${message}`, ...args);
     }
   };
@@ -67,9 +68,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const maxInitAttempts = 3;
   const emergencyStopRequested = useRef<boolean>(false);
 
-  // 🚀 EMERGENCY FIX: Simplified Mobile Touch Handler
-  const USE_SIMPLIFIED_MOBILE_TOUCH = true; // Feature flag for testing
-  const USE_MOBILE_VISUAL_ONLY = true; // Feature flag to bypass SiriButton entirely on mobile
+  // Mobile optimization - Always using simplified approach based on testing results
   
   const simplifiedMobileTouch = useSimplifiedMobileTouch({
     containerId,
@@ -77,19 +76,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     onCallStart,
     onCallEnd,
     onInteractionStart: (position) => {
-      // Only try to update SiriButton if we're not using mobile visual only
-      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
-        buttonRef.current.setInteractionMode('active');
-        buttonRef.current.setTouchPosition(position.x, position.y);
-      }
+      // Mobile visual only mode - no SiriButton updates needed
     },
     onInteractionEnd: () => {
-      // Only try to update SiriButton if we're not using mobile visual only
-      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
-        buttonRef.current.setInteractionMode('idle');
-      }
+      // Mobile visual only mode - no SiriButton updates needed  
     },
-    enabled: USE_SIMPLIFIED_MOBILE_TOUCH,
+    enabled: true, // Always use simplified mobile touch
     debugEnabled: DEBUG_LEVEL >= 1
   });
 
@@ -230,9 +222,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   useEffect(() => {
     const isMobile = isMobileDevice();
     
-    // 🚀 EMERGENCY BYPASS: Skip SiriButton creation on mobile if using visual-only mode
-    if (isMobile && USE_MOBILE_VISUAL_ONLY) {
-      debug('🚀 [SiriCallButton] BYPASSING SiriButton creation - using mobile visual only');
+    // Skip SiriButton creation on mobile - using visual-only mode
+    if (isMobile) {
+      debug('[SiriCallButton] Bypassing SiriButton creation - using mobile visual only');
       setCanvasReady(true); // Set ready immediately for mobile visual
       return () => {
         // No cleanup needed for mobile visual only
@@ -313,12 +305,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     logDeviceInfo('SiriCallButton');
     console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobileDevice_local);
 
-    // 🚀 EMERGENCY FIX: Use simplified mobile touch handler if enabled
-    if (isMobileDevice_local && USE_SIMPLIFIED_MOBILE_TOUCH) {
-      console.log('🚀 [SiriCallButton] Using SIMPLIFIED mobile touch handler');
+    // Use simplified mobile touch handler on mobile devices
+    if (isMobileDevice_local) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SiriCallButton] Using simplified mobile touch handler');
+      }
       // Simplified handler is already set up via the hook
       // Just log the status
-      const handlerState = simplifiedMobileTouch.getHandlerState();
+      const handlerState = simplifiedMobileTouch.handlerState;
       console.log('🚀 [SiriCallButton] Simplified handler state:', handlerState);
       
       return () => {
@@ -326,26 +320,15 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         safeCleanup();
       };
     } else if (isMobileDevice_local) {
-      // ✅ MOBILE: Touch events with enhanced debugging
-      console.log('📱 [SiriCallButton] 🔥 SETTING UP MOBILE TOUCH EVENTS');
-      console.log('  📱 Element for touch events:', element);
-      console.log('  📱 Element rect:', element.getBoundingClientRect());
-      console.log('  📱 Element computed style:', {
-        position: getComputedStyle(element).position,
-        zIndex: getComputedStyle(element).zIndex,
-        pointerEvents: getComputedStyle(element).pointerEvents,
-        display: getComputedStyle(element).display,
-        width: getComputedStyle(element).width,
-        height: getComputedStyle(element).height
-      });
+      // Mobile touch events setup
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[SiriCallButton] Setting up mobile touch events for:', element.id);
+      }
       
-      const handleTouchStart = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] 🔥 TOUCH START DETECTED!');
-        console.log('  📱 Touch event:', e);
-        console.log('  📱 Touch target:', e.target);
-        console.log('  📱 Touch position:', e.touches[0].clientX, e.touches[0].clientY);
-        console.log('  📱 Element rect:', element.getBoundingClientRect());
-        console.log('  📱 Touches count:', e.touches.length);
+              const handleTouchStart = (e: TouchEvent) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[SiriCallButton] Touch start detected');
+          }
         
         const touch = e.touches[0];
         const rect = element.getBoundingClientRect();
@@ -357,12 +340,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         console.log('  ✅ Touch start handled successfully');
       };
 
-      const handleTouchEnd = (e: TouchEvent) => {
-        console.log('📱 [SiriCallButton] 🔥 TOUCH END DETECTED!');
-        console.log('  📱 Touch event:', e);
-        console.log('  📱 Touch target:', e.target);
-        console.log('  📱 Changed touches:', e.changedTouches.length);
-        console.log('  📱 Preventing default to avoid ghost clicks');
+              const handleTouchEnd = (e: TouchEvent) => {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[SiriCallButton] Touch end detected');
+          }
         
         e.preventDefault(); // Prevent ghost click
         handleInteractionEnd(e);
@@ -571,8 +552,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         />
       )}
 
-      {/* 🚀 MOBILE VISUAL: Simple mobile visual component */}
-      {isMobileDevice() && USE_MOBILE_VISUAL_ONLY && canvasReady && (
+      {/* Mobile visual component */}
+      {isMobileDevice() && canvasReady && (
         <div 
           style={{
             position: 'absolute',
@@ -600,8 +581,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         </div>
       )}
 
-      {/* Loading state - Only show for non-mobile or when not using mobile visual */}
-      {!canvasReady && !(isMobileDevice() && USE_MOBILE_VISUAL_ONLY) && (
+      {/* Loading state - Only show for non-mobile devices */}
+      {!canvasReady && !isMobileDevice() && (
         <div 
           className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
@@ -635,9 +616,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         </div>
       )}
 
-      {/* 🚨 EMERGENCY DEBUG: Mobile Touch Debugger - Remove after fixing mobile issues */}
-      {/* FORCE SHOW DEBUG - Temporarily always show for testing */}
-      {true && (
+      {/* Debug components - Development only */}
+      {process.env.NODE_ENV === 'development' && (
         <>
           <MobileTouchDebugger
             containerId={containerId}
@@ -647,8 +627,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             enabled={true}
           />
           
-          {/* 🚀 SIMPLIFIED MOBILE TOUCH DEBUG INFO */}
-          {simplifiedMobileTouch.isMobile && (
+          {/* Simplified mobile touch debug info - Development only */}
+          {process.env.NODE_ENV === 'development' && simplifiedMobileTouch.isMobile && (
             <div
               style={{
                 position: 'fixed',
@@ -696,8 +676,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             </div>
           )}
 
-          {/* 🚨 IMMEDIATE TOUCH DEBUG - Add direct touch logging to container */}
-          <script
+          {/* Immediate touch debug script - Development only */}
+          {process.env.NODE_ENV === 'development' && <script
             dangerouslySetInnerHTML={{
               __html: `
                 setTimeout(() => {
@@ -736,7 +716,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
                 }, 500);
               `
             }}
-          />
+          />}
         </>
       )}
     </div>

@@ -1,6 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useCallback } from 'react';
 import { isMobileDevice } from '@/utils/deviceDetection';
-import { SimplifiedMobileTouchHandler, TouchCallbacks, TouchHandlerConfig } from '@/components/siri/handlers/SimplifiedMobileTouchHandler';
 
 interface UseSimplifiedMobileTouchProps {
   containerId: string;
@@ -23,117 +22,36 @@ export const useSimplifiedMobileTouch = ({
   enabled = true,
   debugEnabled = process.env.NODE_ENV === 'development'
 }: UseSimplifiedMobileTouchProps) => {
-  const handlerRef = useRef<SimplifiedMobileTouchHandler | null>(null);
   const isMobile = isMobileDevice();
+  const isEnabled = enabled && isMobile;
 
-  // Create stable callback refs to avoid unnecessary re-initializations
-  const callbacksRef = useRef<TouchCallbacks>({});
-  
-  // Update callbacks ref when props change
-  useEffect(() => {
-    callbacksRef.current = {
-      onCallStart,
-      onCallEnd,
-      onInteractionStart,
-      onInteractionEnd
-    };
-
-    // Update handler callbacks if it exists
-    if (handlerRef.current) {
-      handlerRef.current.updateCallbacks(callbacksRef.current);
-    }
-  }, [onCallStart, onCallEnd, onInteractionStart, onInteractionEnd]);
-
-  // Initialize handler
-  useEffect(() => {
-    // Only initialize on mobile devices
-    if (!isMobile || !enabled) {
-      console.log('📱 SKIPPING: Not mobile or disabled');
-      return;
-    }
-
-    console.log('📱 INITIALIZING SimplifiedMobileTouch for:', containerId);
-
-    const config: TouchHandlerConfig = {
-      containerId,
-      isListening,
-      enabled: true,
-      debugEnabled
-    };
-
-    // Create handler if it doesn't exist
-    if (!handlerRef.current) {
-      handlerRef.current = new SimplifiedMobileTouchHandler(config, callbacksRef.current);
-      
-      // Initialize with retry logic
-      const initializeWithRetry = () => {
-        const success = handlerRef.current?.initialize();
-        if (!success && handlerRef.current) {
-          // Retry after a short delay if container not found
-          setTimeout(() => {
-            handlerRef.current?.initialize();
-          }, 100);
+  // Simple test function for manual testing
+  const manualTest = useCallback(async () => {
+    if (debugEnabled) {
+      console.log('🧪 [useSimplifiedMobileTouch] Manual test call start');
+      if (onCallStart) {
+        try {
+          await onCallStart();
+          console.log('✅ [useSimplifiedMobileTouch] Manual test successful');
+        } catch (error) {
+          console.error('❌ [useSimplifiedMobileTouch] Manual test failed:', error);
         }
-      };
-
-      // Try immediate initialization
-      initializeWithRetry();
-
-      // Also try after a delay in case the DOM isn't ready
-      setTimeout(initializeWithRetry, 200);
-    }
-
-    return () => {
-      // Don't cleanup here - let the final useEffect handle it
-    };
-  }, [containerId, isMobile, enabled, debugEnabled]);
-
-  // Update config when props change
-  useEffect(() => {
-    if (handlerRef.current && isMobile && enabled) {
-      handlerRef.current.updateConfig({
-        isListening,
-        enabled: true,
-        debugEnabled
-      });
-    }
-  }, [isListening, enabled, debugEnabled, isMobile]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (handlerRef.current) {
-        handlerRef.current.cleanup();
-        handlerRef.current = null;
+      } else {
+        console.warn('⚠️ [useSimplifiedMobileTouch] onCallStart not available for test');
       }
-    };
-  }, []);
-
-  // Manual test function for debugging
-  const testCallStart = useCallback(async () => {
-    if (callbacksRef.current.onCallStart) {
-      try {
-        console.log('🧪 [useSimplifiedMobileTouch] Manual test call start');
-        await callbacksRef.current.onCallStart();
-        console.log('✅ [useSimplifiedMobileTouch] Manual test successful');
-      } catch (error) {
-        console.error('❌ [useSimplifiedMobileTouch] Manual test failed:', error);
-      }
-    } else {
-      console.warn('⚠️ [useSimplifiedMobileTouch] onCallStart not available for test');
     }
-  }, []);
-
-  // Get handler state for debugging
-  const getHandlerState = useCallback(() => {
-    return handlerRef.current?.getState() || null;
-  }, []);
+  }, [onCallStart, debugEnabled]);
 
   return {
     isMobile,
-    isEnabled: isMobile && enabled,
-    testCallStart,
-    getHandlerState,
-    handler: handlerRef.current
+    isEnabled,
+    manualTest,
+    // Legacy compatibility - provide handler state for existing code
+    handlerState: {
+      isInitialized: isEnabled,
+      isProcessing: false,
+      containerId,
+      isListening
+    }
   };
 }; 
