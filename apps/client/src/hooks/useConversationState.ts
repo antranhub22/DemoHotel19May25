@@ -155,35 +155,44 @@ export const useConversationState = ({
     console.log('🛑 [useConversationState] Ending call');
     console.log('🔍 [useConversationState] Current isCallStarted state:', isCallStarted);
     
-    // Check if we should force VAPI calls in development
+    // ✅ FIX: ALWAYS call endCall() first to stop VAPI in all modes
+    console.log('📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...');
+    try {
+      endCall(); // ← This MUST run to stop VAPI instance
+      console.log('✅ [useConversationState] endCall() completed - VAPI stopped');
+    } catch (endCallError) {
+      console.error('❌ [useConversationState] Error in endCall():', endCallError);
+      // Continue with state cleanup even if endCall fails
+    }
+    
+    // ✅ FIX: ALWAYS update UI state 
+    console.log('📞 [useConversationState] Step 2: Updating UI state...');
+    setIsCallStarted(false);
+    setManualCallStarted(false);
+    console.log('✅ [useConversationState] UI state updated');
+    
+    // ✅ IMPROVED: Development mode logic AFTER call ending
+    console.log('🔍 [useConversationState] Step 3: Checking development mode...');
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
     const hasVapiCredentials = import.meta.env.VITE_VAPI_PUBLIC_KEY && import.meta.env.VITE_VAPI_ASSISTANT_ID;
-    
-    // DEV MODE: Skip API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
+    
     if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
-      console.log('🚧 [DEV MODE] Simulating call end - no API calls');
-      console.log('❌ [useConversationState] Setting isCallStarted = false (DEV MODE)');
-      setIsCallStarted(false);
-      setManualCallStarted(false); // Clear manual flag when simulating
-      return;
+      console.log('🚧 [DEV MODE] Using simulated call end - limited API calls');
+      console.log('📝 [DEV MODE] Call ended successfully with mock data');
+      console.log('📝 [DEV MODE] Staying in Interface1 - No interface switching');
+      return; // Early return for development simulation
     }
     
-    // If we have credentials or force flag, proceed with real VAPI call end
+    // Production mode or forced VAPI in development
     if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
-      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL END');
+      console.log('🔥 [DEV MODE] Using real VAPI call end - full API integration');
+    } else {
+      console.log('🚀 [PRODUCTION MODE] Real call end completed');
     }
     
-    console.log('📞 [useConversationState] Calling endCall()...');
-    endCall();
-    console.log('❌ [useConversationState] Setting isCallStarted = false');
-    setIsCallStarted(false);
-    setManualCallStarted(false); // Clear manual flag on real end
-    
-    // DISABLED: Focus on Interface1 development only  
-    // // setCurrentInterface('interface1');
-    console.log('📝 [DEV MODE] Staying in Interface1 - No interface switching');
-  }, [endCall]);
+    console.log('📝 [useConversationState] Staying in Interface1 - No interface switching');
+  }, [endCall, isCallStarted]);
 
   const handleCancel = useCallback(() => {
     console.log('❌ [useConversationState] Canceling call - FULL RESET');
