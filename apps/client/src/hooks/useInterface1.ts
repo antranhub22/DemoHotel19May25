@@ -291,63 +291,26 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
       hasServiceRequests: serviceRequests?.length > 0
     });
     
-    // DEV MODE: Skip API calls to prevent server overload
-    const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment) {
-      console.log('🚧 [DEV MODE] Skipping API calls - showing demo summary popup');
-      
-      // Clear conversation popup if active
-      if (conversationPopupId) {
-        console.log('🗑️ [useInterface1Legacy] Removing conversation popup after confirm');
-        removePopup(conversationPopupId);
-        setConversationPopupId(null);
-      }
-      
-      // Show demo summary popup immediately
-      setTimeout(() => {
-        console.log('📋 [DEV MODE] Showing demo summary popup');
-        const summaryPopupId = showSummary(undefined, { 
-          title: 'Call Summary (Demo)',
-          priority: 'high' 
-        });
-        console.log('✅ [DEV MODE] Demo summary popup created:', summaryPopupId);
-      }, 500);
-      
-      return;
-    }
-    
     try {
-      // Use conversation state handler first
+      // Use conversation state handler to end call properly
       conversationState.handleConfirm();
       
-      // Clear conversation popup if active
+      // Clear conversation popup if active (not needed anymore with tabbed interface)
       if (conversationPopupId) {
         console.log('🗑️ [useInterface1Legacy] Removing conversation popup after confirm');
         removePopup(conversationPopupId);
         setConversationPopupId(null);
       }
       
-      // Auto-show summary popup after confirmation with delay for processing
-      setTimeout(() => {
-        console.log('📋 [useInterface1Legacy] Auto-showing summary popup after confirm');
-        console.log('📊 [useInterface1Legacy] Summary data available:', {
-          callSummary: !!callSummary,
-          serviceRequests: serviceRequests?.length || 0
-        });
-        
-        const summaryPopupId = showSummary(undefined, { 
-          title: 'Call Summary',
-          priority: 'high' 
-        });
-        
-        console.log('✅ [useInterface1Legacy] Summary popup created with ID:', summaryPopupId);
-      }, 1500); // Increased delay for better processing
+      // 🆕 NO LONGER CREATE SUMMARY POPUP MODAL
+      // Summary is now available via tab in RealtimeConversationPopup
+      console.log('✅ [useInterface1Legacy] Confirm completed - Summary available in conversation popup tab');
+      console.log('📋 [useInterface1Legacy] Summary data will be displayed in tabbed interface');
       
-      console.log('✅ [useInterface1Legacy] Confirm completed - summary popup will show');
     } catch (error) {
       console.error('❌ [useInterface1Legacy] Error in handleConfirm:', error);
     }
-  }, [conversationState, conversationPopupId, removePopup, showSummary, transcripts.length, callSummary, serviceRequests]);
+  }, [conversationState, conversationPopupId, removePopup, transcripts.length, callSummary, serviceRequests]);
 
   // Update badge count when transcripts change
   useEffect(() => {

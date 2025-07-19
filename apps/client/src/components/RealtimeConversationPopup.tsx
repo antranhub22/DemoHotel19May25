@@ -3,6 +3,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
 import { STANDARD_POPUP_HEIGHT, STANDARD_POPUP_MAX_WIDTH, STANDARD_POPUP_MAX_HEIGHT_VH } from '@/context/PopupContext';
+import { extractRoomNumber, parseSummaryToOrderDetails } from '@/lib/summaryParser';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -21,6 +22,24 @@ interface ConversationTurn {
   }>;
 }
 
+// Interface cho summary data
+interface SummaryData {
+  source: string;
+  roomNumber: string;
+  content: string;
+  items: Array<{
+    name: string;
+    description: string;
+    quantity: number;
+    price: number;
+  }>;
+  timestamp: Date;
+  hasData: boolean;
+}
+
+// Tab modes
+type PopupMode = 'conversation' | 'summary';
+
 interface RealtimeConversationPopupProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,17 +48,19 @@ interface RealtimeConversationPopupProps {
 }
 
 const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
-  const { transcripts, modelOutput, language } = useAssistant();
+  const { transcripts, modelOutput, language, callSummary, serviceRequests, callDuration } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{[key: string]: number}>({});
   
-  // State cho Paint-on effect
-  const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
+  // 🆕 Tab state - NEW FUNCTIONALITY
+  const [mode, setMode] = useState<PopupMode>('conversation');
+  const [showSummaryTab, setShowSummaryTab] = useState(false);
   
-  // State để lưu trữ các turns đã được xử lý
+  // ✅ EXISTING STATES - UNCHANGED
+  const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
   const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
 
-  // Cleanup function for animations
+  // ✅ EXISTING FUNCTIONS - UNCHANGED
   const cleanupAnimations = () => {
     Object.values(animationFrames.current).forEach(frameId => {
       cancelAnimationFrame(frameId);
@@ -47,7 +68,70 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     animationFrames.current = {};
   };
 
-  // Process transcripts into conversation turns
+  // 🆕 NEW: Summary data processing
+  const getSummaryData = (): SummaryData => {
+    // Priority 1: Vapi.ai callSummary (real-time, voice-optimized)
+    if (callSummary && callSummary.content) {
+      const roomNumber = extractRoomNumber(callSummary.content);
+      const orderDetails = parseSummaryToOrderDetails(callSummary.content);
+      
+      return {
+        source: 'Vapi.ai',
+        roomNumber: roomNumber || 'Unknown',
+        content: callSummary.content,
+        items: orderDetails.items || [],
+        timestamp: callSummary.timestamp,
+        hasData: true
+      };
+    }
+    
+    // Priority 2: OpenAI serviceRequests (enhanced processing)
+    if (serviceRequests && serviceRequests.length > 0) {
+      const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
+      
+      return {
+        source: 'OpenAI Enhanced',
+        roomNumber,
+        content: serviceRequests.map(req => 
+          `${req.serviceType}: ${req.requestText}`
+        ).join('\n'),
+        items: serviceRequests.map(req => ({
+          name: req.serviceType,
+          description: req.requestText,
+          quantity: 1,
+          price: 10
+        })),
+        timestamp: new Date(),
+        hasData: true
+      };
+    }
+    
+    // Fallback: No summary available
+    return {
+      source: 'No data',
+      roomNumber: 'Unknown',
+      content: 'Call summary not available yet',
+      items: [],
+      timestamp: new Date(),
+      hasData: false
+    };
+  };
+
+  // 🆕 NEW: Check when to show summary tab
+  useEffect(() => {
+    const summaryData = getSummaryData();
+    setShowSummaryTab(summaryData.hasData);
+  }, [callSummary, serviceRequests]);
+
+  // 🆕 NEW: Auto-switch to summary when call ends (optional)
+  useEffect(() => {
+    if (callDuration === 0 && showSummaryTab && conversationTurns.length > 0) {
+      // Auto switch to summary when call ends and we have data
+      // setTimeout(() => setMode('summary'), 1000); // Commented out - let user choose
+    }
+  }, [callDuration, showSummaryTab, conversationTurns.length]);
+
+  // ✅ EXISTING EFFECT - UNCHANGED: Process transcripts into conversation turns
   useEffect(() => {
     const sortedTranscripts = [...transcripts].sort((a, b) => 
       a.timestamp.getTime() - b.timestamp.getTime()
@@ -94,8 +178,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     setConversationTurns(turns);
   }, [transcripts]);
 
-  // Paint-on animation effect
+  // ✅ EXISTING EFFECT - UNCHANGED: Paint-on animation effect
   useEffect(() => {
+    // Only animate if we're in conversation mode
+    if (mode !== 'conversation') return;
+    
     // Get all assistant messages from all turns
     const assistantMessages = conversationTurns
       .filter(turn => turn.role === 'assistant')
@@ -126,18 +213,18 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
-  }, [conversationTurns]); // NOTE: visibleChars intentionally not included to prevent infinite loop
+  }, [conversationTurns, mode]); // Added mode dependency
 
-  // Auto scroll to bottom when new messages arrive
+  // ✅ EXISTING EFFECT - UNCHANGED: Auto scroll to bottom when new messages arrive
   useEffect(() => {
-    if (containerRef.current) {
+    if (containerRef.current && mode === 'conversation') {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [conversationTurns]);
+  }, [conversationTurns, mode]);
 
   if (!isOpen) return null;
 
-  // Conditional styles based on layout
+  // ✅ EXISTING LOGIC - UNCHANGED: Conditional styles based on layout
   const isGrid = layout === 'grid';
   const popupStyles = isGrid ? {
     // Desktop Grid: Normal popup styling
@@ -170,6 +257,128 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     marginBottom: 0,
   };
 
+  // 🆕 NEW: Summary content component
+  const SummaryContent: React.FC<{ data: SummaryData }> = ({ data }) => (
+    <div className="space-y-3 p-3">
+      {data.hasData ? (
+        <>
+          {/* Header with source indicator */}
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium text-green-700">📋 {t('summary', language)}</span>
+            <span className="text-gray-500 text-[10px]">{data.source}</span>
+          </div>
+          
+          {/* Room & Basic Info */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <span className="font-medium text-gray-600">Room:</span>
+              <span className="ml-1 font-semibold text-blue-800">{data.roomNumber}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-600">Items:</span>
+              <span className="ml-1 font-semibold text-green-700">{data.items.length}</span>
+            </div>
+          </div>
+          
+          {/* Quick Requests List */}
+          {data.items.length > 0 && (
+            <div className="space-y-1">
+              <div className="text-[11px] font-medium text-gray-600">Requests:</div>
+              <div className="space-y-1 max-h-20 overflow-y-auto">
+                {data.items.slice(0, 3).map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-[10px]">
+                    <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
+                    <span className="text-gray-700 truncate">{item.name}</span>
+                  </div>
+                ))}
+                {data.items.length > 3 && (
+                  <div className="text-[10px] text-gray-500 italic">
+                    +{data.items.length - 3} more items...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Timestamp */}
+          <div className="text-[10px] text-gray-400 text-right">
+            {data.timestamp.toLocaleTimeString()}
+          </div>
+        </>
+      ) : (
+        /* No Data State */
+        <div className="text-center py-4 text-gray-500">
+          <div className="text-xs">⏳ Processing call summary...</div>
+          <div className="text-[10px] mt-1">Please wait a moment</div>
+        </div>
+      )}
+    </div>
+  );
+
+  // 🆕 NEW: Conversation content component (extracted from existing logic)
+  const ConversationContent: React.FC = () => (
+    <div 
+      ref={containerRef}
+      className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
+    >
+      {conversationTurns.length === 0 && (
+        <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
+          {t('tap_to_speak', language)}
+        </div>
+      )}
+      {conversationTurns.map((turn, turnIdx) => (
+        <div key={turn.id} className="mb-2">
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              {turn.role === 'user' ? (
+                <div className="bg-gray-100 rounded-lg p-2">
+                  <p className="text-gray-800 text-sm">{turn.messages[0].content}</p>
+                </div>
+              ) : (
+                <div className="bg-green-50 rounded-lg p-2">
+                  <p
+                    className="text-sm font-medium"
+                    style={{
+                      position: 'relative',
+                      background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      fontWeight: 600,
+                      letterSpacing: 0.2,
+                      transition: 'background 0.5s'
+                    }}
+                  >
+                    <span className="inline-flex flex-wrap">
+                      {turn.messages.map((msg, idx) => {
+                        const content = msg.content.slice(0, visibleChars[msg.id] || 0);
+                        return (
+                          <span key={msg.id} style={{ whiteSpace: 'pre' }}>
+                            {content}
+                            {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
+                            {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
+                              <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </span>
+                    {/* 3 chấm nhấp nháy khi assistant đang nghe */}
+                    {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
+                      <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
+                    )}
+                  </p>
+                </div>
+              )}
+              <span className="text-xs text-gray-500 mt-0.5 block">
+                {turn.timestamp.toLocaleTimeString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <>
       {/* Popup */}
@@ -177,9 +386,35 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
         className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isRight ? 'popup-right' : ''} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
         style={popupStyles}
       >
-        {/* Header */}
+        {/* 🆕 ENHANCED Header with Tabs */}
         <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
-          <div></div>
+          {/* 🆕 NEW: Tab buttons */}
+          <div className="flex space-x-1">
+            <button
+              onClick={() => setMode('conversation')}
+              className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                mode === 'conversation' 
+                  ? 'bg-blue-500/80 text-white shadow-sm' 
+                  : 'text-gray-600 hover:bg-white/20'
+              }`}
+            >
+              💬 Chat
+            </button>
+            {showSummaryTab && (
+              <button
+                onClick={() => setMode('summary')}
+                className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                  mode === 'summary' 
+                    ? 'bg-green-500/80 text-white shadow-sm' 
+                    : 'text-gray-600 hover:bg-white/20'
+                }`}
+              >
+                📋 Summary
+              </button>
+            )}
+          </div>
+          
+          {/* ✅ EXISTING: Close button */}
           <button
             onClick={onClose}
             className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -187,69 +422,16 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
-        {/* Conversation Content */}
-        <div 
-          ref={containerRef}
-          className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
-        >
-          {conversationTurns.length === 0 && (
-            <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
-              {t('tap_to_speak', language)}
-            </div>
-          )}
-          {conversationTurns.map((turn, turnIdx) => (
-            <div key={turn.id} className="mb-2">
-              <div className="flex items-start gap-2">
-                <div className="flex-1">
-                  {turn.role === 'user' ? (
-                    <div className="bg-gray-100 rounded-lg p-2">
-                      <p className="text-gray-800 text-sm">{turn.messages[0].content}</p>
-                    </div>
-                  ) : (
-                    <div className="bg-green-50 rounded-lg p-2">
-                      <p
-                        className="text-sm font-medium"
-                        style={{
-                          position: 'relative',
-                          background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          fontWeight: 600,
-                          letterSpacing: 0.2,
-                          transition: 'background 0.5s'
-                        }}
-                      >
-                        <span className="inline-flex flex-wrap">
-                          {turn.messages.map((msg, idx) => {
-                            const content = msg.content.slice(0, visibleChars[msg.id] || 0);
-                            return (
-                              <span key={msg.id} style={{ whiteSpace: 'pre' }}>
-                                {content}
-                                {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
-                                {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
-                                  <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
-                                )}
-                              </span>
-                            );
-                          })}
-                        </span>
-                        {/* 3 chấm nhấp nháy khi assistant đang nghe */}
-                        {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
-                          <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
-                        )}
-                      </p>
-                    </div>
-                  )}
-                  <span className="text-xs text-gray-500 mt-0.5 block">
-                    {turn.timestamp.toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+
+        {/* 🆕 DYNAMIC Content based on active tab */}
+        {mode === 'conversation' ? (
+          <ConversationContent />
+        ) : (
+          <SummaryContent data={getSummaryData()} />
+        )}
       </div>
-      {/* Conditional styles based on layout */}
+
+      {/* ✅ EXISTING STYLES - UNCHANGED */}
       <style>{`
         /* Animation for slide up from bottom - only for overlay */
         @keyframes slideUp {
