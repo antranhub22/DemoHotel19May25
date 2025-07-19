@@ -827,8 +827,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         console.error('🚨 [AssistantContext] Emergency cleanup failed:', emergencyError);
       }
       
-      // Re-throw the error so it propagates up
-      throw error;
+      // Don't re-throw error to prevent Error Boundary trigger
+      console.log('🔄 [AssistantContext] endCall() error handled gracefully, continuing normal operation');
     }
   }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language]);
 
