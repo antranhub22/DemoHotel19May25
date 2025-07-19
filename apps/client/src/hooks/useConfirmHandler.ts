@@ -46,16 +46,11 @@ export const useConfirmHandler = ({
     });
     
     try {
-      console.log('🔄 [useConfirmHandler] Step 1: Calling conversationState.handleConfirm()...');
+      // 🔧 STEP 1: Show loading popup BEFORE ending call
+      console.log('📋 [useConfirmHandler] Step 1: Showing immediate loading popup...');
       
-      // Use conversation state handler to end call properly
-      conversationState.handleConfirm();
-      
-      console.log('✅ [useConfirmHandler] Step 1 completed: conversationState.handleConfirm() successful');
-      console.log('🔄 [useConfirmHandler] Step 2: Showing immediate loading popup...');
-      
-      // 🎯 STEP 2: Show immediate loading popup
       try {
+        // Show loading popup immediately
         const loadingElement = createElement('div', { 
           id: 'summary-loading-popup',
           style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } 
@@ -112,8 +107,8 @@ export const useConfirmHandler = ({
           document.head.appendChild(style);
         }
         
-        console.log('✅ [useConfirmHandler] Step 2a: Loading element created');
-        console.log('🚀 [useConfirmHandler] Step 2b: Calling showSummary...');
+        console.log('✅ [useConfirmHandler] Step 1a: Loading element created');
+        console.log('🚀 [useConfirmHandler] Step 1b: Calling showSummary...');
         
         // Show loading popup immediately
         showSummary(
@@ -124,226 +119,166 @@ export const useConfirmHandler = ({
           }
         );
         
-        console.log('✅ [useConfirmHandler] Step 2c: Loading popup shown successfully');
-        console.log('🔄 [useConfirmHandler] Step 3: Starting polling for summary data...');
+        console.log('✅ [useConfirmHandler] Step 1c: Loading popup shown successfully');
+      } catch (popupError) {
+        console.error('❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:', popupError);
+        // Continue with call end even if popup fails
+      }
+      
+      // 🔧 STEP 2: End call AFTER showing loading popup
+      console.log('🔄 [useConfirmHandler] Step 2: Ending call...');
+      conversationState.handleConfirm(); // Assuming conversationState has a handleConfirm method
+      console.log('✅ [useConfirmHandler] Step 2: Call ended successfully');
+      
+      // 🔧 STEP 3: Start polling for summary data
+      console.log('🔄 [useConfirmHandler] Step 3: Starting polling for summary data...');
+      
+      let pollCount = 0;
+      const maxPolls = 15; // Maximum 30 seconds (15 * 2s)
+      
+      isPollingRef.current = true;
+      
+      const pollForSummary = () => {
+        // Safety check - stop if polling was cancelled
+        if (!isPollingRef.current) {
+          console.log('🛑 [useConfirmHandler] Polling cancelled - component may have unmounted');
+          return;
+        }
         
-        // 🎯 STEP 3: Start polling for summary data
-        let pollCount = 0;
-        const maxPolls = 15; // Maximum 30 seconds (15 * 2s)
+        pollCount++;
+        console.log(`🔍 [useConfirmHandler] Poll #${pollCount}: Checking for summary data...`);
         
-        isPollingRef.current = true;
-        
-        const pollForSummary = () => {
-          // Safety check - stop if polling was cancelled
-          if (!isPollingRef.current) {
-            console.log('🛑 [useConfirmHandler] Polling cancelled - component may have unmounted');
-            return;
-          }
+        try {
+          // Get fresh data (these should be from React state/context)
+          const currentCallSummary = callSummary;
+          const currentServiceRequests = serviceRequests;
           
-          pollCount++;
-          console.log(`🔍 [useConfirmHandler] Poll #${pollCount}: Checking for summary data...`);
+          console.log('📊 [useConfirmHandler] Poll data check:', {
+            hasCallSummary: !!currentCallSummary,
+            callSummaryContent: currentCallSummary?.content?.substring(0, 50),
+            isGenerating: currentCallSummary?.content === "Generating AI summary of your conversation...",
+            hasServiceRequests: currentServiceRequests?.length > 0,
+            pollCount,
+            maxPolls
+          });
           
-          try {
-            // Get fresh data (these should be from React state/context)
-            const currentCallSummary = callSummary;
-            const currentServiceRequests = serviceRequests;
+          // Check if we have real summary data
+          const hasRealSummary = currentCallSummary && 
+            currentCallSummary.content && 
+            currentCallSummary.content !== "Generating AI summary of your conversation...";
+          
+          const hasServiceRequests = currentServiceRequests && currentServiceRequests.length > 0;
+          
+          if (hasRealSummary || hasServiceRequests) {
+            // 🎉 SUCCESS: We have data! Update popup
+            console.log('🎉 [useConfirmHandler] Success! Summary data found, updating popup...');
             
-            console.log('📊 [useConfirmHandler] Poll data check:', {
-              hasCallSummary: !!currentCallSummary,
-              callSummaryContent: currentCallSummary?.content?.substring(0, 50),
-              isGenerating: currentCallSummary?.content === "Generating AI summary of your conversation...",
-              hasServiceRequests: currentServiceRequests?.length > 0,
-              pollCount,
-              maxPolls
-            });
-            
-            // Check if we have real summary data
-            const hasRealSummary = currentCallSummary && 
-              currentCallSummary.content && 
-              currentCallSummary.content !== "Generating AI summary of your conversation...";
-            
-            const hasServiceRequests = currentServiceRequests && currentServiceRequests.length > 0;
-            
-            if (hasRealSummary || hasServiceRequests) {
-              // 🎉 SUCCESS: We have data! Update popup
-              console.log('🎉 [useConfirmHandler] Success! Summary data found, updating popup...');
-              
-              try {
-                const summaryElement = createElement('div', { 
-                  style: { padding: '20px', maxWidth: '500px' } 
+            try {
+              const summaryElement = createElement('div', { 
+                style: { padding: '20px', maxWidth: '500px' } 
+              }, [
+                // Header
+                createElement('h3', { 
+                  key: 'title', 
+                  style: { marginBottom: '16px', color: '#333', fontSize: '18px', fontWeight: '600' } 
+                }, '📋 Call Summary'),
+                
+                // Success Icon
+                createElement('div', { 
+                  key: 'icon', 
+                  style: { fontSize: '32px', marginBottom: '16px', textAlign: 'center' } 
+                }, '✅'),
+                
+                // Summary Content (if available)
+                hasRealSummary && createElement('div', { 
+                  key: 'summary-content',
+                  style: { 
+                    marginBottom: '16px', 
+                    padding: '12px', 
+                    backgroundColor: '#f8f9fa', 
+                    borderRadius: '6px', 
+                    fontSize: '14px',
+                    lineHeight: '1.5'
+                  }
                 }, [
-                  // Header
-                  createElement('h3', { 
-                    key: 'title', 
-                    style: { marginBottom: '16px', color: '#333', fontSize: '18px', fontWeight: '600' } 
-                  }, '📋 Call Summary'),
-                  
-                  // Success Icon
                   createElement('div', { 
-                    key: 'icon', 
-                    style: { fontSize: '32px', marginBottom: '16px', textAlign: 'center' } 
-                  }, '✅'),
-                  
-                  // Summary Content (if available)
-                  hasRealSummary && createElement('div', { 
-                    key: 'summary-content',
-                    style: { 
-                      marginBottom: '16px', 
-                      padding: '12px', 
-                      backgroundColor: '#f8f9fa', 
-                      borderRadius: '6px', 
-                      fontSize: '14px',
-                      lineHeight: '1.5'
-                    }
-                  }, [
-                    createElement('div', { 
-                      key: 'summary-title', 
-                      style: { fontWeight: '600', marginBottom: '8px', color: '#555' } 
-                    }, 'AI Summary:'),
-                    createElement('div', { 
-                      key: 'summary-text', 
-                      style: { color: '#666' } 
-                    }, currentCallSummary.content)
-                  ]),
-                  
-                  // Service Requests (if available)
-                  hasServiceRequests && createElement('div', { 
-                    key: 'requests',
-                    style: { 
-                      marginBottom: '16px', 
-                      padding: '12px', 
-                      backgroundColor: '#f0f9ff', 
-                      borderRadius: '6px', 
-                      fontSize: '14px'
-                    }
-                  }, [
-                    createElement('div', { 
-                      key: 'req-title', 
-                      style: { fontWeight: '600', marginBottom: '8px', color: '#1e40af' } 
-                    }, 'Service Requests:'),
-                    createElement('ul', { 
-                      key: 'req-list', 
-                      style: { listStyle: 'disc', marginLeft: '20px', color: '#374151' } 
-                    }, 
-                      currentServiceRequests.slice(0, 5).map((req, idx) => 
-                        createElement('li', { 
-                          key: idx, 
-                          style: { marginBottom: '4px' } 
-                        }, `${req.serviceType}: ${req.requestText}`)
-                      )
+                    key: 'summary-title', 
+                    style: { fontWeight: '600', marginBottom: '8px', color: '#555' } 
+                  }, 'AI Summary:'),
+                  createElement('div', { 
+                    key: 'summary-text', 
+                    style: { color: '#666' } 
+                  }, currentCallSummary.content)
+                ]),
+                
+                // Service Requests (if available)
+                hasServiceRequests && createElement('div', { 
+                  key: 'requests',
+                  style: { 
+                    marginBottom: '16px', 
+                    padding: '12px', 
+                    backgroundColor: '#f0f9ff', 
+                    borderRadius: '6px', 
+                    fontSize: '14px'
+                  }
+                }, [
+                  createElement('div', { 
+                    key: 'req-title', 
+                    style: { fontWeight: '600', marginBottom: '8px', color: '#1e40af' } 
+                  }, 'Service Requests:'),
+                  createElement('ul', { 
+                    key: 'req-list', 
+                    style: { listStyle: 'disc', marginLeft: '20px', color: '#374151' } 
+                  }, 
+                    currentServiceRequests.slice(0, 5).map((req, idx) => 
+                      createElement('li', { 
+                        key: idx, 
+                        style: { marginBottom: '4px' } 
+                      }, `${req.serviceType}: ${req.requestText}`)
                     )
-                  ]),
-                  
-                  // Completion Message
-                  createElement('p', { 
-                    key: 'completion', 
-                    style: { 
-                      fontSize: '14px', 
-                      color: '#22c55e', 
-                      fontWeight: '500',
-                      textAlign: 'center',
-                      marginBottom: '16px'
-                    } 
-                  }, 'Call completed and processed successfully!'),
-                  
-                  // Timestamp
-                  createElement('div', { 
-                    key: 'time', 
-                    style: { 
-                      fontSize: '12px', 
-                      color: '#999', 
-                      textAlign: 'right',
-                      borderTop: '1px solid #eee', 
-                      paddingTop: '12px'
-                    } 
-                  }, hasRealSummary 
-                    ? 'Generated at: ' + currentCallSummary.timestamp.toLocaleTimeString()
-                    : 'Processed at: ' + new Date().toLocaleTimeString()
                   )
-                ]);
+                ]),
                 
-                // Update popup with summary content
-                showSummary(
-                  summaryElement,
-                  { 
-                    title: 'Call Summary - Complete',
-                    priority: 'high' as const
-                  }
-                );
+                // Completion Message
+                createElement('p', { 
+                  key: 'completion', 
+                  style: { 
+                    fontSize: '14px', 
+                    color: '#22c55e', 
+                    fontWeight: '500',
+                    textAlign: 'center',
+                    marginBottom: '16px'
+                  } 
+                }, 'Call completed and processed successfully!'),
                 
-                console.log('✅ [useConfirmHandler] Popup updated with summary content successfully');
-                
-                // Stop polling - we're done!
-                isPollingRef.current = false;
-                if (pollingRef.current) {
-                  clearInterval(pollingRef.current);
-                  pollingRef.current = null;
+                // Timestamp
+                createElement('div', { 
+                  key: 'time', 
+                  style: { 
+                    fontSize: '12px', 
+                    color: '#999', 
+                    textAlign: 'right',
+                    borderTop: '1px solid #eee', 
+                    paddingTop: '12px'
+                  } 
+                }, hasRealSummary 
+                  ? 'Generated at: ' + currentCallSummary.timestamp.toLocaleTimeString()
+                  : 'Processed at: ' + new Date().toLocaleTimeString()
+                )
+              ]);
+              
+              // Update popup with summary content
+              showSummary(
+                summaryElement,
+                { 
+                  title: 'Call Summary - Complete',
+                  priority: 'high' as const
                 }
-                
-                return; // Exit polling
-                
-              } catch (updateError) {
-                console.error('❌ [useConfirmHandler] Error updating popup with summary:', updateError);
-                // Continue polling in case this was a temporary error
-              }
-            }
-            
-            // Check if we've exceeded max polling attempts
-            if (pollCount >= maxPolls) {
-              console.log('⏰ [useConfirmHandler] Max polling attempts reached, showing completion message');
+              );
               
-              try {
-                // Show completion without detailed summary
-                const completionElement = createElement('div', { 
-                  style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } 
-                }, [
-                  createElement('h3', { 
-                    key: 'title', 
-                    style: { marginBottom: '16px', color: '#333', fontSize: '18px', fontWeight: '600' } 
-                  }, '📋 Call Summary'),
-                  
-                  createElement('div', { 
-                    key: 'icon', 
-                    style: { fontSize: '48px', marginBottom: '16px' } 
-                  }, '✅'),
-                  
-                  createElement('p', { 
-                    key: 'message', 
-                    style: { marginBottom: '16px', lineHeight: '1.5', color: '#333', fontSize: '16px' } 
-                  }, 'Call completed successfully!'),
-                  
-                  createElement('p', { 
-                    key: 'note', 
-                    style: { fontSize: '14px', color: '#666', marginBottom: '16px' } 
-                  }, 'Your conversation has been recorded. Summary processing may take a moment longer.'),
-                  
-                  createElement('div', { 
-                    key: 'contact', 
-                    style: { 
-                      fontSize: '12px', 
-                      color: '#999', 
-                      borderTop: '1px solid #eee', 
-                      paddingTop: '12px',
-                      marginTop: '16px'
-                    } 
-                  }, 'For immediate assistance, please contact the front desk.')
-                ]);
-                
-                showSummary(
-                  completionElement,
-                  { 
-                    title: 'Call Complete',
-                    priority: 'medium' as const
-                  }
-                );
-                
-                console.log('✅ [useConfirmHandler] Completion message shown after max polling');
-                
-              } catch (completionError) {
-                console.error('❌ [useConfirmHandler] Error showing completion message:', completionError);
-              }
+              console.log('✅ [useConfirmHandler] Popup updated with summary content successfully');
               
-              // Stop polling
+              // Stop polling - we're done!
               isPollingRef.current = false;
               if (pollingRef.current) {
                 clearInterval(pollingRef.current);
@@ -351,37 +286,92 @@ export const useConfirmHandler = ({
               }
               
               return; // Exit polling
+              
+            } catch (updateError) {
+              console.error('❌ [useConfirmHandler] Error updating popup with summary:', updateError);
+              // Continue polling in case this was a temporary error
+            }
+          }
+          
+          // Check if we've exceeded max polling attempts
+          if (pollCount >= maxPolls) {
+            console.log('⏰ [useConfirmHandler] Max polling attempts reached, showing completion message');
+            
+            try {
+              // Show completion without detailed summary
+              const completionElement = createElement('div', { 
+                style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } 
+              }, [
+                createElement('h3', { 
+                  key: 'title', 
+                  style: { marginBottom: '16px', color: '#333', fontSize: '18px', fontWeight: '600' } 
+                }, '📋 Call Summary'),
+                
+                createElement('div', { 
+                  key: 'icon', 
+                  style: { fontSize: '48px', marginBottom: '16px' } 
+                }, '✅'),
+                
+                createElement('p', { 
+                  key: 'message', 
+                  style: { marginBottom: '16px', lineHeight: '1.5', color: '#333', fontSize: '16px' } 
+                }, 'Call completed successfully!'),
+                
+                createElement('p', { 
+                  key: 'note', 
+                  style: { fontSize: '14px', color: '#666', marginBottom: '16px' } 
+                }, 'Your conversation has been recorded. Summary processing may take a moment longer.'),
+                
+                createElement('div', { 
+                  key: 'contact', 
+                  style: { 
+                    fontSize: '12px', 
+                    color: '#999', 
+                    borderTop: '1px solid #eee', 
+                    paddingTop: '12px',
+                    marginTop: '16px'
+                  } 
+                }, 'For immediate assistance, please contact the front desk.')
+              ]);
+              
+              showSummary(
+                completionElement,
+                { 
+                  title: 'Call Complete',
+                  priority: 'medium' as const
+                }
+              );
+              
+              console.log('✅ [useConfirmHandler] Completion message shown after max polling');
+              
+            } catch (completionError) {
+              console.error('❌ [useConfirmHandler] Error showing completion message:', completionError);
             }
             
-            // Continue polling
-            console.log(`⏳ [useConfirmHandler] No data yet, will check again in 2s (${pollCount}/${maxPolls})...`);
+            // Stop polling
+            isPollingRef.current = false;
+            if (pollingRef.current) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
             
-          } catch (pollError) {
-            console.error('❌ [useConfirmHandler] Error during polling:', pollError);
-            // Continue polling - might be temporary error
+            return; // Exit polling
           }
-        };
-        
-        // Start polling immediately, then every 2 seconds
-        pollForSummary();
-        pollingRef.current = setInterval(pollForSummary, 2000);
-        
-        console.log('✅ [useConfirmHandler] Polling started successfully');
-        
-      } catch (popupError) {
-        console.error('❌ [useConfirmHandler] Step 2 ERROR: Loading popup creation failed:', popupError);
-        console.error('❌ [useConfirmHandler] Popup error details:', {
-          name: popupError?.name,
-          message: popupError?.message,
-          stack: popupError?.stack
-        });
-        
-        // Simple fallback - just alert
-        console.log('🚨 [useConfirmHandler] Showing simple alert fallback');
-        setTimeout(() => {
-          alert('Call completed successfully! Your conversation has been recorded.');
-        }, 100);
-      }
+          
+          // Continue polling
+          console.log(`⏳ [useConfirmHandler] No data yet, will check again in 2s (${pollCount}/${maxPolls})...`);
+          
+        } catch (pollError) {
+          console.error('❌ [useConfirmHandler] Error during polling:', pollError);
+          // Continue polling - might be temporary error
+        }
+      };
+      
+      // Start polling immediately, then every 2 seconds
+      pollForSummary();
+      pollingRef.current = setInterval(pollForSummary, 2000);
+      
+      console.log('✅ [useConfirmHandler] Polling started successfully');
       
     } catch (error) {
       console.error('❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:', error);
@@ -396,9 +386,6 @@ export const useConfirmHandler = ({
       setTimeout(() => {
         alert('Call completed! Please check with front desk for any service requests.');
       }, 100);
-      
-      // 🔧 FIX: Don't re-throw error to prevent Error Boundary trigger
-      console.log('🔄 [useConfirmHandler] Error handled gracefully, continuing normal operation');
     }
   }, [conversationState, transcripts.length, callSummary, serviceRequests, showSummary]);
 
