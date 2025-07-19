@@ -18,6 +18,10 @@ import { ScrollToTopButton } from './interface1/ScrollToTopButton';
 // UI Components - Interactive
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
 
+// New Separate Popups
+import ChatPopup from './ChatPopup';
+import SummaryPopup from './SummaryPopup';
+
 
 interface Interface1Props {
   isActive: boolean;
@@ -71,16 +75,15 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           
           {/* Desktop: 4-Position Grid Layout */}
           <div className="hidden md:block">
-            {/* Row 1: 3-Column Layout - Right Panel | Siri | Summary */}
+            {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}
             <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
               
-              {/* Column 1: Right Panel (Left) */}
+              {/* Column 1: Chat Popup (Left) */}
               <div className="w-full max-w-sm">
-                <RightPanelSection
-                  ref={rightPanelRef}
-                  showPanel={showRightPanel}
-                  onClose={handleRightPanelClose}
-                  className="relative z-30"
+                <ChatPopup
+                  isOpen={showConversation}
+                  onClose={handleCancel}
+                  layout="grid"
                 />
               </div>
               
@@ -100,14 +103,12 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 </div>
               </div>
               
-              {/* Column 3: Summary/Conversation Popup (Right) */}
+              {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
-                <ConversationSection
-                  ref={conversationRef}
-                  showConversation={showConversation}
-                  onClose={() => {}} // Will be handled by popup context
-                  className="relative z-40"
-                  isOverlay={false} // Desktop: relative position in grid
+                <SummaryPopup
+                  isOpen={showConversation}
+                  onClose={() => {}}
+                  layout="grid"
                 />
               </div>
               
