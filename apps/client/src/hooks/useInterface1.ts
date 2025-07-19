@@ -106,9 +106,18 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     setShowingSummary(!!summaryPopup);
   }, [popups]);
   
-  // DISABLED: Auto-popup effects - using ConversationSection instead
-  // All conversation popup management moved to ConversationSection component
-  
+  // ✅ DISABLED: Auto-popup effects - using unified ChatPopup instead
+  // All conversation popup management moved to ChatPopup component with layout prop
+  useEffect(() => {
+    // DISABLED: No auto-popup creation
+    // Conversation display handled by ChatPopup component in Interface1
+    // with layout="grid" for desktop and layout="overlay" for mobile
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+  }, []);
+
   // Effect to restart call when language changes during active call
   useEffect(() => {
     // TEMPORARILY DISABLED - causing issues
@@ -153,8 +162,8 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
 
   // Demo popup functions - conversation disabled, others active
   const handleShowConversationPopup = () => {
-    console.log('Conversation demo disabled - using ConversationSection instead');
-    // No longer create conversation popup - handled by ConversationSection component
+    console.log('Conversation demo disabled - using unified ChatPopup instead');
+    // No longer create conversation popup - handled by ChatPopup component
   };
 
   const handleShowNotificationDemo = () => {

@@ -43,11 +43,7 @@ export interface ServiceGridContainerProps {
   className?: string;
 }
 
-export interface ConversationSectionProps {
-  showConversation: boolean;
-  onClose: () => void;
-  className?: string;
-}
+// ConversationSectionProps removed - replaced by unified ChatPopup component
 
 export interface ScrollToTopButtonProps {
   show: boolean;

@@ -1,3 +1,7 @@
+// ⚠️ DEPRECATED: ConversationSection has been replaced by unified ChatPopup component
+// This file is kept for reference but should not be used in new code
+// Use ChatPopup with layout="overlay" for mobile and layout="grid" for desktop instead
+
 import { forwardRef } from 'react';
 import RealtimeConversationPopup from '../RealtimeConversationPopup';
 

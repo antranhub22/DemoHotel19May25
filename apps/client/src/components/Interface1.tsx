@@ -1,7 +1,13 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Single Implementation
 
+// React hooks
+import { useState, useEffect } from 'react';
+
 // Custom Hook
 import { useInterface1 } from '@/hooks/useInterface1';
+
+// Context
+import { usePopupContext } from '@/context/PopupContext';
 
 // UI Components - States
 import { LoadingState } from './interface1/LoadingState';
@@ -11,15 +17,40 @@ import { ErrorState } from './interface1/ErrorState';
 import { InterfaceContainer } from './interface1/InterfaceContainer';
 import { InterfaceHeader } from './interface1/InterfaceHeader';
 import { ServiceGridContainer } from './interface1/ServiceGridContainer';
-import { ConversationSection } from './interface1/ConversationSection';
-import { RightPanelSection } from './interface1/RightPanelSection';
-import { ScrollToTopButton } from './interface1/ScrollToTopButton';
 
-// UI Components - Interactive
+// UI Components - Popups
+import ChatPopup from './ChatPopup';
+import SummaryPopup from './SummaryPopup';
+
+// Siri Components
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
 
-// New Separate Popups
-import ChatPopup from './ChatPopup';
+// Mobile Summary Popup Component - Similar to RightPanelSection logic
+const MobileSummaryPopup = () => {
+  const { popups, removePopup } = usePopupContext();
+  const [showSummary, setShowSummary] = useState(false);
+
+  // Listen for summary popups and show them in mobile center modal
+  useEffect(() => {
+    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    setShowSummary(!!summaryPopup);
+  }, [popups]);
+
+  const handleClose = () => {
+    // Remove all summary popups
+    popups
+      .filter(popup => popup.type === 'summary')
+      .forEach(popup => removePopup(popup.id));
+  };
+
+  return (
+    <SummaryPopup
+      isOpen={showSummary}
+      onClose={handleClose}
+      layout="center-modal"
+    />
+  );
+};
 
 
 interface Interface1Props {
@@ -114,11 +145,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               
               {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
-                <RightPanelSection
-                  ref={rightPanelRef}
-                  showPanel={showRightPanel}
+                <SummaryPopup
+                  isOpen={showRightPanel}
                   onClose={handleRightPanelClose}
-                  className="w-full"
+                  layout="grid"
+                  className="relative z-30 ml-10"
                 />
               </div>
               
@@ -152,17 +183,16 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               </div>
             </div>
             
-            {/* Mobile: Conversation popup (overlay) */}
-            <ConversationSection
-              ref={conversationRef}
-              showConversation={showConversation}
+            {/* Mobile: Chat popup (overlay) - UNIFIED COMPONENT */}
+            <ChatPopup
+              isOpen={showConversation}
               onClose={() => {}} // Will be handled by popup context
+              layout="overlay" // Mobile: overlay positioning
               className="fixed bottom-0 left-0 right-0 z-40"
-              isOverlay={true} // Mobile: fixed overlay position
             />
-            
-            {/* ❌ REMOVED: Mobile RightPanelSection to avoid duplicate Summary 
-                Summary will be handled by PopupStack center modal instead */}
+
+            {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
+            <MobileSummaryPopup />
           </div>
           
         </div>
@@ -174,13 +204,13 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       </div>
 
       {/* Scroll Controls */}
-      <ScrollToTopButton
-        show={showScrollButton}
-        onScrollToTop={scrollToTop}
-        onScrollToServices={() => scrollToSection('services')}
-      />
-      
-      {/* Realtime Conversation now handled by ConversationSection */}
+      {/* ScrollToTopButton - temporarily disabled
+        <ScrollToTopButton
+          show={showScrollButton}
+          onScrollToTop={scrollToTop}
+          onScrollToServices={() => scrollToSection('services')}
+        />
+        */}
     </InterfaceContainer>
   );
 };

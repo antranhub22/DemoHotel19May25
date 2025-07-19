@@ -60,8 +60,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
     }
   };
 
-  // Filter popups based on mobile vs desktop
-  const summaryPopups = popups.filter(popup => popup.type === 'summary');
+  // Filter popups - Remove summary popups since they're handled by unified SummaryPopup components
   const regularPopups = popups.filter(popup => popup.type !== 'summary');
 
   return (
@@ -78,61 +77,22 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
         />
       )}
 
-      {/* Summary popups: Center modal ONLY on mobile, desktop uses RightPanelSection */}
-      {summaryPopups.length > 0 && isMobile && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-          style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-          }}
-          onClick={(e) => {
-            // Close on backdrop click
-            if (e.target === e.currentTarget) {
-              summaryPopups.forEach(popup => handlePopupDismiss(popup.id));
-            }
-          }}
-        >
-          <div
-            className="relative w-full max-w-md mx-auto"
-            style={{
-              pointerEvents: 'auto',
-              animation: 'modalSlideIn 0.3s ease-out'
-            }}
-          >
-            <PopupStack
-              popups={summaryPopups}
-              activePopup={activePopup}
-              maxVisible={1} // Only show one summary at a time
-              onPopupSelect={handlePopupSelect}
-              onPopupDismiss={handlePopupDismiss}
-              position="center"
-            />
-          </div>
-        </div>
-      )}
+      {/* Summary popups are now handled by unified SummaryPopup components:
+          - Desktop: SummaryPopup with layout="grid" in Interface1
+          - Mobile: MobileSummaryPopup with layout="center-modal" in Interface1
+          This ensures consistent behavior and maintainability across platforms.
+      */}
 
-      {/* CSS for modal animation */}
+      {/* CSS for any remaining animations */}
       <style>{`
         @keyframes modalSlideIn {
           from {
+            transform: scale(0.95) translateY(20px);
             opacity: 0;
-            transform: scale(0.9) translateY(-20px);
           }
           to {
-            opacity: 1;
             transform: scale(1) translateY(0);
-          }
-        }
-
-        /* Ensure modal is always on top and responsive */
-        @media (max-width: 640px) {
-          .fixed.inset-0.z-\\[9999\\] {
-            padding: 16px;
-          }
-          .fixed.inset-0.z-\\[9999\\] .relative {
-            max-width: 100%;
+            opacity: 1;
           }
         }
       `}</style>
