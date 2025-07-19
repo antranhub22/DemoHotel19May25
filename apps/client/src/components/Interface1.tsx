@@ -53,6 +53,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleShowSummaryDemo
   } = useInterface1({ isActive });
 
+  // 🔍 DEBUG: Log popup states
+  console.log('🔍 [Interface1] Popup States:', {
+    isCallStarted,
+    showConversation,
+    chatPopupOpen: showConversation && isCallStarted,
+    summaryPopupOpen: showConversation && !isCallStarted
+  });
+
   // Early returns
   if (isLoading) {
     return <LoadingState />;
@@ -81,8 +89,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               {/* Column 1: Chat Popup (Left) */}
               <div className="w-full max-w-sm">
                 <ChatPopup
-                  isOpen={showConversation}
-                  onClose={handleCancel}
+                  isOpen={showConversation && isCallStarted}
+                  onClose={() => {}} 
                   layout="grid"
                 />
               </div>
@@ -106,7 +114,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
                 <SummaryPopup
-                  isOpen={showConversation}
+                  isOpen={showConversation && !isCallStarted}
                   onClose={() => {}}
                   layout="grid"
                 />
