@@ -287,18 +287,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const maxTimestampMs = maxPostgresTimestamp * 1000; // Convert to milliseconds
             
             let validTimestamp;
-            if (inputTimestamp > maxTimestampMs) {
-              console.warn(`Timestamp ${inputTimestamp} exceeds PostgreSQL limit, using current time`);
+            
+            // Enhanced timestamp validation
+            if (!inputTimestamp || isNaN(inputTimestamp) || !isFinite(inputTimestamp)) {
+              console.warn(`⚠️ [WebSocket] Invalid timestamp ${inputTimestamp}, using current time`);
+              validTimestamp = now;
+            } else if (inputTimestamp > maxTimestampMs) {
+              console.warn(`⚠️ [WebSocket] Timestamp ${inputTimestamp} exceeds PostgreSQL limit, using current time`);
               validTimestamp = now;
             } else if (inputTimestamp < 946684800000) { // Year 2000
-              console.warn(`Timestamp ${inputTimestamp} is too old, using current time`);
+              console.warn(`⚠️ [WebSocket] Timestamp ${inputTimestamp} is too old, using current time`);
               validTimestamp = now;
             } else {
               validTimestamp = inputTimestamp;
             }
             
-            // Ensure we don't exceed PostgreSQL limits
-            validTimestamp = Math.min(validTimestamp, maxTimestampMs);
+            // Ensure we don't exceed PostgreSQL limits and the timestamp is valid
+            validTimestamp = Math.min(Math.max(validTimestamp, 946684800000), maxTimestampMs);
+            
+            // Additional validation before creating Date object
+            const testDate = new Date(validTimestamp);
+            if (isNaN(testDate.getTime())) {
+              console.error(`❌ [WebSocket] Date creation failed for timestamp ${validTimestamp}, using current time`);
+              validTimestamp = now;
+            }
             
             console.log(`📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`);
 
@@ -314,6 +326,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log('✅ [WebSocket] Transcript stored successfully');
             } catch (storageError) {
               console.error('❌ [WebSocket] Error storing transcript:', storageError);
+              console.error('❌ [WebSocket] Storage error details:', {
+                message: storageError.message,
+                stack: storageError.stack
+              });
               // Continue processing even if storage fails
             }
 
@@ -339,16 +355,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             } catch (callError) {
               console.error('❌ [WebSocket] Error handling call record:', callError);
+              console.error('❌ [WebSocket] Call error details:', {
+                message: callError.message,
+                stack: callError.stack
+              });
               // Continue processing even if call record handling fails
             }
             
             // Broadcast transcript to all clients with matching callId
+            // Use safe timestamp for ISO string creation
+            let isoTimestamp;
+            try {
+              isoTimestamp = new Date(validTimestamp).toISOString();
+            } catch (dateError) {
+              console.error('❌ [WebSocket] Failed to create ISO timestamp, using current time');
+              isoTimestamp = new Date().toISOString();
+            }
+            
             const message = JSON.stringify({
               type: 'transcript',
               callId: data.call_id,
               role: data.role,
               content: data.content,
-              timestamp: new Date(validTimestamp).toISOString() // Use ISO string for client
+              timestamp: isoTimestamp
             });
             
             // Count matching clients and broadcast
@@ -364,6 +393,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
           } catch (error) {
             console.error('❌ [WebSocket] Error processing transcript:', error);
+            console.error('❌ [WebSocket] Error details:', {
+              name: error.name,
+              message: error.message,
+              stack: error.stack
+            });
             if (error instanceof z.ZodError) {
               console.error('📋 [WebSocket] Validation errors:', error.errors);
             }
@@ -597,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (client.readyState === 1) {
             client.send(JSON.stringify({
               type: 'order_status_update',
-              reference: updatedOrder.order_id, // Use orderId as reference
+              reference: updatedOrder.order_id, // Use orderId instead of specialInstructions
               status: updatedOrder.status
             }));
           }
@@ -757,7 +791,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const summaryData = insertCallSummarySchema.parse({
         call_id: callId,  // Convert to snake_case for schema
         content: finalSummary,
-        timestamp: new Date(timestamp || Date.now()).toISOString(), // Convert to text string
+        timestamp: (() => {
+          // Safe timestamp creation with validation
+          try {
+            const inputTime = timestamp || Date.now();
+            const testDate = new Date(inputTime);
+            if (isNaN(testDate.getTime())) {
+              console.warn('⚠️ [store-summary] Invalid timestamp, using current time');
+              return new Date().toISOString();
+            }
+            return testDate.toISOString();
+          } catch (dateError) {
+            console.error('❌ [store-summary] Date creation failed, using current time');
+            return new Date().toISOString();
+          }
+        })(), // Convert to text string with validation
         room_number: roomNumber,  // Convert to snake_case for schema
         duration: durationStr
         // Remove orderReference - not in schema

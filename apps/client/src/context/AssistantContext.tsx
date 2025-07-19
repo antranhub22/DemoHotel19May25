@@ -612,44 +612,71 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   // End call function
   const endCall = useCallback(() => {
     console.log('🛑 [AssistantContext] endCall() called');
+    console.log('🔍 [AssistantContext] Current state before endCall:', {
+      callDuration,
+      transcriptsCount: transcripts.length,
+      hasCallDetails: !!callDetails,
+      hasCallTimer: !!callTimer,
+      language,
+      tenantId
+    });
     
     try {
+      console.log('🔄 [AssistantContext] Step 1: Stopping VAPI...');
+      
       // Stop VAPI with error handling
       try {
         const vapi = getVapiInstance();
         if (vapi) {
-          console.log('📞 [AssistantContext] Stopping VAPI call...');
+          console.log('📞 [AssistantContext] Step 1a: VAPI instance found, calling stop()...');
           vapi.stop();
-          console.log('✅ [AssistantContext] VAPI call stopped successfully');
+          console.log('✅ [AssistantContext] Step 1a: VAPI call stopped successfully');
         } else {
-          console.log('⚠️ [AssistantContext] No VAPI instance to stop');
+          console.log('⚠️ [AssistantContext] Step 1a: No VAPI instance to stop');
         }
       } catch (vapiError) {
-        console.error('❌ [AssistantContext] Error stopping VAPI:', vapiError);
+        console.error('❌ [AssistantContext] Step 1a ERROR: Error stopping VAPI:', vapiError);
+        console.log('🔄 [AssistantContext] Continuing with cleanup despite VAPI error...');
         // Continue with cleanup even if VAPI stop fails
       }
     
+      console.log('🔄 [AssistantContext] Step 2: Batch state updates...');
+      
       // Batch state updates with error handling
       try {
+        console.log('🔄 [AssistantContext] Step 2a: Formatting call duration...');
+        
         // Format call duration for API first
         const formattedDuration = callDuration ? 
           `${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}` : 
           '0:00';
           
+        console.log('✅ [AssistantContext] Step 2a: Duration formatted:', formattedDuration);
+        console.log('🔄 [AssistantContext] Step 2b: Updating states...');
+          
         const updates = () => {
+          console.log('🔄 [AssistantContext] Step 2b-1: Stopping timer...');
+          
           // Stop the timer
           if (callTimer) {
             clearInterval(callTimer);
             setCallTimer(null);
+            console.log('✅ [AssistantContext] Timer stopped and cleared');
+          } else {
+            console.log('⚠️ [AssistantContext] No timer to stop');
           }
+          
+          console.log('🔄 [AssistantContext] Step 2b-2: Setting initial order summary...');
           
           // Initialize with default values
           setOrderSummary(initialOrderSummary);
           
-          console.log('✅ [AssistantContext] State cleanup completed');
+          console.log('✅ [AssistantContext] Step 2b: State cleanup completed');
         };
         
         updates();
+        
+        console.log('🔄 [AssistantContext] Step 3: Processing summary generation...');
         
         // Process summary generation if we have transcript data
         try {
@@ -658,9 +685,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             content: message.content
           }));
           
+          console.log('🔍 [AssistantContext] Transcript data prepared:', {
+            count: transcriptData.length,
+            firstFew: transcriptData.slice(0, 2)
+          });
+          
           // Check if we have enough transcript data
           if (transcriptData.length >= 2) {
-            console.log('📝 [AssistantContext] Processing call summary...');
+            console.log('📝 [AssistantContext] Step 3a: Sufficient transcript data, processing call summary...');
             
             // Show loading state for summary
             const loadingSummary: CallSummary = {
@@ -671,6 +703,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               tenantId: tenantId || 'default'
             };
             setCallSummary(loadingSummary);
+            console.log('✅ [AssistantContext] Loading summary state set');
+            
+            console.log('🔄 [AssistantContext] Step 3b: Sending transcript data to server for OpenAI processing...');
             
             // Send transcript data to server for OpenAI processing
             fetch('/api/store-summary', {
@@ -690,13 +725,19 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               }),
             })
             .then(response => {
+              console.log('📡 [AssistantContext] Store-summary API response received:', response.status);
+              
               if (!response.ok) {
                 throw new Error(`Network response was not ok: ${response.status}`);
               }
               return response.json();
             })
             .then(data => {
+              console.log('✅ [AssistantContext] Store-summary API data received:', data);
+              
               if (data.success && data.summary && data.summary.content) {
+                console.log('📋 [AssistantContext] Valid summary received, updating state...');
+                
                 const summaryContent = data.summary.content;
                 const aiSummary: CallSummary = {
                   id: Date.now() as unknown as number,
@@ -706,13 +747,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   tenantId: tenantId || 'default'
                 };
                 setCallSummary(aiSummary);
+                console.log('✅ [AssistantContext] Summary state updated successfully');
+                
                 if (data.serviceRequests && Array.isArray(data.serviceRequests) && data.serviceRequests.length > 0) {
+                  console.log('📝 [AssistantContext] Service requests received:', data.serviceRequests.length);
                   setServiceRequests(data.serviceRequests);
+                } else {
+                  console.log('⚠️ [AssistantContext] No service requests in response');
                 }
+              } else {
+                console.log('⚠️ [AssistantContext] Invalid summary data received:', data);
               }
             })
-            .catch(error => {
-              console.error('❌ [AssistantContext] Error processing summary:', error);
+            .catch((summaryError) => {
+              console.error('❌ [AssistantContext] Error processing summary:', summaryError);
               // Show error state
               const errorSummary: CallSummary = {
                 id: Date.now() as unknown as number,
@@ -722,9 +770,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 tenantId: tenantId || 'default'
               };
               setCallSummary(errorSummary);
+              console.log('✅ [AssistantContext] Error summary state set');
             });
           } else {
-            console.log('⚠️ [AssistantContext] Not enough transcript data for summary');
+            console.log('⚠️ [AssistantContext] Step 3a: Not enough transcript data for summary');
+            console.log('🔍 [AssistantContext] Transcript data count:', transcriptData.length);
+            
             const noTranscriptSummary: CallSummary = {
               id: Date.now() as unknown as number,
               callId: callDetails?.id || `call-${Date.now()}`,
@@ -733,19 +784,23 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               tenantId: tenantId || 'default'
             };
             setCallSummary(noTranscriptSummary);
+            console.log('✅ [AssistantContext] No transcript summary state set');
           }
         } catch (summaryError) {
-          console.error('❌ [AssistantContext] Error in summary processing:', summaryError);
+          console.error('❌ [AssistantContext] Step 3 ERROR: Error in summary processing:', summaryError);
           // Don't let summary errors crash the endCall
         }
       } catch (cleanupError) {
-        console.error('❌ [AssistantContext] Error during state cleanup:', cleanupError);
+        console.error('❌ [AssistantContext] Step 2 ERROR: Error during state cleanup:', cleanupError);
+        
+        console.log('🔄 [AssistantContext] Attempting force cleanup of critical states...');
         
         // Force cleanup critical states
         try {
           if (callTimer) {
             clearInterval(callTimer);
             setCallTimer(null);
+            console.log('✅ [AssistantContext] Force timer cleanup completed');
           }
         } catch (timerError) {
           console.error('❌ [AssistantContext] Failed to clear timer:', timerError);
@@ -754,17 +809,26 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       
       console.log('✅ [AssistantContext] endCall() completed successfully');
     } catch (error) {
-      console.error('❌ [AssistantContext] Critical error in endCall():', error);
+      console.error('❌ [AssistantContext] CRITICAL ERROR in endCall():', error);
+      console.error('❌ [AssistantContext] Error name:', error.name);
+      console.error('❌ [AssistantContext] Error message:', error.message);
+      console.error('❌ [AssistantContext] Error stack:', error.stack);
+      
+      console.log('🔄 [AssistantContext] Attempting emergency cleanup...');
       
       // Emergency cleanup
       try {
         if (callTimer) {
           clearInterval(callTimer);
           setCallTimer(null);
+          console.log('✅ [AssistantContext] Emergency timer cleanup completed');
         }
       } catch (emergencyError) {
         console.error('🚨 [AssistantContext] Emergency cleanup failed:', emergencyError);
       }
+      
+      // Re-throw the error so it propagates up
+      throw error;
     }
   }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language]);
 

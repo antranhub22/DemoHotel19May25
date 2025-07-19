@@ -219,24 +219,62 @@ export const useConversationState = ({
 
   const handleConfirm = useCallback(() => {
     console.log('✅ [useConversationState] Confirming call - PROCESSING SUMMARY');
+    console.log('🔍 [useConversationState] Current state before confirm:', {
+      isCallStarted,
+      showConversation,
+      manualCallStarted,
+      transcriptsCount: transcripts.length
+    });
     
     try {
+      console.log('🔄 [useConversationState] Step 1: Calling endCall()...');
+      
       // End call and prepare for summary  
       endCall();
       
+      console.log('✅ [useConversationState] Step 1 completed: endCall() successful');
+      console.log('🔄 [useConversationState] Step 2: Updating UI states...');
+      
       // Update states - DIFFERENT from Cancel
+      console.log('🔄 [useConversationState] Step 2a: Setting isCallStarted = false');
       setIsCallStarted(false);
+      
+      console.log('🔄 [useConversationState] Step 2b: Setting showConversation = false');
       setShowConversation(false); // 🆕 CLOSE conversation popup to show summary popup instead
+      
+      console.log('🔄 [useConversationState] Step 2c: Setting manualCallStarted = false');
       setManualCallStarted(false); // Clear manual flag on confirmation
       
+      console.log('✅ [useConversationState] Step 2 completed: All states updated successfully');
       console.log('✅ [useConversationState] Confirm completed - conversation popup closed, summary popup will be shown');
       console.log('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false (summary popup will show)');
+      
     } catch (error) {
-      console.error('❌ [useConversationState] Error in handleConfirm:', error);
-      // Fallback - close conversation popup even on error
-      setIsCallStarted(false);
-      setShowConversation(false); // Close conversation popup on error too
-      setManualCallStarted(false); // Clear manual flag on fallback
+      console.error('❌ [useConversationState] CRITICAL ERROR in handleConfirm:', error);
+      console.error('❌ [useConversationState] Error name:', error.name);
+      console.error('❌ [useConversationState] Error message:', error.message);
+      console.error('❌ [useConversationState] Error stack:', error.stack);
+      
+      console.log('🔄 [useConversationState] Attempting fallback state cleanup...');
+      
+      try {
+        // Fallback - close conversation popup even on error
+        console.log('🔄 [useConversationState] Fallback: Setting isCallStarted = false');
+        setIsCallStarted(false);
+        
+        console.log('🔄 [useConversationState] Fallback: Setting showConversation = false');
+        setShowConversation(false); // Close conversation popup on error too
+        
+        console.log('🔄 [useConversationState] Fallback: Setting manualCallStarted = false');
+        setManualCallStarted(false); // Clear manual flag on fallback
+        
+        console.log('✅ [useConversationState] Fallback cleanup completed');
+      } catch (fallbackError) {
+        console.error('❌ [useConversationState] Fallback cleanup also failed:', fallbackError);
+      }
+      
+      // Re-throw the error so it can be caught by the outer handler
+      throw error;
     }
   }, [endCall]);
 

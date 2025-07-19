@@ -5,6 +5,8 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
+import { useCancelHandler } from '@/hooks/useCancelHandler';
+import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
 
@@ -192,177 +194,21 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     });
   };
 
-  // Add specific handlers for SiriButtonContainer Cancel/Confirm
-  const handleCancel = useCallback(() => {
-    console.log('❌ [useInterface1Legacy] Cancel button clicked - Returning to Interface1 initial state');
-    console.log('📊 [useInterface1Legacy] Current state:', { 
-      isCallStarted: conversationState.isCallStarted,
-      conversationPopupId,
-      transcriptsCount: transcripts.length 
-    });
-    
-    try {
-      // STEP 1: Clear any active popups first
-      if (conversationPopupId) {
-        try {
-          console.log('🗑️ [useInterface1Legacy] Removing conversation popup:', conversationPopupId);
-          removePopup(conversationPopupId);
-          setConversationPopupId(null);
-          console.log('✅ [useInterface1Legacy] Popup removed successfully');
-        } catch (popupError) {
-          console.error('⚠️ [useInterface1Legacy] Failed to remove popup but continuing:', popupError);
-          setConversationPopupId(null);
-        }
-      }
-      
-      // STEP 2: Reset conversation state with error isolation
-      try {
-        conversationState.handleCancel();
-        console.log('✅ [useInterface1Legacy] conversationState.handleCancel() completed');
-      } catch (stateError) {
-        console.error('⚠️ [useInterface1Legacy] conversationState.handleCancel() failed:', stateError);
-        // Continue - the popup cleanup is more important for UI consistency
-      }
-      
-      // STEP 3: Close right panel if open
-      try {
-        setShowRightPanel(false);
-        console.log('✅ [useInterface1Legacy] Right panel closed');
-      } catch (panelError) {
-        console.error('⚠️ [useInterface1Legacy] Failed to close right panel:', panelError);
-      }
-      
-      // STEP 4: Force scroll to top (return to initial view)
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        console.log('✅ [useInterface1Legacy] Scrolled to top');
-      } catch (scrollError) {
-        console.error('⚠️ [useInterface1Legacy] Failed to scroll to top:', scrollError);
-      }
-      
-      console.log('✅ [useInterface1Legacy] Cancel completed - Interface1 returned to initial state');
-    } catch (error) {
-      console.error('❌ [useInterface1Legacy] Critical error in handleCancel:', error);
-      
-      // EMERGENCY CLEANUP - ensure UI is always in clean state
-      try {
-        // Force clear all popups
-        if (conversationPopupId) {
-          removePopup(conversationPopupId);
-          setConversationPopupId(null);
-        }
-        
-        // Force close right panel
-        setShowRightPanel(false);
-        
-        // Force scroll to top
-        window.scrollTo({ top: 0, behavior: 'auto' });
-        
-        console.log('🚨 [useInterface1Legacy] Emergency cleanup completed');
-      } catch (emergencyError) {
-        console.error('🚨 [useInterface1Legacy] Emergency cleanup failed:', emergencyError);
-      }
-      
-      // Prevent error propagation to avoid crash
-      console.log('🔄 [useInterface1Legacy] Cancel operation completed despite errors - UI restored');
-    }
-  }, [conversationState, conversationPopupId, removePopup, transcripts.length, setShowRightPanel]);
+  // ✅ Use dedicated handlers for Cancel/Confirm buttons
+  const { handleCancel } = useCancelHandler({
+    conversationState,
+    conversationPopupId,
+    setConversationPopupId,
+    setShowRightPanel,
+    transcripts
+  });
 
-  const handleConfirm = useCallback(() => {
-    console.log('✅ [useInterface1Legacy] Confirm button clicked in SiriButtonContainer');
-    console.log('📊 [useInterface1Legacy] Current state:', { 
-      isCallStarted: conversationState.isCallStarted,
-      transcriptsCount: transcripts.length,
-      hasCallSummary: !!callSummary,
-      hasServiceRequests: serviceRequests?.length > 0
-    });
-    
-    try {
-      // Use conversation state handler to end call properly
-      conversationState.handleConfirm();
-      
-      // 🆕 CREATE SUMMARY POPUP after call ends and summary is generated
-      console.log('✅ [useInterface1Legacy] Call ended, waiting for summary generation...');
-      
-      // Wait for summary to be generated, then show popup
-      setTimeout(() => {
-        if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
-          console.log('📋 [useInterface1Legacy] Showing Summary popup with content:', callSummary.content.substring(0, 50) + '...');
-          
-          // Import and show summary popup
-          import('../components/popup-system/DemoPopupContent').then((module) => {
-            const { SummaryPopupContent } = module;
-            showSummary(
-              createElement(SummaryPopupContent),
-              { 
-                title: 'Call Summary',
-                priority: 'high' as const
-              }
-            );
-          }).catch(() => {
-            // Fallback to simple summary popup
-            showSummary(
-              createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
-                createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
-                createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
-                  'Generated at ' + callSummary.timestamp.toLocaleTimeString()),
-                serviceRequests && serviceRequests.length > 0 && createElement('div', { key: 'requests' }, [
-                  createElement('h4', { key: 'req-title', style: { marginTop: '16px', marginBottom: '8px' } }, 'Service Requests:'),
-                  createElement('ul', { key: 'req-list', style: { listStyle: 'disc', marginLeft: '20px' } }, 
-                    serviceRequests.map((req, idx) => 
-                      createElement('li', { key: idx }, `${req.serviceType}: ${req.requestText}`)
-                    )
-                  )
-                ])
-              ]),
-              { 
-                title: 'Call Summary',
-                priority: 'high' as const
-              }
-            );
-          });
-        } else {
-          // Summary not ready yet, wait a bit more
-          console.log('⏳ [useInterface1Legacy] Summary not ready, waiting more...');
-          setTimeout(() => {
-            if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
-              console.log('📋 [useInterface1Legacy] Showing delayed Summary popup');
-              showSummary(
-                createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
-                  createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                  createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
-                  createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
-                    'Generated at ' + callSummary.timestamp.toLocaleTimeString())
-                ]),
-                { 
-                  title: 'Call Summary',
-                  priority: 'high' as const
-                }
-              );
-            } else {
-              console.log('❌ [useInterface1Legacy] Summary still not available, showing fallback');
-              showSummary(
-                createElement('div', { style: { padding: '20px', textAlign: 'center' } }, [
-                  createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                  createElement('p', { key: 'message' }, 'Summary is being generated. Please check the conversation tab for details.')
-                ]),
-                { 
-                  title: 'Call Summary',
-                  priority: 'medium' as const
-                }
-              );
-            }
-          }, 2000);
-        }
-      }, 1500); // Initial delay to allow summary generation
-      
-      console.log('✅ [useInterface1Legacy] Confirm completed - Summary popup will be shown when ready');
-      
-    } catch (error) {
-      console.error('❌ [useInterface1Legacy] Error in handleConfirm:', error);
-    }
-  }, [conversationState, transcripts.length, callSummary, serviceRequests, showSummary]);
+  const { handleConfirm } = useConfirmHandler({
+    conversationState,
+    transcripts,
+    callSummary,
+    serviceRequests
+  });
 
   // Update badge count when transcripts change
   useEffect(() => {
