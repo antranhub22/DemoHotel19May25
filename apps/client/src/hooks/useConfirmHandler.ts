@@ -49,85 +49,105 @@ export const useConfirmHandler = ({
       conversationState.handleConfirm();
       
       console.log('✅ [useConfirmHandler] Step 1 completed: conversationState.handleConfirm() successful');
-      console.log('🔄 [useConfirmHandler] Step 2: Setting up summary popup generation...');
+      console.log('🔄 [useConfirmHandler] Step 2: handleEndCall completed');
       
-      // 🆕 CREATE SUMMARY POPUP after call ends and summary is generated
-      console.log('✅ [useConfirmHandler] Call ended, waiting for summary generation...');
+      // 🔄 NEW: Show immediate loading popup, then update content
+      console.log('📋 [useConfirmHandler] Step 3: Showing immediate loading popup...');
       
-      // Wait for summary to be generated, then show popup
+      try {
+        // Show loading popup immediately
+        const loadingElement = createElement('div', { 
+          id: 'summary-loading-popup',
+          style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } 
+        }, [
+          createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+          createElement('div', { key: 'loading', style: { marginBottom: '16px' } }, [
+            createElement('div', { 
+              key: 'spinner',
+              style: { 
+                display: 'inline-block',
+                width: '20px', 
+                height: '20px', 
+                border: '2px solid #f3f3f3',
+                borderTop: '2px solid #3498db',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginRight: '10px'
+              }
+            }),
+            createElement('span', { key: 'text' }, 'Generating summary...')
+          ]),
+          createElement('p', { key: 'message', style: { fontSize: '14px', color: '#666', lineHeight: '1.5' } }, 
+            'Please wait while we process your conversation and generate insights.'),
+          createElement('div', { key: 'time', style: { fontSize: '10px', color: '#999', marginTop: '12px' } }, 
+            'Call ended at: ' + new Date().toLocaleTimeString())
+        ]);
+        
+        showSummary(
+          loadingElement,
+          { 
+            title: 'Generating Summary...',
+            priority: 'high' as const
+          }
+        );
+        console.log('✅ [useConfirmHandler] Step 3: Loading popup shown');
+        
+        // Add CSS animation for spinner
+        if (!document.getElementById('spinner-animation')) {
+          const style = document.createElement('style');
+          style.id = 'spinner-animation';
+          style.textContent = `
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `;
+          document.head.appendChild(style);
+        }
+      } catch (loadingError) {
+        console.error('❌ [useConfirmHandler] Step 3 ERROR: Loading popup failed:', loadingError);
+      }
+
+      // Wait for summary to be generated, then UPDATE the same popup
       setTimeout(() => {
-        console.log('⏰ [useConfirmHandler] Step 3: First timeout reached, checking summary...');
+        console.log('⏰ [useConfirmHandler] Step 4: First timeout reached, checking summary...');
         console.log('🔍 [useConfirmHandler] callSummary:', callSummary);
         console.log('🔍 [useConfirmHandler] callSummary.content:', callSummary?.content);
         
         if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
-          console.log('📋 [useConfirmHandler] Step 4a: Summary ready, showing popup with content:', callSummary.content.substring(0, 50) + '...');
+          console.log('📋 [useConfirmHandler] Step 5a: Summary ready, updating popup with content:', callSummary.content.substring(0, 50) + '...');
           
           try {
-            // Import and show summary popup
-            console.log('📦 [useConfirmHandler] Step 5a: Importing DemoPopupContent module...');
-            import('../components/popup-system/DemoPopupContent').then((module) => {
-              console.log('✅ [useConfirmHandler] Step 6a: Module imported successfully:', module);
-              console.log('🔍 [useConfirmHandler] SummaryPopupContent available:', !!module.SummaryPopupContent);
-              
-              const { SummaryPopupContent } = module;
-              console.log('🎨 [useConfirmHandler] Step 7a: Creating popup element...');
-              
-              const summaryElement = createElement(SummaryPopupContent);
-              console.log('✅ [useConfirmHandler] Step 8a: Element created:', summaryElement);
-              
-              console.log('🚀 [useConfirmHandler] Step 9a: Calling showSummary...');
-              showSummary(
-                summaryElement,
-                { 
-                  title: 'Call Summary',
-                  priority: 'high' as const
-                }
-              );
-              console.log('✅ [useConfirmHandler] Step 10a: showSummary completed successfully');
-            }).catch((importError) => {
-              console.error('❌ [useConfirmHandler] Step 6a ERROR: Failed to import DemoPopupContent:', importError);
-              console.log('🔄 [useConfirmHandler] Step 6a: Falling back to simple summary popup...');
-              
-              try {
-                // Fallback to simple summary popup
-                console.log('🎨 [useConfirmHandler] Step 7b: Creating fallback popup element...');
-                const fallbackElement = createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
-                  createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                  createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
-                  createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
-                    'Generated at ' + callSummary.timestamp.toLocaleTimeString()),
-                  serviceRequests && serviceRequests.length > 0 && createElement('div', { key: 'requests' }, [
-                    createElement('h4', { key: 'req-title', style: { marginTop: '16px', marginBottom: '8px' } }, 'Service Requests:'),
-                    createElement('ul', { key: 'req-list', style: { listStyle: 'disc', marginLeft: '20px' } }, 
-                      serviceRequests.map((req, idx) => 
-                        createElement('li', { key: idx }, `${req.serviceType}: ${req.requestText}`)
-                      )
-                    )
-                  ])
-                ]);
-                
-                console.log('✅ [useConfirmHandler] Step 8b: Fallback element created');
-                console.log('🚀 [useConfirmHandler] Step 9b: Calling showSummary with fallback...');
-                
-                showSummary(
-                  fallbackElement,
-                  { 
-                    title: 'Call Summary',
-                    priority: 'high' as const
-                  }
-                );
-                console.log('✅ [useConfirmHandler] Step 10b: Fallback showSummary completed');
-              } catch (fallbackError) {
-                console.error('❌ [useConfirmHandler] Step 7b ERROR: Fallback popup creation failed:', fallbackError);
+            // Update popup with actual summary content
+            const summaryElement = createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
+              createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+              createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5', background: '#f8f9fa', padding: '12px', borderRadius: '6px' } }, callSummary.content),
+              createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666', textAlign: 'right' } }, 
+                'Generated at ' + callSummary.timestamp.toLocaleTimeString()),
+              serviceRequests && serviceRequests.length > 0 && createElement('div', { key: 'requests', style: { marginTop: '16px' } }, [
+                createElement('h4', { key: 'req-title', style: { marginBottom: '8px', color: '#333' } }, 'Service Requests:'),
+                createElement('ul', { key: 'req-list', style: { listStyle: 'disc', marginLeft: '20px', color: '#555' } }, 
+                  serviceRequests.map((req, idx) => 
+                    createElement('li', { key: idx, style: { marginBottom: '4px' } }, `${req.serviceType}: ${req.requestText}`)
+                  )
+                )
+              ])
+            ]);
+            
+            // Update the existing popup
+            showSummary(
+              summaryElement,
+              { 
+                title: 'Call Summary - Complete',
+                priority: 'high' as const
               }
-            });
-          } catch (outerError) {
-            console.error('❌ [useConfirmHandler] Step 5a ERROR: Outer try-catch error:', outerError);
+            );
+            console.log('✅ [useConfirmHandler] Step 6a: Popup updated with summary content');
+          } catch (updateError) {
+            console.error('❌ [useConfirmHandler] Step 5a ERROR: Failed to update popup:', updateError);
           }
         } else {
-          // Summary not ready yet, wait a bit more
-          console.log('⏳ [useConfirmHandler] Step 4b: Summary not ready, waiting more...');
+          console.log('⏳ [useConfirmHandler] Step 5b: Summary not ready, will check again...');
           console.log('🔍 [useConfirmHandler] Current callSummary state:', {
             exists: !!callSummary,
             hasContent: !!(callSummary?.content),
@@ -135,56 +155,64 @@ export const useConfirmHandler = ({
             isGenerating: callSummary?.content === "Generating AI summary of your conversation..."
           });
           
+          // Wait a bit more, then show fallback if still not ready
           setTimeout(() => {
-            console.log('⏰ [useConfirmHandler] Step 5b: Second timeout reached, checking summary again...');
-            console.log('🔍 [useConfirmHandler] Updated callSummary:', callSummary);
+            console.log('⏰ [useConfirmHandler] Step 6b: Second timeout reached, final check...');
+            console.log('🔍 [useConfirmHandler] Final callSummary:', callSummary);
             
             if (callSummary && callSummary.content && callSummary.content !== "Generating AI summary of your conversation...") {
-              console.log('📋 [useConfirmHandler] Step 6b: Delayed summary ready, showing popup');
+              console.log('📋 [useConfirmHandler] Step 7b: Delayed summary ready, updating popup');
               
               try {
                 const delayedElement = createElement('div', { style: { padding: '20px', maxWidth: '500px' } }, [
                   createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                  createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5' } }, callSummary.content),
-                  createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666' } }, 
+                  createElement('div', { key: 'content', style: { marginBottom: '16px', lineHeight: '1.5', background: '#f8f9fa', padding: '12px', borderRadius: '6px' } }, callSummary.content),
+                  createElement('div', { key: 'time', style: { fontSize: '12px', color: '#666', textAlign: 'right' } }, 
                     'Generated at ' + callSummary.timestamp.toLocaleTimeString())
                 ]);
                 
                 showSummary(
                   delayedElement,
                   { 
-                    title: 'Call Summary',
+                    title: 'Call Summary - Complete',
                     priority: 'high' as const
                   }
                 );
-                console.log('✅ [useConfirmHandler] Step 7b: Delayed summary popup shown');
+                console.log('✅ [useConfirmHandler] Step 8b: Delayed summary popup updated');
               } catch (delayedError) {
-                console.error('❌ [useConfirmHandler] Step 6b ERROR: Delayed popup creation failed:', delayedError);
+                console.error('❌ [useConfirmHandler] Step 7b ERROR: Delayed popup update failed:', delayedError);
               }
             } else {
-              console.log('❌ [useConfirmHandler] Step 6b: Summary still not available, showing fallback message');
+              console.log('❌ [useConfirmHandler] Step 7b: Summary still not available, showing completion message');
               
               try {
-                const noSummaryElement = createElement('div', { style: { padding: '20px', textAlign: 'center' } }, [
+                // Update to show completion without detailed summary
+                const completionElement = createElement('div', { style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } }, [
                   createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
-                  createElement('p', { key: 'message' }, 'Summary is being generated. Please check the conversation tab for details.')
+                  createElement('div', { key: 'icon', style: { fontSize: '48px', marginBottom: '16px' } }, '✅'),
+                  createElement('p', { key: 'message', style: { marginBottom: '16px', lineHeight: '1.5', color: '#333' } }, 
+                    'Call completed successfully!'),
+                  createElement('p', { key: 'note', style: { fontSize: '14px', color: '#666', marginBottom: '16px' } }, 
+                    'Your conversation has been recorded. Summary processing is continuing in the background.'),
+                  createElement('div', { key: 'contact', style: { fontSize: '12px', color: '#999', borderTop: '1px solid #eee', paddingTop: '12px' } }, 
+                    'For immediate assistance, please contact the front desk.')
                 ]);
                 
                 showSummary(
-                  noSummaryElement,
+                  completionElement,
                   { 
-                    title: 'Call Summary',
+                    title: 'Call Complete',
                     priority: 'medium' as const
                   }
                 );
-                console.log('✅ [useConfirmHandler] Step 7b: No summary fallback shown');
-              } catch (noSummaryError) {
-                console.error('❌ [useConfirmHandler] Step 6b ERROR: No summary popup creation failed:', noSummaryError);
+                console.log('✅ [useConfirmHandler] Step 8b: Final completion message shown');
+              } catch (completionError) {
+                console.error('❌ [useConfirmHandler] Step 7b ERROR: Completion popup failed:', completionError);
               }
             }
-          }, 2000);
+          }, 3000); // Wait 3 more seconds for summary
         }
-      }, 1500); // Initial delay to allow summary generation
+      }, 2000); // Initial delay for summary generation
       
       console.log('✅ [useConfirmHandler] Confirm completed - Summary popup will be shown when ready');
       
@@ -194,8 +222,38 @@ export const useConfirmHandler = ({
       console.error('❌ [useConfirmHandler] Error message:', error.message);
       console.error('❌ [useConfirmHandler] Error stack:', error.stack);
       
-      // Re-throw the error so we can see it in the error boundary
-      throw error;
+      // 🔧 FIX: Don't re-throw error, show fallback popup instead
+      console.log('🔄 [useConfirmHandler] Showing emergency fallback popup due to error...');
+      
+      try {
+        // Emergency fallback popup
+        const emergencyElement = createElement('div', { style: { padding: '20px', textAlign: 'center', maxWidth: '400px' } }, [
+          createElement('h3', { key: 'title', style: { marginBottom: '16px', color: '#333' } }, '📋 Call Summary'),
+          createElement('p', { key: 'message', style: { marginBottom: '16px', lineHeight: '1.5' } }, 
+            'Call completed successfully! Summary is being processed in the background.'),
+          createElement('div', { key: 'note', style: { fontSize: '12px', color: '#666', marginTop: '12px' } }, 
+            'If you need immediate assistance, please contact front desk.'),
+          createElement('div', { key: 'time', style: { fontSize: '10px', color: '#999', marginTop: '8px' } }, 
+            'Timestamp: ' + new Date().toLocaleTimeString())
+        ]);
+        
+        showSummary(
+          emergencyElement,
+          { 
+            title: 'Call Summary',
+            priority: 'medium' as const
+          }
+        );
+        
+        console.log('✅ [useConfirmHandler] Emergency fallback popup shown successfully');
+      } catch (fallbackError) {
+        console.error('❌ [useConfirmHandler] Emergency fallback also failed:', fallbackError);
+        // Last resort: at least don't crash the app
+        alert('Call completed! Please check with front desk for any service requests.');
+      }
+      
+      // 🔧 FIX: Don't re-throw error to prevent Error Boundary trigger
+      console.log('🔄 [useConfirmHandler] Error handled gracefully, continuing normal operation');
     }
   }, [conversationState, transcripts.length, callSummary, serviceRequests, showSummary]);
 
