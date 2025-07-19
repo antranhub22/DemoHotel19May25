@@ -309,7 +309,6 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
                 console.log('🛑 [Interface2] SiriCallButton onCallEnd triggered');
                 contextEndCall();
               }}
-              language="en"
             />
             {/* Duration bar với các nút hai bên, căn giữa tuyệt đối */}
             <div className="flex items-center justify-center mt-2 w-full gap-2 sm:gap-3">

@@ -3,6 +3,8 @@ export { SiriButton } from './SiriButton';
 export { default as SiriCallButton } from './SiriCallButton';
 export { SiriButtonContainer } from './SiriButtonContainer';
 export { MobileDebugComponent } from './MobileDebugComponent';
+export { MobileTouchDebugger } from './MobileTouchDebugger';
+export { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 
 // 🚀 PHASE 2: Modular Architecture Components
 export * from './modules';

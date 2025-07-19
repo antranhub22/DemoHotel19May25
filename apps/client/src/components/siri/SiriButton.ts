@@ -62,10 +62,10 @@ export class SiriButton {
     } else {
       // Use default colors
       this.state.setColorScheme({
-        primary: '#5DB6B9',
-        secondary: '#E8B554',
-        glow: 'rgba(93, 182, 185, 0.4)',
-        name: 'English'
+      primary: '#5DB6B9',
+      secondary: '#E8B554',
+      glow: 'rgba(93, 182, 185, 0.4)',
+      name: 'English'
       });
     }
 
@@ -115,17 +115,17 @@ export class SiriButton {
     this.canvas.style.background = 'transparent';
     this.canvas.style.zIndex = '1';
     this.canvas.style.pointerEvents = 'none'; // Let container handle events
-
+    
     // Add debug attributes
     this.canvas.setAttribute('data-siri-canvas', 'true');
     this.canvas.setAttribute('data-mobile-debug', 
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
     );
     this.canvas.id = `${containerId}-canvas`;
-
+    
     // Append to container
     container.appendChild(this.canvas);
-
+    
     // Get context
     const ctx = this.canvas.getContext('2d');
     if (!ctx) {
@@ -133,7 +133,7 @@ export class SiriButton {
       throw new Error('Could not get canvas context');
     }
     this.ctx = ctx;
-
+    
     this.debug.log('✅ [SiriButton] Canvas created and context obtained');
 
     // Debug canvas verification
@@ -342,16 +342,16 @@ export class SiriButton {
     // Remove canvas safely
     if (this.canvas && this.canvas.parentElement && document.contains(this.canvas)) {
       try {
-        this.canvas.parentElement.removeChild(this.canvas);
+          this.canvas.parentElement.removeChild(this.canvas);
         this.debug.log('✅ [SiriButton] Canvas removed successfully');
       } catch (error) {
         this.debug.warn('⚠️ [SiriButton] Error removing canvas:', error);
       }
-    }
-
+      }
+      
     // Clear references
-    this.canvas = null as any;
-    this.ctx = null as any;
+      this.canvas = null as any;
+      this.ctx = null as any;
     this.isInitialized = false;
 
     this.debug.log('✅ [SiriButton] Cleanup completed');

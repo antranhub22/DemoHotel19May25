@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
+import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
+import { useSimplifiedMobileTouch } from '@/hooks/useSimplifiedMobileTouch';
 import '../../styles/voice-interface.css';
 import { Language } from '@/types/interface1.types';
 
 interface SiriCallButtonProps {
-  containerId: string;
   isListening: boolean;
-  onCallStart: () => void;
-  onCallEnd: () => void;
   volumeLevel: number;
-  language: Language;
+  containerId: string;
+  onCallStart?: () => Promise<void>;
+  onCallEnd?: () => void;
+  language?: Language;
   colors?: {
     primary: string;
     secondary: string;
@@ -19,35 +22,76 @@ interface SiriCallButtonProps {
   };
 }
 
-const SiriCallButton: React.FC<SiriCallButtonProps> = ({
-  isListening,
+const SiriCallButton: React.FC<SiriCallButtonProps> = ({ 
+  isListening, 
   volumeLevel,
   containerId,
   onCallStart,
   onCallEnd,
-  language,
+  language = 'en',
   colors
 }) => {
-  // 🎯 STATE MANAGEMENT
+  // 🚨 IMMEDIATE DEBUG: Log component render
+  console.log('🔥🔥🔥 [SiriCallButton] ===== MOBILE TOUCH TEST READY =====');
+  console.log('🔥 [SiriCallButton] Container:', containerId, 'onCallStart:', !!onCallStart, 'Mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
+  // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
+  const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
+  
+  // 🔧 PHASE 2: Debug utility methods
+  const debug = (message: string, ...args: any[]) => {
+    if (DEBUG_LEVEL >= 2) {
+      console.log(`[SiriCallButton] ${message}`, ...args);
+    }
+  };
+
+  const debugWarn = (message: string, ...args: any[]) => {
+    if (DEBUG_LEVEL >= 1) {
+      console.warn(`[SiriCallButton] ${message}`, ...args);
+    }
+  };
+
+  const debugError = (message: string, ...args: any[]) => {
+    // Always show errors, even in production
+    console.error(`[SiriCallButton] ${message}`, ...args);
+  };
+
   const buttonRef = useRef<SiriButton | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLElement | null>(null);
   const cleanupFlagRef = useRef<boolean>(false);
-  
-  // UI State
+  const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
   const [canvasReady, setCanvasReady] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'processing' | 'speaking'>('idle');
   
-  // Debug flags
-  const DEBUG_LEVEL = parseInt(process.env.NODE_ENV === 'development' ? '2' : '0');
-  const [debugInfo, setDebugInfo] = useState<any>({});
-  
-  // Emergency management
-  const maxInitAttempts = 3;
+  // 🚨 PHASE 1: EMERGENCY GUARDS - Prevent double firing and infinite loops
+  const isHandlingClick = useRef<boolean>(false);
   const initAttemptCount = useRef<number>(0);
+  const maxInitAttempts = 3;
   const emergencyStopRequested = useRef<boolean>(false);
 
-  // Modular SiriButton handles all mobile interactions now
+  // 🚀 EMERGENCY FIX: Simplified Mobile Touch Handler
+  const USE_SIMPLIFIED_MOBILE_TOUCH = true; // Feature flag for testing
+  const USE_MOBILE_VISUAL_ONLY = true; // Feature flag to bypass SiriButton entirely on mobile
+  
+  const simplifiedMobileTouch = useSimplifiedMobileTouch({
+    containerId,
+    isListening,
+    onCallStart,
+    onCallEnd,
+    onInteractionStart: (position) => {
+      // Only try to update SiriButton if we're not using mobile visual only
+      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
+        buttonRef.current.setInteractionMode('active');
+        buttonRef.current.setTouchPosition(position.x, position.y);
+      }
+    },
+    onInteractionEnd: () => {
+      // Only try to update SiriButton if we're not using mobile visual only
+      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
+        buttonRef.current.setInteractionMode('idle');
+      }
+    },
+    enabled: USE_SIMPLIFIED_MOBILE_TOUCH,
+    debugEnabled: DEBUG_LEVEL >= 1
+  });
 
   // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
@@ -59,7 +103,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         try {
           buttonRef.current.cleanup();
         } catch (error) {
-          console.warn('Cleanup error:', error);
+          debugWarn('Cleanup error:', error);
         }
         buttonRef.current = null;
       }
@@ -74,50 +118,127 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             }
           });
         } catch (error) {
-          console.warn('Canvas cleanup error:', error);
+          debugError('Failed to remove canvases:', error);
         }
       }
       
+      setCanvasReady(false);
     } catch (error) {
-      console.error('General cleanup error:', error);
+      debugError('Safe cleanup failed:', error);
     }
   }, [containerId]);
 
-  // Debug helpers
-  const debug = useCallback((message: string, ...args: any[]) => {
-    if (DEBUG_LEVEL >= 1) {
-      console.log(`[SiriCallButton] ${message}`, ...args);
-    }
-  }, [DEBUG_LEVEL]);
-
-  const debugWarn = useCallback((message: string, ...args: any[]) => {
-    if (DEBUG_LEVEL >= 1) {
-      console.warn(`[SiriCallButton] ${message}`, ...args);
-    }
-  }, [DEBUG_LEVEL]);
-
-  const debugError = useCallback((message: string, ...args: any[]) => {
-    console.error(`[SiriCallButton] ${message}`, ...args);
-  }, []);
-
-  // 🚨 EMERGENCY STOP HANDLER
-  const triggerEmergencyStop = useCallback((reason: string) => {
-    debugError(`🚨 EMERGENCY STOP: ${reason}`);
+  // 🚨 PHASE 1: EMERGENCY STOP - Force stop all operations
+  const emergencyStop = useCallback(() => {
+    debugWarn('🚨 EMERGENCY STOP TRIGGERED');
     emergencyStopRequested.current = true;
     
     try {
+      // Stop SiriButton if exists
+      if (buttonRef.current) {
+        try {
+          if (typeof buttonRef.current.emergencyStopPublic === 'function') {
+            buttonRef.current.emergencyStopPublic();
+          }
+        } catch (error) {
+          debugError('Failed to emergency stop SiriButton:', error);
+        }
+      }
+      
+      // Force cleanup
       safeCleanup();
-      setCanvasReady(false);
-      setStatus('idle');
+      
+      debugWarn('🚨 EMERGENCY STOP COMPLETED');
     } catch (error) {
-      debugError('Emergency stop cleanup failed:', error);
+      debugError('Emergency stop failed:', error);
     }
-  }, [safeCleanup, debugError]);
+  }, [safeCleanup]);
+
+  // ✅ CENTRALIZED interaction handlers
+  const handleInteractionStart = useCallback((e: Event, position?: { x: number; y: number }) => {
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode('active');
+      if (position) {
+        buttonRef.current.setTouchPosition(position.x, position.y);
+      }
+    }
+    debug('🎯 [SiriCallButton] Interaction start:', { position });
+  }, []);
+
+  const handleInteractionEnd = useCallback(async (e: Event) => {
+    debug('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
+    debug('  🎯 Event type:', e.type);
+    debug('  🎯 Event target:', e.target);
+    
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode('idle');
+      debug('  ✅ Visual state set to idle');
+    }
+    
+    // Business logic - prevent double-firing
+    if (isHandlingClick.current) {
+      debug('🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...');
+      return;
+    }
+    
+    isHandlingClick.current = true;
+    debug('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
+    debug('  🎧 isListening:', isListening);
+    debug('  ✅ onCallStart available:', !!onCallStart);
+    debug('  ✅ onCallEnd available:', !!onCallEnd);
+    
+    try {
+      if (!isListening && onCallStart) {
+        setStatus('listening');
+        debug('🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...');
+        try {
+          await onCallStart();
+          debug('🎤 [SiriCallButton] ✅ onCallStart() completed successfully');
+        } catch (error) {
+          debugError('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
+          setStatus('idle');
+        }
+      } else if (isListening && onCallEnd) {
+        setStatus('processing');
+        debug('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
+        onCallEnd();
+        debug('🛑 [SiriCallButton] ✅ onCallEnd() completed');
+        setTimeout(() => setStatus('idle'), 500);
+      } else {
+        debug('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
+        debug('  🎧 isListening:', isListening);
+        debug('  🎤 onCallStart available:', !!onCallStart);
+        debug('  🛑 onCallEnd available:', !!onCallEnd);
+      }
+    } finally {
+      setTimeout(() => {
+        isHandlingClick.current = false;
+        debug('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
+      }, 100);
+    }
+    
+    debug('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
+  }, [isListening, onCallStart, onCallEnd]);
+
+  const handleHover = useCallback((isHovered: boolean) => {
+    if (buttonRef.current) {
+      buttonRef.current.setInteractionMode(isHovered ? 'hover' : 'idle');
+    }
+  }, []);
 
   // 🚨 PHASE 1: SAFE INITIALIZATION - Initialize SiriButton with emergency guards
   useEffect(() => {
     const isMobile = isMobileDevice();
     
+    // 🚀 EMERGENCY BYPASS: Skip SiriButton creation on mobile if using visual-only mode
+    if (isMobile && USE_MOBILE_VISUAL_ONLY) {
+      debug('🚀 [SiriCallButton] BYPASSING SiriButton creation - using mobile visual only');
+      setCanvasReady(true); // Set ready immediately for mobile visual
+      return () => {
+        // No cleanup needed for mobile visual only
+      };
+    }
+
     // 🚨 EMERGENCY: Check if emergency stop was requested
     if (emergencyStopRequested.current) {
       debugWarn('Skipping initialization due to emergency stop');
@@ -128,297 +249,321 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     initAttemptCount.current++;
     if (initAttemptCount.current > maxInitAttempts) {
       debugError('Too many initialization attempts, triggering emergency stop');
-      triggerEmergencyStop('Max initialization attempts reached');
+      emergencyStop();
       return;
     }
 
-    debug('🚀 [INIT] Starting initialization', { 
-      attempt: initAttemptCount.current,
-      isMobile,
-      containerId 
+    cleanupFlagRef.current = false;
+    
+    const element = document.getElementById(containerId);
+    if (!element) {
+      debugWarn('Container element not found:', containerId);
+      return;
+    }
+
+    // Clear existing content
+    const existingCanvases = element.querySelectorAll('canvas');
+    existingCanvases.forEach(canvas => {
+      if (canvas.parentElement && document.contains(canvas)) {
+        canvas.parentElement.removeChild(canvas);
+      }
     });
 
-    let isInitializing = true;
-    const initStartTime = Date.now();
-
-    const initializeButton = async () => {
-      try {
-        // Get container reference
-        const container = document.getElementById(containerId);
-        containerRef.current = container;
-        
-        if (!container) {
-          throw new Error(`Container with ID "${containerId}" not found`);
+    // 🚨 PHASE 1: SAFE INITIALIZATION - Try-catch for SiriButton creation
+    try {
+      buttonRef.current = new SiriButton(containerId, colors);
+      setCanvasReady(true);
+      
+      // 🔧 FIX 4: Single resize trigger for better mobile performance  
+      setTimeout(() => {
+        if (buttonRef.current && !cleanupFlagRef.current && !emergencyStopRequested.current) {
+          debug('🔧 [SiriCallButton] Single resize for mobile compatibility');
+          window.dispatchEvent(new Event('resize'));
         }
-
-        debug('✅ [INIT] Container found', { containerId });
-
-        // Clear any existing canvases
-        const existingCanvases = container.querySelectorAll('canvas');
-        existingCanvases.forEach(canvas => {
-          if (canvas.parentElement) {
-            canvas.parentElement.removeChild(canvas);
-          }
-        });
-
-        // Create and setup canvas
-        const canvas = document.createElement('canvas');
-        canvasRef.current = canvas;
-        container.appendChild(canvas);
-
-        debug('✅ [INIT] Canvas created and appended');
-
-        // Initialize SiriButton with timeout protection
-        const initTimeout = setTimeout(() => {
-          if (isInitializing) {
-            triggerEmergencyStop('Initialization timeout');
-          }
-        }, 10000); // 10 second timeout
-
-        // Check for max attempts before creating SiriButton
-        if (initAttemptCount.current < maxInitAttempts) {
-          debug('✅ [INIT] Creating SiriButton instance...');
-          
-                     buttonRef.current = new SiriButton(containerId, colors);
-
-          debug('✅ [INIT] SiriButton created successfully');
-        } else {
-          debugError('Max init attempts reached, triggering emergency stop');
-          clearTimeout(initTimeout);
-          triggerEmergencyStop('Max initialization attempts reached');
-          return;
-        }
-
-        clearTimeout(initTimeout);
-        isInitializing = false;
-
-        // Set ready state
-        setCanvasReady(true);
-        setStatus('idle');
-        
-        const initDuration = Date.now() - initStartTime;
-        debug('🎉 [INIT] Initialization completed successfully', { 
-          duration: `${initDuration}ms`,
-          attempt: initAttemptCount.current 
-        });
-
-      } catch (error) {
-        isInitializing = false;
-        debugError('❌ [INIT] Initialization failed:', error);
-        
-        if (initAttemptCount.current >= maxInitAttempts) {
-          triggerEmergencyStop('Initialization failed after max attempts');
-        } else {
-          // Try again after delay
-          setTimeout(() => {
-            if (!emergencyStopRequested.current) {
-              debug('🔄 [INIT] Retrying initialization...');
-              initializeButton();
+      }, 200);
+      
+    } catch (error) {
+      debugError('Init error:', error);
+      
+      // 🚨 PHASE 1: SAFE RETRY - Limited retry with emergency guards
+      if (initAttemptCount.current < maxInitAttempts) {
+        setTimeout(() => {
+          if (!cleanupFlagRef.current && !emergencyStopRequested.current) {
+            try {
+              buttonRef.current = new SiriButton(containerId, colors);
+              setCanvasReady(true);
+              debug('🔧 [SiriCallButton] Retry successful - no additional resize needed');
+            } catch (retryError) {
+              debugError('Retry failed:', retryError);
+              if (initAttemptCount.current >= maxInitAttempts) {
+                emergencyStop();
+              }
             }
-          }, 1000);
-        }
+          }
+        }, 200);
+      } else {
+        debugError('Max init attempts reached, triggering emergency stop');
+        emergencyStop();
       }
-    };
-
-    // Start initialization
-    initializeButton();
-
-    // Cleanup function
-    return () => {
-      isInitializing = false;
-      safeCleanup();
-    };
-  }, [containerId, onCallStart, onCallEnd, language, colors, DEBUG_LEVEL, debug, debugWarn, debugError, triggerEmergencyStop, safeCleanup]);
-
-  // 🚨 PHASE 2: SAFE INTERACTION HANDLERS
-  useEffect(() => {
-    if (!buttonRef.current || !canvasReady) return;
-
-    const button = buttonRef.current;
-    debug('🎯 [INTERACTION] Setting up interaction handlers');
-
-    // Setup container click handler with emergency protection
-    const container = document.getElementById(containerId);
-    if (!container) {
-      debugWarn('Container not found for interaction setup');
-      return;
     }
 
-    // Enhanced mobile detection and debug
-    const isMobile = isMobileDevice();
-    debug('🎯 [INTERACTION] Setup for device:', isMobile ? 'Mobile' : 'Desktop');
-    debug('🎯 [INTERACTION] Container:', containerId, container.getBoundingClientRect());
-
-    const handleContainerInteraction = async (event: Event) => {
-      try {
-        if (emergencyStopRequested.current) {
-          debugWarn('Interaction blocked - emergency stop active');
-          return;
-        }
-
-        debug('🎯 [INTERACTION] Container interaction detected');
-        
-        // Handle the interaction based on current state
-        if (isListening) {
-          debug('🔴 [INTERACTION] Stopping call (was listening)');
-          if (onCallEnd) {
-            await onCallEnd();
-          }
-        } else {
-          debug('🔵 [INTERACTION] Starting call (was idle)');
-          if (onCallStart) {
-            await onCallStart();
-          }
-        }
-      } catch (error) {
-        debugError('❌ [INTERACTION] Handler error:', error);
-      }
-    };
-
-    // Mobile touch handling
-    const handleTouchStart = (event: TouchEvent) => {
-      debug('📱 [TOUCH] Touch start detected');
-      event.preventDefault(); // Prevent ghost clicks
-      
-      if (buttonRef.current) {
-        buttonRef.current.setInteractionMode('active');
-        
-        const touch = event.touches[0];
-        const rect = container.getBoundingClientRect();
-        buttonRef.current.setTouchPosition(
-          touch.clientX - rect.left,
-          touch.clientY - rect.top
-        );
-      }
-    };
-
-    const handleTouchEnd = async (event: TouchEvent) => {
-      debug('📱 [TOUCH] Touch end detected');
-      event.preventDefault(); // Prevent ghost clicks
-      
-      if (buttonRef.current) {
-        buttonRef.current.setInteractionMode('idle');
-      }
-      
-      await handleContainerInteraction(event);
-    };
-
-    // Add event listeners with proper mobile support
-    container.addEventListener('click', handleContainerInteraction);
+    // ✅ DEVICE-SPECIFIC event setup with centralized handlers
+    const isMobileDevice_local = isMobileDevice();
     
-    // Add mobile touch events
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+    logDeviceInfo('SiriCallButton');
+    console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobileDevice_local);
 
-    return () => {
-      container.removeEventListener('click', handleContainerInteraction);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [canvasReady, isListening, onCallStart, onCallEnd, containerId, debug, debugWarn, debugError]);
+    // 🚀 EMERGENCY FIX: Use simplified mobile touch handler if enabled
+    if (isMobileDevice_local && USE_SIMPLIFIED_MOBILE_TOUCH) {
+      console.log('🚀 [SiriCallButton] Using SIMPLIFIED mobile touch handler');
+      // Simplified handler is already set up via the hook
+      // Just log the status
+      const handlerState = simplifiedMobileTouch.getHandlerState();
+      console.log('🚀 [SiriCallButton] Simplified handler state:', handlerState);
+      
+      return () => {
+        // Cleanup is handled by the hook
+        safeCleanup();
+      };
+    } else if (isMobileDevice_local) {
+      // ✅ MOBILE: Touch events with enhanced debugging
+      console.log('📱 [SiriCallButton] 🔥 SETTING UP MOBILE TOUCH EVENTS');
+      console.log('  📱 Element for touch events:', element);
+      console.log('  📱 Element rect:', element.getBoundingClientRect());
+      console.log('  📱 Element computed style:', {
+        position: getComputedStyle(element).position,
+        zIndex: getComputedStyle(element).zIndex,
+        pointerEvents: getComputedStyle(element).pointerEvents,
+        display: getComputedStyle(element).display,
+        width: getComputedStyle(element).width,
+        height: getComputedStyle(element).height
+      });
+      
+      const handleTouchStart = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] 🔥 TOUCH START DETECTED!');
+        console.log('  📱 Touch event:', e);
+        console.log('  📱 Touch target:', e.target);
+        console.log('  📱 Touch position:', e.touches[0].clientX, e.touches[0].clientY);
+        console.log('  📱 Element rect:', element.getBoundingClientRect());
+        console.log('  📱 Touches count:', e.touches.length);
+        
+        const touch = e.touches[0];
+        const rect = element.getBoundingClientRect();
+        handleInteractionStart(e, {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        });
+        
+        console.log('  ✅ Touch start handled successfully');
+      };
 
-  // 🚨 PHASE 3: VISUAL STATE UPDATES
-  useEffect(() => {
-    if (!buttonRef.current || !canvasReady) return;
+      const handleTouchEnd = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] 🔥 TOUCH END DETECTED!');
+        console.log('  📱 Touch event:', e);
+        console.log('  📱 Touch target:', e.target);
+        console.log('  📱 Changed touches:', e.changedTouches.length);
+        console.log('  📱 Preventing default to avoid ghost clicks');
+        
+        e.preventDefault(); // Prevent ghost click
+        handleInteractionEnd(e);
+        
+        console.log('  ✅ Touch end handled successfully');
+      };
 
-    try {
-             buttonRef.current.setListening(isListening);
-      debug('✅ [STATE] Updated listening state', { isListening });
-    } catch (error) {
-      debugError('❌ [STATE] Failed to update listening state:', error);
+      const handleTouchCancel = (e: TouchEvent) => {
+        console.log('📱 [SiriCallButton] ⚠️ TOUCH CANCELLED');
+        console.log('  📱 Touch event:', e);
+        if (buttonRef.current) {
+          buttonRef.current.setInteractionMode('idle');
+        }
+      };
+
+      // Add events with enhanced logging
+      console.log('📱 [SiriCallButton] 🎯 ADDING TOUCH EVENT LISTENERS');
+      console.log('  📱 Adding to element:', element.id, element.tagName);
+      
+      // Test if element can receive events
+      const testEventHandler = (e: Event) => {
+        console.log('📱 [SiriCallButton] 🧪 TEST EVENT RECEIVED:', e.type);
+      };
+      
+      element.addEventListener('touchstart', testEventHandler, { once: true });
+      
+      element.addEventListener('touchstart', handleTouchStart, { passive: true });
+      element.addEventListener('touchend', handleTouchEnd, { passive: false });
+      element.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+      
+      console.log('📱 [SiriCallButton] ✅ Touch event listeners added successfully');
+
+      return () => {
+        element.removeEventListener('touchstart', handleTouchStart);
+        element.removeEventListener('touchend', handleTouchEnd);
+        element.removeEventListener('touchcancel', handleTouchCancel);
+        safeCleanup();
+      };
+    } else {
+      // ✅ DESKTOP: Mouse events with hover support + Enhanced Debug
+      const handleMouseEnter = () => {
+        handleHover(true);
+        console.log('🖱️ [SiriCallButton] 🟢 DESKTOP Mouse enter');
+      };
+      
+      const handleMouseLeave = () => {
+        handleHover(false);
+        console.log('🖱️ [SiriCallButton] 🔴 DESKTOP Mouse leave');
+      };
+      
+      const handleMouseDown = (e: MouseEvent) => {
+        console.log('🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:', e.target);
+        console.log('🖱️ [SiriCallButton] 🔽 Element ID:', element.id);
+        console.log('🖱️ [SiriCallButton] 🔽 isHandlingClick before:', isHandlingClick.current);
+        
+        const rect = element.getBoundingClientRect();
+        handleInteractionStart(e, {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+        console.log('🖱️ [SiriCallButton] 🔽 Mouse down completed');
+      };
+      
+      const handleMouseUp = (e: MouseEvent) => {
+        console.log('🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:', e.target);
+        console.log('🖱️ [SiriCallButton] 🔼 onCallStart available:', !!onCallStart);
+        console.log('🖱️ [SiriCallButton] 🔼 isListening state:', isListening);
+        console.log('🖱️ [SiriCallButton] 🔼 isHandlingClick before:', isHandlingClick.current);
+        
+        handleInteractionEnd(e);
+        console.log('🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed');
+      };
+
+      // Enhanced debug for element setup
+      console.log('🖱️ [SiriCallButton] 🎯 DESKTOP EVENT SETUP:');
+      console.log('  📦 Element ID:', element.id);
+      console.log('  📦 Element tagName:', element.tagName);
+      console.log('  🎛️ onCallStart available:', !!onCallStart);
+      console.log('  🎛️ onCallEnd available:', !!onCallEnd);
+      console.log('  🎨 Element computed style:', window.getComputedStyle(element).pointerEvents);
+
+      // 🔧 MANUAL TEST: Add click listener for debugging
+      const testClickHandler = (e: MouseEvent) => {
+        console.log('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!');
+        console.log('  🎯 Click target:', e.target);
+        console.log('  🎯 Click coordinates:', e.clientX, e.clientY);
+        console.log('  🎯 Element rect:', element.getBoundingClientRect());
+        console.log('  🎯 onCallStart available:', !!onCallStart);
+      };
+
+      element.addEventListener('click', testClickHandler);
+
+      element.addEventListener('mouseenter', handleMouseEnter);
+      element.addEventListener('mouseleave', handleMouseLeave);
+      element.addEventListener('mousedown', handleMouseDown);
+      element.addEventListener('mouseup', handleMouseUp);
+
+      console.log('🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully');
+
+      return () => {
+        console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
+        element.removeEventListener('click', testClickHandler);
+        element.removeEventListener('mouseenter', handleMouseEnter);
+        element.removeEventListener('mouseleave', handleMouseLeave);
+        element.removeEventListener('mousedown', handleMouseDown);
+        element.removeEventListener('mouseup', handleMouseUp);
+        safeCleanup();
+      };
     }
-  }, [isListening, canvasReady, debug, debugError]);
+  }, [containerId, colors, handleInteractionStart, handleInteractionEnd, handleHover, safeCleanup, onCallStart, isListening]);
+
+  // ✅ SYNC visual state with props
+  useEffect(() => {
+    if (buttonRef.current && !cleanupFlagRef.current) {
+      buttonRef.current.setListening(isListening);
+      // ✅ FIX 4: Remove unnecessary resize on listening state change
+      // Canvas animations handle listening state internally, no resize needed
+      console.log('🔧 [SiriCallButton] Listening state updated without resize trigger');
+    }
+  }, [isListening, containerId]);
 
   useEffect(() => {
-    if (!buttonRef.current || !canvasReady) return;
-
-    try {
-             buttonRef.current.setVolumeLevel(volumeLevel);
-      debug('✅ [STATE] Updated volume level', { volumeLevel });
-    } catch (error) {
-      debugError('❌ [STATE] Failed to update volume level:', error);
+    if (buttonRef.current && !cleanupFlagRef.current) {
+      buttonRef.current.setVolumeLevel(volumeLevel);
     }
-  }, [volumeLevel, canvasReady, debug, debugError]);
+  }, [volumeLevel]);
 
-  // 🎨 PHASE 4: RENDER
+  useEffect(() => {
+    if (buttonRef.current && colors && !cleanupFlagRef.current) {
+      buttonRef.current.updateColors(colors);
+    }
+  }, [colors]);
+
+  // 🚨 IMMEDIATE DEBUG: Manual event handlers for testing
+  const handleDirectTouch = (e: any) => {
+    console.log('🎯🎯🎯 TOUCH:', e.type, 'on', containerId);
+    
+    // Test onCallStart directly
+    if (e.type === 'touchend' || e.type === 'click') {
+      console.log('🚀🚀🚀 CALLING onCallStart...');
+      if (onCallStart) {
+        onCallStart().then(() => {
+          console.log('✅✅✅ onCallStart SUCCESS!');
+        }).catch((error) => {
+          console.error('❌❌❌ onCallStart ERROR:', error);
+        });
+      } else {
+        console.error('❌❌❌ onCallStart NOT AVAILABLE!');
+      }
+    }
+  };
+
   return (
-    <div
+    <div 
       id={containerId}
-      className="siri-call-button-container"
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        borderRadius: '50%',
-        overflow: 'hidden',
+      className="voice-button"
+      // 🚨 EMERGENCY: Direct event handlers for testing
+      onTouchStart={handleDirectTouch}
+      onTouchEnd={handleDirectTouch}
+      onClick={handleDirectTouch}
+      style={{ 
+        width: '100%', // Use full container width
+        height: '100%', // Use full container height
+        position: 'relative', // Relative for absolute canvas positioning
         cursor: 'pointer',
-        touchAction: 'manipulation',
+        zIndex: 10, // Higher than canvas (zIndex: 1)
+        borderRadius: '50%', // Match container shape
+        // 🔧 HYBRID FIX: Remove flexbox centering to prevent conflicts
+        // ❌ REMOVED: display: 'flex', alignItems: 'center', justifyContent: 'center'
+        // 🔧 CRITICAL FIX: Ensure container can receive events
+        pointerEvents: 'auto', // Explicitly enable pointer events
+        background: 'rgba(255, 0, 0, 0.1)', // 🚨 TEMPORARY: Red background for testing
+        overflow: 'visible', // Allow canvas to be visible
+        // Mobile touch optimizations
+        touchAction: 'manipulation', // Improve touch responsiveness
         WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
         WebkitUserSelect: 'none', // Prevent text selection
-        userSelect: 'none',
+        userSelect: 'none', // Prevent text selection
         WebkitTouchCallout: 'none', // Disable context menu on long press
-        background: DEBUG_LEVEL >= 1 ? 'rgba(255, 0, 0, 0.1)' : 'transparent', // Debug background
-        border: DEBUG_LEVEL >= 1 ? '2px solid yellow' : 'none',
-        // Mobile touch optimization
-        minHeight: '44px', // iOS minimum touch target
-        minWidth: '44px'
       }}
     >
-      {/* Error Injection for Testing - Only in development */}
-      {DEBUG_LEVEL >= 2 && (
+      {/* 🔍 DEBUG: Container setup validation */}
+      {process.env.NODE_ENV === 'development' && (
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              console.log('🧪 [SiriCallButton] Debug injection active');
-              window.testSiriError = () => {
-                console.log('🧪 [SiriCallButton] Triggering test error...');
-                throw new Error('Test error for debugging');
-              };
-              
               setTimeout(() => {
-                console.log('🧪 [SiriCallButton] Testing mobile setup...');
                 const container = document.getElementById('${containerId}');
-                const canvas = container?.querySelector('canvas');
-                
-                console.log('🧪 [SiriCallButton] Container found:', !!container, container);
-                console.log('🧪 [SiriCallButton] Canvas found:', !!canvas, canvas);
-                console.log('🧪 [SiriCallButton] Is mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-                
                 if (container) {
-                  console.log('🧪 [SiriCallButton] Container styles:', {
-                    position: getComputedStyle(container).position,
-                    pointerEvents: getComputedStyle(container).pointerEvents,
-                    touchAction: getComputedStyle(container).touchAction,
-                    cursor: getComputedStyle(container).cursor
-                  });
+                  console.log('🔍 [SiriCallButton] CONTAINER DEBUG:');
+                  console.log('  📦 Container element:', container);
+                  console.log('  📦 Container style.pointerEvents:', container.style.pointerEvents);
+                  console.log('  📦 Container computed pointerEvents:', getComputedStyle(container).pointerEvents);
+                  console.log('  📦 Container zIndex:', getComputedStyle(container).zIndex);
+                  console.log('  📦 Container position:', getComputedStyle(container).position);
+                  console.log('  📦 Container dimensions:', container.getBoundingClientRect());
                   
-                  // Add quick test button for mobile debugging
-                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                    const testBtn = document.createElement('button');
-                    testBtn.textContent = '🧪 TEST MOBILE CALL';
-                    testBtn.style.position = 'fixed';
-                    testBtn.style.top = '10px';
-                    testBtn.style.right = '10px';
-                    testBtn.style.zIndex = '99999';
-                    testBtn.style.padding = '10px';
-                    testBtn.style.background = '#4CAF50';
-                    testBtn.style.color = 'white';
-                    testBtn.style.border = 'none';
-                    testBtn.style.borderRadius = '5px';
-                    testBtn.onclick = () => {
-                      console.log('🧪 [MOBILE TEST] Manual test triggered');
-                      if (window.${containerId.replace(/-/g, '_')}_onCallStart) {
-                        window.${containerId.replace(/-/g, '_')}_onCallStart();
-                      }
-                    };
-                    document.body.appendChild(testBtn);
-                    
-                    // Expose onCallStart for testing
-                    window.${containerId.replace(/-/g, '_')}_onCallStart = () => {
-                      const evt = new Event('click');
-                      container.dispatchEvent(evt);
-                    };
-                  }
+                  // Test click detection
+                  container.addEventListener('click', (e) => {
+                    console.log('🎯 [SiriCallButton] Container received click!', e);
+                  }, { once: true });
                 }
               }, 500);
             `
@@ -426,32 +571,173 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         />
       )}
 
-      {/* Loading state */}
-      {!canvasReady && (
+      {/* 🚀 MOBILE VISUAL: Simple mobile visual component */}
+      {isMobileDevice() && USE_MOBILE_VISUAL_ONLY && canvasReady && (
         <div 
-          className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            fontSize: '14px',
-            fontWeight: 'bold'
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none' // Don't block container events
           }}
         >
-          Loading...
+          <SimpleMobileSiriVisual
+            isListening={isListening}
+            volumeLevel={volumeLevel}
+            colors={colors || {
+              primary: '#5DB6B9',
+              secondary: '#E8B554',
+              glow: 'rgba(93, 182, 185, 0.4)',
+              name: 'English'
+            }}
+            size={Math.min(300, Math.min(
+              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).width) - 20,
+              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).height) - 20
+            ))}
+          />
         </div>
       )}
 
-      {/* Status display */}
-      {(status === 'processing' || status === 'speaking') && (
-        <div
-          className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-bold z-50"
+      {/* Loading state - Only show for non-mobile or when not using mobile visual */}
+      {!canvasReady && !(isMobileDevice() && USE_MOBILE_VISUAL_ONLY) && (
+        <div 
+          className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
-            background: status === 'processing' ? '#ff9800' : '#4caf50',
-            color: 'white'
+            background: `linear-gradient(135deg, ${colors?.primary || '#5DB6B9'}, ${colors?.secondary || '#E8B554'})`,
+            color: 'white',
+            fontSize: '36px', // ✅ FIX 3: Reduced from 48px to 36px for better mobile fit
+            boxShadow: `0 0 30px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
+            border: '2px solid rgba(255,255,255,0.1)',
+            pointerEvents: 'none' // Don't block container events
+          }}
+        >
+          🎤
+        </div>
+      )}
+      
+      {/* Status indicator */}
+      {status !== 'idle' && status !== 'listening' && (
+        <div 
+          className={`status-indicator ${status}`}
+          style={{
+            position: 'absolute',
+            top: '-48px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            color: colors?.primary || '#5DB6B9',
+            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
+            pointerEvents: 'none' // Don't block container events
           }}
         >
           {status === 'processing' ? 'Processing...' : 'Speaking...'}
         </div>
+      )}
+
+      {/* 🚨 EMERGENCY DEBUG: Mobile Touch Debugger - Remove after fixing mobile issues */}
+      {/* FORCE SHOW DEBUG - Temporarily always show for testing */}
+      {true && (
+        <>
+          <MobileTouchDebugger
+            containerId={containerId}
+            onCallStart={onCallStart}
+            onCallEnd={onCallEnd}
+            isListening={isListening}
+            enabled={true}
+          />
+          
+          {/* 🚀 SIMPLIFIED MOBILE TOUCH DEBUG INFO */}
+          {simplifiedMobileTouch.isMobile && (
+            <div
+              style={{
+                position: 'fixed',
+                top: '10px',
+                left: '10px',
+                zIndex: 99997,
+                background: simplifiedMobileTouch.isEnabled ? '#4CAF50' : '#f44336',
+                color: 'white',
+                padding: '8px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+              }}
+            >
+              {simplifiedMobileTouch.isEnabled ? '🚀 SIMPLIFIED TOUCH' : '🔧 COMPLEX TOUCH'}
+              <button
+                onClick={async () => {
+                  console.log('🧪 [DEBUG] Manual TEST button clicked');
+                  console.log('🧪 [DEBUG] onCallStart available:', !!onCallStart);
+                  console.log('🧪 [DEBUG] isListening:', isListening);
+                  if (onCallStart) {
+                    try {
+                      console.log('🧪 [DEBUG] Calling onCallStart...');
+                      await onCallStart();
+                      console.log('✅ [DEBUG] onCallStart completed');
+                    } catch (error) {
+                      console.error('❌ [DEBUG] onCallStart failed:', error);
+                    }
+                  }
+                }}
+                style={{
+                  marginLeft: '8px',
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '2px 6px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  cursor: 'pointer'
+                }}
+              >
+                TEST
+              </button>
+            </div>
+          )}
+
+          {/* 🚨 IMMEDIATE TOUCH DEBUG - Add direct touch logging to container */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                setTimeout(() => {
+                  const container = document.getElementById('${containerId}');
+                  if (container) {
+                    console.log('🔍 [IMMEDIATE DEBUG] Container found:', container);
+                    
+                    // Add direct touch event logging
+                    container.addEventListener('touchstart', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH START on container!', {
+                        target: e.target,
+                        touches: e.touches.length,
+                        position: e.touches[0] ? [e.touches[0].clientX, e.touches[0].clientY] : null
+                      });
+                    });
+                    
+                    container.addEventListener('touchend', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] TOUCH END on container!', {
+                        target: e.target,
+                        changedTouches: e.changedTouches.length
+                      });
+                    });
+                    
+                    container.addEventListener('click', (e) => {
+                      console.log('🔥 [IMMEDIATE DEBUG] CLICK on container!', {
+                        target: e.target,
+                        clientX: e.clientX,
+                        clientY: e.clientY
+                      });
+                    });
+                    
+                    console.log('✅ [IMMEDIATE DEBUG] Touch event listeners added to container');
+                  } else {
+                    console.error('❌ [IMMEDIATE DEBUG] Container not found:', '${containerId}');
+                  }
+                }, 500);
+              `
+            }}
+          />
+        </>
       )}
     </div>
   );
