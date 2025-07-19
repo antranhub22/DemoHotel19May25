@@ -1,4 +1,40 @@
-import Vapi from '@vapi-ai/web';
+// EMERGENCY FIX: Temporarily disable Vapi import for mobile testing
+// import Vapi from '@vapi-ai/web';
+
+// Mock Vapi class for testing
+class MockVapi {
+  constructor(publicKey: string) {
+    console.log('🧪 [MockVapi] Created with key:', publicKey);
+  }
+  
+  start(assistantId: string) {
+    console.log('🧪 [MockVapi] Start called with assistant:', assistantId);
+    return Promise.resolve();
+  }
+  
+  stop() {
+    console.log('🧪 [MockVapi] Stop called');
+    return Promise.resolve();
+  }
+  
+  send(message: string) {
+    console.log('🧪 [MockVapi] Send called with:', message);
+  }
+  
+  setMuted(muted: boolean) {
+    console.log('🧪 [MockVapi] SetMuted called:', muted);
+  }
+  
+  on(event: string, callback: Function) {
+    console.log('🧪 [MockVapi] Event listener added for:', event);
+  }
+  
+  off(event: string, callback: Function) {
+    console.log('🧪 [MockVapi] Event listener removed for:', event);
+  }
+}
+
+const Vapi = MockVapi;
 
 // Initialize with environment variable or fallback
 const PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || 'demo';
@@ -21,7 +57,7 @@ interface AddMessage {
   message: Message;
 }
 
-let vapiInstance: Vapi | null = null;
+let vapiInstance: any | null = null;
 
 interface VapiConnectionStatus {
   status: 'connecting' | 'connected' | 'disconnected';
@@ -33,7 +69,7 @@ interface VapiMessage {
   [key: string]: any;
 }
 
-export const initVapi = async (publicKey: string): Promise<Vapi> => {
+export const initVapi = async (publicKey: string): Promise<any> => {
   try {
     console.log('[vapiClient] Initializing Vapi with public key:', publicKey);
     
@@ -89,7 +125,7 @@ export const initVapi = async (publicKey: string): Promise<Vapi> => {
   }
 };
 
-export const getVapiInstance = (): Vapi | null => {
+export const getVapiInstance = (): any | null => {
   return vapiInstance;
 };
 

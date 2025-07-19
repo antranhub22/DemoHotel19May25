@@ -609,7 +609,8 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       )}
 
       {/* 🚨 EMERGENCY DEBUG: Mobile Touch Debugger - Remove after fixing mobile issues */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* FORCE SHOW DEBUG - Temporarily always show for testing */}
+      {true && (
         <>
           <MobileTouchDebugger
             containerId={containerId}

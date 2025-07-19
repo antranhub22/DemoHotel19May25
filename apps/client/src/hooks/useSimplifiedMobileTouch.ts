@@ -46,10 +46,22 @@ export const useSimplifiedMobileTouch = ({
 
   // Initialize handler
   useEffect(() => {
+    console.log('🔧 [useSimplifiedMobileTouch] useEffect triggered:', {
+      isMobile,
+      enabled,
+      containerId
+    });
+
     // Only initialize on mobile devices
     if (!isMobile || !enabled) {
+      console.log('🔧 [useSimplifiedMobileTouch] Skipping initialization:', {
+        isMobile,
+        enabled
+      });
       return;
     }
+
+    console.log('🔧 [useSimplifiedMobileTouch] Proceeding with initialization');
 
     const config: TouchHandlerConfig = {
       containerId,
