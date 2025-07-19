@@ -31,6 +31,15 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   language = 'en',
   colors
 }) => {
+  // 🚨 IMMEDIATE DEBUG: Log component render
+  console.log('🔥 [SiriCallButton] COMPONENT RENDER START', {
+    containerId,
+    isListening,
+    onCallStartAvailable: !!onCallStart,
+    onCallEndAvailable: !!onCallEnd,
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  });
+
   // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
   const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
   
@@ -492,10 +501,38 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
   }, [colors]);
 
+  // 🚨 IMMEDIATE DEBUG: Manual event handlers for testing
+  const handleDirectTouch = (e: any) => {
+    console.log('🔥 [SiriCallButton] 🎯 DIRECT TOUCH DETECTED!', {
+      type: e.type,
+      target: e.target,
+      containerId: containerId,
+      timestamp: Date.now()
+    });
+    
+    // Test onCallStart directly
+    if (e.type === 'touchend' || e.type === 'click') {
+      console.log('🔥 [SiriCallButton] 🚀 DIRECT TRIGGER onCallStart');
+      if (onCallStart) {
+        onCallStart().then(() => {
+          console.log('🔥 [SiriCallButton] ✅ DIRECT onCallStart SUCCESS');
+        }).catch((error) => {
+          console.error('🔥 [SiriCallButton] ❌ DIRECT onCallStart ERROR:', error);
+        });
+      } else {
+        console.error('🔥 [SiriCallButton] ❌ onCallStart NOT AVAILABLE');
+      }
+    }
+  };
+
   return (
     <div 
       id={containerId}
       className="voice-button"
+      // 🚨 EMERGENCY: Direct event handlers for testing
+      onTouchStart={handleDirectTouch}
+      onTouchEnd={handleDirectTouch}
+      onClick={handleDirectTouch}
       style={{ 
         width: '100%', // Use full container width
         height: '100%', // Use full container height
@@ -507,7 +544,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         // ❌ REMOVED: display: 'flex', alignItems: 'center', justifyContent: 'center'
         // 🔧 CRITICAL FIX: Ensure container can receive events
         pointerEvents: 'auto', // Explicitly enable pointer events
-        background: 'transparent', // Ensure no background blocking
+        background: 'rgba(255, 0, 0, 0.1)', // 🚨 TEMPORARY: Red background for testing
         overflow: 'visible', // Allow canvas to be visible
         // Mobile touch optimizations
         touchAction: 'manipulation', // Improve touch responsiveness
