@@ -208,7 +208,7 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
   });
 
   const { handleConfirm } = useConfirmHandler({
-    conversationState,
+    endCall: conversationState.handleCallEnd, // ✅ FIXED: Use endCall function directly
     transcripts,
     callSummary,
     serviceRequests
