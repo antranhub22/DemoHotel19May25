@@ -102,6 +102,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [vietnameseSummary, setVietnameseSummary] = useState<string | null>(null);
   const [emailSentForCurrentSession, setEmailSentForCurrentSession] = useState<boolean>(false);
   const [requestReceivedAt, setRequestReceivedAt] = useState<Date | null>(null);
+  
+  // ✅ NEW: Prevent Vapi reinitialization during endCall
+  const [isEndingCall, setIsEndingCall] = useState(false);
+  
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
@@ -318,6 +322,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // Initialize Vapi when component mounts
   useEffect(() => {
+    // ✅ NEW: Skip initialization if ending call
+    if (isEndingCall) {
+      console.log('🛑 [setupVapi] Skipping Vapi initialization - call is ending');
+      return;
+    }
+    
     const setupVapi = async () => {
       try {
         console.log('🔧 [setupVapi] Language changed to:', language);
@@ -470,10 +480,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     return () => {
       const vapi = getVapiInstance();
       if (vapi) {
+        console.log('🧹 [setupVapi] Cleanup: Stopping Vapi due to dependency change');
         vapi.stop();
       }
     };
-  }, [language, hotelConfig, tenantId, callDetails?.id]);
+  }, [language, hotelConfig, tenantId, callDetails?.id, isEndingCall]);
 
   // ✅ REMOVED: Interface2 timer logic (focus Interface1 only)
   // useEffect(() => {
@@ -585,24 +596,44 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       hasCallDetails: !!callDetails,
       hasCallTimer: !!callTimer,
       language,
-      tenantId
+      tenantId,
+      isEndingCall
     });
     
+    // ✅ NEW: Set ending flag to prevent reinitialization
+    console.log('🚫 [AssistantContext] Step 0: Setting isEndingCall flag to prevent Vapi reinitialization...');
+    setIsEndingCall(true);
+    
     try {
-      console.log('🔄 [AssistantContext] Step 1: Stopping VAPI...');
+      console.log('🔄 [AssistantContext] Step 1: Stopping VAPI IMMEDIATELY...');
       
-      // Stop VAPI with error handling
+      // Stop VAPI with enhanced error handling
       try {
         const vapi = getVapiInstance();
         if (vapi) {
           console.log('📞 [AssistantContext] Step 1a: VAPI instance found, calling stop()...');
+          
+          // ✅ NEW: Force stop all Vapi activities
           vapi.stop();
-          console.log('✅ [AssistantContext] Step 1a: VAPI call stopped successfully');
+          
+          // ✅ NEW: Additional cleanup if available
+          if (typeof vapi.cleanup === 'function') {
+            console.log('🧹 [AssistantContext] Step 1b: Calling vapi.cleanup()...');
+            vapi.cleanup();
+          }
+          
+          // ✅ NEW: Force disconnect if available  
+          if (typeof vapi.disconnect === 'function') {
+            console.log('🔌 [AssistantContext] Step 1c: Calling vapi.disconnect()...');
+            vapi.disconnect();
+          }
+          
+          console.log('✅ [AssistantContext] Step 1: VAPI fully stopped and cleaned up');
         } else {
           console.log('⚠️ [AssistantContext] Step 1a: No VAPI instance to stop');
         }
       } catch (vapiError) {
-        console.error('❌ [AssistantContext] Step 1a ERROR: Error stopping VAPI:', vapiError);
+        console.error('❌ [AssistantContext] Step 1 ERROR: Error stopping VAPI:', vapiError);
         console.log('🔄 [AssistantContext] Continuing with cleanup despite VAPI error...');
         // Continue with cleanup even if VAPI stop fails
       }
@@ -796,8 +827,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       
       // Don't re-throw error to prevent Error Boundary trigger
       console.log('🔄 [AssistantContext] endCall() error handled gracefully, continuing normal operation');
+    } finally {
+      // ✅ NEW: Reset ending flag after a delay to allow cleanup
+      setTimeout(() => {
+        console.log('🔄 [AssistantContext] Resetting isEndingCall flag...');
+        setIsEndingCall(false);
+      }, 2000); // 2 second delay to ensure all cleanup is complete
     }
-  }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language]);
+  }, [callTimer, callDuration, transcripts, callDetails?.id, tenantId, language, isEndingCall]);
 
   // Function to translate text to Vietnamese
   const translateToVietnamese = async (text: string): Promise<string> => {
