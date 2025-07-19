@@ -7,17 +7,22 @@ import './index.css';
 import { getAuthToken } from '@/lib/authHelper';
 import '@/lib/debugAuth'; // Make debugAuth available globally
 
-// Auto-authenticate for development
+// Auto-authenticate for development with fresh token
 const initAuth = async () => {
   try {
     console.log('🚀 [Main] Starting authentication initialization...');
     
+    // Clear any potentially expired tokens first
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    console.log('🧹 [Main] Cleared any existing tokens to get fresh ones');
+    
     const token = await getAuthToken();
     if (token) {
-      console.log('✅ [Main] Authentication initialized successfully');
+      console.log('✅ [Main] Fresh authentication token generated successfully');
       console.log('🎫 [Main] Token stored in localStorage');
     } else {
-      console.warn('⚠️ [Main] No authentication token available');
+      console.warn('⚠️ [Main] Failed to generate authentication token');
       console.log('🔧 [Main] You can run: debugAuth.runFullTest() in console to debug');
     }
   } catch (error) {

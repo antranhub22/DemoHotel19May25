@@ -90,10 +90,24 @@ export const debugAuth = {
     }
   },
 
+  async clearTokens() {
+    console.log('🧹 [DebugAuth] Clearing all stored tokens...');
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    localStorage.removeItem('dev_auth_token');
+    console.log('✅ [DebugAuth] Tokens cleared');
+  },
+
+  async forceRefreshToken() {
+    console.log('🔄 [DebugAuth] Force refreshing token...');
+    await this.clearTokens();
+    return await this.testGetAuthToken();
+  },
+
   async runFullTest() {
     console.log('🧪 [DebugAuth] Running full authentication test...');
     
-    const results = {
+    const results: any = {
       login: await this.testLogin(),
       token: await this.testGetAuthToken(),
       headers: await this.testAuthHeaders(),
@@ -101,6 +115,15 @@ export const debugAuth = {
     };
 
     console.log('📊 [DebugAuth] Full test results:', results);
+    
+    // If API request failed, try with fresh token
+    if (!results.apiRequest) {
+      console.log('🔄 [DebugAuth] API request failed, trying with fresh token...');
+      await this.forceRefreshToken();
+      const retryResult = await this.testApiRequest();
+      results.retryWithFreshToken = retryResult;
+    }
+    
     return results;
   }
 };

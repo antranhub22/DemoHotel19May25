@@ -929,17 +929,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     let polling: NodeJS.Timeout | null = null;
     const fetchOrders = async () => {
       try {
-        // ✅ FIX: Use auth helper for token management
-        const { getAuthHeaders } = await import('@/lib/authHelper');
-        const headers = await getAuthHeaders();
+        // ✅ FIX: Use authenticated fetch with auto-retry
+        const { authenticatedFetch } = await import('@/lib/authHelper');
         
         // Use relative URL to call API from same domain
-        const res = await fetch(`/api/request`, {
-          headers
-        });
+        const res = await authenticatedFetch(`/api/request`);
         if (!res.ok) {
-          if (res.status === 401) {
-            console.warn('⚠️ [AssistantContext] 401 unauthorized - token may be invalid or missing');
+          if (res.status === 401 || res.status === 403) {
+            console.warn('⚠️ [AssistantContext] Auth failed - token may be invalid or missing');
           }
           return;
         }

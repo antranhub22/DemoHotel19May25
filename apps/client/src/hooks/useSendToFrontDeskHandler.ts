@@ -135,19 +135,17 @@ export const useSendToFrontDeskHandler = ({
     };
   }, [extractRoomNumber, generateOrderReference, defaultServiceItem, callSummary?.content]);
 
-  // ✅ EXTRACTED: API call logic with authentication
+  // ✅ EXTRACTED: API call logic with authentication and auto-retry
   const submitRequest = useCallback(async (payload: any) => {
     console.log('📤 [useSendToFrontDeskHandler] Submitting request to /api/request:', payload);
     
-    // ✅ FIX: Use auth helper for token management
-    const { getAuthHeaders } = await import('@/lib/authHelper');
-    const headers = await getAuthHeaders();
+    // ✅ FIX: Use authenticated fetch with auto-retry
+    const { authenticatedFetch } = await import('@/lib/authHelper');
     
-    console.log('🔐 [useSendToFrontDeskHandler] Using auth headers for request');
+    console.log('🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry');
     
-    const response = await fetch('/api/request', {
+    const response = await authenticatedFetch('/api/request', {
       method: 'POST',
-      headers,
       body: JSON.stringify(payload)
     });
 
