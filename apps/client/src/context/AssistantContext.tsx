@@ -4,6 +4,7 @@ import { Transcript, OrderSummary, CallDetails, Order, InterfaceLayer, CallSumma
 import ReactDOM from 'react-dom';
 import { HotelConfiguration, getVapiPublicKeyByLanguage, getVapiAssistantIdByLanguage } from '@/hooks/useHotelConfiguration';
 import { resetVapi } from '@/lib/vapiClient';
+import { usePopup } from '@/components/popup-system';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -105,6 +106,23 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   
   // ✅ NEW: Prevent Vapi reinitialization during endCall
   const [isEndingCall, setIsEndingCall] = useState(false);
+  
+  // ✅ NEW: Popup hook for auto-showing summary on call end
+  const { showSummary } = usePopup();
+  
+  // ✅ DEBUG: Manual test function for call-end (development only)
+  if (typeof window !== 'undefined' && import.meta.env.DEV) {
+    (window as any).testCallEnd = () => {
+      console.log('🧪 [DEBUG] Manual call-end test triggered');
+      const vapi = getVapiInstance();
+      if (vapi && typeof vapi.emit === 'function') {
+        vapi.emit('call-end');
+        console.log('✅ [DEBUG] call-end event emitted manually');
+      } else {
+        console.warn('⚠️ [DEBUG] Cannot emit call-end - no vapi instance or emit method');
+      }
+    };
+  }
   
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -468,6 +486,40 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             handleMessage(message);
           } catch (error) {
             console.warn('Error handling Vapi message:', error);
+          }
+        });
+
+        // ✅ NEW: Auto-show Summary Popup when call ends
+        vapi.on('call-end', () => {
+          console.log('📞 [AssistantContext] Vapi call-end event received');
+          console.log('📊 [AssistantContext] Call-end context:', {
+            transcriptsCount: transcripts.length,
+            hasCallSummary: !!callSummary,
+            hasServiceRequests: serviceRequests?.length > 0,
+            callDuration,
+            isEndingCall
+          });
+          
+          try {
+            // Brief delay to allow final state updates
+            setTimeout(() => {
+              console.log('🔮 [AssistantContext] Auto-showing Summary Popup after call end...');
+              
+              // Show summary popup with default content (SummaryPopupContent)
+              showSummary(undefined, {
+                title: 'Call Summary',
+                priority: 'high'
+              });
+              
+              console.log('✅ [AssistantContext] Summary Popup auto-shown successfully');
+            }, 1000); // 1 second delay to allow state updates
+            
+          } catch (error) {
+            console.error('❌ [AssistantContext] Error auto-showing summary popup:', error);
+            // Fallback: Simple alert
+            setTimeout(() => {
+              alert('Call completed! Please check your conversation summary.');
+            }, 1000);
           }
         });
       } catch (error) {
