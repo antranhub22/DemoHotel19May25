@@ -55,6 +55,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
   // 🆕 Tab state - NEW FUNCTIONALITY
   const [mode, setMode] = useState<PopupMode>('conversation');
   const [showSummaryTab, setShowSummaryTab] = useState(false);
+  const [callHasEnded, setCallHasEnded] = useState(false); // Track if call actually ended
   
   // ✅ EXISTING STATES - UNCHANGED
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
@@ -106,8 +107,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       };
     }
     
-    // Priority 3: Show processing state if call ended with transcripts
-    if (transcripts.length >= 2 && callDuration === 0) {
+    // Priority 3: Show processing state if call actually ended with transcripts
+    if (transcripts.length >= 2 && callHasEnded) {
       return {
         source: 'Processing',
         roomNumber: 'Processing...',
@@ -129,6 +130,19 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
     };
   };
 
+  // 🆕 NEW: Track when call actually ends (from active to 0)
+  useEffect(() => {
+    // Track call ending: if callDuration goes from > 0 to 0, then call ended
+    if (callDuration === 0 && transcripts.length > 0) {
+      // Call ended if we have transcripts (meaning call was active before)
+      setCallHasEnded(true);
+      console.log('📞 [RealtimeConversationPopup] Call has ended - enabling summary features');
+    } else if (callDuration > 0) {
+      // Call is active - reset ended flag
+      setCallHasEnded(false);
+    }
+  }, [callDuration, transcripts.length]);
+
   // 🆕 NEW: Check when to show summary tab
   useEffect(() => {
     const summaryData = getSummaryData();
@@ -136,25 +150,27 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
       hasCallSummary: !!callSummary,
       hasServiceRequests: serviceRequests?.length > 0,
       summaryDataHasData: summaryData.hasData,
-      transcriptsCount: transcripts.length
+      transcriptsCount: transcripts.length,
+      callHasEnded,
+      callDuration
     });
     
-    // Show summary tab if we have actual data OR if we have enough transcripts for potential summary
+    // Show summary tab if we have actual data OR if call has actually ended with transcripts
     const shouldShowTab = summaryData.hasData || 
-      (transcripts.length >= 2 && callDuration === 0); // After call ends with transcripts
+      (transcripts.length >= 2 && callHasEnded); // ✅ Only after call ACTUALLY ends
     
     setShowSummaryTab(shouldShowTab);
     console.log('📋 [RealtimeConversationPopup] Summary tab visibility:', shouldShowTab);
-  }, [callSummary, serviceRequests, transcripts.length, callDuration]);
+  }, [callSummary, serviceRequests, transcripts.length, callHasEnded]);
 
   // 🆕 NEW: Auto-switch to summary when call ends with data
   useEffect(() => {
-    if (callDuration === 0 && showSummaryTab && conversationTurns.length > 0) {
-      // Auto switch to summary when call ends and we have data
+    if (callHasEnded && showSummaryTab && conversationTurns.length > 0) {
+      // Auto switch to summary when call ACTUALLY ends and we have data
       console.log('🔄 [RealtimeConversationPopup] Auto-switching to summary after call end');
       setTimeout(() => setMode('summary'), 1500); // Delay to allow processing message to show
     }
-  }, [callDuration, showSummaryTab, conversationTurns.length]);
+  }, [callHasEnded, showSummaryTab, conversationTurns.length]);
 
   // ✅ EXISTING EFFECT - UNCHANGED: Process transcripts into conversation turns
   useEffect(() => {
