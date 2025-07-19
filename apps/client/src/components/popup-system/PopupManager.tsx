@@ -62,11 +62,8 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 
   // Filter popups based on desktop vs mobile
   const filteredPopups = popups.filter(popup => {
-    // On desktop, hide summary popups (they appear in grid layout)
-    if (!isMobile && popup.type === 'summary') {
-      return false;
-    }
-    // Show all other popups on both mobile and desktop
+    // 🔧 FIX: Show summary popups on both desktop and mobile
+    // Summary popups should be visible everywhere for better UX
     return true;
   });
 
