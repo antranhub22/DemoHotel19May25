@@ -3,34 +3,39 @@ import { db } from '../db';
 import { request as requestTable } from '@shared/db';
 import { verifyJWT } from '../middleware/auth';
 import { eq } from 'drizzle-orm';
+import { requestMapper } from '@shared/db/transformers';
 
 const router = Router();
 
-// ✅ POST /api/request - Create new request (UNIFIED ENDPOINT)
+// ✅ POST /api/request - Create new request (WITH AUTO TRANSFORMATION)
 router.post('/', verifyJWT, async (req: Request, res: Response) => {
   try {
-    console.log('📝 [Request API] Creating new request:', req.body);
+    console.log('📝 [Request API] Creating new request (camelCase):', req.body);
     
-    // Extract data from request body (compatible with both order and request formats)
+    // ✅ TRANSFORM: camelCase frontend data → snake_case database data
+    const transformedData = requestMapper.toDatabase(req.body);
+    console.log('🔄 [Request API] Transformed to snake_case:', transformedData);
+    
+    // Extract data from transformed body (now all snake_case)
     const {
-      callId,
-      roomNumber,
-      orderType,
-      deliveryTime,
-      specialInstructions,
-      items,
-      totalAmount,
-      status = 'Đã ghi nhận',
-      // Alternative field names for backward compatibility
+      call_id,
       room_number,
       order_type,
+      delivery_time,
+      special_instructions,
+      items,
+      total_amount,
+      status = 'Đã ghi nhận',
+      // Alternative field names for backward compatibility
       type,
-      requestContent,
       request_content
-    } = req.body;
+    } = transformedData;
 
+    // ✅ FIX: Determine final status - prioritize client value
+    const finalStatus = status || 'Đã ghi nhận';
+    
     // Build request content from items or use provided content
-    let content = requestContent || request_content || specialInstructions;
+    let content = request_content || special_instructions;
     
     if (!content && items && Array.isArray(items) && items.length > 0) {
       content = items.map((item: any) => 
@@ -39,18 +44,22 @@ router.post('/', verifyJWT, async (req: Request, res: Response) => {
     }
     
     if (!content) {
-      content = orderType || order_type || type || 'Service Request';
+      content = order_type || type || 'Service Request';
     }
 
     // Create request record compatible with schema (id will be auto-generated)
     const newRequest = {
       tenant_id: (req as any).tenant?.id || 'default-tenant',
-      call_id: callId || `CALL-${Date.now()}`,
-      room_number: roomNumber || room_number || 'unknown',
+      call_id: call_id || `CALL-${Date.now()}`,
+      room_number: room_number || 'unknown',
       order_id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       request_content: content,
-      status: status,
+      status: finalStatus,
       created_at: Math.floor(Date.now() / 1000), // Unix timestamp
+      updated_at: Math.floor(Date.now() / 1000), // Set initial updated_at
+      description: special_instructions || null,   // Use specialInstructions as description
+      priority: 'medium',                        // Default priority
+      assigned_to: null                          // Will be assigned by staff later
     };
 
     console.log('💾 [Request API] Inserting request:', newRequest);
@@ -59,24 +68,21 @@ router.post('/', verifyJWT, async (req: Request, res: Response) => {
     const insertResult = await db.insert(requestTable).values(newRequest).returning();
     const createdRequest = insertResult[0];
 
+    // ✅ TRANSFORM: snake_case database response → camelCase frontend response
+    const frontendResponse = requestMapper.toFrontend(createdRequest);
+    
     // Return success response
     const response = {
       success: true,
       data: {
-        id: createdRequest.id,
-        orderId: newRequest.order_id,
-        callId: newRequest.call_id,
-        roomNumber: newRequest.room_number,
-        content: newRequest.request_content,
-        status: newRequest.status,
-        createdAt: new Date(newRequest.created_at * 1000).toISOString(),
+        ...frontendResponse,
         // Backward compatibility fields
         reference: newRequest.order_id,
-        estimatedTime: deliveryTime || 'asap'
+        estimatedTime: delivery_time || 'asap'
       }
     };
 
-    console.log('✅ [Request API] Request created successfully:', response);
+    console.log('✅ [Request API] Request created successfully (camelCase):', response);
     res.status(201).json(response);
 
   } catch (error) {
