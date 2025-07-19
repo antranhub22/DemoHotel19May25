@@ -12,6 +12,7 @@ interface SiriButtonContainerProps {
   onCallEnd: () => void;
   onCancel?: () => void;
   onConfirm?: () => void;
+  showingSummary?: boolean; // ✅ NEW: Hide Cancel/Confirm when summary is showing
 }
 
 // Màu sắc cho từng ngôn ngữ
@@ -60,7 +61,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   onCallStart,
   onCallEnd,
   onCancel,
-  onConfirm
+  onConfirm,
+  showingSummary = false // ✅ NEW: Default to false
 }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
@@ -97,8 +99,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           left: '50%',
           transform: 'translateX(-50%)',
           height: '40px',           // Fixed height for buttons
-          opacity: isCallStarted ? 1 : 0,
-          visibility: isCallStarted ? 'visible' : 'hidden',
+          opacity: isCallStarted && !showingSummary ? 1 : 0, // ✅ NEW: Hide when summary is showing
+          visibility: isCallStarted && !showingSummary ? 'visible' : 'hidden', // ✅ NEW: Hide when summary is showing
           transition: 'opacity 0.3s ease-in-out',
           zIndex: 1,                // Above container but below outer z-index
         }}

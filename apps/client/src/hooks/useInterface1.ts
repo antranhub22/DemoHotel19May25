@@ -9,6 +9,7 @@ import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { useState, useEffect, useCallback, useRef, createElement } from 'react';
 import { usePopup } from '@/components/popup-system';
+import { usePopupContext } from '@/context/PopupContext';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -39,6 +40,9 @@ interface UseInterface1Return {
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
+  
+  // ✅ NEW: Summary popup state
+  showingSummary: boolean;
   
   // Right panel state
   showRightPanel: boolean;
@@ -210,6 +214,16 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     serviceRequests
   });
 
+  // ✅ NEW: Track summary popup state
+  const { popups } = usePopupContext();
+  const [showingSummary, setShowingSummary] = useState(false);
+
+  // ✅ NEW: Monitor summary popups
+  useEffect(() => {
+    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    setShowingSummary(!!summaryPopup);
+  }, [popups]);
+
   // Update badge count when transcripts change
   useEffect(() => {
     if (conversationPopupId && transcripts.length > 0) {
@@ -237,6 +251,9 @@ const useInterface1Legacy = ({ isActive }: UseInterface1Props): UseInterface1Ret
     handleCallEnd: conversationState.handleCallEnd,
     handleCancel, // From useCancelHandler
     handleConfirm, // From useConfirmHandler
+    
+    // ✅ NEW: Summary popup state
+    showingSummary,
     
     // Right panel state
     showRightPanel,
