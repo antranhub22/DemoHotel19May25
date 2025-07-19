@@ -214,4 +214,153 @@
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-} 
+}
+
+/* ========================================
+   🚀 GLASSMORPHISM 2025 ENHANCEMENTS
+   ======================================== */
+
+/* ✨ Holographic rim animation - positioned behind button */
+@keyframes holographic-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glass-shimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
+
+/* 🌈 Holographic rim effect - SAFE: positioned behind main button */
+.voice-button::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #FF0080, #FF8C00, #40E0D0, #8A2BE2, 
+    #00FF7F, #FF6347, #4169E1, #FF0080
+  );
+  animation: holographic-rotate 4s linear infinite;
+  filter: blur(12px);
+  opacity: 0;
+  z-index: -1; /* CRITICAL: Behind everything else */
+  pointer-events: none; /* CRITICAL: No event interference */
+  /* SAFE: No transform on main button - only on ::before */
+}
+
+/* 💎 Enhanced glassmorphism for listening state */
+.voice-button.listening::before {
+  opacity: 0.6; /* Show holographic rim when listening */
+  filter: blur(8px); /* Sharper when active */
+  animation: holographic-rotate 2s linear infinite; /* Faster rotation */
+}
+
+/* 🌟 Subtle glass shimmer for idle state */
+.voice-button:not(.listening)::before {
+  opacity: 0.2; /* Very subtle when idle */
+  animation: 
+    holographic-rotate 6s linear infinite,
+    glass-shimmer 3s ease-in-out infinite;
+}
+
+/* ✨ Enhanced glassmorphism backdrop */
+.voice-button::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  z-index: -1; /* CRITICAL: Behind canvas and main button */
+  pointer-events: none; /* CRITICAL: No event interference */
+  transition: opacity 0.3s ease;
+}
+
+/* 🎨 Show glassmorphism effect on hover/listening */
+.voice-button:hover::after,
+.voice-button.listening::after {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* 📱 Mobile optimizations for new effects */
+@media (max-width: 768px) {
+  .voice-button::before {
+    filter: blur(8px); /* Less blur on mobile for performance */
+    inset: -3px; /* Smaller rim on mobile */
+  }
+  
+  .voice-button::after {
+    backdrop-filter: blur(15px) saturate(150%); /* Reduced blur for mobile */
+  }
+  
+  /* 🔧 CRITICAL: Maintain mobile touch functionality */
+  .voice-button {
+    pointer-events: auto !important; /* Main button still receives touches */
+    z-index: 9999 !important; /* Highest priority for touch */
+  }
+  
+  .voice-button::before,
+  .voice-button::after {
+    pointer-events: none !important; /* Decorative elements don't block touches */
+  }
+}
+
+/* 🛡️ SAFETY: Preserve all existing critical protections */
+.voice-button {
+  /* UNCHANGED: All existing protections remain */
+  transform: none !important; /* Prevent any transform interference */
+  /* Enhanced: Add overflow handling for new effects */
+  overflow: visible; /* Allow pseudo-elements to show */
+}
+
+/* 🎯 Enhanced color integration with current language system */
+.voice-button[data-language="en"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #5DB6B9, #E8B554, #5DB6B9, #E8B554
+  );
+}
+
+.voice-button[data-language="vi"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #EC4899, #F9A8D4, #EC4899, #F9A8D4
+  );
+}
+
+.voice-button[data-language="fr"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #8B5CF6, #A78BFA, #8B5CF6, #A78BFA
+  );
+}
+
+.voice-button[data-language="zh"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #EF4444, #FCA5A5, #EF4444, #FCA5A5
+  );
+}
+
+.voice-button[data-language="ru"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #10B981, #6EE7B7, #10B981, #6EE7B7
+  );
+}
+
+.voice-button[data-language="ko"]::before {
+  background: conic-gradient(
+    from 0deg,
+    #F59E0B, #FDE68A, #F59E0B, #FDE68A
+  );
+}

@@ -124,7 +124,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       {/* Siri Button Container - HYBRID: Desktop fixed + Mobile responsive */}
       <div 
-        className="relative transition-all duration-500 ease-in-out"
+        className={`relative transition-all duration-500 ease-in-out voice-button ${isCallStarted ? 'listening' : ''}`}
+        data-language={language}
         style={{ 
           // 🔧 HYBRID FIX: Use responsive sizing hook
           width: responsiveSize.width,
