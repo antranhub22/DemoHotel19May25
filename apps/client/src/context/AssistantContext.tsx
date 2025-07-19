@@ -293,7 +293,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const addTranscript = React.useCallback((transcript: Omit<Transcript, 'id' | 'timestamp' | 'callId'>) => {
     const newTranscript: Transcript = {
       ...transcript,
-      id: Date.now() as unknown as number,
+      // ✅ FIX: Remove explicit ID - let database auto-generate
+      // id: Date.now() as unknown as number, // REMOVED
       callId: callDetails?.id || `call-${Date.now()}`,
       timestamp: new Date(),
       tenantId: tenantId || 'default'
@@ -436,7 +437,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               
               // Add as transcript with isModelOutput flag
               const newTranscript: Transcript = {
-                id: Date.now() as unknown as number,
+                // ✅ FIX: Remove explicit ID - let database auto-generate
+                // id: Date.now() as unknown as number, // REMOVED
                 callId: callDetails?.id || `call-${Date.now()}`,
                 role: 'assistant',
                 content: outputContent,
@@ -462,13 +464,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           if (message.type === 'transcript') {
             console.log('Adding transcript:', message);
             const newTranscript: Transcript = {
-              id: Date.now() as unknown as number,
+              // ✅ FIX: Remove explicit ID - let database auto-generate
+              // id: Date.now() as unknown as number, // REMOVED
               callId: callDetails?.id || `call-${Date.now()}`,
               role: message.role, // Keep original role (user or assistant)
               content: message.content || message.transcript || '',
               timestamp: new Date(),
               tenantId: tenantId || 'default'
-            };
+            } as Transcript;
             setTranscripts(prev => [...prev, newTranscript]);
             
             // Bridge to WebSocket
@@ -740,7 +743,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             
             // Show loading state for summary
             const loadingSummary: CallSummary = {
-              id: Date.now() as unknown as number,
+              // ✅ FIX: Remove explicit ID - let database auto-generate
+              // id: Date.now() as unknown as number, // REMOVED
               callId: callDetails?.id || `call-${Date.now()}`,
               content: "Generating AI summary of your conversation...",
               timestamp: new Date(),
@@ -784,7 +788,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 
                 const summaryContent = data.summary.content;
                 const aiSummary: CallSummary = {
-                  id: Date.now() as unknown as number,
+                  // ✅ FIX: Remove explicit ID - let database auto-generate
+                  // id: Date.now() as unknown as number, // REMOVED
                   callId: callDetails?.id || `call-${Date.now()}`,
                   content: summaryContent,
                   timestamp: new Date(data.summary.timestamp || Date.now()),
@@ -807,7 +812,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               console.error('❌ [AssistantContext] Error processing summary:', summaryError);
               // Show error state
               const errorSummary: CallSummary = {
-                id: Date.now() as unknown as number,
+                // ✅ FIX: Remove explicit ID - let database auto-generate
+                // id: Date.now() as unknown as number, // REMOVED
                 callId: callDetails?.id || `call-${Date.now()}`,
                 content: "An error occurred while generating the call summary.",
                 timestamp: new Date(),
@@ -821,7 +827,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             console.log('🔍 [AssistantContext] Transcript data count:', transcriptData.length);
             
             const noTranscriptSummary: CallSummary = {
-              id: Date.now() as unknown as number,
+              // ✅ FIX: Remove explicit ID - let database auto-generate
+              // id: Date.now() as unknown as number, // REMOVED
               callId: callDetails?.id || `call-${Date.now()}`,
               content: "Call was too short to generate a summary. Please try a more detailed conversation.",
               timestamp: new Date(),
@@ -922,9 +929,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     let polling: NodeJS.Timeout | null = null;
     const fetchOrders = async () => {
       try {
+        // ✅ FIX: Use auth helper for token management
+        const { getAuthHeaders } = await import('@/lib/authHelper');
+        const headers = await getAuthHeaders();
+        
         // Use relative URL to call API from same domain
-        const res = await fetch(`/api/request`);
-        if (!res.ok) return;
+        const res = await fetch(`/api/request`, {
+          headers
+        });
+        if (!res.ok) {
+          if (res.status === 401) {
+            console.warn('⚠️ [AssistantContext] 401 unauthorized - token may be invalid or missing');
+          }
+          return;
+        }
         const data = await res.json();
         console.log('[AssistantContext] Fetched orders from API:', data);
         // data là mảng order, cần map sang ActiveOrder (chuyển requestedAt sang Date)

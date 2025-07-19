@@ -106,38 +106,37 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     setShowingSummary(!!summaryPopup);
   }, [popups]);
 
-  // ✅ AUTO-SUMMARY: Register call end listener for auto-showing summary
-  useEffect(() => {
-    const autoShowSummary = () => {
-      console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
-      
-      try {
-        // Show summary popup with default content
-        showSummary(undefined, {
-          title: 'Call Summary',
-          priority: 'high'
-        });
-        
-        console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
-      } catch (error) {
-        console.error('❌ [useInterface1] Error auto-showing summary popup:', error);
-        // Fallback: Simple alert
-        setTimeout(() => {
-          alert('Call completed! Please check your conversation summary.');
-        }, 500);
-      }
-    };
-
-    // Register call end listener
-    const unregister = addCallEndListener(autoShowSummary);
-    console.log('📞 [useInterface1] Auto-summary listener registered');
+  // ✅ AUTO-SUMMARY: Show summary popup when call ends
+  const autoShowSummary = useCallback(() => {
+    console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
     
-    // Cleanup on unmount
+    try {
+      showSummary(undefined, {
+        title: 'Call Summary',
+        priority: 'high'
+      });
+      
+      console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
+    } catch (error) {
+      console.error('❌ [useInterface1] Error auto-showing summary popup:', error);
+      setTimeout(() => {
+        alert('Call completed! Please check your conversation summary.');
+      }, 500);
+    }
+  }, [showSummary]);
+
+  // ✅ AUTO-SUMMARY: Register listener for call end events
+  useEffect(() => {
+    console.log('📞 [useInterface1] Registering auto-summary listener...');
+    
+    const unregister = addCallEndListener(autoShowSummary);
+    console.log('✅ [useInterface1] Auto-summary listener registered');
+    
     return () => {
+      console.log('🧹 [useInterface1] Unregistering auto-summary listener...');
       unregister();
-      console.log('🧹 [useInterface1] Auto-summary listener unregistered');
     };
-  }, [addCallEndListener, showSummary]);
+  }, [addCallEndListener, autoShowSummary]);
   
   // ✅ DISABLED: Auto-popup effects - using unified ChatPopup instead
   // All conversation popup management moved to ChatPopup component with layout prop

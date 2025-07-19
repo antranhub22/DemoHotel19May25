@@ -347,9 +347,13 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       createdAt: now.toISOString()
     };
     try {
-              const res = await fetch(`/api/request`, {
-              method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      // ✅ FIX: Use auth helper for token management
+      const { getAuthHeaders } = await import('@/lib/authHelper');
+      const headers = await getAuthHeaders();
+      
+      const res = await fetch(`/api/request`, {
+        method: 'POST',
+        headers,
         body: JSON.stringify(newOrder)
       });
       if (!res.ok) throw new Error('Failed to create order');

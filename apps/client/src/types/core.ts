@@ -76,7 +76,7 @@ export interface Call {
 }
 
 export interface Transcript {
-  id: number;
+  id?: number; // ✅ FIX: Make optional - database auto-generates
   callId: string;
   role: 'user' | 'assistant';
   content: string;
@@ -86,7 +86,7 @@ export interface Transcript {
 }
 
 export interface CallSummary {
-  id: number;
+  id?: number; // ✅ FIX: Make optional - database auto-generates
   callId: string;
   content: string;
   timestamp: Date;
