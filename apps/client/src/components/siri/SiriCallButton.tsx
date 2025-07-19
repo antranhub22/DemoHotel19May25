@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
+import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import { useSimplifiedMobileTouch } from '@/hooks/useSimplifiedMobileTouch';
@@ -64,19 +65,23 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // 🚀 EMERGENCY FIX: Simplified Mobile Touch Handler
   const USE_SIMPLIFIED_MOBILE_TOUCH = true; // Feature flag for testing
+  const USE_MOBILE_VISUAL_ONLY = true; // Feature flag to bypass SiriButton entirely on mobile
+  
   const simplifiedMobileTouch = useSimplifiedMobileTouch({
     containerId,
     isListening,
     onCallStart,
     onCallEnd,
     onInteractionStart: (position) => {
-      if (buttonRef.current) {
+      // Only try to update SiriButton if we're not using mobile visual only
+      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
         buttonRef.current.setInteractionMode('active');
         buttonRef.current.setTouchPosition(position.x, position.y);
       }
     },
     onInteractionEnd: () => {
-      if (buttonRef.current) {
+      // Only try to update SiriButton if we're not using mobile visual only
+      if (buttonRef.current && !USE_MOBILE_VISUAL_ONLY) {
         buttonRef.current.setInteractionMode('idle');
       }
     },
@@ -219,6 +224,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // 🚨 PHASE 1: SAFE INITIALIZATION - Initialize SiriButton with emergency guards
   useEffect(() => {
+    const isMobile = isMobileDevice();
+    
+    // 🚀 EMERGENCY BYPASS: Skip SiriButton creation on mobile if using visual-only mode
+    if (isMobile && USE_MOBILE_VISUAL_ONLY) {
+      debug('🚀 [SiriCallButton] BYPASSING SiriButton creation - using mobile visual only');
+      setCanvasReady(true); // Set ready immediately for mobile visual
+      return () => {
+        // No cleanup needed for mobile visual only
+      };
+    }
+
     // 🚨 EMERGENCY: Check if emergency stop was requested
     if (emergencyStopRequested.current) {
       debugWarn('Skipping initialization due to emergency stop');
@@ -288,13 +304,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
 
     // ✅ DEVICE-SPECIFIC event setup with centralized handlers
-    const isMobile = isMobileDevice();
+    const isMobileDevice_local = isMobileDevice();
     
     logDeviceInfo('SiriCallButton');
-    console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobile);
+    console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobileDevice_local);
 
     // 🚀 EMERGENCY FIX: Use simplified mobile touch handler if enabled
-    if (isMobile && USE_SIMPLIFIED_MOBILE_TOUCH) {
+    if (isMobileDevice_local && USE_SIMPLIFIED_MOBILE_TOUCH) {
       console.log('🚀 [SiriCallButton] Using SIMPLIFIED mobile touch handler');
       // Simplified handler is already set up via the hook
       // Just log the status
@@ -305,7 +321,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         // Cleanup is handled by the hook
         safeCleanup();
       };
-    } else if (isMobile) {
+    } else if (isMobileDevice_local) {
       // ✅ MOBILE: Touch events with enhanced debugging
       console.log('📱 [SiriCallButton] 🔥 SETTING UP MOBILE TOUCH EVENTS');
       console.log('  📱 Element for touch events:', element);
@@ -528,8 +544,37 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         />
       )}
 
-      {/* Loading state */}
-      {!canvasReady && (
+      {/* 🚀 MOBILE VISUAL: Simple mobile visual component */}
+      {isMobileDevice() && USE_MOBILE_VISUAL_ONLY && canvasReady && (
+        <div 
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none' // Don't block container events
+          }}
+        >
+          <SimpleMobileSiriVisual
+            isListening={isListening}
+            volumeLevel={volumeLevel}
+            colors={colors || {
+              primary: '#5DB6B9',
+              secondary: '#E8B554',
+              glow: 'rgba(93, 182, 185, 0.4)',
+              name: 'English'
+            }}
+            size={Math.min(300, Math.min(
+              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).width) - 20,
+              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).height) - 20
+            ))}
+          />
+        </div>
+      )}
+
+      {/* Loading state - Only show for non-mobile or when not using mobile visual */}
+      {!canvasReady && !(isMobileDevice() && USE_MOBILE_VISUAL_ONLY) && (
         <div 
           className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{

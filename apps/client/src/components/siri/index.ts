@@ -4,6 +4,7 @@ export { default as SiriCallButton } from './SiriCallButton';
 export { SiriButtonContainer } from './SiriButtonContainer';
 export { MobileDebugComponent } from './MobileDebugComponent';
 export { MobileTouchDebugger } from './MobileTouchDebugger';
+export { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 
 // Types
 export interface SiriCallButtonProps {
