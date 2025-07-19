@@ -43,59 +43,52 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
     animationFrames.current = {};
   };
 
-  // Process transcripts into conversation turns
+  // ✅ ORIGINAL WORKING LOGIC: Process transcripts into conversation turns
   useEffect(() => {
+    const sortedTranscripts = [...transcripts].sort((a, b) => 
+      a.timestamp.getTime() - b.timestamp.getTime()
+    );
+
     const turns: ConversationTurn[] = [];
     let currentTurn: ConversationTurn | null = null;
 
-    [...transcripts].forEach((transcript) => {
-      const role = transcript.role;
-      
-      if (!currentTurn || currentTurn.role !== role) {
+    sortedTranscripts.forEach((message) => {
+      if (message.role === 'user') {
+        // Always create a new turn for user messages
         currentTurn = {
-          id: `turn-${transcript.id}-${turns.length}`,
-          role,
-          timestamp: new Date(transcript.timestamp),
-          messages: []
+          id: message.id.toString(),
+          role: 'user',
+          timestamp: message.timestamp,
+          messages: [{ 
+            id: message.id.toString(), 
+            content: message.content,
+            timestamp: message.timestamp 
+          }]
         };
-        turns.unshift(currentTurn);
-      }
-
-      const existingMessage = currentTurn.messages.find(msg => 
-        msg.content.includes(transcript.content) || transcript.content.includes(msg.content)
-      );
-
-      if (!existingMessage) {
+        turns.push(currentTurn);
+      } else {
+        // For assistant messages
+        if (!currentTurn || currentTurn.role === 'user') {
+          // Start new assistant turn
+          currentTurn = {
+            id: message.id.toString(),
+            role: 'assistant',
+            timestamp: message.timestamp,
+            messages: []
+          };
+          turns.push(currentTurn);
+        }
+        // Add message to current assistant turn
         currentTurn.messages.push({
-          id: `msg-${transcript.id}`,
-          content: transcript.content,
-          timestamp: new Date(transcript.timestamp)
+          id: message.id.toString(),
+          content: message.content,
+          timestamp: message.timestamp
         });
       }
     });
 
-    if (modelOutput && modelOutput.length > 0) {
-      const assistantTurn = turns.find(turn => turn.role === 'assistant');
-      if (assistantTurn) {
-        modelOutput.forEach((output, index) => {
-          if (output && output.trim()) {
-            const outputMessage = assistantTurn.messages.find(msg => 
-              msg.content.includes(output) || output.includes(msg.content)
-            );
-            if (!outputMessage) {
-              assistantTurn.messages.push({
-                id: `model-output-${Date.now()}-${index}`,
-                content: output,
-                timestamp: new Date()
-              });
-            }
-          }
-        });
-      }
-    }
-
     setConversationTurns(turns);
-  }, [transcripts, modelOutput]);
+  }, [transcripts]);
 
   // Paint-on animation effect
   useEffect(() => {
