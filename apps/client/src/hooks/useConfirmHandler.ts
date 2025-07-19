@@ -395,11 +395,38 @@ export const useConfirmHandler = ({
         stack: error?.stack
       });
       
-      // Emergency fallback - simple alert
-      console.log('🚨 [useConfirmHandler] Showing emergency alert fallback');
-      setTimeout(() => {
-        alert('Call completed! Please check with front desk for any service requests.');
-      }, 100);
+      // 🔧 CRITICAL: Prevent error from bubbling to Error Boundary
+      try {
+        // Emergency fallback - simple alert
+        console.log('🚨 [useConfirmHandler] Showing emergency alert fallback');
+        
+        // Still try to show summary with safe fallback
+        const errorSummary = createElement('div', { 
+          style: { padding: '20px', textAlign: 'center' } 
+        }, [
+          createElement('h3', { key: 'title', style: { marginBottom: '16px' } }, '📋 Call Completed'),
+          createElement('p', { key: 'message', style: { marginBottom: '16px' } }, 'Your call has been processed successfully.'),
+          createElement('p', { key: 'note', style: { fontSize: '14px', color: '#666' } }, 'Please check with front desk for any service requests.')
+        ]);
+        
+        showSummary(
+          errorSummary,
+          { 
+            title: 'Call Complete',
+            priority: 'high' as const
+          }
+        );
+        
+      } catch (fallbackError) {
+        console.error('❌ [useConfirmHandler] Even fallback failed:', fallbackError);
+        // Last resort - don't throw, just log
+        setTimeout(() => {
+          alert('Call completed! Please check with front desk.');
+        }, 100);
+      }
+      
+      // 🚨 CRITICAL: DO NOT re-throw error - prevent Error Boundary trigger
+      // return; // Exit gracefully without throwing
     }
   }, [endCall, transcripts.length, callSummary, serviceRequests, showSummary]);
 
