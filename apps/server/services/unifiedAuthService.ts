@@ -48,7 +48,7 @@ export interface AuthResult {
 // Configuration
 // ============================================
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
 const JWT_EXPIRES_IN = '24h';
 const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
