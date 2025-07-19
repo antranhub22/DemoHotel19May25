@@ -23,8 +23,8 @@
   border-radius: 50%;
   /* Remove background to let canvas show through */
   background: transparent;
-  /* 🔧 CRITICAL FIX: Remove animations that interfere with canvas positioning */
-  /* animation: breathing 3s ease-in-out infinite; */
+  /* Restore breathing animation for idle state */
+  animation: breathing 3s ease-in-out infinite;
   transition: all 0.3s ease;
   /* Remove box-shadow as canvas handles its own styling */
   box-shadow: none;
@@ -46,8 +46,8 @@
 }
 
 .voice-button.listening {
-  /* 🔧 CRITICAL FIX: Remove pulse animation that interferes with positioning */
-  /* animation: pulse 2s infinite; */
+  /* Restore pulse animation for listening state */
+  animation: pulse 2s infinite;
   /* Remove background override when listening */
   background: transparent;
 }
