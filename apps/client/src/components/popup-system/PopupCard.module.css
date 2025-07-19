@@ -165,6 +165,25 @@
   }
 }
 
+/* Special styling for modal popups (center position) */
+.popupCard {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.popupCardInner {
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.popupCardActive .popupCardInner {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
 /* Animation keyframes */
 @keyframes slideInFromTop {
   from {

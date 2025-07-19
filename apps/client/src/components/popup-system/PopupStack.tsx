@@ -52,7 +52,9 @@ export const PopupStack: React.FC<PopupStackProps> = ({
         ...(position === 'bottom' && { bottom: '260px' }),
         ...(position === 'center' && { 
           top: '50%', 
-          transform: 'translate(-50%, -50%)' 
+          transform: 'translate(-50%, -50%)',
+          maxWidth: '90vw', // Better mobile support
+          width: 'auto', // Let content determine width
         }),
       }}
     >
@@ -62,7 +64,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
           display: 'flex',
           flexDirection: position === 'bottom' ? 'column-reverse' : 'column',
           gap: '4px',
-          padding: '0 16px',
+          padding: position === 'center' ? '0' : '0 16px', // No padding for center modal
           pointerEvents: 'auto',
         }}
       >

@@ -161,15 +161,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               isOverlay={true} // Mobile: fixed overlay position
             />
             
-            {/* Mobile: Right panel popup (overlay) */}
-            <div className="absolute top-8 right-4 w-80 z-10 pointer-events-auto">
-              <RightPanelSection
-                ref={rightPanelRef}
-                showPanel={showRightPanel}
-                onClose={handleRightPanelClose}
-                className="w-full max-w-sm z-20"
-              />
-            </div>
+            {/* ❌ REMOVED: Mobile RightPanelSection to avoid duplicate Summary 
+                Summary will be handled by PopupStack center modal instead */}
           </div>
           
         </div>
