@@ -73,8 +73,18 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
     // 2. Define default users (let database auto-generate IDs)
     const defaultUsers = [
       {
+        username: 'admin',
+        password: 'admin123',
+        email: 'admin@minhonhotel.com',
+        role: 'super-admin',
+        firstName: 'System',
+        lastName: 'Administrator',
+        displayName: 'System Administrator',
+        tenantId
+      },
+      {
         username: 'manager',
-        password: 'password123',
+        password: 'manager123',
         email: 'manager@minhonhotel.com',
         role: 'hotel-manager',
         firstName: 'Hotel',
