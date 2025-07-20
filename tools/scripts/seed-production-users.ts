@@ -66,8 +66,54 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       `, [tenantId, 'Mi Nhon Hotel', 'minhonmuine', 'premium', 'active']);
       
       console.log('✅ Default tenant created');
+
+      // Create hotel profile
+      console.log('🏨 Creating hotel profile...');
+      await client.query(`
+        INSERT INTO hotel_profiles (
+          id, tenant_id, research_data, assistant_config, services_config, knowledge_base, system_prompt
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7
+        ) ON CONFLICT (id) DO NOTHING
+      `, [
+        `${tenantId}-profile`,
+        tenantId,
+        JSON.stringify({ location: 'Mui Ne, Vietnam' }),
+        JSON.stringify({ language: 'vi' }),
+        JSON.stringify({ enabled: ['room_service', 'housekeeping', 'concierge'] }),
+        'Mi Nhon Hotel is a beautiful beachfront hotel in Mui Ne.',
+        'You are a helpful hotel assistant for Mi Nhon Hotel.'
+      ]);
+      console.log('✅ Hotel profile created');
     } else {
       console.log('✅ Default tenant already exists');
+      
+      // Check and update hotel profile
+      const existingProfile = await client.query(`
+        SELECT id FROM hotel_profiles WHERE tenant_id = $1 LIMIT 1
+      `, [tenantId]);
+
+      if (!existingProfile.rows?.length) {
+        console.log('🏨 Creating missing hotel profile...');
+        await client.query(`
+          INSERT INTO hotel_profiles (
+            id, tenant_id, research_data, assistant_config, services_config, knowledge_base, system_prompt
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7
+          )
+        `, [
+          `${tenantId}-profile`,
+          tenantId,
+          JSON.stringify({ location: 'Mui Ne, Vietnam' }),
+          JSON.stringify({ language: 'vi' }),
+          JSON.stringify({ enabled: ['room_service', 'housekeeping', 'concierge'] }),
+          'Mi Nhon Hotel is a beautiful beachfront hotel in Mui Ne.',
+          'You are a helpful hotel assistant for Mi Nhon Hotel.'
+        ]);
+        console.log('✅ Hotel profile created');
+      } else {
+        console.log('✅ Hotel profile already exists');
+      }
     }
 
     // 2. Define default users (let database auto-generate IDs)
@@ -80,7 +126,8 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         firstName: 'System',
         lastName: 'Administrator',
         displayName: 'System Administrator',
-        tenantId
+        tenantId,
+        permissions: ['admin', 'manage_users', 'manage_settings', 'view_analytics']
       },
       {
         username: 'manager',
@@ -90,7 +137,8 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         firstName: 'Hotel',
         lastName: 'Manager',
         displayName: 'Hotel Manager',
-        tenantId
+        tenantId,
+        permissions: ['manage_staff', 'view_analytics', 'manage_requests']
       },
       {
         username: 'frontdesk',
@@ -100,7 +148,8 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         firstName: 'Front',
         lastName: 'Desk',
         displayName: 'Front Desk Staff',
-        tenantId
+        tenantId,
+        permissions: ['handle_requests', 'view_guests']
       },
       {
         username: 'itmanager', 
@@ -110,7 +159,8 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         firstName: 'IT',
         lastName: 'Manager',
         displayName: 'IT Manager',
-        tenantId
+        tenantId,
+        permissions: ['manage_system', 'view_logs', 'manage_integrations']
       }
     ];
 
@@ -147,7 +197,7 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         user.email,
         user.role,
         user.displayName,
-        '["read", "write", "admin"]', // Default permissions
+        JSON.stringify(user.permissions), // Properly format permissions as JSON
         true
       ]);
       
