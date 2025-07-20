@@ -61,6 +61,19 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:10000',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/socket.io': {
+        target: 'http://localhost:10000',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+    },
   },
   // Optimize dependencies
   optimizeDeps: {
