@@ -316,13 +316,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`);
 
-            // Store transcript in database - CONVERT TO SECONDS HERE
+            // Store transcript in database - USE PROPER TIMESTAMP CONVERSION
             const savedTranscript = await storage.addTranscript({
               callId: data.call_id,
               role: data.role,
               content: data.content,
               tenantId: 'default',
-              timestamp: Math.floor(validTimestamp / 1000) // ✅ CRITICAL: Convert milliseconds to seconds
+              timestamp: validTimestamp // ✅ CRITICAL: Let storage.addTranscript handle conversion properly
             });
 
             console.log('✅ [WebSocket] Transcript stored in database');
@@ -496,7 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         content,
         tenant_id: tenantId || 'default',  // Convert tenantId to tenant_id
-        timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
+        timestamp: validTimestamp // ✅ FIXED: Use proper timestamp, storage will handle conversion
       };
       
       console.log('Converted data for validation:', transcriptDataForValidation);
@@ -512,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         content,
         tenantId: tenantId || 'default',
-        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
+        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
       
       console.log(`Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`);
@@ -1648,12 +1648,13 @@ Mi Nhon Hotel Mui Ne`
       console.log('Attempting to delete all requests');
       // Xóa tất cả dữ liệu từ bảng request sử dụng API function
       const result = await deleteAllRequests();
-      console.log(`Deleted ${result.deletedCount || 0} requests from database`);
+      const deletedCount = result.success && 'deletedCount' in result ? (result.deletedCount || 0) : 0;
+      console.log(`Deleted ${deletedCount} requests from database`);
       
       res.json({ 
         success: true, 
-        message: `Đã xóa ${result.deletedCount || 0} requests`, 
-        deletedCount: result.deletedCount || 0 
+        message: `Đã xóa ${deletedCount} requests`, 
+        deletedCount: deletedCount 
       });
     } catch (error) {
       handleApiError(res, error, 'Error deleting all requests:');

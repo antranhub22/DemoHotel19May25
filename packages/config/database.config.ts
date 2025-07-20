@@ -1,5 +1,5 @@
 /* ========================================
-   DATABASE CONFIGURATION
+   DATABASE CONFIGURATION - PostgreSQL Only
    ======================================== */
 
 import { z } from 'zod';
@@ -9,7 +9,7 @@ import { z } from 'zod';
 // ========================================
 
 const DatabaseSchema = z.object({
-  DATABASE_URL: z.string().optional(),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   DB_HOST: z.string().optional(),
   DB_PORT: z.string().transform(Number).optional(),
   DB_NAME: z.string().optional(),
@@ -19,26 +19,42 @@ const DatabaseSchema = z.object({
 });
 
 // ========================================
-// DATABASE CONFIG
+// DATABASE CONFIG - PostgreSQL Only
 // ========================================
+
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  throw new Error(
+    '❌ DATABASE_URL environment variable is required!\n' +
+    '📋 Please set up PostgreSQL and provide DATABASE_URL.\n' +
+    '🐳 For local development, you can use Docker:\n' +
+    '   docker run -d --name hotel-postgres \\\n' +
+    '     -e POSTGRES_DB=hotel_dev \\\n' +
+    '     -e POSTGRES_USER=hotel_user \\\n' +
+    '     -e POSTGRES_PASSWORD=dev_password \\\n' +
+    '     -p 5432:5432 postgres:15\n' +
+    '🔗 Then set: DATABASE_URL=postgresql://hotel_user:dev_password@localhost:5432/hotel_dev'
+  );
+}
 
 export const databaseConfig = {
   // Connection
-  url: process.env.DATABASE_URL,
+  url: DATABASE_URL,
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432', 10),
-  name: process.env.DB_NAME || 'minhon_hotel',
-  user: process.env.DB_USER || 'postgres',
+  name: process.env.DB_NAME || 'hotel_dev',
+  user: process.env.DB_USER || 'hotel_user',
   password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === 'true',
+  ssl: process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production',
 
-  // Type
-  type: process.env.DATABASE_URL ? 'postgresql' : 'sqlite',
+  // Type - Always PostgreSQL
+  type: 'postgresql' as const,
 
   // Options
   options: {
     logging: process.env.NODE_ENV === 'development',
-    synchronize: process.env.NODE_ENV === 'development',
+    synchronize: false, // Use migrations instead
     dropSchema: false,
     migrationsRun: true,
     entities: ['**/*.entity{.ts,.js}'],
@@ -83,30 +99,10 @@ export const getConnectionString = (): string => {
     return databaseConfig.url;
   }
 
-  if (databaseConfig.type === 'postgresql') {
-    const params = new URLSearchParams();
-    if (databaseConfig.ssl) params.append('sslmode', 'require');
-    
-    return `postgresql://${databaseConfig.user}:${databaseConfig.password}@${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.name}?${params.toString()}`;
-  }
-
-  return `file:./dev.db`;
-};
-
-// ========================================
-// VALIDATION
-// ========================================
-
-export const validateDatabaseConfig = () => {
-  try {
-    DatabaseSchema.parse(process.env);
-    return { success: true, errors: null };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.errors };
-    }
-    return { success: false, errors: [{ message: 'Unknown validation error' }] };
-  }
+  const params = new URLSearchParams();
+  if (databaseConfig.ssl) params.append('sslmode', 'require');
+  
+  return `postgresql://${databaseConfig.user}:${databaseConfig.password}@${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.name}?${params.toString()}`;
 };
 
 // ========================================
@@ -114,29 +110,29 @@ export const validateDatabaseConfig = () => {
 // ========================================
 
 export const isPostgreSQL = (): boolean => {
-  return databaseConfig.type === 'postgresql';
+  return true; // Always PostgreSQL now
 };
 
-export const isSQLite = (): boolean => {
-  return databaseConfig.type === 'sqlite';
-};
-
-export const getDatabaseName = (): string => {
-  return databaseConfig.name;
-};
-
-export const shouldLogQueries = (): boolean => {
-  return databaseConfig.options.logging;
-};
-
-export const shouldSynchronize = (): boolean => {
-  return databaseConfig.options.synchronize;
+export const validateDatabaseConfig = () => {
+  try {
+    DatabaseSchema.parse(process.env);
+    console.log('✅ Database configuration is valid');
+    return { success: true, errors: null };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('❌ Database configuration errors:');
+      error.errors.forEach(err => {
+        console.error(`  - ${err.path.join('.')}: ${err.message}`);
+      });
+      return { success: false, errors: error.errors };
+    }
+    return { success: false, errors: [{ message: 'Invalid database configuration' }] };
+  }
 };
 
 // ========================================
-// TYPE DEFINITIONS
+// TYPE EXPORTS
 // ========================================
 
-export type DatabaseConfig = typeof databaseConfig;
-export type DatabaseType = 'postgresql' | 'sqlite';
-export type DatabaseEnvironment = z.infer<typeof DatabaseSchema>; 
+export type DatabaseType = 'postgresql';
+export type DatabaseConfig = typeof databaseConfig; 

@@ -2,6 +2,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { db } from '@server/db';
 import { tenants, hotelProfiles, staff, call, transcript, request, message } from '@shared/schema';
 import { z } from 'zod';
+import { tenantMapper, hotelProfileMapper, type TenantCamelCase, type InsertHotelProfileCamelCase } from '@shared/db/transformers';
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -75,8 +76,10 @@ export class TenantService {
       const featureFlags = this.getDefaultFeatureFlags(config.subscriptionPlan);
       const subscriptionLimits = this.getSubscriptionLimits(config.subscriptionPlan);
       
-      // Create tenant
-      const [tenant] = await db.insert(tenants).values({
+      // Create tenant using field mapper
+      const tenantId = `tenant-${Date.now()}`;
+      const tenantData = tenantMapper.toDatabase({
+        id: tenantId,
         hotelName: config.hotelName,
         subdomain: config.subdomain,
         customDomain: config.customDomain,
@@ -89,11 +92,15 @@ export class TenantService {
         multiLocation: featureFlags.multiLocation,
         whiteLabel: featureFlags.whiteLabel,
         dataRetentionDays: subscriptionLimits.dataRetentionDays,
-        monthlyCallLimit: subscriptionLimits.monthlyCallLimit
-      }).returning();
+        monthlyCallLimit: subscriptionLimits.monthlyCallLimit,
+        createdAt: new Date()
+      });
       
-      // Create default hotel profile
-      await db.insert(hotelProfiles).values({
+      const [tenant] = await db.insert(tenants).values(tenantData).returning();
+      
+      // Create default hotel profile using field mapper
+      const profileData = hotelProfileMapper.toDatabase({
+        id: `profile-${tenant.id}`,
         tenantId: tenant.id,
         researchData: null,
         assistantConfig: null,
@@ -102,6 +109,8 @@ export class TenantService {
         knowledgeBase: null,
         systemPrompt: null
       });
+      
+      await db.insert(hotelProfiles).values(profileData);
       
       console.log(`✅ Tenant created successfully: ${tenant.id}`);
       return tenant.id;

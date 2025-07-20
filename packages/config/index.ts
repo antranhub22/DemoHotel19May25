@@ -38,7 +38,10 @@ export const validateAllConfigurations = () => {
 export const getConfigurationSummary = () => {
   return {
     environment: process.env.NODE_ENV || 'development',
-    database: process.env.DATABASE_URL ? 'postgresql' : 'sqlite',
+    // Database configuration
+    database: process.env.DATABASE_URL ? 'postgresql' : (() => {
+      throw new Error('DATABASE_URL is required. Please set up PostgreSQL.');
+    })(),
     features: {
       voiceAssistant: true,
       multiLanguage: true,

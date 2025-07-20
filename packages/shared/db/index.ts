@@ -1,11 +1,38 @@
-// Database connection and schema exports
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+// ✅ POSTGRESQL-ONLY Database connection and schema exports
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
+const { Pool } = pg;
 import { tenants, hotelProfiles, staff, call, transcript, request, message, call_summaries } from './schema';
 
-// Create database connection
-const sqlite = new Database('dev.db');
-export const db = drizzle(sqlite, {
+// ✅ POSTGRESQL-ONLY CONNECTION
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
+  throw new Error(
+    '❌ DATABASE_URL environment variable is required!\n' +
+    '📋 Please set up PostgreSQL and provide DATABASE_URL.\n' +
+    '🐳 For local development, you can use Docker:\n' +
+    '   docker run -d --name hotel-postgres \\\n' +
+    '     -e POSTGRES_DB=hotel_dev \\\n' +
+    '     -e POSTGRES_USER=hotel_user \\\n' +
+    '     -e POSTGRES_PASSWORD=dev_password \\\n' +
+    '     -p 5432:5432 postgres:15\n' +
+    '🔗 Then set: DATABASE_URL=postgresql://hotel_user:dev_password@localhost:5432/hotel_dev'
+  );
+}
+
+// Create PostgreSQL connection pool
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 10,
+  min: 2,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Create Drizzle instance with PostgreSQL
+export const db = drizzle(pool, {
   schema: {
     tenants,
     hotelProfiles,
@@ -18,7 +45,7 @@ export const db = drizzle(sqlite, {
   },
 });
 
-// Re-export schema tables
+// Export all schema tables
 export {
   tenants,
   hotelProfiles,
@@ -30,31 +57,41 @@ export {
   call_summaries,
 };
 
-// Export database instance as default
-export default db;
+// ✅ POSTGRESQL-OPTIMIZED UTILITIES
+export const getCurrentTimestamp = (): Date => {
+  return new Date();
+};
 
-// ============================================
-// Helper Functions
-// ============================================
+// PostgreSQL-compatible date conversion
+export const convertToDate = (value: string | number | Date | null): Date | null => {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  
+  if (value instanceof Date) {
+    return value;
+  }
+  
+  if (typeof value === 'string') {
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  
+  if (typeof value === 'number') {
+    // Handle both seconds and milliseconds
+    const timestamp = value < 10000000000 ? value * 1000 : value;
+    const date = new Date(timestamp);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  
+  return null;
+};
 
-// Convert Date object to SQLite-compatible string
-export function dateToString(date: Date | string | null | undefined): string | null {
-  if (!date) return null;
-  if (typeof date === 'string') return date;
-  return date.toISOString();
-}
-
-// Get current timestamp as string
-export function getCurrentTimestamp(): string {
-  return new Date().toISOString();
-}
-
-// Safe number conversion for SQLite
-export function toSafeNumber(value: any): number | null {
-  if (value === null || value === undefined) return null;
+// Safe number conversion for PostgreSQL
+export const safeNumber = (value: any): number => {
   const num = Number(value);
-  return isNaN(num) ? null : num;
-}
+  return isNaN(num) ? 0 : num;
+};
 
 export * from './schema';
 export * from './transformers'; 

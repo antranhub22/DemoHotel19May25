@@ -1,4 +1,5 @@
 import { db, request } from './db';
+import { handlePostgreSQLResult } from './db/transformers';
 
 // ============================================
 // Database Utility Functions
@@ -8,7 +9,7 @@ import { db, request } from './db';
 export async function deleteAllRequests() {
   try {
     const result = await db.delete(request);
-    return { success: true, deletedCount: result.changes };
+    return handlePostgreSQLResult(result);
   } catch (error) {
     console.error('Error deleting all requests:', error);
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };

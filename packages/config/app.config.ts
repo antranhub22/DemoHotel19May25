@@ -53,7 +53,7 @@ export const appConfig = {
   // Database
   database: {
     url: process.env.DATABASE_URL,
-    type: process.env.DATABASE_URL ? 'postgresql' : 'sqlite',
+    type: 'postgresql' as const, // Always PostgreSQL now
     logging: process.env.NODE_ENV === 'development',
   },
 

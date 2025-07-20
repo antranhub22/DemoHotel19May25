@@ -61,7 +61,7 @@ export class CallService {
         role,
         content,
         tenant_id: 'default',
-        timestamp: Math.floor(validTimestamp / 1000) // Convert to seconds for PostgreSQL compatibility
+        timestamp: validTimestamp // ✅ FIXED: Use proper timestamp, storage will handle conversion
       };
       
       // Validate with database schema (expects snake_case)
@@ -76,7 +76,7 @@ export class CallService {
         role,
         content,
         tenantId: 'default',
-        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
+        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
 
       console.log('✅ [CallService] Transcript stored successfully');

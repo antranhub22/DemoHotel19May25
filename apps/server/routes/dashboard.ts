@@ -9,6 +9,7 @@ import { tenants, hotelProfiles } from '@shared/schema';
 import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
 import { getOverview, getServiceDistribution, getHourlyActivity } from '@server/analytics';
+import { hotelProfileMapper, type HotelProfileDB, type HotelProfileCamelCase, type InsertHotelProfileCamelCase } from '@shared/db/transformers';
 
 // ============================================
 // Router Setup
@@ -187,12 +188,14 @@ router.post('/research-hotel', checkLimits, async (req: Request, res: Response) 
     const knowledgeBase = knowledgeBaseGenerator.generateKnowledgeBase(hotelData);
     
     // Update hotel profile with research data
+    const updateData = hotelProfileMapper.toUpdateFields({
+      researchData: JSON.stringify(hotelData),
+      knowledgeBase: knowledgeBase
+    });
+    updateData.updated_at = new Date();
+    
     await db.update(hotelProfiles)
-      .set({
-        researchData: hotelData,
-        knowledgeBase: knowledgeBase,
-        updated_at: new Date()
-      })
+      .set(updateData)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Hotel research completed for ${hotelName}`);
@@ -251,13 +254,15 @@ router.post('/generate-assistant', checkLimits, async (req: Request, res: Respon
     });
     
     // Update hotel profile with assistant info
+    const assistantUpdateData = hotelProfileMapper.toUpdateFields({
+      vapiAssistantId: assistantId,
+      assistantConfig: JSON.stringify(customization),
+      systemPrompt: systemPrompt
+    });
+    assistantUpdateData.updated_at = new Date();
+    
     await db.update(hotelProfiles)
-      .set({
-        vapiAssistantId: assistantId,
-        assistantConfig: customization,
-        systemPrompt: systemPrompt,
-        updated_at: new Date()
-      })
+      .set(assistantUpdateData)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant generated successfully: ${assistantId}`);
@@ -289,11 +294,14 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
     console.log(`📊 Hotel profile requested by tenant: ${req.tenant.hotelName}`);
     
     // Get hotel profile
-    const [profile] = await db
+    const [profileDB] = await db
       .select()
       .from(hotelProfiles)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
+    
+    // Convert to camelCase for easier access
+    const profile = profileDB ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB) : null;
     
     if (!profile) {
       return res.status(404).json({
@@ -326,7 +334,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
     res.json({
       success: true,
       profile: {
-        tenantId: profile.tenant_id,
+        tenantId: profile.tenantId,
         hasResearchData: !!profile.researchData,
         hasAssistant: !!profile.vapiAssistantId,
         assistantId: profile.vapiAssistantId,
@@ -335,7 +343,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
         knowledgeBase: profile.knowledgeBase,
         systemPrompt: profile.systemPrompt,
         createdAt: profile.createdAt,
-        updated_at: profile.updatedAt
+        updatedAt: profile.updatedAt
       },
       tenant: {
         hotelName: req.tenant.hotelName,
@@ -365,11 +373,14 @@ router.put('/assistant-config', checkLimits, async (req: Request, res: Response)
     const config = assistantConfigSchema.parse(req.body);
     
     // Get current profile
-    const [profile] = await db
+    const [profileDB] = await db
       .select()
       .from(hotelProfiles)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
+    
+    // Convert to camelCase for easier access
+    const profile = profileDB ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB) : null;
     
     if (!profile) {
       return res.status(404).json({
@@ -378,22 +389,22 @@ router.put('/assistant-config', checkLimits, async (req: Request, res: Response)
       });
     }
     
-    if (!profile.vapiAssistantId) {
+        if (!profile.vapiAssistantId) {
       return res.status(400).json({
         error: 'No assistant found. Please generate an assistant first.',
         assistantRequired: true
       });
     }
-    
+
     // Merge current config with updates
-    const currentConfig = profile.assistantConfig || {};
+    const currentConfig = JSON.parse(profile.assistantConfig || '{}');
     const updatedConfig = { ...currentConfig, ...config };
-    
+
     // Update assistant via Vapi API if hotel data exists
     if (profile.researchData) {
       await assistantGeneratorService.updateAssistant(
         profile.vapiAssistantId,
-        profile.researchData,
+        JSON.parse(profile.researchData),
         updatedConfig
       );
     } else {
@@ -403,17 +414,19 @@ router.put('/assistant-config', checkLimits, async (req: Request, res: Response)
         silenceTimeoutSeconds: config.silenceTimeout,
         maxDurationSeconds: config.maxDuration,
         backgroundSound: config.backgroundSound,
-        systemPrompt: config.systemPrompt
+        systemPrompt: config.systemPrompt || profile.systemPrompt
       });
     }
     
     // Update database
+    const configUpdateData = hotelProfileMapper.toUpdateFields({
+      assistantConfig: JSON.stringify(updatedConfig),
+      systemPrompt: config.systemPrompt || profile.systemPrompt
+    });
+    configUpdateData.updated_at = new Date();
+    
     await db.update(hotelProfiles)
-      .set({
-        assistantConfig: updatedConfig,
-        systemPrompt: config.systemPrompt || profile.systemPrompt,
-        updated_at: new Date()
-      })
+      .set(configUpdateData)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant config updated for tenant: ${req.tenant.hotelName}`);
@@ -539,11 +552,14 @@ router.delete('/reset-assistant', requireFeature('apiAccess'), async (req: Reque
     console.log(`🗑️ Assistant reset requested by tenant: ${req.tenant.hotelName}`);
     
     // Get current profile
-    const [profile] = await db
+    const [profileDB] = await db
       .select()
       .from(hotelProfiles)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id))
       .limit(1);
+    
+    // Convert to camelCase for easier access
+    const profile = profileDB ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB) : null;
     
     if (!profile || !profile.vapiAssistantId) {
       return res.status(404).json({
@@ -559,13 +575,15 @@ router.delete('/reset-assistant', requireFeature('apiAccess'), async (req: Reque
     }
     
     // Clear assistant data from database
+    const resetData = hotelProfileMapper.toUpdateFields({
+      vapiAssistantId: null,
+      assistantConfig: null,
+      systemPrompt: null
+    });
+    resetData.updated_at = new Date();
+    
     await db.update(hotelProfiles)
-      .set({
-        vapiAssistantId: null,
-        assistantConfig: null,
-        systemPrompt: null,
-        updated_at: new Date()
-      })
+      .set(resetData)
       .where(eq(hotelProfiles.tenant_id, req.tenant.id));
     
     console.log(`✅ Assistant reset completed for tenant: ${req.tenant.hotelName}`);

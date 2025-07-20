@@ -160,6 +160,57 @@ import { script } from '@tools/scripts';            // tools/scripts
 import { test } from '@tests/utils';                // tests/utils
 ```
 
+## 🗄️ Database Setup
+
+### PostgreSQL-Only Architecture
+
+This project now uses **PostgreSQL exclusively** for both development and production to ensure consistency and eliminate schema drift issues.
+
+### Local Development Setup (Docker)
+
+```bash
+# 1. Start PostgreSQL with Docker
+docker run -d --name hotel-postgres \
+  -e POSTGRES_DB=hotel_dev \
+  -e POSTGRES_USER=hotel_user \
+  -e POSTGRES_PASSWORD=dev_password \
+  -p 5432:5432 \
+  postgres:15
+
+# 2. Set environment variable
+export DATABASE_URL="postgresql://hotel_user:dev_password@localhost:5432/hotel_dev"
+
+# 3. Run migrations
+npm run db:generate
+npm run db:migrate
+
+# 4. Start development server
+npm run dev
+```
+
+### Alternative: Use existing PostgreSQL
+
+If you already have PostgreSQL installed:
+
+```bash
+# Create database and user
+createdb hotel_dev
+createuser hotel_user
+
+# Set environment variable  
+export DATABASE_URL="postgresql://hotel_user:your_password@localhost:5432/hotel_dev"
+```
+
+### Production (Render.com)
+
+The application automatically uses the `DATABASE_URL` environment variable provided by Render's PostgreSQL service.
+
+### ⚠️ Important Notes
+
+- **SQLite is no longer supported** - this eliminates dual database complexity
+- **Always use DATABASE_URL** - the application will error if not provided
+- **Migrations are PostgreSQL-specific** - optimized for production consistency
+
 ## 🏗️ Architecture
 
 ### Frontend (React + TypeScript)

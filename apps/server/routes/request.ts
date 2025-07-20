@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { db } from '../db';
 import { request as requestTable } from '@shared/db';
 import { verifyJWT } from '../middleware/auth';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { requestMapper } from '@shared/db/transformers';
 
 const router = Router();
@@ -134,11 +134,15 @@ router.get('/:id', verifyJWT, async (req: Request, res: Response) => {
     
     const tenantId = (req as any).tenant?.id;
     
-    let query = db.select().from(requestTable).where(eq(requestTable.id, requestId));
-    
+    // Build query with proper condition chaining
+    const whereConditions = [eq(requestTable.id, requestId)];
     if (tenantId) {
-      query = query.where(eq(requestTable.tenant_id, tenantId));
+      whereConditions.push(eq(requestTable.tenant_id, tenantId));
     }
+    
+    const query = db.select().from(requestTable).where(
+      whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions)
+    );
     
     const request = await query;
     
@@ -181,19 +185,20 @@ router.patch('/:id/status', verifyJWT, async (req: Request, res: Response) => {
 
     const tenantId = (req as any).tenant?.id;
     
-    // Update the request
-    let updateQuery = db.update(requestTable)
+    // Update the request with proper condition chaining
+    const updateConditions = [eq(requestTable.id, requestId)];
+    if (tenantId) {
+      updateConditions.push(eq(requestTable.tenant_id, tenantId));
+    }
+    
+    await db.update(requestTable)
       .set({ 
         status,
         updated_at: Math.floor(Date.now() / 1000)
       })
-      .where(eq(requestTable.id, requestId));
-    
-    if (tenantId) {
-      updateQuery = updateQuery.where(eq(requestTable.tenant_id, tenantId));
-    }
-    
-    await updateQuery;
+      .where(
+        updateConditions.length === 1 ? updateConditions[0] : and(...updateConditions)
+      );
 
     res.json({ 
       success: true, 

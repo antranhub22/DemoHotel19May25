@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { eq, and } from 'drizzle-orm';
 import { db, staff, tenants } from '@shared/db';
 import { UserRole, Permission, getPermissionsForRole } from '@shared/constants/permissions';
+import { authUserMapper } from '@shared/db/transformers';
 
 // ============================================
 // Types & Interfaces
@@ -128,7 +129,7 @@ export class UnifiedAuthService {
         permissions = getPermissionsForRole(user.role as UserRole);
       }
 
-      // Create auth user object
+      // Create auth user object with proper field mapping
       const authUser: AuthUser = {
         id: user.id,
         username: user.username,
@@ -138,7 +139,7 @@ export class UnifiedAuthService {
         permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login
+        last_login: user.last_login?.toISOString() || null
       };
 
       // Generate tokens
@@ -205,7 +206,7 @@ export class UnifiedAuthService {
         permissions: decoded.permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login
+        last_login: user.last_login?.toISOString() || null
       };
 
     } catch (error) {
@@ -264,7 +265,7 @@ export class UnifiedAuthService {
         permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login
+        last_login: user.last_login?.toISOString() || null
       };
 
       const newToken = this.generateToken(authUser);
@@ -347,7 +348,7 @@ export class UnifiedAuthService {
         permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login
+        last_login: user.last_login?.toISOString() || null
       };
 
     } catch (error) {
