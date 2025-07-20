@@ -122,7 +122,7 @@ const VoiceAssistant: React.FC = () => {
       >
         {/* ✅ INTERFACE1 ONLY - Focus Development */}
         <ErrorBoundary
-          fallbackComponent={<Interface1ErrorFallback />}
+          fallbackComponent={Interface1ErrorFallback}
           onError={(error, errorInfo) => {
             console.error('🚨 [VoiceAssistant] Interface1 Error:', error);
             console.error('🚨 [VoiceAssistant] Error Info:', errorInfo);

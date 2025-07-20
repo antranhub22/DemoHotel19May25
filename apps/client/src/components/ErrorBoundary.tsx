@@ -1,15 +1,19 @@
 import React, { Component, ReactNode, ErrorInfo } from 'react';
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallbackComponent?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-}
-
 interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
+  error?: Error;
+  errorInfo?: ErrorInfo;
   retryCount: number;
+  isRecovering: boolean;
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallbackComponent?: React.ComponentType<{ error?: Error; onRetry?: () => void }>;
+  onError?: (error: Error, info: ErrorInfo) => void;
+  maxRetries?: number;
+  autoRetryDelay?: number;
 }
 
 class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
@@ -17,30 +21,129 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null, retryCount: 0 };
+    this.state = {
+      hasError: false,
+      retryCount: 0,
+      isRecovering: false
+    };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error, retryCount: 0 };
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('🚨 [ErrorBoundary] Uncaught error in component tree:', error);
     console.error('🚨 [ErrorBoundary] Component stack:', info.componentStack);
     
+    // ✅ IMPROVED: Better error categorization
+    const errorCategory = this.categorizeError(error);
+    console.log('🔍 [ErrorBoundary] Error category:', errorCategory);
+    
     // Call custom error handler if provided
     if (this.props.onError) {
       this.props.onError(error, info);
     }
     
-    // Auto-retry for certain types of errors (like temporary state issues)
-    if (this.shouldAutoRetry(error) && this.state.retryCount < 2) {
-      console.log('🔄 [ErrorBoundary] Attempting auto-recovery...');
+    this.setState({ errorInfo: info });
+    
+    // ✅ IMPROVED: Smart auto-retry logic based on error type
+    const maxRetries = this.props.maxRetries || 2;
+    if (this.shouldAutoRetry(error, errorCategory) && this.state.retryCount < maxRetries) {
+      console.log('🔄 [ErrorBoundary] Attempting auto-recovery for:', errorCategory);
+      this.setState({ isRecovering: true });
+      
+      const delay = this.getRetryDelay(errorCategory);
       this.retryTimeoutId = setTimeout(() => {
         this.handleRetry();
-      }, 1000);
+      }, delay);
     }
   }
+
+  // ✅ IMPROVED: Better error categorization
+  private categorizeError(error: Error): string {
+    const message = error.message.toLowerCase();
+    const stack = error.stack?.toLowerCase() || '';
+    
+    if (message.includes('chunk') || message.includes('loading chunk')) {
+      return 'chunk-loading';
+    }
+    if (message.includes('network') || message.includes('fetch')) {
+      return 'network';
+    }
+    if (message.includes('vapi') || message.includes('webCallUrl')) {
+      return 'vapi';
+    }
+    if (message.includes('hook') || stack.includes('useeffect') || stack.includes('usestate')) {
+      return 'react-hooks';
+    }
+    if (message.includes('render') || stack.includes('render')) {
+      return 'react-render';
+    }
+    if (message.includes('canvas') || message.includes('siri')) {
+      return 'canvas-siri';
+    }
+    
+    return 'unknown';
+  }
+
+  // ✅ IMPROVED: Smart retry logic based on error category
+  private shouldAutoRetry(error: Error, category: string): boolean {
+    // Don't retry certain types of errors
+    const nonRetryableCategories = ['react-hooks', 'canvas-siri'];
+    if (nonRetryableCategories.includes(category)) {
+      console.log('🚫 [ErrorBoundary] Non-retryable error category:', category);
+      return false;
+    }
+    
+    // Retry transient errors
+    const retryableCategories = ['chunk-loading', 'network', 'vapi', 'react-render'];
+    return retryableCategories.includes(category);
+  }
+
+  // ✅ IMPROVED: Different retry delays for different error types
+  private getRetryDelay(category: string): number {
+    const delays = {
+      'chunk-loading': 1000,
+      'network': 2000,
+      'vapi': 1500,
+      'react-render': 500,
+      'unknown': 1000
+    };
+    
+    return delays[category as keyof typeof delays] || 1000;
+  }
+
+  private handleRetry = () => {
+    console.log('🔄 [ErrorBoundary] Executing retry attempt:', this.state.retryCount + 1);
+    
+    // ✅ IMPROVED: Clear problematic state before retry
+    try {
+      // Clear localStorage items that might cause issues
+      const problematicKeys = ['conversationState', 'interface1State', 'vapiState'];
+      problematicKeys.forEach(key => {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      });
+      
+      console.log('🧹 [ErrorBoundary] Cleared problematic state');
+    } catch (cleanupError) {
+      console.warn('⚠️ [ErrorBoundary] Error during state cleanup:', cleanupError);
+    }
+    
+    this.setState(prevState => ({
+      hasError: false,
+      error: undefined,
+      errorInfo: undefined,
+      retryCount: prevState.retryCount + 1,
+      isRecovering: false
+    }));
+    
+    if (this.retryTimeoutId) {
+      clearTimeout(this.retryTimeoutId);
+      this.retryTimeoutId = null;
+    }
+  };
 
   componentWillUnmount() {
     if (this.retryTimeoutId) {
@@ -48,92 +151,72 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     }
   }
 
-  shouldAutoRetry = (error: Error): boolean => {
-    // Auto-retry for certain recoverable errors
-    const recoverableErrors = [
-      'ChunkLoadError',
-      'Loading chunk',
-      'Failed to import',
-      'NetworkError',
-      'TypeError: Failed to fetch'
-    ];
-    
-    return recoverableErrors.some(pattern => 
-      error.message.includes(pattern) || error.name.includes(pattern)
-    );
-  };
-
-  handleRetry = () => {
-    console.log('🔄 [ErrorBoundary] Retrying after error...');
-    this.setState(prevState => ({ 
-      hasError: false, 
-      error: null,
-      retryCount: prevState.retryCount + 1
-    }));
-  };
-
-  handleResetToHome = () => {
-    console.log('🏠 [ErrorBoundary] Resetting to home state...');
-    
-    try {
-      // Clear any problematic state
-      localStorage.removeItem('lastInterface');
-      sessionStorage.clear();
-      
-      // Reset to home page
-      window.location.href = '/';
-    } catch (resetError) {
-      console.error('🚨 [ErrorBoundary] Failed to reset to home:', resetError);
-      // Last resort: full reload
-      window.location.reload();
-    }
-  };
-
   render() {
     if (this.state.hasError) {
-      // Use custom fallback component if provided
-      if (this.props.fallbackComponent) {
-        return this.props.fallbackComponent;
+      const FallbackComponent = this.props.fallbackComponent;
+      
+      // ✅ IMPROVED: Show recovery state
+      if (this.state.isRecovering) {
+        return (
+          <div className="flex items-center justify-center min-h-[400px] bg-gradient-to-br from-blue-50 to-white">
+            <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl border border-blue-200">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Đang khôi phục trợ lý...
+              </h3>
+              <p className="text-gray-600">
+                Vui lòng chờ trong giây lát
+              </p>
+            </div>
+          </div>
+        );
+      }
+      
+      if (FallbackComponent) {
+        return <FallbackComponent error={this.state.error} onRetry={this.handleRetry} />;
       }
 
+      // ✅ IMPROVED: Default fallback with better UX
       return (
-        <div className="flex items-center justify-center h-screen p-4 bg-gray-50">
-          <div className="max-w-md text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-2">Tạm thời có lỗi</h1>
-            <p className="text-gray-700 mb-4">
-              Có lỗi không mong muốn xảy ra. Đừng lo lắng, chúng tôi sẽ đưa bạn về trang chủ.
+        <div className="flex items-center justify-center min-h-[400px] bg-gradient-to-br from-red-50 to-white">
+          <div className="text-center p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 max-w-md">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              Có lỗi xảy ra
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Trợ lý gặp sự cố tạm thời. Chúng tôi sẽ thử khôi phục tự động.
             </p>
             
             <div className="space-y-3">
-              {this.state.retryCount < 3 && (
-                <button
-                  onClick={this.handleRetry}
-                  className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  Thử lại ({3 - this.state.retryCount} lần còn lại)
-                </button>
-              )}
-              
               <button
-                onClick={this.handleResetToHome}
-                className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                onClick={this.handleRetry}
+                className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold transition-all duration-200 active:scale-95"
               >
-                🏠 Về trang chủ
+                🔄 Thử lại ({this.state.retryCount + 1}/{this.props.maxRetries || 2})
               </button>
               
               <button
                 onClick={() => window.location.reload()}
-                className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+                className="w-full px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full font-semibold transition-all duration-200 active:scale-95"
               >
                 🔄 Tải lại trang
               </button>
             </div>
-            
+
             {this.state.error && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">Chi tiết lỗi</summary>
-                <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+              <details className="mt-6 text-left">
+                <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
+                  Chi tiết lỗi
+                </summary>
+                <pre className="mt-2 p-3 bg-gray-100 rounded text-xs text-gray-600 overflow-auto max-h-32">
                   {this.state.error.toString()}
+                  {this.state.errorInfo?.componentStack && (
+                    <>
+                      {'\n\nComponent Stack:'}
+                      {this.state.errorInfo.componentStack}
+                    </>
+                  )}
                 </pre>
               </details>
             )}

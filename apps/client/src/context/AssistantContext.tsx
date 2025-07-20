@@ -593,8 +593,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // Initialize Vapi
       const vapi = getVapiInstance();
       if (!vapi) {
-        console.error('Vapi instance not initialized');
-        return;
+        console.error('❌ [startCall] Vapi instance not initialized');
+        throw new Error('Voice assistant not initialized. Please refresh the page and try again.');
       }
 
       // Use hotel configuration for assistant ID if available
@@ -615,18 +615,21 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       console.log('🤖 [startCall] Selected assistantId for language', language, ':', assistantId ? assistantId.substring(0, 10) + '...' : 'undefined');
       
       if (!assistantId) {
-        console.error('Assistant ID not configured');
-        return;
+        console.error('❌ [startCall] Assistant ID not configured for language:', language);
+        throw new Error(`Voice assistant not configured for ${language}. Please contact support.`);
       }
 
-      // Start the call
+      // ✅ IMPROVED: Enhanced call starting with better error handling
+      console.log('🚀 [startCall] Starting Vapi call...');
       const call = await vapi.start(assistantId);
+      
+      // ✅ IMPROVED: Validate call object
       if (!call) {
-        console.error('Failed to start call - call object is null');
-        return;
+        console.error('❌ [startCall] Vapi.start() returned null/undefined');
+        throw new Error('Failed to start voice call. Please check your internet connection and try again.');
       }
-
-      console.log('Call started successfully');
+      
+      console.log('✅ [startCall] Call started successfully:', call);
 
       // Reset call duration to 0
       setCallDuration(0);
@@ -644,7 +647,31 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // setCurrentInterface('interface2');
 
     } catch (error) {
-      console.error('Error starting call:', error);
+      console.error('❌ [startCall] Error starting call:', error);
+      
+      // ✅ IMPROVED: Better error handling and user feedback
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Log detailed error for debugging
+      console.error('❌ [startCall] Detailed error:', {
+        error,
+        language,
+        hasHotelConfig: !!hotelConfig,
+        vapiInstance: !!getVapiInstance()
+      });
+      
+      // Show user-friendly error message
+      // You can replace this with a toast notification or modal
+      if (typeof window !== 'undefined') {
+        alert(`Failed to start voice call: ${errorMessage}`);
+      }
+      
+      // Clean up any partial state
+      setCallDuration(0);
+      if (callTimer) {
+        clearInterval(callTimer);
+        setCallTimer(null);
+      }
     }
   }, [language, hotelConfig, tenantId]);
 

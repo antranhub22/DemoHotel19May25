@@ -108,41 +108,85 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     await onCallStart(lang);
   };
 
-  // ✅ NEW: Enhanced Confirm handler with protection
-  const handleConfirm = () => {
-    console.log('🔵 [SiriButtonContainer] Confirm button clicked');
+  const handleStartCall = async (lang: Language) => {
+    console.log('🎤 [SiriButtonContainer] Starting call with language:', lang);
     
-    // Set confirming state to prevent restarts
-    setIsConfirming(true);
-    
+    // ✅ IMPROVED: Better error handling for call start
     try {
-      if (onConfirm) {
-        console.log('🔵 [SiriButtonContainer] Calling onConfirm...');
-        onConfirm();
-        console.log('✅ [SiriButtonContainer] onConfirm completed successfully');
-        
-        // 🚨 FIX: Reset isConfirming after successful onConfirm
-        setTimeout(() => {
-          setIsConfirming(false);
-          console.log('🔓 [SiriButtonContainer] isConfirming reset after successful confirm');
-        }, 1000); // Give time for onConfirm to complete
-      } else {
-        console.warn('⚠️ [SiriButtonContainer] onConfirm is undefined');
-        alert('Confirm function is not available');
-        setIsConfirming(false); // Reset if no onConfirm
-      }
+      await onCallStart(lang);
+      console.log('✅ [SiriButtonContainer] Call started successfully');
+      
     } catch (error) {
-      console.error('❌ [SiriButtonContainer] Error in Confirm button:', error);
-      console.error('❌ [SiriButtonContainer] Error details:', {
-        name: error?.name,
-        message: error?.message,
-        stack: error?.stack
-      });
+      console.error('❌ [SiriButtonContainer] Error during call start:', error);
       
-      setIsConfirming(false); // Reset on error
+      // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
+      const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
       
-      // Prevent error from bubbling up to ErrorBoundary
-      alert('Call completed! There was an issue with the summary. Please check with front desk.');
+      if (typeof window !== 'undefined') {
+        if (errorMessage.includes('webCallUrl')) {
+          alert('Không thể khởi tạo cuộc gọi. Vui lòng kiểm tra kết nối internet và thử lại.');
+        } else if (errorMessage.includes('assistant')) {
+          alert('Cấu hình trợ lý gặp vấn đề. Vui lòng liên hệ hỗ trợ.');
+        } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+          alert('Lỗi mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
+        } else if (errorMessage.includes('microphone') || errorMessage.includes('permissions')) {
+          alert('Cần quyền truy cập microphone. Vui lòng cho phép quyền truy cập và thử lại.');
+        } else {
+          alert(`Không thể bắt đầu cuộc gọi: ${errorMessage}`);
+        }
+      }
+    }
+  };
+
+  const handleEndCall = () => {
+    console.log('🛑 [SiriButtonContainer] Ending call');
+    
+    // ✅ IMPROVED: Better error handling for call end
+    try {
+      onCallEnd();
+      console.log('✅ [SiriButtonContainer] Call ended successfully');
+      
+    } catch (error) {
+      console.error('❌ [SiriButtonContainer] Error ending call:', error);
+      
+      // ✅ IMPROVED: Even if end call fails, still show success to user
+      // The error is logged but we don't want to confuse the user
+      console.log('⚠️ [SiriButtonContainer] Call end had errors but proceeding normally');
+    }
+  };
+
+  const handleCancel = () => {
+    console.log('❌ [SiriButtonContainer] Cancelling call');
+    
+    // ✅ IMPROVED: Better error handling for cancel
+    try {
+      onCancel();
+      console.log('✅ [SiriButtonContainer] Call cancelled successfully');
+      
+    } catch (error) {
+      console.error('❌ [SiriButtonContainer] Error cancelling call:', error);
+      
+      // ✅ IMPROVED: Continue with cancel even if there's an error
+      console.log('⚠️ [SiriButtonContainer] Cancel had errors but proceeding normally');
+    }
+  };
+
+  const handleConfirm = () => {
+    console.log('✅ [SiriButtonContainer] Confirming call');
+    
+    // ✅ IMPROVED: Better error handling for confirm
+    try {
+      onConfirm();
+      console.log('✅ [SiriButtonContainer] Call confirmed successfully');
+      
+    } catch (error) {
+      console.error('❌ [SiriButtonContainer] Error confirming call:', error);
+      
+      // ✅ IMPROVED: Show error to user for confirm as it's more critical
+      if (typeof window !== 'undefined') {
+        const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
+        alert(`Lỗi khi xác nhận cuộc gọi: ${errorMessage}`);
+      }
     }
   };
 

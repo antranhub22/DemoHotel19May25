@@ -178,10 +178,39 @@ export const startCall = async (assistantId: string, assistantOverrides?: any) =
   try {
     console.log('🚀 [REAL VAPI] Starting call with assistant:', assistantId);
     const call = await vapiInstance.start(assistantId, assistantOverrides);
+    
+    // ✅ IMPROVED: Validate call object before using it
+    if (!call) {
+      const error = new Error('Failed to start call - Vapi returned null/undefined call object');
+      console.error('❌ [REAL VAPI] Call object is null/undefined:', error);
+      throw error;
+    }
+    
+    // ✅ IMPROVED: Check if call has required properties
+    if (typeof call !== 'object') {
+      const error = new Error('Failed to start call - Invalid call object type');
+      console.error('❌ [REAL VAPI] Invalid call object type:', typeof call, call);
+      throw error;
+    }
+    
     console.log('✅ [REAL VAPI] Call started successfully!', call);
+    console.log('🔍 [REAL VAPI] Call object properties:', Object.keys(call));
+    
     return call;
   } catch (error) {
     console.error('❌ [REAL VAPI] Failed to start call:', error);
+    
+    // ✅ IMPROVED: Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('webCallUrl')) {
+        throw new Error('Vapi call initialization failed - webCallUrl issue. Please check Vapi configuration and try again.');
+      } else if (error.message.includes('assistant')) {
+        throw new Error('Invalid assistant configuration. Please check assistant ID and permissions.');
+      } else {
+        throw new Error(`Vapi call failed: ${error.message}`);
+      }
+    }
+    
     throw error;
   }
 };

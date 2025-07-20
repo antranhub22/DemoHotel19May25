@@ -135,48 +135,68 @@ export const useConversationState = ({
     
     // DEV MODE: Skip actual API calls UNLESS forced or credentials available
     const isDevelopment = import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
-    if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
-      console.log('🚧 [DEV MODE] Simulating call start - no API calls (no credentials or force flag)');
-      console.log('✅ [useConversationState] Setting isCallStarted = true (DEV MODE)');
-      setIsCallStarted(true);
-      setManualCallStarted(true); // Set manual flag when simulating
-      return { success: true };
-    }
     
-    // If we have credentials or force flag, proceed with real VAPI call
-    if (isDevelopment && (forceVapiInDev || hasAnyVapiCredentials)) {
-      console.log('🔥 [DEV MODE] FORCING REAL VAPI CALL - credentials available or forced');
-    }
-    
+    // ✅ IMPROVED: Better error handling for call start
     try {
-      console.log('📞 [useConversationState] Calling startCall()...');
-      console.log('📞 [useConversationState] About to call startCall with all checks passed');
-      await startCall();
-      console.log('✅ [useConversationState] startCall() successful, setting isCallStarted = true');
+      if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
+        console.log('🚧 [DEV MODE] Using simulated call start - limited API calls');
+        setIsCallStarted(true);
+        setManualCallStarted(true);
+        setLanguage(lang);
+        console.log('✅ [DEV MODE] Simulated call started successfully');
+        return { success: true };
+      }
+      
+      // PRODUCTION MODE or forced VAPI in development
+      console.log('🚀 [PRODUCTION MODE] Using real VAPI call start');
       setIsCallStarted(true);
-      setManualCallStarted(true); // Set manual flag when real call starts
+      setManualCallStarted(true);
       
-      // DISABLED: Focus on Interface1 development only
-      // // setCurrentInterface('interface2');
+      // ✅ IMPROVED: Enhanced startCall with error handling
+      await startCall();
       
-      console.log('🎯 [useConversationState] Call start completed successfully');
+      console.log('✅ [useConversationState] Real call started successfully');
       return { success: true };
+      
     } catch (error) {
-      console.error('❌ [useConversationState] Error in startCall():', error);
-      console.error('❌ [useConversationState] Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
+      console.error('❌ [useConversationState] Error starting call:', error);
       
-      // Don't set isCallStarted to false here - let user manually end call
-      // This prevents popup from disappearing immediately
-      console.log('⚠️ [useConversationState] Call failed but keeping isCallStarted = true for debugging');
-      setIsCallStarted(true); // Keep it true so popup stays visible
-      setManualCallStarted(true); // Keep manual flag true on failure
+      // ✅ IMPROVED: Reset state on error
+      setIsCallStarted(false);
+      setManualCallStarted(false);
       
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      // ✅ IMPROVED: Better error message handling
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // ✅ IMPROVED: Categorize and handle different error types
+      if (errorMessage.includes('webCallUrl')) {
+        return { 
+          success: false, 
+          error: 'Voice call initialization failed. Please check your internet connection and try again.' 
+        };
+      } else if (errorMessage.includes('assistant')) {
+        return { 
+          success: false, 
+          error: 'Voice assistant configuration issue. Please contact support.' 
+        };
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        return { 
+          success: false, 
+          error: 'Network error. Please check your internet connection and try again.' 
+        };
+      } else if (errorMessage.includes('permissions') || errorMessage.includes('microphone')) {
+        return { 
+          success: false, 
+          error: 'Microphone access required. Please enable microphone permissions and try again.' 
+        };
+      } else {
+        return { 
+          success: false, 
+          error: `Failed to start voice call: ${errorMessage}` 
+        };
+      }
     }
-  }, [startCall, isCallStarted, manualCallStarted, callDuration, transcripts.length]);
+  }, [isCallStarted, manualCallStarted, callDuration, transcripts, startCall, setLanguage]);
 
   const handleCallEnd = useCallback(() => {
     console.log('🛑 [useConversationState] Ending call');
