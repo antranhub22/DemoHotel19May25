@@ -3,7 +3,11 @@
 // ============================================
 
 // Main auth middleware
-export { authenticateJWT } from './auth.middleware';
+export { 
+  authenticateJWT,
+  requireRole,
+  requirePermission 
+} from './auth.middleware';
 
 // Re-export commonly used functions
 export {
