@@ -107,7 +107,7 @@ export class DatabaseStorage implements IStorage {
         call_id: insertTranscript.callId || insertTranscript.call_id,
         content: insertTranscript.content,
         role: insertTranscript.role,
-        timestamp: convertTimestamp(insertTranscript.timestamp || Date.now()),
+        timestamp: Math.floor((insertTranscript.timestamp || Date.now()) / 1000), // Convert to seconds
         tenant_id: insertTranscript.tenant_id || insertTranscript.tenantId || 'default'
       };
 
