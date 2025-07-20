@@ -57,13 +57,41 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
     if (!existingTenant.rows || existingTenant.rows.length === 0) {
       console.log('🏨 Creating default tenant: Mi Nhon Hotel');
       
+      // Create tenant with settings
       await client.query(`
         INSERT INTO tenants (
-          id, hotel_name, subdomain, subscription_plan, subscription_status, created_at
+          id, hotel_name, subdomain, subscription_plan, subscription_status,
+          settings, features, created_at
         ) VALUES (
-          $1, $2, $3, $4, $5, CURRENT_TIMESTAMP
+          $1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP
         ) ON CONFLICT (id) DO NOTHING
-      `, [tenantId, 'Mi Nhon Hotel', 'minhonmuine', 'premium', 'active']);
+      `, [
+        tenantId, 
+        'Mi Nhon Hotel', 
+        'minhonmuine', 
+        'premium', 
+        'active',
+        JSON.stringify({
+          timezone: 'Asia/Ho_Chi_Minh',
+          defaultLanguage: 'vi',
+          checkIn: '14:00',
+          checkOut: '12:00',
+          currency: 'VND',
+          phoneFormat: '+84',
+          notifications: {
+            email: true,
+            sms: false,
+            voice: true
+          }
+        }),
+        JSON.stringify([
+          'voice_assistant',
+          'multi_language',
+          'analytics',
+          'staff_management',
+          'request_tracking'
+        ])
+      ]);
       
       console.log('✅ Default tenant created');
 
@@ -78,13 +106,90 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       `, [
         `${tenantId}-profile`,
         tenantId,
-        JSON.stringify({ location: 'Mui Ne, Vietnam' }),
-        JSON.stringify({ language: 'vi' }),
-        JSON.stringify({ enabled: ['room_service', 'housekeeping', 'concierge'] }),
-        'Mi Nhon Hotel is a beautiful beachfront hotel in Mui Ne.',
-        'You are a helpful hotel assistant for Mi Nhon Hotel.'
+        JSON.stringify({ 
+          location: 'Mui Ne, Vietnam',
+          type: 'Beach Resort',
+          rooms: 50,
+          facilities: [
+            'Restaurant',
+            'Swimming Pool',
+            'Spa',
+            'Beach Access',
+            'Room Service'
+          ]
+        }),
+        JSON.stringify({ 
+          language: 'vi',
+          voice: 'female',
+          personality: 'professional',
+          greeting: 'Xin chào, tôi là trợ lý ảo của khách sạn Mi Nhon. Tôi có thể giúp gì cho quý khách?'
+        }),
+        JSON.stringify({ 
+          enabled: [
+            'room_service',
+            'housekeeping',
+            'concierge',
+            'maintenance',
+            'spa'
+          ],
+          hours: {
+            room_service: '24/7',
+            housekeeping: '07:00-22:00',
+            concierge: '24/7',
+            maintenance: '08:00-17:00',
+            spa: '09:00-21:00'
+          }
+        }),
+        'Mi Nhon Hotel là một khách sạn nghỉ dưỡng bên bờ biển Mũi Né, cách trung tâm Phan Thiết 15km. Khách sạn có 50 phòng với đầy đủ tiện nghi hiện đại, nhà hàng phục vụ ẩm thực Việt Nam và quốc tế, hồ bơi ngoài trời và spa.',
+        'Bạn là trợ lý ảo của khách sạn Mi Nhon. Nhiệm vụ của bạn là hỗ trợ khách hàng 24/7 với mọi yêu cầu về dịch vụ phòng, dọn phòng, đặt tour du lịch và các dịch vụ khác của khách sạn. Hãy luôn thân thiện, chuyên nghiệp và sẵn sàng giúp đỡ.'
       ]);
       console.log('✅ Hotel profile created');
+
+      // Create sample requests
+      console.log('📋 Creating sample requests...');
+      const sampleRequests = [
+        {
+          room_number: '101',
+          request_content: 'Yêu cầu dọn phòng',
+          status: 'Đã hoàn thành',
+          priority: 'normal',
+          assigned_to: 'frontdesk'
+        },
+        {
+          room_number: '205',
+          request_content: 'Thêm khăn tắm',
+          status: 'Đang thực hiện',
+          priority: 'high',
+          assigned_to: 'housekeeping'
+        },
+        {
+          room_number: '308',
+          request_content: 'Sửa điều hòa',
+          status: 'Đã ghi nhận',
+          priority: 'urgent',
+          assigned_to: 'maintenance'
+        }
+      ];
+
+      for (const req of sampleRequests) {
+        await client.query(`
+          INSERT INTO request (
+            tenant_id, room_number, request_content, status,
+            priority, assigned_to, created_at
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP
+          )
+        `, [
+          tenantId,
+          req.room_number,
+          req.request_content,
+          req.status,
+          req.priority,
+          req.assigned_to
+        ]);
+      }
+      console.log('✅ Sample requests created');
+
     } else {
       console.log('✅ Default tenant already exists');
       
@@ -104,15 +209,99 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         `, [
           `${tenantId}-profile`,
           tenantId,
-          JSON.stringify({ location: 'Mui Ne, Vietnam' }),
-          JSON.stringify({ language: 'vi' }),
-          JSON.stringify({ enabled: ['room_service', 'housekeeping', 'concierge'] }),
-          'Mi Nhon Hotel is a beautiful beachfront hotel in Mui Ne.',
-          'You are a helpful hotel assistant for Mi Nhon Hotel.'
+          JSON.stringify({ 
+            location: 'Mui Ne, Vietnam',
+            type: 'Beach Resort',
+            rooms: 50,
+            facilities: [
+              'Restaurant',
+              'Swimming Pool',
+              'Spa',
+              'Beach Access',
+              'Room Service'
+            ]
+          }),
+          JSON.stringify({ 
+            language: 'vi',
+            voice: 'female',
+            personality: 'professional',
+            greeting: 'Xin chào, tôi là trợ lý ảo của khách sạn Mi Nhon. Tôi có thể giúp gì cho quý khách?'
+          }),
+          JSON.stringify({ 
+            enabled: [
+              'room_service',
+              'housekeeping',
+              'concierge',
+              'maintenance',
+              'spa'
+            ],
+            hours: {
+              room_service: '24/7',
+              housekeeping: '07:00-22:00',
+              concierge: '24/7',
+              maintenance: '08:00-17:00',
+              spa: '09:00-21:00'
+            }
+          }),
+          'Mi Nhon Hotel là một khách sạn nghỉ dưỡng bên bờ biển Mũi Né, cách trung tâm Phan Thiết 15km. Khách sạn có 50 phòng với đầy đủ tiện nghi hiện đại, nhà hàng phục vụ ẩm thực Việt Nam và quốc tế, hồ bơi ngoài trời và spa.',
+          'Bạn là trợ lý ảo của khách sạn Mi Nhon. Nhiệm vụ của bạn là hỗ trợ khách hàng 24/7 với mọi yêu cầu về dịch vụ phòng, dọn phòng, đặt tour du lịch và các dịch vụ khác của khách sạn. Hãy luôn thân thiện, chuyên nghiệp và sẵn sàng giúp đỡ.'
         ]);
         console.log('✅ Hotel profile created');
       } else {
         console.log('✅ Hotel profile already exists');
+      }
+
+      // Check and create sample requests if none exist
+      const existingRequests = await client.query(`
+        SELECT COUNT(*) as count FROM request WHERE tenant_id = $1
+      `, [tenantId]);
+
+      if (existingRequests.rows[0].count === '0') {
+        console.log('📋 Creating sample requests...');
+        const sampleRequests = [
+          {
+            room_number: '101',
+            request_content: 'Yêu cầu dọn phòng',
+            status: 'Đã hoàn thành',
+            priority: 'normal',
+            assigned_to: 'frontdesk'
+          },
+          {
+            room_number: '205',
+            request_content: 'Thêm khăn tắm',
+            status: 'Đang thực hiện',
+            priority: 'high',
+            assigned_to: 'housekeeping'
+          },
+          {
+            room_number: '308',
+            request_content: 'Sửa điều hòa',
+            status: 'Đã ghi nhận',
+            priority: 'urgent',
+            assigned_to: 'maintenance'
+          }
+        ];
+
+        for (const req of sampleRequests) {
+          await client.query(`
+            INSERT INTO request (
+              tenant_id, room_number, request_content, status,
+              priority, assigned_to, created_at
+            ) VALUES (
+              $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP
+            )
+          `, [
+            tenantId,
+            req.room_number,
+            req.request_content,
+            req.status,
+            req.priority,
+            req.assigned_to
+          ]);
+        }
+        console.log('✅ Sample requests created');
+      } else {
+        console.log('✅ Sample requests already exist');
       }
     }
 
