@@ -57,27 +57,6 @@
       ],
       "@tests/*": [
         "./tests/*"
-      ],
-      "@auth/*": [
-        "./packages/auth-system/*"
-      ],
-      "@auth/types": [
-        "./packages/auth-system/types"
-      ],
-      "@auth/config": [
-        "./packages/auth-system/config"
-      ],
-      "@auth/services": [
-        "./packages/auth-system/services"
-      ],
-      "@auth/middleware": [
-        "./packages/auth-system/middleware"
-      ],
-      "@auth/routes": [
-        "./packages/auth-system/routes"
-      ],
-      "@auth/frontend/*": [
-        "./packages/auth-system/frontend/*"
       ]
     },
     "noImplicitAny": false,
