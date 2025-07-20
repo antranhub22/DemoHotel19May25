@@ -2,7 +2,8 @@
 
 import { Pool } from 'pg';
 import fs from 'fs';
-import path from 'path';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 /**
  * Auto-Migration Script for Production Deployment
@@ -180,8 +181,14 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
 // Export for use in other scripts
 export { autoMigrateOnDeploy };
 
-// Run if called directly
-if (require.main === module) {
+// Run if called directly (ES module compatible)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Check if this file is being run directly
+const isMainModule = process.argv[1] === __filename || process.argv[1]?.endsWith('auto-migrate-on-deploy.ts');
+
+if (isMainModule) {
   autoMigrateOnDeploy()
     .then(result => {
       if (!result.success) {
