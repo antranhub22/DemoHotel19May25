@@ -142,17 +142,41 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
       console.log('✅ Tenants table schema is up to date');
     }
 
-    // 3. Ensure indexes exist
+    // 3. Ensure indexes exist (only for existing tables)
     console.log('🔍 Checking database indexes...');
-    const indexSQL = `
-      CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id);
-      CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username);
-      CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email);
-      CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id);
-      CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id);
-    `;
     
-    await client.query(indexSQL);
+    // Get list of existing tables
+    const existingTables = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    
+    const tableNames = existingTables.rows.map(row => row.table_name);
+    const indexQueries = [];
+    
+    // Always create staff indexes (we know staff table exists)
+    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id)');
+    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username)');
+    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email)');
+    
+    // Only create indexes for tables that exist
+    if (tableNames.includes('call')) {
+      indexQueries.push('CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id)');
+    }
+    if (tableNames.includes('request')) {
+      indexQueries.push('CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)');
+    }
+    
+    // Execute all index creation queries
+    for (const query of indexQueries) {
+      try {
+        await client.query(query);
+      } catch (error) {
+        console.warn(`⚠️ Failed to create index: ${error.message}`);
+      }
+    }
+    
     console.log('✅ Database indexes ensured');
     
     client.release();
