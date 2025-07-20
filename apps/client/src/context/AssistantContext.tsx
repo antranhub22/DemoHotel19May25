@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import { initVapi, getVapiInstance, FORCE_BASIC_SUMMARY, apiRequest, parseSummaryToOrderDetails } from '@/lib';
 import { Transcript, OrderSummary, CallDetails, Order, InterfaceLayer, CallSummary, ServiceRequest, ActiveOrder } from '@/types';
 import ReactDOM from 'react-dom';
@@ -107,6 +107,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   
   // ✅ NEW: Prevent Vapi reinitialization during endCall
   const [isEndingCall, setIsEndingCall] = useState(false);
+  
+  // ✅ STABILITY: Add ref to track if component is mounted
+  const isMountedRef = useRef(true);
   
   // ✅ NEW: Call end event handler for external listeners
   const [callEndListeners, setCallEndListeners] = useState<(() => void)[]>([]);
@@ -527,13 +530,22 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     setupVapi();
     
     return () => {
+      isMountedRef.current = false;
       const vapi = getVapiInstance();
       if (vapi) {
         console.log('🧹 [setupVapi] Cleanup: Stopping Vapi due to dependency change');
         vapi.stop();
       }
     };
-  }, [language, hotelConfig, tenantId, callDetails?.id, isEndingCall]);
+  }, [language, hotelConfig, tenantId, isEndingCall]); // ✅ FIXED: Removed callDetails?.id to prevent restart loop
+  
+  // ✅ STABILITY: Cleanup on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // ✅ REMOVED: Interface2 timer logic (focus Interface1 only)
   // useEffect(() => {
