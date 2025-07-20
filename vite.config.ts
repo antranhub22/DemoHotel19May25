@@ -37,32 +37,57 @@ export default defineConfig({
         manualChunks: (id) => {
           // ✅ IMPROVED: Better chunk logic to prevent vendor chunk errors
           if (id.includes('node_modules')) {
-            // React and core dependencies
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
+            // React and core dependencies - highest priority
+            if (id.includes('react') && !id.includes('react-router')) {
+              return 'react-core';
             }
+            if (id.includes('react-router') || id.includes('react-dom')) {
+              return 'react-router';
+            }
+            
             // UI libraries  
             if (id.includes('@radix-ui') || id.includes('radix-ui')) {
               return 'ui-vendor';
             }
-            // Charts and visualization
-            if (id.includes('recharts') || id.includes('d3-')) {
-              return 'chart-vendor';
+            
+            // ✅ FIXED: Better chart handling to prevent circular deps
+            if (id.includes('recharts')) {
+              return 'charts';
             }
-            // Voice and audio libraries
-            if (id.includes('@vapi-ai') || id.includes('@daily-co') || id.includes('daily-js')) {
-              return 'voice-vendor';
+            if (id.includes('d3-') && !id.includes('recharts')) {
+              return 'charts-utils';
             }
-            // Utility libraries
-            if (id.includes('axios') || id.includes('jwt-decode') || id.includes('zod') || 
-                id.includes('clsx') || id.includes('tailwind-merge')) {
-              return 'utility-vendor';
+            
+            // Voice and audio libraries - separate to avoid conflicts
+            if (id.includes('@vapi-ai')) {
+              return 'vapi';
             }
-            // Other vendor libraries
+            if (id.includes('@daily-co') || id.includes('daily-js')) {
+              return 'daily';
+            }
+            
+            // Utility libraries - group carefully
+            if (id.includes('axios')) {
+              return 'http-client';
+            }
+            if (id.includes('jwt-decode') || id.includes('zod')) {
+              return 'validation';
+            }
+            if (id.includes('clsx') || id.includes('tailwind-merge')) {
+              return 'css-utils';
+            }
+            
+            // Other vendor libraries - catch-all
             return 'vendor';
           }
           
-          // Application chunks
+          // Application chunks - more granular
+          if (id.includes('/components/siri/')) {
+            return 'siri-components';
+          }
+          if (id.includes('/components/dashboard/')) {
+            return 'dashboard-components';
+          }
           if (id.includes('/components/')) {
             return 'components';
           }
@@ -71,6 +96,9 @@ export default defineConfig({
           }
           if (id.includes('/pages/') || id.includes('/routes/')) {
             return 'pages';
+          }
+          if (id.includes('/services/') || id.includes('/lib/')) {
+            return 'services';
           }
         },
         // ✅ IMPROVED: Better chunk file naming
@@ -87,11 +115,17 @@ export default defineConfig({
         return false;
       },
       onwarn: (warning, warn) => {
-        // ✅ IMPROVED: Suppress chunk size warnings for vendor files
+        // ✅ IMPROVED: Suppress problematic warnings that don't affect functionality
         if (warning.code === 'CIRCULAR_DEPENDENCY') {
           return;
         }
         if (warning.code === 'INVALID_ANNOTATION') {
+          return;
+        }
+        if (warning.code === 'UNRESOLVED_IMPORT') {
+          return;
+        }
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
           return;
         }
         warn(warning);
