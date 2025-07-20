@@ -49,7 +49,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     `);
     
     const existingColumns = staffColumns.rows.map(row => row.column_name);
-    const requiredColumns = ['first_name', 'last_name', 'display_name', 'permissions', 'is_active'];
+    const requiredColumns = ['first_name', 'last_name', 'display_name', 'phone', 'email', 'permissions', 'is_active'];
     const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
     
     if (missingColumns.length > 0) {
@@ -62,6 +62,8 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         ADD COLUMN IF NOT EXISTS first_name VARCHAR(255),
         ADD COLUMN IF NOT EXISTS last_name VARCHAR(255),
         ADD COLUMN IF NOT EXISTS display_name VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS phone VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS email VARCHAR(255),
         ADD COLUMN IF NOT EXISTS avatar_url TEXT,
         ADD COLUMN IF NOT EXISTS permissions TEXT DEFAULT '[]',
         ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
