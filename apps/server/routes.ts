@@ -12,7 +12,7 @@ import { sendServiceConfirmation, sendCallSummary } from "./gmail";
 import { sendMobileEmail, sendMobileCallSummary } from "./mobileMail";
 import axios from "axios";
 import express, { type Request, Response } from 'express';
-import { verifyJWT } from './middleware/auth';
+import { authenticateJWT } from './middleware/auth/unified';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Staff } from './models/Staff';
@@ -27,11 +27,11 @@ import { getOverview, getServiceDistribution, getHourlyActivity } from './analyt
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
-import unifiedAuthRoutes from './routes/unifiedAuth';
+import unifiedAuthRoutes from './routes/auth/unified';
 
 import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
-import { UnifiedAuthService } from './services/unifiedAuthService.js';
+import { UnifiedAuthService } from './services/auth/UnifiedAuthService.v2';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -548,7 +548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update order status
   
   // Staff: get all orders, optionally filter by status, room, time
-  app.get('/api/staff/orders', verifyJWT, async (req: Request, res: Response) => {
+  app.get('/api/staff/orders', authenticateJWT, async (req: Request, res: Response) => {
     try {
       const { status, roomNumber } = req.query;
       const orders = await storage.getAllOrders({
@@ -1404,133 +1404,14 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-  // Staff login route with tenant support
-  app.post('/api/staff/login', async (req, res) => {
-    const { username, password } = req.body;
-    console.log(`Staff login attempt: ${username}`);
-    
-    try {
-      // 1. Extract tenant from subdomain or host
-      const tenantId = await extractTenantFromRequest(req);
-      console.log(`🏨 Tenant identified for login: ${tenantId}`);
-      
-      // 2. Try to find staff in database with tenant association
-      let staffUser = await findStaffInDatabase(username, password, tenantId);
-      
-      // 3. Fallback to environment variables and hardcoded accounts (for backward compatibility)
-      if (!staffUser) {
-        staffUser = await findStaffInFallback(username, password, tenantId);
-      }
-      
-      if (!staffUser) {
-        console.log('Login failed: Invalid credentials or tenant access denied');
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      
-      // 4. Generate JWT with tenant and role information
-      const token = jwt.sign(
-        { 
-          username: staffUser.username, 
-          tenantId: staffUser.tenant_id,
-          role: staffUser.role,
-          permissions: staffUser.permissions || []
-        }, 
-        JWT_SECRET, 
-        { expiresIn: '1d' }
-      );
-      
-      console.log(`✅ Login successful for ${username} at tenant ${tenantId}`);
-      res.json({ 
-        token, 
-        user: {
-          username: staffUser.username,
-          role: staffUser.role,
-          tenantId: staffUser.tenant_id
-        }
-      });
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ error: 'Internal server error during login' });
-    }
-  });
-
   // ============================================
-  // Auth API Routes (for client compatibility)
+  // LEGACY AUTH ROUTES REMOVED
   // ============================================
-
-  // Auth login route (matches client expectations)
-  app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
-    console.log(`Auth login attempt: ${email}`);
-    
-          try {
-        // 1. Extract tenant from subdomain or host
-        const tenantId = await extractTenantFromRequest(req);
-        console.log(`🏨 Tenant identified for auth login: ${tenantId}`);
-        
-                // 2. Use UnifiedAuthService for authentication  
-        const authResult = await UnifiedAuthService.login({
-          username: email, // Use email as username for client compatibility
-          password: password,
-          tenantId: 'mi-nhon-hotel' // Use correct tenant ID for test users
-        });
-      
-      if (!authResult.success || !authResult.token) {
-        console.log('Auth login failed: Invalid credentials or tenant access denied');
-        return res.status(401).json({ error: 'Invalid credentials' });
-      }
-      
-      console.log(`✅ Auth login successful for ${email} at tenant ${tenantId}`);
-      res.json({ 
-        token: authResult.token,
-        refreshToken: authResult.refreshToken,
-        user: {
-          username: authResult.user?.username,
-          email: authResult.user?.email,
-          role: authResult.user?.role,
-          tenantId: authResult.user?.tenantId,
-          displayName: authResult.user?.displayName,
-          permissions: authResult.user?.permissions
-        },
-        tenant: {
-          id: authResult.user?.tenantId,
-          name: 'Mi Nhon Hotel', // Default tenant name
-          subdomain: 'minhonmuine'
-        }
-      });
-    } catch (error) {
-      console.error('Auth login error:', error);
-      res.status(500).json({ error: 'Internal server error during auth login' });
-    }
-  });
-
-  // Auth me route (get current user info)
-  app.get('/api/auth/me', verifyJWT, async (req, res) => {
-    try {
-      console.log('Auth me request for user:', req.user);
-      
-      const user = {
-        username: req.user.username,
-        email: req.user.username, // Use username as email for client compatibility
-        role: req.user.role,
-        tenantId: req.user.tenantId
-      };
-      
-      const tenant = {
-        id: req.user.tenantId,
-        name: 'Mi Nhon Hotel', // Default tenant name
-        subdomain: 'minhonmuine'
-      };
-      
-      res.json({ user, tenant });
-    } catch (error) {
-      console.error('Auth me error:', error);
-      res.status(500).json({ error: 'Internal server error during auth me' });
-    }
-  });
+  // All authentication routes have been moved to unified auth system
+  // See: /api/auth/* routes mounted from './routes/auth/unified'
 
   // Lấy danh sách request
-  app.get('/api/staff/requests', verifyJWT, async (req, res) => {
+  app.get('/api/staff/requests', authenticateJWT, async (req, res) => {
     console.log('API /api/staff/requests called');
     console.log('Authorization header:', req.headers.authorization);
     try {
@@ -1556,7 +1437,7 @@ Mi Nhon Hotel Mui Ne`
   });
 
   // Cập nhật trạng thái request
-  app.patch('/api/staff/requests/:id/status', verifyJWT, async (req, res) => {
+  app.patch('/api/staff/requests/:id/status', authenticateJWT, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const { status } = req.body;
@@ -1619,14 +1500,14 @@ Mi Nhon Hotel Mui Ne`
   });
 
   // Lấy lịch sử tin nhắn của request
-  app.get('/api/staff/requests/:id/messages', verifyJWT, (req, res) => {
+  app.get('/api/staff/requests/:id/messages', authenticateJWT, (req, res) => {
     const id = parseInt(req.params.id);
     const msgs = messageList.filter(m => m.requestId === id);
     res.json(msgs);
   });
 
   // Gửi tin nhắn tới guest
-  app.post('/api/staff/requests/:id/message', verifyJWT, (req, res) => {
+  app.post('/api/staff/requests/:id/message', authenticateJWT, (req, res) => {
     const id = parseInt(req.params.id);
     const { content } = req.body;
     if (!content) return res.status(400).json({ error: 'Missing content' });
@@ -1643,7 +1524,7 @@ Mi Nhon Hotel Mui Ne`
   });
 
   // Xóa tất cả requests
-  app.delete('/api/staff/requests/all', verifyJWT, async (req, res) => {
+  app.delete('/api/staff/requests/all', authenticateJWT, async (req, res) => {
     try {
       console.log('Attempting to delete all requests');
       // Xóa tất cả dữ liệu từ bảng request sử dụng API function
@@ -1666,7 +1547,7 @@ Mi Nhon Hotel Mui Ne`
   // Xóa tất cả orders (public, không cần xác thực)
 
   // Analytics routes
-  app.get('/api/analytics/overview', verifyJWT, async (req, res) => {
+  app.get('/api/analytics/overview', authenticateJWT, async (req, res) => {
     try {
       const data = await getOverview();
       res.json(data);
@@ -1675,7 +1556,7 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-  app.get('/api/analytics/service-distribution', verifyJWT, async (req, res) => {
+  app.get('/api/analytics/service-distribution', authenticateJWT, async (req, res) => {
     try {
       const data = await getServiceDistribution();
       res.json(data);
@@ -1684,7 +1565,7 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-  app.get('/api/analytics/hourly-activity', verifyJWT, async (req, res) => {
+  app.get('/api/analytics/hourly-activity', authenticateJWT, async (req, res) => {
     try {
       const data = await getHourlyActivity();
       res.json(data);

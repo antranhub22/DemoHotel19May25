@@ -18,7 +18,7 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
     }
     setError('');
     try {
-      const res = await fetch('/api/staff/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -29,7 +29,7 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
         return;
       }
       const data = await res.json();
-      if (data.token) {
+      if (data.success && data.token) {
         localStorage.setItem('token', data.token);
         onLogin();
       } else {

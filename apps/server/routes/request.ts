@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
 import { request as requestTable } from '@shared/db';
-import { verifyJWT } from '../middleware/auth';
+import { authenticateJWT } from '../middleware/auth/unified';
 import { eq, and } from 'drizzle-orm';
 import { requestMapper } from '@shared/db/transformers';
 
 const router = Router();
 
 // ✅ POST /api/request - Create new request (WITH AUTO TRANSFORMATION)
-router.post('/', verifyJWT, async (req: Request, res: Response) => {
+router.post('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
     console.log('📝 [Request API] Creating new request (camelCase):', req.body);
     
@@ -96,7 +96,7 @@ router.post('/', verifyJWT, async (req: Request, res: Response) => {
 });
 
 // ✅ GET /api/request - Get all requests
-router.get('/', verifyJWT, async (req: Request, res: Response) => {
+router.get('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).tenant?.id;
     
@@ -121,7 +121,7 @@ router.get('/', verifyJWT, async (req: Request, res: Response) => {
 });
 
 // ✅ GET /api/request/:id - Get specific request
-router.get('/:id', verifyJWT, async (req: Request, res: Response) => {
+router.get('/:id', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const requestId = parseInt(req.params.id, 10);
     
@@ -164,7 +164,7 @@ router.get('/:id', verifyJWT, async (req: Request, res: Response) => {
 });
 
 // ✅ PATCH /api/request/:id/status - Update request status
-router.patch('/:id/status', verifyJWT, async (req: Request, res: Response) => {
+router.patch('/:id/status', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const requestId = parseInt(req.params.id, 10);
     const { status } = req.body;

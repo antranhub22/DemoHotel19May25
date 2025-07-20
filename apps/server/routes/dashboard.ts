@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { verifyJWT } from '@server/middleware/auth';
+import { authenticateJWT } from '@server/middleware/auth/unified';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { VapiIntegrationService, AssistantGeneratorService } from '@server/services/vapiIntegration';
@@ -18,7 +18,7 @@ import { hotelProfileMapper, type HotelProfileDB, type HotelProfileCamelCase, ty
 const router = express.Router();
 
 // Apply authentication and tenant middleware to all dashboard routes
-router.use(verifyJWT);
+router.use(authenticateJWT);
 // router.use(identifyTenant);
 // router.use(enforceRowLevelSecurity);
 

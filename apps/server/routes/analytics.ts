@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { verifyJWT } from '@server/middleware/auth';
+import { authenticateJWT } from '@server/middleware/auth/unified';
 import { getOverview, getServiceDistribution, getHourlyActivity } from '@server/analytics';
 
 const router = Router();
@@ -14,7 +14,7 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
 }
 
 // Get analytics overview
-router.get('/overview', verifyJWT, async (req: Request, res: Response) => {
+router.get('/overview', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const overview = await getOverview();
     res.json(overview);
@@ -24,7 +24,7 @@ router.get('/overview', verifyJWT, async (req: Request, res: Response) => {
 });
 
 // Get service distribution analytics
-router.get('/service-distribution', verifyJWT, async (req: Request, res: Response) => {
+router.get('/service-distribution', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const distribution = await getServiceDistribution();
     res.json(distribution);
@@ -34,7 +34,7 @@ router.get('/service-distribution', verifyJWT, async (req: Request, res: Respons
 });
 
 // Get hourly activity analytics
-router.get('/hourly-activity', verifyJWT, async (req: Request, res: Response) => {
+router.get('/hourly-activity', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const activity = await getHourlyActivity();
     res.json(activity);

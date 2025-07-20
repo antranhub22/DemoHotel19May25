@@ -125,7 +125,7 @@ export class DatabaseStorage implements IStorage {
 
       console.log('📝 [PostgreSQL Storage] Final transcript for database:', {
         ...processedTranscript,
-        timestampISO: processedTranscript.timestamp.toISOString(),
+        timestampISO: processedTranscript.timestamp instanceof Date ? processedTranscript.timestamp.toISOString() : 'Invalid Date',
         fieldCount: Object.keys(processedTranscript).length
       });
 

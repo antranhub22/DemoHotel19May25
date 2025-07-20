@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/staff/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),
@@ -186,34 +186,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Sai tài khoản hoặc mật khẩu');
       }
       const data = await res.json();
-      if (!data.token) throw new Error('Không nhận được token từ server');
+      if (!data.success || !data.token) throw new Error('Không nhận được token từ server');
       localStorage.setItem('token', data.token);
 
-      // Giải mã token để lấy user/tenant
-      const decoded = jwtDecode<MyJwtPayload>(data.token);
-      
-      // Tạo user object từ token payload
-      const mappedRole = mapLegacyRole(decoded.role);
-      const userFromToken: AuthUser = {
-        id: decoded.username,
-        name: decoded.username,
-        email: decoded.username,
-        tenantId: decoded.tenantId,
-        role: mappedRole,
-        permissions: getPermissionsForRole(mappedRole)
+      // Sử dụng user data từ unified auth response
+      const userFromResponse: AuthUser = {
+        id: data.user.id,
+        name: data.user.displayName || data.user.username,
+        email: data.user.email,
+        tenantId: data.user.tenantId,
+        role: data.user.role,
+        permissions: data.user.permissions || []
       };
       
-      // Tạo tenant object từ token payload
-      const tenantFromToken: TenantData = {
-        id: decoded.tenantId,
-        hotelName: 'Mi Nhon Hotel', // Default name
+      // Tạo tenant object từ user data
+      const tenantFromResponse: TenantData = {
+        id: data.user.tenantId,
+        hotelName: 'Mi Nhon Hotel', // Default name  
         subdomain: 'minhonmuine',
         subscriptionPlan: 'premium',
         subscriptionStatus: 'active'
       };
       
-      setUser(userFromToken);
-      setTenant(tenantFromToken);
+      setUser(userFromResponse);
+      setTenant(tenantFromResponse);
     } catch (err: any) {
       localStorage.removeItem('token');
       setUser(null);

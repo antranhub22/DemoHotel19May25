@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { UnifiedAuthService } from '../../apps/server/services/unifiedAuthService.js';
+import { UnifiedAuthService } from '../../apps/server/services/auth/UnifiedAuthService.v2';
 import { db } from '../../packages/shared/db/index.js';
 import { staff } from '../../packages/shared/db/schema.js';
 import { eq } from 'drizzle-orm';
