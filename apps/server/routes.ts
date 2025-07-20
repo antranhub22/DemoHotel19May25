@@ -12,7 +12,7 @@ import { sendServiceConfirmation, sendCallSummary } from "./gmail";
 import { sendMobileEmail, sendMobileCallSummary } from "./mobileMail";
 import axios from "axios";
 import express, { type Request, Response } from 'express';
-import { authenticateJWT } from '@auth/middleware';
+import { authenticateJWT } from '../../packages/auth-system/middleware/auth.middleware';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Staff } from './models/Staff';
@@ -27,11 +27,11 @@ import { getOverview, getServiceDistribution, getHourlyActivity } from './analyt
 import { seedDevelopmentData } from './seed';
 import dashboardRoutes from './routes/dashboard';
 import healthRoutes from './routes/health';
-import unifiedAuthRoutes from '@auth/routes/auth.routes';
+import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 
 import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
-import { UnifiedAuthService } from '@auth/services';
+import { UnifiedAuthService } from '../../packages/auth-system/services/UnifiedAuthService';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({

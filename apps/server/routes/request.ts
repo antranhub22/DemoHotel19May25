@@ -1,7 +1,7 @@
 import express, { type Request, Response } from 'express';
 import { db } from '../db';
 import { request as requestTable } from '@shared/db';
-import { authenticateJWT } from '@auth/middleware';
+import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import { eq, and } from 'drizzle-orm';
 import { requestMapper } from '@shared/db/transformers';
 
