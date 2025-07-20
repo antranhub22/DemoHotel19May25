@@ -8,10 +8,10 @@ interface Interface4Props {
 }
 
 const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
-  // --- ALL HOOKS MUST BE DECLARED FIRST ---
+  // ✅ HOOKS STABILITY FIX: Always call all hooks consistently
   const { order, language, setOrder } = useAssistant(); // ✅ REMOVED: setCurrentInterface (focus Interface1 only)
 
-  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
+  // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext  
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
   // Clear console for clean debugging when Interface4 mounts

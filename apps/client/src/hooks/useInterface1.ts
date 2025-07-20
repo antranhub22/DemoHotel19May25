@@ -106,7 +106,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     setShowingSummary(!!summaryPopup);
   }, [popups]);
 
-  // ✅ AUTO-SUMMARY: Show summary popup when call ends
+  // ✅ AUTO-SUMMARY: Show summary popup when call ends - STABILIZED
   const autoShowSummary = useCallback(() => {
     console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
     
@@ -125,7 +125,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     }
   }, [showSummary]);
 
-  // ✅ AUTO-SUMMARY: Register listener for call end events
+  // ✅ AUTO-SUMMARY: Register listener for call end events - STABILIZED
   useEffect(() => {
     console.log('📞 [useInterface1] Registering auto-summary listener...');
     
@@ -184,21 +184,21 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     }
   }, [language, conversationState.isCallStarted, conversationPopupId, conversationState.handleCallEnd, conversationState.handleCallStart]); // Include necessary dependencies
   
-  const handleRightPanelToggle = () => {
-    setShowRightPanel(!showRightPanel);
-  };
+  const handleRightPanelToggle = useCallback(() => {
+    setShowRightPanel(prev => !prev);
+  }, []);
   
-  const handleRightPanelClose = () => {
+  const handleRightPanelClose = useCallback(() => {
     setShowRightPanel(false);
-  };
+  }, []);
 
-  // Demo popup functions - conversation disabled, others active
-  const handleShowConversationPopup = () => {
+  // Demo popup functions - conversation disabled, others active - STABILIZED
+  const handleShowConversationPopup = useCallback(() => {
     console.log('Conversation demo disabled - using unified ChatPopup instead');
     // No longer create conversation popup - handled by ChatPopup component
-  };
+  }, []);
 
-  const handleShowNotificationDemo = () => {
+  const handleShowNotificationDemo = useCallback(() => {
     import('../components/popup-system/DemoPopupContent').then((module) => {
       const { NotificationDemoContent } = module;
       showNotification(
@@ -223,9 +223,9 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
         }
       );
     });
-  };
+  }, [showNotification]);
 
-  const handleShowSummaryDemo = () => {
+  const handleShowSummaryDemo = useCallback(() => {
     import('../components/popup-system/DemoPopupContent').then((module) => {
       const { SummaryPopupContent } = module;
       showSummary(
@@ -250,7 +250,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
         }
       );
     });
-  };
+  }, [showSummary]);
 
   // Update badge count when transcripts change
   useEffect(() => {

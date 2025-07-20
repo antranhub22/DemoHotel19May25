@@ -23,15 +23,7 @@ const VoiceAssistant: React.FC = () => {
   // Language selection state
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
 
-  // ✅ SIMPLIFIED: Only Interface1 state needed
-  const [interfaceStates, setInterfaceStates] = useState({
-    interface1: true, // Always active for development
-    interface2: false,
-    interface3: false,
-    interface3vi: false,
-    interface3fr: false,
-    interface4: false
-  });
+  // ✅ REMOVED: No longer needed - using stableInterfaceStates instead
 
   // First time user
   const [showWelcome, setShowWelcome] = useState(false);
@@ -45,18 +37,16 @@ const VoiceAssistant: React.FC = () => {
     }
   }, []);
 
-  // ✅ SIMPLIFIED: Remove interface switching logic
-  // Always keep Interface1 active for development
-  useEffect(() => {
-    setInterfaceStates({
-      interface1: true, // Always active
-      interface2: false,
-      interface3: false,
-      interface3vi: false,
-      interface3fr: false,
-      interface4: false
-    });
-  }, []); // No dependencies - static state
+  // ✅ STABILIZED: Use useState with initial value instead of useEffect  
+  // This prevents unnecessary re-renders and hook count changes
+  const [stableInterfaceStates] = useState({
+    interface1: true, // Always active
+    interface2: false,
+    interface3: false,
+    interface3vi: false,
+    interface3fr: false,
+    interface4: false
+  });
 
   // Language options for the dropdown
   const languageOptions = [
@@ -138,7 +128,7 @@ const VoiceAssistant: React.FC = () => {
             console.error('🚨 [VoiceAssistant] Error Info:', errorInfo);
           }}
         >
-          <Interface1 isActive={interfaceStates.interface1} />
+          <Interface1 key="stable-interface1" isActive={stableInterfaceStates.interface1} />
         </ErrorBoundary>
         
         {/* ✅ DISCONNECTED: Keep files but don't render 

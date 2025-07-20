@@ -39,7 +39,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   const [note, setNote] = useState('');
   // --- KẾT THÚC DI CHUYỂN HOOK ---
 
-  // Early return if hotel config is not loaded
+  // ✅ FIXED: Render conditionally without early returns
   if (configLoading || !hotelConfig) {
     console.log('[DEBUG] Interface3 render:', { hotelConfig, configLoading });
     return (
@@ -52,7 +52,6 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     );
   }
 
-  // Show error if config failed to load
   if (configError) {
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
@@ -64,7 +63,6 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     );
   }
   
-  // Early return if no order summary - moved to top to prevent hook order issues
   if (!orderSummary) {
     return null;
   }
