@@ -1,7 +1,22 @@
 import * as React from "react"
-import * as RechartsPrimitive from "recharts"
-
 import { cn } from "@/lib/utils"
+
+// ✅ FIX: Dynamic recharts import to prevent initialization errors
+let RechartsPrimitive: any = null;
+
+const loadRecharts = async () => {
+  if (RechartsPrimitive) return RechartsPrimitive;
+  
+  try {
+    console.log('🔄 [Charts] Loading recharts module...');
+    RechartsPrimitive = await import('recharts');
+    console.log('✅ [Charts] Recharts loaded successfully');
+    return RechartsPrimitive;
+  } catch (error) {
+    console.error('❌ [Charts] Failed to load recharts:', error);
+    throw new Error('Failed to load recharts module');
+  }
+};
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -32,17 +47,54 @@ function useChart() {
   return context
 }
 
+// ✅ FIX: Enhanced ChartContainer with error boundary and dynamic loading
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     config: ChartConfig
-    children: React.ComponentProps<
-      typeof RechartsPrimitive.ResponsiveContainer
-    >["children"]
+    children: React.ComponentProps<any>["children"]
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const [isRechartsLoaded, setIsRechartsLoaded] = React.useState(false)
+  const [loadError, setLoadError] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    loadRecharts()
+      .then(() => setIsRechartsLoaded(true))
+      .catch((error) => {
+        console.error('Failed to load recharts:', error);
+        setLoadError(error.message);
+      });
+  }, []);
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center p-4 text-red-500">
+        <p>Error loading charts: {loadError}</p>
+      </div>
+    );
+  }
+
+  if (!isRechartsLoaded) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2">Loading charts...</span>
+      </div>
+    );
+  }
+
+  const ResponsiveContainer = RechartsPrimitive?.ResponsiveContainer;
+
+  if (!ResponsiveContainer) {
+    return (
+      <div className="flex items-center justify-center p-4 text-yellow-600">
+        <p>Charts component not available</p>
+      </div>
+    );
+  }
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -56,9 +108,9 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>
+        <ResponsiveContainer>
           {children}
-        </RechartsPrimitive.ResponsiveContainer>
+        </ResponsiveContainer>
       </div>
     </ChartContext.Provider>
   )
@@ -98,12 +150,17 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip
+// ✅ FIX: Dynamic ChartTooltip component
+const ChartTooltip = React.forwardRef<any, any>((props, ref) => {
+  if (!RechartsPrimitive?.Tooltip) return null;
+  const TooltipComponent = RechartsPrimitive.Tooltip;
+  return <TooltipComponent {...props} ref={ref} />;
+});
+ChartTooltip.displayName = "ChartTooltip";
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
+  any & React.ComponentProps<"div"> & {
       hideLabel?: boolean
       hideIndicator?: boolean
       indicator?: "line" | "dot" | "dashed"
@@ -254,12 +311,18 @@ const ChartTooltipContent = React.forwardRef<
 )
 ChartTooltipContent.displayName = "ChartTooltip"
 
-const ChartLegend = RechartsPrimitive.Legend
+// ✅ FIX: Dynamic ChartLegend component
+const ChartLegend = React.forwardRef<any, any>((props, ref) => {
+  if (!RechartsPrimitive?.Legend) return null;
+  const LegendComponent = RechartsPrimitive.Legend;
+  return <LegendComponent {...props} ref={ref} />;
+});
+ChartLegend.displayName = "ChartLegend";
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    any & {
       hideIcon?: boolean
       nameKey?: string
     }
