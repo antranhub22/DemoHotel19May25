@@ -10,9 +10,9 @@ export const debugAuth = {
     console.log(`🔐 [DebugAuth] Testing login with ${userType}...`);
     
     const credentials = {
-      manager: { email: 'manager', password: 'manager123' },
-      frontdesk: { email: 'frontdesk', password: 'frontdesk123' },
-      itmanager: { email: 'itmanager', password: 'itmanager123' }
+      manager: { username: 'manager', password: 'manager123' },
+      frontdesk: { username: 'frontdesk', password: 'frontdesk123' },
+      itmanager: { username: 'itmanager', password: 'itmanager123' }
     };
     
     const cred = credentials[userType as keyof typeof credentials] || credentials.manager;

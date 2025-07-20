@@ -9,14 +9,14 @@ const DEV_TOKEN_KEY = 'dev_auth_token';
  */
 export const generateDevToken = async (): Promise<string> => {
   const credentials = [
-    { email: 'manager', password: 'manager123' },
-    { email: 'frontdesk', password: 'frontdesk123' },
-    { email: 'itmanager', password: 'itmanager123' }
+    { username: 'manager', password: 'manager123' },
+    { username: 'frontdesk', password: 'frontdesk123' },
+    { username: 'itmanager', password: 'itmanager123' }
   ];
   
   for (const cred of credentials) {
     try {
-      console.log(`🔐 [AuthHelper] Trying login with ${cred.email}...`);
+      console.log(`🔐 [AuthHelper] Trying login with ${cred.username}...`);
       
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -29,14 +29,14 @@ export const generateDevToken = async (): Promise<string> => {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem(DEV_TOKEN_KEY, 'true');
-          console.log(`✅ [AuthHelper] Dev token generated with ${cred.email}`);
+          console.log(`✅ [AuthHelper] Dev token generated with ${cred.username}`);
           return data.token;
         }
       } else {
-        console.warn(`⚠️ [AuthHelper] Login failed for ${cred.email}:`, response.status);
+        console.warn(`⚠️ [AuthHelper] Login failed for ${cred.username}:`, response.status);
       }
     } catch (error) {
-      console.warn(`⚠️ [AuthHelper] Error with ${cred.email}:`, error);
+      console.warn(`⚠️ [AuthHelper] Error with ${cred.username}:`, error);
     }
   }
   
