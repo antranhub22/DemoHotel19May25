@@ -139,7 +139,7 @@ export class UnifiedAuthService {
         permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login?.toISOString() || null
+        last_login: user.last_login ? (typeof user.last_login === 'string' ? user.last_login : user.last_login.toISOString()) : null
       };
 
       // Generate tokens
@@ -150,8 +150,8 @@ export class UnifiedAuthService {
       await db
         .update(staff)
         .set({ 
-          last_login: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          last_login: new Date(),
+          updated_at: new Date()
         } as any)
         .where(eq(staff.id, user.id));
 
@@ -206,7 +206,7 @@ export class UnifiedAuthService {
         permissions: decoded.permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login?.toISOString() || null
+        last_login: user.last_login ? (typeof user.last_login === 'string' ? user.last_login : user.last_login.toISOString()) : null
       };
 
     } catch (error) {
@@ -265,7 +265,7 @@ export class UnifiedAuthService {
         permissions,
         tenantId: user.tenant_id || 'default',
         avatarUrl: user.avatar_url,
-        last_login: user.last_login?.toISOString() || null
+        last_login: user.last_login ? (typeof user.last_login === 'string' ? user.last_login : user.last_login.toISOString()) : null
       };
 
       const newToken = this.generateToken(authUser);
@@ -296,7 +296,7 @@ export class UnifiedAuthService {
       await db
         .update(staff)
         .set({ 
-          updated_at: new Date().toISOString()
+          updated_at: new Date()
         } as any)
         .where(eq(staff.id, userId));
 
