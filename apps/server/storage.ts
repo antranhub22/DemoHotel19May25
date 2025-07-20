@@ -102,15 +102,20 @@ export class DatabaseStorage implements IStorage {
         timestampType: typeof insertTranscript.timestamp
       });
 
-      // ✅ FIXED: Use conversion utilities for timestamp - ENSURE NO ID FIELD
+      // ✅ EMERGENCY FIX: Completely remove any ID field and ensure clean insert
       const processedTranscript = {
-        // ✅ CRITICAL: Do NOT include id field - let database auto-generate
         call_id: insertTranscript.callId || insertTranscript.call_id,
         content: insertTranscript.content,
         role: insertTranscript.role,
         timestamp: convertTimestamp(insertTranscript.timestamp || Date.now()),
         tenant_id: insertTranscript.tenant_id || insertTranscript.tenantId || 'default'
       };
+
+      // ✅ NUCLEAR OPTION: Remove ALL possible ID variations
+      delete (processedTranscript as any).id;
+      delete (processedTranscript as any).Id;
+      delete (processedTranscript as any).ID;
+      delete (processedTranscript as any)._id;
 
       // ✅ DEBUG: Ensure no ID field leaked through
       if ('id' in processedTranscript) {
@@ -124,7 +129,14 @@ export class DatabaseStorage implements IStorage {
         fieldCount: Object.keys(processedTranscript).length
       });
 
-      const result = await db.insert(transcript).values(processedTranscript).returning();
+      // ✅ EMERGENCY WORKAROUND: Generate manual ID for broken PostgreSQL table
+      const finalTranscript = {
+        ...processedTranscript,
+        // Generate unique ID if database doesn't auto-increment
+        id: Date.now() + Math.floor(Math.random() * 1000)
+      };
+
+      const result = await db.insert(transcript).values(finalTranscript).returning();
       
       if (result.length === 0) {
         throw new Error('Failed to insert transcript - no result returned');
