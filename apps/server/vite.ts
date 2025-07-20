@@ -58,8 +58,28 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
+  
+  // ✅ FIXED: Only serve index.html for non-asset requests
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
+    
+    // ✅ IMPORTANT: Skip index.html serving for asset requests
+    if (url.startsWith('/assets/') || 
+        url.startsWith('/src/') ||
+        url.startsWith('/@') ||
+        url.endsWith('.js') || 
+        url.endsWith('.css') || 
+        url.endsWith('.map') ||
+        url.endsWith('.ico') ||
+        url.endsWith('.png') || 
+        url.endsWith('.jpg') || 
+        url.endsWith('.jpeg') || 
+        url.endsWith('.svg') ||
+        url.endsWith('.woff') || 
+        url.endsWith('.woff2') ||
+        url.endsWith('.ttf')) {
+      return next();
+    }
 
     try {
       const clientTemplate = path.resolve(

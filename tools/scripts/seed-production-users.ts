@@ -33,7 +33,21 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
     return { success: true, usersCreated: [] };
   }
 
-  console.log('📍 Production database detected - seeding default users...');
+  // ✅ FIXED: Skip PostgreSQL seeding for SQLite databases
+  if (DATABASE_URL.startsWith('sqlite://')) {
+    console.log('📁 SQLite database detected - skipping PostgreSQL user seeding');
+    console.log('ℹ️ SQLite databases should use local seeding methods (npm run db:seed)');
+    return;
+  }
+
+  // ✅ IMPROVED: Only proceed with PostgreSQL seeding for actual PostgreSQL databases
+  if (!DATABASE_URL.includes('postgres') && !DATABASE_URL.includes('postgresql')) {
+    console.log('⚠️ Database URL does not appear to be PostgreSQL - skipping user seeding');
+    console.log('🔍 DATABASE_URL pattern:', DATABASE_URL.substring(0, 20) + '...');
+    return;
+  }
+
+  console.log('🐘 PostgreSQL database detected - proceeding with user seeding...');
   
   const pool = new Pool({
     connectionString: DATABASE_URL,

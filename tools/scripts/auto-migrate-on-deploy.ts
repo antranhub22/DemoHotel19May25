@@ -28,7 +28,21 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     return { success: true, migrationsRun: [] };
   }
 
-  console.log('📍 Production database detected - running auto-migration...');
+  // ✅ FIXED: Skip PostgreSQL auto-migration for SQLite databases
+  if (DATABASE_URL.startsWith('sqlite://')) {
+    console.log('📁 SQLite database detected - skipping PostgreSQL auto-migration');
+    console.log('ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)');
+    return { success: true, migrationsRun: ['sqlite-auto-handled'] };
+  }
+
+  // ✅ IMPROVED: Only proceed with PostgreSQL auto-migration for actual PostgreSQL databases
+  if (!DATABASE_URL.includes('postgres') && !DATABASE_URL.includes('postgresql')) {
+    console.log('⚠️ Database URL does not appear to be PostgreSQL - skipping auto-migration');
+    console.log('🔍 DATABASE_URL pattern:', DATABASE_URL.substring(0, 20) + '...');
+    return { success: true, migrationsRun: [] };
+  }
+
+  console.log('🐘 PostgreSQL database detected - running auto-migration...');
   
   const pool = new Pool({
     connectionString: DATABASE_URL,
