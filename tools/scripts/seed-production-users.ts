@@ -13,7 +13,6 @@ import { fileURLToPath } from 'url';
  */
 
 interface DefaultUser {
-  id: string;
   username: string;
   password: string;
   email: string;
@@ -71,10 +70,9 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       console.log('✅ Default tenant already exists');
     }
 
-    // 2. Define default users
-    const defaultUsers: DefaultUser[] = [
+    // 2. Define default users (let database auto-generate IDs)
+    const defaultUsers = [
       {
-        id: 'user-manager-001',
         username: 'manager',
         password: 'password123',
         email: 'manager@minhonhotel.com',
@@ -85,7 +83,6 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         tenantId
       },
       {
-        id: 'user-frontdesk-001', 
         username: 'frontdesk',
         password: 'frontdesk123',
         email: 'frontdesk@minhonhotel.com',
@@ -96,7 +93,6 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         tenantId
       },
       {
-        id: 'user-itmanager-001',
         username: 'itmanager', 
         password: 'itmanager123',
         email: 'it@minhonhotel.com',
@@ -121,16 +117,15 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         // Hash password
         const hashedPassword = await bcrypt.hash(user.password, 10);
         
-        // Create user
+        // Create user (let database auto-generate ID)
         await client.query(`
           INSERT INTO staff (
-            id, tenant_id, username, password, first_name, last_name, 
+            tenant_id, username, password, first_name, last_name, 
             email, role, display_name, permissions, is_active, created_at
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, CURRENT_TIMESTAMP
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP
           )
         `, [
-          user.id,
           user.tenantId, 
           user.username,
           hashedPassword,
