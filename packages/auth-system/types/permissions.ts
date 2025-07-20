@@ -42,6 +42,87 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     staff: [], // No staff management
     security: ['view', 'manage'], // IT security access
     notifications: ['view'] // System notifications
+  },
+  // Legacy role mappings for backward compatibility
+  'admin': {
+    dashboard: ['view', 'edit', 'view_client_interface'],
+    analytics: ['view', 'export', 'advanced', 'view_advanced'],
+    billing: ['view', 'edit'],
+    staff: ['view', 'edit', 'delete', 'invite', 'manage'],
+    settings: ['view', 'edit'],
+    calls: ['view', 'join', 'transfer', 'end', 'override'],
+    system: ['view', 'monitor'],
+    assistant: ['configure', 'manage'],
+    notifications: ['view', 'manage'],
+    requests: ['view', 'manage'],
+    guests: ['view', 'manage'],
+    security: ['view', 'manage'],
+    integrations: ['view', 'manage'],
+    logs: ['view', 'export']
+  },
+  'staff': {
+    dashboard: ['view'],
+    calls: ['view', 'join', 'transfer', 'end'],
+    analytics: ['view_basic'],
+    profile: ['view', 'edit'],
+    guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
+    requests: ['view', 'manage'],
+    notifications: ['view'],
+    system: []
+  },
+  'manager': {
+    dashboard: ['view', 'edit', 'view_client_interface'],
+    analytics: ['view', 'export', 'advanced', 'view_advanced'],
+    billing: ['view', 'edit'],
+    staff: ['view', 'edit', 'delete', 'invite', 'manage'],
+    settings: ['view', 'edit'],
+    calls: ['view', 'join', 'transfer', 'end', 'override'],
+    system: ['view', 'monitor'],
+    assistant: ['configure', 'manage'],
+    notifications: ['view', 'manage'],
+    requests: ['view', 'manage'],
+    guests: ['view', 'manage'],
+    security: ['view', 'manage'],
+    integrations: ['view', 'manage'],
+    logs: ['view', 'export']
+  },
+  'frontdesk': {
+    dashboard: ['view'],
+    calls: ['view', 'join', 'transfer', 'end'],
+    analytics: ['view_basic'],
+    profile: ['view', 'edit'],
+    guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
+    requests: ['view', 'manage'],
+    notifications: ['view'],
+    system: []
+  },
+  'itmanager': {
+    dashboard: ['view'],
+    system: ['view', 'edit', 'debug', 'restart', 'monitor'],
+    integrations: ['view', 'edit', 'test', 'manage'],
+    logs: ['view', 'export', 'debug'],
+    calls: ['view', 'debug'],
+    analytics: ['view', 'technical'],
+    billing: [],
+    staff: [],
+    security: ['view', 'manage'],
+    notifications: ['view']
+  },
+  'super-admin': {
+    dashboard: ['view', 'edit', 'view_client_interface'],
+    analytics: ['view', 'export', 'advanced', 'view_advanced'],
+    billing: ['view', 'edit'],
+    staff: ['view', 'edit', 'delete', 'invite', 'manage'],
+    settings: ['view', 'edit'],
+    calls: ['view', 'join', 'transfer', 'end', 'override'],
+    system: ['view', 'monitor', 'edit', 'debug', 'restart'],
+    assistant: ['configure', 'manage'],
+    notifications: ['view', 'manage'],
+    requests: ['view', 'manage'],
+    guests: ['view', 'manage'],
+    security: ['view', 'manage'],
+    integrations: ['view', 'manage'],
+    logs: ['view', 'export']
   }
 };
 
@@ -207,6 +288,257 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       path: '/dashboard/analytics/technical',
       requiredPermission: 'analytics.technical'
     }
+  ],
+  // Legacy role menu mappings for backward compatibility
+  'admin': [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'calls',
+      label: 'Cuộc gọi',
+      icon: '📞',
+      path: '/dashboard/calls',
+      requiredPermission: 'calls.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Phân tích',
+      icon: '📈',
+      path: '/dashboard/analytics',
+      requiredPermission: 'analytics.view'
+    },
+    {
+      key: 'staff',
+      label: 'Nhân viên',
+      icon: '👥',
+      path: '/dashboard/staff',
+      requiredPermission: 'staff.view'
+    },
+    {
+      key: 'settings',
+      label: 'Cài đặt',
+      icon: '⚙️',
+      path: '/dashboard/settings',
+      requiredPermission: 'settings.view'
+    },
+    {
+      key: 'billing',
+      label: 'Thanh toán',
+      icon: '💰',
+      path: '/dashboard/billing',
+      requiredPermission: 'billing.view'
+    }
+  ],
+  'staff': [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'calls',
+      label: 'Cuộc gọi',
+      icon: '📞',
+      path: '/dashboard/calls',
+      requiredPermission: 'calls.view'
+    },
+    {
+      key: 'guests',
+      label: 'Khách hàng',
+      icon: '🏨',
+      path: '/dashboard/guests',
+      requiredPermission: 'guests.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Thống kê cơ bản',
+      icon: '📊',
+      path: '/dashboard/analytics/basic',
+      requiredPermission: 'analytics.view_basic'
+    },
+    {
+      key: 'profile',
+      label: 'Hồ sơ',
+      icon: '👤',
+      path: '/dashboard/profile',
+      requiredPermission: 'profile.view'
+    }
+  ],
+  'manager': [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'calls',
+      label: 'Cuộc gọi',
+      icon: '📞',
+      path: '/dashboard/calls',
+      requiredPermission: 'calls.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Phân tích',
+      icon: '📈',
+      path: '/dashboard/analytics',
+      requiredPermission: 'analytics.view'
+    },
+    {
+      key: 'staff',
+      label: 'Nhân viên',
+      icon: '👥',
+      path: '/dashboard/staff',
+      requiredPermission: 'staff.view'
+    },
+    {
+      key: 'settings',
+      label: 'Cài đặt',
+      icon: '⚙️',
+      path: '/dashboard/settings',
+      requiredPermission: 'settings.view'
+    },
+    {
+      key: 'billing',
+      label: 'Thanh toán',
+      icon: '💰',
+      path: '/dashboard/billing',
+      requiredPermission: 'billing.view'
+    }
+  ],
+  'frontdesk': [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'calls',
+      label: 'Cuộc gọi',
+      icon: '📞',
+      path: '/dashboard/calls',
+      requiredPermission: 'calls.view'
+    },
+    {
+      key: 'guests',
+      label: 'Khách hàng',
+      icon: '🏨',
+      path: '/dashboard/guests',
+      requiredPermission: 'guests.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Thống kê cơ bản',
+      icon: '📊',
+      path: '/dashboard/analytics/basic',
+      requiredPermission: 'analytics.view_basic'
+    },
+    {
+      key: 'profile',
+      label: 'Hồ sơ',
+      icon: '👤',
+      path: '/dashboard/profile',
+      requiredPermission: 'profile.view'
+    }
+  ],
+  'itmanager': [
+    {
+      key: 'dashboard',
+      label: 'System Dashboard',
+      icon: '🔧',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'system',
+      label: 'Hệ thống',
+      icon: '⚙️',
+      path: '/dashboard/system',
+      requiredPermission: 'system.view'
+    },
+    {
+      key: 'integrations',
+      label: 'Tích hợp',
+      icon: '🔗',
+      path: '/dashboard/integrations',
+      requiredPermission: 'integrations.view'
+    },
+    {
+      key: 'logs',
+      label: 'Logs',
+      icon: '📄',
+      path: '/dashboard/logs',
+      requiredPermission: 'logs.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Performance',
+      icon: '📈',
+      path: '/dashboard/analytics/technical',
+      requiredPermission: 'analytics.technical'
+    }
+  ],
+  'super-admin': [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/dashboard',
+      requiredPermission: 'dashboard.view'
+    },
+    {
+      key: 'calls',
+      label: 'Cuộc gọi',
+      icon: '📞',
+      path: '/dashboard/calls',
+      requiredPermission: 'calls.view'
+    },
+    {
+      key: 'analytics',
+      label: 'Phân tích',
+      icon: '📈',
+      path: '/dashboard/analytics',
+      requiredPermission: 'analytics.view'
+    },
+    {
+      key: 'staff',
+      label: 'Nhân viên',
+      icon: '👥',
+      path: '/dashboard/staff',
+      requiredPermission: 'staff.view'
+    },
+    {
+      key: 'settings',
+      label: 'Cài đặt',
+      icon: '⚙️',
+      path: '/dashboard/settings',
+      requiredPermission: 'settings.view'
+    },
+    {
+      key: 'billing',
+      label: 'Thanh toán',
+      icon: '💰',
+      path: '/dashboard/billing',
+      requiredPermission: 'billing.view'
+    },
+    {
+      key: 'system',
+      label: 'Hệ thống',
+      icon: '⚙️',
+      path: '/dashboard/system',
+      requiredPermission: 'system.view'
+    }
   ]
 };
 
@@ -260,6 +592,51 @@ export const DASHBOARD_COMPONENTS: Record<UserRole, string[]> = {
     'PerformanceMetrics',
     'ErrorLogs',
     'IntegrationStatus',
+    'SecurityAlerts'
+  ],
+  // Legacy role dashboard component mappings
+  'admin': [
+    'RevenueChart',
+    'CallsOverview', 
+    'OperationalMetrics',
+    'StaffPerformance',
+    'FinancialSummary'
+  ],
+  'staff': [
+    'ActiveCalls',
+    'GuestRequests',
+    'RoomStatus',
+    'QuickActions',
+    'ShiftSummary'
+  ],
+  'manager': [
+    'RevenueChart',
+    'CallsOverview', 
+    'OperationalMetrics',
+    'StaffPerformance',
+    'FinancialSummary'
+  ],
+  'frontdesk': [
+    'ActiveCalls',
+    'GuestRequests',
+    'RoomStatus',
+    'QuickActions',
+    'ShiftSummary'
+  ],
+  'itmanager': [
+    'SystemHealth',
+    'PerformanceMetrics',
+    'ErrorLogs',
+    'IntegrationStatus',
+    'SecurityAlerts'
+  ],
+  'super-admin': [
+    'RevenueChart',
+    'CallsOverview', 
+    'OperationalMetrics',
+    'StaffPerformance',
+    'FinancialSummary',
+    'SystemHealth',
     'SecurityAlerts'
   ]
 }; 

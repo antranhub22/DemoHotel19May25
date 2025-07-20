@@ -22,41 +22,6 @@ export * from './routes';
 export * from './frontend';
 
 // ============================================
-// QUICK ACCESS EXPORTS
-// ============================================
-
-// Most commonly used exports for convenience
-export { 
-  // Types
-  type AuthUser,
-  type JWTPayload,
-  type LoginCredentials,
-  type AuthResult,
-  type UserRole,
-  type Permission
-} from './types';
-
-export {
-  // Config
-  JWT_CONFIG,
-  AUTH_ENDPOINTS,
-  ROLE_HIERARCHY,
-  DEFAULT_PERMISSIONS
-} from './config';
-
-export {
-  // Services  
-  UnifiedAuthService
-} from './services';
-
-export {
-  // Middleware
-  authenticateJWT,
-  requireRole,
-  requirePermission
-} from './middleware';
-
-// ============================================
 // MODULE INFO
 // ============================================
 
