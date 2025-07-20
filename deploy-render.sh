@@ -10,6 +10,10 @@ npm install || echo "Some packages failed to install but continuing..."
 echo "🔄 Running auto-migration..."
 npm run migrate:auto || echo "Auto-migration completed (may have warnings)"
 
+# Seed default users (safe to run multiple times)
+echo "👥 Seeding default users..."
+npm run seed:users || echo "User seeding completed (may have warnings)"
+
 # Try TypeScript check but don't fail
 echo "⚙️ Running TypeScript check..."
 npm run typecheck || echo "TypeScript errors found but continuing deployment..."

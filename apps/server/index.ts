@@ -6,6 +6,7 @@ import { setupSocket } from './socket';
 import { runAutoDbFix } from './startup/auto-database-fix';
 import { runProductionMigration } from './startup/production-migration';
 import { autoMigrateOnDeploy } from '../../tools/scripts/auto-migrate-on-deploy';
+import { seedProductionUsers } from '../../tools/scripts/seed-production-users';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -168,6 +169,14 @@ app.use((req, res, next) => {
     await autoMigrateOnDeploy();
   } else {
     console.log('⚠️ Auto-migration disabled by environment variable');
+  }
+  
+  // Seed default users (safe for production)
+  if (process.env.SEED_USERS !== 'false') {
+    console.log('👥 Seeding default users...');
+    await seedProductionUsers();
+  } else {
+    console.log('⚠️ User seeding disabled by environment variable');
   }
   
   // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)

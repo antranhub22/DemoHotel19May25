@@ -40,6 +40,7 @@
     "guide:change": "node scripts/what-to-change-enhanced.cjs",
     "fix:production-schema": "tsx tools/scripts/fix-production-schema.ts",
     "migrate:auto": "tsx tools/scripts/auto-migrate-on-deploy.ts",
+    "seed:users": "tsx tools/scripts/seed-production-users.ts",
     "check:siri-components": "npm run validate:architecture && echo '✅ Siri components architecture validated'",
     "fix:production-db": "npx tsx tools/scripts/fix-production-request-table.ts"
   },
@@ -75,6 +76,7 @@
     "@replit/vite-plugin-shadcn-theme-json": "^0.0.4",
     "@tanstack/react-query": "^5.75.5",
     "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.18",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/jwt-decode": "^2.2.1",
