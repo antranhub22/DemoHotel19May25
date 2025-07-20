@@ -49,10 +49,10 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
     console.log('🏨 Checking for default tenant...');
     
     const existingTenant = await client.query(`
-      SELECT id FROM tenants WHERE id = 'mi-nhon-hotel' LIMIT 1
+      SELECT id FROM tenants WHERE id = 'hotel-minhon' LIMIT 1
     `);
     
-    let tenantId = 'mi-nhon-hotel';
+    let tenantId = 'hotel-minhon';
     
     if (!existingTenant.rows || existingTenant.rows.length === 0) {
       console.log('🏨 Creating default tenant: Mi Nhon Hotel');
@@ -63,7 +63,7 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         ) VALUES (
           $1, $2, $3, $4, $5, CURRENT_TIMESTAMP
         ) ON CONFLICT (id) DO NOTHING
-      `, [tenantId, 'Mi Nhon Hotel', 'minhon', 'trial', 'active']);
+      `, [tenantId, 'Mi Nhon Hotel', 'minhonmuine', 'premium', 'active']);
       
       console.log('✅ Default tenant created');
     } else {
@@ -124,8 +124,8 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       `, [user.username, user.tenantId]);
       
       if (!existingUser.rows || existingUser.rows.length === 0) {
-        // Hash password
-        const hashedPassword = await bcrypt.hash(user.password, 10);
+        // Hash password with consistent salt rounds
+        const hashedPassword = await bcrypt.hash(user.password, 12); // Use 12 rounds consistently
         
         // Create user (let database auto-generate ID)
         await client.query(`
@@ -150,8 +150,27 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
         
         usersCreated.push(user.username);
         console.log(`✅ Created user: ${user.username} (${user.role})`);
+
+        // Verify password hash
+        const verifyHash = await bcrypt.compare(user.password, hashedPassword);
+        console.log(`   Password verification: ${verifyHash ? '✅ VALID' : '❌ INVALID'}`);
       } else {
-        console.log(`✅ User already exists: ${user.username}`);
+        // Update existing user's password
+        const hashedPassword = await bcrypt.hash(user.password, 12);
+        await client.query(`
+          UPDATE staff 
+          SET password = $1, 
+              role = $2,
+              display_name = $3,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE username = $4 AND tenant_id = $5
+        `, [hashedPassword, user.role, user.displayName, user.username, user.tenantId]);
+        
+        console.log(`✅ Updated user: ${user.username}`);
+        
+        // Verify updated password
+        const verifyHash = await bcrypt.compare(user.password, hashedPassword);
+        console.log(`   Password verification: ${verifyHash ? '✅ VALID' : '❌ INVALID'}`);
       }
     }
     
@@ -162,11 +181,12 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       console.log(`📝 Users created: ${usersCreated.join(', ')}`);
       console.log('');
       console.log('🔑 Default login credentials:');
-      console.log('  Manager: manager / password123');
+      console.log('  Admin: admin / admin123');
+      console.log('  Manager: manager / manager123');
       console.log('  Front Desk: frontdesk / frontdesk123'); 
       console.log('  IT Manager: itmanager / itmanager123');
     } else {
-      console.log('✅ All users already exist - no seeding needed');
+      console.log('✅ All users already exist - passwords updated');
     }
     
     return { success: true, usersCreated };
