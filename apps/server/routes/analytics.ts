@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { authenticateJWT } from '@server/middleware/auth/unified';
+import { authenticateJWT } from '../../auth-system/middleware';
 import { getOverview, getServiceDistribution, getHourlyActivity } from '@server/analytics';
 
 const router = Router();

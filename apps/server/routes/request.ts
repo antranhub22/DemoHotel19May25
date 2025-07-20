@@ -1,11 +1,12 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
+import { Request, Response } from 'express';
 import { db } from '../db';
 import { request as requestTable } from '@shared/db';
-import { authenticateJWT } from '../middleware/auth/unified';
+import { authenticateJWT } from '../../auth-system/middleware';
 import { eq, and } from 'drizzle-orm';
 import { requestMapper } from '@shared/db/transformers';
 
-const router = Router();
+const router = express.Router();
 
 // ✅ POST /api/request - Create new request (WITH AUTO TRANSFORMATION)
 router.post('/', authenticateJWT, async (req: Request, res: Response) => {

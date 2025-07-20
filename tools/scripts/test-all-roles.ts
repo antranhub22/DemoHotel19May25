@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { UnifiedAuthService } from '../../apps/server/services/auth/UnifiedAuthService.v2';
+import { UnifiedAuthService } from '../../auth-system/services';
 
 async function testAllRoles() {
   try {

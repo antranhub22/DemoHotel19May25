@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { authenticateJWT } from '@server/middleware/auth/unified';
+import { authenticateJWT } from '../../auth-system/middleware';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { VapiIntegrationService, AssistantGeneratorService } from '@server/services/vapiIntegration';

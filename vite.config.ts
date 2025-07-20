@@ -22,6 +22,7 @@ export default defineConfig({
       "@config": path.resolve(__dirname, "packages", "config"),
       "@tools": path.resolve(__dirname, "tools"),
       "@tests": path.resolve(__dirname, "tests"),
+      "@auth": path.resolve(__dirname, "auth-system"),
     },
   },
   root: path.resolve(__dirname, "apps", "client"),

@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
-import { UnifiedAuthService } from '../../apps/server/services/auth/UnifiedAuthService.v2';
+import { db } from '@shared/db';
+import { UnifiedAuthService } from '../../auth-system/services';
 
 async function testUnifiedAuth() {
   try {
