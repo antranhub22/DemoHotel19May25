@@ -49,10 +49,10 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
     console.log('🏨 Checking for default tenant...');
     
     const existingTenant = await client.query(`
-      SELECT id FROM tenants WHERE id = 'hotel-minhon' LIMIT 1
+      SELECT id FROM tenants WHERE id = 'mi-nhon-hotel' LIMIT 1
     `);
     
-    let tenantId = 'hotel-minhon';
+    let tenantId = 'mi-nhon-hotel';
     
     if (!existingTenant.rows || existingTenant.rows.length === 0) {
       console.log('🏨 Creating default tenant: Mi Nhon Hotel');
