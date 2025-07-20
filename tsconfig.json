@@ -2,8 +2,8 @@
   "include": [
     "apps/client/src/**/*",
     "packages/shared/**/*",
-    "apps/server/**/*",
-    "auth-system/**/*"
+    "packages/auth-system/**/*",
+    "apps/server/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -58,25 +58,25 @@
         "./tests/*"
       ],
       "@auth/*": [
-        "./auth-system/*"
+        "./packages/auth-system/*"
       ],
       "@auth/types": [
-        "./auth-system/types"
+        "./packages/auth-system/types"
       ],
       "@auth/config": [
-        "./auth-system/config"
+        "./packages/auth-system/config"
       ],
       "@auth/services": [
-        "./auth-system/services"
+        "./packages/auth-system/services"
       ],
       "@auth/middleware": [
-        "./auth-system/middleware"
+        "./packages/auth-system/middleware"
       ],
       "@auth/routes": [
-        "./auth-system/routes"
+        "./packages/auth-system/routes"
       ],
       "@auth/frontend/*": [
-        "./auth-system/frontend/*"
+        "./packages/auth-system/frontend/*"
       ]
     },
     "noImplicitAny": false,

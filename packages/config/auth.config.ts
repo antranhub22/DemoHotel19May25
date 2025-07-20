@@ -5,7 +5,7 @@
 // that still import from @config/auth.config
 
 // Re-export everything from the new location in auth-system
-export * from '../../auth-system/config/auth.config';
+export * from '../auth-system/config/auth.config';
 
 // Explicit re-exports for commonly used items
 export { 
@@ -14,4 +14,4 @@ export {
   ROLE_HIERARCHY,
   DEFAULT_PERMISSIONS,
   SECURITY_CONFIG
-} from '../../auth-system/config/auth.config'; 
+} from '../auth-system/config/auth.config'; 
