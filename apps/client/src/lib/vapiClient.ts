@@ -47,6 +47,7 @@ console.log('[vapiClient] Environment public key:', publicKey);
 export const FORCE_BASIC_SUMMARY = false; // Set to true to always use basic summary
 
 let vapiInstance: any = null;
+let isInitializing = false; // ✅ NEW: Prevent multiple simultaneous initializations
 
 interface VapiConnectionStatus {
   status: 'connecting' | 'connected' | 'disconnected';
@@ -62,22 +63,65 @@ export const initVapi = async (publicKey: string): Promise<any> => {
   try {
     console.log('🚀 [REAL VAPI] Initializing with key:', publicKey?.substring(0, 10) + '...');
     
+    // ✅ NEW: Prevent multiple simultaneous initializations
+    if (isInitializing) {
+      console.log('⏳ [REAL VAPI] Already initializing, waiting for current initialization...');
+      return new Promise((resolve, reject) => {
+        const checkInterval = setInterval(() => {
+          if (!isInitializing) {
+            clearInterval(checkInterval);
+            resolve(vapiInstance);
+          }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          reject(new Error('Vapi initialization timeout'));
+        }, 5000);
+      });
+    }
+    
+    isInitializing = true;
+    
     // Load Vapi class dynamically
     const Vapi = await loadVapi();
     console.log('🚀 [REAL VAPI] Vapi class loaded:', typeof Vapi);
     
-    // Always create a new instance to avoid stale connections
+    // ✅ ENHANCED: Always cleanup existing instance properly
     if (vapiInstance) {
-      console.log('[vapiClient] Cleaning up existing instance');
+      console.log('🧹 [REAL VAPI] Cleaning up existing instance...');
       try {
-        vapiInstance.stop();
-      } catch (error) {
-        console.warn('[vapiClient] Error stopping previous instance:', error);
+        // Enhanced cleanup - stop all activities
+        if (typeof vapiInstance.stop === 'function') {
+          vapiInstance.stop();
+        }
+        if (typeof vapiInstance.cleanup === 'function') {
+          vapiInstance.cleanup();
+        }
+        if (typeof vapiInstance.disconnect === 'function') {
+          vapiInstance.disconnect();
+        }
+        
+        // Remove all event listeners to prevent conflicts
+        if (typeof vapiInstance.removeAllListeners === 'function') {
+          vapiInstance.removeAllListeners();
+        }
+        
+        console.log('✅ [REAL VAPI] Existing instance cleaned up successfully');
+      } catch (cleanupError) {
+        console.warn('⚠️ [REAL VAPI] Cleanup error (continuing anyway):', cleanupError);
       }
+      
+      // Brief pause to ensure cleanup completes
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
     
     console.log('🚀 [REAL VAPI] Creating new Vapi instance...');
-    vapiInstance = new Vapi(publicKey);
+    vapiInstance = new Vapi(publicKey, {
+      // ✅ NEW: Prevent multiple call instances
+      allowMultipleCallInstances: false
+    });
     console.log('✅ [REAL VAPI] Instance created successfully!');
 
     // Add event listeners
@@ -109,8 +153,14 @@ export const initVapi = async (publicKey: string): Promise<any> => {
       console.error('[vapiClient] Vapi error:', error);
     });
 
+    // ✅ NEW: Clear initialization flag on success
+    isInitializing = false;
+    console.log('✅ [REAL VAPI] Initialization completed successfully');
+
     return vapiInstance;
   } catch (error) {
+    // ✅ NEW: Clear initialization flag on error
+    isInitializing = false;
     console.error('[vapiClient] Failed to initialize Vapi:', error);
     throw error;
   }
@@ -182,15 +232,37 @@ export const sendMessage = (message: VapiMessage) => {
 };
 
 export const resetVapi = () => {
-  console.log('[vapiClient] Resetting Vapi instance');
+  console.log('🧹 [vapiClient] Resetting Vapi instance');
+  
+  // ✅ NEW: Clear initialization flag to allow fresh init
+  isInitializing = false;
+  
   if (vapiInstance) {
     try {
-      vapiInstance.stop();
+      // Enhanced cleanup - stop all activities
+      if (typeof vapiInstance.stop === 'function') {
+        vapiInstance.stop();
+      }
+      if (typeof vapiInstance.cleanup === 'function') {
+        vapiInstance.cleanup();
+      }
+      if (typeof vapiInstance.disconnect === 'function') {
+        vapiInstance.disconnect();
+      }
+      
+      // Remove all event listeners to prevent conflicts
+      if (typeof vapiInstance.removeAllListeners === 'function') {
+        vapiInstance.removeAllListeners();
+      }
+      
+      console.log('✅ [vapiClient] Instance cleanup completed');
     } catch (error) {
-      console.warn('[vapiClient] Error stopping instance during reset:', error);
+      console.warn('⚠️ [vapiClient] Error during reset cleanup:', error);
     }
     vapiInstance = null;
   }
+  
+  console.log('✅ [vapiClient] Reset completed - ready for fresh initialization');
 };
 
 // Auto-initialize with default key if available

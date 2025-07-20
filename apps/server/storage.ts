@@ -129,14 +129,8 @@ export class DatabaseStorage implements IStorage {
         fieldCount: Object.keys(processedTranscript).length
       });
 
-      // ✅ EMERGENCY WORKAROUND: Generate manual ID for broken PostgreSQL table
-      const finalTranscript = {
-        ...processedTranscript,
-        // Generate unique ID if database doesn't auto-increment
-        id: Date.now() + Math.floor(Math.random() * 1000)
-      };
-
-      const result = await db.insert(transcript).values(finalTranscript).returning();
+      // ✅ FINAL FIX: Let PostgreSQL handle ID auto-increment completely
+      const result = await db.insert(transcript).values(processedTranscript).returning();
       
       if (result.length === 0) {
         throw new Error('Failed to insert transcript - no result returned');

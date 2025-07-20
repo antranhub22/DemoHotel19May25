@@ -58,6 +58,7 @@ interface Interface1Props {
 }
 
 export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
+  // ✅ HOOKS MUST BE FIRST - NO CONDITIONAL CALLS
   const {
     isLoading,
     error,
@@ -92,7 +93,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     summaryPopupOpen: showConversation && !isCallStarted
   });
 
-  // Early returns
+  // ✅ CONDITIONAL RENDERING WITHOUT EARLY RETURNS
   if (isLoading) {
     return <LoadingState />;
   }

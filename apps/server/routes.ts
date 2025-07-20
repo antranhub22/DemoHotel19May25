@@ -316,13 +316,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             console.log(`📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`);
 
-            // Store transcript in database - storage.addTranscript already handles field mapping
+            // Store transcript in database - CONVERT TO SECONDS HERE
             const savedTranscript = await storage.addTranscript({
               callId: data.call_id,
               role: data.role,
               content: data.content,
               tenantId: 'default',
-              timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
+              timestamp: Math.floor(validTimestamp / 1000) // ✅ CRITICAL: Convert milliseconds to seconds
             });
 
             console.log('✅ [WebSocket] Transcript stored in database');
