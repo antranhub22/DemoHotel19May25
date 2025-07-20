@@ -6,11 +6,19 @@ import postgres from 'postgres';
  * Runs automatically on server startup in production
  */
 export async function runProductionMigration() {
-  // Only run in production with PostgreSQL
-  if (process.env.NODE_ENV !== 'production' || !process.env.DATABASE_URL?.includes('postgres')) {
-    console.log('⏭️ Skipping production migration (not production PostgreSQL environment)');
+  // Run when DATABASE_URL exists and contains postgres/postgresql (production environment)
+  const databaseUrl = process.env.DATABASE_URL;
+  const isPostgreSQL = databaseUrl && (databaseUrl.includes('postgres') || databaseUrl.includes('postgresql'));
+  
+  if (!isPostgreSQL) {
+    console.log('⏭️ Skipping production migration (not PostgreSQL environment)');
+    console.log(`🔍 DATABASE_URL check: ${databaseUrl ? 'exists' : 'missing'}, isPostgreSQL: ${isPostgreSQL}`);
     return;
   }
+  
+  console.log('🚀 [Production Migration] Starting - PostgreSQL detected!');
+  console.log(`📊 Environment: NODE_ENV=${process.env.NODE_ENV}`);
+  console.log(`🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}`);
 
   console.log('🔧 [Production Migration] Checking database schema...');
   
@@ -46,14 +54,49 @@ export async function runProductionMigration() {
 
     console.log('🚀 Creating missing tables and columns...');
 
-    // Create missing tables first
+    // EXPLICIT TRANSCRIPT TABLE FIX - Check and recreate if needed
+    try {
+      console.log('🔍 Checking transcript table structure...');
+      
+      // Check if transcript table has proper SERIAL PRIMARY KEY
+      const transcriptIdColumn = await sql`
+        SELECT column_name, column_default, is_nullable
+        FROM information_schema.columns 
+        WHERE table_name = 'transcript' AND column_name = 'id';
+      `;
+      
+      if (transcriptIdColumn.length > 0) {
+        const idColumn = transcriptIdColumn[0];
+        console.log('📋 Current transcript.id column:', idColumn);
+        
+        // Check if it's NOT auto-increment (SERIAL)
+        if (!idColumn.column_default || !idColumn.column_default.includes('nextval')) {
+          console.log('🚨 Transcript table has wrong ID column - recreating!');
+          
+          // Backup existing data
+          const existingTranscripts = await sql`SELECT * FROM transcript LIMIT 10`;
+          console.log(`📦 Found ${existingTranscripts.length} existing transcripts`);
+          
+          // Drop and recreate table with proper structure
+          await sql`DROP TABLE IF EXISTS transcript CASCADE`;
+          console.log('✅ Dropped old transcript table');
+        } else {
+          console.log('✅ Transcript table has proper SERIAL PRIMARY KEY');
+        }
+      }
+    } catch (error: any) {
+      console.log(`⚠️ Error checking transcript table: ${error.message}`);
+    }
+
+    // Create missing tables first - EXPLICIT transcript table fix
     const createTableStatements = [
       `CREATE TABLE IF NOT EXISTS transcript (
         id SERIAL PRIMARY KEY,
         call_id TEXT NOT NULL,
         role TEXT NOT NULL,
         content TEXT NOT NULL,
-        timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+        timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+        tenant_id TEXT DEFAULT 'default'
       )`,
       `CREATE TABLE IF NOT EXISTS call_summaries (
         id SERIAL PRIMARY KEY,
