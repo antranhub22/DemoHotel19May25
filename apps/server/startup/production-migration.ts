@@ -12,7 +12,7 @@ export async function runProductionMigration() {
     return;
   }
 
-  console.log('🔧 [Production Migration] Checking request table schema...');
+  console.log('🔧 [Production Migration] Checking database schema...');
   
   let sql: any;
   try {
@@ -21,21 +21,77 @@ export async function runProductionMigration() {
       max: 1,
     });
 
-    // Check if call_id column exists
-    const columns = await sql`
+    // Check existing table structures
+    const requestColumns = await sql`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'request' AND column_name = 'call_id';
     `;
 
-    if (columns.length > 0) {
-      console.log('✅ call_id column already exists - migration not needed');
+    const transcriptTable = await sql`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_name = 'transcript';
+    `;
+
+    const hasCallId = requestColumns.length > 0;
+    const hasTranscriptTable = transcriptTable.length > 0;
+
+    if (hasCallId && hasTranscriptTable) {
+      console.log('✅ Database schema already updated - migration not needed');
       return;
     }
 
-    console.log('🚀 Adding missing columns to request table...');
+    console.log(`📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}`);
 
-    // Add missing columns with error handling
+    console.log('🚀 Creating missing tables and columns...');
+
+    // Create missing tables first
+    const createTableStatements = [
+      `CREATE TABLE IF NOT EXISTS transcript (
+        id SERIAL PRIMARY KEY,
+        call_id TEXT NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP NOT NULL DEFAULT NOW()
+      )`,
+      `CREATE TABLE IF NOT EXISTS call_summaries (
+        id SERIAL PRIMARY KEY,
+        call_id TEXT NOT NULL,
+        content TEXT NOT NULL,
+        timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+        room_number TEXT,
+        duration TEXT
+      )`,
+      `CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        call_id TEXT NOT NULL,
+        room_number TEXT NOT NULL,
+        order_type TEXT NOT NULL,
+        delivery_time TEXT NOT NULL,
+        special_instructions TEXT,
+        items JSONB NOT NULL,
+        total_amount INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )`,
+      `CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+      )`
+    ];
+
+    for (const statement of createTableStatements) {
+      try {
+        await sql.unsafe(statement);
+        console.log(`✅ Table created: ${statement.substring(0, 50)}...`);
+      } catch (error: any) {
+        console.log(`⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...`);
+      }
+    }
+
+    // Add missing columns to request table
     const alterStatements = [
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS call_id VARCHAR(255)`,
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(255)`,
@@ -62,12 +118,23 @@ export async function runProductionMigration() {
       }
     }
 
-    // Add indexes
+    // Add indexes for all tables
     const indexStatements = [
+      // Request table indexes
       `CREATE INDEX IF NOT EXISTS idx_request_call_id ON request(call_id)`,
       `CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)`,
       `CREATE INDEX IF NOT EXISTS idx_request_status ON request(status)`,
-      `CREATE INDEX IF NOT EXISTS idx_request_type ON request(type)`
+      `CREATE INDEX IF NOT EXISTS idx_request_type ON request(type)`,
+      // Transcript table indexes
+      `CREATE INDEX IF NOT EXISTS idx_transcript_call_id ON transcript(call_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_transcript_timestamp ON transcript(timestamp)`,
+      // Call summaries indexes
+      `CREATE INDEX IF NOT EXISTS idx_call_summaries_call_id ON call_summaries(call_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_call_summaries_timestamp ON call_summaries(timestamp)`,
+      // Orders table indexes
+      `CREATE INDEX IF NOT EXISTS idx_orders_call_id ON orders(call_id)`,
+      `CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`,
+      `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`
     ];
 
     for (const statement of indexStatements) {
