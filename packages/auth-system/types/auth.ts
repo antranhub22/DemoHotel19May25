@@ -271,14 +271,4 @@ export type AuthErrorCode =
   | 'PERMISSION_DENIED'
   | 'TENANT_ACCESS_DENIED'
   | 'NETWORK_ERROR'
-  | 'SERVER_ERROR';
-
-// ============================================
-// EXPORT ALIASES (Backward Compatibility)
-// ============================================
-
-// Re-export legacy types for backward compatibility
-export type { User as LegacyUser };
-export type { AuthContextType as LegacyAuthContextType };
-export type { LoginCredentials as UnifiedLoginCredentials };
-export type { JWTPayload as StandardJWTPayload }; 
+  | 'SERVER_ERROR'; 
