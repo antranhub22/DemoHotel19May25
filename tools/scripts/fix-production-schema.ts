@@ -1,282 +1,128 @@
 #!/usr/bin/env tsx
 
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { sql } from 'drizzle-orm';
+import { Pool } from 'pg';
+import fs from 'fs';
+import path from 'path';
 
-// ============================================
-// Production Schema Fix Script
-// ============================================
+// Production Database Schema Fix Script
+// Run this to fix missing columns on Render production database
 
 async function fixProductionSchema() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    console.error('❌ DATABASE_URL environment variable not set');
+  const DATABASE_URL = process.env.DATABASE_URL;
+  
+  if (!DATABASE_URL) {
+    console.error('❌ DATABASE_URL environment variable not found');
     process.exit(1);
   }
 
-  console.log('🔧 Production Schema Fix Starting...');
-  console.log('🔗 Connecting to database:', databaseUrl.replace(/\/\/.*@/, '//***@'));
+  console.log('🔧 Starting Production Database Schema Fix...');
+  console.log('📍 Database:', DATABASE_URL.split('@')[1]?.split('/')[0] || 'Unknown');
 
-  const client = postgres(databaseUrl);
-  const db = drizzle(client);
+  const pool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
 
   try {
-    console.log('📋 Fixing schema mismatches...');
-
-    // Fix 1: Check and add missing columns to request table
-    console.log('🔄 Fixing request table schema...');
+    // Test connection
+    console.log('🔗 Testing database connection...');
+    const client = await pool.connect();
     
-    // Add call_id column if missing
-    try {
-      await db.execute(sql`ALTER TABLE request ADD COLUMN IF NOT EXISTS call_id TEXT`);
-      console.log('✅ Added call_id column to request table');
-    } catch (error: any) {
-      console.log('ℹ️ call_id column addition skipped:', error.message);
-    }
-
-    // Add tenant_id column if missing  
-    try {
-      await db.execute(sql`ALTER TABLE request ADD COLUMN IF NOT EXISTS tenant_id TEXT`);
-      console.log('✅ Added tenant_id column to request table');
-    } catch (error: any) {
-      console.log('ℹ️ tenant_id column addition skipped:', error.message);
-    }
-
-    // Add other missing columns to request table
-    const requestColumns = [
-      'description TEXT',
-      'priority TEXT DEFAULT \'medium\'',
-      'assigned_to TEXT',
-      'completed_at TEXT',
-      'metadata TEXT',
-      'type TEXT DEFAULT \'order\'',
-      'total_amount REAL',
-      'items TEXT',
-      'delivery_time TEXT',
-      'special_instructions TEXT',
-      'order_type TEXT'
-    ];
-
-    for (const column of requestColumns) {
-      try {
-        const [columnName] = column.split(' ');
-        await db.execute(sql`ALTER TABLE request ADD COLUMN IF NOT EXISTS ${sql.raw(column)}`);
-        console.log(`✅ Added ${columnName} column to request table`);
-      } catch (error: any) {
-        console.log(`ℹ️ Column addition skipped: ${error.message}`);
-      }
-    }
-
-    // Fix 2: Check tenants table and ensure proper columns exist
-    console.log('🔄 Fixing tenants table schema...');
+    // Check current schema state
+    console.log('📊 Checking current schema state...');
     
-    // Check if hotel_name column exists (we use hotel_name, not name)
+    const staffColumns = await client.query(`
+      SELECT column_name, data_type, is_nullable
+      FROM information_schema.columns 
+      WHERE table_name = 'staff' 
+      ORDER BY ordinal_position;
+    `);
+    
+    console.log('📋 Current staff table columns:');
+    staffColumns.rows.forEach(row => {
+      console.log(`  - ${row.column_name}: ${row.data_type} ${row.is_nullable === 'YES' ? '(nullable)' : '(not null)'}`);
+    });
+
+    // Check if migration is needed
+    const hasFirstName = staffColumns.rows.some(row => row.column_name === 'first_name');
+    const hasLastName = staffColumns.rows.some(row => row.column_name === 'last_name');
+    
+    if (hasFirstName && hasLastName) {
+      console.log('✅ Schema appears to be up to date - no migration needed');
+      client.release();
+      return;
+    }
+
+    console.log('🚨 Missing columns detected - running migration...');
+    
+    // Read migration file
+    const migrationPath = path.join(__dirname, '../migrations/0007_fix_production_staff_columns.sql');
+    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+    
+    // Run migration in transaction
+    console.log('🔄 Running migration in transaction...');
+    await client.query('BEGIN');
+    
     try {
-      await db.execute(sql`SELECT hotel_name FROM tenants LIMIT 1`);
-      console.log('✅ hotel_name column exists in tenants table');
-    } catch (error: any) {
-      if (error.message.includes('does not exist')) {
-        // Try to add hotel_name column
-        try {
-          await db.execute(sql`ALTER TABLE tenants ADD COLUMN hotel_name TEXT`);
-          console.log('✅ Added hotel_name column to tenants table');
-          
-          // No need to copy since we use hotel_name directly
-        } catch (addError: any) {
-          console.log('ℹ️ Could not add hotel_name column:', addError.message);
+      // Split SQL into individual statements and execute
+      const statements = migrationSQL
+        .split(';')
+        .map(stmt => stmt.trim())
+        .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
+      
+      for (let i = 0; i < statements.length; i++) {
+        const statement = statements[i];
+        if (statement.includes('INSERT INTO migration_log')) {
+          // Skip migration log insert if table doesn't exist
+          try {
+            await client.query(statement);
+          } catch (error) {
+            console.log('⚠️ Skipping migration log (table may not exist)');
+          }
+        } else {
+          console.log(`📝 Executing statement ${i + 1}/${statements.length}...`);
+          await client.query(statement);
         }
       }
-    }
-
-    // Fix 3: Create missing tables if they don't exist
-    console.log('🔄 Creating missing tables...');
-
-    // Create tenants table if it doesn't exist
-    try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS tenants (
-          id TEXT PRIMARY KEY,
-          name TEXT,
-          hotel_name TEXT,
-          subdomain TEXT NOT NULL UNIQUE,
-          custom_domain TEXT,
-          subscription_plan TEXT DEFAULT 'trial',
-          subscription_status TEXT DEFAULT 'active',
-          trial_ends_at INTEGER,
-          created_at INTEGER,
-          max_voices INTEGER DEFAULT 5,
-          max_languages INTEGER DEFAULT 4,
-          voice_cloning BOOLEAN DEFAULT FALSE,
-          multi_location BOOLEAN DEFAULT FALSE,
-          white_label BOOLEAN DEFAULT FALSE,
-          data_retention_days INTEGER DEFAULT 90,
-          monthly_call_limit INTEGER DEFAULT 1000,
-          updated_at TEXT,
-          is_active BOOLEAN DEFAULT TRUE,
-          settings TEXT,
-          tier TEXT DEFAULT 'free',
-          max_calls INTEGER DEFAULT 1000,
-          max_users INTEGER DEFAULT 10,
-          features TEXT
-        )
+      
+      await client.query('COMMIT');
+      console.log('✅ Migration completed successfully!');
+      
+      // Verify changes
+      console.log('🔍 Verifying migration results...');
+      const newStaffColumns = await client.query(`
+        SELECT column_name, data_type
+        FROM information_schema.columns 
+        WHERE table_name = 'staff' AND column_name IN ('first_name', 'last_name', 'display_name')
+        ORDER BY column_name;
       `);
-      console.log('✅ Created/verified tenants table');
-    } catch (error: any) {
-      console.log('ℹ️ Tenants table creation skipped:', error.message);
+      
+      console.log('✅ New columns added:');
+      newStaffColumns.rows.forEach(row => {
+        console.log(`  ✓ ${row.column_name}: ${row.data_type}`);
+      });
+      
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
     }
-
-    // Create call_summaries table if it doesn't exist
-    try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS call_summaries (
-          id SERIAL PRIMARY KEY,
-          call_id TEXT NOT NULL,
-          content TEXT NOT NULL,
-          timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-          room_number TEXT,
-          duration TEXT
-        )
-      `);
-      console.log('✅ Created/verified call_summaries table');
-    } catch (error: any) {
-      console.log('ℹ️ call_summaries table creation skipped:', error.message);
-    }
-
-    // Create call table if it doesn't exist
-    try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS call (
-          id SERIAL PRIMARY KEY,
-          tenant_id TEXT REFERENCES tenants(id),
-          call_id_vapi TEXT NOT NULL UNIQUE,
-          room_number TEXT,
-          language TEXT,
-          service_type TEXT,
-          start_time INTEGER,
-          end_time INTEGER,
-          duration INTEGER,
-          created_at INTEGER,
-          updated_at INTEGER
-        )
-      `);
-      console.log('✅ Created/verified call table');
-    } catch (error: any) {
-      console.log('ℹ️ call table creation skipped:', error.message);
-    }
-
-    // Create transcript table if it doesn't exist
-    try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS transcript (
-          id SERIAL PRIMARY KEY,
-          call_id TEXT NOT NULL,
-          content TEXT NOT NULL,
-          role TEXT NOT NULL,
-          timestamp INTEGER,
-          tenant_id TEXT REFERENCES tenants(id)
-        )
-      `);
-      console.log('✅ Created/verified transcript table');
-    } catch (error: any) {
-      console.log('ℹ️ transcript table creation skipped:', error.message);
-    }
-
-    // Create message table if it doesn't exist
-    try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS message (
-          id SERIAL PRIMARY KEY,
-          request_id INTEGER REFERENCES request(id),
-          sender TEXT NOT NULL,
-          content TEXT NOT NULL,
-          timestamp INTEGER,
-          tenant_id TEXT REFERENCES tenants(id)
-        )
-      `);
-      console.log('✅ Created/verified message table');
-    } catch (error: any) {
-      console.log('ℹ️ message table creation skipped:', error.message);
-    }
-
-    // Fix 4: Add tenant_id to other tables if missing
-    console.log('🔄 Adding tenant_id columns to existing tables...');
     
-    const tablesNeedingTenantId = ['transcript', 'message', 'staff', 'call'];
+    client.release();
     
-    for (const table of tablesNeedingTenantId) {
-      try {
-        await db.execute(sql`ALTER TABLE ${sql.identifier(table)} ADD COLUMN IF NOT EXISTS tenant_id TEXT`);
-        console.log(`✅ Added tenant_id to ${table} table`);
-      } catch (error: any) {
-        console.log(`ℹ️ tenant_id addition to ${table} skipped:`, error.message);
-      }
-    }
-
-    // Fix 5: Create default Mi Nhon tenant if not exists
-    console.log('🔄 Creating default Mi Nhon tenant...');
-    try {
-      await db.execute(sql`
-        INSERT INTO tenants (
-          id, name, hotel_name, subdomain, subscription_plan, subscription_status, 
-          max_voices, max_languages, monthly_call_limit, created_at
-        ) VALUES (
-          'minhon-hotel', 'Mi Nhon Hotel', 'Mi Nhon Hotel', 'minhonmuine', 'premium', 'active',
-          10, 10, 5000, ${Date.now()}
-        ) ON CONFLICT (id) DO NOTHING
-      `);
-      console.log('✅ Created default Mi Nhon tenant');
-    } catch (error: any) {
-      console.log('ℹ️ Default tenant creation skipped:', error.message);
-    }
-
-    // Fix 6: Update existing data to have tenant_id
-    console.log('🔄 Updating existing data with tenant_id...');
-    const updateQueries = [
-      `UPDATE request SET tenant_id = 'minhon-hotel' WHERE tenant_id IS NULL`,
-      `UPDATE transcript SET tenant_id = 'minhon-hotel' WHERE tenant_id IS NULL`,
-      `UPDATE message SET tenant_id = 'minhon-hotel' WHERE tenant_id IS NULL`,
-      `UPDATE staff SET tenant_id = 'minhon-hotel' WHERE tenant_id IS NULL`,
-      `UPDATE call SET tenant_id = 'minhon-hotel' WHERE tenant_id IS NULL`
-    ];
-
-    for (const query of updateQueries) {
-      try {
-        await db.execute(sql`${sql.raw(query)}`);
-        console.log(`✅ Updated data: ${query.split(' ')[1]}`);
-      } catch (error: any) {
-        console.log(`ℹ️ Data update skipped: ${error.message}`);
-      }
-    }
-
-    console.log('\n🎉 Production schema fix completed successfully!');
-    console.log('📋 Summary of changes applied:');
-    console.log('  - Added missing columns to request table');
-    console.log('  - Fixed tenants table schema');
-    console.log('  - Created missing database tables');
-    console.log('  - Added tenant_id columns where needed');
-    console.log('  - Created default Mi Nhon tenant');
-    console.log('  - Updated existing data with tenant associations');
-
   } catch (error) {
-    console.error('❌ Schema fix failed:', error);
-    throw error;
+    console.error('❌ Migration failed:', error);
+    process.exit(1);
   } finally {
-    await client.end();
+    await pool.end();
   }
+  
+  console.log('🎉 Production schema fix completed!');
+  console.log('🚀 You can now redeploy your application - the schema errors should be resolved.');
 }
 
-// Run the fix
-if (import.meta.url === `file://${process.argv[1]}`) {
-  fixProductionSchema()
-    .then(() => {
-      console.log('✅ Script completed successfully');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('❌ Script failed:', error);
-      process.exit(1);
-    });
+// Run if called directly
+if (require.main === module) {
+  fixProductionSchema().catch(console.error);
 }
 
 export { fixProductionSchema }; 

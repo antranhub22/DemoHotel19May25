@@ -5,6 +5,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { setupSocket } from './socket';
 import { runAutoDbFix } from './startup/auto-database-fix';
 import { runProductionMigration } from './startup/production-migration';
+import { autoMigrateOnDeploy } from '../../tools/scripts/auto-migrate-on-deploy';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -160,6 +161,14 @@ app.use((req, res, next) => {
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();
+  
+  // Auto-migrate database schema (safe for production)
+  if (process.env.AUTO_MIGRATE !== 'false') {
+    console.log('🔄 Running auto-migration...');
+    await autoMigrateOnDeploy();
+  } else {
+    console.log('⚠️ Auto-migration disabled by environment variable');
+  }
   
   // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)
   if (process.env.AUTO_DB_FIX !== 'false') {
