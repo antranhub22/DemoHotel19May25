@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { UserRole, Permission, getPermissionsForRole, hasRolePermission } from '@shared/constants/permissions';
+import { UserRole, Permission, getPermissionsForRole, hasRolePermission } from '../../types/permissions';
 
 // ============================================
 // Types & Interfaces

@@ -1,13 +1,16 @@
-DEPLOY TRIGGER: Auth System Fix - Include auth-system in tsconfig.json
+DEPLOY TRIGGER: Permissions Re-export Fix - Backward Compatibility
 
-Date: July 20, 2024, 12:20 PM
-Fix: Added "auth-system/**/*" to tsconfig.json include array
-Issue: ERR_MODULE_NOT_FOUND - auth-system/middleware in production
-Solution: TypeScript compiler now includes auth-system folder in build
+Date: July 20, 2024, 12:30 PM
+Fix: Created packages/shared/constants/permissions.ts re-export
+Issue: TS2307 - Cannot find module '@shared/constants/permissions'
+Solution: Re-export from auth-system/types/permissions for backward compatibility
 
-This should resolve the module not found error in Render deployment.
+This should resolve:
+- TS2307: Cannot find module '@shared/constants/permissions'
+- Multiple component import errors
+- Auth system module resolution issues
 
-Previous trigger: 2024-07-20 11:30 AM - Force rebuild attempt
-Current trigger: 2024-07-20 12:20 PM - Auth system path fix
+Previous trigger: 2024-07-20 12:20 PM - Auth system tsconfig fix
+Current trigger: 2024-07-20 12:30 PM - Permissions backward compatibility
 
-Status: Ready for redeploy
+Status: Ready for redeploy to test permissions fix
