@@ -245,6 +245,9 @@ declare global {
   var wss: import('ws').WebSocketServer | undefined;
 }
 
+// Import reset users endpoint
+import resetUsersRouter from './reset-users-endpoint.js';
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server for express app
   const httpServer = createServer(app);
@@ -1725,6 +1728,9 @@ Mi Nhon Hotel Mui Ne`
   
   // Mount request routes (new unified endpoint)
   app.use('/api/request', requestRoutes);
+
+  // Emergency reset endpoint (temporary)
+  app.use('/api', resetUsersRouter);
 
   return httpServer;
 }
