@@ -114,80 +114,61 @@ async function seedProductionUsers(): Promise<{ success: boolean; usersCreated: 
       }
     ];
 
+    // STEP 0: Delete all existing users first
+    console.log('🗑️ Cleaning up existing users...');
+    for (const user of defaultUsers) {
+      await client.query(`
+        DELETE FROM staff WHERE username = $1
+      `, [user.username]);
+      console.log(`   Deleted if exists: ${user.username}`);
+    }
+
     // 3. Create users if they don't exist
     console.log('👤 Creating default users...');
     
     for (const user of defaultUsers) {
-      // Check if user already exists
-      const existingUser = await client.query(`
-        SELECT id FROM staff WHERE username = $1 AND tenant_id = $2 LIMIT 1
-      `, [user.username, user.tenantId]);
+      // Hash password with consistent salt rounds
+      const hashedPassword = await bcrypt.hash(user.password, 12); // Use 12 rounds consistently
       
-      if (!existingUser.rows || existingUser.rows.length === 0) {
-        // Hash password with consistent salt rounds
-        const hashedPassword = await bcrypt.hash(user.password, 12); // Use 12 rounds consistently
-        
-        // Create user (let database auto-generate ID)
-        await client.query(`
-          INSERT INTO staff (
-            tenant_id, username, password, first_name, last_name, 
-            email, role, display_name, permissions, is_active, created_at
-          ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP
-          )
-        `, [
-          user.tenantId, 
-          user.username,
-          hashedPassword,
-          user.firstName,
-          user.lastName,
-          user.email,
-          user.role,
-          user.displayName,
-          '["read", "write", "admin"]', // Default permissions
-          true
-        ]);
-        
-        usersCreated.push(user.username);
-        console.log(`✅ Created user: ${user.username} (${user.role})`);
+      // Create user (let database auto-generate ID)
+      await client.query(`
+        INSERT INTO staff (
+          tenant_id, username, password, first_name, last_name, 
+          email, role, display_name, permissions, is_active, created_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP
+        )
+      `, [
+        user.tenantId, 
+        user.username,
+        hashedPassword,
+        user.firstName,
+        user.lastName,
+        user.email,
+        user.role,
+        user.displayName,
+        '["read", "write", "admin"]', // Default permissions
+        true
+      ]);
+      
+      usersCreated.push(user.username);
+      console.log(`✅ Created user: ${user.username} (${user.role})`);
 
-        // Verify password hash
-        const verifyHash = await bcrypt.compare(user.password, hashedPassword);
-        console.log(`   Password verification: ${verifyHash ? '✅ VALID' : '❌ INVALID'}`);
-      } else {
-        // Update existing user's password
-        const hashedPassword = await bcrypt.hash(user.password, 12);
-        await client.query(`
-          UPDATE staff 
-          SET password = $1, 
-              role = $2,
-              display_name = $3,
-              updated_at = CURRENT_TIMESTAMP
-          WHERE username = $4 AND tenant_id = $5
-        `, [hashedPassword, user.role, user.displayName, user.username, user.tenantId]);
-        
-        console.log(`✅ Updated user: ${user.username}`);
-        
-        // Verify updated password
-        const verifyHash = await bcrypt.compare(user.password, hashedPassword);
-        console.log(`   Password verification: ${verifyHash ? '✅ VALID' : '❌ INVALID'}`);
-      }
+      // Verify password hash
+      const verifyHash = await bcrypt.compare(user.password, hashedPassword);
+      console.log(`   Password verification: ${verifyHash ? '✅ VALID' : '❌ INVALID'}`);
     }
     
     client.release();
     
-    if (usersCreated.length > 0) {
-      console.log('🎉 User seeding completed successfully!');
-      console.log(`📝 Users created: ${usersCreated.join(', ')}`);
-      console.log('');
-      console.log('🔑 Default login credentials:');
-      console.log('  Admin: admin / admin123');
-      console.log('  Manager: manager / manager123');
-      console.log('  Front Desk: frontdesk / frontdesk123'); 
-      console.log('  IT Manager: itmanager / itmanager123');
-    } else {
-      console.log('✅ All users already exist - passwords updated');
-    }
+    console.log('🎉 User seeding completed successfully!');
+    console.log(`📝 Users created: ${usersCreated.join(', ')}`);
+    console.log('');
+    console.log('🔑 Default login credentials:');
+    console.log('  Admin: admin / admin123');
+    console.log('  Manager: manager / manager123');
+    console.log('  Front Desk: frontdesk / frontdesk123'); 
+    console.log('  IT Manager: itmanager / itmanager123');
     
     return { success: true, usersCreated };
     
