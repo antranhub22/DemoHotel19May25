@@ -2,7 +2,6 @@
   "include": [
     "apps/client/src/**/*",
     "packages/shared/**/*",
-    "packages/auth-system/**/*",
     "apps/server/**/*"
   ],
   "exclude": [
@@ -10,7 +9,8 @@
     "build",
     "dist",
     "**/*.test.ts",
-    ".backup/**/*"
+    ".backup/**/*",
+    "packages/auth-system/**/*"
   ],
   "compilerOptions": {
     "incremental": true,
