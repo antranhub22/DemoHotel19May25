@@ -33,13 +33,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 }) => {
   // Component render debug - Development only
   if (process.env.NODE_ENV === 'development') {
-    logger.debug('[SiriCallButton] Component render - Container:', 'Component', containerId,
-      'onCallStart:',
-      !!onCallStart,
-      'Mobile:',
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent)
-    );
+    logger.debug(`[SiriCallButton] Component render - Container: ${containerId}, onCallStart: ${!!onCallStart}, Mobile: ${/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}`, 'Component');
   }
 
   // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control
@@ -382,7 +376,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       const testClickHandler = (e: MouseEvent) => {
         logger.debug('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!', 'Component');
         logger.debug('  🎯 Click target:', 'Component', e.target);
-        logger.debug('  🎯 Click coordinates:', 'Component', e.clientX, e.clientY);
+        logger.debug(`  🎯 Click coordinates: ${e.clientX}, ${e.clientY}`, 'Component');
         logger.debug('  🎯 Element rect:', 'Component', element.getBoundingClientRect());
         logger.debug('  🎯 onCallStart available:', 'Component', !!onCallStart);
       };
@@ -449,9 +443,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // Mobile touch handler - unified with desktop logic
   const handleDirectTouch = async (e: any) => {
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('📱 [SiriCallButton] Mobile touch event:', 'Component', e.type,
-        'on',
-        containerId);
+      logger.debug(`📱 [SiriCallButton] Mobile touch event: ${e.type} on ${containerId}`, 'Component');
       logger.debug('📱 [SiriCallButton] Current isListening state:', 'Component', isListening);
     }
 

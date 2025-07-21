@@ -108,41 +108,44 @@ export interface CallDetails {
 // ========================================
 
 export interface OrderItem {
+  id: string;
   name: string;
+  description: string;
   quantity: number;
   price: number;
-  category?: string;
-  description?: string;
+  serviceType?: string;
 }
 
 export interface OrderSummary {
+  orderType: string;
+  deliveryTime: 'asap' | '30min' | '1hour' | 'specific';
+  roomNumber: string;
+  guestName: string;
+  guestEmail: string;
+  guestPhone: string;
+  specialInstructions: string;
   items: OrderItem[];
   totalAmount: number;
-  deliveryTime?: string;
-  specialInstructions?: string;
-  roomNumber?: string;
 }
 
 export interface ServiceRequest {
-  id: string;
-  type: 'roomservice' | 'housekeeping' | 'maintenance' | 'concierge';
-  description: string;
-  roomNumber: string;
-  status: 'pending' | 'in-progress' | 'completed';
-  priority: 'low' | 'medium' | 'high';
-  timestamp: Date;
+  serviceType: string;
+  requestText: string;
+  details: {
+    date?: string;
+    time?: string;
+    location?: string;
+    people?: number;
+    amount?: string;
+    roomNumber?: string;
+    otherDetails?: string;
+  };
 }
 
 export interface Order {
-  id: string;
-  roomNumber: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: 'pending' | 'confirmed' | 'delivered';
-  timestamp: Date;
-  customerName?: string;
-  deliveryTime?: string;
-  specialInstructions?: string;
+  reference: string;
+  estimatedTime: string;
+  summary: OrderSummary;
 }
 
 export interface Request {
@@ -157,12 +160,10 @@ export interface Request {
 }
 
 export interface ActiveOrder {
-  id: string;
-  roomNumber: string;
-  items: OrderItem[];
-  status: 'pending' | 'confirmed' | 'preparing' | 'delivered';
-  timestamp: Date;
-  estimatedDelivery?: Date;
+  reference: string;
+  requestedAt: Date;
+  estimatedTime: string;
+  status?: string;
 }
 
 // ========================================

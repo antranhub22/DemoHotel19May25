@@ -2,12 +2,14 @@
 export type { 
   Transcript, 
   OrderSummary, 
+  OrderItem,
   Order, 
   CallDetails, 
   InterfaceLayer, 
   ServiceRequest,
   ActiveOrder,
-  CallSummary
+  CallSummary,
+  AssistantContextType
 } from './core';
 
 // API types that exist

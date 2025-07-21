@@ -78,11 +78,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     LANGUAGE_COLORS['en'];
 
   // Debug: Log language and color changes
-  logger.debug('🎨 [SiriButtonContainer] Language:', 'Component', language,
-    'Colors:',
-    currentColors.name,
-    'Primary:',
-    currentColors.primary);
+  logger.debug(`🎨 [SiriButtonContainer] Language: ${language}, Colors: ${currentColors.name}, Primary: ${currentColors.primary}`, 'Component');
   logger.debug('📏 [SiriButtonContainer] Responsive size:', 'Component', responsiveSize);
 
   // 🚨 DEBUG: Tap to End Call Fix Verification
@@ -93,12 +89,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     logger.debug('  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)', 'Component');
     logger.debug('  ✅ Priority 4: MobileTouchDebugger enabled for testing', 'Component');
     logger.debug('  🚫 DISABLED: Cancel and Confirm buttons hidden by user request', 'Component');
-    logger.debug('  🎯 isCallStarted:', 'Component', isCallStarted,
-      'isConfirming:',
-      isConfirming);
-    logger.debug('  🎯 onCallStart available:', 'Component', !!onCallStart,
-      'onCallEnd available:',
-      !!onCallEnd);
+    logger.debug(`  🎯 isCallStarted: ${isCallStarted}, isConfirming: ${isConfirming}`, 'Component');
+    logger.debug(`  🎯 onCallStart available: ${!!onCallStart}, onCallEnd available: ${!!onCallEnd}`, 'Component');
   }
 
   // ✅ NEW: Reset confirming state when call ends

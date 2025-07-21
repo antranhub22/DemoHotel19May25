@@ -479,9 +479,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
                   </div>
                 )}
                 {[...conversationTurns].reverse().map((turn, turnIdx) => {
-                  logger.debug('[Interface2] Rendering turn:', 'Component', turn,
-                    'Index:',
-                    turnIdx);
+                  logger.debug(`[Interface2] Rendering turn Index: ${turnIdx}`, 'Component', turn);
                   return (
                     <div key={turn.id} className="mb-1">
                       <div className="flex items-start">
