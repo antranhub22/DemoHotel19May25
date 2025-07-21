@@ -274,20 +274,99 @@ PostgreSQL service.
 
 ## 🧪 Testing
 
-### API Testing
+### Production Mode
 
 ```bash
-npm run test               # API connectivity tests (6/6 passing)
-npm run test:db            # Database health checks
+# Build for production
+npm run build
+
+# Start production server
+npm run start
 ```
 
-### Manual Testing
+### Debug Commands
 
-- All major features verified post-restructure
-- Voice assistant functionality intact
-- Dashboard and analytics working
-- Database operations functional
-- Real-time features operational
+#### Development Mode:
+
+```bash
+# In browser console:
+debugVapi.checkEnv()    # Check environment variables
+debugVapi.testVapi()    # Test Vapi initialization
+debugVapi.help()        # Show all commands
+```
+
+#### Production Mode:
+
+```bash
+# In browser console:
+vapiTroubleshoot.checkStatus()  # Check current status
+vapiTroubleshoot.exportLogs()   # Export debug logs
+vapiTroubleshoot.help()         # Show troubleshooting guide
+```
+
+### Voice Assistant Debug System
+
+The application includes a comprehensive debug system for troubleshooting Vapi integration issues:
+
+#### **🔍 Debug Levels:**
+
+- `verbose` - All logs (development default)
+- `info` - Info + errors (production default)
+- `error` - Errors only
+- `none` - Disable logging
+
+#### **📋 Browser Console Commands:**
+
+**Production Troubleshooting:**
+
+```javascript
+// Check environment and recent logs
+vapiTroubleshoot.checkStatus();
+
+// Export debug logs for support
+vapiTroubleshoot.exportLogs();
+
+// Enable verbose logging temporarily
+vapiDebug.setLevel('verbose');
+```
+
+**Development Debugging:**
+
+```javascript
+// Check all environment variables
+debugVapi.checkEnv();
+
+// Test Vapi initialization
+debugVapi.testVapi();
+
+// View stored debug logs
+vapiDebug.getLogs();
+```
+
+#### **🐛 Common Issues:**
+
+| **Issue**                   | **Debug Command**                              | **Solution**                  |
+| --------------------------- | ---------------------------------------------- | ----------------------------- |
+| Voice button not responding | `vapiTroubleshoot.checkStatus()`               | Check environment variables   |
+| Call fails to start         | `vapiDebug.setLevel('verbose')` then reproduce | Check logs for specific error |
+| Network timeouts            | `vapiTroubleshoot.exportLogs()`                | Send logs to support          |
+| Invalid assistant ID        | Check console for format validation errors     | Verify assistant ID format    |
+
+#### **📤 Exporting Logs for Support:**
+
+1. Reproduce the issue
+2. Run: `vapiTroubleshoot.exportLogs()`
+3. Download will start automatically
+4. Send the `.txt` file to support
+
+The debug system automatically captures:
+
+- Environment validation
+- Vapi initialization steps
+- Call attempt details
+- Error categorization
+- Retry attempts
+- Network issues
 
 ## 📚 Documentation
 
