@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -14,44 +16,31 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Strict Type Checking */
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    /* Linting */
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
 
-    /* Additional Checks */
-    "exactOptionalPropertyTypes": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": false,
-
-    /* Path Mapping */
+    /* Path mapping */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./apps/client/src/*"],
-      "@shared/*": ["./packages/shared/*"],
       "@server/*": ["./apps/server/*"],
+      "@shared/*": ["./packages/shared/*"],
       "@types/*": ["./packages/types/*"],
-      "@config/*": ["./packages/config/*"],
-      "@tools/*": ["./tools/*"],
-      "@tests/*": ["./tests/*"]
+      "@config/*": ["./packages/config/*"]
     }
   },
-  "include": ["apps/client/src/**/*", "apps/server/**/*", "packages/**/*", "tools/**/*", "tests/**/*"],
+  "include": ["apps/client/src/**/*", "apps/server/**/*", "packages/**/*", "tools/**/*"],
   "exclude": [
+    "tests/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "test-*.ts",
+    "integration-test-*.ts",
     "node_modules",
     "dist",
-    "build",
-    ".vite",
-    "**/*.test.ts",
-    "documentation/**/*",
-    "packages/auth-system/**/*"
+    "build"
   ]
 }

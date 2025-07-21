@@ -10,15 +10,20 @@ import * as path from 'path';
 import { performance } from 'perf_hooks';
 
 // Import services
-import { HotelResearchService } from '../server/services/hotelResearch';
-import { KnowledgeBaseGenerator } from '../server/services/knowledgeBaseGenerator';
+import { HotelResearchService } from '../apps/server/services/hotelResearch';
+import { KnowledgeBaseGenerator } from '../apps/server/services/knowledgeBaseGenerator';
 import {
   VapiIntegrationService,
   AssistantGeneratorService,
-} from '../server/services/vapiIntegration';
+} from '../apps/server/services/vapiIntegration';
 
 // Import schema
-import { tenants, hotelProfiles, call, transcript } from '../src/db/schema';
+import {
+  tenants,
+  hotelProfiles,
+  call,
+  transcript,
+} from '../packages/shared/db/schema';
 
 // ============================================
 // Test Configuration & Types

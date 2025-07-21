@@ -11,12 +11,12 @@ import { performance } from 'perf_hooks';
 import fetch from 'node-fetch';
 
 // Import services
-import { HotelResearchService } from '../server/services/hotelResearch';
-import { KnowledgeBaseGenerator } from '../server/services/knowledgeBaseGenerator';
+import { HotelResearchService } from '../apps/server/services/hotelResearch';
+import { KnowledgeBaseGenerator } from '../apps/server/services/knowledgeBaseGenerator';
 import {
   VapiIntegrationService,
   AssistantGeneratorService,
-} from '../server/services/vapiIntegration';
+} from '../apps/server/services/vapiIntegration';
 
 // Import schema
 import {
@@ -27,7 +27,7 @@ import {
   request,
   message,
   staff,
-} from '../src/db/schema';
+} from '../packages/shared/db/schema';
 
 // ============================================
 // Integration Test Configuration & Types

@@ -3,15 +3,15 @@ const __vite__mapDeps = (
   m = __vite__mapDeps,
   d = m.f ||
     (m.f = [
-      'assets/services-BvUATxiy.js',
+      'assets/services-CFg-LAtT.js',
       'assets/css-utils-BkLtITBR.js',
       'assets/vendor-BXT5a8vO.js',
       'assets/react-core-C6DwaHZM.js',
       'assets/ui-vendor-BQCqNqg0.js',
       'assets/charts-ceMktdbA.js',
       'assets/charts-utils-DdC1WR7j.js',
-      'assets/components-LYkGJCyk.js',
-      'assets/siri-components-BXrmXl8X.js',
+      'assets/components-C2YZ6kZf.js',
+      'assets/siri-components-DrKSOfrR.js',
       'assets/siri-components-GqxCBkk7.css',
       'assets/react-router-B7s-G-0E.js',
       'assets/components-BlTBQwkB.css',
@@ -24,8 +24,8 @@ import {
   aP as Ue,
   aQ as Be,
 } from './react-core-C6DwaHZM.js';
-import { l as e, I as te, u as pe } from './components-LYkGJCyk.js';
-import { g as z, i as $e } from './services-BvUATxiy.js';
+import { l as e, I as te, u as pe } from './components-C2YZ6kZf.js';
+import { g as z, i as $e } from './services-CFg-LAtT.js';
 import { j as qe } from './validation-VWaDGczM.js';
 const We = (function () {
     const o = typeof document < 'u' && document.createElement('link').relList;
@@ -523,7 +523,7 @@ const Et = ({ children: s }) => {
       s
     );
   },
-  Se = { BASE_URL: '/', DEV: !1, MODE: 'development', PROD: !0, SSR: !1 },
+  Se = { BASE_URL: '/', DEV: !1, MODE: 'production', PROD: !0, SSR: !1 },
   Z = {
     hotelName: 'Mi Nhon Hotel Mui Ne',
     logoUrl: '/assets/references/images/minhon-logo.jpg',
@@ -1590,7 +1590,7 @@ function At({ children: s }) {
         const { authenticatedFetch: v } = await Y(
             async () => {
               const { authenticatedFetch: k } = await import(
-                './services-BvUATxiy.js'
+                './services-CFg-LAtT.js'
               ).then(G => G.h);
               return { authenticatedFetch: k };
             },
@@ -2352,7 +2352,7 @@ const at = ({ isActive: s }) => {
                   const { getVapiInstance: a } = await Y(
                       async () => {
                         const { getVapiInstance: i } = await import(
-                          './services-BvUATxiy.js'
+                          './services-CFg-LAtT.js'
                         ).then(h => h.f);
                         return { getVapiInstance: i };
                       },
@@ -2762,7 +2762,7 @@ const at = ({ isActive: s }) => {
       ae = t.useCallback(() => {}, []),
       Q = t.useCallback(() => {
         Y(
-          () => import('./components-LYkGJCyk.js').then(R => R.ab),
+          () => import('./components-C2YZ6kZf.js').then(R => R.ab),
           __vite__mapDeps([7, 3, 2, 1, 5, 6, 4, 0, 8, 9, 10, 11])
         )
           .then(R => {
@@ -2789,7 +2789,7 @@ const at = ({ isActive: s }) => {
       }, [p]),
       ie = t.useCallback(() => {
         Y(
-          () => import('./components-LYkGJCyk.js').then(R => R.ab),
+          () => import('./components-C2YZ6kZf.js').then(R => R.ab),
           __vite__mapDeps([7, 3, 2, 1, 5, 6, 4, 0, 8, 9, 10, 11])
         )
           .then(R => {
@@ -2952,7 +2952,7 @@ const at = ({ isActive: s }) => {
         const { authenticatedFetch: x } = await Y(
           async () => {
             const { authenticatedFetch: V } = await import(
-              './services-BvUATxiy.js'
+              './services-CFg-LAtT.js'
             ).then(B => B.h);
             return { authenticatedFetch: V };
           },
