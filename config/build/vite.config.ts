@@ -36,82 +36,16 @@ export default defineConfig({
     // ✅ IMPROVED: Optimized chunk splitting for better caching and error reduction
     rollupOptions: {
       output: {
-        manualChunks: id => {
-          // ✅ IMPROVED: Better chunk logic to prevent vendor chunk errors
-          if (id.includes('node_modules')) {
-            // React and core dependencies - highest priority
-            if (id.includes('react') && !id.includes('react-router')) {
-              return 'react-core';
-            }
-            if (id.includes('react-router') || id.includes('react-dom')) {
-              return 'react-router';
-            }
-
-            // UI libraries
-            if (id.includes('@radix-ui') || id.includes('radix-ui')) {
-              return 'ui-vendor';
-            }
-
-            // ✅ FIXED: Better chart handling to prevent circular deps
-            if (id.includes('recharts')) {
-              return 'charts';
-            }
-            if (id.includes('d3-') && !id.includes('recharts')) {
-              return 'charts-utils';
-            }
-
-            // Voice and audio libraries - separate to avoid conflicts
-            if (id.includes('@vapi-ai')) {
-              return 'vapi';
-            }
-            if (id.includes('@daily-co') || id.includes('daily-js')) {
-              return 'daily';
-            }
-
-            // Utility libraries - group carefully
-            if (id.includes('axios')) {
-              return 'http-client';
-            }
-            if (id.includes('jwt-decode') || id.includes('zod')) {
-              return 'validation';
-            }
-            if (id.includes('clsx') || id.includes('tailwind-merge')) {
-              return 'css-utils';
-            }
-
-            // Other vendor libraries - catch-all
-            return 'vendor';
-          }
-
-          // Application chunks - more granular
-          if (id.includes('/components/siri/')) {
-            return 'siri-components';
-          }
-          if (id.includes('/components/dashboard/')) {
-            return 'dashboard-components';
-          }
-          if (id.includes('/components/')) {
-            return 'components';
-          }
-          if (id.includes('/hooks/') || id.includes('/context/')) {
-            return 'hooks-context';
-          }
-          if (id.includes('/pages/') || id.includes('/routes/')) {
-            return 'pages';
-          }
-          if (id.includes('/services/') || id.includes('/lib/')) {
-            return 'services';
-          }
-        },
-        // ✅ IMPROVED: Better chunk file naming
-        chunkFileNames: chunkInfo => {
-          const facadeModuleId = chunkInfo.facadeModuleId
-            ? chunkInfo.facadeModuleId.split('/').pop()
-            : 'chunk';
-          return `assets/[name]-[hash].js`;
-        },
+        // Force new file names every build
         entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Add cache-busting suffix
+        manualChunks: {
+          'charts': ['recharts'],
+          'react-core': ['react', 'react-dom'],
+          'vendor': ['lodash', 'date-fns']
+        }
       },
       // ✅ IMPROVED: External dependencies handling
       external: id => {
