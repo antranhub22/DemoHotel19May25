@@ -9,6 +9,9 @@ import { useInterface1 } from '@/hooks/useInterface1';
 // Context
 import { usePopupContext } from '@/context/PopupContext';
 
+// Utils
+import { logger } from '@shared/utils/logger';
+
 // UI Components - States
 import { LoadingState } from './interface1/LoadingState';
 import { ErrorState } from './interface1/ErrorState';
@@ -85,7 +88,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   } = useInterface1({ isActive });
 
   // 🔍 DEBUG: Log popup states
-  console.log('🔍 [Interface1] Popup States:', {
+  logger.debug('Interface1 Popup States', 'Interface1', {
     isCallStarted,
     showConversation,
     chatPopupOpen: showConversation && isCallStarted,

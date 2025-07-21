@@ -5,6 +5,7 @@ import { useConversationState } from '@/hooks/useConversationState';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { usePopupContext } from '@/context/PopupContext';
+import { logger } from '@shared/utils/logger';
 import {
   useState,
   useEffect,
@@ -142,8 +143,9 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Memoized auto-summary callback
   const autoShowSummary = useCallback(() => {
     if (import.meta.env.DEV) {
-      console.log(
-        '🔮 [useInterface1] Auto-showing Summary Popup after call end...'
+      logger.debug(
+        'Auto-showing Summary Popup after call end',
+        'useInterface1'
       );
     }
 
@@ -154,11 +156,12 @@ export const useInterface1 = ({
       });
 
       if (import.meta.env.DEV) {
-        console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
+        logger.success('Summary Popup auto-shown successfully', 'useInterface1');
       }
     } catch (error) {
-      console.error(
-        '❌ [useInterface1] Error auto-showing summary popup:',
+      logger.error(
+        'Error auto-showing summary popup',
+        'useInterface1',
         error
       );
       setTimeout(() => {
@@ -170,15 +173,16 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Auto-summary listener registration
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.log('📞 [useInterface1] Registering auto-summary listener...');
+      logger.debug('Registering auto-summary listener', 'useInterface1');
     }
 
     const unregister = addCallEndListener(autoShowSummary);
 
     return () => {
       if (import.meta.env.DEV) {
-        console.log(
-          '🧹 [useInterface1] Unregistering auto-summary listener...'
+        logger.debug(
+          'Unregistering auto-summary listener',
+          'useInterface1'
         );
       }
       unregister();
@@ -197,8 +201,9 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Memoized demo popup functions with lazy loading
   const handleShowConversationPopup = useCallback(() => {
     if (import.meta.env.DEV) {
-      console.log(
-        'Conversation demo disabled - using unified ChatPopup instead'
+      logger.info(
+        'Conversation demo disabled - using unified ChatPopup instead',
+        'useInterface1'
       );
     }
   }, []);
