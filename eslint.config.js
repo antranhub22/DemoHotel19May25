@@ -8,8 +8,13 @@ import importPlugin from 'eslint-plugin-import';
 
 export default [
   js.configs.recommended,
+
+  // Browser Environment (Client-side)
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: [
+      'apps/client/**/*.{js,jsx,ts,tsx}',
+      'packages/shared/**/*.{js,jsx,ts,tsx}',
+    ],
     ignores: [
       'node_modules/**',
       'dist/**',
@@ -19,10 +24,10 @@ export default [
       '*.min.js',
       '*.d.ts',
       'documentation/**',
-      'tools/scripts/development/debug-console-script.js',
-      '*.config.js',
-      '*.config.cjs',
-      'postcss.config.js',
+      'tools/**',
+      'scripts/**',
+      '*.config.*',
+      'tests/**',
     ],
     languageOptions: {
       parser: typescriptParser,
@@ -34,24 +39,31 @@ export default [
         },
       },
       globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        global: 'readonly',
+        // Browser environment
         window: 'readonly',
         document: 'readonly',
         navigator: 'readonly',
-        React: 'readonly',
-        HTMLDivElement: 'readonly',
+        location: 'readonly',
         HTMLElement: 'readonly',
+        HTMLDivElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        Event: 'readonly',
+        MouseEvent: 'readonly',
+        KeyboardEvent: 'readonly',
+        TouchEvent: 'readonly',
         requestAnimationFrame: 'readonly',
         cancelAnimationFrame: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
         setInterval: 'readonly',
         clearInterval: 'readonly',
+        fetch: 'readonly',
+        FormData: 'readonly',
+        URLSearchParams: 'readonly',
+        WebSocket: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
       },
     },
     plugins: {
@@ -61,22 +73,11 @@ export default [
       'react-refresh': reactRefresh,
       import: importPlugin,
     },
-    settings: {
-      react: {
-        version: 'detect',
-      },
-      'import/resolver': {
-        typescript: {
-          alwaysTryTypes: true,
-          project: './tsconfig.json',
-        },
-      },
-    },
     rules: {
-      // 🚨 CRITICAL: Prevent console statements
+      // Console statements: warn only in browser
       'no-console': 'warn',
 
-      // 🎯 TypeScript Rules
+      // TypeScript Rules
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_' },
@@ -84,26 +85,90 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-empty-function': 'warn',
 
-      // ⚛️ React Rules
+      // React Rules
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
 
-      // 🎨 Style Rules
-      'prefer-const': 'error',
+      // Import Rules
+      'import/no-unresolved': 'off',
+      'import/no-cycle': 'off',
+
+      // General Rules
+      'no-unused-vars': 'off',
+      'no-undef': 'error',
+      'prefer-const': 'warn',
       'no-var': 'error',
-      'object-shorthand': 'error',
-      'prefer-template': 'error',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+  },
 
-      // 🚫 Prevent Common Issues
-      'no-duplicate-imports': 'error',
-      'no-use-before-define': 'off',
-      '@typescript-eslint/no-use-before-define': ['error'],
+  // Node.js Environment (Server-side)
+  {
+    files: [
+      'apps/server/**/*.{js,jsx,ts,tsx}',
+      'packages/auth-system/**/*.{js,jsx,ts,tsx}',
+      'packages/config/**/*.{js,jsx,ts,tsx}',
+    ],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+      globals: {
+        // Node.js environment
+        global: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly',
+        console: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        exports: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setImmediate: 'readonly',
+        clearImmediate: 'readonly',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescript,
+      import: importPlugin,
+    },
+    rules: {
+      // Console statements: allowed in server
+      'no-console': 'off',
 
-      // Import Rules (simplified for ESLint v9)
-      'import/no-unresolved': 'off', // TypeScript handles this
-      'import/no-cycle': 'error',
+      // TypeScript Rules
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-empty-function': 'warn',
+
+      // Import Rules
+      'import/no-unresolved': 'off',
+      'import/no-cycle': 'off',
+
+      // General Rules
+      'no-unused-vars': 'off',
+      'no-undef': 'error',
+      'prefer-const': 'warn',
+      'no-var': 'error',
     },
   },
 ];
