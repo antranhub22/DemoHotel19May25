@@ -13,25 +13,20 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   Hotel,
-  Settings as SettingsIcon,
   Bell,
   Shield,
   Key,
   Globe,
   Phone,
   Mail,
-  MapPin,
   Save,
   AlertCircle,
   CheckCircle2,
   Loader2,
-  CreditCard,
-  Users,
   Database,
-  Wifi,
   Bot,
 } from 'lucide-react';
 

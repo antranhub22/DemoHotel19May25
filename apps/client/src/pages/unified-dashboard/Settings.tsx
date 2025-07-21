@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -15,13 +14,10 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import {
-import { logger } from '@shared/utils/logger';
-  Settings as SettingsIcon,
   Hotel,
   Bot,
   Bell,
   Shield,
-  Key,
   Save,
   RefreshCw,
   CheckCircle,
@@ -29,7 +25,6 @@ import { logger } from '@shared/utils/logger';
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<
     'idle' | 'saving' | 'success' | 'error'
@@ -78,7 +73,7 @@ export const Settings: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (error) {
+    } catch {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } finally {

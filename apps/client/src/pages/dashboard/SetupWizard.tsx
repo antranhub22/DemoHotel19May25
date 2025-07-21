@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import {
   Card,
@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -44,20 +43,12 @@ import {
   Star,
   Users,
   Wifi,
-  Car,
-  Utensils,
-  Dumbbell,
-  Waves,
-  ShieldCheck,
-  XCircle,
   ChevronRight,
   ChevronDown,
-  Info,
 } from 'lucide-react';
 
-// Import API service and types
+// Import API service and types  
 import {
-import { logger } from '@shared/utils/logger';
   dashboardApi,
   HotelData,
   AssistantCustomization,
@@ -286,11 +277,11 @@ const ReviewDataStep: React.FC<StepProps> = ({
   state,
   onNext,
   onBack,
-  onError,
+  onError: _onError,
   onUpdateState,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState<HotelData | null>(
+  const [editedData] = useState<HotelData | null>(
     state.hotelData
   );
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
@@ -957,7 +948,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({
 // Step 4: Success Component
 // ============================================
 
-const SuccessStep: React.FC<StepProps> = ({ state, onUpdateState }) => {
+const SuccessStep: React.FC<StepProps> = ({ state, onUpdateState: _onUpdateState }) => {
   const [, setLocation] = useLocation();
 
   const handleFinish = () => {
