@@ -1,20 +1,14 @@
+import { useState, useCallback, useMemo, useEffect, createElement } from 'react';
+
 import { useAssistant } from '@/context/AssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
+import { usePopup } from '@/components/popup-system/PopupManager';
 import { usePopupContext } from '@/context/PopupContext';
 import { logger } from '@shared/utils/logger';
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  createElement,
-  useMemo,
-} from 'react';
-import { usePopup } from '@/components/popup-system';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -88,7 +82,7 @@ export const useInterface1 = ({
   } = useHotelConfiguration();
 
   // Popup system hooks - optimized imports
-  const { showConversation, showNotification, showSummary } = usePopup();
+  const { showNotification, showSummary } = usePopup();
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(
     null
   );
@@ -111,8 +105,8 @@ export const useInterface1 = ({
       setShowRightPanel,
       transcripts,
     }),
-    [conversationState, conversationPopupId, transcripts]
-  );
+    [conversationState, conversationPopupId, setConversationPopupId, setShowRightPanel, transcripts]
+  ); // Fixed: Added all dependencies
 
   const confirmHandlerConfig = useMemo(
     () => ({
@@ -122,7 +116,7 @@ export const useInterface1 = ({
       serviceRequests,
     }),
     [endCall, transcripts, callSummary, serviceRequests]
-  );
+  ); // Dependencies are correct
 
   const { handleCancel } = useCancelHandler(cancelHandlerConfig);
   const { handleConfirm } = useConfirmHandler(confirmHandlerConfig);
@@ -133,7 +127,7 @@ export const useInterface1 = ({
 
   // ✅ OPTIMIZED: Single effect for summary popup monitoring
   useEffect(() => {
-    const summaryPopup = popups.find(popup => popup.type === 'summary');
+    const summaryPopup = popups.find((popup: { type: string }) => popup.type === 'summary');
     const hasSummary = !!summaryPopup;
     if (showingSummary !== hasSummary) {
       setShowingSummary(hasSummary);
@@ -165,7 +159,7 @@ export const useInterface1 = ({
         error
       );
       setTimeout(() => {
-        alert('Call completed! Please check your conversation summary.');
+        logger.info('Call completed! Please check your conversation summary.', 'useInterface1');
       }, 500);
     }
   }, [showSummary]);

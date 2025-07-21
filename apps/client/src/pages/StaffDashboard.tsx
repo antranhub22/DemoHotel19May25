@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import StaffRequestDetailModal from '@/components/StaffRequestDetailModal';
 import StaffMessagePopup from '@/components/StaffMessagePopup';
 import { useNavigate } from 'react-router-dom';
@@ -42,54 +42,39 @@ const StaffDashboard: React.FC = () => {
   const [endDate, setEndDate] = useState('');
   const [expandedContent, setExpandedContent] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [pendingStatus, setPendingStatus] = useState<{ [id: number]: string }>(
-    {}
-  );
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<{ [id: number]: string }>({});
   const navigate = useNavigate();
 
   // Lấy token từ localStorage
   const getToken = () => localStorage.getItem('staff_token');
 
-  // Fetch requests from API
-  const fetchRequests = async () => {
+  // Hàm lấy danh sách requests
+  const fetchRequests = useCallback(async () => {
     const token = getToken();
-    if (!token) {
-      navigate('/staff');
-      return;
-    }
+    if (!token) return navigate('/staff');
     try {
-      const res = await fetch('/api/staff/requests', {
+      const res = await fetch('/api/request', {
         headers: { Authorization: `Bearer ${token}` },
-        credentials: 'include',
       });
-      if (res.status === 401) {
-        localStorage.removeItem('staff_token');
-        navigate('/staff');
-        return;
-      }
+      if (!res.ok) return navigate('/staff');
       const data = await res.json();
       logger.debug('Fetched requests data:', 'Component', data); // Debug log
       setRequests(data);
-    } catch (err) {
-      logger.error('Failed to fetch requests:', 'Component', err);
+    } catch (_error) {
+      logger.error('Failed to fetch requests:', 'Component');
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchRequests();
     // Thêm polling mỗi 30 giây
     const intervalId = setInterval(fetchRequests, 30000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [fetchRequests]);
 
-  // Mở modal chi tiết
-  const handleOpenDetail = (req: any) => {
-    setSelectedRequest(req);
-    setShowDetailModal(true);
-  };
   // Đóng modal chi tiết
   const handleCloseDetail = () => {
     setShowDetailModal(false);
@@ -135,7 +120,7 @@ const StaffDashboard: React.FC = () => {
       );
       const data = await res.json();
       setMessages(data);
-    } catch (err) {
+    } catch (_) {
       setMessages([]);
     }
   };
@@ -165,7 +150,7 @@ const StaffDashboard: React.FC = () => {
           time: new Date().toLocaleTimeString().slice(0, 5),
         },
       ]);
-    } catch (err) {
+    } catch (_) {
       // handle error
     }
     setLoadingMsg(false);
@@ -174,14 +159,13 @@ const StaffDashboard: React.FC = () => {
   // Xóa tất cả requests
   const handleDeleteAllRequests = async () => {
     setShowPasswordDialog(true);
-    setDeletePassword('');
-    setPasswordError('');
+    setPasswordInput('');
   };
 
   // Xác nhận xóa sau khi nhập mật khẩu
   const confirmDelete = async () => {
     // Kiểm tra mật khẩu
-    if (deletePassword !== '2208') {
+    if (passwordInput !== '2208') {
       setPasswordError('Mật khẩu không đúng');
       return;
     }
@@ -208,19 +192,19 @@ const StaffDashboard: React.FC = () => {
       setShowPasswordDialog(false);
 
       if (result.success) {
-        alert(`${result.message}`);
+        logger.success(`${result.message}`, 'Component');
         // Cập nhật state để hiển thị danh sách trống
         setRequests([]);
       } else {
-        alert(`Lỗi: ${result.error || 'Không thể xóa requests'}`);
+        logger.error(`Lỗi: ${result.error || 'Không thể xóa requests'}`, 'Component');
       }
     } catch (error) {
       logger.error('Error deleting all requests:', 'Component', error);
-      alert('Đã xảy ra lỗi khi xóa requests');
+      logger.error('Đã xảy ra lỗi khi xóa requests', 'Component');
       setShowPasswordDialog(false);
     } finally {
       setIsDeleting(false);
-      setDeletePassword('');
+      setPasswordInput('');
     }
   };
 
@@ -474,7 +458,7 @@ const StaffDashboard: React.FC = () => {
                             if (newStatus && newStatus !== req.status) {
                               await handleStatusChange(newStatus, req.id);
                               setPendingStatus(s => {
-                                const { [req.id]: _, ...rest } = s;
+                                const { [req.id]: _removed, ...rest } = s;
                                 return rest;
                               });
                             }
@@ -577,7 +561,7 @@ const StaffDashboard: React.FC = () => {
                         if (newStatus && newStatus !== req.status) {
                           await handleStatusChange(newStatus, req.id);
                           setPendingStatus(s => {
-                            const { [req.id]: _, ...rest } = s;
+                            const { [req.id]: _removed, ...rest } = s;
                             return rest;
                           });
                         }
@@ -646,8 +630,8 @@ const StaffDashboard: React.FC = () => {
             <div className="mb-4">
               <input
                 type="password"
-                value={deletePassword}
-                onChange={e => setDeletePassword(e.target.value)}
+                value={passwordInput}
+                onChange={e => setPasswordInput(e.target.value)}
                 onKeyDown={handlePasswordKeyDown}
                 className={`w-full px-3 py-2 border rounded ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-red-500`}
                 placeholder="Nhập mật khẩu xác nhận"

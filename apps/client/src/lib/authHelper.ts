@@ -42,7 +42,7 @@ export const attemptLogin = async (cred: LoginCredentials): Promise<string | nul
 
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const decoded: any = jwtDecode(token);
+    const decoded: { exp?: number } = jwtDecode(token);
     if (decoded.exp) {
       const currentTime = Math.floor(Date.now() / 1000);
       const isExpired = decoded.exp < currentTime;
@@ -62,14 +62,13 @@ export const getAuthToken = async (): Promise<string | null> => {
   // Check for existing valid token
   const existingToken = localStorage.getItem('token');
   if (existingToken && !isTokenExpired(existingToken)) {
-    if (import.meta.env.DEV) {
-      logger.debug('⏰ [AuthHelper] Token expired, generating new one...', 'Component');
-    } else {
-      return existingToken;
-    }
-  } else {
+    // Token is valid, return it
     logger.debug('✅ [AuthHelper] Valid token found', 'Component');
     return existingToken;
+  } else if (existingToken) {
+    // Token exists but is expired
+    logger.debug('⏰ [AuthHelper] Token expired, removing it...', 'Component');
+    localStorage.removeItem('token');
   }
 
   // Development mode: try to generate fresh token
@@ -77,9 +76,12 @@ export const getAuthToken = async (): Promise<string | null> => {
     logger.debug('🚧 [AuthHelper] Generating fresh token for dev mode...', 'Component');
     for (const cred of DEV_CREDENTIALS) {
       const token = await attemptLogin(cred);
-      if (token) return token;
-      logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token', 'Component');
+      if (token) {
+        logger.debug('✅ [AuthHelper] Fresh dev token generated', 'Component');
+        return token;
+      }
     }
+    logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token', 'Component');
   }
 
   return null;
@@ -108,7 +110,7 @@ export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const makeRequest = async (headers: Record<string, string>) => {
+  const makeRequest = async (headers: Record<string, string>): Promise<Response> => {
     return fetch(url, {
       ...options,
       headers: {

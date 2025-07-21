@@ -1,15 +1,12 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
-import Reference from './Reference';
+import { logger } from '@shared/utils/logger';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import Reference from '@/components/Reference';
 import SiriCallButton from './siri/SiriCallButton';
 import { referenceService, ReferenceItem } from '@/services/ReferenceService';
-import InfographicSteps from './InfographicSteps';
 import { t } from '@/i18n';
 import { Button } from './ui/button';
-import { AlertCircle } from 'lucide-react';
-import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
-import TranscriptDisplay from './TranscriptDisplay';
-import { logger } from '@shared/utils/logger';
 
 interface Interface2Props {
   isActive: boolean;
@@ -36,17 +33,13 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   // --- ALL HOOKS MUST BE DECLARED FIRST ---
   const {
     transcripts,
-    callDetails,
     callDuration,
     startCall,
     endCall: contextEndCall,
     isMuted,
     toggleMute,
-    // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
     micLevel,
-    modelOutput,
     language,
-    addTranscript, // Added addTranscript to useAssistant
   } = useAssistant();
 
   // Debug isActive changes
@@ -101,7 +94,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   const handleNext = useCallback(() => {
     // Nếu chưa có hội thoại thì không cho xác nhận
     if (!transcripts || transcripts.length === 0) {
-      alert(t('need_conversation', language));
+      logger.warn('No conversation transcript, cannot proceed to interface3.', 'Component');
       return;
     }
     // Capture the current duration for the email
@@ -164,7 +157,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
         }
 
         currentTurn = {
-          id: transcript.id.toString(),
+          id: transcript.id?.toString() || `${Date.now()}-${Math.random()}`,
           role: turnType,
           messages: [],
           timestamp: transcript.timestamp,
@@ -173,7 +166,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
       // Add message to current turn
       currentTurn.messages.push({
-        id: transcript.id.toString(),
+        id: transcript.id?.toString() || `${Date.now()}-${Math.random()}`,
         content: transcript.content,
         timestamp: transcript.timestamp,
       });
@@ -220,7 +213,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
-  }, [conversationTurns, cleanupAnimations]); // FIXED: Removed visibleChars from dependencies to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationTurns, cleanupAnimations]); // Removed visibleChars to prevent infinite loop
 
   // Local timer as a backup to ensure we always have a working timer
   useEffect(() => {

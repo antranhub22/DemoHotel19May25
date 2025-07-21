@@ -444,21 +444,41 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               const ws = new WebSocket(wsUrl);
 
               ws.onopen = () => {
-                ws.send(
-                  JSON.stringify({
-                    type: 'transcript',
-                    call_id: transcript.callId,
-                    role: transcript.role,
-                    content: transcript.content,
-                    timestamp: transcript.timestamp,
-                  })
-                );
-                ws.close(); // Close after sending
+                // Only send when connection is fully established
+                if (ws.readyState === WebSocket.OPEN) {
+                  ws.send(
+                    JSON.stringify({
+                      type: 'transcript',
+                      call_id: transcript.callId,
+                      role: transcript.role,
+                      content: transcript.content,
+                      timestamp: transcript.timestamp,
+                    })
+                  );
+                }
+                // Close after sending with a small delay
+                setTimeout(() => {
+                  if (ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                  }
+                }, 100);
               };
 
               ws.onerror = error => {
                 logger.warn('Failed to send transcript to WebSocket:', 'Component', error);
+                // Ensure cleanup on error
+                if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+                  ws.close();
+                }
               };
+
+              // Add timeout to prevent hanging connections
+              setTimeout(() => {
+                if (ws.readyState === WebSocket.CONNECTING) {
+                  logger.warn('WebSocket connection timeout, closing...', 'Component');
+                  ws.close();
+                }
+              }, 5000);
             }
           } catch (error) {
             logger.warn('Error sending transcript to WebSocket:', 'Component', error);
@@ -486,59 +506,53 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               message.text ||
               message.transcript ||
               message.output;
+
             if (outputContent) {
-              logger.debug('Adding model output to conversation:', 'Component', outputContent);
-
-              // Add as transcript with isModelOutput flag
-              const newTranscript: Transcript = {
-                // ✅ FIX: Remove explicit ID - let database auto-generate
-                // id: Date.now() as unknown as number, // REMOVED
-                callId: callDetails?.id || `call-${Date.now()}`,
-                role: 'assistant',
-                content: outputContent,
-                timestamp: new Date(),
-                isModelOutput: true,
-                tenantId: tenantId || 'default',
-              };
-              logger.debug('Adding new transcript for model output:', 'Component', newTranscript);
-              setTranscripts(prev => {
-                const updated = [...prev, newTranscript];
-                logger.debug('Updated transcripts array:', 'Component', updated);
-                return updated;
-              });
-
-              // Bridge to WebSocket
-              sendTranscriptToWebSocket(newTranscript);
+              logger.debug('Adding model output:', 'Component', outputContent);
+              addModelOutput(outputContent);
             } else {
-              logger.warn('Model output message received but no content found:', 'Component', message);
+              logger.warn('Model output message has no content:', 'Component', message);
             }
+            return;
           }
 
-          // Handle ALL transcript messages (both user and assistant)
-          if (message.type === 'transcript') {
-            logger.debug('Adding transcript:', 'Component', message);
-            const newTranscript: Transcript = {
-              // ✅ FIX: Remove explicit ID - let database auto-generate
-              // id: Date.now() as unknown as number, // REMOVED
-              callId: callDetails?.id || `call-${Date.now()}`,
-              role: message.role, // Keep original role (user or assistant)
-              content: message.content || message.transcript || '',
-              timestamp: new Date(),
-              tenantId: tenantId || 'default',
-            } as Transcript;
-            setTranscripts(prev => [...prev, newTranscript]);
+          // For transcript messages
+          if (message.type === 'transcript' || message.transcript) {
+            const content =
+              message.content || message.text || message.transcript;
+            const role = message.role || 'assistant';
 
-            // Bridge to WebSocket
-            sendTranscriptToWebSocket(newTranscript);
+            if (content) {
+              logger.debug('Adding transcript from Vapi:', 'Component', {
+                role,
+                content,
+              });
+
+              const transcript: Transcript = {
+                id: Date.now(),
+                callId: callDetails?.id || `call-${Date.now()}`,
+                role: role === 'user' ? 'user' : 'assistant',
+                content,
+                timestamp: new Date(),
+                tenantId: tenantId || 'default',
+              };
+
+              addTranscript(transcript);
+
+              // Bridge to WebSocket for compatibility
+              sendTranscriptToWebSocket(transcript);
+            } else {
+              logger.warn('Transcript message has no content:', 'Component', message);
+            }
           }
         };
 
-        vapi.on('message', (message: any) => {
-          try {
-            handleMessage(message);
-          } catch (error) {
-            logger.warn('Error handling Vapi message:', 'Component', error);
-          }
+        // Set up message handler
+        vapi.on('message', handleMessage);
+
+        // Set up error handler
+        vapi.on('error', (error: any) => {
+          logger.error('Vapi error:', 'Component', error);
         });
 
         // ✅ NEW: Trigger call end listeners when call ends
@@ -587,7 +601,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         vapi.stop();
       }
     };
-  }, [language, hotelConfig, tenantId, isEndingCall]); // ✅ FIXED: Removed callDetails?.id to prevent restart loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language, hotelConfig, tenantId, isEndingCall]); // Added deliberate eslint-disable for callDetails and complex dependencies
 
   // ✅ STABILITY: Cleanup on unmount
   useEffect(() => {
@@ -720,9 +735,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
       // Show user-friendly error message
       // You can replace this with a toast notification or modal
-      if (typeof window !== 'undefined') {
-        alert(`Failed to start voice call: ${errorMessage}`);
-      }
+      logger.error(`❌ Failed to start voice call: ${errorMessage}`, 'Component');
 
       // Clean up any partial state
       setCallDuration(0);
@@ -966,9 +979,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       logger.debug('✅ [AssistantContext] endCall() completed successfully', 'Component');
     } catch (error) {
       logger.error('❌ [AssistantContext] CRITICAL ERROR in endCall():', 'Component', error);
-      logger.error('❌ [AssistantContext] Error name:', 'Component', error.name);
-      logger.error('❌ [AssistantContext] Error message:', 'Component', error.message);
-      logger.error('❌ [AssistantContext] Error stack:', 'Component', error.stack);
+      logger.error('❌ [AssistantContext] Error name:', 'Component', (error as Error)?.name);
+      logger.error('❌ [AssistantContext] Error message:', 'Component', (error as Error)?.message);
+      logger.error('❌ [AssistantContext] Error stack:', 'Component', (error as Error)?.stack);
 
       logger.debug('🔄 [AssistantContext] Attempting emergency cleanup...', 'Component');
 

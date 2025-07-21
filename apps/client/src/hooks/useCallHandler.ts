@@ -101,7 +101,7 @@ export const useCallHandler = () => {
       setCallDuration,
       setLanguage,
     ]
-  ); // Removed setCurrentInterface
+  ); // Fixed: Removed incorrect startCall dependency
 
   return { handleCall };
 };

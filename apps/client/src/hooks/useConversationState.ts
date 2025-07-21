@@ -65,7 +65,7 @@ export const useConversationState = ({
       // Manual start in progress - don't override, let it stay true
       logger.debug('⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true', 'Component');
     }
-  }, [callDuration, isCallStarted, manualCallStarted]); // ✅ REMOVED: transcripts.length
+  }, [callDuration, isCallStarted, manualCallStarted, transcripts.length]); // Fixed: Added transcripts.length
 
   // ✅ FIXED: Separate useEffect for showConversation to prevent flickering
   useEffect(() => {
@@ -83,12 +83,12 @@ export const useConversationState = ({
 
     // ✅ OPTIMIZATION: Only update if value actually changes
     if (showConversation !== shouldShowConversation) {
-      logger.debug('🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}', 'Component');
+      logger.debug(`🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`, 'Component');
       setShowConversation(shouldShowConversation);
     } else {
       logger.debug('✅ [useConversationState] showConversation unchanged - no re-render', 'Component');
     }
-  }, [transcripts.length, manualCallStarted, callDuration]); // ✅ FIXED: Removed showConversation to prevent dependency loop
+  }, [transcripts.length, manualCallStarted, callDuration, showConversation]); // Fixed: Re-added showConversation for proper comparison
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
@@ -101,7 +101,7 @@ export const useConversationState = ({
         });
       }, INTERFACE_CONSTANTS.AUTO_SCROLL_DELAY);
     }
-  }, [showConversation, conversationRef]);
+  }, [showConversation]); // Fixed: Removed conversationRef from dependencies as it's a ref
 
   const handleCallStart = useCallback(
     async (lang: Language): Promise<{ success: boolean; error?: string }> => {

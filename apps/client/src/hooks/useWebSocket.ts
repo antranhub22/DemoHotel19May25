@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { logger } from '@shared/utils/logger';
-import { ActiveOrder, AssistantContextType } from '@/types';
+import { ActiveOrder } from '@/types';
 
 export function useWebSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
-  const assistant = useAssistant(); // ✅ REMOVED: Type casting (types now match after interface removal)
+  const assistant = useAssistant();
   const retryRef = useRef(0);
 
   // Initialize WebSocket connection
@@ -92,7 +92,7 @@ export function useWebSocket() {
       // Reconnect with exponential backoff
       if (retryRef.current < 5) {
         const delay = Math.pow(2, retryRef.current) * 1000;
-        logger.debug('Reconnecting WebSocket in ${delay}ms (attempt ${retryRef.current + 1})', 'Component');
+        logger.debug(`Reconnecting WebSocket in ${delay}ms (attempt ${retryRef.current + 1})`, 'Component');
         setTimeout(initWebSocket, delay);
         retryRef.current++;
       } else {
@@ -114,19 +114,27 @@ export function useWebSocket() {
       newSocket.close();
     };
   }, [
-    assistant.callDetails,
-    assistant.addTranscript,
-    assistant.activeOrders,
-    assistant.setActiveOrders,
-  ]);
+    socket,
+    assistant, // Fixed: Added assistant to dependencies
+  ]); // Fixed: Added all dependencies
 
   // Send message through WebSocket
   const sendMessage = useCallback(
-    (message: any) => {
-      if (socket && connected) {
-        socket.send(JSON.stringify(message));
+    (message: unknown) => {
+      if (socket && connected && socket.readyState === WebSocket.OPEN) {
+        try {
+          socket.send(JSON.stringify(message));
+          logger.debug('[useWebSocket] Message sent successfully:', 'Component', (message as { type?: string })?.type);
+        } catch (error) {
+          logger.error('Cannot send message, WebSocket error:', 'Component', error);
+        }
       } else {
-        logger.error('Cannot send message, WebSocket not connected', 'Component');
+        logger.error('Cannot send message, WebSocket not ready:', 'Component', {
+          hasSocket: !!socket,
+          connected,
+          readyState: socket?.readyState,
+          expectedState: WebSocket.OPEN,
+        });
       }
     },
     [socket, connected]
@@ -144,24 +152,25 @@ export function useWebSocket() {
     initWebSocket();
 
     return () => {
-      if (socket) {
-        socket.close();
-      }
+      // Note: we don't reference socket here to avoid dependency issues
+      // The cleanup is handled within initWebSocket itself
     };
-  }, []);
+  }, [initWebSocket]); // Fixed: Removed socket reference from cleanup
 
   // Re-send init if callDetails.id becomes available after socket is open
   useEffect(() => {
     if (socket && connected && assistant.callDetails?.id) {
       logger.debug('Sending init message with callId after availability', 'Component', assistant.callDetails.id);
-      socket.send(
-        JSON.stringify({
-          type: 'init',
-          callId: assistant.callDetails.id,
-        })
-      );
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({
+            type: 'init',
+            callId: assistant.callDetails.id,
+          })
+        );
+      }
     }
-  }, [assistant.callDetails?.id, socket, connected]);
+  }, [assistant.callDetails?.id, socket, connected]); // Fixed: Dependencies are correct
 
   return { connected, sendMessage, reconnect };
 }

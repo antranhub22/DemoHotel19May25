@@ -210,8 +210,8 @@ export const useSendToFrontDeskHandler = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        // Consider replacing with toast notification in production
-        alert(SUCCESS_MESSAGES.REQUEST_SENT);
+        // Use logger instead of alert for better UX
+        logger.success('✅ Request sent to front desk successfully', 'Component');
       }
     },
     [setOrder, onSuccess]
@@ -227,8 +227,8 @@ export const useSendToFrontDeskHandler = ({
       if (onError) {
         onError(errorMessage);
       } else {
-        // Consider replacing with toast notification in production
-        alert(`❌ ${errorMessage}`);
+        // Use logger instead of alert for better UX
+        logger.error(`❌ Failed to send request: ${errorMessage}`, 'Component');
       }
     },
     [onError]
@@ -246,7 +246,7 @@ export const useSendToFrontDeskHandler = ({
       if (onError) {
         onError(errorMsg);
       } else {
-        alert(errorMsg);
+        logger.error(`❌ No order summary available: ${errorMsg}`, 'Component');
       }
       return;
     }

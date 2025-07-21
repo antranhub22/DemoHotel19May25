@@ -125,27 +125,29 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       const errorMessage =
         error instanceof Error ? error.message : 'Lỗi không xác định';
 
+      logger.error('❌ [SiriButtonContainer] Call start error:', 'Component', errorMessage);
+
       if (typeof window !== 'undefined') {
         if (errorMessage.includes('webCallUrl')) {
-          alert(
-            'Không thể khởi tạo cuộc gọi. Vui lòng kiểm tra kết nối internet và thử lại.'
+          logger.warn(
+            'Không thể khởi tạo cuộc gọi. Vui lòng kiểm tra kết nối internet và thử lại.', 'Component'
           );
         } else if (errorMessage.includes('assistant')) {
-          alert('Cấu hình trợ lý gặp vấn đề. Vui lòng liên hệ hỗ trợ.');
+          logger.warn('Cấu hình trợ lý gặp vấn đề. Vui lòng liên hệ hỗ trợ.', 'Component');
         } else if (
           errorMessage.includes('network') ||
           errorMessage.includes('fetch')
         ) {
-          alert('Lỗi mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
+          logger.warn('Lỗi mạng. Vui lòng kiểm tra kết nối internet và thử lại.', 'Component');
         } else if (
           errorMessage.includes('microphone') ||
           errorMessage.includes('permissions')
         ) {
-          alert(
-            'Cần quyền truy cập microphone. Vui lòng cho phép quyền truy cập và thử lại.'
+          logger.warn(
+            'Cần quyền truy cập microphone. Vui lòng cho phép quyền truy cập và thử lại.', 'Component'
           );
         } else {
-          alert(`Không thể bắt đầu cuộc gọi: ${errorMessage}`);
+          logger.warn(`Không thể bắt đầu cuộc gọi: ${errorMessage}`, 'Component');
         }
       }
     }

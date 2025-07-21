@@ -396,14 +396,10 @@ export const useConfirmHandler = ({
             logger.debug('✅ [useConfirmHandler] Completion message shown successfully', 'Component');
           } catch (completionError) {
             logger.error('❌ [useConfirmHandler] Error showing completion message:', 'Component', completionError);
-            // Final fallback - simple alert
+            // Final fallback - simple logger instead of alert
             if (isMountedRef.current) {
-              setTimeout(
-                () =>
-                  alert(
-                    'Call completed successfully! Thank you for using our service.'
-                  ),
-                100
+              logger.success(
+                'Call completed successfully! Thank you for using our service.', 'Component'
               );
             }
           }
@@ -488,14 +484,12 @@ export const useConfirmHandler = ({
             });
           } catch (fallbackError) {
             logger.error('❌ [useConfirmHandler] Fallback popup also failed:', 'Component', fallbackError);
-            // Ultimate fallback - simple alert after delay
-            setTimeout(() => {
-              if (isMountedRef.current) {
-                alert(
-                  'Call completed! There was a technical issue with the summary. Please contact front desk for assistance.'
-                );
-              }
-            }, 500);
+            // Ultimate fallback - simple logger instead of alert
+            if (isMountedRef.current) {
+              logger.error(
+                'Call completed! There was a technical issue with the summary. Please contact front desk for assistance.', 'Component'
+              );
+            }
           }
         }
       }
@@ -507,13 +501,11 @@ export const useConfirmHandler = ({
     } catch (outerError) {
       logger.error('❌ [useConfirmHandler] OUTER ERROR BOUNDARY:', 'Component', outerError);
       // Prevent error from bubbling up to React ErrorBoundary
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          alert(
-            'Call completed! Technical issue occurred. Please contact front desk.'
-          );
-        }
-      }, 100);
+      if (isMountedRef.current) {
+        logger.error(
+          'Call completed! Technical issue occurred. Please contact front desk.', 'Component'
+        );
+      }
     }
   }, [endCall, transcripts, callSummary, serviceRequests, showSummary]);
 

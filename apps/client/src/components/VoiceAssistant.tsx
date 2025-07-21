@@ -65,6 +65,11 @@ const VoiceAssistant: React.FC = () => {
     setLanguage(lang);
   };
 
+  // Update selectedLanguage when language changes from context
+  useEffect(() => {
+    setSelectedLanguage(language);
+  }, [language]); // Fixed: Dependencies are correct
+
   const { logout } = useAuth();
   const isMobile = useIsMobile();
 

@@ -1,19 +1,110 @@
 import { db, call, request } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
-import type { InsertCall } from '@shared/db/schema';
+import bcrypt from 'bcrypt';
+
+// Import staff table and dev users from auth config
+const { staff, tenants } = require('@shared/db/schema');
+const { DEV_CONFIG } = require('../../packages/auth-system/config/auth.config');
 
 export async function seedDevelopmentData() {
+  try {
+    logger.debug('Seeding development data...', 'Component');
+
+    // First, ensure we have a tenant
+    await seedTenant();
+    
+    // Then seed staff users
+    await seedStaffUsers();
+    
+    // Then seed other data
+    await seedCallsAndRequests();
+
+    logger.debug('Development data seeded successfully!', 'Component');
+  } catch (error) {
+    logger.error('Error seeding development data:', 'Component', error);
+  }
+}
+
+async function seedTenant() {
+  try {
+    // Check if tenant exists
+    const existingTenant = await db.select().from(tenants).where(eq(tenants.id, 'mi-nhon-hotel')).limit(1);
+    
+    if (existingTenant.length === 0) {
+      logger.debug('Creating default tenant...', 'Component');
+      await db.insert(tenants).values({
+        id: 'mi-nhon-hotel',
+        hotel_name: 'Mi Nhon Hotel',
+        subdomain: 'minhonmuine',
+        subscription_plan: 'premium',
+        subscription_status: 'active',
+        is_active: true,
+        monthly_call_limit: 1000,
+        max_voices: 5,
+        max_languages: 6,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+      logger.debug('Default tenant created successfully', 'Component');
+    } else {
+      logger.debug('Default tenant already exists', 'Component');
+    }
+  } catch (error) {
+    logger.error('Error seeding tenant:', 'Component', error);
+  }
+}
+
+async function seedStaffUsers() {
+  try {
+    // Check if staff users already exist
+    const existingStaff = await db.select().from(staff).limit(1);
+    
+    if (existingStaff.length > 0) {
+      logger.debug('Staff users already exist, skipping seed...', 'Component');
+      return;
+    }
+
+    logger.debug('Creating development staff users...', 'Component');
+
+    // Create staff users from DEV_CONFIG
+    for (const devUser of DEV_CONFIG.DEFAULT_DEV_USERS) {
+      const hashedPassword = await bcrypt.hash(devUser.password, 10);
+      
+      await db.insert(staff).values({
+        id: `staff-${devUser.username}`,
+        username: devUser.username,
+        email: `${devUser.username}@minhonhotel.com`,
+        password: hashedPassword,
+        role: devUser.role,
+        display_name: devUser.username.charAt(0).toUpperCase() + devUser.username.slice(1),
+        tenant_id: 'mi-nhon-hotel',
+        is_active: true,
+        permissions: JSON.stringify([]), // Will use role-based permissions
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+      
+      logger.debug(`Created staff user: ${devUser.username} (${devUser.role})`, 'Component');
+    }
+    
+    logger.debug('Development staff users created successfully!', 'Component');
+  } catch (error) {
+    logger.error('Error seeding staff users:', 'Component', error);
+  }
+}
+
+async function seedCallsAndRequests() {
   try {
     // Check if data already exists
     const existingCalls = await db.select().from(call).limit(1);
 
     if (existingCalls.length > 0) {
-      logger.debug('Development data already exists, skipping seed...', 'Component');
+      logger.debug('Call/request data already exists, skipping seed...', 'Component');
       return;
     }
 
-    logger.debug('Seeding development data...', 'Component');
+    logger.debug('Seeding call and request data...', 'Component');
 
     // Seed call data
     const callData = [
@@ -104,8 +195,8 @@ export async function seedDevelopmentData() {
       await db.insert(request).values(requestItem);
     }
 
-    logger.debug('Development data seeded successfully!', 'Component');
+    logger.debug('Call and request data seeded successfully!', 'Component');
   } catch (error) {
-    logger.error('Error seeding development data:', 'Component', error);
+    logger.error('Error seeding call and request data:', 'Component', error);
   }
 }

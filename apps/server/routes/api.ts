@@ -8,7 +8,6 @@ import {
   insertCallSummarySchema,
 } from '@shared/schema';
 
-
 import { db } from '@shared/db';
 import {
   call,

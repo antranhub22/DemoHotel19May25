@@ -416,6 +416,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     safeCleanup,
     onCallStart,
     isListening,
+    emergencyStop, // Added missing dependency
   ]);
 
   // ✅ SYNC visual state with props
@@ -426,19 +427,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       // Canvas animations handle listening state internally, no resize needed
       logger.debug('🔧 [SiriCallButton] Listening state updated without resize trigger', 'Component');
     }
-  }, [isListening, containerId]);
+  }, [isListening]); // Fixed: Removed containerId as it's not used in this effect
 
   useEffect(() => {
     if (buttonRef.current && !cleanupFlagRef.current) {
       buttonRef.current.setVolumeLevel(volumeLevel);
     }
-  }, [volumeLevel]);
+  }, [volumeLevel]); // Dependencies are correct
 
   useEffect(() => {
     if (buttonRef.current && colors && !cleanupFlagRef.current) {
       buttonRef.current.updateColors(colors);
     }
-  }, [colors]);
+  }, [colors]); // Dependencies are correct
 
   // Mobile touch handler - unified with desktop logic
   const handleDirectTouch = async (e: any) => {
