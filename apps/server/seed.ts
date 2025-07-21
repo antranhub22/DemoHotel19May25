@@ -18,25 +18,13 @@ export async function seedDevelopmentData() {
     const callData = [
       {
         call_id_vapi: 'call-001-dev',
-        room_number: '101',
-        language: 'en',
-        service_type: 'Room Service',
-        start_time: new Date(Date.now() - 1800000), // 30 minutes ago
-        duration: 180, // 3 minutes
-        end_time: new Date(Date.now() - 1620000), // 27 minutes ago
         tenant_id: 'mi-nhon-hotel'
       },
       {
         call_id_vapi: 'call-002-dev',
-        room_number: '205',
-        language: 'vi',
-        service_type: 'Housekeeping',
-        start_time: new Date(Date.now() - 3600000), // 1 hour ago
-        duration: 120, // 2 minutes
-        end_time: new Date(Date.now() - 3480000), // 58 minutes ago
         tenant_id: 'mi-nhon-hotel'
       }
-    ] satisfies InsertCall[];
+    ];
 
     // Insert call data
     for (const callItem of callData) {

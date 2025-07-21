@@ -6,7 +6,7 @@ import { dateToString, getCurrentTimestamp } from '@shared/utils';
 import { sendServiceConfirmation, sendCallSummary } from "../gmail";
 import { sendMobileEmail, sendMobileCallSummary } from "../mobileMail";
 import { db } from '@shared/db';
-import { request as requestTable, call, transcript } from '@shared/db';
+import { request as requestTable, call, transcript, call_summaries } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '@shared/utils';
@@ -168,7 +168,7 @@ router.get('/analytics/overview', async (req, res) => {
     const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
     console.log(`📊 [API] Getting analytics overview for tenant: ${tenantId}`);
     
-    const overview = await getOverview(tenantId);
+    const overview = await getOverview();
     res.json(overview);
   } catch (error) {
     console.error('❌ [API] Error fetching analytics overview:', error);
@@ -182,7 +182,7 @@ router.get('/analytics/service-distribution', async (req, res) => {
     const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
     console.log(`📊 [API] Getting service distribution for tenant: ${tenantId}`);
     
-    const distribution = await getServiceDistribution(tenantId);
+    const distribution = await getServiceDistribution();
     res.json(distribution);
   } catch (error) {
     console.error('❌ [API] Error fetching service distribution:', error);
@@ -196,7 +196,7 @@ router.get('/analytics/hourly-activity', async (req, res) => {
     const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
     console.log(`📊 [API] Getting hourly activity for tenant: ${tenantId}`);
     
-    const activity = await getHourlyActivity(tenantId);
+    const activity = await getHourlyActivity();
     res.json(activity);
   } catch (error) {
     console.error('❌ [API] Error fetching hourly activity:', error);

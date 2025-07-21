@@ -74,11 +74,16 @@ router.post('/orders', express.json(), async (req, res) => {
 
     // Send email notification
     try {
-      await sendServiceConfirmation({
-        roomNumber,
-        requestContent,
-        orderId
-      });
+      await sendServiceConfirmation(
+        'frontdesk@minhonhotel.com', // Default email for order notifications
+        {
+          serviceType: 'Service Request',
+          roomNumber,
+          timestamp: new Date(),
+          details: requestContent,
+          orderReference: orderId
+        }
+      );
       console.log(`📧 [ORDERS] Email notification sent for order: ${orderId}`);
     } catch (emailError) {
       console.warn(`⚠️ [ORDERS] Email notification failed for order: ${orderId}`, emailError);

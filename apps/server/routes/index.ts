@@ -6,7 +6,7 @@ import analyticsRoutes from './analytics';
 import dashboardRoutes from './dashboard';
 import healthRoutes from './health';
 import requestRoutes from './request';
-import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
+// import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 
 const router = express.Router();
 
@@ -18,6 +18,6 @@ router.use('/api', analyticsRoutes);
 router.use('/api', dashboardRoutes);
 router.use('/api', healthRoutes);
 router.use('/api', requestRoutes);
-router.use('/api/auth', unifiedAuthRoutes);
+// router.use('/api/auth', unifiedAuthRoutes);
 
 export default router; 

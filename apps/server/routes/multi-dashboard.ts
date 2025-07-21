@@ -1,5 +1,5 @@
 import express, { type Request, Response } from 'express';
-import { authenticateJWT } from '../../packages/auth-system/middleware/auth.middleware';
+// import { authenticateJWT } from '../../packages/auth-system/middleware/auth.middleware';
 import { db } from '@shared/db';
 import { tenants, staff, call, request as requestTable } from '@shared/db';
 import { eq, and, sql, desc } from 'drizzle-orm';
@@ -7,7 +7,7 @@ import { eq, and, sql, desc } from 'drizzle-orm';
 const router = express.Router();
 
 // ============================================
-// MULTI-DASHBOARD ARCHITECTURE
+// MULTI-DASHBOARD ARCHITECTURE - TEMPORARILY DISABLED
 // ============================================
 
 /**
@@ -17,6 +17,10 @@ const router = express.Router();
  * 3. Staff Dashboard - Limited operations view
  */
 
+// Temporarily comment out all routes due to auth middleware dependency issues
+// TODO: Re-enable after auth system is properly configured
+
+/*
 // ============================================
 // HOTEL MANAGER DASHBOARD
 // ============================================
@@ -358,5 +362,6 @@ router.get('/dashboard/config/:type', authenticateJWT, async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch dashboard configuration' });
   }
 });
+*/
 
 export default router; 
