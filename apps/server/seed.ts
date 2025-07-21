@@ -1,11 +1,10 @@
-import { db, call, request } from '@shared/db';
+import { db, call, request, staff, tenants } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 import bcrypt from 'bcrypt';
 
-// Import staff table and dev users from auth config
-const { staff, tenants } = require('@shared/db/schema');
-const { DEV_CONFIG } = require('../../packages/auth-system/config/auth.config');
+// Import dev users from auth config
+import { DEV_CONFIG } from '../../packages/auth-system/config/auth.config';
 
 export async function seedDevelopmentData() {
   try {
@@ -13,10 +12,10 @@ export async function seedDevelopmentData() {
 
     // First, ensure we have a tenant
     await seedTenant();
-    
+
     // Then seed staff users
     await seedStaffUsers();
-    
+
     // Then seed other data
     await seedCallsAndRequests();
 
@@ -29,8 +28,12 @@ export async function seedDevelopmentData() {
 async function seedTenant() {
   try {
     // Check if tenant exists
-    const existingTenant = await db.select().from(tenants).where(eq(tenants.id, 'mi-nhon-hotel')).limit(1);
-    
+    const existingTenant = await db
+      .select()
+      .from(tenants)
+      .where(eq(tenants.id, 'mi-nhon-hotel'))
+      .limit(1);
+
     if (existingTenant.length === 0) {
       logger.debug('Creating default tenant...', 'Component');
       await db.insert(tenants).values({
@@ -59,7 +62,7 @@ async function seedStaffUsers() {
   try {
     // Check if staff users already exist
     const existingStaff = await db.select().from(staff).limit(1);
-    
+
     if (existingStaff.length > 0) {
       logger.debug('Staff users already exist, skipping seed...', 'Component');
       return;
@@ -70,24 +73,28 @@ async function seedStaffUsers() {
     // Create staff users from DEV_CONFIG
     for (const devUser of DEV_CONFIG.DEFAULT_DEV_USERS) {
       const hashedPassword = await bcrypt.hash(devUser.password, 10);
-      
+
       await db.insert(staff).values({
         id: `staff-${devUser.username}`,
         username: devUser.username,
         email: `${devUser.username}@minhonhotel.com`,
         password: hashedPassword,
         role: devUser.role,
-        display_name: devUser.username.charAt(0).toUpperCase() + devUser.username.slice(1),
+        display_name:
+          devUser.username.charAt(0).toUpperCase() + devUser.username.slice(1),
         tenant_id: 'mi-nhon-hotel',
         is_active: true,
         permissions: JSON.stringify([]), // Will use role-based permissions
         created_at: new Date(),
         updated_at: new Date(),
       });
-      
-      logger.debug(`Created staff user: ${devUser.username} (${devUser.role})`, 'Component');
+
+      logger.debug(
+        `Created staff user: ${devUser.username} (${devUser.role})`,
+        'Component'
+      );
     }
-    
+
     logger.debug('Development staff users created successfully!', 'Component');
   } catch (error) {
     logger.error('Error seeding staff users:', 'Component', error);
@@ -100,7 +107,10 @@ async function seedCallsAndRequests() {
     const existingCalls = await db.select().from(call).limit(1);
 
     if (existingCalls.length > 0) {
-      logger.debug('Call/request data already exists, skipping seed...', 'Component');
+      logger.debug(
+        'Call/request data already exists, skipping seed...',
+        'Component'
+      );
       return;
     }
 
