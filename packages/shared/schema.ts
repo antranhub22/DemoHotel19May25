@@ -110,10 +110,4 @@ export const DashboardStatsSchema = z.object({
 
 export type DashboardStats = z.infer<typeof DashboardStatsSchema>;
 
-// ==============================================================
-// Legacy Support (Deprecated - for backward compatibility only)
-// ==============================================================
 
-export const UsersSchema = insertStaffSchema; // Deprecated: Use insertStaffSchema
-export const OrdersSchema = insertRequestSchema; // Deprecated: Use insertRequestSchema
-// REMOVED: insertOrderSchema - use insertRequestSchema directly

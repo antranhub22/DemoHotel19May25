@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { Pool } from 'pg';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 

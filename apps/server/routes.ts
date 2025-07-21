@@ -13,7 +13,7 @@ import { sendMobileEmail, sendMobileCallSummary } from "./mobileMail";
 import axios from "axios";
 import express, { type Request, Response } from 'express';
 import { authenticateJWT } from '../../packages/auth-system/middleware/auth.middleware';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Staff } from './models/Staff';
 import { Request as StaffRequest } from './models/Request';

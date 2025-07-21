@@ -5,7 +5,7 @@
 // a single source of truth for authentication and authorization
 
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { eq, and } from 'drizzle-orm';
 import { db, staff, tenants } from '../../shared/db';
 
