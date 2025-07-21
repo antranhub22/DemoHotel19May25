@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { IntegrationTestSuite } from '../tests/integration-test-suite';
+import { IntegrationTestSuite } from '../../../tests/integration-test-suite';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -387,9 +387,14 @@ class IntegrationTestRunner {
 
   private async checkServerHealth(): Promise<boolean> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch('http://localhost:3000/api/db-test', {
-        timeout: 5000,
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {
       return false;
@@ -409,7 +414,7 @@ ${Object.entries(TEST_SCENARIOS)
 📋 ${name.toUpperCase()}
    Description: ${config.description}
    Mock Data: ${config.useMockData ? 'Yes' : 'No'}
-   Database: ${config.databaseUrl ? 'PostgreSQL' : 'SQLite'}
+   Database: ${'databaseUrl' in config && config.databaseUrl ? 'PostgreSQL' : 'SQLite'}
    Timeout: ${config.testTimeout}ms
    Cleanup: ${config.cleanupOnFailure ? 'Yes' : 'No'}
 `

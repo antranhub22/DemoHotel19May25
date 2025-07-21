@@ -2,7 +2,7 @@
 
 // Script to setup SQLite database for development
 import Database from 'better-sqlite3';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import fs from 'fs';
 import path from 'path';
 

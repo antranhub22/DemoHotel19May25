@@ -5,7 +5,7 @@
  * Validates all required environment variables before deployment
  */
 
-import { validateEnvironment } from '../../packages/config/environment';
+import { validateEnvironment } from '../../../packages/config/environment';
 
 const REQUIRED_VARS = [
   'DATABASE_URL',

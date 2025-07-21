@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { DatabaseMigrationTest } from '../migrations/test-migration';
+import { DatabaseMigrationTest } from '../../migrations/test-migration';
 import * as fs from 'fs';
 import * as path from 'path';
 

@@ -19,7 +19,7 @@ import {
   request,
   message,
   staff,
-} from '../src/db/schema';
+} from '@shared/db';
 
 // ============================================
 // Test Configuration
@@ -473,26 +473,26 @@ export class DatabaseMigrationTest {
     const miNhonTranscripts = await this.db
       .select()
       .from(transcript)
-      .where(eq(transcript.tenantId, this.miNhonTenantId))
+      .where(eq(transcript.tenant_id, this.miNhonTenantId))
       .limit(5);
 
     const miNhonRequests = await this.db
       .select()
       .from(request)
-      .where(eq(request.tenantId, this.miNhonTenantId))
+      .where(eq(request.tenant_id, this.miNhonTenantId))
       .limit(5);
 
     const miNhonStaff = await this.db
       .select()
       .from(staff)
-      .where(eq(staff.tenantId, this.miNhonTenantId))
+      .where(eq(staff.tenant_id, this.miNhonTenantId))
       .limit(5);
 
     // Verify data is correctly associated
     const isAssociatedCorrectly =
-      miNhonTranscripts.every(t => t.tenantId === this.miNhonTenantId) &&
-      miNhonRequests.every(r => r.tenantId === this.miNhonTenantId) &&
-      miNhonStaff.every(s => s.tenantId === this.miNhonTenantId);
+      miNhonTranscripts.every(t => t.tenant_id === this.miNhonTenantId) &&
+      miNhonRequests.every(r => r.tenant_id === this.miNhonTenantId) &&
+      miNhonStaff.every(s => s.tenant_id === this.miNhonTenantId);
 
     this.results.dataIntegrity.miNhonData.associatedCorrectly =
       isAssociatedCorrectly;
@@ -543,15 +543,15 @@ export class DatabaseMigrationTest {
     const isolatedRequests = await this.db
       .select()
       .from(request)
-      .where(eq(request.tenantId, this.testTenantId));
+      .where(eq(request.tenant_id, this.testTenantId));
 
     const miNhonDataVisible = await this.db
       .select()
       .from(request)
       .where(
         and(
-          eq(request.tenantId, this.miNhonTenantId!),
-          eq(request.tenantId, this.testTenantId)
+          eq(request.tenant_id, this.miNhonTenantId!),
+          eq(request.tenant_id, this.testTenantId)
         )
       );
 
@@ -592,7 +592,7 @@ export class DatabaseMigrationTest {
     await this.db
       .select()
       .from(transcript)
-      .where(eq(transcript.tenantId, this.miNhonTenantId))
+      .where(eq(transcript.tenant_id, this.miNhonTenantId))
       .limit(100);
 
     const duration = performance.now() - start;
@@ -633,7 +633,7 @@ export class DatabaseMigrationTest {
 
         await this.db
           .delete(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId));
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId));
         await this.db
           .delete(tenants)
           .where(eq(tenants.id, this.miNhonTenantId));
@@ -725,7 +725,7 @@ export class DatabaseMigrationTest {
     const orphanedMessages = await this.db
       .select()
       .from(message)
-      .leftJoin(request, eq(message.requestId, request.id))
+      .leftJoin(request, eq(message.request_id, request.id))
       .where(sql`request.id IS NULL`);
 
     if (orphanedMessages.length > 0) {
@@ -756,8 +756,8 @@ export class DatabaseMigrationTest {
       .from(request)
       .where(
         and(
-          eq(request.tenantId, this.miNhonTenantId),
-          eq(request.tenantId, this.testTenantId)
+          eq(request.tenant_id, this.miNhonTenantId),
+          eq(request.tenant_id, this.testTenantId)
         )
       );
 
@@ -771,7 +771,7 @@ export class DatabaseMigrationTest {
     const inconsistentProfiles = await this.db
       .select()
       .from(hotelProfiles)
-      .leftJoin(tenants, eq(hotelProfiles.tenantId, tenants.id))
+      .leftJoin(tenants, eq(hotelProfiles.tenant_id, tenants.id))
       .where(sql`tenants.id IS NULL`);
 
     if (inconsistentProfiles.length > 0) {
@@ -820,7 +820,7 @@ COMMIT;
       try {
         await this.db
           .delete(request)
-          .where(eq(request.tenantId, this.testTenantId));
+          .where(eq(request.tenant_id, this.testTenantId));
         await this.db.delete(tenants).where(eq(tenants.id, this.testTenantId));
       } catch (error) {
         this.log(`Could not cleanup test tenant: ${error.message}`, 'warn');

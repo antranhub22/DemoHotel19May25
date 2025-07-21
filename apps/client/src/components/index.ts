@@ -6,7 +6,6 @@
 export { Interface1 } from './Interface1';
 
 // Legacy interfaces - Lazy loaded to reduce bundle size
-export const Interface2 = React.lazy(() => import('./Interface2'));
 export const Interface3 = React.lazy(() => import('./Interface3'));
 export const Interface4 = React.lazy(() => import('./Interface4'));
 

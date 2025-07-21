@@ -12,51 +12,16 @@ import {
   getPermissionsForRole,
   hasRolePermission,
 } from '../../types/permissions';
+import {
+  AuthUser,
+  TenantData,
+} from '../../types/auth';
 
 // ============================================
-// Types & Interfaces
+// Types & Interfaces  
 // ============================================
 
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  tenantId: string;
-  role: UserRole; // Updated to use UserRole type
-  permissions: Permission[];
-  avatar?: string;
-}
-
-export interface TenantData {
-  id: string;
-  hotelName: string;
-  subdomain: string;
-  subscriptionPlan: 'trial' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'expired' | 'cancelled';
-  trialEndsAt?: Date;
-  remainingDays?: number;
-  customDomain?: string;
-  features?: {
-    voiceCloning: boolean;
-    multiLocation: boolean;
-    whiteLabel: boolean;
-    advancedAnalytics: boolean;
-    apiAccess: boolean;
-  };
-  limits?: {
-    maxCalls: number;
-    maxAssistants: number;
-    maxLanguages: number;
-    dataRetentionDays: number;
-  };
-  usage?: {
-    totalCalls: number;
-    currentMonth: number;
-    remainingCalls: number;
-  };
-}
-
-export interface AuthContextType {
+interface AuthContextType {
   user: AuthUser | null;
   tenant: TenantData | null;
   isAuthenticated: boolean;
@@ -162,11 +127,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const mappedRole = mapLegacyRole(decoded.role);
       const userFromToken: AuthUser = {
         id: decoded.username, // Use username as id
-        name: decoded.username,
+        username: decoded.username,
+        displayName: decoded.username,
         email: decoded.username,
         tenantId: decoded.tenantId,
         role: mappedRole,
         permissions: getPermissionsForRole(mappedRole),
+        isActive: true,
       };
 
       // Tạo tenant object từ token payload
@@ -208,11 +175,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Sử dụng user data từ unified auth response
       const userFromResponse: AuthUser = {
         id: data.user.id,
-        name: data.user.displayName || data.user.username,
+        username: data.user.username,
+        displayName: data.user.displayName || data.user.username,
         email: data.user.email,
         tenantId: data.user.tenantId,
         role: data.user.role,
         permissions: data.user.permissions || [],
+        isActive: true,
       };
 
       // Tạo tenant object từ user data

@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
-import { db } from '../../packages/shared/db/index.js';
-import { tenants } from '../../packages/shared/db/schema.js';
+import { db } from '@shared/db';
+import { tenants } from '@shared/db';
 
 async function listTenants() {
   try {

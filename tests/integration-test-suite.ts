@@ -11,7 +11,7 @@ import { performance } from 'perf_hooks';
 import fetch from 'node-fetch';
 
 // Import services
-import { HotelResearchService } from '../apps/server/services/hotelResearch';
+import { HotelResearchService, BasicHotelData } from '../apps/server/services/hotelResearch';
 import { KnowledgeBaseGenerator } from '../apps/server/services/knowledgeBaseGenerator';
 import {
   VapiIntegrationService,
@@ -151,11 +151,40 @@ const MOCK_NEW_TENANT_DATA = {
     name: 'Grand Test Hotel',
     address: '123 Test Street, Test City',
     phone: '+1-555-TEST',
+    location: {
+      lat: 10.7769,
+      lng: 106.7009,
+    },
+    categories: ['hotel', 'lodging'],
     services: [
-      { name: 'Room Service', type: 'room_service', available: true },
-      { name: 'Concierge', type: 'concierge', available: true },
+      { name: 'Room Service', description: 'In-room dining service', type: 'room_service', category: 'dining', available: true },
+      { name: 'Concierge', description: 'Guest assistance service', type: 'concierge', category: 'service', available: true },
     ],
     amenities: ['Free WiFi', 'Pool', 'Gym'],
+    policies: {
+      checkIn: '15:00',
+      checkOut: '11:00',
+      cancellation: 'Free cancellation before 24 hours',
+      petPolicy: 'Pets not allowed',
+      smokingPolicy: 'No smoking',
+    },
+    roomTypes: [
+      {
+        name: 'Standard Room',
+        description: 'Comfortable standard accommodation',
+        maxOccupancy: 2,
+        amenities: ['AC', 'WiFi', 'TV'],
+        basePrice: 100,
+      },
+    ],
+    localAttractions: [
+      {
+        name: 'Test Beach',
+        description: 'Beautiful local beach',
+        distance: '5 minutes walk',
+        category: 'beach',
+      },
+    ],
   },
 };
 
@@ -312,7 +341,7 @@ export class IntegrationTestSuite {
         const miNhonTenant = await this.db
           .select()
           .from(tenants)
-          .where(eq(tenants.hotelName, 'Mi Nhon Hotel'))
+          .where(eq(tenants.hotel_name, 'Mi Nhon Hotel'))
           .limit(1);
 
         if (!miNhonTenant || miNhonTenant.length === 0) {
@@ -333,14 +362,14 @@ export class IntegrationTestSuite {
         const transcripts = await this.db
           .select()
           .from(transcript)
-          .where(eq(transcript.tenantId, this.miNhonTenantId))
+          .where(eq(transcript.tenant_id, this.miNhonTenantId))
           .limit(10);
 
         // Check if existing calls are associated with Mi Nhon
         const calls = await this.db
           .select()
           .from(call)
-          .where(eq(call.tenantId, this.miNhonTenantId))
+          .where(eq(call.tenant_id, this.miNhonTenantId))
           .limit(10);
 
         this.log(
@@ -386,7 +415,7 @@ export class IntegrationTestSuite {
         const miNhonProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         if (!miNhonProfile || miNhonProfile.length === 0) {
@@ -415,7 +444,7 @@ export class IntegrationTestSuite {
         await this.db
           .select()
           .from(transcript)
-          .where(eq(transcript.tenantId, this.miNhonTenantId))
+          .where(eq(transcript.tenant_id, this.miNhonTenantId))
           .limit(100);
 
         const endTime = performance.now();
@@ -485,7 +514,7 @@ export class IntegrationTestSuite {
         const tenantData = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId));
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId));
 
         if (tenantData.length !== 1) {
           throw new Error('Tenant data isolation failed');
@@ -511,7 +540,7 @@ export class IntegrationTestSuite {
 
           // Generate knowledge base
           const knowledgeBase =
-            knowledgeBaseGenerator.generateKnowledgeBase(hotelData);
+            knowledgeBaseGenerator.generateKnowledgeBase(hotelData as unknown as BasicHotelData);
           if (!knowledgeBase || knowledgeBase.length < 100) {
             throw new Error('Knowledge base generation failed');
           }
@@ -539,7 +568,7 @@ export class IntegrationTestSuite {
           await this.db
             .update(hotelProfiles)
             .set({ vapiAssistantId: this.testAssistantId })
-            .where(eq(hotelProfiles.tenantId, this.testTenantId));
+            .where(eq(hotelProfiles.tenant_id, this.testTenantId));
 
           this.results.newTenantFunctionality.assistantCreationWorks = true;
           this.log(
@@ -619,12 +648,12 @@ export class IntegrationTestSuite {
         const miNhonData = await this.db
           .select()
           .from(transcript)
-          .where(eq(transcript.tenantId, this.miNhonTenantId));
+          .where(eq(transcript.tenant_id, this.miNhonTenantId));
 
         const testTenantData = await this.db
           .select()
           .from(transcript)
-          .where(eq(transcript.tenantId, this.testTenantId));
+          .where(eq(transcript.tenant_id, this.testTenantId));
 
         // Check that each tenant only sees their own data
         const miNhonHasTestData = miNhonData.some(
@@ -655,8 +684,8 @@ export class IntegrationTestSuite {
             .from(hotelProfiles)
             .where(
               and(
-                eq(hotelProfiles.tenantId, this.miNhonTenantId),
-                eq(hotelProfiles.tenantId, this.testTenantId)
+                eq(hotelProfiles.tenant_id, this.miNhonTenantId),
+                eq(hotelProfiles.tenant_id, this.testTenantId)
               )
             );
 
@@ -685,12 +714,12 @@ export class IntegrationTestSuite {
         const miNhonCount = await this.db
           .select({ count: count() })
           .from(transcript)
-          .where(eq(transcript.tenantId, this.miNhonTenantId));
+          .where(eq(transcript.tenant_id, this.miNhonTenantId));
 
         const testTenantCount = await this.db
           .select({ count: count() })
           .from(transcript)
-          .where(eq(transcript.tenantId, this.testTenantId));
+          .where(eq(transcript.tenant_id, this.testTenantId));
 
         // Verify counts are different (proving isolation)
         this.log(
@@ -713,12 +742,12 @@ export class IntegrationTestSuite {
         const miNhonProfiles = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId));
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId));
 
         const testProfiles = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId));
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId));
 
         // Verify that filtered queries return subset of all data
         if (miNhonProfiles.length + testProfiles.length > allProfiles.length) {
@@ -811,12 +840,12 @@ export class IntegrationTestSuite {
         const miNhonAnalytics = await this.db
           .select()
           .from(call)
-          .where(eq(call.tenantId, this.miNhonTenantId));
+          .where(eq(call.tenant_id, this.miNhonTenantId));
 
         const testTenantAnalytics = await this.db
           .select()
           .from(call)
-          .where(eq(call.tenantId, this.testTenantId));
+          .where(eq(call.tenant_id, this.testTenantId));
 
         if (miNhonAnalytics.length === 0 || testTenantAnalytics.length === 0) {
           throw new Error('Analytics data not properly isolated');
@@ -866,13 +895,13 @@ export class IntegrationTestSuite {
         const miNhonProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         const testProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId))
           .limit(1);
 
         // Verify data integrity
@@ -880,7 +909,7 @@ export class IntegrationTestSuite {
           throw new Error('Hotel profiles not found');
         }
 
-        if (miNhonProfile[0].tenantId === testProfile[0].tenantId) {
+        if (miNhonProfile[0].tenant_id === testProfile[0].tenant_id) {
           throw new Error('Tenant data mixing detected');
         }
 
@@ -906,7 +935,7 @@ export class IntegrationTestSuite {
         const miNhonProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         if (miNhonProfile.length > 0 && miNhonProfile[0].vapiAssistantId) {
@@ -937,7 +966,7 @@ export class IntegrationTestSuite {
         const testProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId))
           .limit(1);
 
         if (testProfile.length > 0 && testProfile[0].vapiAssistantId) {
@@ -961,13 +990,13 @@ export class IntegrationTestSuite {
         const miNhonProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         const testProfile = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId))
           .limit(1);
 
         if (miNhonProfile[0]?.knowledgeBase === testProfile[0]?.knowledgeBase) {
@@ -988,13 +1017,13 @@ export class IntegrationTestSuite {
         const miNhonAssistant = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.miNhonTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         const testAssistant = await this.db
           .select()
           .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenantId, this.testTenantId))
+          .where(eq(hotelProfiles.tenant_id, this.testTenantId))
           .limit(1);
 
         if (
