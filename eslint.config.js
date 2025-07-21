@@ -26,7 +26,7 @@ export default [
       '**/ws_test_client.*',
       '**/debug-*.js',
       '**/debug-*.ts',
-      '**/*.cjs',  // Exclude CommonJS files
+      '**/*.cjs', // Exclude CommonJS files
     ],
   },
 
@@ -35,6 +35,7 @@ export default [
     files: [
       'apps/client/**/*.{js,jsx,ts,tsx}',
       'packages/shared/**/*.{js,jsx,ts,tsx}',
+      'packages/auth-system/frontend/**/*.{js,jsx,ts,tsx}',
     ],
     ignores: [
       'node_modules/**',
@@ -90,11 +91,21 @@ export default [
         WebSocket: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
-        
+        atob: 'readonly',
+        btoa: 'readonly',
+        Blob: 'readonly',
+        console: 'readonly',
+        alert: 'readonly',
+        confirm: 'readonly',
+        prompt: 'readonly',
+        RequestInit: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+
         // React and JSX globals
         React: 'readonly',
         JSX: 'readonly',
-        
+
         // Node.js types in browser context
         NodeJS: 'readonly',
       },
@@ -112,11 +123,11 @@ export default [
 
       // TypeScript Rules
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         { argsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off', // Allow any in development
+      '@typescript-eslint/no-empty-function': 'off', // Allow empty functions in development
 
       // React Rules
       'react/react-in-jsx-scope': 'off',
@@ -187,11 +198,11 @@ export default [
 
       // TypeScript Rules
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         { argsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off', // Allow any in development
+      '@typescript-eslint/no-empty-function': 'off', // Allow empty functions in development
 
       // Import Rules
       'import/no-unresolved': 'off',

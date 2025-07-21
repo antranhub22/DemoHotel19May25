@@ -5,20 +5,12 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
-import {
-  UserRole,
-  Permission,
-  getPermissionsForRole,
-  hasRolePermission,
-} from '../../types/permissions';
-import {
-  AuthUser,
-  TenantData,
-} from '../../types/auth';
+import { jwtDecode } from 'jwt-decode';
+import { UserRole, getPermissionsForRole } from '../../types/permissions';
+import { AuthUser, TenantData } from '../../types/auth';
 
 // ============================================
-// Types & Interfaces  
+// Types & Interfaces
 // ============================================
 
 interface AuthContextType {
