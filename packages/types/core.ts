@@ -196,7 +196,6 @@ export interface Staff {
 
 export type InterfaceLayer =
   | 'interface1'
-  | 'interface2'
   | 'interface3'
   | 'interface3vi'
   | 'interface3fr'

@@ -59,7 +59,6 @@ export const useCallHandler = () => {
       if ((!publicKey || !assistantId) && isDevelopment) {
         logger.warn('[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing', 'Component');
         setLanguage(lang);
-        // setCurrentInterface('interface2');
         return { success: true, isDevelopment: true };
       }
 
@@ -75,9 +74,6 @@ export const useCallHandler = () => {
 
         if (assistantId) {
           logger.debug('[useCallHandler] Starting Vapi call with assistant ID:', 'Component', assistantId);
-
-          // Debug logging for interface switching
-          // setCurrentInterface('interface2');
 
           return { success: true };
         } else {

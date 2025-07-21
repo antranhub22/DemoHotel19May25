@@ -612,12 +612,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // ✅ REMOVED: Interface2 timer logic (focus Interface1 only)
-  // useEffect(() => {
-  //   if (currentInterface === 'interface2') {
-  //     // Timer logic for interface2...
-  //   }
-  // }, []);
+
 
   // Format duration for display
   const formatDuration = (seconds: number) => {
@@ -715,9 +710,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // Store timer ID for cleanup
       setCallTimer(timer);
 
-      // DISABLED: Don't auto-switch to Interface2 to allow popup to show in Interface1
-      // Update interface to show call in progress
-      // setCurrentInterface('interface2');
+
     } catch (error) {
       logger.error('❌ [startCall] Error starting call:', 'Component', error);
 

@@ -315,7 +315,6 @@ function Router() {
       <Switch>
         <Route path="/" component={VoiceAssistant} />
         <Route path="/interface1" component={VoiceAssistant} />
-        <Route path="/interface2" component={VoiceAssistant} />
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />
         <Route path="/call-history" component={CallHistory} />

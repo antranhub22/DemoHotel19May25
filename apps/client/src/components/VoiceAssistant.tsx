@@ -4,8 +4,7 @@ import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
 import { Interface1 } from '@/components/Interface1';
-// ✅ PERFORMANCE: Lazy load Interface2,3,4 to exclude from initial bundle
-// import { Interface2 } from '@/components/Interface2';
+// ✅ PERFORMANCE: Lazy load Interface3,4 to exclude from initial bundle
 // import { Interface3 } from '@/components/Interface3';
 // import { Interface4 } from '@/components/Interface4';
 import { useAssistant } from '@/context/AssistantContext';
@@ -42,7 +41,6 @@ const VoiceAssistant: React.FC = () => {
   // This prevents unnecessary re-renders and hook count changes
   const [stableInterfaceStates] = useState({
     interface1: true, // Always active
-    interface2: false,
     interface3: false,
     interface3vi: false,
     interface3fr: false,
@@ -145,7 +143,6 @@ const VoiceAssistant: React.FC = () => {
           </ErrorBoundary>
 
           {/* ✅ DISCONNECTED: Keep files but don't render 
-        <Interface2 isActive={interfaceStates.interface2} />
         <Interface3 isActive={interfaceStates.interface3 || interfaceStates.interface3vi || interfaceStates.interface3fr} />
         <Interface4 isActive={interfaceStates.interface4} />
         */}
