@@ -1,102 +1,84 @@
-/**
- * Authentication Helper - Auto-login for Development
- */
+import { jwtDecode } from 'jwt-decode';
+import { logger } from '@shared/utils/logger';
 
-const DEV_TOKEN_KEY = 'dev_auth_token';
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
 
-/**
- * Generate a development token for testing
- */
-export const generateDevToken = async (): Promise<string> => {
-  const credentials = [
-    { username: 'manager', password: 'manager123' },
-    { username: 'frontdesk', password: 'frontdesk123' },
-    { username: 'itmanager', password: 'itmanager123' },
-  ];
+// Development credentials for testing
+const DEV_CREDENTIALS: LoginCredentials[] = [
+  { username: 'admin', password: 'admin123' },
+  { username: 'manager', password: 'manager123' },
+  { username: 'frontdesk', password: 'frontdesk123' },
+  { username: 'itmanager', password: 'itmanager123' },
+];
 
-  for (const cred of credentials) {
-    try {
-      logger.debug('🔐 [AuthHelper] Trying login with ${cred.username}...', 'Component');
+export const attemptLogin = async (cred: LoginCredentials): Promise<string | null> => {
+  try {
+    logger.debug(`🔐 [AuthHelper] Trying login with ${cred.username}...`, 'Component');
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cred),
-      });
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cred),
+    });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.token) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem(DEV_TOKEN_KEY, 'true');
-          logger.debug('✅ [AuthHelper] Dev token generated with ${cred.username}', 'Component');
-          return data.token;
-        }
-      } else {
-        logger.warn('⚠️ [AuthHelper] Login failed for ${cred.username}:', 'Component', response.status);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        logger.debug(`✅ [AuthHelper] Dev token generated with ${cred.username}`, 'Component');
+        return data.token;
       }
-    } catch (error) {
-      logger.warn('⚠️ [AuthHelper] Error with ${cred.username}:', 'Component', error);
+    } else {
+      logger.warn(`⚠️ [AuthHelper] Login failed for ${cred.username}: ${response.status}`, 'Component');
     }
+  } catch (error) {
+    logger.warn(`⚠️ [AuthHelper] Error with ${cred.username}:`, 'Component', error);
   }
-
-  throw new Error('Failed to generate dev token with any credentials');
+  return null;
 };
 
-/**
- * Check if token is expired
- */
-const isTokenExpired = (token: string): boolean => {
+export const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000; // Convert to milliseconds
-    const now = Date.now();
-    const isExpired = now >= exp;
-
-    if (isExpired) {
-      logger.debug('⏰ [AuthHelper] Token expired:', 'Component', new Date(exp),
-        'vs now:',
-        new Date(now)
-      );
+    const decoded: any = jwtDecode(token);
+    if (decoded.exp) {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const isExpired = decoded.exp < currentTime;
+      if (isExpired) {
+        logger.debug('⏰ [AuthHelper] Token expired:', 'Component', new Date(decoded.exp * 1000));
+      }
+      return isExpired;
     }
-
-    return isExpired;
+    return true;
   } catch (error) {
     logger.error('❌ [AuthHelper] Failed to decode token:', 'Component', error);
-    return true; // Assume expired if can't decode
+    return true;
   }
 };
 
-/**
- * Get auth token, auto-generate for development if needed
- */
 export const getAuthToken = async (): Promise<string | null> => {
-  // Check if token exists
-  let token = localStorage.getItem('token') || sessionStorage.getItem('token');
-
-  // If token exists, check if it's expired
-  if (token) {
-    if (isTokenExpired(token)) {
+  // Check for existing valid token
+  const existingToken = localStorage.getItem('token');
+  if (existingToken && !isTokenExpired(existingToken)) {
+    if (import.meta.env.DEV) {
       logger.debug('⏰ [AuthHelper] Token expired, generating new one...', 'Component');
-      // Clear expired token
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
-      token = null;
     } else {
-      logger.debug('✅ [AuthHelper] Valid token found', 'Component');
-      return token;
+      return existingToken;
     }
+  } else {
+    logger.debug('✅ [AuthHelper] Valid token found', 'Component');
+    return existingToken;
   }
 
-  // In development, auto-generate token if none exists or expired
+  // Development mode: try to generate fresh token
   if (import.meta.env.DEV || import.meta.env.NODE_ENV === 'development') {
     logger.debug('🚧 [AuthHelper] Generating fresh token for dev mode...', 'Component');
-    try {
-      token = await generateDevToken();
-      return token;
-    } catch (error) {
-      logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token:', 'Component', error);
-      return null;
+    for (const cred of DEV_CREDENTIALS) {
+      const token = await attemptLogin(cred);
+      if (token) return token;
+      logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token', 'Component');
     }
   }
 

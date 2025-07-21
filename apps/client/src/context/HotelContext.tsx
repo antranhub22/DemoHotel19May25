@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useState,
   ReactNode,
-  useCallback,
 } from 'react';
 import {
   useHotelConfiguration,

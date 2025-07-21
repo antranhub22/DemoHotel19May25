@@ -1,8 +1,9 @@
-interface ReferenceItem {
-  type: 'image' | 'document' | 'link';
-  title: string;
+import { logger } from '@shared/utils/logger';
+
+export interface ReferenceItem {
   url: string;
-  description?: string;
+  title: string;
+  description: string;
   keywords: string[];
 }
 
@@ -62,4 +63,4 @@ class ReferenceService {
 }
 
 export const referenceService = new ReferenceService();
-export type { ReferenceItem, ReferenceMap };
+export { ReferenceService };

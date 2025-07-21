@@ -1,41 +1,26 @@
-/* ========================================
-   TYPES INDEX - CENTRALIZED TYPE EXPORTS
-   ======================================== */
+// Core types
+export type { 
+  Transcript, 
+  OrderSummary, 
+  Order, 
+  CallDetails, 
+  InterfaceLayer, 
+  ServiceRequest,
+  ActiveOrder,
+  CallSummary
+} from './core';
 
-// ========================================
-// CORE TYPES
-// ========================================
+// API types that exist
+export type { 
+  ApiResponse, 
+  ApiError,
+  SaveTranscriptRequest,
+  SaveTranscriptResponse
+} from './api';
 
-export * from './core';
-
-// ========================================
-// API TYPES
-// ========================================
-
-export * from './api';
-
-// ========================================
-// UI TYPES
-// ========================================
-
-export * from './ui';
-
-// ========================================
-// INTERFACE COMPONENT TYPES
-// ========================================
-
-export * from './interface1-components';
-
-// Interface1 specific types (avoiding conflicts)
-export {
+// Interface specific types
+export type { 
   Interface1Props,
   ServiceCategory,
-  SERVICE_CATEGORIES,
+  Language 
 } from './interface1.types';
-
-// ========================================
-// LEGACY TYPES (for backwards compatibility)
-// ========================================
-
-// Note: All types are now consolidated in core.ts, api.ts, and ui.ts
-// This file serves as the main export point for all types

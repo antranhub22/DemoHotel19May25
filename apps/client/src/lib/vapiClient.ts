@@ -1,4 +1,6 @@
 // 🚀 REAL VAPI INTEGRATION: Dynamic import to fix module issues
+import { logger } from '@shared/utils/logger';
+
 let VapiClass: any = null;
 
 // Dynamically load Vapi to handle module format issues
@@ -20,7 +22,7 @@ const loadVapi = async () => {
     // If dynamic import doesn't work, try require
     throw new Error('Dynamic import failed, trying alternative...');
   } catch (error) {
-    logger.warn('⚠️ [VAPI] Dynamic import failed:', 'Component', error.message);
+    logger.warn('⚠️ [VAPI] Dynamic import failed:', 'Component', (error as Error).message);
 
     try {
       // Alternative: Try to access from window if available
@@ -33,41 +35,27 @@ const loadVapi = async () => {
       throw new Error('No Vapi available');
     } catch (fallbackError) {
       logger.error('❌ [VAPI] All import methods failed:', 'Component', fallbackError);
-      throw new Error(`Failed to load Vapi: ${fallbackError.message}`);
+      throw new Error(`Failed to load Vapi: ${(fallbackError as Error).message}`);
     }
   }
 };
 
-// Initialize with environment variable or fallback
-const publicKey =
+const publicKey = 
   import.meta.env.VITE_VAPI_PUBLIC_KEY ||
-  'pk_c3e56893-4a8b-45bb-b3d6-b5a2a0edd8f8';
+  'pk-placeholder-for-dev';
 logger.debug('[vapiClient] Environment public key:', 'Component', publicKey);
 
-// Option to force basic summary generation (for testing fallback)
-export const FORCE_BASIC_SUMMARY = false; // Set to true to always use basic summary
-
+// 🚀 REAL VAPI CLIENT: Properly handle initialization and cleanup
 let vapiInstance: any = null;
-let isInitializing = false; // ✅ NEW: Prevent multiple simultaneous initializations
-
-interface VapiConnectionStatus {
-  status: 'connecting' | 'connected' | 'disconnected';
-}
-
-interface VapiMessage {
-  type: string;
-  content?: string;
-  [key: string]: any;
-}
+let isInitializing = false;
 
 export const initVapi = async (publicKey: string): Promise<any> => {
   try {
-    logger.debug('🚀 [REAL VAPI] Initializing with key:', 'Component', `${publicKey?.substring(0, 10)}...`
-    );
+    logger.debug('🚀 [REAL VAPI] Initializing with key:', 'Component', `${publicKey?.substring(0, 10)}...`);
 
     // ✅ NEW: Prevent multiple simultaneous initializations
     if (isInitializing) {
-      logger.debug('⏳ [REAL VAPI] Already initializing, waiting for current initialization...', 'Component');
+      logger.debug('⏳ [REAL VAPI] Already initializing, waiting...', 'Component');
       return new Promise((resolve, reject) => {
         const checkInterval = setInterval(() => {
           if (!isInitializing) {
@@ -90,43 +78,31 @@ export const initVapi = async (publicKey: string): Promise<any> => {
     const Vapi = await loadVapi();
     logger.debug('🚀 [REAL VAPI] Vapi class loaded:', 'Component', typeof Vapi);
 
-    // ✅ ENHANCED: Always cleanup existing instance properly
+    // Clean up existing instance if any
     if (vapiInstance) {
       logger.debug('🧹 [REAL VAPI] Cleaning up existing instance...', 'Component');
       try {
-        // Enhanced cleanup - stop all activities
         if (typeof vapiInstance.stop === 'function') {
-          vapiInstance.stop();
+          await vapiInstance.stop();
         }
-        if (typeof vapiInstance.cleanup === 'function') {
-          vapiInstance.cleanup();
+        if (typeof vapiInstance.destroy === 'function') {
+          vapiInstance.destroy();
         }
-        if (typeof vapiInstance.disconnect === 'function') {
-          vapiInstance.disconnect();
-        }
-
-        // Remove all event listeners to prevent conflicts
-        if (typeof vapiInstance.removeAllListeners === 'function') {
-          vapiInstance.removeAllListeners();
-        }
-
         logger.debug('✅ [REAL VAPI] Existing instance cleaned up successfully', 'Component');
       } catch (cleanupError) {
         logger.warn('⚠️ [REAL VAPI] Cleanup error (continuing anyway):', 'Component', cleanupError);
       }
-
-      // Brief pause to ensure cleanup completes
-      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
+    // Create new instance
     logger.debug('🚀 [REAL VAPI] Creating new Vapi instance...', 'Component');
-    vapiInstance = new Vapi(publicKey, {
-      // ✅ NEW: Prevent multiple call instances
-      allowMultipleCallInstances: false,
+    vapiInstance = new Vapi({
+      publicKey,
     });
+
     logger.debug('✅ [REAL VAPI] Instance created successfully!', 'Component');
 
-    // Add event listeners
+    // Event listeners
     vapiInstance.on('call-start', () => {
       logger.debug('[vapiClient] Call started', 'Component');
     });
@@ -147,7 +123,7 @@ export const initVapi = async (publicKey: string): Promise<any> => {
       logger.debug('[vapiClient] Volume level:', 'Component', volume);
     });
 
-    vapiInstance.on('message', (message: VapiMessage) => {
+    vapiInstance.on('message', (message: any) => {
       logger.debug('[vapiClient] Message received:', 'Component', message);
     });
 
@@ -166,10 +142,6 @@ export const initVapi = async (publicKey: string): Promise<any> => {
     logger.error('[vapiClient] Failed to initialize Vapi:', 'Component', error);
     throw error;
   }
-};
-
-export const isVapiInitialized = (): boolean => {
-  return vapiInstance !== null;
 };
 
 export const startCall = async (
@@ -198,8 +170,7 @@ export const startCall = async (
       const error = new Error(
         'Failed to start call - Invalid call object type'
       );
-      logger.error('❌ [REAL VAPI] Invalid call object type:', 'Component', typeof call,
-        call);
+      logger.error('❌ [REAL VAPI] Invalid call object type:', 'Component', typeof call);
       throw error;
     }
 
@@ -240,35 +211,34 @@ export const endCall = async () => {
     await vapiInstance.stop();
   } catch (error) {
     logger.error('[vapiClient] Failed to end call:', 'Component', error);
-    throw error;
   }
 };
 
-export const getVapiInstance = (): any => {
-  return vapiInstance;
-};
-
-export const setMuted = (muted: boolean) => {
+export const setMuted = async (muted: boolean) => {
   if (!vapiInstance) {
     logger.warn('[vapiClient] No Vapi instance to set muted', 'Component');
     return;
   }
 
   try {
-    vapiInstance.setMuted(muted);
+    if (typeof vapiInstance.setMuted === 'function') {
+      await vapiInstance.setMuted(muted);
+    }
   } catch (error) {
     logger.error('[vapiClient] Failed to set muted:', 'Component', error);
   }
 };
 
-export const sendMessage = (message: VapiMessage) => {
+export const sendMessage = async (message: any) => {
   if (!vapiInstance) {
     logger.warn('[vapiClient] No Vapi instance to send message', 'Component');
     return;
   }
 
   try {
-    vapiInstance.send(JSON.stringify(message));
+    if (typeof vapiInstance.send === 'function') {
+      await vapiInstance.send(message);
+    }
   } catch (error) {
     logger.error('[vapiClient] Failed to send message:', 'Component', error);
   }
@@ -276,46 +246,44 @@ export const sendMessage = (message: VapiMessage) => {
 
 export const resetVapi = () => {
   logger.debug('🧹 [vapiClient] Resetting Vapi instance', 'Component');
-
-  // ✅ NEW: Clear initialization flag to allow fresh init
-  isInitializing = false;
-
+  
   if (vapiInstance) {
     try {
-      // Enhanced cleanup - stop all activities
+      // Clean up existing instance
       if (typeof vapiInstance.stop === 'function') {
-        vapiInstance.stop();
+        vapiInstance.stop().catch(() => {
+          // Ignore errors during cleanup
+        });
       }
-      if (typeof vapiInstance.cleanup === 'function') {
-        vapiInstance.cleanup();
+      
+      if (typeof vapiInstance.destroy === 'function') {
+        vapiInstance.destroy();
       }
-      if (typeof vapiInstance.disconnect === 'function') {
-        vapiInstance.disconnect();
-      }
-
-      // Remove all event listeners to prevent conflicts
+      
+      // Remove all event listeners
       if (typeof vapiInstance.removeAllListeners === 'function') {
         vapiInstance.removeAllListeners();
       }
-
+      
       logger.debug('✅ [vapiClient] Instance cleanup completed', 'Component');
     } catch (error) {
       logger.warn('⚠️ [vapiClient] Error during reset cleanup:', 'Component', error);
     }
-    vapiInstance = null;
   }
-
+  
+  vapiInstance = null;
+  isInitializing = false;
   logger.debug('✅ [vapiClient] Reset completed - ready for fresh initialization', 'Component');
 };
 
-// Auto-initialize with default key if available
-if (publicKey && publicKey !== 'demo') {
+export const getVapiInstance = () => vapiInstance;
+
+// Auto-initialize for development if key is available
+if (publicKey && publicKey !== 'pk-placeholder-for-dev') {
   logger.debug('[vapiClient] Auto-initializing with environment key', 'Component');
-  initVapi(publicKey).catch(error => {
+  initVapi(publicKey).catch((error) => {
     logger.error('[vapiClient] Auto-initialization failed:', 'Component', error);
   });
 } else {
   logger.warn('[vapiClient] No valid public key found, manual initialization required', 'Component');
 }
-
-export { publicKey };
