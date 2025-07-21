@@ -122,6 +122,13 @@ const users = [
     displayName: 'IT Manager',
     email: 'itmanager@minhonhotel.com',
   },
+  {
+    username: 'staff',
+    password: 'staff123',
+    role: 'front-desk',
+    displayName: 'General Staff',
+    email: 'staff@minhonhotel.com',
+  },
 ];
 
 for (const user of users) {
