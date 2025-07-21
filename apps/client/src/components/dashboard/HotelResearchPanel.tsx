@@ -13,8 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+
 import {
-import { logger } from '@shared/utils/logger';
   Search,
   MapPin,
   Phone,
@@ -239,7 +239,7 @@ const ResearchSkeleton = () => (
 const HotelInfoDisplay = ({
   data,
   editable = false,
-  onEdit,
+  onEdit: _onEdit,
   onSave,
 }: {
   data: HotelData;
@@ -664,7 +664,7 @@ export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
           <HotelInfoDisplay
             data={data}
             editable={editable}
-            onEdit={onEdit ? () => onEdit(data) : undefined}
+            onEdit={onEdit}
             onSave={onSave}
           />
         </div>

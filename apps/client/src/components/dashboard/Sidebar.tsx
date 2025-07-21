@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-import { logger } from '@shared/utils/logger';
   Home,
   Bot,
   BarChart,
@@ -18,7 +17,7 @@ import { logger } from '@shared/utils/logger';
 // Types
 interface NavItem {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   label: string;
   description: string;
   requiresPlan?: 'basic' | 'premium' | 'enterprise';
@@ -82,7 +81,7 @@ const premiumNavItems: NavItem[] = [
 ];
 
 // Navigation item component
-const NavItem = ({
+const NavigationItem = ({
   href,
   icon: Icon,
   label,
@@ -91,7 +90,7 @@ const NavItem = ({
   disabled = false,
 }: {
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<any>;
   label: string;
   description: string;
   isActive: boolean;
@@ -264,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
 
             return (
-              <NavItem
+              <NavigationItem
                 key={item.href}
                 href={item.href}
                 icon={item.icon}

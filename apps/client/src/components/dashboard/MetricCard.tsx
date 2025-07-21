@@ -1,17 +1,9 @@
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
-import { logger } from '@shared/utils/logger';
   TrendingUp,
   TrendingDown,
   Minus,
@@ -32,7 +24,7 @@ interface MetricCardProps {
     period: string;
     type: 'increase' | 'decrease' | 'neutral';
   };
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<any>;
   status?: 'normal' | 'warning' | 'error' | 'success';
   loading?: boolean;
   className?: string;
@@ -66,7 +58,7 @@ const formatValue = (
       }).format(value);
     case 'percentage':
       return `${value}%`;
-    case 'duration':
+    case 'duration': {
       // Assuming value is in seconds
       const hours = Math.floor(value / 3600);
       const minutes = Math.floor((value % 3600) / 60);
@@ -74,6 +66,7 @@ const formatValue = (
         return `${hours}h ${minutes}m`;
       }
       return `${minutes}m`;
+    }
     case 'number':
     default:
       return `${prefix || ''}${value.toLocaleString('vi-VN')}${suffix || ''}`;
@@ -84,7 +77,7 @@ const formatValue = (
 const getTrendInfo = (change?: MetricCardProps['change']) => {
   if (!change) return null;
 
-  const { type, value } = change;
+  const { type } = change;
 
   switch (type) {
     case 'increase':

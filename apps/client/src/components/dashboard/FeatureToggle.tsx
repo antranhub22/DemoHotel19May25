@@ -9,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -17,28 +16,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import {
-import { logger } from '@shared/utils/logger';
   Crown,
   Lock,
-  Unlock,
   Star,
-  Zap,
   Shield,
-  Users,
-  Globe,
   Mic,
   BarChart3,
   Database,
   Palette,
-  Settings,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
-  ArrowRight,
   Sparkles,
 } from 'lucide-react';
 

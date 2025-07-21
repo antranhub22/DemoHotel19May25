@@ -23,19 +23,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   Bot,
   Settings,
-  Mic,
-  Volume2,
-  Globe,
-  Clock,
   Save,
   RefreshCw,
   Play,
-  Pause,
-  CheckCircle2,
   AlertCircle,
   Loader2,
   MessageSquare,
