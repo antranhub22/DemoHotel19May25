@@ -31,7 +31,8 @@ export class CallService {
       await db
         .update(call)
               .set({ 
-        // TODO: Add duration and endTime when schema is fixed
+        duration: duration,
+        end_time: new Date()
       })
         .where(eq(call.call_id_vapi, callId));
       

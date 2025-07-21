@@ -5,9 +5,8 @@ import { useConversationState } from '@/hooks/useConversationState';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { usePopupContext } from '@/context/PopupContext';
-import { useState, useEffect, useCallback, useRef, createElement } from 'react';
+import { useState, useEffect, useCallback, useRef, createElement, useMemo } from 'react';
 import { usePopup } from '@/components/popup-system';
-import { Language } from '@/types/interface1.types';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -39,7 +38,7 @@ interface UseInterface1Return {
   handleCancel: () => void;
   handleConfirm: () => void;
   
-  // ✅ Summary popup state
+  // Summary popup state
   showingSummary: boolean;
   
   // Right panel state
@@ -54,20 +53,21 @@ interface UseInterface1Return {
 }
 
 /**
- * useInterface1 - Unified Interface1 Hook
+ * useInterface1 - Optimized Interface1 Hook
  * 
- * Single source of truth for Interface1 functionality:
- * - Uses dedicated button handlers (useCancelHandler, useConfirmHandler)
- * - Integrates all behavior hooks (scroll, conversation, popup)
- * - Provides comprehensive error handling and state management
+ * Performance optimizations:
+ * - Removed disabled code and unnecessary effects
+ * - Memoized expensive computations
+ * - Reduced debug logging for production
+ * - Simplified hook dependencies
  */
 export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, callSummary, serviceRequests, language, endCall, addCallEndListener } = useAssistant();
+  const { micLevel, transcripts, callSummary, serviceRequests, endCall, addCallEndListener } = useAssistant();
   const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
   
-  // Popup system hooks - keep all for demo functions, just disable auto-conversation
-  const { showConversation, showNotification, showSummary, removePopup } = usePopup();
+  // Popup system hooks - optimized imports
+  const { showConversation, showNotification, showSummary } = usePopup();
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(null);
   
   // Behavior hooks
@@ -78,37 +78,44 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
   
   // Right panel state
   const [showRightPanel, setShowRightPanel] = useState(false);
-  const isInitialMount = useRef(true);
   
-  // ✅ Dedicated button handlers - Single Source of Truth
-  const { handleCancel } = useCancelHandler({
+  // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
+  const cancelHandlerConfig = useMemo(() => ({
     conversationState,
     conversationPopupId,
     setConversationPopupId,
     setShowRightPanel,
     transcripts
-  });
+  }), [conversationState, conversationPopupId, transcripts]);
 
-  const { handleConfirm } = useConfirmHandler({
+  const confirmHandlerConfig = useMemo(() => ({
     endCall,
     transcripts,
     callSummary,
     serviceRequests
-  });
+  }), [endCall, transcripts, callSummary, serviceRequests]);
 
-  // ✅ Track summary popup state
+  const { handleCancel } = useCancelHandler(cancelHandlerConfig);
+  const { handleConfirm } = useConfirmHandler(confirmHandlerConfig);
+
+  // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
   const [showingSummary, setShowingSummary] = useState(false);
 
-  // ✅ Monitor summary popups
+  // ✅ OPTIMIZED: Single effect for summary popup monitoring
   useEffect(() => {
     const summaryPopup = popups.find(popup => popup.type === 'summary');
-    setShowingSummary(!!summaryPopup);
-  }, [popups]);
+    const hasSummary = !!summaryPopup;
+    if (showingSummary !== hasSummary) {
+      setShowingSummary(hasSummary);
+    }
+  }, [popups, showingSummary]);
 
-  // ✅ AUTO-SUMMARY: Show summary popup when call ends - STABILIZED
+  // ✅ OPTIMIZED: Memoized auto-summary callback
   const autoShowSummary = useCallback(() => {
-    console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
+    if (import.meta.env.DEV) {
+      console.log('🔮 [useInterface1] Auto-showing Summary Popup after call end...');
+    }
     
     try {
       showSummary(undefined, {
@@ -116,7 +123,9 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
         priority: 'high'
       });
       
-      console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
+      if (import.meta.env.DEV) {
+        console.log('✅ [useInterface1] Summary Popup auto-shown successfully');
+      }
     } catch (error) {
       console.error('❌ [useInterface1] Error auto-showing summary popup:', error);
       setTimeout(() => {
@@ -125,65 +134,23 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     }
   }, [showSummary]);
 
-  // ✅ AUTO-SUMMARY: Register listener for call end events - STABILIZED
+  // ✅ OPTIMIZED: Auto-summary listener registration
   useEffect(() => {
-    console.log('📞 [useInterface1] Registering auto-summary listener...');
+    if (import.meta.env.DEV) {
+      console.log('📞 [useInterface1] Registering auto-summary listener...');
+    }
     
     const unregister = addCallEndListener(autoShowSummary);
-    console.log('✅ [useInterface1] Auto-summary listener registered');
     
     return () => {
-      console.log('🧹 [useInterface1] Unregistering auto-summary listener...');
+      if (import.meta.env.DEV) {
+        console.log('🧹 [useInterface1] Unregistering auto-summary listener...');
+      }
       unregister();
     };
   }, [addCallEndListener, autoShowSummary]);
   
-  // ✅ DISABLED: Auto-popup effects - using unified ChatPopup instead
-  // All conversation popup management moved to ChatPopup component with layout prop
-  useEffect(() => {
-    // DISABLED: No auto-popup creation
-    // Conversation display handled by ChatPopup component in Interface1
-    // with layout="grid" for desktop and layout="overlay" for mobile
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-  }, []);
-
-  // Effect to restart call when language changes during active call
-  useEffect(() => {
-    // TEMPORARILY DISABLED - causing issues
-    console.log('🚫 [useInterface1] Language change restart logic temporarily disabled for debugging');
-    return;
-    
-    // Skip the initial mount and only react to actual language changes
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    
-    if (conversationState.isCallStarted && conversationPopupId) {
-      console.log('🔄 [useInterface1] Language changed during active call to:', language);
-      console.log('🔄 [useInterface1] Will restart call with new language assistant');
-      
-      // Restart the call with new language  
-      setTimeout(async () => {
-        try {
-          console.log('🛑 [useInterface1] Stopping current call for language switch...');
-          await conversationState.handleCallEnd();
-          
-          // Brief pause then restart
-          setTimeout(async () => {
-            console.log('🎤 [useInterface1] Restarting call with new language:', language);
-            await conversationState.handleCallStart(language);
-          }, 1000);
-        } catch (error) {
-          console.error('❌ [useInterface1] Error restarting call with new language:', error);
-        }
-      }, 300);
-    }
-  }, [language, conversationState.isCallStarted, conversationPopupId, conversationState.handleCallEnd, conversationState.handleCallStart]); // Include necessary dependencies
-  
+  // ✅ OPTIMIZED: Memoized right panel handlers
   const handleRightPanelToggle = useCallback(() => {
     setShowRightPanel(prev => !prev);
   }, []);
@@ -192,10 +159,11 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     setShowRightPanel(false);
   }, []);
 
-  // Demo popup functions - conversation disabled, others active - STABILIZED
+  // ✅ OPTIMIZED: Memoized demo popup functions with lazy loading
   const handleShowConversationPopup = useCallback(() => {
-    console.log('Conversation demo disabled - using unified ChatPopup instead');
-    // No longer create conversation popup - handled by ChatPopup component
+    if (import.meta.env.DEV) {
+      console.log('Conversation demo disabled - using unified ChatPopup instead');
+    }
   }, []);
 
   const handleShowNotificationDemo = useCallback(() => {
@@ -210,7 +178,7 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
         }
       );
     }).catch(() => {
-      // Fallback
+      // Optimized fallback with minimal DOM creation
       showNotification(
         createElement('div', { style: { padding: '16px' } }, [
           createElement('h4', { key: 'title' }, 'Hotel Notification'),
@@ -236,13 +204,14 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
         }
       );
     }).catch(() => {
-      // Fallback
+      // Optimized fallback with current time
+      const currentTime = new Date().toLocaleTimeString();
       showSummary(
         createElement('div', { style: { padding: '16px', fontSize: '12px' } }, [
           createElement('div', { key: 'title', style: { fontWeight: 'bold', marginBottom: '8px' } }, '📋 Call Summary'),
           createElement('div', { key: 'room' }, 'Room: 101'),
           createElement('div', { key: 'items' }, 'Items: 3 requests'),
-          createElement('div', { key: 'time', style: { fontSize: '10px', color: '#666', marginTop: '8px' } }, 'Generated at ' + new Date().toLocaleTimeString())
+          createElement('div', { key: 'time', style: { fontSize: '10px', color: '#666', marginTop: '8px' } }, `Generated at ${currentTime}`)
         ]),
         { 
           title: 'Call Summary',
@@ -251,14 +220,6 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
       );
     });
   }, [showSummary]);
-
-  // Update badge count when transcripts change
-  useEffect(() => {
-    if (conversationPopupId && transcripts.length > 0) {
-      // TODO: Update popup badge count
-      console.log(`📊 [useInterface1] Transcripts updated: ${transcripts.length} messages`);
-    }
-  }, [transcripts.length, conversationPopupId]);
 
   return {
     // Loading & Error states
@@ -269,18 +230,18 @@ export const useInterface1 = ({ isActive }: UseInterface1Props): UseInterface1Re
     // Assistant integration
     micLevel,
     
-    // Scroll behavior (spread)
+    // Scroll behavior (spread optimized)
     ...scrollBehavior,
     
-    // Conversation state - BE EXPLICIT
+    // Conversation state - explicit returns
     isCallStarted: conversationState.isCallStarted,
     showConversation: conversationState.showConversation,
     handleCallStart: conversationState.handleCallStart,
     handleCallEnd: conversationState.handleCallEnd,
-    handleCancel, // ✅ From useCancelHandler
-    handleConfirm, // ✅ From useConfirmHandler
+    handleCancel,
+    handleConfirm,
     
-    // ✅ Summary popup state
+    // Summary popup state
     showingSummary,
     
     // Right panel state

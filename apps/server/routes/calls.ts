@@ -34,21 +34,56 @@ router.post('/call-end', async (req, res) => {
   try {
     const { callId, duration } = req.body;
     
-    if (!callId) {
-      return res.status(400).json({ error: 'Call ID is required' });
+    if (!callId || duration === undefined) {
+      return res.status(400).json({ 
+        error: 'callId and duration are required' 
+      });
     }
+
+    // Update call duration and end time using existing schema fields
+    await db
+      .update(call)
+      .set({ 
+        duration: Math.floor(duration),
+        end_time: new Date()
+      })
+      .where(eq(call.call_id_vapi, callId));
     
-    // TODO: Update call duration in database when schema is fixed
-    // await db.update(call).set({ duration: duration || 0 }).where(eq(call.call_id_vapi, callId));
-    
-    console.log(`Updated call duration for ${callId}: ${duration} seconds`);
-    
-    res.json({ 
-      success: true, 
-      message: 'Call duration updated successfully' 
-    });
+    console.log(`✅ Updated call duration for ${callId}: ${duration} seconds`);
+    res.json({ success: true, duration });
   } catch (error) {
-    handleApiError(res, error, 'Failed to update call duration');
+    console.error('❌ Error updating call duration:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Create call endpoint - now enabled with proper schema fields
+router.post('/calls', async (req, res) => {
+  try {
+    const { call_id_vapi, room_number, language, service_type, tenant_id } = req.body;
+    
+    if (!call_id_vapi) {
+      return res.status(400).json({ error: 'call_id_vapi is required' });
+    }
+
+    // Create call record with all supported fields
+    const [newCall] = await db
+      .insert(call)
+      .values({
+        call_id_vapi,
+        room_number: room_number || null,
+        language: language || 'en',
+        service_type: service_type || null,
+        tenant_id: tenant_id || null,
+        start_time: new Date()
+      })
+      .returning();
+
+    console.log(`✅ Created call record:`, newCall);
+    res.json({ success: true, call: newCall });
+  } catch (error) {
+    console.error('❌ Error creating call:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

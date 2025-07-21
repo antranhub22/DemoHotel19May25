@@ -564,28 +564,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Endpoint to update status via POST
   
   // Handle call end event from Vapi to update call duration
-  app.post('/api/call-end', async (req, res) => {
+  app.post('/api/call-end', express.json(), async (req, res) => {
     try {
       const { callId, duration } = req.body;
       
-      if (!callId) {
-        return res.status(400).json({ error: 'Call ID is required' });
+      if (!callId || duration === undefined) {
+        return res.status(400).json({ 
+          error: 'callId and duration are required' 
+        });
       }
+
+      // Update call duration and end time using existing schema fields
+      await db
+        .update(call)
+        .set({ 
+          duration: Math.floor(duration),
+          end_time: new Date()
+        })
+        .where(eq(call.call_id_vapi, callId));
       
-      // TODO: Update call duration in database when schema supports duration field
-      // const existingCall = await db.select().from(call).where(eq(call.call_id_vapi, callId)).limit(1);
-      // if (existingCall.length > 0) {
-      //   await db.update(call)
-      //     .set({ duration: duration || 0 })
-      //     .where(eq(call.call_id_vapi, callId));
-      //   
-      //   console.log(`Updated call duration for ${callId}: ${duration || 0} seconds`);
-      // }
-      console.log(`Call duration for ${callId}: ${duration || 0} seconds (logged only - DB schema needs update)`);
-      
-      res.json({ success: true });
+      console.log(`✅ Updated call duration for ${callId}: ${duration} seconds`);
+      res.json({ success: true, duration });
     } catch (error) {
-      handleApiError(res, error, 'Error updating call duration');
+      console.error('❌ Error updating call duration:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   });
 

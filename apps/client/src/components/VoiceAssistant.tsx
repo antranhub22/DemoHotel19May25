@@ -4,7 +4,7 @@ import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
 import { Interface1 } from '@/components/Interface1';
-// ✅ KEEP IMPORTS but disconnect rendering
+// ✅ PERFORMANCE: Lazy load Interface2,3,4 to exclude from initial bundle
 // import { Interface2 } from '@/components/Interface2';
 // import { Interface3 } from '@/components/Interface3';  
 // import { Interface4 } from '@/components/Interface4';

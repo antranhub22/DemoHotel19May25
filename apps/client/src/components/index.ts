@@ -2,11 +2,22 @@
  * Barrel exports for components directory
  */
 
-// Core components
+// Core components - Always loaded
 export { Interface1 } from './Interface1';
-export { default as Interface2 } from './Interface2';
-export { default as Interface3 } from './Interface3';
-export { default as Interface4 } from './Interface4';
+
+// Legacy interfaces - Lazy loaded to reduce bundle size
+export const Interface2 = React.lazy(() => import('./Interface2'));
+export const Interface3 = React.lazy(() => import('./Interface3'));
+export const Interface4 = React.lazy(() => import('./Interface4'));
+
+// Shared components
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as Reference } from './Reference';
+export { default as SummaryPopup } from './SummaryPopup';
+export { default as ChatPopup } from './ChatPopup';
+
+// Import React for lazy loading
+import React from 'react';
 
 // Interface1 components
 export { InterfaceContainer } from './interface1/InterfaceContainer';

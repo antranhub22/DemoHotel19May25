@@ -1,5 +1,6 @@
 import { db, call, request } from '@shared/db';
 import { eq } from 'drizzle-orm';
+import type { InsertCall } from '@shared/db/schema';
 
 export async function seedDevelopmentData() {
   try {
@@ -16,58 +17,31 @@ export async function seedDevelopmentData() {
     // Seed call data
     const callData = [
       {
-        id: 'test-call-001',
-        callIdVapi: 'test-call-001',
-        roomNumber: '101',
-        language: 'vi',
-        serviceType: 'room_service',
-        duration: 120,
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
-      },
-      {
-        id: 'test-call-002',
-        callIdVapi: 'test-call-002',
-        roomNumber: '202',
+        call_id_vapi: 'call-001-dev',
+        room_number: '101',
         language: 'en',
-        serviceType: 'housekeeping',
-        duration: 90,
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+        service_type: 'Room Service',
+        start_time: new Date(Date.now() - 1800000), // 30 minutes ago
+        duration: 180, // 3 minutes
+        end_time: new Date(Date.now() - 1620000), // 27 minutes ago
+        tenant_id: 'mi-nhon-hotel'
       },
       {
-        id: 'test-call-003',
-        callIdVapi: 'test-call-003',
-        roomNumber: '303',
-        language: 'fr',
-        serviceType: 'transportation',
-        duration: 150,
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6 hours ago
-      },
-      {
-        id: 'test-call-004',
-        callIdVapi: 'test-call-004',
-        roomNumber: '404',
+        call_id_vapi: 'call-002-dev',
+        room_number: '205',
         language: 'vi',
-        serviceType: 'concierge',
-        duration: 75,
-        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() // 8 hours ago
-      },
-      {
-        id: 'test-call-005',
-        callIdVapi: 'test-call-005',
-        roomNumber: '505',
-        language: 'en',
-        serviceType: 'maintenance',
-        duration: 45,
-        createdAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString() // 10 hours ago
+        service_type: 'Housekeeping',
+        start_time: new Date(Date.now() - 3600000), // 1 hour ago
+        duration: 120, // 2 minutes
+        end_time: new Date(Date.now() - 3480000), // 58 minutes ago
+        tenant_id: 'mi-nhon-hotel'
       }
-    ];
+    ] satisfies InsertCall[];
 
-    // TODO: Fix database schema mismatch - temporarily commented out
-    // Insert calls
-    // for (const callItem of callData) {
-    //   await db.insert(call).values(callItem);
-    // }
-    console.log('Call seeding skipped due to schema mismatch - needs to be fixed');
+    // Insert call data
+    for (const callItem of callData) {
+      await db.insert(call).values(callItem).onConflictDoNothing();
+    }
 
     // Seed request data
     const requestData = [
