@@ -20,7 +20,7 @@ export const useSimplifiedMobileTouch = ({
   onInteractionStart,
   onInteractionEnd,
   enabled = true,
-  debugEnabled = process.env.NODE_ENV === 'development'
+  debugEnabled = process.env.NODE_ENV === 'development',
 }: UseSimplifiedMobileTouchProps) => {
   const isMobile = isMobileDevice();
   const isEnabled = enabled && isMobile;
@@ -34,10 +34,15 @@ export const useSimplifiedMobileTouch = ({
           await onCallStart();
           console.log('✅ [useSimplifiedMobileTouch] Manual test successful');
         } catch (error) {
-          console.error('❌ [useSimplifiedMobileTouch] Manual test failed:', error);
+          console.error(
+            '❌ [useSimplifiedMobileTouch] Manual test failed:',
+            error
+          );
         }
       } else {
-        console.warn('⚠️ [useSimplifiedMobileTouch] onCallStart not available for test');
+        console.warn(
+          '⚠️ [useSimplifiedMobileTouch] onCallStart not available for test'
+        );
       }
     }
   }, [onCallStart, debugEnabled]);
@@ -51,7 +56,7 @@ export const useSimplifiedMobileTouch = ({
       isInitialized: isEnabled,
       isProcessing: false,
       containerId,
-      isListening
-    }
+      isListening,
+    },
   };
-}; 
+};

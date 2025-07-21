@@ -1,13 +1,14 @@
 # DATABASE CLEANUP AUDIT REPORT
 
-Generated: $(date)
-Database: SQLite (dev.db)
+Generated: $(date) Database: SQLite (dev.db)
 
 ## 🎯 EXECUTIVE SUMMARY
 
-Sau khi xóa bảng `orders` và phân tích toàn bộ database, tôi đã phát hiện **3 trường hợp tương tự** cần được xử lý để đảm bảo tính nhất quán.
+Sau khi xóa bảng `orders` và phân tích toàn bộ database, tôi đã phát hiện **3 trường hợp tương tự**
+cần được xử lý để đảm bảo tính nhất quán.
 
 **Overall Database Health: 🟡 MEDIUM RISK**
+
 - ✅ Bảng `orders` đã được xóa thành công
 - ⚠️ 3 alias gây nhầm lẫn còn tồn tại
 - ⚠️ 1 bảng database riêng biệt nhưng có cùng chức năng
@@ -17,9 +18,10 @@ Sau khi xóa bảng `orders` và phân tích toàn bộ database, tôi đã phá
 ## 📊 DATABASE TABLES ANALYSIS
 
 ### Current Tables in Database:
+
 ```
 call            ✅ Active (0 records)
-call_summaries  ✅ Active (0 records) 
+call_summaries  ✅ Active (0 records)
 hotel_profiles  ✅ Active (0 records)
 message         ✅ Active (0 records)
 request         ✅ Active (1 record) - MAIN TABLE
@@ -34,57 +36,71 @@ users           ⚠️ NOT IN SCHEMA - ORPHANED TABLE (0 records)
 ## 🚨 FOUND ISSUES
 
 ### 1. **ALIAS DUPLICATION: `callSummaries = call`**
+
 **Risk Level: 🟡 MEDIUM**
 
 **Problem:**
+
 - Schema định nghĩa: `export const callSummaries = call;`
 - Bảng `call_summaries` tồn tại riêng biệt trong database
 - Code sử dụng `callSummaries` alias thay vì `call` trực tiếp
 
 **Files Affected:**
+
 - `packages/shared/db/schema.ts:163`
 - `apps/server/storage.ts` (5 references)
 - `apps/server/routes.ts` (2 references)
 
 **Impact:**
+
 - Nhầm lẫn giữa bảng `call` và `call_summaries`
 - Code không rõ ràng về việc đang làm việc với bảng nào
 
 ### 2. **ALIAS DUPLICATION: `users = staff`**
+
 **Risk Level: 🟡 MEDIUM**
 
 **Problem:**
+
 - Schema định nghĩa: `export const users = staff;`
 - Bảng `users` orphaned tồn tại trong database (0 records)
 - Code sử dụng alias `users` thay vì `staff`
 
 **Files Affected:**
+
 - `packages/shared/db/schema.ts:156`
 - `apps/server/storage.ts` (3 references)
 - `packages/shared/schema.ts:166`
 
 **Impact:**
+
 - Nhầm lẫn về bảng đang được sử dụng
 - Bảng `users` orphaned trong database
 
 ### 3. **ALIAS DUPLICATION: `transcripts = transcript`**
+
 **Risk Level: 🟢 LOW**
 
 **Problem:**
+
 - Schema định nghĩa: `export const transcripts = transcript;`
 - Tên số ít/số nhiều gây nhầm lẫn
 
 **Files Affected:**
+
 - `packages/shared/db/schema.ts:157`
 - `apps/server/storage.ts` (1 reference)
 
 **Impact:**
+
 - Tương đối nhỏ, chỉ là vấn đề naming convention
 
 ### 4. **ORPHANED TABLE: `users`**
+
 **Risk Level: 🟡 MEDIUM**
 
 **Problem:**
+
 - Bảng `users` tồn tại trong database nhưng không được định nghĩa trong schema
 - 0 records, có thể là legacy table
 
@@ -95,6 +111,7 @@ users           ⚠️ NOT IN SCHEMA - ORPHANED TABLE (0 records)
 ### Priority 1: Critical (Fix Immediately)
 
 #### 1.1 Remove `callSummaries` Alias
+
 ```sql
 -- Check if call_summaries table is actually needed
 -- If not, consider dropping it
@@ -108,6 +125,7 @@ export const callSummaries = call;
 ```
 
 #### 1.2 Remove `users` Alias & Orphaned Table
+
 ```sql
 -- Drop orphaned users table
 DROP TABLE IF EXISTS users;
@@ -123,6 +141,7 @@ export const users = staff;
 ### Priority 2: Medium (Clean up when convenient)
 
 #### 2.1 Fix `transcripts` Alias
+
 ```typescript
 // In schema.ts, remove:
 export const transcripts = transcript;
@@ -133,6 +152,7 @@ export const transcripts = transcript;
 ### Priority 3: Documentation
 
 #### 3.1 Update Schema Documentation
+
 - Document why certain aliases were removed
 - Clarify naming conventions for future tables
 
@@ -141,15 +161,18 @@ export const transcripts = transcript;
 ## 📈 EXPECTED BENEFITS AFTER CLEANUP
 
 ### Performance
+
 - ✅ Reduced confusion in query planning
 - ✅ Cleaner database structure
 
 ### Developer Experience
+
 - ✅ Clear table naming without aliases
 - ✅ Reduced cognitive load when reading code
 - ✅ Easier onboarding for new developers
 
 ### Maintenance
+
 - ✅ Single source of truth for each entity
 - ✅ Reduced risk of bugs from alias confusion
 - ✅ Simpler database migrations
@@ -194,4 +217,4 @@ export const transcripts = transcript;
 - Các alias còn lại chủ yếu gây nhầm lẫn về mặt code clarity
 - Không có data loss risk cho các cleanup này
 
-**Status:** ✅ READY FOR CLEANUP 
+**Status:** ✅ READY FOR CLEANUP

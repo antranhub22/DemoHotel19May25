@@ -1,14 +1,14 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import themePlugin from "@replit/vite-plugin-shadcn-theme-json";
-import path from "path";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import themePlugin from '@replit/vite-plugin-shadcn-theme-json';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // Since vite.config.ts is now in config/build/, we need to go up 2 levels to reach root
-const rootDir = path.resolve(__dirname, "..", "..");
+const rootDir = path.resolve(__dirname, '..', '..');
 
 export default defineConfig({
   plugins: [
@@ -17,26 +17,26 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(rootDir, "apps", "client", "src"),
-      "@shared": path.resolve(rootDir, "packages", "shared"),
-      "@server": path.resolve(rootDir, "apps", "server"),
-      "@types": path.resolve(rootDir, "packages", "types"),
-      "@config": path.resolve(rootDir, "packages", "config"),
-      "@tools": path.resolve(rootDir, "tools"),
-      "@tests": path.resolve(rootDir, "tests"),
-      "@auth": path.resolve(rootDir, "packages", "auth-system"),
+      '@': path.resolve(rootDir, 'apps', 'client', 'src'),
+      '@shared': path.resolve(rootDir, 'packages', 'shared'),
+      '@server': path.resolve(rootDir, 'apps', 'server'),
+      '@types': path.resolve(rootDir, 'packages', 'types'),
+      '@config': path.resolve(rootDir, 'packages', 'config'),
+      '@tools': path.resolve(rootDir, 'tools'),
+      '@tests': path.resolve(rootDir, 'tests'),
+      '@auth': path.resolve(rootDir, 'packages', 'auth-system'),
     },
   },
-  root: path.resolve(rootDir, "apps", "client"),
+  root: path.resolve(rootDir, 'apps', 'client'),
   build: {
-    outDir: path.resolve(rootDir, "dist/public"),
+    outDir: path.resolve(rootDir, 'dist/public'),
     emptyOutDir: true,
     sourcemap: false,
     cssCodeSplit: true,
     // ✅ IMPROVED: Optimized chunk splitting for better caching and error reduction
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
+        manualChunks: id => {
           // ✅ IMPROVED: Better chunk logic to prevent vendor chunk errors
           if (id.includes('node_modules')) {
             // React and core dependencies - highest priority
@@ -46,12 +46,12 @@ export default defineConfig({
             if (id.includes('react-router') || id.includes('react-dom')) {
               return 'react-router';
             }
-            
-            // UI libraries  
+
+            // UI libraries
             if (id.includes('@radix-ui') || id.includes('radix-ui')) {
               return 'ui-vendor';
             }
-            
+
             // ✅ FIXED: Better chart handling to prevent circular deps
             if (id.includes('recharts')) {
               return 'charts';
@@ -59,7 +59,7 @@ export default defineConfig({
             if (id.includes('d3-') && !id.includes('recharts')) {
               return 'charts-utils';
             }
-            
+
             // Voice and audio libraries - separate to avoid conflicts
             if (id.includes('@vapi-ai')) {
               return 'vapi';
@@ -67,7 +67,7 @@ export default defineConfig({
             if (id.includes('@daily-co') || id.includes('daily-js')) {
               return 'daily';
             }
-            
+
             // Utility libraries - group carefully
             if (id.includes('axios')) {
               return 'http-client';
@@ -78,11 +78,11 @@ export default defineConfig({
             if (id.includes('clsx') || id.includes('tailwind-merge')) {
               return 'css-utils';
             }
-            
+
             // Other vendor libraries - catch-all
             return 'vendor';
           }
-          
+
           // Application chunks - more granular
           if (id.includes('/components/siri/')) {
             return 'siri-components';
@@ -104,15 +104,17 @@ export default defineConfig({
           }
         },
         // ✅ IMPROVED: Better chunk file naming
-        chunkFileNames: (chunkInfo) => {
-          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+        chunkFileNames: chunkInfo => {
+          const facadeModuleId = chunkInfo.facadeModuleId
+            ? chunkInfo.facadeModuleId.split('/').pop()
+            : 'chunk';
           return `assets/[name]-[hash].js`;
         },
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
       },
       // ✅ IMPROVED: External dependencies handling
-      external: (id) => {
+      external: id => {
         // Don't externalize these dependencies as they need to be bundled
         return false;
       },
@@ -131,7 +133,7 @@ export default defineConfig({
           return;
         }
         warn(warning);
-      }
+      },
     },
     // ✅ IMPROVED: Build performance optimizations
     target: 'esnext',
@@ -141,8 +143,8 @@ export default defineConfig({
     // ✅ IMPROVED: Better build optimizations
     reportCompressedSize: false, // Faster builds
     modulePreload: {
-      polyfill: false // Modern browsers don't need polyfill
-    }
+      polyfill: false, // Modern browsers don't need polyfill
+    },
   },
   // Development optimizations
   server: {
@@ -177,10 +179,7 @@ export default defineConfig({
       'axios',
       'zod',
     ],
-    exclude: [
-      '@vapi-ai/web',
-      '@daily-co/daily-js',
-    ],
+    exclude: ['@vapi-ai/web', '@daily-co/daily-js'],
   },
   // CSS optimization
   css: {

@@ -26,4 +26,4 @@ export * from './frontend';
 // ============================================
 
 export const AUTH_SYSTEM_VERSION = '2.0.0';
-export const AUTH_SYSTEM_NAME = 'DemoHotel19May Auth System'; 
+export const AUTH_SYSTEM_NAME = 'DemoHotel19May Auth System';

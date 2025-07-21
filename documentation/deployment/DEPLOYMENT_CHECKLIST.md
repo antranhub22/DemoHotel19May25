@@ -2,11 +2,13 @@
 
 ## 📋 Overview
 
-This checklist ensures safe and successful deployment of the multi-tenant SaaS hotel assistant platform from the current Mi Nhon Hotel MVP to a full multi-tenant system.
+This checklist ensures safe and successful deployment of the multi-tenant SaaS hotel assistant
+platform from the current Mi Nhon Hotel MVP to a full multi-tenant system.
 
 ## 🎯 Pre-Deployment Requirements
 
 ### ✅ Code & Environment Verification
+
 - [ ] All code changes merged to `DASHBOARD-MASTER` branch
 - [ ] Environment configuration validated: `npm run env:validate`
 - [ ] All tests passing: `npm run test:all`
@@ -14,6 +16,7 @@ This checklist ensures safe and successful deployment of the multi-tenant SaaS h
 - [ ] Integration tests passed: `npm run test:integration pre-deploy`
 
 ### ✅ API Keys & Services Ready
+
 - [ ] **OpenAI API Key** - Active with billing configured
 - [ ] **Vapi API Key** - Both public key and API key for dynamic creation
 - [ ] **Google Places API Key** - Enabled and quota configured
@@ -27,6 +30,7 @@ This checklist ensures safe and successful deployment of the multi-tenant SaaS h
 ### 1. Database Migration Steps
 
 #### 1.1 Pre-Migration Backup
+
 ```bash
 # Create staging database backup
 pg_dump $STAGING_DATABASE_URL > staging-backup-$(date +%Y%m%d-%H%M%S).sql
@@ -36,6 +40,7 @@ ls -lh staging-backup-*.sql
 ```
 
 #### 1.2 Run Migration Test
+
 ```bash
 # Test migration in dry-run mode
 npm run migration:test:dry-run
@@ -45,6 +50,7 @@ npm run migration:test:production
 ```
 
 #### 1.3 Execute Migration
+
 ```bash
 # Run database migration
 npm run db:migrate
@@ -54,6 +60,7 @@ npm run migration:verify
 ```
 
 #### 1.4 Create Mi Nhon Tenant
+
 ```bash
 # Create Mi Nhon Hotel as first tenant
 npm run seed:minhon-tenant
@@ -65,6 +72,7 @@ npm run db:verify-tenant
 ### 2. Environment Variable Updates
 
 #### 2.1 Core Environment Variables
+
 ```bash
 # Core Settings
 NODE_ENV=staging
@@ -104,6 +112,7 @@ ENABLE_BILLING_SYSTEM=false
 ```
 
 #### 2.2 Validate Environment
+
 ```bash
 # Validate all environment variables
 npm run env:health
@@ -118,6 +127,7 @@ npm run env:test-db
 ### 3. DNS Configuration for Subdomains
 
 #### 3.1 DNS Records Setup
+
 ```bash
 # Main domain
 staging.talk2go.online    A    [IP_ADDRESS]
@@ -131,6 +141,7 @@ demo.staging.talk2go.online       A    [IP_ADDRESS]
 ```
 
 #### 3.2 SSL Certificate Configuration
+
 ```bash
 # Configure SSL for wildcard domain
 certbot certonly --dns-cloudflare \
@@ -145,6 +156,7 @@ SSL_KEY_PATH=/etc/letsencrypt/live/staging.talk2go.online/privkey.pem
 ### 4. Verification Steps
 
 #### 4.1 Database Verification
+
 ```bash
 # Check database structure
 npm run db:verify
@@ -157,6 +169,7 @@ npm run db:check-integrity
 ```
 
 #### 4.2 Application Verification
+
 ```bash
 # Start application
 npm run start:staging
@@ -169,6 +182,7 @@ curl https://minhon.staging.talk2go.online/api/health
 ```
 
 #### 4.3 Feature Testing
+
 ```bash
 # Test hotel research
 npm run test:hotel-research:staging
@@ -183,6 +197,7 @@ npm run test:dashboard:staging
 ### 5. Rollback Procedures (if needed)
 
 #### 5.1 Database Rollback
+
 ```bash
 # Stop application
 npm run stop:staging
@@ -195,6 +210,7 @@ npm run db:verify-rollback
 ```
 
 #### 5.2 Application Rollback
+
 ```bash
 # Revert to previous deployment
 git checkout [PREVIOUS_COMMIT]
@@ -213,6 +229,7 @@ curl https://staging.talk2go.online/api/health
 ### 1. Database Migration Steps
 
 #### 1.1 Pre-Migration Backup
+
 ```bash
 # Create production database backup
 pg_dump $PRODUCTION_DATABASE_URL > production-backup-$(date +%Y%m%d-%H%M%S).sql
@@ -225,6 +242,7 @@ pg_restore --list production-backup-*.sql | head -20
 ```
 
 #### 1.2 Maintenance Window Setup
+
 ```bash
 # Set maintenance mode
 echo "MAINTENANCE_MODE=true" >> .env
@@ -237,6 +255,7 @@ npm run notify:maintenance-start
 ```
 
 #### 1.3 Run Migration Test
+
 ```bash
 # Final migration test with production data
 npm run migration:test:production
@@ -246,6 +265,7 @@ npm run migration:verify-test-results
 ```
 
 #### 1.4 Execute Migration
+
 ```bash
 # Run database migration
 npm run db:migrate:production
@@ -255,6 +275,7 @@ npm run migration:verify:production
 ```
 
 #### 1.5 Create Mi Nhon Tenant
+
 ```bash
 # Create Mi Nhon Hotel as first tenant with production data
 npm run seed:minhon-tenant:production
@@ -266,6 +287,7 @@ npm run db:verify-tenant:production
 ### 2. Environment Variable Updates
 
 #### 2.1 Production Environment Variables
+
 ```bash
 # Core Settings
 NODE_ENV=production
@@ -318,6 +340,7 @@ LOG_LEVEL=info
 ```
 
 #### 2.2 Validate Production Environment
+
 ```bash
 # Comprehensive environment validation
 npm run env:validate-production
@@ -332,6 +355,7 @@ npm run env:test-db:production
 ### 3. DNS Configuration for Subdomains
 
 #### 3.1 Production DNS Records
+
 ```bash
 # Main domain
 talk2go.online              A    [PRODUCTION_IP]
@@ -346,6 +370,7 @@ demo.talk2go.online         A    [PRODUCTION_IP]
 ```
 
 #### 3.2 SSL Certificate Configuration
+
 ```bash
 # Configure SSL for wildcard domain
 certbot certonly --dns-cloudflare \
@@ -358,6 +383,7 @@ echo "0 0,12 * * * root certbot renew --quiet" >> /etc/crontab
 ```
 
 #### 3.3 CDN Configuration (Optional)
+
 ```bash
 # Configure CloudFlare settings
 # - SSL/TLS: Full (strict)
@@ -370,6 +396,7 @@ echo "0 0,12 * * * root certbot renew --quiet" >> /etc/crontab
 ### 4. Verification Steps
 
 #### 4.1 Database Verification
+
 ```bash
 # Verify database structure
 npm run db:verify:production
@@ -385,6 +412,7 @@ npm run db:performance-check:production
 ```
 
 #### 4.2 Application Verification
+
 ```bash
 # Start production application
 npm run start:production
@@ -400,6 +428,7 @@ curl https://talk2go.online/api/dashboard/health
 ```
 
 #### 4.3 Feature Testing
+
 ```bash
 # Test hotel research functionality
 npm run test:hotel-research:production
@@ -415,6 +444,7 @@ npm run test:voice-assistant:production
 ```
 
 #### 4.4 Performance Testing
+
 ```bash
 # Load testing
 npm run test:load:production
@@ -427,6 +457,7 @@ npm run test:api-performance:production
 ```
 
 #### 4.5 Security Testing
+
 ```bash
 # Tenant isolation security test
 npm run test:security:tenant-isolation
@@ -441,6 +472,7 @@ npm run test:security:auth
 ### 5. Post-Deployment Tasks
 
 #### 5.1 Disable Maintenance Mode
+
 ```bash
 # Remove maintenance mode
 echo "MAINTENANCE_MODE=false" >> .env
@@ -453,6 +485,7 @@ npm run notify:maintenance-complete
 ```
 
 #### 5.2 Monitoring Setup
+
 ```bash
 # Start monitoring services
 npm run monitoring:start
@@ -465,6 +498,7 @@ npm run monitoring:setup-dashboards
 ```
 
 #### 5.3 Backup Schedule
+
 ```bash
 # Set up daily database backups
 echo "0 2 * * * root pg_dump $DATABASE_URL > /backups/daily-$(date +%Y%m%d).sql" >> /etc/crontab
@@ -476,6 +510,7 @@ echo "0 3 * * 0 root /scripts/full-backup.sh" >> /etc/crontab
 ### 6. Rollback Procedures (if needed)
 
 #### 6.1 Emergency Rollback
+
 ```bash
 # Immediate rollback (if critical issues)
 npm run rollback:emergency
@@ -489,6 +524,7 @@ npm run deploy:production:rollback
 ```
 
 #### 6.2 Gradual Rollback
+
 ```bash
 # Enable maintenance mode
 echo "MAINTENANCE_MODE=true" >> .env
@@ -514,6 +550,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 ## 🔍 VERIFICATION CHECKLIST
 
 ### ✅ Mi Nhon Hotel Compatibility
+
 - [ ] Original voice assistant functionality works
 - [ ] All existing data preserved and accessible
 - [ ] No performance degradation
@@ -521,6 +558,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 - [ ] Staff dashboard accessible and functional
 
 ### ✅ Multi-Tenant Functionality
+
 - [ ] Tenant creation flow works
 - [ ] Data isolation between tenants verified
 - [ ] Subdomain routing works correctly
@@ -528,6 +566,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 - [ ] Voice assistants unique per tenant
 
 ### ✅ SaaS Features
+
 - [ ] Hotel research functionality working
 - [ ] Dynamic assistant creation working
 - [ ] Knowledge base generation working
@@ -535,6 +574,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 - [ ] Subscription management working
 
 ### ✅ Performance & Security
+
 - [ ] Database queries optimized with tenant filtering
 - [ ] API response times acceptable (< 500ms)
 - [ ] SSL certificates valid and auto-renewing
@@ -546,17 +586,20 @@ echo "MAINTENANCE_MODE=false" >> .env
 ## 📞 EMERGENCY CONTACTS
 
 ### Development Team
+
 - **Lead Developer**: [Contact Info]
 - **Database Administrator**: [Contact Info]
 - **DevOps Engineer**: [Contact Info]
 
 ### External Services
+
 - **Vapi.ai Support**: [Contact Info]
 - **OpenAI Support**: [Contact Info]
 - **Google Cloud Support**: [Contact Info]
 - **DNS Provider Support**: [Contact Info]
 
 ### Rollback Authority
+
 - **Decision Maker**: [Contact Info]
 - **Backup Contact**: [Contact Info]
 
@@ -565,6 +608,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 ## 📊 SUCCESS METRICS
 
 ### Deployment Success Indicators
+
 - [ ] **Zero Data Loss** - All Mi Nhon data preserved
 - [ ] **100% Tenant Isolation** - No cross-tenant data access
 - [ ] **< 2 Second Response Time** - API performance maintained
@@ -572,6 +616,7 @@ echo "MAINTENANCE_MODE=false" >> .env
 - [ ] **No Security Breaches** - All security tests passed
 
 ### Business Metrics
+
 - [ ] **Mi Nhon Hotel** - Continues normal operations
 - [ ] **New Tenant Creation** - Setup flow working
 - [ ] **Voice Assistant Quality** - Functionality maintained
@@ -583,20 +628,22 @@ echo "MAINTENANCE_MODE=false" >> .env
 ## 📝 DEPLOYMENT LOG
 
 ### Staging Deployment
-- **Date**: ___________
-- **Time**: ___________
-- **Deployed by**: ___________
-- **Git Commit**: ___________
-- **Database Migration**: ___________
-- **Status**: ___________
+
+- **Date**: ****\_\_\_****
+- **Time**: ****\_\_\_****
+- **Deployed by**: ****\_\_\_****
+- **Git Commit**: ****\_\_\_****
+- **Database Migration**: ****\_\_\_****
+- **Status**: ****\_\_\_****
 
 ### Production Deployment
-- **Date**: ___________
-- **Time**: ___________
-- **Deployed by**: ___________
-- **Git Commit**: ___________
-- **Database Migration**: ___________
-- **Status**: ___________
+
+- **Date**: ****\_\_\_****
+- **Time**: ****\_\_\_****
+- **Deployed by**: ****\_\_\_****
+- **Git Commit**: ****\_\_\_****
+- **Database Migration**: ****\_\_\_****
+- **Status**: ****\_\_\_****
 
 ---
 
@@ -608,9 +655,9 @@ echo "MAINTENANCE_MODE=false" >> .env
 - **Document any issues** encountered during deployment
 - **Update this checklist** based on lessons learned
 
-**Remember**: This migration transforms the application from single-tenant to multi-tenant. Take time to thoroughly test and understand the implications before production deployment.
+**Remember**: This migration transforms the application from single-tenant to multi-tenant. Take
+time to thoroughly test and understand the implications before production deployment.
 
 ---
 
-**Generated**: $(date)
-**Version**: 1.0.0 
+**Generated**: $(date) **Version**: 1.0.0

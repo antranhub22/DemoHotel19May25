@@ -2,19 +2,23 @@
 
 ## 🎯 OVERVIEW
 
-This system automatically prevents architectural overlaps and guides developers to the correct files for changes. **No more guessing which file to modify!**
+This system automatically prevents architectural overlaps and guides developers to the correct files
+for changes. **No more guessing which file to modify!**
 
 ---
 
 ## 🛠️ TOOLS & COMMANDS
 
 ### **1. 🎯 Change Guidance System**
+
 ```bash
 npm run guide:change
 ```
+
 **Interactive tool that tells you EXACTLY which file to modify based on your description.**
 
 **Example Usage:**
+
 ```
 🤔 What do you want to change?
 > I want to add a new button animation
@@ -27,12 +31,15 @@ npm run guide:change
 ```
 
 ### **2. 🏗️ Architecture Validation**
+
 ```bash
 npm run validate:architecture
 ```
+
 **Automatically detects violations and overlaps.**
 
 **Example Output:**
+
 ```
 ✅ ARCHITECTURE VALIDATION PASSED!
 🎯 All components maintain proper separation of concerns
@@ -46,15 +53,19 @@ OR
 ```
 
 ### **3. ✅ Complete Validation**
+
 ```bash
 npm run validate:all
 ```
+
 **Runs architecture + TypeScript validation.**
 
 ### **4. 🔍 Siri Components Check**
+
 ```bash
 npm run check:siri-components
 ```
+
 **Specific validation for Siri button system.**
 
 ---
@@ -64,16 +75,19 @@ npm run check:siri-components
 ### **Scenario 1: Making Changes**
 
 1. **Ask the system first:**
+
    ```bash
    npm run guide:change
    ```
 
 2. **Describe your change:**
+
    ```
    > The button animation is too slow
    ```
 
 3. **Follow the guidance:**
+
    ```
    🎯 Primary file to modify: SiriButton.ts
    💡 Example changes: Modify animation timing, Update animation speed
@@ -101,28 +115,29 @@ open docs/ARCHITECTURE_GUIDELINES.md
 
 ### **Scenario 3: Pre-Commit Validation**
 
-**Automatic:** Pre-commit hooks run architecture validation
-**Manual:** `npm run validate:architecture`
+**Automatic:** Pre-commit hooks run architecture validation **Manual:**
+`npm run validate:architecture`
 
 ---
 
 ## 📋 DECISION MATRIX - QUICK REFERENCE
 
-| What You Want To Change | Primary File | Secondary Files |
-|--------------------------|-------------|-----------------|
-| **Visual effects, animations** | `SiriButton.ts` | None |
-| **Button colors, themes** | `SiriButton.ts` | None |
-| **Touch/click behavior** | `SiriCallButton.tsx` | `SiriButton.ts` (interface only) |
-| **Event handling logic** | `SiriCallButton.tsx` | None |
-| **Layout, positioning** | `SiriButtonContainer.tsx` | `voice-interface.css` |
-| **Language themes** | `SiriButtonContainer.tsx` | `SiriButton.ts` (colors) |
-| **Mobile/desktop responsive** | `SiriButtonContainer.tsx` | `voice-interface.css` |
+| What You Want To Change        | Primary File              | Secondary Files                  |
+| ------------------------------ | ------------------------- | -------------------------------- |
+| **Visual effects, animations** | `SiriButton.ts`           | None                             |
+| **Button colors, themes**      | `SiriButton.ts`           | None                             |
+| **Touch/click behavior**       | `SiriCallButton.tsx`      | `SiriButton.ts` (interface only) |
+| **Event handling logic**       | `SiriCallButton.tsx`      | None                             |
+| **Layout, positioning**        | `SiriButtonContainer.tsx` | `voice-interface.css`            |
+| **Language themes**            | `SiriButtonContainer.tsx` | `SiriButton.ts` (colors)         |
+| **Mobile/desktop responsive**  | `SiriButtonContainer.tsx` | `voice-interface.css`            |
 
 ---
 
 ## 🚫 AUTOMATED PREVENTION RULES
 
 ### **SiriButton.ts - Visual Engine ONLY**
+
 ```typescript
 ✅ ALLOWED:
 - Canvas operations (draw, render, animate)
@@ -138,6 +153,7 @@ open docs/ARCHITECTURE_GUIDELINES.md
 ```
 
 ### **SiriCallButton.tsx - Event Controller ONLY**
+
 ```typescript
 ✅ ALLOWED:
 - Event handling (touch, click, mouse)
@@ -152,6 +168,7 @@ open docs/ARCHITECTURE_GUIDELINES.md
 ```
 
 ### **SiriButtonContainer.tsx - Layout Manager ONLY**
+
 ```typescript
 ✅ ALLOWED:
 - Layout composition
@@ -170,13 +187,16 @@ open docs/ARCHITECTURE_GUIDELINES.md
 ## 🔧 INTEGRATION WITH DEVELOPMENT WORKFLOW
 
 ### **VS Code Integration**
+
 Press `Ctrl+Shift+P` → Type `Tasks: Run Task`:
+
 - `🏗️ Validate Architecture`
-- `🎯 Change Guidance` 
+- `🎯 Change Guidance`
 - `✅ Check Siri Components`
 - `🔍 Validate All`
 
 ### **Git Workflow**
+
 ```bash
 # 1. Ask for guidance
 npm run guide:change
@@ -194,6 +214,7 @@ npm run validate:architecture  # See specific issues
 ```
 
 ### **Code Review Process**
+
 - ✅ Pre-commit hooks prevent bad commits
 - ✅ Architecture violations highlighted
 - ✅ Clear guidance for fixes
@@ -203,18 +224,21 @@ npm run validate:architecture  # See specific issues
 ## 🎯 BENEFITS
 
 ### **For Developers:**
+
 - ✅ **No guessing** which file to modify
 - ✅ **Instant feedback** on architecture violations
 - ✅ **Clear guidance** with examples
 - ✅ **Automated prevention** of overlaps
 
 ### **For Code Quality:**
+
 - ✅ **Enforced separation** of concerns
 - ✅ **Consistent patterns** across codebase
 - ✅ **No architectural drift** over time
 - ✅ **Maintainable codebase** long-term
 
 ### **For Team Productivity:**
+
 - ✅ **Faster onboarding** for new developers
 - ✅ **Reduced debugging** time
 - ✅ **Fewer architectural discussions** needed
@@ -225,6 +249,7 @@ npm run validate:architecture  # See specific issues
 ## 🚨 TROUBLESHOOTING
 
 ### **"I don't know what I want to change"**
+
 ```bash
 npm run guide:change
 > help
@@ -232,12 +257,15 @@ npm run guide:change
 ```
 
 ### **"Validation is failing but I think my change is correct"**
+
 1. Check `docs/ARCHITECTURE_GUIDELINES.md`
 2. Run `npm run validate:architecture` for specific details
 3. Consider if the change violates separation of concerns
 
 ### **"I need to change multiple components"**
+
 🚨 **RED FLAG** - This usually indicates:
+
 - Design review needed
 - Feature should be broken down
 - Architecture boundary unclear
@@ -249,10 +277,11 @@ npm run guide:change
 ## 🎉 SUCCESS METRICS
 
 With this system, you should see:
+
 - ✅ Zero architecture violations in commits
-- ✅ Faster development cycles  
+- ✅ Faster development cycles
 - ✅ Fewer bugs from component conflicts
 - ✅ Easier code maintenance
 - ✅ Clear development patterns
 
-**The system learns and evolves with your codebase!** 
+**The system learns and evolves with your codebase!**

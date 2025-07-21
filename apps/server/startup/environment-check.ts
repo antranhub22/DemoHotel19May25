@@ -2,18 +2,18 @@
  * ===============================================
  * 🚀 Environment Validation Startup Script
  * ===============================================
- * 
+ *
  * This script validates the environment configuration
  * when the server starts up and provides warnings
  * for missing or misconfigured variables.
  */
 
-import { 
-  validateEnvironment, 
-  getEnvironmentStatus, 
+import {
+  validateEnvironment,
+  getEnvironmentStatus,
   printEnvironmentStatus,
   loadEnvironmentConfig,
-  EnvironmentValidationError
+  EnvironmentValidationError,
 } from '../../../packages/config/environment';
 
 // Colors for console output
@@ -35,43 +35,59 @@ function colorize(text: string, color: keyof typeof colors): string {
 function printStartupBanner(): void {
   console.log('');
   console.log(colorize('🏨 Hotel Voice Assistant SaaS Platform', 'bright'));
-  console.log(colorize('===============================================', 'cyan'));
+  console.log(
+    colorize('===============================================', 'cyan')
+  );
   console.log('');
 }
 
 function printEnvironmentSummary(): void {
   const config = loadEnvironmentConfig();
   const status = getEnvironmentStatus();
-  
+
   console.log(colorize('📋 Environment Summary:', 'blue'));
   console.log(colorize('-'.repeat(30), 'blue'));
   console.log(`Environment: ${colorize(config.NODE_ENV, 'yellow')}`);
   console.log(`Port: ${colorize(config.PORT.toString(), 'yellow')}`);
-  console.log(`Database: ${colorize(config.DATABASE_URL.includes('postgres') ? 'PostgreSQL' : 'SQLite', 'yellow')}`);
+  console.log(
+    `Database: ${colorize(config.DATABASE_URL.includes('postgres') ? 'PostgreSQL' : 'SQLite', 'yellow')}`
+  );
   console.log(`Domain: ${colorize(config.TALK2GO_DOMAIN, 'yellow')}`);
   console.log('');
-  
+
   // Feature status
   console.log(colorize('🎯 Feature Status:', 'blue'));
-  console.log(`Basic Setup: ${status.basicSetup ? colorize('✅ Ready', 'green') : colorize('❌ Missing', 'red')}`);
-  console.log(`SaaS Features: ${status.saasFeatures ? colorize('✅ Ready', 'green') : colorize('❌ Missing', 'red')}`);
-  console.log(`Multi-language: ${status.multiLanguage ? colorize('✅ Enabled', 'green') : colorize('⚪ Disabled', 'yellow')}`);
-  console.log(`Email Services: ${status.emailServices ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`);
-  console.log(`Storage: ${status.storage ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`);
-  console.log(`Monitoring: ${status.monitoring ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`);
+  console.log(
+    `Basic Setup: ${status.basicSetup ? colorize('✅ Ready', 'green') : colorize('❌ Missing', 'red')}`
+  );
+  console.log(
+    `SaaS Features: ${status.saasFeatures ? colorize('✅ Ready', 'green') : colorize('❌ Missing', 'red')}`
+  );
+  console.log(
+    `Multi-language: ${status.multiLanguage ? colorize('✅ Enabled', 'green') : colorize('⚪ Disabled', 'yellow')}`
+  );
+  console.log(
+    `Email Services: ${status.emailServices ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`
+  );
+  console.log(
+    `Storage: ${status.storage ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`
+  );
+  console.log(
+    `Monitoring: ${status.monitoring ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`
+  );
   console.log('');
 }
 
 function printMissingVariables(missing: string[]): void {
   if (missing.length === 0) return;
-  
+
   console.log(colorize('❌ Missing Environment Variables:', 'red'));
   console.log(colorize('-'.repeat(35), 'red'));
-  
+
   missing.forEach(varName => {
     console.log(`  • ${colorize(varName, 'red')}`);
   });
-  
+
   console.log('');
   console.log(colorize('💡 To fix these issues:', 'yellow'));
   console.log('  1. Run: npm run env:generate');
@@ -83,14 +99,14 @@ function printMissingVariables(missing: string[]): void {
 
 function printWarnings(warnings: string[]): void {
   if (warnings.length === 0) return;
-  
+
   console.log(colorize('⚠️  Warnings:', 'yellow'));
   console.log(colorize('-'.repeat(15), 'yellow'));
-  
+
   warnings.forEach(warning => {
     console.log(`  • ${colorize(warning, 'yellow')}`);
   });
-  
+
   console.log('');
 }
 
@@ -107,7 +123,9 @@ function printQuickCommands(): void {
 
 function printReadyMessage(): void {
   console.log(colorize('🚀 Server Starting...', 'green'));
-  console.log(colorize('===============================================', 'cyan'));
+  console.log(
+    colorize('===============================================', 'cyan')
+  );
   console.log('');
 }
 
@@ -117,7 +135,7 @@ function printReadyMessage(): void {
 export async function validateEnvironmentOnStartup(): Promise<void> {
   try {
     printStartupBanner();
-    
+
     // Basic validation
     try {
       validateEnvironment(false);
@@ -125,49 +143,61 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
       if (error instanceof EnvironmentValidationError) {
         console.log(colorize('❌ Basic environment validation failed!', 'red'));
         printMissingVariables(error.missingVars);
-        console.log(colorize('⚠️  Server will continue with limited functionality', 'yellow'));
+        console.log(
+          colorize(
+            '⚠️  Server will continue with limited functionality',
+            'yellow'
+          )
+        );
         console.log('');
       } else {
         throw error;
       }
     }
-    
+
     // SaaS features validation (non-blocking)
     try {
       validateEnvironment(true);
     } catch (error) {
       if (error instanceof EnvironmentValidationError) {
-        console.log(colorize('⚠️  SaaS features are not fully configured', 'yellow'));
-        console.log(colorize('   Some advanced features may be disabled', 'yellow'));
+        console.log(
+          colorize('⚠️  SaaS features are not fully configured', 'yellow')
+        );
+        console.log(
+          colorize('   Some advanced features may be disabled', 'yellow')
+        );
         console.log('');
       } else {
         throw error;
       }
     }
-    
+
     // Print environment summary
     printEnvironmentSummary();
-    
+
     // Print warnings
     const status = getEnvironmentStatus();
     if (status.warnings.length > 0) {
       printWarnings(status.warnings);
     }
-    
+
     // Print quick commands
     printQuickCommands();
-    
+
     // Ready message
     printReadyMessage();
-    
   } catch (error) {
     console.error(colorize('💥 Critical environment error:', 'red'));
     console.error(colorize((error as Error).message, 'red'));
     console.log('');
-    console.log(colorize('🔧 Please check your environment configuration:', 'yellow'));
+    console.log(
+      colorize('🔧 Please check your environment configuration:', 'yellow')
+    );
     console.log('  1. Run: npm run env:status');
     console.log('  2. Run: npm run env:validate');
-    console.log('  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md');
+    console.log(
+      '  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md'
+    );
     console.log('');
     process.exit(1);
   }
@@ -178,50 +208,55 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
  */
 export async function validateProductionEnvironment(): Promise<void> {
   const config = loadEnvironmentConfig();
-  
+
   if (config.NODE_ENV !== 'production') {
     return;
   }
-  
+
   console.log(colorize('🔒 Production Environment Validation', 'blue'));
   console.log(colorize('=====================================', 'blue'));
-  
+
   const productionChecks = [
     {
       name: 'JWT Secret',
-      check: () => config.JWT_SECRET !== 'fallback-jwt-secret-change-in-production',
+      check: () =>
+        config.JWT_SECRET !== 'fallback-jwt-secret-change-in-production',
       critical: true,
-      message: 'Using default JWT secret in production is not secure'
+      message: 'Using default JWT secret in production is not secure',
     },
     {
       name: 'Database URL',
       check: () => config.DATABASE_URL.includes('postgres'),
       critical: true,
-      message: 'Production should use PostgreSQL, not SQLite'
+      message: 'Production should use PostgreSQL, not SQLite',
     },
     {
       name: 'SSL Configuration',
       check: () => !!(config.SSL_CERT_PATH && config.SSL_KEY_PATH),
       critical: false,
-      message: 'SSL certificates not configured'
+      message: 'SSL certificates not configured',
     },
     {
       name: 'Email Service',
-      check: () => !!(config.GMAIL_APP_PASSWORD || (config.MAILJET_API_KEY && config.MAILJET_SECRET_KEY)),
+      check: () =>
+        !!(
+          config.GMAIL_APP_PASSWORD ||
+          (config.MAILJET_API_KEY && config.MAILJET_SECRET_KEY)
+        ),
       critical: false,
-      message: 'Email service not configured'
+      message: 'Email service not configured',
     },
     {
       name: 'Monitoring',
       check: () => !!(config.SENTRY_DSN || config.GOOGLE_ANALYTICS_ID),
       critical: false,
-      message: 'No monitoring service configured'
-    }
+      message: 'No monitoring service configured',
+    },
   ];
-  
+
   const failures: string[] = [];
   const warnings: string[] = [];
-  
+
   for (const check of productionChecks) {
     if (!check.check()) {
       if (check.critical) {
@@ -233,23 +268,28 @@ export async function validateProductionEnvironment(): Promise<void> {
       console.log(`✅ ${check.name}: OK`);
     }
   }
-  
+
   if (failures.length > 0) {
     console.log('');
     console.log(colorize('💥 Critical Production Issues:', 'red'));
     failures.forEach(failure => console.log(`  ${failure}`));
     console.log('');
-    console.log(colorize('🔧 Please fix these issues before deploying to production', 'yellow'));
+    console.log(
+      colorize(
+        '🔧 Please fix these issues before deploying to production',
+        'yellow'
+      )
+    );
     process.exit(1);
   }
-  
+
   if (warnings.length > 0) {
     console.log('');
     console.log(colorize('⚠️  Production Warnings:', 'yellow'));
     warnings.forEach(warning => console.log(`  ${warning}`));
     console.log('');
   }
-  
+
   console.log(colorize('✅ Production environment validation passed', 'green'));
   console.log('');
 }
@@ -263,7 +303,12 @@ export function quickEnvironmentCheck(): boolean {
     return true;
   } catch (error) {
     if (error instanceof EnvironmentValidationError) {
-      console.log(colorize('⚠️  Environment issues detected. Run: npm run env:validate', 'yellow'));
+      console.log(
+        colorize(
+          '⚠️  Environment issues detected. Run: npm run env:validate',
+          'yellow'
+        )
+      );
       return false;
     }
     throw error;
@@ -276,20 +321,22 @@ export function quickEnvironmentCheck(): boolean {
 export function printCompactEnvironmentStatus(): void {
   const status = getEnvironmentStatus();
   const config = loadEnvironmentConfig();
-  
+
   const statusIcon = status.basicSetup ? '✅' : '❌';
   const saasIcon = status.saasFeatures ? '✅' : '⚪';
-  
-  console.log(`${statusIcon} Environment: ${config.NODE_ENV} | SaaS: ${saasIcon} | Port: ${config.PORT}`);
-  
+
+  console.log(
+    `${statusIcon} Environment: ${config.NODE_ENV} | SaaS: ${saasIcon} | Port: ${config.PORT}`
+  );
+
   if (status.missing.length > 0) {
     console.log(colorize(`   Missing: ${status.missing.join(', ')}`, 'red'));
   }
-  
+
   if (status.warnings.length > 0) {
     console.log(colorize(`   Warnings: ${status.warnings.length}`, 'yellow'));
   }
 }
 
 // Export startup function as default
-export default validateEnvironmentOnStartup; 
+export default validateEnvironmentOnStartup;

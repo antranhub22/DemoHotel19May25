@@ -22,20 +22,23 @@ export class CallService {
   /**
    * Update call duration when call ends
    */
-  static async updateCallDuration(callId: string, duration: number): Promise<void> {
+  static async updateCallDuration(
+    callId: string,
+    duration: number
+  ): Promise<void> {
     try {
       if (!callId) {
         throw new Error('Call ID is required');
       }
-      
+
       await db
         .update(call)
-              .set({ 
-        duration: duration,
-        end_time: new Date()
-      })
+        .set({
+          duration,
+          end_time: new Date(),
+        })
         .where(eq(call.call_id_vapi, callId));
-      
+
       console.log(`Updated call duration for ${callId}: ${duration} seconds`);
     } catch (error) {
       console.error('Error updating call duration:', error);
@@ -46,51 +49,59 @@ export class CallService {
   /**
    * Store test transcript
    */
-  static async storeTestTranscript(callId: string, role: string, content: string): Promise<any> {
+  static async storeTestTranscript(
+    callId: string,
+    role: string,
+    content: string
+  ): Promise<any> {
     try {
       if (!callId || !role || !content) {
         throw new Error('Call ID, role, and content are required');
       }
-      
+
       // Convert camelCase to snake_case for database schema validation
       // Ensure timestamp is within valid range for PostgreSQL
       const now = Date.now();
       const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
-      
+
       const transcriptDataForValidation = {
         call_id: callId,
         role,
         content,
         tenant_id: 'default',
-        timestamp: validTimestamp // ✅ FIXED: Use proper timestamp, storage will handle conversion
+        timestamp: validTimestamp, // ✅ FIXED: Use proper timestamp, storage will handle conversion
       };
-      
+
       // Validate with database schema (expects snake_case)
-      const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
-      
+      const validatedData = insertTranscriptSchema.parse(
+        transcriptDataForValidation
+      );
+
       // Auto-create call record if it doesn't exist
       await this.ensureCallRecordExists(callId, content);
-      
+
       // Store transcript in database with proper field mapping
       await storage.addTranscript({
-        callId: callId,
+        callId,
         role,
         content,
         tenantId: 'default',
-        timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion properly
+        timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
 
       console.log('✅ [CallService] Transcript stored successfully');
-      
+
       return {
         success: true,
         message: 'Test transcript stored successfully',
-        transcript: validatedData
+        transcript: validatedData,
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error('Zod validation errors in callService:', error.errors);
-        throw new Error(`Invalid transcript data: ${JSON.stringify(error.errors)}`);
+        throw new Error(
+          `Invalid transcript data: ${JSON.stringify(error.errors)}`
+        );
       }
       console.error('Error storing test transcript:', error);
       throw new Error('Failed to store test transcript');
@@ -100,22 +111,26 @@ export class CallService {
   /**
    * Ensure call record exists, create if not
    */
-  private static async ensureCallRecordExists(callId: string, content: string): Promise<void> {
+  private static async ensureCallRecordExists(
+    callId: string,
+    content: string
+  ): Promise<void> {
     try {
       const existingCall = await db
         .select()
         .from(call)
         .where(eq(call.call_id_vapi, callId))
         .limit(1);
-      
+
       if (existingCall.length === 0) {
         // Extract room number from content if possible
-        const roomMatch = content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
+        const roomMatch =
+          content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
         const roomNumber = roomMatch ? roomMatch[1] : null;
-        
+
         // Determine language from content
         const language = this.detectLanguage(content);
-        
+
         // TODO: Fix database schema mismatch - temporarily commented out
         // await db.insert(call).values({
         //   call_id_vapi: callId,
@@ -124,8 +139,10 @@ export class CallService {
         //   language: language,
         //   created_at: getCurrentTimestamp()
         // });
-        
-        console.log(`Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`);
+
+        console.log(
+          `Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`
+        );
       }
     } catch (callError) {
       console.error('Error creating call record:', callError);
@@ -137,9 +154,12 @@ export class CallService {
    * Detect language from content
    */
   private static detectLanguage(content: string): string {
-    const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(content);
+    const hasVietnamese =
+      /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(
+        content
+      );
     const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
-    
+
     if (hasVietnamese) return 'vi';
     if (hasFrench) return 'fr';
     return 'en';
@@ -152,17 +172,21 @@ export class CallService {
     try {
       const totalCalls = await db.select().from(call);
       const totalTranscripts = await db.select().from(transcript);
-      
+
       return {
         totalCalls: totalCalls.length,
         totalTranscripts: totalTranscripts.length,
-        averageDuration: totalCalls.length > 0 
-          ? totalCalls.reduce((sum: number, c: any) => sum + (c.duration || 0), 0) / totalCalls.length 
-          : 0
+        averageDuration:
+          totalCalls.length > 0
+            ? totalCalls.reduce(
+                (sum: number, c: any) => sum + (c.duration || 0),
+                0
+              ) / totalCalls.length
+            : 0,
       };
     } catch (error) {
       console.error('Error getting call statistics:', error);
       throw new Error('Failed to get call statistics');
     }
   }
-} 
+}

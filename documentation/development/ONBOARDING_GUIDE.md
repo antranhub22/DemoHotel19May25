@@ -1,12 +1,16 @@
 # 🚀 Developer Onboarding Guide
 
-Welcome to the **DemoHotel19May** project! This guide will help you get up and running quickly with our restructured monorepo architecture.
+Welcome to the **DemoHotel19May** project! This guide will help you get up and running quickly with
+our restructured monorepo architecture.
 
 ## 🎯 Project Overview
 
-**DemoHotel19May** is an AI-powered voice assistant platform designed specifically for hotels. The system enables guests to interact with hotel services through natural voice commands, powered by OpenAI and Vapi.ai integrations.
+**DemoHotel19May** is an AI-powered voice assistant platform designed specifically for hotels. The
+system enables guests to interact with hotel services through natural voice commands, powered by
+OpenAI and Vapi.ai integrations.
 
 ### 🏗️ Architecture Highlights
+
 - **Monorepo structure** for better code organization
 - **TypeScript-first** development
 - **React frontend** with modern tooling
@@ -19,6 +23,7 @@ Welcome to the **DemoHotel19May** project! This guide will help you get up and r
 Before you begin, ensure you have:
 
 ### Required Software
+
 - **Node.js** v18+ ([Download](https://nodejs.org/))
 - **npm** v8+ (comes with Node.js)
 - **Git** ([Download](https://git-scm.com/))
@@ -30,10 +35,12 @@ Before you begin, ensure you have:
   - Prettier - Code formatter
 
 ### Development Database
+
 - **PostgreSQL** for production-like development
 - **SQLite** (included) for quick local development
 
 ### API Keys (for full functionality)
+
 - **OpenAI API Key** - For AI features
 - **Vapi.ai Keys** - For voice integration
 - **Gmail App Password** - For email features (optional)
@@ -41,6 +48,7 @@ Before you begin, ensure you have:
 ## 🚀 Quick Setup (5 minutes)
 
 ### 1. Clone and Install
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -55,6 +63,7 @@ cp .env.example .env
 ```
 
 ### 2. Environment Configuration
+
 Edit `.env` file with your settings:
 
 ```bash
@@ -71,6 +80,7 @@ VITE_VAPI_ASSISTANT_ID=asst-your-id
 ```
 
 ### 3. Start Development
+
 ```bash
 # Start the full stack
 npm run dev
@@ -86,6 +96,7 @@ npm run dev:client
 ## 📁 Understanding the Structure
 
 ### High-Level Overview
+
 ```
 DemoHotel19May/
 ├── apps/                    # 🚀 Applications
@@ -99,6 +110,7 @@ DemoHotel19May/
 ### Detailed Structure
 
 #### `apps/` - Applications
+
 ```
 apps/
 ├── client/                  # React frontend
@@ -118,6 +130,7 @@ apps/
 ```
 
 #### `packages/` - Shared Code
+
 ```
 packages/
 ├── shared/                  # Shared utilities
@@ -134,6 +147,7 @@ packages/
 ### 1. Working with Features
 
 #### Adding a New Component
+
 ```bash
 # Navigate to components
 cd apps/client/src/components/
@@ -145,6 +159,7 @@ touch MyFeature.tsx index.ts
 ```
 
 Example component structure:
+
 ```typescript
 // MyFeature.tsx
 import React from 'react';
@@ -172,6 +187,7 @@ export { default } from './MyFeature';
 ```
 
 #### Adding a New API Route
+
 ```bash
 # Navigate to routes
 cd apps/server/routes/
@@ -181,6 +197,7 @@ touch myFeature.ts
 ```
 
 Example route structure:
+
 ```typescript
 // myFeature.ts
 import { Router, Request, Response } from 'express';
@@ -191,10 +208,10 @@ const router = Router();
 router.get('/my-feature', async (req: Request, res: Response) => {
   try {
     logger.api('My feature endpoint called');
-    
+
     // Your logic here
     const data = { message: 'Hello from my feature!' };
-    
+
     res.json(data);
   } catch (error) {
     logger.error('My feature error', 'api', error);
@@ -208,6 +225,7 @@ export default router;
 ### 2. Import Best Practices
 
 #### Use Absolute Imports
+
 ```typescript
 // ✅ Good
 import { Button } from '@/components/ui/button';
@@ -220,6 +238,7 @@ import { logger } from '../../../../packages/shared/utils/logger';
 ```
 
 #### Import Order
+
 ```typescript
 // 1. External packages
 import React from 'react';
@@ -237,6 +256,7 @@ import type { ApiResponse } from '@types/api';
 ### 3. Database Development
 
 #### Schema Changes
+
 ```bash
 # Make changes to packages/shared/db/schema.ts
 # Then generate migration
@@ -247,6 +267,7 @@ npm run db:setup
 ```
 
 #### Adding New Tables
+
 ```typescript
 // packages/shared/db/schema.ts
 export const myNewTable = pgTable('my_new_table', {
@@ -259,6 +280,7 @@ export const myNewTable = pgTable('my_new_table', {
 ## 🧪 Testing Your Changes
 
 ### Run Tests
+
 ```bash
 # API tests
 npm run test
@@ -274,6 +296,7 @@ npm run typecheck
 ```
 
 ### Manual Testing Checklist
+
 - [ ] Backend starts without errors
 - [ ] Frontend loads correctly
 - [ ] API endpoints respond
@@ -284,6 +307,7 @@ npm run typecheck
 ## 🎨 UI Development
 
 ### Using TailwindCSS
+
 ```typescript
 // Component styling
 <div className="flex items-center space-x-4 p-6 bg-white rounded-lg shadow-md">
@@ -294,6 +318,7 @@ npm run typecheck
 ```
 
 ### Using Radix UI Components
+
 ```typescript
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -307,6 +332,7 @@ import { Dialog } from '@/components/ui/dialog';
 ## 🛠️ Development Tools
 
 ### Available Scripts
+
 ```bash
 # Development
 npm run dev                  # Start backend
@@ -330,6 +356,7 @@ npm run clean               # Clean build
 ```
 
 ### Useful Commands
+
 ```bash
 # Clean everything and reinstall
 ./clean-build.sh
@@ -344,6 +371,7 @@ npm run build:analyze
 ## 🔍 Debugging
 
 ### Backend Debugging
+
 ```typescript
 import { logger } from '@shared/utils/logger';
 
@@ -360,6 +388,7 @@ logger.email('Email sent');
 ```
 
 ### Frontend Debugging
+
 ```typescript
 // React DevTools recommended
 // Use browser developer tools
@@ -369,6 +398,7 @@ logger.email('Email sent');
 ### Common Issues & Solutions
 
 #### Port Already in Use
+
 ```bash
 # Kill process on port 10000
 lsof -ti:10000 | xargs kill -9
@@ -378,6 +408,7 @@ PORT=10001 npm run dev
 ```
 
 #### TypeScript Errors
+
 ```bash
 # Check for errors
 npm run typecheck
@@ -389,6 +420,7 @@ npm run typecheck
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Reset database
 npm run db:setup
@@ -403,11 +435,13 @@ echo $DATABASE_URL
 ## 📚 Learning Resources
 
 ### Project Documentation
+
 - [Architecture Guide](./ARCHITECTURE.md) - System overview
-- [API Documentation](./API_DOCUMENTATION.md) - API reference  
+- [API Documentation](./API_DOCUMENTATION.md) - API reference
 - [Code Review Guide](./CODE_REVIEW_GUIDE.md) - Coding standards
 
 ### External Resources
+
 - [React Documentation](https://react.dev/)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [TailwindCSS Docs](https://tailwindcss.com/docs)
@@ -417,12 +451,14 @@ echo $DATABASE_URL
 ## 🤝 Getting Help
 
 ### When You're Stuck
+
 1. **Check logs** - Look for error messages
 2. **Read documentation** - Check relevant docs
 3. **Search codebase** - Look for similar patterns
 4. **Ask team** - Reach out for help
 
 ### Communication Channels
+
 - **Code Reviews** - Submit PRs for feedback
 - **Documentation** - Update docs when you learn
 - **Issues** - Report bugs and suggest improvements
@@ -452,4 +488,5 @@ Welcome to the team! 🎉
 
 ---
 
-**Need help?** Check our [Contributing Guidelines](./CONTRIBUTING.md) or reach out to the development team. 
+**Need help?** Check our [Contributing Guidelines](./CONTRIBUTING.md) or reach out to the
+development team.

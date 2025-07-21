@@ -24,16 +24,16 @@ export function normalizeText(text: string): string {
 export function stringSimilarity(str1: string, str2: string): number {
   if (str1 === str2) return 1.0;
   if (str1.length === 0 || str2.length === 0) return 0.0;
-  
+
   // Get longest common substring
   const longer = str1.length > str2.length ? str1 : str2;
   const shorter = str1.length > str2.length ? str2 : str1;
-  
+
   // Check if the shorter string appears in the longer one
   if (longer.includes(shorter)) {
     return shorter.length / longer.length;
   }
-  
+
   // Count matching characters
   let matches = 0;
   for (let i = 0; i < shorter.length; i++) {
@@ -41,36 +41,41 @@ export function stringSimilarity(str1: string, str2: string): number {
       matches++;
     }
   }
-  
+
   return matches / shorter.length;
 }
 
 /**
  * Remove duplicates from array using similarity comparison
  */
-export function removeSimilarItems<T extends { name: string }>(items: T[], similarityThreshold: number = 0.8): T[] {
+export function removeSimilarItems<T extends { name: string }>(
+  items: T[],
+  similarityThreshold: number = 0.8
+): T[] {
   const uniqueItems: T[] = [];
   const nameMap = new Map<string, boolean>();
-  
+
   for (const item of items) {
     const normalizedName = item.name.toLowerCase().replace(/\s+/g, ' ').trim();
-    
+
     let isDuplicate = false;
     const existingNames = Array.from(nameMap.keys());
-    
+
     for (const existingName of existingNames) {
-      if (stringSimilarity(normalizedName, existingName) > similarityThreshold) {
+      if (
+        stringSimilarity(normalizedName, existingName) > similarityThreshold
+      ) {
         isDuplicate = true;
         break;
       }
     }
-    
+
     if (!isDuplicate) {
       nameMap.set(normalizedName, true);
       uniqueItems.push(item);
     }
   }
-  
+
   return uniqueItems;
 }
 
@@ -80,8 +85,9 @@ export function removeSimilarItems<T extends { name: string }>(items: T[], simil
 
 export const PATTERNS = {
   // Room number detection
-  roomNumber: /(?:room(?:\s+number)?|room|phòng)(?:\s*[:#\-]?\s*)([0-9]{1,4}[A-Za-z]?)|(?:staying in|in room|in phòng|phòng số)(?:\s+)([0-9]{1,4}[A-Za-z]?)/i,
-  
+  roomNumber:
+    /(?:room(?:\s+number)?|room|phòng)(?:\s*[:#\-]?\s*)([0-9]{1,4}[A-Za-z]?)|(?:staying in|in room|in phòng|phòng số)(?:\s+)([0-9]{1,4}[A-Za-z]?)/i,
+
   // Service categories
   food: /food|beverage|breakfast|lunch|dinner|meal|drink|snack|restaurant/i,
   housekeeping: /housekeeping|cleaning|towel|cleaning\s*service|laundry/i,
@@ -93,8 +99,9 @@ export const PATTERNS = {
   concierge: /reservation|booking|restaurant|ticket|arrangement|concierge/i,
   wellness: /gym|fitness|exercise|yoga|swimming|pool|sauna/i,
   security: /safe|security|lost|found|key|card|lock|emergency/i,
-  specialOccasion: /birthday|anniversary|celebration|honeymoon|proposal|wedding|special occasion/i,
-  
+  specialOccasion:
+    /birthday|anniversary|celebration|honeymoon|proposal|wedding|special occasion/i,
+
   // Support categories
   wifi: /wifi|internet|connection|password/i,
   checkIn: /check\s*-?\s*in|registration/i,
@@ -102,45 +109,50 @@ export const PATTERNS = {
   information: /information|hotel\s*info|facilities|amenities/i,
   feedback: /feedback|suggestion|complaint|comment/i,
   support: /support|help|assistance|issue/i,
-  
+
   // Other category
-  other: /currency\s*exchange|money\s*change|exchange\s*money|foreign\s*currency|bus\s*ticket|train\s*ticket|sell|purchase|buy/i,
-  
+  other:
+    /currency\s*exchange|money\s*change|exchange\s*money|foreign\s*currency|bus\s*ticket|train\s*ticket|sell|purchase|buy/i,
+
   // Item extraction
   items: /items?[:\s]*([^\.]+)/i,
-  
+
   // Time patterns
   time: /(?:at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))/i,
-  
+
   // Date patterns
   date: /(?:on|for)\s+((?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i,
-  
+
   // People/quantity patterns
   people: /(\d+)\s+(?:people|person|pax|guest|adult|child|passenger)/i,
-  
+
   // Location patterns
-  location: /(?:to|in|at|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*|[A-Z][A-Z]+|[A-Z][a-z]+)/,
-  
+  location:
+    /(?:to|in|at|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*|[A-Z][A-Z]+|[A-Z][a-z]+)/,
+
   // Amount patterns
   amount: /(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:USD|US dollars|\$|VND|dong)/i,
-  
+
   // Request patterns
-  request: /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^\.;]+)/gi,
-  
+  request:
+    /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^\.;]+)/gi,
+
   // Bullet points
   bullets: /(?:^|\n)[-•*]\s*([^\n]+)/g,
-  
+
   // Sentences
   sentences: /\.(?:\s|$)/,
-  
+
   // Special instructions
-  specialInstructions: /(?:special|additional|extra|note|instruction|request|preference)[:\s]*([^\.]+)/i,
-  
+  specialInstructions:
+    /(?:special|additional|extra|note|instruction|request|preference)[:\s]*([^\.]+)/i,
+
   // Delivery time
   deliveryTime: /(?:delivery|arrival|ready|serve|bring)[:\s]*([^\.]+)/i,
-  
+
   // Total amount
-  totalAmount: /(?:total|amount|cost|price|bill|charge)[:\s]*(\d+(?:,\d+)*(?:\.\d+)?)/i
+  totalAmount:
+    /(?:total|amount|cost|price|bill|charge)[:\s]*(\d+(?:,\d+)*(?:\.\d+)?)/i,
 };
 
 // ========================================
@@ -152,7 +164,7 @@ export const PATTERNS = {
  */
 export function extractRoomNumber(text: string): string | null {
   const match = text.match(PATTERNS.roomNumber);
-  return match ? (match[1] || match[2]) : null;
+  return match ? match[1] || match[2] : null;
 }
 
 /**
@@ -254,10 +266,13 @@ export function isValidRoomNumber(roomNumber: string): boolean {
 /**
  * Format currency
  */
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = 'USD'
+): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency
+    currency,
   }).format(amount);
 }
 
@@ -269,7 +284,7 @@ export function formatDate(date: Date | string): string {
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 }
 
@@ -280,7 +295,7 @@ export function formatTime(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleTimeString('en-US', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   });
 }
 
@@ -296,5 +311,5 @@ export function capitalizeWords(text: string): string {
  */
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength).trim() + '...';
-} 
+  return `${text.substring(0, maxLength).trim()}...`;
+}

@@ -364,4 +364,4 @@ router.get('/dashboard/config/:type', authenticateJWT, async (req, res) => {
 });
 */
 
-export default router; 
+export default router;

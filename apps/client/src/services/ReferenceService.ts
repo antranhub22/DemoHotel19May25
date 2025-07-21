@@ -29,7 +29,7 @@ class ReferenceService {
 
     // Check each reference item for matching keywords
     Object.values(this.referenceMap).forEach(item => {
-      const hasMatch = item.keywords.some(keyword => 
+      const hasMatch = item.keywords.some(keyword =>
         normalizedContent.includes(keyword.toLowerCase())
       );
 
@@ -48,12 +48,12 @@ class ReferenceService {
       await fetch('/api/references', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...reference,
-          id: key
-        })
+          id: key,
+        }),
       });
     } catch (error) {
       console.error('Error saving reference:', error);
@@ -62,4 +62,4 @@ class ReferenceService {
 }
 
 export const referenceService = new ReferenceService();
-export type { ReferenceItem, ReferenceMap }; 
+export type { ReferenceItem, ReferenceMap };

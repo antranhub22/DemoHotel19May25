@@ -137,7 +137,10 @@ const SAAS_REQUIRED_VARS = [
  * Environment variable validation errors
  */
 export class EnvironmentValidationError extends Error {
-  constructor(message: string, public missingVars: string[]) {
+  constructor(
+    message: string,
+    public missingVars: string[]
+  ) {
     super(message);
     this.name = 'EnvironmentValidationError';
   }
@@ -146,7 +149,10 @@ export class EnvironmentValidationError extends Error {
 /**
  * Parse boolean environment variable
  */
-function parseBoolean(value: string | undefined, defaultValue: boolean = false): boolean {
+function parseBoolean(
+  value: string | undefined,
+  defaultValue: boolean = false
+): boolean {
   if (value === undefined) return defaultValue;
   return value.toLowerCase() === 'true' || value === '1';
 }
@@ -174,7 +180,8 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
 
     // Authentication
-    JWT_SECRET: process.env.JWT_SECRET || 'fallback-jwt-secret-change-in-production',
+    JWT_SECRET:
+      process.env.JWT_SECRET || 'fallback-jwt-secret-change-in-production',
     STAFF_ACCOUNTS: process.env.STAFF_ACCOUNTS || 'admin@hotel.com:password123',
 
     // OpenAI
@@ -214,7 +221,8 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     SUMMARY_EMAILS: process.env.SUMMARY_EMAILS,
 
     // Multi-tenant
-    MINHON_TENANT_ID: process.env.MINHON_TENANT_ID || 'minhon-default-tenant-id',
+    MINHON_TENANT_ID:
+      process.env.MINHON_TENANT_ID || 'minhon-default-tenant-id',
     SUBDOMAIN_SUFFIX: process.env.SUBDOMAIN_SUFFIX || '.talk2go.online',
 
     // External Services
@@ -242,15 +250,33 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
 
     // Feature Flags
-    ENABLE_HOTEL_RESEARCH: parseBoolean(process.env.ENABLE_HOTEL_RESEARCH, true),
-    ENABLE_DYNAMIC_ASSISTANT_CREATION: parseBoolean(process.env.ENABLE_DYNAMIC_ASSISTANT_CREATION, true),
-    ENABLE_MULTI_LANGUAGE_SUPPORT: parseBoolean(process.env.ENABLE_MULTI_LANGUAGE_SUPPORT, true),
-    ENABLE_ANALYTICS_DASHBOARD: parseBoolean(process.env.ENABLE_ANALYTICS_DASHBOARD, true),
-    ENABLE_BILLING_SYSTEM: parseBoolean(process.env.ENABLE_BILLING_SYSTEM, false),
+    ENABLE_HOTEL_RESEARCH: parseBoolean(
+      process.env.ENABLE_HOTEL_RESEARCH,
+      true
+    ),
+    ENABLE_DYNAMIC_ASSISTANT_CREATION: parseBoolean(
+      process.env.ENABLE_DYNAMIC_ASSISTANT_CREATION,
+      true
+    ),
+    ENABLE_MULTI_LANGUAGE_SUPPORT: parseBoolean(
+      process.env.ENABLE_MULTI_LANGUAGE_SUPPORT,
+      true
+    ),
+    ENABLE_ANALYTICS_DASHBOARD: parseBoolean(
+      process.env.ENABLE_ANALYTICS_DASHBOARD,
+      true
+    ),
+    ENABLE_BILLING_SYSTEM: parseBoolean(
+      process.env.ENABLE_BILLING_SYSTEM,
+      false
+    ),
 
     // Rate Limiting
     RATE_LIMIT_WINDOW_MS: parseNumber(process.env.RATE_LIMIT_WINDOW_MS, 900000),
-    RATE_LIMIT_MAX_REQUESTS: parseNumber(process.env.RATE_LIMIT_MAX_REQUESTS, 100),
+    RATE_LIMIT_MAX_REQUESTS: parseNumber(
+      process.env.RATE_LIMIT_MAX_REQUESTS,
+      100
+    ),
 
     // Cache
     REDIS_URL: process.env.REDIS_URL,
@@ -278,9 +304,11 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
 /**
  * Validate required environment variables
  */
-export function validateEnvironment(requireSaasFeatures: boolean = false): void {
+export function validateEnvironment(
+  requireSaasFeatures: boolean = false
+): void {
   const missingVars: string[] = [];
-  
+
   // Check basic required variables
   for (const varName of REQUIRED_VARS) {
     if (!process.env[varName]) {
@@ -346,7 +374,10 @@ export function getEnvironmentStatus(): {
   );
 
   // Check email services
-  const emailServices = !!(config.GMAIL_APP_PASSWORD || (config.MAILJET_API_KEY && config.MAILJET_SECRET_KEY));
+  const emailServices = !!(
+    config.GMAIL_APP_PASSWORD ||
+    (config.MAILJET_API_KEY && config.MAILJET_SECRET_KEY)
+  );
 
   // Check storage
   const storage = !!(config.AWS_ACCESS_KEY_ID && config.AWS_SECRET_ACCESS_KEY);
@@ -387,19 +418,31 @@ export function getEnvironmentStatus(): {
  */
 export function printEnvironmentStatus(): void {
   const status = getEnvironmentStatus();
-  
+
   console.log('🔧 Environment Configuration Status:');
-  console.log(`✅ Basic Setup: ${status.basicSetup ? 'Ready' : 'Missing requirements'}`);
-  console.log(`🏢 SaaS Features: ${status.saasFeatures ? 'Ready' : 'Missing requirements'}`);
-  console.log(`🌍 Multi-language: ${status.multiLanguage ? 'Enabled' : 'Disabled'}`);
-  console.log(`📧 Email Services: ${status.emailServices ? 'Configured' : 'Not configured'}`);
-  console.log(`💾 Storage: ${status.storage ? 'Configured' : 'Not configured'}`);
-  console.log(`📊 Monitoring: ${status.monitoring ? 'Configured' : 'Not configured'}`);
-  
+  console.log(
+    `✅ Basic Setup: ${status.basicSetup ? 'Ready' : 'Missing requirements'}`
+  );
+  console.log(
+    `🏢 SaaS Features: ${status.saasFeatures ? 'Ready' : 'Missing requirements'}`
+  );
+  console.log(
+    `🌍 Multi-language: ${status.multiLanguage ? 'Enabled' : 'Disabled'}`
+  );
+  console.log(
+    `📧 Email Services: ${status.emailServices ? 'Configured' : 'Not configured'}`
+  );
+  console.log(
+    `💾 Storage: ${status.storage ? 'Configured' : 'Not configured'}`
+  );
+  console.log(
+    `📊 Monitoring: ${status.monitoring ? 'Configured' : 'Not configured'}`
+  );
+
   if (status.missing.length > 0) {
     console.log(`❌ Missing Variables: ${status.missing.join(', ')}`);
   }
-  
+
   if (status.warnings.length > 0) {
     console.log(`⚠️  Warnings: ${status.warnings.join(', ')}`);
   }
@@ -425,7 +468,7 @@ export const ENVIRONMENT_TEMPLATES = {
     ENABLE_DYNAMIC_ASSISTANT_CREATION: 'true',
     LOG_LEVEL: 'debug',
   },
-  
+
   production: {
     NODE_ENV: 'production',
     PORT: '10000',
@@ -450,4 +493,4 @@ export const ENVIRONMENT_TEMPLATES = {
     ENABLE_DYNAMIC_ASSISTANT_CREATION: 'false',
     LOG_LEVEL: 'error',
   },
-}; 
+};

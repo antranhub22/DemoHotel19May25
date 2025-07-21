@@ -18,7 +18,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
   maxVisible = 4,
   onPopupSelect,
   onPopupDismiss,
-  position = 'bottom'
+  position = 'bottom',
 }) => {
   if (popups.length === 0) {
     return null;
@@ -28,17 +28,17 @@ export const PopupStack: React.FC<PopupStackProps> = ({
   const sortedPopups = [...popups].sort((a, b) => {
     // Priority order: high -> medium -> low
     const priorityOrder = { high: 0, medium: 1, low: 2 };
-    
+
     if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     }
-    
+
     // If same priority, sort by timestamp (newest first)
     return b.timestamp.getTime() - a.timestamp.getTime();
   });
 
   return (
-    <div 
+    <div
       className={styles.popupStack}
       style={{
         position: 'fixed',
@@ -50,15 +50,15 @@ export const PopupStack: React.FC<PopupStackProps> = ({
         pointerEvents: 'none',
         ...(position === 'top' && { top: '20px' }),
         ...(position === 'bottom' && { bottom: '260px' }),
-        ...(position === 'center' && { 
-          top: '50%', 
+        ...(position === 'center' && {
+          top: '50%',
           transform: 'translate(-50%, -50%)',
           maxWidth: '90vw', // Better mobile support
           width: 'auto', // Let content determine width
         }),
       }}
     >
-      <div 
+      <div
         className={styles.popupStackContainer}
         style={{
           display: 'flex',
@@ -70,7 +70,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
       >
         {/* Title when multiple popups */}
         {sortedPopups.length > 1 && (
-          <div 
+          <div
             className={styles.popupStackHeader}
             style={{
               textAlign: 'center',
@@ -87,7 +87,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
 
         {/* Active popup on top (or bottom based on position) */}
         {activePopup && (
-          <div 
+          <div
             className={styles.popupStackActive}
             style={{
               order: position === 'bottom' ? 0 : 0,
@@ -105,13 +105,12 @@ export const PopupStack: React.FC<PopupStackProps> = ({
                   onDismiss={() => onPopupDismiss(popup.id)}
                   maxVisible={maxVisible}
                 />
-              ))
-            }
+              ))}
           </div>
         )}
 
         {/* Stacked inactive popups */}
-        <div 
+        <div
           className={styles.popupStackInactive}
           style={{
             order: position === 'bottom' ? 2 : 1,
@@ -130,13 +129,13 @@ export const PopupStack: React.FC<PopupStackProps> = ({
                 onDismiss={() => onPopupDismiss(popup.id)}
                 maxVisible={maxVisible}
               />
-            ))
-          }
+            ))}
         </div>
 
         {/* More indicator if there are hidden popups */}
-        {sortedPopups.filter(p => p.id !== activePopup).length > maxVisible - 1 && (
-          <div 
+        {sortedPopups.filter(p => p.id !== activePopup).length >
+          maxVisible - 1 && (
+          <div
             className={styles.popupStackMore}
             style={{
               textAlign: 'center',
@@ -147,10 +146,13 @@ export const PopupStack: React.FC<PopupStackProps> = ({
               order: position === 'bottom' ? 3 : 2,
             }}
           >
-            +{sortedPopups.filter(p => p.id !== activePopup).length - (maxVisible - 1)} more
+            +
+            {sortedPopups.filter(p => p.id !== activePopup).length -
+              (maxVisible - 1)}{' '}
+            more
           </div>
         )}
       </div>
     </div>
   );
-}; 
+};

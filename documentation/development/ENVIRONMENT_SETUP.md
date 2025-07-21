@@ -2,17 +2,21 @@
 
 ## Overview
 
-This guide covers the complete environment configuration for the Hotel Voice Assistant SaaS Platform. The platform requires various API keys and configurations to enable all features including voice assistants, hotel research, multi-tenancy, and more.
+This guide covers the complete environment configuration for the Hotel Voice Assistant SaaS
+Platform. The platform requires various API keys and configurations to enable all features including
+voice assistants, hotel research, multi-tenancy, and more.
 
 ## Quick Start
 
 1. **Copy environment template:**
+
    ```bash
    cp config/environment.ts .env
    # Edit .env with your actual values
    ```
 
 2. **Validate environment:**
+
    ```bash
    npm run env:validate
    npm run env:status
@@ -90,17 +94,20 @@ VITE_VAPI_ASSISTANT_ID_KO=asst_your-vapi-assistant-id-korean
 Choose one email service for notifications:
 
 **Option 1: Gmail**
+
 ```bash
 GMAIL_APP_PASSWORD=your-gmail-app-password
 ```
 
 **Option 2: Mailjet**
+
 ```bash
 MAILJET_API_KEY=your-mailjet-api-key
 MAILJET_SECRET_KEY=your-mailjet-secret-key
 ```
 
 **Email Configuration**
+
 ```bash
 SUMMARY_EMAILS=admin@hotel.com,manager@hotel.com
 ```
@@ -177,12 +184,14 @@ REDIS_PASSWORD=your-redis-password
 ### 4. Email Service Keys
 
 **Gmail App Password:**
+
 1. Enable 2-factor authentication on Gmail
 2. Go to App Passwords in Google Account settings
 3. Generate app password for "Mail"
 4. Use generated password (not your regular password)
 
 **Mailjet:**
+
 1. Visit [Mailjet](https://www.mailjet.com/)
 2. Create account
 3. Go to API Keys section
@@ -289,6 +298,7 @@ ENABLE_BILLING_SYSTEM=false
 ### Common Issues
 
 **1. "Missing required environment variables"**
+
 ```bash
 # Check which variables are missing
 npm run env:status
@@ -298,16 +308,19 @@ npm run env:validate
 ```
 
 **2. "OpenAI API key invalid"**
+
 - Check if key starts with `sk-`
 - Verify account has sufficient credits
 - Check if key is properly set
 
 **3. "Vapi connection failed"**
+
 - Verify public key starts with `pk_`
 - Check assistant ID starts with `asst_`
 - Ensure API key is valid
 
 **4. "Google Places API error"**
+
 - Enable Google Places API in Google Cloud Console
 - Check if API key is properly set
 - Verify billing is enabled
@@ -375,11 +388,13 @@ For environment setup support:
 If migrating from an existing setup:
 
 1. **Backup current .env file:**
+
    ```bash
    cp .env .env.backup
    ```
 
 2. **Update environment variables:**
+
    ```bash
    # Add new SaaS variables
    echo "VAPI_API_KEY=your-key" >> .env
@@ -388,6 +403,7 @@ If migrating from an existing setup:
    ```
 
 3. **Validate migration:**
+
    ```bash
    npm run env:validate
    npm run env:test
@@ -401,6 +417,7 @@ If migrating from an existing setup:
 ## Environment Variables Complete List
 
 For a complete list of all supported environment variables, see:
+
 - `config/environment.ts` - Configuration file
 - `ENVIRONMENT_TEMPLATES` - Template configurations
-- `getEnvironmentStatus()` - Status checking function 
+- `getEnvironmentStatus()` - Status checking function

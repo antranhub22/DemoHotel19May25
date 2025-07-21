@@ -1,73 +1,57 @@
 {
-  "include": [
-    "apps/client/src/**/*",
-    "packages/shared/**/*",
-    "apps/server/**/*"
-  ],
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Strict Type Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    /* Additional Checks */
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": false,
+
+    /* Path Mapping */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./apps/client/src/*"],
+      "@shared/*": ["./packages/shared/*"],
+      "@server/*": ["./apps/server/*"],
+      "@types/*": ["./packages/types/*"],
+      "@config/*": ["./packages/config/*"],
+      "@tools/*": ["./tools/*"],
+      "@tests/*": ["./tests/*"]
+    }
+  },
+  "include": ["apps/client/src/**/*", "apps/server/**/*", "packages/**/*", "tools/**/*", "tests/**/*"],
   "exclude": [
     "node_modules",
-    "build",
     "dist",
+    "build",
+    ".vite",
     "**/*.test.ts",
-    ".backup/**/*",
+    "documentation/**/*",
     "packages/auth-system/**/*"
-  ],
-  "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
-    "module": "ESNext",
-    "strict": false,
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable"
-    ],
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
-    "downlevelIteration": true,
-    "baseUrl": ".",
-    "types": [
-      "node",
-      "vite/client",
-      "react",
-      "react-dom"
-    ],
-    "paths": {
-      "@/*": [
-        "./apps/client/src/*"
-      ],
-      "@shared/*": [
-        "./packages/shared/*"
-      ],
-      "@server/*": [
-        "./apps/server/*"
-      ],
-      "@types/*": [
-        "./packages/types/*"
-      ],
-      "@config/*": [
-        "./packages/config/*"
-      ],
-      "@tools/*": [
-        "./tools/*"
-      ],
-      "@tests/*": [
-        "./tests/*"
-      ]
-    },
-    "noImplicitAny": false,
-    "noImplicitReturns": false,
-    "noImplicitThis": false,
-    "strictNullChecks": false,
-    "strictFunctionTypes": false,
-    "noImplicitOverride": false,
-    "strictBindCallApply": false,
-    "strictPropertyInitialization": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
-  }
+  ]
 }

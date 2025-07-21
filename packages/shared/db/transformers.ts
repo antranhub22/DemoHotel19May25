@@ -6,14 +6,21 @@
 // ✅ POSTGRESQL FIELD MAPPING UTILITIES
 // Handles conversion between PostgreSQL snake_case and JavaScript camelCase
 
-import type { 
-  Tenant, InsertTenant,
-  Staff, InsertStaff, 
-  Call, InsertCall,
-  Transcript, InsertTranscript,
-  Request, InsertRequest,
-  Message, InsertMessage,
-  CallSummary, InsertCallSummary
+import type {
+  Tenant,
+  InsertTenant,
+  Staff,
+  InsertStaff,
+  Call,
+  InsertCall,
+  Transcript,
+  InsertTranscript,
+  Request,
+  InsertRequest,
+  Message,
+  InsertMessage,
+  CallSummary,
+  InsertCallSummary,
 } from './schema';
 
 // ============================================
@@ -100,16 +107,22 @@ export const hotelProfileMapper = {
   // Update fields mapping
   toUpdateFields: (updates: Partial<InsertHotelProfileCamelCase>): any => {
     const mapped: any = {};
-    
-    if (updates.researchData !== undefined) mapped.research_data = updates.researchData;
-    if (updates.assistantConfig !== undefined) mapped.assistant_config = updates.assistantConfig;
-    if (updates.vapiAssistantId !== undefined) mapped.vapi_assistant_id = updates.vapiAssistantId;
-    if (updates.servicesConfig !== undefined) mapped.services_config = updates.servicesConfig;
-    if (updates.knowledgeBase !== undefined) mapped.knowledge_base = updates.knowledgeBase;
-    if (updates.systemPrompt !== undefined) mapped.system_prompt = updates.systemPrompt;
-    
+
+    if (updates.researchData !== undefined)
+      mapped.research_data = updates.researchData;
+    if (updates.assistantConfig !== undefined)
+      mapped.assistant_config = updates.assistantConfig;
+    if (updates.vapiAssistantId !== undefined)
+      mapped.vapi_assistant_id = updates.vapiAssistantId;
+    if (updates.servicesConfig !== undefined)
+      mapped.services_config = updates.servicesConfig;
+    if (updates.knowledgeBase !== undefined)
+      mapped.knowledge_base = updates.knowledgeBase;
+    if (updates.systemPrompt !== undefined)
+      mapped.system_prompt = updates.systemPrompt;
+
     return mapped;
-  }
+  },
 };
 
 // ============================================
@@ -193,7 +206,7 @@ export const tenantMapper = {
     max_calls: tenant.maxCalls,
     max_users: tenant.maxUsers,
     features: tenant.features,
-  })
+  }),
 };
 
 // ============================================
@@ -246,18 +259,20 @@ export const authUserMapper = {
     email: user.email,
     phone: user.phone,
     role: user.role,
-    permissions: user.permissions ? JSON.stringify(user.permissions) : undefined,
+    permissions: user.permissions
+      ? JSON.stringify(user.permissions)
+      : undefined,
     display_name: user.displayName,
     avatar_url: user.avatarUrl,
     last_login: user.lastLogin ? new Date(user.lastLogin) : undefined,
     is_active: user.isActive,
     created_at: user.createdAt ? new Date(user.createdAt) : undefined,
     updated_at: user.updatedAt ? new Date(user.updatedAt) : undefined,
-  })
+  }),
 };
 
 // ============================================
-// REQUEST MAPPER  
+// REQUEST MAPPER
 // ============================================
 
 export interface RequestCamelCase {
@@ -304,20 +319,24 @@ export const requestMapper = {
     description: request.description,
     priority: request.priority,
     assigned_to: request.assignedTo,
-  })
+  }),
 };
 
 // ============================================
 // UTILITY FUNCTIONS
 // ============================================
 
-export const convertToISOString = (date: Date | string | null | undefined): string | null => {
+export const convertToISOString = (
+  date: Date | string | null | undefined
+): string | null => {
   if (!date) return null;
   if (typeof date === 'string') return date;
   return date.toISOString();
 };
 
-export const convertToDate = (dateString: string | Date | null | undefined): Date | null => {
+export const convertToDate = (
+  dateString: string | Date | null | undefined
+): Date | null => {
   if (!dateString) return null;
   if (dateString instanceof Date) return dateString;
   const date = new Date(dateString);
@@ -333,6 +352,6 @@ export const handlePostgreSQLResult = (result: any) => {
   return {
     success: true,
     deletedCount: result.rowCount || 0,
-    affectedRows: result.rowCount || 0
+    affectedRows: result.rowCount || 0,
   };
-}; 
+};

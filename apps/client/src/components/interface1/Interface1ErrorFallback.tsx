@@ -7,19 +7,18 @@ interface Interface1ErrorFallbackProps {
   onRetry?: () => void;
 }
 
-export const Interface1ErrorFallback: React.FC<Interface1ErrorFallbackProps> = ({ 
-  error, 
-  onRetry 
-}) => {
+export const Interface1ErrorFallback: React.FC<
+  Interface1ErrorFallbackProps
+> = ({ error, onRetry }) => {
   const handleReturnToInitial = () => {
     try {
       // Clear any problematic state
       localStorage.removeItem('conversationState');
       sessionStorage.removeItem('interface1State');
-      
+
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      
+
       // Reload the page to reset all state
       if (onRetry) {
         onRetry();
@@ -36,7 +35,7 @@ export const Interface1ErrorFallback: React.FC<Interface1ErrorFallbackProps> = (
     <InterfaceContainer>
       <div className="relative">
         <InterfaceHeader />
-        
+
         <div className="relative min-h-[400px] px-4 flex items-center justify-center">
           <div className="max-w-md text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
             <div className="text-6xl mb-4">🤖</div>
@@ -46,7 +45,7 @@ export const Interface1ErrorFallback: React.FC<Interface1ErrorFallbackProps> = (
             <p className="text-white/80 mb-6">
               Đừng lo lắng! Chúng tôi sẽ khôi phục trợ lý về trạng thái ban đầu.
             </p>
-            
+
             <div className="space-y-3">
               <button
                 onClick={handleReturnToInitial}
@@ -54,9 +53,9 @@ export const Interface1ErrorFallback: React.FC<Interface1ErrorFallbackProps> = (
               >
                 🔄 Khôi phục trợ lý
               </button>
-              
+
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = '/')}
                 className="w-full px-6 py-3 bg-white/20 hover:bg-white/30 text-white rounded-full font-semibold transition-all duration-200 active:scale-95"
               >
                 🏠 Về trang chủ
@@ -78,4 +77,4 @@ export const Interface1ErrorFallback: React.FC<Interface1ErrorFallbackProps> = (
       </div>
     </InterfaceContainer>
   );
-}; 
+};

@@ -18,7 +18,7 @@ const CATEGORIES = [
   'Activity and Experiences',
   'Tours',
   'Transportation',
-  'Dining'
+  'Dining',
 ];
 
 interface ReferenceProps {
@@ -43,11 +43,18 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
       return;
     }
     references.forEach((ref: ReferenceItem) => {
-      if ((ref as any).type === 'document' && ref.url.endsWith('.txt') && !docContents[ref.url]) {
+      if (
+        (ref as any).type === 'document' &&
+        ref.url.endsWith('.txt') &&
+        !docContents[ref.url]
+      ) {
         fetch(ref.url)
           .then(res => res.text())
           .then(text => {
-            setDocContents((prev: DocContents) => ({ ...prev, [ref.url]: text }));
+            setDocContents((prev: DocContents) => ({
+              ...prev,
+              [ref.url]: text,
+            }));
             fetchCount++;
             if (fetchCount === references.length) setLoading(false);
           })
@@ -60,7 +67,11 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
         if (fetchCount === references.length) setLoading(false);
       }
     });
-    if (references.every(ref => (ref as any).type !== 'document' || !ref.url.endsWith('.txt'))) {
+    if (
+      references.every(
+        ref => (ref as any).type !== 'document' || !ref.url.endsWith('.txt')
+      )
+    ) {
       setLoading(false);
     }
   }, [references]);
@@ -107,52 +118,85 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
       <div
         className="group bg-white/90 rounded-xl shadow-md h-[180px] flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:scale-[1.03] active:scale-95 border border-white/40 backdrop-blur-md"
         style={{ minWidth: 220, maxWidth: 260 }}
-        onClick={() => (reference as any).type === 'link' ? handleOpenLink(reference.url) : undefined}
+        onClick={() =>
+          (reference as any).type === 'link'
+            ? handleOpenLink(reference.url)
+            : undefined
+        }
       >
         {/* Thumbnail */}
-        <div className="flex-1 flex items-center justify-center overflow-hidden rounded-t-xl" style={{ height: '60%' }}>
+        <div
+          className="flex-1 flex items-center justify-center overflow-hidden rounded-t-xl"
+          style={{ height: '60%' }}
+        >
           {(reference as any).type === 'image' && (
             <img
               src={getAssetUrl(reference.url)}
               alt={reference.title}
               className="object-cover w-full h-full rounded-t-xl hover:opacity-80 transition cursor-zoom-in"
-              onClick={e => { e.stopPropagation(); setLightboxImg(getAssetUrl(reference.url)); }}
+              onClick={e => {
+                e.stopPropagation();
+                setLightboxImg(getAssetUrl(reference.url));
+              }}
               tabIndex={0}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setLightboxImg(getAssetUrl(reference.url)); } }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setLightboxImg(getAssetUrl(reference.url));
+                }
+              }}
             />
           )}
-          {(reference as any).type === 'document' && reference.url.endsWith('.pdf') && (
-            <span className="material-icons text-5xl text-blue-700/80">picture_as_pdf</span>
-          )}
-          {(reference as any).type === 'document' && reference.url.endsWith('.txt') && (
-            <span className="material-icons text-5xl text-green-700/80">description</span>
-          )}
+          {(reference as any).type === 'document' &&
+            reference.url.endsWith('.pdf') && (
+              <span className="material-icons text-5xl text-blue-700/80">
+                picture_as_pdf
+              </span>
+            )}
+          {(reference as any).type === 'document' &&
+            reference.url.endsWith('.txt') && (
+              <span className="material-icons text-5xl text-green-700/80">
+                description
+              </span>
+            )}
           {(reference as any).type === 'link' && (
-            <span className="material-icons text-5xl text-yellow-700/80">link</span>
+            <span className="material-icons text-5xl text-yellow-700/80">
+              link
+            </span>
           )}
         </div>
         {/* Text content */}
         <div className="flex flex-col gap-1 px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="text-base font-medium text-gray-900 truncate">{reference.title}</span>
+            <span className="text-base font-medium text-gray-900 truncate">
+              {reference.title}
+            </span>
             {(reference as any).type === 'document' && (
               <button
-                onClick={e => { e.stopPropagation(); handleDownload(reference.url, reference.title); }}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleDownload(reference.url, reference.title);
+                }}
                 className="ml-auto p-1 rounded-full hover:bg-yellow-100 text-yellow-700 transition-colors"
               >
                 <span className="material-icons text-base">download</span>
               </button>
             )}
             {(reference as any).type === 'link' && (
-              <span className="material-icons text-xs text-gray-400 ml-1">open_in_new</span>
+              <span className="material-icons text-xs text-gray-400 ml-1">
+                open_in_new
+              </span>
             )}
           </div>
           {reference.description && (
-            <span className="text-xs text-gray-500 truncate">{reference.description}</span>
+            <span className="text-xs text-gray-500 truncate">
+              {reference.description}
+            </span>
           )}
           {/* Inline preview for .txt */}
           {reference.url.endsWith('.txt') && docContents[reference.url] && (
-            <pre className="mt-1 max-h-12 overflow-auto whitespace-pre-wrap text-xs text-gray-700 bg-gray-50 rounded p-1">{docContents[reference.url].slice(0, 120)}...</pre>
+            <pre className="mt-1 max-h-12 overflow-auto whitespace-pre-wrap text-xs text-gray-700 bg-gray-50 rounded p-1">
+              {docContents[reference.url].slice(0, 120)}...
+            </pre>
           )}
         </div>
       </div>
@@ -168,11 +212,19 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
   };
 
   // Lọc reference theo category, không phân biệt hoa thường và loại bỏ dấu cách thừa
-  const filteredReferences = references.filter(ref => (ref as any).category && (ref as any).category.trim().toLowerCase() === activeCategory.trim().toLowerCase());
+  const filteredReferences = references.filter(
+    ref =>
+      (ref as any).category &&
+      (ref as any).category.trim().toLowerCase() ===
+        activeCategory.trim().toLowerCase()
+  );
 
   // Main render
   return (
-    <div className="w-full sm:max-w-5xl mx-auto mt-2 mb-2 px-2 py-3 rounded-2xl" style={{ background: 'rgba(85,154,154,0.85)', minHeight: 260 }}>
+    <div
+      className="w-full sm:max-w-5xl mx-auto mt-2 mb-2 px-2 py-3 rounded-2xl"
+      style={{ background: 'rgba(85,154,154,0.85)', minHeight: 260 }}
+    >
       {/* Lightbox modal */}
       {lightboxImg && (
         <div
@@ -182,7 +234,10 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
           <div className="relative max-w-3xl w-full flex flex-col items-center">
             <button
               className="absolute top-2 right-2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg z-10"
-              onClick={e => { e.stopPropagation(); setLightboxImg(null); }}
+              onClick={e => {
+                e.stopPropagation();
+                setLightboxImg(null);
+              }}
             >
               <span className="material-icons text-2xl">close</span>
             </button>
@@ -195,23 +250,28 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
           </div>
         </div>
       )}
-      
+
       {/* Dropdown category - phong cách mới giống Interface1 */}
       <div className="flex items-center mb-4 px-2">
-        <div className="flex items-center px-3 py-2 sm:py-1.5 gap-2 transition-all duration-300 mx-auto sm:mx-0"
+        <div
+          className="flex items-center px-3 py-2 sm:py-1.5 gap-2 transition-all duration-300 mx-auto sm:mx-0"
           style={{
             background: 'linear-gradient(135deg, #79DBDC 0%, #559A9A 100%)',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)', 
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)',
             borderRadius: '8px',
             minWidth: '150px',
             maxWidth: '95%',
             width: 'auto',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-          <FaBookOpen className="text-[#F9BF3B] text-xl mr-1.5"
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          }}
+        >
+          <FaBookOpen
+            className="text-[#F9BF3B] text-xl mr-1.5"
             style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))' }}
           />
-          <label className="mr-2 font-semibold font-sans text-white whitespace-nowrap text-sm sm:text-base">Category:</label>
+          <label className="mr-2 font-semibold font-sans text-white whitespace-nowrap text-sm sm:text-base">
+            Category:
+          </label>
           <div className="relative flex-1">
             <select
               value={activeCategory}
@@ -221,11 +281,17 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
                 fontWeight: 600,
                 color: '#fff',
                 textShadow: '0px 1px 2px rgba(0, 0, 0, 0.2)',
-                borderRadius: '8px'
+                borderRadius: '8px',
               }}
             >
               {CATEGORIES.map(cat => (
-                <option key={cat} value={cat} className="bg-blue-800 text-white">{cat}</option>
+                <option
+                  key={cat}
+                  value={cat}
+                  className="bg-blue-800 text-white"
+                >
+                  {cat}
+                </option>
               ))}
             </select>
             <FiChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[#F9BF3B] pointer-events-none text-lg" />
@@ -236,10 +302,14 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
       {/* Loading state */}
       {loading ? (
         <div className="flex gap-4 overflow-x-auto pb-2">
-          {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
+          {[...Array(3)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       ) : filteredReferences.length === 0 ? (
-        <div className="flex items-center justify-center h-[120px] text-white/80 text-base font-medium">No references available</div>
+        <div className="flex items-center justify-center h-[120px] text-white/80 text-base font-medium">
+          No references available
+        </div>
       ) : (
         <Swiper
           modules={[Navigation, Pagination, A11y]}
@@ -248,10 +318,21 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
           navigation={filteredReferences.length > 3}
           pagination={{ clickable: true, dynamicBullets: true }}
           className="w-full"
-          style={{ paddingBottom: 32, overflowX: window.innerWidth < 640 ? 'auto' : undefined }}
+          style={{
+            paddingBottom: 32,
+            overflowX: window.innerWidth < 640 ? 'auto' : undefined,
+          }}
         >
           {filteredReferences.map((reference, idx) => (
-            <SwiperSlide key={reference.url + idx} className="flex justify-center" style={window.innerWidth < 640 ? { width: '90vw', maxWidth: '98vw', minWidth: 0 } : {}}>
+            <SwiperSlide
+              key={reference.url + idx}
+              className="flex justify-center"
+              style={
+                window.innerWidth < 640
+                  ? { width: '90vw', maxWidth: '98vw', minWidth: 0 }
+                  : {}
+              }
+            >
               {renderReferenceCard(reference)}
             </SwiperSlide>
           ))}

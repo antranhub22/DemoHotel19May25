@@ -2,11 +2,14 @@
 
 ## Overview
 
-This document provides a comprehensive guide to the environment configuration system implemented for the Hotel Voice Assistant SaaS Platform. The system ensures proper validation, documentation, and management of all environment variables required for SaaS features.
+This document provides a comprehensive guide to the environment configuration system implemented for
+the Hotel Voice Assistant SaaS Platform. The system ensures proper validation, documentation, and
+management of all environment variables required for SaaS features.
 
 ## 📋 What Was Implemented
 
 ### 1. Environment Configuration System (`config/environment.ts`)
+
 - **Complete environment interface** with TypeScript support
 - **Validation functions** for basic and SaaS features
 - **Environment status reporting** with detailed diagnostics
@@ -15,6 +18,7 @@ This document provides a comprehensive guide to the environment configuration sy
 - **Error handling** with detailed error messages
 
 ### 2. Validation Scripts (`scripts/validate-environment.ts`)
+
 - **Command-line validation tool** with multiple modes
 - **API connection testing** for OpenAI, Vapi, Google Places
 - **Database connection verification**
@@ -23,6 +27,7 @@ This document provides a comprehensive guide to the environment configuration sy
 - **Comprehensive health checks**
 
 ### 3. Startup Validation (`server/startup/environment-check.ts`)
+
 - **Server startup validation** with environment checks
 - **Production environment validation** with security checks
 - **Quick environment check** for development
@@ -30,6 +35,7 @@ This document provides a comprehensive guide to the environment configuration sy
 - **Graceful error handling** with helpful messages
 
 ### 4. Documentation (`docs/ENVIRONMENT_SETUP.md`)
+
 - **Complete setup guide** with step-by-step instructions
 - **API key acquisition guides** for all services
 - **Configuration templates** for different environments
@@ -37,6 +43,7 @@ This document provides a comprehensive guide to the environment configuration sy
 - **Security best practices** and recommendations
 
 ### 5. NPM Scripts Integration
+
 - **8 new npm scripts** for environment management
 - **Easy-to-use commands** for validation and testing
 - **Template generation** for quick setup
@@ -45,6 +52,7 @@ This document provides a comprehensive guide to the environment configuration sy
 ## 🎯 Environment Variables Added
 
 ### Core SaaS Features
+
 ```bash
 # Vapi API for dynamic assistant creation
 VAPI_API_KEY=your-vapi-api-key-for-dynamic-creation
@@ -57,6 +65,7 @@ TALK2GO_DOMAIN=talk2go.online
 ```
 
 ### Multi-tenant Configuration
+
 ```bash
 # Tenant management
 MINHON_TENANT_ID=minhon-default-tenant-id
@@ -64,6 +73,7 @@ SUBDOMAIN_SUFFIX=.talk2go.online
 ```
 
 ### Feature Flags
+
 ```bash
 # Control platform features
 ENABLE_HOTEL_RESEARCH=true
@@ -74,6 +84,7 @@ ENABLE_BILLING_SYSTEM=false
 ```
 
 ### Optional Services
+
 ```bash
 # Enhanced hotel research
 YELP_API_KEY=your-yelp-api-key
@@ -90,6 +101,7 @@ SENTRY_DSN=your-sentry-dsn
 ## 🚀 How to Use
 
 ### 1. Quick Setup
+
 ```bash
 # Generate environment template
 npm run env:generate
@@ -100,6 +112,7 @@ npm run env:validate
 ```
 
 ### 2. Environment Status Check
+
 ```bash
 # Check current environment status
 npm run env:status
@@ -112,6 +125,7 @@ npm run env:status
 ```
 
 ### 3. Complete Health Check
+
 ```bash
 # Run comprehensive environment validation
 npm run env:health
@@ -125,6 +139,7 @@ npm run env:health
 ```
 
 ### 4. API Connection Testing
+
 ```bash
 # Test all API connections
 npm run env:test-apis
@@ -136,6 +151,7 @@ npm run env:test-apis
 ```
 
 ### 5. Database Connection Testing
+
 ```bash
 # Test database connection
 npm run env:test-db
@@ -145,6 +161,7 @@ npm run env:test-db
 ```
 
 ### 6. Environment Templates
+
 ```bash
 # Show development template
 npm run env:template development
@@ -158,21 +175,23 @@ npm run env:template testing
 
 ## 🔍 Available Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run env:validate` | Validate basic environment requirements |
-| `npm run env:validate-saas` | Validate SaaS features requirements |
-| `npm run env:status` | Show environment status summary |
-| `npm run env:test-apis` | Test all API connections |
-| `npm run env:test-db` | Test database connection |
-| `npm run env:health` | Complete environment health check |
-| `npm run env:template [env]` | Show environment template |
-| `npm run env:generate` | Generate .env file template |
+| Command                      | Description                             |
+| ---------------------------- | --------------------------------------- |
+| `npm run env:validate`       | Validate basic environment requirements |
+| `npm run env:validate-saas`  | Validate SaaS features requirements     |
+| `npm run env:status`         | Show environment status summary         |
+| `npm run env:test-apis`      | Test all API connections                |
+| `npm run env:test-db`        | Test database connection                |
+| `npm run env:health`         | Complete environment health check       |
+| `npm run env:template [env]` | Show environment template               |
+| `npm run env:generate`       | Generate .env file template             |
 
 ## 💡 Environment Validation Levels
 
 ### Level 1: Basic Requirements
+
 Required for the platform to function:
+
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `VITE_OPENAI_API_KEY`
@@ -180,13 +199,17 @@ Required for the platform to function:
 - `VITE_VAPI_ASSISTANT_ID`
 
 ### Level 2: SaaS Features
+
 Required for full SaaS functionality:
+
 - `VAPI_API_KEY`
 - `GOOGLE_PLACES_API_KEY`
 - `TALK2GO_DOMAIN`
 
 ### Level 3: Optional Features
+
 Enhance platform capabilities:
+
 - Multi-language support
 - Email services
 - Storage services
@@ -196,12 +219,14 @@ Enhance platform capabilities:
 ## 🛡️ Security Features
 
 ### 1. Production Validation
+
 - **JWT secret security check** - prevents using default secrets
 - **Database configuration validation** - ensures PostgreSQL in production
 - **SSL certificate validation** - warns if SSL not configured
 - **Critical security warnings** - blocks startup if security issues found
 
 ### 2. Development Safety
+
 - **API key format validation** - checks key formats
 - **Connection testing** - validates API connectivity
 - **Environment isolation** - different configs for dev/prod
@@ -210,12 +235,14 @@ Enhance platform capabilities:
 ## 📊 Environment Status Reports
 
 ### Compact Status (for monitoring)
+
 ```
 ✅ Environment: development | SaaS: ⚪ | Port: 10000
    Missing: VAPI_API_KEY, GOOGLE_PLACES_API_KEY
 ```
 
 ### Detailed Status (for debugging)
+
 ```
 🔧 Environment Configuration Status:
 ✅ Basic Setup: Ready
@@ -230,6 +257,7 @@ Enhance platform capabilities:
 ## 🔄 Integration with Server
 
 ### Startup Validation
+
 The server automatically validates environment on startup:
 
 ```typescript
@@ -241,6 +269,7 @@ await validateEnvironmentOnStartup();
 ```
 
 ### Production Validation
+
 Additional security checks for production:
 
 ```typescript
@@ -251,6 +280,7 @@ await validateProductionEnvironment();
 ## 🎨 Template System
 
 ### Development Template
+
 ```bash
 NODE_ENV=development
 PORT=10000
@@ -261,6 +291,7 @@ LOG_LEVEL=debug
 ```
 
 ### Production Template
+
 ```bash
 NODE_ENV=production
 PORT=10000
@@ -276,6 +307,7 @@ SSL_CERT_PATH=/path/to/ssl/cert.pem
 ### Common Issues
 
 **1. "Missing required environment variables"**
+
 ```bash
 npm run env:status
 npm run env:generate
@@ -283,18 +315,21 @@ npm run env:generate
 ```
 
 **2. "API connection failed"**
+
 ```bash
 npm run env:test-apis
 # Check specific API keys and configurations
 ```
 
 **3. "Database connection failed"**
+
 ```bash
 npm run env:test-db
 # Verify DATABASE_URL and database server status
 ```
 
 **4. "Production validation failed"**
+
 ```bash
 npm run env:validate-saas
 # Check production-specific requirements
@@ -303,6 +338,7 @@ npm run env:validate-saas
 ## 📈 Development Workflow
 
 ### 1. Initial Setup
+
 ```bash
 # Clone repository
 git clone <repository>
@@ -317,6 +353,7 @@ npm run env:validate
 ```
 
 ### 2. Development Process
+
 ```bash
 # Before starting development
 npm run env:health
@@ -328,6 +365,7 @@ npm run dev
 ```
 
 ### 3. Deployment Process
+
 ```bash
 # Before deployment
 npm run env:validate-saas
@@ -372,6 +410,7 @@ ENABLE_BILLING_SYSTEM=false
 ## ✅ Success Metrics
 
 ### Environment Configuration System
+
 - ✅ **50+ environment variables** configured and documented
 - ✅ **3 validation levels** (basic, SaaS, optional)
 - ✅ **8 npm scripts** for environment management
@@ -383,6 +422,7 @@ ENABLE_BILLING_SYSTEM=false
 - ✅ **Comprehensive documentation** with troubleshooting guides
 
 ### User Experience
+
 - ✅ **One-command setup** with `npm run env:generate`
 - ✅ **Clear error messages** with actionable recommendations
 - ✅ **Colored console output** for better readability
@@ -399,4 +439,6 @@ ENABLE_BILLING_SYSTEM=false
 
 ---
 
-**Step 22 Complete**: Environment configuration system is now fully implemented and ready for production use. The platform has comprehensive validation, documentation, and management tools for all environment variables required for SaaS features. 
+**Step 22 Complete**: Environment configuration system is now fully implemented and ready for
+production use. The platform has comprehensive validation, documentation, and management tools for
+all environment variables required for SaaS features.

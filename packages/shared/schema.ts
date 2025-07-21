@@ -1,17 +1,17 @@
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import { createInsertSchema } from 'drizzle-zod';
+import { z } from 'zod';
 
 // Import table definitions from database schema
-import { 
-  tenants, 
-  hotelProfiles, 
-  call, 
-  transcript, 
-  request, 
-  message, 
+import {
+  tenants,
+  hotelProfiles,
+  call,
+  transcript,
+  request,
+  message,
   staff,
   call_summaries,
-} from "./db/schema";
+} from './db/schema';
 
 // Re-export tables for convenience
 export {
@@ -68,16 +68,20 @@ export const LoginCredentialsSchema = z.object({
   password: z.string().min(6).max(100),
 });
 
-export const StaffRoleSchema = z.enum(["hotel-manager", "front-desk", "it-manager"]);
-
-export const RequestStatusSchema = z.enum([
-  "Đã ghi nhận",
-  "Đang xử lý", 
-  "Hoàn thành",
-  "Đã hủy"
+export const StaffRoleSchema = z.enum([
+  'hotel-manager',
+  'front-desk',
+  'it-manager',
 ]);
 
-export const CallRoleSchema = z.enum(["user", "assistant"]);
+export const RequestStatusSchema = z.enum([
+  'Đã ghi nhận',
+  'Đang xử lý',
+  'Hoàn thành',
+  'Đã hủy',
+]);
+
+export const CallRoleSchema = z.enum(['user', 'assistant']);
 
 // ==============================================================
 // API Response Schemas
@@ -109,5 +113,3 @@ export const DashboardStatsSchema = z.object({
 });
 
 export type DashboardStats = z.infer<typeof DashboardStatsSchema>;
-
-

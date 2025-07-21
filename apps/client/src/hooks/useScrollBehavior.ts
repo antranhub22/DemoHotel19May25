@@ -15,9 +15,11 @@ interface UseScrollBehaviorReturn {
   rightPanelRef: RefObject<HTMLDivElement>;
 }
 
-export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScrollBehaviorReturn => {
+export const useScrollBehavior = ({
+  isActive,
+}: UseScrollBehaviorProps): UseScrollBehaviorReturn => {
   const [showScrollButton, setShowScrollButton] = useState(false);
-  
+
   // Refs for scroll targets
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const serviceGridRef = useRef<HTMLDivElement>(null);
@@ -30,16 +32,19 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
     let lastExecTime = 0;
     return (...args: any[]) => {
       const currentTime = Date.now();
-      
+
       if (currentTime - lastExecTime > delay) {
         func(...args);
         lastExecTime = currentTime;
       } else {
         clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          func(...args);
-          lastExecTime = Date.now();
-        }, delay - (currentTime - lastExecTime));
+        timeoutId = setTimeout(
+          () => {
+            func(...args);
+            lastExecTime = Date.now();
+          },
+          delay - (currentTime - lastExecTime)
+        );
       }
     };
   };
@@ -49,25 +54,27 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
     const handleScroll = () => {
       const scrollY = window.scrollY;
       setShowScrollButton(scrollY > INTERFACE_CONSTANTS.SCROLL_THRESHOLD);
-      
+
       // Auto-highlight sections based on scroll position
       const heroSection = heroSectionRef.current;
       const serviceSection = serviceGridRef.current;
-      
+
       if (heroSection && serviceSection) {
         const heroRect = heroSection.getBoundingClientRect();
         const serviceRect = serviceSection.getBoundingClientRect();
-        
+
         // If service grid is partially visible, ensure it's fully visible
         if (serviceRect.top < window.innerHeight && serviceRect.bottom > 0) {
           if (serviceRect.top < 0 || serviceRect.bottom > window.innerHeight) {
             // Auto-adjust scroll to show service grid better
-            const shouldScrollToService = serviceRect.top < INTERFACE_CONSTANTS.SCROLL_OFFSETS.NEGATIVE_TOP_THRESHOLD;
+            const shouldScrollToService =
+              serviceRect.top <
+              INTERFACE_CONSTANTS.SCROLL_OFFSETS.NEGATIVE_TOP_THRESHOLD;
             if (shouldScrollToService) {
-              serviceSection.scrollIntoView({ 
-                behavior: 'smooth', 
+              serviceSection.scrollIntoView({
+                behavior: 'smooth',
                 block: 'start',
-                inline: 'nearest'
+                inline: 'nearest',
               });
             }
           }
@@ -75,7 +82,10 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
       }
     };
 
-    const throttledScroll = throttle(handleScroll, INTERFACE_CONSTANTS.THROTTLE_DELAY);
+    const throttledScroll = throttle(
+      handleScroll,
+      INTERFACE_CONSTANTS.THROTTLE_DELAY
+    );
     window.addEventListener('scroll', throttledScroll);
     return () => window.removeEventListener('scroll', throttledScroll);
   }, []);
@@ -92,15 +102,15 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
     const refs = {
       hero: heroSectionRef,
       services: serviceGridRef,
-      conversation: conversationRef
+      conversation: conversationRef,
     };
-    
+
     const targetRef = refs[section];
     if (targetRef.current) {
-      targetRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
+      targetRef.current.scrollIntoView({
+        behavior: 'smooth',
         block: section === 'hero' ? 'start' : 'center',
-        inline: 'nearest'
+        inline: 'nearest',
       });
     }
   };
@@ -116,6 +126,6 @@ export const useScrollBehavior = ({ isActive }: UseScrollBehaviorProps): UseScro
     heroSectionRef,
     serviceGridRef,
     conversationRef,
-    rightPanelRef
+    rightPanelRef,
   };
-}; 
+};

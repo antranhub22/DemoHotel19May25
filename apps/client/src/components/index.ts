@@ -26,7 +26,7 @@ export { ServiceGridContainer } from './interface1/ServiceGridContainer';
 export { RightPanelSection } from './interface1/RightPanelSection';
 // ConversationSection removed - replaced by unified ChatPopup component
 
-// Shared components  
+// Shared components
 export { LoadingState } from './interface1/LoadingState';
 export { ErrorState } from './interface1/ErrorState';
 export { ServiceGrid } from './interface1/ServiceGrid';
@@ -49,4 +49,4 @@ export { default as HotelResearchPanel } from './dashboard/HotelResearchPanel';
 export { default as MetricCard } from './dashboard/MetricCard';
 export { default as Sidebar } from './dashboard/Sidebar';
 export { default as TopBar } from './dashboard/TopBar';
-export { default as UsageChart } from './dashboard/UsageChart'; 
+export { default as UsageChart } from './dashboard/UsageChart';

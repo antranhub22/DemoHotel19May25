@@ -1,6 +1,7 @@
 # API Documentation
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Authentication](#authentication)
 3. [Base URL](#base-url)
@@ -12,9 +13,11 @@
 
 ## Overview
 
-The Hotel Assistant API provides RESTful endpoints for managing hotel operations, voice calls, orders, and analytics. All endpoints support multi-tenancy and require proper authentication.
+The Hotel Assistant API provides RESTful endpoints for managing hotel operations, voice calls,
+orders, and analytics. All endpoints support multi-tenancy and require proper authentication.
 
 ### API Versioning
+
 - Current Version: `v1`
 - Base URL: `https://api.hotelassistant.com/v1`
 - Content-Type: `application/json`
@@ -22,9 +25,11 @@ The Hotel Assistant API provides RESTful endpoints for managing hotel operations
 ## Authentication
 
 ### JWT Token Authentication
+
 All API endpoints require authentication via JWT tokens.
 
 #### Login
+
 ```http
 POST /auth/login
 Content-Type: application/json
@@ -37,6 +42,7 @@ Content-Type: application/json
 ```
 
 #### Response
+
 ```json
 {
   "success": true,
@@ -59,12 +65,15 @@ Content-Type: application/json
 ```
 
 #### Using the Token
+
 Include the token in the Authorization header:
+
 ```http
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### Token Refresh
+
 ```http
 POST /auth/refresh
 Content-Type: application/json
@@ -77,11 +86,13 @@ Content-Type: application/json
 ## Base URL
 
 ### Development
+
 ```
 http://localhost:3000
 ```
 
 ### Production
+
 ```
 https://api.hotelassistant.com
 ```
@@ -89,6 +100,7 @@ https://api.hotelassistant.com
 ## Error Handling
 
 ### Error Response Format
+
 ```json
 {
   "success": false,
@@ -99,6 +111,7 @@ https://api.hotelassistant.com
 ```
 
 ### HTTP Status Codes
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request
@@ -109,6 +122,7 @@ https://api.hotelassistant.com
 - `500` - Internal Server Error
 
 ### Common Error Codes
+
 ```json
 {
   "AUTH_001": "Invalid credentials",
@@ -126,9 +140,11 @@ https://api.hotelassistant.com
 ### Authentication
 
 #### POST /auth/login
+
 Authenticate user and get access token.
 
 **Request Body:**
+
 ```json
 {
   "username": "string",
@@ -138,6 +154,7 @@ Authenticate user and get access token.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -160,9 +177,11 @@ Authenticate user and get access token.
 ```
 
 #### POST /auth/refresh
+
 Refresh access token.
 
 **Request Body:**
+
 ```json
 {
   "token": "string"
@@ -170,6 +189,7 @@ Refresh access token.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -183,9 +203,11 @@ Refresh access token.
 ### Calls
 
 #### POST /calls/start
+
 Start a new voice call.
 
 **Request Body:**
+
 ```json
 {
   "roomNumber": "string",
@@ -196,6 +218,7 @@ Start a new voice call.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -210,9 +233,11 @@ Start a new voice call.
 ```
 
 #### POST /calls/end
+
 End an active call.
 
 **Request Body:**
+
 ```json
 {
   "callId": "string",
@@ -222,6 +247,7 @@ End an active call.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -234,9 +260,11 @@ End an active call.
 ```
 
 #### GET /calls/:id
+
 Get call details.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -255,9 +283,11 @@ Get call details.
 ```
 
 #### GET /calls
+
 Get paginated list of calls.
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `sortBy` (string, default: "startTime")
@@ -267,6 +297,7 @@ Get paginated list of calls.
 - `serviceType` (string, optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -296,9 +327,11 @@ Get paginated list of calls.
 ### Transcripts
 
 #### POST /transcripts
+
 Save a transcript entry.
 
 **Request Body:**
+
 ```json
 {
   "callId": "string",
@@ -309,6 +342,7 @@ Save a transcript entry.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -323,9 +357,11 @@ Save a transcript entry.
 ```
 
 #### GET /transcripts/:callId
+
 Get transcripts for a specific call.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -345,9 +381,11 @@ Get transcripts for a specific call.
 ### Orders/Requests
 
 #### POST /orders
+
 Create a new order/request.
 
 **Request Body:**
+
 ```json
 {
   "roomNumber": "string",
@@ -358,6 +396,7 @@ Create a new order/request.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -373,15 +412,18 @@ Create a new order/request.
 ```
 
 #### GET /orders
+
 Get paginated list of orders.
 
 **Query Parameters:**
+
 - `page` (number, default: 1)
 - `limit` (number, default: 20)
 - `status` (string, optional)
 - `roomNumber` (string, optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -408,9 +450,11 @@ Get paginated list of orders.
 ```
 
 #### PATCH /orders/:orderId/status
+
 Update order status.
 
 **Request Body:**
+
 ```json
 {
   "status": "pending|in-progress|completed|cancelled",
@@ -419,6 +463,7 @@ Update order status.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -434,9 +479,11 @@ Update order status.
 ### Messages
 
 #### POST /messages
+
 Send a message for an order.
 
 **Request Body:**
+
 ```json
 {
   "requestId": "number",
@@ -447,6 +494,7 @@ Send a message for an order.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -461,9 +509,11 @@ Send a message for an order.
 ```
 
 #### GET /messages/:requestId
+
 Get messages for a specific request.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -482,9 +532,11 @@ Get messages for a specific request.
 ### Hotel Management
 
 #### POST /hotel/research
+
 Research hotel information.
 
 **Request Body:**
+
 ```json
 {
   "hotelName": "string",
@@ -493,6 +545,7 @@ Research hotel information.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -534,9 +587,11 @@ Research hotel information.
 ```
 
 #### POST /hotel/generate-assistant
+
 Generate AI assistant configuration.
 
 **Request Body:**
+
 ```json
 {
   "hotelData": {
@@ -572,6 +627,7 @@ Generate AI assistant configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -585,9 +641,11 @@ Generate AI assistant configuration.
 ```
 
 #### GET /hotel/profile/:tenantId
+
 Get hotel profile.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -607,9 +665,11 @@ Get hotel profile.
 ```
 
 #### PUT /hotel/config/:tenantId
+
 Update hotel configuration.
 
 **Request Body:**
+
 ```json
 {
   "assistantConfig": "object",
@@ -620,6 +680,7 @@ Update hotel configuration.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -638,13 +699,16 @@ Update hotel configuration.
 ### Analytics
 
 #### GET /analytics/:tenantId
+
 Get analytics overview.
 
 **Query Parameters:**
+
 - `startDate` (string, optional)
 - `endDate` (string, optional)
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -682,9 +746,11 @@ Get analytics overview.
 ```
 
 #### GET /analytics/:tenantId/service-distribution
+
 Get service type distribution.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -699,9 +765,11 @@ Get service type distribution.
 ```
 
 #### GET /analytics/:tenantId/hourly-activity
+
 Get hourly activity data.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -718,9 +786,11 @@ Get hourly activity data.
 ### Health
 
 #### GET /health
+
 Basic health check.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -732,9 +802,11 @@ Basic health check.
 ```
 
 #### GET /health/detailed
+
 Detailed health check with service status.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -766,50 +838,59 @@ Detailed health check with service status.
 ## WebSocket Events
 
 ### Connection
+
 ```javascript
 const socket = io('ws://localhost:3000', {
   auth: {
-    token: 'jwt-token'
-  }
+    token: 'jwt-token',
+  },
 });
 ```
 
 ### Client to Server Events
 
 #### init
+
 Initialize connection with tenant context.
+
 ```javascript
 socket.emit('init', {
   tenantId: 'tenant-uuid',
   roomNumber: '101', // optional
-  language: 'en' // optional
+  language: 'en', // optional
 });
 ```
 
 #### transcript
+
 Send transcript data.
+
 ```javascript
 socket.emit('transcript', {
   content: 'Hello, I need room service',
-  role: 'user' // 'user' | 'assistant'
+  role: 'user', // 'user' | 'assistant'
 });
 ```
 
 #### call_end
+
 End call with duration.
+
 ```javascript
 socket.emit('call_end', {
   callId: 'call-uuid',
-  duration: 300 // seconds
+  duration: 300, // seconds
 });
 ```
 
 ### Server to Client Events
 
 #### transcript
+
 Receive transcript updates.
+
 ```javascript
-socket.on('transcript', (data) => {
+socket.on('transcript', data => {
   console.log('Transcript:', data);
   // {
   //   content: 'Hello, I need room service',
@@ -821,9 +902,11 @@ socket.on('transcript', (data) => {
 ```
 
 #### order_status_update
+
 Receive order status updates.
+
 ```javascript
-socket.on('order_status_update', (data) => {
+socket.on('order_status_update', data => {
   console.log('Order update:', data);
   // {
   //   orderId: 'order-uuid',
@@ -836,9 +919,11 @@ socket.on('order_status_update', (data) => {
 ```
 
 #### call_end
+
 Receive call end notification.
+
 ```javascript
-socket.on('call_end', (data) => {
+socket.on('call_end', data => {
   console.log('Call ended:', data);
   // {
   //   callId: 'call-uuid',
@@ -849,9 +934,11 @@ socket.on('call_end', (data) => {
 ```
 
 #### error
+
 Receive error notifications.
+
 ```javascript
-socket.on('error', (data) => {
+socket.on('error', data => {
   console.error('Error:', data);
   // {
   //   message: 'Error message',
@@ -864,12 +951,14 @@ socket.on('error', (data) => {
 ## Rate Limiting
 
 ### Limits
+
 - **Authentication**: 5 requests per minute
 - **API Calls**: 100 requests per minute
 - **WebSocket**: 1000 messages per minute
 - **File Upload**: 10 files per hour
 
 ### Headers
+
 ```
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -877,6 +966,7 @@ X-RateLimit-Reset: 1640995200
 ```
 
 ### Rate Limit Exceeded
+
 ```json
 {
   "success": false,
@@ -891,6 +981,7 @@ X-RateLimit-Reset: 1640995200
 ### JavaScript/TypeScript
 
 #### Using Fetch
+
 ```javascript
 const login = async (username, password) => {
   const response = await fetch('/auth/login', {
@@ -900,7 +991,7 @@ const login = async (username, password) => {
     },
     body: JSON.stringify({ username, password }),
   });
-  
+
   const data = await response.json();
   return data;
 };
@@ -909,16 +1000,17 @@ const getCalls = async (token, params = {}) => {
   const queryString = new URLSearchParams(params).toString();
   const response = await fetch(`/calls?${queryString}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
-  
+
   const data = await response.json();
   return data;
 };
 ```
 
 #### Using Axios
+
 ```javascript
 import axios from 'axios';
 
@@ -928,7 +1020,7 @@ const api = axios.create({
 });
 
 // Add auth interceptor
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -937,16 +1029,17 @@ api.interceptors.request.use((config) => {
 });
 
 const callsApi = {
-  start: (data) => api.post('/calls/start', data),
-  end: (data) => api.post('/calls/end', data),
-  get: (id) => api.get(`/calls/${id}`),
-  list: (params) => api.get('/calls', { params }),
+  start: data => api.post('/calls/start', data),
+  end: data => api.post('/calls/end', data),
+  get: id => api.get(`/calls/${id}`),
+  list: params => api.get('/calls', { params }),
 };
 ```
 
 ### cURL Examples
 
 #### Login
+
 ```bash
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
@@ -957,6 +1050,7 @@ curl -X POST http://localhost:3000/auth/login \
 ```
 
 #### Start Call
+
 ```bash
 curl -X POST http://localhost:3000/calls/start \
   -H "Content-Type: application/json" \
@@ -970,6 +1064,7 @@ curl -X POST http://localhost:3000/calls/start \
 ```
 
 #### Get Analytics
+
 ```bash
 curl -X GET "http://localhost:3000/analytics/tenant-uuid?startDate=2024-01-01&endDate=2024-01-31" \
   -H "Authorization: Bearer YOUR_TOKEN"
@@ -978,6 +1073,7 @@ curl -X GET "http://localhost:3000/analytics/tenant-uuid?startDate=2024-01-01&en
 ### Python
 
 #### Using requests
+
 ```python
 import requests
 
@@ -986,7 +1082,7 @@ class HotelAssistantAPI:
         self.base_url = base_url
         self.token = token
         self.session = requests.Session()
-        
+
     def login(self, username, password):
         response = self.session.post(
             f"{self.base_url}/auth/login",
@@ -997,7 +1093,7 @@ class HotelAssistantAPI:
             self.token = data["data"]["token"]
             self.session.headers["Authorization"] = f"Bearer {self.token}"
         return data
-    
+
     def start_call(self, room_number, language, service_type=None):
         response = self.session.post(
             f"{self.base_url}/calls/start",
@@ -1009,14 +1105,14 @@ class HotelAssistantAPI:
             }
         )
         return response.json()
-    
+
     def get_analytics(self, tenant_id, start_date=None, end_date=None):
         params = {}
         if start_date:
             params["startDate"] = start_date
         if end_date:
             params["endDate"] = end_date
-            
+
         response = self.session.get(
             f"{self.base_url}/analytics/{tenant_id}",
             params=params
@@ -1109,4 +1205,4 @@ Import this collection into Postman:
     }
   ]
 }
-``` 
+```

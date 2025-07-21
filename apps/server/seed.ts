@@ -6,24 +6,24 @@ export async function seedDevelopmentData() {
   try {
     // Check if data already exists
     const existingCalls = await db.select().from(call).limit(1);
-    
+
     if (existingCalls.length > 0) {
       console.log('Development data already exists, skipping seed...');
       return;
     }
 
     console.log('Seeding development data...');
-    
+
     // Seed call data
     const callData = [
       {
         call_id_vapi: 'call-001-dev',
-        tenant_id: 'mi-nhon-hotel'
+        tenant_id: 'mi-nhon-hotel',
       },
       {
         call_id_vapi: 'call-002-dev',
-        tenant_id: 'mi-nhon-hotel'
-      }
+        tenant_id: 'mi-nhon-hotel',
+      },
     ];
 
     // Insert call data
@@ -40,7 +40,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-001',
         requestContent: 'Yêu cầu dọn phòng lúc 2:00 PM',
         status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() // 1 hour ago
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
       },
       {
         id: 'REQ-002',
@@ -49,7 +49,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-002',
         requestContent: 'Cần thêm khăn tắm',
         status: 'Đang thực hiện',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
       },
       {
         id: 'REQ-003',
@@ -58,7 +58,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-003',
         requestContent: 'Yêu cầu taxi đến sân bay lúc 6:00 AM',
         status: 'Hoàn thiện',
-        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // 3 hours ago
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
       },
       {
         id: 'REQ-004',
@@ -67,7 +67,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-004',
         requestContent: 'Thông tin về tour địa phương',
         status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
       },
       {
         id: 'REQ-005',
@@ -76,7 +76,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-005',
         requestContent: 'Sửa chữa điều hòa không hoạt động',
         status: 'Đang thực hiện',
-        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() // 5 hours ago
+        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
       },
       {
         id: 'REQ-006',
@@ -85,7 +85,7 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-006',
         requestContent: 'Đặt bàn nhà hàng cho 4 người lúc 7:00 PM',
         status: 'Hoàn thiện',
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6 hours ago
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
       },
       {
         id: 'REQ-007',
@@ -94,8 +94,8 @@ export async function seedDevelopmentData() {
         orderId: 'ORD-007',
         requestContent: 'Yêu cầu dịch vụ giặt ủi',
         status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString() // 7 hours ago
-      }
+        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(), // 7 hours ago
+      },
     ];
 
     // Insert requests
@@ -107,4 +107,4 @@ export async function seedDevelopmentData() {
   } catch (error) {
     console.error('Error seeding development data:', error);
   }
-} 
+}

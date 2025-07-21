@@ -3,6 +3,7 @@
 ## **📋 PREPARATION - Analysis First**
 
 ### **Step 0: Complete Repository Analysis**
+
 ```bash
 @Codebase Please perform a comprehensive analysis of our Mi Nhon Hotel repository structure and provide:
 
@@ -22,6 +23,7 @@ Give me a detailed report of current state and refactoring opportunities.
 ## **🔍 PHASE 1: ARCHITECTURE ASSESSMENT**
 
 ### **Step 1: Analyze Current Architecture**
+
 ```bash
 @Codebase Based on the repository analysis, please:
 
@@ -38,6 +40,7 @@ Show me what needs to be restructured for better maintainability.
 ```
 
 ### **Step 2: Create Refactoring Strategy**
+
 ```bash
 @Codebase Create a comprehensive refactoring strategy that:
 
@@ -56,6 +59,7 @@ Ensure zero functionality loss during refactoring.
 ## **🗂️ PHASE 2: FOLDER STRUCTURE OPTIMIZATION**
 
 ### **Step 3: Design New Folder Structure**
+
 ```bash
 @Codebase Design an optimal folder structure for our codebase:
 
@@ -77,6 +81,7 @@ Show me the proposed new structure with explanations.
 ```
 
 ### **Step 4: Create Migration Plan**
+
 ```bash
 @Codebase Create a detailed migration plan to move from current structure to new structure:
 
@@ -94,6 +99,7 @@ Ensure we can validate functionality at each step.
 ## **📦 PHASE 3: DEPENDENCY CLEANUP**
 
 ### **Step 5: Audit Dependencies**
+
 ```bash
 @Codebase Perform a thorough dependency audit:
 
@@ -108,6 +114,7 @@ Show me what can be cleaned up safely.
 ```
 
 ### **Step 6: Optimize Package Structure**
+
 ```bash
 @Codebase Optimize our package structure:
 
@@ -126,6 +133,7 @@ Create updated package.json files and migration commands.
 ## **🧩 PHASE 4: CODE CONSOLIDATION**
 
 ### **Step 7: Identify Code Duplication**
+
 ```bash
 @Codebase Find and analyze code duplication across the codebase:
 
@@ -140,6 +148,7 @@ Show me consolidation opportunities with specific examples.
 ```
 
 ### **Step 8: Create Shared Utilities**
+
 ```bash
 @Codebase Create consolidated shared utilities:
 
@@ -158,6 +167,7 @@ Ensure all existing functionality is preserved.
 ## **⚙️ PHASE 5: COMPONENT ORGANIZATION**
 
 ### **Step 9: Analyze Component Structure**
+
 ```bash
 @Codebase Analyze our current React component organization:
 
@@ -172,6 +182,7 @@ Suggest improvements for better maintainability.
 ```
 
 ### **Step 10: Restructure Components**
+
 ```bash
 @Codebase Restructure components following best practices:
 
@@ -190,6 +201,7 @@ Show me the new component organization with migration steps.
 ## **🛠️ PHASE 6: SERVICE LAYER OPTIMIZATION**
 
 ### **Step 11: Analyze Backend Services**
+
 ```bash
 @Codebase Review our backend service organization:
 
@@ -204,6 +216,7 @@ Suggest improvements for better architecture.
 ```
 
 ### **Step 12: Refactor Service Architecture**
+
 ```bash
 @Codebase Implement improved service architecture:
 
@@ -222,6 +235,7 @@ Ensure all existing APIs continue to work.
 ## **🎨 PHASE 7: STYLING AND ASSETS**
 
 ### **Step 13: Optimize Styling Structure**
+
 ```bash
 @Codebase Review and optimize our styling approach:
 
@@ -236,6 +250,7 @@ Suggest improvements for maintainable styling.
 ```
 
 ### **Step 14: Consolidate Assets and Resources**
+
 ```bash
 @Codebase Organize assets and static resources:
 
@@ -254,6 +269,7 @@ Show me the optimized asset structure.
 ## **📊 PHASE 8: CONFIGURATION MANAGEMENT**
 
 ### **Step 15: Consolidate Configuration**
+
 ```bash
 @Codebase Optimize configuration management:
 
@@ -268,6 +284,7 @@ Create a cleaner, more maintainable config structure.
 ```
 
 ### **Step 16: Optimize Build and Dev Setup**
+
 ```bash
 @Codebase Improve build and development setup:
 
@@ -286,6 +303,7 @@ Show me the optimized development workflow.
 ## **🔧 PHASE 9: TYPE SAFETY AND INTERFACES**
 
 ### **Step 17: Consolidate TypeScript Types**
+
 ```bash
 @Codebase Optimize TypeScript type organization:
 
@@ -300,6 +318,7 @@ Create a clean, well-organized type system.
 ```
 
 ### **Step 18: Improve API Type Safety**
+
 ```bash
 @Codebase Enhance API type safety:
 
@@ -318,6 +337,7 @@ Show me the improved type-safe API structure.
 ## **🧪 PHASE 10: TESTING STRUCTURE**
 
 ### **Step 19: Organize Test Structure**
+
 ```bash
 @Codebase Review and improve test organization:
 
@@ -332,6 +352,7 @@ Create a maintainable testing structure.
 ```
 
 ### **Step 20: Optimize Test Performance**
+
 ```bash
 @Codebase Optimize testing performance and reliability:
 
@@ -350,6 +371,7 @@ Show me the optimized test setup.
 ## **📚 PHASE 11: DOCUMENTATION AND COMMENTS**
 
 ### **Step 21: Audit Documentation**
+
 ```bash
 @Codebase Review and improve code documentation:
 
@@ -364,6 +386,7 @@ Create comprehensive, maintainable documentation.
 ```
 
 ### **Step 22: Create Development Guidelines**
+
 ```bash
 @Codebase Create development guidelines and standards:
 
@@ -382,6 +405,7 @@ Ensure new developers can understand and contribute easily.
 ## **🚀 PHASE 12: IMPLEMENTATION AND VALIDATION**
 
 ### **Step 23: Execute Folder Structure Migration**
+
 ```bash
 @Codebase Execute the folder structure refactoring:
 
@@ -396,6 +420,7 @@ Ensure zero functionality loss during migration.
 ```
 
 ### **Step 24: Implement Code Consolidation**
+
 ```bash
 @Codebase Implement code consolidation changes:
 
@@ -410,6 +435,7 @@ Maintain all existing functionality throughout.
 ```
 
 ### **Step 25: Optimize Dependencies and Build**
+
 ```bash
 @Codebase Implement dependency and build optimizations:
 
@@ -428,6 +454,7 @@ Ensure everything still works correctly.
 ## **✅ PHASE 13: VALIDATION AND CLEANUP**
 
 ### **Step 26: Comprehensive Testing**
+
 ```bash
 @Codebase Perform comprehensive testing of refactored codebase:
 
@@ -442,6 +469,7 @@ Document any issues found and fix them.
 ```
 
 ### **Step 27: Final Cleanup and Documentation**
+
 ```bash
 @Codebase Perform final cleanup and documentation:
 
@@ -488,11 +516,12 @@ Provide final report of refactoring results.
 ✅ **Reduced code duplication**  
 ✅ **Cleaner dependencies**  
 ✅ **Better performance**  
-✅ **Easier development experience**  
+✅ **Easier development experience**
 
 ### **Progressive Validation:**
 
 After each phase, run:
+
 ```bash
 @Codebase Validate that all functionality still works after this refactoring phase. Run tests and check for any regressions.
 ```
@@ -502,17 +531,20 @@ After each phase, run:
 ## **📋 REFACTORING CHECKLIST**
 
 ### **Phase 1-2: Analysis & Strategy** ✅
+
 - [ ] Step 0: Complete Repository Analysis
 - [ ] Step 1: Analyze Current Architecture
 - [ ] Step 2: Create Refactoring Strategy
 
 ### **Phase 3-4: Structure & Dependencies** ✅
+
 - [ ] Step 3: Design New Folder Structure
 - [ ] Step 4: Create Migration Plan
 - [ ] Step 5: Audit Dependencies
 - [ ] Step 6: Optimize Package Structure
 
 ### **Phase 5-6: Code & Services** ✅
+
 - [ ] Step 7: Identify Code Duplication
 - [ ] Step 8: Create Shared Utilities
 - [ ] Step 9: Analyze Component Structure
@@ -521,6 +553,7 @@ After each phase, run:
 - [ ] Step 12: Refactor Service Architecture
 
 ### **Phase 7-8: Assets & Configuration** ✅
+
 - [ ] Step 13: Optimize Styling Structure
 - [ ] Step 14: Consolidate Assets and Resources
 - [ ] Step 15: Consolidate Configuration

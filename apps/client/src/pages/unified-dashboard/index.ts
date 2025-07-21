@@ -7,4 +7,4 @@ export { Settings } from './Settings';
 export { GuestManagement } from './GuestManagement';
 export { SecuritySettings } from './SecuritySettings';
 export { SystemLogs } from './SystemLogs';
-export { Integrations } from './Integrations'; 
+export { Integrations } from './Integrations';

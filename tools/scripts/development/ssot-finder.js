@@ -15,18 +15,23 @@ class SSOTFinder {
     this.registry = null;
     this.rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
   }
 
   async loadRegistry() {
     try {
-      const registryPath = path.join(process.cwd(), 'config/ssot-registry.json');
+      const registryPath = path.join(
+        process.cwd(),
+        'config/ssot-registry.json'
+      );
       const content = await fs.readFile(registryPath, 'utf8');
       this.registry = JSON.parse(content);
       console.log(chalk.green('✓ SSOT Registry loaded successfully'));
     } catch (error) {
-      console.error(chalk.red('✗ Failed to load SSOT registry:', error.message));
+      console.error(
+        chalk.red('✗ Failed to load SSOT registry:', error.message)
+      );
       process.exit(1);
     }
   }
@@ -34,7 +39,7 @@ class SSOTFinder {
   displayWelcome() {
     console.log(chalk.blue.bold('\n🔍 SSOT Finder - Hotel Management System'));
     console.log(chalk.gray('Find the right files to change for your task\n'));
-    
+
     console.log(chalk.yellow('Available search methods:'));
     console.log('1. Search by keyword');
     console.log('2. Browse by category');
@@ -45,25 +50,27 @@ class SSOTFinder {
   }
 
   async promptUser(question) {
-    return new Promise((resolve) => {
-      this.rl.question(question, (answer) => {
+    return new Promise(resolve => {
+      this.rl.question(question, answer => {
         resolve(answer.trim());
       });
     });
   }
 
   async searchByKeyword() {
-    const keyword = await this.promptUser(chalk.cyan('Enter keyword to search: '));
-    
+    const keyword = await this.promptUser(
+      chalk.cyan('Enter keyword to search: ')
+    );
+
     if (!keyword) {
       console.log(chalk.red('Please enter a keyword'));
       return;
     }
 
     console.log(chalk.blue(`\n🔍 Searching for "${keyword}"...\n`));
-    
+
     const results = this.findInRegistry(keyword.toLowerCase());
-    
+
     if (results.length === 0) {
       console.log(chalk.yellow('No matches found. Try a different keyword.'));
       return;
@@ -74,28 +81,34 @@ class SSOTFinder {
 
   findInRegistry(keyword) {
     const results = [];
-    
+
     const searchObject = (obj, path = '') => {
       for (const [key, value] of Object.entries(obj)) {
         const currentPath = path ? `${path}.${key}` : key;
-        
+
         if (typeof value === 'string') {
-          if (value.toLowerCase().includes(keyword) || key.toLowerCase().includes(keyword)) {
+          if (
+            value.toLowerCase().includes(keyword) ||
+            key.toLowerCase().includes(keyword)
+          ) {
             results.push({
               path: currentPath,
               type: 'value',
               content: value,
-              key: key
+              key: key,
             });
           }
         } else if (Array.isArray(value)) {
           value.forEach((item, index) => {
-            if (typeof item === 'string' && item.toLowerCase().includes(keyword)) {
+            if (
+              typeof item === 'string' &&
+              item.toLowerCase().includes(keyword)
+            ) {
               results.push({
                 path: `${currentPath}[${index}]`,
                 type: 'array_item',
                 content: item,
-                key: key
+                key: key,
               });
             }
           });
@@ -110,8 +123,10 @@ class SSOTFinder {
   }
 
   displaySearchResults(results, keyword) {
-    console.log(chalk.green(`Found ${results.length} matches for "${keyword}":\n`));
-    
+    console.log(
+      chalk.green(`Found ${results.length} matches for "${keyword}":\n`)
+    );
+
     results.forEach((result, index) => {
       console.log(chalk.blue(`${index + 1}. ${result.path}`));
       console.log(chalk.gray(`   ${result.content}`));
@@ -124,10 +139,14 @@ class SSOTFinder {
   async showRelatedFiles(results) {
     if (results.length === 0) return;
 
-    const choice = await this.promptUser(chalk.cyan('Enter number to see related files (or press Enter to continue): '));
-    
+    const choice = await this.promptUser(
+      chalk.cyan(
+        'Enter number to see related files (or press Enter to continue): '
+      )
+    );
+
     if (!choice) return;
-    
+
     const index = parseInt(choice) - 1;
     if (index >= 0 && index < results.length) {
       const result = results[index];
@@ -138,7 +157,7 @@ class SSOTFinder {
   displayRelatedFiles(result) {
     const pathParts = result.path.split('.');
     let current = this.registry;
-    
+
     // Navigate to the parent object
     for (let i = 0; i < pathParts.length - 1; i++) {
       current = current[pathParts[i]];
@@ -174,16 +193,20 @@ class SSOTFinder {
   }
 
   async browseByCategory() {
-    const categories = Object.keys(this.registry).filter(key => key !== 'meta' && key !== 'change_scenarios');
-    
+    const categories = Object.keys(this.registry).filter(
+      key => key !== 'meta' && key !== 'change_scenarios'
+    );
+
     console.log(chalk.blue('\n📂 Available categories:\n'));
     categories.forEach((category, index) => {
       console.log(`${index + 1}. ${category}`);
     });
 
-    const choice = await this.promptUser(chalk.cyan('\nSelect category number: '));
+    const choice = await this.promptUser(
+      chalk.cyan('\nSelect category number: ')
+    );
     const categoryIndex = parseInt(choice) - 1;
-    
+
     if (categoryIndex >= 0 && categoryIndex < categories.length) {
       const category = categories[categoryIndex];
       this.displayCategory(category);
@@ -194,50 +217,58 @@ class SSOTFinder {
 
   displayCategory(categoryName) {
     const category = this.registry[categoryName];
-    
+
     console.log(chalk.blue(`\n📂 ${categoryName.toUpperCase()} Category:\n`));
-    
+
     Object.entries(category).forEach(([subKey, subValue]) => {
       console.log(chalk.green(`${subKey}:`));
-      
+
       if (subValue.primary) {
         console.log(chalk.white(`  Primary: ${subValue.primary}`));
       }
-      
+
       if (subValue.secondary) {
-        console.log(chalk.yellow(`  Secondary: ${subValue.secondary.join(', ')}`));
+        console.log(
+          chalk.yellow(`  Secondary: ${subValue.secondary.join(', ')}`)
+        );
       }
-      
+
       if (subValue.description) {
         console.log(chalk.gray(`  Description: ${subValue.description}`));
       }
 
       if (subValue.automation) {
-        console.log(chalk.cyan(`  Automation: ${Object.keys(subValue.automation).join(', ')}`));
+        console.log(
+          chalk.cyan(
+            `  Automation: ${Object.keys(subValue.automation).join(', ')}`
+          )
+        );
       }
-      
+
       console.log();
     });
   }
 
   async showChangeScenarios() {
     const scenarios = this.registry.change_scenarios;
-    
+
     if (!scenarios) {
       console.log(chalk.yellow('No change scenarios defined'));
       return;
     }
 
     console.log(chalk.blue('\n🔄 Common Change Scenarios:\n'));
-    
+
     Object.entries(scenarios).forEach(([scenario, details], index) => {
       console.log(`${index + 1}. ${scenario.replace(/_/g, ' ').toUpperCase()}`);
     });
 
-    const choice = await this.promptUser(chalk.cyan('\nSelect scenario number for details: '));
+    const choice = await this.promptUser(
+      chalk.cyan('\nSelect scenario number for details: ')
+    );
     const scenarioKeys = Object.keys(scenarios);
     const scenarioIndex = parseInt(choice) - 1;
-    
+
     if (scenarioIndex >= 0 && scenarioIndex < scenarioKeys.length) {
       const scenarioKey = scenarioKeys[scenarioIndex];
       this.displayChangeScenario(scenarioKey, scenarios[scenarioKey]);
@@ -245,38 +276,40 @@ class SSOTFinder {
   }
 
   displayChangeScenario(scenarioName, scenario) {
-    console.log(chalk.blue(`\n🔄 ${scenarioName.replace(/_/g, ' ').toUpperCase()}:\n`));
-    
+    console.log(
+      chalk.blue(`\n🔄 ${scenarioName.replace(/_/g, ' ').toUpperCase()}:\n`)
+    );
+
     console.log(chalk.green('PRIMARY CHANGE:'));
     console.log(chalk.white(`  ${scenario.primary_change}`));
-    
+
     if (scenario.secondary_updates) {
       console.log(chalk.yellow('\nSECONDARY UPDATES:'));
       scenario.secondary_updates.forEach(update => {
         console.log(chalk.white(`  • ${update}`));
       });
     }
-    
+
     if (scenario.automation_flow) {
       console.log(chalk.cyan('\n🤖 AUTOMATION FLOW:'));
       scenario.automation_flow.forEach((command, index) => {
         console.log(chalk.white(`  ${index + 1}. ${command}`));
       });
     }
-    
+
     console.log();
   }
 
   async validateSSotConsistency() {
     console.log(chalk.blue('\n🔍 Running SSOT consistency validation...\n'));
-    
+
     try {
       const { execSync } = require('child_process');
-      const output = execSync('npm run validate:ssot', { 
+      const output = execSync('npm run validate:ssot', {
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
-      
+
       console.log(chalk.green('✓ SSOT validation completed successfully'));
       console.log(output);
     } catch (error) {
@@ -287,20 +320,47 @@ class SSOTFinder {
 
   async showAutomationCommands() {
     console.log(chalk.blue('\n🤖 Available Automation Commands:\n'));
-    
+
     const commands = [
-      { name: 'generate:types', description: 'Generate TypeScript types from database schema' },
-      { name: 'generate:api-docs', description: 'Generate API documentation from routes' },
+      {
+        name: 'generate:types',
+        description: 'Generate TypeScript types from database schema',
+      },
+      {
+        name: 'generate:api-docs',
+        description: 'Generate API documentation from routes',
+      },
       { name: 'validate:ssot', description: 'Validate SSOT consistency' },
       { name: 'validate:runtime', description: 'Run runtime validation' },
-      { name: 'check:breaking-changes', description: 'Check for breaking changes' },
-      { name: 'generate:migration-guide', description: 'Generate migration guide' },
-      { name: 'generate:migration-docs', description: 'Generate migration documentation' },
+      {
+        name: 'check:breaking-changes',
+        description: 'Check for breaking changes',
+      },
+      {
+        name: 'generate:migration-guide',
+        description: 'Generate migration guide',
+      },
+      {
+        name: 'generate:migration-docs',
+        description: 'Generate migration documentation',
+      },
       { name: 'update:dependencies', description: 'Update dependent files' },
-      { name: 'sync:changes', description: 'Sync changes between environments' },
-      { name: 'watch:ssot', description: 'Start file watcher for auto-updates' },
-      { name: 'generate:changelog', description: 'Generate changelog from git commits' },
-      { name: 'update:readme', description: 'Update README from codebase analysis' }
+      {
+        name: 'sync:changes',
+        description: 'Sync changes between environments',
+      },
+      {
+        name: 'watch:ssot',
+        description: 'Start file watcher for auto-updates',
+      },
+      {
+        name: 'generate:changelog',
+        description: 'Generate changelog from git commits',
+      },
+      {
+        name: 'update:readme',
+        description: 'Update README from codebase analysis',
+      },
     ];
 
     commands.forEach((cmd, index) => {
@@ -309,8 +369,10 @@ class SSOTFinder {
       console.log();
     });
 
-    const choice = await this.promptUser(chalk.cyan('Enter command number to run (or press Enter to continue): '));
-    
+    const choice = await this.promptUser(
+      chalk.cyan('Enter command number to run (or press Enter to continue): ')
+    );
+
     if (choice) {
       const cmdIndex = parseInt(choice) - 1;
       if (cmdIndex >= 0 && cmdIndex < commands.length) {
@@ -321,12 +383,12 @@ class SSOTFinder {
 
   async runCommand(commandName) {
     console.log(chalk.blue(`\n🚀 Running: npm run ${commandName}\n`));
-    
+
     try {
       const { execSync } = require('child_process');
-      const output = execSync(`npm run ${commandName}`, { 
+      const output = execSync(`npm run ${commandName}`, {
         encoding: 'utf8',
-        stdio: 'inherit'
+        stdio: 'inherit',
       });
     } catch (error) {
       console.log(chalk.red(`\n✗ Command failed: ${error.message}`));
@@ -335,9 +397,9 @@ class SSOTFinder {
 
   async showImpact(filePath) {
     console.log(chalk.blue(`\n📊 Impact analysis for: ${filePath}\n`));
-    
+
     const impactedFiles = new Set();
-    
+
     // Search for files that reference this path
     const searchInRegistry = (obj, targetPath) => {
       for (const [key, value] of Object.entries(obj)) {
@@ -356,7 +418,7 @@ class SSOTFinder {
     };
 
     searchInRegistry(this.registry, filePath);
-    
+
     if (impactedFiles.size === 0) {
       console.log(chalk.yellow('No direct impacts found in SSOT registry'));
     } else {
@@ -365,7 +427,7 @@ class SSOTFinder {
         console.log(chalk.white(`  • ${file}`));
       });
     }
-    
+
     console.log(chalk.cyan('\n💡 Recommended actions:'));
     console.log(chalk.white('  1. Run: npm run validate:ssot'));
     console.log(chalk.white('  2. Run: npm run check:breaking-changes'));
@@ -375,12 +437,14 @@ class SSOTFinder {
 
   async run() {
     await this.loadRegistry();
-    
+
     while (true) {
       this.displayWelcome();
-      
-      const choice = await this.promptUser(chalk.cyan('Select an option (1-6): '));
-      
+
+      const choice = await this.promptUser(
+        chalk.cyan('Select an option (1-6): ')
+      );
+
       switch (choice) {
         case '1':
           await this.searchByKeyword();
@@ -404,7 +468,7 @@ class SSOTFinder {
         default:
           console.log(chalk.red('Invalid choice. Please select 1-6.'));
       }
-      
+
       await this.promptUser(chalk.gray('\nPress Enter to continue...'));
       console.clear();
     }
@@ -414,7 +478,7 @@ class SSOTFinder {
 // CLI Interface
 async function main() {
   const args = process.argv.slice(2);
-  
+
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
 SSOT Finder - Interactive Tool
@@ -474,4 +538,4 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-module.exports = { SSOTFinder }; 
+module.exports = { SSOTFinder };

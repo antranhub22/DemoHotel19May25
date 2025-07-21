@@ -5,6 +5,7 @@
 ### **📋 Pre-Cleanup Assessment**
 
 #### **Step 1: Create Comprehensive Backup**
+
 ```bash
 # Git backup
 git branch backup-before-cleanup
@@ -18,6 +19,7 @@ tar -czf repo_backup_$(date +%Y%m%d_%H%M%S).tar.gz ../mi-nhon-hotel/
 ```
 
 #### **Step 2: Document Current State**
+
 ```bash
 @Codebase Create a comprehensive audit report of our current repository state:
 
@@ -37,6 +39,7 @@ This will be our baseline for cleanup validation.
 ## **🔍 PHASE 1: DISCOVERY & ANALYSIS**
 
 ### **Step 3: Dead Code Detection**
+
 ```bash
 @Codebase Perform comprehensive dead code analysis:
 
@@ -53,6 +56,7 @@ Categorize findings by risk level (safe to remove vs. needs investigation).
 ```
 
 ### **Step 4: Dependency Analysis**
+
 ```bash
 @Codebase Analyze all dependencies comprehensively:
 
@@ -68,6 +72,7 @@ Create removal/update plan with impact assessment.
 ```
 
 ### **Step 5: Code Quality Assessment**
+
 ```bash
 @Codebase Assess code quality issues that need cleanup:
 
@@ -88,6 +93,7 @@ Prioritize by impact on maintainability and performance.
 ## **🗑️ PHASE 2: SAFE CLEANUP EXECUTION**
 
 ### **Step 6: Remove Dead Files (Low Risk)**
+
 ```bash
 @Codebase Start with safest cleanup - remove clearly unused files:
 
@@ -102,6 +108,7 @@ For each deletion, verify no hidden references exist.
 ```
 
 ### **Step 7: Clean Up Dependencies**
+
 ```bash
 @Codebase Clean up package dependencies safely:
 
@@ -116,6 +123,7 @@ Test thoroughly after each dependency change.
 ```
 
 ### **Step 8: Remove Commented Code**
+
 ```bash
 @Codebase Remove commented-out code and clean up comments:
 
@@ -134,6 +142,7 @@ Keep only valuable comments that explain business logic.
 ## **🔧 PHASE 3: CODE OPTIMIZATION**
 
 ### **Step 9: Consolidate Duplicate Code**
+
 ```bash
 @Codebase Identify and consolidate duplicate code:
 
@@ -148,6 +157,7 @@ Ensure no functionality is lost during consolidation.
 ```
 
 ### **Step 10: Optimize Imports and Exports**
+
 ```bash
 @Codebase Optimize import/export structure:
 
@@ -162,6 +172,7 @@ Use automated tools where possible for consistency.
 ```
 
 ### **Step 11: Clean Up Assets and Resources**
+
 ```bash
 @Codebase Optimize assets and static resources:
 
@@ -180,6 +191,7 @@ Use tools to identify unused assets automatically.
 ## **📊 PHASE 4: BUILD AND CONFIGURATION CLEANUP**
 
 ### **Step 12: Optimize Build Configuration**
+
 ```bash
 @Codebase Clean up build and configuration files:
 
@@ -194,6 +206,7 @@ Ensure build process remains functional after cleanup.
 ```
 
 ### **Step 13: Database and Migration Cleanup**
+
 ```bash
 @Codebase Clean up database-related files safely:
 
@@ -208,6 +221,7 @@ CRITICAL: Test database operations thoroughly after cleanup.
 ```
 
 ### **Step 14: Environment and Config Cleanup**
+
 ```bash
 @Codebase Clean up environment and configuration:
 
@@ -226,6 +240,7 @@ Verify all environments still work after cleanup.
 ## **🧪 PHASE 5: TESTING AND VALIDATION**
 
 ### **Step 15: Update and Clean Tests**
+
 ```bash
 @Codebase Clean up test files and improve test coverage:
 
@@ -240,6 +255,7 @@ Ensure test coverage doesn't decrease significantly.
 ```
 
 ### **Step 16: Comprehensive Functionality Testing**
+
 ```bash
 @Codebase Perform comprehensive testing after cleanup:
 
@@ -255,6 +271,7 @@ Document any issues found and fix immediately.
 ```
 
 ### **Step 17: Performance Validation**
+
 ```bash
 @Codebase Validate performance improvements from cleanup:
 
@@ -273,6 +290,7 @@ Ensure cleanup resulted in performance gains.
 ## **📚 PHASE 6: DOCUMENTATION AND STANDARDS**
 
 ### **Step 18: Update Documentation**
+
 ```bash
 @Codebase Update all documentation after cleanup:
 
@@ -287,6 +305,7 @@ Ensure documentation accurately reflects cleaned codebase.
 ```
 
 ### **Step 19: Establish Quality Gates**
+
 ```bash
 @Codebase Establish processes to prevent future bloat:
 
@@ -301,6 +320,7 @@ Create sustainable practices for ongoing cleanliness.
 ```
 
 ### **Step 20: Final Optimization Pass**
+
 ```bash
 @Codebase Perform final optimization and cleanup:
 
@@ -319,6 +339,7 @@ Polish the codebase to professional standards.
 ## **🎯 PROFESSIONAL CLEANUP BEST PRACTICES**
 
 ### **🔄 Iterative Approach**
+
 ```bash
 # After each major step:
 @Codebase Validate that all functionality still works after this cleanup step. Run tests and check for any regressions before proceeding.
@@ -333,35 +354,41 @@ Polish the codebase to professional standards.
 ### **📋 Cleanup Checklist**
 
 #### **Pre-Cleanup** ✅
+
 - [ ] Complete backup created
 - [ ] Current state documented
 - [ ] Team notified of cleanup plan
 - [ ] Testing strategy defined
 
 #### **Discovery Phase** ✅
+
 - [ ] Dead code identified
 - [ ] Dependencies analyzed
 - [ ] Code quality assessed
 - [ ] Cleanup plan prioritized
 
 #### **Safe Cleanup** ✅
+
 - [ ] Dead files removed
 - [ ] Dependencies cleaned
 - [ ] Commented code removed
 - [ ] Assets optimized
 
 #### **Code Optimization** ✅
+
 - [ ] Duplicate code consolidated
 - [ ] Imports/exports optimized
 - [ ] Build configuration cleaned
 
 #### **Validation** ✅
+
 - [ ] Tests updated and passing
 - [ ] Functionality verified
 - [ ] Performance validated
 - [ ] Documentation updated
 
 #### **Quality Gates** ✅
+
 - [ ] Automated checks configured
 - [ ] Cleanup procedures documented
 - [ ] Team training completed
@@ -371,6 +398,7 @@ Polish the codebase to professional standards.
 ## **⚡ Automated Cleanup Tools**
 
 ### **Step 21: Implement Automated Cleanup Tools**
+
 ```bash
 @Codebase Set up automated cleanup tools and scripts:
 
@@ -385,6 +413,7 @@ Create npm scripts for regular cleanup maintenance.
 ```
 
 ### **Example Automated Scripts:**
+
 ```json
 {
   "scripts": {
@@ -403,6 +432,7 @@ Create npm scripts for regular cleanup maintenance.
 ## **📊 Success Metrics**
 
 ### **Quantitative Improvements:**
+
 - **Bundle Size**: Measure reduction in bundle size
 - **Dependencies**: Count of removed unused dependencies
 - **File Count**: Number of files removed
@@ -411,6 +441,7 @@ Create npm scripts for regular cleanup maintenance.
 - **Test Coverage**: Maintained or improved coverage
 
 ### **Qualitative Improvements:**
+
 - **Code Clarity**: Easier to understand and navigate
 - **Maintainability**: Simpler to modify and extend
 - **Performance**: Faster loading and execution
@@ -422,6 +453,7 @@ Create npm scripts for regular cleanup maintenance.
 ## **🚨 Safety Guidelines**
 
 ### **❌ Never Do These During Cleanup:**
+
 1. **Remove files without verification** - Always check for dependencies
 2. **Delete database migrations** - Unless absolutely certain they're unused
 3. **Remove environment variables** - Without checking all environments
@@ -430,6 +462,7 @@ Create npm scripts for regular cleanup maintenance.
 6. **Skip testing** - Always validate after changes
 
 ### **✅ Always Do These:**
+
 1. **Make small, incremental changes** - Easier to track and rollback
 2. **Test after each major change** - Catch issues early
 3. **Document what you remove** - For potential restoration
@@ -442,6 +475,7 @@ Create npm scripts for regular cleanup maintenance.
 ## **🔄 Ongoing Maintenance**
 
 ### **Daily Practices:**
+
 ```bash
 # Run before committing:
 npm run cleanup:lint
@@ -449,6 +483,7 @@ npm run cleanup:format
 ```
 
 ### **Weekly Reviews:**
+
 ```bash
 # Check for new unused dependencies:
 npm run cleanup:deps
@@ -458,6 +493,7 @@ npm run audit:bundle
 ```
 
 ### **Monthly Audits:**
+
 ```bash
 # Security audit:
 npm run audit:security
@@ -467,6 +503,7 @@ npm run test:performance
 ```
 
 ### **Quarterly Deep Clean:**
+
 ```bash
 # Full cleanup review:
 @Codebase Perform a quarterly cleanup review and identify new areas for optimization based on recent development.
@@ -477,6 +514,7 @@ npm run test:performance
 ## **🔧 Advanced Cleanup Techniques**
 
 ### **Code Splitting and Tree Shaking**
+
 ```bash
 @Codebase Implement advanced optimization techniques:
 
@@ -491,6 +529,7 @@ Focus on reducing bundle size and improving load times.
 ```
 
 ### **Performance Optimization**
+
 ```bash
 @Codebase Optimize performance during cleanup:
 
@@ -505,6 +544,7 @@ Measure performance before and after optimizations.
 ```
 
 ### **Security Hardening**
+
 ```bash
 @Codebase Enhance security during cleanup:
 
@@ -523,6 +563,7 @@ Run security audits before and after cleanup.
 ## **📈 Measuring Cleanup Impact**
 
 ### **Before Cleanup Metrics:**
+
 ```bash
 @Codebase Establish baseline metrics before cleanup:
 
@@ -538,6 +579,7 @@ Document these for comparison after cleanup.
 ```
 
 ### **After Cleanup Validation:**
+
 ```bash
 @Codebase Measure cleanup impact and improvements:
 
@@ -556,6 +598,7 @@ Create comprehensive cleanup report.
 ## **🛠️ Tool Recommendations**
 
 ### **Static Analysis Tools:**
+
 - **ESLint**: Code quality and unused code detection
 - **Prettier**: Code formatting consistency
 - **TypeScript**: Type checking and unused code detection
@@ -564,6 +607,7 @@ Create comprehensive cleanup report.
 - **Bundle Analyzer**: Bundle size analysis
 
 ### **Security Tools:**
+
 - **npm audit**: Dependency vulnerability scanning
 - **Snyk**: Advanced security scanning
 - **OWASP ZAP**: Security testing
@@ -571,6 +615,7 @@ Create comprehensive cleanup report.
 - **Semgrep**: Static analysis for security
 
 ### **Performance Tools:**
+
 - **Lighthouse**: Web performance auditing
 - **WebPageTest**: Performance testing
 - **Chrome DevTools**: Performance profiling
@@ -582,6 +627,7 @@ Create comprehensive cleanup report.
 ## **👥 Team Coordination**
 
 ### **Communication Strategy:**
+
 ```bash
 # Before starting cleanup:
 @Codebase Create a team communication plan for the cleanup process:
@@ -597,6 +643,7 @@ Ensure team alignment throughout the process.
 ```
 
 ### **Review Process:**
+
 - **Peer Review**: All cleanup changes should be reviewed
 - **Testing Sign-off**: QA team validation of changes
 - **Stakeholder Approval**: Business approval for significant changes
@@ -608,25 +655,28 @@ Ensure team alignment throughout the process.
 ## **🎯 Cleanup Success Criteria**
 
 ### **Technical Goals:**
+
 ✅ **Zero Functionality Loss** - All existing features work  
 ✅ **Performance Improvement** - Measurable speed/size gains  
 ✅ **Security Enhancement** - Reduced vulnerabilities  
 ✅ **Code Quality** - Better maintainability scores  
 ✅ **Dependency Health** - Updated, secure dependencies  
-✅ **Test Coverage** - Maintained or improved coverage  
+✅ **Test Coverage** - Maintained or improved coverage
 
 ### **Business Goals:**
+
 ✅ **Developer Productivity** - Faster development cycles  
 ✅ **Reduced Technical Debt** - Lower maintenance costs  
 ✅ **Better Stability** - Fewer bugs and issues  
 ✅ **Improved Onboarding** - Easier for new developers  
-✅ **Future-Ready** - Prepared for scaling and growth  
+✅ **Future-Ready** - Prepared for scaling and growth
 
 ---
 
 ## **📞 Emergency Procedures**
 
 ### **If Cleanup Breaks Critical Functionality:**
+
 ```bash
 # Immediate response:
 @Codebase Critical functionality is broken after cleanup. Help me immediately identify what was removed incorrectly and create a rollback plan.
@@ -641,6 +691,7 @@ git branch emergency-rollback
 ```
 
 ### **Recovery Checklist:**
+
 - [ ] Identify broken functionality
 - [ ] Locate root cause of breakage
 - [ ] Restore missing/modified code
@@ -653,6 +704,7 @@ git branch emergency-rollback
 ## **🎉 Post-Cleanup Actions**
 
 ### **Final Validation:**
+
 ```bash
 @Codebase Perform final post-cleanup validation:
 
@@ -667,6 +719,7 @@ Create final cleanup report with metrics and improvements.
 ```
 
 ### **Knowledge Sharing:**
+
 - **Team Presentation**: Share cleanup results and lessons learned
 - **Documentation Update**: Update all relevant documentation
 - **Best Practices**: Document cleanup procedures for future use
@@ -675,10 +728,13 @@ Create final cleanup report with metrics and improvements.
 
 ---
 
-**Professional cleanup is an investment in code quality, performance, and developer productivity. Take your time, be methodical, and always prioritize safety over speed!** 🎯
+**Professional cleanup is an investment in code quality, performance, and developer productivity.
+Take your time, be methodical, and always prioritize safety over speed!** 🎯
 
 ---
 
 ## **END OF GUIDE**
 
-**Remember**: A well-executed cleanup can transform your codebase from technical debt liability into a productive, maintainable asset. The key is being systematic, thorough, and always validating that your changes improve rather than harm the codebase.
+**Remember**: A well-executed cleanup can transform your codebase from technical debt liability into
+a productive, maintainable asset. The key is being systematic, thorough, and always validating that
+your changes improve rather than harm the codebase.

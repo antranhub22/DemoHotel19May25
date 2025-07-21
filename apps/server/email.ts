@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 // Để khi gửi email bị lỗi, ứng dụng vẫn hoạt động bình thường
 const createTestTransporter = () => {
   console.log('Sử dụng transporter test (không gửi email thực tế)');
-  
+
   return {
     sendMail: async (mailOptions: any) => {
       console.log('=================== TEST EMAIL ===================');
@@ -13,13 +13,13 @@ const createTestTransporter = () => {
       console.log('From:', mailOptions.from);
       console.log('Content type:', mailOptions.html ? 'HTML' : 'Text');
       console.log('================= END TEST EMAIL =================');
-      
+
       // Trả về một kết quả giả lập thành công
-      return { 
+      return {
         messageId: `test-${Date.now()}@example.com`,
-        response: 'Test email sent successfully' 
+        response: 'Test email sent successfully',
       };
-    }
+    },
   };
 };
 
@@ -27,18 +27,20 @@ const createTestTransporter = () => {
 export const createTransporter = () => {
   // Sử dụng nodemailer với Gmail SMTP hoặc test transporter
   if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-    console.warn('GMAIL_USER hoặc GMAIL_PASS không được cấu hình - sử dụng test transporter');
+    console.warn(
+      'GMAIL_USER hoặc GMAIL_PASS không được cấu hình - sử dụng test transporter'
+    );
     return createTestTransporter();
   }
 
   console.log('Sử dụng cấu hình Gmail SMTP');
-  
+
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS
-    }
+      pass: process.env.GMAIL_PASS,
+    },
   });
 };
 
@@ -77,28 +79,28 @@ export const sendServiceConfirmation = async (
     `;
 
     console.log('Gửi email với Gmail SMTP');
-    
+
     // Tạo bản ghi log
     const emailLog = {
       timestamp: new Date(),
       toEmail,
       subject: `Mi Nhon Hotel - Xác nhận đặt dịch vụ từ phòng ${serviceDetails.roomNumber}`,
       status: 'pending',
-      details: serviceDetails
+      details: serviceDetails,
     };
-    
+
     // Lưu log vào console
     console.log('EMAIL LOG:', JSON.stringify(emailLog, null, 2));
-    
+
     // Sử dụng nodemailer thay vì Mailjet trực tiếp
     // Gmail SMTP là một lựa chọn tốt khi Mailjet không hoạt động
     try {
       // Thử sử dụng Mailjet trước
       const transporter = createTransporter();
-      
+
       // Địa chỉ email gửi đi
       const fromEmail = 'tuan.ctw@gmail.com';
-      
+
       const mailOptions = {
         from: fromEmail,
         to: toEmail,
@@ -108,27 +110,33 @@ export const sendServiceConfirmation = async (
 
       const result = await transporter.sendMail(mailOptions);
       console.log('Email đã gửi thành công:', result.response);
-      
+
       // Cập nhật log
       emailLog.status = 'sent';
       console.log('EMAIL LOG (cập nhật):', JSON.stringify(emailLog, null, 2));
-      
+
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
       console.error('Lỗi khi gửi email qua Gmail SMTP:', emailError);
-      
+
       // Cập nhật log
       emailLog.status = 'failed';
       console.log('EMAIL LOG (thất bại):', JSON.stringify(emailLog, null, 2));
-      
+
       // Lưu lỗi vào console với định dạng dễ đọc
       console.log('============ CHI TIẾT LỖI GỬI EMAIL ============');
       console.log('Thời gian:', new Date().toISOString());
       console.log('Người nhận:', toEmail);
-      console.log('Tiêu đề:', `Mi Nhon Hotel - Xác nhận đặt dịch vụ từ phòng ${serviceDetails.roomNumber}`);
-      console.log('Lỗi:', emailError instanceof Error ? emailError.message : String(emailError));
+      console.log(
+        'Tiêu đề:',
+        `Mi Nhon Hotel - Xác nhận đặt dịch vụ từ phòng ${serviceDetails.roomNumber}`
+      );
+      console.log(
+        'Lỗi:',
+        emailError instanceof Error ? emailError.message : String(emailError)
+      );
       console.log('===================================================');
-      
+
       throw emailError;
     }
   } catch (error) {
@@ -152,8 +160,8 @@ export const sendCallSummary = async (
 ) => {
   try {
     // Tạo danh sách dịch vụ được yêu cầu
-    const serviceRequestsHtml = callDetails.serviceRequests.length 
-      ? callDetails.serviceRequests.map(req => `<li>${req}</li>`).join('') 
+    const serviceRequestsHtml = callDetails.serviceRequests.length
+      ? callDetails.serviceRequests.map(req => `<li>${req}</li>`).join('')
       : '<li>Không có yêu cầu cụ thể</li>';
 
     // Chuẩn bị nội dung email HTML
@@ -185,7 +193,7 @@ export const sendCallSummary = async (
     `;
 
     console.log('Gửi email tóm tắt với Gmail SMTP');
-    
+
     // Tạo bản ghi log
     const emailLog = {
       timestamp: new Date(),
@@ -196,20 +204,20 @@ export const sendCallSummary = async (
         roomNumber: callDetails.roomNumber,
         orderReference: callDetails.orderReference,
         duration: callDetails.duration,
-        serviceCount: callDetails.serviceRequests.length
-      }
+        serviceCount: callDetails.serviceRequests.length,
+      },
     };
-    
+
     // Lưu log vào console
     console.log('EMAIL LOG:', JSON.stringify(emailLog, null, 2));
-    
+
     try {
       // Thử sử dụng transporter được cấu hình
       const transporter = createTransporter();
-      
+
       // Địa chỉ email gửi đi, sử dụng email được xác thực
       const fromEmail = 'tuan.ctw@gmail.com';
-      
+
       const mailOptions = {
         from: fromEmail,
         to: toEmail,
@@ -219,19 +227,19 @@ export const sendCallSummary = async (
 
       const result = await transporter.sendMail(mailOptions);
       console.log('Email tóm tắt đã gửi thành công:', result.response);
-      
+
       // Cập nhật log
       emailLog.status = 'sent';
       console.log('EMAIL LOG (cập nhật):', JSON.stringify(emailLog, null, 2));
-      
+
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
       console.error('Lỗi khi gửi email tóm tắt qua Gmail SMTP:', emailError);
-      
+
       // Cập nhật log
       emailLog.status = 'failed';
       console.log('EMAIL LOG (thất bại):', JSON.stringify(emailLog, null, 2));
-      
+
       // Lưu thông tin tóm tắt vào console để người dùng có thể xem
       console.log('============ THÔNG TIN TÓM TẮT CUỘC GỌI ============');
       console.log('Thời gian:', callDetails.timestamp.toLocaleString());
@@ -245,7 +253,7 @@ export const sendCallSummary = async (
         console.log(`  ${index + 1}. ${req}`);
       });
       console.log('===================================================');
-      
+
       throw emailError;
     }
   } catch (error) {

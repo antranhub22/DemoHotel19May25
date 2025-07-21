@@ -10,26 +10,26 @@ import { eq, and } from 'drizzle-orm';
 import { db, staff, tenants } from '../../shared/db';
 
 // Import new unified types and config
-import type { 
-  JWTPayload, 
-  AuthUser, 
-  AuthResult, 
+import type {
+  JWTPayload,
+  AuthUser,
+  AuthResult,
   LoginCredentials,
   UserRole,
   Permission,
   TokenPair,
   TokenValidationResult,
   AuthError,
-  AuthErrorCode 
+  AuthErrorCode,
 } from '../types';
-import { 
-  JWT_CONFIG, 
-  DEFAULT_PERMISSIONS, 
+import {
+  JWT_CONFIG,
+  DEFAULT_PERMISSIONS,
   SECURITY_CONFIG,
   AUTH_ERROR_MESSAGES,
   TENANT_CONFIG,
   DEV_CONFIG,
-  authValidationSchemas 
+  authValidationSchemas,
 } from '../config';
 
 // ============================================
@@ -65,7 +65,6 @@ class TokenBlacklist {
 // ============================================
 
 export class UnifiedAuthService {
-  
   // ============================================
   // AUTHENTICATION METHODS
   // ============================================
@@ -77,12 +76,17 @@ export class UnifiedAuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResult> {
     try {
       // Validate input
-      const validation = authValidationSchemas.loginCredentials.safeParse(credentials);
+      const validation =
+        authValidationSchemas.loginCredentials.safeParse(credentials);
       if (!validation.success) {
-        return this.createErrorResult('INVALID_CREDENTIALS', 'Invalid login credentials');
+        return this.createErrorResult(
+          'INVALID_CREDENTIALS',
+          'Invalid login credentials'
+        );
       }
 
-      const { username, email, password, tenantId, rememberMe } = validation.data;
+      const { username, email, password, tenantId, rememberMe } =
+        validation.data;
       const loginIdentifier = username || email;
 
       console.log(`🔐 [UnifiedAuth] Login attempt for: ${loginIdentifier}`);
@@ -103,7 +107,9 @@ export class UnifiedAuthService {
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        console.log(`❌ [UnifiedAuth] Invalid password for: ${loginIdentifier}`);
+        console.log(
+          `❌ [UnifiedAuth] Invalid password for: ${loginIdentifier}`
+        );
         return this.createErrorResult('INVALID_CREDENTIALS');
       }
 
@@ -116,7 +122,9 @@ export class UnifiedAuthService {
       // Update last login
       await this.updateLastLogin(user.id);
 
-      console.log(`✅ [UnifiedAuth] Login successful: ${loginIdentifier} (${authUser.role})`);
+      console.log(
+        `✅ [UnifiedAuth] Login successful: ${loginIdentifier} (${authUser.role})`
+      );
 
       return {
         success: true,
@@ -126,7 +134,6 @@ export class UnifiedAuthService {
         expiresIn: tokenPair.expiresIn,
         tokenType: tokenPair.tokenType,
       };
-
     } catch (error) {
       console.error('❌ [UnifiedAuth] Login error:', error);
       return this.createErrorResult('SERVER_ERROR');
@@ -154,12 +161,13 @@ export class UnifiedAuthService {
       // Verify user still exists and is active
       const user = await this.findUserById(payload.userId);
       if (!user || !user.is_active) {
-        console.log(`❌ [UnifiedAuth] User not found or inactive: ${payload.userId}`);
+        console.log(
+          `❌ [UnifiedAuth] User not found or inactive: ${payload.userId}`
+        );
         return null;
       }
 
       return this.createAuthUserFromDbUser(user);
-
     } catch (error) {
       console.error('❌ [UnifiedAuth] Token verification error:', error);
       return null;
@@ -208,7 +216,6 @@ export class UnifiedAuthService {
         expiresIn: tokenPair.expiresIn,
         tokenType: tokenPair.tokenType,
       };
-
     } catch (error) {
       console.error('❌ [UnifiedAuth] Refresh token error:', error);
       return this.createErrorResult('SERVER_ERROR');
@@ -223,7 +230,9 @@ export class UnifiedAuthService {
       const validation = this.validateToken(token, false); // Don't check expiration
       if (validation.valid && validation.payload?.jti) {
         TokenBlacklist.addToken(validation.payload.jti);
-        console.log(`✅ [UnifiedAuth] Token blacklisted: ${validation.payload.jti}`);
+        console.log(
+          `✅ [UnifiedAuth] Token blacklisted: ${validation.payload.jti}`
+        );
       }
     } catch (error) {
       console.error('❌ [UnifiedAuth] Logout error:', error);
@@ -237,11 +246,16 @@ export class UnifiedAuthService {
   /**
    * Check if user has specific permission
    */
-  static hasPermission(user: AuthUser, module: string, action: string): boolean {
-    return user.permissions.some(permission => 
-      permission.module === module && 
-      permission.action === action && 
-      permission.allowed
+  static hasPermission(
+    user: AuthUser,
+    module: string,
+    action: string
+  ): boolean {
+    return user.permissions.some(
+      permission =>
+        permission.module === module &&
+        permission.action === action &&
+        permission.allowed
     );
   }
 
@@ -249,7 +263,9 @@ export class UnifiedAuthService {
    * Check if user has specific role or higher
    */
   static hasRole(user: AuthUser, role: UserRole): boolean {
-    const { hasRolePrivilege } = require('../../../packages/config/auth.config');
+    const {
+      hasRolePrivilege,
+    } = require('../../../packages/config/auth.config');
     return hasRolePrivilege(user.role, role);
   }
 
@@ -259,7 +275,7 @@ export class UnifiedAuthService {
   static canAccessTenant(user: AuthUser, tenantId: string): boolean {
     // Super admin can access all tenants
     if (user.role === 'super-admin') return true;
-    
+
     // Regular users can only access their own tenant
     return user.tenantId === tenantId;
   }
@@ -269,12 +285,10 @@ export class UnifiedAuthService {
   // ============================================
 
   private static async findUserByCredentials(
-    loginIdentifier: string, 
+    loginIdentifier: string,
     tenantId?: string
   ): Promise<any> {
-    const whereConditions = [
-      eq(staff.is_active, true)
-    ];
+    const whereConditions = [eq(staff.is_active, true)];
 
     // Search by username or email
     const isEmail = loginIdentifier.includes('@');
@@ -308,10 +322,12 @@ export class UnifiedAuthService {
     return users[0] || null;
   }
 
-  private static async createAuthUserFromDbUser(dbUser: any): Promise<AuthUser> {
+  private static async createAuthUserFromDbUser(
+    dbUser: any
+  ): Promise<AuthUser> {
     // Get user permissions
     let permissions: Permission[] = [];
-    
+
     try {
       // Parse permissions from database
       if (dbUser.permissions && typeof dbUser.permissions === 'string') {
@@ -319,14 +335,16 @@ export class UnifiedAuthService {
       } else if (Array.isArray(dbUser.permissions)) {
         permissions = dbUser.permissions;
       }
-      
+
       // Fallback to role-based permissions if no custom permissions
       if (permissions.length === 0) {
         const rolePermissions = DEFAULT_PERMISSIONS[dbUser.role as UserRole];
         permissions = rolePermissions ? [...rolePermissions] : [];
       }
     } catch (error) {
-      console.warn(`⚠️ [UnifiedAuth] Failed to parse permissions for user ${dbUser.id}, using role defaults`);
+      console.warn(
+        `⚠️ [UnifiedAuth] Failed to parse permissions for user ${dbUser.id}, using role defaults`
+      );
       const rolePermissions = DEFAULT_PERMISSIONS[dbUser.role as UserRole];
       permissions = rolePermissions ? [...rolePermissions] : [];
     }
@@ -335,9 +353,10 @@ export class UnifiedAuthService {
       id: dbUser.id,
       username: dbUser.username,
       email: dbUser.email,
-      displayName: dbUser.display_name || dbUser.first_name && dbUser.last_name 
-        ? `${dbUser.first_name} ${dbUser.last_name}` 
-        : dbUser.username,
+      displayName:
+        dbUser.display_name || (dbUser.first_name && dbUser.last_name)
+          ? `${dbUser.first_name} ${dbUser.last_name}`
+          : dbUser.username,
       role: dbUser.role as UserRole,
       permissions,
       tenantId: dbUser.tenant_id || TENANT_CONFIG.DEFAULT_TENANT_ID,
@@ -347,13 +366,22 @@ export class UnifiedAuthService {
       lastName: dbUser.last_name,
       phone: dbUser.phone,
       isActive: dbUser.is_active,
-      lastLogin: dbUser.last_login ? new Date(dbUser.last_login).toISOString() : undefined,
-      createdAt: dbUser.created_at ? new Date(dbUser.created_at).toISOString() : undefined,
-      updatedAt: dbUser.updated_at ? new Date(dbUser.updated_at).toISOString() : undefined,
+      lastLogin: dbUser.last_login
+        ? new Date(dbUser.last_login).toISOString()
+        : undefined,
+      createdAt: dbUser.created_at
+        ? new Date(dbUser.created_at).toISOString()
+        : undefined,
+      updatedAt: dbUser.updated_at
+        ? new Date(dbUser.updated_at).toISOString()
+        : undefined,
     };
   }
 
-  private static generateTokenPair(user: AuthUser, rememberMe = false): TokenPair {
+  private static generateTokenPair(
+    user: AuthUser,
+    rememberMe = false
+  ): TokenPair {
     const now = Math.floor(Date.now() / 1000);
     const jti = `${user.id}-${now}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -374,8 +402,8 @@ export class UnifiedAuthService {
     };
 
     // Refresh token payload
-    const refreshExpiry = rememberMe 
-      ? JWT_CONFIG.REMEMBER_ME_EXPIRES_IN 
+    const refreshExpiry = rememberMe
+      ? JWT_CONFIG.REMEMBER_ME_EXPIRES_IN
       : JWT_CONFIG.REFRESH_TOKEN_EXPIRES_IN;
 
     const refreshPayload: JWTPayload = {
@@ -385,12 +413,12 @@ export class UnifiedAuthService {
     };
 
     // Generate tokens
-    const accessToken = jwt.sign(accessPayload, JWT_CONFIG.SECRET, { 
-      algorithm: JWT_CONFIG.ALGORITHM 
+    const accessToken = jwt.sign(accessPayload, JWT_CONFIG.SECRET, {
+      algorithm: JWT_CONFIG.ALGORITHM,
     });
-    
-    const refreshToken = jwt.sign(refreshPayload, JWT_CONFIG.REFRESH_SECRET, { 
-      algorithm: JWT_CONFIG.ALGORITHM 
+
+    const refreshToken = jwt.sign(refreshPayload, JWT_CONFIG.REFRESH_SECRET, {
+      algorithm: JWT_CONFIG.ALGORITHM,
     });
 
     return {
@@ -401,9 +429,12 @@ export class UnifiedAuthService {
     };
   }
 
-  private static validateToken(token: string, checkExpiration = true): TokenValidationResult {
+  private static validateToken(
+    token: string,
+    checkExpiration = true
+  ): TokenValidationResult {
     try {
-      const options: jwt.VerifyOptions = { 
+      const options: jwt.VerifyOptions = {
         algorithms: [JWT_CONFIG.ALGORITHM],
         issuer: JWT_CONFIG.ISSUER,
         audience: JWT_CONFIG.AUDIENCE,
@@ -413,8 +444,12 @@ export class UnifiedAuthService {
         options.ignoreExpiration = true;
       }
 
-      const decoded = jwt.verify(token, JWT_CONFIG.SECRET, options) as JWTPayload;
-      
+      const decoded = jwt.verify(
+        token,
+        JWT_CONFIG.SECRET,
+        options
+      ) as JWTPayload;
+
       return {
         valid: true,
         payload: decoded,
@@ -427,7 +462,7 @@ export class UnifiedAuthService {
           error: 'Token expired',
         };
       }
-      
+
       return {
         valid: false,
         error: error.message || 'Invalid token',
@@ -439,9 +474,9 @@ export class UnifiedAuthService {
     try {
       await db
         .update(staff)
-        .set({ 
+        .set({
           last_login: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         } as any) // Type cast to avoid strict typing issues
         .where(eq(staff.id, userId));
     } catch (error) {
@@ -452,20 +487,23 @@ export class UnifiedAuthService {
 
   private static getExpirationTime(expiresIn: string): number {
     const units: Record<string, number> = {
-      's': 1,
-      'm': 60,
-      'h': 3600,
-      'd': 86400,
+      s: 1,
+      m: 60,
+      h: 3600,
+      d: 86400,
     };
-    
+
     const match = expiresIn.match(/^(\d+)([smhd])$/);
     if (!match) throw new Error(`Invalid expiration format: ${expiresIn}`);
-    
+
     const [, value, unit] = match;
     return parseInt(value) * units[unit];
   }
 
-  private static createErrorResult(code: AuthErrorCode, customMessage?: string): AuthResult {
+  private static createErrorResult(
+    code: AuthErrorCode,
+    customMessage?: string
+  ): AuthResult {
     return {
       success: false,
       error: customMessage || AUTH_ERROR_MESSAGES[code],
@@ -492,7 +530,7 @@ export class UnifiedAuthService {
     try {
       const user = await this.findUserById(id);
       if (!user) return null;
-      
+
       return this.createAuthUserFromDbUser(user);
     } catch (error) {
       console.error('❌ [UnifiedAuth] Get user error:', error);
@@ -515,4 +553,4 @@ export class UnifiedAuthService {
   }
 }
 
-export default UnifiedAuthService; 
+export default UnifiedAuthService;

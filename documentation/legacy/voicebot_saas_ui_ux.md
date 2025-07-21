@@ -7,7 +7,7 @@
 ```
 HOTEL DASHBOARD
 ├── Hotel Manager (Full access)
-├── Front Desk Staff (Limited access)  
+├── Front Desk Staff (Limited access)
 └── IT Manager (Technical access)
 ```
 
@@ -16,6 +16,7 @@ HOTEL DASHBOARD
 ## Layout chung của Dashboard
 
 ### Header (Giống nhau cho tất cả roles)
+
 ```
 +----------------------------------------------------------+
 | [Logo Hotel] | [Real-time Status] | [User] | [Logout]    |
@@ -23,10 +24,11 @@ HOTEL DASHBOARD
 ```
 
 ### Sidebar Navigation (Thay đổi theo role)
+
 ```
 +------------------+
 | 📊 Dashboard     |  ← Tất cả đều thấy
-| 📞 Live Calls    |  ← Tất cả đều thấy  
+| 📞 Live Calls    |  ← Tất cả đều thấy
 | 📋 Call History  |  ← Tất cả đều thấy
 | 📈 Analytics     |  ← Manager + Limited cho Staff
 | ⚙️ Settings      |  ← Phân quyền khác nhau
@@ -42,6 +44,7 @@ HOTEL DASHBOARD
 ### 1. Dashboard Overview (Tất cả đều thấy nhưng khác level)
 
 **Hotel Manager thấy:**
+
 ```
 +------------------+------------------+------------------+
 |   Cuộc gọi hôm nay   |   Tỷ lệ thành công   |   Tiết kiệm chi phí   |
@@ -53,6 +56,7 @@ HOTEL DASHBOARD
 ```
 
 **Front Desk Staff thấy:**
+
 ```
 +------------------+------------------+------------------+
 |   Cuộc gọi hôm nay   |   Tỷ lệ thành công   |   Cuộc gọi chờ xử lý   |
@@ -64,6 +68,7 @@ HOTEL DASHBOARD
 ```
 
 **IT Manager thấy:**
+
 ```
 +------------------+------------------+------------------+
 |   System Uptime      |   Response Time      |   Error Rate         |
@@ -79,6 +84,7 @@ HOTEL DASHBOARD
 ### 2. Live Calls (Tất cả đều thấy nhưng khác quyền)
 
 **Giao diện chung:**
+
 ```
 +-------------------------------------------------------+
 |  🔴 LIVE CALLS (3 active)                           |
@@ -90,6 +96,7 @@ HOTEL DASHBOARD
 ```
 
 **Action buttons theo role:**
+
 - **Hotel Manager:** [Listen] [View Report] [Override]
 - **Front Desk Staff:** [Listen] [Join Call] [Transfer] [End Call]
 - **IT Manager:** [Listen] [View Technical] [Debug]
@@ -99,6 +106,7 @@ HOTEL DASHBOARD
 ### 3. Settings (Phân quyền rõ ràng)
 
 **Hotel Manager có quyền:**
+
 ```
 ✅ Hotel Information (Tên, địa chỉ, branding)
 ✅ Business Hours (Giờ hoạt động)
@@ -111,6 +119,7 @@ HOTEL DASHBOARD
 ```
 
 **Front Desk Staff có quyền:**
+
 ```
 ✅ Personal Profile
 ✅ Shift Settings
@@ -123,6 +132,7 @@ HOTEL DASHBOARD
 ```
 
 **IT Manager có quyền:**
+
 ```
 ✅ Voicebot Configuration
 ✅ System Integration (PMS, Payment gateway)
@@ -139,6 +149,7 @@ HOTEL DASHBOARD
 ## Code logic phân quyền
 
 ### Role-based Menu
+
 ```javascript
 const menuItems = {
   'hotel-manager': [
@@ -147,22 +158,22 @@ const menuItems = {
     { name: 'Analytics', path: '/analytics', icon: '📈' },
     { name: 'Settings', path: '/settings', icon: '⚙️' },
     { name: 'Billing', path: '/billing', icon: '💰' },
-    { name: 'Staff', path: '/staff', icon: '👥' }
+    { name: 'Staff', path: '/staff', icon: '👥' },
   ],
   'front-desk': [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
     { name: 'Live Calls', path: '/calls', icon: '📞' },
     { name: 'Call History', path: '/history', icon: '📋' },
-    { name: 'Profile', path: '/profile', icon: '👤' }
+    { name: 'Profile', path: '/profile', icon: '👤' },
   ],
   'it-manager': [
     { name: 'Dashboard', path: '/dashboard', icon: '📊' },
     { name: 'Live Calls', path: '/calls', icon: '📞' },
     { name: 'System', path: '/system', icon: '🔧' },
     { name: 'Integrations', path: '/integrations', icon: '🔗' },
-    { name: 'Logs', path: '/logs', icon: '📄' }
-  ]
-}
+    { name: 'Logs', path: '/logs', icon: '📄' },
+  ],
+};
 ```
 
 ---
@@ -170,21 +181,25 @@ const menuItems = {
 ## Ưu điểm của approach này
 
 ### 1. **Tiết kiệm chi phí phát triển**
+
 - Chỉ cần develop 1 dashboard thay vì 4
 - Reuse components, layouts
 - Dễ maintain và update
 
 ### 2. **Trải nghiệm user tốt hơn**
+
 - Consistent interface cho tất cả users
 - Không cần training nhiều hệ thống khác nhau
 - Dễ switch role nếu cần
 
 ### 3. **Quản lý dễ dàng**
+
 - Centralized user management
 - Dễ control permissions
 - Audit trail đơn giản
 
 ### 4. **Scalable**
+
 - Dễ thêm roles mới
 - Flexible permission system
 - Easy to add new features
@@ -194,11 +209,12 @@ const menuItems = {
 ## Technical Implementation
 
 ### Database Schema
+
 ```sql
 -- Users table
 users (id, email, password, hotel_id, role, permissions)
 
--- Permissions table  
+-- Permissions table
 permissions (id, role, module, action, allowed)
 
 -- Example permissions:
@@ -208,9 +224,10 @@ permissions (id, role, module, action, allowed)
 ```
 
 ### Frontend Components
+
 ```javascript
 // Protected component example
-<ProtectedComponent 
+<ProtectedComponent
   requiredRole="hotel-manager"
   fallback={<NoPermissionMessage />}
 >
@@ -229,6 +246,7 @@ permissions (id, role, module, action, allowed)
 ## User Management System
 
 ### Role Assignment
+
 ```
 Hotel Manager (1 per hotel)
 ├── Can assign Front Desk Staff roles
@@ -245,6 +263,7 @@ IT Manager (1-2 per hotel)
 ```
 
 ### Permission Matrix
+
 ```
                     | Hotel Manager | Front Desk | IT Manager
 --------------------|---------------|------------|------------
@@ -267,6 +286,7 @@ Billing Access      |       ✅       |     ❌      |     ❌
 ## Kết luận
 
 **Cách tiếp cận này tối ưu vì:**
+
 - **1 codebase** thay vì 4 riêng biệt
 - **Flexible permissions** dễ customize
 - **Better UX** với consistent interface
@@ -274,6 +294,7 @@ Billing Access      |       ✅       |     ❌      |     ❌
 - **Cost-effective** development
 
 **Estimate:**
+
 - **Development time:** 2-3 tháng (thay vì 4-5 tháng)
 - **Maintenance cost:** Giảm 60%
 - **User training:** Đơn giản hóa 80%

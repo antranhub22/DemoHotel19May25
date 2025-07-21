@@ -9,28 +9,35 @@ interface InfographicStepsProps {
   language?: Lang;
 }
 
-export default function InfographicSteps({ currentStep = 1, compact = false, horizontal = false, language: propLanguage }: InfographicStepsProps) {
+export default function InfographicSteps({
+  currentStep = 1,
+  compact = false,
+  horizontal = false,
+  language: propLanguage,
+}: InfographicStepsProps) {
   // Lấy language từ prop hoặc context
-  const { language: contextLanguage } = useAssistant ? useAssistant() : { language: 'en' };
+  const { language: contextLanguage } = useAssistant
+    ? useAssistant()
+    : { language: 'en' };
   const language: Lang = (propLanguage || contextLanguage || 'en') as Lang;
 
-const steps = [
-  {
-    icon: 'call',
+  const steps = [
+    {
+      icon: 'call',
       title: t('press_to_call', language),
       desc: t('press_to_call_desc', language),
-  },
-  {
-    icon: 'check_circle',
+    },
+    {
+      icon: 'check_circle',
       title: t('confirm_request', language),
       desc: t('confirm_request_desc', language),
-  },
-  {
-    icon: 'mail',
+    },
+    {
+      icon: 'mail',
       title: t('send_to_reception', language),
       desc: t('send_to_reception_desc', language),
-  },
-];
+    },
+  ];
 
   if (horizontal) {
     return (
@@ -42,8 +49,8 @@ const steps = [
                 idx + 1 === currentStep
                   ? 'opacity-100 scale-105'
                   : idx + 1 < currentStep
-                  ? 'opacity-60'
-                  : 'opacity-40'
+                    ? 'opacity-60'
+                    : 'opacity-40'
               }`}
             >
               <div
@@ -51,21 +58,32 @@ const steps = [
                   idx + 1 === currentStep
                     ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
                     : idx + 1 === 2 || idx + 1 === 3
-                    ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
-                    : 'bg-white/30 text-white border border-gray-200'
+                      ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
+                      : 'bg-white/30 text-white border border-gray-200'
                 }`}
                 style={{
                   width: 22,
                   height: 22,
                   fontSize: 13,
-                  boxShadow: idx + 1 === 2 || idx + 1 === 3 ? '0 0 0 2px #d4af37' : undefined
+                  boxShadow:
+                    idx + 1 === 2 || idx + 1 === 3
+                      ? '0 0 0 2px #d4af37'
+                      : undefined,
                 }}
               >
                 <span className="material-icons">{step.icon}</span>
               </div>
               <div className="text-center">
-                <div className={`font-semibold font-poppins mb-0 text-[10px] ${idx + 1 === currentStep ? 'text-[#d4af37]' : 'text-[#d4af37]/70'} ${idx + 1 === 2 || idx + 1 === 3 ? 'font-extrabold text-base' : ''}`}>{step.title}</div>
-                <div className={`font-light text-[8px] ${idx + 1 === 2 || idx + 1 === 3 ? 'text-base text-[#b48a19]' : 'text-[#d4af37]/80'} hidden md:block`}>{step.desc}</div>
+                <div
+                  className={`font-semibold font-poppins mb-0 text-[10px] ${idx + 1 === currentStep ? 'text-[#d4af37]' : 'text-[#d4af37]/70'} ${idx + 1 === 2 || idx + 1 === 3 ? 'font-extrabold text-base' : ''}`}
+                >
+                  {step.title}
+                </div>
+                <div
+                  className={`font-light text-[8px] ${idx + 1 === 2 || idx + 1 === 3 ? 'text-base text-[#b48a19]' : 'text-[#d4af37]/80'} hidden md:block`}
+                >
+                  {step.desc}
+                </div>
               </div>
             </div>
             {idx < steps.length - 1 && (
@@ -88,8 +106,8 @@ const steps = [
             idx + 1 === currentStep
               ? 'opacity-100 scale-105'
               : idx + 1 < currentStep
-              ? 'opacity-60'
-              : 'opacity-40'
+                ? 'opacity-60'
+                : 'opacity-40'
           }`}
         >
           <div
@@ -97,14 +115,17 @@ const steps = [
               idx + 1 === currentStep
                 ? 'bg-[#d4af37] text-blue-900 border-2 border-[#d4af37]'
                 : idx + 1 === 2 || idx + 1 === 3
-                ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
-                : 'bg-white/30 text-white border border-gray-200'
+                  ? 'bg-white/30 text-[#d4af37] border-2 border-[#d4af37]'
+                  : 'bg-white/30 text-white border border-gray-200'
             }`}
             style={{
               width: compact ? 32 : 48,
               height: compact ? 32 : 48,
               fontSize: compact ? 18 : 28,
-              boxShadow: idx + 1 === 2 || idx + 1 === 3 ? '0 0 0 2px #d4af37' : undefined
+              boxShadow:
+                idx + 1 === 2 || idx + 1 === 3
+                  ? '0 0 0 2px #d4af37'
+                  : undefined,
             }}
           >
             <span className="material-icons">{step.icon}</span>
@@ -114,17 +135,25 @@ const steps = [
               className={`font-semibold font-poppins mb-1 ${compact ? 'text-xs' : idx + 1 === 2 || idx + 1 === 3 ? 'text-lg' : 'text-base'} ${
                 idx + 1 === currentStep ? 'text-[#d4af37]' : 'text-[#d4af37]/70'
               } ${idx + 1 === 2 || idx + 1 === 3 ? 'font-extrabold' : ''}`}
-              style={idx + 1 === 2 || idx + 1 === 3 ? { letterSpacing: 0.5 } : {}}
+              style={
+                idx + 1 === 2 || idx + 1 === 3 ? { letterSpacing: 0.5 } : {}
+              }
             >
               {step.title}
             </div>
-            <div className={`font-light ${compact ? 'text-[10px]' : idx + 1 === 2 || idx + 1 === 3 ? 'text-base' : 'text-sm'} ${idx + 1 === 2 || idx + 1 === 3 ? 'text-[#b48a19]' : 'text-[#d4af37]/80'}`}>{step.desc}</div>
+            <div
+              className={`font-light ${compact ? 'text-[10px]' : idx + 1 === 2 || idx + 1 === 3 ? 'text-base' : 'text-sm'} ${idx + 1 === 2 || idx + 1 === 3 ? 'text-[#b48a19]' : 'text-[#d4af37]/80'}`}
+            >
+              {step.desc}
+            </div>
           </div>
           {idx < steps.length - 1 && (
-            <div className={`mx-auto my-1 rounded-full ${compact ? 'w-0.5 h-4' : 'w-1 h-8'} bg-gradient-to-b from-[#d4af37]/80 to-transparent`} />
+            <div
+              className={`mx-auto my-1 rounded-full ${compact ? 'w-0.5 h-4' : 'w-1 h-8'} bg-gradient-to-b from-[#d4af37]/80 to-transparent`}
+            />
           )}
         </div>
       ))}
     </div>
   );
-} 
+}

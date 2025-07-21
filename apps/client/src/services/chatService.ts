@@ -27,21 +27,23 @@ export async function fetchAIResponse(userMessage: string): Promise<string> {
   const url = 'https://api.openai.com/v1/chat/completions';
   const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'user', content: userMessage }
+    { role: 'user', content: userMessage },
   ];
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
       model: 'gpt-3.5-turbo',
-      messages
-    })
+      messages,
+    }),
   });
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content ?? "I'm sorry, I encountered an error.";
-} 
+  return (
+    data.choices?.[0]?.message?.content ?? "I'm sorry, I encountered an error."
+  );
+}

@@ -4,10 +4,10 @@ interface ScrollToTopButtonProps {
   onScrollToServices: () => void;
 }
 
-export const ScrollToTopButton = ({ 
-  show, 
-  onScrollToTop, 
-  onScrollToServices 
+export const ScrollToTopButton = ({
+  show,
+  onScrollToTop,
+  onScrollToServices,
 }: ScrollToTopButtonProps): JSX.Element | null => {
   if (!show) return null;
 
@@ -20,19 +20,19 @@ export const ScrollToTopButton = ({
         aria-label="Scroll to services"
         title="View Services"
       >
-        <svg 
+        <svg
           className="w-5 h-5 text-white"
-          fill="none" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth="2" 
-          viewBox="0 0 24 24" 
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
           <path d="M19 9l-7 7-7-7"></path>
         </svg>
       </button>
-      
+
       {/* Scroll to top button */}
       <button
         className="bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20"
@@ -40,13 +40,13 @@ export const ScrollToTopButton = ({
         aria-label="Scroll to top"
         title="Back to Top"
       >
-        <svg 
+        <svg
           className="w-5 h-5 text-white"
-          fill="none" 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
-          strokeWidth="2" 
-          viewBox="0 0 24 24" 
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
           stroke="currentColor"
         >
           <path d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -54,4 +54,4 @@ export const ScrollToTopButton = ({
       </button>
     </div>
   );
-}; 
+};

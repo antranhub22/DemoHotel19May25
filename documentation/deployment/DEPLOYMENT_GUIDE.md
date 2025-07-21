@@ -9,14 +9,16 @@ Hướng dẫn triển khai **Unified Auth System** với JWT authentication, RB
 ## 🎯 SYSTEM REQUIREMENTS
 
 ### ✅ **Already Completed:**
+
 - 🧹 **Backend**: Legacy code cleaned up, unified routes integrated
 - 🔧 **Frontend**: All auth endpoints updated to use unified API
 - 🛡️ **Security**: JWT + RBAC + permissions system ready
 - 📱 **Features**: Access tokens, refresh tokens, token blacklist
 
 ### 🚀 **Ready for Deployment:**
+
 - Backend unified auth system (100% complete)
-- Frontend migration (100% complete)  
+- Frontend migration (100% complete)
 - Production-ready architecture
 
 ---
@@ -24,6 +26,7 @@ Hướng dẫn triển khai **Unified Auth System** với JWT authentication, RB
 ## 🐳 OPTION 1: DOCKER SETUP (RECOMMENDED)
 
 ### **Step 1: Start PostgreSQL Container**
+
 ```bash
 # Start PostgreSQL database
 docker run -d \
@@ -39,6 +42,7 @@ docker ps | grep hotel-postgres
 ```
 
 ### **Step 2: Set Environment Variables**
+
 ```bash
 export DATABASE_URL="postgresql://hotel_user:dev_password@localhost:5432/hotel_dev"
 export JWT_SECRET="your-super-secret-jwt-key-change-in-production"
@@ -47,6 +51,7 @@ export PORT="10000"
 ```
 
 ### **Step 3: Start Application**
+
 ```bash
 # Install dependencies (if not done)
 npm install
@@ -66,6 +71,7 @@ npm run dev
 ## 🌐 OPTION 2: CLOUD DATABASE (PRODUCTION)
 
 ### **Render.com Deployment:**
+
 ```bash
 # Environment Variables to set in Render:
 DATABASE_URL=postgresql://user:password@host:5432/database
@@ -73,12 +79,13 @@ JWT_SECRET=your-production-jwt-secret-key
 NODE_ENV=production
 PORT=10000
 
-# Optional: 
+# Optional:
 AUTO_MIGRATE=true
 SEED_USERS=true
 ```
 
 ### **Vercel/Heroku Deployment:**
+
 ```bash
 # Set these environment variables:
 DATABASE_URL=postgresql://...
@@ -98,6 +105,7 @@ NODE_ENV=production
    - 🏢 **Self-hosted**: Your own PostgreSQL server
 
 2. **Run Database Migrations:**
+
    ```bash
    npm run db:migrate
    ```
@@ -110,11 +118,12 @@ NODE_ENV=production
 ### **Phase 2: Application Deployment**
 
 1. **Set Environment Variables:**
+
    ```bash
    # Required:
    DATABASE_URL=postgresql://...
    JWT_SECRET=your-secret-key
-   
+
    # Optional:
    NODE_ENV=production
    PORT=10000
@@ -131,11 +140,13 @@ NODE_ENV=production
 ### **Phase 3: Verification**
 
 1. **Health Check:**
+
    ```bash
    curl http://localhost:10000/api/health
    ```
 
 2. **Test Authentication:**
+
    ```bash
    # Test login
    curl -X POST http://localhost:10000/api/auth/login \
@@ -155,26 +166,29 @@ NODE_ENV=production
 ## 🎛️ CONFIGURATION OPTIONS
 
 ### **JWT Configuration:**
+
 ```typescript
 // Default settings (in auth.config.ts):
-ACCESS_TOKEN_EXPIRES_IN: '1h'      // Short-lived access token
-REFRESH_TOKEN_EXPIRES_IN: '7d'     // Long-lived refresh token
-JWT_ALGORITHM: 'HS256'             // Signing algorithm
+ACCESS_TOKEN_EXPIRES_IN: '1h'; // Short-lived access token
+REFRESH_TOKEN_EXPIRES_IN: '7d'; // Long-lived refresh token
+JWT_ALGORITHM: 'HS256'; // Signing algorithm
 ```
 
 ### **Security Settings:**
+
 ```typescript
 // Rate limiting and security
-MAX_LOGIN_ATTEMPTS: 5
-LOGIN_RATE_LIMIT: 10              // requests per minute
-BCRYPT_ROUNDS: 12                 // Password hashing strength
+MAX_LOGIN_ATTEMPTS: 5;
+LOGIN_RATE_LIMIT: 10; // requests per minute
+BCRYPT_ROUNDS: 12; // Password hashing strength
 ```
 
 ### **Multi-tenant Settings:**
+
 ```typescript
 // Tenant support
-DEFAULT_TENANT_ID: 'mi-nhon-hotel'
-TENANT_ISOLATION: true            // Row-level security
+DEFAULT_TENANT_ID: 'mi-nhon-hotel';
+TENANT_ISOLATION: true; // Row-level security
 ```
 
 ---
@@ -182,6 +196,7 @@ TENANT_ISOLATION: true            // Row-level security
 ## 🛡️ SECURITY CHECKLIST
 
 ### ✅ **Production Security:**
+
 - [ ] Use strong JWT_SECRET (min 32 characters)
 - [ ] Enable HTTPS in production
 - [ ] Set secure cookie settings
@@ -191,6 +206,7 @@ TENANT_ISOLATION: true            // Row-level security
 - [ ] Enable database SSL in production
 
 ### ✅ **Database Security:**
+
 - [ ] Use strong database passwords
 - [ ] Enable database SSL/TLS
 - [ ] Configure firewall rules
@@ -202,6 +218,7 @@ TENANT_ISOLATION: true            // Row-level security
 ## 🧪 TESTING
 
 ### **Manual Testing:**
+
 ```bash
 # Run comprehensive test suite
 node test-unified-auth-integration.mjs
@@ -214,6 +231,7 @@ curl -X POST /api/auth/logout -H "Authorization: Bearer TOKEN"
 ```
 
 ### **Automated Testing:**
+
 ```bash
 # Run all tests
 npm test
@@ -229,21 +247,27 @@ npm run test:auth
 ### **Common Issues:**
 
 1. **Database Connection Error:**
+
    ```
    Error: ❌ DATABASE_URL environment variable is required!
    ```
+
    **Solution:** Set DATABASE_URL environment variable
 
 2. **JWT Secret Missing:**
+
    ```
    Error: JWT_SECRET environment variable is required
    ```
+
    **Solution:** Set JWT_SECRET environment variable
 
 3. **Token Invalid:**
+
    ```
    Error: Invalid authentication token
    ```
+
    **Solution:** Check token format and expiration
 
 4. **Permission Denied:**
@@ -253,6 +277,7 @@ npm run test:auth
    **Solution:** Check user role and permissions
 
 ### **Debug Commands:**
+
 ```bash
 # Check environment variables
 npm run validate:env
@@ -269,11 +294,13 @@ npm run test:auth
 ## 📊 MONITORING
 
 ### **Health Endpoints:**
+
 - `GET /api/health` - Server health check
 - `GET /api/auth/me` - Authentication status
 - `GET /api/dashboard/stats` - System statistics
 
 ### **Logging:**
+
 - Authentication attempts (success/failure)
 - Token generation and validation
 - Permission checks
@@ -284,15 +311,17 @@ npm run test:auth
 ## 🔄 MIGRATION FROM LEGACY
 
 ### **Already Completed:**
+
 ✅ Backend legacy routes removed  
 ✅ Frontend endpoints updated  
 ✅ Unified auth system integrated  
-✅ RBAC permissions system ready  
+✅ RBAC permissions system ready
 
 ### **Backward Compatibility:**
+
 ✅ Legacy `/api/staff/login` → `/api/auth/staff/login` (with deprecation warning)  
 ✅ Legacy token format supported  
-✅ Existing user sessions preserved  
+✅ Existing user sessions preserved
 
 ---
 
@@ -301,10 +330,10 @@ npm run test:auth
 Once deployed, your **Unified Auth System** provides:
 
 - 🔐 **JWT Authentication** with access + refresh tokens
-- 🛡️ **Role-Based Access Control (RBAC)** 
+- 🛡️ **Role-Based Access Control (RBAC)**
 - 🏢 **Multi-tenant Support** with row-level security
 - 🔄 **Token Management** with blacklist support
 - 📱 **Modern API** with standardized responses
 - 🔒 **Security Best Practices** built-in
 
-**System Status: �� PRODUCTION READY** 
+**System Status: �� PRODUCTION READY**

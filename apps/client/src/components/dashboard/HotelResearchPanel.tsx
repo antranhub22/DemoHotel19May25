@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -7,11 +13,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { 
-  Search, 
-  MapPin, 
-  Phone, 
-  Globe, 
+import {
+  Search,
+  MapPin,
+  Phone,
+  Globe,
   Mail,
   Clock,
   Star,
@@ -28,7 +34,7 @@ import {
   X,
   ExternalLink,
   Hotel,
-  DollarSign
+  DollarSign,
 } from 'lucide-react';
 
 // Types
@@ -88,25 +94,28 @@ interface HotelResearchPanelProps {
 // Amenity icon mapping
 const getAmenityIcon = (amenity: string) => {
   const lowerAmenity = amenity.toLowerCase();
-  
+
   if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) {
     return Wifi;
   } else if (lowerAmenity.includes('parking') || lowerAmenity.includes('car')) {
     return Car;
-  } else if (lowerAmenity.includes('restaurant') || lowerAmenity.includes('breakfast')) {
+  } else if (
+    lowerAmenity.includes('restaurant') ||
+    lowerAmenity.includes('breakfast')
+  ) {
     return Coffee;
   } else if (lowerAmenity.includes('gym') || lowerAmenity.includes('fitness')) {
     return Dumbbell;
   }
-  
+
   return CheckCircle2;
 };
 
 // Research form component
-const ResearchForm = ({ 
-  onSearch, 
-  isLoading 
-}: { 
+const ResearchForm = ({
+  onSearch,
+  isLoading,
+}: {
   onSearch: (hotelName: string, location?: string) => void;
   isLoading: boolean;
 }) => {
@@ -140,7 +149,7 @@ const ResearchForm = ({
                 id="hotel-name"
                 placeholder="Ví dụ: Grand Hotel Saigon"
                 value={hotelName}
-                onChange={(e) => setHotelName(e.target.value)}
+                onChange={e => setHotelName(e.target.value)}
                 required
               />
             </div>
@@ -150,13 +159,13 @@ const ResearchForm = ({
                 id="location"
                 placeholder="Ví dụ: Ho Chi Minh City"
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={e => setLocation(e.target.value)}
               />
             </div>
           </div>
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             disabled={!hotelName.trim() || isLoading}
             className="w-full"
           >
@@ -194,7 +203,7 @@ const ResearchSkeleton = () => (
         </div>
       </CardContent>
     </Card>
-    
+
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
@@ -208,7 +217,7 @@ const ResearchSkeleton = () => (
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <Skeleton className="h-5 w-32" />
@@ -226,11 +235,11 @@ const ResearchSkeleton = () => (
 );
 
 // Hotel information display
-const HotelInfoDisplay = ({ 
-  data, 
+const HotelInfoDisplay = ({
+  data,
   editable = false,
   onEdit,
-  onSave 
+  onSave,
 }: {
   data: HotelData;
   editable?: boolean;
@@ -268,8 +277,8 @@ const HotelInfoDisplay = ({
               </CardDescription>
             </div>
             {editable && !isEditing && (
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setIsEditing(true)}
               >
@@ -279,18 +288,11 @@ const HotelInfoDisplay = ({
             )}
             {isEditing && (
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleCancel}
-                >
+                <Button variant="outline" size="sm" onClick={handleCancel}>
                   <X className="h-4 w-4 mr-1" />
                   Hủy
                 </Button>
-                <Button 
-                  size="sm"
-                  onClick={handleSave}
-                >
+                <Button size="sm" onClick={handleSave}>
                   <Save className="h-4 w-4 mr-1" />
                   Lưu
                 </Button>
@@ -305,14 +307,18 @@ const HotelInfoDisplay = ({
                 <Label>Tên khách sạn</Label>
                 <Input
                   value={editData.name}
-                  onChange={(e) => setEditData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={e =>
+                    setEditData(prev => ({ ...prev, name: e.target.value }))
+                  }
                 />
               </div>
               <div>
                 <Label>Địa chỉ</Label>
                 <Input
                   value={editData.address}
-                  onChange={(e) => setEditData(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={e =>
+                    setEditData(prev => ({ ...prev, address: e.target.value }))
+                  }
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,14 +326,21 @@ const HotelInfoDisplay = ({
                   <Label>Điện thoại</Label>
                   <Input
                     value={editData.phone || ''}
-                    onChange={(e) => setEditData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={e =>
+                      setEditData(prev => ({ ...prev, phone: e.target.value }))
+                    }
                   />
                 </div>
                 <div>
                   <Label>Website</Label>
                   <Input
                     value={editData.website || ''}
-                    onChange={(e) => setEditData(prev => ({ ...prev, website: e.target.value }))}
+                    onChange={e =>
+                      setEditData(prev => ({
+                        ...prev,
+                        website: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -335,7 +348,12 @@ const HotelInfoDisplay = ({
                 <Label>Mô tả</Label>
                 <Textarea
                   value={editData.description || ''}
-                  onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={e =>
+                    setEditData(prev => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   rows={3}
                 />
               </div>
@@ -359,7 +377,7 @@ const HotelInfoDisplay = ({
                   )}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -380,9 +398,9 @@ const HotelInfoDisplay = ({
                 {data.website && (
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4 text-muted-foreground" />
-                    <a 
-                      href={data.website} 
-                      target="_blank" 
+                    <a
+                      href={data.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline flex items-center gap-1"
                     >
@@ -392,20 +410,26 @@ const HotelInfoDisplay = ({
                   </div>
                 )}
               </div>
-              
+
               {data.description && (
                 <div>
                   <h4 className="font-medium mb-2">Mô tả</h4>
-                  <p className="text-sm text-muted-foreground">{data.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {data.description}
+                  </p>
                 </div>
               )}
-              
+
               {data.categories && data.categories.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Phân loại</h4>
                   <div className="flex flex-wrap gap-1">
                     {data.categories.map((category, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="text-xs"
+                      >
                         {category}
                       </Badge>
                     ))}
@@ -467,15 +491,21 @@ const HotelInfoDisplay = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label className="text-sm font-medium">Check-in</Label>
-              <p className="text-sm text-muted-foreground">{data.policies.checkIn}</p>
+              <p className="text-sm text-muted-foreground">
+                {data.policies.checkIn}
+              </p>
             </div>
             <div>
               <Label className="text-sm font-medium">Check-out</Label>
-              <p className="text-sm text-muted-foreground">{data.policies.checkOut}</p>
+              <p className="text-sm text-muted-foreground">
+                {data.policies.checkOut}
+              </p>
             </div>
             <div>
               <Label className="text-sm font-medium">Hủy phòng</Label>
-              <p className="text-sm text-muted-foreground">{data.policies.cancellation}</p>
+              <p className="text-sm text-muted-foreground">
+                {data.policies.cancellation}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -497,7 +527,9 @@ const HotelInfoDisplay = ({
                       {room.price.toLocaleString('vi-VN')} VND/đêm
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">{room.description}</p>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {room.description}
+                  </p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Sức chứa: {room.capacity} người</span>
                     {room.amenities.length > 0 && (
@@ -523,13 +555,17 @@ const HotelInfoDisplay = ({
                 <div key={index} className="flex justify-between items-start">
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{attraction.name}</h4>
-                    <p className="text-xs text-muted-foreground">{attraction.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {attraction.description}
+                    </p>
                   </div>
                   <div className="text-right text-xs">
                     <Badge variant="outline" className="mb-1">
                       {attraction.type}
                     </Badge>
-                    <p className="text-muted-foreground">{attraction.distance}</p>
+                    <p className="text-muted-foreground">
+                      {attraction.distance}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -541,7 +577,8 @@ const HotelInfoDisplay = ({
       {/* Last Updated */}
       {data.lastUpdated && (
         <div className="text-center text-xs text-muted-foreground">
-          Cập nhật lần cuối: {new Date(data.lastUpdated).toLocaleString('vi-VN')}
+          Cập nhật lần cuối:{' '}
+          {new Date(data.lastUpdated).toLocaleString('vi-VN')}
         </div>
       )}
     </div>
@@ -557,14 +594,12 @@ export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
   onEdit,
   onSave,
   editable = false,
-  className
+  className,
 }) => {
   return (
     <div className={cn('space-y-6', className)}>
       {/* Research Form */}
-      {!data && (
-        <ResearchForm onSearch={onSearch} isLoading={isLoading} />
-      )}
+      {!data && <ResearchForm onSearch={onSearch} isLoading={isLoading} />}
 
       {/* Error State */}
       {error && (
@@ -637,4 +672,4 @@ export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
   );
 };
 
-export default HotelResearchPanel; 
+export default HotelResearchPanel;

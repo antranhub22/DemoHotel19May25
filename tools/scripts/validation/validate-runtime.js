@@ -287,7 +287,7 @@ class RuntimeValidator {
     }
   }
 
-  validateData(schemaName, data, definition = null) {
+  async validateData(schemaName, data, definition = null) {
     try {
       const schema = this.schemas.get(schemaName);
       if (!schema) {
@@ -317,7 +317,7 @@ class RuntimeValidator {
     }
   }
 
-  validateApiResponse(response, schemaPath) {
+  async validateApiResponse(response, schemaPath) {
     try {
       // Navigate to the correct schema definition
       const pathParts = schemaPath.split('.');

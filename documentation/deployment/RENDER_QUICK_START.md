@@ -3,6 +3,7 @@
 ## 📋 Tóm tắt nhanh để deploy lên Render
 
 ### 1. Files đã tạo cho bạn:
+
 - `render-env-variables.txt` - Copy & paste environment variables
 - `docs/RENDER_DEPLOYMENT_GUIDE.md` - Hướng dẫn chi tiết
 - `scripts/generate-jwt-secret.ts` - Generate JWT secret
@@ -10,15 +11,19 @@
 ### 2. Quick Steps:
 
 #### Step 1: Generate JWT Secret
+
 ```bash
 tsx scripts/generate-jwt-secret.ts
 ```
+
 Copy JWT_SECRET và SESSION_SECRET từ output.
 
 #### Step 2: Copy Environment Variables
+
 Mở file `render-env-variables.txt` và copy toàn bộ content.
 
 #### Step 3: Setup trên Render
+
 1. Tạo PostgreSQL database trên Render
 2. Tạo Web Service từ GitHub repo
 3. Paste environment variables vào Environment Variables section
@@ -33,28 +38,32 @@ Mở file `render-env-variables.txt` và copy toàn bộ content.
    - `GOOGLE_PLACES_API_KEY` - từ Google Cloud
 
 #### Step 4: Deploy
-Build Command: `npm run build`
-Start Command: `npm run start`
+
+Build Command: `npm run build` Start Command: `npm run start`
 
 ### 3. API Keys cần thiết:
 
 #### OpenAI API Key
+
 - Đăng ký: https://platform.openai.com/
 - Tạo API key (starts with `sk-`)
 - Add payment method
 
 #### Vapi API Keys
+
 - Đăng ký: https://vapi.ai/
 - Lấy Public Key (`pk-`)
 - Lấy Assistant ID (`asst-`)
 - Lấy API Key (for dynamic creation)
 
 #### Google Places API Key
+
 - Đăng ký: https://console.cloud.google.com/
 - Enable Google Places API
 - Create credentials
 
 #### Gmail App Password (Optional)
+
 - Enable 2FA trên Gmail
 - Create App Password: https://myaccount.google.com/apppasswords
 
@@ -102,6 +111,7 @@ npm run start
 ```
 
 ### 7. Files để reference:
+
 - `render-env-variables.txt` - Complete environment variables list
 - `docs/RENDER_DEPLOYMENT_GUIDE.md` - Detailed deployment guide
 - `docs/ENVIRONMENT_SETUP.md` - Complete environment setup guide
@@ -113,4 +123,4 @@ npm run start
 3. ✅ Deploy trên Render
 4. ✅ Check logs và test functionality
 
-Good luck! 🚀 
+Good luck! 🚀

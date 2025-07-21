@@ -3,7 +3,13 @@
  * Shows how camelCase ↔ snake_case conversion works
  */
 
-import { requestMapper, toCamelCase, toSnakeCase, transformObjectToCamelCase, transformObjectToSnakeCase } from './transformers';
+import {
+  requestMapper,
+  toCamelCase,
+  toSnakeCase,
+  transformObjectToCamelCase,
+  transformObjectToSnakeCase,
+} from './transformers';
 
 // ✅ TEST 1: Basic string transformation
 console.log('=== String Transformation Tests ===');
@@ -26,12 +32,12 @@ const frontendRequest = {
       name: 'Towel Service',
       description: 'Fresh towels',
       quantity: 2,
-      price: 0
-    }
+      price: 0,
+    },
   ],
   totalAmount: 0,
   status: 'pending',
-  createdAt: new Date().toISOString()
+  createdAt: new Date().toISOString(),
 };
 
 const databaseRequest = requestMapper.toDatabase(frontendRequest);
@@ -52,11 +58,14 @@ const databaseResponse = {
   updated_at: 1705334425,
   description: 'Extra towels please',
   priority: 'medium',
-  assigned_to: null
+  assigned_to: null,
 };
 
 const frontendResponse = requestMapper.toFrontend(databaseResponse);
-console.log('Database (snake_case):', JSON.stringify(databaseResponse, null, 2));
+console.log(
+  'Database (snake_case):',
+  JSON.stringify(databaseResponse, null, 2)
+);
 console.log('Frontend (camelCase):', JSON.stringify(frontendResponse, null, 2));
 
 // ✅ TEST 4: Complex nested object transformation
@@ -67,25 +76,20 @@ const complexObject = {
     last_name: 'Doe',
     contact_details: {
       phone_number: '+1234567890',
-      email_address: 'john@example.com'
-    }
+      email_address: 'john@example.com',
+    },
   },
   request_items: [
     {
       item_id: '1',
       item_name: 'Service',
-      created_at: new Date().toISOString()
-    }
-  ]
+      created_at: new Date().toISOString(),
+    },
+  ],
 };
 
 const camelCaseObject = transformObjectToCamelCase(complexObject);
 console.log('Snake_case:', JSON.stringify(complexObject, null, 2));
 console.log('CamelCase:', JSON.stringify(camelCaseObject, null, 2));
 
-export {
-  frontendRequest,
-  databaseRequest,
-  databaseResponse,
-  frontendResponse
-}; 
+export { frontendRequest, databaseRequest, databaseResponse, frontendResponse };

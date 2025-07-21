@@ -309,16 +309,16 @@ export const setupMocks = () => {
   // Setup global mocks
   global.fetch = mockFetch;
   global.console = mockConsole;
-  
+
   // Setup timer mocks
   global.setTimeout = mockSetTimeout;
   global.clearTimeout = mockClearTimeout;
   global.setInterval = mockSetInterval;
   global.clearInterval = mockClearInterval;
-  
+
   // Setup crypto mocks
   global.crypto = mockCrypto as any;
-  
+
   // Setup process env
   process.env = { ...process.env, ...mockProcessEnv };
 };
@@ -326,52 +326,52 @@ export const setupMocks = () => {
 export const resetMocks = () => {
   // Reset all mocks
   jest.clearAllMocks();
-  
+
   // Reset mock implementations
   mockApiClient.get.mockReset();
   mockApiClient.post.mockReset();
   mockApiClient.put.mockReset();
   mockApiClient.delete.mockReset();
   mockApiClient.patch.mockReset();
-  
+
   mockFetch.mockReset();
   mockResponse.json.mockReset();
   mockErrorResponse.json.mockReset();
-  
+
   mockAuthService.login.mockReset();
   mockAuthService.logout.mockReset();
   mockAuthService.refreshToken.mockReset();
-  
+
   mockEmailService.sendEmail.mockReset();
   mockVapiClient.startCall.mockReset();
   mockOpenAIClient.chat.completions.create.mockReset();
-  
+
   mockWebSocket.send.mockReset();
   mockWebSocket.close.mockReset();
-  
+
   mockLogger.info.mockReset();
   mockLogger.warn.mockReset();
   mockLogger.error.mockReset();
   mockLogger.debug.mockReset();
-  
+
   mockUtils.generateId.mockReset();
   mockUtils.formatDate.mockReset();
   mockUtils.validateEmail.mockReset();
-  
+
   mockZod.parse.mockReset();
   mockZod.safeParse.mockReset();
-  
+
   mockBcrypt.hash.mockReset();
   mockBcrypt.compare.mockReset();
-  
+
   mockCrypto.randomBytes.mockReset();
   mockCrypto.createHash.mockReset();
-  
+
   mockSetTimeout.mockReset();
   mockClearTimeout.mockReset();
   mockSetInterval.mockReset();
   mockClearInterval.mockReset();
-  
+
   mockDate.now.mockReset();
   mockDate.parse.mockReset();
   mockDate.UTC.mockReset();
@@ -382,7 +382,7 @@ export const setupMockImplementations = () => {
   mockFetch.mockResolvedValue(mockResponse);
   mockResponse.json.mockResolvedValue({ success: true, data: {} });
   mockResponse.text.mockResolvedValue('Mock response text');
-  
+
   mockAuthService.login.mockResolvedValue({
     success: true,
     data: {
@@ -390,62 +390,64 @@ export const setupMockImplementations = () => {
       user: { id: 1, username: 'testuser', role: 'admin' },
     },
   });
-  
+
   mockAuthService.verifyToken.mockResolvedValue({
     success: true,
     data: { userId: 1, role: 'admin' },
   });
-  
+
   mockEmailService.sendEmail.mockResolvedValue({
     success: true,
     messageId: 'mock-message-id',
   });
-  
+
   mockVapiClient.startCall.mockResolvedValue({
     success: true,
     data: { callId: 'mock-call-id', status: 'in-progress' },
   });
-  
-  mockOpenAIClient.chat.completions.create.mockResolvedValue(mockOpenAIResponse);
-  
+
+  mockOpenAIClient.chat.completions.create.mockResolvedValue(
+    mockOpenAIResponse
+  );
+
   mockWebSocket.send.mockImplementation(() => {});
   mockWebSocket.close.mockImplementation(() => {});
-  
+
   mockLogger.info.mockImplementation(() => {});
   mockLogger.warn.mockImplementation(() => {});
   mockLogger.error.mockImplementation(() => {});
   mockLogger.debug.mockImplementation(() => {});
-  
+
   mockUtils.generateId.mockReturnValue('mock-generated-id');
   mockUtils.formatDate.mockReturnValue('2024-01-01');
   mockUtils.validateEmail.mockReturnValue(true);
-  
-  mockZod.parse.mockImplementation((data) => data);
+
+  mockZod.parse.mockImplementation(data => data);
   mockZod.safeParse.mockResolvedValue({ success: true, data: {} });
-  
+
   mockBcrypt.hash.mockResolvedValue('mock-hashed-password');
   mockBcrypt.compare.mockResolvedValue(true);
-  
+
   mockCrypto.randomBytes.mockReturnValue(Buffer.from('mock-random-bytes'));
   mockCrypto.createHash.mockReturnValue({
     update: jest.fn().mockReturnThis(),
     digest: jest.fn().mockReturnValue('mock-hash'),
   });
-  
+
   mockSetTimeout.mockImplementation((callback, delay) => {
     setTimeout(callback, delay);
     return 1;
   });
-  
+
   mockClearTimeout.mockImplementation(() => {});
   mockSetInterval.mockImplementation((callback, delay) => {
     setInterval(callback, delay);
     return 1;
   });
-  
+
   mockClearInterval.mockImplementation(() => {});
-  
+
   mockDate.now.mockReturnValue(1704067200000); // 2024-01-01 00:00:00 UTC
   mockDate.parse.mockReturnValue(1704067200000);
   mockDate.UTC.mockReturnValue(1704067200000);
-}; 
+};

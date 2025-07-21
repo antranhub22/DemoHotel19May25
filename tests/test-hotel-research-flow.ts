@@ -12,7 +12,10 @@ import { performance } from 'perf_hooks';
 // Import services
 import { HotelResearchService } from '../server/services/hotelResearch';
 import { KnowledgeBaseGenerator } from '../server/services/knowledgeBaseGenerator';
-import { VapiIntegrationService, AssistantGeneratorService } from '../server/services/vapiIntegration';
+import {
+  VapiIntegrationService,
+  AssistantGeneratorService,
+} from '../server/services/vapiIntegration';
 
 // Import schema
 import { tenants, hotelProfiles, call, transcript } from '../src/db/schema';
@@ -91,99 +94,96 @@ interface TestCoverage {
 // ============================================
 
 const MOCK_HOTEL_DATA = {
-  name: "Grand Test Hotel",
-  address: "123 Test Street, Test City, Test Country",
-  phone: "+1-555-TEST-HOTEL",
-  website: "https://grandtesthotel.com",
+  name: 'Grand Test Hotel',
+  address: '123 Test Street, Test City, Test Country',
+  phone: '+1-555-TEST-HOTEL',
+  website: 'https://grandtesthotel.com',
   rating: 4.5,
   priceLevel: 3,
   location: {
     lat: 10.7769,
-    lng: 106.7009
+    lng: 106.7009,
   },
-  categories: ["lodging", "establishment"],
+  categories: ['lodging', 'establishment'],
   openingHours: [
-    "Monday: 24 hours",
-    "Tuesday: 24 hours",
-    "Wednesday: 24 hours",
-    "Thursday: 24 hours",
-    "Friday: 24 hours",
-    "Saturday: 24 hours",
-    "Sunday: 24 hours"
+    'Monday: 24 hours',
+    'Tuesday: 24 hours',
+    'Wednesday: 24 hours',
+    'Thursday: 24 hours',
+    'Friday: 24 hours',
+    'Saturday: 24 hours',
+    'Sunday: 24 hours',
   ],
-  photos: [
-    "https://example.com/photo1.jpg",
-    "https://example.com/photo2.jpg"
-  ],
+  photos: ['https://example.com/photo1.jpg', 'https://example.com/photo2.jpg'],
   services: [
     {
-      name: "Room Service",
-      description: "24/7 room service available",
-      type: "room_service",
+      name: 'Room Service',
+      description: '24/7 room service available',
+      type: 'room_service',
       available: true,
-      hours: "24/7"
+      hours: '24/7',
     },
     {
-      name: "Spa & Wellness",
-      description: "Full service spa with massage and treatments",
-      type: "spa",
+      name: 'Spa & Wellness',
+      description: 'Full service spa with massage and treatments',
+      type: 'spa',
       available: true,
-      hours: "8:00 AM - 10:00 PM"
+      hours: '8:00 AM - 10:00 PM',
     },
     {
-      name: "Restaurant",
-      description: "Fine dining restaurant with international cuisine",
-      type: "restaurant",
+      name: 'Restaurant',
+      description: 'Fine dining restaurant with international cuisine',
+      type: 'restaurant',
       available: true,
-      hours: "6:00 AM - 11:00 PM"
-    }
+      hours: '6:00 AM - 11:00 PM',
+    },
   ],
   amenities: [
-    "Free WiFi",
-    "Swimming Pool",
-    "Fitness Center",
-    "Business Center",
-    "Concierge Service",
-    "Airport Shuttle",
-    "Parking Available"
+    'Free WiFi',
+    'Swimming Pool',
+    'Fitness Center',
+    'Business Center',
+    'Concierge Service',
+    'Airport Shuttle',
+    'Parking Available',
   ],
   policies: {
-    checkIn: "3:00 PM",
-    checkOut: "11:00 AM",
-    cancellation: "24 hours before arrival",
-    petPolicy: "Pets allowed with additional fee",
-    smokingPolicy: "Non-smoking property"
+    checkIn: '3:00 PM',
+    checkOut: '11:00 AM',
+    cancellation: '24 hours before arrival',
+    petPolicy: 'Pets allowed with additional fee',
+    smokingPolicy: 'Non-smoking property',
   },
   roomTypes: [
     {
-      name: "Standard Room",
+      name: 'Standard Room',
       price: 120,
-      description: "Comfortable room with city view",
+      description: 'Comfortable room with city view',
       capacity: 2,
-      amenities: ["Free WiFi", "Air Conditioning", "Mini Bar"]
+      amenities: ['Free WiFi', 'Air Conditioning', 'Mini Bar'],
     },
     {
-      name: "Deluxe Suite",
+      name: 'Deluxe Suite',
       price: 250,
-      description: "Spacious suite with separate living area",
+      description: 'Spacious suite with separate living area',
       capacity: 4,
-      amenities: ["Free WiFi", "Air Conditioning", "Kitchen", "Balcony"]
-    }
+      amenities: ['Free WiFi', 'Air Conditioning', 'Kitchen', 'Balcony'],
+    },
   ],
   localAttractions: [
     {
-      name: "Test Museum",
-      description: "Famous local museum with historical artifacts",
-      distance: "0.5 km",
-      type: "museum"
+      name: 'Test Museum',
+      description: 'Famous local museum with historical artifacts',
+      distance: '0.5 km',
+      type: 'museum',
     },
     {
-      name: "Test Beach",
-      description: "Beautiful sandy beach with clear water",
-      distance: "2 km",
-      type: "beach"
-    }
-  ]
+      name: 'Test Beach',
+      description: 'Beautiful sandy beach with clear water',
+      distance: '2 km',
+      type: 'beach',
+    },
+  ],
 };
 
 const MOCK_KNOWLEDGE_BASE = `
@@ -241,7 +241,7 @@ export class HotelResearchFlowTest {
       skipApiCalls: false,
       verbose: true,
       testTimeout: 30000,
-      ...config
+      ...config,
     };
 
     this.results = {
@@ -260,24 +260,24 @@ export class HotelResearchFlowTest {
           advancedResearch: false,
           googlePlacesApi: false,
           websiteScraping: false,
-          errorHandling: false
+          errorHandling: false,
         },
         knowledgeBase: {
           generation: false,
           systemPrompt: false,
-          validation: false
+          validation: false,
         },
         vapiIntegration: {
           assistantCreation: false,
           assistantUpdate: false,
-          errorHandling: false
+          errorHandling: false,
         },
         database: {
           storage: false,
           retrieval: false,
-          tenantIsolation: false
-        }
-      }
+          tenantIsolation: false,
+        },
+      },
     };
 
     // Initialize services
@@ -297,44 +297,72 @@ export class HotelResearchFlowTest {
 
     try {
       // Test 1: Initialize test environment
-      await this.executeTest('initialize-test-env', 'Initialize Test Environment',
-        () => this.initializeTestEnvironment());
+      await this.executeTest(
+        'initialize-test-env',
+        'Initialize Test Environment',
+        () => this.initializeTestEnvironment()
+      );
 
       // Test 2: Test hotel research (complete flow)
-      await this.executeTest('test-hotel-research-flow', 'Test Complete Hotel Research Flow',
-        () => this.testCompleteHotelResearchFlow());
+      await this.executeTest(
+        'test-hotel-research-flow',
+        'Test Complete Hotel Research Flow',
+        () => this.testCompleteHotelResearchFlow()
+      );
 
       // Test 3: Test Google Places API integration
-      await this.executeTest('test-google-places-api', 'Test Google Places API Integration',
-        () => this.testGooglePlacesApiIntegration());
+      await this.executeTest(
+        'test-google-places-api',
+        'Test Google Places API Integration',
+        () => this.testGooglePlacesApiIntegration()
+      );
 
       // Test 4: Test knowledge base generation
-      await this.executeTest('test-knowledge-base-generation', 'Test Knowledge Base Generation',
-        () => this.testKnowledgeBaseGeneration());
+      await this.executeTest(
+        'test-knowledge-base-generation',
+        'Test Knowledge Base Generation',
+        () => this.testKnowledgeBaseGeneration()
+      );
 
       // Test 5: Test Vapi assistant creation
-      await this.executeTest('test-vapi-assistant-creation', 'Test Vapi Assistant Creation',
-        () => this.testVapiAssistantCreation());
+      await this.executeTest(
+        'test-vapi-assistant-creation',
+        'Test Vapi Assistant Creation',
+        () => this.testVapiAssistantCreation()
+      );
 
       // Test 6: Test database storage
-      await this.executeTest('test-database-storage', 'Test Database Storage',
-        () => this.testDatabaseStorage());
+      await this.executeTest(
+        'test-database-storage',
+        'Test Database Storage',
+        () => this.testDatabaseStorage()
+      );
 
       // Test 7: Test with mock data
-      await this.executeTest('test-with-mock-data', 'Test with Mock Data',
-        () => this.testWithMockData());
+      await this.executeTest('test-with-mock-data', 'Test with Mock Data', () =>
+        this.testWithMockData()
+      );
 
       // Test 8: Test error scenarios
-      await this.executeTest('test-error-scenarios', 'Test Error Scenarios',
-        () => this.testErrorScenarios());
+      await this.executeTest(
+        'test-error-scenarios',
+        'Test Error Scenarios',
+        () => this.testErrorScenarios()
+      );
 
       // Test 9: Test API rate limiting
-      await this.executeTest('test-api-rate-limiting', 'Test API Rate Limiting',
-        () => this.testApiRateLimiting());
+      await this.executeTest(
+        'test-api-rate-limiting',
+        'Test API Rate Limiting',
+        () => this.testApiRateLimiting()
+      );
 
       // Test 10: Test tenant isolation
-      await this.executeTest('test-tenant-isolation', 'Test Tenant Isolation',
-        () => this.testTenantIsolation());
+      await this.executeTest(
+        'test-tenant-isolation',
+        'Test Tenant Isolation',
+        () => this.testTenantIsolation()
+      );
 
       // Calculate final results
       this.results.success = this.results.testsFailed === 0;
@@ -354,7 +382,7 @@ export class HotelResearchFlowTest {
       this.results.errors.push({
         step: 'test-suite',
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       this.log(`💥 Test Suite Failed: ${error.message}`, 'error');
       return this.results;
@@ -370,7 +398,7 @@ export class HotelResearchFlowTest {
 
     // Initialize database connection
     const isPostgres = this.config.databaseUrl?.includes('postgres');
-    
+
     if (isPostgres && this.config.databaseUrl) {
       this.log('Connecting to PostgreSQL database...', 'info');
       const client = postgres(this.config.databaseUrl);
@@ -402,7 +430,7 @@ export class HotelResearchFlowTest {
       multiLocation: true,
       whiteLabel: true,
       dataRetentionDays: 365,
-      monthlyCallLimit: 10000
+      monthlyCallLimit: 10000,
     });
 
     this.log(`✅ Test tenant created: ${this.testTenantId}`, 'success');
@@ -423,7 +451,10 @@ export class HotelResearchFlowTest {
         hotelData = MOCK_HOTEL_DATA;
       } else {
         this.log('🔍 Performing actual hotel research...', 'info');
-        hotelData = await this.hotelResearchService.basicResearch(testHotelName, testLocation);
+        hotelData = await this.hotelResearchService.basicResearch(
+          testHotelName,
+          testLocation
+        );
       }
 
       // Validate hotel data structure
@@ -436,28 +467,38 @@ export class HotelResearchFlowTest {
 
       // Step 2: Knowledge base generation
       this.log('📚 Generating knowledge base...', 'info');
-      const knowledgeBase = this.knowledgeBaseGenerator.generateKnowledgeBase(hotelData);
-      
+      const knowledgeBase =
+        this.knowledgeBaseGenerator.generateKnowledgeBase(hotelData);
+
       if (!knowledgeBase || knowledgeBase.length < 100) {
         throw new Error('Knowledge base generation failed or too short');
       }
 
-      this.log(`✅ Knowledge base generated (${knowledgeBase.length} characters)`, 'success');
+      this.log(
+        `✅ Knowledge base generated (${knowledgeBase.length} characters)`,
+        'success'
+      );
       this.results.coverage.knowledgeBase.generation = true;
 
       // Step 3: System prompt generation
       this.log('🤖 Generating system prompt...', 'info');
-      const systemPrompt = this.knowledgeBaseGenerator.generateSystemPrompt(hotelData, {
-        personality: 'professional',
-        tone: 'friendly',
-        languages: ['English']
-      });
+      const systemPrompt = this.knowledgeBaseGenerator.generateSystemPrompt(
+        hotelData,
+        {
+          personality: 'professional',
+          tone: 'friendly',
+          languages: ['English'],
+        }
+      );
 
       if (!systemPrompt || systemPrompt.length < 50) {
         throw new Error('System prompt generation failed or too short');
       }
 
-      this.log(`✅ System prompt generated (${systemPrompt.length} characters)`, 'success');
+      this.log(
+        `✅ System prompt generated (${systemPrompt.length} characters)`,
+        'success'
+      );
       this.results.coverage.knowledgeBase.systemPrompt = true;
 
       // Step 4: Assistant creation (mock or real)
@@ -467,13 +508,16 @@ export class HotelResearchFlowTest {
         assistantId = `mock-assistant-${Date.now()}`;
       } else {
         this.log('🤖 Creating Vapi assistant...', 'info');
-        assistantId = await this.assistantGeneratorService.generateAssistant(hotelData, {
-          personality: 'professional',
-          tone: 'friendly',
-          languages: ['English'],
-          voiceId: 'jennifer',
-          backgroundSound: 'hotel-lobby'
-        });
+        assistantId = await this.assistantGeneratorService.generateAssistant(
+          hotelData,
+          {
+            personality: 'professional',
+            tone: 'friendly',
+            languages: ['English'],
+            voiceId: 'jennifer',
+            backgroundSound: 'hotel-lobby',
+          }
+        );
       }
 
       if (!assistantId) {
@@ -496,8 +540,8 @@ export class HotelResearchFlowTest {
         assistantConfig: {
           personality: 'professional',
           tone: 'friendly',
-          languages: ['English']
-        }
+          languages: ['English'],
+        },
       });
 
       this.log('✅ Research data stored in database', 'success');
@@ -505,7 +549,8 @@ export class HotelResearchFlowTest {
 
       // Step 6: Verify storage and retrieval
       this.log('🔍 Verifying data retrieval...', 'info');
-      const storedProfile = await this.db.select()
+      const storedProfile = await this.db
+        .select()
         .from(hotelProfiles)
         .where(eq(hotelProfiles.tenantId, this.testTenantId))
         .limit(1);
@@ -515,14 +560,15 @@ export class HotelResearchFlowTest {
       }
 
       if (storedProfile[0].vapiAssistantId !== assistantId) {
-        throw new Error('Stored assistant ID does not match created assistant ID');
+        throw new Error(
+          'Stored assistant ID does not match created assistant ID'
+        );
       }
 
       this.log('✅ Data retrieval verified', 'success');
       this.results.coverage.database.retrieval = true;
 
       this.log('🎉 Complete hotel research flow test passed!', 'success');
-
     } catch (error) {
       this.log(`❌ Complete flow test failed: ${error.message}`, 'error');
       throw error;
@@ -533,14 +579,17 @@ export class HotelResearchFlowTest {
     this.log('🌍 Testing Google Places API integration...', 'info');
 
     if (this.config.skipApiCalls) {
-      this.log('⏭️ Skipping Google Places API test (API calls disabled)', 'info');
+      this.log(
+        '⏭️ Skipping Google Places API test (API calls disabled)',
+        'info'
+      );
       return;
     }
 
     try {
       // Test API health check
       const health = await this.hotelResearchService.getServiceHealth();
-      
+
       if (!health.apis.googlePlaces) {
         throw new Error('Google Places API is not available');
       }
@@ -549,16 +598,24 @@ export class HotelResearchFlowTest {
       this.results.coverage.hotelResearch.googlePlacesApi = true;
 
       // Test actual API call with a well-known hotel
-      const testHotel = await this.hotelResearchService.basicResearch('Hilton', 'New York');
-      
+      const testHotel = await this.hotelResearchService.basicResearch(
+        'Hilton',
+        'New York'
+      );
+
       if (!testHotel || !testHotel.name || !testHotel.location) {
         throw new Error('Google Places API returned invalid data');
       }
 
-      this.log(`✅ Google Places API integration test passed: ${testHotel.name}`, 'success');
-
+      this.log(
+        `✅ Google Places API integration test passed: ${testHotel.name}`,
+        'success'
+      );
     } catch (error) {
-      this.log(`❌ Google Places API integration test failed: ${error.message}`, 'error');
+      this.log(
+        `❌ Google Places API integration test failed: ${error.message}`,
+        'error'
+      );
       throw error;
     }
   }
@@ -576,40 +633,54 @@ export class HotelResearchFlowTest {
         policies: {
           checkIn: '3:00 PM',
           checkOut: '11:00 AM',
-          cancellation: '24 hours'
+          cancellation: '24 hours',
         },
         roomTypes: [],
-        localAttractions: []
+        localAttractions: [],
       };
 
-      const knowledgeBase = this.knowledgeBaseGenerator.generateKnowledgeBase(minimalHotelData);
-      
+      const knowledgeBase =
+        this.knowledgeBaseGenerator.generateKnowledgeBase(minimalHotelData);
+
       if (!knowledgeBase || knowledgeBase.length < 50) {
         throw new Error('Knowledge base generation failed with minimal data');
       }
 
-      this.log('✅ Knowledge base generation with minimal data passed', 'success');
+      this.log(
+        '✅ Knowledge base generation with minimal data passed',
+        'success'
+      );
 
       // Test with full hotel data
-      const fullKnowledgeBase = this.knowledgeBaseGenerator.generateKnowledgeBase(MOCK_HOTEL_DATA);
-      
+      const fullKnowledgeBase =
+        this.knowledgeBaseGenerator.generateKnowledgeBase(MOCK_HOTEL_DATA);
+
       if (!fullKnowledgeBase || fullKnowledgeBase.length < 500) {
         throw new Error('Knowledge base generation failed with full data');
       }
 
       // Verify knowledge base contains key information
-      const requiredSections = ['HOTEL INFORMATION', 'SERVICES', 'AMENITIES', 'POLICIES'];
+      const requiredSections = [
+        'HOTEL INFORMATION',
+        'SERVICES',
+        'AMENITIES',
+        'POLICIES',
+      ];
       for (const section of requiredSections) {
         if (!fullKnowledgeBase.includes(section)) {
-          throw new Error(`Knowledge base missing required section: ${section}`);
+          throw new Error(
+            `Knowledge base missing required section: ${section}`
+          );
         }
       }
 
       this.log('✅ Knowledge base generation with full data passed', 'success');
       this.results.coverage.knowledgeBase.validation = true;
-
     } catch (error) {
-      this.log(`❌ Knowledge base generation test failed: ${error.message}`, 'error');
+      this.log(
+        `❌ Knowledge base generation test failed: ${error.message}`,
+        'error'
+      );
       throw error;
     }
   }
@@ -629,44 +700,60 @@ export class HotelResearchFlowTest {
           personality: 'professional',
           tone: 'formal',
           languages: ['English'],
-          voiceId: 'jennifer'
+          voiceId: 'jennifer',
         },
         {
           personality: 'friendly',
           tone: 'warm',
           languages: ['English', 'Spanish'],
-          voiceId: 'michael'
-        }
+          voiceId: 'michael',
+        },
       ];
 
       for (const config of testConfigs) {
-        this.log(`🔧 Testing assistant with config: ${JSON.stringify(config)}`, 'info');
-        
-        const assistantId = await this.assistantGeneratorService.generateAssistant(
-          MOCK_HOTEL_DATA,
-          config
+        this.log(
+          `🔧 Testing assistant with config: ${JSON.stringify(config)}`,
+          'info'
         );
+
+        const assistantId =
+          await this.assistantGeneratorService.generateAssistant(
+            MOCK_HOTEL_DATA,
+            config
+          );
 
         if (!assistantId) {
           throw new Error('Assistant creation failed');
         }
 
-        this.log(`✅ Assistant created successfully: ${assistantId}`, 'success');
+        this.log(
+          `✅ Assistant created successfully: ${assistantId}`,
+          'success'
+        );
 
         // Test assistant update
         const updatedConfig = { ...config, tone: 'energetic' };
-        await this.assistantGeneratorService.updateAssistant(assistantId, MOCK_HOTEL_DATA, updatedConfig);
-        
-        this.log(`✅ Assistant updated successfully: ${assistantId}`, 'success');
+        await this.assistantGeneratorService.updateAssistant(
+          assistantId,
+          MOCK_HOTEL_DATA,
+          updatedConfig
+        );
+
+        this.log(
+          `✅ Assistant updated successfully: ${assistantId}`,
+          'success'
+        );
         this.results.coverage.vapiIntegration.assistantUpdate = true;
 
         // Clean up test assistant
         await this.vapiIntegrationService.deleteAssistant(assistantId);
         this.log(`🗑️ Test assistant cleaned up: ${assistantId}`, 'info');
       }
-
     } catch (error) {
-      this.log(`❌ Vapi assistant creation test failed: ${error.message}`, 'error');
+      this.log(
+        `❌ Vapi assistant creation test failed: ${error.message}`,
+        'error'
+      );
       throw error;
     }
   }
@@ -686,15 +773,16 @@ export class HotelResearchFlowTest {
         vapiAssistantId: 'test-assistant-123',
         assistantConfig: {
           personality: 'professional',
-          tone: 'friendly'
-        }
+          tone: 'friendly',
+        },
       };
 
       await this.db.insert(hotelProfiles).values(profileData);
       this.log('✅ Hotel profile stored successfully', 'success');
 
       // Test data retrieval
-      const retrievedProfile = await this.db.select()
+      const retrievedProfile = await this.db
+        .select()
         .from(hotelProfiles)
         .where(eq(hotelProfiles.id, profileId))
         .limit(1);
@@ -711,14 +799,16 @@ export class HotelResearchFlowTest {
       this.log('✅ Data retrieval and integrity check passed', 'success');
 
       // Test data update
-      await this.db.update(hotelProfiles)
+      await this.db
+        .update(hotelProfiles)
         .set({
           systemPrompt: 'Updated system prompt',
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(hotelProfiles.id, profileId));
 
-      const updatedProfile = await this.db.select()
+      const updatedProfile = await this.db
+        .select()
         .from(hotelProfiles)
         .where(eq(hotelProfiles.id, profileId))
         .limit(1);
@@ -728,7 +818,6 @@ export class HotelResearchFlowTest {
       }
 
       this.log('✅ Data update test passed', 'success');
-
     } catch (error) {
       this.log(`❌ Database storage test failed: ${error.message}`, 'error');
       throw error;
@@ -747,8 +836,9 @@ export class HotelResearchFlowTest {
       this.config.skipApiCalls = true;
 
       // Run knowledge base generation with mock data
-      const knowledgeBase = this.knowledgeBaseGenerator.generateKnowledgeBase(MOCK_HOTEL_DATA);
-      
+      const knowledgeBase =
+        this.knowledgeBaseGenerator.generateKnowledgeBase(MOCK_HOTEL_DATA);
+
       if (!knowledgeBase || !knowledgeBase.includes('Grand Test Hotel')) {
         throw new Error('Mock data knowledge base generation failed');
       }
@@ -756,11 +846,14 @@ export class HotelResearchFlowTest {
       this.log('✅ Mock data knowledge base generation passed', 'success');
 
       // Test system prompt generation with mock data
-      const systemPrompt = this.knowledgeBaseGenerator.generateSystemPrompt(MOCK_HOTEL_DATA, {
-        personality: 'professional',
-        tone: 'friendly',
-        languages: ['English']
-      });
+      const systemPrompt = this.knowledgeBaseGenerator.generateSystemPrompt(
+        MOCK_HOTEL_DATA,
+        {
+          personality: 'professional',
+          tone: 'friendly',
+          languages: ['English'],
+        }
+      );
 
       if (!systemPrompt || !systemPrompt.includes('Grand Test Hotel')) {
         throw new Error('Mock data system prompt generation failed');
@@ -771,7 +864,6 @@ export class HotelResearchFlowTest {
       // Restore original config
       this.config.useMockData = originalUseMockData;
       this.config.skipApiCalls = originalSkipApiCalls;
-
     } catch (error) {
       this.log(`❌ Mock data test failed: ${error.message}`, 'error');
       throw error;
@@ -799,7 +891,10 @@ export class HotelResearchFlowTest {
         process.env.GOOGLE_PLACES_API_KEY = 'invalid-key';
 
         try {
-          await this.hotelResearchService.basicResearch('Test Hotel', 'Test City');
+          await this.hotelResearchService.basicResearch(
+            'Test Hotel',
+            'Test City'
+          );
           throw new Error('Should have failed with invalid API key');
         } catch (error) {
           if (error.message === 'Should have failed with invalid API key') {
@@ -828,7 +923,9 @@ export class HotelResearchFlowTest {
         await invalidDb.select().from(hotelProfiles).limit(1);
         throw new Error('Should have failed with invalid database schema');
       } catch (error) {
-        if (error.message === 'Should have failed with invalid database schema') {
+        if (
+          error.message === 'Should have failed with invalid database schema'
+        ) {
           throw error;
         }
         this.log('✅ Database error handling passed', 'success');
@@ -836,7 +933,6 @@ export class HotelResearchFlowTest {
 
       this.results.coverage.hotelResearch.errorHandling = true;
       this.results.coverage.vapiIntegration.errorHandling = true;
-
     } catch (error) {
       this.log(`❌ Error scenarios test failed: ${error.message}`, 'error');
       throw error;
@@ -847,7 +943,10 @@ export class HotelResearchFlowTest {
     this.log('🚦 Testing API rate limiting...', 'info');
 
     if (this.config.skipApiCalls) {
-      this.log('⏭️ Skipping API rate limiting test (API calls disabled)', 'info');
+      this.log(
+        '⏭️ Skipping API rate limiting test (API calls disabled)',
+        'info'
+      );
       return;
     }
 
@@ -856,24 +955,30 @@ export class HotelResearchFlowTest {
       const requests = [];
       for (let i = 0; i < 5; i++) {
         requests.push(
-          this.hotelResearchService.basicResearch(`Test Hotel ${i}`, 'Test City')
+          this.hotelResearchService.basicResearch(
+            `Test Hotel ${i}`,
+            'Test City'
+          )
         );
       }
 
       const results = await Promise.allSettled(requests);
-      
+
       // Check if any requests were rate limited
-      const rateLimited = results.some(result => 
-        result.status === 'rejected' && 
-        result.reason.message.includes('rate limit')
+      const rateLimited = results.some(
+        result =>
+          result.status === 'rejected' &&
+          result.reason.message.includes('rate limit')
       );
 
       if (rateLimited) {
         this.log('✅ API rate limiting is working correctly', 'success');
       } else {
-        this.log('ℹ️ API rate limiting not triggered (low request volume)', 'info');
+        this.log(
+          'ℹ️ API rate limiting not triggered (low request volume)',
+          'info'
+        );
       }
-
     } catch (error) {
       this.log(`❌ API rate limiting test failed: ${error.message}`, 'error');
       throw error;
@@ -891,7 +996,7 @@ export class HotelResearchFlowTest {
         hotelName: 'Second Test Hotel',
         subdomain: 'second-test-hotel',
         subscriptionPlan: 'basic',
-        subscriptionStatus: 'active'
+        subscriptionStatus: 'active',
       });
 
       // Create hotel profiles for both tenants
@@ -902,37 +1007,44 @@ export class HotelResearchFlowTest {
         id: profile1Id,
         tenantId: this.testTenantId,
         researchData: MOCK_HOTEL_DATA,
-        vapiAssistantId: 'assistant-1'
+        vapiAssistantId: 'assistant-1',
       });
 
       await this.db.insert(hotelProfiles).values({
         id: profile2Id,
         tenantId: secondTenantId,
         researchData: { ...MOCK_HOTEL_DATA, name: 'Second Test Hotel' },
-        vapiAssistantId: 'assistant-2'
+        vapiAssistantId: 'assistant-2',
       });
 
       // Test tenant isolation - tenant 1 should only see their data
-      const tenant1Data = await this.db.select()
+      const tenant1Data = await this.db
+        .select()
         .from(hotelProfiles)
         .where(eq(hotelProfiles.tenantId, this.testTenantId));
 
-      if (tenant1Data.length !== 1 || tenant1Data[0].vapiAssistantId !== 'assistant-1') {
+      if (
+        tenant1Data.length !== 1 ||
+        tenant1Data[0].vapiAssistantId !== 'assistant-1'
+      ) {
         throw new Error('Tenant 1 isolation failed');
       }
 
       // Test tenant isolation - tenant 2 should only see their data
-      const tenant2Data = await this.db.select()
+      const tenant2Data = await this.db
+        .select()
         .from(hotelProfiles)
         .where(eq(hotelProfiles.tenantId, secondTenantId));
 
-      if (tenant2Data.length !== 1 || tenant2Data[0].vapiAssistantId !== 'assistant-2') {
+      if (
+        tenant2Data.length !== 1 ||
+        tenant2Data[0].vapiAssistantId !== 'assistant-2'
+      ) {
         throw new Error('Tenant 2 isolation failed');
       }
 
       this.log('✅ Tenant isolation test passed', 'success');
       this.results.coverage.database.tenantIsolation = true;
-
     } catch (error) {
       this.log(`❌ Tenant isolation test failed: ${error.message}`, 'error');
       throw error;
@@ -943,14 +1055,18 @@ export class HotelResearchFlowTest {
   // Utility Methods
   // ============================================
 
-  private async executeTest(id: string, name: string, testFunction: () => Promise<void>): Promise<void> {
+  private async executeTest(
+    id: string,
+    name: string,
+    testFunction: () => Promise<void>
+  ): Promise<void> {
     const step: TestStep = {
       id,
       name,
       status: 'running',
       startTime: performance.now(),
       endTime: 0,
-      duration: 0
+      duration: 0,
     };
 
     this.results.steps.push(step);
@@ -959,32 +1075,38 @@ export class HotelResearchFlowTest {
     try {
       this.log(`🧪 Running test: ${name}`, 'info');
       await testFunction();
-      
+
       step.status = 'passed';
       step.endTime = performance.now();
       step.duration = step.endTime - step.startTime;
       this.results.testsPassed++;
-      
-      this.log(`✅ Test passed: ${name} (${step.duration.toFixed(2)}ms)`, 'success');
+
+      this.log(
+        `✅ Test passed: ${name} (${step.duration.toFixed(2)}ms)`,
+        'success'
+      );
     } catch (error) {
       step.status = 'failed';
       step.endTime = performance.now();
       step.duration = step.endTime - step.startTime;
       step.error = error.message;
       this.results.testsFailed++;
-      
+
       this.results.errors.push({
         step: id,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
-      
+
       this.log(`❌ Test failed: ${name} - ${error.message}`, 'error');
       throw error;
     }
   }
 
-  private log(message: string, level: 'info' | 'success' | 'error' | 'warn' = 'info'): void {
+  private log(
+    message: string,
+    level: 'info' | 'success' | 'error' | 'warn' = 'info'
+  ): void {
     if (!this.config.verbose) return;
 
     const timestamp = new Date().toISOString();
@@ -992,7 +1114,7 @@ export class HotelResearchFlowTest {
       info: '📋',
       success: '✅',
       error: '❌',
-      warn: '⚠️'
+      warn: '⚠️',
     }[level];
 
     console.log(`[${timestamp}] ${prefix} ${message}`);
@@ -1004,7 +1126,10 @@ export class HotelResearchFlowTest {
 
   generateReport(): string {
     const duration = this.results.duration.toFixed(2);
-    const successRate = ((this.results.testsPassed / this.results.testsRun) * 100).toFixed(1);
+    const successRate = (
+      (this.results.testsPassed / this.results.testsRun) *
+      100
+    ).toFixed(1);
 
     return `
 # Hotel Research Flow Test Report
@@ -1043,27 +1168,40 @@ export class HotelResearchFlowTest {
 
 ## Test Steps
 
-${this.results.steps.map(step => `
+${this.results.steps
+  .map(
+    step => `
 ### ${step.name}
 - **Status**: ${step.status === 'passed' ? '✅ PASSED' : '❌ FAILED'}
 - **Duration**: ${step.duration.toFixed(2)}ms
 ${step.error ? `- **Error**: ${step.error}` : ''}
-`).join('')}
+`
+  )
+  .join('')}
 
 ## Errors
 
-${this.results.errors.length > 0 ? 
-  this.results.errors.map(error => `
+${
+  this.results.errors.length > 0
+    ? this.results.errors
+        .map(
+          error => `
 ### ${error.step}
 - **Message**: ${error.message}
 ${error.stack ? `- **Stack**: \`\`\`\n${error.stack}\n\`\`\`` : ''}
-`).join('') : 'No errors occurred.'}
+`
+        )
+        .join('')
+    : 'No errors occurred.'
+}
 
 ## Recommendations
 
-${this.results.success ? 
-  '✅ All tests passed! The hotel research flow is working correctly.' : 
-  '❌ Some tests failed. Please review the errors above and fix the issues before proceeding.'}
+${
+  this.results.success
+    ? '✅ All tests passed! The hotel research flow is working correctly.'
+    : '❌ Some tests failed. Please review the errors above and fix the issues before proceeding.'
+}
 
 ---
 Generated on: ${new Date().toISOString()}
@@ -1076,4 +1214,4 @@ Test Configuration: ${JSON.stringify(this.config, null, 2)}
 // Export for external use
 // ============================================
 
-export default HotelResearchFlowTest; 
+export default HotelResearchFlowTest;

@@ -30,14 +30,20 @@ Core Responsibilities:
  * @param userMessage The user's question or request.
  * @param context Optional context passages from the Knowledge Base.
  */
-export async function getAIChatResponse(userMessage: string, context?: string): Promise<string> {
+export async function getAIChatResponse(
+  userMessage: string,
+  context?: string
+): Promise<string> {
   // Build messages array
   const messages: ChatCompletionMessageParam[] = [];
   // System prompt
   messages.push({ role: 'system', content: SYSTEM_PROMPT });
   // Include retrieval context if provided
   if (context) {
-    messages.push({ role: 'system', content: `Relevant information from Knowledge Base:\n${context}` });
+    messages.push({
+      role: 'system',
+      content: `Relevant information from Knowledge Base:\n${context}`,
+    });
   }
   // Finally, the user's message
   messages.push({ role: 'user', content: userMessage });
@@ -45,7 +51,10 @@ export async function getAIChatResponse(userMessage: string, context?: string): 
   // Call OpenAI
   const response = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
-    messages: messages
+    messages,
   });
-  return response.choices[0]?.message?.content || "I'm sorry, I encountered an error processing your request.";
-} 
+  return (
+    response.choices[0]?.message?.content ||
+    "I'm sorry, I encountered an error processing your request."
+  );
+}

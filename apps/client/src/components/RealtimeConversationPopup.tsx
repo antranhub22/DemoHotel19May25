@@ -2,8 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
-import { STANDARD_POPUP_HEIGHT, STANDARD_POPUP_MAX_WIDTH, STANDARD_POPUP_MAX_HEIGHT_VH } from '@/context/PopupContext';
-import { extractRoomNumber, parseSummaryToOrderDetails } from '@/lib/summaryParser';
+import {
+  STANDARD_POPUP_HEIGHT,
+  STANDARD_POPUP_MAX_WIDTH,
+  STANDARD_POPUP_MAX_HEIGHT_VH,
+} from '@/context/PopupContext';
+import {
+  extractRoomNumber,
+  parseSummaryToOrderDetails,
+} from '@/lib/summaryParser';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -47,19 +54,26 @@ interface RealtimeConversationPopupProps {
   layout?: 'grid' | 'overlay'; // grid = desktop column, overlay = mobile bottom
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
+  isOpen,
+  onClose,
+  isRight,
+  layout = 'overlay',
+}) => {
   const { transcripts, modelOutput, language, callDuration } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrames = useRef<{[key: string]: number}>({});
-  
+  const animationFrames = useRef<{ [key: string]: number }>({});
+
   // ✅ SIMPLIFIED: Remove tab state - only conversation now
   // Remove: const [mode, setMode] = useState<PopupMode>('conversation');
   // Remove: const [showSummaryTab, setShowSummaryTab] = useState(false);
   // Remove: const [callHasEnded, setCallHasEnded] = useState(false);
-  
+
   // ✅ EXISTING STATES - UNCHANGED
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
-  const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
+  const [conversationTurns, setConversationTurns] = useState<
+    ConversationTurn[]
+  >([]);
 
   // ✅ EXISTING FUNCTIONS - UNCHANGED
   const cleanupAnimations = () => {
@@ -71,30 +85,32 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   // Remove: Summary data processing function getSummaryData
   // Remove: Track when call actually ends useEffect
-  // Remove: Check when to show summary tab useEffect  
+  // Remove: Check when to show summary tab useEffect
   // Remove: Auto-switch to summary when call ends useEffect
 
   // ✅ EXISTING EFFECT - UNCHANGED: Process transcripts into conversation turns
   useEffect(() => {
-    const sortedTranscripts = [...transcripts].sort((a, b) => 
-      a.timestamp.getTime() - b.timestamp.getTime()
+    const sortedTranscripts = [...transcripts].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
     );
 
     const turns: ConversationTurn[] = [];
     let currentTurn: ConversationTurn | null = null;
 
-    sortedTranscripts.forEach((message) => {
+    sortedTranscripts.forEach(message => {
       if (message.role === 'user') {
         // Always create a new turn for user messages
         currentTurn = {
           id: message.id.toString(),
           role: 'user',
           timestamp: message.timestamp,
-          messages: [{ 
-            id: message.id.toString(), 
-            content: message.content,
-            timestamp: message.timestamp 
-          }]
+          messages: [
+            {
+              id: message.id.toString(),
+              content: message.content,
+              timestamp: message.timestamp,
+            },
+          ],
         };
         turns.push(currentTurn);
       } else {
@@ -105,7 +121,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             id: message.id.toString(),
             role: 'assistant',
             timestamp: message.timestamp,
-            messages: []
+            messages: [],
           };
           turns.push(currentTurn);
         }
@@ -113,7 +129,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
         currentTurn.messages.push({
           id: message.id.toString(),
           content: message.content,
-          timestamp: message.timestamp
+          timestamp: message.timestamp,
         });
       }
     });
@@ -125,24 +141,24 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
   useEffect(() => {
     // Only animate if we're in conversation mode
     // if (mode !== 'conversation') return; // mode is removed
-    
+
     // Get all assistant messages from all turns
     const assistantMessages = conversationTurns
       .filter(turn => turn.role === 'assistant')
       .flatMap(turn => turn.messages);
-    
+
     assistantMessages.forEach(message => {
       // Skip if already animated
       if (visibleChars[message.id] === message.content.length) return;
-      
+
       let currentChar = visibleChars[message.id] || 0;
       const content = message.content;
-      
+
       const animate = () => {
         if (currentChar < content.length) {
           setVisibleChars(prev => ({
             ...prev,
-            [message.id]: currentChar + 1
+            [message.id]: currentChar + 1,
           }));
           currentChar++;
           animationFrames.current[message.id] = requestAnimationFrame(animate);
@@ -150,10 +166,10 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
           delete animationFrames.current[message.id];
         }
       };
-      
+
       animationFrames.current[message.id] = requestAnimationFrame(animate);
     });
-    
+
     // Cleanup on unmount or when turns change
     return () => cleanupAnimations();
   }, [conversationTurns]); // Removed mode dependency
@@ -169,45 +185,50 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
 
   // ✅ EXISTING LOGIC - UNCHANGED: Conditional styles based on layout
   const isGrid = layout === 'grid';
-  const popupStyles = isGrid ? {
-    // Desktop Grid: Normal popup styling
-    width: '100%',
-    maxWidth: '100%', // Fit parent column
-    height: '320px',
-    maxHeight: '320px',
-    background: 'rgba(255,255,255,0.15)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1.5px solid rgba(255,255,255,0.3)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-    borderRadius: 16, // Normal border radius
-    marginBottom: 0,
-  } : {
-    // Mobile Overlay: Bottom popup styling
-    width: '100%',
-    maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
-    height: `${STANDARD_POPUP_HEIGHT}px`,
-    maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
-    background: 'rgba(255,255,255,0.12)',
-    backdropFilter: 'blur(18px)',
-    WebkitBackdropFilter: 'blur(18px)',
-    border: '1.5px solid rgba(255,255,255,0.25)',
-    boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    marginBottom: 0,
-  };
+  const popupStyles = isGrid
+    ? {
+        // Desktop Grid: Normal popup styling
+        width: '100%',
+        maxWidth: '100%', // Fit parent column
+        height: '320px',
+        maxHeight: '320px',
+        background: 'rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1.5px solid rgba(255,255,255,0.3)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        borderRadius: 16, // Normal border radius
+        marginBottom: 0,
+      }
+    : {
+        // Mobile Overlay: Bottom popup styling
+        width: '100%',
+        maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
+        height: `${STANDARD_POPUP_HEIGHT}px`,
+        maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
+        background: 'rgba(255,255,255,0.12)',
+        backdropFilter: 'blur(18px)',
+        WebkitBackdropFilter: 'blur(18px)',
+        border: '1.5px solid rgba(255,255,255,0.25)',
+        boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 0,
+        marginBottom: 0,
+      };
 
   // 🆕 NEW: Conversation content component (extracted from existing logic)
   const ConversationContent: React.FC = () => (
-    <div 
+    <div
       ref={containerRef}
       className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
     >
       {conversationTurns.length === 0 && (
-        <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
+        <div
+          className="text-gray-400 text-base text-center select-none"
+          style={{ opacity: 0.7 }}
+        >
           {t('tap_to_speak', language)}
         </div>
       )}
@@ -217,7 +238,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
             <div className="flex-1">
               {turn.role === 'user' ? (
                 <div className="bg-gray-100 rounded-lg p-2">
-                  <p className="text-gray-800 text-sm">{turn.messages[0].content}</p>
+                  <p className="text-gray-800 text-sm">
+                    {turn.messages[0].content}
+                  </p>
                 </div>
               ) : (
                 <div className="bg-green-50 rounded-lg p-2">
@@ -225,32 +248,51 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
                     className="text-sm font-medium"
                     style={{
                       position: 'relative',
-                      background: 'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
+                      background:
+                        'linear-gradient(90deg, #FF512F, #F09819, #FFD700, #56ab2f, #43cea2, #1e90ff, #6a11cb, #FF512F)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       fontWeight: 600,
                       letterSpacing: 0.2,
-                      transition: 'background 0.5s'
+                      transition: 'background 0.5s',
                     }}
                   >
                     <span className="inline-flex flex-wrap">
                       {turn.messages.map((msg, idx) => {
-                        const content = msg.content.slice(0, visibleChars[msg.id] || 0);
+                        const content = msg.content.slice(
+                          0,
+                          visibleChars[msg.id] || 0
+                        );
                         return (
                           <span key={msg.id} style={{ whiteSpace: 'pre' }}>
                             {content}
                             {/* Blinking cursor cho từ cuối cùng khi đang xử lý */}
-                            {idx === turn.messages.length - 1 && turnIdx === 0 && visibleChars[msg.id] < msg.content.length && (
-                              <span className="animate-blink text-yellow-500" style={{marginLeft: 1}}>|</span>
-                            )}
+                            {idx === turn.messages.length - 1 &&
+                              turnIdx === 0 &&
+                              visibleChars[msg.id] < msg.content.length && (
+                                <span
+                                  className="animate-blink text-yellow-500"
+                                  style={{ marginLeft: 1 }}
+                                >
+                                  |
+                                </span>
+                              )}
                           </span>
                         );
                       })}
                     </span>
                     {/* 3 chấm nhấp nháy khi assistant đang nghe */}
-                    {turnIdx === 0 && turn.role === 'assistant' && visibleChars[turn.messages[turn.messages.length-1].id] === turn.messages[turn.messages.length-1].content.length && (
-                      <span className="ml-2 animate-ellipsis text-yellow-500">...</span>
-                    )}
+                    {turnIdx === 0 &&
+                      turn.role === 'assistant' &&
+                      visibleChars[
+                        turn.messages[turn.messages.length - 1].id
+                      ] ===
+                        turn.messages[turn.messages.length - 1].content
+                          .length && (
+                        <span className="ml-2 animate-ellipsis text-yellow-500">
+                          ...
+                        </span>
+                      )}
                   </p>
                 </div>
               )}
@@ -267,17 +309,22 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
   return (
     <>
       {/* Popup */}
-      <div 
+      <div
         className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isRight ? 'popup-right' : ''} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
         style={popupStyles}
       >
         {/* ✅ SIMPLIFIED Header - No tabs needed */}
-        <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
+        <div
+          className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10"
+          style={{ backdropFilter: 'blur(4px)' }}
+        >
           {/* Simple title instead of tabs */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">💬 {t('chat', language)}</span>
+            <span className="text-sm font-medium text-gray-700">
+              💬 {t('chat', language)}
+            </span>
           </div>
-          
+
           {/* ✅ EXISTING: Close button */}
           <button
             onClick={onClose}
@@ -357,4 +404,4 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ i
   );
 };
 
-export default RealtimeConversationPopup; 
+export default RealtimeConversationPopup;

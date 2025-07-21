@@ -18,10 +18,10 @@ interface NoPermissionMessageProps {
 }
 
 // Default no permission message component
-const NoPermissionMessage: React.FC<NoPermissionMessageProps> = ({ 
-  requiredPermission, 
+const NoPermissionMessage: React.FC<NoPermissionMessageProps> = ({
+  requiredPermission,
   requiredRole,
-  variant = 'alert'
+  variant = 'alert',
 }) => {
   if (variant === 'minimal') {
     return (
@@ -62,27 +62,27 @@ const NoPermissionMessage: React.FC<NoPermissionMessageProps> = ({
 
 /**
  * PermissionGuard - Protects UI elements based on user permissions
- * 
+ *
  * Usage examples:
- * 
+ *
  * // Protect by permission
  * <PermissionGuard requiredPermission="analytics.view">
  *   <AnalyticsChart />
  * </PermissionGuard>
- * 
+ *
  * // Protect by role
  * <PermissionGuard requiredRole="hotel-manager">
  *   <BillingSection />
  * </PermissionGuard>
- * 
+ *
  * // Custom fallback
- * <PermissionGuard 
+ * <PermissionGuard
  *   requiredPermission="billing.edit"
  *   fallback={<div>Chỉ manager mới có thể chỉnh sửa</div>}
  * >
  *   <EditBillingForm />
  * </PermissionGuard>
- * 
+ *
  * // Hide completely without fallback
  * <PermissionGuard requiredPermission="system.debug" showFallback={false}>
  *   <DebugPanel />
@@ -93,14 +93,14 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   requiredPermission,
   requiredRole,
   fallback,
-  showFallback = true
+  showFallback = true,
 }) => {
   const { user, hasPermission } = useAuth();
 
   // If no user is authenticated, don't show anything
   if (!user) {
     return showFallback ? (
-      <NoPermissionMessage 
+      <NoPermissionMessage
         requiredPermission={requiredPermission}
         requiredRole={requiredRole}
         variant="minimal"
@@ -110,21 +110,18 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   // Check role-based access
   if (requiredRole && user.role !== requiredRole) {
-    return showFallback ? (
-      fallback || (
-        <NoPermissionMessage 
-          requiredRole={requiredRole}
-          variant="alert"
-        />
-      )
-    ) : null;
+    return showFallback
+      ? fallback || (
+          <NoPermissionMessage requiredRole={requiredRole} variant="alert" />
+        )
+      : null;
   }
 
   // Check permission-based access
   if (requiredPermission) {
     // Handle both dot notation (standard) and colon notation (legacy)
     let module: string, action: string;
-    
+
     if (requiredPermission.includes(':')) {
       // Legacy colon notation: "analytics:view_advanced"
       [module, action] = requiredPermission.split(':');
@@ -132,16 +129,16 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
       // Standard dot notation: "analytics.view"
       [module, action] = requiredPermission.split('.');
     }
-    
+
     if (!hasPermission(module, action)) {
-      return showFallback ? (
-        fallback || (
-          <NoPermissionMessage 
-            requiredPermission={requiredPermission}
-            variant="alert"
-          />
-        )
-      ) : null;
+      return showFallback
+        ? fallback || (
+            <NoPermissionMessage
+              requiredPermission={requiredPermission}
+              variant="alert"
+            />
+          )
+        : null;
     }
   }
 
@@ -157,10 +154,7 @@ interface AdminOnlyProps {
 }
 
 export const AdminOnly: React.FC<AdminOnlyProps> = ({ children, fallback }) => (
-  <PermissionGuard 
-    requiredRole="hotel-manager" 
-    fallback={fallback}
-  >
+  <PermissionGuard requiredRole="hotel-manager" fallback={fallback}>
     {children}
   </PermissionGuard>
 );
@@ -171,10 +165,7 @@ interface StaffOnlyProps {
 }
 
 export const StaffOnly: React.FC<StaffOnlyProps> = ({ children, fallback }) => (
-  <PermissionGuard 
-    requiredRole="front-desk" 
-    fallback={fallback}
-  >
+  <PermissionGuard requiredRole="front-desk" fallback={fallback}>
     {children}
   </PermissionGuard>
 );
@@ -185,10 +176,7 @@ interface ITOnlyProps {
 }
 
 export const ITOnly: React.FC<ITOnlyProps> = ({ children, fallback }) => (
-  <PermissionGuard 
-    requiredRole="it-manager" 
-    fallback={fallback}
-  >
+  <PermissionGuard requiredRole="it-manager" fallback={fallback}>
     {children}
   </PermissionGuard>
 );
@@ -217,8 +205,8 @@ export const usePermissionCheck = () => {
     isManager,
     isStaff,
     isIT,
-    user
+    user,
   };
 };
 
-export default PermissionGuard; 
+export default PermissionGuard;

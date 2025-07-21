@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,24 +14,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Settings as SettingsIcon, 
-  Hotel, 
-  Bot, 
-  Bell, 
-  Shield, 
-  Key, 
-  Save, 
-  RefreshCw, 
+import {
+  Settings as SettingsIcon,
+  Hotel,
+  Bot,
+  Bell,
+  Shield,
+  Key,
+  Save,
+  RefreshCw,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
-  
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'success' | 'error'
+  >('idle');
+
   // Basic settings state
   const [generalSettings, setGeneralSettings] = useState({
     hotelName: 'Minh Hồng Hotel',
@@ -42,7 +44,7 @@ export const Settings: React.FC = () => {
     website: 'https://minhhonghotel.com',
     timezone: 'Asia/Ho_Chi_Minh',
     language: 'vi',
-    currency: 'VND'
+    currency: 'VND',
   });
 
   const [aiSettings, setAiSettings] = useState({
@@ -53,7 +55,8 @@ export const Settings: React.FC = () => {
     enableSmallTalk: true,
     enableTranscription: true,
     confidenceThreshold: 0.8,
-    customInstructions: 'Bạn là trợ lý AI của khách sạn Minh Hồng. Luôn lịch sự, nhiệt tình và chuyên nghiệp.'
+    customInstructions:
+      'Bạn là trợ lý AI của khách sạn Minh Hồng. Luôn lịch sự, nhiệt tình và chuyên nghiệp.',
   });
 
   const [notificationSettings, setNotificationSettings] = useState({
@@ -62,13 +65,13 @@ export const Settings: React.FC = () => {
     pushNotifications: true,
     newRequestAlert: true,
     systemAlerts: true,
-    dailyReports: true
+    dailyReports: true,
   });
 
   const handleSave = async () => {
     setLoading(true);
     setSaveStatus('saving');
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -110,7 +113,10 @@ export const Settings: React.FC = () => {
             <Bot className="h-4 w-4" />
             AI Assistant
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2"
+          >
             <Bell className="h-4 w-4" />
             Thông báo
           </TabsTrigger>
@@ -139,76 +145,108 @@ export const Settings: React.FC = () => {
                     <Input
                       id="hotelName"
                       value={generalSettings.hotelName}
-                      onChange={(e) => setGeneralSettings({...generalSettings, hotelName: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          hotelName: e.target.value,
+                        })
+                      }
                       placeholder="Tên khách sạn"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="phone">Số điện thoại</Label>
                     <Input
                       id="phone"
                       value={generalSettings.phone}
-                      onChange={(e) => setGeneralSettings({...generalSettings, phone: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          phone: e.target.value,
+                        })
+                      }
                       placeholder="+84 28 3823 4567"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
                       value={generalSettings.email}
-                      onChange={(e) => setGeneralSettings({...generalSettings, email: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          email: e.target.value,
+                        })
+                      }
                       placeholder="info@hotel.com"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="website">Website</Label>
                     <Input
                       id="website"
                       value={generalSettings.website}
-                      onChange={(e) => setGeneralSettings({...generalSettings, website: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          website: e.target.value,
+                        })
+                      }
                       placeholder="https://hotel.com"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="description">Mô tả</Label>
                     <Textarea
                       id="description"
                       value={generalSettings.description}
-                      onChange={(e) => setGeneralSettings({...generalSettings, description: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          description: e.target.value,
+                        })
+                      }
                       placeholder="Mô tả về khách sạn..."
                       rows={3}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="address">Địa chỉ</Label>
                     <Textarea
                       id="address"
                       value={generalSettings.address}
-                      onChange={(e) => setGeneralSettings({...generalSettings, address: e.target.value})}
+                      onChange={e =>
+                        setGeneralSettings({
+                          ...generalSettings,
+                          address: e.target.value,
+                        })
+                      }
                       placeholder="Địa chỉ đầy đủ"
                       rows={3}
                     />
                   </div>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {saveStatus === 'success' && (
                     <>
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-green-600">Đã lưu thành công</span>
+                      <span className="text-sm text-green-600">
+                        Đã lưu thành công
+                      </span>
                     </>
                   )}
                   {saveStatus === 'error' && (
@@ -218,7 +256,7 @@ export const Settings: React.FC = () => {
                     </>
                   )}
                 </div>
-                
+
                 <Button onClick={handleSave} disabled={loading}>
                   {loading ? (
                     <>
@@ -258,12 +296,14 @@ export const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={aiSettings.enabled}
-                  onCheckedChange={(checked) => setAiSettings({...aiSettings, enabled: checked})}
+                  onCheckedChange={checked =>
+                    setAiSettings({ ...aiSettings, enabled: checked })
+                  }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
@@ -271,23 +311,30 @@ export const Settings: React.FC = () => {
                     <Input
                       id="assistantName"
                       value={aiSettings.name}
-                      onChange={(e) => setAiSettings({...aiSettings, name: e.target.value})}
+                      onChange={e =>
+                        setAiSettings({ ...aiSettings, name: e.target.value })
+                      }
                       placeholder="Tên trợ lý AI"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="responseDelay">Độ trễ phản hồi (ms)</Label>
                     <Input
                       id="responseDelay"
                       type="number"
                       value={aiSettings.responseDelay}
-                      onChange={(e) => setAiSettings({...aiSettings, responseDelay: parseInt(e.target.value)})}
+                      onChange={e =>
+                        setAiSettings({
+                          ...aiSettings,
+                          responseDelay: parseInt(e.target.value),
+                        })
+                      }
                       min="0"
                       max="5000"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="confidenceThreshold">Ngưỡng tin cậy</Label>
                     <Input
@@ -295,55 +342,81 @@ export const Settings: React.FC = () => {
                       type="number"
                       step="0.1"
                       value={aiSettings.confidenceThreshold}
-                      onChange={(e) => setAiSettings({...aiSettings, confidenceThreshold: parseFloat(e.target.value)})}
+                      onChange={e =>
+                        setAiSettings({
+                          ...aiSettings,
+                          confidenceThreshold: parseFloat(e.target.value),
+                        })
+                      }
                       min="0"
                       max="1"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="enableSmallTalk">Kích hoạt trò chuyện phiếm</Label>
+                      <Label htmlFor="enableSmallTalk">
+                        Kích hoạt trò chuyện phiếm
+                      </Label>
                       <Switch
                         id="enableSmallTalk"
                         checked={aiSettings.enableSmallTalk}
-                        onCheckedChange={(checked) => setAiSettings({...aiSettings, enableSmallTalk: checked})}
+                        onCheckedChange={checked =>
+                          setAiSettings({
+                            ...aiSettings,
+                            enableSmallTalk: checked,
+                          })
+                        }
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="enableTranscription">Kích hoạt chuyển đổi văn bản</Label>
+                      <Label htmlFor="enableTranscription">
+                        Kích hoạt chuyển đổi văn bản
+                      </Label>
                       <Switch
                         id="enableTranscription"
                         checked={aiSettings.enableTranscription}
-                        onCheckedChange={(checked) => setAiSettings({...aiSettings, enableTranscription: checked})}
+                        onCheckedChange={checked =>
+                          setAiSettings({
+                            ...aiSettings,
+                            enableTranscription: checked,
+                          })
+                        }
                       />
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="customInstructions">Hướng dẫn tùy chỉnh</Label>
                 <Textarea
                   id="customInstructions"
                   value={aiSettings.customInstructions}
-                  onChange={(e) => setAiSettings({...aiSettings, customInstructions: e.target.value})}
+                  onChange={e =>
+                    setAiSettings({
+                      ...aiSettings,
+                      customInstructions: e.target.value,
+                    })
+                  }
                   placeholder="Hướng dẫn chi tiết cho AI về cách phục vụ khách hàng..."
                   rows={4}
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {saveStatus === 'success' && (
                     <>
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-green-600">Đã lưu thành công</span>
+                      <span className="text-sm text-green-600">
+                        Đã lưu thành công
+                      </span>
                     </>
                   )}
                   {saveStatus === 'error' && (
@@ -353,7 +426,7 @@ export const Settings: React.FC = () => {
                     </>
                   )}
                 </div>
-                
+
                 <Button onClick={handleSave} disabled={loading}>
                   {loading ? (
                     <>
@@ -393,38 +466,44 @@ export const Settings: React.FC = () => {
                         <Label>Email notifications</Label>
                         <Switch
                           checked={notificationSettings.emailNotifications}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            emailNotifications: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              emailNotifications: checked,
+                            })
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <Label>SMS notifications</Label>
                         <Switch
                           checked={notificationSettings.smsNotifications}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            smsNotifications: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              smsNotifications: checked,
+                            })
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <Label>Push notifications</Label>
                         <Switch
                           checked={notificationSettings.pushNotifications}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            pushNotifications: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              pushNotifications: checked,
+                            })
+                          }
                         />
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-medium mb-3">Loại thông báo</h4>
@@ -433,47 +512,55 @@ export const Settings: React.FC = () => {
                         <Label>Yêu cầu mới</Label>
                         <Switch
                           checked={notificationSettings.newRequestAlert}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            newRequestAlert: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              newRequestAlert: checked,
+                            })
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <Label>Cảnh báo hệ thống</Label>
                         <Switch
                           checked={notificationSettings.systemAlerts}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            systemAlerts: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              systemAlerts: checked,
+                            })
+                          }
                         />
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <Label>Báo cáo hàng ngày</Label>
                         <Switch
                           checked={notificationSettings.dailyReports}
-                          onCheckedChange={(checked) => setNotificationSettings({
-                            ...notificationSettings, 
-                            dailyReports: checked
-                          })}
+                          onCheckedChange={checked =>
+                            setNotificationSettings({
+                              ...notificationSettings,
+                              dailyReports: checked,
+                            })
+                          }
                         />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {saveStatus === 'success' && (
                     <>
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm text-green-600">Đã lưu thành công</span>
+                      <span className="text-sm text-green-600">
+                        Đã lưu thành công
+                      </span>
                     </>
                   )}
                   {saveStatus === 'error' && (
@@ -483,7 +570,7 @@ export const Settings: React.FC = () => {
                     </>
                   )}
                 </div>
-                
+
                 <Button onClick={handleSave} disabled={loading}>
                   {loading ? (
                     <>
@@ -529,4 +616,4 @@ export const Settings: React.FC = () => {
       </Tabs>
     </div>
   );
-}; 
+};

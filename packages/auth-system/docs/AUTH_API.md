@@ -2,13 +2,15 @@
 
 ## 📋 Overview
 
-Complete API reference for the DemoHotel19May authentication system, including JWT authentication, RBAC, and multi-tenant support.
+Complete API reference for the DemoHotel19May authentication system, including JWT authentication,
+RBAC, and multi-tenant support.
 
 ---
 
 ## 🚀 Base Configuration
 
 ### **Import Structure:**
+
 ```typescript
 // Main auth system import
 import { UnifiedAuthService, authenticateJWT, AuthUser } from './auth-system';
@@ -20,12 +22,13 @@ import { authenticateJWT } from './auth-system/middleware';
 ```
 
 ### **Environment Variables:**
+
 ```bash
 # Required
 DATABASE_URL=postgresql://...
 JWT_SECRET=your-super-secret-key
 
-# Optional  
+# Optional
 JWT_REFRESH_SECRET=your-refresh-secret
 NODE_ENV=production
 ```
@@ -37,39 +40,43 @@ NODE_ENV=production
 ### **UnifiedAuthService**
 
 #### `login(credentials: LoginCredentials): Promise<AuthResult>`
+
 Authenticate user with username/email and password.
 
 **Parameters:**
+
 ```typescript
 interface LoginCredentials {
-  username?: string;        // Primary login method
-  email?: string;           // Alternative login method  
-  password: string;         // Required password
-  tenantId?: string;        // Optional tenant specification
-  rememberMe?: boolean;     // Extended session option
+  username?: string; // Primary login method
+  email?: string; // Alternative login method
+  password: string; // Required password
+  tenantId?: string; // Optional tenant specification
+  rememberMe?: boolean; // Extended session option
 }
 ```
 
 **Returns:**
+
 ```typescript
 interface AuthResult {
   success: boolean;
   user?: AuthUser;
-  token?: string;           // Access token (JWT)
-  refreshToken?: string;    // Refresh token
-  expiresIn?: number;       // Token expiration (seconds)
-  tokenType?: string;       // Usually "Bearer"
-  error?: string;           // Error message if failed
-  errorCode?: string;       // Error code for programmatic handling
+  token?: string; // Access token (JWT)
+  refreshToken?: string; // Refresh token
+  expiresIn?: number; // Token expiration (seconds)
+  tokenType?: string; // Usually "Bearer"
+  error?: string; // Error message if failed
+  errorCode?: string; // Error code for programmatic handling
 }
 ```
 
 **Example:**
+
 ```typescript
 const result = await UnifiedAuthService.login({
   username: 'admin',
   password: 'admin123',
-  rememberMe: true
+  rememberMe: true,
 });
 
 if (result.success) {
@@ -83,16 +90,20 @@ if (result.success) {
 ---
 
 #### `verifyToken(token: string): Promise<AuthUser | null>`
+
 Verify and decode JWT token.
 
 **Parameters:**
+
 - `token`: JWT access token string
 
 **Returns:**
+
 - `AuthUser` object if valid
 - `null` if invalid or expired
 
 **Example:**
+
 ```typescript
 const user = await UnifiedAuthService.verifyToken(token);
 if (user) {
@@ -105,15 +116,19 @@ if (user) {
 ---
 
 #### `refreshToken(refreshToken: string): Promise<AuthResult>`
+
 Generate new access token using refresh token.
 
 **Parameters:**
+
 - `refreshToken`: Valid refresh token string
 
 **Returns:**
+
 - New `AuthResult` with fresh tokens
 
 **Example:**
+
 ```typescript
 const result = await UnifiedAuthService.refreshToken(oldRefreshToken);
 if (result.success) {
@@ -124,15 +139,19 @@ if (result.success) {
 ---
 
 #### `logout(token: string): Promise<{ success: boolean }>`
+
 Invalidate token and add to blacklist.
 
 **Parameters:**
+
 - `token`: Token to invalidate
 
 **Returns:**
+
 - Success status
 
 **Example:**
+
 ```typescript
 await UnifiedAuthService.logout(currentToken);
 localStorage.removeItem('token');
@@ -141,17 +160,21 @@ localStorage.removeItem('token');
 ---
 
 #### `hasPermission(user: AuthUser, module: string, action: string): boolean`
+
 Check if user has specific permission.
 
 **Parameters:**
+
 - `user`: AuthUser object
 - `module`: Permission module (e.g., 'dashboard', 'analytics')
 - `action`: Permission action (e.g., 'view', 'edit', 'delete')
 
 **Returns:**
+
 - Boolean permission result
 
 **Example:**
+
 ```typescript
 const canEdit = UnifiedAuthService.hasPermission(user, 'dashboard', 'edit');
 if (canEdit) {
@@ -164,9 +187,11 @@ if (canEdit) {
 ## 🛡️ Middleware
 
 ### **authenticateJWT**
+
 Express middleware for JWT authentication.
 
 **Usage:**
+
 ```typescript
 import { authenticateJWT } from './auth-system/middleware';
 
@@ -180,10 +205,12 @@ app.use('/api/admin', authenticateJWT);
 ```
 
 **Request Extensions:**
+
 ```typescript
 interface AuthenticatedRequest extends Request {
-  user: AuthUser;     // Authenticated user object
-  tenant: {           // Tenant information
+  user: AuthUser; // Authenticated user object
+  tenant: {
+    // Tenant information
     id: string;
     hotelName: string;
     subscriptionPlan: string;
@@ -195,9 +222,11 @@ interface AuthenticatedRequest extends Request {
 ---
 
 ### **requireRole(role: UserRole)**
+
 Middleware for role-based access control.
 
 **Usage:**
+
 ```typescript
 import { requireRole } from './auth-system/middleware';
 
@@ -212,23 +241,19 @@ app.get('/api/manager', authMiddleware.managerOrHigher, handler);
 ---
 
 ### **requirePermission(module: string, action: string)**
+
 Middleware for permission-based access control.
 
 **Usage:**
+
 ```typescript
 import { requirePermission } from './auth-system/middleware';
 
 // Check specific permission
-app.get('/api/analytics', [
-  authenticateJWT, 
-  requirePermission('analytics', 'view')
-], handler);
+app.get('/api/analytics', [authenticateJWT, requirePermission('analytics', 'view')], handler);
 
 // Convenience method
-app.get('/api/analytics', 
-  authMiddleware.withPermission('analytics', 'view'), 
-  handler
-);
+app.get('/api/analytics', authMiddleware.withPermission('analytics', 'view'), handler);
 ```
 
 ---
@@ -236,18 +261,20 @@ app.get('/api/analytics',
 ## 🎭 User Roles & Permissions
 
 ### **Available Roles:**
+
 ```typescript
-type UserRole = 
-  | 'hotel-manager'     // Full hotel management access
-  | 'front-desk'        // Guest service operations
-  | 'it-manager'        // System administration
-  | 'admin'             // Legacy: Full system access
-  | 'staff'             // Legacy: Basic operations
-  | 'manager'           // Legacy: Management operations
-  | 'super-admin';      // Legacy: System-wide access
+type UserRole =
+  | 'hotel-manager' // Full hotel management access
+  | 'front-desk' // Guest service operations
+  | 'it-manager' // System administration
+  | 'admin' // Legacy: Full system access
+  | 'staff' // Legacy: Basic operations
+  | 'manager' // Legacy: Management operations
+  | 'super-admin'; // Legacy: System-wide access
 ```
 
 ### **Permission Modules:**
+
 - `dashboard` - Dashboard access and configuration
 - `analytics` - Data analytics and reporting
 - `billing` - Billing and subscription management
@@ -264,6 +291,7 @@ type UserRole =
 - `logs` - System logs and debugging
 
 ### **Permission Actions:**
+
 - `view` - Read access
 - `edit` - Modify access
 - `delete` - Delete access
@@ -278,6 +306,7 @@ type UserRole =
 ## 🔧 Configuration
 
 ### **JWT Configuration:**
+
 ```typescript
 export const JWT_CONFIG = {
   SECRET: process.env.JWT_SECRET,
@@ -287,11 +316,12 @@ export const JWT_CONFIG = {
   REMEMBER_ME_EXPIRES_IN: '30d',
   ALGORITHM: 'HS256' as const,
   ISSUER: 'DemoHotel19May',
-  AUDIENCE: 'hotel-voice-assistant'
+  AUDIENCE: 'hotel-voice-assistant',
 };
 ```
 
 ### **Security Configuration:**
+
 ```typescript
 export const SECURITY_CONFIG = {
   MAX_LOGIN_ATTEMPTS: 5,
@@ -299,7 +329,7 @@ export const SECURITY_CONFIG = {
   BLACKLIST_CLEANUP_INTERVAL: 60 * 60 * 1000, // 1 hour
   PASSWORD_MIN_LENGTH: 8,
   REQUIRE_STRONG_PASSWORDS: true,
-  SESSION_TIMEOUT: 24 * 60 * 60 * 1000 // 24 hours
+  SESSION_TIMEOUT: 24 * 60 * 60 * 1000, // 24 hours
 };
 ```
 
@@ -308,6 +338,7 @@ export const SECURITY_CONFIG = {
 ## 🧪 Testing Examples
 
 ### **Unit Testing:**
+
 ```typescript
 import { UnifiedAuthService } from './auth-system/services';
 
@@ -315,9 +346,9 @@ describe('UnifiedAuthService', () => {
   test('should login with valid credentials', async () => {
     const result = await UnifiedAuthService.login({
       username: 'testuser',
-      password: 'testpass'
+      password: 'testpass',
     });
-    
+
     expect(result.success).toBe(true);
     expect(result.user).toBeDefined();
     expect(result.token).toBeDefined();
@@ -326,9 +357,9 @@ describe('UnifiedAuthService', () => {
   test('should reject invalid credentials', async () => {
     const result = await UnifiedAuthService.login({
       username: 'testuser',
-      password: 'wrongpass'
+      password: 'wrongpass',
     });
-    
+
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
   });
@@ -336,6 +367,7 @@ describe('UnifiedAuthService', () => {
 ```
 
 ### **Integration Testing:**
+
 ```typescript
 import request from 'supertest';
 import app from './app';
@@ -346,15 +378,15 @@ describe('Auth Integration', () => {
     const loginRes = await request(app)
       .post('/api/auth/login')
       .send({ username: 'admin', password: 'admin123' });
-    
+
     expect(loginRes.status).toBe(200);
     const { token } = loginRes.body;
-    
+
     // Access protected route
     const protectedRes = await request(app)
       .get('/api/protected')
       .set('Authorization', `Bearer ${token}`);
-    
+
     expect(protectedRes.status).toBe(200);
   });
 });
@@ -365,20 +397,22 @@ describe('Auth Integration', () => {
 ## 🚨 Error Handling
 
 ### **Error Codes:**
+
 ```typescript
-type AuthErrorCode = 
-  | 'INVALID_CREDENTIALS'    // Wrong username/password
-  | 'USER_INACTIVE'         // Account disabled
-  | 'TOKEN_EXPIRED'         // Token has expired
-  | 'TOKEN_INVALID'         // Invalid token format
-  | 'TOKEN_BLACKLISTED'     // Token has been revoked
+type AuthErrorCode =
+  | 'INVALID_CREDENTIALS' // Wrong username/password
+  | 'USER_INACTIVE' // Account disabled
+  | 'TOKEN_EXPIRED' // Token has expired
+  | 'TOKEN_INVALID' // Invalid token format
+  | 'TOKEN_BLACKLISTED' // Token has been revoked
   | 'INSUFFICIENT_PERMISSIONS' // Missing required permissions
-  | 'TENANT_NOT_FOUND'      // Invalid tenant
-  | 'SERVER_ERROR'          // Internal server error
-  | 'VALIDATION_ERROR';     // Input validation failed
+  | 'TENANT_NOT_FOUND' // Invalid tenant
+  | 'SERVER_ERROR' // Internal server error
+  | 'VALIDATION_ERROR'; // Input validation failed
 ```
 
 ### **Error Response Format:**
+
 ```typescript
 {
   success: false,
@@ -393,6 +427,7 @@ type AuthErrorCode =
 ## 🔄 Migration Guide
 
 ### **From Old System:**
+
 ```typescript
 // OLD:
 import { AuthUser } from '@shared/types/auth';
@@ -404,7 +439,9 @@ import { AuthUser, JWT_CONFIG, UnifiedAuthService } from './auth-system';
 ```
 
 ### **Path Aliases:**
+
 Add to `tsconfig.json`:
+
 ```json
 {
   "paths": {
@@ -420,4 +457,5 @@ Add to `tsconfig.json`:
 ---
 
 **📝 Last Updated**: July 20, 2024  
-**🔗 Related**: [JWT Guide](./JWT_GUIDE.md) | [RBAC Guide](./RBAC_GUIDE.md) | [Deployment Guide](./DEPLOYMENT.md) 
+**🔗 Related**: [JWT Guide](./JWT_GUIDE.md) | [RBAC Guide](./RBAC_GUIDE.md) |
+[Deployment Guide](./DEPLOYMENT.md)

@@ -1,8 +1,21 @@
 import { eq, and, sql } from 'drizzle-orm';
 import { db } from '@server/db';
-import { tenants, hotelProfiles, staff, call, transcript, request, message } from '@shared/schema';
+import {
+  tenants,
+  hotelProfiles,
+  staff,
+  call,
+  transcript,
+  request,
+  message,
+} from '@shared/schema';
 import { z } from 'zod';
-import { tenantMapper, hotelProfileMapper, type TenantCamelCase, type InsertHotelProfileCamelCase } from '@shared/db/transformers';
+import {
+  tenantMapper,
+  hotelProfileMapper,
+  type TenantCamelCase,
+  type InsertHotelProfileCamelCase,
+} from '@shared/db/transformers';
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -57,7 +70,6 @@ export interface SubscriptionLimits {
 // ============================================
 
 export class TenantService {
-  
   // ============================================
   // Tenant Creation & Management
   // ============================================
@@ -68,14 +80,16 @@ export class TenantService {
   async createTenant(config: TenantConfig): Promise<string> {
     try {
       console.log(`🏨 Creating new tenant: ${config.hotelName}`);
-      
+
       // Validate subdomain availability
       await this.validateSubdomain(config.subdomain);
-      
+
       // Set default feature flags based on subscription plan
       const featureFlags = this.getDefaultFeatureFlags(config.subscriptionPlan);
-      const subscriptionLimits = this.getSubscriptionLimits(config.subscriptionPlan);
-      
+      const subscriptionLimits = this.getSubscriptionLimits(
+        config.subscriptionPlan
+      );
+
       // Create tenant using field mapper
       const tenantId = `tenant-${Date.now()}`;
       const tenantData = tenantMapper.toDatabase({
@@ -93,11 +107,11 @@ export class TenantService {
         whiteLabel: featureFlags.whiteLabel,
         dataRetentionDays: subscriptionLimits.dataRetentionDays,
         monthlyCallLimit: subscriptionLimits.monthlyCallLimit,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
-      
+
       const [tenant] = await db.insert(tenants).values(tenantData).returning();
-      
+
       // Create default hotel profile using field mapper
       const profileData = hotelProfileMapper.toDatabase({
         id: `profile-${tenant.id}`,
@@ -107,11 +121,11 @@ export class TenantService {
         vapiAssistantId: null,
         servicesConfig: null,
         knowledgeBase: null,
-        systemPrompt: null
+        systemPrompt: null,
       });
-      
+
       await db.insert(hotelProfiles).values(profileData);
-      
+
       console.log(`✅ Tenant created successfully: ${tenant.id}`);
       return tenant.id;
     } catch (error) {
@@ -146,16 +160,16 @@ export class TenantService {
           multi_location: tenants.multi_location,
           white_label: tenants.white_label,
           data_retention_days: tenants.data_retention_days,
-          monthly_call_limit: tenants.monthly_call_limit
+          monthly_call_limit: tenants.monthly_call_limit,
         })
         .from(tenants)
         .where(eq(tenants.id, tenantId))
         .limit(1);
-      
+
       if (!tenant) {
         throw new TenantError('Tenant not found', 'TENANT_NOT_FOUND', 404);
       }
-      
+
       return tenant;
     } catch (error) {
       if (error instanceof TenantError) throw error;
@@ -189,16 +203,16 @@ export class TenantService {
           multi_location: tenants.multi_location,
           white_label: tenants.white_label,
           data_retention_days: tenants.data_retention_days,
-          monthly_call_limit: tenants.monthly_call_limit
+          monthly_call_limit: tenants.monthly_call_limit,
         })
         .from(tenants)
         .where(eq(tenants.subdomain, subdomain))
         .limit(1);
-      
+
       if (!tenant) {
         throw new TenantError('Tenant not found', 'TENANT_NOT_FOUND', 404);
       }
-      
+
       return tenant;
     } catch (error) {
       if (error instanceof TenantError) throw error;
@@ -213,30 +227,33 @@ export class TenantService {
   /**
    * Update tenant configuration
    */
-  async updateTenant(tenantId: string, updates: Partial<TenantConfig>): Promise<void> {
+  async updateTenant(
+    tenantId: string,
+    updates: Partial<TenantConfig>
+  ): Promise<void> {
     try {
       console.log(`🔄 Updating tenant: ${tenantId}`);
-      
+
       const updateData: any = {};
-      
+
       // Only update provided fields
       if (updates.hotelName) updateData.hotelName = updates.hotelName;
       if (updates.customDomain) updateData.customDomain = updates.customDomain;
       if (updates.subscriptionPlan) {
         updateData.subscriptionPlan = updates.subscriptionPlan;
         // Update feature flags and limits based on new plan
-        const featureFlags = this.getDefaultFeatureFlags(updates.subscriptionPlan);
+        const featureFlags = this.getDefaultFeatureFlags(
+          updates.subscriptionPlan
+        );
         const limits = this.getSubscriptionLimits(updates.subscriptionPlan);
         Object.assign(updateData, featureFlags, limits);
       }
-      if (updates.subscriptionStatus) updateData.subscriptionStatus = updates.subscriptionStatus;
+      if (updates.subscriptionStatus)
+        updateData.subscriptionStatus = updates.subscriptionStatus;
       if (updates.trialEndsAt) updateData.trialEndsAt = updates.trialEndsAt;
-      
-      await db
-        .update(tenants)
-        .set(updateData)
-        .where(eq(tenants.id, tenantId));
-      
+
+      await db.update(tenants).set(updateData).where(eq(tenants.id, tenantId));
+
       console.log(`✅ Tenant updated successfully: ${tenantId}`);
     } catch (error) {
       console.error(`Failed to update tenant ${tenantId}:`, error);
@@ -254,16 +271,18 @@ export class TenantService {
   async deleteTenant(tenantId: string): Promise<void> {
     try {
       console.log(`🗑️ Deleting tenant: ${tenantId}`);
-      
+
       // Delete in order due to foreign key constraints
       await db.delete(message).where(eq(message.tenant_id, tenantId));
       await db.delete(transcript).where(eq(transcript.tenant_id, tenantId));
       await db.delete(request).where(eq(request.tenant_id, tenantId));
       await db.delete(call).where(eq(call.tenant_id, tenantId));
       await db.delete(staff).where(eq(staff.tenant_id, tenantId));
-      await db.delete(hotelProfiles).where(eq(hotelProfiles.tenant_id, tenantId));
+      await db
+        .delete(hotelProfiles)
+        .where(eq(hotelProfiles.tenant_id, tenantId));
       await db.delete(tenants).where(eq(tenants.id, tenantId));
-      
+
       console.log(`✅ Tenant deleted successfully: ${tenantId}`);
     } catch (error) {
       console.error(`Failed to delete tenant ${tenantId}:`, error);
@@ -282,7 +301,10 @@ export class TenantService {
   /**
    * Check if tenant has access to a specific feature
    */
-  async hasFeatureAccess(tenantId: string, feature: keyof FeatureFlags): Promise<boolean> {
+  async hasFeatureAccess(
+    tenantId: string,
+    feature: keyof FeatureFlags
+  ): Promise<boolean> {
     try {
       const tenant = await this.getTenantById(tenantId);
       const featureFlags = this.getCurrentFeatureFlags(tenant);
@@ -299,13 +321,13 @@ export class TenantService {
   getCurrentFeatureFlags(tenant: any): FeatureFlags {
     const plan = tenant.subscriptionPlan;
     const baseFlags = this.getDefaultFeatureFlags(plan);
-    
+
     // Override with tenant-specific settings
     return {
       ...baseFlags,
       voiceCloning: tenant.voiceCloning || baseFlags.voiceCloning,
       multiLocation: tenant.multiLocation || baseFlags.multiLocation,
-      whiteLabel: tenant.whiteLabel || baseFlags.whiteLabel
+      whiteLabel: tenant.whiteLabel || baseFlags.whiteLabel,
     };
   }
 
@@ -323,7 +345,7 @@ export class TenantService {
           customIntegrations: false,
           prioritySupport: false,
           apiAccess: false,
-          bulkOperations: false
+          bulkOperations: false,
         };
       case 'basic':
         return {
@@ -334,7 +356,7 @@ export class TenantService {
           customIntegrations: false,
           prioritySupport: false,
           apiAccess: true,
-          bulkOperations: false
+          bulkOperations: false,
         };
       case 'premium':
         return {
@@ -345,7 +367,7 @@ export class TenantService {
           customIntegrations: true,
           prioritySupport: true,
           apiAccess: true,
-          bulkOperations: true
+          bulkOperations: true,
         };
       case 'enterprise':
         return {
@@ -356,7 +378,7 @@ export class TenantService {
           customIntegrations: true,
           prioritySupport: true,
           apiAccess: true,
-          bulkOperations: true
+          bulkOperations: true,
         };
       default:
         return this.getDefaultFeatureFlags('trial');
@@ -379,7 +401,7 @@ export class TenantService {
           monthlyCallLimit: 100,
           dataRetentionDays: 30,
           maxStaffUsers: 2,
-          maxHotelLocations: 1
+          maxHotelLocations: 1,
         };
       case 'basic':
         return {
@@ -388,7 +410,7 @@ export class TenantService {
           monthlyCallLimit: 1000,
           dataRetentionDays: 90,
           maxStaffUsers: 5,
-          maxHotelLocations: 1
+          maxHotelLocations: 1,
         };
       case 'premium':
         return {
@@ -397,7 +419,7 @@ export class TenantService {
           monthlyCallLimit: 5000,
           dataRetentionDays: 365,
           maxStaffUsers: 15,
-          maxHotelLocations: 5
+          maxHotelLocations: 5,
         };
       case 'enterprise':
         return {
@@ -406,7 +428,7 @@ export class TenantService {
           monthlyCallLimit: -1, // Unlimited
           dataRetentionDays: -1, // Unlimited
           maxStaffUsers: -1, // Unlimited
-          maxHotelLocations: -1 // Unlimited
+          maxHotelLocations: -1, // Unlimited
         };
       default:
         return this.getSubscriptionLimits('trial');
@@ -416,35 +438,46 @@ export class TenantService {
   /**
    * Check if tenant is within subscription limits
    */
-  async checkSubscriptionLimits(tenantId: string): Promise<{ withinLimits: boolean; violations: string[] }> {
+  async checkSubscriptionLimits(
+    tenantId: string
+  ): Promise<{ withinLimits: boolean; violations: string[] }> {
     try {
       const tenant = await this.getTenantById(tenantId);
       const limits = this.getSubscriptionLimits(tenant.subscriptionPlan);
       const usage = await this.getTenantUsage(tenantId);
-      
+
       const violations: string[] = [];
-      
+
       // Check monthly call limit
-      if (limits.monthlyCallLimit > 0 && usage.callsThisMonth >= limits.monthlyCallLimit) {
+      if (
+        limits.monthlyCallLimit > 0 &&
+        usage.callsThisMonth >= limits.monthlyCallLimit
+      ) {
         violations.push('Monthly call limit exceeded');
       }
-      
+
       // Check voice limit
       if (limits.maxVoices > 0 && usage.voicesUsed >= limits.maxVoices) {
         violations.push('Voice limit exceeded');
       }
-      
+
       // Check language limit
-      if (limits.maxLanguages > 0 && usage.languagesUsed >= limits.maxLanguages) {
+      if (
+        limits.maxLanguages > 0 &&
+        usage.languagesUsed >= limits.maxLanguages
+      ) {
         violations.push('Language limit exceeded');
       }
-      
+
       return {
         withinLimits: violations.length === 0,
-        violations
+        violations,
       };
     } catch (error) {
-      console.error(`Failed to check subscription limits for ${tenantId}:`, error);
+      console.error(
+        `Failed to check subscription limits for ${tenantId}:`,
+        error
+      );
       return { withinLimits: false, violations: ['Unable to check limits'] };
     }
   }
@@ -456,7 +489,7 @@ export class TenantService {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      
+
       // Get calls this month
       const [callsResult] = await db
         .select({ count: sql<number>`count(*)` })
@@ -467,28 +500,32 @@ export class TenantService {
             sql`${call.created_at} >= ${startOfMonth}`
           )
         );
-      
+
       // Get unique languages used
       const languagesResult = await db
         .selectDistinct({ language: call.language })
         .from(call)
         .where(eq(call.tenant_id, tenantId));
-      
+
       // Get storage usage (approximate)
       const [storageResult] = await db
-        .select({ 
+        .select({
           transcripts: sql<number>`count(*)`,
-          avgLength: sql<number>`avg(length(${transcript.content}))`
+          avgLength: sql<number>`avg(length(${transcript.content}))`,
         })
         .from(transcript)
         .where(eq(transcript.tenant_id, tenantId));
-      
+
       return {
         callsThisMonth: callsResult?.count || 0,
         voicesUsed: 1, // Note: Voice tracking to be implemented in future release
         languagesUsed: languagesResult.filter((l: any) => l.language).length,
-        storageUsed: Math.round((storageResult?.transcripts || 0) * (storageResult?.avgLength || 0) / 1024), // KB
-        dataRetentionDays: 90 // Note: Dynamic tenant settings to be implemented
+        storageUsed: Math.round(
+          ((storageResult?.transcripts || 0) *
+            (storageResult?.avgLength || 0)) /
+            1024
+        ), // KB
+        dataRetentionDays: 90, // Note: Dynamic tenant settings to be implemented
       };
     } catch (error) {
       console.error(`Failed to get tenant usage for ${tenantId}:`, error);
@@ -497,7 +534,7 @@ export class TenantService {
         voicesUsed: 0,
         languagesUsed: 0,
         storageUsed: 0,
-        dataRetentionDays: 90
+        dataRetentionDays: 90,
       };
     }
   }
@@ -520,14 +557,16 @@ export class TenantService {
     try {
       const tenant = await this.getTenantById(tenantId);
       const retentionDays = tenant.dataRetentionDays || 90;
-      
+
       if (retentionDays <= 0) return; // Unlimited retention
-      
+
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-      
-      console.log(`🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`);
-      
+
+      console.log(
+        `🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`
+      );
+
       // Delete old transcripts
       await db
         .delete(transcript)
@@ -537,7 +576,7 @@ export class TenantService {
             sql`${transcript.timestamp} < ${cutoffDate}`
           )
         );
-      
+
       // Delete old calls
       await db
         .delete(call)
@@ -547,7 +586,7 @@ export class TenantService {
             sql`${call.created_at} < ${cutoffDate}`
           )
         );
-      
+
       console.log(`✅ Data cleanup completed for tenant ${tenantId}`);
     } catch (error) {
       console.error(`Failed to cleanup data for tenant ${tenantId}:`, error);
@@ -575,20 +614,16 @@ export class TenantService {
         400
       );
     }
-    
+
     // Check availability
     const [existing] = await db
       .select()
       .from(tenants)
       .where(eq(tenants.subdomain, subdomain))
       .limit(1);
-    
+
     if (existing) {
-      throw new TenantError(
-        'Subdomain already exists',
-        'SUBDOMAIN_TAKEN',
-        409
-      );
+      throw new TenantError('Subdomain already exists', 'SUBDOMAIN_TAKEN', 409);
     }
   }
 
@@ -606,40 +641,44 @@ export class TenantService {
    */
   isSubscriptionActive(tenant: any): boolean {
     if (tenant.subscriptionStatus !== 'active') return false;
-    
+
     // Check trial expiration
     if (tenant.subscriptionPlan === 'trial' && tenant.trialEndsAt) {
       return new Date() < new Date(tenant.trialEndsAt);
     }
-    
+
     return true;
   }
 
   /**
    * Get tenant service health status
    */
-  async getServiceHealth(): Promise<{ status: string; tenantsCount: number; activeSubscriptions: number }> {
+  async getServiceHealth(): Promise<{
+    status: string;
+    tenantsCount: number;
+    activeSubscriptions: number;
+  }> {
     try {
       const [tenantsResult] = await db
         .select({ count: sql<number>`count(*)` })
         .from(tenants);
-      
+
       const [activeResult] = await db
         .select({ count: sql<number>`count(*)` })
         .from(tenants)
         .where(eq(tenants.subscription_status, 'active'));
-      
+
       return {
         status: 'healthy',
         tenantsCount: tenantsResult?.count || 0,
-        activeSubscriptions: activeResult?.count || 0
+        activeSubscriptions: activeResult?.count || 0,
       };
     } catch (error) {
       console.error('Failed to get service health:', error);
       return {
         status: 'unhealthy',
         tenantsCount: 0,
-        activeSubscriptions: 0
+        activeSubscriptions: 0,
       };
     }
   }
@@ -664,4 +703,4 @@ export class TenantError extends Error {
 // Export Service
 // ============================================
 
-export default TenantService; 
+export default TenantService;

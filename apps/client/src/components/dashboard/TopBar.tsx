@@ -10,16 +10,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Bell, 
-  Menu, 
-  Settings, 
-  LogOut, 
+import {
+  Bell,
+  Menu,
+  Settings,
+  LogOut,
   HelpCircle,
   User,
   Sun,
   Moon,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 
@@ -53,28 +53,36 @@ interface TopBarProps {
 }
 
 // Notification dropdown component
-const NotificationDropdown = ({ 
-  count, 
-  items 
-}: { 
-  count: number; 
-  items: TopBarProps['notifications']['items']; 
+const NotificationDropdown = ({
+  count,
+  items,
+}: {
+  count: number;
+  items: TopBarProps['notifications']['items'];
 }) => {
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'success': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'error': return 'text-red-600';
-      default: return 'text-blue-600';
+      case 'success':
+        return 'text-green-600';
+      case 'warning':
+        return 'text-yellow-600';
+      case 'error':
+        return 'text-red-600';
+      default:
+        return 'text-blue-600';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'success': return '✓';
-      case 'warning': return '⚠';
-      case 'error': return '✕';
-      default: return 'ℹ';
+      case 'success':
+        return '✓';
+      case 'warning':
+        return '⚠';
+      case 'error':
+        return '✕';
+      default:
+        return 'ℹ';
     }
   };
 
@@ -100,23 +108,27 @@ const NotificationDropdown = ({
           )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
+
         {items.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             Không có thông báo mới
           </div>
         ) : (
           <div className="max-h-80 overflow-y-auto">
-            {items.slice(0, 5).map((notification) => (
-              <DropdownMenuItem 
-                key={notification.id} 
+            {items.slice(0, 5).map(notification => (
+              <DropdownMenuItem
+                key={notification.id}
                 className="flex-col items-start p-3 space-y-1"
               >
                 <div className="flex items-center gap-2 w-full">
-                  <span className={`text-sm ${getTypeColor(notification.type)}`}>
+                  <span
+                    className={`text-sm ${getTypeColor(notification.type)}`}
+                  >
                     {getTypeIcon(notification.type)}
                   </span>
-                  <span className="font-medium text-sm">{notification.title}</span>
+                  <span className="font-medium text-sm">
+                    {notification.title}
+                  </span>
                   {!notification.read && (
                     <div className="w-2 h-2 bg-blue-500 rounded-full ml-auto"></div>
                   )}
@@ -129,7 +141,7 @@ const NotificationDropdown = ({
                 </span>
               </DropdownMenuItem>
             ))}
-            
+
             {items.length > 5 && (
               <>
                 <DropdownMenuSeparator />
@@ -146,21 +158,25 @@ const NotificationDropdown = ({
 };
 
 // User menu component
-const UserMenu = ({ 
-  user, 
-  tenantData, 
-  onLogout 
-}: { 
-  user: TopBarProps['user']; 
+const UserMenu = ({
+  user,
+  tenantData,
+  onLogout,
+}: {
+  user: TopBarProps['user'];
   tenantData: TopBarProps['tenantData'];
   onLogout: () => void;
 }) => {
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return 'Quản trị viên';
-      case 'manager': return 'Quản lý';
-      case 'staff': return 'Nhân viên';
-      default: return role;
+      case 'admin':
+        return 'Quản trị viên';
+      case 'manager':
+        return 'Quản lý';
+      case 'staff':
+        return 'Nhân viên';
+      default:
+        return role;
     }
   };
 
@@ -186,9 +202,9 @@ const UserMenu = ({
             </Badge>
           </div>
         </DropdownMenuLabel>
-        
+
         <DropdownMenuSeparator />
-        
+
         <div className="px-2 py-1">
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Khách sạn hiện tại:
@@ -198,27 +214,27 @@ const UserMenu = ({
             ID: {tenantData.id}
           </div>
         </div>
-        
+
         <DropdownMenuSeparator />
-        
+
         <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
           Hồ sơ cá nhân
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           Cài đặt tài khoản
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem>
           <HelpCircle className="mr-2 h-4 w-4" />
           Trợ giúp & Hỗ trợ
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
-        
-        <DropdownMenuItem 
+
+        <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
           onClick={onLogout}
         >
@@ -241,45 +257,48 @@ const ThemeToggle = () => {
   };
 
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={toggleTheme}
       className="h-9 w-9"
     >
-      {isDark ? (
-        <Sun className="h-4 w-4" />
-      ) : (
-        <Moon className="h-4 w-4" />
-      )}
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   );
 };
 
 // Breadcrumb component
-const Breadcrumb = ({ 
-  title, 
-  description 
-}: { 
-  title: string; 
-  description?: string; 
+const Breadcrumb = ({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
 }) => {
   const [location] = useLocation();
   const pathSegments = location.substring(1).split('/').filter(Boolean);
-  
+
   const getBreadcrumbPath = (index: number) => {
-    return '/' + pathSegments.slice(0, index + 1).join('/');
+    return `/${pathSegments.slice(0, index + 1).join('/')}`;
   };
 
   const getSegmentLabel = (segment: string) => {
     switch (segment) {
-      case 'dashboard': return 'Tổng quan';
-      case 'setup': return 'Thiết lập';
-      case 'analytics': return 'Phân tích';
-      case 'settings': return 'Cài đặt';
-      case 'billing': return 'Thanh toán';
-      case 'team': return 'Nhóm';
-      default: return segment;
+      case 'dashboard':
+        return 'Tổng quan';
+      case 'setup':
+        return 'Thiết lập';
+      case 'analytics':
+        return 'Phân tích';
+      case 'settings':
+        return 'Cài đặt';
+      case 'billing':
+        return 'Thanh toán';
+      case 'team':
+        return 'Nhóm';
+      default:
+        return segment;
     }
   };
 
@@ -292,7 +311,7 @@ const Breadcrumb = ({
         {pathSegments.map((segment, index) => (
           <React.Fragment key={index}>
             <ChevronRight className="h-4 w-4" />
-            <Link 
+            <Link
               href={getBreadcrumbPath(index)}
               className="hover:text-primary"
             >
@@ -305,9 +324,7 @@ const Breadcrumb = ({
         {title}
       </h1>
       {description && (
-        <p className="text-sm text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
   );
@@ -319,18 +336,27 @@ export const TopBar: React.FC<TopBarProps> = ({
   tenantData,
   notifications,
   user,
-  onLogout
+  onLogout,
 }) => {
   // Get current page title from URL or context
   const getCurrentPageInfo = () => {
     const path = window.location.pathname;
-    
+
     if (path === '/dashboard') {
-      return { title: 'Tổng quan', description: 'Theo dõi hiệu suất AI Assistant' };
+      return {
+        title: 'Tổng quan',
+        description: 'Theo dõi hiệu suất AI Assistant',
+      };
     } else if (path.includes('/setup')) {
-      return { title: 'Thiết lập Assistant', description: 'Cấu hình AI Assistant' };
+      return {
+        title: 'Thiết lập Assistant',
+        description: 'Cấu hình AI Assistant',
+      };
     } else if (path.includes('/analytics')) {
-      return { title: 'Phân tích', description: 'Báo cáo và thống kê chi tiết' };
+      return {
+        title: 'Phân tích',
+        description: 'Báo cáo và thống kê chi tiết',
+      };
     } else if (path.includes('/settings')) {
       return { title: 'Cài đặt', description: 'Quản lý thông tin khách sạn' };
     } else if (path.includes('/billing')) {
@@ -338,7 +364,7 @@ export const TopBar: React.FC<TopBarProps> = ({
     } else if (path.includes('/team')) {
       return { title: 'Nhóm', description: 'Quản lý team và permissions' };
     }
-    
+
     return { title: 'Dashboard', description: '' };
   };
 
@@ -358,50 +384,54 @@ export const TopBar: React.FC<TopBarProps> = ({
           >
             <Menu className="h-5 w-5" />
           </Button>
-          
+
           {/* Page info with breadcrumb */}
-          <Breadcrumb 
-            title={pageInfo.title} 
+          <Breadcrumb
+            title={pageInfo.title}
             description={pageInfo.description}
           />
         </div>
-        
+
         {/* Center section - spans 4 columns, hidden on mobile */}
         <div className="hidden lg:col-span-4 lg:flex items-center justify-center">
           {/* Subscription status */}
           <div className="flex items-center gap-2">
-            <Badge 
-              variant={tenantData.subscriptionStatus === 'active' ? 'default' : 'destructive'}
+            <Badge
+              variant={
+                tenantData.subscriptionStatus === 'active'
+                  ? 'default'
+                  : 'destructive'
+              }
               className="text-xs"
             >
-              {tenantData.subscriptionPlan === 'trial' ? 'Dùng thử' : 
-               tenantData.subscriptionPlan === 'basic' ? 'Cơ bản' :
-               tenantData.subscriptionPlan === 'premium' ? 'Cao cấp' : 'Doanh nghiệp'}
+              {tenantData.subscriptionPlan === 'trial'
+                ? 'Dùng thử'
+                : tenantData.subscriptionPlan === 'basic'
+                  ? 'Cơ bản'
+                  : tenantData.subscriptionPlan === 'premium'
+                    ? 'Cao cấp'
+                    : 'Doanh nghiệp'}
             </Badge>
           </div>
         </div>
-        
+
         {/* Right section - spans 4 columns on desktop, full width on mobile */}
         <div className="col-span-12 lg:col-span-4 flex items-center justify-end gap-2">
           {/* Theme toggle */}
           <ThemeToggle />
-          
+
           {/* Notifications */}
-          <NotificationDropdown 
-            count={notifications.count} 
+          <NotificationDropdown
+            count={notifications.count}
             items={notifications.items}
           />
-          
+
           {/* User menu */}
-          <UserMenu 
-            user={user} 
-            tenantData={tenantData}
-            onLogout={onLogout}
-          />
+          <UserMenu user={user} tenantData={tenantData} onLogout={onLogout} />
         </div>
       </div>
     </header>
   );
 };
 
-export default TopBar; 
+export default TopBar;

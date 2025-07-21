@@ -1,18 +1,24 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
-  Info, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Info,
   AlertTriangle,
   CheckCircle2,
   Clock,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 // Types
@@ -50,12 +56,12 @@ const formatValue = (
   suffix?: string
 ): string => {
   if (typeof value === 'string') return value;
-  
+
   switch (format) {
     case 'currency':
       return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
-        currency: 'VND'
+        currency: 'VND',
       }).format(value);
     case 'percentage':
       return `${value}%`;
@@ -76,23 +82,23 @@ const formatValue = (
 // Get trend icon and color
 const getTrendInfo = (change?: MetricCardProps['change']) => {
   if (!change) return null;
-  
+
   const { type, value } = change;
-  
+
   switch (type) {
     case 'increase':
       return {
         icon: TrendingUp,
         color: 'text-green-600',
         bg: 'bg-green-50',
-        sign: '+'
+        sign: '+',
       };
     case 'decrease':
       return {
         icon: TrendingDown,
         color: 'text-red-600',
         bg: 'bg-red-50',
-        sign: '-'
+        sign: '-',
       };
     case 'neutral':
     default:
@@ -100,7 +106,7 @@ const getTrendInfo = (change?: MetricCardProps['change']) => {
         icon: Minus,
         color: 'text-gray-600',
         bg: 'bg-gray-50',
-        sign: ''
+        sign: '',
       };
   }
 };
@@ -112,25 +118,25 @@ const getStatusInfo = (status?: string) => {
       return {
         icon: CheckCircle2,
         color: 'text-green-600',
-        bg: 'bg-green-100'
+        bg: 'bg-green-100',
       };
     case 'warning':
       return {
         icon: AlertTriangle,
         color: 'text-yellow-600',
-        bg: 'bg-yellow-100'
+        bg: 'bg-yellow-100',
       };
     case 'error':
       return {
         icon: AlertTriangle,
         color: 'text-red-600',
-        bg: 'bg-red-100'
+        bg: 'bg-red-100',
       };
     default:
       return {
         icon: Info,
         color: 'text-blue-600',
-        bg: 'bg-blue-100'
+        bg: 'bg-blue-100',
       };
   }
 };
@@ -140,7 +146,7 @@ const MetricCardSkeleton = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const heights = {
     sm: 'h-20',
     md: 'h-24',
-    lg: 'h-32'
+    lg: 'h-32',
   };
 
   return (
@@ -173,7 +179,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   size = 'md',
   variant = 'default',
   onClick,
-  actionButton
+  actionButton,
 }) => {
   if (loading) {
     return <MetricCardSkeleton size={size} />;
@@ -182,31 +188,33 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const trendInfo = getTrendInfo(change);
   const statusInfo = getStatusInfo(status);
   const formattedValue = formatValue(value, format, prefix, suffix);
-  
+
   const cardSizes = {
     sm: 'h-20',
     md: 'h-24',
-    lg: 'h-32'
+    lg: 'h-32',
   };
 
   const cardVariants = {
     default: 'border bg-card text-card-foreground shadow-sm',
     outline: 'border-2 bg-transparent',
-    ghost: 'border-0 bg-transparent shadow-none'
+    ghost: 'border-0 bg-transparent shadow-none',
   };
 
   const CardComponent = onClick ? 'button' : 'div';
-  const cardProps = onClick ? {
-    onClick,
-    className: cn(
-      'w-full text-left transition-all hover:shadow-md hover:scale-105 cursor-pointer',
-      'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
-    )
-  } : {};
+  const cardProps = onClick
+    ? {
+        onClick,
+        className: cn(
+          'w-full text-left transition-all hover:shadow-md hover:scale-105 cursor-pointer',
+          'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+        ),
+      }
+    : {};
 
   return (
     <CardComponent {...cardProps}>
-      <Card 
+      <Card
         className={cn(
           cardVariants[variant],
           cardSizes[size],
@@ -218,30 +226,30 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
           <div className="flex items-center gap-2">
             {status && (
-              <div className={cn(
-                'p-1 rounded-full',
-                statusInfo.bg
-              )}>
+              <div className={cn('p-1 rounded-full', statusInfo.bg)}>
                 <statusInfo.icon className={cn('h-3 w-3', statusInfo.color)} />
               </div>
             )}
-            {Icon && (
-              <Icon className="h-4 w-4 text-muted-foreground" />
-            )}
+            {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <div className="space-y-2">
             {/* Main value */}
-            <div className={cn(
-              'font-bold',
-              size === 'sm' ? 'text-lg' : 
-              size === 'md' ? 'text-2xl' : 'text-3xl'
-            )}>
+            <div
+              className={cn(
+                'font-bold',
+                size === 'sm'
+                  ? 'text-lg'
+                  : size === 'md'
+                    ? 'text-2xl'
+                    : 'text-3xl'
+              )}
+            >
               {formattedValue}
             </div>
-            
+
             {/* Description and change */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col gap-1">
@@ -250,25 +258,25 @@ export const MetricCard: React.FC<MetricCardProps> = ({
                     {description}
                   </div>
                 )}
-                
+
                 {change && trendInfo && (
-                  <div className={cn(
-                    'flex items-center text-xs',
-                    trendInfo.color
-                  )}>
+                  <div
+                    className={cn('flex items-center text-xs', trendInfo.color)}
+                  >
                     <trendInfo.icon className="h-3 w-3 mr-1" />
                     <span>
-                      {trendInfo.sign}{Math.abs(change.value)}% {change.period}
+                      {trendInfo.sign}
+                      {Math.abs(change.value)}% {change.period}
                     </span>
                   </div>
                 )}
               </div>
-              
+
               {actionButton && (
                 <Button
                   variant={actionButton.variant || 'outline'}
                   size="sm"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     actionButton.onClick();
                   }}
@@ -287,34 +295,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 };
 
 // Specialized metric card variants
-export const CallMetricCard: React.FC<Omit<MetricCardProps, 'format' | 'icon'>> = (props) => (
-  <MetricCard
-    {...props}
-    format="number"
-    icon={Clock}
-  />
-);
+export const CallMetricCard: React.FC<
+  Omit<MetricCardProps, 'format' | 'icon'>
+> = props => <MetricCard {...props} format="number" icon={Clock} />;
 
-export const CurrencyMetricCard: React.FC<Omit<MetricCardProps, 'format' | 'icon'>> = (props) => (
-  <MetricCard
-    {...props}
-    format="currency"
-  />
-);
+export const CurrencyMetricCard: React.FC<
+  Omit<MetricCardProps, 'format' | 'icon'>
+> = props => <MetricCard {...props} format="currency" />;
 
-export const PercentageMetricCard: React.FC<Omit<MetricCardProps, 'format' | 'suffix'>> = (props) => (
-  <MetricCard
-    {...props}
-    format="percentage"
-  />
-);
+export const PercentageMetricCard: React.FC<
+  Omit<MetricCardProps, 'format' | 'suffix'>
+> = props => <MetricCard {...props} format="percentage" />;
 
-export const DurationMetricCard: React.FC<Omit<MetricCardProps, 'format'>> = (props) => (
-  <MetricCard
-    {...props}
-    format="duration"
-  />
-);
+export const DurationMetricCard: React.FC<
+  Omit<MetricCardProps, 'format'>
+> = props => <MetricCard {...props} format="duration" />;
 
 // Metric cards grid layout component
 export const MetricCardsGrid: React.FC<{
@@ -322,37 +317,27 @@ export const MetricCardsGrid: React.FC<{
   columns?: 1 | 2 | 3 | 4 | 5 | 6;
   gap?: 'sm' | 'md' | 'lg';
   className?: string;
-}> = ({ 
-  children, 
-  columns = 4, 
-  gap = 'md', 
-  className 
-}) => {
+}> = ({ children, columns = 4, gap = 'md', className }) => {
   const gridCols = {
     1: 'grid-cols-1',
     2: 'grid-cols-1 md:grid-cols-2',
     3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
     4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
     5: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5',
-    6: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6'
+    6: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6',
   };
 
   const gaps = {
     sm: 'gap-2',
     md: 'gap-4',
-    lg: 'gap-6'
+    lg: 'gap-6',
   };
 
   return (
-    <div className={cn(
-      'grid',
-      gridCols[columns],
-      gaps[gap],
-      className
-    )}>
+    <div className={cn('grid', gridCols[columns], gaps[gap], className)}>
       {children}
     </div>
   );
 };
 
-export default MetricCard; 
+export default MetricCard;

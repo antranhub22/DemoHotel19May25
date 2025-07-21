@@ -39,9 +39,13 @@ export const getConfigurationSummary = () => {
   return {
     environment: process.env.NODE_ENV || 'development',
     // Database configuration
-    database: process.env.DATABASE_URL ? 'postgresql' : (() => {
-      throw new Error('DATABASE_URL is required. Please set up PostgreSQL.');
-    })(),
+    database: process.env.DATABASE_URL
+      ? 'postgresql'
+      : (() => {
+          throw new Error(
+            'DATABASE_URL is required. Please set up PostgreSQL.'
+          );
+        })(),
     features: {
       voiceAssistant: true,
       multiLanguage: true,
@@ -58,4 +62,4 @@ export const getConfigurationSummary = () => {
       languages: ['en', 'vi', 'fr', 'zh', 'ru', 'ko'],
     },
   };
-}; 
+};

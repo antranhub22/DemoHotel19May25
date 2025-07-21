@@ -41,7 +41,7 @@ export class AnimationController {
       idleFrame: 0,
       idleFlash: 0,
       lastActiveTime: Date.now(),
-      animationFrameId: 0
+      animationFrameId: 0,
     };
   }
 
@@ -136,7 +136,8 @@ export class AnimationController {
    */
   private updateTimeDisplay(): void {
     // Animate displayedTime for smooth counting
-    this.state.displayedTime += (this.state.elapsedTime - this.state.displayedTime) * 0.18;
+    this.state.displayedTime +=
+      (this.state.elapsedTime - this.state.displayedTime) * 0.18;
   }
 
   /**
@@ -150,7 +151,7 @@ export class AnimationController {
     // Merge animation state with render state
     const completeState: CanvasRenderState = {
       ...renderState,
-      ...this.state
+      ...this.state,
     };
 
     // Safe rendering operation
@@ -170,12 +171,17 @@ export class AnimationController {
   /**
    * Add new ripple effect
    */
-  public addRipple(ripples: Array<{radius: number; alpha: number; speed: number}>, radius: number, volumeLevel: number): void {
-    if (Math.random() < 0.1) { // 10% chance per frame when listening
+  public addRipple(
+    ripples: Array<{ radius: number; alpha: number; speed: number }>,
+    radius: number,
+    volumeLevel: number
+  ): void {
+    if (Math.random() < 0.1) {
+      // 10% chance per frame when listening
       ripples.push({
-        radius: radius,
+        radius,
         alpha: 0.4,
-        speed: 1 + volumeLevel * 2
+        speed: 1 + volumeLevel * 2,
       });
     }
   }
@@ -184,21 +190,28 @@ export class AnimationController {
    * Add new particle effect
    */
   public addParticle(
-    particles: Array<{x: number; y: number; alpha: number; size: number; speed: number}>,
+    particles: Array<{
+      x: number;
+      y: number;
+      alpha: number;
+      size: number;
+      speed: number;
+    }>,
     centerX: number,
     centerY: number,
     radius: number
   ): void {
-    if (Math.random() < 0.05) { // 5% chance per frame
+    if (Math.random() < 0.05) {
+      // 5% chance per frame
       const angle = Math.random() * Math.PI * 2;
       const distance = radius + Math.random() * 20;
-      
+
       particles.push({
         x: centerX + Math.cos(angle) * distance,
         y: centerY + Math.sin(angle) * distance,
         alpha: 0.8,
         size: 2 + Math.random() * 3,
-        speed: 0.5 + Math.random() * 1
+        speed: 0.5 + Math.random() * 1,
       });
     }
   }
@@ -274,7 +287,7 @@ export class AnimationController {
   public forceRestart(): void {
     this.debug.warn('🔧 Force restarting animation');
     this.stop();
-    
+
     // Small delay to ensure cleanup
     setTimeout(() => {
       this.start();
@@ -287,7 +300,7 @@ export class AnimationController {
   public cleanup(): void {
     this.debug.log('Cleaning up animation controller');
     this.stop();
-    
+
     // Reset all state
     this.state = {
       pulsePhase: 0,
@@ -299,7 +312,7 @@ export class AnimationController {
       idleFrame: 0,
       idleFlash: 0,
       lastActiveTime: Date.now(),
-      animationFrameId: 0
+      animationFrameId: 0,
     };
   }
-} 
+}

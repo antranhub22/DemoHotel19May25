@@ -2,7 +2,8 @@
 
 ## 📋 Overview
 
-Hướng dẫn chi tiết để deploy Hotel Voice Assistant SaaS Platform lên Render với tất cả environment variables cần thiết.
+Hướng dẫn chi tiết để deploy Hotel Voice Assistant SaaS Platform lên Render với tất cả environment
+variables cần thiết.
 
 ## 🎯 Quick Setup - Copy & Paste cho Render
 
@@ -147,46 +148,57 @@ REFERENCE_MAP={}
 ## 🔑 API Keys cần thiết
 
 ### 1. OpenAI API Key
+
 ```bash
 VITE_OPENAI_API_KEY=sk-your-openai-api-key
 ```
+
 - Đăng ký tại: https://platform.openai.com/
 - Tạo API key và add payment method
 
 ### 2. Vapi API Keys
+
 ```bash
 VITE_VAPI_PUBLIC_KEY=pk_your-vapi-public-key
 VITE_VAPI_ASSISTANT_ID=asst_your-vapi-assistant-id
 VAPI_API_KEY=your-vapi-api-key-for-dynamic-creation
 ```
+
 - Đăng ký tại: https://vapi.ai/
 - Lấy Public Key, Assistant ID, và API Key
 
 ### 3. Google Places API Key
+
 ```bash
 GOOGLE_PLACES_API_KEY=your-google-places-api-key
 ```
+
 - Tạo tại: https://console.cloud.google.com/
 - Enable Google Places API
 - Tạo credentials
 
 ### 4. Gmail App Password
+
 ```bash
 GMAIL_APP_PASSWORD=your-gmail-app-password
 ```
+
 - Enable 2FA trên Gmail
 - Tạo App Password tại: https://myaccount.google.com/apppasswords
 
 ### 5. JWT Secret (Generate ngẫu nhiên)
+
 ```bash
 JWT_SECRET=your-super-secure-jwt-secret-min-32-chars
 ```
+
 - Generate bằng: `openssl rand -base64 32`
 - Hoặc dùng: https://generate-secret.vercel.app/32
 
 ## 📋 Render Configuration Template
 
 ### Build Settings
+
 ```
 Build Command: npm run build
 Start Command: npm run start
@@ -194,6 +206,7 @@ Auto-Deploy: Yes
 ```
 
 ### Environment Variables (Key-Value pairs)
+
 ```
 NODE_ENV=production
 PORT=10000
@@ -214,6 +227,7 @@ ENABLE_DYNAMIC_ASSISTANT_CREATION=true
 ## 🚀 Deployment Process
 
 ### 1. Pre-deployment Check
+
 ```bash
 # Run locally first
 npm run env:validate-saas
@@ -223,12 +237,14 @@ npm run start
 ```
 
 ### 2. Deploy to Render
+
 1. Push code to GitHub
 2. Render auto-deploys từ GitHub
 3. Monitor build logs
 4. Check deployment status
 
 ### 3. Post-deployment Validation
+
 ```bash
 # Check deployment health
 curl https://your-app.onrender.com/health
@@ -242,12 +258,14 @@ curl https://your-app.onrender.com/api/status
 ### Common Issues
 
 **1. Build Failed - Missing Dependencies**
+
 ```bash
 # Solution: Check package.json dependencies
 npm install --production
 ```
 
 **2. Environment Variables Not Loading**
+
 ```bash
 # Solution: Check variable names exactly match
 # No spaces around = sign
@@ -255,6 +273,7 @@ npm install --production
 ```
 
 **3. Database Connection Failed**
+
 ```bash
 # Solution: Check DATABASE_URL format
 # Ensure PostgreSQL service is running
@@ -262,6 +281,7 @@ npm install --production
 ```
 
 **4. API Keys Invalid**
+
 ```bash
 # Solution: Verify API keys are correct
 # Check key format (sk-, pk-, asst-)
@@ -271,6 +291,7 @@ npm install --production
 ## 🔒 Security Checklist
 
 ### Production Security
+
 - [ ] JWT_SECRET is strong (32+ characters)
 - [ ] All API keys are valid and restricted
 - [ ] Database URL is using SSL
@@ -280,6 +301,7 @@ npm install --production
 - [ ] Email notifications are working
 
 ### Environment Variables Security
+
 - [ ] No sensitive data in source code
 - [ ] All secrets are in environment variables
 - [ ] Production and development configs are separate
@@ -289,6 +311,7 @@ npm install --production
 ## 📊 Monitoring & Logs
 
 ### Render Logs
+
 ```bash
 # View deployment logs
 # Go to Render Dashboard → Your Service → Logs
@@ -300,6 +323,7 @@ npm install --production
 ```
 
 ### Health Checks
+
 ```bash
 # Add to your monitoring
 GET https://your-app.onrender.com/health
@@ -309,6 +333,7 @@ GET https://your-app.onrender.com/api/status
 ## 🎯 Post-Deployment Tasks
 
 ### 1. Verify Functionality
+
 - [ ] Website loads correctly
 - [ ] Voice assistant works
 - [ ] Database queries succeed
@@ -316,12 +341,14 @@ GET https://your-app.onrender.com/api/status
 - [ ] Email notifications work
 
 ### 2. Performance Optimization
+
 - [ ] Enable caching
 - [ ] Configure CDN
 - [ ] Monitor response times
 - [ ] Set up error tracking
 
 ### 3. Backup & Recovery
+
 - [ ] Setup database backups
 - [ ] Document recovery procedures
 - [ ] Test backup restoration
@@ -329,12 +356,14 @@ GET https://your-app.onrender.com/api/status
 ## 📞 Support & Help
 
 ### Resources
+
 - **Environment Validation**: `npm run env:health`
 - **Documentation**: `docs/ENVIRONMENT_SETUP.md`
 - **Render Docs**: https://render.com/docs
 - **Troubleshooting**: Check logs in Render dashboard
 
 ### Quick Commands
+
 ```bash
 # Local testing
 npm run env:validate-saas
@@ -350,12 +379,14 @@ npm run env:template production
 
 ## 🎉 Ready to Deploy!
 
-Với hướng dẫn này, bạn có thể deploy Hotel Voice Assistant SaaS Platform lên Render với đầy đủ environment variables và cấu hình cần thiết. 
+Với hướng dẫn này, bạn có thể deploy Hotel Voice Assistant SaaS Platform lên Render với đầy đủ
+environment variables và cấu hình cần thiết.
 
 **Next Steps:**
+
 1. Copy environment variables vào Render
 2. Update với actual API keys
 3. Deploy và test
 4. Monitor logs và performance
 
-Good luck! 🚀 
+Good luck! 🚀

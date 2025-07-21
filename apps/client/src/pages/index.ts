@@ -19,4 +19,4 @@ export { default as Settings } from './dashboard/Settings';
 export { default as SetupWizard } from './dashboard/SetupWizard';
 
 // Legacy pages
-export { default as StaffPage } from './staff'; 
+export { default as StaffPage } from './staff';

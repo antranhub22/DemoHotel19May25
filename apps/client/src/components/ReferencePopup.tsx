@@ -8,7 +8,7 @@ interface ReferencePopupProps {
 const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   return (
-    <div 
+    <div
       className="relative z-30 overflow-hidden rounded-2xl shadow-2xl reference-popup"
       style={{
         width: '90vw',
@@ -23,10 +23,11 @@ const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
       }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
-        <h3 className="text-lg font-semibold text-gray-800">
-          Reference
-        </h3>
+      <div
+        className="flex items-center justify-between p-4 border-b border-gray-200/40 bg-white/10"
+        style={{ backdropFilter: 'blur(4px)' }}
+      >
+        <h3 className="text-lg font-semibold text-gray-800">Reference</h3>
         <button
           onClick={onClose}
           className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -52,4 +53,4 @@ const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
   );
 };
 
-export default ReferencePopup; 
+export default ReferencePopup;

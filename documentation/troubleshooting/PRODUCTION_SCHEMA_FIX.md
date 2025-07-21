@@ -2,7 +2,8 @@
 
 ## 🚨 **Issue Description**
 
-The production database on Render is missing columns that the updated code expects, causing authentication errors:
+The production database on Render is missing columns that the updated code expects, causing
+authentication errors:
 
 ```bash
 ❌ Login error: error: column "first_name" does not exist
@@ -40,9 +41,10 @@ npm run fix:production-schema
 ### **Option 3: Direct SQL (Advanced)**
 
 Connect to production database and run:
+
 ```sql
 -- Add missing staff columns
-ALTER TABLE staff 
+ALTER TABLE staff
 ADD COLUMN IF NOT EXISTS first_name VARCHAR(255),
 ADD COLUMN IF NOT EXISTS last_name VARCHAR(255),
 ADD COLUMN IF NOT EXISTS display_name VARCHAR(255),
@@ -52,8 +54,8 @@ ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true,
 ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
 
 -- Update existing records
-UPDATE staff 
-SET 
+UPDATE staff
+SET
   first_name = COALESCE(first_name, SPLIT_PART(username, '.', 1)),
   last_name = COALESCE(last_name, SPLIT_PART(username, '.', 2)),
   display_name = COALESCE(display_name, username),
@@ -65,8 +67,9 @@ WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
 ## 📊 **What Gets Fixed**
 
 ### **Staff Table Columns Added:**
+
 - ✅ `first_name` - User's first name
-- ✅ `last_name` - User's last name  
+- ✅ `last_name` - User's last name
 - ✅ `display_name` - Full display name (defaults to username)
 - ✅ `avatar_url` - Profile picture URL
 - ✅ `permissions` - JSON array of permissions
@@ -74,6 +77,7 @@ WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
 - ✅ `last_login` - Last login timestamp
 
 ### **Tenants Table Columns Added:**
+
 - ✅ `hotel_name` - Hotel display name
 - ✅ `subscription_plan` - Current plan (trial/basic/premium)
 - ✅ `subscription_status` - Status (active/inactive/expired)
@@ -83,11 +87,13 @@ WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
 ## 🚀 **After Migration**
 
 1. **Verify the fix worked:**
+
    ```bash
    # Check production logs for successful login
    ```
 
 2. **Redeploy if needed:**
+
    ```bash
    ./deploy-render.sh
    ```
@@ -106,6 +112,7 @@ WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
 ## 📝 **Migration Log**
 
 The script will show progress:
+
 ```bash
 🔧 Starting Production Database Schema Fix...
 📍 Database: your-db-host
@@ -133,12 +140,14 @@ The script will show progress:
 ## 🔍 **Troubleshooting**
 
 ### If migration fails:
+
 1. Check DATABASE_URL is correct
 2. Verify database connectivity
 3. Check database permissions
 4. Review error messages in logs
 
 ### If login still fails after migration:
+
 1. Clear application cache
 2. Restart application
 3. Check for other missing columns
@@ -147,7 +156,8 @@ The script will show progress:
 ## 📞 **Need Help?**
 
 If you encounter issues:
+
 1. Check the migration logs for specific errors
 2. Verify all environment variables are set correctly
 3. Test database connection manually
-4. Contact support with error logs 
+4. Contact support with error logs

@@ -45,7 +45,8 @@ DemoHotel19May/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Node.js** v18+ 
+
+- **Node.js** v18+
 - **npm** v8+
 - **PostgreSQL** (production) or **SQLite** (development)
 
@@ -80,6 +81,7 @@ npm run start:production
 ## 🛠️ Available Scripts
 
 ### Build Commands
+
 ```bash
 npm run build              # Build both client and server
 npm run build:production   # Optimized production build
@@ -89,6 +91,7 @@ npm run build:analyze      # Analyze bundle size
 ```
 
 ### Development Commands
+
 ```bash
 npm run dev                # Start backend server (port 10000)
 npm run dev:client         # Start frontend dev server (port 3000)
@@ -97,6 +100,7 @@ npm run preview            # Preview production build
 ```
 
 ### Database Commands
+
 ```bash
 npm run db:setup           # Setup database schema
 npm run db:seed            # Seed development data
@@ -105,6 +109,7 @@ npm run db:studio          # Open database studio
 ```
 
 ### Testing & Quality
+
 ```bash
 npm run test               # Run API connectivity tests
 npm run test:db            # Test database functionality
@@ -114,6 +119,7 @@ npm run lint:check         # Code linting
 ```
 
 ### Maintenance
+
 ```bash
 npm run clean              # Clean build artifacts
 npm run clean:install      # Clean install dependencies
@@ -151,20 +157,21 @@ GMAIL_PASS=your-app-password
 The project uses TypeScript path aliases for clean imports:
 
 ```typescript
-import { Component } from '@/components';           // apps/client/src/components
-import { utils } from '@shared/utils';              // packages/shared/utils
-import { service } from '@server/services';         // apps/server/services
-import { Config } from '@config/app.config';        // packages/config/app.config
-import { ApiResponse } from '@types/api';           // packages/types/api
-import { script } from '@tools/scripts';            // tools/scripts
-import { test } from '@tests/utils';                // tests/utils
+import { Component } from '@/components'; // apps/client/src/components
+import { utils } from '@shared/utils'; // packages/shared/utils
+import { service } from '@server/services'; // apps/server/services
+import { Config } from '@config/app.config'; // packages/config/app.config
+import { ApiResponse } from '@types/api'; // packages/types/api
+import { script } from '@tools/scripts'; // tools/scripts
+import { test } from '@tests/utils'; // tests/utils
 ```
 
 ## 🗄️ Database Setup
 
 ### PostgreSQL-Only Architecture
 
-This project now uses **PostgreSQL exclusively** for both development and production to ensure consistency and eliminate schema drift issues.
+This project now uses **PostgreSQL exclusively** for both development and production to ensure
+consistency and eliminate schema drift issues.
 
 ### Local Development Setup (Docker)
 
@@ -197,13 +204,14 @@ If you already have PostgreSQL installed:
 createdb hotel_dev
 createuser hotel_user
 
-# Set environment variable  
+# Set environment variable
 export DATABASE_URL="postgresql://hotel_user:your_password@localhost:5432/hotel_dev"
 ```
 
 ### Production (Render.com)
 
-The application automatically uses the `DATABASE_URL` environment variable provided by Render's PostgreSQL service.
+The application automatically uses the `DATABASE_URL` environment variable provided by Render's
+PostgreSQL service.
 
 ### ⚠️ Important Notes
 
@@ -214,6 +222,7 @@ The application automatically uses the `DATABASE_URL` environment variable provi
 ## 🏗️ Architecture
 
 ### Frontend (React + TypeScript)
+
 - **React 18** with TypeScript
 - **Vite** for build tooling
 - **TailwindCSS** for styling
@@ -222,6 +231,7 @@ The application automatically uses the `DATABASE_URL` environment variable provi
 - **React Query** for data fetching
 
 ### Backend (Node.js + Express)
+
 - **Express.js** server
 - **TypeScript** for type safety
 - **Drizzle ORM** for database
@@ -231,12 +241,14 @@ The application automatically uses the `DATABASE_URL` environment variable provi
 - **Vapi.ai** for voice features
 
 ### Database
+
 - **PostgreSQL** (production)
 - **SQLite** (development)
 - **Drizzle ORM** for migrations
 - **Multi-tenant** architecture
 
 ### Build & Deployment
+
 - **Optimized Vite build** (26% faster)
 - **Code splitting** for better caching
 - **TypeScript compilation**
@@ -245,28 +257,32 @@ The application automatically uses the `DATABASE_URL` environment variable provi
 ## 📊 Performance Metrics
 
 ### Build Performance
+
 - **Build Time**: 13.11s (26% improvement from 17.69s)
 - **Bundle Splitting**: Optimized vendor chunks
 - **Tree Shaking**: Enabled for smaller bundles
 
 ### Bundle Analysis
-| Chunk | Size | Gzipped |
-|-------|------|---------|
-| React vendor | 150.92 kB | 48.93 kB |
-| UI vendor | 94.04 kB | 31.30 kB |
-| Chart vendor | 409.59 kB | 110.23 kB |
-| Utility vendor | 21.18 kB | 7.26 kB |
-| Voice vendor | 263.23 kB | 71.68 kB |
+
+| Chunk          | Size      | Gzipped   |
+| -------------- | --------- | --------- |
+| React vendor   | 150.92 kB | 48.93 kB  |
+| UI vendor      | 94.04 kB  | 31.30 kB  |
+| Chart vendor   | 409.59 kB | 110.23 kB |
+| Utility vendor | 21.18 kB  | 7.26 kB   |
+| Voice vendor   | 263.23 kB | 71.68 kB  |
 
 ## 🧪 Testing
 
 ### API Testing
+
 ```bash
 npm run test               # API connectivity tests (6/6 passing)
 npm run test:db            # Database health checks
 ```
 
 ### Manual Testing
+
 - All major features verified post-restructure
 - Voice assistant functionality intact
 - Dashboard and analytics working
@@ -275,19 +291,21 @@ npm run test:db            # Database health checks
 
 ## 📚 Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Architecture Guide](docs/ARCHITECTURE.md) | Detailed system architecture |
-| [API Documentation](docs/API_DOCUMENTATION.md) | Complete API reference |
-| [Deployment Guide](docs/DEPLOYMENT_QUICKSTART.md) | Production deployment |
-| [Code Review Guide](docs/CODE_REVIEW_GUIDE.md) | Development standards |
-| [Contributing Guide](docs/CONTRIBUTING.md) | Contribution guidelines |
+| Document                                          | Description                  |
+| ------------------------------------------------- | ---------------------------- |
+| [Architecture Guide](docs/ARCHITECTURE.md)        | Detailed system architecture |
+| [API Documentation](docs/API_DOCUMENTATION.md)    | Complete API reference       |
+| [Deployment Guide](docs/DEPLOYMENT_QUICKSTART.md) | Production deployment        |
+| [Code Review Guide](docs/CODE_REVIEW_GUIDE.md)    | Development standards        |
+| [Contributing Guide](docs/CONTRIBUTING.md)        | Contribution guidelines      |
 
 ## 🔄 Migration from Legacy Structure
 
-This project has been restructured from a traditional folder structure to a modern monorepo architecture. Key improvements:
+This project has been restructured from a traditional folder structure to a modern monorepo
+architecture. Key improvements:
 
 ### ✅ Improvements Achieved
+
 - **26% faster builds** through optimization
 - **Cleaner imports** with absolute paths
 - **Better code organization** with monorepo structure
@@ -296,16 +314,18 @@ This project has been restructured from a traditional folder structure to a mode
 - **Production-ready** deployment setup
 
 ### 📈 Before vs After
-| Metric | Before | After | Improvement |
-|--------|--------|--------|-------------|
-| Build Time | 17.69s | 13.11s | 26% faster |
+
+| Metric       | Before   | After    | Improvement       |
+| ------------ | -------- | -------- | ----------------- |
+| Build Time   | 17.69s   | 13.11s   | 26% faster        |
 | Import Paths | Relative | Absolute | 28+ files updated |
-| Structure | Mixed | Monorepo | Clean separation |
-| Type Safety | Partial | Strict | Enhanced |
+| Structure    | Mixed    | Monorepo | Clean separation  |
+| Type Safety  | Partial  | Strict   | Enhanced          |
 
 ## 🤝 Contributing
 
 Please read our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
+
 - Code standards and style
 - Development workflow
 - Pull request process
@@ -325,4 +345,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**🏨 Mi Nhon Hotel Voice Assistant** - Powered by AI, built for scalability. 
+**🏨 Mi Nhon Hotel Voice Assistant** - Powered by AI, built for scalability.

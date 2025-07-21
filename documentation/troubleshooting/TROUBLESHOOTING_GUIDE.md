@@ -2,7 +2,8 @@
 
 ## Common Issues & Solutions
 
-This guide provides solutions to frequently encountered issues with the Hotel Voice Assistant Platform. If you can't find a solution here, please contact our support team.
+This guide provides solutions to frequently encountered issues with the Hotel Voice Assistant
+Platform. If you can't find a solution here, please contact our support team.
 
 ---
 
@@ -61,6 +62,7 @@ Before troubleshooting, check our system status:
 ### Problem: Hotel Research Not Finding My Hotel
 
 **Symptoms:**
+
 - Search returns no results
 - Wrong hotel information displayed
 - Research seems stuck or incomplete
@@ -68,6 +70,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Hotel Name Spelling**
+
    ```
    ✅ Correct: "Grand Plaza Hotel"
    ❌ Incorrect: "Grand Plaza" (too generic)
@@ -75,6 +78,7 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Add Location Information**
+
    ```
    ✅ Hotel Name: "Grand Plaza Hotel"
    ✅ Location: "New York, NY" or "Manhattan, New York"
@@ -96,6 +100,7 @@ Before troubleshooting, check our system status:
 ### Problem: Assistant Generation Fails
 
 **Symptoms:**
+
 - "Generation failed" error message
 - Process gets stuck at "Generating..."
 - Assistant created but not working
@@ -103,6 +108,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Required Information**
+
    ```
    Required Fields:
    ✅ Hotel Name
@@ -113,10 +119,11 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Verify Vapi API Connection**
+
    ```
    Dashboard → Settings → Integrations → Vapi
    Status should show: "🟢 Connected"
-   
+
    If not connected:
    - Check your Vapi API key
    - Verify account permissions
@@ -131,6 +138,7 @@ Before troubleshooting, check our system status:
 ### Problem: Voice Preview Not Working
 
 **Symptoms:**
+
 - No audio plays when testing voices
 - Error: "Voice preview failed"
 - Audio plays but sounds distorted
@@ -138,6 +146,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Browser Audio Check**
+
    ```
    1. Enable audio in your browser
    2. Check browser permissions for microphone/audio
@@ -146,6 +155,7 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Network & Firewall**
+
    ```
    Ensure these domains are accessible:
    - *.talk2go.online
@@ -165,6 +175,7 @@ Before troubleshooting, check our system status:
 ### Problem: Assistant Not Responding
 
 **Symptoms:**
+
 - Guests report assistant doesn't answer
 - Calls go to voicemail
 - Long wait times before response
@@ -172,18 +183,20 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Assistant Status**
+
    ```
    Dashboard → Assistant → Status
-   
+
    🟢 Active: Working normally
    🟡 Limited: Reduced functionality
    🔴 Offline: Not responding
    ```
 
 2. **Verify Phone Integration**
+
    ```
    Dashboard → Settings → Phone System
-   
+
    Check:
    - Phone number is correct
    - Call forwarding is enabled
@@ -191,9 +204,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Test Assistant Directly**
+
    ```
    Dashboard → Assistant → Test
-   
+
    1. Click "Test Voice Assistant"
    2. Try different request types
    3. Check response quality
@@ -202,6 +216,7 @@ Before troubleshooting, check our system status:
 ### Problem: Assistant Gives Wrong Information
 
 **Symptoms:**
+
 - Incorrect hotel hours
 - Wrong service information
 - Outdated policies
@@ -209,9 +224,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Update Knowledge Base**
+
    ```
    Dashboard → Hotel Profile → Services
-   
+
    1. Review all service information
    2. Update hours and descriptions
    3. Save changes
@@ -219,9 +235,10 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Check Data Sources**
+
    ```
    Dashboard → Hotel Profile → Data Sources
-   
+
    Verify:
    - Website URL is correct
    - Google My Business is up to date
@@ -229,9 +246,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Manual Knowledge Base Edit**
+
    ```
    Dashboard → Assistant → Knowledge Base
-   
+
    1. Click "Edit Knowledge Base"
    2. Add specific corrections
    3. Use clear, simple language
@@ -241,6 +259,7 @@ Before troubleshooting, check our system status:
 ### Problem: Language Detection Not Working
 
 **Symptoms:**
+
 - Assistant responds in wrong language
 - Guests report language confusion
 - Mixed language responses
@@ -248,9 +267,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Language Settings**
+
    ```
    Dashboard → Assistant → Languages
-   
+
    Verify:
    - Primary language is correct
    - Additional languages are enabled
@@ -258,18 +278,20 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Test Language Detection**
+
    ```
    Dashboard → Assistant → Test
-   
+
    1. Test with different languages
    2. Try various accents
    3. Check response accuracy
    ```
 
 3. **Fallback Configuration**
+
    ```
    Dashboard → Assistant → Advanced Settings
-   
+
    Set fallback behavior:
    - Default to primary language
    - Ask guest for language preference
@@ -283,6 +305,7 @@ Before troubleshooting, check our system status:
 ### Problem: Analytics Not Updating
 
 **Symptoms:**
+
 - Data shows as "Loading..."
 - Numbers don't match recent activity
 - Charts appear empty
@@ -290,18 +313,20 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Data Refresh**
+
    ```
    Dashboard → Analytics
-   
+
    1. Click "Refresh Data" button
    2. Wait 30 seconds
    3. Check "Last Updated" timestamp
    ```
 
 2. **Verify Date Range**
+
    ```
    Common Issue: Date range too narrow
-   
+
    ✅ Try: "Last 30 days"
    ❌ Avoid: "Today" (if no calls yet)
    ```
@@ -316,6 +341,7 @@ Before troubleshooting, check our system status:
 ### Problem: Dashboard Loads Slowly
 
 **Symptoms:**
+
 - Dashboard takes >10 seconds to load
 - Frequent timeouts
 - Incomplete data display
@@ -323,15 +349,17 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Optimize Date Range**
+
    ```
    Instead of: "All time" or "Last year"
    Try: "Last 30 days" or "Last week"
    ```
 
 2. **Reduce Active Widgets**
+
    ```
    Dashboard → Customize
-   
+
    1. Remove unused widgets
    2. Limit real-time updates
    3. Use cached data when possible
@@ -347,6 +375,7 @@ Before troubleshooting, check our system status:
 ### Problem: Export/Report Generation Fails
 
 **Symptoms:**
+
 - "Export failed" error
 - Reports never complete
 - Empty or corrupted files
@@ -354,12 +383,14 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Reduce Report Scope**
+
    ```
    ❌ Large: 365 days, all metrics
    ✅ Smaller: 30 days, key metrics only
    ```
 
 2. **Check File Permissions**
+
    ```
    1. Ensure download folder has write permissions
    2. Try different file format (CSV instead of PDF)
@@ -367,9 +398,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Alternative Export Methods**
+
    ```
    Dashboard → Analytics → Export
-   
+
    Options:
    - Email report to yourself
    - Generate in smaller chunks
@@ -383,6 +415,7 @@ Before troubleshooting, check our system status:
 ### Problem: API Authentication Fails
 
 **Symptoms:**
+
 - "401 Unauthorized" errors
 - "Invalid token" messages
 - API calls rejected
@@ -390,15 +423,17 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Token Validity**
+
    ```
    Dashboard → Settings → API Keys
-   
+
    1. Verify token is not expired
    2. Check token format (starts with "Bearer ")
    3. Regenerate if necessary
    ```
 
 2. **Verify API Key Permissions**
+
    ```
    Required permissions:
    - Read: View data
@@ -415,6 +450,7 @@ Before troubleshooting, check our system status:
 ### Problem: Webhook Not Receiving Events
 
 **Symptoms:**
+
 - Webhook endpoint never called
 - Intermittent webhook delivery
 - Webhook payloads malformed
@@ -422,9 +458,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Verify Webhook URL**
+
    ```
    Dashboard → Settings → Webhooks
-   
+
    Check:
    - URL is publicly accessible
    - HTTPS protocol (required)
@@ -432,6 +469,7 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Test Webhook Endpoint**
+
    ```bash
    # Test your webhook URL
    curl -X POST https://your-hotel.com/webhook \
@@ -440,9 +478,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Check Webhook Logs**
+
    ```
    Dashboard → Settings → Webhooks → Logs
-   
+
    Look for:
    - Delivery attempts
    - Response codes
@@ -452,6 +491,7 @@ Before troubleshooting, check our system status:
 ### Problem: Integration Sync Issues
 
 **Symptoms:**
+
 - PMS data not syncing
 - Booking information outdated
 - Service status inconsistent
@@ -459,14 +499,16 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Integration Status**
+
    ```
    Dashboard → Settings → Integrations
-   
+
    All integrations should show:
    🟢 Connected and syncing
    ```
 
 2. **Verify API Credentials**
+
    ```
    For each integration:
    1. Check API key validity
@@ -475,9 +517,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Force Sync**
+
    ```
    Dashboard → Settings → Integrations
-   
+
    1. Click "Force Sync" for each integration
    2. Wait 5-10 minutes
    3. Check sync status
@@ -490,6 +533,7 @@ Before troubleshooting, check our system status:
 ### Problem: Billing Discrepancies
 
 **Symptoms:**
+
 - Unexpected charges
 - Usage doesn't match billing
 - Plan features not working
@@ -497,9 +541,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Review Usage Details**
+
    ```
    Dashboard → Billing → Usage
-   
+
    Check:
    - Monthly call count
    - Feature usage
@@ -507,9 +552,10 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Verify Plan Features**
+
    ```
    Dashboard → Billing → Plan Details
-   
+
    Current plan should match:
    - Number of languages
    - Monthly call limit
@@ -517,9 +563,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Check Billing Cycle**
+
    ```
    Dashboard → Billing → Billing History
-   
+
    Verify:
    - Billing dates
    - Proration calculations
@@ -529,6 +576,7 @@ Before troubleshooting, check our system status:
 ### Problem: Payment Method Issues
 
 **Symptoms:**
+
 - Payment declined
 - Credit card expired
 - Service suspended
@@ -536,15 +584,17 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Update Payment Method**
+
    ```
    Dashboard → Billing → Payment Methods
-   
+
    1. Add new payment method
    2. Set as default
    3. Remove old method
    ```
 
 2. **Verify Card Details**
+
    ```
    Common issues:
    - Incorrect expiry date
@@ -564,6 +614,7 @@ Before troubleshooting, check our system status:
 ### Problem: Plan Upgrade/Downgrade Issues
 
 **Symptoms:**
+
 - Plan change not reflected
 - Features not available after upgrade
 - Billing incorrect after change
@@ -571,9 +622,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Plan Change Status**
+
    ```
    Dashboard → Billing → Plan Changes
-   
+
    Status should show:
    - Pending: Change scheduled
    - Active: Change applied
@@ -581,6 +633,7 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Clear Cache After Change**
+
    ```
    1. Log out of dashboard
    2. Clear browser cache
@@ -603,6 +656,7 @@ Before troubleshooting, check our system status:
 ### Problem: Slow Response Times
 
 **Symptoms:**
+
 - Assistant takes >5 seconds to respond
 - Dashboard loads slowly
 - API calls timeout
@@ -610,6 +664,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Network Speed**
+
    ```
    Minimum requirements:
    - Download: 10 Mbps
@@ -618,18 +673,20 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Optimize Assistant Configuration**
+
    ```
    Dashboard → Assistant → Performance
-   
+
    1. Reduce system prompt length
    2. Limit active languages
    3. Disable unused functions
    ```
 
 3. **Use CDN Optimizations**
+
    ```
    Dashboard → Settings → Performance
-   
+
    Enable:
    - Response caching
    - CDN delivery
@@ -639,6 +696,7 @@ Before troubleshooting, check our system status:
 ### Problem: Connection Drops
 
 **Symptoms:**
+
 - Calls disconnect unexpectedly
 - WebSocket connections fail
 - Intermittent service
@@ -646,6 +704,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Network Stability**
+
    ```
    Test for:
    - WiFi signal strength
@@ -654,6 +713,7 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Verify Firewall Settings**
+
    ```
    Allow these domains:
    - *.talk2go.online
@@ -663,9 +723,10 @@ Before troubleshooting, check our system status:
    ```
 
 3. **Use Backup Connection**
+
    ```
    Dashboard → Settings → Connectivity
-   
+
    Options:
    - Backup phone line
    - Failover to mobile
@@ -679,6 +740,7 @@ Before troubleshooting, check our system status:
 ### Problem: Mobile Dashboard Issues
 
 **Symptoms:**
+
 - Layout breaks on mobile
 - Touch controls not working
 - Features missing on mobile
@@ -686,6 +748,7 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Browser Compatibility**
+
    ```
    Supported mobile browsers:
    ✅ Chrome Mobile
@@ -695,10 +758,11 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Clear Mobile Cache**
+
    ```
    iOS Safari:
    Settings → Safari → Clear History and Data
-   
+
    Android Chrome:
    Settings → Privacy → Clear Browsing Data
    ```
@@ -714,6 +778,7 @@ Before troubleshooting, check our system status:
 ### Problem: Voice Quality Issues
 
 **Symptoms:**
+
 - Robotic or distorted voice
 - Audio cuts out
 - Poor sound quality
@@ -721,9 +786,10 @@ Before troubleshooting, check our system status:
 **Solutions:**
 
 1. **Check Audio Settings**
+
    ```
    Dashboard → Assistant → Voice Settings
-   
+
    Adjust:
    - Voice speed: 80-90%
    - Audio quality: High
@@ -731,9 +797,10 @@ Before troubleshooting, check our system status:
    ```
 
 2. **Test Different Voices**
+
    ```
    Dashboard → Assistant → Voice Selection
-   
+
    1. Try different voice options
    2. Test various languages
    3. Check audio previews
@@ -760,6 +827,7 @@ Dashboard → Settings → Advanced → Debug Mode
 ```
 
 **Debug Information Includes:**
+
 - API request/response logs
 - System error messages
 - Performance metrics
@@ -768,6 +836,7 @@ Dashboard → Settings → Advanced → Debug Mode
 ### Browser Developer Tools
 
 1. **Open Developer Tools**
+
    ```
    Chrome/Firefox: F12
    Safari: Cmd+Option+I
@@ -775,6 +844,7 @@ Dashboard → Settings → Advanced → Debug Mode
    ```
 
 2. **Check Console for Errors**
+
    ```
    Look for:
    - Red error messages
@@ -799,6 +869,7 @@ Dashboard → Settings → Logs
 ```
 
 **Available Logs:**
+
 - **System Logs**: Server errors and warnings
 - **API Logs**: Request/response details
 - **Assistant Logs**: Voice interaction logs
@@ -813,6 +884,7 @@ Dashboard → Settings → Performance Monitor
 ```
 
 **Key Metrics:**
+
 - Response time trends
 - Error rate patterns
 - Resource utilization
@@ -825,9 +897,10 @@ Dashboard → Settings → Performance Monitor
 ### Self-Service Resources
 
 1. **Knowledge Base**
+
    ```
    📖 https://help.talk2go.online
-   
+
    Sections:
    - Getting Started
    - Feature Guides
@@ -836,9 +909,10 @@ Dashboard → Settings → Performance Monitor
    ```
 
 2. **Video Tutorials**
+
    ```
    📺 https://tutorials.talk2go.online
-   
+
    Topics:
    - Setup & Onboarding
    - Dashboard Navigation
@@ -847,9 +921,10 @@ Dashboard → Settings → Performance Monitor
    ```
 
 3. **Community Forum**
+
    ```
    💬 https://community.talk2go.online
-   
+
    Features:
    - User discussions
    - Best practices
@@ -862,17 +937,20 @@ Dashboard → Settings → Performance Monitor
 #### Support Channels by Plan
 
 **Trial & Basic:**
+
 - 📧 Email: support@talk2go.online
 - 💬 Chat: Available in dashboard
 - 📖 Knowledge Base: 24/7 access
 
 **Professional:**
+
 - 📧 Priority Email: priority@talk2go.online
 - 💬 Priority Chat: Available in dashboard
 - 📞 Phone: Business hours
 - 📖 Knowledge Base: 24/7 access
 
 **Enterprise:**
+
 - 📧 Dedicated Support: enterprise@talk2go.online
 - 💬 24/7 Chat: Available in dashboard
 - 📞 24/7 Phone: +1-800-TALK2GO
@@ -880,14 +958,14 @@ Dashboard → Settings → Performance Monitor
 
 #### Response Times
 
-| Plan | Severity | Response Time |
-|------|----------|---------------|
-| Trial/Basic | Critical | 4-8 hours |
-| Trial/Basic | General | 24-48 hours |
-| Professional | Critical | 2-4 hours |
-| Professional | General | 8-24 hours |
-| Enterprise | Critical | 30 minutes |
-| Enterprise | General | 4-8 hours |
+| Plan         | Severity | Response Time |
+| ------------ | -------- | ------------- |
+| Trial/Basic  | Critical | 4-8 hours     |
+| Trial/Basic  | General  | 24-48 hours   |
+| Professional | Critical | 2-4 hours     |
+| Professional | General  | 8-24 hours    |
+| Enterprise   | Critical | 30 minutes    |
+| Enterprise   | General  | 4-8 hours     |
 
 ### Information to Include
 
@@ -953,6 +1031,7 @@ If your issue isn't resolved:
 4. **Level 4**: Management escalation
 
 Request escalation by:
+
 - Replying to support ticket with "Please escalate"
 - Calling the escalation hotline
 - Requesting account manager involvement (Enterprise)
@@ -981,8 +1060,9 @@ Request escalation by:
 
 ---
 
-*This troubleshooting guide is updated regularly. For the most current information, please visit our [support portal](https://support.talk2go.online).*
+_This troubleshooting guide is updated regularly. For the most current information, please visit our
+[support portal](https://support.talk2go.online)._
 
 **Last Updated:** January 2024  
 **Version:** 2.0  
-**Support:** support@talk2go.online 
+**Support:** support@talk2go.online

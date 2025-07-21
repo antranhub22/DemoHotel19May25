@@ -12,11 +12,11 @@ export interface HotelConfiguration {
   logoUrl: string;
   primaryColor: string;
   headerText: string;
-  
+
   // Vapi configuration
   vapiPublicKey: string;
   vapiAssistantId: string;
-  
+
   // Branding
   branding: {
     logo: string;
@@ -30,7 +30,7 @@ export interface HotelConfiguration {
       secondary: string;
     };
   };
-  
+
   // Features
   features: {
     callHistory: boolean;
@@ -38,14 +38,14 @@ export interface HotelConfiguration {
     analytics: boolean;
     customization: boolean;
   };
-  
+
   // Services available
   services: Array<{
     type: string;
     name: string;
     enabled: boolean;
   }>;
-  
+
   // Language support
   supportedLanguages: string[];
 }
@@ -57,41 +57,41 @@ export interface HotelConfiguration {
 const MI_NHON_DEFAULT_CONFIG: HotelConfiguration = {
   hotelName: 'Mi Nhon Hotel Mui Ne',
   logoUrl: '/assets/references/images/minhon-logo.jpg',
-  primaryColor: '#2C3E50',  // Changed to luxury dark blue for main header
+  primaryColor: '#2C3E50', // Changed to luxury dark blue for main header
   headerText: 'Mi Nhon Hotel Mui Ne',
-  
+
   vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
   vapiAssistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
-  
+
   branding: {
     logo: '/assets/references/images/minhon-logo.jpg',
     colors: {
-      primary: '#2C3E50',    // Changed to luxury dark blue for main header
-      secondary: '#34495E',   // Changed to lighter dark blue for main header
-      accent: '#E74C3C'       // Changed to coral red accent for main header
+      primary: '#2C3E50', // Changed to luxury dark blue for main header
+      secondary: '#34495E', // Changed to lighter dark blue for main header
+      accent: '#E74C3C', // Changed to coral red accent for main header
     },
     fonts: {
       primary: 'Poppins',
-      secondary: 'Inter'
-    }
+      secondary: 'Inter',
+    },
   },
-  
+
   features: {
     callHistory: true,
     multiLanguage: true,
     analytics: true,
-    customization: true
+    customization: true,
   },
-  
+
   services: [
     { type: 'room_service', name: 'Room Service', enabled: true },
     { type: 'concierge', name: 'Concierge', enabled: true },
     { type: 'housekeeping', name: 'Housekeeping', enabled: true },
     { type: 'maintenance', name: 'Maintenance', enabled: true },
-    { type: 'restaurant', name: 'Restaurant', enabled: true }
+    { type: 'restaurant', name: 'Restaurant', enabled: true },
   ],
-  
-  supportedLanguages: ['en', 'fr', 'zh', 'ru', 'ko', 'vi']
+
+  supportedLanguages: ['en', 'fr', 'zh', 'ru', 'ko', 'vi'],
 };
 
 // ============================================
@@ -106,14 +106,21 @@ export const useHotelConfiguration = () => {
   const tenantInfo = useTenantDetection();
 
   // Nhận diện subdomain giống useHotelConfig
-  const extractHotelIdentifier = (): { type: 'default' | 'subdomain' | 'custom', identifier: string } => {
+  const extractHotelIdentifier = (): {
+    type: 'default' | 'subdomain' | 'custom';
+    identifier: string;
+  } => {
     const hostname = window.location.hostname;
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     if (isLocalhost) {
       return { type: 'default', identifier: 'mi-nhon-hotel' };
     }
     const parts = hostname.split('.');
-    if (parts.length >= 3 && parts[parts.length - 2] === 'talk2go' && parts[parts.length - 1] === 'online') {
+    if (
+      parts.length >= 3 &&
+      parts[parts.length - 2] === 'talk2go' &&
+      parts[parts.length - 1] === 'online'
+    ) {
       return { type: 'subdomain', identifier: parts[0] };
     }
     return { type: 'custom', identifier: hostname };
@@ -137,7 +144,8 @@ export const useHotelConfiguration = () => {
         try {
           const response = await fetch(endpoint);
           console.log('[DEBUG] fetch response', response);
-          if (!response.ok) throw new Error('Failed to load hotel configuration');
+          if (!response.ok)
+            throw new Error('Failed to load hotel configuration');
           const hotelData = await response.json();
           console.log('[DEBUG] hotelData', hotelData);
           setConfig({
@@ -150,18 +158,18 @@ export const useHotelConfiguration = () => {
             branding: {
               ...hotelData.branding,
               colors: {
-                primary: hotelData.branding.primaryColor || '#2C3E50',  // Changed to luxury dark blue for main header
+                primary: hotelData.branding.primaryColor || '#2C3E50', // Changed to luxury dark blue for main header
                 secondary: hotelData.branding.secondaryColor || '#34495E',
                 accent: hotelData.branding.accentColor || '#E74C3C',
               },
               fonts: {
                 primary: hotelData.branding.PrimaryFont || 'Inter',
                 secondary: hotelData.branding.SecondaryFont || 'Roboto',
-              }
+              },
             },
             features: hotelData.features,
             services: hotelData.services,
-            supportedLanguages: hotelData.supportedLanguages
+            supportedLanguages: hotelData.supportedLanguages,
           });
           return;
         } catch (err) {
@@ -174,7 +182,9 @@ export const useHotelConfiguration = () => {
       // Nếu là custom domain hoặc fallback, dùng config mặc định
       setConfig(MI_NHON_DEFAULT_CONFIG);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load configuration');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load configuration'
+      );
       setConfig(MI_NHON_DEFAULT_CONFIG);
     } finally {
       setIsLoading(false);
@@ -190,7 +200,7 @@ export const useHotelConfiguration = () => {
     isLoading,
     error,
     reload: loadConfiguration,
-    isMiNhon: false
+    isMiNhon: false,
   };
 };
 
@@ -199,9 +209,13 @@ export const useHotelConfiguration = () => {
 // ============================================
 
 // Cache for Vapi configurations to avoid repeated API calls
-const vapiConfigCache: { [key: string]: { publicKey: string; assistantId: string; fallback: boolean } } = {};
+const vapiConfigCache: {
+  [key: string]: { publicKey: string; assistantId: string; fallback: boolean };
+} = {};
 
-const fetchVapiConfig = async (language: string): Promise<{ publicKey: string; assistantId: string; fallback: boolean }> => {
+const fetchVapiConfig = async (
+  language: string
+): Promise<{ publicKey: string; assistantId: string; fallback: boolean }> => {
   // Check cache first
   if (vapiConfigCache[language]) {
     return vapiConfigCache[language];
@@ -212,73 +226,109 @@ const fetchVapiConfig = async (language: string): Promise<{ publicKey: string; a
     if (!response.ok) {
       throw new Error(`Failed to fetch Vapi config: ${response.status}`);
     }
-    
+
     const config = await response.json();
     console.log(`🔧 [fetchVapiConfig] Received config for ${language}:`, {
-      publicKey: config.publicKey ? config.publicKey.substring(0, 10) + '...' : 'NOT SET',
-      assistantId: config.assistantId ? config.assistantId.substring(0, 10) + '...' : 'NOT SET',
-      fallback: config.fallback
+      publicKey: config.publicKey
+        ? `${config.publicKey.substring(0, 10)}...`
+        : 'NOT SET',
+      assistantId: config.assistantId
+        ? `${config.assistantId.substring(0, 10)}...`
+        : 'NOT SET',
+      fallback: config.fallback,
     });
-    
+
     // Cache the result
     vapiConfigCache[language] = config;
     return config;
   } catch (error) {
-    console.error(`[fetchVapiConfig] Error fetching Vapi config for ${language}:`, error);
-    
+    console.error(
+      `[fetchVapiConfig] Error fetching Vapi config for ${language}:`,
+      error
+    );
+
     // Fallback to build-time environment variables if API fails
     const fallbackConfig = {
-      publicKey: language === 'en' 
-        ? import.meta.env.VITE_VAPI_PUBLIC_KEY || ''
-        : import.meta.env[`VITE_VAPI_PUBLIC_KEY_${language.toUpperCase()}`] || import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
-      assistantId: language === 'en'
-        ? import.meta.env.VITE_VAPI_ASSISTANT_ID || ''
-        : import.meta.env[`VITE_VAPI_ASSISTANT_ID_${language.toUpperCase()}`] || import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
-      fallback: true
+      publicKey:
+        language === 'en'
+          ? import.meta.env.VITE_VAPI_PUBLIC_KEY || ''
+          : import.meta.env[`VITE_VAPI_PUBLIC_KEY_${language.toUpperCase()}`] ||
+            import.meta.env.VITE_VAPI_PUBLIC_KEY ||
+            '',
+      assistantId:
+        language === 'en'
+          ? import.meta.env.VITE_VAPI_ASSISTANT_ID || ''
+          : import.meta.env[
+              `VITE_VAPI_ASSISTANT_ID_${language.toUpperCase()}`
+            ] ||
+            import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+            '',
+      fallback: true,
     };
-    
+
     console.log(`[fetchVapiConfig] Using fallback config for ${language}:`, {
-      publicKey: fallbackConfig.publicKey ? fallbackConfig.publicKey.substring(0, 10) + '...' : 'NOT SET',
-      assistantId: fallbackConfig.assistantId ? fallbackConfig.assistantId.substring(0, 10) + '...' : 'NOT SET'
+      publicKey: fallbackConfig.publicKey
+        ? `${fallbackConfig.publicKey.substring(0, 10)}...`
+        : 'NOT SET',
+      assistantId: fallbackConfig.assistantId
+        ? `${fallbackConfig.assistantId.substring(0, 10)}...`
+        : 'NOT SET',
     });
-    
+
     vapiConfigCache[language] = fallbackConfig;
     return fallbackConfig;
   }
 };
 
-export const getVapiPublicKeyByLanguage = async (language: string, config: HotelConfiguration): Promise<string> => {
+export const getVapiPublicKeyByLanguage = async (
+  language: string,
+  config: HotelConfiguration
+): Promise<string> => {
   // For Mi Nhon Hotel, use language-specific keys from API
   if (config.hotelName === 'Mi Nhon Hotel Mui Ne') {
     try {
       const vapiConfig = await fetchVapiConfig(language);
       return vapiConfig.publicKey || config.vapiPublicKey;
     } catch (error) {
-      console.error(`[getVapiPublicKeyByLanguage] Error for ${language}:`, error);
+      console.error(
+        `[getVapiPublicKeyByLanguage] Error for ${language}:`,
+        error
+      );
       return config.vapiPublicKey;
     }
   }
-  
+
   // For other tenants, use the single assistant
   return config.vapiPublicKey || import.meta.env.VITE_VAPI_PUBLIC_KEY;
 };
 
-export const getVapiAssistantIdByLanguage = async (language: string, config: HotelConfiguration): Promise<string> => {
-  // For Mi Nhon Hotel, use language-specific assistant IDs from API  
+export const getVapiAssistantIdByLanguage = async (
+  language: string,
+  config: HotelConfiguration
+): Promise<string> => {
+  // For Mi Nhon Hotel, use language-specific assistant IDs from API
   if (config.hotelName === 'Mi Nhon Hotel Mui Ne') {
     try {
       const vapiConfig = await fetchVapiConfig(language);
-      console.log(`🤖 [getVapiAssistantIdByLanguage] Selected assistant for ${language}:`, {
-        assistantId: vapiConfig.assistantId ? vapiConfig.assistantId.substring(0, 10) + '...' : 'NOT SET',
-        fallback: vapiConfig.fallback
-      });
+      console.log(
+        `🤖 [getVapiAssistantIdByLanguage] Selected assistant for ${language}:`,
+        {
+          assistantId: vapiConfig.assistantId
+            ? `${vapiConfig.assistantId.substring(0, 10)}...`
+            : 'NOT SET',
+          fallback: vapiConfig.fallback,
+        }
+      );
       return vapiConfig.assistantId || config.vapiAssistantId;
     } catch (error) {
-      console.error(`[getVapiAssistantIdByLanguage] Error for ${language}:`, error);
+      console.error(
+        `[getVapiAssistantIdByLanguage] Error for ${language}:`,
+        error
+      );
       return config.vapiAssistantId;
     }
   }
-  
+
   // For other tenants, use the single assistant
   return config.vapiAssistantId || import.meta.env.VITE_VAPI_ASSISTANT_ID;
-}; 
+};

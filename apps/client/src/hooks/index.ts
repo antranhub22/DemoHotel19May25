@@ -16,4 +16,4 @@ export { useSiriResponsiveSize } from './useSiriResponsiveSize';
 export { useSimplifiedMobileTouch } from './useSimplifiedMobileTouch';
 export { useCancelHandler } from './useCancelHandler';
 export { useConfirmHandler } from './useConfirmHandler';
-export { useSendToFrontDeskHandler } from './useSendToFrontDeskHandler'; 
+export { useSendToFrontDeskHandler } from './useSendToFrontDeskHandler';

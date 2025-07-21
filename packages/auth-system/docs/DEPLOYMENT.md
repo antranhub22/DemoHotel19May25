@@ -2,7 +2,8 @@
 
 ## 📋 Overview
 
-Complete deployment guide for the reorganized auth system in production and development environments.
+Complete deployment guide for the reorganized auth system in production and development
+environments.
 
 ---
 
@@ -12,7 +13,7 @@ Complete deployment guide for the reorganized auth system in production and deve
 auth-system/
 ├── types/              # Shared TypeScript types
 ├── config/             # JWT & RBAC configuration
-├── services/           # Business logic services  
+├── services/           # Business logic services
 ├── middleware/         # Express middleware
 ├── routes/             # API route handlers
 ├── frontend/           # React components & hooks
@@ -26,6 +27,7 @@ auth-system/
 ## 🔧 Environment Setup
 
 ### **Required Environment Variables:**
+
 ```bash
 # Database
 DATABASE_URL=postgresql://user:pass@host:port/db
@@ -46,6 +48,7 @@ MAX_LOGIN_ATTEMPTS=5
 ```
 
 ### **Development Environment:**
+
 ```bash
 # Create .env file
 cat > .env << EOF
@@ -57,6 +60,7 @@ EOF
 ```
 
 ### **Production Environment:**
+
 ```bash
 # Generate secure secrets
 JWT_SECRET=$(openssl rand -base64 32)
@@ -75,6 +79,7 @@ export PORT="10000"
 ## 🐳 Docker Deployment
 
 ### **Dockerfile:**
+
 ```dockerfile
 FROM node:18-alpine AS builder
 
@@ -103,6 +108,7 @@ CMD ["npm", "start"]
 ```
 
 ### **Docker Compose:**
+
 ```yaml
 version: '3.8'
 
@@ -110,24 +116,24 @@ services:
   app:
     build: .
     ports:
-      - "10000:10000"
+      - '10000:10000'
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/hotel
       - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
     depends_on:
       - db
-    
+
   db:
     image: postgres:15
     environment:
       - POSTGRES_DB=hotel
-      - POSTGRES_USER=postgres  
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
 volumes:
   postgres_data:
@@ -138,6 +144,7 @@ volumes:
 ## ☁️ Cloud Deployment
 
 ### **Render.com:**
+
 ```yaml
 # render.yaml
 services:
@@ -163,6 +170,7 @@ databases:
 ```
 
 ### **Heroku:**
+
 ```bash
 # Install Heroku CLI and login
 heroku login
@@ -182,6 +190,7 @@ git push heroku main
 ```
 
 ### **Vercel:**
+
 ```json
 {
   "version": 2,
@@ -221,6 +230,7 @@ git push heroku main
 ## 🗄️ Database Setup
 
 ### **PostgreSQL Setup:**
+
 ```bash
 # Install PostgreSQL
 sudo apt update
@@ -235,6 +245,7 @@ EOF
 ```
 
 ### **Database Migration:**
+
 ```typescript
 // Migration script
 import { db } from './auth-system/config';
@@ -242,14 +253,14 @@ import { staff, tenants } from './auth-system/types';
 
 async function runMigrations() {
   console.log('🔄 Running database migrations...');
-  
+
   try {
     // Create tables
     await db.migrate();
-    
+
     // Seed default data
     await seedDefaultData();
-    
+
     console.log('✅ Migrations completed successfully');
   } catch (error) {
     console.error('❌ Migration failed:', error);
@@ -259,12 +270,15 @@ async function runMigrations() {
 
 async function seedDefaultData() {
   // Create default tenant
-  const tenant = await db.insert(tenants).values({
-    id: 'default-hotel',
-    hotelName: 'Demo Hotel',
-    subscriptionPlan: 'premium',
-    subscriptionStatus: 'active'
-  }).returning();
+  const tenant = await db
+    .insert(tenants)
+    .values({
+      id: 'default-hotel',
+      hotelName: 'Demo Hotel',
+      subscriptionPlan: 'premium',
+      subscriptionStatus: 'active',
+    })
+    .returning();
 
   // Create admin user
   await db.insert(staff).values({
@@ -273,7 +287,7 @@ async function seedDefaultData() {
     password: await bcrypt.hash('admin123', 12),
     role: 'hotel-manager',
     tenantId: tenant[0].id,
-    isActive: true
+    isActive: true,
   });
 }
 ```
@@ -283,6 +297,7 @@ async function seedDefaultData() {
 ## 🔄 CI/CD Pipeline
 
 ### **GitHub Actions:**
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy Auth System
@@ -296,7 +311,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -304,32 +319,29 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test_db
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests
         run: npm test
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
           JWT_SECRET: test-secret-key-for-ci-only
-      
+
       - name: Type check
         run: npm run type-check
-      
+
       - name: Lint
         run: npm run lint
 
@@ -337,10 +349,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Deploy to production
         run: |
           # Add your deployment commands here
@@ -354,6 +366,7 @@ jobs:
 ### **Production Security Checklist:**
 
 #### **1. Environment Security:**
+
 ```bash
 # ✅ Use strong, unique secrets
 JWT_SECRET=$(openssl rand -base64 32)
@@ -369,6 +382,7 @@ CORS_ORIGIN=https://yourdomain.com
 ```
 
 #### **2. Database Security:**
+
 ```sql
 -- Create dedicated database user
 CREATE USER auth_service WITH PASSWORD 'strong_random_password';
@@ -383,6 +397,7 @@ ALTER SYSTEM SET ssl = on;
 ```
 
 #### **3. Application Security:**
+
 ```typescript
 // Security middleware
 import helmet from 'helmet';
@@ -390,19 +405,23 @@ import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 
 // Helmet for security headers
-app.use(helmet({
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  }
-}));
+app.use(
+  helmet({
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+);
 
 // Rate limiting
 const authLimiter = rateLimit({
@@ -410,7 +429,7 @@ const authLimiter = rateLimit({
   max: 5, // 5 attempts per window
   message: 'Too many auth attempts',
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
 });
 
 app.use('/api/auth', authLimiter);
@@ -421,6 +440,7 @@ app.use('/api/auth', authLimiter);
 ## 📊 Monitoring & Logging
 
 ### **Application Monitoring:**
+
 ```typescript
 import winston from 'winston';
 
@@ -435,14 +455,16 @@ const logger = winston.createLogger({
   defaultMeta: { service: 'auth-system' },
   transports: [
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  ]
+    new winston.transports.File({ filename: 'logs/combined.log' }),
+  ],
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple()
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
 }
 
 // Auth event logging
@@ -452,7 +474,7 @@ class AuthLogger {
       username,
       success,
       ip,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -462,35 +484,36 @@ class AuthLogger {
       module,
       action,
       granted,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 }
 ```
 
 ### **Health Checks:**
+
 ```typescript
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
     // Check database connection
     await db.raw('SELECT 1');
-    
+
     // Check auth service
     const authHealthy = await UnifiedAuthService.healthCheck();
-    
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       version: process.env.npm_package_version,
       uptime: process.uptime(),
       database: 'connected',
-      auth: authHealthy ? 'healthy' : 'unhealthy'
+      auth: authHealthy ? 'healthy' : 'unhealthy',
     });
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -501,6 +524,7 @@ app.get('/health', async (req, res) => {
 ## 🧪 Testing in Production
 
 ### **Smoke Tests:**
+
 ```bash
 #!/bin/bash
 # production-smoke-test.sh
@@ -530,6 +554,7 @@ echo "✅ All smoke tests passed"
 ```
 
 ### **Load Testing:**
+
 ```javascript
 // k6 load test
 import http from 'k6/http';
@@ -540,15 +565,15 @@ export let options = {
   duration: '30s',
 };
 
-export default function() {
+export default function () {
   let response = http.post('https://your-domain.com/api/auth/login', {
     username: 'test',
-    password: 'test'
+    password: 'test',
   });
-  
+
   check(response, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
+    'status is 200': r => r.status === 200,
+    'response time < 500ms': r => r.timings.duration < 500,
   });
 }
 ```
@@ -560,6 +585,7 @@ export default function() {
 ### **Common Issues:**
 
 #### **1. "Invalid Token" Errors:**
+
 ```bash
 # Check JWT secret
 echo $JWT_SECRET | wc -c  # Should be > 32 characters
@@ -572,6 +598,7 @@ node -e "console.log(new Date(JSON.parse(atob('PAYLOAD_PART')).exp * 1000))"
 ```
 
 #### **2. Database Connection Issues:**
+
 ```bash
 # Test database connection
 psql $DATABASE_URL -c "SELECT version();"
@@ -581,6 +608,7 @@ netstat -an | grep :5432
 ```
 
 #### **3. Permission Denied:**
+
 ```bash
 # Check user role and permissions
 curl -H "Authorization: Bearer TOKEN" /api/auth/me
@@ -590,6 +618,7 @@ node -e "console.log(require('./auth-system/types').ROLE_HIERARCHY)"
 ```
 
 ### **Debug Mode:**
+
 ```bash
 # Enable debug logging
 DEBUG=auth:* NODE_ENV=development npm start
@@ -606,6 +635,7 @@ curl /health | jq
 ## 📋 Deployment Checklist
 
 ### **Pre-Deployment:**
+
 - [ ] Environment variables configured
 - [ ] Database migrations tested
 - [ ] SSL certificates installed
@@ -614,6 +644,7 @@ curl /health | jq
 - [ ] Load testing completed
 
 ### **Deployment:**
+
 - [ ] Deploy to staging first
 - [ ] Run smoke tests
 - [ ] Check health endpoints
@@ -622,6 +653,7 @@ curl /health | jq
 - [ ] Test rollback procedure
 
 ### **Post-Deployment:**
+
 - [ ] Monitor application logs
 - [ ] Check performance metrics
 - [ ] Verify user authentication
@@ -634,6 +666,7 @@ curl /health | jq
 ## 🔄 Maintenance
 
 ### **Regular Tasks:**
+
 ```bash
 # Weekly tasks
 ./scripts/rotate-jwt-secrets.sh
@@ -647,6 +680,7 @@ curl /health | jq
 ```
 
 ### **Updates & Patches:**
+
 ```bash
 # Update dependencies
 npm audit fix
@@ -663,4 +697,5 @@ npm run type-check
 ---
 
 **📝 Last Updated**: July 20, 2024  
-**🔗 Related**: [Auth API](./AUTH_API.md) | [JWT Guide](./JWT_GUIDE.md) | [RBAC Guide](./RBAC_GUIDE.md) 
+**🔗 Related**: [Auth API](./AUTH_API.md) | [JWT Guide](./JWT_GUIDE.md) |
+[RBAC Guide](./RBAC_GUIDE.md)

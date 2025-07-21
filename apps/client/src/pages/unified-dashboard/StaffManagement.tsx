@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import {
   Dialog,
@@ -38,7 +38,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -46,12 +46,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { 
-  Users, 
-  UserPlus, 
-  Edit, 
-  Trash2, 
-  Shield, 
+import {
+  Users,
+  UserPlus,
+  Edit,
+  Trash2,
+  Shield,
   Eye,
   EyeOff,
   Mail,
@@ -63,7 +63,7 @@ import {
   Settings,
   Lock,
   Unlock,
-  Key
+  Key,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { UserRole } from '@shared/constants/permissions';
@@ -99,29 +99,29 @@ const roleConfigs = {
     label: 'Quản lý khách sạn',
     color: 'bg-blue-100 text-blue-800 border-blue-300',
     icon: <Shield className="h-3 w-3" />,
-    description: 'Quyền truy cập đầy đủ'
+    description: 'Quyền truy cập đầy đủ',
   },
   'front-desk': {
     label: 'Lễ tân',
-    color: 'bg-green-100 text-green-800 border-green-300', 
+    color: 'bg-green-100 text-green-800 border-green-300',
     icon: <Users className="h-3 w-3" />,
-    description: 'Quản lý yêu cầu khách hàng'
+    description: 'Quản lý yêu cầu khách hàng',
   },
   'it-manager': {
     label: 'Quản lý IT',
     color: 'bg-purple-100 text-purple-800 border-purple-300',
     icon: <Settings className="h-3 w-3" />,
-    description: 'Quản lý hệ thống kỹ thuật'
-  }
+    description: 'Quản lý hệ thống kỹ thuật',
+  },
 };
 
 // Staff form dialog
-const StaffFormDialog = ({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
+const StaffFormDialog = ({
+  isOpen,
+  onClose,
+  onSubmit,
   staff = null,
-  loading = false
+  loading = false,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -137,7 +137,7 @@ const StaffFormDialog = ({
     role: staff?.role || 'front-desk',
     password: '',
     confirmPassword: '',
-    isActive: staff?.isActive ?? true
+    isActive: staff?.isActive ?? true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -152,7 +152,7 @@ const StaffFormDialog = ({
         role: staff?.role || 'front-desk',
         password: '',
         confirmPassword: '',
-        isActive: staff?.isActive ?? true
+        isActive: staff?.isActive ?? true,
       });
       setErrors({});
     }
@@ -208,10 +208,9 @@ const StaffFormDialog = ({
             {isEdit ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
           </DialogTitle>
           <DialogDescription>
-            {isEdit 
-              ? 'Cập nhật thông tin nhân viên' 
-              : 'Tạo tài khoản nhân viên mới'
-            }
+            {isEdit
+              ? 'Cập nhật thông tin nhân viên'
+              : 'Tạo tài khoản nhân viên mới'}
           </DialogDescription>
         </DialogHeader>
 
@@ -221,11 +220,15 @@ const StaffFormDialog = ({
             <Input
               id="username"
               value={formData.username}
-              onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, username: e.target.value }))
+              }
               className={errors.username ? 'border-red-500' : ''}
               disabled={isEdit} // Cannot change username after creation
             />
-            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+            {errors.username && (
+              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+            )}
           </div>
 
           <div>
@@ -234,10 +237,14 @@ const StaffFormDialog = ({
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, email: e.target.value }))
+              }
               className={errors.email ? 'border-red-500' : ''}
             />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
 
           <div>
@@ -245,15 +252,24 @@ const StaffFormDialog = ({
             <Input
               id="displayName"
               value={formData.displayName}
-              onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, displayName: e.target.value }))
+              }
               className={errors.displayName ? 'border-red-500' : ''}
             />
-            {errors.displayName && <p className="text-red-500 text-sm mt-1">{errors.displayName}</p>}
+            {errors.displayName && (
+              <p className="text-red-500 text-sm mt-1">{errors.displayName}</p>
+            )}
           </div>
 
           <div>
             <Label htmlFor="role">Vai trò</Label>
-            <Select value={formData.role} onValueChange={(value: UserRole) => setFormData(prev => ({ ...prev, role: value }))}>
+            <Select
+              value={formData.role}
+              onValueChange={(value: UserRole) =>
+                setFormData(prev => ({ ...prev, role: value }))
+              }
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -277,9 +293,14 @@ const StaffFormDialog = ({
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    onChange={e =>
+                      setFormData(prev => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
                     className={errors.password ? 'border-red-500' : ''}
                   />
                   <Button
@@ -289,10 +310,16 @@ const StaffFormDialog = ({
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
-                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                {errors.password && (
+                  <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                )}
               </div>
 
               <div>
@@ -301,10 +328,19 @@ const StaffFormDialog = ({
                   id="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  onChange={e =>
+                    setFormData(prev => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
                   className={errors.confirmPassword ? 'border-red-500' : ''}
                 />
-                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.confirmPassword}
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -314,7 +350,9 @@ const StaffFormDialog = ({
               type="checkbox"
               id="isActive"
               checked={formData.isActive}
-              onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+              onChange={e =>
+                setFormData(prev => ({ ...prev, isActive: e.target.checked }))
+              }
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <Label htmlFor="isActive">Tài khoản hoạt động</Label>
@@ -340,10 +378,10 @@ const StaffFormDialog = ({
 };
 
 // Staff permissions modal
-const StaffPermissionsModal = ({ 
-  staff, 
-  isOpen, 
-  onClose 
+const StaffPermissionsModal = ({
+  staff,
+  isOpen,
+  onClose,
 }: {
   staff: StaffMember | null;
   isOpen: boolean;
@@ -369,19 +407,24 @@ const StaffPermissionsModal = ({
         <div className="space-y-4">
           <div>
             <Label>Vai trò</Label>
-            <Badge variant="outline" className={cn("mt-1", roleConfig.color)}>
+            <Badge variant="outline" className={cn('mt-1', roleConfig.color)}>
               {roleConfig.icon}
               <span className="ml-1">{roleConfig.label}</span>
             </Badge>
-            <p className="text-sm text-gray-600 mt-1">{roleConfig.description}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {roleConfig.description}
+            </p>
           </div>
 
           <div>
             <Label>Quyền hạn ({staff.permissions.length})</Label>
             <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg p-3">
               <div className="grid grid-cols-1 gap-1">
-                {staff.permissions.map((permission) => (
-                  <div key={permission} className="flex items-center gap-2 text-sm">
+                {staff.permissions.map(permission => (
+                  <div
+                    key={permission}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <Key className="h-3 w-3 text-gray-400" />
                     <span className="font-mono text-xs">{permission}</span>
                   </div>
@@ -423,11 +466,16 @@ export const StaffManagement: React.FC = () => {
       email: 'manager@hotel.com',
       displayName: 'Hotel Manager',
       role: 'hotel-manager',
-      permissions: ['dashboard:view', 'analytics:view_advanced', 'staff:manage', 'settings:manage'],
+      permissions: [
+        'dashboard:view',
+        'analytics:view_advanced',
+        'staff:manage',
+        'settings:manage',
+      ],
       isActive: true,
       lastLogin: '2024-01-15T10:30:00Z',
       createdAt: '2024-01-01T09:00:00Z',
-      updatedAt: '2024-01-15T10:30:00Z'
+      updatedAt: '2024-01-15T10:30:00Z',
     },
     {
       id: '2',
@@ -435,11 +483,16 @@ export const StaffManagement: React.FC = () => {
       email: 'frontdesk@hotel.com',
       displayName: 'Front Desk Staff',
       role: 'front-desk',
-      permissions: ['dashboard:view', 'requests:view', 'calls:view', 'guests:manage'],
+      permissions: [
+        'dashboard:view',
+        'requests:view',
+        'calls:view',
+        'guests:manage',
+      ],
       isActive: true,
       lastLogin: '2024-01-15T09:15:00Z',
       createdAt: '2024-01-02T10:00:00Z',
-      updatedAt: '2024-01-15T09:15:00Z'
+      updatedAt: '2024-01-15T09:15:00Z',
     },
     {
       id: '3',
@@ -447,11 +500,16 @@ export const StaffManagement: React.FC = () => {
       email: 'it@hotel.com',
       displayName: 'IT Manager',
       role: 'it-manager',
-      permissions: ['dashboard:view', 'system:monitor', 'logs:view', 'security:manage'],
+      permissions: [
+        'dashboard:view',
+        'system:monitor',
+        'logs:view',
+        'security:manage',
+      ],
       isActive: true,
       lastLogin: '2024-01-14T16:45:00Z',
       createdAt: '2024-01-03T11:00:00Z',
-      updatedAt: '2024-01-14T16:45:00Z'
+      updatedAt: '2024-01-14T16:45:00Z',
     },
     {
       id: '4',
@@ -463,8 +521,8 @@ export const StaffManagement: React.FC = () => {
       isActive: false,
       lastLogin: '2024-01-10T14:20:00Z',
       createdAt: '2024-01-05T08:30:00Z',
-      updatedAt: '2024-01-10T14:20:00Z'
-    }
+      updatedAt: '2024-01-10T14:20:00Z',
+    },
   ];
 
   // Fetch staff list
@@ -486,17 +544,19 @@ export const StaffManagement: React.FC = () => {
   const handleStaffSubmit = async (data: StaffFormData) => {
     try {
       setFormLoading(true);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       if (selectedStaff) {
         // Update existing staff
-        setStaffList(prev => prev.map(staff => 
-          staff.id === selectedStaff.id 
-            ? { ...staff, ...data, updatedAt: new Date().toISOString() }
-            : staff
-        ));
+        setStaffList(prev =>
+          prev.map(staff =>
+            staff.id === selectedStaff.id
+              ? { ...staff, ...data, updatedAt: new Date().toISOString() }
+              : staff
+          )
+        );
         setShowEditModal(false);
       } else {
         // Add new staff
@@ -505,12 +565,12 @@ export const StaffManagement: React.FC = () => {
           ...data,
           permissions: [], // Will be set by backend based on role
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
         setStaffList(prev => [...prev, newStaff]);
         setShowAddModal(false);
       }
-      
+
       setSelectedStaff(null);
     } catch (error) {
       console.error('Failed to save staff:', error);
@@ -524,7 +584,7 @@ export const StaffManagement: React.FC = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setStaffList(prev => prev.filter(staff => staff.id !== staffId));
     } catch (error) {
       console.error('Failed to delete staff:', error);
@@ -534,11 +594,17 @@ export const StaffManagement: React.FC = () => {
   // Toggle staff status
   const toggleStaffStatus = async (staffId: string) => {
     try {
-      setStaffList(prev => prev.map(staff => 
-        staff.id === staffId 
-          ? { ...staff, isActive: !staff.isActive, updatedAt: new Date().toISOString() }
-          : staff
-      ));
+      setStaffList(prev =>
+        prev.map(staff =>
+          staff.id === staffId
+            ? {
+                ...staff,
+                isActive: !staff.isActive,
+                updatedAt: new Date().toISOString(),
+              }
+            : staff
+        )
+      );
     } catch (error) {
       console.error('Failed to toggle staff status:', error);
     }
@@ -546,16 +612,17 @@ export const StaffManagement: React.FC = () => {
 
   // Filter staff
   const filteredStaff = staffList.filter(staff => {
-    const matchesSearch = 
+    const matchesSearch =
       staff.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       staff.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       staff.email.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesRole = roleFilter === 'all' || staff.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || 
+    const matchesStatus =
+      statusFilter === 'all' ||
       (statusFilter === 'active' && staff.isActive) ||
       (statusFilter === 'inactive' && !staff.isActive);
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -576,7 +643,9 @@ export const StaffManagement: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchStaffList} disabled={loading}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            <RefreshCw
+              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+            />
             Làm mới
           </Button>
           <Button onClick={() => setShowAddModal(true)}>
@@ -599,7 +668,7 @@ export const StaffManagement: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -613,7 +682,7 @@ export const StaffManagement: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -627,7 +696,7 @@ export const StaffManagement: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -660,7 +729,7 @@ export const StaffManagement: React.FC = () => {
                 <Input
                   placeholder="Tên, username, email..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -727,7 +796,7 @@ export const StaffManagement: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStaff.map((staff) => {
+                  {filteredStaff.map(staff => {
                     const roleConfig = roleConfigs[staff.role];
                     return (
                       <TableRow key={staff.id}>
@@ -737,7 +806,9 @@ export const StaffManagement: React.FC = () => {
                               <Users className="h-5 w-5 text-gray-500" />
                             </div>
                             <div>
-                              <div className="font-medium">{staff.displayName}</div>
+                              <div className="font-medium">
+                                {staff.displayName}
+                              </div>
                               <div className="text-sm text-gray-500">
                                 @{staff.username} • {staff.email}
                               </div>
@@ -751,7 +822,9 @@ export const StaffManagement: React.FC = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={staff.isActive ? "default" : "secondary"}>
+                          <Badge
+                            variant={staff.isActive ? 'default' : 'secondary'}
+                          >
                             {staff.isActive ? (
                               <>
                                 <Unlock className="h-3 w-3 mr-1" />
@@ -769,13 +842,21 @@ export const StaffManagement: React.FC = () => {
                           <div className="text-sm">
                             {staff.lastLogin ? (
                               <>
-                                <div>{new Date(staff.lastLogin).toLocaleDateString()}</div>
+                                <div>
+                                  {new Date(
+                                    staff.lastLogin
+                                  ).toLocaleDateString()}
+                                </div>
                                 <div className="text-gray-500">
-                                  {new Date(staff.lastLogin).toLocaleTimeString()}
+                                  {new Date(
+                                    staff.lastLogin
+                                  ).toLocaleTimeString()}
                                 </div>
                               </>
                             ) : (
-                              <span className="text-gray-400">Chưa đăng nhập</span>
+                              <span className="text-gray-400">
+                                Chưa đăng nhập
+                              </span>
                             )}
                           </div>
                         </TableCell>
@@ -820,15 +901,18 @@ export const StaffManagement: React.FC = () => {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                                  <AlertDialogTitle>
+                                    Xác nhận xóa
+                                  </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Bạn có chắc muốn xóa nhân viên "{staff.displayName}"? 
-                                    Hành động này không thể hoàn tác.
+                                    Bạn có chắc muốn xóa nhân viên "
+                                    {staff.displayName}"? Hành động này không
+                                    thể hoàn tác.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                  <AlertDialogAction 
+                                  <AlertDialogAction
                                     onClick={() => handleDeleteStaff(staff.id)}
                                     className="bg-red-600 hover:bg-red-700"
                                   >
@@ -878,4 +962,4 @@ export const StaffManagement: React.FC = () => {
       />
     </div>
   );
-}; 
+};

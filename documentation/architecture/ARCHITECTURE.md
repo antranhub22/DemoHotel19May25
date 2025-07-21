@@ -1,6 +1,7 @@
 # Hotel Assistant Architecture Documentation
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [System Architecture](#system-architecture)
 3. [Technology Stack](#technology-stack)
@@ -15,6 +16,7 @@
 ## Overview
 
 The Hotel Assistant is a comprehensive voice-enabled hotel management system that provides:
+
 - Multi-language voice assistant integration via Vapi.ai
 - Real-time call management and transcript processing
 - Order and service request management
@@ -24,6 +26,7 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 ## System Architecture
 
 ### High-Level Architecture
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend       │    │   External      │
@@ -39,6 +42,7 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 ```
 
 ### Component Architecture
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Frontend Layer                          │
@@ -72,6 +76,7 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 ## Technology Stack
 
 ### Frontend
+
 - **React 18** - UI framework
 - **TypeScript** - Type safety
 - **Vite** - Build tool
@@ -82,6 +87,7 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 - **Recharts** - Data visualization
 
 ### Backend
+
 - **Node.js** - Runtime
 - **Express.js** - Web framework
 - **TypeScript** - Type safety
@@ -92,11 +98,13 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 - **bcrypt** - Password hashing
 
 ### External Services
+
 - **Vapi.ai** - Voice assistant platform
 - **OpenAI** - AI language model
 - **Gmail/SendGrid** - Email service
 
 ### Development Tools
+
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **Jest** - Testing
@@ -107,6 +115,7 @@ The Hotel Assistant is a comprehensive voice-enabled hotel management system tha
 ### Core Tables
 
 #### Tenants
+
 ```sql
 CREATE TABLE tenants (
   id UUID PRIMARY KEY,
@@ -129,6 +138,7 @@ CREATE TABLE tenants (
 ```
 
 #### Hotel Profiles
+
 ```sql
 CREATE TABLE hotel_profiles (
   id UUID PRIMARY KEY,
@@ -145,6 +155,7 @@ CREATE TABLE hotel_profiles (
 ```
 
 #### Calls
+
 ```sql
 CREATE TABLE calls (
   id UUID PRIMARY KEY,
@@ -161,6 +172,7 @@ CREATE TABLE calls (
 ```
 
 #### Transcripts
+
 ```sql
 CREATE TABLE transcripts (
   id SERIAL PRIMARY KEY,
@@ -174,6 +186,7 @@ CREATE TABLE transcripts (
 ```
 
 #### Requests (Orders)
+
 ```sql
 CREATE TABLE requests (
   id SERIAL PRIMARY KEY,
@@ -188,6 +201,7 @@ CREATE TABLE requests (
 ```
 
 #### Messages
+
 ```sql
 CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
@@ -200,6 +214,7 @@ CREATE TABLE messages (
 ```
 
 #### Staff
+
 ```sql
 CREATE TABLE staff (
   id SERIAL PRIMARY KEY,
@@ -213,6 +228,7 @@ CREATE TABLE staff (
 ```
 
 ### Database Relationships
+
 ```
 tenants (1) ──── (1) hotel_profiles
 tenants (1) ──── (N) calls
@@ -229,6 +245,7 @@ requests (1) ──── (N) messages
 ### RESTful Endpoints
 
 #### Authentication
+
 ```
 POST   /auth/login
 POST   /auth/refresh
@@ -236,6 +253,7 @@ POST   /auth/logout
 ```
 
 #### Calls
+
 ```
 POST   /calls/start
 POST   /calls/end
@@ -244,6 +262,7 @@ GET    /calls
 ```
 
 #### Transcripts
+
 ```
 POST   /transcripts
 GET    /transcripts/:callId
@@ -251,6 +270,7 @@ GET    /transcripts
 ```
 
 #### Orders/Requests
+
 ```
 POST   /orders
 GET    /orders
@@ -259,12 +279,14 @@ PATCH  /orders/:id/status
 ```
 
 #### Messages
+
 ```
 POST   /messages
 GET    /messages/:requestId
 ```
 
 #### Hotel Management
+
 ```
 POST   /hotel/research
 POST   /hotel/generate-assistant
@@ -273,6 +295,7 @@ PUT    /hotel/config/:tenantId
 ```
 
 #### Analytics
+
 ```
 GET    /analytics/:tenantId
 GET    /analytics/:tenantId/service-distribution
@@ -280,6 +303,7 @@ GET    /analytics/:tenantId/hourly-activity
 ```
 
 #### Health
+
 ```
 GET    /health
 GET    /health/detailed
@@ -288,27 +312,30 @@ GET    /health/detailed
 ### WebSocket Events
 
 #### Client to Server
+
 ```typescript
 interface ClientEvents {
-  'init': (data: { tenantId: string; roomNumber?: string; language?: string }) => void;
-  'transcript': (data: { content: string; role: 'user' | 'assistant' }) => void;
-  'call_end': (data: { callId: string; duration: number }) => void;
+  init: (data: { tenantId: string; roomNumber?: string; language?: string }) => void;
+  transcript: (data: { content: string; role: 'user' | 'assistant' }) => void;
+  call_end: (data: { callId: string; duration: number }) => void;
 }
 ```
 
 #### Server to Client
+
 ```typescript
 interface ServerEvents {
-  'transcript': (data: { content: string; role: 'user' | 'assistant'; timestamp: Date }) => void;
-  'order_status_update': (data: { orderId: string; status: string; roomNumber?: string }) => void;
-  'call_end': (data: { callId: string; duration: number }) => void;
-  'error': (data: { message: string; code?: string }) => void;
+  transcript: (data: { content: string; role: 'user' | 'assistant'; timestamp: Date }) => void;
+  order_status_update: (data: { orderId: string; status: string; roomNumber?: string }) => void;
+  call_end: (data: { callId: string; duration: number }) => void;
+  error: (data: { message: string; code?: string }) => void;
 }
 ```
 
 ## Frontend Architecture
 
 ### Component Structure
+
 ```
 src/
 ├── components/
@@ -327,12 +354,14 @@ src/
 ```
 
 ### State Management
+
 - **React Context** - Global state (authentication, theme, language)
 - **React Query** - Server state management
 - **Local State** - Component-specific state
 - **URL State** - Navigation and routing state
 
 ### Data Flow
+
 ```
 User Action → Component → Hook → Service → API → Database
      ↑                                                      ↓
@@ -342,6 +371,7 @@ User Action → Component → Hook → Service → API → Database
 ## Backend Architecture
 
 ### Service Layer
+
 ```
 src/
 ├── routes/                    # API route handlers
@@ -359,6 +389,7 @@ src/
 ```
 
 ### Middleware Stack
+
 1. **CORS** - Cross-origin resource sharing
 2. **Helmet** - Security headers
 3. **Compression** - Response compression
@@ -369,6 +400,7 @@ src/
 8. **Error Handling** - Global error handling
 
 ### Service Communication
+
 ```
 Route Handler → Service → External API → Database
      ↑              ↓
@@ -378,12 +410,14 @@ Route Handler → Service → External API → Database
 ## Multi-tenancy
 
 ### Tenant Isolation
+
 - **Database Level**: All tables include `tenant_id` foreign key
 - **Application Level**: Middleware injects tenant context
 - **API Level**: All endpoints filter by tenant
 - **Frontend Level**: Tenant context in authentication
 
 ### Tenant Configuration
+
 ```typescript
 interface Tenant {
   id: string;
@@ -402,6 +436,7 @@ interface Tenant {
 ```
 
 ### Tenant Routing
+
 - **Subdomain-based**: `hotel1.app.com`, `hotel2.app.com`
 - **Custom Domain**: `hotel1.com`, `hotel2.com`
 - **Path-based**: `app.com/hotel1`, `app.com/hotel2`
@@ -409,24 +444,28 @@ interface Tenant {
 ## Security
 
 ### Authentication
+
 - **JWT Tokens** - Stateless authentication
 - **bcrypt** - Password hashing
 - **Refresh Tokens** - Token rotation
 - **Session Management** - Secure session handling
 
 ### Authorization
+
 - **Role-based Access Control (RBAC)**
   - Admin: Full system access
   - Manager: Hotel management access
   - Staff: Limited operational access
 
 ### Data Protection
+
 - **Input Validation** - Zod schema validation
 - **SQL Injection Prevention** - Parameterized queries
 - **XSS Prevention** - Content sanitization
 - **CSRF Protection** - Token-based protection
 
 ### API Security
+
 - **Rate Limiting** - Request throttling
 - **CORS Configuration** - Cross-origin policies
 - **Security Headers** - Helmet middleware
@@ -435,6 +474,7 @@ interface Tenant {
 ## Deployment
 
 ### Environment Configuration
+
 ```bash
 # Database
 DATABASE_URL=postgresql://user:pass@host:port/db
@@ -461,6 +501,7 @@ CORS_ORIGIN=https://your-domain.com
 ```
 
 ### Docker Deployment
+
 ```dockerfile
 # Multi-stage build
 FROM node:18-alpine AS builder
@@ -477,6 +518,7 @@ CMD ["npm", "start"]
 ```
 
 ### Production Considerations
+
 - **Load Balancing** - Multiple server instances
 - **Database Scaling** - Read replicas, connection pooling
 - **Caching** - Redis for session storage
@@ -489,18 +531,21 @@ CMD ["npm", "start"]
 ## Performance Optimization
 
 ### Frontend
+
 - **Code Splitting** - Lazy loading of components
 - **Bundle Optimization** - Tree shaking, minification
 - **Caching** - Service worker, browser caching
 - **Image Optimization** - WebP format, lazy loading
 
 ### Backend
+
 - **Database Indexing** - Optimized query performance
 - **Connection Pooling** - Database connection management
 - **Caching** - Redis for frequently accessed data
 - **Compression** - Gzip response compression
 
 ### Monitoring
+
 - **Application Metrics** - Response times, error rates
 - **Database Metrics** - Query performance, connection usage
 - **Infrastructure Metrics** - CPU, memory, disk usage
@@ -509,6 +554,7 @@ CMD ["npm", "start"]
 ## Development Workflow
 
 ### Local Development
+
 1. **Environment Setup** - Install dependencies
 2. **Database Setup** - Run migrations, seed data
 3. **Service Configuration** - Configure external services
@@ -516,6 +562,7 @@ CMD ["npm", "start"]
 5. **Testing** - Run unit and integration tests
 
 ### Code Quality
+
 - **TypeScript** - Static type checking
 - **ESLint** - Code linting and formatting
 - **Prettier** - Code formatting
@@ -523,8 +570,9 @@ CMD ["npm", "start"]
 - **Git Hooks** - Pre-commit validation
 
 ### Deployment Pipeline
+
 1. **Code Review** - Pull request validation
 2. **Automated Testing** - CI/CD pipeline
 3. **Security Scanning** - Vulnerability assessment
 4. **Staging Deployment** - Pre-production testing
-5. **Production Deployment** - Blue-green deployment 
+5. **Production Deployment** - Blue-green deployment

@@ -11,11 +11,11 @@ const router = express.Router();
 router.post('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
     console.log('📝 [Request API] Creating new request (camelCase):', req.body);
-    
+
     // ✅ TRANSFORM: camelCase frontend data → snake_case database data
     const transformedData = requestMapper.toDatabase(req.body);
     console.log('🔄 [Request API] Transformed to snake_case:', transformedData);
-    
+
     // Extract data from transformed body (now all snake_case)
     const {
       call_id,
@@ -28,21 +28,21 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
       status = 'Đã ghi nhận',
       // Alternative field names for backward compatibility
       type,
-      request_content
+      request_content,
     } = transformedData;
 
     // ✅ FIX: Determine final status - prioritize client value
     const finalStatus = status || 'Đã ghi nhận';
-    
+
     // Build request content from items or use provided content
     let content = request_content || special_instructions;
-    
+
     if (!content && items && Array.isArray(items) && items.length > 0) {
-      content = items.map((item: any) => 
-        `${item.name || 'Item'} x${item.quantity || 1}`
-      ).join(', ');
+      content = items
+        .map((item: any) => `${item.name || 'Item'} x${item.quantity || 1}`)
+        .join(', ');
     }
-    
+
     if (!content) {
       content = order_type || type || 'Service Request';
     }
@@ -57,20 +57,23 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
       status: finalStatus,
       created_at: Math.floor(Date.now() / 1000), // Unix timestamp
       updated_at: Math.floor(Date.now() / 1000), // Set initial updated_at
-      description: special_instructions || null,   // Use specialInstructions as description
-      priority: 'medium',                        // Default priority
-      assigned_to: null                          // Will be assigned by staff later
+      description: special_instructions || null, // Use specialInstructions as description
+      priority: 'medium', // Default priority
+      assigned_to: null, // Will be assigned by staff later
     };
 
     console.log('💾 [Request API] Inserting request:', newRequest);
 
     // Insert into database and get the generated ID
-    const insertResult = await db.insert(requestTable).values(newRequest).returning();
+    const insertResult = await db
+      .insert(requestTable)
+      .values(newRequest)
+      .returning();
     const createdRequest = insertResult[0];
 
     // ✅ TRANSFORM: snake_case database response → camelCase frontend response
     const frontendResponse = requestMapper.toFrontend(createdRequest);
-    
+
     // Return success response
     const response = {
       success: true,
@@ -78,19 +81,21 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
         ...frontendResponse,
         // Backward compatibility fields
         reference: newRequest.order_id,
-        estimatedTime: delivery_time || 'asap'
-      }
+        estimatedTime: delivery_time || 'asap',
+      },
     };
 
-    console.log('✅ [Request API] Request created successfully (camelCase):', response);
+    console.log(
+      '✅ [Request API] Request created successfully (camelCase):',
+      response
+    );
     res.status(201).json(response);
-
   } catch (error) {
     console.error('❌ [Request API] Failed to create request:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Failed to create request',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -99,23 +104,27 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
 router.get('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).tenant?.id;
-    
+
     let requests;
     if (tenantId) {
-      requests = await db.select().from(requestTable)
+      requests = await db
+        .select()
+        .from(requestTable)
         .where(eq(requestTable.tenant_id, tenantId))
         .orderBy(requestTable.created_at);
     } else {
-      requests = await db.select().from(requestTable)
+      requests = await db
+        .select()
+        .from(requestTable)
         .orderBy(requestTable.created_at);
     }
 
     res.json({ success: true, data: requests });
   } catch (error) {
     console.error('❌ [Request API] Failed to fetch requests:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch requests' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch requests',
     });
   }
 });
@@ -124,93 +133,105 @@ router.get('/', authenticateJWT, async (req: Request, res: Response) => {
 router.get('/:id', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const requestId = parseInt(req.params.id, 10);
-    
+
     if (isNaN(requestId)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid request ID format' 
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request ID format',
       });
     }
-    
+
     const tenantId = (req as any).tenant?.id;
-    
+
     // Build query with proper condition chaining
     const whereConditions = [eq(requestTable.id, requestId)];
     if (tenantId) {
       whereConditions.push(eq(requestTable.tenant_id, tenantId));
     }
-    
-    const query = db.select().from(requestTable).where(
-      whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions)
-    );
-    
+
+    const query = db
+      .select()
+      .from(requestTable)
+      .where(
+        whereConditions.length === 1
+          ? whereConditions[0]
+          : and(...whereConditions)
+      );
+
     const request = await query;
-    
+
     if (!request || request.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Request not found' 
+      return res.status(404).json({
+        success: false,
+        error: 'Request not found',
       });
     }
 
     res.json({ success: true, data: request[0] });
   } catch (error) {
     console.error('❌ [Request API] Failed to fetch request:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to fetch request' 
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch request',
     });
   }
 });
 
 // ✅ PATCH /api/request/:id/status - Update request status
-router.patch('/:id/status', authenticateJWT, async (req: Request, res: Response) => {
-  try {
-    const requestId = parseInt(req.params.id, 10);
-    const { status } = req.body;
-    
-    if (isNaN(requestId)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid request ID format' 
+router.patch(
+  '/:id/status',
+  authenticateJWT,
+  async (req: Request, res: Response) => {
+    try {
+      const requestId = parseInt(req.params.id, 10);
+      const { status } = req.body;
+
+      if (isNaN(requestId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid request ID format',
+        });
+      }
+
+      if (!status) {
+        return res.status(400).json({
+          success: false,
+          error: 'Status is required',
+        });
+      }
+
+      const tenantId = (req as any).tenant?.id;
+
+      // Update the request with proper condition chaining
+      const updateConditions = [eq(requestTable.id, requestId)];
+      if (tenantId) {
+        updateConditions.push(eq(requestTable.tenant_id, tenantId));
+      }
+
+      await db
+        .update(requestTable)
+        .set({
+          status,
+          updated_at: Math.floor(Date.now() / 1000),
+        })
+        .where(
+          updateConditions.length === 1
+            ? updateConditions[0]
+            : and(...updateConditions)
+        );
+
+      res.json({
+        success: true,
+        message: 'Request status updated successfully',
+      });
+    } catch (error) {
+      console.error('❌ [Request API] Failed to update request status:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update request status',
       });
     }
-    
-    if (!status) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Status is required' 
-      });
-    }
-
-    const tenantId = (req as any).tenant?.id;
-    
-    // Update the request with proper condition chaining
-    const updateConditions = [eq(requestTable.id, requestId)];
-    if (tenantId) {
-      updateConditions.push(eq(requestTable.tenant_id, tenantId));
-    }
-    
-    await db.update(requestTable)
-      .set({ 
-        status,
-        updated_at: Math.floor(Date.now() / 1000)
-      })
-      .where(
-        updateConditions.length === 1 ? updateConditions[0] : and(...updateConditions)
-      );
-
-    res.json({ 
-      success: true, 
-      message: 'Request status updated successfully' 
-    });
-  } catch (error) {
-    console.error('❌ [Request API] Failed to update request status:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to update request status' 
-    });
   }
-});
+);
 
-export default router; 
+export default router;

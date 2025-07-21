@@ -15,7 +15,7 @@ const TEST_SCENARIOS = {
     isDryRun: false,
     skipBackup: false,
     verbose: true,
-    description: 'Full production-like migration test with PostgreSQL'
+    description: 'Full production-like migration test with PostgreSQL',
   },
 
   // SQLite development test
@@ -24,7 +24,7 @@ const TEST_SCENARIOS = {
     isDryRun: false,
     skipBackup: false,
     verbose: true,
-    description: 'Development migration test with SQLite'
+    description: 'Development migration test with SQLite',
   },
 
   // Dry run test (safe preview)
@@ -33,7 +33,7 @@ const TEST_SCENARIOS = {
     isDryRun: true,
     skipBackup: true,
     verbose: true,
-    description: 'Dry run migration test (no actual changes)'
+    description: 'Dry run migration test (no actual changes)',
   },
 
   // Quick smoke test
@@ -41,8 +41,8 @@ const TEST_SCENARIOS = {
     isDryRun: true,
     skipBackup: true,
     verbose: false,
-    description: 'Quick smoke test for CI/CD'
-  }
+    description: 'Quick smoke test for CI/CD',
+  },
 };
 
 // ============================================
@@ -57,23 +57,33 @@ class MigrationTestRunner {
     fs.mkdirSync(this.resultsDir, { recursive: true });
   }
 
-  async runScenario(scenarioName: keyof typeof TEST_SCENARIOS): Promise<boolean> {
+  async runScenario(
+    scenarioName: keyof typeof TEST_SCENARIOS
+  ): Promise<boolean> {
     console.log(`\n🚀 Running migration test scenario: ${scenarioName}`);
-    console.log(`📝 Description: ${TEST_SCENARIOS[scenarioName].description}\n`);
+    console.log(
+      `📝 Description: ${TEST_SCENARIOS[scenarioName].description}\n`
+    );
 
     const config = TEST_SCENARIOS[scenarioName];
     const test = new DatabaseMigrationTest(config);
 
     try {
       const results = await test.runMigrationTest();
-      
+
       // Save results to file
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const resultsFile = path.join(this.resultsDir, `${scenarioName}-${timestamp}.json`);
+      const resultsFile = path.join(
+        this.resultsDir,
+        `${scenarioName}-${timestamp}.json`
+      );
       fs.writeFileSync(resultsFile, JSON.stringify(results, null, 2));
 
       // Generate and save report
-      const reportFile = path.join(this.resultsDir, `${scenarioName}-${timestamp}.md`);
+      const reportFile = path.join(
+        this.resultsDir,
+        `${scenarioName}-${timestamp}.md`
+      );
       fs.writeFileSync(reportFile, test.generateReport());
 
       console.log(`\n📊 Results saved to: ${resultsFile}`);
@@ -99,19 +109,21 @@ class MigrationTestRunner {
       total: 0,
       passed: 0,
       failed: 0,
-      scenarios: {} as Record<string, boolean>
+      scenarios: {} as Record<string, boolean>,
     };
 
     for (const [scenarioName, _] of Object.entries(TEST_SCENARIOS)) {
       results.total++;
-      const success = await this.runScenario(scenarioName as keyof typeof TEST_SCENARIOS);
-      
+      const success = await this.runScenario(
+        scenarioName as keyof typeof TEST_SCENARIOS
+      );
+
       if (success) {
         results.passed++;
       } else {
         results.failed++;
       }
-      
+
       results.scenarios[scenarioName] = success;
     }
 
@@ -122,35 +134,44 @@ class MigrationTestRunner {
     console.log(`Total Scenarios: ${results.total}`);
     console.log(`Passed: ${results.passed} ✅`);
     console.log(`Failed: ${results.failed} ❌`);
-    console.log(`Success Rate: ${(results.passed / results.total * 100).toFixed(1)}%`);
-    
+    console.log(
+      `Success Rate: ${((results.passed / results.total) * 100).toFixed(1)}%`
+    );
+
     console.log('\nScenario Results:');
     for (const [scenario, success] of Object.entries(results.scenarios)) {
       console.log(`  ${scenario}: ${success ? '✅' : '❌'}`);
     }
 
     // Save summary
-    const summaryFile = path.join(this.resultsDir, `summary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    const summaryFile = path.join(
+      this.resultsDir,
+      `summary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
+    );
     fs.writeFileSync(summaryFile, JSON.stringify(results, null, 2));
     console.log(`\n📄 Summary saved to: ${summaryFile}`);
 
     // Exit with error code if any tests failed
     if (results.failed > 0) {
-      console.log('\n❌ Some migration tests failed. Please review the results before proceeding.');
+      console.log(
+        '\n❌ Some migration tests failed. Please review the results before proceeding.'
+      );
       process.exit(1);
     } else {
-      console.log('\n✅ All migration tests passed! Ready for production deployment.');
+      console.log(
+        '\n✅ All migration tests passed! Ready for production deployment.'
+      );
       process.exit(0);
     }
   }
 
   async runPreDeploymentCheck(): Promise<void> {
     console.log('🚨 PRE-DEPLOYMENT MIGRATION CHECK\n');
-    
+
     // Run dry run first
     console.log('1️⃣ Running dry run test...');
     const dryRunSuccess = await this.runScenario('dryRun');
-    
+
     if (!dryRunSuccess) {
       console.log('❌ Dry run failed! Aborting pre-deployment check.');
       process.exit(1);
@@ -167,7 +188,7 @@ class MigrationTestRunner {
 
     console.log('\n✅ PRE-DEPLOYMENT CHECK PASSED!');
     console.log('🚀 Migration is ready for production deployment.');
-    
+
     // Generate deployment checklist
     this.generateDeploymentChecklist();
   }
@@ -256,7 +277,10 @@ async function main() {
   switch (command) {
     case 'scenario':
       if (!scenario || !(scenario in TEST_SCENARIOS)) {
-        console.error('❌ Invalid scenario. Available scenarios:', Object.keys(TEST_SCENARIOS).join(', '));
+        console.error(
+          '❌ Invalid scenario. Available scenarios:',
+          Object.keys(TEST_SCENARIOS).join(', ')
+        );
         process.exit(1);
       }
       await runner.runScenario(scenario);
@@ -280,9 +304,9 @@ Usage:
   npm run migration:test pre-deploy          - Run pre-deployment check
 
 Available scenarios:
-${Object.entries(TEST_SCENARIOS).map(([name, config]) => 
-  `  ${name.padEnd(12)} - ${config.description}`
-).join('\n')}
+${Object.entries(TEST_SCENARIOS)
+  .map(([name, config]) => `  ${name.padEnd(12)} - ${config.description}`)
+  .join('\n')}
 
 Examples:
   npm run migration:test scenario dryRun
@@ -298,4 +322,4 @@ if (require.main === module) {
   main().catch(console.error);
 }
 
-export { MigrationTestRunner, TEST_SCENARIOS }; 
+export { MigrationTestRunner, TEST_SCENARIOS };

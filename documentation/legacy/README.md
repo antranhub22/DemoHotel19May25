@@ -1,6 +1,8 @@
 # Mi Nhon Hotel Mui Ne - Voice Assistant
 
-A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline guest interactions through an intelligent, minimalist service interface with advanced call management and personalized user experience.
+A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline guest interactions
+through an intelligent, minimalist service interface with advanced call management and personalized
+user experience.
 
 ## Features
 
@@ -32,17 +34,20 @@ A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline
 ### Installation
 
 1. Clone the repository
+
    ```bash
    git clone https://github.com/your-username/MiNhon-Hotel-MUiNe.git
    cd MiNhon-Hotel-MUiNe
    ```
 
 2. Install dependencies
+
    ```bash
    npm install
    ```
 
 3. Create `.env` file with the following variables:
+
    ```
    DATABASE_URL=your_postgresql_connection_string
    OPENAI_API_KEY=your_openai_api_key
@@ -51,6 +56,7 @@ A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline
    ```
 
 4. Push database schema
+
    ```bash
    npm run db:push
    ```
@@ -63,6 +69,7 @@ A voice-powered web application for Mi Nhon Hotel Mui Ne, designed to streamline
 ## Usage
 
 The application provides a simple interface for hotel guests to:
+
 - Request room service, housekeeping, concierge services, etc.
 - Get information about hotel amenities, local attractions, and more
 - Make special requests or arrangements
@@ -70,7 +77,8 @@ The application provides a simple interface for hotel guests to:
 
 ## License
 
-This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly prohibited.
+This project is proprietary and confidential. Unauthorized copying, distribution, or use is strictly
+prohibited.
 
 ## Contact
 

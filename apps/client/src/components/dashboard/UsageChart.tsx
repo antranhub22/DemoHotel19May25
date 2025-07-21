@@ -1,14 +1,26 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { 
-  BarChart3, 
-  TrendingUp, 
+import {
+  BarChart3,
+  TrendingUp,
   TrendingDown,
   Calendar,
   Download,
@@ -20,7 +32,7 @@ import {
   Target,
   PieChart,
   LineChart,
-  Filter
+  Filter,
 } from 'lucide-react';
 
 // Types
@@ -77,7 +89,7 @@ const formatValue = (value: number, format?: string): string => {
     case 'currency':
       return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
-        currency: 'VND'
+        currency: 'VND',
       }).format(value);
     case 'duration':
       const hours = Math.floor(value / 3600);
@@ -95,11 +107,16 @@ const formatValue = (value: number, format?: string): string => {
 // Get trend info
 const getTrendInfo = (change?: number) => {
   if (change === undefined) return null;
-  
+
   return {
     icon: change > 0 ? TrendingUp : change < 0 ? TrendingDown : null,
-    color: change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600',
-    sign: change > 0 ? '+' : ''
+    color:
+      change > 0
+        ? 'text-green-600'
+        : change < 0
+          ? 'text-red-600'
+          : 'text-gray-600',
+    sign: change > 0 ? '+' : '',
   };
 };
 
@@ -128,12 +145,12 @@ const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
 );
 
 // Simple bar chart
-const SimpleBarChart = ({ 
-  data, 
-  height = 300, 
+const SimpleBarChart = ({
+  data,
+  height = 300,
   format = 'number',
   showGrid = true,
-  animated = true 
+  animated = true,
 }: {
   data: ChartDataPoint[];
   height?: number;
@@ -153,7 +170,7 @@ const SimpleBarChart = ({
           <span>{formatValue(maxValue, format)}</span>
         </div>
       )}
-      
+
       {/* Chart bars */}
       <div className="space-y-3">
         {data.map((item, index) => (
@@ -163,28 +180,37 @@ const SimpleBarChart = ({
               <div className="flex items-center gap-2">
                 <span>{formatValue(item.value, format)}</span>
                 {item.change !== undefined && (
-                  <span className={cn(
-                    'text-xs flex items-center gap-1',
-                    getTrendInfo(item.change)?.color
-                  )}>
+                  <span
+                    className={cn(
+                      'text-xs flex items-center gap-1',
+                      getTrendInfo(item.change)?.color
+                    )}
+                  >
                     {(() => {
                       const trendInfo = getTrendInfo(item.change);
-                      return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-3 w-3' });
+                      return (
+                        trendInfo?.icon &&
+                        React.createElement(trendInfo.icon, {
+                          className: 'h-3 w-3',
+                        })
+                      );
                     })()}
-                    {getTrendInfo(item.change)?.sign}{Math.abs(item.change)}%
+                    {getTrendInfo(item.change)?.sign}
+                    {Math.abs(item.change)}%
                   </span>
                 )}
               </div>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className={cn(
-                  "h-2 rounded-full transition-all duration-500",
-                  animated && "ease-out"
+                  'h-2 rounded-full transition-all duration-500',
+                  animated && 'ease-out'
                 )}
-                style={{ 
+                style={{
                   width: `${(item.value / maxValue) * 100}%`,
-                  backgroundColor: item.color || CHART_COLORS[index % CHART_COLORS.length]
+                  backgroundColor:
+                    item.color || CHART_COLORS[index % CHART_COLORS.length],
                 }}
               />
             </div>
@@ -196,10 +222,10 @@ const SimpleBarChart = ({
 };
 
 // Progress chart for single metrics
-const ProgressChart = ({ 
-  data, 
+const ProgressChart = ({
+  data,
   format = 'number',
-  threshold 
+  threshold,
 }: {
   data: ChartDataPoint[];
   format?: string;
@@ -208,13 +234,13 @@ const ProgressChart = ({
   const primaryItem = data[0];
   if (!primaryItem) return null;
 
-  const percentage = threshold 
+  const percentage = threshold
     ? (primaryItem.value / threshold.value) * 100
     : primaryItem.value;
 
   const getProgressColor = () => {
     if (!threshold) return 'bg-primary';
-    
+
     if (percentage >= 90) return 'bg-red-500';
     if (percentage >= 75) return 'bg-yellow-500';
     return 'bg-green-500';
@@ -232,16 +258,13 @@ const ProgressChart = ({
           </div>
         )}
       </div>
-      
+
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span>Tiến độ</span>
           <span>{Math.round(percentage)}%</span>
         </div>
-        <Progress 
-          value={Math.min(percentage, 100)} 
-          className="h-3"
-        />
+        <Progress value={Math.min(percentage, 100)} className="h-3" />
         {threshold && percentage > 100 && (
           <div className="text-xs text-red-600 text-center">
             Vượt quá giới hạn {Math.round(percentage - 100)}%
@@ -251,16 +274,22 @@ const ProgressChart = ({
 
       {primaryItem.change !== undefined && (
         <div className="text-center">
-          <div className={cn(
-            'text-sm flex items-center justify-center gap-1',
-            getTrendInfo(primaryItem.change)?.color
-          )}>
+          <div
+            className={cn(
+              'text-sm flex items-center justify-center gap-1',
+              getTrendInfo(primaryItem.change)?.color
+            )}
+          >
             {(() => {
               const trendInfo = getTrendInfo(primaryItem.change);
-              return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-4 w-4' });
+              return (
+                trendInfo?.icon &&
+                React.createElement(trendInfo.icon, { className: 'h-4 w-4' })
+              );
             })()}
             <span>
-              {getTrendInfo(primaryItem.change)?.sign}{Math.abs(primaryItem.change)}% so với tháng trước
+              {getTrendInfo(primaryItem.change)?.sign}
+              {Math.abs(primaryItem.change)}% so với tháng trước
             </span>
           </div>
         </div>
@@ -270,9 +299,9 @@ const ProgressChart = ({
 };
 
 // Pie chart representation using progress bars
-const SimplePieChart = ({ 
-  data, 
-  format = 'number' 
+const SimplePieChart = ({
+  data,
+  format = 'number',
 }: {
   data: ChartDataPoint[];
   format?: string;
@@ -285,9 +314,12 @@ const SimplePieChart = ({
       <div className="grid grid-cols-2 gap-2 text-sm">
         {data.map((item, index) => (
           <div key={index} className="flex items-center gap-2">
-            <div 
+            <div
               className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: item.color || CHART_COLORS[index % CHART_COLORS.length] }}
+              style={{
+                backgroundColor:
+                  item.color || CHART_COLORS[index % CHART_COLORS.length],
+              }}
             />
             <span className="text-xs text-muted-foreground truncate">
               {item.label}
@@ -295,7 +327,7 @@ const SimplePieChart = ({
           </div>
         ))}
       </div>
-      
+
       {/* Chart segments */}
       <div className="space-y-3">
         {data.map((item, index) => {
@@ -312,11 +344,12 @@ const SimplePieChart = ({
                 </div>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="h-2 rounded-full transition-all duration-500"
-                  style={{ 
+                  style={{
                     width: `${percentage}%`,
-                    backgroundColor: item.color || CHART_COLORS[index % CHART_COLORS.length]
+                    backgroundColor:
+                      item.color || CHART_COLORS[index % CHART_COLORS.length],
                   }}
                 />
               </div>
@@ -329,9 +362,9 @@ const SimplePieChart = ({
 };
 
 // Metric display for key numbers
-const MetricDisplay = ({ 
-  data, 
-  format = 'number' 
+const MetricDisplay = ({
+  data,
+  format = 'number',
 }: {
   data: ChartDataPoint[];
   format?: string;
@@ -343,19 +376,23 @@ const MetricDisplay = ({
           <div className="text-2xl font-bold mb-1">
             {formatValue(item.value, format)}
           </div>
-          <div className="text-sm text-muted-foreground mb-2">
-            {item.label}
-          </div>
+          <div className="text-sm text-muted-foreground mb-2">{item.label}</div>
           {item.change !== undefined && (
-            <div className={cn(
-              'text-xs flex items-center justify-center gap-1',
-              getTrendInfo(item.change)?.color
-            )}>
+            <div
+              className={cn(
+                'text-xs flex items-center justify-center gap-1',
+                getTrendInfo(item.change)?.color
+              )}
+            >
               {(() => {
                 const trendInfo = getTrendInfo(item.change);
-                return trendInfo?.icon && React.createElement(trendInfo.icon, { className: 'h-3 w-3' });
+                return (
+                  trendInfo?.icon &&
+                  React.createElement(trendInfo.icon, { className: 'h-3 w-3' })
+                );
               })()}
-              {getTrendInfo(item.change)?.sign}{Math.abs(item.change)}%
+              {getTrendInfo(item.change)?.sign}
+              {Math.abs(item.change)}%
             </div>
           )}
         </div>
@@ -369,7 +406,7 @@ const TIME_RANGE_OPTIONS = [
   { value: '7d', label: '7 ngày' },
   { value: '30d', label: '30 ngày' },
   { value: '90d', label: '90 ngày' },
-  { value: '1y', label: '1 năm' }
+  { value: '1y', label: '1 năm' },
 ];
 
 // Main Usage Chart component
@@ -391,7 +428,7 @@ export const UsageChart: React.FC<UsageChartProps> = ({
   animated = true,
   interactive = true,
   format = 'number',
-  threshold
+  threshold,
 }) => {
   if (loading) {
     return <ChartSkeleton height={height} />;
@@ -423,8 +460,8 @@ export const UsageChart: React.FC<UsageChartProps> = ({
     switch (type) {
       case 'bar':
         return (
-          <SimpleBarChart 
-            data={data} 
+          <SimpleBarChart
+            data={data}
             height={height}
             format={format}
             showGrid={showGrid}
@@ -434,14 +471,16 @@ export const UsageChart: React.FC<UsageChartProps> = ({
       case 'pie':
         return <SimplePieChart data={data} format={format} />;
       case 'progress':
-        return <ProgressChart data={data} format={format} threshold={threshold} />;
+        return (
+          <ProgressChart data={data} format={format} threshold={threshold} />
+        );
       case 'metric':
         return <MetricDisplay data={data} format={format} />;
       case 'line':
       default:
         return (
-          <SimpleBarChart 
-            data={data} 
+          <SimpleBarChart
+            data={data}
             height={height}
             format={format}
             showGrid={showGrid}
@@ -464,11 +503,9 @@ export const UsageChart: React.FC<UsageChartProps> = ({
               {type === 'metric' && <TrendingUp className="h-5 w-5" />}
               {title}
             </CardTitle>
-            {description && (
-              <CardDescription>{description}</CardDescription>
-            )}
+            {description && <CardDescription>{description}</CardDescription>}
           </div>
-          
+
           <div className="flex items-center gap-2">
             {onTimeRangeChange && (
               <Select value={timeRange} onValueChange={onTimeRangeChange}>
@@ -476,7 +513,7 @@ export const UsageChart: React.FC<UsageChartProps> = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIME_RANGE_OPTIONS.map((option) => (
+                  {TIME_RANGE_OPTIONS.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
                     </SelectItem>
@@ -484,13 +521,13 @@ export const UsageChart: React.FC<UsageChartProps> = ({
                 </SelectContent>
               </Select>
             )}
-            
+
             {onRefresh && (
               <Button variant="outline" size="sm" onClick={onRefresh}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
             )}
-            
+
             {onExport && (
               <Button variant="outline" size="sm" onClick={onExport}>
                 <Download className="h-4 w-4" />
@@ -499,7 +536,7 @@ export const UsageChart: React.FC<UsageChartProps> = ({
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {data.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -515,20 +552,20 @@ export const UsageChart: React.FC<UsageChartProps> = ({
 };
 
 // Specialized chart components
-export const CallVolumeChart: React.FC<Omit<UsageChartProps, 'type' | 'format'>> = (props) => (
-  <UsageChart {...props} type="bar" format="number" />
-);
+export const CallVolumeChart: React.FC<
+  Omit<UsageChartProps, 'type' | 'format'>
+> = props => <UsageChart {...props} type="bar" format="number" />;
 
-export const LanguageDistributionChart: React.FC<Omit<UsageChartProps, 'type' | 'format'>> = (props) => (
-  <UsageChart {...props} type="pie" format="percentage" />
-);
+export const LanguageDistributionChart: React.FC<
+  Omit<UsageChartProps, 'type' | 'format'>
+> = props => <UsageChart {...props} type="pie" format="percentage" />;
 
-export const UsageProgressChart: React.FC<Omit<UsageChartProps, 'type'>> = (props) => (
-  <UsageChart {...props} type="progress" />
-);
+export const UsageProgressChart: React.FC<
+  Omit<UsageChartProps, 'type'>
+> = props => <UsageChart {...props} type="progress" />;
 
-export const MetricsOverview: React.FC<Omit<UsageChartProps, 'type'>> = (props) => (
-  <UsageChart {...props} type="metric" />
-);
+export const MetricsOverview: React.FC<
+  Omit<UsageChartProps, 'type'>
+> = props => <UsageChart {...props} type="metric" />;
 
-export default UsageChart; 
+export default UsageChart;

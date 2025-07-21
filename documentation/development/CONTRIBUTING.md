@@ -1,6 +1,7 @@
 # 🤝 Contributing Guidelines
 
-Thank you for your interest in contributing to **DemoHotel19May**! This document provides guidelines and best practices for contributing to our restructured monorepo.
+Thank you for your interest in contributing to **DemoHotel19May**! This document provides guidelines
+and best practices for contributing to our restructured monorepo.
 
 ## 📋 Table of Contents
 
@@ -16,11 +17,13 @@ Thank you for your interest in contributing to **DemoHotel19May**! This document
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Read the [Onboarding Guide](./ONBOARDING_GUIDE.md)
 - Set up development environment
 - Understand the [Architecture](./ARCHITECTURE.md)
 
 ### First Contribution
+
 1. **Fork the repository**
 2. **Clone your fork**
 3. **Create a feature branch**
@@ -69,6 +72,7 @@ refactor/optimize-database-queries
 ### Development Process
 
 1. **Create feature branch**
+
    ```bash
    git checkout main
    git pull origin main
@@ -81,6 +85,7 @@ refactor/optimize-database-queries
    - Update documentation
 
 3. **Test locally**
+
    ```bash
    npm run typecheck
    npm run test
@@ -88,6 +93,7 @@ refactor/optimize-database-queries
    ```
 
 4. **Commit changes**
+
    ```bash
    git add .
    git commit -m "feat: add voice recognition feature"
@@ -104,6 +110,7 @@ refactor/optimize-database-queries
 ### File Organization
 
 #### Adding New Files
+
 ```bash
 # Components
 apps/client/src/components/YourComponent/
@@ -125,17 +132,18 @@ packages/shared/utils/
 
 #### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Components | PascalCase | `VoiceAssistant.tsx` |
-| Utilities | camelCase | `hotelUtils.ts` |
-| Constants | UPPER_SNAKE_CASE | `API_ENDPOINTS.ts` |
-| Types | PascalCase + suffix | `ApiResponse.types.ts` |
-| Hooks | camelCase + prefix | `useVoiceRecognition.ts` |
+| Type       | Convention          | Example                  |
+| ---------- | ------------------- | ------------------------ |
+| Components | PascalCase          | `VoiceAssistant.tsx`     |
+| Utilities  | camelCase           | `hotelUtils.ts`          |
+| Constants  | UPPER_SNAKE_CASE    | `API_ENDPOINTS.ts`       |
+| Types      | PascalCase + suffix | `ApiResponse.types.ts`   |
+| Hooks      | camelCase + prefix  | `useVoiceRecognition.ts` |
 
 ### Import Standards
 
 #### Import Order
+
 ```typescript
 // 1. External packages
 import React from 'react';
@@ -153,6 +161,7 @@ import type { ApiResponse } from '@types/api';
 ```
 
 #### Absolute Path Usage
+
 ```typescript
 // ✅ Always use absolute paths
 import { logger } from '@shared/utils/logger';
@@ -167,6 +176,7 @@ import { Component } from '../../../components/Component';
 ### TypeScript Standards
 
 #### Type Definitions
+
 ```typescript
 // ✅ Good: Explicit types
 interface UserProps {
@@ -191,6 +201,7 @@ function processData(data: any): any {
 ```
 
 #### Component Typing
+
 ```typescript
 // ✅ React component typing
 interface ComponentProps {
@@ -199,11 +210,7 @@ interface ComponentProps {
   children?: React.ReactNode;
 }
 
-export default function Component({ 
-  title, 
-  onSubmit, 
-  children 
-}: ComponentProps): JSX.Element {
+export default function Component({ title, onSubmit, children }: ComponentProps): JSX.Element {
   // Implementation
 }
 ```
@@ -211,6 +218,7 @@ export default function Component({
 ### Logging Standards
 
 #### Use Proper Logger
+
 ```typescript
 import { logger } from '@shared/utils/logger';
 
@@ -224,6 +232,7 @@ console.log('User created'); // Only for quick debugging
 ```
 
 #### Log Levels
+
 - **DEBUG**: Development debugging information
 - **INFO**: General application flow
 - **WARN**: Warning conditions
@@ -245,16 +254,16 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 
 ### Commit Types
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feat` | New feature | `feat: add voice recognition` |
-| `fix` | Bug fix | `fix: resolve database timeout` |
-| `docs` | Documentation | `docs: update API reference` |
-| `style` | Code style changes | `style: format code with prettier` |
-| `refactor` | Code refactoring | `refactor: simplify user service` |
-| `test` | Adding tests | `test: add unit tests for auth` |
-| `chore` | Maintenance tasks | `chore: update dependencies` |
-| `perf` | Performance improvements | `perf: optimize database queries` |
+| Type       | Description              | Example                            |
+| ---------- | ------------------------ | ---------------------------------- |
+| `feat`     | New feature              | `feat: add voice recognition`      |
+| `fix`      | Bug fix                  | `fix: resolve database timeout`    |
+| `docs`     | Documentation            | `docs: update API reference`       |
+| `style`    | Code style changes       | `style: format code with prettier` |
+| `refactor` | Code refactoring         | `refactor: simplify user service`  |
+| `test`     | Adding tests             | `test: add unit tests for auth`    |
+| `chore`    | Maintenance tasks        | `chore: update dependencies`       |
+| `perf`     | Performance improvements | `perf: optimize database queries`  |
 
 ### Examples
 
@@ -285,6 +294,7 @@ BREAKING CHANGE: Users now need to re-authenticate
 ### Before Creating PR
 
 1. **Ensure tests pass**
+
    ```bash
    npm run test
    npm run typecheck
@@ -305,9 +315,11 @@ BREAKING CHANGE: Users now need to re-authenticate
 
 ```markdown
 ## Description
+
 Brief description of changes made.
 
 ## Type of Change
+
 - [ ] Bug fix (non-breaking change)
 - [ ] New feature (non-breaking change)
 - [ ] Breaking change
@@ -316,12 +328,14 @@ Brief description of changes made.
 - [ ] Refactoring
 
 ## Testing
+
 - [ ] Added unit tests
 - [ ] Added integration tests
 - [ ] Manual testing completed
 - [ ] All existing tests pass
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Self-reviewed the code
 - [ ] Documentation updated
@@ -347,12 +361,14 @@ Brief description of changes made.
 ### Test Coverage
 
 #### Required Tests
+
 - **Unit tests** for utilities and services
 - **Component tests** for React components
 - **Integration tests** for API endpoints
 - **Type tests** for complex types
 
 #### Test Structure
+
 ```typescript
 // Component test example
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -368,7 +384,7 @@ describe('VoiceAssistant', () => {
   it('should handle voice commands', () => {
     const onCommand = vi.fn();
     render(<VoiceAssistant onCommand={onCommand} />);
-    
+
     fireEvent.click(screen.getByText('Start Recording'));
     expect(onCommand).toHaveBeenCalled();
   });
@@ -396,7 +412,8 @@ npm run test -- --coverage
 ### Code Documentation
 
 #### JSDoc Comments
-```typescript
+
+````typescript
 /**
  * Creates a new hotel booking with voice confirmation
  * @param bookingData - The booking information
@@ -417,22 +434,23 @@ async function createBooking(
 ): Promise<BookingConfirmation> {
   // Implementation
 }
-```
+````
 
 #### README Updates
+
 - Update README when adding major features
 - Include example usage
 - Update setup instructions if needed
 
 ### Documentation Types
 
-| Type | When to Update |
-|------|----------------|
-| API docs | New/changed endpoints |
-| Component docs | New/changed components |
-| README | Major features/setup changes |
-| Architecture docs | Structural changes |
-| Contributing | Process changes |
+| Type              | When to Update               |
+| ----------------- | ---------------------------- |
+| API docs          | New/changed endpoints        |
+| Component docs    | New/changed components       |
+| README            | Major features/setup changes |
+| Architecture docs | Structural changes           |
+| Contributing      | Process changes              |
 
 ## 🐛 Issue Guidelines
 
@@ -442,25 +460,31 @@ Use the bug report template:
 
 ```markdown
 ## Bug Description
+
 Clear description of the bug.
 
 ## Steps to Reproduce
+
 1. Go to '...'
 2. Click on '...'
 3. See error
 
 ## Expected Behavior
+
 What should happen.
 
 ## Actual Behavior
+
 What actually happens.
 
 ## Environment
+
 - OS: [e.g. macOS 13.0]
 - Node.js: [e.g. v18.17.0]
 - Browser: [e.g. Chrome 118]
 
 ## Additional Context
+
 Screenshots, logs, etc.
 ```
 
@@ -468,37 +492,43 @@ Screenshots, logs, etc.
 
 ```markdown
 ## Feature Description
+
 Clear description of the proposed feature.
 
 ## Problem Statement
+
 What problem does this solve?
 
 ## Proposed Solution
+
 How should this be implemented?
 
 ## Alternatives Considered
+
 Other approaches considered.
 
 ## Additional Context
+
 Mockups, examples, etc.
 ```
 
 ### Issue Labels
 
-| Label | Description |
-|-------|-------------|
-| `bug` | Something isn't working |
-| `enhancement` | New feature request |
-| `documentation` | Documentation needs |
-| `good first issue` | Good for newcomers |
-| `help wanted` | Need community help |
-| `priority: high` | High priority issue |
+| Label              | Description             |
+| ------------------ | ----------------------- |
+| `bug`              | Something isn't working |
+| `enhancement`      | New feature request     |
+| `documentation`    | Documentation needs     |
+| `good first issue` | Good for newcomers      |
+| `help wanted`      | Need community help     |
+| `priority: high`   | High priority issue     |
 
 ## ✅ Quality Checklist
 
 Before submitting any contribution:
 
 ### Code Quality
+
 - [ ] Follows TypeScript strict mode
 - [ ] Uses absolute imports with aliases
 - [ ] Proper error handling
@@ -507,18 +537,21 @@ Before submitting any contribution:
 - [ ] Proper type definitions
 
 ### Testing
+
 - [ ] Unit tests for new functions
 - [ ] Component tests for UI changes
 - [ ] Integration tests for API changes
 - [ ] All tests pass locally
 
 ### Documentation
+
 - [ ] JSDoc comments for public APIs
 - [ ] README updated if needed
 - [ ] Code is self-documenting
 - [ ] Examples provided for complex features
 
 ### Performance
+
 - [ ] No unnecessary re-renders
 - [ ] Efficient database queries
 - [ ] Proper caching where applicable
@@ -527,6 +560,7 @@ Before submitting any contribution:
 ## 🎯 Best Practices
 
 ### Development
+
 1. **Start small** - Make incremental changes
 2. **Test early** - Write tests as you develop
 3. **Document as you go** - Don't leave it for later
@@ -534,6 +568,7 @@ Before submitting any contribution:
 5. **Review your own code** - Before submitting
 
 ### Collaboration
+
 1. **Be respectful** - Constructive feedback only
 2. **Be thorough** - Review code carefully
 3. **Be responsive** - Address feedback promptly
@@ -543,12 +578,14 @@ Before submitting any contribution:
 ## 🆘 Getting Help
 
 ### When You Need Help
+
 1. **Check documentation** first
 2. **Search existing issues**
 3. **Ask in discussions**
 4. **Create detailed issue**
 
 ### Resources
+
 - [Onboarding Guide](./ONBOARDING_GUIDE.md)
 - [Architecture Overview](./ARCHITECTURE.md)
 - [API Documentation](./API_DOCUMENTATION.md)
@@ -558,4 +595,4 @@ Before submitting any contribution:
 
 Thank you for contributing to **DemoHotel19May**! 🎉
 
-Your contributions help make this project better for everyone. 
+Your contributions help make this project better for everyone.

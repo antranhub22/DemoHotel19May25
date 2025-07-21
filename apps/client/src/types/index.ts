@@ -27,10 +27,10 @@ export * from './ui';
 export * from './interface1-components';
 
 // Interface1 specific types (avoiding conflicts)
-export { 
-  Interface1Props, 
-  ServiceCategory, 
-  SERVICE_CATEGORIES 
+export {
+  Interface1Props,
+  ServiceCategory,
+  SERVICE_CATEGORIES,
 } from './interface1.types';
 
 // ========================================

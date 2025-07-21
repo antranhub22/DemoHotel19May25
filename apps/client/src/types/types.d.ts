@@ -23,11 +23,11 @@ declare module '@/utils/dictionary' {
 
 declare module './Reference' {
   import { ReferenceItem } from '@/services/ReferenceService';
-  
+
   interface ReferenceProps {
     references: ReferenceItem[];
   }
-  
+
   const Reference: React.FC<ReferenceProps>;
   export default Reference;
 }
@@ -38,7 +38,7 @@ declare module './SiriCallButton' {
     isListening: boolean;
     volumeLevel: number;
   }
-  
+
   const SiriCallButton: React.FC<SiriCallButtonProps>;
   export default SiriCallButton;
 }
@@ -46,14 +46,14 @@ declare module './SiriCallButton' {
 // Khai báo type cho các component local
 declare namespace Components {
   import { ReferenceItem } from '@/services/ReferenceService';
-  
+
   export interface ReferenceProps {
     references: ReferenceItem[];
   }
-  
+
   export interface SiriCallButtonProps {
     containerId: string;
     isListening: boolean;
     volumeLevel: number;
   }
-} 
+}

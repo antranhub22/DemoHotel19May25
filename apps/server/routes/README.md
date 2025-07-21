@@ -2,7 +2,9 @@
 
 ## Overview
 
-The dashboard API routes provide comprehensive SaaS functionality for the multi-tenant hotel voice assistant platform. These routes power the setup wizard, assistant management, and analytics dashboard.
+The dashboard API routes provide comprehensive SaaS functionality for the multi-tenant hotel voice
+assistant platform. These routes power the setup wizard, assistant management, and analytics
+dashboard.
 
 ## Base URL
 
@@ -11,6 +13,7 @@ All dashboard routes are prefixed with `/api/dashboard/`
 ## Authentication & Authorization
 
 All routes require:
+
 - ✅ **JWT Authentication** - Valid Bearer token in Authorization header
 - ✅ **Tenant Identification** - Tenant extracted from JWT token
 - ✅ **Row-Level Security** - Automatic tenant data isolation
@@ -26,6 +29,7 @@ All routes require:
 Automatically research hotel information using Google Places API and web scraping.
 
 **Request Body:**
+
 ```json
 {
   "hotelName": "Grand Hotel Saigon",
@@ -35,6 +39,7 @@ Automatically research hotel information using Google Places API and web scrapin
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -57,6 +62,7 @@ Automatically research hotel information using Google Places API and web scrapin
 ```
 
 **Features:**
+
 - Google Places API integration
 - Website scraping for detailed info
 - Automatic knowledge base generation
@@ -70,6 +76,7 @@ Automatically research hotel information using Google Places API and web scrapin
 Generate a Vapi AI assistant from hotel research data.
 
 **Request Body:**
+
 ```json
 {
   "hotelData": {
@@ -88,6 +95,7 @@ Generate a Vapi AI assistant from hotel research data.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -101,6 +109,7 @@ Generate a Vapi AI assistant from hotel research data.
 ```
 
 **Features:**
+
 - Dynamic Vapi assistant creation
 - Customizable personality and voice settings
 - Automatic function generation based on hotel services
@@ -114,6 +123,7 @@ Generate a Vapi AI assistant from hotel research data.
 Get complete hotel profile, assistant status, and tenant information.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -169,6 +179,7 @@ Get complete hotel profile, assistant status, and tenant information.
 ```
 
 **Features:**
+
 - Complete tenant overview
 - Assistant status monitoring
 - Usage and limit tracking
@@ -182,6 +193,7 @@ Get complete hotel profile, assistant status, and tenant information.
 Update assistant configuration and settings.
 
 **Request Body:**
+
 ```json
 {
   "personality": "luxurious", // Optional
@@ -196,6 +208,7 @@ Update assistant configuration and settings.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -208,6 +221,7 @@ Update assistant configuration and settings.
 ```
 
 **Features:**
+
 - Partial configuration updates
 - Real-time Vapi assistant updates
 - Configuration merging
@@ -220,6 +234,7 @@ Update assistant configuration and settings.
 Get tenant-filtered analytics data with plan-based access.
 
 **Response (Premium Plan):**
+
 ```json
 {
   "success": true,
@@ -249,6 +264,7 @@ Get tenant-filtered analytics data with plan-based access.
 ```
 
 **Response (Basic Plan):**
+
 ```json
 {
   "success": true,
@@ -265,6 +281,7 @@ Get tenant-filtered analytics data with plan-based access.
 ```
 
 **Features:**
+
 - Plan-based analytics access
 - Tenant-filtered data
 - Real-time metrics
@@ -278,6 +295,7 @@ Get tenant-filtered analytics data with plan-based access.
 Check health status of all integrated services.
 
 **Response:**
+
 ```json
 {
   "overall": "healthy", // healthy, degraded, down
@@ -305,6 +323,7 @@ Check health status of all integrated services.
 ```
 
 **Features:**
+
 - Multi-service health monitoring
 - API availability checking
 - Performance metrics
@@ -319,6 +338,7 @@ Delete and reset assistant for testing/development.
 **Requires:** `apiAccess` feature flag
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -328,6 +348,7 @@ Delete and reset assistant for testing/development.
 ```
 
 **Features:**
+
 - Development/testing utility
 - Complete assistant cleanup
 - Vapi API integration cleanup
@@ -401,31 +422,31 @@ All endpoints follow consistent error response format:
 // 1. Research hotel
 const researchResponse = await fetch('/api/dashboard/research-hotel', {
   method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` },
+  headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify({
     hotelName: 'Grand Hotel Saigon',
     location: 'Ho Chi Minh City',
-    researchTier: 'basic'
-  })
+    researchTier: 'basic',
+  }),
 });
 
 // 2. Generate assistant
 const assistantResponse = await fetch('/api/dashboard/generate-assistant', {
   method: 'POST',
-  headers: { 'Authorization': `Bearer ${token}` },
+  headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify({
     hotelData: researchResponse.hotelData,
     customization: {
       personality: 'professional',
       tone: 'friendly',
-      languages: ['English', 'Vietnamese']
-    }
-  })
+      languages: ['English', 'Vietnamese'],
+    },
+  }),
 });
 
 // 3. Get profile status
 const profileResponse = await fetch('/api/dashboard/hotel-profile', {
-  headers: { 'Authorization': `Bearer ${token}` }
+  headers: { Authorization: `Bearer ${token}` },
 });
 ```
 
@@ -434,12 +455,12 @@ const profileResponse = await fetch('/api/dashboard/hotel-profile', {
 ```javascript
 const updateResponse = await fetch('/api/dashboard/assistant-config', {
   method: 'PUT',
-  headers: { 'Authorization': `Bearer ${token}` },
+  headers: { Authorization: `Bearer ${token}` },
   body: JSON.stringify({
     personality: 'luxurious',
     tone: 'formal',
-    voiceId: 'premium-voice'
-  })
+    voiceId: 'premium-voice',
+  }),
 });
 ```
 
@@ -447,17 +468,16 @@ const updateResponse = await fetch('/api/dashboard/assistant-config', {
 
 ## Implementation Status
 
-✅ **COMPLETED** - All dashboard API routes implemented
-✅ **COMPLETED** - Tenant middleware integration
-✅ **COMPLETED** - Service integration
-✅ **COMPLETED** - Error handling and validation
-✅ **COMPLETED** - Feature gates and subscription limits
-✅ **COMPLETED** - Documentation and examples
+✅ **COMPLETED** - All dashboard API routes implemented ✅ **COMPLETED** - Tenant middleware
+integration ✅ **COMPLETED** - Service integration ✅ **COMPLETED** - Error handling and validation
+✅ **COMPLETED** - Feature gates and subscription limits ✅ **COMPLETED** - Documentation and
+examples
 
 **Next Steps:**
+
 - Phase 4: Dashboard Frontend Implementation
 - Phase 5: Frontend-Backend Integration Testing
 
 ---
 
-*Part of the Mi Nhon Hotel → Multi-tenant SaaS transformation* 
+_Part of the Mi Nhon Hotel → Multi-tenant SaaS transformation_

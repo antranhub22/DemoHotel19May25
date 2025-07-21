@@ -3,7 +3,10 @@ import { useAssistant } from '@/context/AssistantContext';
 import { ServiceRequest } from '@/types';
 import hotelImage from '@/assets/hotel-exterior.jpeg';
 import InfographicSteps from './InfographicSteps';
-import { parseSummaryToOrderDetails, extractRoomNumber } from '@/lib/summaryParser';
+import {
+  parseSummaryToOrderDetails,
+  extractRoomNumber,
+} from '@/lib/summaryParser';
 import { t } from '@/i18n';
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
@@ -15,9 +18,9 @@ interface Interface3Props {
 
 const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
-  const { 
-    orderSummary, 
-    setOrderSummary, 
+  const {
+    orderSummary,
+    setOrderSummary,
     // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
     setOrder,
     callSummary,
@@ -29,13 +32,19 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     setEmailSentForCurrentSession,
     addActiveOrder,
     translateToVietnamese,
-    language
+    language,
   } = useAssistant();
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
-  const { config: hotelConfig, isLoading: configLoading, error: configError } = useHotelConfiguration();
+  const {
+    config: hotelConfig,
+    isLoading: configLoading,
+    error: configError,
+  } = useHotelConfiguration();
 
-  const [groupedRequests, setGroupedRequests] = useState<Record<string, ServiceRequest[]>>({});
+  const [groupedRequests, setGroupedRequests] = useState<
+    Record<string, ServiceRequest[]>
+  >({});
   const [note, setNote] = useState('');
   // --- KẾT THÚC DI CHUYỂN HOOK ---
 
@@ -46,7 +55,9 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading hotel configuration...</p>
+          <p className="text-gray-600 text-lg">
+            Loading hotel configuration...
+          </p>
         </div>
       </div>
     );
@@ -56,71 +67,84 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">
-          <div className="text-red-500 text-lg mb-4">Failed to load hotel configuration</div>
+          <div className="text-red-500 text-lg mb-4">
+            Failed to load hotel configuration
+          </div>
           <p className="text-gray-600">{configError}</p>
         </div>
       </div>
     );
   }
-  
+
   if (!orderSummary) {
     return null;
   }
-  
+
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
     if (!orderSummary) return;
-    
+
     setOrderSummary({
       ...orderSummary,
-      [field]: value
+      [field]: value,
     });
   };
-  
+
   // Handle item removal
   const handleRemoveItem = (itemId: string) => {
     if (!orderSummary) return;
-    
+
     const updatedItems = orderSummary.items.filter(item => item.id !== itemId);
-    const newTotalAmount = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
+    const newTotalAmount = updatedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
     setOrderSummary({
       ...orderSummary,
       items: updatedItems,
-      totalAmount: newTotalAmount
+      totalAmount: newTotalAmount,
     });
   };
-  
+
   // Group service requests by type for better organization
   useEffect(() => {
     if (serviceRequests && serviceRequests.length > 0) {
       // Group the requests by service type
-      const grouped = serviceRequests.reduce((acc, request) => {
-        const type = request.serviceType;
-        if (!acc[type]) acc[type] = [];
-        acc[type].push(request);
-        return acc;
-      }, {} as Record<string, ServiceRequest[]>);
-      
+      const grouped = serviceRequests.reduce(
+        (acc, request) => {
+          const type = request.serviceType;
+          if (!acc[type]) acc[type] = [];
+          acc[type].push(request);
+          return acc;
+        },
+        {} as Record<string, ServiceRequest[]>
+      );
+
       setGroupedRequests(grouped);
-      
+
       // Generate OrderItems based on service requests
-      if (orderSummary && (!orderSummary.items || orderSummary.items.length === 0)) {
+      if (
+        orderSummary &&
+        (!orderSummary.items || orderSummary.items.length === 0)
+      ) {
         // Create items from service requests
         const newItems = serviceRequests.map((request, index) => {
           // Determine appropriate quantity based on details
           let quantity = 1;
-          
+
           // Look for specific quantities in the request text or details
           const details = request.details || {};
-          const quantityMatch = request.requestText.match(/(\d+)\s+(towels|bottles|pieces|cups|glasses|plates|servings|items)/i);
+          const quantityMatch = request.requestText.match(
+            /(\d+)\s+(towels|bottles|pieces|cups|glasses|plates|servings|items)/i
+          );
           if (quantityMatch) {
             quantity = parseInt(quantityMatch[1]);
           } else if (typeof details.people === 'number') {
             // For tours, transportation, use people count as quantity reference
             quantity = details.people;
           }
-          
+
           // Calculate appropriate price based on service type
           let price = 10; // Default price
           if (request.serviceType === 'room-service') price = 15;
@@ -128,13 +152,13 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
           else if (request.serviceType === 'transportation') price = 25;
           else if (request.serviceType === 'tours-activities') price = 35;
           else if (request.serviceType === 'spa') price = 30;
-          
+
           return {
             id: `item-${index}`,
             name: request.serviceType,
             description: request.requestText,
             quantity,
-            price
+            price,
           };
         });
 
@@ -142,37 +166,44 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         setOrderSummary({
           ...orderSummary,
           items: newItems,
-          totalAmount: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+          totalAmount: newItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          ),
         });
       }
     }
   }, [serviceRequests, orderSummary, setOrderSummary]);
-  
+
   // Helper function to get readable service name from service type
   const getServiceName = (serviceType: string): string => {
     const typeMap: Record<string, string> = {
       'room-service': t('room_service', language),
-      'housekeeping': t('housekeeping', language),
+      housekeeping: t('housekeeping', language),
       'wake-up': t('wake_up_call', language),
-      'amenities': t('additional_amenities', language),
-      'restaurant': t('restaurant_reservation', language),
-      'spa': t('spa_appointment', language),
-      'transportation': t('transportation', language),
-      'attractions': t('local_attractions', language),
+      amenities: t('additional_amenities', language),
+      restaurant: t('restaurant_reservation', language),
+      spa: t('spa_appointment', language),
+      transportation: t('transportation', language),
+      attractions: t('local_attractions', language),
       'tours-activities': t('tours_activities', language),
       'technical-support': t('technical_support', language),
-      'concierge': t('concierge_services', language),
+      concierge: t('concierge_services', language),
       'wellness-fitness': t('wellness_fitness', language),
-      'security': t('security_assistance', language),
+      security: t('security_assistance', language),
       'special-occasions': t('special_occasion', language),
-      'other': t('other_service', language)
+      other: t('other_service', language),
     };
-    
-    return typeMap[serviceType] || serviceType.split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+
+    return (
+      typeMap[serviceType] ||
+      serviceType
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+    );
   };
-  
+
   // Legacy function to analyze call summary and prepare request items
   useEffect(() => {
     if (isActive && callSummary && orderSummary) {
@@ -181,103 +212,130 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
 
       // Luôn cập nhật số phòng nếu phát hiện được
       const detectedRoomNumber = extractRoomNumber(content);
-      if (detectedRoomNumber && detectedRoomNumber !== orderSummary.roomNumber) {
+      if (
+        detectedRoomNumber &&
+        detectedRoomNumber !== orderSummary.roomNumber
+      ) {
         setOrderSummary({
           ...orderSummary,
-          roomNumber: detectedRoomNumber
+          roomNumber: detectedRoomNumber,
         });
       }
 
       // Phần còn lại giữ nguyên logic cũ cho items
       if (!serviceRequests || serviceRequests.length === 0) {
         // Try to find "List of Requests:" section and extract individual requests
-        const requestsMatch = content.match(/List of Requests:([\s\S]*?)(?:\n\nSpecial Instructions|\n\nThe conversation)/);
+        const requestsMatch = content.match(
+          /List of Requests:([\s\S]*?)(?:\n\nSpecial Instructions|\n\nThe conversation)/
+        );
         if (requestsMatch) {
           const requestsSection = requestsMatch[1];
           const requestRegex = /Request (\d+): ([^\n]+)/g;
-          
+
           let match;
           const newItems = [];
           let id = 1;
-          
+
           // Extract all detected service requests
           while ((match = requestRegex.exec(requestsSection)) !== null) {
             const requestType = match[2].trim();
             const requestIndex = match.index;
-            const endIndex = requestsSection.indexOf(`Request ${parseInt(match[1]) + 1}:`, requestIndex);
-            
+            const endIndex = requestsSection.indexOf(
+              `Request ${parseInt(match[1]) + 1}:`,
+              requestIndex
+            );
+
             // Extract the details section for this request
-            const detailsSection = endIndex > -1 
-              ? requestsSection.substring(requestIndex, endIndex)
-              : requestsSection.substring(requestIndex);
-            
+            const detailsSection =
+              endIndex > -1
+                ? requestsSection.substring(requestIndex, endIndex)
+                : requestsSection.substring(requestIndex);
+
             // Parse specific details
             const detailsRegex = /- ([^:]+): ([^\n]+)/g;
             let detailsMatch;
             const details: Record<string, string> = {};
-            
-            while ((detailsMatch = detailsRegex.exec(detailsSection)) !== null) {
+
+            while (
+              (detailsMatch = detailsRegex.exec(detailsSection)) !== null
+            ) {
               const key = detailsMatch[1].trim();
               const value = detailsMatch[2].trim();
               details[key.toLowerCase()] = value;
             }
-            
+
             // Construct comprehensive description including all details
             let description = '';
-            
+
             if (details['service description']) {
               description += `${details['service description']}`;
             }
-            
+
             if (details['details']) {
-              description += description ? `. ${details['details']}` : details['details'];
+              description += description
+                ? `. ${details['details']}`
+                : details['details'];
             }
-            
+
             if (details['items']) {
-              description += description ? `\nItems: ${details['items']}` : `Items: ${details['items']}`;
+              description += description
+                ? `\nItems: ${details['items']}`
+                : `Items: ${details['items']}`;
             }
-            
+
             if (details['service timing requested']) {
               description += `\nTiming: ${details['service timing requested']}`;
             }
-            
+
             if (details['destinations']) {
               description += `\nDestinations: ${details['destinations']}`;
             }
-            
+
             // If no details were extracted, provide a default description
             if (!description) {
               description = `Requested ${requestType} service`;
             }
-            
+
             newItems.push({
               id: id.toString(),
               name: requestType,
-              description: description,
+              description,
               quantity: 1,
-              price: 10 // Default price
+              price: 10, // Default price
             });
-            
+
             id++;
           }
-          
+
           // If we found at least one request and we don't already have items,
           // update the orderSummary with the new items
-          if (newItems.length > 0 && (!orderSummary.items || orderSummary.items.length === 0)) {
+          if (
+            newItems.length > 0 &&
+            (!orderSummary.items || orderSummary.items.length === 0)
+          ) {
             // Create a comma-separated list of service types
-            const serviceTypes = newItems.map(item => {
-              // Convert service name to service type value
-              const serviceType = item.name.toLowerCase().replace(/\s+/g, '-');
-              return serviceType;
-            }).join(',');
-            
+            const serviceTypes = newItems
+              .map(item => {
+                // Convert service name to service type value
+                const serviceType = item.name
+                  .toLowerCase()
+                  .replace(/\s+/g, '-');
+                return serviceType;
+              })
+              .join(',');
+
             // Look for room number in the summary
-            const roomNumber = extractRoomNumber(content) || orderSummary.roomNumber;
-            
+            const roomNumber =
+              extractRoomNumber(content) || orderSummary.roomNumber;
+
             // Look for overall timing
-            const timingMatch = content.match(/Service Timing Requested:?\s*([^\n]+)/i);
-            const timing = timingMatch ? timingMatch[1] : orderSummary.deliveryTime;
-            
+            const timingMatch = content.match(
+              /Service Timing Requested:?\s*([^\n]+)/i
+            );
+            const timing = timingMatch
+              ? timingMatch[1]
+              : orderSummary.deliveryTime;
+
             // Map the timing description to our delivery time options
             let deliveryTime = orderSummary.deliveryTime;
             if (timing) {
@@ -291,14 +349,17 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                 deliveryTime = 'specific';
               }
             }
-            
+
             setOrderSummary({
               ...orderSummary,
               items: newItems,
               orderType: serviceTypes,
-              roomNumber: roomNumber,
-              deliveryTime: deliveryTime,
-              totalAmount: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+              roomNumber,
+              deliveryTime,
+              totalAmount: newItems.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0
+              ),
             });
           }
         }
@@ -310,7 +371,8 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   const handleConfirmOrder = async () => {
     if (!orderSummary) return;
     const getValidRoomNumber = () => {
-      if (orderSummary.roomNumber && orderSummary.roomNumber !== 'unknown') return orderSummary.roomNumber;
+      if (orderSummary.roomNumber && orderSummary.roomNumber !== 'unknown')
+        return orderSummary.roomNumber;
       // Thử lấy từ callSummary nếu có
       if (callSummary && callSummary.content) {
         const match = callSummary.content.match(/Room Number:?\s*(\w+)/i);
@@ -318,17 +380,18 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       }
       return 'unknown';
     };
-    const validItems = (orderSummary.items && orderSummary.items.length > 0)
-      ? orderSummary.items
-      : [
-          {
-            id: '1',
-            name: 'General Service',
-            description: 'No details provided',
-            quantity: 1,
-            price: 0
-          }
-        ];
+    const validItems =
+      orderSummary.items && orderSummary.items.length > 0
+        ? orderSummary.items
+        : [
+            {
+              id: '1',
+              name: 'General Service',
+              description: 'No details provided',
+              quantity: 1,
+              price: 0,
+            },
+          ];
     const validOrderType = orderSummary.orderType || 'Room Service';
     const validDeliveryTime = orderSummary.deliveryTime || 'asap';
     const orderReference = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -342,38 +405,38 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
       items: validItems,
       totalAmount: orderSummary.totalAmount || 0,
       status: 'pending',
-      createdAt: now.toISOString()
+      createdAt: now.toISOString(),
     };
     try {
       // ✅ FIX: Use authenticated fetch with auto-retry
       const { authenticatedFetch } = await import('@/lib/authHelper');
-      
+
       const res = await authenticatedFetch(`/api/request`, {
         method: 'POST',
-        body: JSON.stringify(newOrder)
+        body: JSON.stringify(newOrder),
       });
       if (!res.ok) throw new Error('Failed to create order');
       setOrder({
         reference: newOrder.specialInstructions || newOrder.callId,
         estimatedTime: newOrder.deliveryTime,
         summary: orderSummary,
-        ...newOrder
+        ...newOrder,
       });
       // setCurrentInterface('interface4');
     } catch (err) {
       alert('Failed to send order to reception!');
     }
   };
-  
+
   // Function to add note to the displayed summary
   const handleAddNote = () => {
     if (!note.trim() || !callSummary) return;
     setCallSummary({
       ...callSummary,
-      content: `${callSummary.content}\n\nAdditional Notes:\n${note}`
+      content: `${callSummary.content}\n\nAdditional Notes:\n${note}`,
     });
   };
-  
+
   return (
     <div
       className={`w-full transition-opacity duration-500 ${
@@ -384,23 +447,32 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         backgroundImage: `linear-gradient(${hotelConfig?.branding?.colors?.primary || '#1e40af'}CC, ${hotelConfig?.branding?.colors?.secondary || '#d4af37'}99), url(${hotelImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        fontFamily: hotelConfig.branding.fonts.primary + ', SF Pro Text, Roboto, Open Sans, Arial, sans-serif'
+        fontFamily: `${hotelConfig.branding.fonts.primary}, SF Pro Text, Roboto, Open Sans, Arial, sans-serif`,
       }}
     >
       <div className="container mx-auto flex flex-col p-2 sm:p-4 md:p-8">
-        <div className="mx-auto w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md" style={{minHeight: 420}}>
+        <div
+          className="mx-auto w-full max-w-4xl bg-white/90 rounded-2xl shadow-xl p-3 sm:p-6 md:p-10 mb-4 sm:mb-6 flex-grow border border-white/40 backdrop-blur-md"
+          style={{ minHeight: 420 }}
+        >
           <div className="mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-200">
-            <p className="font-poppins font-bold text-xl sm:text-2xl text-blue-900 tracking-wide">{t('order_summary', language)}</p>
+            <p className="font-poppins font-bold text-xl sm:text-2xl text-blue-900 tracking-wide">
+              {t('order_summary', language)}
+            </p>
           </div>
           <div className="flex flex-col md:flex-row gap-4 sm:gap-10 md:gap-16">
             {/* Left column: summary, notes, room number */}
             <div className="md:w-3/4 w-full space-y-3 sm:space-y-4">
               {/* Mobile: Cancel và Send to Reception lên trên cùng */}
               <div className="flex sm:hidden flex-row w-full gap-2 mb-2">
-                <button className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => {
-                  // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
-                }}>
-                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                <button
+                  className="flex-1 flex items-center justify-center px-2 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors"
+                  onClick={() => {
+                    // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                  }}
+                >
+                  <span className="material-icons text-base mr-1">cancel</span>
+                  {t('cancel', language)}
                 </button>
                 <Button
                   onClick={handleConfirmOrder}
@@ -409,82 +481,210 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                   style={{ minHeight: 44, minWidth: 120, zIndex: 10 }}
                 >
                   <span className="material-icons">send</span>
-                  <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
+                  <span className="whitespace-nowrap">
+                    {t('send_to_reception', language)}
+                  </span>
                 </Button>
               </div>
               {/* Mobile: Add Note, Room, Vietnamese, textarea lên trên summary */}
               <div className="flex flex-col gap-2 mb-2 sm:hidden">
                 <div className="flex flex-row w-full gap-2">
-                  <button className="h-10 px-3 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs font-semibold shadow transition-colors flex-1" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
+                  <button
+                    className="h-10 px-3 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs font-semibold shadow transition-colors flex-1"
+                    onClick={handleAddNote}
+                    disabled={!note.trim()}
+                  >
+                    {t('add_note', language)}
+                  </button>
                   <div className="flex items-center space-x-2 w-full justify-center">
-                    <label className="text-xs text-gray-600 font-medium">{t('room_number', language)}</label>
-                    <input type="text" placeholder={t('enter_room_number', language)} className="w-16 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
+                    <label className="text-xs text-gray-600 font-medium">
+                      {t('room_number', language)}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t('enter_room_number', language)}
+                      className="w-16 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs"
+                      value={orderSummary.roomNumber}
+                      onChange={e =>
+                        handleInputChange('roomNumber', e.target.value)
+                      }
+                    />
                   </div>
-                  <button className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => {
-                    // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
-                  }}>
+                  <button
+                    className="h-10 px-3 bg-white/70 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow flex items-center justify-center"
+                    onClick={() => {
+                      // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                    }}
+                  >
                     <span className="material-icons text-base">language</span>
                   </button>
                 </div>
-                <textarea placeholder={t('enter_notes', language)} className="w-full p-2 border border-white/30 rounded-xl text-xs bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
+                <textarea
+                  placeholder={t('enter_notes', language)}
+                  className="w-full p-2 border border-white/30 rounded-xl text-xs bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500"
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  rows={3}
+                  style={{ fontFamily: 'inherit' }}
+                />
               </div>
               {/* AI-generated Call Summary Container */}
               {callSummary && (
                 <div id="summary-container" className="mb-3 sm:mb-4">
-                  <div className="p-3 sm:p-5 bg-white/80 rounded-xl shadow border border-white/30 mb-3 sm:mb-4 relative" style={{backdropFilter:'blur(2px)'}}>
-                    <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2 text-blue-800">{t('summary', language)}</h3>
-                    <div className="text-sm sm:text-base leading-relaxed text-gray-800 whitespace-pre-line" style={{fontWeight: 400}}>
+                  <div
+                    className="p-3 sm:p-5 bg-white/80 rounded-xl shadow border border-white/30 mb-3 sm:mb-4 relative"
+                    style={{ backdropFilter: 'blur(2px)' }}
+                  >
+                    <h3 className="font-semibold text-base sm:text-lg mb-1 sm:mb-2 text-blue-800">
+                      {t('summary', language)}
+                    </h3>
+                    <div
+                      className="text-sm sm:text-base leading-relaxed text-gray-800 whitespace-pre-line"
+                      style={{ fontWeight: 400 }}
+                    >
                       {/* Custom summary formatting */}
                       {(() => {
                         const lines = (callSummary.content || '').split('\n');
                         // Lọc bỏ dòng Next Step và xử lý Guest's Name
-                        return lines.filter(line => !/^Next Step:/i.test(line) && !/Please Press Send To Reception/i.test(line)).map((line, idx) => {
-                          // Loại bỏ phần (used for Guest with a confirmed reservation)
-                          if (/^Guest's Name/i.test(line)) {
-                            const cleaned = line.replace(/\s*\(used for Guest with a confirmed reservation\)/i, '');
-                            return <div key={idx}><b>{cleaned}</b></div>;
-                          }
-                          if (/^Room Number:/i.test(line)) return <div key={idx}><b>{line}</b></div>;
-                          if (/^REQUEST \d+:/i.test(line)) return <div key={idx} className="mt-3 mb-1"><b>{line}</b></div>;
-                          if (/^• Service Timing:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                          if (/^• Order Details:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                          if (/^• Special Requirements:/i.test(line)) return <div key={idx} style={{marginLeft:16}}><b>{line}</b></div>;
-                          // Lùi dòng cho nội dung con của Order Details
-                          if (/^• [^-].+/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
-                          if (/^\s*[-•]/.test(line)) return <div key={idx} style={{marginLeft:32}}>{line}</div>;
-                          if (/^\s*$/.test(line)) return <div key={idx} style={{height:8}}></div>;
-                          return <div key={idx}>{line}</div>;
-                        });
+                        return lines
+                          .filter(
+                            line =>
+                              !/^Next Step:/i.test(line) &&
+                              !/Please Press Send To Reception/i.test(line)
+                          )
+                          .map((line, idx) => {
+                            // Loại bỏ phần (used for Guest with a confirmed reservation)
+                            if (/^Guest's Name/i.test(line)) {
+                              const cleaned = line.replace(
+                                /\s*\(used for Guest with a confirmed reservation\)/i,
+                                ''
+                              );
+                              return (
+                                <div key={idx}>
+                                  <b>{cleaned}</b>
+                                </div>
+                              );
+                            }
+                            if (/^Room Number:/i.test(line))
+                              return (
+                                <div key={idx}>
+                                  <b>{line}</b>
+                                </div>
+                              );
+                            if (/^REQUEST \d+:/i.test(line))
+                              return (
+                                <div key={idx} className="mt-3 mb-1">
+                                  <b>{line}</b>
+                                </div>
+                              );
+                            if (/^• Service Timing:/i.test(line))
+                              return (
+                                <div key={idx} style={{ marginLeft: 16 }}>
+                                  <b>{line}</b>
+                                </div>
+                              );
+                            if (/^• Order Details:/i.test(line))
+                              return (
+                                <div key={idx} style={{ marginLeft: 16 }}>
+                                  <b>{line}</b>
+                                </div>
+                              );
+                            if (/^• Special Requirements:/i.test(line))
+                              return (
+                                <div key={idx} style={{ marginLeft: 16 }}>
+                                  <b>{line}</b>
+                                </div>
+                              );
+                            // Lùi dòng cho nội dung con của Order Details
+                            if (/^• [^-].+/.test(line))
+                              return (
+                                <div key={idx} style={{ marginLeft: 32 }}>
+                                  {line}
+                                </div>
+                              );
+                            if (/^\s*[-•]/.test(line))
+                              return (
+                                <div key={idx} style={{ marginLeft: 32 }}>
+                                  {line}
+                                </div>
+                              );
+                            if (/^\s*$/.test(line))
+                              return (
+                                <div key={idx} style={{ height: 8 }}></div>
+                              );
+                            return <div key={idx}>{line}</div>;
+                          });
                       })()}
                     </div>
                     <div className="mt-2 sm:mt-3 flex justify-end">
                       <div className="text-xs text-gray-500">
-                        {t('generated_at', language)} {new Date(callSummary.timestamp).toLocaleTimeString()}
+                        {t('generated_at', language)}{' '}
+                        {new Date(callSummary.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
                   </div>
                   {/* Ghi chú in nghiêng dưới cùng */}
                   <div className="text-center mt-2 mb-1">
-                    <span className="italic text-sm" style={{color:'#2563eb', background:'#e0f2fe', borderRadius: '6px', padding: '4px 12px', display: 'inline-block', fontWeight: 500}}>
-                      Please Press <b style={{fontWeight:700, color:'#1d4ed8'}}>{t('send_to_reception', language)}</b> To Complete Your Request
+                    <span
+                      className="italic text-sm"
+                      style={{
+                        color: '#2563eb',
+                        background: '#e0f2fe',
+                        borderRadius: '6px',
+                        padding: '4px 12px',
+                        display: 'inline-block',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Please Press{' '}
+                      <b style={{ fontWeight: 700, color: '#1d4ed8' }}>
+                        {t('send_to_reception', language)}
+                      </b>{' '}
+                      To Complete Your Request
                     </span>
                   </div>
                 </div>
               )}
               {/* Desktop: Additional Notes, Room Number, and Actions (giữ nguyên) */}
               <div className="hidden sm:flex flex-row items-center gap-2 h-10">
-                <button className="h-10 px-3 sm:px-4 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs sm:text-sm font-semibold shadow transition-colors" onClick={handleAddNote} disabled={!note.trim()}>{t('add_note', language)}</button>
+                <button
+                  className="h-10 px-3 sm:px-4 bg-[#ffe082] hover:bg-[#ffe9b3] text-blue-900 rounded-full text-xs sm:text-sm font-semibold shadow transition-colors"
+                  onClick={handleAddNote}
+                  disabled={!note.trim()}
+                >
+                  {t('add_note', language)}
+                </button>
                 <div className="flex items-center space-x-2 w-full justify-center">
-                  <label className="text-xs sm:text-base text-gray-600 font-medium">{t('room_number', language)}</label>
-                  <input type="text" placeholder={t('enter_room_number', language)} className="w-16 sm:w-32 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs sm:text-base" value={orderSummary.roomNumber} onChange={(e) => handleInputChange('roomNumber', e.target.value)} />
+                  <label className="text-xs sm:text-base text-gray-600 font-medium">
+                    {t('room_number', language)}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={t('enter_room_number', language)}
+                    className="w-16 sm:w-32 p-2 border border-white/30 rounded-xl focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white/70 text-gray-900 font-semibold text-xs sm:text-base"
+                    value={orderSummary.roomNumber}
+                    onChange={e =>
+                      handleInputChange('roomNumber', e.target.value)
+                    }
+                  />
                 </div>
-                <button className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center" onClick={() => {
-                  // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
-                }}>
+                <button
+                  className="h-10 px-3 sm:px-4 bg-white/70 text-blue-900 rounded-full text-xs sm:text-sm font-semibold border border-white/30 shadow flex items-center justify-center"
+                  onClick={() => {
+                    // setCurrentInterface('interface3vi'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                  }}
+                >
                   <span className="material-icons text-base">language</span>
                 </button>
               </div>
-              <textarea placeholder={t('enter_notes', language)} className="hidden sm:block w-full p-2 sm:p-3 border border-white/30 rounded-xl mb-3 sm:mb-4 text-xs sm:text-sm bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500" value={note} onChange={(e) => setNote(e.target.value)} rows={3} style={{fontFamily:'inherit'}} />
+              <textarea
+                placeholder={t('enter_notes', language)}
+                className="hidden sm:block w-full p-2 sm:p-3 border border-white/30 rounded-xl mb-3 sm:mb-4 text-xs sm:text-sm bg-white/60 focus:bg-white/90 focus:ring-2 focus:ring-[#d4af37] transition italic font-light text-gray-500"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                rows={3}
+                style={{ fontFamily: 'inherit' }}
+              />
             </div>
             {/* Right column: control buttons at top-right (ẩn trên mobile) */}
             <div className="md:w-1/4 w-full hidden sm:flex md:justify-end justify-center">
@@ -496,12 +696,18 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
                   style={{ minHeight: 44, minWidth: 160, zIndex: 10 }}
                 >
                   <span className="material-icons">send</span>
-                  <span className="whitespace-nowrap">{t('send_to_reception', language)}</span>
+                  <span className="whitespace-nowrap">
+                    {t('send_to_reception', language)}
+                  </span>
                 </Button>
-                <button className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors" onClick={() => {
-                  // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
-                }}>
-                  <span className="material-icons text-base mr-1">cancel</span>{t('cancel', language)}
+                <button
+                  className="w-full md:w-auto flex items-center justify-center px-2 sm:px-3 py-1.5 bg-white/80 hover:bg-blue-100 text-blue-900 rounded-full text-xs font-semibold border border-white/30 shadow transition-colors"
+                  onClick={() => {
+                    // setCurrentInterface('interface1'); // ✅ REMOVED: Interface switching (focus Interface1 only)
+                  }}
+                >
+                  <span className="material-icons text-base mr-1">cancel</span>
+                  {t('cancel', language)}
                 </button>
               </div>
             </div>

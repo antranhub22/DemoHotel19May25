@@ -293,10 +293,7 @@
       ],
       "detail": "Start development server with SSOT watching",
       "dependsOrder": "sequence",
-      "dependsOn": [
-        "SSOT: Generate All",
-        "SSOT: Watch and Auto-Update"
-      ]
+      "dependsOn": ["SSOT: Generate All", "SSOT: Watch and Auto-Update"]
     },
     {
       "label": "Build: Full",
@@ -315,17 +312,16 @@
       "problemMatcher": ["$tsc"],
       "detail": "Full production build with SSOT validation",
       "dependsOrder": "sequence",
-      "dependsOn": [
-        "SSOT: Generate All",
-        "SSOT: Validate",
-        "TypeScript: Check"
-      ]
+      "dependsOn": ["SSOT: Generate All", "SSOT: Validate", "TypeScript: Check"]
     },
     {
       "label": "Clean: Generated Files",
       "type": "shell",
       "command": "node",
-      "args": ["-e", "const fs = require('fs'); const path = require('path'); ['packages/types', 'docs/api', 'backup'].forEach(dir => { const fullPath = path.join(process.cwd(), dir); if (fs.existsSync(fullPath)) { fs.rmSync(fullPath, { recursive: true, force: true }); console.log(`🗑️ Cleaned ${dir}`); } });"],
+      "args": [
+        "-e",
+        "const fs = require('fs'); const path = require('path'); ['packages/types', 'docs/api', 'backup'].forEach(dir => { const fullPath = path.join(process.cwd(), dir); if (fs.existsSync(fullPath)) { fs.rmSync(fullPath, { recursive: true, force: true }); console.log(`🗑️ Cleaned ${dir}`); } });"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -342,7 +338,10 @@
       "label": "Setup: SSOT Development",
       "type": "shell",
       "command": "node",
-      "args": ["-e", "console.log('🚀 Setting up SSOT development environment...'); require('child_process').execSync('npm install', {stdio: 'inherit'}); console.log('✅ Dependencies installed'); console.log('📝 Running initial SSOT generation...'); require('child_process').execSync('node scripts/generate-types.js', {stdio: 'inherit'}); console.log('✅ SSOT setup complete!');"],
+      "args": [
+        "-e",
+        "console.log('🚀 Setting up SSOT development environment...'); require('child_process').execSync('npm install', {stdio: 'inherit'}); console.log('✅ Dependencies installed'); console.log('📝 Running initial SSOT generation...'); require('child_process').execSync('node scripts/generate-types.js', {stdio: 'inherit'}); console.log('✅ SSOT setup complete!');"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -428,8 +427,8 @@
     },
     {
       "id": "migrationReason",
-      "type": "promptString", 
+      "type": "promptString",
       "description": "Reason for breaking changes migration"
     }
   ]
-} 
+}

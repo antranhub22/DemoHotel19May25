@@ -10,7 +10,7 @@ const BASE_URL = 'https://minhonmuine.talk2go.online';
 async function testApiEndpoint(endpoint: string) {
   try {
     console.log(`Testing: ${BASE_URL}${endpoint}`);
-    
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
@@ -20,7 +20,7 @@ async function testApiEndpoint(endpoint: string) {
 
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
-    
+
     if (isJson) {
       const data = await response.json();
       console.log(`✅ ${endpoint} - OK (JSON response)`);
@@ -43,30 +43,30 @@ async function testApiEndpoint(endpoint: string) {
 
 async function runTests() {
   console.log('🔍 Testing API connectivity...\n');
-  
+
   const endpoints = [
     '/api/health',
     '/api/health/database',
     '/api/health/environment',
     '/api/health/assets',
     '/api/dashboard/overview',
-    '/api/staff/login'
+    '/api/staff/login',
   ];
 
   const results: { endpoint: string; success: boolean }[] = [];
-  
+
   for (const endpoint of endpoints) {
     const success = await testApiEndpoint(endpoint);
     results.push({ endpoint, success });
     console.log(''); // Empty line for readability
   }
-  
+
   console.log('\n📊 Summary:');
   const passed = results.filter(r => r.success).length;
   const total = results.length;
-  
+
   console.log(`✅ Passed: ${passed}/${total}`);
-  
+
   if (passed === total) {
     console.log('🎉 All API endpoints returning JSON correctly!');
   } else {
@@ -75,4 +75,4 @@ async function runTests() {
   }
 }
 
-runTests().catch(console.error); 
+runTests().catch(console.error);

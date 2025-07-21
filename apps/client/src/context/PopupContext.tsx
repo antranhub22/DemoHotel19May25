@@ -1,5 +1,17 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { MessageSquare, Users, Bell, AlertTriangle, ShoppingCart } from 'lucide-react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
+import {
+  MessageSquare,
+  Users,
+  Bell,
+  AlertTriangle,
+  ShoppingCart,
+} from 'lucide-react';
 
 // STANDARD POPUP DIMENSIONS - Không che nút Siri Button
 export const STANDARD_POPUP_HEIGHT = 120; // px - Further reduced for better mobile clearance
@@ -7,7 +19,13 @@ export const STANDARD_POPUP_MAX_WIDTH = 350; // px
 export const STANDARD_POPUP_MAX_HEIGHT_VH = 20; // % of viewport height - Further reduced for mobile
 
 // Popup types
-export type PopupType = 'conversation' | 'staff' | 'notification' | 'alert' | 'order' | 'summary';
+export type PopupType =
+  | 'conversation'
+  | 'staff'
+  | 'notification'
+  | 'alert'
+  | 'order'
+  | 'summary';
 
 export type PopupPriority = 'high' | 'medium' | 'low';
 
@@ -83,66 +101,79 @@ const PopupContext = createContext<PopupContextValue | null>(null);
 
 let popupIdCounter = 0;
 
-export const PopupProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const PopupProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [popups, setPopups] = useState<PopupState[]>([]);
   const [activePopup, setActivePopupState] = useState<string | null>(null);
 
-  const addPopup = useCallback((popup: Omit<PopupState, 'id' | 'timestamp'>) => {
-    const id = `popup-${++popupIdCounter}`;
-    const newPopup: PopupState = {
-      ...popup,
-      id,
-      timestamp: new Date(),
-    };
+  const addPopup = useCallback(
+    (popup: Omit<PopupState, 'id' | 'timestamp'>) => {
+      const id = `popup-${++popupIdCounter}`;
+      const newPopup: PopupState = {
+        ...popup,
+        id,
+        timestamp: new Date(),
+      };
 
-    setPopups(prev => {
-      // Remove any existing popup of the same type if priority is high
-      if (popup.priority === 'high') {
-        const filtered = prev.filter(p => p.type !== popup.type);
-        return [newPopup, ...filtered];
+      setPopups(prev => {
+        // Remove any existing popup of the same type if priority is high
+        if (popup.priority === 'high') {
+          const filtered = prev.filter(p => p.type !== popup.type);
+          return [newPopup, ...filtered];
+        }
+        return [newPopup, ...prev];
+      });
+
+      // Auto-set as active if high priority or no active popup
+      if (popup.priority === 'high' || popup.isActive) {
+        setActivePopupState(id);
       }
-      return [newPopup, ...prev];
-    });
 
-    // Auto-set as active if high priority or no active popup
-    if (popup.priority === 'high' || popup.isActive) {
-      setActivePopupState(id);
-    }
-
-    return id;
-  }, []);
+      return id;
+    },
+    []
+  );
 
   const removePopup = useCallback((id: string) => {
     setPopups(prev => prev.filter(p => p.id !== id));
-    setActivePopupState(prev => prev === id ? null : prev);
+    setActivePopupState(prev => (prev === id ? null : prev));
   }, []);
 
   const setActivePopup = useCallback((id: string | null) => {
     setActivePopupState(id);
-    
+
     // Update the active state of popups
     if (id) {
-      setPopups(prev => prev.map(p => ({
-        ...p,
-        isActive: p.id === id
-      })));
+      setPopups(prev =>
+        prev.map(p => ({
+          ...p,
+          isActive: p.id === id,
+        }))
+      );
     }
   }, []);
 
-  const updatePopup = useCallback((id: string, updates: Partial<PopupState>) => {
-    setPopups(prev => prev.map(p => 
-      p.id === id ? { ...p, ...updates } : p
-    ));
-  }, []);
+  const updatePopup = useCallback(
+    (id: string, updates: Partial<PopupState>) => {
+      setPopups(prev =>
+        prev.map(p => (p.id === id ? { ...p, ...updates } : p))
+      );
+    },
+    []
+  );
 
   const clearAllPopups = useCallback(() => {
     setPopups([]);
     setActivePopupState(null);
   }, []);
 
-  const getPopupsByType = useCallback((type: PopupType) => {
-    return popups.filter(p => p.type === type);
-  }, [popups]);
+  const getPopupsByType = useCallback(
+    (type: PopupType) => {
+      return popups.filter(p => p.type === type);
+    },
+    [popups]
+  );
 
   const value: PopupContextValue = {
     popups,
@@ -156,16 +187,16 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   return (
-    <PopupContext.Provider value={value}>
-      {children}
-    </PopupContext.Provider>
+    <PopupContext.Provider value={value}>{children}</PopupContext.Provider>
   );
 };
 
 export const usePopupContext = (): PopupContextValue => {
   const context = useContext(PopupContext);
   if (!context) {
-    console.warn('usePopupContext used outside PopupProvider - returning safe defaults');
+    console.warn(
+      'usePopupContext used outside PopupProvider - returning safe defaults'
+    );
     // Return safe defaults instead of throwing
     return {
       popups: [],
@@ -179,4 +210,4 @@ export const usePopupContext = (): PopupContextValue => {
     };
   }
   return context;
-}; 
+};

@@ -6,4 +6,4 @@
 export * from './auth';
 
 // Permission and RBAC types
-export * from './permissions'; 
+export * from './permissions';

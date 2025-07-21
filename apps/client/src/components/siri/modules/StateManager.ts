@@ -40,7 +40,7 @@ export class StateManager {
 
   constructor(debug: DebugManager) {
     this.debug = debug;
-    
+
     // Initialize with default state
     this.state = {
       isListening: false,
@@ -52,12 +52,12 @@ export class StateManager {
       isDarkMode: false,
       colors: {
         primary: '#60a5fa',
-        secondary: '#34d399', 
+        secondary: '#34d399',
         glow: '#10b981',
-        name: 'blue-green'
+        name: 'blue-green',
       },
       ripples: [],
-      particles: []
+      particles: [],
     };
 
     // Detect dark mode
@@ -69,13 +69,17 @@ export class StateManager {
    */
   private initializeDarkMode(): void {
     if (typeof window !== 'undefined' && window.matchMedia) {
-      this.state.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
+      this.state.isDarkMode = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+
       // Listen for dark mode changes
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-        this.state.isDarkMode = e.matches;
-        this.debug.log('Dark mode changed:', e.matches);
-      });
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', e => {
+          this.state.isDarkMode = e.matches;
+          this.debug.log('Dark mode changed:', e.matches);
+        });
     }
   }
 
@@ -92,12 +96,18 @@ export class StateManager {
   public updateExternalState(newState: ExternalVisualState): void {
     let hasChanges = false;
 
-    if (newState.isHovered !== undefined && newState.isHovered !== this.state.isHovered) {
+    if (
+      newState.isHovered !== undefined &&
+      newState.isHovered !== this.state.isHovered
+    ) {
       this.state.isHovered = newState.isHovered;
       hasChanges = true;
     }
 
-    if (newState.isActive !== undefined && newState.isActive !== this.state.isActive) {
+    if (
+      newState.isActive !== undefined &&
+      newState.isActive !== this.state.isActive
+    ) {
       this.state.isActive = newState.isActive;
       hasChanges = true;
     }
@@ -148,7 +158,7 @@ export class StateManager {
   public updateColors(colors: Partial<VisualState['colors']>): void {
     this.state.colors = {
       ...this.state.colors,
-      ...colors
+      ...colors,
     };
     this.debug.log('Colors updated:', this.state.colors);
   }
@@ -164,7 +174,11 @@ export class StateManager {
   /**
    * Add ripple effect
    */
-  public addRipple(radius: number, alpha: number = 0.4, speed: number = 1): void {
+  public addRipple(
+    radius: number,
+    alpha: number = 0.4,
+    speed: number = 1
+  ): void {
     this.state.ripples.push({ radius, alpha, speed });
     this.debug.debug('Ripple added:', { radius, alpha, speed });
   }
@@ -172,7 +186,13 @@ export class StateManager {
   /**
    * Add particle effect
    */
-  public addParticle(x: number, y: number, alpha: number = 0.8, size: number = 2, speed: number = 1): void {
+  public addParticle(
+    x: number,
+    y: number,
+    alpha: number = 0.8,
+    size: number = 2,
+    speed: number = 1
+  ): void {
     this.state.particles.push({ x, y, alpha, size, speed });
     this.debug.debug('Particle added:', { x, y, alpha, size, speed });
   }
@@ -270,10 +290,10 @@ export class StateManager {
    */
   public reset(): void {
     this.debug.log('Resetting visual state');
-    
+
     const colors = this.state.colors; // Preserve colors
     const isDarkMode = this.state.isDarkMode; // Preserve dark mode
-    
+
     this.state = {
       isListening: false,
       isHovered: false,
@@ -284,14 +304,26 @@ export class StateManager {
       isDarkMode,
       colors,
       ripples: [],
-      particles: []
+      particles: [],
     };
   }
 
   /**
    * Get state for animation rendering
    */
-  public getRenderState(): Pick<VisualState, 'isListening' | 'isHovered' | 'isActive' | 'volumeLevel' | 'mouseX' | 'mouseY' | 'isDarkMode' | 'colors' | 'ripples' | 'particles'> {
+  public getRenderState(): Pick<
+    VisualState,
+    | 'isListening'
+    | 'isHovered'
+    | 'isActive'
+    | 'volumeLevel'
+    | 'mouseX'
+    | 'mouseY'
+    | 'isDarkMode'
+    | 'colors'
+    | 'ripples'
+    | 'particles'
+  > {
     return {
       isListening: this.state.isListening,
       isHovered: this.state.isHovered,
@@ -302,7 +334,7 @@ export class StateManager {
       isDarkMode: this.state.isDarkMode,
       colors: { ...this.state.colors },
       ripples: [...this.state.ripples],
-      particles: [...this.state.particles]
+      particles: [...this.state.particles],
     };
   }
 
@@ -312,11 +344,13 @@ export class StateManager {
   public forceUpdateDarkMode(): void {
     if (typeof window !== 'undefined' && window.matchMedia) {
       const wasDark = this.state.isDarkMode;
-      this.state.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
+      this.state.isDarkMode = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+
       if (wasDark !== this.state.isDarkMode) {
         this.debug.log('Dark mode force updated:', this.state.isDarkMode);
       }
     }
   }
-} 
+}

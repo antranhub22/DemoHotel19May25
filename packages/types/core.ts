@@ -194,13 +194,19 @@ export interface Staff {
 // INTERFACE & UI TYPES
 // ========================================
 
-export type InterfaceLayer = 'interface1' | 'interface2' | 'interface3' | 'interface3vi' | 'interface3fr' | 'interface4';
+export type InterfaceLayer =
+  | 'interface1'
+  | 'interface2'
+  | 'interface3'
+  | 'interface3vi'
+  | 'interface3fr'
+  | 'interface4';
 
 export interface AssistantContextType {
   // Interface Management
   currentInterface: InterfaceLayer;
   setCurrentInterface: (layer: InterfaceLayer) => void;
-  
+
   // Call Management
   startCall: () => Promise<void>;
   endCall: () => void;
@@ -208,12 +214,12 @@ export interface AssistantContextType {
   setCallDuration: (duration: number) => void;
   isMuted: boolean;
   toggleMute: () => void;
-  
+
   // Transcript Management
   transcripts: Transcript[];
   setTranscripts: (transcripts: Transcript[]) => void;
   addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
-  
+
   // Order Management
   orderSummary: OrderSummary | null;
   setOrderSummary: (summary: OrderSummary) => void;
@@ -222,30 +228,30 @@ export interface AssistantContextType {
   activeOrders: ActiveOrder[];
   addActiveOrder: (order: ActiveOrder) => void;
   setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
-  
+
   // Service Requests
   serviceRequests: ServiceRequest[];
   setServiceRequests: (requests: ServiceRequest[]) => void;
-  
+
   // Call Details
   callDetails: CallDetails | null;
   setCallDetails: (details: CallDetails) => void;
   callSummary: CallSummary | null;
   setCallSummary: (summary: CallSummary) => void;
-  
+
   // Language & Translation
   language: Language;
   setLanguage: (lang: Language) => void;
   vietnameseSummary: string | null;
   setVietnameseSummary: (summary: string) => void;
   translateToVietnamese: (text: string) => Promise<string>;
-  
+
   // Email & Notifications
   emailSentForCurrentSession: boolean;
   setEmailSentForCurrentSession: (sent: boolean) => void;
   requestReceivedAt: Date | null;
   setRequestReceivedAt: (date: Date | null) => void;
-  
+
   // Audio & Model
   micLevel: number;
   modelOutput: string[];
@@ -333,4 +339,4 @@ export interface EmailConfig {
   pass: string;
   from: string;
   to: string;
-} 
+}

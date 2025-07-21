@@ -2,14 +2,15 @@
 
 ## 📋 Overview
 
-Unified authentication and authorization system for DemoHotel19May. This module consolidates all JWT, RBAC, and multi-tenant authentication logic into a single, well-organized system.
+Unified authentication and authorization system for DemoHotel19May. This module consolidates all
+JWT, RBAC, and multi-tenant authentication logic into a single, well-organized system.
 
 ## 🗂️ Structure
 
 ```
 auth-system/
 ├── types/          # TypeScript types & interfaces
-├── config/         # JWT & RBAC configuration  
+├── config/         # JWT & RBAC configuration
 ├── services/       # Auth business logic
 ├── middleware/     # Express middleware
 ├── routes/         # API endpoints
@@ -44,6 +45,7 @@ import { UnifiedAuthService } from './auth-system/services';
 ## 📚 Documentation
 
 See `./docs/` for detailed documentation:
+
 - `AUTH_API.md` - API endpoints
 - `JWT_GUIDE.md` - JWT implementation
 - `RBAC_GUIDE.md` - Role setup
@@ -55,16 +57,15 @@ See `./docs/` for detailed documentation:
 # Run auth tests
 npm run test:auth
 
-# Run integration tests  
+# Run integration tests
 npm run test:auth:integration
 ```
 
 ## 🎯 Status
 
-**✅ Phase 1 Complete**: Folder structure created
-**🔄 In Progress**: Moving files from original locations
-**⏳ Pending**: Import updates and testing
+**✅ Phase 1 Complete**: Folder structure created **🔄 In Progress**: Moving files from original
+locations **⏳ Pending**: Import updates and testing
 
 ---
 
-*Generated during auth system reorganization - DemoHotel19May v2.0* 
+_Generated during auth system reorganization - DemoHotel19May v2.0_

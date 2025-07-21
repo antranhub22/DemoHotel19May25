@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
-import { STANDARD_POPUP_HEIGHT, STANDARD_POPUP_MAX_WIDTH, STANDARD_POPUP_MAX_HEIGHT_VH } from '@/context/PopupContext';
+import {
+  STANDARD_POPUP_HEIGHT,
+  STANDARD_POPUP_MAX_WIDTH,
+  STANDARD_POPUP_MAX_HEIGHT_VH,
+} from '@/context/PopupContext';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -28,17 +32,24 @@ interface ChatPopupProps {
   className?: string; // Allow custom className
 }
 
-const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overlay', className = "" }) => {
+const ChatPopup: React.FC<ChatPopupProps> = ({
+  isOpen,
+  onClose,
+  layout = 'overlay',
+  className = '',
+}) => {
   const { transcripts, modelOutput, language, callDuration } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrames = useRef<{[key: string]: number}>({});
-  
+  const animationFrames = useRef<{ [key: string]: number }>({});
+
   // ✅ FIX: Track animation state to prevent re-animation on re-renders
   const [hasAnimated, setHasAnimated] = useState(false);
-  
+
   // Conversation states
   const [visibleChars, setVisibleChars] = useState<VisibleCharState>({});
-  const [conversationTurns, setConversationTurns] = useState<ConversationTurn[]>([]);
+  const [conversationTurns, setConversationTurns] = useState<
+    ConversationTurn[]
+  >([]);
 
   // ✅ FIX: Reset animation state when popup opens/closes
   useEffect(() => {
@@ -67,25 +78,27 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
       return;
     }
 
-    const sortedTranscripts = [...transcripts].sort((a, b) => 
-      a.timestamp.getTime() - b.timestamp.getTime()
+    const sortedTranscripts = [...transcripts].sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
     );
 
     const turns: ConversationTurn[] = [];
     let currentTurn: ConversationTurn | null = null;
 
-    sortedTranscripts.forEach((message) => {
+    sortedTranscripts.forEach(message => {
       if (message.role === 'user') {
         // Always create a new turn for user messages
         currentTurn = {
           id: message.id.toString(),
           role: 'user',
           timestamp: message.timestamp,
-          messages: [{ 
-            id: message.id.toString(), 
-            content: message.content,
-            timestamp: message.timestamp 
-          }]
+          messages: [
+            {
+              id: message.id.toString(),
+              content: message.content,
+              timestamp: message.timestamp,
+            },
+          ],
         };
         turns.push(currentTurn);
       } else {
@@ -96,7 +109,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
             id: message.id.toString(),
             role: 'assistant',
             timestamp: message.timestamp,
-            messages: []
+            messages: [],
           };
           turns.push(currentTurn);
         }
@@ -104,7 +117,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
         currentTurn.messages.push({
           id: message.id.toString(),
           content: message.content,
-          timestamp: message.timestamp
+          timestamp: message.timestamp,
         });
       }
     });
@@ -117,11 +130,11 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
     const assistantMessages = conversationTurns
       .filter(turn => turn.role === 'assistant')
       .flatMap(turn => turn.messages);
-    
+
     assistantMessages.forEach(message => {
       if (!visibleChars[message.id]) {
         setVisibleChars(prev => ({ ...prev, [message.id]: 0 }));
-        
+
         const paintText = () => {
           setVisibleChars(prev => {
             const currentLength = prev[message.id] || 0;
@@ -135,7 +148,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
             }
           });
         };
-        
+
         setTimeout(paintText, 100);
       }
     });
@@ -151,51 +164,62 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
   if (!isOpen) return null;
 
   const isGrid = layout === 'grid';
-  
+
   // ✅ FIX: Memoize styles to prevent recalculation
-  const popupStyles = useMemo(() => isGrid ? {
-    // Desktop Grid: Normal popup styling
-    width: '100%',
-    maxWidth: '100%',
-    height: '320px',
-    maxHeight: '320px',
-    background: 'rgba(255,255,255,0.15)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    border: '1.5px solid rgba(255,255,255,0.3)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-    borderRadius: 16,
-    marginBottom: 0,
-  } : {
-    // Mobile Overlay: Bottom popup styling
-    width: '100%',
-    maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
-    height: `${STANDARD_POPUP_HEIGHT}px`,
-    maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
-    background: 'rgba(255,255,255,0.12)',
-    backdropFilter: 'blur(18px)',
-    WebkitBackdropFilter: 'blur(18px)',
-    border: '1.5px solid rgba(255,255,255,0.25)',
-    boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    marginBottom: 0,
-  }, [isGrid]);
+  const popupStyles = useMemo(
+    () =>
+      isGrid
+        ? {
+            // Desktop Grid: Normal popup styling
+            width: '100%',
+            maxWidth: '100%',
+            height: '320px',
+            maxHeight: '320px',
+            background: 'rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1.5px solid rgba(255,255,255,0.3)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            borderRadius: 16,
+            marginBottom: 0,
+          }
+        : {
+            // Mobile Overlay: Bottom popup styling
+            width: '100%',
+            maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
+            height: `${STANDARD_POPUP_HEIGHT}px`,
+            maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
+            background: 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(18px)',
+            WebkitBackdropFilter: 'blur(18px)',
+            border: '1.5px solid rgba(255,255,255,0.25)',
+            boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+            marginBottom: 0,
+          },
+    [isGrid]
+  );
 
   // Popup content component
   const PopupContent = () => (
-    <div 
+    <div
       className={`relative z-30 overflow-hidden shadow-2xl chat-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${!isGrid && hasAnimated ? 'mx-auto animate-slide-up' : 'mx-auto'}`}
       style={popupStyles}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10" style={{backdropFilter:'blur(4px)'}}>
+      <div
+        className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10"
+        style={{ backdropFilter: 'blur(4px)' }}
+      >
         <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium text-gray-700">💬 {t('chat', language)}</span>
+          <span className="text-sm font-medium text-gray-700">
+            💬 {t('chat', language)}
+          </span>
         </div>
-        
+
         <button
           onClick={onClose}
           className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -205,12 +229,15 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
       </div>
 
       {/* Conversation Content */}
-      <div 
+      <div
         ref={containerRef}
         className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
       >
         {conversationTurns.length === 0 && (
-          <div className="text-gray-400 text-base text-center select-none" style={{opacity: 0.7}}>
+          <div
+            className="text-gray-400 text-base text-center select-none"
+            style={{ opacity: 0.7 }}
+          >
             {t('tap_to_speak', language)}
           </div>
         )}
@@ -220,15 +247,24 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
               <div className="flex-1">
                 {turn.role === 'user' ? (
                   <div className="bg-gray-100 rounded-lg p-2">
-                    <p className="text-gray-800 text-sm">{turn.messages[0].content}</p>
+                    <p className="text-gray-800 text-sm">
+                      {turn.messages[0].content}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-1">
                     {turn.messages.map((message, msgIdx) => (
-                      <div key={message.id} className="bg-blue-50 rounded-lg p-2">
+                      <div
+                        key={message.id}
+                        className="bg-blue-50 rounded-lg p-2"
+                      >
                         <p className="text-blue-900 text-sm">
-                          {message.content.slice(0, visibleChars[message.id] || 0)}
-                          {(visibleChars[message.id] || 0) < message.content.length && (
+                          {message.content.slice(
+                            0,
+                            visibleChars[message.id] || 0
+                          )}
+                          {(visibleChars[message.id] || 0) <
+                            message.content.length && (
                             <span className="opacity-60 animate-pulse">|</span>
                           )}
                         </p>
@@ -255,7 +291,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
   // Mobile: Wrap with fixed positioning container
   return (
     <>
-      <div 
+      <div
         className={className}
         style={{
           position: 'fixed',
@@ -269,14 +305,14 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
           WebkitTransform: 'translateZ(0)',
         }}
       >
-        <div 
-          style={{ 
+        <div
+          style={{
             pointerEvents: 'auto',
             // ✅ FIX: Ensure content doesn't shift
             position: 'relative',
             transform: 'translateZ(0)',
           }}
-        > 
+        >
           <PopupContent />
         </div>
       </div>
@@ -352,4 +388,4 @@ const ChatPopup: React.FC<ChatPopupProps> = ({ isOpen, onClose, layout = 'overla
   );
 };
 
-export default ChatPopup; 
+export default ChatPopup;

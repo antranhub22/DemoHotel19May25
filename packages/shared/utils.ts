@@ -12,12 +12,17 @@ export async function deleteAllRequests() {
     return handlePostgreSQLResult(result);
   } catch (error) {
     console.error('Error deleting all requests:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
   }
 }
 
 // Helper to convert Date to string for SQLite
-export function dateToString(date: Date | string | null | undefined): string | null {
+export function dateToString(
+  date: Date | string | null | undefined
+): string | null {
   if (!date) return null;
   if (typeof date === 'string') return date;
   return date.toISOString();
@@ -26,4 +31,4 @@ export function dateToString(date: Date | string | null | undefined): string | n
 // Get current timestamp as string
 export function getCurrentTimestamp(): string {
   return new Date().toISOString();
-} 
+}

@@ -53,7 +53,7 @@ export const testHotels = {
       smoking: false,
     },
   },
-  
+
   testHotel: {
     name: 'Test Hotel',
     location: 'Test Location',
@@ -100,14 +100,14 @@ export const testUsers = {
     role: 'admin' as const,
     tenantId: 'test-tenant-id',
   },
-  
+
   staff: {
     username: 'staff',
     password: 'staff123',
     role: 'staff' as const,
     tenantId: 'test-tenant-id',
   },
-  
+
   manager: {
     username: 'manager',
     password: 'manager123',
@@ -131,7 +131,7 @@ export const testCalls = {
     endTime: new Date('2024-01-01T10:05:00Z'),
     tenantId: 'test-tenant-id',
   },
-  
+
   spaBooking: {
     callIdVapi: 'test-call-spa-booking',
     roomNumber: '202',
@@ -142,7 +142,7 @@ export const testCalls = {
     endTime: new Date('2024-01-01T14:10:00Z'),
     tenantId: 'test-tenant-id',
   },
-  
+
   tourInquiry: {
     callIdVapi: 'test-call-tour-inquiry',
     roomNumber: '303',
@@ -172,7 +172,8 @@ export const testTranscripts = {
     {
       callId: 'test-call-room-service',
       role: 'assistant' as const,
-      content: 'Of course! I can help you with room service. What would you like to order?',
+      content:
+        'Of course! I can help you with room service. What would you like to order?',
       timestamp: new Date('2024-01-01T10:00:35Z'),
       isModelOutput: true,
       tenantId: 'test-tenant-id',
@@ -186,7 +187,7 @@ export const testTranscripts = {
       tenantId: 'test-tenant-id',
     },
   ],
-  
+
   spaBooking: [
     {
       callId: 'test-call-spa-booking',
@@ -199,7 +200,8 @@ export const testTranscripts = {
     {
       callId: 'test-call-spa-booking',
       role: 'assistant' as const,
-      content: 'Xin chào! Tôi có thể giúp bạn đặt lịch spa. Bạn muốn đặt vào thời gian nào?',
+      content:
+        'Xin chào! Tôi có thể giúp bạn đặt lịch spa. Bạn muốn đặt vào thời gian nào?',
       timestamp: new Date('2024-01-01T14:00:35Z'),
       isModelOutput: true,
       tenantId: 'test-tenant-id',
@@ -219,7 +221,7 @@ export const testOrders = {
     status: 'pending' as const,
     tenantId: 'test-tenant-id',
   },
-  
+
   spaBooking: {
     roomNumber: '202',
     orderId: 'test-order-spa-booking',
@@ -227,7 +229,7 @@ export const testOrders = {
     status: 'in-progress' as const,
     tenantId: 'test-tenant-id',
   },
-  
+
   tourBooking: {
     roomNumber: '303',
     orderId: 'test-order-tour-booking',
@@ -246,7 +248,8 @@ export const testMessages = {
     {
       requestId: 1,
       sender: 'staff',
-      content: 'Your room service order has been received and is being prepared',
+      content:
+        'Your room service order has been received and is being prepared',
       timestamp: new Date('2024-01-01T10:02:00Z'),
       tenantId: 'test-tenant-id',
     },
@@ -258,7 +261,7 @@ export const testMessages = {
       tenantId: 'test-tenant-id',
     },
   ],
-  
+
   spaBooking: [
     {
       requestId: 2,
@@ -290,13 +293,13 @@ export const testAnalytics = {
     },
     serviceTypeDistribution: {
       'room-service': 40,
-      'spa': 25,
-      'tours': 20,
-      'restaurant': 10,
-      'other': 5,
+      spa: 25,
+      tours: 20,
+      restaurant: 10,
+      other: 5,
     },
   },
-  
+
   serviceDistribution: [
     { type: 'room-service', count: 30, percentage: 40 },
     { type: 'spa', count: 19, percentage: 25 },
@@ -304,7 +307,7 @@ export const testAnalytics = {
     { type: 'restaurant', count: 8, percentage: 10 },
     { type: 'other', count: 3, percentage: 5 },
   ],
-  
+
   hourlyActivity: [
     { hour: 8, calls: 5, orders: 2 },
     { hour: 9, calls: 8, orders: 4 },
@@ -331,14 +334,14 @@ export const testConfigs = {
     publicKey: 'test-public-key',
     assistantId: 'test-assistant-id',
   },
-  
+
   openai: {
     apiKey: 'test-openai-key',
     model: 'gpt-4',
     maxTokens: 1000,
     temperature: 0.7,
   },
-  
+
   email: {
     service: 'gmail' as const,
     user: 'test@hotel.com',
@@ -370,7 +373,7 @@ export const testErrors = {
       details: 'You do not have permission to access this resource',
     },
   },
-  
+
   validation: {
     invalidEmail: {
       status: 400,
@@ -383,7 +386,7 @@ export const testErrors = {
       details: 'Room number is required',
     },
   },
-  
+
   server: {
     internalError: {
       status: 500,
@@ -396,4 +399,4 @@ export const testErrors = {
       details: 'The service is temporarily unavailable',
     },
   },
-}; 
+};

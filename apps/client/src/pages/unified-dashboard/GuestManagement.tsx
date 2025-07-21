@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -36,11 +36,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  Users, 
-  UserPlus, 
-  Search, 
-  Filter, 
+import {
+  Users,
+  UserPlus,
+  Search,
+  Filter,
   Eye,
   Edit,
   Phone,
@@ -59,7 +59,7 @@ import {
   XCircle,
   AlertCircle,
   Save,
-  User
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -152,8 +152,8 @@ const mockGuests: Guest[] = [
       floorPreference: 'High floor',
       smokingPreference: 'Non-smoking',
       bedPreference: 'King bed',
-      specialRequests: ['Late check-out', 'Extra towels']
-    }
+      specialRequests: ['Late check-out', 'Extra towels'],
+    },
   },
   {
     id: '2',
@@ -183,8 +183,8 @@ const mockGuests: Guest[] = [
       floorPreference: 'Mid floor',
       smokingPreference: 'Non-smoking',
       bedPreference: 'Twin beds',
-      specialRequests: ['Early breakfast', 'Business center access']
-    }
+      specialRequests: ['Early breakfast', 'Business center access'],
+    },
   },
   {
     id: '3',
@@ -214,9 +214,13 @@ const mockGuests: Guest[] = [
       floorPreference: 'Top floor',
       smokingPreference: 'Non-smoking',
       bedPreference: 'King bed',
-      specialRequests: ['Shellfish allergy', 'Concierge service', 'Airport transfer']
-    }
-  }
+      specialRequests: [
+        'Shellfish allergy',
+        'Concierge service',
+        'Airport transfer',
+      ],
+    },
+  },
 ];
 
 const mockBookings: Booking[] = [
@@ -234,7 +238,7 @@ const mockBookings: Booking[] = [
     specialRequests: ['Late check-out', 'Extra towels'],
     rating: 5,
     review: 'Excellent service and room quality',
-    createdAt: '2024-01-05T10:00:00Z'
+    createdAt: '2024-01-05T10:00:00Z',
   },
   {
     id: '2',
@@ -250,8 +254,8 @@ const mockBookings: Booking[] = [
     specialRequests: ['Early breakfast'],
     rating: 4,
     review: 'Good stay, helpful staff',
-    createdAt: '2024-01-01T09:00:00Z'
-  }
+    createdAt: '2024-01-01T09:00:00Z',
+  },
 ];
 
 const mockNotes: GuestNote[] = [
@@ -261,7 +265,7 @@ const mockNotes: GuestNote[] = [
     note: 'Guest requested room upgrade, complimentary provided',
     type: 'general',
     staffMember: 'Front Desk Staff',
-    createdAt: '2024-01-10T16:00:00Z'
+    createdAt: '2024-01-10T16:00:00Z',
   },
   {
     id: '2',
@@ -269,37 +273,51 @@ const mockNotes: GuestNote[] = [
     note: 'Prefers high floor rooms with city view',
     type: 'preference',
     staffMember: 'Front Desk Staff',
-    createdAt: '2024-01-10T15:30:00Z'
-  }
+    createdAt: '2024-01-10T15:30:00Z',
+  },
 ];
 
 // Helper functions
 const getMembershipColor = (tier: string) => {
   switch (tier) {
-    case 'platinum': return 'bg-purple-100 text-purple-800';
-    case 'gold': return 'bg-yellow-100 text-yellow-800';
-    case 'silver': return 'bg-gray-100 text-gray-800';
-    case 'bronze': return 'bg-orange-100 text-orange-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'platinum':
+      return 'bg-purple-100 text-purple-800';
+    case 'gold':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'silver':
+      return 'bg-gray-100 text-gray-800';
+    case 'bronze':
+      return 'bg-orange-100 text-orange-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'vip': return 'bg-purple-100 text-purple-800';
-    case 'active': return 'bg-green-100 text-green-800';
-    case 'inactive': return 'bg-gray-100 text-gray-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'vip':
+      return 'bg-purple-100 text-purple-800';
+    case 'active':
+      return 'bg-green-100 text-green-800';
+    case 'inactive':
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getBookingStatusColor = (status: string) => {
   switch (status) {
-    case 'confirmed': return 'bg-blue-100 text-blue-800';
-    case 'checked-in': return 'bg-green-100 text-green-800';
-    case 'checked-out': return 'bg-gray-100 text-gray-800';
-    case 'cancelled': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'confirmed':
+      return 'bg-blue-100 text-blue-800';
+    case 'checked-in':
+      return 'bg-green-100 text-green-800';
+    case 'checked-out':
+      return 'bg-gray-100 text-gray-800';
+    case 'cancelled':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
@@ -307,7 +325,7 @@ const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   }).format(amount);
 };
 
@@ -315,19 +333,19 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
   });
 };
 
 // Guest Details Modal
-const GuestDetailsModal = ({ 
-  guest, 
-  isOpen, 
-  onClose, 
-  onUpdate 
-}: { 
-  guest: Guest | null; 
-  isOpen: boolean; 
+const GuestDetailsModal = ({
+  guest,
+  isOpen,
+  onClose,
+  onUpdate,
+}: {
+  guest: Guest | null;
+  isOpen: boolean;
   onClose: () => void;
   onUpdate: (guest: Guest) => void;
 }) => {
@@ -341,7 +359,7 @@ const GuestDetailsModal = ({
 
   const handleSave = async () => {
     if (!formData) return;
-    
+
     setLoading(true);
     try {
       // Simulate API call
@@ -364,7 +382,9 @@ const GuestDetailsModal = ({
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
             {guest.firstName} {guest.lastName}
-            <Badge className={cn('ml-2', getMembershipColor(guest.membershipTier))}>
+            <Badge
+              className={cn('ml-2', getMembershipColor(guest.membershipTier))}
+            >
               {guest.membershipTier.toUpperCase()}
             </Badge>
             <Badge className={cn('ml-1', getStatusColor(guest.status))}>
@@ -403,53 +423,63 @@ const GuestDetailsModal = ({
                   <Input
                     id="firstName"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="lastName">Tên</Label>
                   <Input
                     id="lastName"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="phone">Số điện thoại</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="nationality">Quốc tịch</Label>
                   <Input
                     id="nationality"
                     value={formData.nationality}
-                    onChange={(e) => setFormData({...formData, nationality: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, nationality: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="dateOfBirth">Ngày sinh</Label>
@@ -457,48 +487,58 @@ const GuestDetailsModal = ({
                     id="dateOfBirth"
                     type="date"
                     value={formData.dateOfBirth}
-                    onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, dateOfBirth: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="idNumber">Số CMND/CCCD</Label>
                   <Input
                     id="idNumber"
                     value={formData.idNumber}
-                    onChange={(e) => setFormData({...formData, idNumber: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, idNumber: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="address">Địa chỉ</Label>
                   <Textarea
                     id="address"
                     value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                     disabled={!editMode}
                     rows={2}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="city">Thành phố</Label>
                   <Input
                     id="city"
                     value={formData.city}
-                    onChange={(e) => setFormData({...formData, city: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="country">Quốc gia</Label>
                   <Input
                     id="country"
                     value={formData.country}
-                    onChange={(e) => setFormData({...formData, country: e.target.value})}
+                    onChange={e =>
+                      setFormData({ ...formData, country: e.target.value })
+                    }
                     disabled={!editMode}
                   />
                 </div>
@@ -510,7 +550,9 @@ const GuestDetailsModal = ({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 disabled={!editMode}
                 rows={3}
               />
@@ -550,54 +592,76 @@ const GuestDetailsModal = ({
             </div>
 
             <div className="space-y-4">
-              {mockBookings.filter(b => b.guestId === guest.id).map((booking) => (
-                <Card key={booking.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Phòng {booking.roomNumber}</span>
-                        <Badge variant="outline">{booking.roomType}</Badge>
-                        <Badge className={cn(getBookingStatusColor(booking.status))}>
-                          {booking.status}
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Số khách:</span> {booking.guests}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Tổng tiền:</span> {formatCurrency(booking.totalAmount)}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Đánh giá:</span> 
-                        <div className="flex items-center gap-1 ml-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={cn(
-                                "h-3 w-3",
-                                i < booking.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                              )} 
-                            />
-                          ))}
-                          <span className="ml-1">({booking.rating}/5)</span>
+              {mockBookings
+                .filter(b => b.guestId === guest.id)
+                .map(booking => (
+                  <Card key={booking.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            Phòng {booking.roomNumber}
+                          </span>
+                          <Badge variant="outline">{booking.roomType}</Badge>
+                          <Badge
+                            className={cn(
+                              getBookingStatusColor(booking.status)
+                            )}
+                          >
+                            {booking.status}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(booking.checkIn)} -{' '}
+                          {formatDate(booking.checkOut)}
                         </div>
                       </div>
-                    </div>
-                    
-                    {booking.review && (
-                      <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
-                        <span className="text-muted-foreground">Đánh giá:</span> {booking.review}
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">
+                            Số khách:
+                          </span>{' '}
+                          {booking.guests}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Tổng tiền:
+                          </span>{' '}
+                          {formatCurrency(booking.totalAmount)}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Đánh giá:
+                          </span>
+                          <div className="flex items-center gap-1 ml-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={cn(
+                                  'h-3 w-3',
+                                  i < booking.rating
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                )}
+                              />
+                            ))}
+                            <span className="ml-1">({booking.rating}/5)</span>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+
+                      {booking.review && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
+                          <span className="text-muted-foreground">
+                            Đánh giá:
+                          </span>{' '}
+                          {booking.review}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </TabsContent>
 
@@ -611,19 +675,21 @@ const GuestDetailsModal = ({
             </div>
 
             <div className="space-y-3">
-              {mockNotes.filter(n => n.guestId === guest.id).map((note) => (
-                <Card key={note.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">{note.type}</Badge>
-                      <div className="text-sm text-muted-foreground">
-                        {note.staffMember} • {formatDate(note.createdAt)}
+              {mockNotes
+                .filter(n => n.guestId === guest.id)
+                .map(note => (
+                  <Card key={note.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="outline">{note.type}</Badge>
+                        <div className="text-sm text-muted-foreground">
+                          {note.staffMember} • {formatDate(note.createdAt)}
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm">{note.note}</p>
-                  </CardContent>
-                </Card>
-              ))}
+                      <p className="text-sm">{note.note}</p>
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </TabsContent>
         </Tabs>
@@ -633,12 +699,12 @@ const GuestDetailsModal = ({
 };
 
 // Add Guest Modal
-const AddGuestModal = ({ 
-  isOpen, 
-  onClose, 
-  onAdd 
-}: { 
-  isOpen: boolean; 
+const AddGuestModal = ({
+  isOpen,
+  onClose,
+  onAdd,
+}: {
+  isOpen: boolean;
   onClose: () => void;
   onAdd: (guest: Guest) => void;
 }) => {
@@ -656,18 +722,18 @@ const AddGuestModal = ({
     zipCode: '',
     preferredLanguage: 'vi',
     membershipTier: 'bronze',
-    notes: ''
+    notes: '',
   });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const newGuest: Guest = {
         id: Date.now().toString(),
         ...formData,
@@ -683,13 +749,13 @@ const AddGuestModal = ({
           floorPreference: '',
           smokingPreference: 'Non-smoking',
           bedPreference: '',
-          specialRequests: []
-        }
+          specialRequests: [],
+        },
       } as Guest;
-      
+
       onAdd(newGuest);
       onClose();
-      
+
       // Reset form
       setFormData({
         firstName: '',
@@ -705,7 +771,7 @@ const AddGuestModal = ({
         zipCode: '',
         preferredLanguage: 'vi',
         membershipTier: 'bronze',
-        notes: ''
+        notes: '',
       });
     } catch (error) {
       console.error('Failed to add guest:', error);
@@ -734,73 +800,92 @@ const AddGuestModal = ({
               <Input
                 id="firstName"
                 value={formData.firstName}
-                onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="lastName">Tên *</Label>
               <Input
                 id="lastName"
                 value={formData.lastName}
-                onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="phone">Số điện thoại *</Label>
               <Input
                 id="phone"
                 value={formData.phone}
-                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="nationality">Quốc tịch</Label>
               <Input
                 id="nationality"
                 value={formData.nationality}
-                onChange={(e) => setFormData({...formData, nationality: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, nationality: e.target.value })
+                }
               />
             </div>
-            
+
             <div>
               <Label htmlFor="dateOfBirth">Ngày sinh</Label>
               <Input
                 id="dateOfBirth"
                 type="date"
                 value={formData.dateOfBirth}
-                onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, dateOfBirth: e.target.value })
+                }
               />
             </div>
-            
+
             <div>
               <Label htmlFor="idNumber">Số CMND/CCCD</Label>
               <Input
                 id="idNumber"
                 value={formData.idNumber}
-                onChange={(e) => setFormData({...formData, idNumber: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, idNumber: e.target.value })
+                }
               />
             </div>
-            
+
             <div>
               <Label htmlFor="preferredLanguage">Ngôn ngữ ưa thích</Label>
-              <Select value={formData.preferredLanguage} onValueChange={(value) => setFormData({...formData, preferredLanguage: value})}>
+              <Select
+                value={formData.preferredLanguage}
+                onValueChange={value =>
+                  setFormData({ ...formData, preferredLanguage: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -813,48 +898,56 @@ const AddGuestModal = ({
               </Select>
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="address">Địa chỉ</Label>
             <Textarea
               id="address"
               value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
+              onChange={e =>
+                setFormData({ ...formData, address: e.target.value })
+              }
               rows={2}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="city">Thành phố</Label>
               <Input
                 id="city"
                 value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
               />
             </div>
-            
+
             <div>
               <Label htmlFor="country">Quốc gia</Label>
               <Input
                 id="country"
                 value={formData.country}
-                onChange={(e) => setFormData({...formData, country: e.target.value})}
+                onChange={e =>
+                  setFormData({ ...formData, country: e.target.value })
+                }
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="notes">Ghi chú</Label>
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              onChange={e =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
               placeholder="Thông tin bổ sung về khách hàng..."
               rows={3}
             />
           </div>
-          
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Hủy
@@ -893,15 +986,18 @@ export const GuestManagement: React.FC = () => {
 
   // Filter guests based on search and filters
   const filteredGuests = guests.filter(guest => {
-    const matchesSearch = !searchQuery || 
+    const matchesSearch =
+      !searchQuery ||
       guest.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guest.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guest.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guest.phone.includes(searchQuery);
-    
-    const matchesMembership = membershipFilter === 'all' || guest.membershipTier === membershipFilter;
-    const matchesStatus = statusFilter === 'all' || guest.status === statusFilter;
-    
+
+    const matchesMembership =
+      membershipFilter === 'all' || guest.membershipTier === membershipFilter;
+    const matchesStatus =
+      statusFilter === 'all' || guest.status === statusFilter;
+
     return matchesSearch && matchesMembership && matchesStatus;
   });
 
@@ -911,7 +1007,9 @@ export const GuestManagement: React.FC = () => {
   };
 
   const handleUpdateGuest = (updatedGuest: Guest) => {
-    setGuests(prev => prev.map(g => g.id === updatedGuest.id ? updatedGuest : g));
+    setGuests(prev =>
+      prev.map(g => (g.id === updatedGuest.id ? updatedGuest : g))
+    );
     setSelectedGuest(updatedGuest);
   };
 
@@ -949,7 +1047,9 @@ export const GuestManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý khách hàng</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Quản lý khách hàng
+          </h1>
           <p className="text-gray-600 mt-2">
             Quản lý thông tin khách hàng và lịch sử lưu trú
           </p>
@@ -973,13 +1073,16 @@ export const GuestManagement: React.FC = () => {
                 <Input
                   placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
             <div className="flex gap-2">
-              <Select value={membershipFilter} onValueChange={setMembershipFilter}>
+              <Select
+                value={membershipFilter}
+                onValueChange={setMembershipFilter}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Membership tier" />
                 </SelectTrigger>
@@ -991,7 +1094,7 @@ export const GuestManagement: React.FC = () => {
                   <SelectItem value="platinum">Platinum</SelectItem>
                 </SelectContent>
               </Select>
-              
+
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Trạng thái" />
@@ -1021,40 +1124,51 @@ export const GuestManagement: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Khách VIP</p>
-                <p className="text-2xl font-bold">{guests.filter(g => g.status === 'vip').length}</p>
+                <p className="text-2xl font-bold">
+                  {guests.filter(g => g.status === 'vip').length}
+                </p>
               </div>
               <Star className="h-8 w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Khách hàng mới</p>
                 <p className="text-2xl font-bold">
-                  {guests.filter(g => new Date(g.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length}
+                  {
+                    guests.filter(
+                      g =>
+                        new Date(g.createdAt) >
+                        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                    ).length
+                  }
                 </p>
               </div>
               <UserPlus className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Đánh giá TB</p>
                 <p className="text-2xl font-bold">
-                  {(guests.reduce((sum, g) => sum + g.averageRating, 0) / guests.length).toFixed(1)}
+                  {(
+                    guests.reduce((sum, g) => sum + g.averageRating, 0) /
+                    guests.length
+                  ).toFixed(1)}
                 </p>
               </div>
               <Star className="h-8 w-8 text-yellow-500" />
@@ -1068,7 +1182,8 @@ export const GuestManagement: React.FC = () => {
         <CardHeader>
           <CardTitle>Danh sách khách hàng</CardTitle>
           <CardDescription>
-            Hiển thị {filteredGuests.length} trong tổng số {guests.length} khách hàng
+            Hiển thị {filteredGuests.length} trong tổng số {guests.length} khách
+            hàng
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1088,12 +1203,16 @@ export const GuestManagement: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredGuests.map((guest) => (
+                {filteredGuests.map(guest => (
                   <TableRow key={guest.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{guest.firstName} {guest.lastName}</div>
-                        <div className="text-sm text-muted-foreground">{guest.nationality}</div>
+                        <div className="font-medium">
+                          {guest.firstName} {guest.lastName}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {guest.nationality}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -1109,7 +1228,9 @@ export const GuestManagement: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getMembershipColor(guest.membershipTier)}>
+                      <Badge
+                        className={getMembershipColor(guest.membershipTier)}
+                      >
                         {guest.membershipTier.toUpperCase()}
                       </Badge>
                     </TableCell>
@@ -1127,7 +1248,9 @@ export const GuestManagement: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {guest.lastStay ? formatDate(guest.lastStay) : 'Chưa lưu trú'}
+                      {guest.lastStay
+                        ? formatDate(guest.lastStay)
+                        : 'Chưa lưu trú'}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -1162,4 +1285,4 @@ export const GuestManagement: React.FC = () => {
       />
     </div>
   );
-}; 
+};

@@ -1,5 +1,5 @@
 // ============================================
-// UNIFIED AUTH ROUTES v2.0 
+// UNIFIED AUTH ROUTES v2.0
 // ============================================
 // This file consolidates all authentication routes into a single system
 // Provides backward compatibility with existing endpoints
@@ -37,32 +37,34 @@ const legacyAuthLoginSchema = z.object({
  */
 router.post('/login', async (req: Request, res: Response) => {
   try {
-    console.log('🔐 [UnifiedAuth] Login attempt:', { 
+    console.log('🔐 [UnifiedAuth] Login attempt:', {
       username: req.body.username || req.body.email,
-      hasPassword: !!req.body.password 
+      hasPassword: !!req.body.password,
     });
 
     // Validate input using unified schema
-    const validation = authValidationSchemas.loginCredentials.safeParse(req.body);
+    const validation = authValidationSchemas.loginCredentials.safeParse(
+      req.body
+    );
     if (!validation.success) {
       return res.status(400).json({
         success: false,
         error: 'Invalid login credentials',
         details: validation.error.errors,
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       });
     }
 
     const credentials: LoginCredentials = validation.data as LoginCredentials;
-    
+
     // Attempt login using unified auth service
     const result = await UnifiedAuthService.login(credentials);
-    
+
     if (!result.success) {
       return res.status(401).json({
         success: false,
         error: result.error,
-        code: result.errorCode
+        code: result.errorCode,
       });
     }
 
@@ -86,13 +88,12 @@ router.post('/login', async (req: Request, res: Response) => {
       expiresIn: result.expiresIn,
       tokenType: result.tokenType || 'Bearer',
     });
-
   } catch (error) {
     console.error('❌ [UnifiedAuth] Login error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      code: 'SERVER_ERROR'
+      code: 'SERVER_ERROR',
     });
   }
 });
@@ -104,22 +105,22 @@ router.post('/login', async (req: Request, res: Response) => {
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
-    
+
     if (!refreshToken) {
       return res.status(400).json({
         success: false,
         error: 'Refresh token is required',
-        code: 'REFRESH_TOKEN_MISSING'
+        code: 'REFRESH_TOKEN_MISSING',
       });
     }
 
     const result = await UnifiedAuthService.refreshToken(refreshToken);
-    
+
     if (!result.success) {
       return res.status(401).json({
         success: false,
         error: result.error,
-        code: result.errorCode
+        code: result.errorCode,
       });
     }
 
@@ -139,13 +140,12 @@ router.post('/refresh', async (req: Request, res: Response) => {
       expiresIn: result.expiresIn,
       tokenType: result.tokenType || 'Bearer',
     });
-
   } catch (error) {
     console.error('❌ [UnifiedAuth] Refresh error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      code: 'SERVER_ERROR'
+      code: 'SERVER_ERROR',
     });
   }
 });
@@ -158,22 +158,21 @@ router.post('/logout', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
-    
+
     if (token) {
       await UnifiedAuthService.logout(token);
     }
 
     res.json({
       success: true,
-      message: 'Logged out successfully'
+      message: 'Logged out successfully',
     });
-
   } catch (error) {
     console.error('❌ [UnifiedAuth] Logout error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      code: 'SERVER_ERROR'
+      code: 'SERVER_ERROR',
     });
   }
 });
@@ -185,12 +184,12 @@ router.post('/logout', authenticateJWT, async (req: Request, res: Response) => {
 router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    
+
     if (!user) {
       return res.status(401).json({
         success: false,
         error: 'Not authenticated',
-        code: 'AUTHENTICATION_REQUIRED'
+        code: 'AUTHENTICATION_REQUIRED',
       });
     }
 
@@ -208,15 +207,14 @@ router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
         // Legacy compatibility
         name: user.displayName,
         hotelId: user.tenantId,
-      }
+      },
     });
-
   } catch (error) {
     console.error('❌ [UnifiedAuth] Get user error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      code: 'SERVER_ERROR'
+      code: 'SERVER_ERROR',
     });
   }
 });
@@ -231,8 +229,10 @@ router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
  * @deprecated Use /api/auth/login instead
  */
 router.post('/staff/login', async (req: Request, res: Response) => {
-  console.warn('⚠️ [LegacyAuth] /api/staff/login is deprecated, use /api/auth/login instead');
-  
+  console.warn(
+    '⚠️ [LegacyAuth] /api/staff/login is deprecated, use /api/auth/login instead'
+  );
+
   try {
     // Validate legacy format
     const validation = legacyStaffLoginSchema.safeParse(req.body);
@@ -240,21 +240,21 @@ router.post('/staff/login', async (req: Request, res: Response) => {
       return res.status(400).json({
         error: 'Username and password are required',
         deprecated: true,
-        newEndpoint: '/api/auth/login'
+        newEndpoint: '/api/auth/login',
       });
     }
 
     const { username, password } = validation.data;
-    
+
     // Convert to unified format and call unified login
     const credentials: LoginCredentials = { username, password };
     const result = await UnifiedAuthService.login(credentials);
-    
+
     if (!result.success) {
       return res.status(401).json({
         error: result.error,
         deprecated: true,
-        newEndpoint: '/api/auth/login'
+        newEndpoint: '/api/auth/login',
       });
     }
 
@@ -271,33 +271,34 @@ router.post('/staff/login', async (req: Request, res: Response) => {
       },
       deprecated: true,
       newEndpoint: '/api/auth/login',
-      migration: 'Please update your client to use /api/auth/login'
+      migration: 'Please update your client to use /api/auth/login',
     });
-
   } catch (error) {
     console.error('❌ [LegacyAuth] Staff login error:', error);
     res.status(500).json({
       error: 'Internal server error',
       deprecated: true,
-      newEndpoint: '/api/auth/login'
+      newEndpoint: '/api/auth/login',
     });
   }
 });
 
 /**
  * GET /api/auth/me (legacy format support)
- * Support for legacy /auth/me endpoint 
+ * Support for legacy /auth/me endpoint
  */
 router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
-  console.warn('⚠️ [LegacyAuth] /api/auth/me called - use /api/auth/me instead');
-  
+  console.warn(
+    '⚠️ [LegacyAuth] /api/auth/me called - use /api/auth/me instead'
+  );
+
   try {
     const user = (req as any).user;
-    
+
     if (!user) {
       return res.status(401).json({
         error: 'Unauthorized',
-        deprecated: true
+        deprecated: true,
       });
     }
 
@@ -312,14 +313,13 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
         tenant_id: user.tenantId,
       },
       deprecated: true,
-      migration: 'Please update your client to use /api/auth/me'
+      migration: 'Please update your client to use /api/auth/me',
     });
-
   } catch (error) {
     console.error('❌ [LegacyAuth] Get user error:', error);
     res.status(500).json({
       error: 'Internal server error',
-      deprecated: true
+      deprecated: true,
     });
   }
 });
@@ -337,12 +337,12 @@ router.get('/dev/users', (req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'development') {
     return res.status(404).json({
       error: 'Not found',
-      code: 'DEV_ONLY'
+      code: 'DEV_ONLY',
     });
   }
 
   const devUsers = UnifiedAuthService.getDevUsers();
-  
+
   res.json({
     success: true,
     users: devUsers.map(user => ({
@@ -350,8 +350,8 @@ router.get('/dev/users', (req: Request, res: Response) => {
       role: user.role,
       // Don't expose passwords even in dev mode
     })),
-    note: 'Development mode only - passwords are predefined'
+    note: 'Development mode only - passwords are predefined',
   });
 });
 
-export default router; 
+export default router;

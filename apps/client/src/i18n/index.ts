@@ -11,4 +11,4 @@ const resources = { en, fr, zh, ru, ko, vi };
 
 export function t(key: string, lang: Lang = 'en'): string {
   return (resources[lang] as Record<string, string>)[key] || key;
-} 
+}

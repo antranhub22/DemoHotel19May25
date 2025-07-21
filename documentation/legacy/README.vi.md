@@ -1,6 +1,8 @@
 # Mi Nhon Hotel Mui Ne - Trợ lý Giọng nói
 
-Ứng dụng web hỗ trợ giọng nói cho Mi Nhon Hotel Mui Ne, được thiết kế để tối ưu hóa tương tác với khách hàng thông qua giao diện dịch vụ thông minh, tối giản với khả năng quản lý cuộc gọi nâng cao và trải nghiệm người dùng cá nhân hóa.
+Ứng dụng web hỗ trợ giọng nói cho Mi Nhon Hotel Mui Ne, được thiết kế để tối ưu hóa tương tác với
+khách hàng thông qua giao diện dịch vụ thông minh, tối giản với khả năng quản lý cuộc gọi nâng cao
+và trải nghiệm người dùng cá nhân hóa.
 
 ## Tính năng
 
@@ -32,17 +34,20 @@
 ### Cài đặt
 
 1. Clone repository
+
    ```bash
    git clone https://github.com/your-username/MiNhon-Hotel-MUiNe.git
    cd MiNhon-Hotel-MUiNe
    ```
 
 2. Cài đặt dependencies
+
    ```bash
    npm install
    ```
 
 3. Tạo file `.env` với các biến sau:
+
    ```
    DATABASE_URL=your_postgresql_connection_string
    OPENAI_API_KEY=your_openai_api_key
@@ -53,6 +58,7 @@
    ```
 
 4. Cập nhật schema cơ sở dữ liệu
+
    ```bash
    npm run db:push
    ```
@@ -65,6 +71,7 @@
 ## Cách sử dụng
 
 Ứng dụng cung cấp giao diện đơn giản cho khách sạn để:
+
 - Yêu cầu dịch vụ phòng, dọn phòng, lễ tân, v.v.
 - Nhận thông tin về tiện nghi khách sạn, điểm tham quan địa phương, và hơn thế nữa
 - Tạo yêu cầu hoặc sắp xếp đặc biệt
@@ -73,7 +80,8 @@
 
 ## Giấy phép
 
-Dự án này là tài sản riêng và bảo mật. Việc sao chép, phân phối hoặc sử dụng trái phép đều bị nghiêm cấm.
+Dự án này là tài sản riêng và bảo mật. Việc sao chép, phân phối hoặc sử dụng trái phép đều bị nghiêm
+cấm.
 
 ## Liên hệ
 

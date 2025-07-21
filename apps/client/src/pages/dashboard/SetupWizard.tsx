@@ -1,23 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Search, 
-  Loader2, 
-  CheckCircle2, 
-  AlertCircle, 
-  Bot, 
-  Settings, 
-  ArrowRight, 
+import {
+  Search,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Bot,
+  Settings,
+  ArrowRight,
   ArrowLeft,
   Hotel,
   Globe,
@@ -40,21 +52,21 @@ import {
   XCircle,
   ChevronRight,
   ChevronDown,
-  Info
+  Info,
 } from 'lucide-react';
 
 // Import API service and types
-import { 
-  dashboardApi, 
-  HotelData, 
-  AssistantCustomization, 
+import {
+  dashboardApi,
+  HotelData,
+  AssistantCustomization,
   ApiError,
   PERSONALITY_OPTIONS,
   TONE_OPTIONS,
   LANGUAGE_OPTIONS,
   BACKGROUND_SOUND_OPTIONS,
   validateHotelData,
-  validateAssistantCustomization
+  validateAssistantCustomization,
 } from '@/services/dashboardApi';
 
 // ============================================
@@ -94,17 +106,22 @@ interface StepProps {
 // Step 1: Hotel Search Component
 // ============================================
 
-const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdateState }) => {
+const HotelSearchStep: React.FC<StepProps> = ({
+  state,
+  onNext,
+  onError,
+  onUpdateState,
+}) => {
   const handleInputChange = (field: string, value: string) => {
     onUpdateState({
       formData: { ...state.formData, [field]: value },
-      validation: { ...state.validation, [field]: null }
+      validation: { ...state.validation, [field]: null },
     });
   };
 
   const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
-    
+
     if (!state.formData.hotelName.trim()) {
       errors.hotelName = 'Tên khách sạn là bắt buộc';
     } else if (state.formData.hotelName.length < 2) {
@@ -119,12 +136,12 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
     if (!validateForm()) return;
 
     onUpdateState({ isResearching: true, error: null });
-    
+
     try {
       const response = await dashboardApi.researchHotel({
         hotelName: state.formData.hotelName,
         location: state.formData.location || undefined,
-        researchTier: state.formData.researchTier
+        researchTier: state.formData.researchTier,
       });
 
       if (response.success && validateHotelData(response.hotelData)) {
@@ -149,7 +166,8 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
         </div>
         <CardTitle className="text-2xl">Tìm kiếm thông tin khách sạn</CardTitle>
         <CardDescription>
-          Chúng tôi sẽ tự động nghiên cứu và thu thập thông tin về khách sạn của bạn
+          Chúng tôi sẽ tự động nghiên cứu và thu thập thông tin về khách sạn của
+          bạn
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -160,30 +178,34 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
               id="hotel-name"
               placeholder="Ví dụ: Grand Hotel Saigon"
               value={state.formData.hotelName}
-              onChange={(e) => handleInputChange('hotelName', e.target.value)}
+              onChange={e => handleInputChange('hotelName', e.target.value)}
               className={`mt-1 ${state.validation.hotelName ? 'border-red-500' : ''}`}
             />
             {state.validation.hotelName && (
-              <p className="text-sm text-red-500 mt-1">{state.validation.hotelName}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {state.validation.hotelName}
+              </p>
             )}
           </div>
-          
+
           <div>
             <Label htmlFor="location">Địa điểm (không bắt buộc)</Label>
             <Input
               id="location"
               placeholder="Ví dụ: Ho Chi Minh City, Vietnam"
               value={state.formData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
+              onChange={e => handleInputChange('location', e.target.value)}
               className="mt-1"
             />
           </div>
 
           <div>
             <Label htmlFor="research-tier">Mức độ nghiên cứu</Label>
-            <Select 
-              value={state.formData.researchTier} 
-              onValueChange={(value: any) => handleInputChange('researchTier', value)}
+            <Select
+              value={state.formData.researchTier}
+              onValueChange={(value: any) =>
+                handleInputChange('researchTier', value)
+              }
             >
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -195,9 +217,11 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
             </Select>
           </div>
         </div>
-        
+
         <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Thông tin sẽ được thu thập:</h4>
+          <h4 className="font-medium text-blue-900 mb-2">
+            Thông tin sẽ được thu thập:
+          </h4>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Thông tin cơ bản (địa chỉ, số điện thoại, website)</li>
             <li>• Dịch vụ và tiện nghi</li>
@@ -229,8 +253,8 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
             </AlertDescription>
           </Alert>
         )}
-        
-        <Button 
+
+        <Button
           onClick={handleSearch}
           disabled={!state.formData.hotelName.trim() || state.isResearching}
           className="w-full"
@@ -257,10 +281,20 @@ const HotelSearchStep: React.FC<StepProps> = ({ state, onNext, onError, onUpdate
 // Step 2: Review Hotel Data Component
 // ============================================
 
-const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, onUpdateState }) => {
+const ReviewDataStep: React.FC<StepProps> = ({
+  state,
+  onNext,
+  onBack,
+  onError,
+  onUpdateState,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState<HotelData | null>(state.hotelData);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['basic']));
+  const [editedData, setEditedData] = useState<HotelData | null>(
+    state.hotelData
+  );
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(['basic'])
+  );
 
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections);
@@ -316,7 +350,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
       <div className="flex justify-center gap-2 mb-6">
         <Button
-          variant={isEditing ? "default" : "outline"}
+          variant={isEditing ? 'default' : 'outline'}
           onClick={handleEdit}
           size="sm"
         >
@@ -328,11 +362,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
           Tìm kiếm lại
         </Button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Information */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('basic')}
           >
@@ -341,10 +375,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <Hotel className="h-5 w-5" />
                 Thông tin cơ bản
               </div>
-              {expandedSections.has('basic') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('basic') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('basic') && (
@@ -355,7 +390,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
               </div>
               <div className="space-y-2">
                 <Label>Địa chỉ</Label>
-                <p className="text-sm text-gray-600">{state.hotelData.address}</p>
+                <p className="text-sm text-gray-600">
+                  {state.hotelData.address}
+                </p>
               </div>
               {state.hotelData.phone && (
                 <div className="space-y-2">
@@ -366,9 +403,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
               {state.hotelData.website && (
                 <div className="space-y-2">
                   <Label>Website</Label>
-                  <a 
-                    href={state.hotelData.website} 
-                    target="_blank" 
+                  <a
+                    href={state.hotelData.website}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline text-sm flex items-center gap-1"
                   >
@@ -382,7 +419,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                   <Label>Đánh giá</Label>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{state.hotelData.rating}</span>
+                    <span className="font-medium">
+                      {state.hotelData.rating}
+                    </span>
                   </div>
                 </div>
               )}
@@ -392,7 +431,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
         {/* Services */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('services')}
           >
@@ -401,10 +440,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <Settings className="h-5 w-5" />
                 Dịch vụ ({state.hotelData.services.length})
               </div>
-              {expandedSections.has('services') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('services') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('services') && (
@@ -413,7 +453,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 {state.hotelData.services.map((service, index) => (
                   <div key={index} className="p-2 bg-gray-50 rounded">
                     <div className="font-medium text-sm">{service.name}</div>
-                    <div className="text-xs text-gray-600">{service.description}</div>
+                    <div className="text-xs text-gray-600">
+                      {service.description}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -423,7 +465,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
         {/* Amenities */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('amenities')}
           >
@@ -432,10 +474,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <Wifi className="h-5 w-5" />
                 Tiện nghi ({state.hotelData.amenities.length})
               </div>
-              {expandedSections.has('amenities') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('amenities') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('amenities') && (
@@ -453,7 +496,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
         {/* Room Types */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('rooms')}
           >
@@ -462,10 +505,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <Users className="h-5 w-5" />
                 Loại phòng ({state.hotelData.roomTypes.length})
               </div>
-              {expandedSections.has('rooms') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('rooms') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('rooms') && (
@@ -476,7 +520,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="font-medium">{room.name}</div>
-                        <div className="text-sm text-gray-600">{room.description}</div>
+                        <div className="text-sm text-gray-600">
+                          {room.description}
+                        </div>
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-green-600">
@@ -494,7 +540,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
         {/* Policies */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('policies')}
           >
@@ -503,25 +549,32 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <Clock className="h-5 w-5" />
                 Chính sách
               </div>
-              {expandedSections.has('policies') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('policies') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('policies') && (
             <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm">Check-in:</span>
-                <span className="font-medium">{state.hotelData.policies.checkIn}</span>
+                <span className="font-medium">
+                  {state.hotelData.policies.checkIn}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Check-out:</span>
-                <span className="font-medium">{state.hotelData.policies.checkOut}</span>
+                <span className="font-medium">
+                  {state.hotelData.policies.checkOut}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm">Hủy phòng:</span>
-                <span className="font-medium">{state.hotelData.policies.cancellation}</span>
+                <span className="font-medium">
+                  {state.hotelData.policies.cancellation}
+                </span>
               </div>
             </CardContent>
           )}
@@ -529,7 +582,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 
         {/* Local Attractions */}
         <Card>
-          <CardHeader 
+          <CardHeader
             className="cursor-pointer"
             onClick={() => toggleSection('attractions')}
           >
@@ -538,10 +591,11 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 <MapPin className="h-5 w-5" />
                 Điểm tham quan ({state.hotelData.localAttractions.length})
               </div>
-              {expandedSections.has('attractions') ? 
-                <ChevronDown className="h-4 w-4" /> : 
+              {expandedSections.has('attractions') ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
                 <ChevronRight className="h-4 w-4" />
-              }
+              )}
             </CardTitle>
           </CardHeader>
           {expandedSections.has('attractions') && (
@@ -550,7 +604,9 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
                 {state.hotelData.localAttractions.map((attraction, index) => (
                   <div key={index} className="p-2 bg-gray-50 rounded">
                     <div className="font-medium text-sm">{attraction.name}</div>
-                    <div className="text-xs text-gray-600">{attraction.description}</div>
+                    <div className="text-xs text-gray-600">
+                      {attraction.description}
+                    </div>
                     {attraction.distance && (
                       <div className="text-xs text-blue-600 mt-1">
                         Cách {attraction.distance}
@@ -563,7 +619,7 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
           )}
         </Card>
       </div>
-      
+
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -582,11 +638,17 @@ const ReviewDataStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, o
 // Step 3: Customize Assistant Component
 // ============================================
 
-const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, onError, onUpdateState }) => {
+const CustomizeAssistantStep: React.FC<StepProps> = ({
+  state,
+  onNext,
+  onBack,
+  onError,
+  onUpdateState,
+}) => {
   const updateCustomization = (field: string, value: any) => {
     onUpdateState({
       customization: { ...state.customization, [field]: value },
-      validation: { ...state.validation, [field]: null }
+      validation: { ...state.validation, [field]: null },
     });
   };
 
@@ -602,7 +664,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
 
   const validateForm = (): boolean => {
     const errors: { [key: string]: string } = {};
-    
+
     if (state.customization.languages.length === 0) {
       errors.languages = 'Vui lòng chọn ít nhất một ngôn ngữ';
     }
@@ -620,11 +682,11 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
     }
 
     onUpdateState({ isGenerating: true, error: null });
-    
+
     try {
       const response = await dashboardApi.generateAssistant({
         hotelData: state.hotelData,
-        customization: state.customization
+        customization: state.customization,
       });
 
       if (response.success) {
@@ -652,7 +714,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
           Cá nhân hóa AI Assistant theo phong cách khách sạn của bạn
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Personality */}
         <Card>
@@ -666,9 +728,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Select 
-              value={state.customization.personality} 
-              onValueChange={(value) => updateCustomization('personality', value)}
+            <Select
+              value={state.customization.personality}
+              onValueChange={value => updateCustomization('personality', value)}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -678,7 +740,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
                   <SelectItem key={option.value} value={option.value}>
                     <div>
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-xs text-gray-500">{option.description}</div>
+                      <div className="text-xs text-gray-500">
+                        {option.description}
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
@@ -686,7 +750,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
             </Select>
           </CardContent>
         </Card>
-        
+
         {/* Tone */}
         <Card>
           <CardHeader>
@@ -694,14 +758,12 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
               <Volume2 className="h-5 w-5" />
               Giọng điệu
             </CardTitle>
-            <CardDescription>
-              Chọn cách thức giao tiếp
-            </CardDescription>
+            <CardDescription>Chọn cách thức giao tiếp</CardDescription>
           </CardHeader>
           <CardContent>
-            <Select 
-              value={state.customization.tone} 
-              onValueChange={(value) => updateCustomization('tone', value)}
+            <Select
+              value={state.customization.tone}
+              onValueChange={value => updateCustomization('tone', value)}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -711,7 +773,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
                   <SelectItem key={option.value} value={option.value}>
                     <div>
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-xs text-gray-500">{option.description}</div>
+                      <div className="text-xs text-gray-500">
+                        {option.description}
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
@@ -734,15 +798,23 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {LANGUAGE_OPTIONS.map(language => (
-                <div key={language.value} className="flex items-center space-x-2">
+                <div
+                  key={language.value}
+                  className="flex items-center space-x-2"
+                >
                   <Checkbox
                     id={language.value}
-                    checked={state.customization.languages.includes(language.value)}
-                    onCheckedChange={(checked) => 
+                    checked={state.customization.languages.includes(
+                      language.value
+                    )}
+                    onCheckedChange={checked =>
                       handleLanguageChange(language.value, checked as boolean)
                     }
                   />
-                  <Label htmlFor={language.value} className="flex items-center gap-2 cursor-pointer">
+                  <Label
+                    htmlFor={language.value}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <span>{language.flag}</span>
                     <span>{language.label}</span>
                   </Label>
@@ -750,7 +822,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
               ))}
             </div>
             {state.validation.languages && (
-              <p className="text-sm text-red-500 mt-2">{state.validation.languages}</p>
+              <p className="text-sm text-red-500 mt-2">
+                {state.validation.languages}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -762,9 +836,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
               <Mic className="h-5 w-5" />
               Cài đặt giọng nói
             </CardTitle>
-            <CardDescription>
-              Điều chỉnh thời gian và âm thanh
-            </CardDescription>
+            <CardDescription>Điều chỉnh thời gian và âm thanh</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -774,7 +846,12 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
                 min="10"
                 max="120"
                 value={state.customization.silenceTimeout || 30}
-                onChange={(e) => updateCustomization('silenceTimeout', parseInt(e.target.value))}
+                onChange={e =>
+                  updateCustomization(
+                    'silenceTimeout',
+                    parseInt(e.target.value)
+                  )
+                }
                 className="mt-1"
               />
             </div>
@@ -785,7 +862,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
                 min="300"
                 max="3600"
                 value={state.customization.maxDuration || 1800}
-                onChange={(e) => updateCustomization('maxDuration', parseInt(e.target.value))}
+                onChange={e =>
+                  updateCustomization('maxDuration', parseInt(e.target.value))
+                }
                 className="mt-1"
               />
             </div>
@@ -799,14 +878,14 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
               <Volume2 className="h-5 w-5" />
               Âm thanh nền
             </CardTitle>
-            <CardDescription>
-              Chọn âm thanh nền cho cuộc gọi
-            </CardDescription>
+            <CardDescription>Chọn âm thanh nền cho cuộc gọi</CardDescription>
           </CardHeader>
           <CardContent>
-            <Select 
-              value={state.customization.backgroundSound} 
-              onValueChange={(value) => updateCustomization('backgroundSound', value)}
+            <Select
+              value={state.customization.backgroundSound}
+              onValueChange={value =>
+                updateCustomization('backgroundSound', value)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -816,7 +895,9 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
                   <SelectItem key={option.value} value={option.value}>
                     <div>
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-xs text-gray-500">{option.description}</div>
+                      <div className="text-xs text-gray-500">
+                        {option.description}
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
@@ -841,15 +922,17 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({ state, onNext, onBack, on
           </AlertDescription>
         </Alert>
       )}
-      
+
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Quay lại
         </Button>
-        <Button 
+        <Button
           onClick={handleGenerate}
-          disabled={state.customization.languages.length === 0 || state.isGenerating}
+          disabled={
+            state.customization.languages.length === 0 || state.isGenerating
+          }
           size="lg"
         >
           {state.isGenerating ? (
@@ -895,12 +978,15 @@ const SuccessStep: React.FC<StepProps> = ({ state, onUpdateState }) => {
         </div>
         <CardTitle className="text-2xl">AI Assistant đã sẵn sàng!</CardTitle>
         <CardDescription className="text-base">
-          Khách sạn của bạn đã được thiết lập thành công. AI Assistant hiện có thể phục vụ khách hàng 24/7.
+          Khách sạn của bạn đã được thiết lập thành công. AI Assistant hiện có
+          thể phục vụ khách hàng 24/7.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="bg-green-50 p-4 rounded-lg">
-          <h4 className="font-medium text-green-900 mb-2">Những gì đã được thiết lập:</h4>
+          <h4 className="font-medium text-green-900 mb-2">
+            Những gì đã được thiết lập:
+          </h4>
           <ul className="text-sm text-green-800 space-y-1">
             <li>✓ Thông tin khách sạn đã được lưu trữ</li>
             <li>✓ Knowledge base đã được tạo</li>
@@ -912,21 +998,38 @@ const SuccessStep: React.FC<StepProps> = ({ state, onUpdateState }) => {
 
         {state.assistantId && (
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Thông tin Assistant:</h4>
+            <h4 className="font-medium text-blue-900 mb-2">
+              Thông tin Assistant:
+            </h4>
             <div className="text-sm text-blue-800 space-y-1">
-              <div>ID: <code className="bg-blue-100 px-1 rounded">{state.assistantId}</code></div>
-              <div>Tính cách: <span className="capitalize">{state.customization.personality}</span></div>
+              <div>
+                ID:{' '}
+                <code className="bg-blue-100 px-1 rounded">
+                  {state.assistantId}
+                </code>
+              </div>
+              <div>
+                Tính cách:{' '}
+                <span className="capitalize">
+                  {state.customization.personality}
+                </span>
+              </div>
               <div>Ngôn ngữ: {state.customization.languages.join(', ')}</div>
             </div>
           </div>
         )}
-        
+
         <div className="text-center space-y-4">
           <p className="text-sm text-gray-600">
-            Bạn có thể bắt đầu sử dụng AI Assistant ngay bây giờ hoặc tùy chỉnh thêm trong cài đặt.
+            Bạn có thể bắt đầu sử dụng AI Assistant ngay bây giờ hoặc tùy chỉnh
+            thêm trong cài đặt.
           </p>
           <div className="flex gap-3">
-            <Button onClick={handleTestAssistant} variant="outline" className="flex-1">
+            <Button
+              onClick={handleTestAssistant}
+              variant="outline"
+              className="flex-1"
+            >
               <Phone className="w-4 h-4 mr-2" />
               Kiểm tra Assistant
             </Button>
@@ -952,7 +1055,7 @@ export const SetupWizard: React.FC = () => {
       personality: 'professional',
       tone: 'friendly',
       languages: ['vi'],
-      backgroundSound: 'hotel-lobby'
+      backgroundSound: 'hotel-lobby',
     },
     isLoading: false,
     error: null,
@@ -963,12 +1066,12 @@ export const SetupWizard: React.FC = () => {
     formData: {
       hotelName: '',
       location: '',
-      researchTier: 'basic'
+      researchTier: 'basic',
     },
     validation: {
       hotelName: null,
-      languages: null
-    }
+      languages: null,
+    },
   });
 
   const totalSteps = 4;
@@ -981,32 +1084,32 @@ export const SetupWizard: React.FC = () => {
   const handleNext = (data?: any) => {
     if (state.currentStep === 1 && data) {
       // Hotel research completed
-      updateState({ 
-        hotelData: data, 
+      updateState({
+        hotelData: data,
         currentStep: 2,
-        error: null 
+        error: null,
       });
     } else if (state.currentStep === 2) {
       // Hotel data reviewed
-      updateState({ 
+      updateState({
         currentStep: 3,
-        error: null 
+        error: null,
       });
     } else if (state.currentStep === 3 && data) {
       // Assistant generated
-      updateState({ 
-        assistantId: data, 
+      updateState({
+        assistantId: data,
         currentStep: 4,
-        error: null 
+        error: null,
       });
     }
   };
 
   const handleBack = () => {
     if (state.currentStep > 1) {
-      updateState({ 
+      updateState({
         currentStep: state.currentStep - 1,
-        error: null 
+        error: null,
       });
     }
   };
@@ -1016,9 +1119,9 @@ export const SetupWizard: React.FC = () => {
   };
 
   const handleRetry = () => {
-    updateState({ 
-      error: null, 
-      retryCount: state.retryCount + 1 
+    updateState({
+      error: null,
+      retryCount: state.retryCount + 1,
     });
   };
 
@@ -1027,7 +1130,7 @@ export const SetupWizard: React.FC = () => {
     onNext: handleNext,
     onBack: handleBack,
     onError: handleError,
-    onUpdateState: updateState
+    onUpdateState: updateState,
   };
 
   return (
@@ -1036,8 +1139,12 @@ export const SetupWizard: React.FC = () => {
         {/* Progress Bar */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-gray-600">Bước {state.currentStep} / {totalSteps}</span>
-            <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
+            <span className="text-sm text-gray-600">
+              Bước {state.currentStep} / {totalSteps}
+            </span>
+            <span className="text-sm text-gray-600">
+              {Math.round(progress)}%
+            </span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -1068,4 +1175,4 @@ export const SetupWizard: React.FC = () => {
   );
 };
 
-export default SetupWizard; 
+export default SetupWizard;

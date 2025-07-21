@@ -16,40 +16,44 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
   isListening,
   volumeLevel,
   colors,
-  size = 280
+  size = 280,
 }) => {
   const [pulsePhase, setPulsePhase] = useState(0);
-  const [ripples, setRipples] = useState<Array<{ id: number; scale: number; opacity: number }>>([]);
+  const [ripples, setRipples] = useState<
+    Array<{ id: number; scale: number; opacity: number }>
+  >([]);
 
   // Animation loop
   useEffect(() => {
     let animationId: number;
     let lastTime = 0;
-    
+
     const animate = (currentTime: number) => {
       const deltaTime = currentTime - lastTime;
-      
-      if (deltaTime >= 16) { // ~60fps
+
+      if (deltaTime >= 16) {
+        // ~60fps
         setPulsePhase(prev => prev + 0.05);
-        
+
         // Update ripples
-        setRipples(prev => prev
-          .map(ripple => ({
-            ...ripple,
-            scale: ripple.scale + 0.02,
-            opacity: ripple.opacity - 0.01
-          }))
-          .filter(ripple => ripple.opacity > 0)
+        setRipples(prev =>
+          prev
+            .map(ripple => ({
+              ...ripple,
+              scale: ripple.scale + 0.02,
+              opacity: ripple.opacity - 0.01,
+            }))
+            .filter(ripple => ripple.opacity > 0)
         );
-        
+
         lastTime = currentTime;
       }
-      
+
       animationId = requestAnimationFrame(animate);
     };
-    
+
     animationId = requestAnimationFrame(animate);
-    
+
     return () => {
       if (animationId) {
         cancelAnimationFrame(animationId);
@@ -61,13 +65,16 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
   useEffect(() => {
     if (isListening) {
       const interval = setInterval(() => {
-        setRipples(prev => [...prev, {
-          id: Date.now(),
-          scale: 1,
-          opacity: 0.4
-        }]);
+        setRipples(prev => [
+          ...prev,
+          {
+            id: Date.now(),
+            scale: 1,
+            opacity: 0.4,
+          },
+        ]);
       }, 300);
-      
+
       return () => clearInterval(interval);
     }
   }, [isListening]);
@@ -86,7 +93,7 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
         height: size,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}
     >
       {/* Ripples */}
@@ -101,11 +108,11 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
             border: `2px solid ${colors.primary}`,
             transform: `scale(${ripple.scale})`,
             opacity: ripple.opacity,
-            pointerEvents: 'none'
+            pointerEvents: 'none',
           }}
         />
       ))}
-      
+
       {/* Outer glow */}
       <div
         style={{
@@ -117,10 +124,10 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
           transform: `scale(${finalScale})`,
           opacity: isListening ? 0.8 : 0.4,
           transition: 'opacity 0.3s ease',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
         }}
       />
-      
+
       {/* Main circle */}
       <div
         style={{
@@ -135,7 +142,7 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
         }}
       >
         {/* Microphone Icon */}
@@ -145,13 +152,13 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
             fontSize: size * 0.25,
             textShadow: '0 0 20px rgba(255,255,255,0.8)',
             transform: `scale(${1 + volumeLevel * 0.2})`,
-            transition: 'transform 0.1s ease'
+            transition: 'transform 0.1s ease',
           }}
         >
           🎤
         </div>
       </div>
-      
+
       {/* Listening indicator */}
       {isListening && (
         <div
@@ -164,13 +171,13 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
             fontSize: 14,
             fontWeight: 'bold',
             textAlign: 'center',
-            animation: 'pulse 1.5s infinite'
+            animation: 'pulse 1.5s infinite',
           }}
         >
           Listening...
         </div>
       )}
-      
+
       {/* CSS Animations */}
       <style>
         {`
@@ -182,4 +189,4 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
       </style>
     </div>
   );
-}; 
+};

@@ -17,7 +17,7 @@ const TEST_SCENARIOS = {
     verbose: true,
     testTimeout: 120000,
     cleanupOnFailure: false,
-    description: 'Full production-like integration test with real APIs'
+    description: 'Full production-like integration test with real APIs',
   },
 
   // Development integration test with SQLite
@@ -28,7 +28,7 @@ const TEST_SCENARIOS = {
     verbose: true,
     testTimeout: 60000,
     cleanupOnFailure: true,
-    description: 'Development integration test with SQLite and real APIs'
+    description: 'Development integration test with SQLite and real APIs',
   },
 
   // Mock integration test (safe, no API calls)
@@ -39,7 +39,7 @@ const TEST_SCENARIOS = {
     verbose: true,
     testTimeout: 30000,
     cleanupOnFailure: true,
-    description: 'Mock integration test with fake data (safe, no API calls)'
+    description: 'Mock integration test with fake data (safe, no API calls)',
   },
 
   // Quick smoke test
@@ -50,7 +50,7 @@ const TEST_SCENARIOS = {
     verbose: false,
     testTimeout: 15000,
     cleanupOnFailure: true,
-    description: 'Quick smoke test for CI/CD'
+    description: 'Quick smoke test for CI/CD',
   },
 
   // Mi Nhon compatibility test only
@@ -61,8 +61,8 @@ const TEST_SCENARIOS = {
     verbose: true,
     testTimeout: 20000,
     cleanupOnFailure: true,
-    description: 'Mi Nhon Hotel compatibility test only'
-  }
+    description: 'Mi Nhon Hotel compatibility test only',
+  },
 };
 
 // ============================================
@@ -83,23 +83,33 @@ class IntegrationTestRunner {
     }
   }
 
-  async runScenario(scenarioName: keyof typeof TEST_SCENARIOS): Promise<boolean> {
+  async runScenario(
+    scenarioName: keyof typeof TEST_SCENARIOS
+  ): Promise<boolean> {
     console.log(`\n🧪 Running integration test scenario: ${scenarioName}`);
-    console.log(`📝 Description: ${TEST_SCENARIOS[scenarioName].description}\n`);
+    console.log(
+      `📝 Description: ${TEST_SCENARIOS[scenarioName].description}\n`
+    );
 
     const config = TEST_SCENARIOS[scenarioName];
     const testSuite = new IntegrationTestSuite(config);
 
     try {
       const results = await testSuite.runIntegrationTests();
-      
+
       // Save results to file
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const resultsFile = path.join(this.resultsDir, `${scenarioName}-${timestamp}.json`);
+      const resultsFile = path.join(
+        this.resultsDir,
+        `${scenarioName}-${timestamp}.json`
+      );
       fs.writeFileSync(resultsFile, JSON.stringify(results, null, 2));
 
       // Generate and save report
-      const reportFile = path.join(this.resultsDir, `${scenarioName}-${timestamp}.md`);
+      const reportFile = path.join(
+        this.resultsDir,
+        `${scenarioName}-${timestamp}.md`
+      );
       fs.writeFileSync(reportFile, testSuite.generateReport());
 
       console.log(`\n📊 Results saved to: ${resultsFile}`);
@@ -107,39 +117,61 @@ class IntegrationTestRunner {
 
       if (results.success) {
         console.log(`\n✅ Scenario '${scenarioName}' completed successfully!`);
-        console.log(`🎯 Success Rate: ${((results.testsPassed / results.testsRun) * 100).toFixed(1)}%`);
+        console.log(
+          `🎯 Success Rate: ${((results.testsPassed / results.testsRun) * 100).toFixed(1)}%`
+        );
         console.log(`⏱️ Duration: ${results.duration.toFixed(2)}ms`);
         console.log(`🧪 Test Suites: ${results.testSuites.length}`);
         console.log(`📋 Tests Run: ${results.testsRun}`);
-        
+
         // Print test suite summary
         console.log('\n📊 Test Suite Results:');
         results.testSuites.forEach(suite => {
           const status = suite.status === 'passed' ? '✅' : '❌';
-          console.log(`  ${status} ${suite.name} (${suite.duration.toFixed(2)}ms)`);
+          console.log(
+            `  ${status} ${suite.name} (${suite.duration.toFixed(2)}ms)`
+          );
         });
-        
+
         // Print key functionality status
         console.log('\n🔍 Key Functionality Status:');
-        console.log(`  Mi Nhon Compatibility: ${results.miNhonCompatibility.voiceAssistantWorking ? '✅' : '❌'}`);
-        console.log(`  New Tenant Creation: ${results.newTenantFunctionality.canCreateNewTenant ? '✅' : '❌'}`);
-        console.log(`  Data Isolation: ${results.dataIsolation.dataIsolationVerified ? '✅' : '❌'}`);
-        console.log(`  Dashboard APIs: ${results.dashboardApis.hotelResearchWorks ? '✅' : '❌'}`);
-        console.log(`  Voice Interface: ${results.voiceInterface.miNhonVoiceWorks ? '✅' : '❌'}`);
+        console.log(
+          `  Mi Nhon Compatibility: ${results.miNhonCompatibility.voiceAssistantWorking ? '✅' : '❌'}`
+        );
+        console.log(
+          `  New Tenant Creation: ${results.newTenantFunctionality.canCreateNewTenant ? '✅' : '❌'}`
+        );
+        console.log(
+          `  Data Isolation: ${results.dataIsolation.dataIsolationVerified ? '✅' : '❌'}`
+        );
+        console.log(
+          `  Dashboard APIs: ${results.dashboardApis.hotelResearchWorks ? '✅' : '❌'}`
+        );
+        console.log(
+          `  Voice Interface: ${results.voiceInterface.miNhonVoiceWorks ? '✅' : '❌'}`
+        );
       } else {
         console.log(`\n❌ Scenario '${scenarioName}' failed!`);
-        console.log(`🎯 Success Rate: ${((results.testsPassed / results.testsRun) * 100).toFixed(1)}%`);
+        console.log(
+          `🎯 Success Rate: ${((results.testsPassed / results.testsRun) * 100).toFixed(1)}%`
+        );
         console.log(`⏱️ Duration: ${results.duration.toFixed(2)}ms`);
-        console.log(`❌ Failed Tests: ${results.testsFailed}/${results.testsRun}`);
-        
+        console.log(
+          `❌ Failed Tests: ${results.testsFailed}/${results.testsRun}`
+        );
+
         // Show failed test suites
         console.log('\n❌ Failed Test Suites:');
-        results.testSuites.filter(suite => suite.status === 'failed').forEach(suite => {
-          console.log(`  ❌ ${suite.name}`);
-          suite.tests.filter(test => test.status === 'failed').forEach(test => {
-            console.log(`    ❌ ${test.name}: ${test.error}`);
+        results.testSuites
+          .filter(suite => suite.status === 'failed')
+          .forEach(suite => {
+            console.log(`  ❌ ${suite.name}`);
+            suite.tests
+              .filter(test => test.status === 'failed')
+              .forEach(test => {
+                console.log(`    ❌ ${test.name}: ${test.error}`);
+              });
           });
-        });
       }
 
       return results.success;
@@ -157,19 +189,21 @@ class IntegrationTestRunner {
       passed: 0,
       failed: 0,
       scenarios: {} as Record<string, boolean>,
-      startTime: Date.now()
+      startTime: Date.now(),
     };
 
     for (const [scenarioName, _] of Object.entries(TEST_SCENARIOS)) {
       results.total++;
-      const success = await this.runScenario(scenarioName as keyof typeof TEST_SCENARIOS);
-      
+      const success = await this.runScenario(
+        scenarioName as keyof typeof TEST_SCENARIOS
+      );
+
       if (success) {
         results.passed++;
       } else {
         results.failed++;
       }
-      
+
       results.scenarios[scenarioName] = success;
     }
 
@@ -182,16 +216,21 @@ class IntegrationTestRunner {
     console.log(`Total Scenarios: ${results.total}`);
     console.log(`Passed: ${results.passed} ✅`);
     console.log(`Failed: ${results.failed} ❌`);
-    console.log(`Success Rate: ${(results.passed / results.total * 100).toFixed(1)}%`);
+    console.log(
+      `Success Rate: ${((results.passed / results.total) * 100).toFixed(1)}%`
+    );
     console.log(`Total Duration: ${(duration / 1000).toFixed(2)}s`);
-    
+
     console.log('\nScenario Results:');
     for (const [scenario, success] of Object.entries(results.scenarios)) {
       console.log(`  ${scenario.padEnd(15)}: ${success ? '✅' : '❌'}`);
     }
 
     // Save summary
-    const summaryFile = path.join(this.resultsDir, `summary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+    const summaryFile = path.join(
+      this.resultsDir,
+      `summary-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
+    );
     fs.writeFileSync(summaryFile, JSON.stringify(results, null, 2));
     console.log(`\n📄 Summary saved to: ${summaryFile}`);
 
@@ -202,40 +241,52 @@ class IntegrationTestRunner {
 
     // Exit with error code if any tests failed
     if (results.failed > 0) {
-      console.log('\n❌ Some integration tests failed. Please review the results before proceeding.');
+      console.log(
+        '\n❌ Some integration tests failed. Please review the results before proceeding.'
+      );
       process.exit(1);
     } else {
-      console.log('\n✅ All integration tests passed! The system is ready for deployment.');
+      console.log(
+        '\n✅ All integration tests passed! The system is ready for deployment.'
+      );
       process.exit(0);
     }
   }
 
   async runCompatibilityTest(): Promise<void> {
     console.log('🏨 MI NHON HOTEL COMPATIBILITY TEST\n');
-    
+
     // Run compatibility-focused test
     console.log('🔍 Running Mi Nhon Hotel compatibility test...');
     const compatibilitySuccess = await this.runScenario('compatibility');
 
     if (!compatibilitySuccess) {
-      console.log('❌ Mi Nhon Hotel compatibility test failed! Migration may have broken existing functionality.');
+      console.log(
+        '❌ Mi Nhon Hotel compatibility test failed! Migration may have broken existing functionality.'
+      );
       process.exit(1);
     }
 
     console.log('\n✅ MI NHON HOTEL COMPATIBILITY TEST PASSED!');
-    console.log('🎉 Mi Nhon Hotel functionality remains unchanged after migration.');
+    console.log(
+      '🎉 Mi Nhon Hotel functionality remains unchanged after migration.'
+    );
   }
 
   async runPreDeploymentTest(): Promise<void> {
     console.log('🚨 PRE-DEPLOYMENT INTEGRATION TEST\n');
-    
+
     // Run critical tests in order
     const criticalTests = ['mock', 'compatibility', 'production'];
-    
+
     for (const testName of criticalTests) {
-      console.log(`${criticalTests.indexOf(testName) + 1}️⃣ Running ${testName} test...`);
-      const success = await this.runScenario(testName as keyof typeof TEST_SCENARIOS);
-      
+      console.log(
+        `${criticalTests.indexOf(testName) + 1}️⃣ Running ${testName} test...`
+      );
+      const success = await this.runScenario(
+        testName as keyof typeof TEST_SCENARIOS
+      );
+
       if (!success) {
         console.log(`❌ ${testName} test failed! DO NOT DEPLOY.`);
         process.exit(1);
@@ -244,7 +295,7 @@ class IntegrationTestRunner {
 
     console.log('\n✅ PRE-DEPLOYMENT TEST PASSED!');
     console.log('🚀 System is ready for production deployment.');
-    
+
     // Generate deployment checklist
     this.generateDeploymentChecklist();
   }
@@ -253,13 +304,43 @@ class IntegrationTestRunner {
     console.log('🔍 Validating integration test environment...\n');
 
     const checks = [
-      { name: 'Database URL', check: () => !!process.env.DATABASE_URL, required: false },
-      { name: 'Server Running', check: () => this.checkServerHealth(), required: true },
-      { name: 'Google Places API Key', check: () => !!process.env.GOOGLE_PLACES_API_KEY, required: false },
-      { name: 'Vapi API Key', check: () => !!process.env.VAPI_API_KEY, required: false },
-      { name: 'OpenAI API Key', check: () => !!process.env.VITE_OPENAI_API_KEY, required: false },
-      { name: 'Test Directory', check: () => fs.existsSync(this.resultsDir), required: true },
-      { name: 'Node.js Version', check: () => process.version.startsWith('v18') || process.version.startsWith('v20'), required: true }
+      {
+        name: 'Database URL',
+        check: () => !!process.env.DATABASE_URL,
+        required: false,
+      },
+      {
+        name: 'Server Running',
+        check: () => this.checkServerHealth(),
+        required: true,
+      },
+      {
+        name: 'Google Places API Key',
+        check: () => !!process.env.GOOGLE_PLACES_API_KEY,
+        required: false,
+      },
+      {
+        name: 'Vapi API Key',
+        check: () => !!process.env.VAPI_API_KEY,
+        required: false,
+      },
+      {
+        name: 'OpenAI API Key',
+        check: () => !!process.env.VITE_OPENAI_API_KEY,
+        required: false,
+      },
+      {
+        name: 'Test Directory',
+        check: () => fs.existsSync(this.resultsDir),
+        required: true,
+      },
+      {
+        name: 'Node.js Version',
+        check: () =>
+          process.version.startsWith('v18') ||
+          process.version.startsWith('v20'),
+        required: true,
+      },
     ];
 
     let allPassed = true;
@@ -272,10 +353,10 @@ class IntegrationTestRunner {
       } catch (error) {
         passed = false;
       }
-      
-      const status = passed ? '✅' : (check.required ? '❌' : '⚠️');
+
+      const status = passed ? '✅' : check.required ? '❌' : '⚠️';
       console.log(`${status} ${check.name}: ${passed ? 'OK' : 'MISSING'}`);
-      
+
       if (!passed) {
         allPassed = false;
         if (check.required) {
@@ -287,11 +368,15 @@ class IntegrationTestRunner {
     console.log('\n' + '='.repeat(50));
     if (criticalFailed) {
       console.log('❌ ENVIRONMENT VALIDATION FAILED');
-      console.log('Critical requirements are missing. Cannot proceed with integration tests.');
+      console.log(
+        'Critical requirements are missing. Cannot proceed with integration tests.'
+      );
       return false;
     } else if (!allPassed) {
       console.log('⚠️ ENVIRONMENT VALIDATION PARTIAL');
-      console.log('Some optional components are missing. Some tests may be skipped.');
+      console.log(
+        'Some optional components are missing. Some tests may be skipped.'
+      );
       return true;
     } else {
       console.log('✅ ENVIRONMENT VALIDATION PASSED');
@@ -303,7 +388,7 @@ class IntegrationTestRunner {
   private async checkServerHealth(): Promise<boolean> {
     try {
       const response = await fetch('http://localhost:3000/api/db-test', {
-        timeout: 5000
+        timeout: 5000,
       });
       return response.ok;
     } catch (error) {
@@ -317,15 +402,19 @@ class IntegrationTestRunner {
 ===========================
 
 Available Test Scenarios:
-${Object.entries(TEST_SCENARIOS).map(([name, config]) => 
-  `
+${Object.entries(TEST_SCENARIOS)
+  .map(
+    ([name, config]) =>
+      `
 📋 ${name.toUpperCase()}
    Description: ${config.description}
    Mock Data: ${config.useMockData ? 'Yes' : 'No'}
    Database: ${config.databaseUrl ? 'PostgreSQL' : 'SQLite'}
    Timeout: ${config.testTimeout}ms
    Cleanup: ${config.cleanupOnFailure ? 'Yes' : 'No'}
-`).join('')}
+`
+  )
+  .join('')}
 
 Test Coverage:
 ✅ Mi Nhon Hotel Compatibility
@@ -371,8 +460,11 @@ Usage Examples:
   }
 
   private generateDeploymentChecklist(): void {
-    const checklistFile = path.join(this.resultsDir, `deployment-checklist-${new Date().toISOString().replace(/[:.]/g, '-')}.md`);
-    
+    const checklistFile = path.join(
+      this.resultsDir,
+      `deployment-checklist-${new Date().toISOString().replace(/[:.]/g, '-')}.md`
+    );
+
     const checklist = `
 # 🚀 Deployment Checklist - Multi-Tenant Migration
 
@@ -497,7 +589,10 @@ async function main() {
   switch (command) {
     case 'scenario':
       if (!scenario || !(scenario in TEST_SCENARIOS)) {
-        console.error('❌ Invalid scenario. Available scenarios:', Object.keys(TEST_SCENARIOS).join(', '));
+        console.error(
+          '❌ Invalid scenario. Available scenarios:',
+          Object.keys(TEST_SCENARIOS).join(', ')
+        );
         process.exit(1);
       }
       await runner.runScenario(scenario);
@@ -539,9 +634,9 @@ Commands:
   validate            Validate test environment
 
 Available scenarios:
-${Object.entries(TEST_SCENARIOS).map(([name, config]) => 
-  `  ${name.padEnd(15)} - ${config.description}`
-).join('\n')}
+${Object.entries(TEST_SCENARIOS)
+  .map(([name, config]) => `  ${name.padEnd(15)} - ${config.description}`)
+  .join('\n')}
 
 Examples:
   npm run test:integration scenario mock
@@ -567,4 +662,4 @@ main().catch(error => {
   process.exit(1);
 });
 
-export { IntegrationTestRunner, TEST_SCENARIOS }; 
+export { IntegrationTestRunner, TEST_SCENARIOS };

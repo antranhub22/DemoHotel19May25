@@ -1,11 +1,16 @@
-import { BasicHotelData, AdvancedHotelData, HotelService, RoomType, LocalAttraction } from './hotelResearch';
+import {
+  BasicHotelData,
+  AdvancedHotelData,
+  HotelService,
+  RoomType,
+  LocalAttraction,
+} from './hotelResearch';
 
 // ============================================
 // Knowledge Base Generator Service
 // ============================================
 
 export class KnowledgeBaseGenerator {
-  
   /**
    * Generate comprehensive knowledge base from hotel research data
    */
@@ -17,7 +22,7 @@ export class KnowledgeBaseGenerator {
       this.generateAmenitiesSection(hotelData.amenities),
       this.generatePoliciesSection(hotelData.policies),
       this.generateLocalAttractionsSection(hotelData.localAttractions),
-      this.generateContactSection(hotelData)
+      this.generateContactSection(hotelData),
     ];
 
     // Add advanced sections if available
@@ -32,7 +37,10 @@ export class KnowledgeBaseGenerator {
   /**
    * Generate system prompt for Vapi assistant
    */
-  generateSystemPrompt(hotelData: BasicHotelData | AdvancedHotelData, customization?: SystemPromptCustomization): string {
+  generateSystemPrompt(
+    hotelData: BasicHotelData | AdvancedHotelData,
+    customization?: SystemPromptCustomization
+  ): string {
     const personality = customization?.personality || 'professional';
     const tone = customization?.tone || 'friendly';
     const languages = customization?.languages || ['English'];
@@ -50,7 +58,7 @@ CORE RESPONSIBILITIES:
 - Ensure excellent guest satisfaction`;
 
     const knowledgeBase = this.generateKnowledgeBase(hotelData);
-    
+
     const instructionsPrompt = `
 IMPORTANT INSTRUCTIONS:
 - Always use the hotel information provided below to answer questions accurately
@@ -73,39 +81,44 @@ ${this.generateFunctionDescriptions(hotelData.services)}`;
   /**
    * Generate FAQ section from hotel data
    */
-  generateFAQSection(hotelData: BasicHotelData | AdvancedHotelData): Array<{question: string; answer: string}> {
-    const faqs: Array<{question: string; answer: string}> = [
+  generateFAQSection(
+    hotelData: BasicHotelData | AdvancedHotelData
+  ): Array<{ question: string; answer: string }> {
+    const faqs: Array<{ question: string; answer: string }> = [
       {
-        question: "What time is check-in and check-out?",
-        answer: `Check-in is at ${hotelData.policies.checkIn} and check-out is at ${hotelData.policies.checkOut}.`
+        question: 'What time is check-in and check-out?',
+        answer: `Check-in is at ${hotelData.policies.checkIn} and check-out is at ${hotelData.policies.checkOut}.`,
       },
       {
-        question: "What amenities are available?",
-        answer: `We offer the following amenities: ${hotelData.amenities.join(', ')}.`
+        question: 'What amenities are available?',
+        answer: `We offer the following amenities: ${hotelData.amenities.join(', ')}.`,
       },
       {
-        question: "What services do you provide?",
-        answer: `Our available services include: ${hotelData.services.map(s => s.name).join(', ')}.`
+        question: 'What services do you provide?',
+        answer: `Our available services include: ${hotelData.services.map(s => s.name).join(', ')}.`,
       },
       {
-        question: "How can I contact the hotel?",
-        answer: `You can reach us at ${hotelData.phone || 'the front desk'} or visit us at ${hotelData.address}.`
-      }
+        question: 'How can I contact the hotel?',
+        answer: `You can reach us at ${hotelData.phone || 'the front desk'} or visit us at ${hotelData.address}.`,
+      },
     ];
 
     // Add room-specific FAQs
     if (hotelData.roomTypes.length > 0) {
       faqs.push({
-        question: "What room types are available?",
-        answer: `We offer ${hotelData.roomTypes.map(r => r.name).join(', ')}. Each room type has different amenities and pricing.`
+        question: 'What room types are available?',
+        answer: `We offer ${hotelData.roomTypes.map(r => r.name).join(', ')}. Each room type has different amenities and pricing.`,
       });
     }
 
     // Add location-specific FAQs
     if (hotelData.localAttractions.length > 0) {
       faqs.push({
-        question: "What attractions are nearby?",
-        answer: `Popular nearby attractions include: ${hotelData.localAttractions.slice(0, 5).map(a => a.name).join(', ')}.`
+        question: 'What attractions are nearby?',
+        answer: `Popular nearby attractions include: ${hotelData.localAttractions
+          .slice(0, 5)
+          .map(a => a.name)
+          .join(', ')}.`,
       });
     }
 
@@ -115,14 +128,16 @@ ${this.generateFunctionDescriptions(hotelData.services)}`;
   /**
    * Generate service menu from hotel data
    */
-  generateServiceMenu(hotelData: BasicHotelData | AdvancedHotelData): ServiceMenu {
+  generateServiceMenu(
+    hotelData: BasicHotelData | AdvancedHotelData
+  ): ServiceMenu {
     const menu: ServiceMenu = {
       roomService: this.generateRoomServiceMenu(hotelData.services),
       housekeeping: this.generateHousekeepingMenu(hotelData.services),
       concierge: this.generateConciergeMenu(hotelData.services),
       transportation: this.generateTransportationMenu(hotelData.services),
       spa: this.generateSpaMenu(hotelData.services),
-      tours: this.generateToursMenu(hotelData.localAttractions)
+      tours: this.generateToursMenu(hotelData.localAttractions),
     };
 
     return menu;
@@ -191,20 +206,24 @@ Check-out: ${policies.checkOut}
 Cancellation: ${policies.cancellation}`;
   }
 
-  private generateLocalAttractionsSection(attractions: LocalAttraction[]): string {
+  private generateLocalAttractionsSection(
+    attractions: LocalAttraction[]
+  ): string {
     if (attractions.length === 0) return '';
 
     const attractionsByCategory = this.groupAttractionsByCategory(attractions);
     let section = 'LOCAL ATTRACTIONS:\n';
 
-    Object.entries(attractionsByCategory).forEach(([category, categoryAttractions]) => {
-      section += `\n${category.toUpperCase()}:\n`;
-      categoryAttractions.forEach(attraction => {
-        section += `- ${attraction.name} (${attraction.distance}): ${attraction.description}`;
-        if (attraction.rating) section += ` - Rating: ${attraction.rating}/5`;
-        section += '\n';
-      });
-    });
+    Object.entries(attractionsByCategory).forEach(
+      ([category, categoryAttractions]) => {
+        section += `\n${category.toUpperCase()}:\n`;
+        categoryAttractions.forEach(attraction => {
+          section += `- ${attraction.name} (${attraction.distance}): ${attraction.description}`;
+          if (attraction.rating) section += ` - Rating: ${attraction.rating}/5`;
+          section += '\n';
+        });
+      }
+    );
 
     return section;
   }
@@ -236,11 +255,12 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
 
   private generateFunctionDescriptions(services: HotelService[]): string {
     const availableServices = services.filter(s => s.available);
-    if (availableServices.length === 0) return 'Standard hotel information services';
+    if (availableServices.length === 0)
+      return 'Standard hotel information services';
 
-    return availableServices.map(service => 
-      `- ${service.name}: ${service.description}`
-    ).join('\n');
+    return availableServices
+      .map(service => `- ${service.name}: ${service.description}`)
+      .join('\n');
   }
 
   // ============================================
@@ -253,17 +273,21 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
       name: service.name,
       description: service.description,
       price: service.price || 'Contact for pricing',
-      available: service.available
+      available: service.available,
     }));
   }
 
-  private generateHousekeepingMenu(services: HotelService[]): ServiceMenuItem[] {
-    const housekeepingServices = services.filter(s => s.type === 'housekeeping');
+  private generateHousekeepingMenu(
+    services: HotelService[]
+  ): ServiceMenuItem[] {
+    const housekeepingServices = services.filter(
+      s => s.type === 'housekeeping'
+    );
     return housekeepingServices.map(service => ({
       name: service.name,
       description: service.description,
       price: service.price || 'Complimentary',
-      available: service.available
+      available: service.available,
     }));
   }
 
@@ -273,17 +297,19 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
       name: service.name,
       description: service.description,
       price: service.price || 'Complimentary',
-      available: service.available
+      available: service.available,
     }));
   }
 
-  private generateTransportationMenu(services: HotelService[]): ServiceMenuItem[] {
+  private generateTransportationMenu(
+    services: HotelService[]
+  ): ServiceMenuItem[] {
     const transportServices = services.filter(s => s.type === 'transportation');
     return transportServices.map(service => ({
       name: service.name,
       description: service.description,
       price: service.price || 'Contact for pricing',
-      available: service.available
+      available: service.available,
     }));
   }
 
@@ -293,7 +319,7 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
       name: service.name,
       description: service.description,
       price: service.price || 'Contact for pricing',
-      available: service.available
+      available: service.available,
     }));
   }
 
@@ -302,7 +328,7 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
       name: `Tour to ${attraction.name}`,
       description: `${attraction.description} - ${attraction.distance} away`,
       price: 'Contact for pricing',
-      available: true
+      available: true,
     }));
   }
 
@@ -316,20 +342,28 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
 
   private getHotelCategory(hotelData: BasicHotelData): string {
     if (hotelData.priceLevel === undefined) return 'hotel';
-    
+
     switch (hotelData.priceLevel) {
-      case 0: return 'budget hotel';
-      case 1: return 'budget hotel';
-      case 2: return 'mid-range hotel';
-      case 3: return 'upscale hotel';
-      case 4: return 'luxury hotel';
-      default: return 'hotel';
+      case 0:
+        return 'budget hotel';
+      case 1:
+        return 'budget hotel';
+      case 2:
+        return 'mid-range hotel';
+      case 3:
+        return 'upscale hotel';
+      case 4:
+        return 'luxury hotel';
+      default:
+        return 'hotel';
     }
   }
 
-  private groupServicesByType(services: HotelService[]): Record<string, HotelService[]> {
+  private groupServicesByType(
+    services: HotelService[]
+  ): Record<string, HotelService[]> {
     const grouped: Record<string, HotelService[]> = {};
-    
+
     services.forEach(service => {
       if (!grouped[service.type]) {
         grouped[service.type] = [];
@@ -340,9 +374,11 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
     return grouped;
   }
 
-  private groupAttractionsByCategory(attractions: LocalAttraction[]): Record<string, LocalAttraction[]> {
+  private groupAttractionsByCategory(
+    attractions: LocalAttraction[]
+  ): Record<string, LocalAttraction[]> {
     const grouped: Record<string, LocalAttraction[]> = {};
-    
+
     attractions.forEach(attraction => {
       if (!grouped[attraction.category]) {
         grouped[attraction.category] = [];
@@ -379,4 +415,4 @@ export interface ServiceMenuItem {
   description: string;
   price: string;
   available: boolean;
-} 
+}

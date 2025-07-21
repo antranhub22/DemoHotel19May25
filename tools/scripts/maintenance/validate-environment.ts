@@ -53,24 +53,28 @@ async function main() {
   }
 
   console.log('\n📊 VALIDATION RESULTS:');
-  console.log(`✅ Basic variables present: ${presentBasic.length}/${REQUIRED_VARS.length}`);
-  console.log(`🌟 SaaS variables present: ${presentSaaS.length}/${SAAS_REQUIRED_VARS.length}`);
+  console.log(
+    `✅ Basic variables present: ${presentBasic.length}/${REQUIRED_VARS.length}`
+  );
+  console.log(
+    `🌟 SaaS variables present: ${presentSaaS.length}/${SAAS_REQUIRED_VARS.length}`
+  );
 
   if (missingBasic.length > 0) {
     console.log('\n❌ MISSING REQUIRED VARIABLES:');
     missingBasic.forEach(varName => {
       console.log(`   - ${varName}`);
     });
-    
+
     console.log('\n📝 TO FIX THIS:');
     console.log('1. Go to Render Dashboard → Your Service → Environment');
     console.log('2. Add the missing variables above');
     console.log('3. Redeploy your service');
-    
+
     console.log('\n🔐 Generate JWT Secret:');
     const crypto = await import('crypto');
     console.log('JWT_SECRET=' + crypto.randomBytes(64).toString('hex'));
-    
+
     process.exit(1);
   }
 
@@ -79,11 +83,13 @@ async function main() {
     missingSaaS.forEach(varName => {
       console.log(`   - ${varName}`);
     });
-    console.log('These are optional for basic functionality but required for advanced features.');
+    console.log(
+      'These are optional for basic functionality but required for advanced features.'
+    );
   }
 
   console.log('\n🎉 ALL REQUIRED ENVIRONMENT VARIABLES ARE PRESENT!');
   console.log('🚀 Ready for deployment!\n');
 }
 
-main().catch(console.error); 
+main().catch(console.error);

@@ -3,7 +3,6 @@ import { SiriButton } from './SiriButton';
 import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 
-
 import '../../styles/voice-interface.css';
 import { Language } from '@/types/interface1.types';
 
@@ -22,23 +21,32 @@ interface SiriCallButtonProps {
   };
 }
 
-const SiriCallButton: React.FC<SiriCallButtonProps> = ({ 
-  isListening, 
+const SiriCallButton: React.FC<SiriCallButtonProps> = ({
+  isListening,
   volumeLevel,
   containerId,
   onCallStart,
   onCallEnd,
   language = 'en',
-  colors
+  colors,
 }) => {
   // Component render debug - Development only
   if (process.env.NODE_ENV === 'development') {
-    console.log('[SiriCallButton] Component render - Container:', containerId, 'onCallStart:', !!onCallStart, 'Mobile:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    console.log(
+      '[SiriCallButton] Component render - Container:',
+      containerId,
+      'onCallStart:',
+      !!onCallStart,
+      'Mobile:',
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    );
   }
 
-  // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control  
+  // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control
   const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
-  
+
   // Debug utility methods - Environment aware
   const debug = (message: string, ...args: any[]) => {
     if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 2) {
@@ -59,9 +67,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   const buttonRef = useRef<SiriButton | null>(null);
   const cleanupFlagRef = useRef<boolean>(false);
-  const [status, setStatus] = useState<'idle' | 'listening' | 'processing' | 'speaking'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'listening' | 'processing' | 'speaking'
+  >('idle');
   const [canvasReady, setCanvasReady] = useState(false);
-  
+
   // 🚨 PHASE 1: EMERGENCY GUARDS - Prevent double firing and infinite loops
   const isHandlingClick = useRef<boolean>(false);
   const initAttemptCount = useRef<number>(0);
@@ -74,7 +84,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const safeCleanup = useCallback(() => {
     if (cleanupFlagRef.current) return;
     cleanupFlagRef.current = true;
-    
+
     try {
       if (buttonRef.current) {
         try {
@@ -98,7 +108,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           debugError('Failed to remove canvases:', error);
         }
       }
-      
+
       setCanvasReady(false);
     } catch (error) {
       debugError('Safe cleanup failed:', error);
@@ -109,7 +119,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const emergencyStop = useCallback(() => {
     debugWarn('🚨 EMERGENCY STOP TRIGGERED');
     emergencyStopRequested.current = true;
-    
+
     try {
       // Stop SiriButton if exists
       if (buttonRef.current) {
@@ -121,10 +131,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           debugError('Failed to emergency stop SiriButton:', error);
         }
       }
-      
+
       // Force cleanup
       safeCleanup();
-      
+
       debugWarn('🚨 EMERGENCY STOP COMPLETED');
     } catch (error) {
       debugError('Emergency stop failed:', error);
@@ -132,70 +142,82 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   }, [safeCleanup]);
 
   // ✅ CENTRALIZED interaction handlers
-  const handleInteractionStart = useCallback((e: Event, position?: { x: number; y: number }) => {
-    if (buttonRef.current) {
-      buttonRef.current.setInteractionMode('active');
-      if (position) {
-        buttonRef.current.setTouchPosition(position.x, position.y);
-      }
-    }
-    debug('🎯 [SiriCallButton] Interaction start:', { position });
-  }, []);
-
-  const handleInteractionEnd = useCallback(async (e: Event) => {
-    debug('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
-    debug('  🎯 Event type:', e.type);
-    debug('  🎯 Event target:', e.target);
-    
-    if (buttonRef.current) {
-      buttonRef.current.setInteractionMode('idle');
-      debug('  ✅ Visual state set to idle');
-    }
-    
-    // Business logic - prevent double-firing
-    if (isHandlingClick.current) {
-      debug('🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...');
-      return;
-    }
-    
-    isHandlingClick.current = true;
-    debug('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
-    debug('  🎧 isListening:', isListening);
-    debug('  ✅ onCallStart available:', !!onCallStart);
-    debug('  ✅ onCallEnd available:', !!onCallEnd);
-    
-    try {
-      if (!isListening && onCallStart) {
-        setStatus('listening');
-        debug('🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...');
-        try {
-          await onCallStart();
-          debug('🎤 [SiriCallButton] ✅ onCallStart() completed successfully');
-        } catch (error) {
-          debugError('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
-          setStatus('idle');
+  const handleInteractionStart = useCallback(
+    (e: Event, position?: { x: number; y: number }) => {
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('active');
+        if (position) {
+          buttonRef.current.setTouchPosition(position.x, position.y);
         }
-      } else if (isListening && onCallEnd) {
-        setStatus('processing');
-        debug('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
-        onCallEnd();
-        debug('🛑 [SiriCallButton] ✅ onCallEnd() completed');
-        setTimeout(() => setStatus('idle'), 500);
-      } else {
-        debug('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
-        debug('  🎧 isListening:', isListening);
-        debug('  🎤 onCallStart available:', !!onCallStart);
-        debug('  🛑 onCallEnd available:', !!onCallEnd);
       }
-    } finally {
-      setTimeout(() => {
-        isHandlingClick.current = false;
-        debug('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
-      }, 100);
-    }
-    
-    debug('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
-  }, [isListening, onCallStart, onCallEnd]);
+      debug('🎯 [SiriCallButton] Interaction start:', { position });
+    },
+    []
+  );
+
+  const handleInteractionEnd = useCallback(
+    async (e: Event) => {
+      debug('🔔 [SiriCallButton] 🎯 INTERACTION END STARTED');
+      debug('  🎯 Event type:', e.type);
+      debug('  🎯 Event target:', e.target);
+
+      if (buttonRef.current) {
+        buttonRef.current.setInteractionMode('idle');
+        debug('  ✅ Visual state set to idle');
+      }
+
+      // Business logic - prevent double-firing
+      if (isHandlingClick.current) {
+        debug(
+          '🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...'
+        );
+        return;
+      }
+
+      isHandlingClick.current = true;
+      debug('🔔 [SiriCallButton] 🚀 BUSINESS LOGIC STARTING');
+      debug('  🎧 isListening:', isListening);
+      debug('  ✅ onCallStart available:', !!onCallStart);
+      debug('  ✅ onCallEnd available:', !!onCallEnd);
+
+      try {
+        if (!isListening && onCallStart) {
+          setStatus('listening');
+          debug(
+            '🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...'
+          );
+          try {
+            await onCallStart();
+            debug(
+              '🎤 [SiriCallButton] ✅ onCallStart() completed successfully'
+            );
+          } catch (error) {
+            debugError('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
+            setStatus('idle');
+          }
+        } else if (isListening && onCallEnd) {
+          setStatus('processing');
+          debug('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
+          onCallEnd();
+          debug('🛑 [SiriCallButton] ✅ onCallEnd() completed');
+          setTimeout(() => setStatus('idle'), 500);
+        } else {
+          debug('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
+          debug('  🎧 isListening:', isListening);
+          debug('  🎤 onCallStart available:', !!onCallStart);
+          debug('  🛑 onCallEnd available:', !!onCallEnd);
+        }
+      } finally {
+        setTimeout(() => {
+          isHandlingClick.current = false;
+          debug('🔔 [SiriCallButton] 🔓 isHandlingClick reset to false');
+        }, 100);
+      }
+
+      debug('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
+    },
+    [isListening, onCallStart, onCallEnd]
+  );
 
   const handleHover = useCallback((isHovered: boolean) => {
     if (buttonRef.current) {
@@ -206,15 +228,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // 🚨 PHASE 1: SAFE INITIALIZATION - Initialize SiriButton with emergency guards
   useEffect(() => {
     const isMobile = isMobileDevice();
-    
+
     // Skip SiriButton creation on mobile - using visual-only mode
     if (isMobile) {
-      debug('[SiriCallButton] Bypassing SiriButton creation - using mobile visual only');
+      debug(
+        '[SiriCallButton] Bypassing SiriButton creation - using mobile visual only'
+      );
       setCanvasReady(true); // Set ready immediately for mobile visual
       return () => {
         // 🛡️ SAFETY: Reset protection flags for mobile
         isHandlingClick.current = false;
-        debug('🛡️ [SiriCallButton] Mobile cleanup - isHandlingClick reset to false');
+        debug(
+          '🛡️ [SiriCallButton] Mobile cleanup - isHandlingClick reset to false'
+        );
       };
     }
 
@@ -233,11 +259,11 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     }
 
     cleanupFlagRef.current = false;
-    
+
     // 🚨 FIX: Reset emergency stop flag on re-initialization
     emergencyStopRequested.current = false;
     debug('🔄 [SiriCallButton] Emergency stop flag reset on re-initialization');
-    
+
     const element = document.getElementById(containerId);
     if (!element) {
       debugWarn('Container element not found:', containerId);
@@ -256,18 +282,21 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     try {
       buttonRef.current = new SiriButton(containerId, colors);
       setCanvasReady(true);
-      
-      // 🔧 FIX 4: Single resize trigger for better mobile performance  
+
+      // 🔧 FIX 4: Single resize trigger for better mobile performance
       setTimeout(() => {
-        if (buttonRef.current && !cleanupFlagRef.current && !emergencyStopRequested.current) {
+        if (
+          buttonRef.current &&
+          !cleanupFlagRef.current &&
+          !emergencyStopRequested.current
+        ) {
           debug('🔧 [SiriCallButton] Single resize for mobile compatibility');
           window.dispatchEvent(new Event('resize'));
         }
       }, 200);
-      
     } catch (error) {
       debugError('Init error:', error);
-      
+
       // 🚨 PHASE 1: SAFE RETRY - Limited retry with emergency guards
       if (initAttemptCount.current < maxInitAttempts) {
         setTimeout(() => {
@@ -275,7 +304,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             try {
               buttonRef.current = new SiriButton(containerId, colors);
               setCanvasReady(true);
-              debug('🔧 [SiriCallButton] Retry successful - no additional resize needed');
+              debug(
+                '🔧 [SiriCallButton] Retry successful - no additional resize needed'
+              );
             } catch (retryError) {
               debugError('Retry failed:', retryError);
               if (initAttemptCount.current >= maxInitAttempts) {
@@ -292,15 +323,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
     // ✅ DEVICE-SPECIFIC event setup with centralized handlers
     const isMobileDevice_local = isMobileDevice();
-    
+
     logDeviceInfo('SiriCallButton');
-    console.log('📱 [SiriCallButton] Device detection - isMobile:', isMobileDevice_local);
+    console.log(
+      '📱 [SiriCallButton] Device detection - isMobile:',
+      isMobileDevice_local
+    );
 
     // Mobile devices use JSX direct event handlers (handleDirectTouch)
     // Desktop gets mouse events for hover effects
     if (isMobileDevice_local) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[SiriCallButton] Mobile device detected - using direct JSX handlers');
+        console.log(
+          '[SiriCallButton] Mobile device detected - using direct JSX handlers'
+        );
       }
       return () => {
         safeCleanup();
@@ -311,33 +347,50 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         handleHover(true);
         console.log('🖱️ [SiriCallButton] 🟢 DESKTOP Mouse enter');
       };
-      
+
       const handleMouseLeave = () => {
         handleHover(false);
         console.log('🖱️ [SiriCallButton] 🔴 DESKTOP Mouse leave');
       };
-      
+
       const handleMouseDown = (e: MouseEvent) => {
-        console.log('🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:', e.target);
+        console.log(
+          '🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:',
+          e.target
+        );
         console.log('🖱️ [SiriCallButton] 🔽 Element ID:', element.id);
-        console.log('🖱️ [SiriCallButton] 🔽 isHandlingClick before:', isHandlingClick.current);
-        
+        console.log(
+          '🖱️ [SiriCallButton] 🔽 isHandlingClick before:',
+          isHandlingClick.current
+        );
+
         const rect = element.getBoundingClientRect();
         handleInteractionStart(e, {
           x: e.clientX - rect.left,
-          y: e.clientY - rect.top
+          y: e.clientY - rect.top,
         });
         console.log('🖱️ [SiriCallButton] 🔽 Mouse down completed');
       };
-      
+
       const handleMouseUp = (e: MouseEvent) => {
-        console.log('🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:', e.target);
-        console.log('🖱️ [SiriCallButton] 🔼 onCallStart available:', !!onCallStart);
+        console.log(
+          '🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:',
+          e.target
+        );
+        console.log(
+          '🖱️ [SiriCallButton] 🔼 onCallStart available:',
+          !!onCallStart
+        );
         console.log('🖱️ [SiriCallButton] 🔼 isListening state:', isListening);
-        console.log('🖱️ [SiriCallButton] 🔼 isHandlingClick before:', isHandlingClick.current);
-        
+        console.log(
+          '🖱️ [SiriCallButton] 🔼 isHandlingClick before:',
+          isHandlingClick.current
+        );
+
         handleInteractionEnd(e);
-        console.log('🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed');
+        console.log(
+          '🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed'
+        );
       };
 
       // Enhanced debug for element setup
@@ -346,7 +399,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       console.log('  📦 Element tagName:', element.tagName);
       console.log('  🎛️ onCallStart available:', !!onCallStart);
       console.log('  🎛️ onCallEnd available:', !!onCallEnd);
-      console.log('  🎨 Element computed style:', window.getComputedStyle(element).pointerEvents);
+      console.log(
+        '  🎨 Element computed style:',
+        window.getComputedStyle(element).pointerEvents
+      );
 
       // 🔧 MANUAL TEST: Add click listener for debugging
       const testClickHandler = (e: MouseEvent) => {
@@ -364,15 +420,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       element.addEventListener('mousedown', handleMouseDown);
       element.addEventListener('mouseup', handleMouseUp);
 
-      console.log('🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully');
+      console.log(
+        '🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully'
+      );
 
       return () => {
         console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
-        
+
         // 🛡️ SAFETY: Reset protection flags
         isHandlingClick.current = false;
-        debug('🛡️ [SiriCallButton] Desktop cleanup - isHandlingClick reset to false');
-        
+        debug(
+          '🛡️ [SiriCallButton] Desktop cleanup - isHandlingClick reset to false'
+        );
+
         element.removeEventListener('click', testClickHandler);
         element.removeEventListener('mouseenter', handleMouseEnter);
         element.removeEventListener('mouseleave', handleMouseLeave);
@@ -381,7 +441,16 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         safeCleanup();
       };
     }
-  }, [containerId, colors, handleInteractionStart, handleInteractionEnd, handleHover, safeCleanup, onCallStart, isListening]);
+  }, [
+    containerId,
+    colors,
+    handleInteractionStart,
+    handleInteractionEnd,
+    handleHover,
+    safeCleanup,
+    onCallStart,
+    isListening,
+  ]);
 
   // ✅ SYNC visual state with props
   useEffect(() => {
@@ -389,7 +458,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       buttonRef.current.setListening(isListening);
       // ✅ FIX 4: Remove unnecessary resize on listening state change
       // Canvas animations handle listening state internally, no resize needed
-      console.log('🔧 [SiriCallButton] Listening state updated without resize trigger');
+      console.log(
+        '🔧 [SiriCallButton] Listening state updated without resize trigger'
+      );
     }
   }, [isListening, containerId]);
 
@@ -408,28 +479,38 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // Mobile touch handler - unified with desktop logic
   const handleDirectTouch = async (e: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('📱 [SiriCallButton] Mobile touch event:', e.type, 'on', containerId);
-      console.log('📱 [SiriCallButton] Current isListening state:', isListening);
+      console.log(
+        '📱 [SiriCallButton] Mobile touch event:',
+        e.type,
+        'on',
+        containerId
+      );
+      console.log(
+        '📱 [SiriCallButton] Current isListening state:',
+        isListening
+      );
     }
-    
+
     // Handle touch end or click events
     if (e.type === 'touchend' || e.type === 'click') {
       debug('📱 [SiriCallButton] 🎯 MOBILE INTERACTION END STARTED');
       debug('  📱 Event type:', e.type);
       debug('  📱 Event target:', e.target);
-      
+
       // 🛡️ UNIFIED: Add same protection as desktop
       if (isHandlingClick.current) {
-        debug('📱 [SiriCallButton] ⚠️ Mobile touch already being handled, ignoring...');
+        debug(
+          '📱 [SiriCallButton] ⚠️ Mobile touch already being handled, ignoring...'
+        );
         return;
       }
-      
+
       isHandlingClick.current = true;
       debug('📱 [SiriCallButton] 🚀 MOBILE BUSINESS LOGIC STARTING');
       debug('  🎧 isListening:', isListening);
       debug('  ✅ onCallStart available:', !!onCallStart);
       debug('  ✅ onCallEnd available:', !!onCallEnd);
-      
+
       try {
         if (!isListening && onCallStart) {
           // 🟢 START CALL - with status management
@@ -437,9 +518,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           debug('📱 [SiriCallButton] 🟢 MOBILE - STARTING CALL');
           try {
             await onCallStart();
-            debug('📱 [SiriCallButton] ✅ Mobile onCallStart() completed successfully');
+            debug(
+              '📱 [SiriCallButton] ✅ Mobile onCallStart() completed successfully'
+            );
           } catch (error) {
-            debugError('📱 [SiriCallButton] ❌ Mobile onCallStart() error:', error);
+            debugError(
+              '📱 [SiriCallButton] ❌ Mobile onCallStart() error:',
+              error
+            );
             setStatus('idle');
           }
         } else if (isListening && onCallEnd) {
@@ -463,20 +549,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
           debug('📱 [SiriCallButton] 🔓 Mobile isHandlingClick reset to false');
         }, 100);
       }
-      
+
       debug('📱 [SiriCallButton] 🎯 MOBILE INTERACTION END COMPLETED');
     }
   };
 
   return (
-    <div 
+    <div
       id={containerId}
       className="voice-button"
       // Direct event handlers for mobile touch and desktop click
       onTouchStart={handleDirectTouch}
       onTouchEnd={handleDirectTouch}
       onClick={handleDirectTouch}
-      style={{ 
+      style={{
         width: '100%',
         height: '100%',
         position: 'relative',
@@ -515,43 +601,56 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
                   }, { once: true });
                 }
               }, 500);
-            `
+            `,
           }}
         />
       )}
 
       {/* Mobile visual component */}
       {isMobileDevice() && canvasReady && (
-        <div 
+        <div
           style={{
             position: 'absolute',
             inset: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            pointerEvents: 'none' // Don't block container events
+            pointerEvents: 'none', // Don't block container events
           }}
         >
           <SimpleMobileSiriVisual
             isListening={isListening}
             volumeLevel={volumeLevel}
-            colors={colors || {
-              primary: '#5DB6B9',
-              secondary: '#E8B554',
-              glow: 'rgba(93, 182, 185, 0.4)',
-              name: 'English'
-            }}
-            size={Math.min(300, Math.min(
-              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).width) - 20,
-              parseInt(getComputedStyle(document.getElementById(containerId) || document.body).height) - 20
-            ))}
+            colors={
+              colors || {
+                primary: '#5DB6B9',
+                secondary: '#E8B554',
+                glow: 'rgba(93, 182, 185, 0.4)',
+                name: 'English',
+              }
+            }
+            size={Math.min(
+              300,
+              Math.min(
+                parseInt(
+                  getComputedStyle(
+                    document.getElementById(containerId) || document.body
+                  ).width
+                ) - 20,
+                parseInt(
+                  getComputedStyle(
+                    document.getElementById(containerId) || document.body
+                  ).height
+                ) - 20
+              )
+            )}
           />
         </div>
       )}
 
       {/* Loading state - Only show for non-mobile devices */}
       {!canvasReady && !isMobileDevice() && (
-        <div 
+        <div
           className="absolute inset-0 rounded-full flex items-center justify-center"
           style={{
             background: `linear-gradient(135deg, ${colors?.primary || '#5DB6B9'}, ${colors?.secondary || '#E8B554'})`,
@@ -559,16 +658,16 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             fontSize: '36px', // ✅ FIX 3: Reduced from 48px to 36px for better mobile fit
             boxShadow: `0 0 30px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
             border: '2px solid rgba(255,255,255,0.1)',
-            pointerEvents: 'none' // Don't block container events
+            pointerEvents: 'none', // Don't block container events
           }}
         >
           🎤
         </div>
       )}
-      
+
       {/* Status indicator */}
       {status !== 'idle' && status !== 'listening' && (
-        <div 
+        <div
           className={`status-indicator ${status}`}
           style={{
             position: 'absolute',
@@ -577,16 +676,14 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
             transform: 'translateX(-50%)',
             color: colors?.primary || '#5DB6B9',
             textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
-            pointerEvents: 'none' // Don't block container events
+            pointerEvents: 'none', // Don't block container events
           }}
         >
           {status === 'processing' ? 'Processing...' : 'Speaking...'}
         </div>
       )}
-
-
     </div>
   );
 };
 
-export default SiriCallButton; 
+export default SiriCallButton;

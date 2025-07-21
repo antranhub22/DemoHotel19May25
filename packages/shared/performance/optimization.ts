@@ -20,7 +20,8 @@ class MemoryCache {
   private readonly maxSize: number;
   private readonly defaultTTL: number;
 
-  constructor(maxSize: number = 1000, defaultTTL: number = 300000) { // 5 minutes default
+  constructor(maxSize: number = 1000, defaultTTL: number = 300000) {
+    // 5 minutes default
     this.maxSize = maxSize;
     this.defaultTTL = defaultTTL;
   }
@@ -98,7 +99,10 @@ export const cache = new MemoryCache();
 // ============================================================================
 
 export class QueryOptimizer {
-  private static queryCache = new Map<string, { result: any; timestamp: number }>();
+  private static queryCache = new Map<
+    string,
+    { result: any; timestamp: number }
+  >();
   private static readonly CACHE_TTL = 60000; // 1 minute
 
   static async withCache<T>(
@@ -161,7 +165,7 @@ export class ConnectionPool {
     }
 
     // Wait for available connection
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const checkForConnection = () => {
         const available = this.connections.find(conn => !this.inUse.has(conn));
         if (available) {
@@ -200,13 +204,16 @@ export class ConnectionPool {
 // ============================================================================
 
 export class PerformanceMonitor {
-  private static metrics = new Map<string, {
-    count: number;
-    totalTime: number;
-    minTime: number;
-    maxTime: number;
-    avgTime: number;
-  }>();
+  private static metrics = new Map<
+    string,
+    {
+      count: number;
+      totalTime: number;
+      minTime: number;
+      maxTime: number;
+      avgTime: number;
+    }
+  >();
 
   static startTimer(operation: string): () => void {
     const start = performance.now();
@@ -232,8 +239,11 @@ export class PerformanceMonitor {
     this.metrics.set(operation, existing);
 
     // Log slow operations
-    if (duration > 1000) { // 1 second threshold
-      logger.warn(`Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`);
+    if (duration > 1000) {
+      // 1 second threshold
+      logger.warn(
+        `Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`
+      );
     }
   }
 
@@ -264,7 +274,7 @@ export class AsyncOptimizer {
 
     if (current >= limit) {
       // Wait for slot to become available
-      await new Promise<void>((resolve) => {
+      await new Promise<void>(resolve => {
         const checkLimit = () => {
           const running = this.runningTasks.get(key) || 0;
           if (running < limit) {
@@ -296,7 +306,9 @@ export class AsyncOptimizer {
 
     for (const batch of batches) {
       const batchResults = await Promise.all(
-        batch.map(item => this.withConcurrencyLimit('batch', concurrency, () => processor(item)))
+        batch.map(item =>
+          this.withConcurrencyLimit('batch', concurrency, () => processor(item))
+        )
       );
       results.push(...batchResults);
     }
@@ -327,7 +339,9 @@ export class MemoryOptimizer {
     const heapUsed = usage.heapUsed / usage.heapTotal;
 
     if (heapUsed > this.memoryThreshold) {
-      logger.warn(`High memory usage detected: ${(heapUsed * 100).toFixed(2)}% (${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB)`);
+      logger.warn(
+        `High memory usage detected: ${(heapUsed * 100).toFixed(2)}% (${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB)`
+      );
 
       // Force garbage collection if available
       if (global.gc && Date.now() - this.lastGC > this.GC_INTERVAL) {
@@ -362,7 +376,7 @@ export class ResponseOptimizer {
   static compressResponse(data: any): any {
     // Remove null/undefined values
     const cleanData = this.removeNullValues(data);
-    
+
     // Limit array sizes
     if (Array.isArray(cleanData) && cleanData.length > 1000) {
       return cleanData.slice(0, 1000);
@@ -425,14 +439,16 @@ export class ResponseOptimizer {
 
 export const performanceMiddleware = (req: any, res: any, next: any) => {
   const endTimer = PerformanceMonitor.startTimer(`${req.method} ${req.path}`);
-  
+
   res.on('finish', () => {
     endTimer();
-    
+
     // Log slow requests
     const duration = performance.now();
     if (duration > 1000) {
-      logger.warn(`Slow request detected: ${req.method} ${req.path} took ${duration.toFixed(2)}ms (${res.statusCode})`);
+      logger.warn(
+        `Slow request detected: ${req.method} ${req.path} took ${duration.toFixed(2)}ms (${res.statusCode})`
+      );
     }
   });
 
@@ -447,13 +463,13 @@ export const cacheMiddleware = (ttl: number = 300000) => {
 
     const cacheKey = `${req.method}:${req.originalUrl}`;
     const cached = cache.get(cacheKey);
-    
+
     if (cached) {
       return res.json(cached);
     }
 
     const originalSend = res.json;
-    res.json = function(data: any) {
+    res.json = function (data: any) {
       cache.set(cacheKey, data, ttl);
       return originalSend.call(this, data);
     };
@@ -496,14 +512,14 @@ export const memoize = <T extends (...args: any[]) => any>(
   keyGenerator?: (...args: Parameters<T>) => string
 ): T => {
   const cache = new Map<string, ReturnType<T>>();
-  
+
   return ((...args: Parameters<T>) => {
     const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key);
     }
-    
+
     const result = func(...args);
     cache.set(key, result);
     return result;
@@ -527,4 +543,4 @@ export const performanceUtils = {
   debounce,
   throttle,
   memoize,
-}; 
+};

@@ -46,12 +46,15 @@ const MenuItemComponent: React.FC<{
   }
 
   const itemContent = (
-    <div className={cn(
-      "flex items-center justify-between w-full px-3 py-2 text-left transition-colors",
-      "hover:bg-gray-100 dark:hover:bg-gray-700",
-      isActive && "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-      depth > 0 && "ml-4 text-sm"
-    )}>
+    <div
+      className={cn(
+        'flex items-center justify-between w-full px-3 py-2 text-left transition-colors',
+        'hover:bg-gray-100 dark:hover:bg-gray-700',
+        isActive &&
+          'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
+        depth > 0 && 'ml-4 text-sm'
+      )}
+    >
       <div className="flex items-center gap-3">
         {getIconComponent(item.icon)}
         <span className="font-medium">{item.label}</span>
@@ -82,10 +85,7 @@ const MenuItemComponent: React.FC<{
 
   return (
     <Link href={item.path}>
-      <Button
-        variant="ghost"
-        className="w-full justify-start p-0 h-auto"
-      >
+      <Button variant="ghost" className="w-full justify-start p-0 h-auto">
         {itemContent}
       </Button>
     </Link>
@@ -95,18 +95,21 @@ const MenuItemComponent: React.FC<{
 // Role badge component
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
   const roleConfig = {
-    'hotel-manager': { label: 'Hotel Manager', color: 'bg-purple-100 text-purple-800' },
+    'hotel-manager': {
+      label: 'Hotel Manager',
+      color: 'bg-purple-100 text-purple-800',
+    },
     'front-desk': { label: 'Front Desk', color: 'bg-blue-100 text-blue-800' },
-    'it-manager': { label: 'IT Manager', color: 'bg-green-100 text-green-800' }
+    'it-manager': { label: 'IT Manager', color: 'bg-green-100 text-green-800' },
   };
 
   const config = roleConfig[role as keyof typeof roleConfig] || {
     label: 'Unknown',
-    color: 'bg-gray-100 text-gray-800'
+    color: 'bg-gray-100 text-gray-800',
   };
 
   return (
-    <Badge className={cn("text-xs font-medium", config.color)}>
+    <Badge className={cn('text-xs font-medium', config.color)}>
       {config.label}
     </Badge>
   );
@@ -114,7 +117,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
 
 /**
  * DynamicSidebar - A role-based sidebar that shows different menu items based on user permissions
- * 
+ *
  * Features:
  * - Automatically filters menu items based on user permissions
  * - Shows different content for different roles
@@ -124,7 +127,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
 export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
   isOpen,
   onClose,
-  className
+  className,
 }) => {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -153,7 +156,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
   // Render menu items recursively
   const renderMenuItems = (items: any[], depth = 0): React.ReactNode => {
-    return items.map((item) => {
+    return items.map(item => {
       const isActive = isActivePath(item.path);
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedItems.has(item.key);
@@ -168,7 +171,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
             onToggle={() => toggleExpanded(item.key)}
             depth={depth}
           />
-          
+
           {/* Render children if expanded */}
           {hasChildren && isExpanded && (
             <div className="ml-4 space-y-1 border-l border-gray-200 dark:border-gray-700 pl-4">
@@ -191,8 +194,8 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
-        isOpen ? "translate-x-0" : "-translate-x-full",
+        'fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
         className
       )}
     >
@@ -209,7 +212,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
             <RoleBadge role={user.role} />
           </div>
         </div>
-        
+
         {/* Close button for mobile */}
         <Button
           variant="ghost"
@@ -223,9 +226,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
       {/* Menu Items */}
       <nav className="flex-1 overflow-y-auto p-4">
-        <div className="space-y-2">
-          {renderMenuItems(menuItems)}
-        </div>
+        <div className="space-y-2">{renderMenuItems(menuItems)}</div>
       </nav>
 
       {/* Footer */}
@@ -239,4 +240,4 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
   );
 };
 
-export default DynamicSidebar; 
+export default DynamicSidebar;

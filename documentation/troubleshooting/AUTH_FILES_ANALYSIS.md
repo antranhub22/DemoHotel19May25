@@ -3,6 +3,7 @@
 ## 🔍 CURRENT FILE STRUCTURE
 
 ### **Backend Files:**
+
 ```
 apps/server/
 ├── services/auth/UnifiedAuthService.v2.ts     (Main auth service)
@@ -17,6 +18,7 @@ packages/
 ```
 
 ### **Frontend Files:**
+
 ```
 apps/client/src/
 ├── context/AuthContext.tsx                    (React auth context)
@@ -27,6 +29,7 @@ apps/client/src/
 ```
 
 ### **Documentation Files:**
+
 ```
 docs/
 ├── DEPLOYMENT_GUIDE.md                        (Has auth sections)
@@ -43,6 +46,7 @@ Root/
 ## 🎯 PROPOSED NEW STRUCTURE
 
 ### **Option 1: Single Auth Folder (RECOMMENDED)**
+
 ```
 auth-system/
 ├── types/
@@ -99,6 +103,7 @@ auth-system/
 ```
 
 ### **Option 2: Distributed by Layer**
+
 ```
 src/
 ├── auth/
@@ -123,23 +128,27 @@ src/
 ## 🚀 MIGRATION ROADMAP
 
 ### **Phase 1: Setup New Structure (30 minutes)**
+
 1. ✅ Create `auth-system/` folder structure
 2. ✅ Setup proper `index.ts` barrel exports
 3. ✅ Create initial documentation
 
 ### **Phase 2: Move Shared Files (20 minutes)**
+
 1. ✅ Move `packages/shared/types/auth.ts` → `auth-system/types/`
 2. ✅ Move `packages/config/auth.config.ts` → `auth-system/config/`
 3. ✅ Move `packages/shared/constants/permissions.ts` → `auth-system/types/`
 4. ✅ Update all import references
 
 ### **Phase 3: Move Backend Files (25 minutes)**
+
 1. ✅ Move `apps/server/services/auth/` → `auth-system/services/`
 2. ✅ Move `apps/server/middleware/auth/` → `auth-system/middleware/`
 3. ✅ Move `apps/server/routes/auth/` → `auth-system/routes/`
 4. ✅ Update all import references in server code
 
 ### **Phase 4: Move Frontend Files (20 minutes)**
+
 1. ✅ Move `apps/client/src/context/AuthContext.tsx` → `auth-system/frontend/context/`
 2. ✅ Move `apps/client/src/lib/authHelper.ts` → `auth-system/frontend/utils/`
 3. ✅ Move `apps/client/src/lib/debugAuth.ts` → `auth-system/frontend/utils/`
@@ -147,12 +156,14 @@ src/
 5. ✅ Update all import references in client code
 
 ### **Phase 5: Documentation & Testing (15 minutes)**
+
 1. ✅ Move auth-related docs to `auth-system/docs/`
 2. ✅ Move `test-unified-auth-integration.mjs` → `auth-system/tests/`
 3. ✅ Move `quick-deploy.sh` → `auth-system/scripts/`
 4. ✅ Create comprehensive `auth-system/README.md`
 
 ### **Phase 6: Update Build & Config (10 minutes)**
+
 1. ✅ Update `tsconfig.json` path mappings
 2. ✅ Update `vite.config.ts` imports
 3. ✅ Update `package.json` scripts
@@ -163,6 +174,7 @@ src/
 ## ⚙️ IMPORT ALIAS UPDATES
 
 ### **New Path Aliases (tsconfig.json):**
+
 ```json
 {
   "compilerOptions": {
@@ -183,6 +195,7 @@ src/
 ```
 
 ### **Example Import Updates:**
+
 ```typescript
 // OLD:
 import { AuthUser } from '@shared/types/auth';
@@ -200,24 +213,28 @@ import { UnifiedAuthService } from '@auth/services';
 ## 🎯 BENEFITS OF NEW STRUCTURE
 
 ### **🔍 Improved Organization:**
+
 - ✅ All auth-related files in one place
 - ✅ Clear separation of concerns (types, config, services, etc.)
 - ✅ Easy to find and maintain auth code
 - ✅ Better development experience
 
 ### **📦 Better Modularity:**
+
 - ✅ Self-contained auth system
 - ✅ Reusable across different projects
 - ✅ Clear dependencies and interfaces
 - ✅ Easier testing and debugging
 
 ### **🚀 Enhanced Development:**
+
 - ✅ Faster development with clear structure
 - ✅ Easier onboarding for new developers
 - ✅ Better code reusability
 - ✅ Simplified documentation
 
 ### **🔧 Easier Maintenance:**
+
 - ✅ Centralized auth logic
 - ✅ Easier to update and refactor
 - ✅ Better version control
@@ -228,12 +245,11 @@ import { UnifiedAuthService } from '@auth/services';
 ## ⚠️ MIGRATION RISKS & MITIGATION
 
 ### **Potential Issues:**
+
 1. **Import References**: Many files import auth code
    - **Mitigation**: Use path aliases and barrel exports
-   
 2. **Build Configuration**: Path mappings need updates
    - **Mitigation**: Update all config files systematically
-   
 3. **Testing**: Tests might break due to path changes
    - **Mitigation**: Update test imports and run full test suite
 
@@ -241,6 +257,7 @@ import { UnifiedAuthService } from '@auth/services';
    - **Mitigation**: Clear IDE cache and restart
 
 ### **Safety Measures:**
+
 1. ✅ Create backup of current working system
 2. ✅ Migrate one phase at a time
 3. ✅ Test after each phase
@@ -251,12 +268,14 @@ import { UnifiedAuthService } from '@auth/services';
 ## 🧪 TESTING STRATEGY
 
 ### **After Each Phase:**
+
 1. ✅ Run TypeScript compilation check
 2. ✅ Run existing tests
 3. ✅ Test auth endpoints manually
 4. ✅ Verify frontend auth flows
 
 ### **Final Validation:**
+
 1. ✅ Full application build
 2. ✅ End-to-end auth testing
 3. ✅ Deploy to staging environment
@@ -267,17 +286,20 @@ import { UnifiedAuthService } from '@auth/services';
 ## 📋 IMPLEMENTATION CHECKLIST
 
 ### **Pre-Migration:**
+
 - [ ] Backup current system
 - [ ] Document current import structure
 - [ ] Plan rollback strategy
 
 ### **During Migration:**
+
 - [ ] Follow phase-by-phase approach
 - [ ] Test after each phase
 - [ ] Update documentation as you go
 - [ ] Maintain git history
 
 ### **Post-Migration:**
+
 - [ ] Full system testing
 - [ ] Update README and docs
 - [ ] Performance validation
@@ -296,6 +318,5 @@ After migration, you'll have:
 - 🧪 **Easier Testing**: Centralized auth testing suite
 - 📦 **Reusable Module**: Auth system can be extracted as separate package
 
-**Total Estimated Time: ~2 hours**
-**Difficulty Level: Medium**
-**Risk Level: Low (with proper backup and testing)** 
+**Total Estimated Time: ~2 hours** **Difficulty Level: Medium** **Risk Level: Low (with proper
+backup and testing)**

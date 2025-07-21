@@ -8,4 +8,4 @@ export interface Staff {
 }
 
 // Nếu dùng ORM (ví dụ: drizzle, sequelize, typeorm), có thể export schema ở đây
-// Nếu dùng raw SQL, chỉ cần interface này để type-check 
+// Nếu dùng raw SQL, chỉ cần interface này để type-check

@@ -34,43 +34,47 @@ export class TenantMiddleware {
    * Extract tenant information from JWT token
    * Requires auth middleware to run first
    */
-  tenantIdentification = async (req: Request, res: Response, next: NextFunction) => {
+  tenantIdentification = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       // Check if user is authenticated
       if (!req.user) {
-        return res.status(401).json({ 
+        return res.status(401).json({
           error: 'Authentication required',
-          code: 'AUTH_REQUIRED' 
+          code: 'AUTH_REQUIRED',
         });
       }
 
       // Extract tenant ID from JWT payload
       const tenantId = req.user.tenantId;
-      
+
       if (!tenantId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Tenant ID not found in token',
-          code: 'TENANT_ID_MISSING' 
+          code: 'TENANT_ID_MISSING',
         });
       }
 
       // Load tenant data
       const tenant = await this.tenantService.getTenantById(tenantId);
-      
+
       if (!tenant) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: 'Tenant not found',
-          code: 'TENANT_NOT_FOUND' 
+          code: 'TENANT_NOT_FOUND',
         });
       }
 
       // Check subscription status
       if (!this.tenantService.isSubscriptionActive(tenant)) {
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'Subscription inactive or expired',
           code: 'SUBSCRIPTION_INACTIVE',
           subscriptionStatus: tenant.subscriptionStatus,
-          subscriptionPlan: tenant.subscriptionPlan
+          subscriptionPlan: tenant.subscriptionPlan,
         });
       }
 
@@ -78,21 +82,23 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenantId;
 
-      console.log(`🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})`);
+      console.log(
+        `🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})`
+      );
       next();
     } catch (error) {
       console.error('Tenant identification failed:', error);
-      
+
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
           error: error.message,
-          code: error.code
+          code: error.code,
         });
       }
-      
-      return res.status(500).json({ 
+
+      return res.status(500).json({
         error: 'Tenant identification failed',
-        code: 'TENANT_IDENTIFICATION_FAILED' 
+        code: 'TENANT_IDENTIFICATION_FAILED',
       });
     }
   };
@@ -100,34 +106,38 @@ export class TenantMiddleware {
   /**
    * Identify tenant from subdomain (for public routes)
    */
-  tenantFromSubdomain = async (req: Request, res: Response, next: NextFunction) => {
+  tenantFromSubdomain = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       // Extract subdomain from host header
       const host = req.get('host') || '';
       const subdomain = this.extractSubdomain(host);
-      
+
       if (!subdomain) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Subdomain not found',
-          code: 'SUBDOMAIN_MISSING' 
+          code: 'SUBDOMAIN_MISSING',
         });
       }
 
       // Load tenant by subdomain
       const tenant = await this.tenantService.getTenantBySubdomain(subdomain);
-      
+
       if (!tenant) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: 'Tenant not found',
-          code: 'TENANT_NOT_FOUND' 
+          code: 'TENANT_NOT_FOUND',
         });
       }
 
       // Check subscription status
       if (!this.tenantService.isSubscriptionActive(tenant)) {
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'Service unavailable - subscription inactive',
-          code: 'SUBSCRIPTION_INACTIVE' 
+          code: 'SUBSCRIPTION_INACTIVE',
         });
       }
 
@@ -135,21 +145,23 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenant.id;
 
-      console.log(`🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})`);
+      console.log(
+        `🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})`
+      );
       next();
     } catch (error) {
       console.error('Tenant identification from subdomain failed:', error);
-      
+
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
           error: error.message,
-          code: error.code
+          code: error.code,
         });
       }
-      
-      return res.status(500).json({ 
+
+      return res.status(500).json({
         error: 'Tenant identification failed',
-        code: 'TENANT_IDENTIFICATION_FAILED' 
+        code: 'TENANT_IDENTIFICATION_FAILED',
       });
     }
   };
@@ -161,9 +173,9 @@ export class TenantMiddleware {
     try {
       // Check if tenant is identified
       if (!req.tenantId) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Tenant not identified',
-          code: 'TENANT_NOT_IDENTIFIED' 
+          code: 'TENANT_NOT_IDENTIFIED',
         });
       }
 
@@ -175,9 +187,9 @@ export class TenantMiddleware {
       next();
     } catch (error) {
       console.error('Row-level security enforcement failed:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Security enforcement failed',
-        code: 'SECURITY_ENFORCEMENT_FAILED' 
+        code: 'SECURITY_ENFORCEMENT_FAILED',
       });
     }
   };
@@ -189,31 +201,36 @@ export class TenantMiddleware {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: 'Tenant not identified',
-            code: 'TENANT_NOT_IDENTIFIED' 
+            code: 'TENANT_NOT_IDENTIFIED',
           });
         }
 
-        const hasAccess = await this.tenantService.hasFeatureAccess(req.tenant.id, feature as any);
-        
+        const hasAccess = await this.tenantService.hasFeatureAccess(
+          req.tenant.id,
+          feature as any
+        );
+
         if (!hasAccess) {
           return res.status(403).json({
             error: `Feature '${feature}' not available in your plan`,
             code: 'FEATURE_NOT_AVAILABLE',
             feature,
             currentPlan: req.tenant.subscriptionPlan,
-            upgradeRequired: true
+            upgradeRequired: true,
           });
         }
 
-        console.log(`✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}`);
+        console.log(
+          `✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}`
+        );
         next();
       } catch (error) {
         console.error(`Feature access check failed for ${feature}:`, error);
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Feature access check failed',
-          code: 'FEATURE_ACCESS_CHECK_FAILED' 
+          code: 'FEATURE_ACCESS_CHECK_FAILED',
         });
       }
     };
@@ -222,34 +239,42 @@ export class TenantMiddleware {
   /**
    * Check subscription limits before processing
    */
-  checkSubscriptionLimits = async (req: Request, res: Response, next: NextFunction) => {
+  checkSubscriptionLimits = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       if (!req.tenant) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Tenant not identified',
-          code: 'TENANT_NOT_IDENTIFIED' 
+          code: 'TENANT_NOT_IDENTIFIED',
         });
       }
 
-      const limitsCheck = await this.tenantService.checkSubscriptionLimits(req.tenant.id);
-      
+      const limitsCheck = await this.tenantService.checkSubscriptionLimits(
+        req.tenant.id
+      );
+
       if (!limitsCheck.withinLimits) {
         return res.status(429).json({
           error: 'Subscription limits exceeded',
           code: 'SUBSCRIPTION_LIMITS_EXCEEDED',
           violations: limitsCheck.violations,
           currentPlan: req.tenant.subscriptionPlan,
-          upgradeRequired: true
+          upgradeRequired: true,
         });
       }
 
-      console.log(`📊 Subscription limits check passed for tenant ${req.tenant.hotelName}`);
+      console.log(
+        `📊 Subscription limits check passed for tenant ${req.tenant.hotelName}`
+      );
       next();
     } catch (error) {
       console.error('Subscription limits check failed:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Subscription limits check failed',
-        code: 'LIMITS_CHECK_FAILED' 
+        code: 'LIMITS_CHECK_FAILED',
       });
     }
   };
@@ -261,9 +286,9 @@ export class TenantMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: 'Tenant not identified',
-            code: 'TENANT_NOT_IDENTIFIED' 
+            code: 'TENANT_NOT_IDENTIFIED',
           });
         }
 
@@ -272,13 +297,15 @@ export class TenantMiddleware {
         req.resourceTenantIdField = resourceTenantIdField;
         req.validateOwnership = true;
 
-        console.log(`🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}`);
+        console.log(
+          `🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}`
+        );
         next();
       } catch (error) {
         console.error('Tenant ownership validation setup failed:', error);
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Ownership validation setup failed',
-          code: 'OWNERSHIP_VALIDATION_FAILED' 
+          code: 'OWNERSHIP_VALIDATION_FAILED',
         });
       }
     };
@@ -288,14 +315,17 @@ export class TenantMiddleware {
    * Rate limiting per tenant
    */
   tenantRateLimit = (requestsPerMinute: number = 60) => {
-    const tenantRequestCounts = new Map<string, { count: number; resetTime: number }>();
+    const tenantRequestCounts = new Map<
+      string,
+      { count: number; resetTime: number }
+    >();
 
     return (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: 'Tenant not identified',
-            code: 'TENANT_NOT_IDENTIFIED' 
+            code: 'TENANT_NOT_IDENTIFIED',
           });
         }
 
@@ -304,20 +334,23 @@ export class TenantMiddleware {
         const windowStart = Math.floor(now / 60000) * 60000; // 1-minute window
 
         const tenantData = tenantRequestCounts.get(tenantId);
-        
+
         if (!tenantData || tenantData.resetTime !== windowStart) {
           // Reset counter for new window
-          tenantRequestCounts.set(tenantId, { count: 1, resetTime: windowStart });
+          tenantRequestCounts.set(tenantId, {
+            count: 1,
+            resetTime: windowStart,
+          });
         } else {
           // Increment counter
           tenantData.count++;
-          
+
           if (tenantData.count > requestsPerMinute) {
             return res.status(429).json({
               error: 'Rate limit exceeded',
               code: 'RATE_LIMIT_EXCEEDED',
               limit: requestsPerMinute,
-              resetTime: windowStart + 60000
+              resetTime: windowStart + 60000,
             });
           }
         }
@@ -325,16 +358,19 @@ export class TenantMiddleware {
         // Set rate limit headers
         res.set({
           'X-RateLimit-Limit': requestsPerMinute.toString(),
-          'X-RateLimit-Remaining': Math.max(0, requestsPerMinute - (tenantData?.count || 1)).toString(),
-          'X-RateLimit-Reset': (windowStart + 60000).toString()
+          'X-RateLimit-Remaining': Math.max(
+            0,
+            requestsPerMinute - (tenantData?.count || 1)
+          ).toString(),
+          'X-RateLimit-Reset': (windowStart + 60000).toString(),
         });
 
         next();
       } catch (error) {
         console.error('Tenant rate limiting failed:', error);
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Rate limiting failed',
-          code: 'RATE_LIMITING_FAILED' 
+          code: 'RATE_LIMITING_FAILED',
         });
       }
     };
@@ -350,30 +386,32 @@ export class TenantMiddleware {
   private extractSubdomain(host: string): string | null {
     // Remove port if present
     const cleanHost = host.split(':')[0];
-    
+
     // For development (localhost)
     if (cleanHost === 'localhost' || cleanHost === '127.0.0.1') {
       return 'minhon'; // Default to Mi Nhon for development
     }
-    
+
     // For production domains like subdomain.talk2go.online
     const parts = cleanHost.split('.');
     if (parts.length >= 3) {
       return parts[0]; // Return first part as subdomain
     }
-    
+
     return null;
   }
 
   /**
    * Get tenant context for database operations
    */
-  getTenantContext(req: Request): { tenantId: string; tenantFilter: any } | null {
+  getTenantContext(
+    req: Request
+  ): { tenantId: string; tenantFilter: any } | null {
     if (!req.tenantId) return null;
-    
+
     return {
       tenantId: req.tenantId,
-      tenantFilter: this.tenantService.getTenantFilter(req.tenantId)
+      tenantFilter: this.tenantService.getTenantFilter(req.tenantId),
     };
   }
 }
@@ -429,7 +467,7 @@ export const tenantRateLimit = tenantMiddleware.tenantRateLimit;
 export const fullTenantMiddleware = [
   identifyTenant,
   enforceRowLevelSecurity,
-  checkLimits
+  checkLimits,
 ];
 
 /**
@@ -438,7 +476,7 @@ export const fullTenantMiddleware = [
 export const publicTenantMiddleware = [
   identifyTenantFromSubdomain,
   enforceRowLevelSecurity,
-  tenantRateLimit()
+  tenantRateLimit(),
 ];
 
 /**
@@ -447,11 +485,11 @@ export const publicTenantMiddleware = [
 export const adminTenantMiddleware = [
   identifyTenant,
   enforceRowLevelSecurity,
-  requireFeature('apiAccess')
+  requireFeature('apiAccess'),
 ];
 
 // ============================================
 // Export Middleware
 // ============================================
 
-export default tenantMiddleware; 
+export default tenantMiddleware;

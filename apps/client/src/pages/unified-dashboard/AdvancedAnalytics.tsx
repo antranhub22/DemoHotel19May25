@@ -1,52 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  LineChart, 
-  Line, 
-  PieChart, 
-  Pie, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
   Cell,
   Area,
-  AreaChart
+  AreaChart,
 } from 'recharts';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Phone, 
-  Users, 
-  Clock, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Phone,
+  Users,
+  Clock,
   Calendar,
   Download,
   RefreshCw,
   BarChart3,
   PieChart as PieChartIcon,
   TrendingUp as TrendIcon,
-  Filter
+  Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -83,16 +83,23 @@ interface AnalyticsData {
 }
 
 // Colors for charts
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF4560'];
+const COLORS = [
+  '#0088FE',
+  '#00C49F',
+  '#FFBB28',
+  '#FF8042',
+  '#AF19FF',
+  '#FF4560',
+];
 
 // Custom metric card component
-const MetricCard = ({ 
-  title, 
-  value, 
-  change, 
-  changeType, 
-  icon: Icon, 
-  description 
+const MetricCard = ({
+  title,
+  value,
+  change,
+  changeType,
+  icon: Icon,
+  description,
 }: {
   title: string;
   value: string | number;
@@ -103,17 +110,23 @@ const MetricCard = ({
 }) => {
   const getChangeColor = () => {
     switch (changeType) {
-      case 'positive': return 'text-green-600';
-      case 'negative': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'positive':
+        return 'text-green-600';
+      case 'negative':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getChangeIcon = () => {
     switch (changeType) {
-      case 'positive': return <TrendingUp className="h-3 w-3" />;
-      case 'negative': return <TrendingDown className="h-3 w-3" />;
-      default: return <TrendIcon className="h-3 w-3" />;
+      case 'positive':
+        return <TrendingUp className="h-3 w-3" />;
+      case 'negative':
+        return <TrendingDown className="h-3 w-3" />;
+      default:
+        return <TrendIcon className="h-3 w-3" />;
     }
   };
 
@@ -125,7 +138,12 @@ const MetricCard = ({
             <p className="text-sm font-medium text-gray-600">{title}</p>
             <p className="text-2xl font-bold">{value}</p>
             {change && (
-              <div className={cn("flex items-center gap-1 text-sm mt-1", getChangeColor())}>
+              <div
+                className={cn(
+                  'flex items-center gap-1 text-sm mt-1',
+                  getChangeColor()
+                )}
+              >
                 {getChangeIcon()}
                 <span>{change}</span>
               </div>
@@ -174,14 +192,14 @@ export const AdvancedAnalytics: React.FC = () => {
       successRate: 94.2,
       topLanguages: ['Vietnamese', 'English', 'Korean'],
       callsThisMonth: 423,
-      growthRate: 15.3
+      growthRate: 15.3,
     },
     serviceDistribution: [
       { service: 'Room Service', calls: 450, percentage: 36.1 },
       { service: 'Concierge', calls: 300, percentage: 24.1 },
       { service: 'Housekeeping', calls: 250, percentage: 20.1 },
       { service: 'Front Desk', calls: 150, percentage: 12.0 },
-      { service: 'Spa & Wellness', calls: 97, percentage: 7.8 }
+      { service: 'Spa & Wellness', calls: 97, percentage: 7.8 },
     ],
     hourlyActivity: [
       { hour: '06:00', calls: 5 },
@@ -201,7 +219,7 @@ export const AdvancedAnalytics: React.FC = () => {
       { hour: '20:00', calls: 38 },
       { hour: '21:00', calls: 25 },
       { hour: '22:00', calls: 15 },
-      { hour: '23:00', calls: 8 }
+      { hour: '23:00', calls: 8 },
     ],
     dailyTrends: [
       { date: '2024-01-01', calls: 45, duration: 154, satisfaction: 4.5 },
@@ -210,27 +228,27 @@ export const AdvancedAnalytics: React.FC = () => {
       { date: '2024-01-04', calls: 41, duration: 156, satisfaction: 4.7 },
       { date: '2024-01-05', calls: 48, duration: 159, satisfaction: 4.5 },
       { date: '2024-01-06', calls: 55, duration: 165, satisfaction: 4.8 },
-      { date: '2024-01-07', calls: 42, duration: 151, satisfaction: 4.6 }
+      { date: '2024-01-07', calls: 42, duration: 151, satisfaction: 4.6 },
     ],
     languageDistribution: [
       { language: 'Vietnamese', calls: 687, percentage: 55.1 },
       { language: 'English', calls: 423, percentage: 33.9 },
       { language: 'Korean', calls: 87, percentage: 7.0 },
-      { language: 'Chinese', calls: 50, percentage: 4.0 }
-    ]
+      { language: 'Chinese', calls: 50, percentage: 4.0 },
+    ],
   };
 
   // Fetch analytics data
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      
+
       // Simulate API call
       setTimeout(() => {
         setAnalytics(mockAnalytics);
         setLoading(false);
       }, 1000);
-      
+
       // Replace with actual API call:
       // const response = await fetch('/api/dashboard/analytics', {
       //   headers: { 'Authorization': `Bearer ${user?.token}` }
@@ -357,11 +375,11 @@ export const AdvancedAnalytics: React.FC = () => {
                     <XAxis dataKey="date" />
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area 
-                      type="monotone" 
-                      dataKey="calls" 
-                      stroke="#8884d8" 
-                      fill="#8884d8" 
+                    <Area
+                      type="monotone"
+                      dataKey="calls"
+                      stroke="#8884d8"
+                      fill="#8884d8"
                       fillOpacity={0.6}
                     />
                   </AreaChart>
@@ -381,10 +399,10 @@ export const AdvancedAnalytics: React.FC = () => {
                     <XAxis dataKey="date" />
                     <YAxis domain={[4.0, 5.0]} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="satisfaction" 
-                      stroke="#00C49F" 
+                    <Line
+                      type="monotone"
+                      dataKey="satisfaction"
+                      stroke="#00C49F"
                       strokeWidth={2}
                     />
                   </LineChart>
@@ -410,13 +428,18 @@ export const AdvancedAnalytics: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percentage }) => `${name} (${percentage}%)`}
+                      label={({ name, percentage }) =>
+                        `${name} (${percentage}%)`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="calls"
                     >
                       {analytics.serviceDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -433,17 +456,26 @@ export const AdvancedAnalytics: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {analytics.serviceDistribution.map((service, index) => (
-                    <div key={service.service} className="flex items-center justify-between">
+                    <div
+                      key={service.service}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-3">
-                        <div 
+                        <div
                           className="w-4 h-4 rounded"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          style={{
+                            backgroundColor: COLORS[index % COLORS.length],
+                          }}
                         />
                         <span className="font-medium">{service.service}</span>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold">{service.calls} cuộc gọi</div>
-                        <div className="text-sm text-gray-500">{service.percentage}%</div>
+                        <div className="font-semibold">
+                          {service.calls} cuộc gọi
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {service.percentage}%
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -490,13 +522,18 @@ export const AdvancedAnalytics: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percentage }) => `${name} (${percentage}%)`}
+                      label={({ name, percentage }) =>
+                        `${name} (${percentage}%)`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="calls"
                     >
                       {analytics.languageDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -521,11 +558,11 @@ export const AdvancedAnalytics: React.FC = () => {
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="h-2 rounded-full"
-                          style={{ 
+                          style={{
                             width: `${lang.percentage}%`,
-                            backgroundColor: COLORS[index % COLORS.length]
+                            backgroundColor: COLORS[index % COLORS.length],
                           }}
                         />
                       </div>
@@ -601,4 +638,4 @@ export const AdvancedAnalytics: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

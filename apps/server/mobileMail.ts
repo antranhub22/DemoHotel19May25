@@ -3,13 +3,13 @@ import nodemailer from 'nodemailer';
 // Tạo transporter đơn giản chỉ dành cho thiết bị di động
 export const createSimpleMobileTransporter = () => {
   console.log('Sử dụng transporter đơn giản cho thiết bị di động');
-  
+
   // Kiểm tra xem Gmail app password có tồn tại hay không
   if (!process.env.GMAIL_APP_PASSWORD) {
     console.error('GMAIL_APP_PASSWORD không được cấu hình');
     return createFallbackTransporter();
   }
-  
+
   try {
     // Tạo một transporter với cấu hình tối thiểu để giảm thiểu lỗi
     return nodemailer.createTransport({
@@ -18,16 +18,16 @@ export const createSimpleMobileTransporter = () => {
       secure: false, // Sử dụng STARTTLS để tăng độ tin cậy
       auth: {
         user: 'tuan.ctw@gmail.com',
-        pass: process.env.GMAIL_APP_PASSWORD
+        pass: process.env.GMAIL_APP_PASSWORD,
       },
       tls: {
         rejectUnauthorized: false, // Bỏ qua lỗi SSL
-        ciphers: 'SSLv3' // Sử dụng cipher cũ hơn để tương thích tốt hơn
+        ciphers: 'SSLv3', // Sử dụng cipher cũ hơn để tương thích tốt hơn
       },
       connectionTimeout: 20000, // 20 giây timeout
       debug: true, // In ra tất cả log
       disableFileAccess: true, // Tăng cường bảo mật
-      disableUrlAccess: true // Tăng cường bảo mật
+      disableUrlAccess: true, // Tăng cường bảo mật
     });
   } catch (error) {
     console.error('Lỗi khi tạo mobile transporter:', error);
@@ -38,19 +38,19 @@ export const createSimpleMobileTransporter = () => {
 // Transporter dự phòng luôn trả về thành công
 const createFallbackTransporter = () => {
   console.log('Sử dụng transporter dự phòng');
-  
+
   return {
     sendMail: async (mailOptions: any) => {
       console.log('=========== MOBILE EMAIL TEST (FALLBACK) ===========');
       console.log('Đến:', mailOptions.to);
       console.log('Tiêu đề:', mailOptions.subject);
       console.log('================================================');
-      
-      return { 
+
+      return {
         messageId: `fallback-${Date.now()}@example.com`,
-        response: 'Fallback email success'
+        response: 'Fallback email success',
       };
-    }
+    },
   };
 };
 
@@ -64,14 +64,14 @@ export const sendMobileEmail = async (
     console.log('==== BẮT ĐẦU GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====');
     console.log('Người nhận:', toEmail);
     console.log('Tiêu đề:', subject);
-    
+
     const transporter = createSimpleMobileTransporter();
-    
+
     // Tạo nội dung email đơn giản
     const mailOptions = {
       from: '"Mi Nhon Hotel" <tuan.ctw@gmail.com>',
       to: toEmail,
-      subject: subject,
+      subject,
       text: messageText,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto;">
@@ -84,12 +84,12 @@ export const sendMobileEmail = async (
             Email này được gửi từ thiết bị di động - Mi Nhon Hotel
           </p>
         </div>
-      `
+      `,
     };
-    
+
     // Log trước khi gửi
     console.log('Chuẩn bị gửi email, thiết lập xong');
-    
+
     try {
       const result = await transporter.sendMail(mailOptions);
       console.log('EMAIL MOBILE ĐÃ GỬI THÀNH CÔNG:', result.messageId);
@@ -121,13 +121,15 @@ export const sendMobileCallSummary = async (
   }
 ): Promise<{ success: boolean; error?: any; messageId?: string }> => {
   try {
-    console.log('==== BẮT ĐẦU GỬI EMAIL TÓM TẮT CUỘC GỌI TỪ THIẾT BỊ DI ĐỘNG ====');
-    
+    console.log(
+      '==== BẮT ĐẦU GỬI EMAIL TÓM TẮT CUỘC GỌI TỪ THIẾT BỊ DI ĐỘNG ===='
+    );
+
     // Tạo danh sách dịch vụ được yêu cầu
-    const serviceRequestsText = callDetails.serviceRequests.length 
-      ? callDetails.serviceRequests.join('\n- ') 
+    const serviceRequestsText = callDetails.serviceRequests.length
+      ? callDetails.serviceRequests.join('\n- ')
       : 'Không có yêu cầu cụ thể';
-    
+
     // Tạo nội dung email
     const messageText = `
 Mi Nhon Hotel Mui Ne - Tóm tắt cuộc gọi từ phòng ${callDetails.roomNumber}
@@ -146,7 +148,7 @@ Các dịch vụ được yêu cầu:
 Email này được gửi từ thiết bị di động.
 Cảm ơn quý khách đã sử dụng dịch vụ của Mi Nhon Hotel.
     `;
-    
+
     // Gọi hàm gửi email đơn giản
     return await sendMobileEmail(
       toEmail,
@@ -154,7 +156,10 @@ Cảm ơn quý khách đã sử dụng dịch vụ của Mi Nhon Hotel.
       messageText
     );
   } catch (error: any) {
-    console.error('Lỗi khi gửi email tóm tắt cuộc gọi từ thiết bị di động:', error);
+    console.error(
+      'Lỗi khi gửi email tóm tắt cuộc gọi từ thiết bị di động:',
+      error
+    );
     return { success: false, error: error.message };
   }
 };

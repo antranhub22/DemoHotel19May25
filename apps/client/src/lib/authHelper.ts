@@ -11,17 +11,17 @@ export const generateDevToken = async (): Promise<string> => {
   const credentials = [
     { username: 'manager', password: 'manager123' },
     { username: 'frontdesk', password: 'frontdesk123' },
-    { username: 'itmanager', password: 'itmanager123' }
+    { username: 'itmanager', password: 'itmanager123' },
   ];
-  
+
   for (const cred of credentials) {
     try {
       console.log(`🔐 [AuthHelper] Trying login with ${cred.username}...`);
-      
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cred)
+        body: JSON.stringify(cred),
       });
 
       if (response.ok) {
@@ -29,17 +29,22 @@ export const generateDevToken = async (): Promise<string> => {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem(DEV_TOKEN_KEY, 'true');
-          console.log(`✅ [AuthHelper] Dev token generated with ${cred.username}`);
+          console.log(
+            `✅ [AuthHelper] Dev token generated with ${cred.username}`
+          );
           return data.token;
         }
       } else {
-        console.warn(`⚠️ [AuthHelper] Login failed for ${cred.username}:`, response.status);
+        console.warn(
+          `⚠️ [AuthHelper] Login failed for ${cred.username}:`,
+          response.status
+        );
       }
     } catch (error) {
       console.warn(`⚠️ [AuthHelper] Error with ${cred.username}:`, error);
     }
   }
-  
+
   throw new Error('Failed to generate dev token with any credentials');
 };
 
@@ -52,11 +57,16 @@ const isTokenExpired = (token: string): boolean => {
     const exp = payload.exp * 1000; // Convert to milliseconds
     const now = Date.now();
     const isExpired = now >= exp;
-    
+
     if (isExpired) {
-      console.log('⏰ [AuthHelper] Token expired:', new Date(exp), 'vs now:', new Date(now));
+      console.log(
+        '⏰ [AuthHelper] Token expired:',
+        new Date(exp),
+        'vs now:',
+        new Date(now)
+      );
     }
-    
+
     return isExpired;
   } catch (error) {
     console.error('❌ [AuthHelper] Failed to decode token:', error);
@@ -70,7 +80,7 @@ const isTokenExpired = (token: string): boolean => {
 export const getAuthToken = async (): Promise<string | null> => {
   // Check if token exists
   let token = localStorage.getItem('token') || sessionStorage.getItem('token');
-  
+
   // If token exists, check if it's expired
   if (token) {
     if (isTokenExpired(token)) {
@@ -105,7 +115,7 @@ export const getAuthToken = async (): Promise<string | null> => {
  */
 export const getAuthHeaders = async (): Promise<Record<string, string>> => {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
   const token = await getAuthToken();
@@ -119,14 +129,17 @@ export const getAuthHeaders = async (): Promise<Record<string, string>> => {
 /**
  * Make authenticated request with auto-retry on token expiry
  */
-export const authenticatedFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
+export const authenticatedFetch = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
   const makeRequest = async (headers: Record<string, string>) => {
     return fetch(url, {
       ...options,
       headers: {
         ...headers,
-        ...options.headers
-      }
+        ...options.headers,
+      },
     });
   };
 
@@ -137,17 +150,19 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
   // If 403 (forbidden/expired), try once more with fresh token
   if (response.status === 403) {
     console.log('🔄 [AuthHelper] 403 error, retrying with fresh token...');
-    
+
     // Force refresh token
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
-    
+
     // Get fresh headers and retry
     headers = await getAuthHeaders();
     response = await makeRequest(headers);
-    
+
     if (response.status === 403) {
-      console.error('❌ [AuthHelper] Still 403 after token refresh - auth may be broken');
+      console.error(
+        '❌ [AuthHelper] Still 403 after token refresh - auth may be broken'
+      );
     } else {
       console.log('✅ [AuthHelper] Success after token refresh!');
     }
@@ -160,6 +175,7 @@ export const authenticatedFetch = async (url: string, options: RequestInit = {})
  * Check if user is authenticated
  */
 export const isAuthenticated = (): boolean => {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const token =
+    localStorage.getItem('token') || sessionStorage.getItem('token');
   return !!token;
-}; 
+};

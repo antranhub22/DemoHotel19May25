@@ -9,13 +9,16 @@ import { z } from 'zod';
 // ========================================
 
 const DatabaseSchema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   DB_HOST: z.string().optional(),
   DB_PORT: z.string().transform(Number).optional(),
   DB_NAME: z.string().optional(),
   DB_USER: z.string().optional(),
   DB_PASSWORD: z.string().optional(),
-  DB_SSL: z.string().transform(val => val === 'true').optional(),
+  DB_SSL: z
+    .string()
+    .transform(val => val === 'true')
+    .optional(),
 });
 
 // ========================================
@@ -27,14 +30,14 @@ const DATABASE_URL = process.env.DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error(
     '❌ DATABASE_URL environment variable is required!\n' +
-    '📋 Please set up PostgreSQL and provide DATABASE_URL.\n' +
-    '🐳 For local development, you can use Docker:\n' +
-    '   docker run -d --name hotel-postgres \\\n' +
-    '     -e POSTGRES_DB=hotel_dev \\\n' +
-    '     -e POSTGRES_USER=hotel_user \\\n' +
-    '     -e POSTGRES_PASSWORD=dev_password \\\n' +
-    '     -p 5432:5432 postgres:15\n' +
-    '🔗 Then set: DATABASE_URL=postgresql://hotel_user:dev_password@localhost:5432/hotel_dev'
+      '📋 Please set up PostgreSQL and provide DATABASE_URL.\n' +
+      '🐳 For local development, you can use Docker:\n' +
+      '   docker run -d --name hotel-postgres \\\n' +
+      '     -e POSTGRES_DB=hotel_dev \\\n' +
+      '     -e POSTGRES_USER=hotel_user \\\n' +
+      '     -e POSTGRES_PASSWORD=dev_password \\\n' +
+      '     -p 5432:5432 postgres:15\n' +
+      '🔗 Then set: DATABASE_URL=postgresql://hotel_user:dev_password@localhost:5432/hotel_dev'
   );
 }
 
@@ -101,7 +104,7 @@ export const getConnectionString = (): string => {
 
   const params = new URLSearchParams();
   if (databaseConfig.ssl) params.append('sslmode', 'require');
-  
+
   return `postgresql://${databaseConfig.user}:${databaseConfig.password}@${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.name}?${params.toString()}`;
 };
 
@@ -126,7 +129,10 @@ export const validateDatabaseConfig = () => {
       });
       return { success: false, errors: error.errors };
     }
-    return { success: false, errors: [{ message: 'Invalid database configuration' }] };
+    return {
+      success: false,
+      errors: [{ message: 'Invalid database configuration' }],
+    };
   }
 };
 
@@ -135,4 +141,4 @@ export const validateDatabaseConfig = () => {
 // ========================================
 
 export type DatabaseType = 'postgresql';
-export type DatabaseConfig = typeof databaseConfig; 
+export type DatabaseConfig = typeof databaseConfig;

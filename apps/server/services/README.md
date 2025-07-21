@@ -2,7 +2,9 @@
 
 ## Overview
 
-This directory contains the hotel research engine services that power the multi-tenant SaaS platform. These services automatically research hotel information and generate knowledge bases for AI assistants.
+This directory contains the hotel research engine services that power the multi-tenant SaaS
+platform. These services automatically research hotel information and generate knowledge bases for
+AI assistants.
 
 ## Services
 
@@ -11,6 +13,7 @@ This directory contains the hotel research engine services that power the multi-
 Automatically researches hotel information using multiple data sources:
 
 **Features:**
+
 - ✅ Google Places API integration for basic hotel info
 - ✅ Website scraping for detailed services and amenities
 - ✅ Rate limiting and error handling
@@ -18,11 +21,13 @@ Automatically researches hotel information using multiple data sources:
 - ✅ Support for both basic and advanced research tiers
 
 **API Methods:**
+
 - `basicResearch(hotelName, location)` - Basic hotel research using free APIs
 - `advancedResearch(hotelName, location)` - Advanced research with paid APIs
 - `getServiceHealth()` - Check service status and API availability
 
 **Data Sources:**
+
 - Google Places API (basic info, photos, reviews)
 - Website scraping (services, policies, room types)
 - Nearby attractions and points of interest
@@ -32,6 +37,7 @@ Automatically researches hotel information using multiple data sources:
 Generates comprehensive knowledge bases from hotel research data:
 
 **Features:**
+
 - ✅ Knowledge base generation from hotel data
 - ✅ System prompt generation for AI assistants
 - ✅ FAQ generation from hotel information
@@ -39,6 +45,7 @@ Generates comprehensive knowledge bases from hotel research data:
 - ✅ Customizable personality and tone settings
 
 **API Methods:**
+
 - `generateKnowledgeBase(hotelData)` - Create comprehensive knowledge base
 - `generateSystemPrompt(hotelData, customization)` - Generate AI assistant prompt
 - `generateFAQSection(hotelData)` - Create FAQ from hotel data
@@ -49,6 +56,7 @@ Generates comprehensive knowledge bases from hotel research data:
 Dynamic Vapi assistant creation and management for multi-tenant SaaS:
 
 **Features:**
+
 - ✅ Dynamic Vapi assistant creation via API
 - ✅ Assistant updating and management
 - ✅ Dynamic function generation based on hotel services
@@ -57,6 +65,7 @@ Dynamic Vapi assistant creation and management for multi-tenant SaaS:
 - ✅ Comprehensive error handling and logging
 
 **API Methods:**
+
 - `createAssistant(config)` - Create new Vapi assistant
 - `updateAssistant(id, config)` - Update existing assistant
 - `deleteAssistant(id)` - Delete assistant
@@ -65,6 +74,7 @@ Dynamic Vapi assistant creation and management for multi-tenant SaaS:
 - `getServiceHealth()` - Check Vapi API connection
 
 **Assistant Generator:**
+
 - `generateAssistant(hotelData, customization)` - Generate complete assistant
 - `updateAssistant(id, hotelData, customization)` - Update assistant with new data
 - Dynamic function generation for: room service, housekeeping, transportation, spa, concierge
@@ -117,7 +127,7 @@ const knowledgeBase = generator.generateKnowledgeBase(hotelData);
 const systemPrompt = generator.generateSystemPrompt(hotelData, {
   personality: 'professional',
   tone: 'friendly',
-  languages: ['English', 'Vietnamese']
+  languages: ['English', 'Vietnamese'],
 });
 ```
 
@@ -140,7 +150,7 @@ const assistantId = await assistantGenerator.generateAssistant(hotelData, {
   tone: 'friendly',
   languages: ['English', 'Vietnamese'],
   voiceId: 'jennifer',
-  backgroundSound: 'hotel-lobby'
+  backgroundSound: 'hotel-lobby',
 });
 
 console.log('Assistant created:', assistantId);
@@ -153,7 +163,7 @@ await assistantGenerator.updateAssistant(assistantId, updatedHotelData, {
   personality: 'luxurious',
   tone: 'formal',
   languages: ['English'],
-  voiceId: 'premium-voice'
+  voiceId: 'premium-voice',
 });
 ```
 
@@ -201,4 +211,4 @@ These services integrate with:
 
 ---
 
-*Generated as part of the Mi Nhon Hotel → Multi-tenant SaaS transformation* 
+_Generated as part of the Mi Nhon Hotel → Multi-tenant SaaS transformation_

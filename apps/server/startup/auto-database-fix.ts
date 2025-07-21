@@ -18,7 +18,7 @@ export class AutoDatabaseFixer {
     try {
       console.log('🔧 Running auto database fix...');
       console.log('🔍 Checking database schema...');
-      
+
       const needsFix = await this.checkIfDatabaseNeedsFix();
       if (!needsFix) {
         console.log('✅ Database schema is already up to date');
@@ -30,9 +30,15 @@ export class AutoDatabaseFixer {
       console.log('✅ Auto database fix completed successfully');
       return true;
     } catch (error) {
-      console.error('❌ Auto database fix failed:', error instanceof Error ? error.message : String(error));
-      console.error('❌ Full error stack:', error instanceof Error ? error.stack : String(error));
-      
+      console.error(
+        '❌ Auto database fix failed:',
+        error instanceof Error ? error.message : String(error)
+      );
+      console.error(
+        '❌ Full error stack:',
+        error instanceof Error ? error.stack : String(error)
+      );
+
       // Don't fail server startup, just log error
       console.log('⚠️ Server will continue without database auto-fix');
       return false;
@@ -51,7 +57,10 @@ export class AutoDatabaseFixer {
         return true;
       }
     } catch (error) {
-      console.log('📋 Database check failed, assuming needs fix:', error instanceof Error ? error.message : String(error));
+      console.log(
+        '📋 Database check failed, assuming needs fix:',
+        error instanceof Error ? error.message : String(error)
+      );
       return true;
     }
   }
@@ -59,13 +68,16 @@ export class AutoDatabaseFixer {
   private async performAutoFix(): Promise<void> {
     try {
       console.log('🔧 Step 1: Ensuring basic database setup...');
-      
+
       // For now, just ensure we can connect and the basic structure exists
       // We'll rely on migrations for actual table creation
-      
+
       console.log('✅ Database auto-fix completed (basic check only)');
     } catch (error) {
-      console.error('❌ Auto-fix step failed:', error instanceof Error ? error.message : String(error));
+      console.error(
+        '❌ Auto-fix step failed:',
+        error instanceof Error ? error.message : String(error)
+      );
       throw error;
     }
   }
@@ -83,8 +95,11 @@ export async function runAutoDbFix(): Promise<boolean> {
     await fixer.cleanup();
     return result;
   } catch (error) {
-    console.error('❌ Database auto-fix failed completely:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '❌ Database auto-fix failed completely:',
+      error instanceof Error ? error.message : String(error)
+    );
     await fixer.cleanup();
     return false;
   }
-} 
+}

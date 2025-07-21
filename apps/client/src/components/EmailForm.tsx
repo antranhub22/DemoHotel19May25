@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 interface EmailFormProps {
@@ -20,7 +20,11 @@ interface EmailFormProps {
   roomNumber: string;
 }
 
-export function EmailForm({ summaryContent, serviceRequests, roomNumber }: EmailFormProps) {
+export function EmailForm({
+  summaryContent,
+  serviceRequests,
+  roomNumber,
+}: EmailFormProps) {
   const [email, setEmail] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,15 +32,15 @@ export function EmailForm({ summaryContent, serviceRequests, roomNumber }: Email
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !email.includes('@')) {
       setError('Vui lòng nhập địa chỉ email hợp lệ');
       return;
     }
-    
+
     setIsSending(true);
     setError(null);
-    
+
     try {
       const requestData = {
         toEmail: email,
@@ -45,18 +49,19 @@ export function EmailForm({ summaryContent, serviceRequests, roomNumber }: Email
           timestamp: new Date(),
           duration: '0:00', // Có thể cập nhật từ trạng thái cuộc gọi
           summary: summaryContent,
-          serviceRequests: serviceRequests.map(req => 
-            `${req.serviceType}: ${req.requestText || 'Không có thông tin chi tiết'}`
-          )
-        }
+          serviceRequests: serviceRequests.map(
+            req =>
+              `${req.serviceType}: ${req.requestText || 'Không có thông tin chi tiết'}`
+          ),
+        },
       };
-      
-      const response = await apiRequest({
+
+      const response = (await apiRequest({
         url: '/api/send-call-summary-email',
         method: 'POST',
-        body: requestData
-      }) as any;
-      
+        body: requestData,
+      })) as any;
+
       if (response && response.success) {
         toast({
           title: 'Gửi email thành công',
@@ -97,22 +102,22 @@ export function EmailForm({ summaryContent, serviceRequests, roomNumber }: Email
                 id="email"
                 placeholder="khachhang@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 type="email"
                 required
               />
             </div>
           </div>
-          
+
           {error && (
             <Alert variant="destructive" className="mt-4">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
-          <Button 
-            className="w-full mt-4" 
-            type="submit" 
+
+          <Button
+            className="w-full mt-4"
+            type="submit"
             disabled={isSending || !email}
           >
             {isSending ? 'Đang gửi...' : 'Gửi email'}

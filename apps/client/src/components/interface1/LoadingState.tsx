@@ -3,23 +3,25 @@ import { designSystem } from '@/styles/designSystem';
 
 export const LoadingState: React.FC = () => {
   return (
-    <div 
+    <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
-      style={{ 
+      style={{
         background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.secondary})`,
-        fontFamily: designSystem.fonts.primary
+        fontFamily: designSystem.fonts.primary,
       }}
     >
-      <div 
-        className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl" 
+      <div
+        className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl"
         style={{ boxShadow: designSystem.shadows.card }}
       >
-        <div 
+        <div
           className="animate-spin rounded-full border-4 border-white/20 border-t-white mx-auto mb-6"
           style={{ width: '64px', height: '64px' }}
         ></div>
-        <p className="text-white text-lg font-medium">Loading hotel configuration...</p>
+        <p className="text-white text-lg font-medium">
+          Loading hotel configuration...
+        </p>
       </div>
     </div>
   );
-}; 
+};

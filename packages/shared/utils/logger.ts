@@ -26,18 +26,28 @@ class Logger {
   private getLogLevel(): LogLevel {
     const level = process.env.LOG_LEVEL?.toUpperCase();
     switch (level) {
-      case 'DEBUG': return LogLevel.DEBUG;
-      case 'INFO': return LogLevel.INFO;
-      case 'WARN': return LogLevel.WARN;
-      case 'ERROR': return LogLevel.ERROR;
-      default: return this.isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
+      case 'DEBUG':
+        return LogLevel.DEBUG;
+      case 'INFO':
+        return LogLevel.INFO;
+      case 'WARN':
+        return LogLevel.WARN;
+      case 'ERROR':
+        return LogLevel.ERROR;
+      default:
+        return this.isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
     }
   }
 
-  private formatMessage(level: LogLevel, message: string, context?: string, data?: any): string {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    context?: string,
+    data?: any
+  ): string {
     const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];
-    
+
     const logEntry: LogEntry = {
       timestamp,
       level: levelStr,
@@ -59,11 +69,16 @@ class Logger {
     }
   }
 
-  private log(level: LogLevel, message: string, context?: string, data?: any): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    context?: string,
+    data?: any
+  ): void {
     if (level < this.logLevel) return;
 
     const formatted = this.formatMessage(level, message, context, data);
-    
+
     switch (level) {
       case LogLevel.DEBUG:
         console.debug(formatted);
@@ -134,4 +149,4 @@ class Logger {
 export const logger = new Logger();
 
 // Export default for backwards compatibility
-export default logger; 
+export default logger;

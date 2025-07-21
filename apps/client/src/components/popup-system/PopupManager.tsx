@@ -14,14 +14,10 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
   position = 'bottom',
   maxVisible = 4,
   autoCloseDelay,
-  isMobile = false
+  isMobile = false,
 }) => {
-  const {
-    popups,
-    activePopup,
-    setActivePopup,
-    removePopup,
-  } = usePopupContext();
+  const { popups, activePopup, setActivePopup, removePopup } =
+    usePopupContext();
 
   // Auto-close popups after delay
   useEffect(() => {
@@ -50,7 +46,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 
   const handlePopupDismiss = (id: string) => {
     removePopup(id);
-    
+
     // If we're dismissing the active popup, set the next one as active
     if (activePopup === id && popups.length > 1) {
       const remainingPopups = popups.filter(p => p.id !== id);
@@ -104,11 +100,14 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 export const usePopup = () => {
   const { addPopup, removePopup, setActivePopup } = usePopupContext();
 
-  const showConversation = (content: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-    badge?: number;
-  }) => {
+  const showConversation = (
+    content: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+      badge?: number;
+    }
+  ) => {
     return addPopup({
       type: 'conversation',
       title: options?.title || 'Realtime Conversation',
@@ -119,11 +118,14 @@ export const usePopup = () => {
     });
   };
 
-  const showStaffMessage = (content: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-    badge?: number;
-  }) => {
+  const showStaffMessage = (
+    content: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+      badge?: number;
+    }
+  ) => {
     return addPopup({
       type: 'staff',
       title: options?.title || 'Staff Message',
@@ -134,11 +136,14 @@ export const usePopup = () => {
     });
   };
 
-  const showNotification = (content: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-    badge?: number;
-  }) => {
+  const showNotification = (
+    content: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+      badge?: number;
+    }
+  ) => {
     return addPopup({
       type: 'notification',
       title: options?.title || 'Hotel Notification',
@@ -149,11 +154,14 @@ export const usePopup = () => {
     });
   };
 
-  const showAlert = (content: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-    badge?: number;
-  }) => {
+  const showAlert = (
+    content: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+      badge?: number;
+    }
+  ) => {
     return addPopup({
       type: 'alert',
       title: options?.title || 'System Alert',
@@ -164,11 +172,14 @@ export const usePopup = () => {
     });
   };
 
-  const showOrderUpdate = (content: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-    badge?: number;
-  }) => {
+  const showOrderUpdate = (
+    content: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+      badge?: number;
+    }
+  ) => {
     return addPopup({
       type: 'order',
       title: options?.title || 'Order Update',
@@ -179,10 +190,13 @@ export const usePopup = () => {
     });
   };
 
-  const showSummary = (content?: React.ReactNode, options?: {
-    title?: string;
-    priority?: 'high' | 'medium' | 'low';
-  }) => {
+  const showSummary = (
+    content?: React.ReactNode,
+    options?: {
+      title?: string;
+      priority?: 'high' | 'medium' | 'low';
+    }
+  ) => {
     return addPopup({
       type: 'summary',
       title: options?.title || 'Call Summary',
@@ -202,4 +216,4 @@ export const usePopup = () => {
     removePopup,
     setActivePopup,
   };
-}; 
+};

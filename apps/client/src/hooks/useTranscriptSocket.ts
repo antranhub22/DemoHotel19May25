@@ -10,7 +10,9 @@ interface TranscriptState {
   isAssistantSpeaking: boolean;
 }
 
-export const useTranscriptSocket = ({ socketUrl }: UseTranscriptSocketProps) => {
+export const useTranscriptSocket = ({
+  socketUrl,
+}: UseTranscriptSocketProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [state, setState] = useState<TranscriptState>({
     text: '',
@@ -31,7 +33,7 @@ export const useTranscriptSocket = ({ socketUrl }: UseTranscriptSocketProps) => 
       console.log('[useTranscriptSocket] Socket.IO disconnected');
     });
 
-    newSocket.on('error', (error) => {
+    newSocket.on('error', error => {
       console.error('[useTranscriptSocket] Socket.IO error:', error);
     });
 
@@ -52,7 +54,9 @@ export const useTranscriptSocket = ({ socketUrl }: UseTranscriptSocketProps) => 
       }
     };
 
-    const handleAssistantResponse = (data: { assistant_reply_text: string }) => {
+    const handleAssistantResponse = (data: {
+      assistant_reply_text: string;
+    }) => {
       console.log('[useTranscriptSocket] Assistant response received:', data);
       if (state.isAssistantSpeaking) {
         setState(prev => ({ ...prev, text: data.assistant_reply_text }));
@@ -70,12 +74,24 @@ export const useTranscriptSocket = ({ socketUrl }: UseTranscriptSocketProps) => 
     };
 
     // Handle generic transcript messages from WebSocket bridge
-    const handleTranscript = (data: { role: string; content: string; call_id?: string }) => {
+    const handleTranscript = (data: {
+      role: string;
+      content: string;
+      call_id?: string;
+    }) => {
       console.log('[useTranscriptSocket] Generic transcript received:', data);
       if (data.role === 'user') {
-        setState(prev => ({ ...prev, text: data.content, isAssistantSpeaking: false }));
+        setState(prev => ({
+          ...prev,
+          text: data.content,
+          isAssistantSpeaking: false,
+        }));
       } else if (data.role === 'assistant') {
-        setState(prev => ({ ...prev, text: data.content, isAssistantSpeaking: true }));
+        setState(prev => ({
+          ...prev,
+          text: data.content,
+          isAssistantSpeaking: true,
+        }));
       }
     };
 
@@ -100,4 +116,4 @@ export const useTranscriptSocket = ({ socketUrl }: UseTranscriptSocketProps) => 
     transcript: state.text,
     isAssistantSpeaking: state.isAssistantSpeaking,
   };
-}; 
+};

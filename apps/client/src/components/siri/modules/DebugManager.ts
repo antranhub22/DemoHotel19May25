@@ -1,14 +1,17 @@
 export type DebugLevel = 0 | 1 | 2; // 0: off, 1: errors only, 2: all
 
 export class DebugManager {
-  private static DEBUG_LEVEL: DebugLevel = process.env.NODE_ENV === 'development' ? 1 : 0;
+  private static DEBUG_LEVEL: DebugLevel =
+    process.env.NODE_ENV === 'development' ? 1 : 0;
 
   /**
    * Set the global debug level
    */
   public static setDebugLevel(level: DebugLevel): void {
     DebugManager.DEBUG_LEVEL = level;
-    console.log(`[DebugManager] Debug level set to: ${level} (0: off, 1: errors only, 2: all)`);
+    console.log(
+      `[DebugManager] Debug level set to: ${level} (0: off, 1: errors only, 2: all)`
+    );
   }
 
   /**
@@ -95,7 +98,7 @@ if (typeof window !== 'undefined') {
     },
     getLevel: () => DebugManager.getDebugLevel(),
     silent: () => DebugManager.setDebugLevel(0),
-    errorsOnly: () => DebugManager.setDebugLevel(1), 
+    errorsOnly: () => DebugManager.setDebugLevel(1),
     verbose: () => DebugManager.setDebugLevel(2),
     help: () => {
       console.log(`
@@ -106,10 +109,10 @@ if (typeof window !== 'undefined') {
 - SiriDebugControls.setLevel(n)  -> Set level manually (0-2)
 - SiriDebugControls.getLevel()   -> Check current level
       `);
-    }
+    },
   };
-  
+
   // Quick shortcuts
   (window as any).voiceDebugOff = () => DebugManager.setDebugLevel(0);
   (window as any).voiceDebugOn = () => DebugManager.setDebugLevel(2);
-} 
+}

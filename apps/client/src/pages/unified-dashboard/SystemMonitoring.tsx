@@ -1,35 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  AreaChart, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
   Area,
   BarChart,
-  Bar
+  Bar,
 } from 'recharts';
-import { 
-  Monitor, 
-  Cpu, 
-  HardDrive, 
-  Wifi, 
-  Database, 
-  Server, 
+import {
+  Monitor,
+  Cpu,
+  HardDrive,
+  Wifi,
+  Database,
+  Server,
   Activity,
   AlertTriangle,
   CheckCircle,
@@ -47,7 +47,7 @@ import {
   Info,
   Terminal,
   Eye,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -116,39 +116,69 @@ const mockMetrics: SystemMetrics = {
     usage: 45.2,
     cores: 4,
     temperature: 62,
-    processes: 156
+    processes: 156,
   },
   memory: {
     used: 6.8,
     total: 16,
     available: 9.2,
-    usage: 42.5
+    usage: 42.5,
   },
   disk: {
     used: 85.4,
     total: 500,
     available: 414.6,
-    usage: 17.1
+    usage: 17.1,
   },
   network: {
     downloadSpeed: 125.5,
     uploadSpeed: 25.2,
     latency: 12,
-    status: 'connected'
+    status: 'connected',
   },
   database: {
     connections: 15,
     queries: 1250,
     responseTime: 45,
-    status: 'healthy'
+    status: 'healthy',
   },
   services: [
-    { name: 'Hotel API', status: 'running', uptime: '15d 4h 23m', memory: 256, cpu: 12.5 },
-    { name: 'Database', status: 'running', uptime: '15d 4h 23m', memory: 512, cpu: 8.2 },
-    { name: 'Web Server', status: 'running', uptime: '15d 4h 23m', memory: 128, cpu: 5.1 },
-    { name: 'Socket Server', status: 'running', uptime: '15d 4h 23m', memory: 64, cpu: 3.8 },
-    { name: 'Email Service', status: 'error', uptime: '0d 0h 0m', memory: 0, cpu: 0 }
-  ]
+    {
+      name: 'Hotel API',
+      status: 'running',
+      uptime: '15d 4h 23m',
+      memory: 256,
+      cpu: 12.5,
+    },
+    {
+      name: 'Database',
+      status: 'running',
+      uptime: '15d 4h 23m',
+      memory: 512,
+      cpu: 8.2,
+    },
+    {
+      name: 'Web Server',
+      status: 'running',
+      uptime: '15d 4h 23m',
+      memory: 128,
+      cpu: 5.1,
+    },
+    {
+      name: 'Socket Server',
+      status: 'running',
+      uptime: '15d 4h 23m',
+      memory: 64,
+      cpu: 3.8,
+    },
+    {
+      name: 'Email Service',
+      status: 'error',
+      uptime: '0d 0h 0m',
+      memory: 0,
+      cpu: 0,
+    },
+  ],
 };
 
 const mockAlerts: SystemAlert[] = [
@@ -158,7 +188,7 @@ const mockAlerts: SystemAlert[] = [
     title: 'Email Service Down',
     message: 'Email service has been down for 2 hours',
     timestamp: '2024-01-15T10:30:00Z',
-    resolved: false
+    resolved: false,
   },
   {
     id: '2',
@@ -166,7 +196,7 @@ const mockAlerts: SystemAlert[] = [
     title: 'High Memory Usage',
     message: 'System memory usage is above 80%',
     timestamp: '2024-01-15T09:15:00Z',
-    resolved: false
+    resolved: false,
   },
   {
     id: '3',
@@ -174,8 +204,8 @@ const mockAlerts: SystemAlert[] = [
     title: 'Database Backup Completed',
     message: 'Daily database backup completed successfully',
     timestamp: '2024-01-15T02:00:00Z',
-    resolved: true
-  }
+    resolved: true,
+  },
 ];
 
 const mockLogs: LogEntry[] = [
@@ -185,7 +215,7 @@ const mockLogs: LogEntry[] = [
     level: 'ERROR',
     service: 'EmailService',
     message: 'Failed to connect to SMTP server',
-    details: 'Connection timeout after 30 seconds'
+    details: 'Connection timeout after 30 seconds',
   },
   {
     id: '2',
@@ -193,7 +223,7 @@ const mockLogs: LogEntry[] = [
     level: 'WARN',
     service: 'HotelAPI',
     message: 'High response time detected',
-    details: 'Average response time: 2.5s (threshold: 1s)'
+    details: 'Average response time: 2.5s (threshold: 1s)',
   },
   {
     id: '3',
@@ -201,7 +231,7 @@ const mockLogs: LogEntry[] = [
     level: 'INFO',
     service: 'Database',
     message: 'Query executed successfully',
-    details: 'SELECT * FROM requests - 156 rows returned'
+    details: 'SELECT * FROM requests - 156 rows returned',
   },
   {
     id: '4',
@@ -209,8 +239,8 @@ const mockLogs: LogEntry[] = [
     level: 'DEBUG',
     service: 'WebServer',
     message: 'Static file served',
-    details: 'GET /assets/logo.png - 200 OK'
-  }
+    details: 'GET /assets/logo.png - 200 OK',
+  },
 ];
 
 // Performance data for charts
@@ -221,7 +251,7 @@ const performanceData = [
   { time: '12:00', cpu: 65, memory: 60, disk: 22 },
   { time: '16:00', cpu: 55, memory: 58, disk: 20 },
   { time: '20:00', cpu: 42, memory: 45, disk: 17 },
-  { time: '24:00', cpu: 35, memory: 40, disk: 15 }
+  { time: '24:00', cpu: 35, memory: 40, disk: 15 },
 ];
 
 // System status component
@@ -257,7 +287,12 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
               <Cpu className="h-5 w-5 text-blue-500" />
               <span className="font-medium">CPU</span>
             </div>
-            <span className={cn("text-lg font-bold", getStatusColor(metrics.cpu.usage))}>
+            <span
+              className={cn(
+                'text-lg font-bold',
+                getStatusColor(metrics.cpu.usage)
+              )}
+            >
               {metrics.cpu.usage}%
             </span>
           </div>
@@ -277,7 +312,12 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
               <Monitor className="h-5 w-5 text-green-500" />
               <span className="font-medium">Memory</span>
             </div>
-            <span className={cn("text-lg font-bold", getStatusColor(metrics.memory.usage))}>
+            <span
+              className={cn(
+                'text-lg font-bold',
+                getStatusColor(metrics.memory.usage)
+              )}
+            >
               {metrics.memory.usage}%
             </span>
           </div>
@@ -297,7 +337,12 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
               <HardDrive className="h-5 w-5 text-purple-500" />
               <span className="font-medium">Disk</span>
             </div>
-            <span className={cn("text-lg font-bold", getStatusColor(metrics.disk.usage))}>
+            <span
+              className={cn(
+                'text-lg font-bold',
+                getStatusColor(metrics.disk.usage)
+              )}
+            >
               {metrics.disk.usage}%
             </span>
           </div>
@@ -354,13 +399,22 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
               <span className="font-medium">Services</span>
             </div>
             <span className="text-lg font-bold text-green-600">
-              {metrics.services.filter(s => s.status === 'running').length}/{metrics.services.length}
+              {metrics.services.filter(s => s.status === 'running').length}/
+              {metrics.services.length}
             </span>
           </div>
           <div className="text-sm text-gray-500 space-y-1">
-            <div>Running: {metrics.services.filter(s => s.status === 'running').length}</div>
-            <div>Stopped: {metrics.services.filter(s => s.status === 'stopped').length}</div>
-            <div>Error: {metrics.services.filter(s => s.status === 'error').length}</div>
+            <div>
+              Running:{' '}
+              {metrics.services.filter(s => s.status === 'running').length}
+            </div>
+            <div>
+              Stopped:{' '}
+              {metrics.services.filter(s => s.status === 'stopped').length}
+            </div>
+            <div>
+              Error: {metrics.services.filter(s => s.status === 'error').length}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -406,8 +460,11 @@ const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
           <p>Không có cảnh báo nào</p>
         </div>
       ) : (
-        unresolvedAlerts.map((alert) => (
-          <div key={alert.id} className={cn("border rounded-lg p-4", getAlertColor(alert.type))}>
+        unresolvedAlerts.map(alert => (
+          <div
+            key={alert.id}
+            className={cn('border rounded-lg p-4', getAlertColor(alert.type))}
+          >
             <div className="flex items-start gap-3">
               {getAlertIcon(alert.type)}
               <div className="flex-1">
@@ -428,7 +485,11 @@ const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
 };
 
 // Services component
-const ServicesTable = ({ services }: { services: SystemMetrics['services'] }) => {
+const ServicesTable = ({
+  services,
+}: {
+  services: SystemMetrics['services'];
+}) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'running':
@@ -505,10 +566,13 @@ const SystemLogs = ({ logs }: { logs: LogEntry[] }) => {
 
   return (
     <div className="space-y-2">
-      {logs.map((log) => (
+      {logs.map(log => (
         <div key={log.id} className="border rounded-lg p-3 hover:bg-gray-50">
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className={cn("text-xs", getLevelColor(log.level))}>
+            <Badge
+              variant="outline"
+              className={cn('text-xs', getLevelColor(log.level))}
+            >
               {log.level}
             </Badge>
             <div className="flex-1">
@@ -520,7 +584,9 @@ const SystemLogs = ({ logs }: { logs: LogEntry[] }) => {
               </div>
               <p className="text-sm text-gray-700">{log.message}</p>
               {log.details && (
-                <p className="text-xs text-gray-500 mt-1 font-mono">{log.details}</p>
+                <p className="text-xs text-gray-500 mt-1 font-mono">
+                  {log.details}
+                </p>
               )}
             </div>
           </div>
@@ -559,7 +625,7 @@ export const SystemMonitoring: React.FC = () => {
   // Auto refresh metrics every 30 seconds
   useEffect(() => {
     fetchMetrics();
-    
+
     if (autoRefresh) {
       const interval = setInterval(fetchMetrics, 30000);
       return () => clearInterval(interval);
@@ -577,8 +643,8 @@ export const SystemMonitoring: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={autoRefresh ? 'bg-green-50' : ''}
           >
@@ -586,7 +652,9 @@ export const SystemMonitoring: React.FC = () => {
             {autoRefresh ? 'Auto ON' : 'Auto OFF'}
           </Button>
           <Button variant="outline" onClick={fetchMetrics} disabled={loading}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            <RefreshCw
+              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+            />
             Làm mới
           </Button>
           <Button variant="outline">
@@ -622,9 +690,24 @@ export const SystemMonitoring: React.FC = () => {
                   <XAxis dataKey="time" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="cpu" stroke="#8884d8" strokeWidth={2} />
-                  <Line type="monotone" dataKey="memory" stroke="#82ca9d" strokeWidth={2} />
-                  <Line type="monotone" dataKey="disk" stroke="#ffc658" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="cpu"
+                    stroke="#8884d8"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="memory"
+                    stroke="#82ca9d"
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="disk"
+                    stroke="#ffc658"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -654,7 +737,9 @@ export const SystemMonitoring: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Dịch vụ hệ thống</CardTitle>
-              <CardDescription>Trạng thái và hiệu suất các dịch vụ</CardDescription>
+              <CardDescription>
+                Trạng thái và hiệu suất các dịch vụ
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ServicesTable services={metrics.services} />
@@ -680,4 +765,4 @@ export const SystemMonitoring: React.FC = () => {
       </Tabs>
     </div>
   );
-}; 
+};

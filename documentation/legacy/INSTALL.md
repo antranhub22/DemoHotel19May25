@@ -81,11 +81,13 @@ npm run db:push
 ### 5. Khởi chạy ứng dụng
 
 Phát triển:
+
 ```bash
 npm run dev
 ```
 
 Sản phẩm:
+
 ```bash
 npm run build
 npm start
@@ -96,6 +98,7 @@ npm start
 ### Lỗi kết nối database
 
 Nếu gặp lỗi "Connection refused", hãy kiểm tra:
+
 - PostgreSQL đã được cài đặt và đang chạy
 - Thông tin kết nối trong DATABASE_URL chính xác
 - Cơ sở dữ liệu đã được tạo
@@ -103,6 +106,7 @@ Nếu gặp lỗi "Connection refused", hãy kiểm tra:
 ### Lỗi API key không hợp lệ
 
 Nếu thấy lỗi về API key, hãy kiểm tra:
+
 - OpenAI API key còn hiệu lực và có đủ credit
 - Vapi public key và assistant ID chính xác cho từng ngôn ngữ
 - Các biến môi trường đã được cài đặt đúng cách

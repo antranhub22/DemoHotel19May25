@@ -6,4 +6,4 @@
 export * from './authHelper';
 
 // Debug utilities
-export * from './debugAuth'; 
+export * from './debugAuth';

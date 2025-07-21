@@ -6,4 +6,4 @@
 export { AssistantProvider, useAssistant } from './AssistantContext';
 export { AuthProvider, useAuth } from './AuthContext';
 export { HotelProvider, useHotel } from './HotelContext';
-export { PopupProvider, usePopupContext } from './PopupContext'; 
+export { PopupProvider, usePopupContext } from './PopupContext';

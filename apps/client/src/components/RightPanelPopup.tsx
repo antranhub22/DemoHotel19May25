@@ -12,7 +12,7 @@ interface RightPanelPopupProps {
 const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   isOpen,
   onClose,
-  showSummary = false
+  showSummary = false,
 }) => {
   // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
   const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
@@ -20,9 +20,9 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
       alert('✅ Request sent to Front Desk successfully!');
       onClose();
     },
-    onError: (error) => {
+    onError: error => {
       alert(`❌ ${error}`);
-    }
+    },
   });
 
   if (!isOpen) return null;
@@ -30,7 +30,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   return (
     <div className="relative">
       {/* Popup Container */}
-      <div 
+      <div
         className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-4 w-full max-w-sm"
         style={{
           minHeight: '300px',
@@ -59,7 +59,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
             <div className="overflow-y-auto" style={{ maxHeight: '320px' }}>
               <SummaryPopupContent />
             </div>
-            
+
             {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}
             <div className="flex gap-3 pt-3 border-t border-gray-100">
               <button
@@ -113,4 +113,4 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   );
 };
 
-export default RightPanelPopup; 
+export default RightPanelPopup;

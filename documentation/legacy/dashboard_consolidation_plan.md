@@ -2,16 +2,19 @@
 
 ## 🎯 Executive Summary
 
-Transform the current fragmented dashboard system into a **unified, role-based hotel management dashboard** that reduces development costs by 60% and improves user experience by 80%.
+Transform the current fragmented dashboard system into a **unified, role-based hotel management
+dashboard** that reduces development costs by 60% and improves user experience by 80%.
 
 ## 📊 Current State Analysis
 
 ### Existing Dashboards:
+
 1. **Admin Dashboard** (`/dashboard/*`) - Manager/Admin features
 2. **Staff Dashboard** (`/staff/dashboard`) - Staff operations
 3. **Analytics Dashboard** (`/analytics`) - Standalone analytics
 
 ### Issues Identified:
+
 - ❌ **Code Duplication**: Shared components across 3 codebases
 - ❌ **Authentication Fragmentation**: `auth context` vs `staff_token`
 - ❌ **Inconsistent UX**: Different layouts and navigation patterns
@@ -51,12 +54,14 @@ HOTEL DASHBOARD
 **Goal**: Establish role-based access control system
 
 **Tasks**:
+
 1. Design permission matrix
 2. Create role management system
 3. Implement middleware for route protection
 4. Database schema updates
 
 **Key Components**:
+
 ```typescript
 // Enhanced auth context with roles
 interface User {
@@ -79,6 +84,7 @@ interface Permission {
 **Goal**: Merge staff_token system with main auth context
 
 **Migration Strategy**:
+
 - Migrate staff authentication to main JWT system
 - Add role field to existing users
 - Update all API endpoints to use unified auth
@@ -89,15 +95,16 @@ interface Permission {
 **Goal**: Create single dashboard layout with dynamic components
 
 **Components to Build**:
+
 ```typescript
 // Dynamic sidebar based on user role
-<DynamicSidebar 
-  userRole={user.role} 
+<DynamicSidebar
+  userRole={user.role}
   permissions={user.permissions}
 />
 
 // Role-based dashboard home
-<RoleBasedDashboard 
+<RoleBasedDashboard
   role={user.role}
   components={{
     'hotel-manager': <ManagerDashboard />,
@@ -107,7 +114,7 @@ interface Permission {
 />
 
 // Protected route wrapper
-<ProtectedRoute 
+<ProtectedRoute
   requiredPermission="analytics.view"
   fallback={<NoAccessMessage />}
 >
@@ -120,11 +127,13 @@ interface Permission {
 **Goal**: Migrate existing features into unified dashboard
 
 **Migration Priority**:
+
 1. **High Priority**: Dashboard overview, Live calls
 2. **Medium Priority**: Analytics, Settings
 3. **Low Priority**: Advanced features, Billing
 
 **Code Consolidation**:
+
 - Merge duplicate components
 - Standardize data fetching patterns
 - Unified state management
@@ -135,6 +144,7 @@ interface Permission {
 **Goal**: Ensure quality and smooth transition
 
 **Testing Strategy**:
+
 - Role-based testing scenarios
 - Permission boundary testing
 - Performance testing
@@ -152,14 +162,14 @@ const PERMISSION_MATRIX = {
     billing: ['view', 'edit'],
     staff: ['view', 'edit', 'delete'],
     settings: ['view', 'edit'],
-    system: ['view']
+    system: ['view'],
   },
   'front-desk': {
     dashboard: ['view'],
     calls: ['view', 'join', 'transfer'],
     analytics: ['view_basic'],
     profile: ['view', 'edit'],
-    system: []
+    system: [],
   },
   'it-manager': {
     dashboard: ['view'],
@@ -167,8 +177,8 @@ const PERMISSION_MATRIX = {
     integrations: ['view', 'edit'],
     logs: ['view', 'export'],
     billing: [],
-    staff: []
-  }
+    staff: [],
+  },
 };
 ```
 
@@ -177,9 +187,7 @@ const PERMISSION_MATRIX = {
 ```typescript
 const getMenuItems = (role: UserRole, permissions: Permission[]) => {
   const baseItems = MENU_CONFIG[role];
-  return baseItems.filter(item => 
-    hasPermission(permissions, item.requiredPermission)
-  );
+  return baseItems.filter(item => hasPermission(permissions, item.requiredPermission));
 };
 ```
 
@@ -221,16 +229,19 @@ apps/client/src/components/unified-dashboard/
 ## 💰 Cost-Benefit Analysis
 
 ### Development Cost Savings:
+
 - **Before**: 3 separate dashboards = 12-15 months development
 - **After**: 1 unified dashboard = 2.5 months development
 - **Savings**: ~70% development time
 
 ### Maintenance Benefits:
+
 - **Reduced Bug Surface**: Single codebase vs 3 separate
 - **Faster Feature Delivery**: Add once, available for all roles
 - **Consistent UX**: No user confusion between interfaces
 
 ### User Experience Improvements:
+
 - **Single Sign-On**: One login for all functionalities
 - **Consistent Navigation**: Same UI patterns across roles
 - **Role Switching**: Easy to change permissions without new training
@@ -238,16 +249,19 @@ apps/client/src/components/unified-dashboard/
 ## ✅ Success Metrics
 
 ### Technical Metrics:
+
 - Code duplication reduced by 80%
 - Bundle size decreased by 40%
 - Maintenance time reduced by 60%
 
 ### User Metrics:
+
 - User training time reduced by 75%
 - Feature adoption increased by 50%
 - Support tickets decreased by 45%
 
 ### Business Metrics:
+
 - Development cost reduced by 70%
 - Time-to-market improved by 60%
 - Customer satisfaction increased by 25%
@@ -255,12 +269,14 @@ apps/client/src/components/unified-dashboard/
 ## 🚧 Migration Strategy
 
 ### Backward Compatibility:
+
 1. Keep existing routes active during transition
 2. Gradual user migration per hotel
 3. Feature flags for new dashboard
 4. Rollback plan if issues arise
 
 ### Data Migration:
+
 1. User role assignment
 2. Permission mapping
 3. Session management update
@@ -268,13 +284,13 @@ apps/client/src/components/unified-dashboard/
 
 ## 📅 Timeline Summary
 
-| Phase | Duration | Key Deliverable |
-|-------|----------|----------------|
-| Phase 1 | 2 weeks | RBAC System |
-| Phase 2 | 1 week | Auth Consolidation |
-| Phase 3 | 2 weeks | Unified Layout |
-| Phase 4 | 3 weeks | Feature Migration |
-| Phase 5 | 2 weeks | Testing & Rollout |
+| Phase     | Duration     | Key Deliverable       |
+| --------- | ------------ | --------------------- |
+| Phase 1   | 2 weeks      | RBAC System           |
+| Phase 2   | 1 week       | Auth Consolidation    |
+| Phase 3   | 2 weeks      | Unified Layout        |
+| Phase 4   | 3 weeks      | Feature Migration     |
+| Phase 5   | 2 weeks      | Testing & Rollout     |
 | **Total** | **10 weeks** | **Unified Dashboard** |
 
 ## 🎯 Next Steps
@@ -287,4 +303,5 @@ apps/client/src/components/unified-dashboard/
 
 ---
 
-*This consolidation will transform the hotel management experience from fragmented tools to a cohesive, professional platform that scales with business needs.* 
+_This consolidation will transform the hotel management experience from fragmented tools to a
+cohesive, professional platform that scales with business needs._

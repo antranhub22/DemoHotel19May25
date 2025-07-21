@@ -1,23 +1,35 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Bot, 
-  Settings, 
-  Mic, 
-  Volume2, 
-  Globe, 
-  Palette, 
-  Save, 
-  Play, 
-  Pause, 
+import {
+  Bot,
+  Settings,
+  Mic,
+  Volume2,
+  Globe,
+  Palette,
+  Save,
+  Play,
+  Pause,
   RotateCcw,
   AlertCircle,
   CheckCircle2,
@@ -25,7 +37,7 @@ import {
   Phone,
   MessageSquare,
   Clock,
-  Activity
+  Activity,
 } from 'lucide-react';
 
 // Mock assistant configuration
@@ -41,7 +53,7 @@ const mockAssistantConfig = {
   backgroundSound: 'hotel-lobby',
   systemPrompt: 'You are the AI concierge for Mi Nhon Hotel...',
   status: 'active',
-  lastUpdated: '2024-01-15T10:30:00Z'
+  lastUpdated: '2024-01-15T10:30:00Z',
 };
 
 // Mock performance metrics
@@ -54,8 +66,8 @@ const mockMetrics = {
     { intent: 'Room Service', count: 342, percentage: 27.4 },
     { intent: 'Hotel Information', count: 298, percentage: 23.9 },
     { intent: 'Spa Booking', count: 187, percentage: 15.0 },
-    { intent: 'Restaurant Reservation', count: 156, percentage: 12.5 }
-  ]
+    { intent: 'Restaurant Reservation', count: 156, percentage: 12.5 },
+  ],
 };
 
 // Assistant configuration form
@@ -95,21 +107,27 @@ const AssistantConfigForm = () => {
               <Input
                 id="assistant-name"
                 value={config.name}
-                onChange={(e) => setConfig(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e =>
+                  setConfig(prev => ({ ...prev, name: e.target.value }))
+                }
                 className="mt-1"
               />
             </div>
             <div>
               <Label htmlFor="voice-id">Giọng nói</Label>
-              <Select 
-                value={config.voiceId} 
-                onValueChange={(value) => setConfig(prev => ({ ...prev, voiceId: value }))}
+              <Select
+                value={config.voiceId}
+                onValueChange={value =>
+                  setConfig(prev => ({ ...prev, voiceId: value }))
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="jennifer">Jennifer (Nữ, Tiếng Anh)</SelectItem>
+                  <SelectItem value="jennifer">
+                    Jennifer (Nữ, Tiếng Anh)
+                  </SelectItem>
                   <SelectItem value="david">David (Nam, Tiếng Anh)</SelectItem>
                   <SelectItem value="linh">Linh (Nữ, Tiếng Việt)</SelectItem>
                   <SelectItem value="duc">Đức (Nam, Tiếng Việt)</SelectItem>
@@ -117,13 +135,15 @@ const AssistantConfigForm = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="personality">Tính cách</Label>
-              <Select 
-                value={config.personality} 
-                onValueChange={(value) => setConfig(prev => ({ ...prev, personality: value }))}
+              <Select
+                value={config.personality}
+                onValueChange={value =>
+                  setConfig(prev => ({ ...prev, personality: value }))
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -138,9 +158,11 @@ const AssistantConfigForm = () => {
             </div>
             <div>
               <Label htmlFor="tone">Giọng điệu</Label>
-              <Select 
-                value={config.tone} 
-                onValueChange={(value) => setConfig(prev => ({ ...prev, tone: value }))}
+              <Select
+                value={config.tone}
+                onValueChange={value =>
+                  setConfig(prev => ({ ...prev, tone: value }))
+                }
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
@@ -155,7 +177,7 @@ const AssistantConfigForm = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="silence-timeout">Thời gian chờ (giây)</Label>
@@ -163,7 +185,12 @@ const AssistantConfigForm = () => {
                 id="silence-timeout"
                 type="number"
                 value={config.silenceTimeout}
-                onChange={(e) => setConfig(prev => ({ ...prev, silenceTimeout: parseInt(e.target.value) }))}
+                onChange={e =>
+                  setConfig(prev => ({
+                    ...prev,
+                    silenceTimeout: parseInt(e.target.value),
+                  }))
+                }
                 className="mt-1"
                 min="10"
                 max="120"
@@ -175,19 +202,26 @@ const AssistantConfigForm = () => {
                 id="max-duration"
                 type="number"
                 value={config.maxDuration}
-                onChange={(e) => setConfig(prev => ({ ...prev, maxDuration: parseInt(e.target.value) }))}
+                onChange={e =>
+                  setConfig(prev => ({
+                    ...prev,
+                    maxDuration: parseInt(e.target.value),
+                  }))
+                }
                 className="mt-1"
                 min="300"
                 max="3600"
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="background-sound">Âm thanh nền</Label>
-            <Select 
-              value={config.backgroundSound} 
-              onValueChange={(value) => setConfig(prev => ({ ...prev, backgroundSound: value }))}
+            <Select
+              value={config.backgroundSound}
+              onValueChange={value =>
+                setConfig(prev => ({ ...prev, backgroundSound: value }))
+              }
             >
               <SelectTrigger className="mt-1">
                 <SelectValue />
@@ -201,7 +235,7 @@ const AssistantConfigForm = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -215,14 +249,16 @@ const AssistantConfigForm = () => {
         <CardContent>
           <Textarea
             value={config.systemPrompt}
-            onChange={(e) => setConfig(prev => ({ ...prev, systemPrompt: e.target.value }))}
+            onChange={e =>
+              setConfig(prev => ({ ...prev, systemPrompt: e.target.value }))
+            }
             rows={8}
             className="font-mono text-sm"
             placeholder="Nhập system prompt cho AI Assistant..."
           />
         </CardContent>
       </Card>
-      
+
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
@@ -251,12 +287,14 @@ const AssistantTester = () => {
 
   const handleTest = async () => {
     if (!testPhrase.trim()) return;
-    
+
     setIsTesting(true);
     try {
       // TODO: Replace with actual API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      setTestResponse(`Xin chào! Tôi là AI Assistant của Mi Nhon Hotel. Tôi có thể giúp bạn về ${testPhrase}. Bạn có cần tôi hỗ trợ gì thêm không?`);
+      setTestResponse(
+        `Xin chào! Tôi là AI Assistant của Mi Nhon Hotel. Tôi có thể giúp bạn về ${testPhrase}. Bạn có cần tôi hỗ trợ gì thêm không?`
+      );
     } catch (error) {
       setTestResponse('Đã xảy ra lỗi khi kiểm tra. Vui lòng thử lại.');
     } finally {
@@ -285,7 +323,7 @@ const AssistantTester = () => {
             />
             <Label htmlFor="test-mode">Chế độ kiểm tra</Label>
           </div>
-          
+
           {isTestMode && (
             <div className="space-y-4">
               <div>
@@ -294,11 +332,11 @@ const AssistantTester = () => {
                   <Input
                     id="test-phrase"
                     value={testPhrase}
-                    onChange={(e) => setTestPhrase(e.target.value)}
+                    onChange={e => setTestPhrase(e.target.value)}
                     placeholder="Ví dụ: Tôi muốn đặt phòng"
                     className="flex-1"
                   />
-                  <Button 
+                  <Button
                     onClick={handleTest}
                     disabled={!testPhrase.trim() || isTesting}
                   >
@@ -310,10 +348,12 @@ const AssistantTester = () => {
                   </Button>
                 </div>
               </div>
-              
+
               {testResponse && (
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <Label className="text-sm font-medium">Phản hồi của AI:</Label>
+                  <Label className="text-sm font-medium">
+                    Phản hồi của AI:
+                  </Label>
                   <p className="text-sm text-gray-700 mt-1">{testResponse}</p>
                 </div>
               )}
@@ -321,7 +361,7 @@ const AssistantTester = () => {
           )}
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Mẫu câu hỏi thường gặp</CardTitle>
@@ -339,7 +379,7 @@ const AssistantTester = () => {
               'Làm sao để đi sân bay?',
               'Có wifi miễn phí không?',
               'Tôi muốn gọi room service',
-              'Khách sạn có hồ bơi không?'
+              'Khách sạn có hồ bơi không?',
             ].map((question, index) => (
               <Button
                 key={index}
@@ -370,36 +410,48 @@ const PerformanceMetrics = () => {
             <Phone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockMetrics.totalCalls.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              {mockMetrics.totalCalls.toLocaleString()}
+            </div>
             <p className="text-xs text-muted-foreground">Tháng này</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đánh giá trung bình</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Đánh giá trung bình
+            </CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockMetrics.averageRating}/5</div>
+            <div className="text-2xl font-bold">
+              {mockMetrics.averageRating}/5
+            </div>
             <p className="text-xs text-muted-foreground">Điểm hài lòng</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Thời gian phản hồi</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Thời gian phản hồi
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockMetrics.responseTime}s</div>
+            <div className="text-2xl font-bold">
+              {mockMetrics.responseTime}s
+            </div>
             <p className="text-xs text-muted-foreground">Trung bình</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tỷ lệ thành công</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tỷ lệ thành công
+            </CardTitle>
             <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -408,7 +460,7 @@ const PerformanceMetrics = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Ý định phổ biến</CardTitle>
@@ -458,7 +510,7 @@ export const AssistantManager: React.FC = () => {
           </Badge>
         </div>
       </div>
-      
+
       {/* Status Card */}
       <Card>
         <CardHeader>
@@ -471,22 +523,28 @@ export const AssistantManager: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label className="text-sm font-medium">Tên Assistant</Label>
-              <p className="text-sm text-gray-600">{mockAssistantConfig.name}</p>
+              <p className="text-sm text-gray-600">
+                {mockAssistantConfig.name}
+              </p>
             </div>
             <div>
               <Label className="text-sm font-medium">ID Assistant</Label>
-              <p className="text-sm text-gray-600 font-mono">{mockAssistantConfig.id}</p>
+              <p className="text-sm text-gray-600 font-mono">
+                {mockAssistantConfig.id}
+              </p>
             </div>
             <div>
               <Label className="text-sm font-medium">Cập nhật lần cuối</Label>
               <p className="text-sm text-gray-600">
-                {new Date(mockAssistantConfig.lastUpdated).toLocaleString('vi-VN')}
+                {new Date(mockAssistantConfig.lastUpdated).toLocaleString(
+                  'vi-VN'
+                )}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Tabs */}
       <Tabs defaultValue="config" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
@@ -494,15 +552,15 @@ export const AssistantManager: React.FC = () => {
           <TabsTrigger value="test">Kiểm tra</TabsTrigger>
           <TabsTrigger value="performance">Hiệu suất</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="config" className="space-y-4">
           <AssistantConfigForm />
         </TabsContent>
-        
+
         <TabsContent value="test" className="space-y-4">
           <AssistantTester />
         </TabsContent>
-        
+
         <TabsContent value="performance" className="space-y-4">
           <PerformanceMetrics />
         </TabsContent>
@@ -511,4 +569,4 @@ export const AssistantManager: React.FC = () => {
   );
 };
 
-export default AssistantManager; 
+export default AssistantManager;

@@ -9,10 +9,14 @@ import { z } from 'zod';
 // ========================================
 
 const EnvironmentSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.string().transform(Number).default('3000'),
   DATABASE_URL: z.string().optional(),
-  JWT_SECRET: z.string().default('your-super-secret-jwt-key-change-in-production'),
+  JWT_SECRET: z
+    .string()
+    .default('your-super-secret-jwt-key-change-in-production'),
   VAPI_PUBLIC_KEY: z.string().optional(),
   VAPI_ASSISTANT_ID: z.string().optional(),
   VAPI_PUBLIC_KEY_FR: z.string().optional(),
@@ -59,7 +63,9 @@ export const appConfig = {
 
   // Authentication
   auth: {
-    jwtSecret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
+    jwtSecret:
+      process.env.JWT_SECRET ||
+      'your-super-secret-jwt-key-change-in-production',
     jwtExpiresIn: '24h',
     bcryptRounds: 12,
   },
@@ -178,7 +184,10 @@ export const validateEnvironment = () => {
     if (error instanceof z.ZodError) {
       return { success: false, errors: error.errors };
     }
-    return { success: false, errors: [{ message: 'Unknown validation error' }] };
+    return {
+      success: false,
+      errors: [{ message: 'Unknown validation error' }],
+    };
   }
 };
 
@@ -187,11 +196,14 @@ export const validateEnvironment = () => {
 // ========================================
 
 export const getVapiConfig = (language: string = 'en') => {
-  const langConfig = appConfig.vapi.languages[language as keyof typeof appConfig.vapi.languages];
+  const langConfig =
+    appConfig.vapi.languages[language as keyof typeof appConfig.vapi.languages];
   return langConfig || appConfig.vapi.languages.en;
 };
 
-export const isFeatureEnabled = (feature: keyof typeof appConfig.features): boolean => {
+export const isFeatureEnabled = (
+  feature: keyof typeof appConfig.features
+): boolean => {
   return appConfig.features[feature];
 };
 
@@ -210,4 +222,4 @@ export const getClientUrl = (path: string = ''): string => {
 export type AppConfig = typeof appConfig;
 export type Environment = z.infer<typeof EnvironmentSchema>;
 export type VapiLanguage = keyof typeof appConfig.vapi.languages;
-export type FeatureKey = keyof typeof appConfig.features; 
+export type FeatureKey = keyof typeof appConfig.features;

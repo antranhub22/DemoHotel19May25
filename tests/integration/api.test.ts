@@ -1,7 +1,14 @@
 import request from 'supertest';
 import { app } from '../../server';
 import { db } from '../../lib/db';
-import { staff, tenants, calls, transcripts, requests, messages } from '../../lib/db/schema';
+import {
+  staff,
+  tenants,
+  calls,
+  transcripts,
+  requests,
+  messages,
+} from '../../lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
@@ -48,12 +55,15 @@ const setupTestData = async () => {
 
   // Create test user
   const hashedPassword = await bcrypt.hash(testData.user.password, 10);
-  const [user] = await db.insert(staff).values({
-    username: testData.user.username,
-    password: hashedPassword,
-    role: testData.user.role,
-    tenantId: testData.tenant.id,
-  }).returning();
+  const [user] = await db
+    .insert(staff)
+    .values({
+      username: testData.user.username,
+      password: hashedPassword,
+      role: testData.user.role,
+      tenantId: testData.tenant.id,
+    })
+    .returning();
 
   testTenantId = testData.tenant.id;
   testUserId = user.id;
@@ -83,13 +93,11 @@ describe('Authentication API', () => {
 
   describe('POST /auth/login', () => {
     it('should authenticate valid credentials', async () => {
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          username: testData.user.username,
-          password: testData.user.password,
-          tenantId: testTenantId,
-        });
+      const response = await request(app).post('/auth/login').send({
+        username: testData.user.username,
+        password: testData.user.password,
+        tenantId: testTenantId,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -102,13 +110,11 @@ describe('Authentication API', () => {
     });
 
     it('should reject invalid credentials', async () => {
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          username: testData.user.username,
-          password: 'wrongpassword',
-          tenantId: testTenantId,
-        });
+      const response = await request(app).post('/auth/login').send({
+        username: testData.user.username,
+        password: 'wrongpassword',
+        tenantId: testTenantId,
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -116,12 +122,10 @@ describe('Authentication API', () => {
     });
 
     it('should reject missing username', async () => {
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          password: testData.user.password,
-          tenantId: testTenantId,
-        });
+      const response = await request(app).post('/auth/login').send({
+        password: testData.user.password,
+        tenantId: testTenantId,
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -129,12 +133,10 @@ describe('Authentication API', () => {
     });
 
     it('should reject missing password', async () => {
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          username: testData.user.username,
-          tenantId: testTenantId,
-        });
+      const response = await request(app).post('/auth/login').send({
+        username: testData.user.username,
+        tenantId: testTenantId,
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -144,11 +146,9 @@ describe('Authentication API', () => {
 
   describe('POST /auth/refresh', () => {
     it('should refresh valid token', async () => {
-      const response = await request(app)
-        .post('/auth/refresh')
-        .send({
-          token: authToken,
-        });
+      const response = await request(app).post('/auth/refresh').send({
+        token: authToken,
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -157,11 +157,9 @@ describe('Authentication API', () => {
     });
 
     it('should reject invalid token', async () => {
-      const response = await request(app)
-        .post('/auth/refresh')
-        .send({
-          token: 'invalid-token',
-        });
+      const response = await request(app).post('/auth/refresh').send({
+        token: 'invalid-token',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -358,13 +356,16 @@ describe('Transcript API', () => {
 
   beforeAll(async () => {
     // Create a test call
-    const [call] = await db.insert(calls).values({
-      callIdVapi: 'test-vapi-call-id',
-      roomNumber: '102',
-      language: 'en',
-      startTime: new Date(),
-      tenantId: testTenantId,
-    }).returning();
+    const [call] = await db
+      .insert(calls)
+      .values({
+        callIdVapi: 'test-vapi-call-id',
+        roomNumber: '102',
+        language: 'en',
+        startTime: new Date(),
+        tenantId: testTenantId,
+      })
+      .returning();
     testCallId = call.id;
   });
 
@@ -438,7 +439,9 @@ describe('Order Management API', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.roomNumber).toBe(testData.order.roomNumber);
       expect(response.body.data.orderId).toBe(testData.order.orderId);
-      expect(response.body.data.requestContent).toBe(testData.order.requestContent);
+      expect(response.body.data.requestContent).toBe(
+        testData.order.requestContent
+      );
       expect(response.body.data.status).toBe('pending');
 
       testOrderId = response.body.data.orderId;
@@ -531,13 +534,16 @@ describe('Message API', () => {
 
   beforeAll(async () => {
     // Create a test request
-    const [request] = await db.insert(requests).values({
-      roomNumber: '103',
-      orderId: 'TEST-ORDER-002',
-      requestContent: 'Test request',
-      status: 'pending',
-      tenantId: testTenantId,
-    }).returning();
+    const [request] = await db
+      .insert(requests)
+      .values({
+        roomNumber: '103',
+        orderId: 'TEST-ORDER-002',
+        requestContent: 'Test request',
+        status: 'pending',
+        tenantId: testTenantId,
+      })
+      .returning();
     testRequestId = request.id;
   });
 
@@ -773,4 +779,4 @@ describe('Error Handling', () => {
       expect(response.body.details).toBeDefined();
     });
   });
-}); 
+});

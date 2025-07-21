@@ -136,7 +136,7 @@ export const retry = async <T>(
   delay: number = 1000
 ): Promise<T> => {
   let lastError: Error;
-  
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
@@ -148,7 +148,7 @@ export const retry = async <T>(
       await waitFor(delay);
     }
   }
-  
+
   throw lastError!;
 };
 
@@ -160,7 +160,10 @@ export const createMockResponse = <T>(data: T, status: number = 200) => {
   } as Response;
 };
 
-export const createMockErrorResponse = (message: string, status: number = 400) => {
+export const createMockErrorResponse = (
+  message: string,
+  status: number = 400
+) => {
   return {
     ok: false,
     status,
@@ -175,7 +178,7 @@ export const createMockErrorResponse = (message: string, status: number = 400) =
 export const expectApiResponse = <T>(response: any, expectedData?: T) => {
   expect(response).toHaveProperty('success');
   expect(typeof response.success).toBe('boolean');
-  
+
   if (response.success) {
     expect(response).toHaveProperty('data');
     if (expectedData) {
@@ -187,29 +190,36 @@ export const expectApiResponse = <T>(response: any, expectedData?: T) => {
   }
 };
 
-export const expectPaginatedResponse = <T>(response: any, expectedData?: T[]) => {
+export const expectPaginatedResponse = <T>(
+  response: any,
+  expectedData?: T[]
+) => {
   expect(response).toHaveProperty('data');
   expect(response).toHaveProperty('pagination');
   expect(Array.isArray(response.data)).toBe(true);
-  
+
   expect(response.pagination).toHaveProperty('page');
   expect(response.pagination).toHaveProperty('limit');
   expect(response.pagination).toHaveProperty('total');
   expect(response.pagination).toHaveProperty('totalPages');
-  
+
   if (expectedData) {
     expect(response.data).toEqual(expectedData);
   }
 };
 
-export const expectErrorResponse = (response: any, expectedStatus?: number, expectedMessage?: string) => {
+export const expectErrorResponse = (
+  response: any,
+  expectedStatus?: number,
+  expectedMessage?: string
+) => {
   expect(response.success).toBe(false);
   expect(response).toHaveProperty('error');
-  
+
   if (expectedStatus) {
     expect(response.status).toBe(expectedStatus);
   }
-  
+
   if (expectedMessage) {
     expect(response.error).toContain(expectedMessage);
   }
@@ -250,4 +260,4 @@ export const createTestContext = (): TestContext => {
 export const cleanupTestContext = async (context: TestContext) => {
   // Cleanup test context
   console.log(`Cleaning up test context: ${context.testId}`);
-}; 
+};

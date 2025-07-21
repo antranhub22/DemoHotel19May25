@@ -1,0 +1,29 @@
+node_modules
+dist
+build
+.vite
+coverage
+*.min.js
+*.d.ts
+
+# Backup and temporary files
+*.bak
+*.backup
+*.old
+*.tmp
+
+# Generated files
+documentation/
+.git
+
+# Config files that don't need linting
+*.config.js
+*.config.cjs
+postcss.config.js
+tailwind.config.ts
+
+# Development scripts
+tools/scripts/development/debug-console-script.js
+
+# Legacy files
+documentation/legacy/ 

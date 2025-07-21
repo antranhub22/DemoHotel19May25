@@ -4,7 +4,7 @@
 
 // Core utilities
 export { cn } from './utils';
-export { 
+export {
   normalizeText,
   stringSimilarity,
   removeSimilarItems,
@@ -25,11 +25,14 @@ export {
   formatTime,
   capitalizeWords,
   truncateText,
-  PATTERNS
+  PATTERNS,
 } from './sharedUtils';
 
 // Summary parsing
-export { parseSummaryToOrderDetails, extractRoomNumber as extractRoomNumberFromSummary } from './summaryParser';
+export {
+  parseSummaryToOrderDetails,
+  extractRoomNumber as extractRoomNumberFromSummary,
+} from './summaryParser';
 
 // API client
 export { ApiClient } from './apiClient';
@@ -55,5 +58,5 @@ export {
   VALIDATION_PATTERNS,
   DEFAULT_VALUES,
   ENV,
-  FEATURE_FLAGS
-} from './constants'; 
+  FEATURE_FLAGS,
+} from './constants';

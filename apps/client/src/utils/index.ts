@@ -10,4 +10,4 @@ export { findInDictionary } from './dictionary';
 
 // Dictionary data
 export { englishDictionary } from './dictionary/englishDictionary';
-export { default as dictionaryData } from './dictionary/dictionary.json'; 
+export { default as dictionaryData } from './dictionary/dictionary.json';

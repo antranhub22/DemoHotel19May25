@@ -1,7 +1,7 @@
 import express, { type Request, Response } from 'express';
-import { z } from "zod";
-import { sendServiceConfirmation } from "../gmail";
-import { sendMobileEmail } from "../mobileMail";
+import { z } from 'zod';
+import { sendServiceConfirmation } from '../gmail';
+import { sendMobileEmail } from '../mobileMail';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db';
 import { eq, desc } from 'drizzle-orm';
@@ -16,16 +16,18 @@ const router = express.Router();
 // Get all orders/requests
 router.get('/orders', async (req, res) => {
   try {
-    const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
+    const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
     console.log(`📦 [ORDERS] Getting all orders for tenant: ${tenantId}`);
-    
+
     const orders = await db
       .select()
       .from(requestTable)
       .where(eq(requestTable.tenant_id, tenantId))
       .orderBy(desc(requestTable.created_at));
-    
-    console.log(`📦 [ORDERS] Found ${orders.length} orders for tenant: ${tenantId}`);
+
+    console.log(
+      `📦 [ORDERS] Found ${orders.length} orders for tenant: ${tenantId}`
+    );
     res.json(orders);
   } catch (error) {
     console.error('❌ [ORDERS] Error fetching orders:', error);
@@ -36,18 +38,18 @@ router.get('/orders', async (req, res) => {
 // Create new order/request
 router.post('/orders', express.json(), async (req, res) => {
   try {
-    const { 
-      roomNumber, 
-      requestContent, 
-      description, 
+    const {
+      roomNumber,
+      requestContent,
+      description,
       priority = 'medium',
       tenantId = 'mi-nhon-hotel',
-      callId 
+      callId,
     } = req.body;
-    
+
     if (!roomNumber || !requestContent) {
-      return res.status(400).json({ 
-        error: 'roomNumber and requestContent are required' 
+      return res.status(400).json({
+        error: 'roomNumber and requestContent are required',
       });
     }
 
@@ -68,7 +70,7 @@ router.post('/orders', express.json(), async (req, res) => {
         call_id: callId || null,
         order_id: orderId,
         status: 'Đã ghi nhận',
-        created_at: new Date()
+        created_at: new Date(),
       })
       .returning();
 
@@ -81,20 +83,23 @@ router.post('/orders', express.json(), async (req, res) => {
           roomNumber,
           timestamp: new Date(),
           details: requestContent,
-          orderReference: orderId
+          orderReference: orderId,
         }
       );
       console.log(`📧 [ORDERS] Email notification sent for order: ${orderId}`);
     } catch (emailError) {
-      console.warn(`⚠️ [ORDERS] Email notification failed for order: ${orderId}`, emailError);
+      console.warn(
+        `⚠️ [ORDERS] Email notification failed for order: ${orderId}`,
+        emailError
+      );
       // Don't fail the request if email fails
     }
 
     console.log(`✅ [ORDERS] Order created successfully: ${orderId}`);
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       order: newRequest,
-      orderId 
+      orderId,
     });
   } catch (error) {
     console.error('❌ [ORDERS] Error creating order:', error);
@@ -107,7 +112,7 @@ router.put('/orders/:id', express.json(), async (req, res) => {
   try {
     const { id } = req.params;
     const { status, assigned_to } = req.body;
-    
+
     if (!status) {
       return res.status(400).json({ error: 'Status is required' });
     }
@@ -116,10 +121,10 @@ router.put('/orders/:id', express.json(), async (req, res) => {
 
     const [updatedOrder] = await db
       .update(requestTable)
-      .set({ 
+      .set({
         status,
         assigned_to: assigned_to || null,
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .where(eq(requestTable.id, parseInt(id)))
       .returning();
@@ -141,13 +146,13 @@ router.get('/orders/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`📦 [ORDERS] Getting order by ID: ${id}`);
-    
+
     const [order] = await db
       .select()
       .from(requestTable)
       .where(eq(requestTable.id, parseInt(id)))
       .limit(1);
-    
+
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -165,17 +170,19 @@ router.delete('/orders/:id', async (req, res) => {
   try {
     const { id } = req.params;
     console.log(`🗑️ [ORDERS] Deleting order: ${id}`);
-    
+
     const [deletedOrder] = await db
       .delete(requestTable)
       .where(eq(requestTable.id, parseInt(id)))
       .returning();
-    
+
     if (!deletedOrder) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    console.log(`✅ [ORDERS] Order deleted successfully: ${deletedOrder.order_id}`);
+    console.log(
+      `✅ [ORDERS] Order deleted successfully: ${deletedOrder.order_id}`
+    );
     res.json({ success: true, message: 'Order deleted successfully' });
   } catch (error) {
     console.error('❌ [ORDERS] Error deleting order:', error);
@@ -183,4 +190,4 @@ router.delete('/orders/:id', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

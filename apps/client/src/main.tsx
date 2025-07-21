@@ -11,24 +11,32 @@ import '@/lib/debugAuth'; // Make debugAuth available globally
 const initAuth = async () => {
   try {
     console.log('🚀 [Main] Starting authentication initialization...');
-    
+
     // Clear any potentially expired tokens first
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('dev_auth_token');
-    console.log('🧹 [Main] Cleared all existing tokens to test new credentials');
-    
+    console.log(
+      '🧹 [Main] Cleared all existing tokens to test new credentials'
+    );
+
     const token = await getAuthToken();
     if (token) {
-      console.log('✅ [Main] Fresh authentication token generated successfully');
+      console.log(
+        '✅ [Main] Fresh authentication token generated successfully'
+      );
       console.log('🎫 [Main] Token stored in localStorage');
     } else {
       console.warn('⚠️ [Main] Failed to generate authentication token');
-      console.log('🔧 [Main] You can run: debugAuth.runFullTest() in console to debug');
+      console.log(
+        '🔧 [Main] You can run: debugAuth.runFullTest() in console to debug'
+      );
     }
   } catch (error) {
     console.error('❌ [Main] Failed to initialize authentication:', error);
-    console.log('🔧 [Main] You can run: debugAuth.runFullTest() in console to debug');
+    console.log(
+      '🔧 [Main] You can run: debugAuth.runFullTest() in console to debug'
+    );
   }
 };
 
@@ -39,5 +47,5 @@ initAuth();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

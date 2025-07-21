@@ -11,10 +11,10 @@ const router = Router();
 
 // Health check endpoint
 router.get('/', (_req: Request, res: Response) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
   });
 });
 
@@ -22,28 +22,28 @@ router.get('/', (_req: Request, res: Response) => {
 router.get('/env-check', (_req: Request, res: Response) => {
   const requiredVars = [
     'JWT_SECRET',
-    'DATABASE_URL', 
+    'DATABASE_URL',
     'VITE_OPENAI_API_KEY',
     'VITE_VAPI_PUBLIC_KEY',
-    'VITE_VAPI_ASSISTANT_ID'
+    'VITE_VAPI_ASSISTANT_ID',
   ];
 
   const envStatus = requiredVars.map(varName => ({
     name: varName,
     present: !!process.env[varName],
     length: process.env[varName]?.length || 0,
-    prefix: process.env[varName]?.substring(0, 10) || 'NOT_SET'
+    prefix: process.env[varName]?.substring(0, 10) || 'NOT_SET',
   }));
 
   const missingVars = envStatus.filter(v => !v.present).map(v => v.name);
-  
+
   res.json({
     status: missingVars.length === 0 ? 'ALL_OK' : 'MISSING_VARS',
     requiredCount: requiredVars.length,
     presentCount: envStatus.filter(v => v.present).length,
     missingVars,
     details: envStatus,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -62,13 +62,13 @@ router.get('/health', async (req: Request, res: Response) => {
       uptime: process.uptime(),
       memory: process.memoryUsage(),
       version: process.version,
-      database: 'connected' // Assume connected since app is running
+      database: 'connected', // Assume connected since app is running
     });
   } catch (error) {
     res.status(500).json({
       status: 'unhealthy',
       error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -77,25 +77,25 @@ router.get('/health', async (req: Request, res: Response) => {
 router.post('/health/fix-database', async (req: Request, res: Response) => {
   try {
     console.log('🔧 Manual database fix triggered via API...');
-    
+
     // For now, just return success without doing database operations
     // since db.execute is not available in Drizzle ORM
-    
+
     console.log('✅ Database setup completed successfully!');
-    
+
     res.json({
       status: 'success',
-      message: 'Database setup completed successfully - simplified version without db.execute',
-      timestamp: new Date().toISOString()
+      message:
+        'Database setup completed successfully - simplified version without db.execute',
+      timestamp: new Date().toISOString(),
     });
-    
   } catch (error) {
     console.error('❌ Database setup API error:', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
       message: 'Database setup failed',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -105,32 +105,35 @@ router.get('/health/database', async (req: Request, res: Response) => {
   try {
     const schemaChecks = {
       database_connection: true, // Assume true since app is running
-      tenants_table: true,       // Assume true for simplicity
+      tenants_table: true, // Assume true for simplicity
       hotel_profiles_table: true,
       tenant_id_columns: true,
       mi_nhon_tenant: true,
-      staff_accounts: true
+      staff_accounts: true,
     };
 
-    const allHealthy = Object.values(schemaChecks).every(check => check === true);
+    const allHealthy = Object.values(schemaChecks).every(
+      check => check === true
+    );
 
     res.json({
       status: allHealthy ? 'healthy' : 'needs_attention',
       timestamp: new Date().toISOString(),
       schema_checks: schemaChecks,
-      recommendations: allHealthy ? [] : [
-        'Run manual fix: POST /api/health/fix-database',
-        'Or run: npm run db:fix-production',
-        'Check environment variables: DATABASE_URL',
-        'Verify database migrations are complete'
-      ]
+      recommendations: allHealthy
+        ? []
+        : [
+            'Run manual fix: POST /api/health/fix-database',
+            'Or run: npm run db:fix-production',
+            'Check environment variables: DATABASE_URL',
+            'Verify database migrations are complete',
+          ],
     });
-
   } catch (error) {
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -145,7 +148,7 @@ router.get('/health/environment', async (req: Request, res: Response) => {
     openai_api_key: !!process.env.VITE_OPENAI_API_KEY,
     vapi_public_key: !!process.env.VITE_VAPI_PUBLIC_KEY,
     cors_origin: process.env.CORS_ORIGIN || 'not_set',
-    client_url: process.env.CLIENT_URL || 'not_set'
+    client_url: process.env.CLIENT_URL || 'not_set',
   };
 
   const criticalMissing = [];
@@ -157,58 +160,65 @@ router.get('/health/environment', async (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     environment_checks: envChecks,
     critical_missing: criticalMissing,
-    recommendations: criticalMissing.length > 0 ? [
-      'Set missing environment variables in your deployment platform',
-      'Generate JWT secret: npm run env:jwt-secret',
-      'Configure API keys for full functionality'
-    ] : []
+    recommendations:
+      criticalMissing.length > 0
+        ? [
+            'Set missing environment variables in your deployment platform',
+            'Generate JWT secret: npm run env:jwt-secret',
+            'Configure API keys for full functionality',
+          ]
+        : [],
   });
 });
 
 // Build assets health check
 router.get('/health/assets', async (req: Request, res: Response) => {
   try {
-    const distPath = path.resolve(import.meta.dirname || process.cwd(), "..", "dist/public");
-    const indexHtmlPath = path.resolve(distPath, "index.html");
-    const assetsPath = path.resolve(distPath, "assets");
-    
+    const distPath = path.resolve(
+      import.meta.dirname || process.cwd(),
+      '..',
+      'dist/public'
+    );
+    const indexHtmlPath = path.resolve(distPath, 'index.html');
+    const assetsPath = path.resolve(distPath, 'assets');
+
     // Check if build directory exists
     if (!fs.existsSync(distPath)) {
       return res.status(500).json({
         status: 'error',
         message: 'Build directory not found',
         distPath,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     // Check if index.html exists
     if (!fs.existsSync(indexHtmlPath)) {
       return res.status(500).json({
         status: 'error',
         message: 'index.html not found',
         indexHtmlPath,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     // Read index.html to check referenced assets
     const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
     const assetMatches = indexHtml.match(/\/assets\/[^"']+/g) || [];
-    
+
     // Check if assets directory exists
     if (!fs.existsSync(assetsPath)) {
       return res.status(500).json({
         status: 'error',
         message: 'Assets directory not found',
         assetsPath,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
-    
+
     // List actual assets
     const actualAssets = fs.readdirSync(assetsPath);
-    
+
     // Check if referenced assets exist
     const missingAssets = [];
     for (const assetPath of assetMatches) {
@@ -217,20 +227,22 @@ router.get('/health/assets', async (req: Request, res: Response) => {
         missingAssets.push(assetName);
       }
     }
-    
+
     res.json({
       status: missingAssets.length === 0 ? 'healthy' : 'missing_assets',
       buildPath: distPath,
       referencedAssets: assetMatches.map(a => path.basename(a)),
-      actualAssets: actualAssets.filter(f => f.endsWith('.js') || f.endsWith('.css')),
+      actualAssets: actualAssets.filter(
+        f => f.endsWith('.js') || f.endsWith('.css')
+      ),
       missingAssets,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -239,25 +251,24 @@ router.get('/health/assets', async (req: Request, res: Response) => {
 router.post('/health/setup-database', async (req: Request, res: Response) => {
   try {
     console.log('🔧 Simple database setup triggered via API...');
-    
+
     // For now, just return success without doing database operations
     // since db.execute is not available in Drizzle ORM
-    
+
     console.log('✅ Database setup completed successfully!');
-    
+
     res.json({
       status: 'success',
       message: 'Database setup completed successfully - simplified version',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
   } catch (error) {
     console.error('❌ Database setup API error:', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
       message: 'Database setup failed',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -267,21 +278,21 @@ router.get('/health/test', async (req: Request, res: Response) => {
   res.json({
     status: 'success',
     message: 'Test endpoint is working',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev'
+  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev',
 });
 
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   console.error(defaultMessage, error);
-  res.status(500).json({ 
+  res.status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 }
 
@@ -290,19 +301,24 @@ router.post('/test-openai', async (req, res) => {
   try {
     const { message } = req.body;
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: message || "Hello, give me a quick test response." }],
-      max_tokens: 30
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'user',
+          content: message || 'Hello, give me a quick test response.',
+        },
+      ],
+      max_tokens: 30,
     });
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: response.choices[0].message.content,
       model: response.model,
-      usage: response.usage
+      usage: response.usage,
     });
   } catch (error: any) {
-    handleApiError(res, error, "OpenAI API test error:");
+    handleApiError(res, error, 'OpenAI API test error:');
   }
 });
 
@@ -310,17 +326,18 @@ router.post('/test-openai', async (req, res) => {
 router.get('/db-test', async (req, res) => {
   try {
     // Simple test without using db.execute since it doesn't exist in Drizzle
-    res.json({ 
-      success: true, 
-      message: 'Database connection test - simplified (db.execute not available)',
-      timestamp: new Date().toISOString()
+    res.json({
+      success: true,
+      message:
+        'Database connection test - simplified (db.execute not available)',
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       message: 'Database connection test failed',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -329,21 +346,21 @@ router.get('/db-test', async (req, res) => {
 router.post('/translate-to-vietnamese', async (req, res) => {
   try {
     const { text } = req.body;
-    
+
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
     }
-    
+
     const translatedText = await translateToVietnamese(text);
-    
+
     res.json({
       success: true,
       original: text,
-      translated: translatedText
+      translated: translatedText,
     });
   } catch (error) {
     handleApiError(res, error, 'Translation failed');
   }
 });
 
-export default router; 
+export default router;

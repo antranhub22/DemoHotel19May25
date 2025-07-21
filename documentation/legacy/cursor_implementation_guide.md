@@ -3,11 +3,13 @@
 ## **📋 Tổng quan Implementation**
 
 ### **🔄 Flow Chính**
+
 ```
 Hotel Name Input → Research APIs → Build Knowledge Base → Create Vapi Assistant → Dashboard Ready
 ```
 
 ### **🏗️ Architecture Overview**
+
 ```
 Current MVP (Mi Nhon Hotel) → Migrate to Multi-tenant SaaS Platform
 ├── Keep existing voice assistant functionality
@@ -22,11 +24,13 @@ Current MVP (Mi Nhon Hotel) → Migrate to Multi-tenant SaaS Platform
 ### **PHASE 1: Database Foundation (Week 1)**
 
 #### **What Cursor will do:**
+
 1. **Extend existing database schema** trong `shared/db/schema.ts`
 2. **Create migration files** để add new tables
 3. **Migrate Mi Nhon Hotel** thành tenant đầu tiên
 
 #### **Files to Create/Modify:**
+
 ```typescript
 // shared/db/schema.ts - ADD these tables
 export const tenants = pgTable('tenants', {
@@ -38,7 +42,7 @@ export const tenants = pgTable('tenants', {
   subscriptionStatus: text('subscription_status').default('active'),
   trialEndsAt: timestamp('trial_ends_at'),
   createdAt: timestamp('created_at').defaultNow(),
-  
+
   // Feature flags
   maxVoices: integer('max_voices').default(5),
   maxLanguages: integer('max_languages').default(4),
@@ -46,12 +50,14 @@ export const tenants = pgTable('tenants', {
   multiLocation: boolean('multi_location').default(false),
   whiteLabel: boolean('white_label').default(false),
   dataRetentionDays: integer('data_retention_days').default(90),
-  monthlyCallLimit: integer('monthly_call_limit').default(1000)
-})
+  monthlyCallLimit: integer('monthly_call_limit').default(1000),
+});
 
 export const hotelProfiles = pgTable('hotel_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  tenantId: uuid('tenant_id').references(() => tenants.id).notNull(),
+  tenantId: uuid('tenant_id')
+    .references(() => tenants.id)
+    .notNull(),
   researchData: jsonb('research_data'), // Auto-researched hotel info
   assistantConfig: jsonb('assistant_config'), // Vapi assistant config
   vapiAssistantId: text('vapi_assistant_id'), // Store Vapi assistant ID
@@ -59,28 +65,29 @@ export const hotelProfiles = pgTable('hotel_profiles', {
   knowledgeBase: text('knowledge_base'), // Generated knowledge base
   systemPrompt: text('system_prompt'), // Custom system prompt
   createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow()
-})
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
 
 // ADD tenant_id to existing tables
 export const users = pgTable('users', {
   // existing fields...
-  tenantId: uuid('tenant_id').references(() => tenants.id)
-})
+  tenantId: uuid('tenant_id').references(() => tenants.id),
+});
 
 // Modify existing tables to add tenant_id
 export const transcripts = pgTable('transcripts', {
   // existing fields...
-  tenantId: uuid('tenant_id').references(() => tenants.id)
-})
+  tenantId: uuid('tenant_id').references(() => tenants.id),
+});
 
 export const orders = pgTable('orders', {
   // existing fields...
-  tenantId: uuid('tenant_id').references(() => tenants.id)
-})
+  tenantId: uuid('tenant_id').references(() => tenants.id),
+});
 ```
 
 #### **Migration Script:**
+
 ```typescript
 // migrations/xxx_add_multi_tenancy.sql
 -- Cursor sẽ tạo migration để:
@@ -95,46 +102,48 @@ export const orders = pgTable('orders', {
 ### **PHASE 2: Hotel Research Engine (Week 2)**
 
 #### **What Cursor will do:**
+
 1. **Create hotel research service** để auto-research hotel data
 2. **Implement Google Places API integration**
 3. **Add web scraping capabilities** cho hotel websites
 4. **Build knowledge base generator** từ research data
 
 #### **Files to Create:**
+
 ```typescript
 // server/services/hotelResearch.ts
 export class HotelResearchService {
   // Basic tier research (Free APIs)
   async basicResearch(hotelName: string, location?: string): Promise<BasicHotelData> {
-    const googlePlacesData = await this.getGooglePlacesData(hotelName, location)
-    const websiteData = await this.scrapeOfficialWebsite(googlePlacesData.website)
-    
+    const googlePlacesData = await this.getGooglePlacesData(hotelName, location);
+    const websiteData = await this.scrapeOfficialWebsite(googlePlacesData.website);
+
     return {
       basicInfo: googlePlacesData,
       services: this.extractServices(websiteData),
       amenities: this.extractAmenities(websiteData),
-      policies: this.extractPolicies(websiteData)
-    }
+      policies: this.extractPolicies(websiteData),
+    };
   }
-  
+
   // Advanced tier research (Paid APIs)
   async advancedResearch(hotelName: string): Promise<AdvancedHotelData> {
-    const basicData = await this.basicResearch(hotelName)
-    const socialMediaData = await this.getSocialMediaData(hotelName)
-    const reviewData = await this.getReviewData(hotelName)
-    const competitorData = await this.getCompetitorAnalysis(hotelName)
-    
-    return { ...basicData, socialMediaData, reviewData, competitorData }
+    const basicData = await this.basicResearch(hotelName);
+    const socialMediaData = await this.getSocialMediaData(hotelName);
+    const reviewData = await this.getReviewData(hotelName);
+    const competitorData = await this.getCompetitorAnalysis(hotelName);
+
+    return { ...basicData, socialMediaData, reviewData, competitorData };
   }
-  
+
   private async getGooglePlacesData(name: string, location?: string) {
     // Google Places API integration
   }
-  
+
   private async scrapeOfficialWebsite(url: string) {
     // Web scraping for hotel website
   }
-  
+
   private async getSocialMediaData(hotelName: string) {
     // Social media scraping (Instagram, Facebook)
   }
@@ -166,12 +175,13 @@ Cancellation: ${hotelData.policies.cancellation}
 
 LOCAL ATTRACTIONS:
 ${hotelData.localAttractions.map(a => `- ${a.name}: ${a.description}`).join('\n')}
-    `
+    `;
   }
 }
 ```
 
 #### **Environment Variables to Add:**
+
 ```bash
 # .env
 GOOGLE_PLACES_API_KEY=your_google_places_key
@@ -184,65 +194,67 @@ SCRAPING_SERVICE_URL=your_scraping_service
 ### **PHASE 3: Dynamic Vapi Assistant Creation (Week 3)**
 
 #### **What Cursor will do:**
+
 1. **Study Vapi API documentation** để understand assistant creation
 2. **Create Vapi integration service**
 3. **Build dynamic assistant generator**
 4. **Create system prompt templates**
 
 #### **Vapi API Integration Study:**
+
 ```typescript
 // server/services/vapiIntegration.ts
 export class VapiIntegrationService {
-  private baseURL = 'https://api.vapi.ai'
-  private apiKey = process.env.VAPI_API_KEY
-  
+  private baseURL = 'https://api.vapi.ai';
+  private apiKey = process.env.VAPI_API_KEY;
+
   // Create new assistant via Vapi API
   async createAssistant(config: AssistantConfig): Promise<string> {
     const response = await fetch(`${this.baseURL}/assistant`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: `${config.hotelName} AI Concierge`,
         model: {
           provider: 'openai',
           model: 'gpt-4',
-          systemMessage: config.systemPrompt
+          systemMessage: config.systemPrompt,
         },
         voice: {
           provider: 'playht',
-          voiceId: config.voiceId
+          voiceId: config.voiceId,
         },
-        functions: config.functions
-      })
-    })
-    
-    const assistant = await response.json()
-    return assistant.id
+        functions: config.functions,
+      }),
+    });
+
+    const assistant = await response.json();
+    return assistant.id;
   }
-  
+
   // Update existing assistant
   async updateAssistant(assistantId: string, config: Partial<AssistantConfig>) {
     await fetch(`${this.baseURL}/assistant/${assistantId}`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(config)
-    })
+      body: JSON.stringify(config),
+    });
   }
-  
+
   // Delete assistant
   async deleteAssistant(assistantId: string) {
     await fetch(`${this.baseURL}/assistant/${assistantId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`
-      }
-    })
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+    });
   }
 }
 
@@ -252,35 +264,42 @@ export class AssistantGeneratorService {
     private vapiService: VapiIntegrationService,
     private knowledgeGenerator: KnowledgeBaseGenerator
   ) {}
-  
-  async generateAssistant(hotelData: HotelData, customization: AssistantCustomization): Promise<string> {
+
+  async generateAssistant(
+    hotelData: HotelData,
+    customization: AssistantCustomization
+  ): Promise<string> {
     // 1. Generate knowledge base
-    const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData)
-    
+    const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+
     // 2. Build system prompt
-    const systemPrompt = this.buildSystemPrompt(hotelData, knowledgeBase, customization)
-    
+    const systemPrompt = this.buildSystemPrompt(hotelData, knowledgeBase, customization);
+
     // 3. Generate functions based on hotel services
-    const functions = this.generateFunctions(hotelData.services)
-    
+    const functions = this.generateFunctions(hotelData.services);
+
     // 4. Create assistant via Vapi API
     const assistantId = await this.vapiService.createAssistant({
       hotelName: hotelData.name,
       systemPrompt,
       voiceId: customization.voiceId,
-      functions
-    })
-    
-    return assistantId
+      functions,
+    });
+
+    return assistantId;
   }
-  
-  private buildSystemPrompt(hotelData: HotelData, knowledgeBase: string, customization: AssistantCustomization): string {
-    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${hotelData.category} hotel located in ${hotelData.location}.`
-    
-    const personalityPrompt = this.buildPersonalityPrompt(customization.personality)
-    
-    const knowledgePrompt = `Here is everything you need to know about the hotel:\n\n${knowledgeBase}`
-    
+
+  private buildSystemPrompt(
+    hotelData: HotelData,
+    knowledgeBase: string,
+    customization: AssistantCustomization
+  ): string {
+    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${hotelData.category} hotel located in ${hotelData.location}.`;
+
+    const personalityPrompt = this.buildPersonalityPrompt(customization.personality);
+
+    const knowledgePrompt = `Here is everything you need to know about the hotel:\n\n${knowledgeBase}`;
+
     const instructionsPrompt = `
 IMPORTANT INSTRUCTIONS:
 - Always be helpful, professional, and knowledgeable
@@ -288,14 +307,14 @@ IMPORTANT INSTRUCTIONS:
 - When booking services, collect necessary details (room number, guest name, timing)
 - For complex requests, offer to connect to human staff
 - Maintain the ${customization.personality.tone} tone throughout conversations
-    `
-    
-    return [basePrompt, personalityPrompt, knowledgePrompt, instructionsPrompt].join('\n\n')
+    `;
+
+    return [basePrompt, personalityPrompt, knowledgePrompt, instructionsPrompt].join('\n\n');
   }
-  
+
   private generateFunctions(services: HotelService[]): VapiFunction[] {
-    const functions: VapiFunction[] = []
-    
+    const functions: VapiFunction[] = [];
+
     // Core functions always included
     functions.push({
       name: 'get_hotel_info',
@@ -303,11 +322,11 @@ IMPORTANT INSTRUCTIONS:
       parameters: {
         type: 'object',
         properties: {
-          info_type: { type: 'string', enum: ['hours', 'contact', 'location', 'amenities'] }
-        }
-      }
-    })
-    
+          info_type: { type: 'string', enum: ['hours', 'contact', 'location', 'amenities'] },
+        },
+      },
+    });
+
     // Dynamic functions based on detected services
     if (services.some(s => s.type === 'room_service')) {
       functions.push({
@@ -319,16 +338,16 @@ IMPORTANT INSTRUCTIONS:
             room_number: { type: 'string' },
             items: { type: 'array', items: { type: 'string' } },
             delivery_time: { type: 'string' },
-            special_instructions: { type: 'string' }
+            special_instructions: { type: 'string' },
           },
-          required: ['room_number', 'items']
-        }
-      })
+          required: ['room_number', 'items'],
+        },
+      });
     }
-    
+
     // Add more functions based on available services...
-    
-    return functions
+
+    return functions;
   }
 }
 ```
@@ -338,19 +357,21 @@ IMPORTANT INSTRUCTIONS:
 ### **PHASE 4: Dashboard Frontend (Week 4)**
 
 #### **What Cursor will do:**
+
 1. **Create dashboard layout structure**
 2. **Build setup wizard flow**
 3. **Implement hotel research UI**
 4. **Create assistant management interface**
 
 #### **Key Components to Create:**
+
 ```typescript
 // client/src/pages/dashboard/SetupWizard.tsx
 export const SetupWizard = () => {
   const [step, setStep] = useState(1)
   const [hotelData, setHotelData] = useState<HotelData | null>(null)
   const [isResearching, setIsResearching] = useState(false)
-  
+
   const handleHotelResearch = async (hotelName: string, location?: string) => {
     setIsResearching(true)
     try {
@@ -363,7 +384,7 @@ export const SetupWizard = () => {
       setIsResearching(false)
     }
   }
-  
+
   const handleGenerateAssistant = async (customization: AssistantCustomization) => {
     const assistantId = await api.post('/api/dashboard/generate-assistant', {
       hotelData,
@@ -371,17 +392,17 @@ export const SetupWizard = () => {
     })
     // Redirect to dashboard
   }
-  
+
   return (
     <div className="setup-wizard">
       {step === 1 && (
-        <HotelSearchStep 
+        <HotelSearchStep
           onSearch={handleHotelResearch}
           isLoading={isResearching}
         />
       )}
       {step === 2 && hotelData && (
-        <ReviewDataStep 
+        <ReviewDataStep
           hotelData={hotelData}
           onConfirm={() => setStep(3)}
           onEdit={() => setStep(1)}
@@ -415,7 +436,7 @@ export const HotelSearchStep = ({ onSearch, isLoading }) => (
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
-        <Button 
+        <Button
           onClick={() => onSearch(hotelName, location)}
           disabled={!hotelName || isLoading}
           className="w-full"
@@ -436,11 +457,12 @@ export const HotelSearchStep = ({ onSearch, isLoading }) => (
 ```
 
 #### **Dashboard Layout Structure:**
+
 ```typescript
 // client/src/pages/dashboard/DashboardLayout.tsx
 export const DashboardLayout = () => {
   const { currentTenant } = useAuth()
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation */}
@@ -453,7 +475,7 @@ export const DashboardLayout = () => {
           <UserMenu />
         </div>
       </header>
-      
+
       {/* Main Content */}
       <div className="flex">
         {/* Sidebar */}
@@ -468,7 +490,7 @@ export const DashboardLayout = () => {
             )}
           </nav>
         </aside>
-        
+
         {/* Main Content */}
         <main className="flex-1 p-6">
           <Outlet />
@@ -484,154 +506,158 @@ export const DashboardLayout = () => {
 ### **PHASE 5: API Routes & Controllers (Week 5)**
 
 #### **What Cursor will do:**
+
 1. **Create dashboard API routes**
 2. **Implement hotel research endpoints**
 3. **Add assistant generation endpoints**
 4. **Create tenant management APIs**
 
 #### **API Routes Structure:**
+
 ```typescript
 // server/routes/dashboard.ts
-import express from 'express'
-import { authMiddleware } from '../middleware/auth'
-import { tenantMiddleware } from '../middleware/tenant'
+import express from 'express';
+import { authMiddleware } from '../middleware/auth';
+import { tenantMiddleware } from '../middleware/tenant';
 
-const router = express.Router()
+const router = express.Router();
 
 // Apply auth to all dashboard routes
-router.use(authMiddleware)
-router.use(tenantMiddleware) // Extract tenant from JWT
+router.use(authMiddleware);
+router.use(tenantMiddleware); // Extract tenant from JWT
 
 // Hotel Research
 router.post('/research-hotel', async (req, res) => {
-  const { hotelName, location } = req.body
-  const researchService = new HotelResearchService()
-  
+  const { hotelName, location } = req.body;
+  const researchService = new HotelResearchService();
+
   try {
-    const hotelData = await researchService.basicResearch(hotelName, location)
-    res.json(hotelData)
+    const hotelData = await researchService.basicResearch(hotelName, location);
+    res.json(hotelData);
   } catch (error) {
-    res.status(500).json({ error: 'Research failed' })
+    res.status(500).json({ error: 'Research failed' });
   }
-})
+});
 
 // Generate Assistant
 router.post('/generate-assistant', async (req, res) => {
-  const { hotelData, customization } = req.body
-  const { tenantId } = req.user
-  
+  const { hotelData, customization } = req.body;
+  const { tenantId } = req.user;
+
   try {
-    const assistantGenerator = new AssistantGeneratorService()
-    const assistantId = await assistantGenerator.generateAssistant(hotelData, customization)
-    
+    const assistantGenerator = new AssistantGeneratorService();
+    const assistantId = await assistantGenerator.generateAssistant(hotelData, customization);
+
     // Save to database
-    await db.update(hotelProfiles)
-      .set({ 
+    await db
+      .update(hotelProfiles)
+      .set({
         vapiAssistantId: assistantId,
         assistantConfig: customization,
-        researchData: hotelData
+        researchData: hotelData,
       })
-      .where(eq(hotelProfiles.tenantId, tenantId))
-    
-    res.json({ assistantId })
+      .where(eq(hotelProfiles.tenantId, tenantId));
+
+    res.json({ assistantId });
   } catch (error) {
-    res.status(500).json({ error: 'Assistant generation failed' })
+    res.status(500).json({ error: 'Assistant generation failed' });
   }
-})
+});
 
 // Get Hotel Profile
 router.get('/hotel-profile', async (req, res) => {
-  const { tenantId } = req.user
-  
+  const { tenantId } = req.user;
+
   try {
-    const profile = await db.select()
+    const profile = await db
+      .select()
       .from(hotelProfiles)
       .where(eq(hotelProfiles.tenantId, tenantId))
-      .limit(1)
-    
-    res.json(profile[0] || null)
+      .limit(1);
+
+    res.json(profile[0] || null);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch profile' })
+    res.status(500).json({ error: 'Failed to fetch profile' });
   }
-})
+});
 
 // Update Assistant Configuration
 router.put('/assistant-config', async (req, res) => {
-  const { tenantId } = req.user
-  const { config } = req.body
-  
+  const { tenantId } = req.user;
+  const { config } = req.body;
+
   try {
     // Update in database
-    await db.update(hotelProfiles)
+    await db
+      .update(hotelProfiles)
       .set({ assistantConfig: config, updatedAt: new Date() })
-      .where(eq(hotelProfiles.tenantId, tenantId))
-    
+      .where(eq(hotelProfiles.tenantId, tenantId));
+
     // Update Vapi assistant
-    const profile = await db.select()
+    const profile = await db
+      .select()
       .from(hotelProfiles)
       .where(eq(hotelProfiles.tenantId, tenantId))
-      .limit(1)
-    
-    if (profile[0]?.vapiAssistantId) {
-      const vapiService = new VapiIntegrationService()
-      await vapiService.updateAssistant(profile[0].vapiAssistantId, config)
-    }
-    
-    res.json({ success: true })
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update assistant' })
-  }
-})
+      .limit(1);
 
-export default router
+    if (profile[0]?.vapiAssistantId) {
+      const vapiService = new VapiIntegrationService();
+      await vapiService.updateAssistant(profile[0].vapiAssistantId, config);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update assistant' });
+  }
+});
+
+export default router;
 ```
 
 #### **Authentication Middleware Updates:**
+
 ```typescript
 // server/middleware/tenant.ts
 export const tenantMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { tenantId } = req.user // From JWT
-    
+    const { tenantId } = req.user; // From JWT
+
     // Load tenant data
-    const tenant = await db.select()
-      .from(tenants)
-      .where(eq(tenants.id, tenantId))
-      .limit(1)
-    
+    const tenant = await db.select().from(tenants).where(eq(tenants.id, tenantId)).limit(1);
+
     if (!tenant[0]) {
-      return res.status(404).json({ error: 'Tenant not found' })
+      return res.status(404).json({ error: 'Tenant not found' });
     }
-    
+
     // Check subscription status
     if (tenant[0].subscriptionStatus === 'expired') {
-      return res.status(403).json({ error: 'Subscription expired' })
+      return res.status(403).json({ error: 'Subscription expired' });
     }
-    
+
     // Add tenant to request
-    req.tenant = tenant[0]
-    next()
+    req.tenant = tenant[0];
+    next();
   } catch (error) {
-    res.status(500).json({ error: 'Tenant verification failed' })
+    res.status(500).json({ error: 'Tenant verification failed' });
   }
-}
+};
 
 // server/middleware/featureGate.ts
 export const requireFeature = (feature: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const tenant = req.tenant
-    
+    const tenant = req.tenant;
+
     if (!tenant[feature]) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Feature not available in your plan',
         feature,
-        upgradeRequired: true
-      })
+        upgradeRequired: true,
+      });
     }
-    
-    next()
-  }
-}
+
+    next();
+  };
+};
 ```
 
 ---
@@ -639,6 +665,7 @@ export const requireFeature = (feature: string) => {
 ## **🚀 Cursor Execution Steps**
 
 ### **Step 1: Setup (Day 1)**
+
 ```bash
 # Cursor should:
 1. Analyze current repo structure
@@ -648,6 +675,7 @@ export const requireFeature = (feature: string) => {
 ```
 
 ### **Step 2: Database (Day 2-3)**
+
 ```bash
 # Cursor should:
 1. Modify shared/db/schema.ts with new tables
@@ -657,6 +685,7 @@ export const requireFeature = (feature: string) => {
 ```
 
 ### **Step 3: Backend Services (Day 4-7)**
+
 ```bash
 # Cursor should:
 1. Create hotel research service
@@ -666,6 +695,7 @@ export const requireFeature = (feature: string) => {
 ```
 
 ### **Step 4: Frontend Components (Day 8-12)**
+
 ```bash
 # Cursor should:
 1. Create dashboard layout
@@ -675,6 +705,7 @@ export const requireFeature = (feature: string) => {
 ```
 
 ### **Step 5: Integration (Day 13-14)**
+
 ```bash
 # Cursor should:
 1. Connect frontend to backend APIs
@@ -747,6 +778,7 @@ Mi Nhon Hotel (Updated to SaaS)
 ## **📝 Critical Information for Cursor**
 
 ### **🔑 Key Environment Variables Needed:**
+
 ```bash
 # Database (existing)
 DATABASE_URL=postgresql://...
@@ -775,13 +807,16 @@ JWT_SECRET=your_jwt_secret
 ```
 
 ### **🎯 Core Functionality Flow:**
+
 1. **User Registration**: User signs up → Create tenant → Setup wizard
 2. **Hotel Research**: Input hotel name → Research APIs → Generate knowledge base
-3. **Assistant Creation**: Knowledge base + customization → Create Vapi assistant → Store assistant ID
+3. **Assistant Creation**: Knowledge base + customization → Create Vapi assistant → Store assistant
+   ID
 4. **Assistant Ready**: User can test/customize → Dashboard shows metrics
 5. **Multi-tenancy**: Each tenant has isolated data and separate Vapi assistant
 
 ### **🔧 Integration Points with Existing MVP:**
+
 - **Preserve**: All existing voice assistant functionality for Mi Nhon Hotel
 - **Extend**: `AssistantContext` for multi-tenancy support
 - **Reuse**: Existing components (`VoiceAssistant`, `Interface` components) with tenant restrictions
@@ -789,6 +824,7 @@ JWT_SECRET=your_jwt_secret
 - **Analytics**: Existing analytics extended with tenant filtering
 
 ### **🎨 UI/UX Considerations:**
+
 - **Trial Users**: See upgrade prompts for locked features
 - **Production Users**: Full access to all features
 - **Responsive**: Mobile-first design with collapsible sidebar
@@ -796,6 +832,7 @@ JWT_SECRET=your_jwt_secret
 - **Intuitive**: Setup wizard guides new users through onboarding
 
 ### **🔐 Security & Isolation:**
+
 - **Row-level security**: All data queries filtered by tenant_id
 - **JWT tokens**: Include tenant information and feature flags
 - **Rate limiting**: Per-tenant limits based on subscription plan
@@ -806,10 +843,12 @@ JWT_SECRET=your_jwt_secret
 ## **✅ Ready for Implementation**
 
 This guide provides Cursor with:
+
 - Complete technical specifications
 - Step-by-step implementation plan
 - Code examples and file structures
 - Integration points with existing codebase
 - Security and multi-tenancy considerations
 
-**Cursor can now start implementing Phase 1 with the database foundation and work through each phase systematically.**
+**Cursor can now start implementing Phase 1 with the database foundation and work through each phase
+systematically.**

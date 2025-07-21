@@ -19,7 +19,7 @@ export class DimensionsManager {
   constructor(debug: DebugManager, emergency: EmergencyStopManager) {
     this.debug = debug;
     this.emergency = emergency;
-    
+
     // Create debounced resize function
     this.debouncedResize = this.debounce(() => {
       this.safeResize();
@@ -43,7 +43,7 @@ export class DimensionsManager {
       height: 400,
       centerX: 200,
       centerY: 200,
-      radius: 180
+      radius: 180,
     };
 
     this.debug.log('Dimensions initialized:', initialState);
@@ -55,17 +55,19 @@ export class DimensionsManager {
    */
   public calculateDimensions(): DimensionsState {
     if (!this.canvas || !this.canvas.parentElement) {
-      this.debug.warn('Canvas or container not available, using fallback dimensions');
+      this.debug.warn(
+        'Canvas or container not available, using fallback dimensions'
+      );
       return this.emergency.setFallbackDimensions();
     }
 
     try {
       const container = this.canvas.parentElement;
       const containerRect = container.getBoundingClientRect();
-      
+
       this.debug.debug('Container dimensions:', {
         width: containerRect.width,
-        height: containerRect.height
+        height: containerRect.height,
       });
 
       // Calculate optimal canvas size
@@ -76,7 +78,7 @@ export class DimensionsManager {
       const radius = Math.max(60, Math.min(width, height) * 0.35);
 
       const dimensions = { width, height, centerX, centerY, radius };
-      
+
       this.debug.log('Calculated dimensions:', dimensions);
       return dimensions;
     } catch (error) {
@@ -126,13 +128,13 @@ export class DimensionsManager {
     try {
       // Calculate new dimensions
       const dimensions = this.calculateDimensions();
-      
+
       // Apply dimensions to canvas
       const success = this.applyDimensions(dimensions);
-      
+
       // Notify emergency manager of result
       this.emergency.finishResize(success);
-      
+
       if (success) {
         this.debug.log('Resize completed successfully');
         return dimensions;
@@ -172,13 +174,13 @@ export class DimensionsManager {
    */
   public forceResize(): DimensionsState {
     this.debug.warn('🔧 Force resize triggered');
-    
+
     // Clear any pending debounced resize
     if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = null;
     }
-    
+
     return this.safeResize();
   }
 
@@ -190,7 +192,7 @@ export class DimensionsManager {
       if (this.resizeTimeout) {
         clearTimeout(this.resizeTimeout);
       }
-      
+
       this.resizeTimeout = window.setTimeout(() => {
         this.resizeTimeout = null;
         func();
@@ -203,17 +205,21 @@ export class DimensionsManager {
    */
   public validateDimensions(dimensions: DimensionsState): boolean {
     const { width, height, radius } = dimensions;
-    
+
     if (width <= 0 || height <= 0) {
-      this.debug.error('Invalid dimensions: width or height is zero or negative');
+      this.debug.error(
+        'Invalid dimensions: width or height is zero or negative'
+      );
       return false;
     }
-    
+
     if (radius <= 0 || radius > Math.min(width, height) / 2) {
-      this.debug.error('Invalid radius: must be positive and fit within dimensions');
+      this.debug.error(
+        'Invalid radius: must be positive and fit within dimensions'
+      );
       return false;
     }
-    
+
     return true;
   }
 
@@ -227,21 +233,29 @@ export class DimensionsManager {
   /**
    * Update dimensions with validation
    */
-  public updateDimensions(newDimensions: Partial<DimensionsState>, currentDimensions: DimensionsState): DimensionsState {
+  public updateDimensions(
+    newDimensions: Partial<DimensionsState>,
+    currentDimensions: DimensionsState
+  ): DimensionsState {
     const updated = {
       ...currentDimensions,
-      ...newDimensions
+      ...newDimensions,
     };
 
     // Recalculate center points if width/height changed
-    if (newDimensions.width !== undefined || newDimensions.height !== undefined) {
+    if (
+      newDimensions.width !== undefined ||
+      newDimensions.height !== undefined
+    ) {
       updated.centerX = updated.width / 2;
       updated.centerY = updated.height / 2;
     }
 
     // Recalculate radius if not explicitly provided
-    if (newDimensions.radius === undefined && 
-        (newDimensions.width !== undefined || newDimensions.height !== undefined)) {
+    if (
+      newDimensions.radius === undefined &&
+      (newDimensions.width !== undefined || newDimensions.height !== undefined)
+    ) {
       updated.radius = this.getOptimalRadius(updated.width, updated.height);
     }
 
@@ -259,14 +273,14 @@ export class DimensionsManager {
    */
   public cleanup(): void {
     this.debug.log('Cleaning up dimensions manager');
-    
+
     this.removeResizeListener();
-    
+
     if (this.resizeTimeout) {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = null;
     }
-    
+
     this.canvas = null;
   }
-} 
+}

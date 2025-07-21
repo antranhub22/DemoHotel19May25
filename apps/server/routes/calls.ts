@@ -12,9 +12,9 @@ const router = Router();
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   console.error(defaultMessage, error);
-  res.status(500).json({ 
+  res.status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 }
 
@@ -33,22 +33,22 @@ router.get('/transcripts/:callId', async (req, res) => {
 router.post('/call-end', async (req, res) => {
   try {
     const { callId, duration } = req.body;
-    
+
     if (!callId || duration === undefined) {
-      return res.status(400).json({ 
-        error: 'callId and duration are required' 
+      return res.status(400).json({
+        error: 'callId and duration are required',
       });
     }
 
     // Update call duration and end time using existing schema fields
     await db
       .update(call)
-      .set({ 
+      .set({
         duration: Math.floor(duration),
-        end_time: new Date()
+        end_time: new Date(),
       })
       .where(eq(call.call_id_vapi, callId));
-    
+
     console.log(`✅ Updated call duration for ${callId}: ${duration} seconds`);
     res.json({ success: true, duration });
   } catch (error) {
@@ -60,8 +60,9 @@ router.post('/call-end', async (req, res) => {
 // Create call endpoint - now enabled with proper schema fields
 router.post('/calls', async (req, res) => {
   try {
-    const { call_id_vapi, room_number, language, service_type, tenant_id } = req.body;
-    
+    const { call_id_vapi, room_number, language, service_type, tenant_id } =
+      req.body;
+
     if (!call_id_vapi) {
       return res.status(400).json({ error: 'call_id_vapi is required' });
     }
@@ -75,7 +76,7 @@ router.post('/calls', async (req, res) => {
         language: language || 'en',
         service_type: service_type || null,
         tenant_id: tenant_id || null,
-        start_time: new Date()
+        start_time: new Date(),
       })
       .returning();
 
@@ -91,29 +92,31 @@ router.post('/calls', async (req, res) => {
 router.post('/test-transcript', async (req, res) => {
   try {
     const { callId, role, content } = req.body;
-    
+
     if (!callId || !role || !content) {
-      return res.status(400).json({ 
-        error: 'Call ID, role, and content are required' 
+      return res.status(400).json({
+        error: 'Call ID, role, and content are required',
       });
     }
-    
+
     // Convert camelCase to snake_case for database schema validation
     // Ensure timestamp is within valid range for PostgreSQL
     const now = Date.now();
     const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
-    
+
     const transcriptDataForValidation = {
       call_id: callId,
       role,
       content,
       tenant_id: 'default',
-      timestamp: validTimestamp // ✅ FIXED: Use raw timestamp for validation
+      timestamp: validTimestamp, // ✅ FIXED: Use raw timestamp for validation
     };
-    
+
     // Validate with database schema (expects snake_case)
-    const validatedData = insertTranscriptSchema.parse(transcriptDataForValidation);
-    
+    const validatedData = insertTranscriptSchema.parse(
+      transcriptDataForValidation
+    );
+
     // Auto-create call record if it doesn't exist
     try {
       const existingCall = await db
@@ -123,15 +126,17 @@ router.post('/test-transcript', async (req, res) => {
         .limit(1);
 
       if (existingCall.length === 0) {
-        console.log(`🔍 [API/calls] No call found for ${callId}, skipping auto-creation due to schema mismatch`);
-        
+        console.log(
+          `🔍 [API/calls] No call found for ${callId}, skipping auto-creation due to schema mismatch`
+        );
+
         // TODO: Fix schema mismatch and re-enable call creation
         // await db.insert(call).values({
         //   call_id_vapi: callId,
         //   start_time: Math.floor(validTimestamp / 1000),
         //   tenant_id: 'default'
         // });
-        
+
         console.log('⚠️ [API/calls] Call record creation skipped');
       }
     } catch (error) {
@@ -140,27 +145,27 @@ router.post('/test-transcript', async (req, res) => {
 
     // Store transcript in database with field mapping
     await storage.addTranscript({
-      callId: callId,
+      callId,
       role,
       content,
       tenantId: 'default',
-      timestamp: validTimestamp // ✅ FIXED: Let storage.addTranscript handle conversion
+      timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion
     });
 
     console.log('✅ [API/calls] Transcript stored successfully');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: 'Test transcript stored successfully',
-      transcript: validatedData
+      transcript: validatedData,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error('Zod validation errors in test-transcript:', error.errors);
-      res.status(400).json({ 
-        error: 'Invalid transcript data', 
+      res.status(400).json({
+        error: 'Invalid transcript data',
         details: error.errors,
-        receivedFields: Object.keys(req.body)
+        receivedFields: Object.keys(req.body),
       });
     } else {
       handleApiError(res, error, 'Failed to store test transcript');
@@ -168,4 +173,4 @@ router.post('/test-transcript', async (req, res) => {
   }
 });
 
-export default router; 
+export default router;

@@ -16,7 +16,14 @@ export interface BaseComponentProps {
 }
 
 export interface ButtonProps extends BaseComponentProps {
-  variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link' | 'yellow';
+  variant?:
+    | 'default'
+    | 'outline'
+    | 'secondary'
+    | 'destructive'
+    | 'ghost'
+    | 'link'
+    | 'yellow';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   disabled?: boolean;
   loading?: boolean;
@@ -151,7 +158,18 @@ export interface UserMenuProps {
 export interface FormField {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'tel' | 'textarea' | 'select' | 'checkbox' | 'radio' | 'date' | 'time';
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'tel'
+    | 'textarea'
+    | 'select'
+    | 'checkbox'
+    | 'radio'
+    | 'date'
+    | 'time';
   placeholder?: string;
   required?: boolean;
   validation?: {
@@ -431,4 +449,4 @@ export interface I18nContextType {
   formatDate: (date: Date, options?: Intl.DateTimeFormatOptions) => string;
   formatNumber: (number: number, options?: Intl.NumberFormatOptions) => string;
   formatCurrency: (amount: number, currency: string) => string;
-} 
+}

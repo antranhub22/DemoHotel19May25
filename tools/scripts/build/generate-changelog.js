@@ -294,7 +294,7 @@ class ChangelogGenerator {
     }
   }
 
-  organizeChanges(commits) {
+  async organizeChanges(commits) {
     await this.log('Organizing changes by category...');
     
     // Group commits by category

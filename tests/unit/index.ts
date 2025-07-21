@@ -17,19 +17,19 @@ export * from './utils/mocks';
 export const testConfig = {
   // Test environment
   environment: 'test',
-  
+
   // Database
   database: {
     url: 'file:./test.db',
     type: 'sqlite' as const,
   },
-  
+
   // API
   api: {
     baseUrl: 'http://localhost:3001',
     timeout: 5000,
   },
-  
+
   // Test data
   testData: {
     tenantId: 'test-tenant-id',
@@ -37,7 +37,7 @@ export const testConfig = {
     callId: 'test-call-id',
     orderId: 'test-order-id',
   },
-  
+
   // Mock data
   mocks: {
     hotelData: {
@@ -66,7 +66,7 @@ export const testCategories = {
     types: 'Type definitions tests',
     config: 'Configuration tests',
   },
-  
+
   // Integration tests
   integration: {
     api: 'API integration tests',
@@ -74,7 +74,7 @@ export const testCategories = {
     auth: 'Authentication integration tests',
     websocket: 'WebSocket integration tests',
   },
-  
+
   // Component tests
   components: {
     ui: 'UI components tests',
@@ -82,7 +82,7 @@ export const testCategories = {
     charts: 'Chart components tests',
     layout: 'Layout components tests',
   },
-  
+
   // E2E tests
   e2e: {
     userFlows: 'User flow tests',
@@ -147,4 +147,4 @@ export const runAllTests = async () => {
   await runIntegrationTests();
   await runComponentTests();
   await runE2ETests();
-}; 
+};

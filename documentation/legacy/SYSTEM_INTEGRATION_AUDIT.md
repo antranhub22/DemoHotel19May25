@@ -2,7 +2,8 @@
 
 ## Executive Summary
 
-**Status**: ✅ **Request table is well-integrated** across the system with some redundancy that needs cleanup.
+**Status**: ✅ **Request table is well-integrated** across the system with some redundancy that
+needs cleanup.
 
 **Risk Level**: 🟡 **LOW-MEDIUM** - System functional but has legacy code overhead.
 
@@ -13,23 +14,27 @@
 ### ✅ **WELL CONNECTED AREAS**
 
 #### 1. **Backend API Layer**
+
 - **Storage Service**: ✅ Successfully abstracts request table as "orders"
 - **Route Handlers**: ✅ Multiple endpoints properly query request table
 - **Authentication**: ✅ JWT middleware protects request operations
 - **Error Handling**: ✅ Consistent error responses across request endpoints
 
 #### 2. **Frontend Components**
+
 - **Staff Dashboard**: ✅ Real-time request management interface
 - **Voice Assistant**: ✅ Order tracking through request table
 - **Interface Components**: ✅ Display order status from request data
 - **API Client**: ✅ Type-safe request operations
 
 #### 3. **Real-time Features**
+
 - **WebSocket Updates**: ✅ Status changes broadcast to all clients
 - **Polling**: ✅ Frontend auto-refreshes request data every 30s
 - **Live Status Sync**: ✅ Staff updates immediately visible to guests
 
 #### 4. **Multi-tenant Support**
+
 - **Tenant Isolation**: ✅ All request queries filtered by tenantId
 - **Row-level Security**: ✅ Users only see their tenant's requests
 - **Scalable Architecture**: ✅ Ready for multiple hotels
@@ -39,6 +44,7 @@
 ## ⚠️ **REDUNDANCY ISSUES IDENTIFIED**
 
 ### 1. **Duplicate Sync Logic**
+
 ```typescript
 // ❌ PROBLEM: Still syncing orders → requests (unnecessary)
 // Location: apps/server/routes/orders.ts:28-40
@@ -50,6 +56,7 @@
 ```
 
 ### 2. **Multiple Endpoints Same Data**
+
 ```typescript
 // ❌ PROBLEM: Two endpoints serving same data
 GET /api/orders          → queries request table
@@ -60,6 +67,7 @@ GET /api/staff/requests  → queries request table
 ```
 
 ### 3. **Legacy Type Aliases**
+
 ```typescript
 // ❌ PROBLEM: Confusing type aliases still present
 type Order = typeof request.$inferSelect;
@@ -74,6 +82,7 @@ type InsertOrder = typeof request.$inferInsert;
 ## 🔗 **CONNECTION MAP**
 
 ### **Data Flow Diagram**
+
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Frontend UI   │───▶│   API Routes     │───▶│  Request Table  │
@@ -98,8 +107,9 @@ type InsertOrder = typeof request.$inferInsert;
 ```
 
 ### **Component Dependencies**
+
 - ✅ **StaffDashboard** → `/api/staff/requests` → request table
-- ✅ **AssistantContext** → `/api/orders` → request table  
+- ✅ **AssistantContext** → `/api/orders` → request table
 - ✅ **Interface3/4** → order summary → request table data
 - ✅ **WebSocket** → status updates → request table changes
 - ✅ **Email Service** → save summaries → request table
@@ -108,15 +118,15 @@ type InsertOrder = typeof request.$inferInsert;
 
 ## 📊 **INTEGRATION HEALTH SCORE**
 
-| Component | Connection Status | Score | Notes |
-|-----------|------------------|-------|--------|
-| **Backend APIs** | ✅ Connected | 9/10 | Working well, needs cleanup |
-| **Frontend UI** | ✅ Connected | 9/10 | Real-time updates working |
-| **WebSocket** | ✅ Connected | 8/10 | Status broadcasts functional |
-| **Email Integration** | ✅ Connected | 8/10 | Saves to request table |
-| **Multi-tenant** | ✅ Connected | 9/10 | Proper isolation |
-| **Type Safety** | 🟡 Partial | 6/10 | Legacy aliases confusing |
-| **API Consistency** | 🟡 Partial | 6/10 | Duplicate endpoints |
+| Component             | Connection Status | Score | Notes                        |
+| --------------------- | ----------------- | ----- | ---------------------------- |
+| **Backend APIs**      | ✅ Connected      | 9/10  | Working well, needs cleanup  |
+| **Frontend UI**       | ✅ Connected      | 9/10  | Real-time updates working    |
+| **WebSocket**         | ✅ Connected      | 8/10  | Status broadcasts functional |
+| **Email Integration** | ✅ Connected      | 8/10  | Saves to request table       |
+| **Multi-tenant**      | ✅ Connected      | 9/10  | Proper isolation             |
+| **Type Safety**       | 🟡 Partial        | 6/10  | Legacy aliases confusing     |
+| **API Consistency**   | 🟡 Partial        | 6/10  | Duplicate endpoints          |
 
 **Overall Score**: ✅ **8.1/10** - Strong integration with cleanup needed
 
@@ -125,14 +135,16 @@ type InsertOrder = typeof request.$inferInsert;
 ## 🔧 **RECOMMENDED CLEANUP ACTIONS**
 
 ### Priority 1: **Remove Redundant Sync Logic**
+
 ```typescript
 // TODO: Remove these sync blocks
 // File: apps/server/routes/orders.ts:28-40
-// File: apps/server/routes.ts:410-430  
+// File: apps/server/routes.ts:410-430
 // File: apps/server/services/orderService.ts:125-145
 ```
 
 ### Priority 2: **Consolidate API Endpoints**
+
 ```typescript
 // TODO: Deprecate /api/orders endpoints
 // TODO: Standardize on /api/requests for all operations
@@ -140,6 +152,7 @@ type InsertOrder = typeof request.$inferInsert;
 ```
 
 ### Priority 3: **Clean Type Definitions**
+
 ```typescript
 // TODO: Remove Order type aliases
 // TODO: Use Request types directly
@@ -147,6 +160,7 @@ type InsertOrder = typeof request.$inferInsert;
 ```
 
 ### Priority 4: **Update Documentation**
+
 ```typescript
 // TODO: Update API docs to reflect unified schema
 // TODO: Remove references to separate orders table
@@ -158,6 +172,7 @@ type InsertOrder = typeof request.$inferInsert;
 ## 🎯 **VALIDATION TESTS NEEDED**
 
 ### Critical Paths to Test:
+
 1. **Order Creation** → Guest creates order → Staff sees request
 2. **Status Updates** → Staff updates → Guest sees change via WebSocket
 3. **Email Integration** → Call summary → Request saved to database
@@ -165,6 +180,7 @@ type InsertOrder = typeof request.$inferInsert;
 5. **Real-time Sync** → Multiple staff updating same request
 
 ### Test Commands:
+
 ```bash
 # Test order creation flow
 curl -X POST /api/orders -d '{"roomNumber":"101","requestContent":"Test order"}'
@@ -183,14 +199,16 @@ curl -X PATCH -H "Authorization: Bearer $TOKEN" /api/staff/requests/1/status -d 
 
 ## ✅ **CONCLUSION**
 
-The request table is **well-integrated** across the system with strong real-time capabilities and proper multi-tenant isolation. The main issues are **legacy code redundancy** rather than functional problems.
+The request table is **well-integrated** across the system with strong real-time capabilities and
+proper multi-tenant isolation. The main issues are **legacy code redundancy** rather than functional
+problems.
 
 **Immediate Actions:**
+
 1. Remove sync logic (2-3 hours)
 2. Consolidate API endpoints (4-6 hours)
 3. Clean type definitions (2-3 hours)
 4. Update documentation (2-3 hours)
 
-**Total Cleanup Time**: ~12-15 hours
-**Risk of Breaking Changes**: Low
-**Business Impact**: Improved maintainability, cleaner codebase 
+**Total Cleanup Time**: ~12-15 hours **Risk of Breaking Changes**: Low **Business Impact**: Improved
+maintainability, cleaner codebase

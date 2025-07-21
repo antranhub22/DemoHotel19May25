@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { cn } from '@/lib/utils';
-import { 
-  Home, 
-  Bot, 
-  BarChart, 
-  Settings, 
-  CreditCard, 
-  Users, 
+import {
+  Home,
+  Bot,
+  BarChart,
+  Settings,
+  CreditCard,
+  Users,
   Bell,
   Menu,
   X,
   LogOut,
   HelpCircle,
-  Building2
+  Building2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +49,7 @@ const mockTenant: TenantData = {
   hotelName: 'Mi Nhon Hotel',
   subscriptionPlan: 'premium',
   subscriptionStatus: 'active',
-  remainingDays: 15
+  remainingDays: 15,
 };
 
 // Navigation items
@@ -58,60 +58,60 @@ const navigationItems = [
     href: '/dashboard',
     icon: Home,
     label: 'Tổng quan',
-    description: 'Metrics và thống kê tổng quan'
+    description: 'Metrics và thống kê tổng quan',
   },
   {
     href: '/dashboard/setup',
     icon: Bot,
     label: 'Thiết lập Assistant',
-    description: 'Cấu hình và tùy chỉnh AI Assistant'
+    description: 'Cấu hình và tùy chỉnh AI Assistant',
   },
   {
     href: '/dashboard/analytics',
     icon: BarChart,
     label: 'Phân tích',
-    description: 'Báo cáo và thống kê chi tiết'
+    description: 'Báo cáo và thống kê chi tiết',
   },
   {
     href: '/dashboard/settings',
     icon: Settings,
     label: 'Cài đặt',
-    description: 'Quản lý thông tin khách sạn'
-  }
+    description: 'Quản lý thông tin khách sạn',
+  },
 ];
 
 // Conditional navigation items based on subscription
 const getConditionalNavItems = (subscriptionPlan: string) => {
   const items = [];
-  
+
   if (subscriptionPlan !== 'trial') {
     items.push({
       href: '/dashboard/billing',
       icon: CreditCard,
       label: 'Thanh toán',
-      description: 'Quản lý subscription và billing'
+      description: 'Quản lý subscription và billing',
     });
   }
-  
+
   if (subscriptionPlan === 'enterprise') {
     items.push({
       href: '/dashboard/team',
       icon: Users,
       label: 'Nhóm',
-      description: 'Quản lý team và permissions'
+      description: 'Quản lý team và permissions',
     });
   }
-  
+
   return items;
 };
 
 // Sidebar navigation item component
-const NavItem = ({ 
-  href, 
-  icon: Icon, 
-  label, 
-  description, 
-  isActive 
+const NavItem = ({
+  href,
+  icon: Icon,
+  label,
+  description,
+  isActive,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -121,20 +121,22 @@ const NavItem = ({
 }) => (
   <Link href={href}>
     <Button
-      variant={isActive ? "default" : "ghost"}
+      variant={isActive ? 'default' : 'ghost'}
       className={cn(
-        "w-full justify-start gap-3 px-3 py-6 h-auto",
-        "hover:bg-gray-100 dark:hover:bg-gray-800",
-        isActive && "bg-primary text-primary-foreground hover:bg-primary/90"
+        'w-full justify-start gap-3 px-3 py-6 h-auto',
+        'hover:bg-gray-100 dark:hover:bg-gray-800',
+        isActive && 'bg-primary text-primary-foreground hover:bg-primary/90'
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
       <div className="flex-1 text-left">
         <div className="font-medium">{label}</div>
-        <div className={cn(
-          "text-xs text-muted-foreground",
-          isActive && "text-primary-foreground/80"
-        )}>
+        <div
+          className={cn(
+            'text-xs text-muted-foreground',
+            isActive && 'text-primary-foreground/80'
+          )}
+        >
           {description}
         </div>
       </div>
@@ -143,7 +145,13 @@ const NavItem = ({
 );
 
 // Subscription status badge
-const SubscriptionBadge = ({ plan, status }: { plan: string; status: string }) => {
+const SubscriptionBadge = ({
+  plan,
+  status,
+}: {
+  plan: string;
+  status: string;
+}) => {
   const getVariant = () => {
     if (status === 'expired') return 'destructive';
     if (plan === 'trial') return 'secondary';
@@ -182,9 +190,7 @@ const UserMenu = ({ tenant }: { tenant: TenantData }) => (
     <DropdownMenuContent className="w-56" align="end">
       <DropdownMenuLabel className="flex flex-col">
         <div className="font-medium">{tenant.hotelName}</div>
-        <div className="text-xs text-muted-foreground">
-          ID: {tenant.id}
-        </div>
+        <div className="text-xs text-muted-foreground">ID: {tenant.id}</div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
@@ -205,7 +211,9 @@ const UserMenu = ({ tenant }: { tenant: TenantData }) => (
 );
 
 // Main dashboard layout component
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  children,
+}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [location] = useLocation();
   const { tenant, logout } = useAuth();
@@ -213,7 +221,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   // Get all navigation items including conditional ones
   const allNavItems = [
     ...navigationItems,
-    ...getConditionalNavItems(tenant?.subscriptionPlan || mockTenant.subscriptionPlan)
+    ...getConditionalNavItems(
+      tenant?.subscriptionPlan || mockTenant.subscriptionPlan
+    ),
   ];
 
   return (
@@ -226,7 +236,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         />
       )}
       {/* Sidebar dùng component chuẩn */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} tenantData={tenant || mockTenant} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        tenantData={tenant || mockTenant}
+      />
       {/* Main content */}
       <div className="lg:ml-80">
         {/* Top header */}
@@ -261,18 +275,28 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               {/* User menu sửa để gọi logout */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full"
+                  >
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src="" alt={(tenant || mockTenant).hotelName} />
+                      <AvatarImage
+                        src=""
+                        alt={(tenant || mockTenant).hotelName}
+                      />
                       <AvatarFallback className="bg-primary text-primary-foreground">
-                        {(tenant || mockTenant).hotelName.charAt(0).toUpperCase()}
+                        {(tenant || mockTenant).hotelName
+                          .charAt(0)
+                          .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
                   <DropdownMenuLabel className="flex flex-col">
-                    <div className="font-medium">{(tenant || mockTenant).hotelName}</div>
+                    <div className="font-medium">
+                      {(tenant || mockTenant).hotelName}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       ID: {(tenant || mockTenant).id}
                     </div>
@@ -287,7 +311,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     Trợ giúp
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={logout}>
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={logout}
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     Đăng xuất
                   </DropdownMenuItem>
@@ -297,12 +324,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           </div>
         </header>
         {/* Page content */}
-        <main className="p-6">
-          {children}
-        </main>
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );
 };
 
-export default DashboardLayout; 
+export default DashboardLayout;

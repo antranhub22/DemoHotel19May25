@@ -1,6 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { UserRole, Permission, getPermissionsForRole, hasRolePermission } from '../../types/permissions';
+import {
+  UserRole,
+  Permission,
+  getPermissionsForRole,
+  hasRolePermission,
+} from '../../types/permissions';
 
 // ============================================
 // Types & Interfaces
@@ -122,9 +133,11 @@ const mapLegacyRole = (legacyRole: string): UserRole => {
   }
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   console.log('[DEBUG] AuthProvider render');
-  
+
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,7 +146,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('[DEBUG] AuthProvider useEffect - checking token');
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('[DEBUG] AuthProvider - no token found, setting loading false');
+      console.log(
+        '[DEBUG] AuthProvider - no token found, setting loading false'
+      );
       setIsLoading(false);
       return;
     }
@@ -142,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('[DEBUG] AuthProvider - decoding token');
       const decoded = jwtDecode<MyJwtPayload>(token);
       console.log('[DEBUG] AuthProvider - token decoded:', decoded);
-      
+
       // Tạo user object từ token payload
       const mappedRole = mapLegacyRole(decoded.role);
       const userFromToken: AuthUser = {
@@ -151,18 +166,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: decoded.username,
         tenantId: decoded.tenantId,
         role: mappedRole,
-        permissions: getPermissionsForRole(mappedRole)
+        permissions: getPermissionsForRole(mappedRole),
       };
-      
+
       // Tạo tenant object từ token payload
       const tenantFromToken: TenantData = {
         id: decoded.tenantId,
         hotelName: 'Mi Nhon Hotel', // Default name
         subdomain: 'minhonmuine',
         subscriptionPlan: 'premium',
-        subscriptionStatus: 'active'
+        subscriptionStatus: 'active',
       };
-      
+
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
@@ -186,7 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Sai tài khoản hoặc mật khẩu');
       }
       const data = await res.json();
-      if (!data.success || !data.token) throw new Error('Không nhận được token từ server');
+      if (!data.success || !data.token)
+        throw new Error('Không nhận được token từ server');
       localStorage.setItem('token', data.token);
 
       // Sử dụng user data từ unified auth response
@@ -196,18 +212,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: data.user.email,
         tenantId: data.user.tenantId,
         role: data.user.role,
-        permissions: data.user.permissions || []
+        permissions: data.user.permissions || [],
       };
-      
+
       // Tạo tenant object từ user data
       const tenantFromResponse: TenantData = {
         id: data.user.tenantId,
-        hotelName: 'Mi Nhon Hotel', // Default name  
+        hotelName: 'Mi Nhon Hotel', // Default name
         subdomain: 'minhonmuine',
         subscriptionPlan: 'premium',
-        subscriptionStatus: 'active'
+        subscriptionStatus: 'active',
       };
-      
+
       setUser(userFromResponse);
       setTenant(tenantFromResponse);
     } catch (err: any) {
@@ -229,37 +245,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // Permission checking function
-  const hasPermission = useCallback((module: string, action: string): boolean => {
-    if (!user || !user.permissions) return false;
-    
-    return user.permissions.some(permission => 
-      permission.module === module && 
-      permission.action === action && 
-      permission.allowed
-    );
-  }, [user]);
+  const hasPermission = useCallback(
+    (module: string, action: string): boolean => {
+      if (!user || !user.permissions) return false;
+
+      return user.permissions.some(
+        permission =>
+          permission.module === module &&
+          permission.action === action &&
+          permission.allowed
+      );
+    },
+    [user]
+  );
 
   // Role checking function
-  const hasRole = useCallback((role: UserRole): boolean => {
-    return user?.role === role;
-  }, [user]);
+  const hasRole = useCallback(
+    (role: UserRole): boolean => {
+      return user?.role === role;
+    },
+    [user]
+  );
 
   console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
-  
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      tenant,
-      isLoading,
-      login, // dùng hàm login thực tế
-      logout,
-      isAuthenticated: !!user,
-      refreshAuth: async () => {}, // dummy async refreshAuth
-      hasFeature: () => false,
-      hasRole,
-      hasPermission,
-      isWithinLimits: () => true
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        tenant,
+        isLoading,
+        login, // dùng hàm login thực tế
+        logout,
+        isAuthenticated: !!user,
+        refreshAuth: async () => {}, // dummy async refreshAuth
+        hasFeature: () => false,
+        hasRole,
+        hasPermission,
+        isWithinLimits: () => true,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -282,16 +307,17 @@ export const useTenantDetection = () => {
 
     const host = window.location.host;
     const hostname = window.location.hostname;
-    
+
     // Check if it's a subdomain (not localhost, IP, or main domain)
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
     const isIP = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
-    const isMainDomain = hostname === 'talk2go.online' || hostname === 'www.talk2go.online';
-    
+    const isMainDomain =
+      hostname === 'talk2go.online' || hostname === 'www.talk2go.online';
+
     let subdomain: string | null = null;
     let isSubdomain = false;
     let customDomain: string | undefined = undefined;
-    
+
     if (!isLocalhost && !isIP && !isMainDomain) {
       // Check if it's a custom domain or subdomain
       if (hostname.includes('.talk2go.online')) {
@@ -307,19 +333,20 @@ export const useTenantDetection = () => {
         isSubdomain = false;
       }
     }
-    
+
     // Check if it's Mi Nhon Hotel (for backward compatibility)
-    const isMiNhon = isLocalhost || 
-                     hostname === 'minhotel.talk2go.online' || 
-                     hostname === 'talk2go.online' ||
-                     hostname === 'www.talk2go.online' ||
-                     subdomain === 'minhon';
+    const isMiNhon =
+      isLocalhost ||
+      hostname === 'minhotel.talk2go.online' ||
+      hostname === 'talk2go.online' ||
+      hostname === 'www.talk2go.online' ||
+      subdomain === 'minhon';
 
     setTenantInfo({
       subdomain,
       isMiNhon,
       isSubdomain,
-      customDomain
+      customDomain,
     });
   }, []);
 
@@ -330,22 +357,26 @@ export const useTenantDetection = () => {
 // Protected Route Hook
 // ============================================
 
-export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: UserRole) => {
-  const { user, isAuthenticated, isLoading, hasRole, hasPermission } = useAuth();
-  
+export const useRequireAuth = (
+  requireAuth: boolean = true,
+  requiredRole?: UserRole
+) => {
+  const { user, isAuthenticated, isLoading, hasRole, hasPermission } =
+    useAuth();
+
   const canAccess = () => {
     if (isLoading) return null; // Still loading
-    
+
     if (requireAuth && !isAuthenticated) {
       return false; // Not authenticated
     }
-    
+
     if (requiredRole && user && !hasRole(requiredRole)) {
       // For new RBAC system, roles are more specific and don't have hierarchy
       // Each role has specific permissions instead
       return false;
     }
-    
+
     return true; // Access granted
   };
 
@@ -355,8 +386,8 @@ export const useRequireAuth = (requireAuth: boolean = true, requiredRole?: UserR
     user,
     isAuthenticated,
     hasRole,
-    hasPermission
+    hasPermission,
   };
 };
 
-export default AuthContext; 
+export default AuthContext;

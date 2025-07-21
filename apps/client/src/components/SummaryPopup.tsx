@@ -10,11 +10,11 @@ interface SummaryPopupProps {
   className?: string; // Allow custom className
 }
 
-const SummaryPopup: React.FC<SummaryPopupProps> = ({ 
-  isOpen, 
-  onClose, 
-  layout = 'center-modal', 
-  className = "" 
+const SummaryPopup: React.FC<SummaryPopupProps> = ({
+  isOpen,
+  onClose,
+  layout = 'center-modal',
+  className = '',
 }) => {
   // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
   const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
@@ -22,39 +22,39 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
       alert('✅ Request sent to Front Desk successfully!');
       onClose();
     },
-    onError: (error) => {
+    onError: error => {
       alert(`❌ ${error}`);
-    }
+    },
   });
 
   if (!isOpen) return null;
 
   const isGrid = layout === 'grid';
-  
+
   // Shared popup content
   const PopupContent = () => (
-    <div 
+    <div
       className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden"
       style={{
-        ...(isGrid ? {
-          // Desktop Grid: Normal popup styling
-          width: '100%',
-          maxWidth: '100%',
-          minHeight: '300px',
-          maxHeight: '500px',
-        } : {
-          // Mobile Center Modal: Modal styling
-          width: '90vw',
-          maxWidth: '400px',
-          maxHeight: '80vh',
-        })
+        ...(isGrid
+          ? {
+              // Desktop Grid: Normal popup styling
+              width: '100%',
+              maxWidth: '100%',
+              minHeight: '300px',
+              maxHeight: '500px',
+            }
+          : {
+              // Mobile Center Modal: Modal styling
+              width: '90vw',
+              maxWidth: '400px',
+              maxHeight: '80vh',
+            }),
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white/90">
-        <h3 className="text-lg font-semibold text-gray-800">
-          🔮 Call Summary
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-800">🔮 Call Summary</h3>
         <button
           onClick={onClose}
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -67,15 +67,15 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
       {/* Summary Content */}
       <div className="p-4 space-y-4">
         {/* Summary Content */}
-        <div 
-          className="overflow-y-auto" 
-          style={{ 
-            maxHeight: isGrid ? '320px' : '50vh' 
+        <div
+          className="overflow-y-auto"
+          style={{
+            maxHeight: isGrid ? '320px' : '50vh',
           }}
         >
           <SummaryPopupContent />
         </div>
-        
+
         {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}
         <div className="flex gap-3 pt-3 border-t border-gray-100">
           <button
@@ -105,9 +105,7 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
       {/* Footer */}
       <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
         <div className="flex justify-center">
-          <span className="text-xs text-gray-400">
-            Call Summary Panel
-          </span>
+          <span className="text-xs text-gray-400">Call Summary Panel</span>
         </div>
       </div>
     </div>
@@ -126,7 +124,7 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md"
         onClick={onClose}
         style={{
@@ -134,16 +132,16 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
           WebkitBackdropFilter: 'blur(12px)',
         }}
       />
-      
+
       {/* Modal Container */}
-      <div 
+      <div
         className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 ${className}`}
         style={{ pointerEvents: 'none' }}
       >
-        <div 
-          style={{ 
+        <div
+          style={{
             pointerEvents: 'auto',
-            animation: 'modalSlideIn 0.3s ease-out'
+            animation: 'modalSlideIn 0.3s ease-out',
           }}
         >
           <PopupContent />
@@ -167,4 +165,4 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
   );
 };
 
-export default SummaryPopup; 
+export default SummaryPopup;

@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push validations..."
+
+echo "🔧 TypeScript compilation check..."
+npm run typecheck || {
+  echo "❌ TypeScript errors found. Fix before pushing."
+  exit 1
+}
+
+echo "🧪 Running tests..."
+npm run test || {
+  echo "❌ Tests failed. Fix before pushing."
+  exit 1
+}
+
+echo "🎨 Style consistency check..."
+npm run style:check || {
+  echo "❌ Style issues found. Run 'npm run style:fix' before pushing."
+  exit 1
+}
+
+echo "✅ All pre-push checks passed!" 

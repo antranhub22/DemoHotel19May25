@@ -1,7 +1,7 @@
 // ============================================
 // BACKWARD COMPATIBILITY RE-EXPORT
 // ============================================
-// This file maintains backward compatibility for components 
+// This file maintains backward compatibility for components
 // that still import from @shared/constants/permissions
 
 // DISABLED: auth-system excluded from TypeScript compilation
@@ -12,12 +12,12 @@
 // FALLBACK PERMISSIONS FOR FRONTEND
 // ============================================
 
-export type UserRole = 
-  | 'hotel-manager' 
-  | 'front-desk' 
+export type UserRole =
+  | 'hotel-manager'
+  | 'front-desk'
   | 'it-manager'
-  | 'admin' 
-  | 'staff' 
+  | 'admin'
+  | 'staff'
   | 'manager'
   | 'frontdesk'
   | 'itmanager'
@@ -47,28 +47,28 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     system: ['view', 'debug'],
     calls: ['view'],
   },
-  'admin': {
+  admin: {
     dashboard: ['view', 'edit'],
     analytics: ['view', 'export'],
     calls: ['view', 'manage'],
     requests: ['view', 'manage'],
   },
-  'staff': {
+  staff: {
     dashboard: ['view'],
     requests: ['view'],
   },
-  'manager': {
+  manager: {
     dashboard: ['view', 'edit'],
     analytics: ['view', 'export'],
     calls: ['view', 'manage'],
     requests: ['view', 'manage'],
   },
-  'frontdesk': {
+  frontdesk: {
     dashboard: ['view'],
     calls: ['view'],
     requests: ['view', 'manage'],
   },
-  'itmanager': {
+  itmanager: {
     dashboard: ['view'],
     system: ['view', 'debug'],
     calls: ['view'],
@@ -79,27 +79,31 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     calls: ['view', 'manage'],
     requests: ['view', 'manage'],
     system: ['view', 'debug', 'manage'],
-  }
+  },
 };
 
 export const getPermissionsForRole = (role: UserRole): Permission[] => {
   const rolePermissions = PERMISSION_MATRIX[role] || {};
   const permissions: Permission[] = [];
-  
+
   for (const [module, actions] of Object.entries(rolePermissions)) {
     for (const action of actions) {
       permissions.push({
         module,
         action,
-        allowed: true
+        allowed: true,
       });
     }
   }
-  
+
   return permissions;
 };
 
-export const hasRolePermission = (role: UserRole, module: string, action: string): boolean => {
+export const hasRolePermission = (
+  role: UserRole,
+  module: string,
+  action: string
+): boolean => {
   const rolePermissions = PERMISSION_MATRIX[role] || {};
   return rolePermissions[module]?.includes(action) || false;
 };
@@ -122,22 +126,22 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
-    }
+      requiredPermission: 'analytics.view',
+    },
   ],
   'front-desk': [
     {
@@ -145,15 +149,15 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
-    }
+      requiredPermission: 'calls.view',
+    },
   ],
   'it-manager': [
     {
@@ -161,102 +165,102 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'System Dashboard',
       icon: '🔧',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'system',
       label: 'Hệ thống',
       icon: '⚙️',
       path: '/dashboard/system',
-      requiredPermission: 'system.view'
-    }
+      requiredPermission: 'system.view',
+    },
   ],
-  'admin': [
+  admin: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
-    }
+      requiredPermission: 'analytics.view',
+    },
   ],
-  'staff': [
+  staff: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
-    }
+      requiredPermission: 'dashboard.view',
+    },
   ],
-  'manager': [
+  manager: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
-    }
+      requiredPermission: 'analytics.view',
+    },
   ],
-  'frontdesk': [
+  frontdesk: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
-    }
+      requiredPermission: 'calls.view',
+    },
   ],
-  'itmanager': [
+  itmanager: [
     {
       key: 'dashboard',
       label: 'System Dashboard',
       icon: '🔧',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'system',
       label: 'Hệ thống',
       icon: '⚙️',
       path: '/dashboard/system',
-      requiredPermission: 'system.view'
-    }
+      requiredPermission: 'system.view',
+    },
   ],
   'super-admin': [
     {
@@ -264,33 +268,33 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
+      requiredPermission: 'analytics.view',
     },
     {
       key: 'system',
       label: 'Hệ thống',
       icon: '⚙️',
       path: '/dashboard/system',
-      requiredPermission: 'system.view'
-    }
-  ]
+      requiredPermission: 'system.view',
+    },
+  ],
 };
 
 // Get menu items for a specific role
 export const getMenuForRole = (role: UserRole): MenuItemConfig[] => {
   return ROLE_MENU_CONFIG[role] || [];
-}; 
+};

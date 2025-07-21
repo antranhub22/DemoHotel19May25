@@ -60,12 +60,8 @@
           "name": "message_request_id_request_id_fk",
           "tableFrom": "message",
           "tableTo": "request",
-          "columnsFrom": [
-            "request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["request_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -190,9 +186,7 @@
         "staff_username_unique": {
           "name": "staff_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},

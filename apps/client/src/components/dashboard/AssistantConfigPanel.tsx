@@ -1,24 +1,36 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { 
-  Bot, 
-  Settings, 
-  Mic, 
-  Volume2, 
-  Globe, 
+import {
+  Bot,
+  Settings,
+  Mic,
+  Volume2,
+  Globe,
   Clock,
-  Save, 
+  Save,
   RefreshCw,
   Play,
   Pause,
@@ -28,7 +40,7 @@ import {
   MessageSquare,
   Palette,
   Headphones,
-  Languages
+  Languages,
 } from 'lucide-react';
 
 // Types
@@ -82,11 +94,41 @@ interface AssistantConfigPanelProps {
 
 // Available voices
 const AVAILABLE_VOICES = [
-  { id: 'jennifer', name: 'Jennifer', gender: 'Nữ', language: 'English', sample: 'Hello, welcome to our hotel.' },
-  { id: 'david', name: 'David', gender: 'Nam', language: 'English', sample: 'Good morning, how can I help you?' },
-  { id: 'linh', name: 'Linh', gender: 'Nữ', language: 'Tiếng Việt', sample: 'Xin chào, tôi có thể giúp gì?' },
-  { id: 'duc', name: 'Đức', gender: 'Nam', language: 'Tiếng Việt', sample: 'Chào bạn, cần hỗ trợ gì không?' },
-  { id: 'marie', name: 'Marie', gender: 'Nữ', language: 'Français', sample: 'Bonjour, comment puis-je vous aider?' }
+  {
+    id: 'jennifer',
+    name: 'Jennifer',
+    gender: 'Nữ',
+    language: 'English',
+    sample: 'Hello, welcome to our hotel.',
+  },
+  {
+    id: 'david',
+    name: 'David',
+    gender: 'Nam',
+    language: 'English',
+    sample: 'Good morning, how can I help you?',
+  },
+  {
+    id: 'linh',
+    name: 'Linh',
+    gender: 'Nữ',
+    language: 'Tiếng Việt',
+    sample: 'Xin chào, tôi có thể giúp gì?',
+  },
+  {
+    id: 'duc',
+    name: 'Đức',
+    gender: 'Nam',
+    language: 'Tiếng Việt',
+    sample: 'Chào bạn, cần hỗ trợ gì không?',
+  },
+  {
+    id: 'marie',
+    name: 'Marie',
+    gender: 'Nữ',
+    language: 'Français',
+    sample: 'Bonjour, comment puis-je vous aider?',
+  },
 ];
 
 // Available languages
@@ -96,7 +138,7 @@ const AVAILABLE_LANGUAGES = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
   { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' }
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
 ];
 
 // Personality options
@@ -104,32 +146,40 @@ const PERSONALITY_OPTIONS = [
   {
     value: 'professional',
     label: 'Chuyên nghiệp',
-    description: 'Lịch sự, trang trọng, chuyên nghiệp'
+    description: 'Lịch sự, trang trọng, chuyên nghiệp',
   },
   {
     value: 'friendly',
     label: 'Thân thiện',
-    description: 'Gần gũi, nhiệt tình, dễ tiếp cận'
+    description: 'Gần gũi, nhiệt tình, dễ tiếp cận',
   },
   {
     value: 'luxurious',
     label: 'Sang trọng',
-    description: 'Lịch lãm, tinh tế, đẳng cấp'
+    description: 'Lịch lãm, tinh tế, đẳng cấp',
   },
   {
     value: 'casual',
     label: 'Thoải mái',
-    description: 'Tự nhiên, không gò bó, thân mật'
-  }
+    description: 'Tự nhiên, không gò bó, thân mật',
+  },
 ];
 
 // Tone options
 const TONE_OPTIONS = [
-  { value: 'formal', label: 'Lịch sự', description: 'Trang trọng và chính thức' },
+  {
+    value: 'formal',
+    label: 'Lịch sự',
+    description: 'Trang trọng và chính thức',
+  },
   { value: 'friendly', label: 'Thân thiện', description: 'Ấm áp và gần gũi' },
   { value: 'warm', label: 'Ấm áp', description: 'Chân tình và quan tâm' },
-  { value: 'energetic', label: 'Năng động', description: 'Nhiệt huyết và tích cực' },
-  { value: 'calm', label: 'Bình tĩnh', description: 'Điềm tĩnh và tin cậy' }
+  {
+    value: 'energetic',
+    label: 'Năng động',
+    description: 'Nhiệt huyết và tích cực',
+  },
+  { value: 'calm', label: 'Bình tĩnh', description: 'Điềm tĩnh và tin cậy' },
 ];
 
 // Loading skeleton
@@ -157,7 +207,7 @@ const ConfigSkeleton = () => (
 const VoiceSelector = ({
   selectedVoice,
   onVoiceChange,
-  onTest
+  onTest,
 }: {
   selectedVoice: string;
   onVoiceChange: (voiceId: string) => void;
@@ -176,23 +226,27 @@ const VoiceSelector = ({
 
   return (
     <div className="space-y-3">
-      {AVAILABLE_VOICES.map((voice) => (
+      {AVAILABLE_VOICES.map(voice => (
         <div
           key={voice.id}
           className={cn(
-            "border rounded-lg p-3 cursor-pointer transition-colors",
-            selectedVoice === voice.id 
-              ? "border-primary bg-primary/5" 
-              : "border-gray-200 hover:border-gray-300"
+            'border rounded-lg p-3 cursor-pointer transition-colors',
+            selectedVoice === voice.id
+              ? 'border-primary bg-primary/5'
+              : 'border-gray-200 hover:border-gray-300'
           )}
           onClick={() => onVoiceChange(voice.id)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "w-3 h-3 rounded-full border-2",
-                selectedVoice === voice.id ? "bg-primary border-primary" : "border-gray-300"
-              )} />
+              <div
+                className={cn(
+                  'w-3 h-3 rounded-full border-2',
+                  selectedVoice === voice.id
+                    ? 'bg-primary border-primary'
+                    : 'border-gray-300'
+                )}
+              />
               <div>
                 <div className="font-medium">{voice.name}</div>
                 <div className="text-sm text-muted-foreground">
@@ -203,7 +257,7 @@ const VoiceSelector = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 handleTest(voice.id);
               }}
@@ -228,7 +282,7 @@ const VoiceSelector = ({
 // Language selector component
 const LanguageSelector = ({
   selectedLanguages,
-  onLanguageChange
+  onLanguageChange,
 }: {
   selectedLanguages: string[];
   onLanguageChange: (languages: string[]) => void;
@@ -243,14 +297,17 @@ const LanguageSelector = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      {AVAILABLE_LANGUAGES.map((language) => (
+      {AVAILABLE_LANGUAGES.map(language => (
         <div key={language.code} className="flex items-center space-x-3">
           <Checkbox
             id={language.code}
             checked={selectedLanguages.includes(language.code)}
             onCheckedChange={() => handleToggle(language.code)}
           />
-          <Label htmlFor={language.code} className="flex items-center gap-2 cursor-pointer">
+          <Label
+            htmlFor={language.code}
+            className="flex items-center gap-2 cursor-pointer"
+          >
             <span className="text-lg">{language.flag}</span>
             <span>{language.name}</span>
           </Label>
@@ -270,7 +327,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
   onTest,
   onReset,
   className,
-  disabled = false
+  disabled = false,
 }) => {
   const [editConfig, setEditConfig] = useState<AssistantConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
@@ -284,7 +341,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
 
   const handleConfigChange = (updates: Partial<AssistantConfig>) => {
     if (!editConfig) return;
-    
+
     const newConfig = { ...editConfig, ...updates };
     setEditConfig(newConfig);
     setHasChanges(JSON.stringify(newConfig) !== JSON.stringify(config));
@@ -292,7 +349,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
 
   const handleSave = async () => {
     if (!editConfig || !hasChanges) return;
-    
+
     try {
       await onSave(editConfig);
       setHasChanges(false);
@@ -303,7 +360,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
 
   const handleTest = async () => {
     if (!editConfig) return;
-    
+
     try {
       await onTest(editConfig);
     } catch (error) {
@@ -338,12 +395,15 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge 
+          <Badge
             variant={editConfig.status === 'active' ? 'default' : 'secondary'}
             className="text-xs"
           >
-            {editConfig.status === 'active' ? 'Hoạt động' : 
-             editConfig.status === 'testing' ? 'Đang test' : 'Tạm dừng'}
+            {editConfig.status === 'active'
+              ? 'Hoạt động'
+              : editConfig.status === 'testing'
+                ? 'Đang test'
+                : 'Tạm dừng'}
           </Badge>
         </div>
       </div>
@@ -378,7 +438,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
             <Input
               id="assistant-name"
               value={editConfig.name}
-              onChange={(e) => handleConfigChange({ name: e.target.value })}
+              onChange={e => handleConfigChange({ name: e.target.value })}
               disabled={disabled}
               placeholder="Ví dụ: Mi Nhon Hotel AI Concierge"
             />
@@ -402,43 +462,55 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
             <div>
               <Label className="text-base font-medium">Tính cách</Label>
               <div className="space-y-3 mt-3">
-                {PERSONALITY_OPTIONS.map((option) => (
+                {PERSONALITY_OPTIONS.map(option => (
                   <div key={option.value} className="flex items-start gap-3">
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2 mt-0.5",
-                      editConfig.personality === option.value 
-                        ? "bg-primary border-primary" 
-                        : "border-gray-300"
-                    )} />
-                    <div 
+                    <div
+                      className={cn(
+                        'w-4 h-4 rounded-full border-2 mt-0.5',
+                        editConfig.personality === option.value
+                          ? 'bg-primary border-primary'
+                          : 'border-gray-300'
+                      )}
+                    />
+                    <div
                       className="flex-1 cursor-pointer"
-                      onClick={() => handleConfigChange({ personality: option.value as any })}
+                      onClick={() =>
+                        handleConfigChange({ personality: option.value as any })
+                      }
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-muted-foreground">{option.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {option.description}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            
+
             <div>
               <Label className="text-base font-medium">Giọng điệu</Label>
               <div className="space-y-3 mt-3">
-                {TONE_OPTIONS.map((option) => (
+                {TONE_OPTIONS.map(option => (
                   <div key={option.value} className="flex items-start gap-3">
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2 mt-0.5",
-                      editConfig.tone === option.value 
-                        ? "bg-primary border-primary" 
-                        : "border-gray-300"
-                    )} />
-                    <div 
+                    <div
+                      className={cn(
+                        'w-4 h-4 rounded-full border-2 mt-0.5',
+                        editConfig.tone === option.value
+                          ? 'bg-primary border-primary'
+                          : 'border-gray-300'
+                      )}
+                    />
+                    <div
                       className="flex-1 cursor-pointer"
-                      onClick={() => handleConfigChange({ tone: option.value as any })}
+                      onClick={() =>
+                        handleConfigChange({ tone: option.value as any })
+                      }
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-muted-foreground">{option.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {option.description}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -461,29 +533,33 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label className="text-base font-medium mb-3 block">Chọn giọng nói</Label>
+            <Label className="text-base font-medium mb-3 block">
+              Chọn giọng nói
+            </Label>
             <VoiceSelector
               selectedVoice={editConfig.voiceSettings.voiceId}
-              onVoiceChange={(voiceId) => 
+              onVoiceChange={voiceId =>
                 handleConfigChange({
-                  voiceSettings: { ...editConfig.voiceSettings, voiceId }
+                  voiceSettings: { ...editConfig.voiceSettings, voiceId },
                 })
               }
-              onTest={async (voiceId) => {
+              onTest={async voiceId => {
                 // Test voice implementation
                 console.log('Testing voice:', voiceId);
               }}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <Label className="text-sm font-medium">Tốc độ nói ({editConfig.voiceSettings.speed}x)</Label>
+              <Label className="text-sm font-medium">
+                Tốc độ nói ({editConfig.voiceSettings.speed}x)
+              </Label>
               <Slider
                 value={[editConfig.voiceSettings.speed]}
-                onValueChange={([speed]) => 
+                onValueChange={([speed]) =>
                   handleConfigChange({
-                    voiceSettings: { ...editConfig.voiceSettings, speed }
+                    voiceSettings: { ...editConfig.voiceSettings, speed },
                   })
                 }
                 min={0.5}
@@ -492,14 +568,16 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
                 className="mt-2"
               />
             </div>
-            
+
             <div>
-              <Label className="text-sm font-medium">Độ cao ({editConfig.voiceSettings.pitch})</Label>
+              <Label className="text-sm font-medium">
+                Độ cao ({editConfig.voiceSettings.pitch})
+              </Label>
               <Slider
                 value={[editConfig.voiceSettings.pitch]}
-                onValueChange={([pitch]) => 
+                onValueChange={([pitch]) =>
                   handleConfigChange({
-                    voiceSettings: { ...editConfig.voiceSettings, pitch }
+                    voiceSettings: { ...editConfig.voiceSettings, pitch },
                   })
                 }
                 min={-20}
@@ -508,14 +586,16 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
                 className="mt-2"
               />
             </div>
-            
+
             <div>
-              <Label className="text-sm font-medium">Âm lượng ({editConfig.voiceSettings.volume}%)</Label>
+              <Label className="text-sm font-medium">
+                Âm lượng ({editConfig.voiceSettings.volume}%)
+              </Label>
               <Slider
                 value={[editConfig.voiceSettings.volume]}
-                onValueChange={([volume]) => 
+                onValueChange={([volume]) =>
                   handleConfigChange({
-                    voiceSettings: { ...editConfig.voiceSettings, volume }
+                    voiceSettings: { ...editConfig.voiceSettings, volume },
                   })
                 }
                 min={0}
@@ -542,7 +622,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
         <CardContent>
           <LanguageSelector
             selectedLanguages={editConfig.languages}
-            onLanguageChange={(languages) => handleConfigChange({ languages })}
+            onLanguageChange={languages => handleConfigChange({ languages })}
           />
         </CardContent>
       </Card>
@@ -561,17 +641,19 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="silence-timeout">Thời gian chờ im lặng (giây)</Label>
+              <Label htmlFor="silence-timeout">
+                Thời gian chờ im lặng (giây)
+              </Label>
               <Input
                 id="silence-timeout"
                 type="number"
                 value={editConfig.behaviorSettings.silenceTimeout}
-                onChange={(e) => 
+                onChange={e =>
                   handleConfigChange({
                     behaviorSettings: {
                       ...editConfig.behaviorSettings,
-                      silenceTimeout: parseInt(e.target.value)
-                    }
+                      silenceTimeout: parseInt(e.target.value),
+                    },
                   })
                 }
                 min={5}
@@ -579,19 +661,21 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
                 disabled={disabled}
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="max-duration">Thời lượng cuộc gọi tối đa (giây)</Label>
+              <Label htmlFor="max-duration">
+                Thời lượng cuộc gọi tối đa (giây)
+              </Label>
               <Input
                 id="max-duration"
                 type="number"
                 value={editConfig.behaviorSettings.maxCallDuration}
-                onChange={(e) => 
+                onChange={e =>
                   handleConfigChange({
                     behaviorSettings: {
                       ...editConfig.behaviorSettings,
-                      maxCallDuration: parseInt(e.target.value)
-                    }
+                      maxCallDuration: parseInt(e.target.value),
+                    },
                   })
                 }
                 min={60}
@@ -600,33 +684,41 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-base font-medium">Cho phép ngắt lời</Label>
+                <Label className="text-base font-medium">
+                  Cho phép ngắt lời
+                </Label>
                 <p className="text-sm text-muted-foreground">
                   Khách hàng có thể ngắt lời AI khi đang nói
                 </p>
               </div>
               <Switch
                 checked={editConfig.behaviorSettings.interruptible}
-                onCheckedChange={(interruptible) => 
+                onCheckedChange={interruptible =>
                   handleConfigChange({
-                    behaviorSettings: { ...editConfig.behaviorSettings, interruptible }
+                    behaviorSettings: {
+                      ...editConfig.behaviorSettings,
+                      interruptible,
+                    },
                   })
                 }
                 disabled={disabled}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="background-sound">Âm thanh nền</Label>
               <Select
                 value={editConfig.behaviorSettings.backgroundSound}
-                onValueChange={(backgroundSound: any) => 
+                onValueChange={(backgroundSound: any) =>
                   handleConfigChange({
-                    behaviorSettings: { ...editConfig.behaviorSettings, backgroundSound }
+                    behaviorSettings: {
+                      ...editConfig.behaviorSettings,
+                      backgroundSound,
+                    },
                   })
                 }
               >
@@ -661,12 +753,12 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
             <Textarea
               id="greeting"
               value={editConfig.conversationSettings.greeting}
-              onChange={(e) => 
+              onChange={e =>
                 handleConfigChange({
                   conversationSettings: {
                     ...editConfig.conversationSettings,
-                    greeting: e.target.value
-                  }
+                    greeting: e.target.value,
+                  },
                 })
               }
               placeholder="Ví dụ: Xin chào! Tôi là AI Assistant của khách sạn..."
@@ -674,18 +766,18 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
               rows={2}
             />
           </div>
-          
+
           <div>
             <Label htmlFor="fallback">Tin nhắn dự phòng</Label>
             <Textarea
               id="fallback"
               value={editConfig.conversationSettings.fallbackMessage}
-              onChange={(e) => 
+              onChange={e =>
                 handleConfigChange({
                   conversationSettings: {
                     ...editConfig.conversationSettings,
-                    fallbackMessage: e.target.value
-                  }
+                    fallbackMessage: e.target.value,
+                  },
                 })
               }
               placeholder="Khi không hiểu yêu cầu..."
@@ -693,18 +785,18 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
               rows={2}
             />
           </div>
-          
+
           <div>
             <Label htmlFor="end-call">Tin nhắn kết thúc</Label>
             <Textarea
               id="end-call"
               value={editConfig.conversationSettings.endCallMessage}
-              onChange={(e) => 
+              onChange={e =>
                 handleConfigChange({
                   conversationSettings: {
                     ...editConfig.conversationSettings,
-                    endCallMessage: e.target.value
-                  }
+                    endCallMessage: e.target.value,
+                  },
                 })
               }
               placeholder="Cảm ơn bạn đã liên hệ..."
@@ -726,7 +818,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
         <CardContent>
           <Textarea
             value={editConfig.systemPrompt}
-            onChange={(e) => handleConfigChange({ systemPrompt: e.target.value })}
+            onChange={e => handleConfigChange({ systemPrompt: e.target.value })}
             rows={10}
             className="font-mono text-sm"
             placeholder="Nhập system prompt cho AI Assistant..."
@@ -745,11 +837,12 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
           )}
           {editConfig.lastUpdated && (
             <span className="text-xs text-muted-foreground">
-              Cập nhật: {new Date(editConfig.lastUpdated).toLocaleString('vi-VN')}
+              Cập nhật:{' '}
+              {new Date(editConfig.lastUpdated).toLocaleString('vi-VN')}
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -759,16 +852,12 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
             <RefreshCw className="h-4 w-4 mr-2" />
             Đặt lại
           </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handleTest}
-            disabled={disabled}
-          >
+
+          <Button variant="outline" onClick={handleTest} disabled={disabled}>
             <Play className="h-4 w-4 mr-2" />
             Test Assistant
           </Button>
-          
+
           <Button
             onClick={handleSave}
             disabled={disabled || !hasChanges || isSaving}
@@ -791,4 +880,4 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
   );
 };
 
-export default AssistantConfigPanel; 
+export default AssistantConfigPanel;

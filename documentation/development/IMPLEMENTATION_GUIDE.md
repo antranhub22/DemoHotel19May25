@@ -1,6 +1,7 @@
 # Implementation Guide
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
 3. [Environment Setup](#environment-setup)
@@ -14,9 +15,11 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for implementing the Hotel Assistant system. The implementation follows a modular approach with clear separation of concerns.
+This guide provides step-by-step instructions for implementing the Hotel Assistant system. The
+implementation follows a modular approach with clear separation of concerns.
 
 ### Implementation Phases
+
 1. **Phase 1**: Environment and Database Setup
 2. **Phase 2**: Backend Core Implementation
 3. **Phase 3**: Frontend Core Implementation
@@ -26,6 +29,7 @@ This guide provides step-by-step instructions for implementing the Hotel Assista
 ## Prerequisites
 
 ### Required Software
+
 - **Node.js** (v18 or higher)
 - **npm** or **yarn**
 - **Git**
@@ -33,11 +37,13 @@ This guide provides step-by-step instructions for implementing the Hotel Assista
 - **Docker** (optional, for containerized deployment)
 
 ### Required Accounts
+
 - **Vapi.ai** account for voice assistant
 - **OpenAI** API key for AI processing
 - **Email service** (Gmail, SendGrid, or SMTP)
 
 ### System Requirements
+
 - **RAM**: 4GB minimum, 8GB recommended
 - **Storage**: 10GB minimum
 - **Network**: Stable internet connection
@@ -46,12 +52,14 @@ This guide provides step-by-step instructions for implementing the Hotel Assista
 ## Environment Setup
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/your-org/hotel-assistant.git
 cd hotel-assistant
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 # Install backend dependencies
 npm install
@@ -117,6 +125,7 @@ ENABLE_SWAGGER=true
 The application uses Drizzle ORM with automatic migrations.
 
 #### Run Migrations
+
 ```bash
 # Generate migration files
 npm run db:generate
@@ -197,8 +206,12 @@ export async function seedDatabase() {
   // Create hotel profile
   await db.insert(hotelProfiles).values({
     tenantId: tenant.id,
-    researchData: { /* hotel data */ },
-    assistantConfig: { /* assistant config */ },
+    researchData: {
+      /* hotel data */
+    },
+    assistantConfig: {
+      /* assistant config */
+    },
     vapiAssistantId: 'your-vapi-assistant-id',
   });
 }
@@ -236,6 +249,7 @@ server/
 ### 2. Core Services Implementation
 
 #### Authentication Service
+
 ```typescript
 // services/authService.ts
 import bcrypt from 'bcrypt';
@@ -246,11 +260,8 @@ import { staff } from '../db/schema';
 export class AuthService {
   async login(username: string, password: string, tenantId?: string) {
     const user = await db.query.staff.findFirst({
-      where: (staff, { eq, and }) => 
-        and(
-          eq(staff.username, username),
-          tenantId ? eq(staff.tenantId, tenantId) : undefined
-        ),
+      where: (staff, { eq, and }) =>
+        and(eq(staff.username, username), tenantId ? eq(staff.tenantId, tenantId) : undefined),
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -277,6 +288,7 @@ export class AuthService {
 ```
 
 #### Call Service
+
 ```typescript
 // services/callService.ts
 import { db } from '../db';
@@ -312,10 +324,11 @@ export class CallService {
   }
 
   async endCall(callId: string, duration: number, tenantId: string) {
-    await db.update(call)
-      .set({ 
+    await db
+      .update(call)
+      .set({
         endTime: new Date(),
-        duration 
+        duration,
       })
       .where(eq(call.id, callId));
   }
@@ -337,6 +350,7 @@ export class CallService {
 ```
 
 #### Order Service
+
 ```typescript
 // services/orderService.ts
 import { db } from '../db';
@@ -367,15 +381,13 @@ export class OrderService {
   }
 
   async updateOrderStatus(orderId: string, status: string, tenantId: string) {
-    return await db.update(request)
-      .set({ 
+    return await db
+      .update(request)
+      .set({
         status,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
-      .where(and(
-        eq(request.orderId, orderId),
-        eq(request.tenantId, tenantId)
-      ));
+      .where(and(eq(request.orderId, orderId), eq(request.tenantId, tenantId)));
   }
 }
 ```
@@ -383,6 +395,7 @@ export class OrderService {
 ### 3. API Routes Implementation
 
 #### Authentication Routes
+
 ```typescript
 // routes/auth.ts
 import { Router } from 'express';
@@ -396,7 +409,7 @@ router.post('/login', validateLoginRequest, async (req, res) => {
   try {
     const { username, password, tenantId } = req.body;
     const result = await authService.login(username, password, tenantId);
-    
+
     res.json({
       success: true,
       data: result,
@@ -413,7 +426,7 @@ router.post('/refresh', async (req, res) => {
   try {
     const { token } = req.body;
     const decoded = await authService.verifyToken(token);
-    
+
     const newToken = jwt.sign(
       { userId: decoded.userId, role: decoded.role, tenantId: decoded.tenantId },
       process.env.JWT_SECRET!,
@@ -436,6 +449,7 @@ export default router;
 ```
 
 #### Call Routes
+
 ```typescript
 // routes/calls.ts
 import { Router } from 'express';
@@ -452,7 +466,7 @@ router.post('/start', authenticateToken, validateCallRequest, async (req, res) =
       ...req.body,
       tenantId: req.user.tenantId,
     });
-    
+
     res.json({
       success: true,
       data: result,
@@ -469,7 +483,7 @@ router.post('/end', authenticateToken, async (req, res) => {
   try {
     const { callId, duration } = req.body;
     await callService.endCall(callId, duration, req.user.tenantId);
-    
+
     res.json({
       success: true,
       data: { callId, endTime: new Date(), duration },
@@ -488,6 +502,7 @@ export default router;
 ### 4. Middleware Implementation
 
 #### Authentication Middleware
+
 ```typescript
 // middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
@@ -533,29 +548,26 @@ export const authenticateToken = async (
 ```
 
 #### Multi-tenancy Middleware
+
 ```typescript
 // middleware/tenant.ts
 import { Request, Response, NextFunction } from 'express';
 import { db } from '../db';
 import { tenants } from '../db/schema';
 
-export const injectTenant = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const injectTenant = async (req: Request, res: Response, next: NextFunction) => {
   const subdomain = req.headers.host?.split('.')[0];
-  
+
   if (subdomain) {
     const tenant = await db.query.tenants.findFirst({
       where: (tenants, { eq }) => eq(tenants.subdomain, subdomain),
     });
-    
+
     if (tenant) {
       req.tenant = tenant;
     }
   }
-  
+
   next();
 };
 ```
@@ -586,6 +598,7 @@ client/
 ### 2. Core Components Implementation
 
 #### API Client
+
 ```typescript
 // lib/apiClient.ts
 import { ApiClient } from './apiClient';
@@ -601,8 +614,8 @@ apiClient.setToken(localStorage.getItem('token') || '');
 
 // Auto-refresh token
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     if (error.status === 401) {
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
@@ -624,6 +637,7 @@ apiClient.interceptors.response.use(
 ```
 
 #### Authentication Context
+
 ```typescript
 // context/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -656,7 +670,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiClient.login({ username, password });
       const { token, user } = response.data;
-      
+
       localStorage.setItem('token', token);
       apiClient.setToken(token);
       setUser(user);
@@ -701,6 +715,7 @@ export const useAuth = () => {
 ```
 
 #### Dashboard Component
+
 ```typescript
 // components/dashboard/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
@@ -736,7 +751,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
-      
+
       <div className="metrics-grid">
         <MetricCard
           title="Total Calls"
@@ -799,17 +814,17 @@ export const useWebSocket = () => {
         tenantId: user.tenantId,
       });
 
-      socketRef.current.on('transcript', (data) => {
+      socketRef.current.on('transcript', data => {
         console.log('Transcript received:', data);
         // Handle transcript updates
       });
 
-      socketRef.current.on('order_status_update', (data) => {
+      socketRef.current.on('order_status_update', data => {
         console.log('Order update received:', data);
         // Handle order status updates
       });
 
-      socketRef.current.on('error', (data) => {
+      socketRef.current.on('error', data => {
         console.error('WebSocket error:', data);
       });
     }
@@ -842,17 +857,21 @@ export const useWebSocket = () => {
 ### 1. Backend-Frontend Integration
 
 #### CORS Configuration
+
 ```typescript
 // server/index.ts
 import cors from 'cors';
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 ```
 
 #### API Route Integration
+
 ```typescript
 // server/index.ts
 import authRoutes from './routes/auth';
@@ -869,6 +888,7 @@ app.use('/analytics', analyticsRoutes);
 ### 2. External Service Integration
 
 #### Vapi.ai Integration
+
 ```typescript
 // utils/vapiClient.ts
 import { Vapi } from '@vapi-ai/web';
@@ -882,10 +902,7 @@ export class VapiClient {
     });
   }
 
-  async startCall(params: {
-    assistantId: string;
-    language: string;
-  }) {
+  async startCall(params: { assistantId: string; language: string }) {
     const call = await this.vapi.start({
       assistantId: params.assistantId,
       language: params.language,
@@ -904,6 +921,7 @@ export class VapiClient {
 ```
 
 #### OpenAI Integration
+
 ```typescript
 // utils/openaiClient.ts
 import OpenAI from 'openai';
@@ -933,6 +951,7 @@ export class OpenAIClient {
 ### 3. Database Integration
 
 #### Connection Setup
+
 ```typescript
 // db/index.ts
 import { drizzle } from 'drizzle-orm/postgres-js';
@@ -963,6 +982,7 @@ export { db };
 ### 1. Unit Testing
 
 #### Backend Tests
+
 ```typescript
 // tests/unit/services/authService.test.ts
 import { AuthService } from '../../services/authService';
@@ -983,15 +1003,16 @@ describe('AuthService', () => {
     });
 
     it('should reject invalid credentials', async () => {
-      await expect(
-        authService.login('admin', 'wrongpassword')
-      ).rejects.toThrow('Invalid credentials');
+      await expect(authService.login('admin', 'wrongpassword')).rejects.toThrow(
+        'Invalid credentials'
+      );
     });
   });
 });
 ```
 
 #### Frontend Tests
+
 ```typescript
 // tests/unit/components/Dashboard.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -1023,12 +1044,10 @@ describe('API Integration Tests', () => {
   let authToken: string;
 
   beforeAll(async () => {
-    const loginResponse = await request(app)
-      .post('/auth/login')
-      .send({
-        username: 'admin',
-        password: 'admin123',
-      });
+    const loginResponse = await request(app).post('/auth/login').send({
+      username: 'admin',
+      password: 'admin123',
+    });
 
     authToken = loginResponse.body.data.token;
   });
@@ -1084,6 +1103,7 @@ test('Complete user flow', async ({ page }) => {
 ### 1. Production Environment
 
 #### Environment Variables
+
 ```bash
 # Production .env
 NODE_ENV=production
@@ -1098,6 +1118,7 @@ CORS_ORIGIN=https://your-domain.com
 ```
 
 #### Build Process
+
 ```bash
 # Build frontend
 cd client
@@ -1113,6 +1134,7 @@ npm start
 ### 2. Docker Deployment
 
 #### Dockerfile
+
 ```dockerfile
 # Multi-stage build
 FROM node:18-alpine AS builder
@@ -1131,6 +1153,7 @@ CMD ["npm", "start"]
 ```
 
 #### Docker Compose
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -1139,7 +1162,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://user:pass@db:5432/hotel_assistant
@@ -1162,16 +1185,14 @@ volumes:
 ### 3. Monitoring and Logging
 
 #### Application Monitoring
+
 ```typescript
 // utils/monitoring.ts
 import winston from 'winston';
 
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.File({ filename: 'error.log', level: 'error' }),
     new winston.transports.File({ filename: 'combined.log' }),
@@ -1179,9 +1200,11 @@ export const logger = winston.createLogger({
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.simple(),
-  }));
+  logger.add(
+    new winston.transports.Console({
+      format: winston.format.simple(),
+    })
+  );
 }
 ```
 
@@ -1190,6 +1213,7 @@ if (process.env.NODE_ENV !== 'production') {
 ### Common Issues
 
 #### Database Connection Issues
+
 ```bash
 # Check database connection
 npm run db:check
@@ -1202,6 +1226,7 @@ npm run db:migrate
 ```
 
 #### Authentication Issues
+
 ```bash
 # Check JWT secret
 echo $JWT_SECRET
@@ -1211,6 +1236,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:3000/auth/verify
 ```
 
 #### External Service Issues
+
 ```bash
 # Test Vapi connection
 npm run test:vapi
@@ -1235,6 +1261,7 @@ NODE_ENV=development DEBUG=* npm start
 ### Performance Optimization
 
 #### Database Optimization
+
 ```sql
 -- Add indexes for better performance
 CREATE INDEX idx_calls_tenant_id ON calls(tenant_id);
@@ -1243,6 +1270,7 @@ CREATE INDEX idx_requests_tenant_id ON requests(tenant_id);
 ```
 
 #### Caching
+
 ```typescript
 // utils/cache.ts
 import Redis from 'ioredis';
@@ -1253,7 +1281,7 @@ export const cache = {
   async get(key: string) {
     return await redis.get(key);
   },
-  
+
   async set(key: string, value: string, ttl?: number) {
     if (ttl) {
       await redis.setex(key, ttl, value);
@@ -1264,4 +1292,6 @@ export const cache = {
 };
 ```
 
-This implementation guide provides a comprehensive roadmap for building and deploying the Hotel Assistant system. Follow the steps sequentially and test each component thoroughly before moving to the next phase. 
+This implementation guide provides a comprehensive roadmap for building and deploying the Hotel
+Assistant system. Follow the steps sequentially and test each component thoroughly before moving to
+the next phase.

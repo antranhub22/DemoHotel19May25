@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -14,9 +20,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import { 
-  Crown, 
-  Lock, 
+import {
+  Crown,
+  Lock,
   Unlock,
   Star,
   Zap,
@@ -32,7 +38,7 @@ import {
   XCircle,
   AlertTriangle,
   ArrowRight,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 
 // Types
@@ -72,11 +78,27 @@ interface FeatureToggleProps {
 
 // Feature categories
 const FEATURE_CATEGORIES = {
-  voice: { label: 'Giọng nói & AI', icon: Mic, color: 'bg-blue-50 text-blue-700' },
-  analytics: { label: 'Phân tích', icon: BarChart3, color: 'bg-green-50 text-green-700' },
-  customization: { label: 'Tùy chỉnh', icon: Palette, color: 'bg-purple-50 text-purple-700' },
-  integration: { label: 'Tích hợp', icon: Database, color: 'bg-orange-50 text-orange-700' },
-  support: { label: 'Hỗ trợ', icon: Shield, color: 'bg-red-50 text-red-700' }
+  voice: {
+    label: 'Giọng nói & AI',
+    icon: Mic,
+    color: 'bg-blue-50 text-blue-700',
+  },
+  analytics: {
+    label: 'Phân tích',
+    icon: BarChart3,
+    color: 'bg-green-50 text-green-700',
+  },
+  customization: {
+    label: 'Tùy chỉnh',
+    icon: Palette,
+    color: 'bg-purple-50 text-purple-700',
+  },
+  integration: {
+    label: 'Tích hợp',
+    icon: Database,
+    color: 'bg-orange-50 text-orange-700',
+  },
+  support: { label: 'Hỗ trợ', icon: Shield, color: 'bg-red-50 text-red-700' },
 };
 
 // Subscription plans
@@ -90,8 +112,8 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       '500 cuộc gọi/tháng',
       '2 ngôn ngữ',
       'Báo cáo cơ bản',
-      'Hỗ trợ email'
-    ]
+      'Hỗ trợ email',
+    ],
   },
   {
     id: 'basic',
@@ -103,8 +125,8 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       '5 ngôn ngữ',
       'Báo cáo chi tiết',
       'Tùy chỉnh giọng nói',
-      'Hỗ trợ chat'
-    ]
+      'Hỗ trợ chat',
+    ],
   },
   {
     id: 'premium',
@@ -118,8 +140,8 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'Voice cloning',
       'Báo cáo nâng cao',
       'API tích hợp',
-      'Hỗ trợ ưu tiên'
-    ]
+      'Hỗ trợ ưu tiên',
+    ],
   },
   {
     id: 'enterprise',
@@ -132,9 +154,9 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       'White-label',
       'Custom integration',
       'Dedicated support',
-      'SLA 99.9%'
-    ]
-  }
+      'SLA 99.9%',
+    ],
+  },
 ];
 
 // Plan hierarchy levels
@@ -142,19 +164,20 @@ const PLAN_LEVELS = {
   trial: 0,
   basic: 1,
   premium: 2,
-  enterprise: 3
+  enterprise: 3,
 };
 
 // Feature status component
-const FeatureStatus = ({ 
-  feature, 
-  currentPlan 
-}: { 
-  feature: Feature; 
-  currentPlan: string; 
+const FeatureStatus = ({
+  feature,
+  currentPlan,
+}: {
+  feature: Feature;
+  currentPlan: string;
 }) => {
-  const canAccess = PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS] >= 
-                   PLAN_LEVELS[feature.requiredPlan as keyof typeof PLAN_LEVELS];
+  const canAccess =
+    PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS] >=
+    PLAN_LEVELS[feature.requiredPlan as keyof typeof PLAN_LEVELS];
 
   if (canAccess) {
     return (
@@ -174,16 +197,17 @@ const FeatureStatus = ({
 };
 
 // Feature limitations display
-const FeatureLimitations = ({ 
-  feature, 
-  currentPlan 
-}: { 
-  feature: Feature; 
-  currentPlan: string; 
+const FeatureLimitations = ({
+  feature,
+  currentPlan,
+}: {
+  feature: Feature;
+  currentPlan: string;
 }) => {
   if (!feature.limitations) return null;
 
-  const limitation = feature.limitations[currentPlan as keyof typeof feature.limitations];
+  const limitation =
+    feature.limitations[currentPlan as keyof typeof feature.limitations];
   if (!limitation) return null;
 
   return (
@@ -195,35 +219,35 @@ const FeatureLimitations = ({
 };
 
 // Feature card component
-const FeatureCard = ({ 
-  feature, 
-  currentPlan, 
-  onToggle, 
-  onUpgrade 
+const FeatureCard = ({
+  feature,
+  currentPlan,
+  onToggle,
+  onUpgrade,
 }: {
   feature: Feature;
   currentPlan: string;
   onToggle: (enabled: boolean) => void;
   onUpgrade: (targetPlan: string) => void;
 }) => {
-  const canAccess = PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS] >= 
-                   PLAN_LEVELS[feature.requiredPlan as keyof typeof PLAN_LEVELS];
-  
+  const canAccess =
+    PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS] >=
+    PLAN_LEVELS[feature.requiredPlan as keyof typeof PLAN_LEVELS];
+
   const category = FEATURE_CATEGORIES[feature.category];
   const IconComponent = feature.icon;
 
   return (
-    <Card className={cn(
-      'transition-all duration-200',
-      !canAccess && 'opacity-60 bg-gray-50'
-    )}>
+    <Card
+      className={cn(
+        'transition-all duration-200',
+        !canAccess && 'opacity-60 bg-gray-50'
+      )}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <div className={cn(
-              'p-2 rounded-lg',
-              category.color
-            )}>
+            <div className={cn('p-2 rounded-lg', category.color)}>
               <IconComponent className="h-4 w-4" />
             </div>
             <div className="flex-1">
@@ -236,7 +260,7 @@ const FeatureCard = ({
               </CardDescription>
             </div>
           </div>
-          
+
           {canAccess ? (
             <Switch
               checked={feature.enabled}
@@ -256,7 +280,7 @@ const FeatureCard = ({
           )}
         </div>
       </CardHeader>
-      
+
       {canAccess && (
         <CardContent className="pt-0">
           <FeatureLimitations feature={feature} currentPlan={currentPlan} />
@@ -267,10 +291,10 @@ const FeatureCard = ({
 };
 
 // Upgrade prompt dialog
-const UpgradePrompt = ({ 
-  targetPlan, 
-  onUpgrade, 
-  onClose 
+const UpgradePrompt = ({
+  targetPlan,
+  onUpgrade,
+  onClose,
 }: {
   targetPlan: string;
   onUpgrade: (plan: string) => void;
@@ -290,7 +314,7 @@ const UpgradePrompt = ({
           Mở khóa tính năng cao cấp và nâng cao trải nghiệm của bạn
         </DialogDescription>
       </DialogHeader>
-      
+
       <div className="space-y-4">
         <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
           <div className="text-2xl font-bold">
@@ -298,7 +322,7 @@ const UpgradePrompt = ({
           </div>
           <div className="text-sm text-muted-foreground">/ tháng</div>
         </div>
-        
+
         <div className="space-y-2">
           <h4 className="font-medium">Bao gồm:</h4>
           <ul className="space-y-1">
@@ -311,7 +335,7 @@ const UpgradePrompt = ({
           </ul>
         </div>
       </div>
-      
+
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
           Để sau
@@ -326,9 +350,9 @@ const UpgradePrompt = ({
 };
 
 // Current plan display
-const CurrentPlanCard = ({ 
-  currentPlan, 
-  onUpgrade 
+const CurrentPlanCard = ({
+  currentPlan,
+  onUpgrade,
 }: {
   currentPlan: string;
   onUpgrade: (plan: string) => void;
@@ -336,8 +360,10 @@ const CurrentPlanCard = ({
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === currentPlan);
   if (!plan) return null;
 
-  const nextPlan = SUBSCRIPTION_PLANS.find(p => 
-    PLAN_LEVELS[p.id as keyof typeof PLAN_LEVELS] > PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS]
+  const nextPlan = SUBSCRIPTION_PLANS.find(
+    p =>
+      PLAN_LEVELS[p.id as keyof typeof PLAN_LEVELS] >
+      PLAN_LEVELS[currentPlan as keyof typeof PLAN_LEVELS]
   );
 
   return (
@@ -350,14 +376,13 @@ const CurrentPlanCard = ({
               Gói hiện tại: {plan.name}
             </CardTitle>
             <CardDescription>
-              {plan.price > 0 
+              {plan.price > 0
                 ? `${plan.price.toLocaleString('vi-VN')} VND/tháng`
-                : 'Miễn phí'
-              }
+                : 'Miễn phí'}
             </CardDescription>
           </div>
           {nextPlan && (
-            <Button 
+            <Button
               onClick={() => onUpgrade(nextPlan.id)}
               className="bg-gradient-to-r from-blue-600 to-purple-600"
             >
@@ -388,18 +413,23 @@ export const FeatureToggle: React.FC<FeatureToggleProps> = ({
   onFeatureToggle,
   onUpgrade,
   className,
-  showUpgradePrompts = true
+  showUpgradePrompts = true,
 }) => {
-  const [upgradeDialogPlan, setUpgradeDialogPlan] = useState<string | null>(null);
-  
+  const [upgradeDialogPlan, setUpgradeDialogPlan] = useState<string | null>(
+    null
+  );
+
   // Group features by category
-  const featuresByCategory = features.reduce((acc, feature) => {
-    if (!acc[feature.category]) {
-      acc[feature.category] = [];
-    }
-    acc[feature.category].push(feature);
-    return acc;
-  }, {} as Record<string, Feature[]>);
+  const featuresByCategory = features.reduce(
+    (acc, feature) => {
+      if (!acc[feature.category]) {
+        acc[feature.category] = [];
+      }
+      acc[feature.category].push(feature);
+      return acc;
+    },
+    {} as Record<string, Feature[]>
+  );
 
   const handleUpgrade = (targetPlan: string) => {
     if (showUpgradePrompts) {
@@ -434,73 +464,85 @@ export const FeatureToggle: React.FC<FeatureToggleProps> = ({
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{enabledFeatures}</div>
-              <div className="text-sm text-muted-foreground">Tính năng đã bật</div>
+              <div className="text-2xl font-bold text-primary">
+                {enabledFeatures}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Tính năng đã bật
+              </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{availableFeatures}</div>
-              <div className="text-sm text-muted-foreground">Tính năng có sẵn</div>
+              <div className="text-2xl font-bold text-green-600">
+                {availableFeatures}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Tính năng có sẵn
+              </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600">{totalFeatures}</div>
-              <div className="text-sm text-muted-foreground">Tổng tính năng</div>
+              <div className="text-2xl font-bold text-gray-600">
+                {totalFeatures}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Tổng tính năng
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Current Plan */}
-      <CurrentPlanCard 
-        currentPlan={currentPlan} 
-        onUpgrade={handleUpgrade}
-      />
+      <CurrentPlanCard currentPlan={currentPlan} onUpgrade={handleUpgrade} />
 
       {/* Features by Category */}
-      {Object.entries(featuresByCategory).map(([categoryKey, categoryFeatures]) => {
-        const category = FEATURE_CATEGORIES[categoryKey as keyof typeof FEATURE_CATEGORIES];
-        const CategoryIcon = category.icon;
-        
-        return (
-          <div key={categoryKey} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className={cn('p-2 rounded-lg', category.color)}>
-                <CategoryIcon className="h-4 w-4" />
+      {Object.entries(featuresByCategory).map(
+        ([categoryKey, categoryFeatures]) => {
+          const category =
+            FEATURE_CATEGORIES[categoryKey as keyof typeof FEATURE_CATEGORIES];
+          const CategoryIcon = category.icon;
+
+          return (
+            <div key={categoryKey} className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className={cn('p-2 rounded-lg', category.color)}>
+                  <CategoryIcon className="h-4 w-4" />
+                </div>
+                <h3 className="text-lg font-semibold">{category.label}</h3>
+                <Badge variant="outline" className="text-xs">
+                  {categoryFeatures.length} tính năng
+                </Badge>
               </div>
-              <h3 className="text-lg font-semibold">{category.label}</h3>
-              <Badge variant="outline" className="text-xs">
-                {categoryFeatures.length} tính năng
-              </Badge>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {categoryFeatures.map(feature => (
+                  <FeatureCard
+                    key={feature.id}
+                    feature={feature}
+                    currentPlan={currentPlan}
+                    onToggle={enabled => onFeatureToggle(feature.id, enabled)}
+                    onUpgrade={handleUpgrade}
+                  />
+                ))}
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {categoryFeatures.map((feature) => (
-                <FeatureCard
-                  key={feature.id}
-                  feature={feature}
-                  currentPlan={currentPlan}
-                  onToggle={(enabled) => onFeatureToggle(feature.id, enabled)}
-                  onUpgrade={handleUpgrade}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+          );
+        }
+      )}
 
       {/* Upgrade Dialog */}
-      <Dialog 
-        open={upgradeDialogPlan !== null} 
-        onOpenChange={(open) => !open && setUpgradeDialogPlan(null)}
+      <Dialog
+        open={upgradeDialogPlan !== null}
+        onOpenChange={open => !open && setUpgradeDialogPlan(null)}
       >
         {upgradeDialogPlan && (
           <UpgradePrompt
@@ -519,21 +561,17 @@ export const useFeatureToggle = (initialFeatures: Feature[]) => {
   const [features, setFeatures] = useState(initialFeatures);
 
   const toggleFeature = (featureId: string, enabled: boolean) => {
-    setFeatures(prev => 
-      prev.map(feature => 
-        feature.id === featureId 
-          ? { ...feature, enabled }
-          : feature
+    setFeatures(prev =>
+      prev.map(feature =>
+        feature.id === featureId ? { ...feature, enabled } : feature
       )
     );
   };
 
   const updateFeatureAvailability = (featureId: string, available: boolean) => {
-    setFeatures(prev => 
-      prev.map(feature => 
-        feature.id === featureId 
-          ? { ...feature, available }
-          : feature
+    setFeatures(prev =>
+      prev.map(feature =>
+        feature.id === featureId ? { ...feature, available } : feature
       )
     );
   };
@@ -541,8 +579,8 @@ export const useFeatureToggle = (initialFeatures: Feature[]) => {
   return {
     features,
     toggleFeature,
-    updateFeatureAvailability
+    updateFeatureAvailability,
   };
 };
 
-export default FeatureToggle; 
+export default FeatureToggle;

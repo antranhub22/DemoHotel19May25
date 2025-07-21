@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,12 +38,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { 
-  RefreshCw, 
-  MessageSquare, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  RefreshCw,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   Search,
   Filter,
   Trash2,
@@ -52,7 +52,7 @@ import {
   Calendar,
   MapPin,
   Eye,
-  Edit
+  Edit,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -121,12 +121,12 @@ const getStatusIcon = (status: string) => {
 };
 
 // Request detail modal component
-const RequestDetailModal = ({ 
-  request, 
-  isOpen, 
-  onClose, 
+const RequestDetailModal = ({
+  request,
+  isOpen,
+  onClose,
   onStatusChange,
-  onOpenMessage 
+  onOpenMessage,
 }: {
   request: CustomerRequest;
   isOpen: boolean;
@@ -150,11 +150,9 @@ const RequestDetailModal = ({
             <MapPin className="h-5 w-5" />
             Phòng {request.roomNumber} - {request.orderId}
           </DialogTitle>
-          <DialogDescription>
-            Chi tiết yêu cầu khách hàng
-          </DialogDescription>
+          <DialogDescription>Chi tiết yêu cầu khách hàng</DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Request info */}
           <div className="grid grid-cols-2 gap-4">
@@ -186,9 +184,9 @@ const RequestDetailModal = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Trạng thái hiện tại</Label>
-              <Badge 
-                variant="outline" 
-                className={cn("mt-2", getStatusColor(request.status))}
+              <Badge
+                variant="outline"
+                className={cn('mt-2', getStatusColor(request.status))}
               >
                 {getStatusIcon(request.status)}
                 <span className="ml-1">{request.status}</span>
@@ -201,11 +199,13 @@ const RequestDetailModal = ({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.filter(opt => opt !== 'Tất cả').map(status => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
+                  {statusOptions
+                    .filter(opt => opt !== 'Tất cả')
+                    .map(status => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -213,7 +213,7 @@ const RequestDetailModal = ({
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
-            <Button 
+            <Button
               onClick={handleStatusUpdate}
               disabled={selectedStatus === request.status}
             >
@@ -232,13 +232,13 @@ const RequestDetailModal = ({
 };
 
 // Message modal component
-const MessageModal = ({ 
-  request, 
-  messages, 
-  isOpen, 
-  onClose, 
-  onSendMessage, 
-  loading 
+const MessageModal = ({
+  request,
+  messages,
+  isOpen,
+  onClose,
+  onSendMessage,
+  loading,
 }: {
   request: CustomerRequest;
   messages: Message[];
@@ -264,7 +264,7 @@ const MessageModal = ({
             Tin nhắn với khách - Phòng {request.roomNumber}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Messages */}
           <div className="h-60 overflow-y-auto border rounded-lg p-3 space-y-2">
@@ -273,27 +273,31 @@ const MessageModal = ({
                 Chưa có tin nhắn nào
               </div>
             ) : (
-              messages.map((msg) => (
+              messages.map(msg => (
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex",
-                    msg.sender === 'staff' ? "justify-end" : "justify-start"
+                    'flex',
+                    msg.sender === 'staff' ? 'justify-end' : 'justify-start'
                   )}
                 >
                   <div
                     className={cn(
-                      "max-w-[70%] p-2 rounded-lg text-sm",
+                      'max-w-[70%] p-2 rounded-lg text-sm',
                       msg.sender === 'staff'
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-900"
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
                     )}
                   >
                     <p>{msg.content}</p>
-                    <p className={cn(
-                      "text-xs mt-1",
-                      msg.sender === 'staff' ? "text-blue-100" : "text-gray-500"
-                    )}>
+                    <p
+                      className={cn(
+                        'text-xs mt-1',
+                        msg.sender === 'staff'
+                          ? 'text-blue-100'
+                          : 'text-gray-500'
+                      )}
+                    >
                       {msg.time}
                     </p>
                   </div>
@@ -307,12 +311,12 @@ const MessageModal = ({
             <Textarea
               placeholder="Nhập tin nhắn..."
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={e => setNewMessage(e.target.value)}
               className="min-h-[60px]"
             />
             <div className="flex justify-end">
-              <Button 
-                onClick={handleSend} 
+              <Button
+                onClick={handleSend}
                 disabled={!newMessage.trim() || loading}
                 size="sm"
               >
@@ -336,18 +340,19 @@ export const CustomerRequests: React.FC = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<CustomerRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRequest, setSelectedRequest] = useState<CustomerRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] =
+    useState<CustomerRequest | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageLoading, setMessageLoading] = useState(false);
-  
+
   // Filters
   const [statusFilter, setStatusFilter] = useState('Tất cả');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Delete modal
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
@@ -355,8 +360,8 @@ export const CustomerRequests: React.FC = () => {
 
   // Get auth headers
   const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${localStorage.getItem('token')}`,
+    'Content-Type': 'application/json',
   });
 
   // Fetch requests
@@ -364,7 +369,7 @@ export const CustomerRequests: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetch('/api/staff/requests', {
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
       });
 
       if (response.status === 401) {
@@ -392,14 +397,14 @@ export const CustomerRequests: React.FC = () => {
       await fetch(`/api/staff/requests/${requestId}/status`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
       });
-      
+
       // Update local state
-      setRequests(prev => 
-        prev.map(r => r.id === requestId ? { ...r, status } : r)
+      setRequests(prev =>
+        prev.map(r => (r.id === requestId ? { ...r, status } : r))
       );
-      
+
       if (selectedRequest && selectedRequest.id === requestId) {
         setSelectedRequest({ ...selectedRequest, status });
       }
@@ -411,10 +416,13 @@ export const CustomerRequests: React.FC = () => {
   // Fetch messages
   const fetchMessages = async (requestId: number) => {
     try {
-      const response = await fetch(`/api/staff/requests/${requestId}/messages`, {
-        headers: getAuthHeaders()
-      });
-      
+      const response = await fetch(
+        `/api/staff/requests/${requestId}/messages`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
       if (response.ok) {
         const data = await response.json();
         setMessages(data);
@@ -428,21 +436,21 @@ export const CustomerRequests: React.FC = () => {
   // Send message
   const sendMessage = async (content: string) => {
     if (!selectedRequest) return;
-    
+
     setMessageLoading(true);
     try {
       await fetch(`/api/staff/requests/${selectedRequest.id}/message`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content }),
       });
-      
+
       // Add message to local state
       const newMessage: Message = {
         id: Date.now().toString(),
         sender: 'staff',
         content,
-        time: new Date().toLocaleTimeString().slice(0, 5)
+        time: new Date().toLocaleTimeString().slice(0, 5),
       };
       setMessages(prev => [...prev, newMessage]);
     } catch (error) {
@@ -458,16 +466,16 @@ export const CustomerRequests: React.FC = () => {
       setDeleteError('Mật khẩu không đúng');
       return;
     }
-    
+
     setDeleteLoading(true);
     try {
       const response = await fetch('/api/staff/requests/all', {
         method: 'DELETE',
-        headers: getAuthHeaders()
+        headers: getAuthHeaders(),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setRequests([]);
         setDeletePassword('');
@@ -489,14 +497,15 @@ export const CustomerRequests: React.FC = () => {
     if (statusFilter !== 'Tất cả' && request.status !== statusFilter) {
       return false;
     }
-    
+
     // Date filter
     if (startDate || endDate) {
       const requestDate = new Date(request.createdAt);
       if (startDate && requestDate < new Date(startDate)) return false;
-      if (endDate && requestDate > new Date(endDate + 'T23:59:59')) return false;
+      if (endDate && requestDate > new Date(`${endDate}T23:59:59`))
+        return false;
     }
-    
+
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -507,14 +516,14 @@ export const CustomerRequests: React.FC = () => {
         request.orderId.toLowerCase().includes(query)
       );
     }
-    
+
     return true;
   });
 
   // Load requests on component mount
   useEffect(() => {
     fetchRequests();
-    
+
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchRequests, 30000);
     return () => clearInterval(interval);
@@ -534,7 +543,7 @@ export const CustomerRequests: React.FC = () => {
   // Handle message modal
   const handleOpenMessage = async () => {
     if (!selectedRequest) return;
-    
+
     setShowMessageModal(true);
     await fetchMessages(selectedRequest.id);
   };
@@ -555,34 +564,28 @@ export const CustomerRequests: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={fetchRequests}
-            disabled={loading}
-          >
-            <RefreshCw className={cn(
-              "h-4 w-4 mr-2",
-              loading && "animate-spin"
-            )} />
+          <Button variant="outline" onClick={fetchRequests} disabled={loading}>
+            <RefreshCw
+              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+            />
             Làm mới
           </Button>
-          
+
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button 
-                variant="destructive" 
-                disabled={requests.length === 0}
-              >
+              <Button variant="destructive" disabled={requests.length === 0}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Xóa tất cả
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Xác nhận xóa tất cả requests</AlertDialogTitle>
+                <AlertDialogTitle>
+                  Xác nhận xóa tất cả requests
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  Hành động này sẽ xóa tất cả yêu cầu và không thể hoàn tác. 
-                  Vui lòng nhập mật khẩu để xác nhận:
+                  Hành động này sẽ xóa tất cả yêu cầu và không thể hoàn tác. Vui
+                  lòng nhập mật khẩu để xác nhận:
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <div className="py-4">
@@ -590,15 +593,15 @@ export const CustomerRequests: React.FC = () => {
                   type="password"
                   placeholder="Nhập mật khẩu xác nhận"
                   value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  className={deleteError ? "border-red-500" : ""}
+                  onChange={e => setDeletePassword(e.target.value)}
+                  className={deleteError ? 'border-red-500' : ''}
                 />
                 {deleteError && (
                   <p className="text-red-500 text-sm mt-1">{deleteError}</p>
                 )}
               </div>
               <AlertDialogFooter>
-                <AlertDialogCancel 
+                <AlertDialogCancel
                   onClick={() => {
                     setDeletePassword('');
                     setDeleteError('');
@@ -606,7 +609,7 @@ export const CustomerRequests: React.FC = () => {
                 >
                   Hủy
                 </AlertDialogCancel>
-                <AlertDialogAction 
+                <AlertDialogAction
                   onClick={deleteAllRequests}
                   disabled={deleteLoading}
                   className="bg-red-600 hover:bg-red-700"
@@ -652,7 +655,7 @@ export const CustomerRequests: React.FC = () => {
               <Input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={e => setStartDate(e.target.value)}
               />
             </div>
 
@@ -661,7 +664,7 @@ export const CustomerRequests: React.FC = () => {
               <Input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={e => setEndDate(e.target.value)}
               />
             </div>
 
@@ -673,7 +676,7 @@ export const CustomerRequests: React.FC = () => {
                 <Input
                   placeholder="Tìm theo phòng, khách..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -681,7 +684,10 @@ export const CustomerRequests: React.FC = () => {
           </div>
 
           {/* Clear filters */}
-          {(statusFilter !== 'Tất cả' || startDate || endDate || searchQuery) && (
+          {(statusFilter !== 'Tất cả' ||
+            startDate ||
+            endDate ||
+            searchQuery) && (
             <div className="mt-4">
               <Button
                 variant="outline"
@@ -715,7 +721,7 @@ export const CustomerRequests: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -729,7 +735,7 @@ export const CustomerRequests: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -743,7 +749,7 @@ export const CustomerRequests: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -779,44 +785,58 @@ export const CustomerRequests: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {filteredRequests
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .map((request) => (
-                  <Card key={request.id} className="hover:shadow-md transition-shadow">
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime()
+                )
+                .map(request => (
+                  <Card
+                    key={request.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <MapPin className="h-4 w-4 text-gray-500" />
-                            <span className="font-semibold">Phòng {request.roomNumber}</span>
+                            <span className="font-semibold">
+                              Phòng {request.roomNumber}
+                            </span>
                             <Badge variant="outline" className="text-xs">
                               {request.orderId}
                             </Badge>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 mb-2">
                             <User className="h-4 w-4 text-gray-500" />
-                            <span className="text-sm text-gray-600">{request.guestName}</span>
+                            <span className="text-sm text-gray-600">
+                              {request.guestName}
+                            </span>
                             <Calendar className="h-4 w-4 text-gray-500 ml-4" />
                             <span className="text-sm text-gray-600">
                               {new Date(request.createdAt).toLocaleString()}
                             </span>
                           </div>
-                          
+
                           <p className="text-sm text-gray-800 mb-3 line-clamp-2">
                             {request.requestContent}
                           </p>
-                          
+
                           <div className="flex items-center gap-2">
-                            <Badge 
-                              variant="outline" 
-                              className={cn("text-xs", getStatusColor(request.status))}
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                'text-xs',
+                                getStatusColor(request.status)
+                              )}
                             >
                               {getStatusIcon(request.status)}
                               <span className="ml-1">{request.status}</span>
                             </Badge>
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-col gap-2 ml-4">
                           <Button
                             variant="outline"
@@ -854,10 +874,12 @@ export const CustomerRequests: React.FC = () => {
             request={selectedRequest}
             isOpen={showDetailModal}
             onClose={handleCloseDetail}
-            onStatusChange={(status) => updateRequestStatus(selectedRequest.id, status)}
+            onStatusChange={status =>
+              updateRequestStatus(selectedRequest.id, status)
+            }
             onOpenMessage={handleOpenMessage}
           />
-          
+
           <MessageModal
             request={selectedRequest}
             messages={messages}
@@ -870,4 +892,4 @@ export const CustomerRequests: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

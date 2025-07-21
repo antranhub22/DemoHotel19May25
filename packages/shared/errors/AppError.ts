@@ -67,7 +67,11 @@ export class RateLimitError extends AppError {
 
 export class ExternalServiceError extends AppError {
   constructor(service: string, message: string) {
-    super(`${service} service error: ${message}`, 502, 'EXTERNAL_SERVICE_ERROR');
+    super(
+      `${service} service error: ${message}`,
+      502,
+      'EXTERNAL_SERVICE_ERROR'
+    );
   }
 }
 
@@ -91,7 +95,11 @@ export class RoomBusyError extends AppError {
 
 export class LanguageNotSupportedError extends AppError {
   constructor(language: string) {
-    super(`Language ${language} not supported`, 400, 'LANGUAGE_NOT_SUPPORTED_ERROR');
+    super(
+      `Language ${language} not supported`,
+      400,
+      'LANGUAGE_NOT_SUPPORTED_ERROR'
+    );
   }
 }
 
@@ -103,7 +111,11 @@ export class SubscriptionExpiredError extends AppError {
 
 export class FeatureNotAvailableError extends AppError {
   constructor(feature: string) {
-    super(`Feature ${feature} not available in current plan`, 403, 'FEATURE_NOT_AVAILABLE_ERROR');
+    super(
+      `Feature ${feature} not available in current plan`,
+      403,
+      'FEATURE_NOT_AVAILABLE_ERROR'
+    );
   }
 }
 
@@ -199,13 +211,20 @@ export class ErrorFactory {
 
   // External service errors
   static database(error: any): AppError {
-    if (error.code === '23505') { // Unique constraint violation
+    if (error.code === '23505') {
+      // Unique constraint violation
       return new AppError('Resource already exists', 409, 'DUPLICATE_ERROR');
     }
-    if (error.code === '23503') { // Foreign key violation
-      return new AppError('Referenced resource not found', 400, 'REFERENCE_ERROR');
+    if (error.code === '23503') {
+      // Foreign key violation
+      return new AppError(
+        'Referenced resource not found',
+        400,
+        'REFERENCE_ERROR'
+      );
     }
-    if (error.code === '23514') { // Check constraint violation
+    if (error.code === '23514') {
+      // Check constraint violation
       return new AppError('Invalid data provided', 400, 'CONSTRAINT_ERROR');
     }
     return new DatabaseError(error.message);
@@ -315,7 +334,8 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.AUTHORIZATION_ERROR]: 'Insufficient permissions',
   [ERROR_CODES.INVALID_TOKEN]: 'Invalid token provided',
   [ERROR_CODES.TOKEN_EXPIRED]: 'Token has expired',
-  [ERROR_CODES.INSUFFICIENT_PERMISSIONS]: 'You do not have permission to perform this action',
+  [ERROR_CODES.INSUFFICIENT_PERMISSIONS]:
+    'You do not have permission to perform this action',
 
   // Validation
   [ERROR_CODES.VALIDATION_ERROR]: 'Validation failed',
@@ -344,7 +364,8 @@ export const ERROR_MESSAGES = {
   [ERROR_CODES.ROOM_BUSY_ERROR]: 'Room has an active call',
   [ERROR_CODES.LANGUAGE_NOT_SUPPORTED_ERROR]: 'Language not supported',
   [ERROR_CODES.SUBSCRIPTION_EXPIRED_ERROR]: 'Subscription has expired',
-  [ERROR_CODES.FEATURE_NOT_AVAILABLE_ERROR]: 'Feature not available in current plan',
+  [ERROR_CODES.FEATURE_NOT_AVAILABLE_ERROR]:
+    'Feature not available in current plan',
   [ERROR_CODES.ASSISTANT_GENERATION_ERROR]: 'Failed to generate assistant',
 
   // Rate Limiting
@@ -403,5 +424,5 @@ export const getErrorDetails = (error: Error): any => {
 // ERROR TYPES
 // ============================================================================
 
-export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
-export type ErrorMessage = typeof ERROR_MESSAGES[keyof typeof ERROR_MESSAGES]; 
+export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
+export type ErrorMessage = (typeof ERROR_MESSAGES)[keyof typeof ERROR_MESSAGES];

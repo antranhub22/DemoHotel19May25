@@ -28,7 +28,9 @@ export const ServiceGrid: React.FC = () => {
               <div className="text-white">
                 <div className="font-medium text-lg">{category.name}</div>
                 {category.description && (
-                  <div className="text-sm text-gray-300 mt-1">{category.description}</div>
+                  <div className="text-sm text-gray-300 mt-1">
+                    {category.description}
+                  </div>
                 )}
               </div>
             </div>
@@ -37,9 +39,7 @@ export const ServiceGrid: React.FC = () => {
       </div>
 
       {/* Desktop View - Fixed grid layout to prevent cutting */}
-      <div 
-        className="hidden md:block w-full max-w-6xl mx-auto px-6 py-8"
-      >
+      <div className="hidden md:block w-full max-w-6xl mx-auto px-6 py-8">
         {/* First row - 5 items */}
         <div className="grid grid-cols-5 gap-4 mb-4">
           {SERVICE_CATEGORIES.slice(0, 5).map((category, index) => {
@@ -67,9 +67,7 @@ export const ServiceGrid: React.FC = () => {
 
                 {/* Hover Overlay with Description */}
                 {category.description && (
-                  <div 
-                    className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-white text-xs text-center rounded-xl"
-                  >
+                  <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-white text-xs text-center rounded-xl">
                     {category.description}
                   </div>
                 )}
@@ -106,9 +104,7 @@ export const ServiceGrid: React.FC = () => {
 
                   {/* Hover Overlay with Description */}
                   {category.description && (
-                    <div 
-                      className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-white text-xs text-center rounded-xl"
-                    >
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-white text-xs text-center rounded-xl">
                       {category.description}
                     </div>
                   )}
@@ -120,4 +116,4 @@ export const ServiceGrid: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

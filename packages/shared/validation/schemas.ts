@@ -22,14 +22,18 @@ export const RefreshTokenSchema = z.object({
   token: z.string().min(1, 'Refresh token is required'),
 });
 
-export const ChangePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'New password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Password confirmation is required'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+export const ChangePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z
+      .string()
+      .min(8, 'New password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Password confirmation is required'),
+  })
+  .refine(data => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 // ============================================================================
 // CALL MANAGEMENT SCHEMAS
@@ -52,8 +56,14 @@ export const EndCallSchema = z.object({
 
 export const CallQuerySchema = z.object({
   page: z.number().min(1, 'Page must be at least 1').default(1),
-  limit: z.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').default(20),
-  sortBy: z.enum(['startTime', 'endTime', 'duration', 'roomNumber']).default('startTime'),
+  limit: z
+    .number()
+    .min(1, 'Limit must be at least 1')
+    .max(100, 'Limit cannot exceed 100')
+    .default(20),
+  sortBy: z
+    .enum(['startTime', 'endTime', 'duration', 'roomNumber'])
+    .default('startTime'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
   roomNumber: z.string().optional(),
   language: z.enum(['en', 'fr', 'zh', 'ru', 'ko', 'vi']).optional(),
@@ -107,8 +117,14 @@ export const UpdateOrderStatusSchema = z.object({
 
 export const OrderQuerySchema = z.object({
   page: z.number().min(1, 'Page must be at least 1').default(1),
-  limit: z.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').default(20),
-  status: z.enum(['pending', 'in-progress', 'completed', 'cancelled']).optional(),
+  limit: z
+    .number()
+    .min(1, 'Limit must be at least 1')
+    .max(100, 'Limit cannot exceed 100')
+    .default(20),
+  status: z
+    .enum(['pending', 'in-progress', 'completed', 'cancelled'])
+    .optional(),
   roomNumber: z.string().optional(),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
@@ -141,7 +157,9 @@ export const MessageQuerySchema = z.object({
 export const HotelResearchSchema = z.object({
   hotelName: z.string().min(1, 'Hotel name is required'),
   location: z.string().min(1, 'Location is required'),
-  researchDepth: z.enum(['basic', 'detailed', 'comprehensive']).default('basic'),
+  researchDepth: z
+    .enum(['basic', 'detailed', 'comprehensive'])
+    .default('basic'),
 });
 
 export const GenerateAssistantSchema = z.object({
@@ -153,41 +171,59 @@ export const GenerateAssistantSchema = z.object({
     website: z.string().url().optional(),
     description: z.string().optional(),
     amenities: z.array(z.string()).optional(),
-    roomTypes: z.array(z.object({
-      name: z.string(),
-      description: z.string(),
-      price: z.number(),
-      capacity: z.number(),
-      amenities: z.array(z.string()),
-    })).optional(),
-    services: z.array(z.object({
-      name: z.string(),
-      description: z.string(),
-      category: z.string(),
-      price: z.number(),
-      availability: z.string(),
-    })).optional(),
-    policies: z.object({
-      checkIn: z.string(),
-      checkOut: z.string(),
-      cancellation: z.string(),
-      pets: z.boolean(),
-      smoking: z.boolean(),
-    }).optional(),
+    roomTypes: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          price: z.number(),
+          capacity: z.number(),
+          amenities: z.array(z.string()),
+        })
+      )
+      .optional(),
+    services: z
+      .array(
+        z.object({
+          name: z.string(),
+          description: z.string(),
+          category: z.string(),
+          price: z.number(),
+          availability: z.string(),
+        })
+      )
+      .optional(),
+    policies: z
+      .object({
+        checkIn: z.string(),
+        checkOut: z.string(),
+        cancellation: z.string(),
+        pets: z.boolean(),
+        smoking: z.boolean(),
+      })
+      .optional(),
   }),
   customization: z.object({
-    voice: z.object({
-      gender: z.enum(['male', 'female']),
-      accent: z.string().optional(),
-      speed: z.number().min(0.5).max(2.0).default(1.0),
-    }).optional(),
-    personality: z.object({
-      tone: z.enum(['professional', 'friendly', 'formal', 'casual']).default('professional'),
-      style: z.string().optional(),
-      language: z.string().default('en'),
-    }).optional(),
+    voice: z
+      .object({
+        gender: z.enum(['male', 'female']),
+        accent: z.string().optional(),
+        speed: z.number().min(0.5).max(2.0).default(1.0),
+      })
+      .optional(),
+    personality: z
+      .object({
+        tone: z
+          .enum(['professional', 'friendly', 'formal', 'casual'])
+          .default('professional'),
+        style: z.string().optional(),
+        language: z.string().default('en'),
+      })
+      .optional(),
     capabilities: z.object({
-      languages: z.array(z.string()).min(1, 'At least one language is required'),
+      languages: z
+        .array(z.string())
+        .min(1, 'At least one language is required'),
       services: z.array(z.string()).optional(),
       features: z.array(z.string()).optional(),
     }),
@@ -195,20 +231,26 @@ export const GenerateAssistantSchema = z.object({
 });
 
 export const UpdateHotelConfigSchema = z.object({
-  assistantConfig: z.object({
-    personality: z.enum(['friendly', 'professional', 'formal', 'casual']).optional(),
-    voiceId: z.string().optional(),
-    languages: z.array(z.string()).optional(),
-    customPrompt: z.string().optional(),
-  }).optional(),
-  servicesConfig: z.object({
-    roomService: z.boolean().default(true),
-    housekeeping: z.boolean().default(true),
-    concierge: z.boolean().default(true),
-    spa: z.boolean().default(false),
-    restaurant: z.boolean().default(false),
-    transportation: z.boolean().default(false),
-  }).optional(),
+  assistantConfig: z
+    .object({
+      personality: z
+        .enum(['friendly', 'professional', 'formal', 'casual'])
+        .optional(),
+      voiceId: z.string().optional(),
+      languages: z.array(z.string()).optional(),
+      customPrompt: z.string().optional(),
+    })
+    .optional(),
+  servicesConfig: z
+    .object({
+      roomService: z.boolean().default(true),
+      housekeeping: z.boolean().default(true),
+      concierge: z.boolean().default(true),
+      spa: z.boolean().default(false),
+      restaurant: z.boolean().default(false),
+      transportation: z.boolean().default(false),
+    })
+    .optional(),
   knowledgeBase: z.string().optional(),
   systemPrompt: z.string().optional(),
 });
@@ -224,7 +266,9 @@ export const HotelProfileSchema = z.object({
 export const AnalyticsQuerySchema = z.object({
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
-  granularity: z.enum(['hourly', 'daily', 'weekly', 'monthly']).default('daily'),
+  granularity: z
+    .enum(['hourly', 'daily', 'weekly', 'monthly'])
+    .default('daily'),
   tenantId: z.string().uuid(),
 });
 
@@ -246,9 +290,17 @@ export const HourlyActivitySchema = z.object({
 
 export const CreateTenantSchema = z.object({
   hotelName: z.string().min(1, 'Hotel name is required'),
-  subdomain: z.string().min(1, 'Subdomain is required').regex(/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens'),
+  subdomain: z
+    .string()
+    .min(1, 'Subdomain is required')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Subdomain can only contain lowercase letters, numbers, and hyphens'
+    ),
   customDomain: z.string().url().optional(),
-  subscriptionPlan: z.enum(['trial', 'basic', 'premium', 'enterprise']).default('trial'),
+  subscriptionPlan: z
+    .enum(['trial', 'basic', 'premium', 'enterprise'])
+    .default('trial'),
   maxVoices: z.number().min(1).default(1),
   maxLanguages: z.number().min(1).default(1),
   voiceCloning: z.boolean().default(false),
@@ -261,7 +313,9 @@ export const CreateTenantSchema = z.object({
 export const UpdateTenantSchema = z.object({
   hotelName: z.string().min(1, 'Hotel name is required').optional(),
   customDomain: z.string().url().optional(),
-  subscriptionPlan: z.enum(['trial', 'basic', 'premium', 'enterprise']).optional(),
+  subscriptionPlan: z
+    .enum(['trial', 'basic', 'premium', 'enterprise'])
+    .optional(),
   maxVoices: z.number().min(1).optional(),
   maxLanguages: z.number().min(1).optional(),
   voiceCloning: z.boolean().optional(),
@@ -288,7 +342,10 @@ export const CreateStaffSchema = z.object({
 });
 
 export const UpdateStaffSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').optional(),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .optional(),
   email: z.string().email('Invalid email format').optional(),
   role: z.enum(['admin', 'staff', 'manager']).optional(),
   isActive: z.boolean().optional(),
@@ -304,7 +361,11 @@ export const StaffIdSchema = z.object({
 
 export const PaginationSchema = z.object({
   page: z.number().min(1, 'Page must be at least 1').default(1),
-  limit: z.number().min(1, 'Limit must be at least 1').max(100, 'Limit cannot exceed 100').default(20),
+  limit: z
+    .number()
+    .min(1, 'Limit must be at least 1')
+    .max(100, 'Limit cannot exceed 100')
+    .default(20),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
@@ -314,28 +375,30 @@ export const PaginationSchema = z.object({
 // ============================================================================
 
 export const FileUploadSchema = z.object({
-  file: z.object({
-    name: z.string(),
-    size: z.number(),
-    type: z.string(),
-  }).refine(
-    (file) => {
-      const maxSize = 10 * 1024 * 1024; // 10MB
-      const allowedTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/pdf',
-        'text/plain',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ];
-      return file.size <= maxSize && allowedTypes.includes(file.type);
-    },
-    {
-      message: 'File must be an image, PDF, or document under 10MB',
-    }
-  ),
+  file: z
+    .object({
+      name: z.string(),
+      size: z.number(),
+      type: z.string(),
+    })
+    .refine(
+      file => {
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        const allowedTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/gif',
+          'application/pdf',
+          'text/plain',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ];
+        return file.size <= maxSize && allowedTypes.includes(file.type);
+      },
+      {
+        message: 'File must be an image, PDF, or document under 10MB',
+      }
+    ),
   category: z.enum(['menu', 'policy', 'amenity', 'service']),
   tenantId: z.string().uuid(),
 });
@@ -346,14 +409,16 @@ export const FileUploadSchema = z.object({
 
 export const WebhookSchema = z.object({
   url: z.string().url('Invalid webhook URL'),
-  events: z.array(z.enum([
-    'call.started',
-    'call.ended',
-    'order.created',
-    'order.updated',
-    'transcript.created',
-    'error.occurred',
-  ])),
+  events: z.array(
+    z.enum([
+      'call.started',
+      'call.ended',
+      'order.created',
+      'order.updated',
+      'transcript.created',
+      'error.occurred',
+    ])
+  ),
   secret: z.string().min(16, 'Webhook secret must be at least 16 characters'),
   isActive: z.boolean().default(true),
   tenantId: z.string().uuid(),
@@ -426,4 +491,4 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type StartCallInput = z.infer<typeof StartCallSchema>;
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>;
 export type HotelResearchInput = z.infer<typeof HotelResearchSchema>;
-export type AnalyticsQueryInput = z.infer<typeof AnalyticsQuerySchema>; 
+export type AnalyticsQueryInput = z.infer<typeof AnalyticsQuerySchema>;

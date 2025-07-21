@@ -4,9 +4,13 @@
  */
 
 export const isMobileDevice = (): boolean => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-         ('ontouchstart' in window) ||
-         (navigator.maxTouchPoints > 0);
+  return (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) ||
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0
+  );
 };
 
 export const getDeviceInfo = () => ({
@@ -16,7 +20,7 @@ export const getDeviceInfo = () => ({
   userAgent: navigator.userAgent,
   screenWidth: window.screen.width,
   screenHeight: window.screen.height,
-  devicePixelRatio: window.devicePixelRatio || 1
+  devicePixelRatio: window.devicePixelRatio || 1,
 });
 
 export const logDeviceInfo = (context: string) => {
@@ -26,6 +30,6 @@ export const logDeviceInfo = (context: string) => {
     hasTouch: info.hasTouch,
     maxTouchPoints: info.maxTouchPoints,
     screen: `${info.screenWidth}x${info.screenHeight}`,
-    dpr: info.devicePixelRatio
+    dpr: info.devicePixelRatio,
   });
-}; 
+};

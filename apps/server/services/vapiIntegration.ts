@@ -1,7 +1,14 @@
 import fetch from 'node-fetch';
 import { z } from 'zod';
-import { BasicHotelData, AdvancedHotelData, HotelService } from './hotelResearch';
-import { KnowledgeBaseGenerator, SystemPromptCustomization } from './knowledgeBaseGenerator';
+import {
+  BasicHotelData,
+  AdvancedHotelData,
+  HotelService,
+} from './hotelResearch';
+import {
+  KnowledgeBaseGenerator,
+  SystemPromptCustomization,
+} from './knowledgeBaseGenerator';
 
 // ============================================
 // Types & Interfaces for Vapi Integration
@@ -29,12 +36,15 @@ export interface VapiFunction {
   description: string;
   parameters: {
     type: 'object';
-    properties: Record<string, {
-      type: string;
-      enum?: string[];
-      description?: string;
-      items?: any;
-    }>;
+    properties: Record<
+      string,
+      {
+        type: string;
+        enum?: string[];
+        description?: string;
+        items?: any;
+      }
+    >;
     required?: string[];
   };
   async?: boolean;
@@ -95,7 +105,7 @@ export class VapiIntegrationService {
 
   constructor() {
     this.apiKey = process.env.VAPI_API_KEY || '';
-    
+
     if (!this.apiKey) {
       console.warn('Vapi API key not found. Assistant creation will fail.');
     }
@@ -110,40 +120,46 @@ export class VapiIntegrationService {
    */
   async createAssistant(config: VapiAssistantConfig): Promise<string> {
     if (!this.apiKey) {
-      throw new VapiIntegrationError('Vapi API key not configured', 'API_KEY_MISSING', 500);
+      throw new VapiIntegrationError(
+        'Vapi API key not configured',
+        'API_KEY_MISSING',
+        500
+      );
     }
 
     try {
       console.log(`🤖 Creating Vapi assistant: ${config.name}`);
-      
+
       const response = await fetch(`${this.baseURL}/assistant`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: config.name,
           model: config.model || {
             provider: 'openai',
             model: 'gpt-4',
-            temperature: 0.7
+            temperature: 0.7,
           },
           voice: {
             provider: 'playht',
-            voiceId: config.voiceId || 'jennifer'
+            voiceId: config.voiceId || 'jennifer',
           },
           systemMessage: config.systemPrompt,
-          firstMessage: config.firstMessage || `Hello! Welcome to ${config.hotelName}. How may I assist you today?`,
+          firstMessage:
+            config.firstMessage ||
+            `Hello! Welcome to ${config.hotelName}. How may I assist you today?`,
           functions: config.functions,
           silenceTimeoutSeconds: config.silenceTimeoutSeconds || 30,
           maxDurationSeconds: config.maxDurationSeconds || 1800, // 30 minutes
-          backgroundSound: config.backgroundSound || 'hotel-lobby'
-        })
+          backgroundSound: config.backgroundSound || 'hotel-lobby',
+        }),
       });
 
       const responseText = await response.text();
-      
+
       if (!response.ok) {
         const errorData: VapiError = JSON.parse(responseText) as VapiError;
         throw new VapiIntegrationError(
@@ -156,13 +172,13 @@ export class VapiIntegrationService {
 
       const assistant: VapiResponse = JSON.parse(responseText);
       console.log(`✅ Vapi assistant created successfully: ${assistant.id}`);
-      
+
       return assistant.id;
     } catch (error: any) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
-      
+
       console.error('Failed to create Vapi assistant:', error);
       throw new VapiIntegrationError(
         `Failed to create assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
@@ -175,37 +191,48 @@ export class VapiIntegrationService {
   /**
    * Update an existing Vapi assistant
    */
-  async updateAssistant(assistantId: string, config: Partial<VapiAssistantConfig>): Promise<void> {
+  async updateAssistant(
+    assistantId: string,
+    config: Partial<VapiAssistantConfig>
+  ): Promise<void> {
     if (!this.apiKey) {
-      throw new VapiIntegrationError('Vapi API key not configured', 'API_KEY_MISSING', 500);
+      throw new VapiIntegrationError(
+        'Vapi API key not configured',
+        'API_KEY_MISSING',
+        500
+      );
     }
 
     try {
       console.log(`🔄 Updating Vapi assistant: ${assistantId}`);
-      
+
       const updateData: any = {};
-      
+
       if (config.name) updateData.name = config.name;
       if (config.systemPrompt) updateData.systemMessage = config.systemPrompt;
       if (config.functions) updateData.functions = config.functions;
       if (config.firstMessage) updateData.firstMessage = config.firstMessage;
-      if (config.voiceId) updateData.voice = { provider: 'playht', voiceId: config.voiceId };
+      if (config.voiceId)
+        updateData.voice = { provider: 'playht', voiceId: config.voiceId };
       if (config.model) updateData.model = config.model;
-      if (config.silenceTimeoutSeconds) updateData.silenceTimeoutSeconds = config.silenceTimeoutSeconds;
-      if (config.maxDurationSeconds) updateData.maxDurationSeconds = config.maxDurationSeconds;
-      if (config.backgroundSound) updateData.backgroundSound = config.backgroundSound;
+      if (config.silenceTimeoutSeconds)
+        updateData.silenceTimeoutSeconds = config.silenceTimeoutSeconds;
+      if (config.maxDurationSeconds)
+        updateData.maxDurationSeconds = config.maxDurationSeconds;
+      if (config.backgroundSound)
+        updateData.backgroundSound = config.backgroundSound;
 
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updateData)
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json() as any;
+        const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -218,7 +245,7 @@ export class VapiIntegrationService {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
-      
+
       console.error('Failed to update Vapi assistant:', error);
       throw new VapiIntegrationError(
         `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
@@ -233,21 +260,25 @@ export class VapiIntegrationService {
    */
   async deleteAssistant(assistantId: string): Promise<void> {
     if (!this.apiKey) {
-      throw new VapiIntegrationError('Vapi API key not configured', 'API_KEY_MISSING', 500);
+      throw new VapiIntegrationError(
+        'Vapi API key not configured',
+        'API_KEY_MISSING',
+        500
+      );
     }
 
     try {
       console.log(`🗑️ Deleting Vapi assistant: ${assistantId}`);
-      
+
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        }
+          Authorization: `Bearer ${this.apiKey}`,
+        },
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json() as any;
+        const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -260,7 +291,7 @@ export class VapiIntegrationService {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
-      
+
       console.error('Failed to delete Vapi assistant:', error);
       throw new VapiIntegrationError(
         `Failed to delete assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
@@ -275,18 +306,22 @@ export class VapiIntegrationService {
    */
   async getAssistant(assistantId: string): Promise<VapiResponse> {
     if (!this.apiKey) {
-      throw new VapiIntegrationError('Vapi API key not configured', 'API_KEY_MISSING', 500);
+      throw new VapiIntegrationError(
+        'Vapi API key not configured',
+        'API_KEY_MISSING',
+        500
+      );
     }
 
     try {
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        }
+          Authorization: `Bearer ${this.apiKey}`,
+        },
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json() as any;
+        const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -294,12 +329,12 @@ export class VapiIntegrationService {
         );
       }
 
-      return await response.json() as VapiResponse;
+      return (await response.json()) as VapiResponse;
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
-      
+
       throw new VapiIntegrationError(
         `Failed to get assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GET_FAILED',
@@ -313,18 +348,22 @@ export class VapiIntegrationService {
    */
   async listAssistants(): Promise<VapiResponse[]> {
     if (!this.apiKey) {
-      throw new VapiIntegrationError('Vapi API key not configured', 'API_KEY_MISSING', 500);
+      throw new VapiIntegrationError(
+        'Vapi API key not configured',
+        'API_KEY_MISSING',
+        500
+      );
     }
 
     try {
       const response = await fetch(`${this.baseURL}/assistant`, {
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        }
+          Authorization: `Bearer ${this.apiKey}`,
+        },
       });
 
       if (!response.ok) {
-        const errorData: VapiError = await response.json() as any;
+        const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
           errorData.error.type || 'API_ERROR',
@@ -332,12 +371,12 @@ export class VapiIntegrationService {
         );
       }
 
-      return await response.json() as VapiResponse[];
+      return (await response.json()) as VapiResponse[];
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
-      
+
       throw new VapiIntegrationError(
         `Failed to list assistants: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'LIST_FAILED',
@@ -366,10 +405,14 @@ export class VapiIntegrationService {
   /**
    * Get service health status
    */
-  async getServiceHealth(): Promise<{ status: string; apiKey: boolean; connection: boolean }> {
+  async getServiceHealth(): Promise<{
+    status: string;
+    apiKey: boolean;
+    connection: boolean;
+  }> {
     const hasApiKey = !!this.apiKey;
     let connectionStatus = false;
-    
+
     if (hasApiKey) {
       connectionStatus = await this.testConnection();
     }
@@ -377,7 +420,7 @@ export class VapiIntegrationService {
     return {
       status: hasApiKey && connectionStatus ? 'healthy' : 'degraded',
       apiKey: hasApiKey,
-      connection: connectionStatus
+      connection: connectionStatus,
     };
   }
 }
@@ -399,21 +442,25 @@ export class AssistantGeneratorService {
    * Generate a complete Vapi assistant for a hotel
    */
   async generateAssistant(
-    hotelData: BasicHotelData | AdvancedHotelData, 
+    hotelData: BasicHotelData | AdvancedHotelData,
     customization: AssistantCustomization
   ): Promise<string> {
     try {
       console.log(`🏨 Generating assistant for: ${hotelData.name}`);
-      
+
       // 1. Generate knowledge base
-      const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData);
-      
+      const knowledgeBase =
+        this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+
       // 2. Build system prompt
-      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(hotelData, customization);
-      
+      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(
+        hotelData,
+        customization
+      );
+
       // 3. Generate functions based on hotel services
       const functions = this.generateFunctions(hotelData.services);
-      
+
       // 4. Build assistant configuration
       const assistantConfig: VapiAssistantConfig = {
         name: `${hotelData.name} AI Concierge`,
@@ -423,22 +470,28 @@ export class AssistantGeneratorService {
         model: {
           provider: 'openai',
           model: 'gpt-4',
-          temperature: customization.personality === 'friendly' ? 0.8 : 0.7
+          temperature: customization.personality === 'friendly' ? 0.8 : 0.7,
         },
         functions,
         firstMessage: this.generateFirstMessage(hotelData, customization),
         silenceTimeoutSeconds: customization.silenceTimeout || 30,
         maxDurationSeconds: customization.maxDuration || 1800,
-        backgroundSound: customization.backgroundSound || 'hotel-lobby'
+        backgroundSound: customization.backgroundSound || 'hotel-lobby',
       };
-      
+
       // 5. Create assistant via Vapi API
-      const assistantId = await this.vapiService.createAssistant(assistantConfig);
-      
-      console.log(`✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}`);
+      const assistantId =
+        await this.vapiService.createAssistant(assistantConfig);
+
+      console.log(
+        `✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}`
+      );
       return assistantId;
     } catch (error) {
-      console.error(`Failed to generate assistant for ${hotelData.name}:`, error);
+      console.error(
+        `Failed to generate assistant for ${hotelData.name}:`,
+        error
+      );
       throw new VapiIntegrationError(
         `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GENERATION_FAILED',
@@ -456,12 +509,18 @@ export class AssistantGeneratorService {
     customization: AssistantCustomization
   ): Promise<void> {
     try {
-      console.log(`🔄 Updating assistant ${assistantId} for: ${hotelData.name}`);
-      
-      const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(hotelData);
-      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(hotelData, customization);
+      console.log(
+        `🔄 Updating assistant ${assistantId} for: ${hotelData.name}`
+      );
+
+      const knowledgeBase =
+        this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+      const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(
+        hotelData,
+        customization
+      );
       const functions = this.generateFunctions(hotelData.services);
-      
+
       const updateConfig: Partial<VapiAssistantConfig> = {
         systemPrompt,
         functions,
@@ -469,9 +528,9 @@ export class AssistantGeneratorService {
         voiceId: customization.voiceId,
         silenceTimeoutSeconds: customization.silenceTimeout,
         maxDurationSeconds: customization.maxDuration,
-        backgroundSound: customization.backgroundSound
+        backgroundSound: customization.backgroundSound,
       };
-      
+
       await this.vapiService.updateAssistant(assistantId, updateConfig);
       console.log(`✅ Assistant updated successfully: ${assistantId}`);
     } catch (error) {
@@ -493,54 +552,65 @@ export class AssistantGeneratorService {
    */
   private generateFunctions(services: HotelService[]): VapiFunction[] {
     const functions: VapiFunction[] = [];
-    
+
     // Core function always included
     functions.push({
       name: 'get_hotel_info',
-      description: 'Get basic hotel information such as hours, contact details, location, and amenities',
+      description:
+        'Get basic hotel information such as hours, contact details, location, and amenities',
       parameters: {
         type: 'object',
         properties: {
-          info_type: { 
-            type: 'string', 
+          info_type: {
+            type: 'string',
             enum: ['hours', 'contact', 'location', 'amenities', 'policies'],
-            description: 'Type of information requested'
-          }
+            description: 'Type of information requested',
+          },
         },
-        required: ['info_type']
+        required: ['info_type'],
       },
-      async: false
+      async: false,
     });
 
     // Dynamic functions based on available services
     const serviceTypes = services.map(s => s.type);
-    
+
     // Room Service Function
     if (serviceTypes.includes('room_service')) {
       functions.push({
         name: 'order_room_service',
-        description: 'Order room service for hotel guests including food, drinks, and amenities',
+        description:
+          'Order room service for hotel guests including food, drinks, and amenities',
         parameters: {
           type: 'object',
           properties: {
             room_number: { type: 'string', description: 'Guest room number' },
-            guest_name: { type: 'string', description: 'Guest name for the order' },
-            items: { 
-              type: 'array', 
+            guest_name: {
+              type: 'string',
+              description: 'Guest name for the order',
+            },
+            items: {
+              type: 'array',
               items: { type: 'string' },
-              description: 'List of items to order'
+              description: 'List of items to order',
             },
-            delivery_time: { 
-              type: 'string', 
+            delivery_time: {
+              type: 'string',
               enum: ['asap', '30min', '1hour', 'specific'],
-              description: 'Preferred delivery time'
+              description: 'Preferred delivery time',
             },
-            specific_time: { type: 'string', description: 'Specific delivery time if selected' },
-            special_instructions: { type: 'string', description: 'Any special instructions' }
+            specific_time: {
+              type: 'string',
+              description: 'Specific delivery time if selected',
+            },
+            special_instructions: {
+              type: 'string',
+              description: 'Any special instructions',
+            },
           },
-          required: ['room_number', 'guest_name', 'items', 'delivery_time']
+          required: ['room_number', 'guest_name', 'items', 'delivery_time'],
         },
-        async: true
+        async: true,
       });
     }
 
@@ -548,26 +618,30 @@ export class AssistantGeneratorService {
     if (serviceTypes.includes('housekeeping')) {
       functions.push({
         name: 'request_housekeeping',
-        description: 'Request housekeeping services including cleaning, towels, amenities',
+        description:
+          'Request housekeeping services including cleaning, towels, amenities',
         parameters: {
           type: 'object',
           properties: {
             room_number: { type: 'string', description: 'Guest room number' },
-            service_type: { 
+            service_type: {
               type: 'string',
               enum: ['cleaning', 'towels', 'amenities', 'maintenance', 'other'],
-              description: 'Type of housekeeping service'
+              description: 'Type of housekeeping service',
             },
-            priority: { 
+            priority: {
               type: 'string',
               enum: ['normal', 'urgent'],
-              description: 'Service priority level'
+              description: 'Service priority level',
             },
-            description: { type: 'string', description: 'Detailed description of the request' }
+            description: {
+              type: 'string',
+              description: 'Detailed description of the request',
+            },
           },
-          required: ['room_number', 'service_type']
+          required: ['room_number', 'service_type'],
         },
-        async: true
+        async: true,
       });
     }
 
@@ -575,25 +649,38 @@ export class AssistantGeneratorService {
     if (serviceTypes.includes('transportation')) {
       functions.push({
         name: 'book_transportation',
-        description: 'Book transportation services including taxi, shuttle, airport transfer',
+        description:
+          'Book transportation services including taxi, shuttle, airport transfer',
         parameters: {
           type: 'object',
           properties: {
             room_number: { type: 'string', description: 'Guest room number' },
-            guest_name: { type: 'string', description: 'Guest name for booking' },
-            transport_type: { 
+            guest_name: {
+              type: 'string',
+              description: 'Guest name for booking',
+            },
+            transport_type: {
               type: 'string',
               enum: ['taxi', 'shuttle', 'airport_transfer', 'private_car'],
-              description: 'Type of transportation'
+              description: 'Type of transportation',
             },
             pickup_time: { type: 'string', description: 'Pickup time' },
             destination: { type: 'string', description: 'Destination address' },
             passengers: { type: 'string', description: 'Number of passengers' },
-            special_requests: { type: 'string', description: 'Any special requests' }
+            special_requests: {
+              type: 'string',
+              description: 'Any special requests',
+            },
           },
-          required: ['room_number', 'guest_name', 'transport_type', 'pickup_time', 'destination']
+          required: [
+            'room_number',
+            'guest_name',
+            'transport_type',
+            'pickup_time',
+            'destination',
+          ],
         },
-        async: true
+        async: true,
       });
     }
 
@@ -601,24 +688,39 @@ export class AssistantGeneratorService {
     if (serviceTypes.includes('spa')) {
       functions.push({
         name: 'book_spa_service',
-        description: 'Book spa and wellness services including massage, treatments',
+        description:
+          'Book spa and wellness services including massage, treatments',
         parameters: {
           type: 'object',
           properties: {
             room_number: { type: 'string', description: 'Guest room number' },
-            guest_name: { type: 'string', description: 'Guest name for booking' },
-            service_type: { 
+            guest_name: {
+              type: 'string',
+              description: 'Guest name for booking',
+            },
+            service_type: {
               type: 'string',
               enum: ['massage', 'facial', 'wellness', 'fitness', 'other'],
-              description: 'Type of spa service'
+              description: 'Type of spa service',
             },
-            preferred_time: { type: 'string', description: 'Preferred appointment time' },
+            preferred_time: {
+              type: 'string',
+              description: 'Preferred appointment time',
+            },
             duration: { type: 'string', description: 'Service duration' },
-            special_requests: { type: 'string', description: 'Any special requests or preferences' }
+            special_requests: {
+              type: 'string',
+              description: 'Any special requests or preferences',
+            },
           },
-          required: ['room_number', 'guest_name', 'service_type', 'preferred_time']
+          required: [
+            'room_number',
+            'guest_name',
+            'service_type',
+            'preferred_time',
+          ],
         },
-        async: true
+        async: true,
       });
     }
 
@@ -626,49 +728,75 @@ export class AssistantGeneratorService {
     if (serviceTypes.includes('concierge')) {
       functions.push({
         name: 'concierge_request',
-        description: 'General concierge services including reservations, recommendations, bookings',
+        description:
+          'General concierge services including reservations, recommendations, bookings',
         parameters: {
           type: 'object',
           properties: {
             room_number: { type: 'string', description: 'Guest room number' },
-            request_type: { 
+            request_type: {
               type: 'string',
-              enum: ['restaurant_reservation', 'attraction_booking', 'recommendation', 'tickets', 'other'],
-              description: 'Type of concierge request'
+              enum: [
+                'restaurant_reservation',
+                'attraction_booking',
+                'recommendation',
+                'tickets',
+                'other',
+              ],
+              description: 'Type of concierge request',
             },
-            details: { type: 'string', description: 'Detailed description of the request' },
-            preferred_time: { type: 'string', description: 'Preferred time if applicable' },
-            budget_range: { type: 'string', description: 'Budget range if applicable' }
+            details: {
+              type: 'string',
+              description: 'Detailed description of the request',
+            },
+            preferred_time: {
+              type: 'string',
+              description: 'Preferred time if applicable',
+            },
+            budget_range: {
+              type: 'string',
+              description: 'Budget range if applicable',
+            },
           },
-          required: ['room_number', 'request_type', 'details']
+          required: ['room_number', 'request_type', 'details'],
         },
-        async: true
+        async: true,
       });
     }
 
     // Connect to Staff Function (always available)
     functions.push({
       name: 'connect_to_staff',
-      description: 'Connect guest to human staff for complex requests or when AI cannot help',
+      description:
+        'Connect guest to human staff for complex requests or when AI cannot help',
       parameters: {
         type: 'object',
         properties: {
           room_number: { type: 'string', description: 'Guest room number' },
-          urgency: { 
+          urgency: {
             type: 'string',
             enum: ['low', 'medium', 'high', 'emergency'],
-            description: 'Urgency level of the request'
+            description: 'Urgency level of the request',
           },
-          reason: { type: 'string', description: 'Reason for connecting to staff' },
-          department: { 
+          reason: {
             type: 'string',
-            enum: ['front_desk', 'housekeeping', 'maintenance', 'concierge', 'management'],
-            description: 'Preferred department to connect with'
-          }
+            description: 'Reason for connecting to staff',
+          },
+          department: {
+            type: 'string',
+            enum: [
+              'front_desk',
+              'housekeeping',
+              'maintenance',
+              'concierge',
+              'management',
+            ],
+            description: 'Preferred department to connect with',
+          },
         },
-        required: ['room_number', 'reason']
+        required: ['room_number', 'reason'],
       },
-      async: false
+      async: false,
     });
 
     return functions;
@@ -677,10 +805,15 @@ export class AssistantGeneratorService {
   /**
    * Generate personalized first message
    */
-  private generateFirstMessage(hotelData: BasicHotelData, customization: AssistantCustomization): string {
+  private generateFirstMessage(
+    hotelData: BasicHotelData,
+    customization: AssistantCustomization
+  ): string {
     const timeGreeting = this.getTimeBasedGreeting();
-    const personalityTouch = this.getPersonalityTouch(customization.personality);
-    
+    const personalityTouch = this.getPersonalityTouch(
+      customization.personality
+    );
+
     return `${timeGreeting} Welcome to ${hotelData.name}! ${personalityTouch} How may I assist you today?`;
   }
 
@@ -724,7 +857,7 @@ export class AssistantGeneratorService {
       name: z.string().min(1),
       hotelName: z.string().min(1),
       systemPrompt: z.string().min(10),
-      functions: z.array(z.any()).min(1)
+      functions: z.array(z.any()).min(1),
     });
 
     schema.parse(config);
@@ -733,17 +866,17 @@ export class AssistantGeneratorService {
   /**
    * Get service health
    */
-  async getServiceHealth(): Promise<{ 
-    status: string; 
-    vapiConnection: boolean; 
-    assistantGeneration: boolean 
+  async getServiceHealth(): Promise<{
+    status: string;
+    vapiConnection: boolean;
+    assistantGeneration: boolean;
   }> {
     const vapiHealth = await this.vapiService.getServiceHealth();
-    
+
     return {
       status: vapiHealth.status,
       vapiConnection: vapiHealth.connection,
-      assistantGeneration: vapiHealth.connection && vapiHealth.apiKey
+      assistantGeneration: vapiHealth.connection && vapiHealth.apiKey,
     };
   }
 }
@@ -755,5 +888,5 @@ export class AssistantGeneratorService {
 export default {
   VapiIntegrationService,
   AssistantGeneratorService,
-  VapiIntegrationError
-}; 
+  VapiIntegrationError,
+};

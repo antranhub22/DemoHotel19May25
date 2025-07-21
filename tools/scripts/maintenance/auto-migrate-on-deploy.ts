@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 /**
  * Auto-Migration Script for Production Deployment
- * 
+ *
  * This script automatically detects and fixes schema mismatches
  * during deployment process. It's safe to run multiple times.
  */
@@ -20,40 +20,54 @@ interface MigrationResult {
 
 async function autoMigrateOnDeploy(): Promise<MigrationResult> {
   console.log('🔄 Auto-Migration: Checking database schema...');
-  
+
   const DATABASE_URL = process.env.DATABASE_URL;
-  
+
   if (!DATABASE_URL) {
-    console.log('⚠️ DATABASE_URL not found - skipping migration (probably local dev)');
+    console.log(
+      '⚠️ DATABASE_URL not found - skipping migration (probably local dev)'
+    );
     return { success: true, migrationsRun: [] };
   }
 
   // ✅ FIXED: Skip PostgreSQL auto-migration for SQLite databases
   if (DATABASE_URL.startsWith('sqlite://')) {
-    console.log('📁 SQLite database detected - skipping PostgreSQL auto-migration');
-    console.log('ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)');
+    console.log(
+      '📁 SQLite database detected - skipping PostgreSQL auto-migration'
+    );
+    console.log(
+      'ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)'
+    );
     return { success: true, migrationsRun: ['sqlite-auto-handled'] };
   }
 
   // ✅ IMPROVED: Only proceed with PostgreSQL auto-migration for actual PostgreSQL databases
-  if (!DATABASE_URL.includes('postgres') && !DATABASE_URL.includes('postgresql')) {
-    console.log('⚠️ Database URL does not appear to be PostgreSQL - skipping auto-migration');
-    console.log('🔍 DATABASE_URL pattern:', DATABASE_URL.substring(0, 20) + '...');
+  if (
+    !DATABASE_URL.includes('postgres') &&
+    !DATABASE_URL.includes('postgresql')
+  ) {
+    console.log(
+      '⚠️ Database URL does not appear to be PostgreSQL - skipping auto-migration'
+    );
+    console.log(
+      '🔍 DATABASE_URL pattern:',
+      DATABASE_URL.substring(0, 20) + '...'
+    );
     return { success: true, migrationsRun: [] };
   }
 
   console.log('🐘 PostgreSQL database detected - running auto-migration...');
-  
+
   const pool = new Pool({
     connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
   });
 
   const migrationsRun: string[] = [];
 
   try {
     const client = await pool.connect();
-    
+
     // 1. Check if staff table has required columns
     console.log('🔍 Checking staff table schema...');
     const staffColumns = await client.query(`
@@ -61,15 +75,25 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
       FROM information_schema.columns 
       WHERE table_name = 'staff'
     `);
-    
+
     const existingColumns = staffColumns.rows.map(row => row.column_name);
-    const requiredColumns = ['first_name', 'last_name', 'display_name', 'phone', 'email', 'permissions', 'is_active'];
-    const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
-    
+    const requiredColumns = [
+      'first_name',
+      'last_name',
+      'display_name',
+      'phone',
+      'email',
+      'permissions',
+      'is_active',
+    ];
+    const missingColumns = requiredColumns.filter(
+      col => !existingColumns.includes(col)
+    );
+
     if (missingColumns.length > 0) {
       console.log(`🚨 Missing columns detected: ${missingColumns.join(', ')}`);
       console.log('🔧 Running staff table migration...');
-      
+
       const migrationSQL = `
         -- Add missing staff columns
         ALTER TABLE staff 
@@ -93,7 +117,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
           is_active = COALESCE(is_active, true)
         WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
       `;
-      
+
       await client.query('BEGIN');
       try {
         await client.query(migrationSQL);
@@ -115,15 +139,25 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
       FROM information_schema.columns 
       WHERE table_name = 'tenants'
     `);
-    
-    const existingTenantColumns = tenantsColumns.rows.map(row => row.column_name);
-    const requiredTenantColumns = ['hotel_name', 'subscription_plan', 'subscription_status'];
-    const missingTenantColumns = requiredTenantColumns.filter(col => !existingTenantColumns.includes(col));
-    
+
+    const existingTenantColumns = tenantsColumns.rows.map(
+      row => row.column_name
+    );
+    const requiredTenantColumns = [
+      'hotel_name',
+      'subscription_plan',
+      'subscription_status',
+    ];
+    const missingTenantColumns = requiredTenantColumns.filter(
+      col => !existingTenantColumns.includes(col)
+    );
+
     if (missingTenantColumns.length > 0) {
-      console.log(`🚨 Missing tenant columns: ${missingTenantColumns.join(', ')}`);
+      console.log(
+        `🚨 Missing tenant columns: ${missingTenantColumns.join(', ')}`
+      );
       console.log('🔧 Running tenants table migration...');
-      
+
       const tenantMigrationSQL = `
         ALTER TABLE tenants 
         ADD COLUMN IF NOT EXISTS hotel_name VARCHAR(255),
@@ -143,7 +177,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         SET hotel_name = COALESCE(hotel_name, name, 'Hotel')
         WHERE hotel_name IS NULL;
       `;
-      
+
       await client.query('BEGIN');
       try {
         await client.query(tenantMigrationSQL);
@@ -160,30 +194,40 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
 
     // 3. Ensure indexes exist (only for existing tables)
     console.log('🔍 Checking database indexes...');
-    
+
     // Get list of existing tables
     const existingTables = await client.query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public'
     `);
-    
+
     const tableNames = existingTables.rows.map(row => row.table_name);
     const indexQueries = [];
-    
+
     // Always create staff indexes (we know staff table exists)
-    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id)');
-    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username)');
-    indexQueries.push('CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email)');
-    
+    indexQueries.push(
+      'CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id)'
+    );
+    indexQueries.push(
+      'CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username)'
+    );
+    indexQueries.push(
+      'CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email)'
+    );
+
     // Only create indexes for tables that exist
     if (tableNames.includes('call')) {
-      indexQueries.push('CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id)');
+      indexQueries.push(
+        'CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id)'
+      );
     }
     if (tableNames.includes('request')) {
-      indexQueries.push('CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)');
+      indexQueries.push(
+        'CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)'
+      );
     }
-    
+
     // Execute all index creation queries
     for (const query of indexQueries) {
       try {
@@ -192,26 +236,25 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         console.warn(`⚠️ Failed to create index: ${error.message}`);
       }
     }
-    
+
     console.log('✅ Database indexes ensured');
-    
+
     client.release();
-    
+
     if (migrationsRun.length > 0) {
       console.log('🎉 Auto-migration completed successfully!');
       console.log(`📝 Migrations run: ${migrationsRun.join(', ')}`);
     } else {
       console.log('✅ Database schema is up to date - no migrations needed');
     }
-    
+
     return { success: true, migrationsRun };
-    
   } catch (error) {
     console.error('❌ Auto-migration failed:', error);
-    return { 
-      success: false, 
+    return {
+      success: false,
       migrationsRun,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   } finally {
     await pool.end();
@@ -226,7 +269,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Check if this file is being run directly
-const isMainModule = process.argv[1] === __filename || process.argv[1]?.endsWith('auto-migrate-on-deploy.ts');
+const isMainModule =
+  process.argv[1] === __filename ||
+  process.argv[1]?.endsWith('auto-migrate-on-deploy.ts');
 
 if (isMainModule) {
   autoMigrateOnDeploy()
@@ -240,4 +285,4 @@ if (isMainModule) {
       console.error('Migration script error:', error);
       // Don't exit with error code to allow deployment to continue
     });
-} 
+}

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { 
-  BarChart3, 
-  Users, 
-  MessageSquare, 
+import {
+  BarChart3,
+  Users,
+  MessageSquare,
   Bot,
   TrendingUp,
   Calendar,
@@ -18,9 +18,15 @@ import {
   Wrench,
   Database,
   Monitor,
-  ClipboardList
+  ClipboardList,
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -34,48 +40,48 @@ const mockData = {
     total: 156,
     today: 23,
     answered: 142,
-    avgDuration: '2.3 min'
+    avgDuration: '2.3 min',
   },
   requests: {
     pending: 8,
     inProgress: 12,
     completed: 45,
-    totalToday: 18
+    totalToday: 18,
   },
   satisfaction: {
     rating: 4.7,
     responses: 89,
-    trend: '+0.2'
+    trend: '+0.2',
   },
   system: {
     uptime: 99.8,
     responseTime: 150,
-    errors: 2
-  }
+    errors: 2,
+  },
 };
 
 // Metric card component
-const MetricCard = ({ 
-  title, 
-  value, 
-  description, 
-  icon: Icon, 
-  trend, 
-  color = "blue" 
+const MetricCard = ({
+  title,
+  value,
+  description,
+  icon: Icon,
+  trend,
+  color = 'blue',
 }: {
   title: string;
   value: string | number;
   description?: string;
   icon: React.ComponentType<{ className?: string }>;
   trend?: string;
-  color?: "blue" | "green" | "red" | "orange" | "purple";
+  color?: 'blue' | 'green' | 'red' | 'orange' | 'purple';
 }) => {
   const colorClasses = {
-    blue: "bg-blue-500",
-    green: "bg-green-500", 
-    red: "bg-red-500",
-    orange: "bg-orange-500",
-    purple: "bg-purple-500"
+    blue: 'bg-blue-500',
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    orange: 'bg-orange-500',
+    purple: 'bg-purple-500',
   };
 
   return (
@@ -105,8 +111,12 @@ const HotelManagerDashboard = () => (
   <div className="space-y-6">
     {/* Welcome section */}
     <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-lg">
-      <h2 className="text-2xl font-bold mb-2">Chào mừng đến với Dashboard Quản lý</h2>
-      <p className="text-blue-100">Tổng quan hoạt động khách sạn và AI Assistant</p>
+      <h2 className="text-2xl font-bold mb-2">
+        Chào mừng đến với Dashboard Quản lý
+      </h2>
+      <p className="text-blue-100">
+        Tổng quan hoạt động khách sạn và AI Assistant
+      </p>
     </div>
 
     {/* Key metrics */}
@@ -301,19 +311,46 @@ const FrontDeskDashboard = () => (
               <span className="text-sm">Đang chờ</span>
               <Badge variant="outline">{mockData.requests.pending}</Badge>
             </div>
-            <Progress value={(mockData.requests.pending / (mockData.requests.pending + mockData.requests.inProgress + mockData.requests.completed)) * 100} className="h-2" />
-            
+            <Progress
+              value={
+                (mockData.requests.pending /
+                  (mockData.requests.pending +
+                    mockData.requests.inProgress +
+                    mockData.requests.completed)) *
+                100
+              }
+              className="h-2"
+            />
+
             <div className="flex items-center justify-between">
               <span className="text-sm">Đang xử lý</span>
               <Badge variant="outline">{mockData.requests.inProgress}</Badge>
             </div>
-            <Progress value={(mockData.requests.inProgress / (mockData.requests.pending + mockData.requests.inProgress + mockData.requests.completed)) * 100} className="h-2" />
-            
+            <Progress
+              value={
+                (mockData.requests.inProgress /
+                  (mockData.requests.pending +
+                    mockData.requests.inProgress +
+                    mockData.requests.completed)) *
+                100
+              }
+              className="h-2"
+            />
+
             <div className="flex items-center justify-between">
               <span className="text-sm">Hoàn thành</span>
               <Badge variant="outline">{mockData.requests.completed}</Badge>
             </div>
-            <Progress value={(mockData.requests.completed / (mockData.requests.pending + mockData.requests.inProgress + mockData.requests.completed)) * 100} className="h-2" />
+            <Progress
+              value={
+                (mockData.requests.completed /
+                  (mockData.requests.pending +
+                    mockData.requests.inProgress +
+                    mockData.requests.completed)) *
+                100
+              }
+              className="h-2"
+            />
           </div>
         </CardContent>
       </Card>
@@ -462,16 +499,13 @@ export const UnifiedDashboardHome: React.FC = () => {
               Chào mừng đến với Dashboard
             </h2>
             <p className="text-gray-600">
-              Vai trò của bạn chưa được cấu hình. Vui lòng liên hệ quản trị viên.
+              Vai trò của bạn chưa được cấu hình. Vui lòng liên hệ quản trị
+              viên.
             </p>
           </div>
         );
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {renderDashboardByRole()}
-    </div>
-  );
-}; 
+  return <div className="space-y-6">{renderDashboardByRole()}</div>;
+};

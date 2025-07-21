@@ -18,5 +18,5 @@ export {
   LANGUAGE_OPTIONS,
   BACKGROUND_SOUND_OPTIONS,
   validateHotelData,
-  validateAssistantCustomization
-} from './dashboardApi'; 
+  validateAssistantCustomization,
+} from './dashboardApi';

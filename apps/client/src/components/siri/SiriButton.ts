@@ -7,7 +7,7 @@ import {
   StateManager,
   type CanvasRenderState,
   type DimensionsState,
-  type ExternalVisualState
+  type ExternalVisualState,
 } from './modules';
 
 export interface SiriButtonColors {
@@ -19,10 +19,10 @@ export interface SiriButtonColors {
 
 /**
  * SiriButton - Modular Architecture
- * 
+ *
  * Orchestrates multiple specialized modules to create a responsive,
  * animated voice assistant button with robust error handling.
- * 
+ *
  * This is a complete rewrite using the modular architecture pattern,
  * maintaining full backward compatibility with the original API.
  */
@@ -48,7 +48,11 @@ export class SiriButton {
     this.debug = new DebugManager();
     this.emergency = new EmergencyStopManager(this.debug);
     this.renderer = new CanvasRenderer(null as any, this.debug); // Will set context later
-    this.animation = new AnimationController(this.debug, this.emergency, this.renderer);
+    this.animation = new AnimationController(
+      this.debug,
+      this.emergency,
+      this.renderer
+    );
     this.dimensions = new DimensionsManager(this.debug, this.emergency);
     this.state = new StateManager(this.debug);
 
@@ -62,23 +66,26 @@ export class SiriButton {
     } else {
       // Use default colors
       this.state.setColorScheme({
-      primary: '#5DB6B9',
-      secondary: '#E8B554',
-      glow: 'rgba(93, 182, 185, 0.4)',
-      name: 'English'
+        primary: '#5DB6B9',
+        secondary: '#E8B554',
+        glow: 'rgba(93, 182, 185, 0.4)',
+        name: 'English',
       });
     }
 
     // Enhanced mobile debug info
     const deviceInfo = {
       userAgent: navigator.userAgent,
-      isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+      isMobile:
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ),
       isTouch: 'ontouchstart' in window,
       screen: {
         width: screen.width,
         height: screen.height,
-        devicePixelRatio: window.devicePixelRatio
-      }
+        devicePixelRatio: window.devicePixelRatio,
+      },
     };
 
     this.debug.log('🔍 [SiriButton] DEVICE INFO:', deviceInfo);
@@ -95,18 +102,24 @@ export class SiriButton {
    * Initialize canvas element and context
    */
   private initializeCanvas(containerId: string): void {
-    this.debug.log('🎨 [SiriButton] Initializing canvas for container:', containerId);
+    this.debug.log(
+      '🎨 [SiriButton] Initializing canvas for container:',
+      containerId
+    );
 
     // Find container
     const container = document.getElementById(containerId);
     if (!container) {
-      this.debug.error('❌ [SiriButton] Container element not found:', containerId);
+      this.debug.error(
+        '❌ [SiriButton] Container element not found:',
+        containerId
+      );
       throw new Error(`Container element not found: ${containerId}`);
     }
 
     // Create canvas
     this.canvas = document.createElement('canvas');
-    
+
     // Set canvas styles for proper display
     this.canvas.style.position = 'absolute';
     this.canvas.style.inset = '2px';
@@ -115,17 +128,22 @@ export class SiriButton {
     this.canvas.style.background = 'transparent';
     this.canvas.style.zIndex = '1';
     this.canvas.style.pointerEvents = 'none'; // Let container handle events
-    
+
     // Add debug attributes
     this.canvas.setAttribute('data-siri-canvas', 'true');
-    this.canvas.setAttribute('data-mobile-debug', 
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    this.canvas.setAttribute(
+      'data-mobile-debug',
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+        ? 'mobile'
+        : 'desktop'
     );
     this.canvas.id = `${containerId}-canvas`;
-    
+
     // Append to container
     container.appendChild(this.canvas);
-    
+
     // Get context
     const ctx = this.canvas.getContext('2d');
     if (!ctx) {
@@ -133,14 +151,17 @@ export class SiriButton {
       throw new Error('Could not get canvas context');
     }
     this.ctx = ctx;
-    
+
     this.debug.log('✅ [SiriButton] Canvas created and context obtained');
 
     // Debug canvas verification
     setTimeout(() => {
       this.debug.debug('🔍 [SiriButton] CANVAS VERIFICATION:');
       this.debug.debug('  🎨 Canvas in DOM:', document.contains(this.canvas));
-      this.debug.debug('  🎨 Canvas rect:', this.canvas.getBoundingClientRect());
+      this.debug.debug(
+        '  🎨 Canvas rect:',
+        this.canvas.getBoundingClientRect()
+      );
     }, 200);
   }
 
@@ -181,10 +202,10 @@ export class SiriButton {
 
       // Start animation loop
       this.animation.start();
-      
+
       // Force initial render
       this.renderFrame();
-      
+
       this.isInitialized = true;
       this.debug.log('✅ [SiriButton] All systems started');
     }, 100);
@@ -212,7 +233,7 @@ export class SiriButton {
     const renderState: CanvasRenderState = {
       ...this.currentDimensions,
       ...visualState,
-      ...this.animation.getState()
+      ...this.animation.getState(),
     };
 
     // Trigger rendering
@@ -286,7 +307,7 @@ export class SiriButton {
     const animState = this.animation.getState();
     return {
       elapsed: animState.elapsedTime,
-      target: animState.timeTarget
+      target: animState.timeTarget,
     };
   }
 
@@ -296,12 +317,12 @@ export class SiriButton {
   public setInteractionMode(mode: 'hover' | 'active' | 'idle'): void {
     const externalState: ExternalVisualState = {
       isHovered: mode === 'hover',
-      isActive: mode === 'active'
+      isActive: mode === 'active',
     };
-    
+
     this.state.updateExternalState(externalState);
     this.animation.markActivity();
-    
+
     this.debug.debug('👆 [SiriButton] Interaction mode:', mode);
   }
 
@@ -333,25 +354,29 @@ export class SiriButton {
 
     // Stop systems
     this.animation.stop();
-    
+
     // Cleanup modules
     this.animation.cleanup();
     this.dimensions.cleanup();
     this.state.reset();
 
     // Remove canvas safely
-    if (this.canvas && this.canvas.parentElement && document.contains(this.canvas)) {
+    if (
+      this.canvas &&
+      this.canvas.parentElement &&
+      document.contains(this.canvas)
+    ) {
       try {
-          this.canvas.parentElement.removeChild(this.canvas);
+        this.canvas.parentElement.removeChild(this.canvas);
         this.debug.log('✅ [SiriButton] Canvas removed successfully');
       } catch (error) {
         this.debug.warn('[SiriButton] Error removing canvas:', error);
       }
-      }
-      
+    }
+
     // Clear references
-      this.canvas = null as any;
-      this.ctx = null as any;
+    this.canvas = null as any;
+    this.ctx = null as any;
     this.isInitialized = false;
 
     this.debug.log('✅ [SiriButton] Cleanup completed');
@@ -371,7 +396,7 @@ if (typeof window !== 'undefined') {
     },
     getLevel: () => SiriButton.getDebugLevel(),
     silent: () => SiriButton.setDebugLevel(0),
-    errorsOnly: () => SiriButton.setDebugLevel(1), 
+    errorsOnly: () => SiriButton.setDebugLevel(1),
     verbose: () => SiriButton.setDebugLevel(2),
     help: () => {
       console.log(`
@@ -387,10 +412,10 @@ if (typeof window !== 'undefined') {
 - Better error isolation and reporting
 - Enhanced mobile debugging support
       `);
-    }
+    },
   };
-  
+
   // Quick shortcuts (same as original)
   (window as any).voiceDebugOff = () => SiriButton.setDebugLevel(0);
   (window as any).voiceDebugOn = () => SiriButton.setDebugLevel(2);
-} 
+}

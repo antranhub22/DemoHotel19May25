@@ -9,7 +9,11 @@ const StaffPage: React.FC = () => {
   // Xử lý đăng nhập thành công
   const handleLoginSuccess = () => setIsLoggedIn(true);
 
-  return isLoggedIn ? <StaffDashboard /> : <StaffLogin onLogin={handleLoginSuccess} />;
+  return isLoggedIn ? (
+    <StaffDashboard />
+  ) : (
+    <StaffLogin onLogin={handleLoginSuccess} />
+  );
 };
 
-export default StaffPage; 
+export default StaffPage;

@@ -12,11 +12,7 @@
           "type": "boolean"
         },
         "data": {
-          "oneOf": [
-            { "type": "object" },
-            { "type": "array" },
-            { "type": "null" }
-          ]
+          "oneOf": [{ "type": "object" }, { "type": "array" }, { "type": "null" }]
         },
         "error": {
           "type": "object",
@@ -136,12 +132,18 @@
           "items": {
             "type": "string",
             "enum": [
-              "dashboard:read", "dashboard:write",
-              "analytics:read", "analytics:write",
-              "staff:read", "staff:write",
-              "calls:read", "calls:write",
-              "settings:read", "settings:write",
-              "voice_assistant:read", "voice_assistant:write"
+              "dashboard:read",
+              "dashboard:write",
+              "analytics:read",
+              "analytics:write",
+              "staff:read",
+              "staff:write",
+              "calls:read",
+              "calls:write",
+              "settings:read",
+              "settings:write",
+              "voice_assistant:read",
+              "voice_assistant:write"
             ]
           },
           "uniqueItems": true
@@ -172,12 +174,18 @@
           "items": {
             "type": "string",
             "enum": [
-              "dashboard:read", "dashboard:write",
-              "analytics:read", "analytics:write",
-              "staff:read", "staff:write",
-              "calls:read", "calls:write",
-              "settings:read", "settings:write",
-              "voice_assistant:read", "voice_assistant:write"
+              "dashboard:read",
+              "dashboard:write",
+              "analytics:read",
+              "analytics:write",
+              "staff:read",
+              "staff:write",
+              "calls:read",
+              "calls:write",
+              "settings:read",
+              "settings:write",
+              "voice_assistant:read",
+              "voice_assistant:write"
             ]
           },
           "uniqueItems": true
@@ -356,9 +364,15 @@
           "items": {
             "type": "string",
             "enum": [
-              "totalCalls", "completedCalls", "missedCalls", 
-              "averageDuration", "responseTime", "satisfactionScore",
-              "categories", "trends", "staffPerformance"
+              "totalCalls",
+              "completedCalls",
+              "missedCalls",
+              "averageDuration",
+              "responseTime",
+              "satisfactionScore",
+              "categories",
+              "trends",
+              "staffPerformance"
             ]
           },
           "default": ["totalCalls", "completedCalls", "missedCalls"]
@@ -397,9 +411,18 @@
           "items": {
             "type": "string",
             "enum": [
-              "wifi", "parking", "pool", "gym", "spa", "restaurant", 
-              "bar", "room_service", "concierge", "business_center",
-              "pet_friendly", "wheelchair_accessible"
+              "wifi",
+              "parking",
+              "pool",
+              "gym",
+              "spa",
+              "restaurant",
+              "bar",
+              "room_service",
+              "concierge",
+              "business_center",
+              "pet_friendly",
+              "wheelchair_accessible"
             ]
           }
         }
@@ -413,9 +436,16 @@
         "event": {
           "type": "string",
           "enum": [
-            "call.started", "call.completed", "call.missed", "call.failed",
-            "transcript.ready", "staff.created", "staff.updated", "staff.deleted",
-            "settings.updated", "voice_assistant.configured"
+            "call.started",
+            "call.completed",
+            "call.missed",
+            "call.failed",
+            "transcript.ready",
+            "staff.created",
+            "staff.updated",
+            "staff.deleted",
+            "settings.updated",
+            "voice_assistant.configured"
           ]
         },
         "timestamp": {
@@ -447,9 +477,16 @@
                 "code": {
                   "type": "string",
                   "enum": [
-                    "VALIDATION_ERROR", "AUTHENTICATION_ERROR", "AUTHORIZATION_ERROR",
-                    "NOT_FOUND", "CONFLICT", "RATE_LIMIT_EXCEEDED", "INTERNAL_ERROR",
-                    "SERVICE_UNAVAILABLE", "TIMEOUT", "INVALID_TENANT"
+                    "VALIDATION_ERROR",
+                    "AUTHENTICATION_ERROR",
+                    "AUTHORIZATION_ERROR",
+                    "NOT_FOUND",
+                    "CONFLICT",
+                    "RATE_LIMIT_EXCEEDED",
+                    "INTERNAL_ERROR",
+                    "SERVICE_UNAVAILABLE",
+                    "TIMEOUT",
+                    "INVALID_TENANT"
                   ]
                 },
                 "message": { "type": "string" },
@@ -609,4 +646,4 @@
     }
   },
   "additionalProperties": false
-} 
+}

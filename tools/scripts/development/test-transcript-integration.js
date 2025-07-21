@@ -13,8 +13,9 @@ async function testTranscriptSaving() {
   const testTranscript = {
     callId: `test-call-${Date.now()}`,
     role: 'user',
-    content: 'Hello, this is a test message from the transcript integration test.',
-    tenantId: 'test-tenant'
+    content:
+      'Hello, this is a test message from the transcript integration test.',
+    tenantId: 'test-tenant',
   };
 
   try {
@@ -29,7 +30,9 @@ async function testTranscriptSaving() {
     });
 
     if (!saveResponse.ok) {
-      throw new Error(`Save failed: ${saveResponse.status} ${saveResponse.statusText}`);
+      throw new Error(
+        `Save failed: ${saveResponse.status} ${saveResponse.statusText}`
+      );
     }
 
     const saveData = await saveResponse.json();
@@ -37,10 +40,14 @@ async function testTranscriptSaving() {
 
     // 2. Test retrieving transcripts
     console.log('\n2️⃣ Testing GET /api/transcripts/:callId...');
-    const getResponse = await fetch(`${API_BASE}/api/transcripts/${testTranscript.callId}`);
+    const getResponse = await fetch(
+      `${API_BASE}/api/transcripts/${testTranscript.callId}`
+    );
 
     if (!getResponse.ok) {
-      throw new Error(`Get failed: ${getResponse.status} ${getResponse.statusText}`);
+      throw new Error(
+        `Get failed: ${getResponse.status} ${getResponse.statusText}`
+      );
     }
 
     const transcripts = await getResponse.json();
@@ -50,8 +57,10 @@ async function testTranscriptSaving() {
     console.log('\n3️⃣ Verifying data integrity...');
     if (transcripts.length > 0) {
       const savedTranscript = transcripts[0];
-      if (savedTranscript.content === testTranscript.content && 
-          savedTranscript.role === testTranscript.role) {
+      if (
+        savedTranscript.content === testTranscript.content &&
+        savedTranscript.role === testTranscript.role
+      ) {
         console.log('✅ Data integrity verified - content and role match');
       } else {
         console.log('❌ Data integrity failed - content or role mismatch');
@@ -61,12 +70,13 @@ async function testTranscriptSaving() {
     }
 
     console.log('\n🎉 Transcript integration test completed successfully!');
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
-    console.error('🔍 Make sure the development server is running on port 3000');
+    console.error(
+      '🔍 Make sure the development server is running on port 3000'
+    );
   }
 }
 
 // Run the test
-testTranscriptSaving(); 
+testTranscriptSaving();

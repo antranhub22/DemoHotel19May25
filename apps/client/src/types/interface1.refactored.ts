@@ -3,7 +3,7 @@ import { Language } from './interface1.types';
 
 /**
  * Interface1 Refactored - Type Definitions
- * 
+ *
  * Comprehensive type system for the refactored Interface1 architecture
  * Ensures type safety across all modular components and hooks
  */
@@ -32,14 +32,14 @@ export interface Interface1State {
   isLoading: boolean;
   error: string | null;
   hotelConfig: any;
-  
+
   // Assistant data
   micLevel: number;
   transcripts: any[];
   callSummary: any;
   serviceRequests: any[];
   language: Language;
-  
+
   // UI states
   showRightPanel: boolean;
   setShowRightPanel: (show: boolean) => void;
@@ -54,13 +54,15 @@ export interface Interface1Handlers {
   // Conversation state
   isCallStarted: boolean;
   showConversation: boolean;
-  
+
   // Call handlers
-  handleCallStart: (lang: Language) => Promise<{ success: boolean; error?: string }>;
+  handleCallStart: (
+    lang: Language
+  ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
-  
+
   // UI handlers
   handleRightPanelToggle: () => void;
   handleRightPanelClose: () => void;
@@ -124,7 +126,9 @@ export interface CallSectionProps {
     micLevel: number;
   };
   handlers: {
-    handleCallStart: (lang: Language) => Promise<{ success: boolean; error?: string }>;
+    handleCallStart: (
+      lang: Language
+    ) => Promise<{ success: boolean; error?: string }>;
     handleCallEnd: () => void;
     handleCancel: () => void;
     handleConfirm: () => void;
@@ -150,7 +154,7 @@ export interface UseInterface1Props {
 
 /**
  * Main useInterface1 Hook Return Type
- * 
+ *
  * This maintains 100% compatibility with the original API
  * while being backed by modular hooks internally
  */
@@ -159,10 +163,10 @@ export interface UseInterface1Return {
   isLoading: boolean;
   error: string | null;
   hotelConfig: any;
-  
+
   // Assistant integration
   micLevel: number;
-  
+
   // Scroll behavior
   showScrollButton: boolean;
   scrollToTop: () => void;
@@ -171,20 +175,22 @@ export interface UseInterface1Return {
   serviceGridRef: RefObject<HTMLDivElement>;
   conversationRef: RefObject<HTMLDivElement>;
   rightPanelRef: RefObject<HTMLDivElement>;
-  
+
   // Conversation state
   isCallStarted: boolean;
   showConversation: boolean;
-  handleCallStart: (lang: Language) => Promise<{ success: boolean; error?: string }>;
+  handleCallStart: (
+    lang: Language
+  ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
   handleCancel: () => void;
   handleConfirm: () => void;
-  
+
   // Right panel state
   showRightPanel: boolean;
   handleRightPanelToggle: () => void;
   handleRightPanelClose: () => void;
-  
+
   // Popup system demo functions
   handleShowConversationPopup: () => void;
   handleShowNotificationDemo: () => void;
@@ -204,7 +210,7 @@ export interface Interface1Props {
 
 /**
  * Hook Dependencies Type
- * 
+ *
  * Used to type the dependencies passed between modular hooks
  */
 export interface HookDependencies {
@@ -214,7 +220,7 @@ export interface HookDependencies {
 
 /**
  * Component References Type
- * 
+ *
  * Central type for all component refs used in Interface1
  */
 export interface ComponentRefs {
@@ -253,7 +259,9 @@ export const isLoadingState = (state: Interface1State): boolean => {
 /**
  * Type guard to check if component has error
  */
-export const hasError = (state: Interface1State): state is Interface1State & { error: string } => {
+export const hasError = (
+  state: Interface1State
+): state is Interface1State & { error: string } => {
   return state.error !== null;
 };
 
@@ -269,4 +277,4 @@ export const isCallActive = (handlers: Interface1Handlers): boolean => {
 // ============================================
 
 // Re-export existing types for convenience
-export type { Language } from './interface1.types'; 
+export type { Language } from './interface1.types';

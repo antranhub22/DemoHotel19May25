@@ -18,5 +18,5 @@ export {
   AUTH_ERROR_MESSAGES,
   TENANT_CONFIG,
   DEV_CONFIG,
-  authValidationSchemas
-} from './auth.config'; 
+  authValidationSchemas,
+} from './auth.config';

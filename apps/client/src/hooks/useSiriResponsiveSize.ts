@@ -26,7 +26,10 @@ export const useSiriResponsiveSize = (): SiriSizeConfig => {
       const newIsDesktop = window.innerWidth >= 768;
       if (newIsDesktop !== isDesktop) {
         setIsDesktop(newIsDesktop);
-        console.log('🔄 [useSiriResponsiveSize] Platform changed:', newIsDesktop ? 'Desktop' : 'Mobile');
+        console.log(
+          '🔄 [useSiriResponsiveSize] Platform changed:',
+          newIsDesktop ? 'Desktop' : 'Mobile'
+        );
       }
     };
 
@@ -40,19 +43,19 @@ export const useSiriResponsiveSize = (): SiriSizeConfig => {
       width: '320px',
       height: '320px',
       minWidth: '320px',
-      minHeight: '320px', 
+      minHeight: '320px',
       maxWidth: '320px',
-      maxHeight: '320px'
+      maxHeight: '320px',
     };
   } else {
     // 🔧 FIX 1: Mobile responsive sizing optimization
     return {
-      width: 'min(300px, 80vw)',   // ✅ Increased from 75vw to 80vw for better size
-      height: 'min(300px, 80vw)',  // ✅ Increased max from 280px to 300px  
-      minWidth: '240px',           // ✅ Reduced from 260px to 240px for small devices
-      minHeight: '240px',          // ✅ Better fit for very small screens
-      maxWidth: '300px',           // ✅ Increased from 280px to 300px for larger touch target
-      maxHeight: '300px'           // ✅ Consistent larger max size for mobile
+      width: 'min(300px, 80vw)', // ✅ Increased from 75vw to 80vw for better size
+      height: 'min(300px, 80vw)', // ✅ Increased max from 280px to 300px
+      minWidth: '240px', // ✅ Reduced from 260px to 240px for small devices
+      minHeight: '240px', // ✅ Better fit for very small screens
+      maxWidth: '300px', // ✅ Increased from 280px to 300px for larger touch target
+      maxHeight: '300px', // ✅ Consistent larger max size for mobile
     };
   }
 };
@@ -77,4 +80,4 @@ export const useIsMobile = (): boolean => {
   }, []);
 
   return isMobile;
-}; 
+};

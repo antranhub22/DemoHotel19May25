@@ -1,21 +1,13 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🏗️  Running architecture validation..."
+echo "🎨 Running code style checks..."
+npx lint-staged
 
-# Validate architecture before commit
-npm run validate:architecture
-
-if [ $? -ne 0 ]; then
-  echo "❌ Architecture validation failed!"
-  echo "🔧 Please fix violations before committing"
-  echo "📖 Review: docs/ARCHITECTURE_GUIDELINES.md"
+echo "🔧 Running TypeScript check..."
+npm run typecheck || {
+  echo "❌ TypeScript errors found. Please fix them before committing."
   exit 1
-fi
+}
 
-echo "✅ Architecture validation passed!"
-
-# Run TypeScript check
-npm run typecheck
-
-echo "🎉 Pre-commit checks completed!" 
+echo "✅ All style checks passed!"

@@ -23,7 +23,9 @@ export interface UseConversationStateProps {
 export interface UseConversationStateReturn {
   isCallStarted: boolean;
   showConversation: boolean;
-  handleCallStart: (lang: Language) => Promise<{ success: boolean; error?: string }>;
+  handleCallStart: (
+    lang: Language
+  ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
 }
 
@@ -88,4 +90,4 @@ export interface InterfaceConstants {
     readonly NEGATIVE_TOP_THRESHOLD: number;
     readonly HERO_SCROLL_TRIGGER: number;
   };
-} 
+}

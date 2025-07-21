@@ -7,12 +7,12 @@ interface InterfaceContainerProps {
   className?: string;
 }
 
-export const InterfaceContainer = ({ 
-  children, 
-  className = "" 
+export const InterfaceContainer = ({
+  children,
+  className = '',
 }: InterfaceContainerProps): JSX.Element => {
   return (
-    <div 
+    <div
       className={`relative min-h-screen w-full scroll-smooth overflow-y-auto ${className}`}
       style={{
         fontFamily: designSystem.fonts.primary,
@@ -26,4 +26,4 @@ export const InterfaceContainer = ({
       </div>
     </div>
   );
-}; 
+};

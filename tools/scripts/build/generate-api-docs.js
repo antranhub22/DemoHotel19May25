@@ -15,7 +15,7 @@ const CONFIG = {
   schemasPath: path.join(__dirname, '../packages/shared/validation/schemas.ts'),
   outputPath: path.join(__dirname, '../docs/api'),
   templatePath: path.join(__dirname, '../docs/templates'),
-  backupPath: path.join(__dirname, '../backup/api-docs-backup.json')
+  backupPath: path.join(__dirname, '../backup/api-docs-backup.json'),
 };
 
 // API endpoint patterns to extract
@@ -24,7 +24,7 @@ const ENDPOINT_PATTERNS = {
   middleware: /router\.use\(([^)]+)\)/g,
   description: /\/\*\*\s*\n\s*\*\s*([^\n]+)/g,
   requestBody: /@param\s+\{([^}]+)\}\s+([^\s]+)\s+-\s+([^\n]+)/g,
-  responseType: /@returns?\s+\{([^}]+)\}\s+([^\n]+)/g
+  responseType: /@returns?\s+\{([^}]+)\}\s+([^\n]+)/g,
 };
 
 class ApiDocGenerator {
@@ -37,32 +37,33 @@ class ApiDocGenerator {
 
   async generateApiDocs() {
     console.log('📚 Starting SSOT API Documentation Generation...');
-    
+
     try {
       // Create backup of existing docs
       await this.createBackup();
-      
+
       // Scan routes directory
       await this.scanRoutes();
-      
+
       // Parse validation schemas
       await this.parseSchemas();
-      
+
       // Generate documentation for each route file
       await this.generateRouteDocs();
-      
+
       // Generate OpenAPI/Swagger specification
       await this.generateOpenApiSpec();
-      
+
       // Generate Postman collection
       await this.generatePostmanCollection();
-      
+
       // Generate README and index
       await this.generateIndexDocs();
-      
+
       console.log('✅ API documentation generation completed!');
-      console.log(`📁 Generated: ${this.generatedDocs.length} documentation files`);
-      
+      console.log(
+        `📁 Generated: ${this.generatedDocs.length} documentation files`
+      );
     } catch (error) {
       console.error('❌ API documentation generation failed:', error);
       await this.restoreBackup();
@@ -72,13 +73,13 @@ class ApiDocGenerator {
 
   async createBackup() {
     console.log('💾 Creating backup of existing API docs...');
-    
+
     if (!fs.existsSync(path.dirname(CONFIG.backupPath))) {
       fs.mkdirSync(path.dirname(CONFIG.backupPath), { recursive: true });
     }
 
     const existingDocs = {};
-    
+
     if (fs.existsSync(CONFIG.outputPath)) {
       const files = this.getAllFiles(CONFIG.outputPath);
       for (const file of files) {
@@ -87,50 +88,62 @@ class ApiDocGenerator {
       }
     }
 
-    fs.writeFileSync(CONFIG.backupPath, JSON.stringify({
-      timestamp: this.timestamp,
-      docs: existingDocs
-    }, null, 2));
+    fs.writeFileSync(
+      CONFIG.backupPath,
+      JSON.stringify(
+        {
+          timestamp: this.timestamp,
+          docs: existingDocs,
+        },
+        null,
+        2
+      )
+    );
 
     console.log('✅ Backup created successfully');
   }
 
   async scanRoutes() {
     console.log('🔍 Scanning routes directory...');
-    
-    const routeFiles = fs.readdirSync(CONFIG.routesPath)
+
+    const routeFiles = fs
+      .readdirSync(CONFIG.routesPath)
       .filter(file => file.endsWith('.ts') && !file.includes('.test.'))
       .map(file => path.join(CONFIG.routesPath, file));
 
     for (const routeFile of routeFiles) {
       const content = fs.readFileSync(routeFile, 'utf8');
       const routeName = path.basename(routeFile, '.ts');
-      
+
       const routes = this.extractRoutesFromFile(content, routeName);
       this.routes.push(...routes);
     }
 
-    console.log(`✅ Found ${this.routes.length} API endpoints across ${routeFiles.length} route files`);
+    console.log(
+      `✅ Found ${this.routes.length} API endpoints across ${routeFiles.length} route files`
+    );
   }
 
   extractRoutesFromFile(content, fileName) {
     const routes = [];
     const lines = content.split('\n');
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      
+
       // Check for route definitions
-      const routeMatch = line.match(/router\.(get|post|put|patch|delete)\(['"`]([^'"`]+)['"`]/);
+      const routeMatch = line.match(
+        /router\.(get|post|put|patch|delete)\(['"`]([^'"`]+)['"`]/
+      );
       if (routeMatch) {
         const [, method, path] = routeMatch;
-        
+
         // Extract documentation from comments above
         const documentation = this.extractDocumentationFromLines(lines, i);
-        
+
         // Extract middleware from the route definition
         const middleware = this.extractMiddleware(line);
-        
+
         // Extract handler function details
         const handler = this.extractHandlerDetails(lines, i);
 
@@ -142,7 +155,7 @@ class ApiDocGenerator {
           documentation,
           middleware,
           handler,
-          lineNumber: i + 1
+          lineNumber: i + 1,
         });
       }
     }
@@ -158,14 +171,19 @@ class ApiDocGenerator {
       parameters: [],
       requestBody: null,
       responses: {},
-      examples: []
+      examples: [],
     };
 
     // Look for JSDoc comments above the route
     let i = routeIndex - 1;
     const commentLines = [];
-    
-    while (i >= 0 && (lines[i].trim().startsWith('*') || lines[i].trim().startsWith('/**') || lines[i].trim().startsWith('//'))) {
+
+    while (
+      i >= 0 &&
+      (lines[i].trim().startsWith('*') ||
+        lines[i].trim().startsWith('/**') ||
+        lines[i].trim().startsWith('//'))
+    ) {
       commentLines.unshift(lines[i].trim());
       i--;
     }
@@ -173,7 +191,7 @@ class ApiDocGenerator {
     // Parse comment lines
     for (const commentLine of commentLines) {
       const clean = commentLine.replace(/^\/\*\*|\*\/|\*|\/\/\s?/g, '').trim();
-      
+
       if (clean.startsWith('@summary')) {
         docs.summary = clean.replace('@summary', '').trim();
       } else if (clean.startsWith('@description')) {
@@ -196,7 +214,9 @@ class ApiDocGenerator {
   }
 
   parseParameter(paramLine) {
-    const match = paramLine.match(/@param\s+\{([^}]+)\}\s+([^\s]+)\s+-?\s*(.*)/);
+    const match = paramLine.match(
+      /@param\s+\{([^}]+)\}\s+([^\s]+)\s+-?\s*(.*)/
+    );
     if (match) {
       const [, type, name, description] = match;
       return {
@@ -204,7 +224,7 @@ class ApiDocGenerator {
         type: type,
         description: description || '',
         required: !type.includes('?'),
-        in: name.includes(':') ? 'path' : 'query'
+        in: name.includes(':') ? 'path' : 'query',
       };
     }
     return null;
@@ -217,20 +237,22 @@ class ApiDocGenerator {
       return {
         description: description || '',
         schema: schema,
-        required: true
+        required: true,
       };
     }
     return null;
   }
 
   parseResponse(responseLine) {
-    const match = responseLine.match(/@response\s+(\d+)\s+\{([^}]+)\}\s+-?\s*(.*)/);
+    const match = responseLine.match(
+      /@response\s+(\d+)\s+\{([^}]+)\}\s+-?\s*(.*)/
+    );
     if (match) {
       const [, code, schema, description] = match;
       return {
         code: code,
         description: description || '',
-        schema: schema
+        schema: schema,
       };
     }
     return null;
@@ -238,13 +260,15 @@ class ApiDocGenerator {
 
   extractMiddleware(routeLine) {
     const middleware = [];
-    
+
     // Common middleware patterns
-    if (routeLine.includes('verifyJWT')) middleware.push('Authentication Required');
+    if (routeLine.includes('verifyJWT'))
+      middleware.push('Authentication Required');
     if (routeLine.includes('checkLimits')) middleware.push('Rate Limiting');
-    if (routeLine.includes('validateTenant')) middleware.push('Tenant Validation');
+    if (routeLine.includes('validateTenant'))
+      middleware.push('Tenant Validation');
     if (routeLine.includes('requireFeature')) middleware.push('Feature Gate');
-    
+
     return middleware;
   }
 
@@ -253,13 +277,13 @@ class ApiDocGenerator {
     const handlerStart = routeIndex;
     let handlerEnd = handlerStart;
     let braceCount = 0;
-    
+
     // Find the end of the handler function
     for (let i = handlerStart; i < lines.length; i++) {
       const line = lines[i];
       braceCount += (line.match(/{/g) || []).length;
       braceCount -= (line.match(/}/g) || []).length;
-      
+
       if (braceCount === 0 && i > handlerStart) {
         handlerEnd = i;
         break;
@@ -267,19 +291,24 @@ class ApiDocGenerator {
     }
 
     const handlerContent = lines.slice(handlerStart, handlerEnd + 1).join('\n');
-    
+
     return {
       startLine: handlerStart + 1,
       endLine: handlerEnd + 1,
-      usesDatabase: handlerContent.includes('db.') || handlerContent.includes('storage.'),
-      usesExternalApi: handlerContent.includes('fetch(') || handlerContent.includes('axios.'),
-      errorHandling: handlerContent.includes('try') && handlerContent.includes('catch'),
-      validation: handlerContent.includes('.parse(') || handlerContent.includes('.safeParse(')
+      usesDatabase:
+        handlerContent.includes('db.') || handlerContent.includes('storage.'),
+      usesExternalApi:
+        handlerContent.includes('fetch(') || handlerContent.includes('axios.'),
+      errorHandling:
+        handlerContent.includes('try') && handlerContent.includes('catch'),
+      validation:
+        handlerContent.includes('.parse(') ||
+        handlerContent.includes('.safeParse('),
     };
   }
 
   normalizePath(path) {
-    return path.replace(/:/g, '{').replace(/([^{]+)/g, (match) => {
+    return path.replace(/:/g, '{').replace(/([^{]+)/g, match => {
       if (match.includes('{')) return match + '}';
       return match;
     });
@@ -288,12 +317,12 @@ class ApiDocGenerator {
   getFullApiPath(path) {
     // Determine base path from route file
     const basePaths = {
-      'auth': '/api/auth',
-      'dashboard': '/api/dashboard',
-      'analytics': '/api/analytics',
-      'orders': '/api/orders',
-      'calls': '/api/calls',
-      'health': '/api/health'
+      auth: '/api/auth',
+      dashboard: '/api/dashboard',
+      analytics: '/api/analytics',
+      orders: '/api/orders',
+      calls: '/api/calls',
+      health: '/api/health',
     };
 
     for (const [key, basePath] of Object.entries(basePaths)) {
@@ -307,26 +336,30 @@ class ApiDocGenerator {
 
   async parseSchemas() {
     console.log('📋 Parsing validation schemas...');
-    
+
     if (fs.existsSync(CONFIG.schemasPath)) {
       const content = fs.readFileSync(CONFIG.schemasPath, 'utf8');
-      
+
       // Extract schema definitions (simplified parsing)
-      const schemaMatches = content.match(/export const (\w+Schema) = z\.([\s\S]*?);/g);
-      
+      const schemaMatches = content.match(
+        /export const (\w+Schema) = z\.([\s\S]*?);/g
+      );
+
       if (schemaMatches) {
         for (const match of schemaMatches) {
           const [, schemaName] = match.match(/export const (\w+Schema)/);
           this.schemas[schemaName] = {
             name: schemaName,
             definition: match,
-            type: 'zod'
+            type: 'zod',
           };
         }
       }
     }
 
-    console.log(`✅ Parsed ${Object.keys(this.schemas).length} validation schemas`);
+    console.log(
+      `✅ Parsed ${Object.keys(this.schemas).length} validation schemas`
+    );
   }
 
   async generateRouteDocs() {
@@ -350,17 +383,19 @@ class ApiDocGenerator {
     for (const [fileName, routes] of Object.entries(routesByFile)) {
       const docContent = this.generateModuleDoc(fileName, routes);
       const docPath = path.join(CONFIG.outputPath, `${fileName}.md`);
-      
+
       fs.writeFileSync(docPath, docContent);
       this.generatedDocs.push(docPath);
     }
 
-    console.log(`✅ Generated ${Object.keys(routesByFile).length} route documentation files`);
+    console.log(
+      `✅ Generated ${Object.keys(routesByFile).length} route documentation files`
+    );
   }
 
   generateModuleDoc(moduleName, routes) {
     const moduleTitle = this.capitalize(moduleName) + ' API';
-    
+
     let content = `# ${moduleTitle}
 
 > Auto-generated API documentation from SSOT
@@ -395,7 +430,7 @@ ${this.getAuthenticationInfo(routes)}
 
   generateEndpointDoc(route) {
     const { method, path, documentation, middleware, handler } = route;
-    
+
     let content = `### ${method} ${path}
 
 ${documentation.summary || 'No description available'}
@@ -417,7 +452,7 @@ ${documentation.description ? `\n${documentation.description}\n` : ''}
       content += `**Parameters:**\n\n`;
       content += `| Name | Type | Required | Location | Description |\n`;
       content += `|------|------|----------|----------|-------------|\n`;
-      
+
       for (const param of documentation.parameters) {
         const required = param.required ? '✅' : '❌';
         content += `| ${param.name} | ${param.type} | ${required} | ${param.in} | ${param.description} |\n`;
@@ -438,7 +473,7 @@ ${documentation.description ? `\n${documentation.description}\n` : ''}
     // Responses
     if (Object.keys(documentation.responses).length > 0) {
       content += `**Responses:**\n\n`;
-      
+
       for (const [code, response] of Object.entries(documentation.responses)) {
         content += `**${code}** - ${response.description}\n`;
         content += `\`\`\`json\n`;
@@ -459,8 +494,10 @@ ${documentation.description ? `\n${documentation.description}\n` : ''}
   }
 
   getAuthenticationInfo(routes) {
-    const hasAuth = routes.some(r => r.middleware.includes('Authentication Required'));
-    
+    const hasAuth = routes.some(r =>
+      r.middleware.includes('Authentication Required')
+    );
+
     if (hasAuth) {
       return `🔒 **Authentication Required**: Most endpoints require a valid JWT token in the Authorization header.
 
@@ -468,7 +505,7 @@ ${documentation.description ? `\n${documentation.description}\n` : ''}
 Authorization: Bearer <your-jwt-token>
 \`\`\``;
     }
-    
+
     return '🔓 **No Authentication Required**: Endpoints in this module are publicly accessible.';
   }
 
@@ -513,18 +550,18 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
         description: 'Multi-tenant hotel voice assistant platform API',
         contact: {
           name: 'API Support',
-          email: 'support@hotel-assistant.com'
-        }
+          email: 'support@hotel-assistant.com',
+        },
       },
       servers: [
         {
           url: 'https://api.hotel-assistant.com',
-          description: 'Production server'
+          description: 'Production server',
         },
         {
           url: 'http://localhost:10000',
-          description: 'Development server'
-        }
+          description: 'Development server',
+        },
       ],
       paths: {},
       components: {
@@ -532,22 +569,23 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
           bearerAuth: {
             type: 'http',
             scheme: 'bearer',
-            bearerFormat: 'JWT'
-          }
+            bearerFormat: 'JWT',
+          },
         },
-        schemas: this.generateOpenApiSchemas()
-      }
+        schemas: this.generateOpenApiSchemas(),
+      },
     };
 
     // Generate paths from routes
     for (const route of this.routes) {
       const pathKey = route.fullPath.replace(/{([^}]+)}/g, '{$1}');
-      
+
       if (!spec.paths[pathKey]) {
         spec.paths[pathKey] = {};
       }
 
-      spec.paths[pathKey][route.method.toLowerCase()] = this.generateOpenApiOperation(route);
+      spec.paths[pathKey][route.method.toLowerCase()] =
+        this.generateOpenApiOperation(route);
     }
 
     const specPath = path.join(CONFIG.outputPath, 'openapi.json');
@@ -561,17 +599,20 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
     const operation = {
       summary: route.documentation.summary || `${route.method} ${route.path}`,
       description: route.documentation.description || '',
-      tags: route.documentation.tags.length > 0 ? route.documentation.tags : [route.file],
+      tags:
+        route.documentation.tags.length > 0
+          ? route.documentation.tags
+          : [route.file],
       responses: {
         200: {
           description: 'Success',
           content: {
             'application/json': {
-              schema: { type: 'object' }
-            }
-          }
-        }
-      }
+              schema: { type: 'object' },
+            },
+          },
+        },
+      },
     };
 
     // Add security if authentication required
@@ -586,7 +627,7 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
         in: param.in,
         required: param.required,
         description: param.description,
-        schema: { type: this.mapTypeToOpenApi(param.type) }
+        schema: { type: this.mapTypeToOpenApi(param.type) },
       }));
     }
 
@@ -596,9 +637,9 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
         required: true,
         content: {
           'application/json': {
-            schema: { type: 'object' }
-          }
-        }
+            schema: { type: 'object' },
+          },
+        },
       };
     }
 
@@ -607,23 +648,23 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
 
   mapTypeToOpenApi(type) {
     const typeMap = {
-      'string': 'string',
-      'number': 'number',
-      'boolean': 'boolean',
-      'object': 'object',
-      'array': 'array'
+      string: 'string',
+      number: 'number',
+      boolean: 'boolean',
+      object: 'object',
+      array: 'array',
     };
     return typeMap[type] || 'string';
   }
 
   generateOpenApiSchemas() {
     const schemas = {};
-    
+
     // Convert Zod schemas to OpenAPI schemas (simplified)
     for (const [name, schema] of Object.entries(this.schemas)) {
       schemas[name] = {
         type: 'object',
-        description: `Generated from ${schema.name}`
+        description: `Generated from ${schema.name}`,
       };
     }
 
@@ -637,7 +678,8 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
       info: {
         name: 'Hotel Voice Assistant API',
         description: 'Auto-generated Postman collection from SSOT',
-        schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json'
+        schema:
+          'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
       },
       auth: {
         type: 'bearer',
@@ -645,21 +687,21 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
           {
             key: 'token',
             value: '{{jwt_token}}',
-            type: 'string'
-          }
-        ]
+            type: 'string',
+          },
+        ],
       },
       variable: [
         {
           key: 'base_url',
-          value: 'http://localhost:10000'
+          value: 'http://localhost:10000',
         },
         {
           key: 'jwt_token',
-          value: 'your-jwt-token-here'
-        }
+          value: 'your-jwt-token-here',
+        },
       ],
-      item: []
+      item: [],
     };
 
     // Group routes by module
@@ -675,7 +717,7 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
     for (const [moduleName, routes] of Object.entries(routesByModule)) {
       const folder = {
         name: this.capitalize(moduleName),
-        item: []
+        item: [],
       };
 
       for (const route of routes) {
@@ -685,7 +727,10 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
       collection.item.push(folder);
     }
 
-    const collectionPath = path.join(CONFIG.outputPath, 'postman-collection.json');
+    const collectionPath = path.join(
+      CONFIG.outputPath,
+      'postman-collection.json'
+    );
     fs.writeFileSync(collectionPath, JSON.stringify(collection, null, 2));
     this.generatedDocs.push(collectionPath);
 
@@ -700,15 +745,15 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
         header: [
           {
             key: 'Content-Type',
-            value: 'application/json'
-          }
+            value: 'application/json',
+          },
         ],
         url: {
           raw: `{{base_url}}${route.fullPath}`,
           host: ['{{base_url}}'],
-          path: route.fullPath.split('/').filter(p => p)
-        }
-      }
+          path: route.fullPath.split('/').filter(p => p),
+        },
+      },
     };
 
     // Add authentication if required
@@ -719,19 +764,26 @@ API endpoints may be rate-limited based on your subscription plan and tenant con
           {
             key: 'token',
             value: '{{jwt_token}}',
-            type: 'string'
-          }
-        ]
+            type: 'string',
+          },
+        ],
       };
     }
 
     // Add request body for POST/PUT/PATCH
-    if (['POST', 'PUT', 'PATCH'].includes(route.method) && route.documentation.requestBody) {
+    if (
+      ['POST', 'PUT', 'PATCH'].includes(route.method) &&
+      route.documentation.requestBody
+    ) {
       request.request.body = {
         mode: 'raw',
-        raw: JSON.stringify({
-          // Example request body
-        }, null, 2)
+        raw: JSON.stringify(
+          {
+            // Example request body
+          },
+          null,
+          2
+        ),
       };
     }
 
@@ -752,10 +804,13 @@ This documentation covers all API endpoints for the Hotel Voice Assistant platfo
 
 ## Modules
 
-${this.routes.reduce((acc, route) => {
-  if (!acc.includes(route.file)) acc.push(route.file);
-  return acc;
-}, []).map(file => `- [${this.capitalize(file)} API](${file}.md)`).join('\n')}
+${this.routes
+  .reduce((acc, route) => {
+    if (!acc.includes(route.file)) acc.push(route.file);
+    return acc;
+  }, [])
+  .map(file => `- [${this.capitalize(file)} API](${file}.md)`)
+  .join('\n')}
 
 ## Quick Start
 
@@ -793,10 +848,12 @@ All API responses follow this standard format:
 ## Statistics
 
 - **Total Endpoints:** ${this.routes.length}
-- **Modules:** ${this.routes.reduce((acc, route) => {
-  if (!acc.includes(route.file)) acc.push(route.file);
-  return acc;
-}, []).length}
+- **Modules:** ${
+      this.routes.reduce((acc, route) => {
+        if (!acc.includes(route.file)) acc.push(route.file);
+        return acc;
+      }, []).length
+    }
 - **Authentication Required:** ${this.routes.filter(r => r.middleware.includes('Authentication Required')).length}/${this.routes.length}
 
 ---
@@ -814,22 +871,22 @@ All API responses follow this standard format:
 
   async restoreBackup() {
     console.log('🔄 Restoring backup...');
-    
+
     try {
       if (fs.existsSync(CONFIG.backupPath)) {
         const backup = JSON.parse(fs.readFileSync(CONFIG.backupPath, 'utf8'));
-        
+
         for (const [relativePath, content] of Object.entries(backup.docs)) {
           const fullPath = path.join(CONFIG.outputPath, relativePath);
           const dir = path.dirname(fullPath);
-          
+
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
           }
-          
+
           fs.writeFileSync(fullPath, content);
         }
-        
+
         console.log('✅ Backup restored successfully');
       }
     } catch (error) {
@@ -840,7 +897,7 @@ All API responses follow this standard format:
   getAllFiles(dir) {
     const files = [];
     const items = fs.readdirSync(dir);
-    
+
     for (const item of items) {
       const fullPath = path.join(dir, item);
       if (fs.statSync(fullPath).isDirectory()) {
@@ -849,7 +906,7 @@ All API responses follow this standard format:
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
@@ -867,4 +924,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = ApiDocGenerator; 
+module.exports = ApiDocGenerator;

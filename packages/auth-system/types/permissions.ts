@@ -1,4 +1,10 @@
-import { PermissionMatrix, MenuItemConfig, RoleConfig, UserRole, Permission } from './auth';
+import {
+  PermissionMatrix,
+  MenuItemConfig,
+  RoleConfig,
+  UserRole,
+  Permission,
+} from './auth';
 
 // Re-export types for easier imports
 export type { UserRole, Permission } from './auth';
@@ -19,7 +25,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'manage'],
     security: ['view', 'manage'],
     integrations: ['view', 'manage'],
-    logs: ['view', 'export']
+    logs: ['view', 'export'],
   },
   'front-desk': {
     dashboard: ['view'],
@@ -29,7 +35,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
     requests: ['view', 'manage'], // Can handle guest requests
     notifications: ['view'], // Can see notifications
-    system: [] // No system access
+    system: [], // No system access
   },
   'it-manager': {
     dashboard: ['view'],
@@ -41,10 +47,10 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     billing: [], // No billing access
     staff: [], // No staff management
     security: ['view', 'manage'], // IT security access
-    notifications: ['view'] // System notifications
+    notifications: ['view'], // System notifications
   },
   // Legacy role mappings for backward compatibility
-  'admin': {
+  admin: {
     dashboard: ['view', 'edit', 'view_client_interface'],
     analytics: ['view', 'export', 'advanced', 'view_advanced'],
     billing: ['view', 'edit'],
@@ -58,9 +64,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'manage'],
     security: ['view', 'manage'],
     integrations: ['view', 'manage'],
-    logs: ['view', 'export']
+    logs: ['view', 'export'],
   },
-  'staff': {
+  staff: {
     dashboard: ['view'],
     calls: ['view', 'join', 'transfer', 'end'],
     analytics: ['view_basic'],
@@ -68,9 +74,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
     requests: ['view', 'manage'],
     notifications: ['view'],
-    system: []
+    system: [],
   },
-  'manager': {
+  manager: {
     dashboard: ['view', 'edit', 'view_client_interface'],
     analytics: ['view', 'export', 'advanced', 'view_advanced'],
     billing: ['view', 'edit'],
@@ -84,9 +90,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'manage'],
     security: ['view', 'manage'],
     integrations: ['view', 'manage'],
-    logs: ['view', 'export']
+    logs: ['view', 'export'],
   },
-  'frontdesk': {
+  frontdesk: {
     dashboard: ['view'],
     calls: ['view', 'join', 'transfer', 'end'],
     analytics: ['view_basic'],
@@ -94,9 +100,9 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'edit', 'checkin', 'checkout', 'manage'],
     requests: ['view', 'manage'],
     notifications: ['view'],
-    system: []
+    system: [],
   },
-  'itmanager': {
+  itmanager: {
     dashboard: ['view'],
     system: ['view', 'edit', 'debug', 'restart', 'monitor'],
     integrations: ['view', 'edit', 'test', 'manage'],
@@ -106,7 +112,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     billing: [],
     staff: [],
     security: ['view', 'manage'],
-    notifications: ['view']
+    notifications: ['view'],
   },
   'super-admin': {
     dashboard: ['view', 'edit', 'view_client_interface'],
@@ -122,8 +128,8 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     guests: ['view', 'manage'],
     security: ['view', 'manage'],
     integrations: ['view', 'manage'],
-    logs: ['view', 'export']
-  }
+    logs: ['view', 'export'],
+  },
 };
 
 // Menu Configuration for each role
@@ -134,7 +140,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
@@ -148,45 +154,45 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
           label: 'Cuộc gọi trực tiếp',
           icon: '🔴',
           path: '/dashboard/calls/live',
-          requiredPermission: 'calls.view'
+          requiredPermission: 'calls.view',
         },
         {
           key: 'calls-history',
           label: 'Lịch sử cuộc gọi',
           icon: '📋',
           path: '/dashboard/calls/history',
-          requiredPermission: 'calls.view'
-        }
-      ]
+          requiredPermission: 'calls.view',
+        },
+      ],
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
+      requiredPermission: 'analytics.view',
     },
     {
       key: 'staff',
       label: 'Nhân viên',
       icon: '👥',
       path: '/dashboard/staff',
-      requiredPermission: 'staff.view'
+      requiredPermission: 'staff.view',
     },
     {
       key: 'settings',
       label: 'Cài đặt',
       icon: '⚙️',
       path: '/dashboard/settings',
-      requiredPermission: 'settings.view'
+      requiredPermission: 'settings.view',
     },
     {
       key: 'billing',
       label: 'Thanh toán',
       icon: '💰',
       path: '/dashboard/billing',
-      requiredPermission: 'billing.view'
-    }
+      requiredPermission: 'billing.view',
+    },
   ],
 
   'front-desk': [
@@ -195,7 +201,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
@@ -209,31 +215,31 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
           label: 'Cuộc gọi trực tiếp',
           icon: '🔴',
           path: '/dashboard/calls/live',
-          requiredPermission: 'calls.view'
-        }
-      ]
+          requiredPermission: 'calls.view',
+        },
+      ],
     },
     {
       key: 'guests',
       label: 'Khách hàng',
       icon: '🏨',
       path: '/dashboard/guests',
-      requiredPermission: 'guests.view'
+      requiredPermission: 'guests.view',
     },
     {
       key: 'analytics',
       label: 'Thống kê cơ bản',
       icon: '📊',
       path: '/dashboard/analytics/basic',
-      requiredPermission: 'analytics.view_basic'
+      requiredPermission: 'analytics.view_basic',
     },
     {
       key: 'profile',
       label: 'Hồ sơ',
       icon: '👤',
       path: '/dashboard/profile',
-      requiredPermission: 'profile.view'
-    }
+      requiredPermission: 'profile.view',
+    },
   ],
 
   'it-manager': [
@@ -242,7 +248,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'System Dashboard',
       icon: '🔧',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'system',
@@ -256,238 +262,238 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
           label: 'Trạng thái hệ thống',
           icon: '🟢',
           path: '/dashboard/system/status',
-          requiredPermission: 'system.view'
+          requiredPermission: 'system.view',
         },
         {
           key: 'system-config',
           label: 'Cấu hình',
           icon: '⚙️',
           path: '/dashboard/system/config',
-          requiredPermission: 'system.edit'
-        }
-      ]
+          requiredPermission: 'system.edit',
+        },
+      ],
     },
     {
       key: 'integrations',
       label: 'Tích hợp',
       icon: '🔗',
       path: '/dashboard/integrations',
-      requiredPermission: 'integrations.view'
+      requiredPermission: 'integrations.view',
     },
     {
       key: 'logs',
       label: 'Logs',
       icon: '📄',
       path: '/dashboard/logs',
-      requiredPermission: 'logs.view'
+      requiredPermission: 'logs.view',
     },
     {
       key: 'analytics',
       label: 'Performance',
       icon: '📈',
       path: '/dashboard/analytics/technical',
-      requiredPermission: 'analytics.technical'
-    }
+      requiredPermission: 'analytics.technical',
+    },
   ],
   // Legacy role menu mappings for backward compatibility
-  'admin': [
+  admin: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
+      requiredPermission: 'analytics.view',
     },
     {
       key: 'staff',
       label: 'Nhân viên',
       icon: '👥',
       path: '/dashboard/staff',
-      requiredPermission: 'staff.view'
+      requiredPermission: 'staff.view',
     },
     {
       key: 'settings',
       label: 'Cài đặt',
       icon: '⚙️',
       path: '/dashboard/settings',
-      requiredPermission: 'settings.view'
+      requiredPermission: 'settings.view',
     },
     {
       key: 'billing',
       label: 'Thanh toán',
       icon: '💰',
       path: '/dashboard/billing',
-      requiredPermission: 'billing.view'
-    }
+      requiredPermission: 'billing.view',
+    },
   ],
-  'staff': [
+  staff: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'guests',
       label: 'Khách hàng',
       icon: '🏨',
       path: '/dashboard/guests',
-      requiredPermission: 'guests.view'
+      requiredPermission: 'guests.view',
     },
     {
       key: 'analytics',
       label: 'Thống kê cơ bản',
       icon: '📊',
       path: '/dashboard/analytics/basic',
-      requiredPermission: 'analytics.view_basic'
+      requiredPermission: 'analytics.view_basic',
     },
     {
       key: 'profile',
       label: 'Hồ sơ',
       icon: '👤',
       path: '/dashboard/profile',
-      requiredPermission: 'profile.view'
-    }
+      requiredPermission: 'profile.view',
+    },
   ],
-  'manager': [
+  manager: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
+      requiredPermission: 'analytics.view',
     },
     {
       key: 'staff',
       label: 'Nhân viên',
       icon: '👥',
       path: '/dashboard/staff',
-      requiredPermission: 'staff.view'
+      requiredPermission: 'staff.view',
     },
     {
       key: 'settings',
       label: 'Cài đặt',
       icon: '⚙️',
       path: '/dashboard/settings',
-      requiredPermission: 'settings.view'
+      requiredPermission: 'settings.view',
     },
     {
       key: 'billing',
       label: 'Thanh toán',
       icon: '💰',
       path: '/dashboard/billing',
-      requiredPermission: 'billing.view'
-    }
+      requiredPermission: 'billing.view',
+    },
   ],
-  'frontdesk': [
+  frontdesk: [
     {
       key: 'dashboard',
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'guests',
       label: 'Khách hàng',
       icon: '🏨',
       path: '/dashboard/guests',
-      requiredPermission: 'guests.view'
+      requiredPermission: 'guests.view',
     },
     {
       key: 'analytics',
       label: 'Thống kê cơ bản',
       icon: '📊',
       path: '/dashboard/analytics/basic',
-      requiredPermission: 'analytics.view_basic'
+      requiredPermission: 'analytics.view_basic',
     },
     {
       key: 'profile',
       label: 'Hồ sơ',
       icon: '👤',
       path: '/dashboard/profile',
-      requiredPermission: 'profile.view'
-    }
+      requiredPermission: 'profile.view',
+    },
   ],
-  'itmanager': [
+  itmanager: [
     {
       key: 'dashboard',
       label: 'System Dashboard',
       icon: '🔧',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'system',
       label: 'Hệ thống',
       icon: '⚙️',
       path: '/dashboard/system',
-      requiredPermission: 'system.view'
+      requiredPermission: 'system.view',
     },
     {
       key: 'integrations',
       label: 'Tích hợp',
       icon: '🔗',
       path: '/dashboard/integrations',
-      requiredPermission: 'integrations.view'
+      requiredPermission: 'integrations.view',
     },
     {
       key: 'logs',
       label: 'Logs',
       icon: '📄',
       path: '/dashboard/logs',
-      requiredPermission: 'logs.view'
+      requiredPermission: 'logs.view',
     },
     {
       key: 'analytics',
       label: 'Performance',
       icon: '📈',
       path: '/dashboard/analytics/technical',
-      requiredPermission: 'analytics.technical'
-    }
+      requiredPermission: 'analytics.technical',
+    },
   ],
   'super-admin': [
     {
@@ -495,73 +501,77 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       label: 'Tổng quan',
       icon: '📊',
       path: '/dashboard',
-      requiredPermission: 'dashboard.view'
+      requiredPermission: 'dashboard.view',
     },
     {
       key: 'calls',
       label: 'Cuộc gọi',
       icon: '📞',
       path: '/dashboard/calls',
-      requiredPermission: 'calls.view'
+      requiredPermission: 'calls.view',
     },
     {
       key: 'analytics',
       label: 'Phân tích',
       icon: '📈',
       path: '/dashboard/analytics',
-      requiredPermission: 'analytics.view'
+      requiredPermission: 'analytics.view',
     },
     {
       key: 'staff',
       label: 'Nhân viên',
       icon: '👥',
       path: '/dashboard/staff',
-      requiredPermission: 'staff.view'
+      requiredPermission: 'staff.view',
     },
     {
       key: 'settings',
       label: 'Cài đặt',
       icon: '⚙️',
       path: '/dashboard/settings',
-      requiredPermission: 'settings.view'
+      requiredPermission: 'settings.view',
     },
     {
       key: 'billing',
       label: 'Thanh toán',
       icon: '💰',
       path: '/dashboard/billing',
-      requiredPermission: 'billing.view'
+      requiredPermission: 'billing.view',
     },
     {
       key: 'system',
       label: 'Hệ thống',
       icon: '⚙️',
       path: '/dashboard/system',
-      requiredPermission: 'system.view'
-    }
-  ]
+      requiredPermission: 'system.view',
+    },
+  ],
 };
 
 // Helper function to get permissions for a role
 export const getPermissionsForRole = (role: UserRole) => {
   const rolePermissions = PERMISSION_MATRIX[role];
   const permissions = [];
-  
+
   for (const [module, actions] of Object.entries(rolePermissions)) {
     for (const action of actions) {
       permissions.push({
         module,
         action,
-        allowed: true
+        allowed: true,
       });
     }
   }
-  
+
   return permissions;
 };
 
 // Helper function to check if a role has a specific permission
-export const hasRolePermission = (role: UserRole, module: string, action: string): boolean => {
+export const hasRolePermission = (
+  role: UserRole,
+  module: string,
+  action: string
+): boolean => {
   const rolePermissions = PERMISSION_MATRIX[role];
   return rolePermissions[module]?.includes(action) || false;
 };
@@ -575,68 +585,68 @@ export const getMenuForRole = (role: UserRole): MenuItemConfig[] => {
 export const DASHBOARD_COMPONENTS: Record<UserRole, string[]> = {
   'hotel-manager': [
     'RevenueChart',
-    'CallsOverview', 
+    'CallsOverview',
     'OperationalMetrics',
     'StaffPerformance',
-    'FinancialSummary'
+    'FinancialSummary',
   ],
   'front-desk': [
     'ActiveCalls',
     'GuestRequests',
     'RoomStatus',
     'QuickActions',
-    'ShiftSummary'
+    'ShiftSummary',
   ],
   'it-manager': [
     'SystemHealth',
     'PerformanceMetrics',
     'ErrorLogs',
     'IntegrationStatus',
-    'SecurityAlerts'
+    'SecurityAlerts',
   ],
   // Legacy role dashboard component mappings
-  'admin': [
+  admin: [
     'RevenueChart',
-    'CallsOverview', 
+    'CallsOverview',
     'OperationalMetrics',
     'StaffPerformance',
-    'FinancialSummary'
+    'FinancialSummary',
   ],
-  'staff': [
+  staff: [
     'ActiveCalls',
     'GuestRequests',
     'RoomStatus',
     'QuickActions',
-    'ShiftSummary'
+    'ShiftSummary',
   ],
-  'manager': [
+  manager: [
     'RevenueChart',
-    'CallsOverview', 
+    'CallsOverview',
     'OperationalMetrics',
     'StaffPerformance',
-    'FinancialSummary'
+    'FinancialSummary',
   ],
-  'frontdesk': [
+  frontdesk: [
     'ActiveCalls',
     'GuestRequests',
     'RoomStatus',
     'QuickActions',
-    'ShiftSummary'
+    'ShiftSummary',
   ],
-  'itmanager': [
+  itmanager: [
     'SystemHealth',
     'PerformanceMetrics',
     'ErrorLogs',
     'IntegrationStatus',
-    'SecurityAlerts'
+    'SecurityAlerts',
   ],
   'super-admin': [
     'RevenueChart',
-    'CallsOverview', 
+    'CallsOverview',
     'OperationalMetrics',
     'StaffPerformance',
     'FinancialSummary',
     'SystemHealth',
-    'SecurityAlerts'
-  ]
-}; 
+    'SecurityAlerts',
+  ],
+};

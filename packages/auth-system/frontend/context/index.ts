@@ -6,4 +6,4 @@
 export * from './AuthContext';
 
 // Re-export key items
-export { AuthProvider, useAuth } from './AuthContext'; 
+export { AuthProvider, useAuth } from './AuthContext';

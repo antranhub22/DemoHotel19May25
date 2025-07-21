@@ -2,10 +2,10 @@
    TYPE-SAFE API CLIENT
    ======================================== */
 
-import { 
-  ApiResponse, 
-  ApiError, 
-  PaginationParams, 
+import {
+  ApiResponse,
+  ApiError,
+  PaginationParams,
   PaginatedResponse,
   LoginRequest,
   LoginResponse,
@@ -29,7 +29,7 @@ import {
   UpdateAssistantConfigRequest,
   UpdateAssistantConfigResponse,
   AnalyticsResponse,
-  ServiceHealthResponse
+  ServiceHealthResponse,
 } from '@/types/api';
 
 // ========================================
@@ -98,7 +98,7 @@ export class ApiClient {
 
     try {
       const requestUrl = new URL(url, this.config.baseUrl);
-      
+
       // Add query parameters
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
@@ -157,7 +157,11 @@ export class ApiClient {
   // HTTP METHODS
   // ========================================
 
-  async get<T>(url: string, params?: Record<string, any>, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async get<T>(
+    url: string,
+    params?: Record<string, any>,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: 'GET',
       url,
@@ -166,7 +170,11 @@ export class ApiClient {
     });
   }
 
-  async post<T>(url: string, data?: any, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: 'POST',
       url,
@@ -175,7 +183,11 @@ export class ApiClient {
     });
   }
 
-  async put<T>(url: string, data?: any, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: 'PUT',
       url,
@@ -184,7 +196,10 @@ export class ApiClient {
     });
   }
 
-  async delete<T>(url: string, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async delete<T>(
+    url: string,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: 'DELETE',
       url,
@@ -192,7 +207,11 @@ export class ApiClient {
     });
   }
 
-  async patch<T>(url: string, data?: any, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     return this.request<T>({
       method: 'PATCH',
       url,
@@ -206,12 +225,19 @@ export class ApiClient {
   // ========================================
 
   async login(request: LoginRequest): Promise<LoginResponse> {
-    const response = await this.post<LoginResponse['data']>('/auth/login', request);
+    const response = await this.post<LoginResponse['data']>(
+      '/auth/login',
+      request
+    );
     return response as LoginResponse;
   }
 
-  async refreshToken(token: string): Promise<ApiResponse<{ token: string; expiresIn: number }>> {
-    return this.post<{ token: string; expiresIn: number }>('/auth/refresh', { token });
+  async refreshToken(
+    token: string
+  ): Promise<ApiResponse<{ token: string; expiresIn: number }>> {
+    return this.post<{ token: string; expiresIn: number }>('/auth/refresh', {
+      token,
+    });
   }
 
   // ========================================
@@ -219,17 +245,28 @@ export class ApiClient {
   // ========================================
 
   async startCall(request: StartCallRequest): Promise<StartCallResponse> {
-    const response = await this.post<StartCallResponse['data']>('/calls/start', request);
+    const response = await this.post<StartCallResponse['data']>(
+      '/calls/start',
+      request
+    );
     return response as StartCallResponse;
   }
 
   async endCall(request: EndCallRequest): Promise<EndCallResponse> {
-    const response = await this.post<EndCallResponse['data']>('/calls/end', request);
+    const response = await this.post<EndCallResponse['data']>(
+      '/calls/end',
+      request
+    );
     return response as EndCallResponse;
   }
 
-  async saveTranscript(request: SaveTranscriptRequest): Promise<SaveTranscriptResponse> {
-    const response = await this.post<SaveTranscriptResponse['data']>('/transcripts', request);
+  async saveTranscript(
+    request: SaveTranscriptRequest
+  ): Promise<SaveTranscriptResponse> {
+    const response = await this.post<SaveTranscriptResponse['data']>(
+      '/transcripts',
+      request
+    );
     return response as SaveTranscriptResponse;
   }
 
@@ -238,12 +275,20 @@ export class ApiClient {
   // ========================================
 
   async createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse> {
-    const response = await this.post<CreateOrderResponse['data']>('/orders', request);
+    const response = await this.post<CreateOrderResponse['data']>(
+      '/orders',
+      request
+    );
     return response as CreateOrderResponse;
   }
 
-  async updateOrderStatus(request: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse> {
-    const response = await this.patch<UpdateOrderStatusResponse['data']>(`/orders/${request.orderId}/status`, request);
+  async updateOrderStatus(
+    request: UpdateOrderStatusRequest
+  ): Promise<UpdateOrderStatusResponse> {
+    const response = await this.patch<UpdateOrderStatusResponse['data']>(
+      `/orders/${request.orderId}/status`,
+      request
+    );
     return response as UpdateOrderStatusResponse;
   }
 
@@ -252,7 +297,10 @@ export class ApiClient {
   // ========================================
 
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
-    const response = await this.post<SendMessageResponse['data']>('/messages', request);
+    const response = await this.post<SendMessageResponse['data']>(
+      '/messages',
+      request
+    );
     return response as SendMessageResponse;
   }
 
@@ -260,23 +308,40 @@ export class ApiClient {
   // HOTEL ENDPOINTS
   // ========================================
 
-  async researchHotel(request: HotelResearchRequest): Promise<HotelResearchResponse> {
-    const response = await this.post<HotelResearchResponse['data']>('/hotel/research', request);
+  async researchHotel(
+    request: HotelResearchRequest
+  ): Promise<HotelResearchResponse> {
+    const response = await this.post<HotelResearchResponse['data']>(
+      '/hotel/research',
+      request
+    );
     return response as HotelResearchResponse;
   }
 
-  async generateAssistant(request: GenerateAssistantRequest): Promise<GenerateAssistantResponse> {
-    const response = await this.post<GenerateAssistantResponse['data']>('/hotel/generate-assistant', request);
+  async generateAssistant(
+    request: GenerateAssistantRequest
+  ): Promise<GenerateAssistantResponse> {
+    const response = await this.post<GenerateAssistantResponse['data']>(
+      '/hotel/generate-assistant',
+      request
+    );
     return response as GenerateAssistantResponse;
   }
 
   async getHotelProfile(tenantId: string): Promise<HotelProfileResponse> {
-    const response = await this.get<HotelProfileResponse['data']>(`/hotel/profile/${tenantId}`);
+    const response = await this.get<HotelProfileResponse['data']>(
+      `/hotel/profile/${tenantId}`
+    );
     return response as HotelProfileResponse;
   }
 
-  async updateAssistantConfig(request: UpdateAssistantConfigRequest): Promise<UpdateAssistantConfigResponse> {
-    const response = await this.put<UpdateAssistantConfigResponse['data']>(`/hotel/config/${request.tenantId}`, request);
+  async updateAssistantConfig(
+    request: UpdateAssistantConfigRequest
+  ): Promise<UpdateAssistantConfigResponse> {
+    const response = await this.put<UpdateAssistantConfigResponse['data']>(
+      `/hotel/config/${request.tenantId}`,
+      request
+    );
     return response as UpdateAssistantConfigResponse;
   }
 
@@ -284,17 +349,35 @@ export class ApiClient {
   // ANALYTICS ENDPOINTS
   // ========================================
 
-  async getAnalytics(tenantId: string, params?: PaginationParams): Promise<AnalyticsResponse> {
-    const response = await this.get<AnalyticsResponse['data']>(`/analytics/${tenantId}`, params);
+  async getAnalytics(
+    tenantId: string,
+    params?: PaginationParams
+  ): Promise<AnalyticsResponse> {
+    const response = await this.get<AnalyticsResponse['data']>(
+      `/analytics/${tenantId}`,
+      params
+    );
     return response as AnalyticsResponse;
   }
 
-  async getServiceDistribution(tenantId: string): Promise<ApiResponse<Array<{ type: string; count: number; percentage: number }>>> {
-    return this.get<Array<{ type: string; count: number; percentage: number }>>(`/analytics/${tenantId}/service-distribution`);
+  async getServiceDistribution(
+    tenantId: string
+  ): Promise<
+    ApiResponse<Array<{ type: string; count: number; percentage: number }>>
+  > {
+    return this.get<Array<{ type: string; count: number; percentage: number }>>(
+      `/analytics/${tenantId}/service-distribution`
+    );
   }
 
-  async getHourlyActivity(tenantId: string): Promise<ApiResponse<Array<{ hour: number; calls: number; orders: number }>>> {
-    return this.get<Array<{ hour: number; calls: number; orders: number }>>(`/analytics/${tenantId}/hourly-activity`);
+  async getHourlyActivity(
+    tenantId: string
+  ): Promise<
+    ApiResponse<Array<{ hour: number; calls: number; orders: number }>>
+  > {
+    return this.get<Array<{ hour: number; calls: number; orders: number }>>(
+      `/analytics/${tenantId}/hourly-activity`
+    );
   }
 
   // ========================================
@@ -311,15 +394,19 @@ export class ApiClient {
   // ========================================
 
   async getPaginated<T>(
-    url: string, 
-    params?: PaginationParams, 
+    url: string,
+    params?: PaginationParams,
     config?: Partial<ApiRequestConfig>
   ): Promise<PaginatedResponse<T>> {
     const response = await this.get<PaginatedResponse<T>>(url, params, config);
     return response.data!;
   }
 
-  async uploadFile<T>(url: string, file: File, config?: Partial<ApiRequestConfig>): Promise<ApiResponse<T>> {
+  async uploadFile<T>(
+    url: string,
+    file: File,
+    config?: Partial<ApiRequestConfig>
+  ): Promise<ApiResponse<T>> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -370,30 +457,39 @@ export const useCalls = () => {
   return {
     startCall: (request: StartCallRequest) => apiClient.startCall(request),
     endCall: (request: EndCallRequest) => apiClient.endCall(request),
-    saveTranscript: (request: SaveTranscriptRequest) => apiClient.saveTranscript(request),
+    saveTranscript: (request: SaveTranscriptRequest) =>
+      apiClient.saveTranscript(request),
   };
 };
 
 export const useOrders = () => {
   return {
-    createOrder: (request: CreateOrderRequest) => apiClient.createOrder(request),
-    updateOrderStatus: (request: UpdateOrderStatusRequest) => apiClient.updateOrderStatus(request),
+    createOrder: (request: CreateOrderRequest) =>
+      apiClient.createOrder(request),
+    updateOrderStatus: (request: UpdateOrderStatusRequest) =>
+      apiClient.updateOrderStatus(request),
   };
 };
 
 export const useHotel = () => {
   return {
-    researchHotel: (request: HotelResearchRequest) => apiClient.researchHotel(request),
-    generateAssistant: (request: GenerateAssistantRequest) => apiClient.generateAssistant(request),
+    researchHotel: (request: HotelResearchRequest) =>
+      apiClient.researchHotel(request),
+    generateAssistant: (request: GenerateAssistantRequest) =>
+      apiClient.generateAssistant(request),
     getHotelProfile: (tenantId: string) => apiClient.getHotelProfile(tenantId),
-    updateAssistantConfig: (request: UpdateAssistantConfigRequest) => apiClient.updateAssistantConfig(request),
+    updateAssistantConfig: (request: UpdateAssistantConfigRequest) =>
+      apiClient.updateAssistantConfig(request),
   };
 };
 
 export const useAnalytics = () => {
   return {
-    getAnalytics: (tenantId: string, params?: PaginationParams) => apiClient.getAnalytics(tenantId, params),
-    getServiceDistribution: (tenantId: string) => apiClient.getServiceDistribution(tenantId),
-    getHourlyActivity: (tenantId: string) => apiClient.getHourlyActivity(tenantId),
+    getAnalytics: (tenantId: string, params?: PaginationParams) =>
+      apiClient.getAnalytics(tenantId, params),
+    getServiceDistribution: (tenantId: string) =>
+      apiClient.getServiceDistribution(tenantId),
+    getHourlyActivity: (tenantId: string) =>
+      apiClient.getHourlyActivity(tenantId),
   };
-}; 
+};

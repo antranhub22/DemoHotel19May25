@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -28,12 +28,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { 
-  Terminal, 
-  Search, 
-  Filter, 
-  Download, 
-  RefreshCw, 
+import {
+  Terminal,
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
   Play,
   Pause,
   AlertCircle,
@@ -58,7 +58,7 @@ import {
   Cpu,
   HardDrive,
   Wifi,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -114,7 +114,7 @@ const mockLogs: LogEntry[] = [
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     duration: 125,
     statusCode: 200,
-    endpoint: '/api/auth/login'
+    endpoint: '/api/auth/login',
   },
   {
     id: '2',
@@ -122,12 +122,13 @@ const mockLogs: LogEntry[] = [
     level: 'error',
     module: 'database',
     message: 'Connection timeout',
-    details: 'Database connection pool exhausted, unable to acquire connection within timeout',
+    details:
+      'Database connection pool exhausted, unable to acquire connection within timeout',
     requestId: 'req_123455',
     ip: '192.168.1.101',
     duration: 5000,
     statusCode: 500,
-    endpoint: '/api/staff/requests'
+    endpoint: '/api/staff/requests',
   },
   {
     id: '3',
@@ -140,7 +141,7 @@ const mockLogs: LogEntry[] = [
     ip: '192.168.1.102',
     duration: 1,
     statusCode: 429,
-    endpoint: '/api/staff/requests'
+    endpoint: '/api/staff/requests',
   },
   {
     id: '4',
@@ -151,7 +152,8 @@ const mockLogs: LogEntry[] = [
     details: 'New WebSocket connection from client',
     requestId: 'ws_123453',
     ip: '192.168.1.103',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
   },
   {
     id: '5',
@@ -162,7 +164,7 @@ const mockLogs: LogEntry[] = [
     details: 'Daily report email sent to admin@hotel.com',
     requestId: 'email_123452',
     duration: 890,
-    statusCode: 200
+    statusCode: 200,
   },
   {
     id: '6',
@@ -175,7 +177,7 @@ const mockLogs: LogEntry[] = [
     ip: '192.168.1.100',
     duration: 2000,
     statusCode: 503,
-    endpoint: '/api/ai/chat'
+    endpoint: '/api/ai/chat',
   },
   {
     id: '7',
@@ -185,7 +187,7 @@ const mockLogs: LogEntry[] = [
     message: 'Backup completed successfully',
     details: 'Database backup completed, size: 2.1GB',
     duration: 45000,
-    statusCode: 200
+    statusCode: 200,
   },
   {
     id: '8',
@@ -200,8 +202,8 @@ const mockLogs: LogEntry[] = [
     userAgent: 'curl/7.68.0',
     duration: 100,
     statusCode: 401,
-    endpoint: '/api/auth/login'
-  }
+    endpoint: '/api/auth/login',
+  },
 ];
 
 const mockStats: LogStats = {
@@ -211,7 +213,7 @@ const mockStats: LogStats = {
     info: 8950,
     warn: 2100,
     error: 1050,
-    fatal: 80
+    fatal: 80,
   },
   byModule: {
     auth: 2340,
@@ -222,48 +224,70 @@ const mockStats: LogStats = {
     ai: 890,
     backup: 340,
     security: 1450,
-    system: 1860
+    system: 1860,
   },
   recentErrors: 25,
   averageResponseTime: 245,
-  errorRate: 6.8
+  errorRate: 6.8,
 };
 
 // Helper functions
 const getLevelColor = (level: string) => {
   switch (level) {
-    case 'debug': return 'bg-blue-100 text-blue-800';
-    case 'info': return 'bg-green-100 text-green-800';
-    case 'warn': return 'bg-yellow-100 text-yellow-800';
-    case 'error': return 'bg-red-100 text-red-800';
-    case 'fatal': return 'bg-purple-100 text-purple-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'debug':
+      return 'bg-blue-100 text-blue-800';
+    case 'info':
+      return 'bg-green-100 text-green-800';
+    case 'warn':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'error':
+      return 'bg-red-100 text-red-800';
+    case 'fatal':
+      return 'bg-purple-100 text-purple-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
 const getLevelIcon = (level: string) => {
   switch (level) {
-    case 'debug': return <Info className="h-4 w-4" />;
-    case 'info': return <CheckCircle className="h-4 w-4" />;
-    case 'warn': return <AlertTriangle className="h-4 w-4" />;
-    case 'error': return <XCircle className="h-4 w-4" />;
-    case 'fatal': return <AlertCircle className="h-4 w-4" />;
-    default: return <Info className="h-4 w-4" />;
+    case 'debug':
+      return <Info className="h-4 w-4" />;
+    case 'info':
+      return <CheckCircle className="h-4 w-4" />;
+    case 'warn':
+      return <AlertTriangle className="h-4 w-4" />;
+    case 'error':
+      return <XCircle className="h-4 w-4" />;
+    case 'fatal':
+      return <AlertCircle className="h-4 w-4" />;
+    default:
+      return <Info className="h-4 w-4" />;
   }
 };
 
 const getModuleIcon = (module: string) => {
   switch (module) {
-    case 'auth': return <Shield className="h-4 w-4" />;
-    case 'api': return <Globe className="h-4 w-4" />;
-    case 'database': return <Database className="h-4 w-4" />;
-    case 'websocket': return <Wifi className="h-4 w-4" />;
-    case 'email': return <FileText className="h-4 w-4" />;
-    case 'ai': return <Zap className="h-4 w-4" />;
-    case 'backup': return <HardDrive className="h-4 w-4" />;
-    case 'security': return <Shield className="h-4 w-4" />;
-    case 'system': return <Server className="h-4 w-4" />;
-    default: return <Monitor className="h-4 w-4" />;
+    case 'auth':
+      return <Shield className="h-4 w-4" />;
+    case 'api':
+      return <Globe className="h-4 w-4" />;
+    case 'database':
+      return <Database className="h-4 w-4" />;
+    case 'websocket':
+      return <Wifi className="h-4 w-4" />;
+    case 'email':
+      return <FileText className="h-4 w-4" />;
+    case 'ai':
+      return <Zap className="h-4 w-4" />;
+    case 'backup':
+      return <HardDrive className="h-4 w-4" />;
+    case 'security':
+      return <Shield className="h-4 w-4" />;
+    case 'system':
+      return <Server className="h-4 w-4" />;
+    default:
+      return <Monitor className="h-4 w-4" />;
   }
 };
 
@@ -275,7 +299,7 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    fractionalSecondDigits: 3
+    fractionalSecondDigits: 3,
   });
 };
 
@@ -286,22 +310,24 @@ const formatDuration = (duration?: number) => {
 };
 
 // Log Details Modal
-const LogDetailsModal = ({ 
-  log, 
-  isOpen, 
-  onClose 
-}: { 
-  log: LogEntry | null; 
-  isOpen: boolean; 
+const LogDetailsModal = ({
+  log,
+  isOpen,
+  onClose,
+}: {
+  log: LogEntry | null;
+  isOpen: boolean;
   onClose: () => void;
 }) => {
   if (!log) return null;
 
   return (
-    <div className={cn(
-      "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50",
-      isOpen ? "block" : "hidden"
-    )}>
+    <div
+      className={cn(
+        'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
+        isOpen ? 'block' : 'hidden'
+      )}
+    >
       <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Log Details</h2>
@@ -356,27 +382,35 @@ const LogDetailsModal = ({
 
           <div>
             <Label className="text-sm font-medium">Message</Label>
-            <p className="text-sm bg-gray-50 p-3 rounded border">{log.message}</p>
+            <p className="text-sm bg-gray-50 p-3 rounded border">
+              {log.message}
+            </p>
           </div>
 
           {log.details && (
             <div>
               <Label className="text-sm font-medium">Details</Label>
-              <p className="text-sm bg-gray-50 p-3 rounded border whitespace-pre-wrap">{log.details}</p>
+              <p className="text-sm bg-gray-50 p-3 rounded border whitespace-pre-wrap">
+                {log.details}
+              </p>
             </div>
           )}
 
           {log.userAgent && (
             <div>
               <Label className="text-sm font-medium">User Agent</Label>
-              <p className="text-sm bg-gray-50 p-3 rounded border break-all">{log.userAgent}</p>
+              <p className="text-sm bg-gray-50 p-3 rounded border break-all">
+                {log.userAgent}
+              </p>
             </div>
           )}
 
           {log.endpoint && (
             <div>
               <Label className="text-sm font-medium">Endpoint</Label>
-              <p className="text-sm bg-gray-50 p-3 rounded border font-mono">{log.endpoint}</p>
+              <p className="text-sm bg-gray-50 p-3 rounded border font-mono">
+                {log.endpoint}
+              </p>
             </div>
           )}
         </div>
@@ -404,31 +438,43 @@ export const SystemLogs: React.FC = () => {
     search: '',
     requestId: '',
     userId: '',
-    ip: ''
+    ip: '',
   });
 
   // Apply filters
   const filteredLogs = logs.filter(log => {
     const matchesLevel = filter.level === 'all' || log.level === filter.level;
-    const matchesModule = filter.module === 'all' || log.module === filter.module;
-    const matchesSearch = !filter.search || 
+    const matchesModule =
+      filter.module === 'all' || log.module === filter.module;
+    const matchesSearch =
+      !filter.search ||
       log.message.toLowerCase().includes(filter.search.toLowerCase()) ||
       log.details?.toLowerCase().includes(filter.search.toLowerCase());
-    const matchesRequestId = !filter.requestId || log.requestId?.includes(filter.requestId);
+    const matchesRequestId =
+      !filter.requestId || log.requestId?.includes(filter.requestId);
     const matchesUserId = !filter.userId || log.userId?.includes(filter.userId);
     const matchesIp = !filter.ip || log.ip?.includes(filter.ip);
 
     // Time filtering
     let matchesTime = true;
     if (filter.startTime) {
-      matchesTime = matchesTime && new Date(log.timestamp) >= new Date(filter.startTime);
+      matchesTime =
+        matchesTime && new Date(log.timestamp) >= new Date(filter.startTime);
     }
     if (filter.endTime) {
-      matchesTime = matchesTime && new Date(log.timestamp) <= new Date(filter.endTime);
+      matchesTime =
+        matchesTime && new Date(log.timestamp) <= new Date(filter.endTime);
     }
 
-    return matchesLevel && matchesModule && matchesSearch && matchesRequestId && 
-           matchesUserId && matchesIp && matchesTime;
+    return (
+      matchesLevel &&
+      matchesModule &&
+      matchesSearch &&
+      matchesRequestId &&
+      matchesUserId &&
+      matchesIp &&
+      matchesTime
+    );
   });
 
   const handleViewLog = (log: LogEntry) => {
@@ -441,12 +487,15 @@ export const SystemLogs: React.FC = () => {
     try {
       // Simulate export
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Create CSV content
-      const csvContent = filteredLogs.map(log => 
-        `${log.timestamp},${log.level},${log.module},"${log.message}",${log.requestId || ''},${log.userId || ''},${log.ip || ''},${log.statusCode || ''}`
-      ).join('\n');
-      
+      const csvContent = filteredLogs
+        .map(
+          log =>
+            `${log.timestamp},${log.level},${log.module},"${log.message}",${log.requestId || ''},${log.userId || ''},${log.ip || ''},${log.statusCode || ''}`
+        )
+        .join('\n');
+
       // Download CSV
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
@@ -485,7 +534,7 @@ export const SystemLogs: React.FC = () => {
       search: '',
       requestId: '',
       userId: '',
-      ip: ''
+      ip: '',
     });
   };
 
@@ -501,12 +550,16 @@ export const SystemLogs: React.FC = () => {
       const newLog: LogEntry = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
-        level: ['debug', 'info', 'warn', 'error'][Math.floor(Math.random() * 4)] as any,
-        module: ['auth', 'api', 'database', 'websocket'][Math.floor(Math.random() * 4)],
+        level: ['debug', 'info', 'warn', 'error'][
+          Math.floor(Math.random() * 4)
+        ] as any,
+        module: ['auth', 'api', 'database', 'websocket'][
+          Math.floor(Math.random() * 4)
+        ],
         message: `Real-time log entry ${Date.now()}`,
         details: 'Generated for real-time demonstration',
         requestId: `req_${Date.now()}`,
-        ip: `192.168.1.${Math.floor(Math.random() * 255)}`
+        ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
       };
 
       setLogs(prev => [newLog, ...prev.slice(0, 99)]);
@@ -533,7 +586,9 @@ export const SystemLogs: React.FC = () => {
             <Label className="text-sm">Real-time</Label>
           </div>
           <Button onClick={fetchLogs} disabled={loading}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+            <RefreshCw
+              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+            />
             Refresh
           </Button>
           <Button onClick={handleExportLogs} disabled={loading}>
@@ -550,43 +605,53 @@ export const SystemLogs: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Logs</p>
-                <p className="text-2xl font-bold">{stats.total.toLocaleString()}</p>
+                <p className="text-2xl font-bold">
+                  {stats.total.toLocaleString()}
+                </p>
               </div>
               <FileText className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Recent Errors</p>
-                <p className="text-2xl font-bold text-red-600">{stats.recentErrors}</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {stats.recentErrors}
+                </p>
               </div>
               <AlertCircle className="h-8 w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg Response Time</p>
-                <p className="text-2xl font-bold">{stats.averageResponseTime}ms</p>
+                <p className="text-sm text-muted-foreground">
+                  Avg Response Time
+                </p>
+                <p className="text-2xl font-bold">
+                  {stats.averageResponseTime}ms
+                </p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Error Rate</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.errorRate}%</p>
+                <p className="text-2xl font-bold text-orange-600">
+                  {stats.errorRate}%
+                </p>
               </div>
               <BarChart3 className="h-8 w-8 text-orange-500" />
             </div>
@@ -610,7 +675,12 @@ export const SystemLogs: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="level">Log Level</Label>
-                  <Select value={filter.level} onValueChange={(value) => setFilter({...filter, level: value})}>
+                  <Select
+                    value={filter.level}
+                    onValueChange={value =>
+                      setFilter({ ...filter, level: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -627,7 +697,12 @@ export const SystemLogs: React.FC = () => {
 
                 <div>
                   <Label htmlFor="module">Module</Label>
-                  <Select value={filter.module} onValueChange={(value) => setFilter({...filter, module: value})}>
+                  <Select
+                    value={filter.module}
+                    onValueChange={value =>
+                      setFilter({ ...filter, module: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -654,7 +729,9 @@ export const SystemLogs: React.FC = () => {
                       id="search"
                       placeholder="Search logs..."
                       value={filter.search}
-                      onChange={(e) => setFilter({...filter, search: e.target.value})}
+                      onChange={e =>
+                        setFilter({ ...filter, search: e.target.value })
+                      }
                       className="pl-10"
                     />
                   </div>
@@ -666,7 +743,9 @@ export const SystemLogs: React.FC = () => {
                     id="startTime"
                     type="datetime-local"
                     value={filter.startTime}
-                    onChange={(e) => setFilter({...filter, startTime: e.target.value})}
+                    onChange={e =>
+                      setFilter({ ...filter, startTime: e.target.value })
+                    }
                   />
                 </div>
 
@@ -676,7 +755,9 @@ export const SystemLogs: React.FC = () => {
                     id="endTime"
                     type="datetime-local"
                     value={filter.endTime}
-                    onChange={(e) => setFilter({...filter, endTime: e.target.value})}
+                    onChange={e =>
+                      setFilter({ ...filter, endTime: e.target.value })
+                    }
                   />
                 </div>
 
@@ -686,7 +767,9 @@ export const SystemLogs: React.FC = () => {
                     id="requestId"
                     placeholder="Filter by request ID..."
                     value={filter.requestId}
-                    onChange={(e) => setFilter({...filter, requestId: e.target.value})}
+                    onChange={e =>
+                      setFilter({ ...filter, requestId: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -733,7 +816,7 @@ export const SystemLogs: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredLogs.map((log) => (
+                    {filteredLogs.map(log => (
                       <TableRow key={log.id}>
                         <TableCell className="font-mono text-sm">
                           {formatDate(log.timestamp)}
@@ -767,7 +850,13 @@ export const SystemLogs: React.FC = () => {
                         <TableCell>{formatDuration(log.duration)}</TableCell>
                         <TableCell>
                           {log.statusCode && (
-                            <Badge variant={log.statusCode >= 400 ? 'destructive' : 'default'}>
+                            <Badge
+                              variant={
+                                log.statusCode >= 400
+                                  ? 'destructive'
+                                  : 'default'
+                              }
+                            >
                               {log.statusCode}
                             </Badge>
                           )}
@@ -799,7 +888,10 @@ export const SystemLogs: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {Object.entries(stats.byLevel).map(([level, count]) => (
-                    <div key={level} className="flex items-center justify-between">
+                    <div
+                      key={level}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
                         {getLevelIcon(level)}
                         <span className="capitalize">{level}</span>
@@ -826,7 +918,10 @@ export const SystemLogs: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   {Object.entries(stats.byModule).map(([module, count]) => (
-                    <div key={module} className="flex items-center justify-between">
+                    <div
+                      key={module}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
                         {getModuleIcon(module)}
                         <span className="capitalize">{module}</span>
@@ -857,4 +952,4 @@ export const SystemLogs: React.FC = () => {
       />
     </div>
   );
-}; 
+};

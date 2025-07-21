@@ -15,19 +15,19 @@ const CONFIG = {
   outputPath: path.join(__dirname, '../packages/types'),
   apiTypesPath: path.join(__dirname, '../packages/types/api.ts'),
   coreTypesPath: path.join(__dirname, '../packages/types/core.ts'),
-  backupPath: path.join(__dirname, '../backup/types-backup.json')
+  backupPath: path.join(__dirname, '../backup/types-backup.json'),
 };
 
 // Database table mapping to TypeScript interfaces
 const TABLE_MAPPINGS = {
   tenants: 'Tenant',
-  hotelProfiles: 'HotelProfile', 
+  hotelProfiles: 'HotelProfile',
   staff: 'Staff',
   call: 'Call',
   transcript: 'Transcript',
   request: 'Request',
   message: 'Message',
-  call_summaries: 'CallSummary'
+  call_summaries: 'CallSummary',
 };
 
 class TypeGenerator {
@@ -39,32 +39,33 @@ class TypeGenerator {
 
   async generateTypes() {
     console.log('🔧 Starting SSOT Type Generation...');
-    
+
     try {
       // Create backup of current types
       await this.createBackup();
-      
+
       // Read schema file
       const schemaContent = await this.readSchema();
-      
+
       // Generate base types from schema
       await this.generateBaseTypes(schemaContent);
-      
+
       // Generate API types
       await this.generateApiTypes();
-      
+
       // Generate core utility types
       await this.generateCoreTypes();
-      
+
       // Write generated types to files
       await this.writeTypesToFiles();
-      
+
       // Update validation schemas
       await this.updateValidationSchemas();
-      
+
       console.log('✅ Type generation completed successfully!');
-      console.log(`📁 Generated files: ${this.generatedTypes.length} type files`);
-      
+      console.log(
+        `📁 Generated files: ${this.generatedTypes.length} type files`
+      );
     } catch (error) {
       console.error('❌ Type generation failed:', error);
       await this.restoreBackup();
@@ -74,13 +75,13 @@ class TypeGenerator {
 
   async createBackup() {
     console.log('💾 Creating backup of existing types...');
-    
+
     if (!fs.existsSync(path.dirname(CONFIG.backupPath))) {
       fs.mkdirSync(path.dirname(CONFIG.backupPath), { recursive: true });
     }
 
     const existingTypes = {};
-    
+
     // Backup existing type files
     if (fs.existsSync(CONFIG.outputPath)) {
       const files = fs.readdirSync(CONFIG.outputPath);
@@ -93,17 +94,24 @@ class TypeGenerator {
     }
 
     // Save backup
-    fs.writeFileSync(CONFIG.backupPath, JSON.stringify({
-      timestamp: this.timestamp,
-      types: existingTypes
-    }, null, 2));
+    fs.writeFileSync(
+      CONFIG.backupPath,
+      JSON.stringify(
+        {
+          timestamp: this.timestamp,
+          types: existingTypes,
+        },
+        null,
+        2
+      )
+    );
 
     console.log('✅ Backup created successfully');
   }
 
   async readSchema() {
     console.log('📖 Reading database schema...');
-    
+
     if (!fs.existsSync(CONFIG.schemaPath)) {
       throw new Error(`Schema file not found: ${CONFIG.schemaPath}`);
     }
@@ -115,8 +123,10 @@ class TypeGenerator {
     console.log('🏗️ Generating base types from schema...');
 
     // Extract table definitions from schema
-    const tableMatches = schemaContent.match(/export const (\w+) = sqliteTable\("(\w+)", \{([\s\S]*?)\}\);/g);
-    
+    const tableMatches = schemaContent.match(
+      /export const (\w+) = sqliteTable\("(\w+)", \{([\s\S]*?)\}\);/g
+    );
+
     if (!tableMatches) {
       throw new Error('No table definitions found in schema');
     }
@@ -124,18 +134,24 @@ class TypeGenerator {
     const baseTypes = [];
 
     for (const match of tableMatches) {
-      const [, tableName, dbTableName, tableFields] = match.match(/export const (\w+) = sqliteTable\("(\w+)", \{([\s\S]*?)\}\);/);
-      
+      const [, tableName, dbTableName, tableFields] = match.match(
+        /export const (\w+) = sqliteTable\("(\w+)", \{([\s\S]*?)\}\);/
+      );
+
       // Generate interface for table
-      const interfaceName = TABLE_MAPPINGS[tableName] || this.capitalize(tableName);
-      const typeDefinition = this.generateInterfaceFromTable(interfaceName, tableFields);
-      
+      const interfaceName =
+        TABLE_MAPPINGS[tableName] || this.capitalize(tableName);
+      const typeDefinition = this.generateInterfaceFromTable(
+        interfaceName,
+        tableFields
+      );
+
       baseTypes.push({
         name: interfaceName,
         type: 'interface',
         definition: typeDefinition,
         tableName: dbTableName,
-        schemaName: tableName
+        schemaName: tableName,
       });
 
       // Generate insert type
@@ -145,7 +161,7 @@ class TypeGenerator {
         type: 'type',
         definition: insertType,
         tableName: dbTableName,
-        schemaName: tableName
+        schemaName: tableName,
       });
     }
 
@@ -155,7 +171,7 @@ class TypeGenerator {
 
   generateInterfaceFromTable(interfaceName, tableFields) {
     const fields = this.parseTableFields(tableFields);
-    
+
     const fieldLines = fields.map(field => {
       const optional = field.isOptional ? '?' : '';
       const nullableUnion = field.nullable ? ' | null' : '';
@@ -169,13 +185,13 @@ ${fieldLines.join('\n')}
 
   generateInsertType(interfaceName, tableFields) {
     const fields = this.parseTableFields(tableFields);
-    
+
     const requiredFields = fields.filter(f => !f.isOptional && !f.hasDefault);
     const optionalFields = fields.filter(f => f.isOptional || f.hasDefault);
-    
+
     const requiredLines = requiredFields.map(f => `  ${f.name}: ${f.type};`);
     const optionalLines = optionalFields.map(f => `  ${f.name}?: ${f.type};`);
-    
+
     const allLines = [...requiredLines, ...optionalLines];
 
     return `export type Insert${interfaceName} = {
@@ -185,14 +201,14 @@ ${allLines.join('\n')}
 
   parseTableFields(tableFieldsStr) {
     const fields = [];
-    
+
     // Simple field parsing - can be enhanced
     const fieldMatches = tableFieldsStr.match(/(\w+):\s*\w+\([^)]*\)([^,]*)/g);
-    
+
     if (fieldMatches) {
       for (const fieldMatch of fieldMatches) {
         const [, fieldName] = fieldMatch.match(/(\w+):/);
-        
+
         // Determine TypeScript type based on SQL type
         let tsType = 'string';
         if (fieldMatch.includes('integer(')) tsType = 'number';
@@ -200,17 +216,19 @@ ${allLines.join('\n')}
         if (fieldMatch.includes('boolean')) tsType = 'boolean';
         if (fieldMatch.includes('json')) tsType = 'Record<string, any>';
         if (fieldMatch.includes('timestamp')) tsType = 'Date | string';
-        
+
         // Check for optional/nullable
-        const isOptional = fieldMatch.includes('.default(') || fieldMatch.includes('.primaryKey()');
+        const isOptional =
+          fieldMatch.includes('.default(') ||
+          fieldMatch.includes('.primaryKey()');
         const nullable = !fieldMatch.includes('.notNull()');
-        
+
         fields.push({
           name: fieldName,
           type: tsType,
           isOptional,
           nullable,
-          hasDefault: fieldMatch.includes('.default(')
+          hasDefault: fieldMatch.includes('.default('),
         });
       }
     }
@@ -225,7 +243,7 @@ ${allLines.join('\n')}
       this.generateApiResponseTypes(),
       this.generateApiRequestTypes(),
       this.generateApiErrorTypes(),
-      this.generatePaginationTypes()
+      this.generatePaginationTypes(),
     ].join('\n\n');
 
     this.apiTypes.push({
@@ -234,7 +252,7 @@ ${allLines.join('\n')}
 // Generated on: ${this.timestamp}
 // Generator: scripts/generate-types.js
 
-${apiTypes}`
+${apiTypes}`,
     });
 
     console.log('✅ API types generated');
@@ -340,8 +358,12 @@ export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type PartialExcept<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
 // Database Types
-export type DatabaseTable = ${Object.keys(TABLE_MAPPINGS).map(k => `'${k}'`).join(' | ')};
-export type EntityType = ${Object.values(TABLE_MAPPINGS).map(v => `'${v}'`).join(' | ')};
+export type DatabaseTable = ${Object.keys(TABLE_MAPPINGS)
+      .map(k => `'${k}'`)
+      .join(' | ')};
+export type EntityType = ${Object.values(TABLE_MAPPINGS)
+      .map(v => `'${v}'`)
+      .join(' | ')};
 
 // Subscription Types
 export type SubscriptionPlan = 'trial' | 'basic' | 'premium' | 'enterprise';
@@ -392,7 +414,7 @@ export interface ServiceHealth {
 
     this.apiTypes.push({
       name: 'core.ts',
-      content: coreTypes
+      content: coreTypes,
     });
 
     console.log('✅ Core types generated');
@@ -417,11 +439,17 @@ ${this.generatedTypes.map(type => type.definition).join('\n\n')}
 ${this.generatedTypes.map(type => `export type { ${type.name} };`).join('\n')}
 `;
 
-    fs.writeFileSync(path.join(CONFIG.outputPath, 'database.ts'), baseTypesContent);
+    fs.writeFileSync(
+      path.join(CONFIG.outputPath, 'database.ts'),
+      baseTypesContent
+    );
 
     // Write API and core types
     for (const apiType of this.apiTypes) {
-      fs.writeFileSync(path.join(CONFIG.outputPath, apiType.name), apiType.content);
+      fs.writeFileSync(
+        path.join(CONFIG.outputPath, apiType.name),
+        apiType.content
+      );
     }
 
     // Generate index file
@@ -440,24 +468,24 @@ export * from './core';
 
   async updateValidationSchemas() {
     console.log('🔍 Updating validation schemas...');
-    
+
     // This will be implemented when we create the validation schemas
     console.log('ℹ️ Validation schema updates will be implemented in Phase 4');
   }
 
   async restoreBackup() {
     console.log('🔄 Restoring backup...');
-    
+
     try {
       if (fs.existsSync(CONFIG.backupPath)) {
         const backup = JSON.parse(fs.readFileSync(CONFIG.backupPath, 'utf8'));
-        
+
         // Restore each file
         for (const [filename, content] of Object.entries(backup.types)) {
           const filePath = path.join(CONFIG.outputPath, filename);
           fs.writeFileSync(filePath, content);
         }
-        
+
         console.log('✅ Backup restored successfully');
       }
     } catch (error) {
@@ -482,4 +510,4 @@ if (require.main === module) {
   generator.generateTypes().catch(handleError);
 }
 
-module.exports = TypeGenerator; 
+module.exports = TypeGenerator;

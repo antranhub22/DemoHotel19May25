@@ -52,7 +52,6 @@ const MobileSummaryPopup = () => {
   );
 };
 
-
 interface Interface1Props {
   isActive: boolean;
 }
@@ -82,7 +81,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleRightPanelClose,
     handleShowConversationPopup,
     handleShowNotificationDemo,
-    handleShowSummaryDemo
+    handleShowSummaryDemo,
   } = useInterface1({ isActive });
 
   // 🔍 DEBUG: Log popup states
@@ -90,7 +89,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     isCallStarted,
     showConversation,
     chatPopupOpen: showConversation && isCallStarted,
-    summaryPopupOpen: showConversation && !isCallStarted
+    summaryPopupOpen: showConversation && !isCallStarted,
   });
 
   // ✅ CONDITIONAL RENDERING WITHOUT EARLY RETURNS
@@ -104,36 +103,32 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   return (
     <InterfaceContainer>
-
-      
       {/* Hero Section with 4-Position Layout */}
       <div ref={heroSectionRef} className="relative">
         <InterfaceHeader />
-        
+
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
         <div className="relative min-h-[400px] px-4">
-          
           {/* Desktop: 4-Position Grid Layout */}
           <div className="hidden md:block">
             {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}
             <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
-              
               {/* Column 1: Chat Popup (Left) */}
               <div className="w-full max-w-sm">
                 <ChatPopup
                   isOpen={showConversation && isCallStarted}
-                  onClose={() => {}} 
+                  onClose={() => {}}
                   layout="grid"
                 />
               </div>
-              
+
               {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
               <div className="flex flex-col items-center justify-center w-full max-w-md">
                 <div className="flex items-center justify-center p-4">
                   <SiriButtonContainer
                     isCallStarted={isCallStarted}
                     micLevel={micLevel}
-                    onCallStart={async (lang) => {
+                    onCallStart={async lang => {
                       await handleCallStart(lang);
                     }}
                     onCallEnd={handleCallEnd}
@@ -143,7 +138,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   />
                 </div>
               </div>
-              
+
               {/* Column 3: Summary Popup (Right) */}
               <div className="w-full max-w-sm">
                 <SummaryPopup
@@ -153,9 +148,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   className="relative z-30 ml-10"
                 />
               </div>
-              
             </div>
-            
+
             {/* Row 2: Notification (Center, below Siri) */}
             <div className="flex justify-center mb-8">
               <div className="w-full max-w-sm">
@@ -163,9 +157,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 {/* <NotificationSection /> */}
               </div>
             </div>
-            
           </div>
-          
+
           {/* Mobile: Original center layout with overlay popups */}
           <div className="block md:hidden">
             <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
@@ -173,7 +166,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 <SiriButtonContainer
                   isCallStarted={isCallStarted}
                   micLevel={micLevel}
-                  onCallStart={async (lang) => {
+                  onCallStart={async lang => {
                     await handleCallStart(lang);
                   }}
                   onCallEnd={handleCallEnd}
@@ -183,7 +176,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 />
               </div>
             </div>
-            
+
             {/* Mobile: Chat popup (overlay) - UNIFIED COMPONENT */}
             <ChatPopup
               isOpen={showConversation}
@@ -195,7 +188,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
             <MobileSummaryPopup />
           </div>
-          
         </div>
       </div>
 

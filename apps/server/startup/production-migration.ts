@@ -8,20 +8,28 @@ import postgres from 'postgres';
 export async function runProductionMigration() {
   // Run when DATABASE_URL exists and contains postgres/postgresql (production environment)
   const databaseUrl = process.env.DATABASE_URL;
-  const isPostgreSQL = databaseUrl && (databaseUrl.includes('postgres') || databaseUrl.includes('postgresql'));
-  
+  const isPostgreSQL =
+    databaseUrl &&
+    (databaseUrl.includes('postgres') || databaseUrl.includes('postgresql'));
+
   if (!isPostgreSQL) {
-    console.log('⏭️ Skipping production migration (not PostgreSQL environment)');
-    console.log(`🔍 DATABASE_URL check: ${databaseUrl ? 'exists' : 'missing'}, isPostgreSQL: ${isPostgreSQL}`);
+    console.log(
+      '⏭️ Skipping production migration (not PostgreSQL environment)'
+    );
+    console.log(
+      `🔍 DATABASE_URL check: ${databaseUrl ? 'exists' : 'missing'}, isPostgreSQL: ${isPostgreSQL}`
+    );
     return;
   }
-  
+
   console.log('🚀 [Production Migration] Starting - PostgreSQL detected!');
   console.log(`📊 Environment: NODE_ENV=${process.env.NODE_ENV}`);
-  console.log(`🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}`);
+  console.log(
+    `🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}`
+  );
 
   console.log('🔧 [Production Migration] Checking database schema...');
-  
+
   let sql: any;
   try {
     sql = postgres(process.env.DATABASE_URL, {
@@ -50,33 +58,41 @@ export async function runProductionMigration() {
       return;
     }
 
-    console.log(`📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}`);
+    console.log(
+      `📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}`
+    );
 
     console.log('🚀 Creating missing tables and columns...');
 
     // EXPLICIT TRANSCRIPT TABLE FIX - Check and recreate if needed
     try {
       console.log('🔍 Checking transcript table structure...');
-      
+
       // Check if transcript table has proper SERIAL PRIMARY KEY
       const transcriptIdColumn = await sql`
         SELECT column_name, column_default, is_nullable
         FROM information_schema.columns 
         WHERE table_name = 'transcript' AND column_name = 'id';
       `;
-      
+
       if (transcriptIdColumn.length > 0) {
         const idColumn = transcriptIdColumn[0];
         console.log('📋 Current transcript.id column:', idColumn);
-        
+
         // Check if it's NOT auto-increment (SERIAL)
-        if (!idColumn.column_default || !idColumn.column_default.includes('nextval')) {
+        if (
+          !idColumn.column_default ||
+          !idColumn.column_default.includes('nextval')
+        ) {
           console.log('🚨 Transcript table has wrong ID column - recreating!');
-          
+
           // Backup existing data
-          const existingTranscripts = await sql`SELECT * FROM transcript LIMIT 10`;
-          console.log(`📦 Found ${existingTranscripts.length} existing transcripts`);
-          
+          const existingTranscripts =
+            await sql`SELECT * FROM transcript LIMIT 10`;
+          console.log(
+            `📦 Found ${existingTranscripts.length} existing transcripts`
+          );
+
           // Drop and recreate table with proper structure
           await sql`DROP TABLE IF EXISTS transcript CASCADE`;
           console.log('✅ Dropped old transcript table');
@@ -122,7 +138,7 @@ export async function runProductionMigration() {
         id SERIAL PRIMARY KEY,
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL
-      )`
+      )`,
     ];
 
     for (const statement of createTableStatements) {
@@ -130,7 +146,9 @@ export async function runProductionMigration() {
         await sql.unsafe(statement);
         console.log(`✅ Table created: ${statement.substring(0, 50)}...`);
       } catch (error: any) {
-        console.log(`⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...`);
+        console.log(
+          `⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...`
+        );
       }
     }
 
@@ -148,7 +166,7 @@ export async function runProductionMigration() {
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS items TEXT`,
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS delivery_time TIMESTAMP`,
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS special_instructions TEXT`,
-      `ALTER TABLE request ADD COLUMN IF NOT EXISTS order_type VARCHAR(100)`
+      `ALTER TABLE request ADD COLUMN IF NOT EXISTS order_type VARCHAR(100)`,
     ];
 
     for (const statement of alterStatements) {
@@ -157,7 +175,9 @@ export async function runProductionMigration() {
         console.log(`✅ Executed: ${statement.substring(0, 50)}...`);
       } catch (error: any) {
         // Column might already exist, which is OK
-        console.log(`⚠️ Statement may have failed (might be OK): ${error.message.substring(0, 100)}...`);
+        console.log(
+          `⚠️ Statement may have failed (might be OK): ${error.message.substring(0, 100)}...`
+        );
       }
     }
 
@@ -177,7 +197,7 @@ export async function runProductionMigration() {
       // Orders table indexes
       `CREATE INDEX IF NOT EXISTS idx_orders_call_id ON orders(call_id)`,
       `CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`,
-      `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`
+      `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
     ];
 
     for (const statement of indexStatements) {
@@ -185,12 +205,13 @@ export async function runProductionMigration() {
         await sql.unsafe(statement);
         console.log(`✅ Index created: ${statement.substring(0, 50)}...`);
       } catch (error: any) {
-        console.log(`⚠️ Index creation may have failed: ${error.message.substring(0, 50)}...`);
+        console.log(
+          `⚠️ Index creation may have failed: ${error.message.substring(0, 50)}...`
+        );
       }
     }
 
     console.log('🎉 Production migration completed successfully!');
-
   } catch (error: any) {
     console.error('❌ Production migration failed:', error.message);
     // Don't crash the server, just log the error
@@ -199,4 +220,4 @@ export async function runProductionMigration() {
       await sql.end();
     }
   }
-} 
+}
