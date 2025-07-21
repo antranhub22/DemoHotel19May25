@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+import { logger } from '@shared/utils/logger';
   Hotel,
   Settings as SettingsIcon,
   Bell,
@@ -84,9 +85,9 @@ const HotelInfoForm = () => {
     setIsSaving(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving hotel settings:', settings);
+      logger.debug('Saving hotel settings:', 'Component', settings);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', 'Component', error);
     } finally {
       setIsSaving(false);
     }
@@ -276,9 +277,9 @@ const NotificationForm = () => {
     setIsSaving(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving notification settings:', settings);
+      logger.debug('Saving notification settings:', 'Component', settings);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', 'Component', error);
     } finally {
       setIsSaving(false);
     }
@@ -450,9 +451,9 @@ const PrivacyForm = () => {
     setIsSaving(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving privacy settings:', settings);
+      logger.debug('Saving privacy settings:', 'Component', settings);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', 'Component', error);
     } finally {
       setIsSaving(false);
     }
@@ -580,9 +581,9 @@ const APIForm = () => {
     setIsSaving(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving API settings:', settings);
+      logger.debug('Saving API settings:', 'Component', settings);
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      logger.error('Failed to save settings:', 'Component', error);
     } finally {
       setIsSaving(false);
     }

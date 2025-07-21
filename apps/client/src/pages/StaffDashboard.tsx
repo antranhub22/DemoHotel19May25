@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StaffRequestDetailModal from '@/components/StaffRequestDetailModal';
 import StaffMessagePopup from '@/components/StaffMessagePopup';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@shared/utils/logger';
 
 const statusOptions = [
   'Tất cả',
@@ -70,10 +71,10 @@ const StaffDashboard: React.FC = () => {
         return;
       }
       const data = await res.json();
-      console.log('Fetched requests data:', data); // Debug log
+      logger.debug('Fetched requests data:', 'Component', data); // Debug log
       setRequests(data);
     } catch (err) {
-      console.error('Failed to fetch requests:', err);
+      logger.error('Failed to fetch requests:', 'Component', err);
     }
   };
 
@@ -115,7 +116,7 @@ const StaffDashboard: React.FC = () => {
       if (selectedRequest && selectedRequest.id === reqId)
         setSelectedRequest({ ...selectedRequest, status });
     } catch (err) {
-      console.error('Failed to update status:', err);
+      logger.error('Failed to update status:', 'Component', err);
     }
   };
   // Mở popup nhắn tin
@@ -214,7 +215,7 @@ const StaffDashboard: React.FC = () => {
         alert(`Lỗi: ${result.error || 'Không thể xóa requests'}`);
       }
     } catch (error) {
-      console.error('Error deleting all requests:', error);
+      logger.error('Error deleting all requests:', 'Component', error);
       alert('Đã xảy ra lỗi khi xóa requests');
       setShowPasswordDialog(false);
     } finally {
@@ -370,10 +371,7 @@ const StaffDashboard: React.FC = () => {
           <div className="space-y-4">
             {/* Debug log */}
             {(() => {
-              console.log(
-                'Mobile rendering - filteredRequests:',
-                filteredRequests
-              );
+              logger.debug('Mobile rendering - filteredRequests:', 'Component', filteredRequests);
               return null;
             })()}
             {filteredRequests.length > 0 ? (

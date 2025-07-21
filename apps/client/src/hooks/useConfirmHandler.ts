@@ -1,6 +1,7 @@
 import React, { useCallback, createElement, useRef } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { usePopup } from '@/components/popup-system';
+import { logger } from '@shared/utils/logger';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
@@ -39,10 +40,8 @@ export const useConfirmHandler = ({
 
   // ✅ IMPROVED: Better error handling with fallback UI
   const handleConfirm = useCallback(() => {
-    console.log(
-      '✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer'
-    );
-    console.log('📊 [useConfirmHandler] Current state:', {
+    logger.debug('✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer', 'Component');
+    logger.debug('📊 [useConfirmHandler] Current state:', 'Component', {
       transcriptsCount: transcripts.length,
       hasCallSummary: !!callSummary,
       hasServiceRequests: serviceRequests?.length > 0,
@@ -52,12 +51,10 @@ export const useConfirmHandler = ({
     const executeWithFallback = async () => {
       try {
         // 🔧 STEP 1: Show loading popup BEFORE ending call
-        console.log(
-          '📋 [useConfirmHandler] Step 1: Showing immediate loading popup...'
-        );
+        logger.debug('📋 [useConfirmHandler] Step 1: Showing immediate loading popup...', 'Component');
 
         if (!isMountedRef.current) {
-          console.warn('⚠️ [useConfirmHandler] Component unmounted, aborting');
+          logger.warn('⚠️ [useConfirmHandler] Component unmounted, aborting', 'Component');
           return;
         }
 
@@ -161,14 +158,11 @@ export const useConfirmHandler = ({
               `;
               document.head.appendChild(style);
             } catch (styleError) {
-              console.warn(
-                '⚠️ [useConfirmHandler] Failed to add spinner styles:',
-                styleError
-              );
+              logger.warn('⚠️ [useConfirmHandler] Failed to add spinner styles:', 'Component', styleError);
             }
           }
 
-          console.log('🚀 [useConfirmHandler] Step 1b: Calling showSummary...');
+          logger.debug('🚀 [useConfirmHandler] Step 1b: Calling showSummary...', 'Component');
 
           // Show loading popup immediately with error handling
           showSummary(loadingElement, {
@@ -176,81 +170,52 @@ export const useConfirmHandler = ({
             priority: 'high' as const,
           });
 
-          console.log(
-            '✅ [useConfirmHandler] Step 1c: Loading popup shown successfully'
-          );
+          logger.debug('✅ [useConfirmHandler] Step 1c: Loading popup shown successfully', 'Component');
         } catch (popupError) {
-          console.error(
-            '❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:',
-            popupError
-          );
+          logger.error('❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:', 'Component', popupError);
           // Continue with call end - don't let popup errors block the flow
         }
 
         // ✅ IMPROVED: Safe delay before calling endCall to prevent state conflicts
-        console.log(
-          '⏳ [useConfirmHandler] Step 1.5: Brief delay before ending call...'
-        );
+        logger.debug('⏳ [useConfirmHandler] Step 1.5: Brief delay before ending call...', 'Component');
         await new Promise(resolve => setTimeout(resolve, 300));
 
         if (!isMountedRef.current) {
-          console.warn(
-            '⚠️ [useConfirmHandler] Component unmounted during delay, aborting'
-          );
+          logger.warn('⚠️ [useConfirmHandler] Component unmounted during delay, aborting', 'Component');
           return;
         }
 
         // 🔧 STEP 2: End call IMMEDIATELY to prevent continued conversation
-        console.log(
-          '🔄 [useConfirmHandler] Step 2: Ending call immediately...'
-        );
+        logger.debug('🔄 [useConfirmHandler] Step 2: Ending call immediately...', 'Component');
         try {
           if (isMountedRef.current) {
-            console.log(
-              '📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...'
-            );
+            logger.debug('📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...', 'Component');
             endCall();
-            console.log(
-              '✅ [useConfirmHandler] Step 2a: Call ended successfully'
-            );
+            logger.debug('✅ [useConfirmHandler] Step 2a: Call ended successfully', 'Component');
 
             // ✅ ADDITIONAL: Force Vapi stop as backup to ensure no continued conversation
             try {
               const { getVapiInstance } = await import('@/lib/vapiClient');
               const vapi = getVapiInstance();
               if (vapi) {
-                console.log(
-                  '🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...'
-                );
+                logger.debug('🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...', 'Component');
                 vapi.stop();
-                console.log(
-                  '✅ [useConfirmHandler] Step 2b: Vapi instance force stopped'
-                );
+                logger.debug('✅ [useConfirmHandler] Step 2b: Vapi instance force stopped', 'Component');
               } else {
-                console.log(
-                  '⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop'
-                );
+                logger.debug('⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop', 'Component');
               }
             } catch (vapiError) {
-              console.warn(
-                '⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:',
-                vapiError
-              );
+              logger.warn('⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:', 'Component', vapiError);
               // Continue - not critical for main flow
             }
           }
         } catch (endCallError) {
-          console.error(
-            '⚠️ [useConfirmHandler] endCall() failed:',
-            endCallError
-          );
+          logger.error('⚠️ [useConfirmHandler] endCall() failed:', 'Component', endCallError);
           // Don't rethrow - continue with completion message
         }
 
         // 🔧 STEP 3: Show completion message immediately (don't wait for polling)
-        console.log(
-          '🔄 [useConfirmHandler] Step 3: Showing completion message...'
-        );
+        logger.debug('🔄 [useConfirmHandler] Step 3: Showing completion message...', 'Component');
 
         // ✅ IMPROVED: Show success message immediately instead of complex polling
         setTimeout(() => {
@@ -428,14 +393,9 @@ export const useConfirmHandler = ({
               priority: 'high' as const,
             });
 
-            console.log(
-              '✅ [useConfirmHandler] Completion message shown successfully'
-            );
+            logger.debug('✅ [useConfirmHandler] Completion message shown successfully', 'Component');
           } catch (completionError) {
-            console.error(
-              '❌ [useConfirmHandler] Error showing completion message:',
-              completionError
-            );
+            logger.error('❌ [useConfirmHandler] Error showing completion message:', 'Component', completionError);
             // Final fallback - simple alert
             if (isMountedRef.current) {
               setTimeout(
@@ -449,14 +409,9 @@ export const useConfirmHandler = ({
           }
         }, 1000); // Give time for endCall to process
 
-        console.log(
-          '✅ [useConfirmHandler] Confirm flow completed successfully'
-        );
+        logger.debug('✅ [useConfirmHandler] Confirm flow completed successfully', 'Component');
       } catch (error) {
-        console.error(
-          '❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:',
-          error
-        );
+        logger.error('❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:', 'Component', error);
 
         // ✅ IMPROVED: Enhanced fallback error handling
         if (isMountedRef.current) {
@@ -532,10 +487,7 @@ export const useConfirmHandler = ({
               priority: 'medium' as const,
             });
           } catch (fallbackError) {
-            console.error(
-              '❌ [useConfirmHandler] Fallback popup also failed:',
-              fallbackError
-            );
+            logger.error('❌ [useConfirmHandler] Fallback popup also failed:', 'Component', fallbackError);
             // Ultimate fallback - simple alert after delay
             setTimeout(() => {
               if (isMountedRef.current) {
@@ -553,7 +505,7 @@ export const useConfirmHandler = ({
     try {
       executeWithFallback();
     } catch (outerError) {
-      console.error('❌ [useConfirmHandler] OUTER ERROR BOUNDARY:', outerError);
+      logger.error('❌ [useConfirmHandler] OUTER ERROR BOUNDARY:', 'Component', outerError);
       // Prevent error from bubbling up to React ErrorBoundary
       setTimeout(() => {
         if (isMountedRef.current) {

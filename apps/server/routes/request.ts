@@ -4,17 +4,18 @@ import { request as requestTable } from '@shared/db';
 import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import { eq, and } from 'drizzle-orm';
 import { requestMapper } from '@shared/db/transformers';
+import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
 // ✅ POST /api/request - Create new request (WITH AUTO TRANSFORMATION)
 router.post('/', authenticateJWT, async (req: Request, res: Response) => {
   try {
-    console.log('📝 [Request API] Creating new request (camelCase):', req.body);
+    logger.debug('📝 [Request API] Creating new request (camelCase):', 'Component', req.body);
 
     // ✅ TRANSFORM: camelCase frontend data → snake_case database data
     const transformedData = requestMapper.toDatabase(req.body);
-    console.log('🔄 [Request API] Transformed to snake_case:', transformedData);
+    logger.debug('🔄 [Request API] Transformed to snake_case:', 'Component', transformedData);
 
     // Extract data from transformed body (now all snake_case)
     const {
@@ -62,7 +63,7 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
       assigned_to: null, // Will be assigned by staff later
     };
 
-    console.log('💾 [Request API] Inserting request:', newRequest);
+    logger.debug('💾 [Request API] Inserting request:', 'Component', newRequest);
 
     // Insert into database and get the generated ID
     const insertResult = await db
@@ -85,13 +86,10 @@ router.post('/', authenticateJWT, async (req: Request, res: Response) => {
       },
     };
 
-    console.log(
-      '✅ [Request API] Request created successfully (camelCase):',
-      response
-    );
+    logger.debug('✅ [Request API] Request created successfully (camelCase):', 'Component', response);
     res.status(201).json(response);
   } catch (error) {
-    console.error('❌ [Request API] Failed to create request:', error);
+    logger.error('❌ [Request API] Failed to create request:', 'Component', error);
     res.status(500).json({
       success: false,
       error: 'Failed to create request',
@@ -121,7 +119,7 @@ router.get('/', authenticateJWT, async (req: Request, res: Response) => {
 
     res.json({ success: true, data: requests });
   } catch (error) {
-    console.error('❌ [Request API] Failed to fetch requests:', error);
+    logger.error('❌ [Request API] Failed to fetch requests:', 'Component', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch requests',
@@ -169,7 +167,7 @@ router.get('/:id', authenticateJWT, async (req: Request, res: Response) => {
 
     res.json({ success: true, data: request[0] });
   } catch (error) {
-    console.error('❌ [Request API] Failed to fetch request:', error);
+    logger.error('❌ [Request API] Failed to fetch request:', 'Component', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch request',
@@ -225,7 +223,7 @@ router.patch(
         message: 'Request status updated successfully',
       });
     } catch (error) {
-      console.error('❌ [Request API] Failed to update request status:', error);
+      logger.error('❌ [Request API] Failed to update request status:', 'Component', error);
       res.status(500).json({
         success: false,
         error: 'Failed to update request status',

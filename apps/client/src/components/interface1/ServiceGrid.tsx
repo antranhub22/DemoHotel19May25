@@ -1,6 +1,7 @@
 import React from 'react';
 import { SERVICE_CATEGORIES } from '@/types/interface1.types';
 import { designSystem } from '@/styles/designSystem';
+import { logger } from '@shared/utils/logger';
 
 export const ServiceGrid: React.FC = () => {
   return (

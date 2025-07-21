@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // ✅ FIX: Dynamic recharts import to prevent initialization errors
 let RechartsPrimitive: any = null;
@@ -8,12 +9,12 @@ const loadRecharts = async () => {
   if (RechartsPrimitive) return RechartsPrimitive;
 
   try {
-    console.log('🔄 [Charts] Loading recharts module...');
+    logger.debug('🔄 [Charts] Loading recharts module...', 'Component');
     RechartsPrimitive = await import('recharts');
-    console.log('✅ [Charts] Recharts loaded successfully');
+    logger.debug('✅ [Charts] Recharts loaded successfully', 'Component');
     return RechartsPrimitive;
   } catch (error) {
-    console.error('❌ [Charts] Failed to load recharts:', error);
+    logger.error('❌ [Charts] Failed to load recharts:', 'Component', error);
     throw new Error('Failed to load recharts module');
   }
 };
@@ -64,7 +65,7 @@ const ChartContainer = React.forwardRef<
     loadRecharts()
       .then(() => setIsRechartsLoaded(true))
       .catch(error => {
-        console.error('Failed to load recharts:', error);
+        logger.error('Failed to load recharts:', 'Component', error);
         setLoadError(error.message);
       });
   }, []);

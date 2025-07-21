@@ -21,6 +21,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+import { logger } from '@shared/utils/logger';
   Bot,
   Settings,
   Mic,
@@ -80,9 +81,9 @@ const AssistantConfigForm = () => {
     try {
       // TODO: Replace with actual API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Saving configuration:', config);
+      logger.debug('Saving configuration:', 'Component', config);
     } catch (error) {
-      console.error('Failed to save configuration:', error);
+      logger.error('Failed to save configuration:', 'Component', error);
     } finally {
       setIsSaving(false);
     }

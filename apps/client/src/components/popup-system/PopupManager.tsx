@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { PopupStack } from './PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
 import { SummaryPopupContent } from './DemoPopupContent';
+import { logger } from '@shared/utils/logger';
 
 interface PopupManagerProps {
   position?: 'top' | 'bottom' | 'center';

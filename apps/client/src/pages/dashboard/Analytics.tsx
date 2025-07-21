@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+import { logger } from '@shared/utils/logger';
   BarChart3,
   TrendingUp,
   Users,

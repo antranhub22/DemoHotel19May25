@@ -55,6 +55,7 @@ import {
   Edit,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface CustomerRequest {
@@ -374,7 +375,7 @@ export const CustomerRequests: React.FC = () => {
 
       if (response.status === 401) {
         // Handle unauthorized
-        console.error('Unauthorized access');
+        logger.error('Unauthorized access', 'Component');
         return;
       }
 
@@ -385,7 +386,7 @@ export const CustomerRequests: React.FC = () => {
       const data = await response.json();
       setRequests(data);
     } catch (error) {
-      console.error('Failed to fetch requests:', error);
+      logger.error('Failed to fetch requests:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -409,7 +410,7 @@ export const CustomerRequests: React.FC = () => {
         setSelectedRequest({ ...selectedRequest, status });
       }
     } catch (error) {
-      console.error('Failed to update status:', error);
+      logger.error('Failed to update status:', 'Component', error);
     }
   };
 
@@ -428,7 +429,7 @@ export const CustomerRequests: React.FC = () => {
         setMessages(data);
       }
     } catch (error) {
-      console.error('Failed to fetch messages:', error);
+      logger.error('Failed to fetch messages:', 'Component', error);
       setMessages([]);
     }
   };
@@ -454,7 +455,7 @@ export const CustomerRequests: React.FC = () => {
       };
       setMessages(prev => [...prev, newMessage]);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      logger.error('Failed to send message:', 'Component', error);
     } finally {
       setMessageLoading(false);
     }
@@ -484,7 +485,7 @@ export const CustomerRequests: React.FC = () => {
         setDeleteError(result.error || 'Không thể xóa requests');
       }
     } catch (error) {
-      console.error('Error deleting requests:', error);
+      logger.error('Error deleting requests:', 'Component', error);
       setDeleteError('Đã xảy ra lỗi khi xóa requests');
     } finally {
       setDeleteLoading(false);

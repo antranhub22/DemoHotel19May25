@@ -1,4 +1,5 @@
 import React, { Component, ReactNode, ErrorInfo } from 'react';
+import { logger } from '@shared/utils/logger';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -36,15 +37,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(
-      '🚨 [ErrorBoundary] Uncaught error in component tree:',
-      error
-    );
-    console.error('🚨 [ErrorBoundary] Component stack:', info.componentStack);
+    logger.error('🚨 [ErrorBoundary] Uncaught error in component tree:', 'Component', error);
+    logger.error('🚨 [ErrorBoundary] Component stack:', 'Component', info.componentStack);
 
     // ✅ IMPROVED: Better error categorization
     const errorCategory = this.categorizeError(error);
-    console.log('🔍 [ErrorBoundary] Error category:', errorCategory);
+    logger.debug('🔍 [ErrorBoundary] Error category:', 'Component', errorCategory);
 
     // Call custom error handler if provided
     if (this.props.onError) {
@@ -59,10 +57,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       this.shouldAutoRetry(error, errorCategory) &&
       this.state.retryCount < maxRetries
     ) {
-      console.log(
-        '🔄 [ErrorBoundary] Attempting auto-recovery for:',
-        errorCategory
-      );
+      logger.debug('🔄 [ErrorBoundary] Attempting auto-recovery for:', 'Component', errorCategory);
       this.setState({ isRecovering: true });
 
       const delay = this.getRetryDelay(errorCategory);
@@ -108,7 +103,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     // Don't retry certain types of errors
     const nonRetryableCategories = ['react-hooks', 'canvas-siri'];
     if (nonRetryableCategories.includes(category)) {
-      console.log('🚫 [ErrorBoundary] Non-retryable error category:', category);
+      logger.debug('🚫 [ErrorBoundary] Non-retryable error category:', 'Component', category);
       return false;
     }
 
@@ -136,10 +131,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   private handleRetry = () => {
-    console.log(
-      '🔄 [ErrorBoundary] Executing retry attempt:',
-      this.state.retryCount + 1
-    );
+    logger.debug('🔄 [ErrorBoundary] Executing retry attempt:', 'Component', this.state.retryCount + 1);
 
     // ✅ IMPROVED: Clear problematic state before retry
     try {
@@ -154,12 +146,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         sessionStorage.removeItem(key);
       });
 
-      console.log('🧹 [ErrorBoundary] Cleared problematic state');
+      logger.debug('🧹 [ErrorBoundary] Cleared problematic state', 'Component');
     } catch (cleanupError) {
-      console.warn(
-        '⚠️ [ErrorBoundary] Error during state cleanup:',
-        cleanupError
-      );
+      logger.warn('⚠️ [ErrorBoundary] Error during state cleanup:', 'Component', cleanupError);
     }
 
     this.setState(prevState => ({

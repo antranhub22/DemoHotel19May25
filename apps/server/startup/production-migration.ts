@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+import { logger } from '@shared/utils/logger';
 
 /**
  * Production Migration: Add missing columns to request table
@@ -13,22 +14,18 @@ export async function runProductionMigration() {
     (databaseUrl.includes('postgres') || databaseUrl.includes('postgresql'));
 
   if (!isPostgreSQL) {
-    console.log(
-      '⏭️ Skipping production migration (not PostgreSQL environment)'
-    );
+    logger.debug('⏭️ Skipping production migration (not PostgreSQL environment)', 'Component');
     console.log(
       `🔍 DATABASE_URL check: ${databaseUrl ? 'exists' : 'missing'}, isPostgreSQL: ${isPostgreSQL}`
     );
     return;
   }
 
-  console.log('🚀 [Production Migration] Starting - PostgreSQL detected!');
-  console.log(`📊 Environment: NODE_ENV=${process.env.NODE_ENV}`);
-  console.log(
-    `🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}`
-  );
+  logger.debug('🚀 [Production Migration] Starting - PostgreSQL detected!', 'Component');
+  logger.debug('📊 Environment: NODE_ENV=${process.env.NODE_ENV}', 'Component');
+  logger.debug('🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}', 'Component');
 
-  console.log('🔧 [Production Migration] Checking database schema...');
+  logger.debug('🔧 [Production Migration] Checking database schema...', 'Component');
 
   let sql: any;
   try {
@@ -54,19 +51,17 @@ export async function runProductionMigration() {
     const hasTranscriptTable = transcriptTable.length > 0;
 
     if (hasCallId && hasTranscriptTable) {
-      console.log('✅ Database schema already updated - migration not needed');
+      logger.debug('✅ Database schema already updated - migration not needed', 'Component');
       return;
     }
 
-    console.log(
-      `📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}`
-    );
+    logger.debug('📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}', 'Component');
 
-    console.log('🚀 Creating missing tables and columns...');
+    logger.debug('🚀 Creating missing tables and columns...', 'Component');
 
     // EXPLICIT TRANSCRIPT TABLE FIX - Check and recreate if needed
     try {
-      console.log('🔍 Checking transcript table structure...');
+      logger.debug('🔍 Checking transcript table structure...', 'Component');
 
       // Check if transcript table has proper SERIAL PRIMARY KEY
       const transcriptIdColumn = await sql`
@@ -77,31 +72,29 @@ export async function runProductionMigration() {
 
       if (transcriptIdColumn.length > 0) {
         const idColumn = transcriptIdColumn[0];
-        console.log('📋 Current transcript.id column:', idColumn);
+        logger.debug('📋 Current transcript.id column:', 'Component', idColumn);
 
         // Check if it's NOT auto-increment (SERIAL)
         if (
           !idColumn.column_default ||
           !idColumn.column_default.includes('nextval')
         ) {
-          console.log('🚨 Transcript table has wrong ID column - recreating!');
+          logger.debug('🚨 Transcript table has wrong ID column - recreating!', 'Component');
 
           // Backup existing data
           const existingTranscripts =
             await sql`SELECT * FROM transcript LIMIT 10`;
-          console.log(
-            `📦 Found ${existingTranscripts.length} existing transcripts`
-          );
+          logger.debug('📦 Found ${existingTranscripts.length} existing transcripts', 'Component');
 
           // Drop and recreate table with proper structure
           await sql`DROP TABLE IF EXISTS transcript CASCADE`;
-          console.log('✅ Dropped old transcript table');
+          logger.debug('✅ Dropped old transcript table', 'Component');
         } else {
-          console.log('✅ Transcript table has proper SERIAL PRIMARY KEY');
+          logger.debug('✅ Transcript table has proper SERIAL PRIMARY KEY', 'Component');
         }
       }
     } catch (error: any) {
-      console.log(`⚠️ Error checking transcript table: ${error.message}`);
+      logger.debug('⚠️ Error checking transcript table: ${error.message}', 'Component');
     }
 
     // Create missing tables first - EXPLICIT transcript table fix
@@ -144,11 +137,9 @@ export async function runProductionMigration() {
     for (const statement of createTableStatements) {
       try {
         await sql.unsafe(statement);
-        console.log(`✅ Table created: ${statement.substring(0, 50)}...`);
+        logger.debug('✅ Table created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        console.log(
-          `⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...`
-        );
+        logger.debug('⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...', 'Component');
       }
     }
 
@@ -172,12 +163,10 @@ export async function runProductionMigration() {
     for (const statement of alterStatements) {
       try {
         await sql.unsafe(statement);
-        console.log(`✅ Executed: ${statement.substring(0, 50)}...`);
+        logger.debug('✅ Executed: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
         // Column might already exist, which is OK
-        console.log(
-          `⚠️ Statement may have failed (might be OK): ${error.message.substring(0, 100)}...`
-        );
+        logger.debug('⚠️ Statement may have failed (might be OK): ${error.message.substring(0, 100)}...', 'Component');
       }
     }
 
@@ -203,17 +192,15 @@ export async function runProductionMigration() {
     for (const statement of indexStatements) {
       try {
         await sql.unsafe(statement);
-        console.log(`✅ Index created: ${statement.substring(0, 50)}...`);
+        logger.debug('✅ Index created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        console.log(
-          `⚠️ Index creation may have failed: ${error.message.substring(0, 50)}...`
-        );
+        logger.debug('⚠️ Index creation may have failed: ${error.message.substring(0, 50)}...', 'Component');
       }
     }
 
-    console.log('🎉 Production migration completed successfully!');
+    logger.debug('🎉 Production migration completed successfully!', 'Component');
   } catch (error: any) {
-    console.error('❌ Production migration failed:', error.message);
+    logger.error('❌ Production migration failed:', 'Component', error.message);
     // Don't crash the server, just log the error
   } finally {
     if (sql) {

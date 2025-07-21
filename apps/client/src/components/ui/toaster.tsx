@@ -1,5 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 import {
+import { logger } from '@shared/utils/logger';
   Toast,
   ToastClose,
   ToastDescription,

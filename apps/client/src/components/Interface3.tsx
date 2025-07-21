@@ -11,6 +11,7 @@ import { t } from '@/i18n';
 import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { logger } from '@shared/utils/logger';
 
 interface Interface3Props {
   isActive: boolean;
@@ -50,7 +51,7 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
 
   // ✅ FIXED: Render conditionally without early returns
   if (configLoading || !hotelConfig) {
-    console.log('[DEBUG] Interface3 render:', { hotelConfig, configLoading });
+    logger.debug('[DEBUG] Interface3 render:', 'Component', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">

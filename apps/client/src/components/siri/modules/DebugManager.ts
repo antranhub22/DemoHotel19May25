@@ -9,9 +9,7 @@ export class DebugManager {
    */
   public static setDebugLevel(level: DebugLevel): void {
     DebugManager.DEBUG_LEVEL = level;
-    console.log(
-      `[DebugManager] Debug level set to: ${level} (0: off, 1: errors only, 2: all)`
-    );
+    logger.debug('[DebugManager] Debug level set to: ${level} (0: off, 1: errors only, 2: all)', 'Component');
   }
 
   /**
@@ -26,7 +24,7 @@ export class DebugManager {
    */
   public log(message: string, ...args: any[]): void {
     if (DebugManager.DEBUG_LEVEL >= 2) {
-      console.log(`[SiriButton] ${message}`, ...args);
+      logger.debug('[SiriButton] ${message}', 'Component', ...args);
     }
   }
 
@@ -35,7 +33,7 @@ export class DebugManager {
    */
   public debug(message: string, ...args: any[]): void {
     if (DebugManager.DEBUG_LEVEL >= 2) {
-      console.log(`[SiriButton] ${message}`, ...args);
+      logger.debug('[SiriButton] ${message}', 'Component', ...args);
     }
   }
 
@@ -44,7 +42,7 @@ export class DebugManager {
    */
   public warn(message: string, ...args: any[]): void {
     if (DebugManager.DEBUG_LEVEL >= 1) {
-      console.warn(`[SiriButton] ${message}`, ...args);
+      logger.warn('[SiriButton] ${message}', 'Component', ...args);
     }
   }
 
@@ -53,7 +51,7 @@ export class DebugManager {
    */
   public debugWarn(message: string, ...args: any[]): void {
     if (DebugManager.DEBUG_LEVEL >= 1) {
-      console.warn(`[SiriButton] ${message}`, ...args);
+      logger.warn('[SiriButton] ${message}', 'Component', ...args);
     }
   }
 
@@ -61,14 +59,14 @@ export class DebugManager {
    * Log error messages (always shown)
    */
   public error(message: string, ...args: any[]): void {
-    console.error(`[SiriButton] ${message}`, ...args);
+    logger.error('[SiriButton] ${message}', 'Component', ...args);
   }
 
   /**
    * Log error messages with explicit prefix
    */
   public debugError(message: string, ...args: any[]): void {
-    console.error(`[SiriButton] ${message}`, ...args);
+    logger.error('[SiriButton] ${message}', 'Component', ...args);
   }
 
   /**
@@ -94,21 +92,21 @@ if (typeof window !== 'undefined') {
   (window as any).SiriDebugControls = {
     setLevel: (level: DebugLevel) => {
       DebugManager.setDebugLevel(level);
-      console.log(`🔧 Voice debug level set to: ${level}`);
+      logger.debug('🔧 Voice debug level set to: ${level}', 'Component');
     },
     getLevel: () => DebugManager.getDebugLevel(),
     silent: () => DebugManager.setDebugLevel(0),
     errorsOnly: () => DebugManager.setDebugLevel(1),
     verbose: () => DebugManager.setDebugLevel(2),
     help: () => {
-      console.log(`
+      logger.debug('
 🔧 SiriDebugControls Help:
 - SiriDebugControls.silent()     -> Turn off all debug logs
 - SiriDebugControls.errorsOnly() -> Show errors + warnings only  
 - SiriDebugControls.verbose()    -> Show all debug logs
 - SiriDebugControls.setLevel(n)  -> Set level manually (0-2)
 - SiriDebugControls.getLevel()   -> Check current level
-      `);
+      ', 'Component');
     },
   };
 

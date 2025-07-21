@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 import {
+import { logger } from '@shared/utils/logger';
   UserRole,
   Permission,
   getPermissionsForRole,
@@ -83,7 +84,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    console.warn('useAuth used outside AuthProvider - returning safe defaults');
+    logger.warn('useAuth used outside AuthProvider - returning safe defaults', 'Component');
     // Return safe defaults instead of throwing
     return {
       user: null,
@@ -136,27 +137,25 @@ const mapLegacyRole = (legacyRole: string): UserRole => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  console.log('[DEBUG] AuthProvider render');
+  logger.debug('[DEBUG] AuthProvider render', 'Component');
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('[DEBUG] AuthProvider useEffect - checking token');
+    logger.debug('[DEBUG] AuthProvider useEffect - checking token', 'Component');
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log(
-        '[DEBUG] AuthProvider - no token found, setting loading false'
-      );
+      logger.debug('[DEBUG] AuthProvider - no token found, setting loading false', 'Component');
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('[DEBUG] AuthProvider - decoding token');
+      logger.debug('[DEBUG] AuthProvider - decoding token', 'Component');
       const decoded = jwtDecode<MyJwtPayload>(token);
-      console.log('[DEBUG] AuthProvider - token decoded:', decoded);
+      logger.debug('[DEBUG] AuthProvider - token decoded:', 'Component', decoded);
 
       // Tạo user object từ token payload
       const mappedRole = mapLegacyRole(decoded.role);
@@ -181,10 +180,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
-      console.log('[DEBUG] AuthProvider - token decode error:', error);
+      logger.debug('[DEBUG] AuthProvider - token decode error:', 'Component', error);
       localStorage.removeItem('token');
     } finally {
-      console.log('[DEBUG] AuthProvider - setting loading false');
+      logger.debug('[DEBUG] AuthProvider - setting loading false', 'Component');
       setIsLoading(false);
     }
   }, []);
@@ -237,7 +236,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(() => {
-    console.log('[DEBUG] AuthProvider logout called');
+    logger.debug('[DEBUG] AuthProvider logout called', 'Component');
     setUser(null);
     setTenant(null);
     localStorage.removeItem('token');
@@ -267,7 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [user]
   );
 
-  console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
+  logger.debug('[DEBUG] AuthProvider state:', 'Component', { user, tenant, isLoading });
 
   return (
     <AuthContext.Provider

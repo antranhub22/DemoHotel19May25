@@ -6,6 +6,7 @@ import { sql } from 'drizzle-orm';
 import { runAutoDbFix } from '@server/startup/auto-database-fix';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '@shared/utils/logger';
 
 const router = Router();
 
@@ -76,12 +77,12 @@ router.get('/health', async (req: Request, res: Response) => {
 // Manual database fix trigger - now includes simple setup
 router.post('/health/fix-database', async (req: Request, res: Response) => {
   try {
-    console.log('🔧 Manual database fix triggered via API...');
+    logger.debug('🔧 Manual database fix triggered via API...', 'Component');
 
     // For now, just return success without doing database operations
     // since db.execute is not available in Drizzle ORM
 
-    console.log('✅ Database setup completed successfully!');
+    logger.debug('✅ Database setup completed successfully!', 'Component');
 
     res.json({
       status: 'success',
@@ -90,7 +91,7 @@ router.post('/health/fix-database', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('❌ Database setup API error:', error);
+    logger.error('❌ Database setup API error:', 'Component', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -250,12 +251,12 @@ router.get('/health/assets', async (req: Request, res: Response) => {
 // Simple database setup endpoint
 router.post('/health/setup-database', async (req: Request, res: Response) => {
   try {
-    console.log('🔧 Simple database setup triggered via API...');
+    logger.debug('🔧 Simple database setup triggered via API...', 'Component');
 
     // For now, just return success without doing database operations
     // since db.execute is not available in Drizzle ORM
 
-    console.log('✅ Database setup completed successfully!');
+    logger.debug('✅ Database setup completed successfully!', 'Component');
 
     res.json({
       status: 'success',
@@ -263,7 +264,7 @@ router.post('/health/setup-database', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('❌ Database setup API error:', error);
+    logger.error('❌ Database setup API error:', 'Component', error);
     res.status(500).json({
       status: 'error',
       error: error instanceof Error ? error.message : 'Unknown error',

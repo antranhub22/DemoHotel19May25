@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { TenantService, TenantError } from '@server/services/tenantService';
 import { eq } from 'drizzle-orm';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Extended Request Interface
@@ -82,12 +83,10 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenantId;
 
-      console.log(
-        `🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})`
-      );
+      logger.debug('🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})', 'Component');
       next();
     } catch (error) {
-      console.error('Tenant identification failed:', error);
+      logger.error('Tenant identification failed:', 'Component', error);
 
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
@@ -145,12 +144,10 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenant.id;
 
-      console.log(
-        `🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})`
-      );
+      logger.debug('🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})', 'Component');
       next();
     } catch (error) {
-      console.error('Tenant identification from subdomain failed:', error);
+      logger.error('Tenant identification from subdomain failed:', 'Component', error);
 
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
@@ -183,10 +180,10 @@ export class TenantMiddleware {
       // This will be used in database queries to ensure data isolation
       req.tenantFilter = this.tenantService.getTenantFilter(req.tenantId);
 
-      console.log(`🔒 Row-level security enabled for tenant: ${req.tenantId}`);
+      logger.debug('🔒 Row-level security enabled for tenant: ${req.tenantId}', 'Component');
       next();
     } catch (error) {
-      console.error('Row-level security enforcement failed:', error);
+      logger.error('Row-level security enforcement failed:', 'Component', error);
       return res.status(500).json({
         error: 'Security enforcement failed',
         code: 'SECURITY_ENFORCEMENT_FAILED',
@@ -222,12 +219,10 @@ export class TenantMiddleware {
           });
         }
 
-        console.log(
-          `✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}`
-        );
+        logger.debug('✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}', 'Component');
         next();
       } catch (error) {
-        console.error(`Feature access check failed for ${feature}:`, error);
+        logger.error('Feature access check failed for ${feature}:', 'Component', error);
         return res.status(500).json({
           error: 'Feature access check failed',
           code: 'FEATURE_ACCESS_CHECK_FAILED',
@@ -266,12 +261,10 @@ export class TenantMiddleware {
         });
       }
 
-      console.log(
-        `📊 Subscription limits check passed for tenant ${req.tenant.hotelName}`
-      );
+      logger.debug('📊 Subscription limits check passed for tenant ${req.tenant.hotelName}', 'Component');
       next();
     } catch (error) {
-      console.error('Subscription limits check failed:', error);
+      logger.error('Subscription limits check failed:', 'Component', error);
       return res.status(500).json({
         error: 'Subscription limits check failed',
         code: 'LIMITS_CHECK_FAILED',
@@ -297,12 +290,10 @@ export class TenantMiddleware {
         req.resourceTenantIdField = resourceTenantIdField;
         req.validateOwnership = true;
 
-        console.log(
-          `🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}`
-        );
+        logger.debug('🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}', 'Component');
         next();
       } catch (error) {
-        console.error('Tenant ownership validation setup failed:', error);
+        logger.error('Tenant ownership validation setup failed:', 'Component', error);
         return res.status(500).json({
           error: 'Ownership validation setup failed',
           code: 'OWNERSHIP_VALIDATION_FAILED',
@@ -367,7 +358,7 @@ export class TenantMiddleware {
 
         next();
       } catch (error) {
-        console.error('Tenant rate limiting failed:', error);
+        logger.error('Tenant rate limiting failed:', 'Component', error);
         return res.status(500).json({
           error: 'Rate limiting failed',
           code: 'RATE_LIMITING_FAILED',

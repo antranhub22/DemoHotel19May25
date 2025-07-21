@@ -62,6 +62,7 @@ import {
   User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface Guest {
@@ -367,7 +368,7 @@ const GuestDetailsModal = ({
       onUpdate(formData);
       setEditMode(false);
     } catch (error) {
-      console.error('Failed to update guest:', error);
+      logger.error('Failed to update guest:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -774,7 +775,7 @@ const AddGuestModal = ({
         notes: '',
       });
     } catch (error) {
-      console.error('Failed to add guest:', error);
+      logger.error('Failed to add guest:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -1024,7 +1025,7 @@ export const GuestManagement: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       setGuests(mockGuests);
     } catch (error) {
-      console.error('Failed to fetch guests:', error);
+      logger.error('Failed to fetch guests:', 'Component', error);
     } finally {
       setLoading(false);
     }

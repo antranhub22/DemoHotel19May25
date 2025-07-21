@@ -3,6 +3,7 @@ import { OTPInput, OTPInputContext } from 'input-otp';
 import { Dot } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,

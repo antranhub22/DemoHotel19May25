@@ -1,5 +1,6 @@
 import { db, call, transcript, request } from '@shared/db';
 import { desc, eq, count, sql } from 'drizzle-orm';
+import { logger } from '@shared/utils/logger';
 
 const isPostgres =
   process.env.NODE_ENV === 'production' ||
@@ -44,7 +45,7 @@ export async function getOverview() {
       languageDistribution,
     };
   } catch (error) {
-    console.error('Error in getOverview:', error);
+    logger.error('Error in getOverview:', 'Component', error);
     return {
       totalCalls: 0,
       averageCallDuration: 0,
@@ -69,7 +70,7 @@ export async function getServiceDistribution() {
       count: row.count,
     }));
   } catch (error) {
-    console.error('Error in getServiceDistribution:', error);
+    logger.error('Error in getServiceDistribution:', 'Component', error);
     return [];
   }
 }
@@ -110,7 +111,7 @@ export async function getHourlyActivity() {
       }));
     }
   } catch (error) {
-    console.error('Error in getHourlyActivity:', error);
+    logger.error('Error in getHourlyActivity:', 'Component', error);
     return [];
   }
 }
@@ -130,7 +131,7 @@ export async function getLanguageDistribution() {
       count: row.count,
     }));
   } catch (error) {
-    console.error('Error in getLanguageDistribution:', error);
+    logger.error('Error in getLanguageDistribution:', 'Component', error);
     return [];
   }
 }

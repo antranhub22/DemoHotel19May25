@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { SummaryPopupContent } from './popup-system/DemoPopupContent';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
+import { logger } from '@shared/utils/logger';
 
 interface RightPanelPopupProps {
   isOpen: boolean;

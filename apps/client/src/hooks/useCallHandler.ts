@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import {
+import { logger } from '@shared/utils/logger';
   useHotelConfiguration,
   getVapiPublicKeyByLanguage,
   getVapiAssistantIdByLanguage,
@@ -22,14 +23,14 @@ export const useCallHandler = () => {
 
   const handleCall = useCallback(
     async (lang: Language) => {
-      console.log('[useCallHandler] handleCall called with language:', lang);
+      logger.debug('[useCallHandler] handleCall called with language:', 'Component', lang);
 
       if (!hotelConfig) {
-        console.error('[useCallHandler] Hotel configuration not loaded');
+        logger.error('[useCallHandler] Hotel configuration not loaded', 'Component');
         return { success: false, error: 'Hotel configuration not loaded' };
       }
 
-      console.log('[useCallHandler] Starting call with language:', lang);
+      logger.debug('[useCallHandler] Starting call with language:', 'Component', lang);
 
       setEmailSentForCurrentSession(false);
       setCallDetails({
@@ -46,7 +47,7 @@ export const useCallHandler = () => {
       const publicKey = await getVapiPublicKeyByLanguage(lang, hotelConfig);
       const assistantId = await getVapiAssistantIdByLanguage(lang, hotelConfig);
 
-      console.log('[useCallHandler] Vapi configuration:', {
+      logger.debug('[useCallHandler] Vapi configuration:', 'Component', {
         publicKey,
         assistantId,
         lang,
@@ -56,9 +57,7 @@ export const useCallHandler = () => {
       const isDevelopment =
         import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
       if ((!publicKey || !assistantId) && isDevelopment) {
-        console.warn(
-          '[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing'
-        );
+        logger.warn('[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing', 'Component');
         setLanguage(lang);
         // setCurrentInterface('interface2');
         return { success: true, isDevelopment: true };
@@ -66,22 +65,16 @@ export const useCallHandler = () => {
 
       if (!publicKey || !assistantId) {
         const error = `Vapi configuration not available for language: ${lang}`;
-        console.error('[useCallHandler]', error);
+        logger.error('[useCallHandler]', 'Component', error);
         return { success: false, error };
       }
 
       try {
-        console.log(
-          '[useCallHandler] Initializing Vapi with public key:',
-          publicKey
-        );
+        logger.debug('[useCallHandler] Initializing Vapi with public key:', 'Component', publicKey);
         setLanguage(lang);
 
         if (assistantId) {
-          console.log(
-            '[useCallHandler] Starting Vapi call with assistant ID:',
-            assistantId
-          );
+          logger.debug('[useCallHandler] Starting Vapi call with assistant ID:', 'Component', assistantId);
 
           console.log(
             '[useCallHandler] 🔄 CALLING // setCurrentInterface("interface2")'
@@ -94,11 +87,11 @@ export const useCallHandler = () => {
           return { success: true };
         } else {
           const error = 'Failed to get Vapi instance or assistant ID';
-          console.error('[useCallHandler]', error);
+          logger.error('[useCallHandler]', 'Component', error);
           return { success: false, error };
         }
       } catch (error) {
-        console.error('[useCallHandler] Error starting Vapi call:', error);
+        logger.error('[useCallHandler] Error starting Vapi call:', 'Component', error);
         const errorMessage =
           error instanceof Error ? error.message : String(error);
         return { success: false, error: errorMessage };

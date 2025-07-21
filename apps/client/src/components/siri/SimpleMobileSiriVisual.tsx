@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { logger } from '@shared/utils/logger';
 
 interface SimpleMobileSiriVisualProps {
   isListening: boolean;
@@ -83,7 +84,7 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
   const volumeBoost = isListening ? volumeLevel * 0.3 : 0;
   const finalScale = pulse + volumeBoost;
 
-  // console.log('🎨 [SimpleMobileSiriVisual] Render:', { isListening, volumeLevel, colors: colors.name });
+  // logger.debug('🎨 [SimpleMobileSiriVisual] Render:', 'Component', { isListening, volumeLevel, colors: colors.name });
 
   return (
     <div

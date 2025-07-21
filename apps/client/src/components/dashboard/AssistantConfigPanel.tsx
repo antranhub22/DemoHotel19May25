@@ -24,6 +24,7 @@ import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
+import { logger } from '@shared/utils/logger';
   Bot,
   Settings,
   Mic,
@@ -354,7 +355,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
       await onSave(editConfig);
       setHasChanges(false);
     } catch (error) {
-      console.error('Failed to save config:', error);
+      logger.error('Failed to save config:', 'Component', error);
     }
   };
 
@@ -364,7 +365,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
     try {
       await onTest(editConfig);
     } catch (error) {
-      console.error('Failed to test assistant:', error);
+      logger.error('Failed to test assistant:', 'Component', error);
     }
   };
 
@@ -545,7 +546,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
               }
               onTest={async voiceId => {
                 // Test voice implementation
-                console.log('Testing voice:', voiceId);
+                logger.debug('Testing voice:', 'Component', voiceId);
               }}
             />
           </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { PopupState, POPUP_TYPES } from '@/context/PopupContext';
 import styles from './PopupCard.module.css';
+import { logger } from '@shared/utils/logger';
 
 interface PopupCardProps {
   popup: PopupState;

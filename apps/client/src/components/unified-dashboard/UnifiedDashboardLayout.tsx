@@ -39,6 +39,7 @@ import {
   usePermissionCheck,
 } from '@/components/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
+import { logger } from '@shared/utils/logger';
 import type { UserRole } from '@shared/constants/permissions';
 
 // Types

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import {
+import { logger } from '@shared/utils/logger';
   Crown,
   Lock,
   Unlock,

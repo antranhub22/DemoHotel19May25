@@ -24,6 +24,7 @@ import { eq, and } from 'drizzle-orm';
 import { sql } from 'drizzle-orm';
 import { deleteAllRequests } from '@shared/utils';
 import {
+import { logger } from '@shared/utils/logger';
   getOverview,
   getServiceDistribution,
   getHourlyActivity,
@@ -47,9 +48,7 @@ router.post('/store-transcript', express.json(), async (req, res) => {
       });
     }
 
-    console.log(
-      `📝 [API] Storing transcript - Call: ${callId}, Role: ${role}, Content length: ${content.length}`
-    );
+    logger.debug('📝 [API] Storing transcript - Call: ${callId}, Role: ${role}, Content length: ${content.length}', 'Component');
 
     // Validate and store transcript
     const validatedData = insertTranscriptSchema.parse({
@@ -62,10 +61,10 @@ router.post('/store-transcript', express.json(), async (req, res) => {
 
     await db.insert(transcript).values(validatedData);
 
-    console.log(`✅ [API] Transcript stored successfully for call: ${callId}`);
+    logger.debug('✅ [API] Transcript stored successfully for call: ${callId}', 'Component');
     res.json({ success: true });
   } catch (error) {
-    console.error('❌ [API] Error storing transcript:', error);
+    logger.error('❌ [API] Error storing transcript:', 'Component', error);
     res.status(500).json({ error: 'Failed to store transcript' });
   }
 });
@@ -74,7 +73,7 @@ router.post('/store-transcript', express.json(), async (req, res) => {
 router.get('/transcripts/:callId', async (req, res) => {
   try {
     const { callId } = req.params;
-    console.log(`🔍 [API] Getting transcripts for call: ${callId}`);
+    logger.debug('🔍 [API] Getting transcripts for call: ${callId}', 'Component');
 
     const transcripts = await db
       .select()
@@ -82,12 +81,10 @@ router.get('/transcripts/:callId', async (req, res) => {
       .where(eq(transcript.call_id, callId))
       .orderBy(transcript.timestamp);
 
-    console.log(
-      `📝 [API] Found ${transcripts.length} transcripts for call: ${callId}`
-    );
+    logger.debug('📝 [API] Found ${transcripts.length} transcripts for call: ${callId}', 'Component');
     res.json(transcripts);
   } catch (error) {
-    console.error('❌ [API] Error fetching transcripts:', error);
+    logger.error('❌ [API] Error fetching transcripts:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch transcripts' });
   }
 });
@@ -116,12 +113,10 @@ router.post('/call-end', express.json(), async (req, res) => {
       })
       .where(eq(call.call_id_vapi, callId));
 
-    console.log(
-      `✅ [API] Updated call duration for ${callId}: ${duration} seconds`
-    );
+    logger.debug('✅ [API] Updated call duration for ${callId}: ${duration} seconds', 'Component');
     res.json({ success: true, duration });
   } catch (error) {
-    console.error('❌ [API] Error updating call duration:', error);
+    logger.error('❌ [API] Error updating call duration:', 'Component', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -141,7 +136,7 @@ router.post('/store-summary', express.json(), async (req, res) => {
       });
     }
 
-    console.log(`📋 [API] Storing summary for call: ${callId}`);
+    logger.debug('📋 [API] Storing summary for call: ${callId}', 'Component');
 
     // Validate and store summary
     const validatedData = insertCallSummarySchema.parse({
@@ -154,10 +149,10 @@ router.post('/store-summary', express.json(), async (req, res) => {
 
     await db.insert(call_summaries).values(validatedData);
 
-    console.log(`✅ [API] Summary stored successfully for call: ${callId}`);
+    logger.debug('✅ [API] Summary stored successfully for call: ${callId}', 'Component');
     res.json({ success: true });
   } catch (error) {
-    console.error('❌ [API] Error storing summary:', error);
+    logger.error('❌ [API] Error storing summary:', 'Component', error);
     res.status(500).json({ error: 'Failed to store summary' });
   }
 });
@@ -166,7 +161,7 @@ router.post('/store-summary', express.json(), async (req, res) => {
 router.get('/summaries/:callId', async (req, res) => {
   try {
     const { callId } = req.params;
-    console.log(`🔍 [API] Getting summary for call: ${callId}`);
+    logger.debug('🔍 [API] Getting summary for call: ${callId}', 'Component');
 
     const summaries = await db
       .select()
@@ -174,12 +169,10 @@ router.get('/summaries/:callId', async (req, res) => {
       .where(eq(call_summaries.call_id, callId))
       .orderBy(call_summaries.timestamp);
 
-    console.log(
-      `📋 [API] Found ${summaries.length} summaries for call: ${callId}`
-    );
+    logger.debug('📋 [API] Found ${summaries.length} summaries for call: ${callId}', 'Component');
     res.json(summaries);
   } catch (error) {
-    console.error('❌ [API] Error fetching summaries:', error);
+    logger.error('❌ [API] Error fetching summaries:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch summaries' });
   }
 });
@@ -192,12 +185,12 @@ router.get('/summaries/:callId', async (req, res) => {
 router.get('/analytics/overview', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    console.log(`📊 [API] Getting analytics overview for tenant: ${tenantId}`);
+    logger.debug('📊 [API] Getting analytics overview for tenant: ${tenantId}', 'Component');
 
     const overview = await getOverview();
     res.json(overview);
   } catch (error) {
-    console.error('❌ [API] Error fetching analytics overview:', error);
+    logger.error('❌ [API] Error fetching analytics overview:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch analytics overview' });
   }
 });
@@ -206,14 +199,12 @@ router.get('/analytics/overview', async (req, res) => {
 router.get('/analytics/service-distribution', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    console.log(
-      `📊 [API] Getting service distribution for tenant: ${tenantId}`
-    );
+    logger.debug('📊 [API] Getting service distribution for tenant: ${tenantId}', 'Component');
 
     const distribution = await getServiceDistribution();
     res.json(distribution);
   } catch (error) {
-    console.error('❌ [API] Error fetching service distribution:', error);
+    logger.error('❌ [API] Error fetching service distribution:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch service distribution' });
   }
 });
@@ -222,12 +213,12 @@ router.get('/analytics/service-distribution', async (req, res) => {
 router.get('/analytics/hourly-activity', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    console.log(`📊 [API] Getting hourly activity for tenant: ${tenantId}`);
+    logger.debug('📊 [API] Getting hourly activity for tenant: ${tenantId}', 'Component');
 
     const activity = await getHourlyActivity();
     res.json(activity);
   } catch (error) {
-    console.error('❌ [API] Error fetching hourly activity:', error);
+    logger.error('❌ [API] Error fetching hourly activity:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch hourly activity' });
   }
 });
@@ -245,14 +236,12 @@ router.post('/translate-to-vietnamese', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Text is required' });
     }
 
-    console.log(
-      `🌐 [API] Translating text to Vietnamese: ${text.substring(0, 50)}...`
-    );
+    logger.debug('🌐 [API] Translating text to Vietnamese: ${text.substring(0, 50)}...', 'Component');
 
     const translatedText = await translateToVietnamese(text);
     res.json({ translatedText });
   } catch (error) {
-    console.error('❌ [API] Error translating text:', error);
+    logger.error('❌ [API] Error translating text:', 'Component', error);
     res.status(500).json({ error: 'Translation failed' });
   }
 });

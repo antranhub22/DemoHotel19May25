@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Types & Interfaces
@@ -196,7 +197,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Hotel research failed:', error);
+      logger.error('Hotel research failed:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -215,7 +216,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Assistant generation failed:', error);
+      logger.error('Assistant generation failed:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -231,7 +232,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Failed to fetch hotel profile:', error);
+      logger.error('Failed to fetch hotel profile:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -250,7 +251,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Failed to update assistant config:', error);
+      logger.error('Failed to update assistant config:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -266,7 +267,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      logger.error('Failed to fetch analytics:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -282,7 +283,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Failed to fetch service health:', error);
+      logger.error('Failed to fetch service health:', 'Component', error);
       throw this.handleApiError(error);
     }
   }
@@ -298,7 +299,7 @@ export class DashboardApi {
       });
       return response;
     } catch (error) {
-      console.error('Failed to reset assistant:', error);
+      logger.error('Failed to reset assistant:', 'Component', error);
       throw this.handleApiError(error);
     }
   }

@@ -1,6 +1,7 @@
 import { useState, useEffect, RefObject, useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
+import { logger } from '@shared/utils/logger';
 import { Language } from '@/types/interface1.types';
 
 interface UseConversationStateProps {
@@ -39,7 +40,7 @@ export const useConversationState = ({
   useEffect(() => {
     const isActive = callDuration > 0;
 
-    console.log('🔄 [useConversationState] Syncing call states:', {
+    logger.debug('🔄 [useConversationState] Syncing call states:', 'Component', {
       callDuration,
       isActive,
       isCallStarted,
@@ -50,27 +51,19 @@ export const useConversationState = ({
     // Auto-sync isCallStarted with actual call state
     if (isActive && !isCallStarted && !manualCallStarted) {
       // There's an active call but UI shows inactive - sync to active
-      console.log(
-        '✅ [useConversationState] Active call detected - syncing isCallStarted = true'
-      );
+      logger.debug('✅ [useConversationState] Active call detected - syncing isCallStarted = true', 'Component');
       setIsCallStarted(true);
     } else if (!isActive && isCallStarted && !manualCallStarted) {
       // Call ended but UI still shows active - sync to inactive
-      console.log(
-        '❌ [useConversationState] Call ended - syncing isCallStarted = false'
-      );
+      logger.debug('❌ [useConversationState] Call ended - syncing isCallStarted = false', 'Component');
       setIsCallStarted(false);
     } else if (!manualCallStarted) {
       // No manual start and no active call - set to false
-      console.log(
-        '❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false'
-      );
+      logger.debug('❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false', 'Component');
       setIsCallStarted(false);
     } else {
       // Manual start in progress - don't override, let it stay true
-      console.log(
-        '⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true'
-      );
+      logger.debug('⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true', 'Component');
     }
   }, [callDuration, isCallStarted, manualCallStarted]); // ✅ REMOVED: transcripts.length
 
@@ -80,7 +73,7 @@ export const useConversationState = ({
     const shouldShowConversation =
       isActive || transcripts.length > 0 || manualCallStarted;
 
-    console.log('🔄 [useConversationState] Evaluating showConversation:', {
+    logger.debug('🔄 [useConversationState] Evaluating showConversation:', 'Component', {
       isActive,
       transcriptsCount: transcripts.length,
       manualCallStarted,
@@ -90,14 +83,10 @@ export const useConversationState = ({
 
     // ✅ OPTIMIZATION: Only update if value actually changes
     if (showConversation !== shouldShowConversation) {
-      console.log(
-        `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`
-      );
+      logger.debug('🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}', 'Component');
       setShowConversation(shouldShowConversation);
     } else {
-      console.log(
-        '✅ [useConversationState] showConversation unchanged - no re-render'
-      );
+      logger.debug('✅ [useConversationState] showConversation unchanged - no re-render', 'Component');
     }
   }, [transcripts.length, manualCallStarted, callDuration]); // ✅ FIXED: Removed showConversation to prevent dependency loop
 
@@ -116,11 +105,8 @@ export const useConversationState = ({
 
   const handleCallStart = useCallback(
     async (lang: Language): Promise<{ success: boolean; error?: string }> => {
-      console.log(
-        '🎤 [useConversationState] Starting call with language:',
-        lang
-      );
-      console.log('🎤 [useConversationState] Current state before call:', {
+      logger.debug('🎤 [useConversationState] Starting call with language:', 'Component', lang);
+      logger.debug('🎤 [useConversationState] Current state before call:', 'Component', {
         isCallStarted,
         manualCallStarted,
         callDuration,
@@ -133,7 +119,7 @@ export const useConversationState = ({
         import.meta.env.VITE_VAPI_PUBLIC_KEY &&
         import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-      console.log('🔍 [useConversationState] Environment check:', {
+      logger.debug('🔍 [useConversationState] Environment check:', 'Component', {
         isDevelopment: import.meta.env.DEV,
         forceVapiInDev,
         hasVapiCredentials: !!hasVapiCredentials,
@@ -159,10 +145,7 @@ export const useConversationState = ({
         import.meta.env.VITE_VAPI_PUBLIC_KEY_RU ||
         import.meta.env.VITE_VAPI_PUBLIC_KEY_KO;
 
-      console.log(
-        '🔍 [useConversationState] hasAnyVapiCredentials:',
-        !!hasAnyVapiCredentials
-      );
+      logger.debug('🔍 [useConversationState] hasAnyVapiCredentials:', 'Component', !!hasAnyVapiCredentials);
 
       // DEV MODE: Skip actual API calls UNLESS forced or credentials available
       const isDevelopment =
@@ -171,28 +154,26 @@ export const useConversationState = ({
       // ✅ IMPROVED: Better error handling for call start
       try {
         if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
-          console.log(
-            '🚧 [DEV MODE] Using simulated call start - limited API calls'
-          );
+          logger.debug('🚧 [DEV MODE] Using simulated call start - limited API calls', 'Component');
           setIsCallStarted(true);
           setManualCallStarted(true);
           setLanguage(lang);
-          console.log('✅ [DEV MODE] Simulated call started successfully');
+          logger.debug('✅ [DEV MODE] Simulated call started successfully', 'Component');
           return { success: true };
         }
 
         // PRODUCTION MODE or forced VAPI in development
-        console.log('🚀 [PRODUCTION MODE] Using real VAPI call start');
+        logger.debug('🚀 [PRODUCTION MODE] Using real VAPI call start', 'Component');
         setIsCallStarted(true);
         setManualCallStarted(true);
 
         // ✅ IMPROVED: Enhanced startCall with error handling
         await startCall();
 
-        console.log('✅ [useConversationState] Real call started successfully');
+        logger.debug('✅ [useConversationState] Real call started successfully', 'Component');
         return { success: true };
       } catch (error) {
-        console.error('❌ [useConversationState] Error starting call:', error);
+        logger.error('❌ [useConversationState] Error starting call:', 'Component', error);
 
         // ✅ IMPROVED: Reset state on error
         setIsCallStarted(false);
@@ -252,39 +233,27 @@ export const useConversationState = ({
   );
 
   const handleCallEnd = useCallback(() => {
-    console.log('🛑 [useConversationState] Ending call');
-    console.log(
-      '🔍 [useConversationState] Current isCallStarted state:',
-      isCallStarted
-    );
+    logger.debug('🛑 [useConversationState] Ending call', 'Component');
+    logger.debug('🔍 [useConversationState] Current isCallStarted state:', 'Component', isCallStarted);
 
     // ✅ FIX: ALWAYS call endCall() first to stop VAPI in all modes
-    console.log(
-      '📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...'
-    );
+    logger.debug('📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...', 'Component');
     try {
       endCall(); // ← This MUST run to stop VAPI instance
-      console.log(
-        '✅ [useConversationState] endCall() completed - VAPI stopped'
-      );
+      logger.debug('✅ [useConversationState] endCall() completed - VAPI stopped', 'Component');
     } catch (endCallError) {
-      console.error(
-        '❌ [useConversationState] Error in endCall():',
-        endCallError
-      );
+      logger.error('❌ [useConversationState] Error in endCall():', 'Component', endCallError);
       // Continue with state cleanup even if endCall fails
     }
 
     // ✅ FIX: ALWAYS update UI state
-    console.log('📞 [useConversationState] Step 2: Updating UI state...');
+    logger.debug('📞 [useConversationState] Step 2: Updating UI state...', 'Component');
     setIsCallStarted(false);
     setManualCallStarted(false);
-    console.log('✅ [useConversationState] UI state updated');
+    logger.debug('✅ [useConversationState] UI state updated', 'Component');
 
     // ✅ IMPROVED: Development mode logic AFTER call ending
-    console.log(
-      '🔍 [useConversationState] Step 3: Checking development mode...'
-    );
+    logger.debug('🔍 [useConversationState] Step 3: Checking development mode...', 'Component');
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
     const hasVapiCredentials =
       import.meta.env.VITE_VAPI_PUBLIC_KEY &&
@@ -293,30 +262,24 @@ export const useConversationState = ({
       import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
 
     if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
-      console.log('🚧 [DEV MODE] Using simulated call end - limited API calls');
-      console.log('📝 [DEV MODE] Call ended successfully with mock data');
-      console.log(
-        '📝 [DEV MODE] Staying in Interface1 - No interface switching'
-      );
+      logger.debug('🚧 [DEV MODE] Using simulated call end - limited API calls', 'Component');
+      logger.debug('📝 [DEV MODE] Call ended successfully with mock data', 'Component');
+      logger.debug('📝 [DEV MODE] Staying in Interface1 - No interface switching', 'Component');
       return; // Early return for development simulation
     }
 
     // Production mode or forced VAPI in development
     if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
-      console.log(
-        '🔥 [DEV MODE] Using real VAPI call end - full API integration'
-      );
+      logger.debug('🔥 [DEV MODE] Using real VAPI call end - full API integration', 'Component');
     } else {
-      console.log('🚀 [PRODUCTION MODE] Real call end completed');
+      logger.debug('🚀 [PRODUCTION MODE] Real call end completed', 'Component');
     }
 
-    console.log(
-      '📝 [useConversationState] Staying in Interface1 - No interface switching'
-    );
+    logger.debug('📝 [useConversationState] Staying in Interface1 - No interface switching', 'Component');
   }, [endCall, isCallStarted]);
 
   const handleCancel = useCallback(() => {
-    console.log('❌ [useConversationState] Canceling call - FULL RESET');
+    logger.debug('❌ [useConversationState] Canceling call - FULL RESET', 'Component');
 
     try {
       // Reset local states first to prevent further operations
@@ -327,32 +290,23 @@ export const useConversationState = ({
       // End call with error handling
       try {
         endCall();
-        console.log(
-          '✅ [useConversationState] endCall() executed successfully'
-        );
+        logger.debug('✅ [useConversationState] endCall() executed successfully', 'Component');
       } catch (endCallError) {
-        console.error(
-          '⚠️ [useConversationState] endCall() failed but continuing with cancel:',
-          endCallError
-        );
+        logger.error('⚠️ [useConversationState] endCall() failed but continuing with cancel:', 'Component', endCallError);
         // Don't rethrow - we still want to complete the cancel operation
       }
 
-      console.log(
-        '✅ [useConversationState] Cancel completed - all states reset'
-      );
-      console.log(
-        '📊 [useConversationState] Final state: isCallStarted=false, showConversation=false'
-      );
+      logger.debug('✅ [useConversationState] Cancel completed - all states reset', 'Component');
+      logger.debug('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false', 'Component');
     } catch (error) {
-      console.error('❌ [useConversationState] Error in handleCancel:', error);
+      logger.error('❌ [useConversationState] Error in handleCancel:', 'Component', error);
 
       // Ensure states are reset even if there's an error
       setIsCallStarted(false);
       setShowConversation(false);
       setManualCallStarted(false);
 
-      console.log('🔄 [useConversationState] Forced state reset after error');
+      logger.debug('🔄 [useConversationState] Forced state reset after error', 'Component');
     }
   }, [endCall]);
 

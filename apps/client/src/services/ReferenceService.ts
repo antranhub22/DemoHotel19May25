@@ -17,9 +17,9 @@ class ReferenceService {
     try {
       const response = await fetch('/assets/references/reference-map.json');
       this.referenceMap = await response.json();
-      console.log('Loaded referenceMap:', this.referenceMap);
+      logger.debug('Loaded referenceMap:', 'Component', this.referenceMap);
     } catch (error) {
-      console.error('Error loading reference map:', error);
+      logger.error('Error loading reference map:', 'Component', error);
     }
   }
 
@@ -56,7 +56,7 @@ class ReferenceService {
         }),
       });
     } catch (error) {
-      console.error('Error saving reference:', error);
+      logger.error('Error saving reference:', 'Component', error);
     }
   }
 }

@@ -3,6 +3,7 @@
    ======================================== */
 
 import {
+import { logger } from '@shared/utils/logger';
   ApiResponse,
   ApiError,
   PaginationParams,

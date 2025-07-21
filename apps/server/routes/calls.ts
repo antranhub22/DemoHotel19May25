@@ -6,6 +6,7 @@ import { call, transcript } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
+import { logger } from '@shared/utils/logger';
 
 const router = Router();
 
@@ -49,10 +50,10 @@ router.post('/call-end', async (req, res) => {
       })
       .where(eq(call.call_id_vapi, callId));
 
-    console.log(`✅ Updated call duration for ${callId}: ${duration} seconds`);
+    logger.debug('✅ Updated call duration for ${callId}: ${duration} seconds', 'Component');
     res.json({ success: true, duration });
   } catch (error) {
-    console.error('❌ Error updating call duration:', error);
+    logger.error('❌ Error updating call duration:', 'Component', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -80,10 +81,10 @@ router.post('/calls', async (req, res) => {
       })
       .returning();
 
-    console.log(`✅ Created call record:`, newCall);
+    logger.debug('✅ Created call record:', 'Component', newCall);
     res.json({ success: true, call: newCall });
   } catch (error) {
-    console.error('❌ Error creating call:', error);
+    logger.error('❌ Error creating call:', 'Component', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -126,9 +127,7 @@ router.post('/test-transcript', async (req, res) => {
         .limit(1);
 
       if (existingCall.length === 0) {
-        console.log(
-          `🔍 [API/calls] No call found for ${callId}, skipping auto-creation due to schema mismatch`
-        );
+        logger.debug('🔍 [API/calls] No call found for ${callId}, skipping auto-creation due to schema mismatch', 'Component');
 
         // TODO: Fix schema mismatch and re-enable call creation
         // await db.insert(call).values({
@@ -137,10 +136,10 @@ router.post('/test-transcript', async (req, res) => {
         //   tenant_id: 'default'
         // });
 
-        console.log('⚠️ [API/calls] Call record creation skipped');
+        logger.debug('⚠️ [API/calls] Call record creation skipped', 'Component');
       }
     } catch (error) {
-      console.error('❌ [API/calls] Error checking call record:', error);
+      logger.error('❌ [API/calls] Error checking call record:', 'Component', error);
     }
 
     // Store transcript in database with field mapping
@@ -152,7 +151,7 @@ router.post('/test-transcript', async (req, res) => {
       timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion
     });
 
-    console.log('✅ [API/calls] Transcript stored successfully');
+    logger.debug('✅ [API/calls] Transcript stored successfully', 'Component');
 
     res.json({
       success: true,
@@ -161,7 +160,7 @@ router.post('/test-transcript', async (req, res) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('Zod validation errors in test-transcript:', error.errors);
+      logger.error('Zod validation errors in test-transcript:', 'Component', error.errors);
       res.status(400).json({
         error: 'Invalid transcript data',
         details: error.errors,

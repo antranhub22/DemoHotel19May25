@@ -32,6 +32,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PermissionGuard } from '@/components/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
+import { logger } from '@shared/utils/logger';
 import type { UserRole } from '@shared/constants/permissions';
 
 // Mock data - replace with real API calls

@@ -19,6 +19,7 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
+import { logger } from '@shared/utils/logger';
   BarChart3,
   TrendingUp,
   TrendingDown,

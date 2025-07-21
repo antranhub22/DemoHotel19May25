@@ -15,6 +15,7 @@ import {
   Cell,
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '@shared/utils/logger';
 
 const COLORS = [
   '#0088FE',
@@ -47,7 +48,7 @@ const AnalyticsDashboard: React.FC = () => {
       }
       return res.json();
     } catch (err) {
-      console.error(`Failed to fetch from ${url}:`, err);
+      logger.error('Failed to fetch from ${url}:', 'Component', err);
       return null;
     }
   };

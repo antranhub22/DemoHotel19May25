@@ -6,6 +6,7 @@ import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db';
 import { eq, desc } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
+import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ const router = express.Router();
 router.get('/orders', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    console.log(`📦 [ORDERS] Getting all orders for tenant: ${tenantId}`);
+    logger.debug('📦 [ORDERS] Getting all orders for tenant: ${tenantId}', 'Component');
 
     const orders = await db
       .select()
@@ -25,12 +26,10 @@ router.get('/orders', async (req, res) => {
       .where(eq(requestTable.tenant_id, tenantId))
       .orderBy(desc(requestTable.created_at));
 
-    console.log(
-      `📦 [ORDERS] Found ${orders.length} orders for tenant: ${tenantId}`
-    );
+    logger.debug('📦 [ORDERS] Found ${orders.length} orders for tenant: ${tenantId}', 'Component');
     res.json(orders);
   } catch (error) {
-    console.error('❌ [ORDERS] Error fetching orders:', error);
+    logger.error('❌ [ORDERS] Error fetching orders:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
@@ -53,7 +52,7 @@ router.post('/orders', express.json(), async (req, res) => {
       });
     }
 
-    console.log(`📦 [ORDERS] Creating new order for room: ${roomNumber}`);
+    logger.debug('📦 [ORDERS] Creating new order for room: ${roomNumber}', 'Component');
 
     // Generate unique order ID
     const orderId = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -86,23 +85,20 @@ router.post('/orders', express.json(), async (req, res) => {
           orderReference: orderId,
         }
       );
-      console.log(`📧 [ORDERS] Email notification sent for order: ${orderId}`);
+      logger.debug('📧 [ORDERS] Email notification sent for order: ${orderId}', 'Component');
     } catch (emailError) {
-      console.warn(
-        `⚠️ [ORDERS] Email notification failed for order: ${orderId}`,
-        emailError
-      );
+      logger.warn('⚠️ [ORDERS] Email notification failed for order: ${orderId}', 'Component', emailError);
       // Don't fail the request if email fails
     }
 
-    console.log(`✅ [ORDERS] Order created successfully: ${orderId}`);
+    logger.debug('✅ [ORDERS] Order created successfully: ${orderId}', 'Component');
     res.status(201).json({
       success: true,
       order: newRequest,
       orderId,
     });
   } catch (error) {
-    console.error('❌ [ORDERS] Error creating order:', error);
+    logger.error('❌ [ORDERS] Error creating order:', 'Component', error);
     res.status(500).json({ error: 'Failed to create order' });
   }
 });
@@ -117,7 +113,7 @@ router.put('/orders/:id', express.json(), async (req, res) => {
       return res.status(400).json({ error: 'Status is required' });
     }
 
-    console.log(`📦 [ORDERS] Updating order ${id} status to: ${status}`);
+    logger.debug('📦 [ORDERS] Updating order ${id} status to: ${status}', 'Component');
 
     const [updatedOrder] = await db
       .update(requestTable)
@@ -133,10 +129,10 @@ router.put('/orders/:id', express.json(), async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    console.log(`✅ [ORDERS] Order updated successfully: ${id}`);
+    logger.debug('✅ [ORDERS] Order updated successfully: ${id}', 'Component');
     res.json({ success: true, order: updatedOrder });
   } catch (error) {
-    console.error('❌ [ORDERS] Error updating order:', error);
+    logger.error('❌ [ORDERS] Error updating order:', 'Component', error);
     res.status(500).json({ error: 'Failed to update order' });
   }
 });
@@ -145,7 +141,7 @@ router.put('/orders/:id', express.json(), async (req, res) => {
 router.get('/orders/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(`📦 [ORDERS] Getting order by ID: ${id}`);
+    logger.debug('📦 [ORDERS] Getting order by ID: ${id}', 'Component');
 
     const [order] = await db
       .select()
@@ -157,10 +153,10 @@ router.get('/orders/:id', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    console.log(`📦 [ORDERS] Found order: ${order.order_id}`);
+    logger.debug('📦 [ORDERS] Found order: ${order.order_id}', 'Component');
     res.json(order);
   } catch (error) {
-    console.error('❌ [ORDERS] Error fetching order:', error);
+    logger.error('❌ [ORDERS] Error fetching order:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch order' });
   }
 });
@@ -169,7 +165,7 @@ router.get('/orders/:id', async (req, res) => {
 router.delete('/orders/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(`🗑️ [ORDERS] Deleting order: ${id}`);
+    logger.debug('🗑️ [ORDERS] Deleting order: ${id}', 'Component');
 
     const [deletedOrder] = await db
       .delete(requestTable)
@@ -180,12 +176,10 @@ router.delete('/orders/:id', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    console.log(
-      `✅ [ORDERS] Order deleted successfully: ${deletedOrder.order_id}`
-    );
+    logger.debug('✅ [ORDERS] Order deleted successfully: ${deletedOrder.order_id}', 'Component');
     res.json({ success: true, message: 'Order deleted successfully' });
   } catch (error) {
-    console.error('❌ [ORDERS] Error deleting order:', error);
+    logger.error('❌ [ORDERS] Error deleting order:', 'Component', error);
     res.status(500).json({ error: 'Failed to delete order' });
   }
 });

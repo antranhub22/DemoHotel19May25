@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from '@shared/utils/logger';
 
 export const InterfaceHeader: React.FC = () => {
   return (

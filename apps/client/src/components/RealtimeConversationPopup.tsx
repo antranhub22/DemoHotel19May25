@@ -8,6 +8,7 @@ import {
   STANDARD_POPUP_MAX_HEIGHT_VH,
 } from '@/context/PopupContext';
 import {
+import { logger } from '@shared/utils/logger';
   extractRoomNumber,
   parseSummaryToOrderDetails,
 } from '@/lib/summaryParser';

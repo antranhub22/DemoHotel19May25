@@ -1,4 +1,5 @@
 import { DebugManager } from './DebugManager';
+import { logger } from '@shared/utils/logger';
 
 export interface CanvasRenderState {
   width: number;

@@ -11,6 +11,7 @@ import {
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {
@@ -72,7 +73,7 @@ class HotelErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Hotel configuration error:', error, errorInfo);
+    logger.error('Hotel configuration error:', 'Component', error, errorInfo);
   }
 
   render() {
@@ -113,7 +114,7 @@ interface HotelProviderProps {
 // Xóa hoàn toàn HotelConfigLoader và mọi logic liên quan đến loading/error ở cấp context
 // Trong HotelProvider, chỉ cần:
 export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
-  console.log('[DEBUG] HotelProvider rendered');
+  logger.debug('[DEBUG] HotelProvider rendered', 'Component');
   const hotelConfigHook = useHotelConfiguration();
   const { config, isLoading, error, reload } = hotelConfigHook;
 
@@ -171,9 +172,7 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
 export const useHotel = (): HotelContextValue => {
   const context = useContext(HotelContext);
   if (context === undefined) {
-    console.warn(
-      'useHotel used outside HotelProvider - returning safe defaults'
-    );
+    logger.warn('useHotel used outside HotelProvider - returning safe defaults', 'Component');
     // Return safe defaults instead of throwing
     return {
       config: null,

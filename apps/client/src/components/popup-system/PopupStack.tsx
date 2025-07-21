@@ -2,6 +2,7 @@ import React from 'react';
 import { PopupCard } from './PopupCard';
 import { PopupState } from '@/context/PopupContext';
 import styles from './PopupStack.module.css';
+import { logger } from '@shared/utils/logger';
 
 interface PopupStackProps {
   popups: PopupState[];

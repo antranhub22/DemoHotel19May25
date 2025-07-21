@@ -5,9 +5,9 @@
  * Replaces console.log/error/warn with proper logger calls
  */
 
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
+import fs from 'fs';
+import path from 'path';
+import { glob } from 'glob';
 
 class ConsoleLogReplacer {
   constructor() {
@@ -171,9 +171,7 @@ class ConsoleLogReplacer {
 }
 
 // Run the replacer
-if (require.main === module) {
-  const replacer = new ConsoleLogReplacer();
-  replacer.run().catch(console.error);
-}
+const replacer = new ConsoleLogReplacer();
+replacer.run().catch(console.error);
 
-module.exports = ConsoleLogReplacer;
+export default ConsoleLogReplacer;

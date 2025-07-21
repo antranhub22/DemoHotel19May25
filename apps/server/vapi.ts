@@ -1,4 +1,5 @@
 import Vapi from '@vapi-ai/web';
+import { logger } from '@shared/utils/logger';
 
 if (!process.env.VITE_VAPI_PUBLIC_KEY) {
   throw new Error('VITE_VAPI_PUBLIC_KEY is not set in environment variables');
@@ -12,7 +13,7 @@ export async function startCall(assistantId: string, assistantOverrides?: any) {
     const call = await vapi.start(assistantId, assistantOverrides);
     return call;
   } catch (error) {
-    console.error('Error starting call:', error);
+    logger.error('Error starting call:', 'Component', error);
     throw error;
   }
 }
@@ -22,7 +23,7 @@ export async function endCall() {
   try {
     await vapi.stop();
   } catch (error) {
-    console.error('Error ending call:', error);
+    logger.error('Error ending call:', 'Component', error);
     throw error;
   }
 }
@@ -33,7 +34,7 @@ export async function getCallStatus() {
     // No direct API, return dummy status or implement as needed
     return { status: 'unknown' };
   } catch (error) {
-    console.error('Error getting call status:', error);
+    logger.error('Error getting call status:', 'Component', error);
     throw error;
   }
 }
@@ -44,7 +45,7 @@ export async function getCallTranscript() {
     // No direct API, return dummy transcript or implement as needed
     return [];
   } catch (error) {
-    console.error('Error getting call transcript:', error);
+    logger.error('Error getting call transcript:', 'Component', error);
     throw error;
   }
 }

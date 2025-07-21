@@ -4,6 +4,7 @@ import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,

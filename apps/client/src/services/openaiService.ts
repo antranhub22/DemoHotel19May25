@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { logger } from '@shared/utils/logger';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 
 // Initialize OpenAI client

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { isMobileDevice } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 
 interface UseSimplifiedMobileTouchProps {
   containerId: string;
@@ -28,21 +29,16 @@ export const useSimplifiedMobileTouch = ({
   // Simple test function for manual testing
   const manualTest = useCallback(async () => {
     if (debugEnabled) {
-      console.log('🧪 [useSimplifiedMobileTouch] Manual test call start');
+      logger.debug('🧪 [useSimplifiedMobileTouch] Manual test call start', 'Component');
       if (onCallStart) {
         try {
           await onCallStart();
-          console.log('✅ [useSimplifiedMobileTouch] Manual test successful');
+          logger.debug('✅ [useSimplifiedMobileTouch] Manual test successful', 'Component');
         } catch (error) {
-          console.error(
-            '❌ [useSimplifiedMobileTouch] Manual test failed:',
-            error
-          );
+          logger.error('❌ [useSimplifiedMobileTouch] Manual test failed:', 'Component', error);
         }
       } else {
-        console.warn(
-          '⚠️ [useSimplifiedMobileTouch] onCallStart not available for test'
-        );
+        logger.warn('⚠️ [useSimplifiedMobileTouch] onCallStart not available for test', 'Component');
       }
     }
   }, [onCallStart, debugEnabled]);

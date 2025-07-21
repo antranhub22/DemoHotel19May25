@@ -57,6 +57,7 @@ import {
 
 // Import API service and types
 import {
+import { logger } from '@shared/utils/logger';
   dashboardApi,
   HotelData,
   AssistantCustomization,

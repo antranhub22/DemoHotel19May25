@@ -67,6 +67,7 @@ import {
   Terminal,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface SecurityConfig {
@@ -407,7 +408,7 @@ const FirewallTab = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       // Save configuration
     } catch (error) {
-      console.error('Failed to save firewall config:', error);
+      logger.error('Failed to save firewall config:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -574,7 +575,7 @@ const SSLTab = ({
       await new Promise(resolve => setTimeout(resolve, 1000));
       // Save configuration
     } catch (error) {
-      console.error('Failed to save SSL config:', error);
+      logger.error('Failed to save SSL config:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -933,7 +934,7 @@ const BackupTab = ({
         status: 'success',
       });
     } catch (error) {
-      console.error('Backup failed:', error);
+      logger.error('Backup failed:', 'Component', error);
       onUpdate({ status: 'failed' });
     } finally {
       setLoading(false);
@@ -1100,7 +1101,7 @@ export const SecuritySettings: React.FC = () => {
       setAlerts(mockSecurityAlerts);
       setLogs(mockSecurityLogs);
     } catch (error) {
-      console.error('Failed to fetch security data:', error);
+      logger.error('Failed to fetch security data:', 'Component', error);
     } finally {
       setLoading(false);
     }

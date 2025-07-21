@@ -50,6 +50,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface SystemMetrics {
@@ -617,7 +618,7 @@ export const SystemMonitoring: React.FC = () => {
         setLoading(false);
       }, 1000);
     } catch (error) {
-      console.error('Failed to fetch metrics:', error);
+      logger.error('Failed to fetch metrics:', 'Component', error);
       setLoading(false);
     }
   };

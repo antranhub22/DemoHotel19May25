@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@shared/utils/logger';
 
 interface SiriSizeConfig {
   width: string;
@@ -26,10 +27,7 @@ export const useSiriResponsiveSize = (): SiriSizeConfig => {
       const newIsDesktop = window.innerWidth >= 768;
       if (newIsDesktop !== isDesktop) {
         setIsDesktop(newIsDesktop);
-        console.log(
-          '🔄 [useSiriResponsiveSize] Platform changed:',
-          newIsDesktop ? 'Desktop' : 'Mobile'
-        );
+        logger.debug('🔄 [useSiriResponsiveSize] Platform changed:', 'Component', newIsDesktop ? 'Desktop' : 'Mobile');
       }
     };
 

@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { usePopupContext } from '@/context/PopupContext';
 import RightPanelPopup from '../RightPanelPopup';
+import { logger } from '@shared/utils/logger';
 
 interface RightPanelSectionProps {
   showPanel: boolean;

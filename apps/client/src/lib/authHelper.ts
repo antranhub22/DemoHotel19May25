@@ -16,7 +16,7 @@ export const generateDevToken = async (): Promise<string> => {
 
   for (const cred of credentials) {
     try {
-      console.log(`🔐 [AuthHelper] Trying login with ${cred.username}...`);
+      logger.debug('🔐 [AuthHelper] Trying login with ${cred.username}...', 'Component');
 
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -29,19 +29,14 @@ export const generateDevToken = async (): Promise<string> => {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem(DEV_TOKEN_KEY, 'true');
-          console.log(
-            `✅ [AuthHelper] Dev token generated with ${cred.username}`
-          );
+          logger.debug('✅ [AuthHelper] Dev token generated with ${cred.username}', 'Component');
           return data.token;
         }
       } else {
-        console.warn(
-          `⚠️ [AuthHelper] Login failed for ${cred.username}:`,
-          response.status
-        );
+        logger.warn('⚠️ [AuthHelper] Login failed for ${cred.username}:', 'Component', response.status);
       }
     } catch (error) {
-      console.warn(`⚠️ [AuthHelper] Error with ${cred.username}:`, error);
+      logger.warn('⚠️ [AuthHelper] Error with ${cred.username}:', 'Component', error);
     }
   }
 
@@ -59,9 +54,7 @@ const isTokenExpired = (token: string): boolean => {
     const isExpired = now >= exp;
 
     if (isExpired) {
-      console.log(
-        '⏰ [AuthHelper] Token expired:',
-        new Date(exp),
+      logger.debug('⏰ [AuthHelper] Token expired:', 'Component', new Date(exp),
         'vs now:',
         new Date(now)
       );
@@ -69,7 +62,7 @@ const isTokenExpired = (token: string): boolean => {
 
     return isExpired;
   } catch (error) {
-    console.error('❌ [AuthHelper] Failed to decode token:', error);
+    logger.error('❌ [AuthHelper] Failed to decode token:', 'Component', error);
     return true; // Assume expired if can't decode
   }
 };
@@ -84,25 +77,25 @@ export const getAuthToken = async (): Promise<string | null> => {
   // If token exists, check if it's expired
   if (token) {
     if (isTokenExpired(token)) {
-      console.log('⏰ [AuthHelper] Token expired, generating new one...');
+      logger.debug('⏰ [AuthHelper] Token expired, generating new one...', 'Component');
       // Clear expired token
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
       token = null;
     } else {
-      console.log('✅ [AuthHelper] Valid token found');
+      logger.debug('✅ [AuthHelper] Valid token found', 'Component');
       return token;
     }
   }
 
   // In development, auto-generate token if none exists or expired
   if (import.meta.env.DEV || import.meta.env.NODE_ENV === 'development') {
-    console.log('🚧 [AuthHelper] Generating fresh token for dev mode...');
+    logger.debug('🚧 [AuthHelper] Generating fresh token for dev mode...', 'Component');
     try {
       token = await generateDevToken();
       return token;
     } catch (error) {
-      console.warn('⚠️ [AuthHelper] Failed to auto-generate dev token:', error);
+      logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token:', 'Component', error);
       return null;
     }
   }
@@ -149,7 +142,7 @@ export const authenticatedFetch = async (
 
   // If 403 (forbidden/expired), try once more with fresh token
   if (response.status === 403) {
-    console.log('🔄 [AuthHelper] 403 error, retrying with fresh token...');
+    logger.debug('🔄 [AuthHelper] 403 error, retrying with fresh token...', 'Component');
 
     // Force refresh token
     localStorage.removeItem('token');
@@ -160,11 +153,9 @@ export const authenticatedFetch = async (
     response = await makeRequest(headers);
 
     if (response.status === 403) {
-      console.error(
-        '❌ [AuthHelper] Still 403 after token refresh - auth may be broken'
-      );
+      logger.error('❌ [AuthHelper] Still 403 after token refresh - auth may be broken', 'Component');
     } else {
-      console.log('✅ [AuthHelper] Success after token refresh!');
+      logger.debug('✅ [AuthHelper] Success after token refresh!', 'Component');
     }
   }
 

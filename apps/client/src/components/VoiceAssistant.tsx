@@ -12,6 +12,7 @@ import { useAssistant } from '@/context/AssistantContext';
 import { useAuth } from '@/context/AuthContext';
 import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { logger } from '@shared/utils/logger';
 
 const VoiceAssistant: React.FC = () => {
   const navigate = useNavigate();
@@ -128,8 +129,8 @@ const VoiceAssistant: React.FC = () => {
           <ErrorBoundary
             fallbackComponent={Interface1ErrorFallback}
             onError={(error, errorInfo) => {
-              console.error('🚨 [VoiceAssistant] Interface1 Error:', error);
-              console.error('🚨 [VoiceAssistant] Error Info:', errorInfo);
+              logger.error('🚨 [VoiceAssistant] Interface1 Error:', 'Component', error);
+              logger.error('🚨 [VoiceAssistant] Error Info:', 'Component', errorInfo);
             }}
           >
             <Interface1

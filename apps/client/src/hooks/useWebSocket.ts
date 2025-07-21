@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
+import { logger } from '@shared/utils/logger';
 import { ActiveOrder, AssistantContextType } from '@/types';
 
 export function useWebSocket() {
@@ -10,10 +11,7 @@ export function useWebSocket() {
 
   // Initialize WebSocket connection
   const initWebSocket = useCallback(() => {
-    console.log(
-      'useWebSocket env VITE_API_HOST:',
-      import.meta.env.VITE_API_HOST
-    );
+    logger.debug('useWebSocket env VITE_API_HOST:', 'Component', import.meta.env.VITE_API_HOST);
     if (socket !== null) {
       socket.close();
     }
@@ -21,12 +19,12 @@ export function useWebSocket() {
     // Always connect WebSocket to the current application origin
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
-    console.log('Attempting WebSocket connection to', wsUrl);
+    logger.debug('Attempting WebSocket connection to', 'Component', wsUrl);
 
     const newSocket = new WebSocket(wsUrl);
 
     newSocket.onopen = () => {
-      console.log('WebSocket connection established');
+      logger.debug('WebSocket connection established', 'Component');
       setConnected(true);
       retryRef.current = 0; // reset retry count
 
@@ -44,11 +42,11 @@ export function useWebSocket() {
     newSocket.onmessage = event => {
       try {
         const data = JSON.parse(event.data);
-        console.log('[useWebSocket] Message received:', data);
+        logger.debug('[useWebSocket] Message received:', 'Component', data);
 
         // Handle transcript messages
         if (data.type === 'transcript') {
-          console.log('[useWebSocket] Transcript message:', data);
+          logger.debug('[useWebSocket] Transcript message:', 'Component', data);
           assistant.addTranscript({
             callId: data.callId,
             role: data.role,
@@ -59,7 +57,7 @@ export function useWebSocket() {
 
         // Handle connection messages
         if (data.type === 'connected') {
-          console.log('[useWebSocket] Connected to server:', data.message);
+          logger.debug('[useWebSocket] Connected to server:', 'Component', data.message);
         }
 
         // Handle order status update (realtime from staff UI)
@@ -68,7 +66,7 @@ export function useWebSocket() {
           (data.orderId || data.reference) &&
           data.status
         ) {
-          console.log('[useWebSocket] Order status update:', data);
+          logger.debug('[useWebSocket] Order status update:', 'Component', data);
           assistant.setActiveOrders((prevOrders: ActiveOrder[]) =>
             prevOrders.map((order: ActiveOrder) => {
               // So sánh theo reference (mã order)
@@ -83,29 +81,27 @@ export function useWebSocket() {
           );
         }
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        logger.error('Error parsing WebSocket message:', 'Component', error);
       }
     };
 
     newSocket.onclose = event => {
-      console.log('WebSocket connection closed', event);
+      logger.debug('WebSocket connection closed', 'Component', event);
       setConnected(false);
 
       // Reconnect with exponential backoff
       if (retryRef.current < 5) {
         const delay = Math.pow(2, retryRef.current) * 1000;
-        console.log(
-          `Reconnecting WebSocket in ${delay}ms (attempt ${retryRef.current + 1})`
-        );
+        logger.debug('Reconnecting WebSocket in ${delay}ms (attempt ${retryRef.current + 1})', 'Component');
         setTimeout(initWebSocket, delay);
         retryRef.current++;
       } else {
-        console.warn('Max WebSocket reconnection attempts reached');
+        logger.warn('Max WebSocket reconnection attempts reached', 'Component');
       }
     };
 
     newSocket.onerror = event => {
-      console.error('WebSocket encountered error', event);
+      logger.error('WebSocket encountered error', 'Component', event);
       // Close socket to trigger reconnect logic
       if (newSocket.readyState !== WebSocket.CLOSED) {
         newSocket.close();
@@ -130,7 +126,7 @@ export function useWebSocket() {
       if (socket && connected) {
         socket.send(JSON.stringify(message));
       } else {
-        console.error('Cannot send message, WebSocket not connected');
+        logger.error('Cannot send message, WebSocket not connected', 'Component');
       }
     },
     [socket, connected]
@@ -157,10 +153,7 @@ export function useWebSocket() {
   // Re-send init if callDetails.id becomes available after socket is open
   useEffect(() => {
     if (socket && connected && assistant.callDetails?.id) {
-      console.log(
-        'Sending init message with callId after availability',
-        assistant.callDetails.id
-      );
+      logger.debug('Sending init message with callId after availability', 'Component', assistant.callDetails.id);
       socket.send(
         JSON.stringify({
           type: 'init',

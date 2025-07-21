@@ -31,6 +31,7 @@ import {
   getVapiAssistantIdByLanguage,
 } from '@/hooks/useHotelConfiguration';
 import { resetVapi } from '@/lib/vapiClient';
+import { logger } from '@shared/utils/logger';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -117,7 +118,7 @@ const AssistantContext = createContext<AssistantContextType | undefined>(
 );
 
 export function AssistantProvider({ children }: { children: ReactNode }) {
-  console.log('[DEBUG] AssistantProvider render');
+  logger.debug('[DEBUG] AssistantProvider render', 'Component');
   // ✅ REMOVED: Interface switching logic (focus Interface1 only)
   // const [currentInterface, setCurrentInterfaceState] = useState<InterfaceLayer>('interface1');
   // const setCurrentInterface = (layer: InterfaceLayer) => { ... };
@@ -168,7 +169,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         requestedAt: new Date(o.requestedAt),
       }));
     } catch (err) {
-      console.error('Failed to parse activeOrders from localStorage', err);
+      logger.error('Failed to parse activeOrders from localStorage', 'Component', err);
       return [];
     }
   });
@@ -184,14 +185,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         savedLanguage &&
         ['en', 'fr', 'zh', 'ru', 'ko', 'vi'].includes(savedLanguage)
       ) {
-        console.log(
-          '🌍 [AssistantContext] Loading saved language:',
-          savedLanguage
-        );
+        logger.debug('🌍 [AssistantContext] Loading saved language:', 'Component', savedLanguage);
         return savedLanguage;
       }
     }
-    console.log('🌍 [AssistantContext] Using default language: en');
+    logger.debug('🌍 [AssistantContext] Using default language: en', 'Component');
     return 'en';
   });
   const [hotelConfig, setHotelConfig] = useState<HotelConfiguration | null>(
@@ -203,25 +201,22 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // Language setter with persistence
   const setLanguage = React.useCallback((lang: Language) => {
-    console.log('🌍 [AssistantContext] setLanguage called with:', lang);
+    logger.debug('🌍 [AssistantContext] setLanguage called with:', 'Component', lang);
     setLanguageState(lang);
     // Persist to localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('selectedLanguage', lang);
-      console.log(
-        '🌍 [AssistantContext] Language saved to localStorage:',
-        lang
-      );
+      logger.debug('🌍 [AssistantContext] Language saved to localStorage:', 'Component', lang);
     }
   }, []);
 
   // ✅ REMOVED: Interface switching debug functions (focus Interface1 only)
 
   const debugSetOrder = (newOrder: Order | null) => {
-    console.log('🗑️ AssistantContext: setOrder called with:', newOrder);
-    console.log('🗑️ Previous order:', order);
+    logger.debug('🗑️ AssistantContext: setOrder called with:', 'Component', newOrder);
+    logger.debug('🗑️ Previous order:', 'Component', order);
     setOrder(newOrder);
-    console.log('✅ AssistantContext: setOrder completed');
+    logger.debug('✅ AssistantContext: setOrder completed', 'Component');
   };
 
   // Persist activeOrders to localStorage whenever it changes
@@ -230,106 +225,106 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem('activeOrders', JSON.stringify(activeOrders));
     } catch {
-      console.error('Failed to persist activeOrders to localStorage');
+      logger.error('Failed to persist activeOrders to localStorage', 'Component');
     }
   }, [activeOrders]);
 
   // ✅ REMOVED: Interface switching debug logic (focus Interface1 only)
   // useEffect(() => {
-  //   console.log('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', currentInterface);
+  //   logger.debug('[DEBUG] AssistantProvider useEffect - currentInterface changed to:', 'Component', currentInterface);
   // }, [currentInterface]);
 
   // Debug: Track order changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - order changed to:', order);
-    // console.log('[DEBUG] AssistantProvider - order reference:', order?.reference);
-    // console.log('[DEBUG] AssistantProvider - timestamp:', new Date().toISOString());
+    // logger.debug('[DEBUG] AssistantProvider useEffect - order changed to:', 'Component', order);
+    // logger.debug('[DEBUG] AssistantProvider - order reference:', 'Component', order?.reference);
+    // logger.debug('[DEBUG] AssistantProvider - timestamp:', 'Component', new Date().toISOString());
   }, [order]);
 
   // Debug: Track activeOrders changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - activeOrders changed:', activeOrders.length);
-    // console.log('[DEBUG] AssistantProvider - activeOrders:', activeOrders);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - activeOrders changed:', 'Component', activeOrders.length);
+    // logger.debug('[DEBUG] AssistantProvider - activeOrders:', 'Component', activeOrders);
   }, [activeOrders]);
 
   // Debug: Track hotelConfig changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - hotelConfig changed:', hotelConfig ? 'loaded' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - hotelConfig changed:', 'Component', hotelConfig ? 'loaded' : 'null');
   }, [hotelConfig]);
 
   // Debug: Track language changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - language changed to:', language);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - language changed to:', 'Component', language);
   }, [language]);
 
   // Debug: Track callDetails changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - callDetails changed:', callDetails ? 'active' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - callDetails changed:', 'Component', callDetails ? 'active' : 'null');
   }, [callDetails]);
 
   // Debug: Track transcripts changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - transcripts count:', transcripts.length);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - transcripts count:', 'Component', transcripts.length);
   }, [transcripts]);
 
   // Debug: Track orderSummary changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - orderSummary changed:', orderSummary ? 'has summary' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - orderSummary changed:', 'Component', orderSummary ? 'has summary' : 'null');
   }, [orderSummary]);
 
   // Debug: Track callSummary changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - callSummary changed:', callSummary ? 'has summary' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - callSummary changed:', 'Component', callSummary ? 'has summary' : 'null');
   }, [callSummary]);
 
   // Debug: Track serviceRequests changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - serviceRequests count:', serviceRequests.length);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - serviceRequests count:', 'Component', serviceRequests.length);
   }, [serviceRequests]);
 
   // Debug: Track modelOutput changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - modelOutput count:', modelOutput.length);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - modelOutput count:', 'Component', modelOutput.length);
   }, [modelOutput]);
 
   // Debug: Track micLevel changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - micLevel:', micLevel);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - micLevel:', 'Component', micLevel);
   }, [micLevel]);
 
   // Debug: Track isMuted changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - isMuted:', isMuted);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - isMuted:', 'Component', isMuted);
   }, [isMuted]);
 
   // Debug: Track callDuration changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - callDuration:', callDuration);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - callDuration:', 'Component', callDuration);
   }, [callDuration]);
 
   // Debug: Track emailSentForCurrentSession changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - emailSentForCurrentSession:', emailSentForCurrentSession);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - emailSentForCurrentSession:', 'Component', emailSentForCurrentSession);
   }, [emailSentForCurrentSession]);
 
   // Debug: Track requestReceivedAt changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - requestReceivedAt:', requestReceivedAt);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - requestReceivedAt:', 'Component', requestReceivedAt);
   }, [requestReceivedAt]);
 
   // Debug: Track vietnameseSummary changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - vietnameseSummary:', vietnameseSummary ? 'has summary' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - vietnameseSummary:', 'Component', vietnameseSummary ? 'has summary' : 'null');
   }, [vietnameseSummary]);
 
   // Debug: Track tenantId changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - tenantId:', tenantId);
+    // logger.debug('[DEBUG] AssistantProvider useEffect - tenantId:', 'Component', tenantId);
   }, [tenantId]);
 
   // Debug: Track tenantConfig changes
   useEffect(() => {
-    // console.log('[DEBUG] AssistantProvider useEffect - tenantConfig:', tenantConfig ? 'loaded' : 'null');
+    // logger.debug('[DEBUG] AssistantProvider useEffect - tenantConfig:', 'Component', tenantConfig ? 'loaded' : 'null');
   }, [tenantConfig]);
 
   const addActiveOrder = (order: ActiveOrder) => {
@@ -378,9 +373,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           }
 
           const data = await response.json();
-          console.log('Transcript saved to database:', data);
+          logger.debug('Transcript saved to database:', 'Component', data);
         } catch (error) {
-          console.error('Error saving transcript to server:', error);
+          logger.error('Error saving transcript to server:', 'Component', error);
           // Still keep in local state even if server save fails
         }
       };
@@ -394,16 +389,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // ✅ NEW: Skip initialization if ending call
     if (isEndingCall) {
-      console.log(
-        '🛑 [setupVapi] Skipping Vapi initialization - call is ending'
-      );
+      logger.debug('🛑 [setupVapi] Skipping Vapi initialization - call is ending', 'Component');
       return;
     }
 
     const setupVapi = async () => {
       try {
-        console.log('🔧 [setupVapi] Language changed to:', language);
-        console.log('🔧 [setupVapi] Hotel config available:', !!hotelConfig);
+        logger.debug('🔧 [setupVapi] Language changed to:', 'Component', language);
+        logger.debug('🔧 [setupVapi] Hotel config available:', 'Component', !!hotelConfig);
 
         // Use hotel configuration if available, otherwise fallback to environment variables
         const publicKey = hotelConfig
@@ -420,9 +413,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                     ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
                     : import.meta.env.VITE_VAPI_PUBLIC_KEY;
 
-        console.log(
-          '🔑 [setupVapi] Selected publicKey for language',
-          language,
+        logger.debug('🔑 [setupVapi] Selected publicKey for language', 'Component', language,
           ':',
           publicKey ? `${publicKey.substring(0, 10)}...` : 'undefined'
         );
@@ -446,7 +437,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               lastMicLevelUpdate = now;
             }
           } catch (error) {
-            console.warn('Error handling volume-level:', error);
+            logger.warn('Error handling volume-level:', 'Component', error);
           }
         });
 
@@ -472,20 +463,20 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               };
 
               ws.onerror = error => {
-                console.warn('Failed to send transcript to WebSocket:', error);
+                logger.warn('Failed to send transcript to WebSocket:', 'Component', error);
               };
             }
           } catch (error) {
-            console.warn('Error sending transcript to WebSocket:', error);
+            logger.warn('Error sending transcript to WebSocket:', 'Component', error);
           }
         };
 
         // Message handler for transcripts and reports
         const handleMessage = async (message: any) => {
-          console.log('Raw message received:', message);
-          console.log('Message type:', message.type);
-          console.log('Message role:', message.role);
-          console.log('Message content structure:', {
+          logger.debug('Raw message received:', 'Component', message);
+          logger.debug('Message type:', 'Component', message.type);
+          logger.debug('Message role:', 'Component', message.role);
+          logger.debug('Message content structure:', 'Component', {
             content: message.content,
             text: message.text,
             transcript: message.transcript,
@@ -493,7 +484,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
           // For model output - handle this first
           if (message.type === 'model-output') {
-            console.log('Model output detected - Full message:', message);
+            logger.debug('Model output detected - Full message:', 'Component', message);
 
             // Try to get content from any available field
             const outputContent =
@@ -502,10 +493,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               message.transcript ||
               message.output;
             if (outputContent) {
-              console.log(
-                'Adding model output to conversation:',
-                outputContent
-              );
+              logger.debug('Adding model output to conversation:', 'Component', outputContent);
 
               // Add as transcript with isModelOutput flag
               const newTranscript: Transcript = {
@@ -518,29 +506,23 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 isModelOutput: true,
                 tenantId: tenantId || 'default',
               };
-              console.log(
-                'Adding new transcript for model output:',
-                newTranscript
-              );
+              logger.debug('Adding new transcript for model output:', 'Component', newTranscript);
               setTranscripts(prev => {
                 const updated = [...prev, newTranscript];
-                console.log('Updated transcripts array:', updated);
+                logger.debug('Updated transcripts array:', 'Component', updated);
                 return updated;
               });
 
               // Bridge to WebSocket
               sendTranscriptToWebSocket(newTranscript);
             } else {
-              console.warn(
-                'Model output message received but no content found:',
-                message
-              );
+              logger.warn('Model output message received but no content found:', 'Component', message);
             }
           }
 
           // Handle ALL transcript messages (both user and assistant)
           if (message.type === 'transcript') {
-            console.log('Adding transcript:', message);
+            logger.debug('Adding transcript:', 'Component', message);
             const newTranscript: Transcript = {
               // ✅ FIX: Remove explicit ID - let database auto-generate
               // id: Date.now() as unknown as number, // REMOVED
@@ -561,14 +543,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           try {
             handleMessage(message);
           } catch (error) {
-            console.warn('Error handling Vapi message:', error);
+            logger.warn('Error handling Vapi message:', 'Component', error);
           }
         });
 
         // ✅ NEW: Trigger call end listeners when call ends
         vapi.on('call-end', () => {
-          console.log('📞 [AssistantContext] Vapi call-end event received');
-          console.log('📊 [AssistantContext] Call-end context:', {
+          logger.debug('📞 [AssistantContext] Vapi call-end event received', 'Component');
+          logger.debug('📊 [AssistantContext] Call-end context:', 'Component', {
             transcriptsCount: transcripts.length,
             hasCallSummary: !!callSummary,
             hasServiceRequests: serviceRequests?.length > 0,
@@ -579,35 +561,25 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           try {
             // Brief delay to allow final state updates
             setTimeout(() => {
-              console.log(
-                '🔔 [AssistantContext] Triggering call end listeners...'
-              );
+              logger.debug('🔔 [AssistantContext] Triggering call end listeners...', 'Component');
 
               // Trigger all registered call end listeners
               callEndListeners.forEach(listener => {
                 try {
                   listener();
                 } catch (error) {
-                  console.error(
-                    '❌ [AssistantContext] Error in call end listener:',
-                    error
-                  );
+                  logger.error('❌ [AssistantContext] Error in call end listener:', 'Component', error);
                 }
               });
 
-              console.log(
-                '✅ [AssistantContext] Call end listeners triggered successfully'
-              );
+              logger.debug('✅ [AssistantContext] Call end listeners triggered successfully', 'Component');
             }, 1000); // 1 second delay to allow state updates
           } catch (error) {
-            console.error(
-              '❌ [AssistantContext] Error triggering call end listeners:',
-              error
-            );
+            logger.error('❌ [AssistantContext] Error triggering call end listeners:', 'Component', error);
           }
         });
       } catch (error) {
-        console.error('Error setting up Vapi:', error);
+        logger.error('Error setting up Vapi:', 'Component', error);
       }
     };
 
@@ -617,9 +589,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       isMountedRef.current = false;
       const vapi = getVapiInstance();
       if (vapi) {
-        console.log(
-          '🧹 [setupVapi] Cleanup: Stopping Vapi due to dependency change'
-        );
+        logger.debug('🧹 [setupVapi] Cleanup: Stopping Vapi due to dependency change', 'Component');
         vapi.stop();
       }
     };
@@ -681,7 +651,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // Initialize Vapi
       const vapi = getVapiInstance();
       if (!vapi) {
-        console.error('❌ [startCall] Vapi instance not initialized');
+        logger.error('❌ [startCall] Vapi instance not initialized', 'Component');
         throw new Error(
           'Voice assistant not initialized. Please refresh the page and try again.'
         );
@@ -702,36 +672,31 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
                   : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-      console.log(
-        '🤖 [startCall] Selected assistantId for language',
-        language,
+      logger.debug('🤖 [startCall] Selected assistantId for language', 'Component', language,
         ':',
         assistantId ? `${assistantId.substring(0, 10)}...` : 'undefined'
       );
 
       if (!assistantId) {
-        console.error(
-          '❌ [startCall] Assistant ID not configured for language:',
-          language
-        );
+        logger.error('❌ [startCall] Assistant ID not configured for language:', 'Component', language);
         throw new Error(
           `Voice assistant not configured for ${language}. Please contact support.`
         );
       }
 
       // ✅ IMPROVED: Enhanced call starting with better error handling
-      console.log('🚀 [startCall] Starting Vapi call...');
+      logger.debug('🚀 [startCall] Starting Vapi call...', 'Component');
       const call = await vapi.start(assistantId);
 
       // ✅ IMPROVED: Validate call object
       if (!call) {
-        console.error('❌ [startCall] Vapi.start() returned null/undefined');
+        logger.error('❌ [startCall] Vapi.start() returned null/undefined', 'Component');
         throw new Error(
           'Failed to start voice call. Please check your internet connection and try again.'
         );
       }
 
-      console.log('✅ [startCall] Call started successfully:', call);
+      logger.debug('✅ [startCall] Call started successfully:', 'Component', call);
 
       // Reset call duration to 0
       setCallDuration(0);
@@ -748,14 +713,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       // Update interface to show call in progress
       // setCurrentInterface('interface2');
     } catch (error) {
-      console.error('❌ [startCall] Error starting call:', error);
+      logger.error('❌ [startCall] Error starting call:', 'Component', error);
 
       // ✅ IMPROVED: Better error handling and user feedback
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
 
       // Log detailed error for debugging
-      console.error('❌ [startCall] Detailed error:', {
+      logger.error('❌ [startCall] Detailed error:', 'Component', {
         error,
         language,
         hasHotelConfig: !!hotelConfig,
@@ -779,8 +744,8 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 
   // End call function
   const endCall = useCallback(() => {
-    console.log('🛑 [AssistantContext] endCall() called');
-    console.log('🔍 [AssistantContext] Current state before endCall:', {
+    logger.debug('🛑 [AssistantContext] endCall() called', 'Component');
+    logger.debug('🔍 [AssistantContext] Current state before endCall:', 'Component', {
       callDuration,
       transcriptsCount: transcripts.length,
       hasCallDetails: !!callDetails,
@@ -791,106 +756,80 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     });
 
     // ✅ NEW: Set ending flag to prevent reinitialization
-    console.log(
-      '🚫 [AssistantContext] Step 0: Setting isEndingCall flag to prevent Vapi reinitialization...'
-    );
+    logger.debug('🚫 [AssistantContext] Step 0: Setting isEndingCall flag to prevent Vapi reinitialization...', 'Component');
     setIsEndingCall(true);
 
     try {
-      console.log('🔄 [AssistantContext] Step 1: Stopping VAPI IMMEDIATELY...');
+      logger.debug('🔄 [AssistantContext] Step 1: Stopping VAPI IMMEDIATELY...', 'Component');
 
       // Stop VAPI with enhanced error handling
       try {
         const vapi = getVapiInstance();
         if (vapi) {
-          console.log(
-            '📞 [AssistantContext] Step 1a: VAPI instance found, calling stop()...'
-          );
+          logger.debug('📞 [AssistantContext] Step 1a: VAPI instance found, calling stop()...', 'Component');
 
           // ✅ NEW: Force stop all Vapi activities
           vapi.stop();
 
           // ✅ NEW: Additional cleanup if available
           if (typeof vapi.cleanup === 'function') {
-            console.log(
-              '🧹 [AssistantContext] Step 1b: Calling vapi.cleanup()...'
-            );
+            logger.debug('🧹 [AssistantContext] Step 1b: Calling vapi.cleanup()...', 'Component');
             vapi.cleanup();
           }
 
           // ✅ NEW: Force disconnect if available
           if (typeof vapi.disconnect === 'function') {
-            console.log(
-              '🔌 [AssistantContext] Step 1c: Calling vapi.disconnect()...'
-            );
+            logger.debug('🔌 [AssistantContext] Step 1c: Calling vapi.disconnect()...', 'Component');
             vapi.disconnect();
           }
 
-          console.log(
-            '✅ [AssistantContext] Step 1: VAPI fully stopped and cleaned up'
-          );
+          logger.debug('✅ [AssistantContext] Step 1: VAPI fully stopped and cleaned up', 'Component');
         } else {
-          console.log(
-            '⚠️ [AssistantContext] Step 1a: No VAPI instance to stop'
-          );
+          logger.debug('⚠️ [AssistantContext] Step 1a: No VAPI instance to stop', 'Component');
         }
       } catch (vapiError) {
-        console.error(
-          '❌ [AssistantContext] Step 1 ERROR: Error stopping VAPI:',
-          vapiError
-        );
-        console.log(
-          '🔄 [AssistantContext] Continuing with cleanup despite VAPI error...'
-        );
+        logger.error('❌ [AssistantContext] Step 1 ERROR: Error stopping VAPI:', 'Component', vapiError);
+        logger.debug('🔄 [AssistantContext] Continuing with cleanup despite VAPI error...', 'Component');
         // Continue with cleanup even if VAPI stop fails
       }
 
-      console.log('🔄 [AssistantContext] Step 2: Batch state updates...');
+      logger.debug('🔄 [AssistantContext] Step 2: Batch state updates...', 'Component');
 
       // Batch state updates with error handling
       try {
-        console.log(
-          '🔄 [AssistantContext] Step 2a: Formatting call duration...'
-        );
+        logger.debug('🔄 [AssistantContext] Step 2a: Formatting call duration...', 'Component');
 
         // Format call duration for API first
         const formattedDuration = callDuration
           ? `${Math.floor(callDuration / 60)}:${(callDuration % 60).toString().padStart(2, '0')}`
           : '0:00';
 
-        console.log(
-          '✅ [AssistantContext] Step 2a: Duration formatted:',
-          formattedDuration
-        );
-        console.log('🔄 [AssistantContext] Step 2b: Updating states...');
+        logger.debug('✅ [AssistantContext] Step 2a: Duration formatted:', 'Component', formattedDuration);
+        logger.debug('🔄 [AssistantContext] Step 2b: Updating states...', 'Component');
 
         const updates = () => {
-          console.log('🔄 [AssistantContext] Step 2b-1: Stopping timer...');
+          logger.debug('🔄 [AssistantContext] Step 2b-1: Stopping timer...', 'Component');
 
           // Stop the timer
           if (callTimer) {
             clearInterval(callTimer);
             setCallTimer(null);
-            console.log('✅ [AssistantContext] Timer stopped and cleared');
+            logger.debug('✅ [AssistantContext] Timer stopped and cleared', 'Component');
           } else {
-            console.log('⚠️ [AssistantContext] No timer to stop');
+            logger.debug('⚠️ [AssistantContext] No timer to stop', 'Component');
           }
 
-          console.log(
-            '🔄 [AssistantContext] Step 2b-2: Setting initial order summary...'
-          );
+          logger.debug('🔄 [AssistantContext] Step 2b-2: Setting initial order summary...', 'Component');
 
           // Initialize with default values
           setOrderSummary(initialOrderSummary);
 
-          console.log('✅ [AssistantContext] Step 2b: State cleanup completed');
+          logger.debug('✅ [AssistantContext] Step 2b: State cleanup completed', 'Component');
         };
 
         updates();
 
-        console.log(
-          '🔄 [AssistantContext] Step 3: Processing summary generation...'
-        );
+        logger.debug('🔄 [AssistantContext] Step 3: Processing summary generation...', 'Component');
 
         // Process summary generation if we have transcript data
         try {
@@ -899,16 +838,14 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
             content: message.content,
           }));
 
-          console.log('🔍 [AssistantContext] Transcript data prepared:', {
+          logger.debug('🔍 [AssistantContext] Transcript data prepared:', 'Component', {
             count: transcriptData.length,
             firstFew: transcriptData.slice(0, 2),
           });
 
           // Check if we have enough transcript data
           if (transcriptData.length >= 2) {
-            console.log(
-              '📝 [AssistantContext] Step 3a: Sufficient transcript data, processing call summary...'
-            );
+            logger.debug('📝 [AssistantContext] Step 3a: Sufficient transcript data, processing call summary...', 'Component');
 
             // Show loading state for summary
             const loadingSummary: CallSummary = {
@@ -920,11 +857,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               tenantId: tenantId || 'default',
             };
             setCallSummary(loadingSummary);
-            console.log('✅ [AssistantContext] Loading summary state set');
+            logger.debug('✅ [AssistantContext] Loading summary state set', 'Component');
 
-            console.log(
-              '🔄 [AssistantContext] Step 3b: Sending transcript data to server for OpenAI processing...'
-            );
+            logger.debug('🔄 [AssistantContext] Step 3b: Sending transcript data to server for OpenAI processing...', 'Component');
 
             // Send transcript data to server for OpenAI processing
             fetch('/api/store-summary', {
@@ -944,10 +879,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               }),
             })
               .then(response => {
-                console.log(
-                  '📡 [AssistantContext] Store-summary API response received:',
-                  response.status
-                );
+                logger.debug('📡 [AssistantContext] Store-summary API response received:', 'Component', response.status);
 
                 if (!response.ok) {
                   throw new Error(
@@ -957,15 +889,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                 return response.json();
               })
               .then(data => {
-                console.log(
-                  '✅ [AssistantContext] Store-summary API data received:',
-                  data
-                );
+                logger.debug('✅ [AssistantContext] Store-summary API data received:', 'Component', data);
 
                 if (data.success && data.summary && data.summary.content) {
-                  console.log(
-                    '📋 [AssistantContext] Valid summary received, updating state...'
-                  );
+                  logger.debug('📋 [AssistantContext] Valid summary received, updating state...', 'Component');
 
                   const summaryContent = data.summary.content;
                   const aiSummary: CallSummary = {
@@ -977,37 +904,24 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                     tenantId: tenantId || 'default',
                   };
                   setCallSummary(aiSummary);
-                  console.log(
-                    '✅ [AssistantContext] Summary state updated successfully'
-                  );
+                  logger.debug('✅ [AssistantContext] Summary state updated successfully', 'Component');
 
                   if (
                     data.serviceRequests &&
                     Array.isArray(data.serviceRequests) &&
                     data.serviceRequests.length > 0
                   ) {
-                    console.log(
-                      '📝 [AssistantContext] Service requests received:',
-                      data.serviceRequests.length
-                    );
+                    logger.debug('📝 [AssistantContext] Service requests received:', 'Component', data.serviceRequests.length);
                     setServiceRequests(data.serviceRequests);
                   } else {
-                    console.log(
-                      '⚠️ [AssistantContext] No service requests in response'
-                    );
+                    logger.debug('⚠️ [AssistantContext] No service requests in response', 'Component');
                   }
                 } else {
-                  console.log(
-                    '⚠️ [AssistantContext] Invalid summary data received:',
-                    data
-                  );
+                  logger.debug('⚠️ [AssistantContext] Invalid summary data received:', 'Component', data);
                 }
               })
               .catch(summaryError => {
-                console.error(
-                  '❌ [AssistantContext] Error processing summary:',
-                  summaryError
-                );
+                logger.error('❌ [AssistantContext] Error processing summary:', 'Component', summaryError);
                 // Show error state
                 const errorSummary: CallSummary = {
                   // ✅ FIX: Remove explicit ID - let database auto-generate
@@ -1019,16 +933,11 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   tenantId: tenantId || 'default',
                 };
                 setCallSummary(errorSummary);
-                console.log('✅ [AssistantContext] Error summary state set');
+                logger.debug('✅ [AssistantContext] Error summary state set', 'Component');
               });
           } else {
-            console.log(
-              '⚠️ [AssistantContext] Step 3a: Not enough transcript data for summary'
-            );
-            console.log(
-              '🔍 [AssistantContext] Transcript data count:',
-              transcriptData.length
-            );
+            logger.debug('⚠️ [AssistantContext] Step 3a: Not enough transcript data for summary', 'Component');
+            logger.debug('🔍 [AssistantContext] Transcript data count:', 'Component', transcriptData.length);
 
             const noTranscriptSummary: CallSummary = {
               // ✅ FIX: Remove explicit ID - let database auto-generate
@@ -1040,78 +949,55 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
               tenantId: tenantId || 'default',
             };
             setCallSummary(noTranscriptSummary);
-            console.log(
-              '✅ [AssistantContext] No transcript summary state set'
-            );
+            logger.debug('✅ [AssistantContext] No transcript summary state set', 'Component');
           }
         } catch (summaryError) {
-          console.error(
-            '❌ [AssistantContext] Step 3 ERROR: Error in summary processing:',
-            summaryError
-          );
+          logger.error('❌ [AssistantContext] Step 3 ERROR: Error in summary processing:', 'Component', summaryError);
           // Don't let summary errors crash the endCall
         }
       } catch (cleanupError) {
-        console.error(
-          '❌ [AssistantContext] Step 2 ERROR: Error during state cleanup:',
-          cleanupError
-        );
+        logger.error('❌ [AssistantContext] Step 2 ERROR: Error during state cleanup:', 'Component', cleanupError);
 
-        console.log(
-          '🔄 [AssistantContext] Attempting force cleanup of critical states...'
-        );
+        logger.debug('🔄 [AssistantContext] Attempting force cleanup of critical states...', 'Component');
 
         // Force cleanup critical states
         try {
           if (callTimer) {
             clearInterval(callTimer);
             setCallTimer(null);
-            console.log('✅ [AssistantContext] Force timer cleanup completed');
+            logger.debug('✅ [AssistantContext] Force timer cleanup completed', 'Component');
           }
         } catch (timerError) {
-          console.error(
-            '❌ [AssistantContext] Failed to clear timer:',
-            timerError
-          );
+          logger.error('❌ [AssistantContext] Failed to clear timer:', 'Component', timerError);
         }
       }
 
-      console.log('✅ [AssistantContext] endCall() completed successfully');
+      logger.debug('✅ [AssistantContext] endCall() completed successfully', 'Component');
     } catch (error) {
-      console.error(
-        '❌ [AssistantContext] CRITICAL ERROR in endCall():',
-        error
-      );
-      console.error('❌ [AssistantContext] Error name:', error.name);
-      console.error('❌ [AssistantContext] Error message:', error.message);
-      console.error('❌ [AssistantContext] Error stack:', error.stack);
+      logger.error('❌ [AssistantContext] CRITICAL ERROR in endCall():', 'Component', error);
+      logger.error('❌ [AssistantContext] Error name:', 'Component', error.name);
+      logger.error('❌ [AssistantContext] Error message:', 'Component', error.message);
+      logger.error('❌ [AssistantContext] Error stack:', 'Component', error.stack);
 
-      console.log('🔄 [AssistantContext] Attempting emergency cleanup...');
+      logger.debug('🔄 [AssistantContext] Attempting emergency cleanup...', 'Component');
 
       // Emergency cleanup
       try {
         if (callTimer) {
           clearInterval(callTimer);
           setCallTimer(null);
-          console.log(
-            '✅ [AssistantContext] Emergency timer cleanup completed'
-          );
+          logger.debug('✅ [AssistantContext] Emergency timer cleanup completed', 'Component');
         }
       } catch (emergencyError) {
-        console.error(
-          '🚨 [AssistantContext] Emergency cleanup failed:',
-          emergencyError
-        );
+        logger.error('🚨 [AssistantContext] Emergency cleanup failed:', 'Component', emergencyError);
       }
 
       // Don't re-throw error to prevent Error Boundary trigger
-      console.log(
-        '🔄 [AssistantContext] endCall() error handled gracefully, continuing normal operation'
-      );
+      logger.debug('🔄 [AssistantContext] endCall() error handled gracefully, continuing normal operation', 'Component');
     } finally {
       // ✅ NEW: Reset ending flag after a delay to allow cleanup
       setTimeout(() => {
-        console.log('🔄 [AssistantContext] Resetting isEndingCall flag...');
+        logger.debug('🔄 [AssistantContext] Resetting isEndingCall flag...', 'Component');
         setIsEndingCall(false);
       }, 2000); // 2 second delay to ensure all cleanup is complete
     }
@@ -1128,7 +1014,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   // Function to translate text to Vietnamese
   const translateToVietnamese = async (text: string): Promise<string> => {
     try {
-      console.log('Requesting Vietnamese translation for summary...');
+      logger.debug('Requesting Vietnamese translation for summary...', 'Component');
       const response = await fetch('/api/translate-to-vietnamese', {
         method: 'POST',
         headers: {
@@ -1151,7 +1037,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         throw new Error('Translation failed');
       }
     } catch (error) {
-      console.error('Error translating to Vietnamese:', error);
+      logger.error('Error translating to Vietnamese:', 'Component', error);
       return 'Không thể dịch nội dung này sang tiếng Việt. Vui lòng thử lại sau.';
     }
   };
@@ -1172,14 +1058,12 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         const res = await authenticatedFetch(`/api/request`);
         if (!res.ok) {
           if (res.status === 401 || res.status === 403) {
-            console.warn(
-              '⚠️ [AssistantContext] Auth failed - token may be invalid or missing'
-            );
+            logger.warn('⚠️ [AssistantContext] Auth failed - token may be invalid or missing', 'Component');
           }
           return;
         }
         const data = await res.json();
-        console.log('[AssistantContext] Fetched orders from API:', data);
+        logger.debug('[AssistantContext] Fetched orders from API:', 'Component', data);
         // data là mảng order, cần map sang ActiveOrder (chuyển requestedAt sang Date)
         if (Array.isArray(data)) {
           setActiveOrders(
@@ -1268,9 +1152,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
 export function useAssistant() {
   const context = useContext(AssistantContext);
   if (context === undefined) {
-    console.warn(
-      'useAssistant used outside AssistantProvider - returning safe defaults'
-    );
+    logger.warn('useAssistant used outside AssistantProvider - returning safe defaults', 'Component');
     // Return safe defaults instead of throwing
     return {
       transcripts: [],

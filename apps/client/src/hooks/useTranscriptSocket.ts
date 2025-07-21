@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { logger } from '@shared/utils/logger';
 
 interface UseTranscriptSocketProps {
   socketUrl: string;
@@ -21,24 +22,24 @@ export const useTranscriptSocket = ({
 
   // Khởi tạo WebSocket connection
   useEffect(() => {
-    console.log('[useTranscriptSocket] Connecting to:', socketUrl);
+    logger.debug('[useTranscriptSocket] Connecting to:', 'Component', socketUrl);
     const newSocket = io(socketUrl);
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
-      console.log('[useTranscriptSocket] Socket.IO connected');
+      logger.debug('[useTranscriptSocket] Socket.IO connected', 'Component');
     });
 
     newSocket.on('disconnect', () => {
-      console.log('[useTranscriptSocket] Socket.IO disconnected');
+      logger.debug('[useTranscriptSocket] Socket.IO disconnected', 'Component');
     });
 
     newSocket.on('error', error => {
-      console.error('[useTranscriptSocket] Socket.IO error:', error);
+      logger.error('[useTranscriptSocket] Socket.IO error:', 'Component', error);
     });
 
     return () => {
-      console.log('[useTranscriptSocket] Cleaning up socket connection');
+      logger.debug('[useTranscriptSocket] Cleaning up socket connection', 'Component');
       newSocket.close();
     };
   }, [socketUrl]);
@@ -48,7 +49,7 @@ export const useTranscriptSocket = ({
     if (!socket) return;
 
     const handleUserTranscript = (data: { text: string }) => {
-      console.log('[useTranscriptSocket] User transcript received:', data);
+      logger.debug('[useTranscriptSocket] User transcript received:', 'Component', data);
       if (!state.isAssistantSpeaking) {
         setState(prev => ({ ...prev, text: data.text }));
       }
@@ -57,19 +58,19 @@ export const useTranscriptSocket = ({
     const handleAssistantResponse = (data: {
       assistant_reply_text: string;
     }) => {
-      console.log('[useTranscriptSocket] Assistant response received:', data);
+      logger.debug('[useTranscriptSocket] Assistant response received:', 'Component', data);
       if (state.isAssistantSpeaking) {
         setState(prev => ({ ...prev, text: data.assistant_reply_text }));
       }
     };
 
     const handleAssistantStartSpeaking = () => {
-      console.log('[useTranscriptSocket] Assistant started speaking');
+      logger.debug('[useTranscriptSocket] Assistant started speaking', 'Component');
       setState(prev => ({ ...prev, isAssistantSpeaking: true }));
     };
 
     const handleAssistantEndSpeaking = () => {
-      console.log('[useTranscriptSocket] Assistant stopped speaking');
+      logger.debug('[useTranscriptSocket] Assistant stopped speaking', 'Component');
       setState(prev => ({ ...prev, isAssistantSpeaking: false }));
     };
 
@@ -79,7 +80,7 @@ export const useTranscriptSocket = ({
       content: string;
       call_id?: string;
     }) => {
-      console.log('[useTranscriptSocket] Generic transcript received:', data);
+      logger.debug('[useTranscriptSocket] Generic transcript received:', 'Component', data);
       if (data.role === 'user') {
         setState(prev => ({
           ...prev,

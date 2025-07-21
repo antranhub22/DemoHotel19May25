@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+import { logger } from '@shared/utils/logger';
   Tooltip,
   TooltipContent,
   TooltipProvider,

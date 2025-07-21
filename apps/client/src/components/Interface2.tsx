@@ -9,6 +9,7 @@ import { Button } from './ui/button';
 import { AlertCircle } from 'lucide-react';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import TranscriptDisplay from './TranscriptDisplay';
+import { logger } from '@shared/utils/logger';
 
 interface Interface2Props {
   isActive: boolean;
@@ -50,7 +51,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
   // Debug isActive changes
   useEffect(() => {
-    console.log('🎯 [Interface2] isActive changed to:', isActive);
+    logger.debug('🎯 [Interface2] isActive changed to:', 'Component', isActive);
   }, [isActive]);
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
@@ -72,12 +73,9 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
   // Debug conversation state
   useEffect(() => {
-    console.log(
-      '💬 [Interface2] showRealtimeConversation:',
-      showRealtimeConversation
-    );
-    console.log('💬 [Interface2] conversationTurns:', conversationTurns);
-    console.log('💬 [Interface2] transcripts:', transcripts);
+    logger.debug('💬 [Interface2] showRealtimeConversation:', 'Component', showRealtimeConversation);
+    logger.debug('💬 [Interface2] conversationTurns:', 'Component', conversationTurns);
+    logger.debug('💬 [Interface2] transcripts:', 'Component', transcripts);
   }, [showRealtimeConversation, conversationTurns, transcripts]);
 
   // Cleanup function for animations
@@ -92,7 +90,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   const handleCancel = useCallback(() => {
     // Capture the current duration for the email
     const finalDuration = callDuration > 0 ? callDuration : localDuration;
-    console.log('Canceling call with duration:', finalDuration);
+    logger.debug('Canceling call with duration:', 'Component', finalDuration);
 
     // Call the context's endCall and switch to interface1
     contextEndCall();
@@ -108,7 +106,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     }
     // Capture the current duration for the email
     const finalDuration = callDuration > 0 ? callDuration : localDuration;
-    console.log('Ending call with duration:', finalDuration);
+    logger.debug('Ending call with duration:', 'Component', finalDuration);
     // Call the context's endCall and switch to interface3, interface3fr (French), hoặc interface3vi (Vietnamese)
     contextEndCall();
     if (language === 'fr') {
@@ -138,7 +136,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
       const allRefs = Object.values(
         (referenceService as any).referenceMap || {}
       ) as ReferenceItem[];
-      console.log('All references loaded:', allRefs);
+      logger.debug('All references loaded:', 'Component', allRefs);
       setReferences(allRefs);
     }
     loadAllReferences();
@@ -146,8 +144,8 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
   // Update conversation turns when transcripts change
   useEffect(() => {
-    console.log('[Interface2] Transcripts changed:', transcripts);
-    console.log('[Interface2] Transcripts count:', transcripts.length);
+    logger.debug('[Interface2] Transcripts changed:', 'Component', transcripts);
+    logger.debug('[Interface2] Transcripts count:', 'Component', transcripts.length);
 
     const sortedTranscripts = [...transcripts].sort(
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
@@ -157,7 +155,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     let currentTurn: ConversationTurn | null = null;
 
     sortedTranscripts.forEach(message => {
-      console.log('[Interface2] Processing transcript:', message);
+      logger.debug('[Interface2] Processing transcript:', 'Component', message);
 
       if (message.role === 'user') {
         // Always create a new turn for user messages
@@ -195,7 +193,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
       }
     });
 
-    console.log('[Interface2] Generated conversation turns:', turns);
+    logger.debug('[Interface2] Generated conversation turns:', 'Component', turns);
     setConversationTurns(turns);
   }, [transcripts]);
 
@@ -239,7 +237,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
     // Only start the timer when this interface is active
     if (isActive) {
-      console.log('Interface2 is active, starting local timer');
+      logger.debug('Interface2 is active, starting local timer', 'Component');
       // Initialize with the current duration from context
       setLocalDuration(callDuration || 0);
 
@@ -251,7 +249,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
 
     return () => {
       if (timer) {
-        console.log('Cleaning up local timer in Interface2');
+        logger.debug('Cleaning up local timer in Interface2', 'Component');
         clearInterval(timer);
       }
     };
@@ -267,7 +265,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
   // --- EARLY RETURNS AFTER ALL HOOKS ---
   // Early return if hotel config is not loaded
   if (configLoading || !hotelConfig) {
-    console.log('[DEBUG] Interface2 render:', { hotelConfig, configLoading });
+    logger.debug('[DEBUG] Interface2 render:', 'Component', { hotelConfig, configLoading });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-40 bg-gray-100">
         <div className="text-center">
@@ -319,22 +317,15 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
               isListening={!isMuted}
               volumeLevel={micLevel}
               onCallStart={async () => {
-                console.log(
-                  '🎤 [Interface2] SiriCallButton onCallStart triggered'
-                );
+                logger.debug('🎤 [Interface2] SiriCallButton onCallStart triggered', 'Component');
                 try {
                   await startCall();
                 } catch (error) {
-                  console.error(
-                    '❌ [Interface2] Error in SiriCallButton onCallStart:',
-                    error
-                  );
+                  logger.error('❌ [Interface2] Error in SiriCallButton onCallStart:', 'Component', error);
                 }
               }}
               onCallEnd={() => {
-                console.log(
-                  '🛑 [Interface2] SiriCallButton onCallEnd triggered'
-                );
+                logger.debug('🛑 [Interface2] SiriCallButton onCallEnd triggered', 'Component');
                 contextEndCall();
               }}
             />
@@ -483,15 +474,9 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
                 style={{ overflowY: 'auto', maxHeight: '28vh' }}
               >
                 {(() => {
-                  console.log(
-                    '[Interface2] Rendering conversation - conversationTurns.length:',
-                    conversationTurns.length
-                  );
-                  console.log(
-                    '[Interface2] showRealtimeConversation:',
-                    showRealtimeConversation
-                  );
-                  console.log('[Interface2] isActive:', isActive);
+                  logger.debug('[Interface2] Rendering conversation - conversationTurns.length:', 'Component', conversationTurns.length);
+                  logger.debug('[Interface2] showRealtimeConversation:', 'Component', showRealtimeConversation);
+                  logger.debug('[Interface2] isActive:', 'Component', isActive);
                   return null;
                 })()}
                 {conversationTurns.length === 0 && (
@@ -503,12 +488,9 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
                   </div>
                 )}
                 {[...conversationTurns].reverse().map((turn, turnIdx) => {
-                  console.log(
-                    '[Interface2] Rendering turn:',
-                    turn,
+                  logger.debug('[Interface2] Rendering turn:', 'Component', turn,
                     'Index:',
-                    turnIdx
-                  );
+                    turnIdx);
                   return (
                     <div key={turn.id} className="mb-1">
                       <div className="flex items-start">

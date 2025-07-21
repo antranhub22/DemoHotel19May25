@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface TopBarProps {

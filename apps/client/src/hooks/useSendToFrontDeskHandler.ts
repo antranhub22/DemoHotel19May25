@@ -1,5 +1,6 @@
 import { useCallback, useState, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
+import { logger } from '@shared/utils/logger';
 
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
@@ -158,17 +159,12 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ EXTRACTED: API call logic with authentication and auto-retry
   const submitRequest = useCallback(async (payload: any) => {
-    console.log(
-      '📤 [useSendToFrontDeskHandler] Submitting request to /api/request:',
-      payload
-    );
+    logger.debug('📤 [useSendToFrontDeskHandler] Submitting request to /api/request:', 'Component', payload);
 
     // ✅ FIX: Use authenticated fetch with auto-retry
     const { authenticatedFetch } = await import('@/lib/authHelper');
 
-    console.log(
-      '🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry'
-    );
+    logger.debug('🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry', 'Component');
 
     const response = await authenticatedFetch('/api/request', {
       method: 'POST',
@@ -198,9 +194,7 @@ export const useSendToFrontDeskHandler = ({
   // ✅ EXTRACTED: Success handling
   const handleSuccess = useCallback(
     (requestData: any, orderData: any) => {
-      console.log(
-        '✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully'
-      );
+      logger.debug('✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully', 'Component');
 
       // Update global order state
       setOrder({
@@ -226,10 +220,7 @@ export const useSendToFrontDeskHandler = ({
   // ✅ EXTRACTED: Error handling
   const handleError = useCallback(
     (error: Error) => {
-      console.error(
-        '❌ [useSendToFrontDeskHandler] Failed to send request:',
-        error
-      );
+      logger.error('❌ [useSendToFrontDeskHandler] Failed to send request:', 'Component', error);
 
       const errorMessage = error.message || ERROR_MESSAGES.REQUEST_FAILED;
 
@@ -245,11 +236,11 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ MAIN HANDLER: Clean and focused
   const handleSendToFrontDesk = useCallback(async () => {
-    console.log('🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated');
+    logger.debug('🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated', 'Component');
 
     // Validate order data availability
     if (!generatedOrderSummary) {
-      console.warn('⚠️ [useSendToFrontDeskHandler] No order summary available');
+      logger.warn('⚠️ [useSendToFrontDeskHandler] No order summary available', 'Component');
       const errorMsg = ERROR_MESSAGES.NO_ORDER_DATA;
 
       if (onError) {

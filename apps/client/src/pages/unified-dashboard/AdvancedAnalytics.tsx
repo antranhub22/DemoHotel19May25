@@ -49,6 +49,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface AnalyticsData {
@@ -256,7 +257,7 @@ export const AdvancedAnalytics: React.FC = () => {
       // const data = await response.json();
       // setAnalytics(data.analytics);
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      logger.error('Failed to fetch analytics:', 'Component', error);
       setLoading(false);
     }
   };

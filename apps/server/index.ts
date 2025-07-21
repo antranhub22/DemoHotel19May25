@@ -10,6 +10,7 @@ import { seedProductionUsers } from '../../tools/scripts/maintenance/seed-produc
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { logger } from '@shared/utils/logger';
 
 // Fixed CSP configuration - v1.5 - FORCE REBUILD with embedded database setup
 // Force rebuild v1.6 - with authentication routes fix
@@ -176,26 +177,26 @@ app.use((req, res, next) => {
 
   // Auto-migrate database schema (safe for production)
   if (process.env.AUTO_MIGRATE !== 'false') {
-    console.log('🔄 Running auto-migration...');
+    logger.debug('🔄 Running auto-migration...', 'Component');
     await autoMigrateOnDeploy();
   } else {
-    console.log('⚠️ Auto-migration disabled by environment variable');
+    logger.debug('⚠️ Auto-migration disabled by environment variable', 'Component');
   }
 
   // Seed default users (safe for production)
   if (process.env.SEED_USERS !== 'false') {
-    console.log('👥 Seeding default users...');
+    logger.debug('👥 Seeding default users...', 'Component');
     await seedProductionUsers();
   } else {
-    console.log('⚠️ User seeding disabled by environment variable');
+    logger.debug('⚠️ User seeding disabled by environment variable', 'Component');
   }
 
   // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)
   if (process.env.AUTO_DB_FIX !== 'false') {
-    console.log('🔧 Running auto database fix...');
+    logger.debug('🔧 Running auto database fix...', 'Component');
     await runAutoDbFix();
   } else {
-    console.log('⚠️ Auto database fix disabled by environment variable');
+    logger.debug('⚠️ Auto database fix disabled by environment variable', 'Component');
   }
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -216,6 +217,6 @@ app.use((req, res, next) => {
 
   const port = process.env.PORT || 10000;
   server.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    logger.debug('Server is running on port ${port}', 'Component');
   });
 })();

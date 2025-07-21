@@ -4,6 +4,7 @@
 
 import { OrderSummary, OrderItem } from '@/types';
 import {
+import { logger } from '@shared/utils/logger';
   extractRoomNumber as extractRoomNumberShared,
   extractSpecialInstructions as extractSpecialInstructionsShared,
   extractDeliveryTime as extractDeliveryTimeShared,

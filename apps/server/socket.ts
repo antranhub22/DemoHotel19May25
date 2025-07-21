@@ -1,5 +1,6 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+import { logger } from '@shared/utils/logger';
 
 export function setupSocket(server: HTTPServer) {
   const io = new SocketIOServer(server, {
@@ -10,12 +11,12 @@ export function setupSocket(server: HTTPServer) {
   });
 
   io.on('connection', (socket: Socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+    logger.debug('Socket connected: ${socket.id}', 'Component');
 
     // Join a room for a particular order ID (room = orderId)
     socket.on('join_room', (orderId: string) => {
       socket.join(orderId);
-      console.log(`Socket ${socket.id} joined room ${orderId}`);
+      logger.debug('Socket ${socket.id} joined room ${orderId}', 'Component');
     });
 
     // Listen for staff updates to order status
@@ -23,14 +24,14 @@ export function setupSocket(server: HTTPServer) {
       'update_order_status',
       (data: { orderId: string; status: string }) => {
         const { orderId, status } = data;
-        console.log(`Received status update for order ${orderId}: ${status}`);
+        logger.debug('Received status update for order ${orderId}: ${status}', 'Component');
         // Broadcast to clients in that room
         io.to(orderId).emit('order_status_update', { orderId, status });
       }
     );
 
     socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`);
+      logger.debug('Socket disconnected: ${socket.id}', 'Component');
     });
   });
 

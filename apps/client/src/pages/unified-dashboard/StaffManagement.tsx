@@ -66,6 +66,7 @@ import {
   Key,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 import type { UserRole } from '@shared/constants/permissions';
 
 // Types
@@ -535,7 +536,7 @@ export const StaffManagement: React.FC = () => {
         setLoading(false);
       }, 1000);
     } catch (error) {
-      console.error('Failed to fetch staff:', error);
+      logger.error('Failed to fetch staff:', 'Component', error);
       setLoading(false);
     }
   };
@@ -573,7 +574,7 @@ export const StaffManagement: React.FC = () => {
 
       setSelectedStaff(null);
     } catch (error) {
-      console.error('Failed to save staff:', error);
+      logger.error('Failed to save staff:', 'Component', error);
     } finally {
       setFormLoading(false);
     }
@@ -587,7 +588,7 @@ export const StaffManagement: React.FC = () => {
 
       setStaffList(prev => prev.filter(staff => staff.id !== staffId));
     } catch (error) {
-      console.error('Failed to delete staff:', error);
+      logger.error('Failed to delete staff:', 'Component', error);
     }
   };
 
@@ -606,7 +607,7 @@ export const StaffManagement: React.FC = () => {
         )
       );
     } catch (error) {
-      console.error('Failed to toggle staff status:', error);
+      logger.error('Failed to toggle staff status:', 'Component', error);
     }
   };
 

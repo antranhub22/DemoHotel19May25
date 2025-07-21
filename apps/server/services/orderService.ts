@@ -3,6 +3,7 @@ import { insertRequestSchema } from '@shared/schema';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db';
 import { z } from 'zod';
+import { logger } from '@shared/utils/logger';
 
 export class OrderService {
   /**
@@ -27,7 +28,7 @@ export class OrderService {
           `Invalid order data: ${error.errors.map(e => e.message).join(', ')}`
         );
       }
-      console.error('Error creating order:', error);
+      logger.error('Error creating order:', 'Component', error);
       throw new Error('Failed to create order');
     }
   }
@@ -45,7 +46,7 @@ export class OrderService {
 
       return order;
     } catch (error) {
-      console.error('Error getting order by ID:', error);
+      logger.error('Error getting order by ID:', 'Component', error);
       throw new Error('Failed to retrieve order');
     }
   }
@@ -57,7 +58,7 @@ export class OrderService {
     try {
       return await storage.getOrdersByRoomNumber(roomNumber);
     } catch (error) {
-      console.error('Error getting orders by room:', error);
+      logger.error('Error getting orders by room:', 'Component', error);
       throw new Error('Failed to retrieve orders by room');
     }
   }
@@ -82,7 +83,7 @@ export class OrderService {
 
       return updatedOrder;
     } catch (error) {
-      console.error('Error updating order status:', error);
+      logger.error('Error updating order status:', 'Component', error);
       throw new Error('Failed to update order status');
     }
   }
@@ -113,7 +114,7 @@ export class OrderService {
             : 0,
       };
     } catch (error) {
-      console.error('Error getting order statistics:', error);
+      logger.error('Error getting order statistics:', 'Component', error);
       throw new Error('Failed to get order statistics');
     }
   }
@@ -125,7 +126,7 @@ export class OrderService {
     try {
       await storage.deleteAllOrders();
     } catch (error) {
-      console.error('Error deleting all orders:', error);
+      logger.error('Error deleting all orders:', 'Component', error);
       throw new Error('Failed to delete all orders');
     }
   }
@@ -153,7 +154,7 @@ export class OrderService {
         updated_at: new Date().toISOString(),
       });
     } catch (syncErr) {
-      console.error('Failed to sync order to request table:', syncErr);
+      logger.error('Failed to sync order to request table:', 'Component', syncErr);
       // Don't throw error, just log it
     }
   }
@@ -204,7 +205,7 @@ export class OrderService {
             : 0,
       };
     } catch (error) {
-      console.error('Error getting order statistics:', error);
+      logger.error('Error getting order statistics:', 'Component', error);
       throw new Error('Failed to get order statistics');
     }
   }

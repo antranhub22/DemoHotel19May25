@@ -1,5 +1,6 @@
 import React from 'react';
 import { designSystem } from '@/styles/designSystem';
+import { logger } from '@shared/utils/logger';
 
 export const LoadingState: React.FC = () => {
   return (

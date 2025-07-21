@@ -4,6 +4,7 @@ import zh from './zh.json';
 import ru from './ru.json';
 import ko from './ko.json';
 import vi from './vi.json';
+import { logger } from '@shared/utils/logger';
 
 export type Lang = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

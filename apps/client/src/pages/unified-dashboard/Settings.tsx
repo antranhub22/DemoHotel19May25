@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import {
+import { logger } from '@shared/utils/logger';
   Settings as SettingsIcon,
   Hotel,
   Bot,

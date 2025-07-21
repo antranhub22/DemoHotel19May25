@@ -1,4 +1,5 @@
 import {
+import { logger } from '@shared/utils/logger';
   DebugManager,
   EmergencyStopManager,
   CanvasRenderer,
@@ -392,14 +393,14 @@ if (typeof window !== 'undefined') {
   (window as any).SiriDebugControls = {
     setLevel: (level: 0 | 1 | 2) => {
       SiriButton.setDebugLevel(level);
-      console.log(`🔧 Voice debug level set to: ${level}`);
+      logger.debug('🔧 Voice debug level set to: ${level}', 'Component');
     },
     getLevel: () => SiriButton.getDebugLevel(),
     silent: () => SiriButton.setDebugLevel(0),
     errorsOnly: () => SiriButton.setDebugLevel(1),
     verbose: () => SiriButton.setDebugLevel(2),
     help: () => {
-      console.log(`
+      logger.debug('
 🔧 SiriDebugControls Help:
 - SiriDebugControls.silent()     -> Turn off all debug logs
 - SiriDebugControls.errorsOnly() -> Show errors + warnings only  
@@ -411,7 +412,7 @@ if (typeof window !== 'undefined') {
 - Each module has independent debug logging
 - Better error isolation and reporting
 - Enhanced mobile debugging support
-      `);
+      ', 'Component');
     },
   };
 

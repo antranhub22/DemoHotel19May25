@@ -3,6 +3,7 @@ import express, { type Request, Response } from 'express';
 import { db } from '@shared/db';
 import { tenants, staff, call, request as requestTable } from '@shared/db';
 import { eq, and, sql, desc } from 'drizzle-orm';
+import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.get('/dashboard/hotel-manager', authenticateJWT, async (req, res) => {
   try {
     const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
     
-    console.log(`🏨 [HOTEL-DASHBOARD] Getting hotel manager dashboard for: ${tenantId}`);
+    logger.debug('🏨 [HOTEL-DASHBOARD] Getting hotel manager dashboard for: ${tenantId}', 'Component');
 
     // Get hotel overview data
     const [hotelInfo] = await db
@@ -100,10 +101,10 @@ router.get('/dashboard/hotel-manager', authenticateJWT, async (req, res) => {
       }
     };
 
-    console.log(`✅ [HOTEL-DASHBOARD] Dashboard data retrieved for: ${hotelInfo.hotel_name}`);
+    logger.debug('✅ [HOTEL-DASHBOARD] Dashboard data retrieved for: ${hotelInfo.hotel_name}', 'Component');
     res.json(dashboardData);
   } catch (error) {
-    console.error('❌ [HOTEL-DASHBOARD] Error fetching hotel manager dashboard:', error);
+    logger.error('❌ [HOTEL-DASHBOARD] Error fetching hotel manager dashboard:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch dashboard data' });
   }
 });
@@ -115,7 +116,7 @@ router.get('/dashboard/hotel-manager', authenticateJWT, async (req, res) => {
 // SaaS Provider Dashboard - Multi-tenant Overview
 router.get('/dashboard/saas-provider', authenticateJWT, async (req, res) => {
   try {
-    console.log(`🏢 [SAAS-DASHBOARD] Getting SaaS provider dashboard`);
+    logger.debug('🏢 [SAAS-DASHBOARD] Getting SaaS provider dashboard', 'Component');
 
     // Get all tenants overview
     const allTenants = await db
@@ -182,10 +183,10 @@ router.get('/dashboard/saas-provider', authenticateJWT, async (req, res) => {
       }
     };
 
-    console.log(`✅ [SAAS-DASHBOARD] Platform dashboard data retrieved`);
+    logger.debug('✅ [SAAS-DASHBOARD] Platform dashboard data retrieved', 'Component');
     res.json(dashboardData);
   } catch (error) {
-    console.error('❌ [SAAS-DASHBOARD] Error fetching SaaS provider dashboard:', error);
+    logger.error('❌ [SAAS-DASHBOARD] Error fetching SaaS provider dashboard:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch platform dashboard data' });
   }
 });
@@ -200,7 +201,7 @@ router.get('/dashboard/staff', authenticateJWT, async (req, res) => {
     const tenantId = req.query.tenantId as string || 'mi-nhon-hotel';
     const userId = req.user?.id;
     
-    console.log(`👥 [STAFF-DASHBOARD] Getting staff dashboard for user: ${userId}, tenant: ${tenantId}`);
+    logger.debug('👥 [STAFF-DASHBOARD] Getting staff dashboard for user: ${userId}, tenant: ${tenantId}', 'Component');
 
     // Get user's role and permissions
     const [userInfo] = await db
@@ -274,10 +275,10 @@ router.get('/dashboard/staff', authenticateJWT, async (req, res) => {
       }
     };
 
-    console.log(`✅ [STAFF-DASHBOARD] Staff dashboard data retrieved for: ${userInfo.username}`);
+    logger.debug('✅ [STAFF-DASHBOARD] Staff dashboard data retrieved for: ${userInfo.username}', 'Component');
     res.json(dashboardData);
   } catch (error) {
-    console.error('❌ [STAFF-DASHBOARD] Error fetching staff dashboard:', error);
+    logger.error('❌ [STAFF-DASHBOARD] Error fetching staff dashboard:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch staff dashboard data' });
   }
 });
@@ -292,7 +293,7 @@ router.get('/dashboard/config/:type', authenticateJWT, async (req, res) => {
     const { type } = req.params;
     const tenantId = req.query.tenantId as string;
     
-    console.log(`⚙️ [DASHBOARD-CONFIG] Getting config for dashboard type: ${type}`);
+    logger.debug('⚙️ [DASHBOARD-CONFIG] Getting config for dashboard type: ${type}', 'Component');
 
     let config = {};
 
@@ -355,10 +356,10 @@ router.get('/dashboard/config/:type', authenticateJWT, async (req, res) => {
         return res.status(400).json({ error: 'Invalid dashboard type' });
     }
 
-    console.log(`✅ [DASHBOARD-CONFIG] Config retrieved for: ${type}`);
+    logger.debug('✅ [DASHBOARD-CONFIG] Config retrieved for: ${type}', 'Component');
     res.json(config);
   } catch (error) {
-    console.error('❌ [DASHBOARD-CONFIG] Error fetching dashboard config:', error);
+    logger.error('❌ [DASHBOARD-CONFIG] Error fetching dashboard config:', 'Component', error);
     res.status(500).json({ error: 'Failed to fetch dashboard configuration' });
   }
 });

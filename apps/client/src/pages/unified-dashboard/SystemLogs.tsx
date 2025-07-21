@@ -61,6 +61,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface LogEntry {
@@ -505,7 +506,7 @@ export const SystemLogs: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Export failed:', error);
+      logger.error('Export failed:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -519,7 +520,7 @@ export const SystemLogs: React.FC = () => {
       setLogs(mockLogs);
       setStats(mockStats);
     } catch (error) {
-      console.error('Failed to fetch logs:', error);
+      logger.error('Failed to fetch logs:', 'Component', error);
     } finally {
       setLoading(false);
     }

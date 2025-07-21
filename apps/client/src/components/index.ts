@@ -18,6 +18,7 @@ export { default as ChatPopup } from './ChatPopup';
 
 // Import React for lazy loading
 import React from 'react';
+import { logger } from '@shared/utils/logger';
 
 // Interface1 components
 export { InterfaceContainer } from './interface1/InterfaceContainer';

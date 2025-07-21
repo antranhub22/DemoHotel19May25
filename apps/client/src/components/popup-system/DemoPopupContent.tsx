@@ -5,6 +5,7 @@ import {
   parseSummaryToOrderDetails,
 } from '@/lib/summaryParser';
 import { t } from '@/i18n';
+import { logger } from '@shared/utils/logger';
 
 export const ConversationDemoContent: React.FC = () => {
   return (

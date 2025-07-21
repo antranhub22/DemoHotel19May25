@@ -5,6 +5,7 @@ import { Language } from '@/types/interface1.types';
 import { useAssistant } from '@/context/AssistantContext';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
+import { logger } from '@shared/utils/logger';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -77,40 +78,27 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     LANGUAGE_COLORS['en'];
 
   // Debug: Log language and color changes
-  console.log(
-    '🎨 [SiriButtonContainer] Language:',
-    language,
+  logger.debug('🎨 [SiriButtonContainer] Language:', 'Component', language,
     'Colors:',
     currentColors.name,
     'Primary:',
-    currentColors.primary
-  );
-  console.log('📏 [SiriButtonContainer] Responsive size:', responsiveSize);
+    currentColors.primary);
+  logger.debug('📏 [SiriButtonContainer] Responsive size:', 'Component', responsiveSize);
 
   // 🚨 DEBUG: Tap to End Call Fix Verification
   if (process.env.NODE_ENV === 'development') {
-    console.log('🔧 [SiriButtonContainer] TAP TO END CALL FIXES APPLIED:');
-    console.log('  ✅ Priority 1: Mobile handleDirectTouch has end call logic');
-    console.log('  ✅ Priority 2: Mobile unified with desktop protections');
-    console.log(
-      '  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)'
-    );
-    console.log('  ✅ Priority 4: MobileTouchDebugger enabled for testing');
-    console.log(
-      '  🚫 DISABLED: Cancel and Confirm buttons hidden by user request'
-    );
-    console.log(
-      '  🎯 isCallStarted:',
-      isCallStarted,
+    logger.debug('🔧 [SiriButtonContainer] TAP TO END CALL FIXES APPLIED:', 'Component');
+    logger.debug('  ✅ Priority 1: Mobile handleDirectTouch has end call logic', 'Component');
+    logger.debug('  ✅ Priority 2: Mobile unified with desktop protections', 'Component');
+    logger.debug('  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)', 'Component');
+    logger.debug('  ✅ Priority 4: MobileTouchDebugger enabled for testing', 'Component');
+    logger.debug('  🚫 DISABLED: Cancel and Confirm buttons hidden by user request', 'Component');
+    logger.debug('  🎯 isCallStarted:', 'Component', isCallStarted,
       'isConfirming:',
-      isConfirming
-    );
-    console.log(
-      '  🎯 onCallStart available:',
-      !!onCallStart,
+      isConfirming);
+    logger.debug('  🎯 onCallStart available:', 'Component', !!onCallStart,
       'onCallEnd available:',
-      !!onCallEnd
-    );
+      !!onCallEnd);
   }
 
   // ✅ NEW: Reset confirming state when call ends
@@ -123,25 +111,23 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   // ✅ NEW: Protected onCallStart to prevent restart during/after Confirm
   const protectedOnCallStart = async (lang: Language) => {
     if (isConfirming) {
-      console.log(
-        '🛡️ [SiriButtonContainer] Call start blocked - confirming in progress'
-      );
+      logger.debug('🛡️ [SiriButtonContainer] Call start blocked - confirming in progress', 'Component');
       return;
     }
 
-    console.log('🎤 [SiriButtonContainer] Starting call normally...');
+    logger.debug('🎤 [SiriButtonContainer] Starting call normally...', 'Component');
     await onCallStart(lang);
   };
 
   const handleStartCall = async (lang: Language) => {
-    console.log('🎤 [SiriButtonContainer] Starting call with language:', lang);
+    logger.debug('🎤 [SiriButtonContainer] Starting call with language:', 'Component', lang);
 
     // ✅ IMPROVED: Better error handling for call start
     try {
       await onCallStart(lang);
-      console.log('✅ [SiriButtonContainer] Call started successfully');
+      logger.debug('✅ [SiriButtonContainer] Call started successfully', 'Component');
     } catch (error) {
-      console.error('❌ [SiriButtonContainer] Error during call start:', error);
+      logger.error('❌ [SiriButtonContainer] Error during call start:', 'Component', error);
 
       // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
       const errorMessage =
@@ -174,49 +160,45 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   };
 
   const handleEndCall = () => {
-    console.log('🛑 [SiriButtonContainer] Ending call');
+    logger.debug('🛑 [SiriButtonContainer] Ending call', 'Component');
 
     // ✅ IMPROVED: Better error handling for call end
     try {
       onCallEnd();
-      console.log('✅ [SiriButtonContainer] Call ended successfully');
+      logger.debug('✅ [SiriButtonContainer] Call ended successfully', 'Component');
     } catch (error) {
-      console.error('❌ [SiriButtonContainer] Error ending call:', error);
+      logger.error('❌ [SiriButtonContainer] Error ending call:', 'Component', error);
 
       // ✅ IMPROVED: Even if end call fails, still show success to user
       // The error is logged but we don't want to confuse the user
-      console.log(
-        '⚠️ [SiriButtonContainer] Call end had errors but proceeding normally'
-      );
+      logger.debug('⚠️ [SiriButtonContainer] Call end had errors but proceeding normally', 'Component');
     }
   };
 
   const handleCancel = () => {
-    console.log('❌ [SiriButtonContainer] Cancelling call');
+    logger.debug('❌ [SiriButtonContainer] Cancelling call', 'Component');
 
     // ✅ IMPROVED: Better error handling for cancel
     try {
       onCancel();
-      console.log('✅ [SiriButtonContainer] Call cancelled successfully');
+      logger.debug('✅ [SiriButtonContainer] Call cancelled successfully', 'Component');
     } catch (error) {
-      console.error('❌ [SiriButtonContainer] Error cancelling call:', error);
+      logger.error('❌ [SiriButtonContainer] Error cancelling call:', 'Component', error);
 
       // ✅ IMPROVED: Continue with cancel even if there's an error
-      console.log(
-        '⚠️ [SiriButtonContainer] Cancel had errors but proceeding normally'
-      );
+      logger.debug('⚠️ [SiriButtonContainer] Cancel had errors but proceeding normally', 'Component');
     }
   };
 
   const handleConfirm = () => {
-    console.log('✅ [SiriButtonContainer] Confirming call');
+    logger.debug('✅ [SiriButtonContainer] Confirming call', 'Component');
 
     // ✅ IMPROVED: Better error handling for confirm
     try {
       onConfirm();
-      console.log('✅ [SiriButtonContainer] Call confirmed successfully');
+      logger.debug('✅ [SiriButtonContainer] Call confirmed successfully', 'Component');
     } catch (error) {
-      console.error('❌ [SiriButtonContainer] Error confirming call:', error);
+      logger.error('❌ [SiriButtonContainer] Error confirming call:', 'Component', error);
 
       // ✅ IMPROVED: Show error to user for confirm as it's more critical
       if (typeof window !== 'undefined') {

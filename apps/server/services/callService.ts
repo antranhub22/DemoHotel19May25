@@ -5,6 +5,7 @@ import { call, transcript } from '@shared/db';
 import { eq } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
+import { logger } from '@shared/utils/logger';
 
 export class CallService {
   /**
@@ -14,7 +15,7 @@ export class CallService {
     try {
       return await storage.getTranscriptsByCallId(callId);
     } catch (error) {
-      console.error('Error getting transcripts:', error);
+      logger.error('Error getting transcripts:', 'Component', error);
       throw new Error('Failed to retrieve transcripts');
     }
   }
@@ -39,9 +40,9 @@ export class CallService {
         })
         .where(eq(call.call_id_vapi, callId));
 
-      console.log(`Updated call duration for ${callId}: ${duration} seconds`);
+      logger.debug('Updated call duration for ${callId}: ${duration} seconds', 'Component');
     } catch (error) {
-      console.error('Error updating call duration:', error);
+      logger.error('Error updating call duration:', 'Component', error);
       throw new Error('Failed to update call duration');
     }
   }
@@ -89,7 +90,7 @@ export class CallService {
         timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
 
-      console.log('✅ [CallService] Transcript stored successfully');
+      logger.debug('✅ [CallService] Transcript stored successfully', 'Component');
 
       return {
         success: true,
@@ -98,12 +99,12 @@ export class CallService {
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error('Zod validation errors in callService:', error.errors);
+        logger.error('Zod validation errors in callService:', 'Component', error.errors);
         throw new Error(
           `Invalid transcript data: ${JSON.stringify(error.errors)}`
         );
       }
-      console.error('Error storing test transcript:', error);
+      logger.error('Error storing test transcript:', 'Component', error);
       throw new Error('Failed to store test transcript');
     }
   }
@@ -145,7 +146,7 @@ export class CallService {
         );
       }
     } catch (callError) {
-      console.error('Error creating call record:', callError);
+      logger.error('Error creating call record:', 'Component', callError);
       // Don't throw error, just log it
     }
   }
@@ -185,7 +186,7 @@ export class CallService {
             : 0,
       };
     } catch (error) {
-      console.error('Error getting call statistics:', error);
+      logger.error('Error getting call statistics:', 'Component', error);
       throw new Error('Failed to get call statistics');
     }
   }

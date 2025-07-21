@@ -24,6 +24,7 @@ import {
   Activity,
 } from 'lucide-react';
 import { Link } from 'wouter';
+import { logger } from '@shared/utils/logger';
 
 // Mock data - will be replaced with actual API calls
 const mockMetrics = {

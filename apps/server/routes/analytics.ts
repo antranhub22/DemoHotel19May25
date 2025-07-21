@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import {
+import { logger } from '@shared/utils/logger';
   getOverview,
   getServiceDistribution,
   getHourlyActivity,

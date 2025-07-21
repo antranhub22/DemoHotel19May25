@@ -11,6 +11,7 @@ import {
 } from '@shared/schema';
 import { z } from 'zod';
 import {
+import { logger } from '@shared/utils/logger';
   tenantMapper,
   hotelProfileMapper,
   type TenantCamelCase,
@@ -79,7 +80,7 @@ export class TenantService {
    */
   async createTenant(config: TenantConfig): Promise<string> {
     try {
-      console.log(`🏨 Creating new tenant: ${config.hotelName}`);
+      logger.debug('🏨 Creating new tenant: ${config.hotelName}', 'Component');
 
       // Validate subdomain availability
       await this.validateSubdomain(config.subdomain);
@@ -126,10 +127,10 @@ export class TenantService {
 
       await db.insert(hotelProfiles).values(profileData);
 
-      console.log(`✅ Tenant created successfully: ${tenant.id}`);
+      logger.debug('✅ Tenant created successfully: ${tenant.id}', 'Component');
       return tenant.id;
     } catch (error) {
-      console.error(`Failed to create tenant ${config.hotelName}:`, error);
+      logger.error('Failed to create tenant ${config.hotelName}:', 'Component', error);
       throw new TenantError(
         `Failed to create tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_CREATION_FAILED',
@@ -232,7 +233,7 @@ export class TenantService {
     updates: Partial<TenantConfig>
   ): Promise<void> {
     try {
-      console.log(`🔄 Updating tenant: ${tenantId}`);
+      logger.debug('🔄 Updating tenant: ${tenantId}', 'Component');
 
       const updateData: any = {};
 
@@ -254,9 +255,9 @@ export class TenantService {
 
       await db.update(tenants).set(updateData).where(eq(tenants.id, tenantId));
 
-      console.log(`✅ Tenant updated successfully: ${tenantId}`);
+      logger.debug('✅ Tenant updated successfully: ${tenantId}', 'Component');
     } catch (error) {
-      console.error(`Failed to update tenant ${tenantId}:`, error);
+      logger.error('Failed to update tenant ${tenantId}:', 'Component', error);
       throw new TenantError(
         `Failed to update tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_UPDATE_FAILED',
@@ -270,7 +271,7 @@ export class TenantService {
    */
   async deleteTenant(tenantId: string): Promise<void> {
     try {
-      console.log(`🗑️ Deleting tenant: ${tenantId}`);
+      logger.debug('🗑️ Deleting tenant: ${tenantId}', 'Component');
 
       // Delete in order due to foreign key constraints
       await db.delete(message).where(eq(message.tenant_id, tenantId));
@@ -283,9 +284,9 @@ export class TenantService {
         .where(eq(hotelProfiles.tenant_id, tenantId));
       await db.delete(tenants).where(eq(tenants.id, tenantId));
 
-      console.log(`✅ Tenant deleted successfully: ${tenantId}`);
+      logger.debug('✅ Tenant deleted successfully: ${tenantId}', 'Component');
     } catch (error) {
-      console.error(`Failed to delete tenant ${tenantId}:`, error);
+      logger.error('Failed to delete tenant ${tenantId}:', 'Component', error);
       throw new TenantError(
         `Failed to delete tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_DELETE_FAILED',
@@ -310,7 +311,7 @@ export class TenantService {
       const featureFlags = this.getCurrentFeatureFlags(tenant);
       return featureFlags[feature] || false;
     } catch (error) {
-      console.error(`Failed to check feature access for ${tenantId}:`, error);
+      logger.error('Failed to check feature access for ${tenantId}:', 'Component', error);
       return false;
     }
   }
@@ -474,10 +475,7 @@ export class TenantService {
         violations,
       };
     } catch (error) {
-      console.error(
-        `Failed to check subscription limits for ${tenantId}:`,
-        error
-      );
+      logger.error('Failed to check subscription limits for ${tenantId}:', 'Component', error);
       return { withinLimits: false, violations: ['Unable to check limits'] };
     }
   }
@@ -528,7 +526,7 @@ export class TenantService {
         dataRetentionDays: 90, // Note: Dynamic tenant settings to be implemented
       };
     } catch (error) {
-      console.error(`Failed to get tenant usage for ${tenantId}:`, error);
+      logger.error('Failed to get tenant usage for ${tenantId}:', 'Component', error);
       return {
         callsThisMonth: 0,
         voicesUsed: 0,
@@ -563,9 +561,7 @@ export class TenantService {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      console.log(
-        `🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`
-      );
+      logger.debug('🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}', 'Component');
 
       // Delete old transcripts
       await db
@@ -587,9 +583,9 @@ export class TenantService {
           )
         );
 
-      console.log(`✅ Data cleanup completed for tenant ${tenantId}`);
+      logger.debug('✅ Data cleanup completed for tenant ${tenantId}', 'Component');
     } catch (error) {
-      console.error(`Failed to cleanup data for tenant ${tenantId}:`, error);
+      logger.error('Failed to cleanup data for tenant ${tenantId}:', 'Component', error);
       throw new TenantError(
         `Failed to cleanup data: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'DATA_CLEANUP_FAILED',
@@ -674,7 +670,7 @@ export class TenantService {
         activeSubscriptions: activeResult?.count || 0,
       };
     } catch (error) {
-      console.error('Failed to get service health:', error);
+      logger.error('Failed to get service health:', 'Component', error);
       return {
         status: 'unhealthy',
         tenantsCount: 0,

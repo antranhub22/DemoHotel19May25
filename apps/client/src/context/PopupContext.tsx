@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from 'react';
 import {
+import { logger } from '@shared/utils/logger';
   MessageSquare,
   Users,
   Bell,
@@ -194,9 +195,7 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
 export const usePopupContext = (): PopupContextValue => {
   const context = useContext(PopupContext);
   if (!context) {
-    console.warn(
-      'usePopupContext used outside PopupProvider - returning safe defaults'
-    );
+    logger.warn('usePopupContext used outside PopupProvider - returning safe defaults', 'Component');
     // Return safe defaults instead of throwing
     return {
       popups: [],

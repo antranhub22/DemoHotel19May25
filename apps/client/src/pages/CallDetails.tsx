@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, Link } from 'wouter';
+import { logger } from '@shared/utils/logger';
 import { Transcript } from '@/types';
 
 const CallDetails: React.FC = () => {
@@ -81,7 +82,7 @@ const CallDetails: React.FC = () => {
         setCopying(false);
       }, 1500);
     } catch (error) {
-      console.error('Could not copy text: ', error);
+      logger.error('Could not copy text: ', 'Component', error);
       setCopying(false);
     }
   };

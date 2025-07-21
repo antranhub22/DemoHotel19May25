@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import { z } from 'zod';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Types & Interfaces for Hotel Research
@@ -185,9 +186,7 @@ export class HotelResearchService {
     this.rateLimiter = new RateLimiter();
 
     if (!this.googlePlacesApiKey) {
-      console.warn(
-        'Google Places API key not found. Hotel research will be limited.'
-      );
+      logger.warn('Google Places API key not found. Hotel research will be limited.', 'Component');
     }
   }
 
@@ -211,7 +210,7 @@ export class HotelResearchService {
     }
 
     try {
-      console.log(`🔍 Starting basic research for: ${hotelName}`);
+      logger.debug('🔍 Starting basic research for: ${hotelName}', 'Component');
 
       // 1. Get Google Places data
       const googlePlacesData = await this.getGooglePlacesData(
@@ -227,9 +226,7 @@ export class HotelResearchService {
             googlePlacesData.website
           );
         } catch (error) {
-          console.warn(
-            'Website scraping failed:',
-            (error as any).message || error
+          logger.warn('Website scraping failed:', 'Component', (error as any).message || error
           );
         }
       }
@@ -258,10 +255,10 @@ export class HotelResearchService {
         ),
       };
 
-      console.log(`✅ Basic research completed for: ${hotelName}`);
+      logger.debug('✅ Basic research completed for: ${hotelName}', 'Component');
       return hotelData;
     } catch (error) {
-      console.error('Basic research failed:', (error as any).message || error);
+      logger.error('Basic research failed:', 'Component', (error as any).message || error);
       throw new HotelResearchError(
         `Failed to research hotel: ${(error as any).message || error}`,
         'RESEARCH_FAILED',
@@ -286,7 +283,7 @@ export class HotelResearchService {
     }
 
     try {
-      console.log(`🔍 Starting advanced research for: ${hotelName}`);
+      logger.debug('🔍 Starting advanced research for: ${hotelName}', 'Component');
 
       // Get basic data first
       const basicData = await this.basicResearch(hotelName, location);
@@ -315,12 +312,10 @@ export class HotelResearchService {
             : ({} as CompetitorData),
       };
 
-      console.log(`✅ Advanced research completed for: ${hotelName}`);
+      logger.debug('✅ Advanced research completed for: ${hotelName}', 'Component');
       return advancedData;
     } catch (error) {
-      console.error(
-        'Advanced research failed:',
-        (error as any).message || error
+      logger.error('Advanced research failed:', 'Component', (error as any).message || error
       );
       throw new HotelResearchError(
         `Failed to perform advanced research: ${(error as any).message || error}`,
@@ -424,9 +419,7 @@ export class HotelResearchService {
         rating: place.rating,
       }));
     } catch (error) {
-      console.warn(
-        'Failed to get nearby attractions:',
-        (error as any).message || error
+      logger.warn('Failed to get nearby attractions:', 'Component', (error as any).message || error
       );
       return [];
     }
@@ -438,7 +431,7 @@ export class HotelResearchService {
 
   private async scrapeOfficialWebsite(websiteUrl: string): Promise<any> {
     try {
-      console.log(`🕷️ Scraping website: ${websiteUrl}`);
+      logger.debug('🕷️ Scraping website: ${websiteUrl}', 'Component');
 
       const response = await fetch(websiteUrl, {
         headers: {
@@ -462,12 +455,10 @@ export class HotelResearchService {
         contact: this.extractContactInfo($),
       };
 
-      console.log(`✅ Website scraping completed for: ${websiteUrl}`);
+      logger.debug('✅ Website scraping completed for: ${websiteUrl}', 'Component');
       return scrapedData;
     } catch (error) {
-      console.warn(
-        `Website scraping failed for ${websiteUrl}:`,
-        (error as any).message || error
+      logger.warn('Website scraping failed for ${websiteUrl}:', 'Component', (error as any).message || error
       );
       return {};
     }
@@ -628,7 +619,7 @@ export class HotelResearchService {
     // Placeholder for social media data extraction
     // In a real implementation, this would use APIs like Instagram Basic Display API
     // or Facebook Graph API
-    console.log(`📱 Analyzing social media for: ${hotelName}`);
+    logger.debug('📱 Analyzing social media for: ${hotelName}', 'Component');
 
     return {
       instagram: {
@@ -645,7 +636,7 @@ export class HotelResearchService {
   private async getReviewData(hotelName: string): Promise<ReviewData> {
     // Placeholder for review data aggregation
     // In a real implementation, this would scrape TripAdvisor, Google Reviews, etc.
-    console.log(`⭐ Analyzing reviews for: ${hotelName}`);
+    logger.debug('⭐ Analyzing reviews for: ${hotelName}', 'Component');
 
     return {
       averageRating: 4.0,
@@ -666,7 +657,7 @@ export class HotelResearchService {
   ): Promise<CompetitorData> {
     // Placeholder for competitor analysis
     // In a real implementation, this would use Google Places API to find nearby hotels
-    console.log(`🏨 Analyzing competitors for: ${hotelName}`);
+    logger.debug('🏨 Analyzing competitors for: ${hotelName}', 'Component');
 
     return {
       nearbyHotels: [],

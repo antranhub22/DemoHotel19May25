@@ -44,6 +44,7 @@ import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
 import { UnifiedAuthService } from '../../packages/auth-system/services/UnifiedAuthService';
+import { logger } from '@shared/utils/logger';
 
 // Initialize OpenAI client with fallback for development
 const openai = new OpenAI({
@@ -119,7 +120,7 @@ async function extractTenantFromRequest(req: Request): Promise<string> {
       .limit(1);
     return tenant?.id || getMiNhonTenantId();
   } catch (error) {
-    console.error('Error looking up tenant:', error);
+    logger.error('Error looking up tenant:', 'Component', error);
     return getMiNhonTenantId();
   }
 }
@@ -187,7 +188,7 @@ async function findStaffInDatabase(
       permissions: [],
     };
   } catch (error) {
-    console.error('Error finding staff in database:', error);
+    logger.error('Error finding staff in database:', 'Component', error);
     return null;
   }
 }
@@ -341,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Handle WebSocket connections
   wss.on('connection', (ws: WebSocketClient) => {
-    console.log('WebSocket client connected');
+    logger.debug('WebSocket client connected', 'Component');
 
     // Add client to set
     clients.add(ws);
@@ -355,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle initialization message
         if (data.type === 'init' && data.call_id) {
           ws.callId = data.call_id;
-          console.log(`Client associated with call ID: ${data.call_id}`);
+          logger.debug('Client associated with call ID: ${data.call_id}', 'Component');
         }
 
         // Handle transcript from Vapi
@@ -366,7 +367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           data.content
         ) {
           try {
-            console.log('📝 [WebSocket] Processing transcript:', data);
+            logger.debug('📝 [WebSocket] Processing transcript:', 'Component', data);
 
             // Validate timestamp
             const now = Date.now();
@@ -386,20 +387,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isNaN(inputTimestamp) ||
               !isFinite(inputTimestamp)
             ) {
-              console.warn(
-                `⚠️ [WebSocket] Invalid timestamp ${inputTimestamp}, using current time`
-              );
+              logger.warn('⚠️ [WebSocket] Invalid timestamp ${inputTimestamp}, using current time', 'Component');
               validTimestamp = now;
             } else if (inputTimestamp > maxTimestampMs) {
-              console.warn(
-                `⚠️ [WebSocket] Timestamp ${inputTimestamp} exceeds PostgreSQL limit, using current time`
-              );
+              logger.warn('⚠️ [WebSocket] Timestamp ${inputTimestamp} exceeds PostgreSQL limit, using current time', 'Component');
               validTimestamp = now;
             } else if (inputTimestamp < 946684800000) {
               // Year 2000
-              console.warn(
-                `⚠️ [WebSocket] Timestamp ${inputTimestamp} is too old, using current time`
-              );
+              logger.warn('⚠️ [WebSocket] Timestamp ${inputTimestamp} is too old, using current time', 'Component');
               validTimestamp = now;
             } else {
               validTimestamp = inputTimestamp;
@@ -414,15 +409,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Additional validation before creating Date object
             const testDate = new Date(validTimestamp);
             if (isNaN(testDate.getTime())) {
-              console.error(
-                `❌ [WebSocket] Date creation failed for timestamp ${validTimestamp}, using current time`
-              );
+              logger.error('❌ [WebSocket] Date creation failed for timestamp ${validTimestamp}, using current time', 'Component');
               validTimestamp = now;
             }
 
-            console.log(
-              `📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}`
-            );
+            logger.debug('📅 [WebSocket] Timestamp validation: input=${inputTimestamp}, valid=${validTimestamp}, seconds=${Math.floor(validTimestamp / 1000)}', 'Component');
 
             // Store transcript in database - USE PROPER TIMESTAMP CONVERSION
             const savedTranscript = await storage.addTranscript({
@@ -433,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               timestamp: validTimestamp, // ✅ CRITICAL: Let storage.addTranscript handle conversion properly
             });
 
-            console.log('✅ [WebSocket] Transcript stored in database');
+            logger.debug('✅ [WebSocket] Transcript stored in database', 'Component');
 
             // Try to find or create call record
             try {
@@ -444,9 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 .limit(1);
 
               if (existingCall.length === 0) {
-                console.log(
-                  `🔍 [WebSocket] No call found for ${data.call_id}, attempting auto-creation`
-                );
+                logger.debug('🔍 [WebSocket] No call found for ${data.call_id}, attempting auto-creation', 'Component');
 
                 // Extract room number from content
                 const roomMatch =
@@ -465,16 +454,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (hasVietnamese) language = 'vi';
                 else if (hasFrench) language = 'fr';
 
-                console.log(
-                  `🌍 [WebSocket] Auto-creating call record: room=${roomNumber}, language=${language}`
-                );
+                logger.debug('🌍 [WebSocket] Auto-creating call record: room=${roomNumber}, language=${language}', 'Component');
               }
             } catch (callError) {
-              console.error(
-                '❌ [WebSocket] Error handling call record:',
-                callError
-              );
-              console.error('❌ [WebSocket] Call error details:', {
+              logger.error('❌ [WebSocket] Error handling call record:', 'Component', callError);
+              logger.error('❌ [WebSocket] Call error details:', 'Component', {
                 message: callError.message,
                 stack: callError.stack,
               });
@@ -487,9 +471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             try {
               isoTimestamp = new Date(validTimestamp).toISOString();
             } catch (dateError) {
-              console.error(
-                '❌ [WebSocket] Failed to create ISO timestamp, using current time'
-              );
+              logger.error('❌ [WebSocket] Failed to create ISO timestamp, using current time', 'Component');
               isoTimestamp = new Date().toISOString();
             }
 
@@ -513,35 +495,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             });
 
-            console.log(
-              `📤 [WebSocket] Transcript broadcasted to ${matchingClients} clients`
-            );
+            logger.debug('📤 [WebSocket] Transcript broadcasted to ${matchingClients} clients', 'Component');
           } catch (error) {
-            console.error('❌ [WebSocket] Error processing transcript:', error);
-            console.error('❌ [WebSocket] Error details:', {
+            logger.error('❌ [WebSocket] Error processing transcript:', 'Component', error);
+            logger.error('❌ [WebSocket] Error details:', 'Component', {
               name: error.name,
               message: error.message,
               stack: error.stack,
             });
             if (error instanceof z.ZodError) {
-              console.error('📋 [WebSocket] Validation errors:', error.errors);
+              logger.error('📋 [WebSocket] Validation errors:', 'Component', error.errors);
             }
           }
         }
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        logger.error('Error parsing WebSocket message:', 'Component', error);
       }
     });
 
     // Handle client disconnection
     ws.on('close', () => {
-      console.log('WebSocket client disconnected');
+      logger.debug('WebSocket client disconnected', 'Component');
       clients.delete(ws);
     });
 
     // Handle errors
     ws.on('error', error => {
-      console.error('WebSocket error:', error);
+      logger.error('WebSocket error:', 'Component', error);
       clients.delete(ws);
     });
 
@@ -616,7 +596,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { callId, role, content, tenantId } = req.body;
 
-      console.log('POST /api/transcripts request body:', req.body);
+      logger.debug('POST /api/transcripts request body:', 'Component', req.body);
 
       if (!callId || !role || !content) {
         return res.status(400).json({
@@ -637,17 +617,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: validTimestamp, // ✅ FIXED: Use proper timestamp, storage will handle conversion
       };
 
-      console.log(
-        'Converted data for validation:',
-        transcriptDataForValidation
-      );
+      logger.debug('Converted data for validation:', 'Component', transcriptDataForValidation);
 
       // Validate with database schema (expects snake_case)
       const validatedData = insertTranscriptSchema.parse(
         transcriptDataForValidation
       );
 
-      console.log('Validated transcript data:', validatedData);
+      logger.debug('Validated transcript data:', 'Component', validatedData);
 
       // Save to database - storage.addTranscript already handles field mapping
       const savedTranscript = await storage.addTranscript({
@@ -658,21 +635,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
 
-      console.log(
-        `Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...`
-      );
-      console.log('Saved transcript result:', savedTranscript);
+      logger.debug('Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...', 'Component');
+      logger.debug('Saved transcript result:', 'Component', savedTranscript);
 
       res.json({
         success: true,
         data: savedTranscript,
       });
     } catch (error) {
-      console.error('Error in POST /api/transcripts:', error);
-      console.error('Error stack:', error.stack);
+      logger.error('Error in POST /api/transcripts:', 'Component', error);
+      logger.error('Error stack:', 'Component', error.stack);
 
       if (error instanceof z.ZodError) {
-        console.error('Zod validation errors:', error.errors);
+        logger.error('Zod validation errors:', 'Component', error.errors);
         return res.status(400).json({
           error: 'Invalid transcript data',
           details: error.errors,
@@ -732,12 +707,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .where(eq(call.call_id_vapi, callId));
 
-      console.log(
-        `✅ Updated call duration for ${callId}: ${duration} seconds`
-      );
+      logger.debug('✅ Updated call duration for ${callId}: ${duration} seconds', 'Component');
       res.json({ success: true, duration });
     } catch (error) {
-      console.error('❌ Error updating call duration:', error);
+      logger.error('❌ Error updating call duration:', 'Component', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -770,30 +743,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           process.env.VITE_OPENAI_API_KEY;
 
         if (useOpenAi) {
-          console.log(
-            'Generating summary with OpenAI from provided transcripts'
-          );
+          logger.debug('Generating summary with OpenAI from provided transcripts', 'Component');
           try {
             finalSummary = await generateCallSummary(transcripts, language);
             isAiGenerated = true;
           } catch (aiError) {
-            console.error('Error generating summary with OpenAI:', aiError);
-            console.log('Falling back to basic summary generation');
+            logger.error('Error generating summary with OpenAI:', 'Component', aiError);
+            logger.debug('Falling back to basic summary generation', 'Component');
             // Fall back to a basic summary if OpenAI fails
             finalSummary = generateBasicSummary(transcripts);
             isAiGenerated = false;
           }
         } else {
-          console.log(
-            'Generating basic summary from transcripts (OpenAI skipped)'
-          );
+          logger.debug('Generating basic summary from transcripts (OpenAI skipped)', 'Component');
           finalSummary = generateBasicSummary(transcripts);
           isAiGenerated = false;
         }
       }
       // If no transcripts and no summary, try to fetch transcripts from database
       else if (!summaryText || summaryText === '') {
-        console.log('Fetching transcripts from database for callId:', callId);
+        logger.debug('Fetching transcripts from database for callId:', 'Component', callId);
         try {
           const storedTranscripts =
             await storage.getTranscriptsByCallId(callId);
@@ -815,10 +784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               );
               isAiGenerated = true;
             } catch (openaiError) {
-              console.error(
-                'Error using OpenAI for stored transcripts:',
-                openaiError
-              );
+              logger.error('Error using OpenAI for stored transcripts:', 'Component', openaiError);
               // Fallback to basic summary
               finalSummary = generateBasicSummary(formattedTranscripts);
               isAiGenerated = false;
@@ -828,7 +794,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               'No conversation transcripts were found for this call.';
           }
         } catch (dbError) {
-          console.error('Error fetching transcripts from database:', dbError);
+          logger.error('Error fetching transcripts from database:', 'Component', dbError);
           // Try to create a basic summary if the database operation fails
           if (transcripts && transcripts.length > 0) {
             finalSummary = generateBasicSummary(transcripts);
@@ -868,16 +834,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const inputTime = timestamp || Date.now();
             const testDate = new Date(inputTime);
             if (isNaN(testDate.getTime())) {
-              console.warn(
-                '⚠️ [store-summary] Invalid timestamp, using current time'
-              );
+              logger.warn('⚠️ [store-summary] Invalid timestamp, using current time', 'Component');
               return new Date().toISOString();
             }
             return testDate.toISOString();
           } catch (dateError) {
-            console.error(
-              '❌ [store-summary] Date creation failed, using current time'
-            );
+            logger.error('❌ [store-summary] Date creation failed, using current time', 'Component');
             return new Date().toISOString();
           }
         })(), // Convert to text string with validation
@@ -889,12 +851,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store in database
       try {
         const result = await storage.addCallSummary(summaryData as any);
-        console.log('Call summary stored successfully:', result);
+        logger.debug('Call summary stored successfully:', 'Component', result);
       } catch (summaryError) {
-        console.error(
-          'Error storing call summary (continuing anyway):',
-          summaryError
-        );
+        logger.error('Error storing call summary (continuing anyway):', 'Component', summaryError);
         // Continue processing even if summary storage fails
       }
 
@@ -902,13 +861,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let serviceRequests: any[] = [];
       if (isAiGenerated && finalSummary) {
         try {
-          console.log('Extracting service requests from AI-generated summary');
+          logger.debug('Extracting service requests from AI-generated summary', 'Component');
           serviceRequests = await extractServiceRequests(finalSummary);
-          console.log(
-            `Successfully extracted ${serviceRequests.length} service requests`
-          );
+          logger.debug('Successfully extracted ${serviceRequests.length} service requests', 'Component');
         } catch (extractError) {
-          console.error('Error extracting service requests:', extractError);
+          logger.error('Error extracting service requests:', 'Component', extractError);
         }
       }
 
@@ -920,17 +877,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `${req.serviceType}: ${req.requestText || 'Không có thông tin chi tiết'}`
         );
 
-        console.log(`Phát hiện thông tin phòng: ${roomNumber}`);
-        console.log(
-          `Số lượng yêu cầu dịch vụ: ${serviceRequestStrings.length}`
-        );
-        console.log(`Thời lượng cuộc gọi: ${durationStr}`);
-        console.log(`Email sẽ được gửi sau khi người dùng nhấn nút xác nhận`);
+        logger.debug('Phát hiện thông tin phòng: ${roomNumber}', 'Component');
+        logger.debug('Số lượng yêu cầu dịch vụ: ${serviceRequestStrings.length}', 'Component');
+        logger.debug('Thời lượng cuộc gọi: ${durationStr}', 'Component');
+        logger.debug('Email sẽ được gửi sau khi người dùng nhấn nút xác nhận', 'Component');
       } catch (extractError: any) {
-        console.error(
-          'Error preparing service information:',
-          extractError?.message || extractError
-        );
+        logger.error('Error preparing service information:', 'Component', extractError?.message || extractError);
         // Continue even if preparation fails - don't block the API response
       }
 
@@ -1047,15 +999,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
       ) {
         try {
-          console.log(
-            'Dịch chi tiết dịch vụ sang tiếng Việt trước khi gửi email'
-          );
+          logger.debug('Dịch chi tiết dịch vụ sang tiếng Việt trước khi gửi email', 'Component');
           vietnameseDetails = await translateToVietnamese(vietnameseDetails);
         } catch (translateError) {
-          console.error(
-            'Lỗi khi dịch chi tiết dịch vụ sang tiếng Việt:',
-            translateError
-          );
+          logger.error('Lỗi khi dịch chi tiết dịch vụ sang tiếng Việt:', 'Component', translateError);
           // Tiếp tục sử dụng bản chi tiết gốc nếu không dịch được
         }
       }
@@ -1114,13 +1061,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
       ) {
         try {
-          console.log('Dịch tóm tắt sang tiếng Việt trước khi gửi email');
+          logger.debug('Dịch tóm tắt sang tiếng Việt trước khi gửi email', 'Component');
           vietnameseSummary = await translateToVietnamese(callDetails.summary);
         } catch (translateError) {
-          console.error(
-            'Lỗi khi dịch tóm tắt sang tiếng Việt:',
-            translateError
-          );
+          logger.error('Lỗi khi dịch tóm tắt sang tiếng Việt:', 'Component', translateError);
           // Tiếp tục sử dụng bản tóm tắt gốc nếu không dịch được
         }
       }
@@ -1141,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const translatedRequest = await translateToVietnamese(request);
               vietnameseServiceRequests.push(translatedRequest);
             } catch (error) {
-              console.error('Lỗi khi dịch yêu cầu dịch vụ:', error);
+              logger.error('Lỗi khi dịch yêu cầu dịch vụ:', 'Component', error);
               vietnameseServiceRequests.push(request); // Sử dụng bản gốc nếu không dịch được
             }
           } else {
@@ -1183,7 +1127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             updated_at: new Date(),
           });
         } catch (dbError) {
-          console.error('Lỗi khi lưu request vào DB:', dbError);
+          logger.error('Lỗi khi lưu request vào DB:', 'Component', dbError);
         }
         res.json({ success: true, recipients: toEmails, orderReference });
       } else {
@@ -1199,12 +1143,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Check Gmail credentials first (preferred method)
       if (process.env.GMAIL_APP_PASSWORD) {
-        console.log('Using Gmail for test email');
+        logger.debug('Using Gmail for test email', 'Component');
       } else if (
         process.env.MAILJET_API_KEY &&
         process.env.MAILJET_SECRET_KEY
       ) {
-        console.log('Using Mailjet for test email');
+        logger.debug('Using Mailjet for test email', 'Component');
       } else {
         return res.status(400).json({
           success: false,
@@ -1231,7 +1175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         details: `Đây là email kiểm tra từ Mi Nhon Hotel Voice Assistant. Sent from ${isMobile ? 'MOBILE' : 'DESKTOP'} at ${new Date().toISOString()}`,
       });
 
-      console.log('Email test result:', result);
+      logger.debug('Email test result:', 'Component', result);
 
       if (result.success) {
         res.json({
@@ -1251,7 +1195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mobile-friendly test endpoint with simplified response
   app.post('/api/mobile-test-email', async (req, res) => {
     try {
-      console.log('Mobile test email requested');
+      logger.debug('Mobile test email requested', 'Component');
 
       // Default email if not provided
       const toEmail = req.body.toEmail || 'tuans2@gmail.com';
@@ -1263,21 +1207,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Ghi log chi tiết
-      console.log('=================== MOBILE EMAIL TEST ===================');
-      console.log('Time:', new Date().toISOString());
-      console.log('Device info:', userAgent);
-      console.log('Device type:', isMobile ? 'MOBILE' : 'DESKTOP');
-      console.log('Recipient:', toEmail);
-      console.log('=========================================================');
+      logger.debug('=================== MOBILE EMAIL TEST ===================', 'Component');
+      logger.debug('Time:', 'Component', new Date().toISOString());
+      logger.debug('Device info:', 'Component', userAgent);
+      logger.debug('Device type:', 'Component', isMobile ? 'MOBILE' : 'DESKTOP');
+      logger.debug('Recipient:', 'Component', toEmail);
+      logger.debug('=========================================================', 'Component');
 
       // Send with timeout to ensure request completes and return response immediately
       setTimeout(async () => {
         try {
           // Sử dụng phương thức đặc biệt cho thiết bị di động
           if (isMobile) {
-            console.log(
-              'Gửi email qua phương thức chuyên biệt cho thiết bị di động...'
-            );
+            logger.debug('Gửi email qua phương thức chuyên biệt cho thiết bị di động...', 'Component');
 
             const result = await sendMobileEmail(
               toEmail,
@@ -1292,11 +1234,11 @@ Trân trọng,
 Mi Nhon Hotel Mui Ne`
             );
 
-            console.log('Kết quả gửi email qua mobile mail:', result);
+            logger.debug('Kết quả gửi email qua mobile mail:', 'Component', result);
           }
           // Cho thiết bị desktop sử dụng phương thức thông thường
           else {
-            console.log('Gửi email với phương thức thông thường...');
+            logger.debug('Gửi email với phương thức thông thường...', 'Component');
             const result = await sendServiceConfirmation(toEmail, {
               serviceType: 'Mobile Test',
               roomNumber: 'DEVICE-TEST',
@@ -1304,11 +1246,11 @@ Mi Nhon Hotel Mui Ne`
               details: `Email kiểm tra gửi từ thiết bị ${isMobile ? 'di động' : 'desktop'} lúc ${new Date().toLocaleTimeString()}. UA: ${userAgent}`,
             });
 
-            console.log('Kết quả gửi email thông thường:', result);
+            logger.debug('Kết quả gửi email thông thường:', 'Component', result);
           }
         } catch (innerError) {
-          console.error('Lỗi trong timeout callback:', innerError);
-          console.error('Chi tiết lỗi:', JSON.stringify(innerError));
+          logger.error('Lỗi trong timeout callback:', 'Component', innerError);
+          logger.error('Chi tiết lỗi:', 'Component', JSON.stringify(innerError));
         }
       }, 50); // Giảm thời gian chờ xuống để di động xử lý nhanh hơn
 
@@ -1350,16 +1292,12 @@ Mi Nhon Hotel Mui Ne`
         userAgent
       );
 
-      console.log(
-        '=================== MOBILE CALL SUMMARY EMAIL ==================='
-      );
-      console.log('Time:', new Date().toISOString());
-      console.log('Device:', isMobile ? 'MOBILE' : 'DESKTOP');
-      console.log('Room:', callDetails.roomNumber);
-      console.log('Recipient:', toEmail);
-      console.log(
-        '=============================================================='
-      );
+      logger.debug('=================== MOBILE CALL SUMMARY EMAIL ===================', 'Component');
+      logger.debug('Time:', 'Component', new Date().toISOString());
+      logger.debug('Device:', 'Component', isMobile ? 'MOBILE' : 'DESKTOP');
+      logger.debug('Room:', 'Component', callDetails.roomNumber);
+      logger.debug('Recipient:', 'Component', toEmail);
+      logger.debug('==============================================================', 'Component');
 
       // Tạo mã tham chiếu
       const orderReference =
@@ -1377,9 +1315,7 @@ Mi Nhon Hotel Mui Ne`
 
       // Phần xử lý bất đồng bộ gửi email
       try {
-        console.log(
-          'Đang xử lý gửi email tóm tắt cuộc gọi từ thiết bị di động...'
-        );
+        logger.debug('Đang xử lý gửi email tóm tắt cuộc gọi từ thiết bị di động...', 'Component');
 
         // Thực hiện gửi email
         const result = await sendMobileCallSummary(toEmail, {
@@ -1391,13 +1327,10 @@ Mi Nhon Hotel Mui Ne`
           serviceRequests: callDetails.serviceRequests || [],
           orderReference,
         });
-        console.log(
-          'Kết quả gửi email tóm tắt cuộc gọi từ thiết bị di động:',
-          result
-        );
+        logger.debug('Kết quả gửi email tóm tắt cuộc gọi từ thiết bị di động:', 'Component', result);
         // Thêm mới: Lưu request vào database để hiển thị trong staff UI
         try {
-          console.log('Lưu request từ thiết bị di động vào database...');
+          logger.debug('Lưu request từ thiết bị di động vào database...', 'Component');
           const cleanedSummary = cleanSummaryContent(callDetails.summary);
           await db.insert(requestTable).values({
             // @ts-ignore
@@ -1408,10 +1341,7 @@ Mi Nhon Hotel Mui Ne`
             status: 'Đã ghi nhận',
             updated_at: new Date(),
           });
-          console.log(
-            'Đã lưu request thành công vào database với ID:',
-            orderReference
-          );
+          logger.debug('Đã lưu request thành công vào database với ID:', 'Component', orderReference);
           // Bổ sung: Lưu order vào bảng orders
           await storage.createOrder({
             id: `ORD-${Date.now()}-${Math.random()}`,
@@ -1421,18 +1351,12 @@ Mi Nhon Hotel Mui Ne`
             requestContent: `Call Summary: ${(callDetails.summary || 'No summary').substring(0, 200)}...`,
             status: 'Đã ghi nhận',
           });
-          console.log('Đã lưu order vào bảng orders');
+          logger.debug('Đã lưu order vào bảng orders', 'Component');
         } catch (dbError) {
-          console.error(
-            'Lỗi khi lưu request hoặc order từ thiết bị di động vào DB:',
-            dbError
-          );
+          logger.error('Lỗi khi lưu request hoặc order từ thiết bị di động vào DB:', 'Component', dbError);
         }
       } catch (sendError) {
-        console.error(
-          'Lỗi khi gửi email tóm tắt từ thiết bị di động:',
-          sendError
-        );
+        logger.error('Lỗi khi gửi email tóm tắt từ thiết bị di động:', 'Component', sendError);
         // Không cần trả về lỗi cho client vì đã trả về success trước đó
       }
     } catch (error: any) {
@@ -1481,7 +1405,7 @@ Mi Nhon Hotel Mui Ne`
           })),
         });
       } catch (apiError: any) {
-        console.error('Lỗi khi kết nối đến Mailjet API:', apiError.message);
+        logger.error('Lỗi khi kết nối đến Mailjet API:', 'Component', apiError.message);
         // Nếu kết nối thất bại, trả về thông tin lỗi
         res.status(500).json({
           success: false,
@@ -1506,7 +1430,7 @@ Mi Nhon Hotel Mui Ne`
         });
       }
 
-      console.log('Lấy danh sách email gần đây từ Mailjet');
+      logger.debug('Lấy danh sách email gần đây từ Mailjet', 'Component');
 
       // Gửi request trực tiếp đến Mailjet API
       try {
@@ -1522,7 +1446,7 @@ Mi Nhon Hotel Mui Ne`
 
         // Kiểm tra và xử lý kết quả
         if (result && result.data && Array.isArray(result.data.Data)) {
-          console.log(`Tìm thấy ${result.data.Count} email gần đây`);
+          logger.debug('Tìm thấy ${result.data.Count} email gần đây', 'Component');
 
           // Chuyển đổi kết quả thành định dạng dễ đọc
           const emails = result.data.Data.map((message: any) => ({
@@ -1546,10 +1470,7 @@ Mi Nhon Hotel Mui Ne`
           throw new Error('Định dạng dữ liệu không hợp lệ từ Mailjet API');
         }
       } catch (apiError: any) {
-        console.error(
-          'Lỗi khi lấy dữ liệu email từ Mailjet:',
-          apiError.message
-        );
+        logger.error('Lỗi khi lấy dữ liệu email từ Mailjet:', 'Component', apiError.message);
         res.status(500).json({
           success: false,
           error: 'Không thể lấy dữ liệu email từ Mailjet',
@@ -1636,9 +1557,7 @@ Mi Nhon Hotel Mui Ne`
       //   timestamp: getCurrentTimestamp()
       // });
 
-      console.log(
-        `Stored transcript for call ${callId}: ${role} - ${content?.substring(0, 100)}...`
-      );
+      logger.debug('Stored transcript for call ${callId}: ${role} - ${content?.substring(0, 100)}...', 'Component');
 
       res.json({
         success: true,
@@ -1721,20 +1640,17 @@ Mi Nhon Hotel Mui Ne`
 
   // Lấy danh sách request
   app.get('/api/staff/requests', authenticateJWT, async (req, res) => {
-    console.log('API /api/staff/requests called');
-    console.log('Authorization header:', req.headers.authorization);
+    logger.debug('API /api/staff/requests called', 'Component');
+    logger.debug('Authorization header:', 'Component', req.headers.authorization);
     try {
       // Skip database connection test since db.execute doesn't exist
-      console.log('Fetching requests from database...');
+      logger.debug('Fetching requests from database...', 'Component');
       const dbRequests = await db.select().from(requestTable);
-      console.log(
-        `Found ${dbRequests.length} requests in database:`,
-        dbRequests
-      );
+      logger.debug('Found ${dbRequests.length} requests in database:', 'Component', dbRequests);
 
       // Thêm kiểm tra nếu không có requests từ DB
       if (dbRequests.length === 0) {
-        console.log('No requests found in database, returning dummy test data');
+        logger.debug('No requests found in database, returning dummy test data', 'Component');
         // Trả về dữ liệu mẫu nếu không có dữ liệu trong DB
         return res.json([
           {
@@ -1868,14 +1784,14 @@ Mi Nhon Hotel Mui Ne`
   // Xóa tất cả requests
   app.delete('/api/staff/requests/all', authenticateJWT, async (req, res) => {
     try {
-      console.log('Attempting to delete all requests');
+      logger.debug('Attempting to delete all requests', 'Component');
       // Xóa tất cả dữ liệu từ bảng request sử dụng API function
       const result = await deleteAllRequests();
       const deletedCount =
         result.success && 'deletedCount' in result
           ? result.deletedCount || 0
           : 0;
-      console.log(`Deleted ${deletedCount} requests from database`);
+      logger.debug('Deleted ${deletedCount} requests from database', 'Component');
 
       res.json({
         success: true,
@@ -2012,7 +1928,7 @@ Mi Nhon Hotel Mui Ne`
         },
       });
     } catch (error) {
-      console.error('Error in /api/hotels/by-subdomain:', error);
+      logger.error('Error in /api/hotels/by-subdomain:', 'Component', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   });
@@ -2024,7 +1940,7 @@ Mi Nhon Hotel Mui Ne`
     try {
       const { language } = req.params;
 
-      console.log(`[API] Getting Vapi config for language: ${language}`);
+      logger.debug('[API] Getting Vapi config for language: ${language}', 'Component');
 
       // Get environment variables for the requested language
       const getEnvVars = (lang: string) => {
@@ -2043,7 +1959,7 @@ Mi Nhon Hotel Mui Ne`
 
       const config = getEnvVars(language);
 
-      console.log(`[API] Vapi config for ${language}:`, {
+      logger.debug('[API] Vapi config for ${language}:', 'Component', {
         publicKey: config.publicKey
           ? `${config.publicKey.substring(0, 10)}...`
           : 'NOT SET',
@@ -2054,9 +1970,7 @@ Mi Nhon Hotel Mui Ne`
 
       // Fallback to English if language-specific config not found
       if (!config.publicKey || !config.assistantId) {
-        console.log(
-          `[API] Language ${language} config not found, falling back to English`
-        );
+        logger.debug('[API] Language ${language} config not found, falling back to English', 'Component');
         const fallbackConfig = getEnvVars('en');
         res.json({
           language,
@@ -2073,7 +1987,7 @@ Mi Nhon Hotel Mui Ne`
         });
       }
     } catch (error) {
-      console.error('[API] Error getting Vapi config:', error);
+      logger.error('[API] Error getting Vapi config:', 'Component', error);
       res.status(500).json({ error: 'Failed to get Vapi configuration' });
     }
   });

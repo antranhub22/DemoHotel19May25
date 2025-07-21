@@ -1,5 +1,6 @@
 import { db, call, request } from '@shared/db';
 import { eq } from 'drizzle-orm';
+import { logger } from '@shared/utils/logger';
 import type { InsertCall } from '@shared/db/schema';
 
 export async function seedDevelopmentData() {
@@ -8,11 +9,11 @@ export async function seedDevelopmentData() {
     const existingCalls = await db.select().from(call).limit(1);
 
     if (existingCalls.length > 0) {
-      console.log('Development data already exists, skipping seed...');
+      logger.debug('Development data already exists, skipping seed...', 'Component');
       return;
     }
 
-    console.log('Seeding development data...');
+    logger.debug('Seeding development data...', 'Component');
 
     // Seed call data
     const callData = [
@@ -103,8 +104,8 @@ export async function seedDevelopmentData() {
       await db.insert(request).values(requestItem);
     }
 
-    console.log('Development data seeded successfully!');
+    logger.debug('Development data seeded successfully!', 'Component');
   } catch (error) {
-    console.error('Error seeding development data:', error);
+    logger.error('Error seeding development data:', 'Component', error);
   }
 }

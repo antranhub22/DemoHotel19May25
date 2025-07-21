@@ -6,6 +6,7 @@ import analyticsRoutes from './analytics';
 import dashboardRoutes from './dashboard';
 import healthRoutes from './health';
 import requestRoutes from './request';
+import { logger } from '@shared/utils/logger';
 // import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 
 const router = express.Router();

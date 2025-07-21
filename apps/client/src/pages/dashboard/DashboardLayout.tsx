@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { useAuth } from '@/context/AuthContext';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface TenantData {

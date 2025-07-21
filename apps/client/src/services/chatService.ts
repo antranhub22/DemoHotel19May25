@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { logger } from '@shared/utils/logger';
 
 // Load the system prompt from environment or inline it here
 const SYSTEM_PROMPT = `FIRST MESSAGE: HI! Hotel ! HOW MAY I ASSIST YOU TODAY ?

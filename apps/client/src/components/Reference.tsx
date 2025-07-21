@@ -9,6 +9,7 @@ import 'swiper/css/pagination';
 import { ChevronDown } from 'lucide-react';
 import { FaBookOpen } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
+import { logger } from '@shared/utils/logger';
 
 const CATEGORIES = [
   'Landmark',
@@ -95,7 +96,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
       document.body.removeChild(link);
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      console.error('Error downloading file:', error);
+      logger.error('Error downloading file:', 'Component', error);
     }
   };
 

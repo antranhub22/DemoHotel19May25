@@ -1,18 +1,19 @@
 import nodemailer from 'nodemailer';
+import { logger } from '@shared/utils/logger';
 
 // Tạo một transporter test luôn trả về thành công (cho môi trường phát triển)
 // Để khi gửi email bị lỗi, ứng dụng vẫn hoạt động bình thường
 const createTestTransporter = () => {
-  console.log('Sử dụng transporter test (không gửi email thực tế)');
+  logger.debug('Sử dụng transporter test (không gửi email thực tế)', 'Component');
 
   return {
     sendMail: async (mailOptions: any) => {
-      console.log('=================== TEST EMAIL ===================');
-      console.log('To:', mailOptions.to);
-      console.log('Subject:', mailOptions.subject);
-      console.log('From:', mailOptions.from);
-      console.log('Content type:', mailOptions.html ? 'HTML' : 'Text');
-      console.log('================= END TEST EMAIL =================');
+      logger.debug('=================== TEST EMAIL ===================', 'Component');
+      logger.debug('To:', 'Component', mailOptions.to);
+      logger.debug('Subject:', 'Component', mailOptions.subject);
+      logger.debug('From:', 'Component', mailOptions.from);
+      logger.debug('Content type:', 'Component', mailOptions.html ? 'HTML' : 'Text');
+      logger.debug('================= END TEST EMAIL =================', 'Component');
 
       // Trả về một kết quả giả lập thành công
       return {
@@ -27,13 +28,11 @@ const createTestTransporter = () => {
 export const createTransporter = () => {
   // Sử dụng nodemailer với Gmail SMTP hoặc test transporter
   if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-    console.warn(
-      'GMAIL_USER hoặc GMAIL_PASS không được cấu hình - sử dụng test transporter'
-    );
+    logger.warn('GMAIL_USER hoặc GMAIL_PASS không được cấu hình - sử dụng test transporter', 'Component');
     return createTestTransporter();
   }
 
-  console.log('Sử dụng cấu hình Gmail SMTP');
+  logger.debug('Sử dụng cấu hình Gmail SMTP', 'Component');
 
   return nodemailer.createTransport({
     service: 'gmail',
@@ -78,7 +77,7 @@ export const sendServiceConfirmation = async (
       </div>
     `;
 
-    console.log('Gửi email với Gmail SMTP');
+    logger.debug('Gửi email với Gmail SMTP', 'Component');
 
     // Tạo bản ghi log
     const emailLog = {
@@ -90,7 +89,7 @@ export const sendServiceConfirmation = async (
     };
 
     // Lưu log vào console
-    console.log('EMAIL LOG:', JSON.stringify(emailLog, null, 2));
+    logger.debug('EMAIL LOG:', 'Component', JSON.stringify(emailLog, null, 2));
 
     // Sử dụng nodemailer thay vì Mailjet trực tiếp
     // Gmail SMTP là một lựa chọn tốt khi Mailjet không hoạt động
@@ -109,38 +108,33 @@ export const sendServiceConfirmation = async (
       };
 
       const result = await transporter.sendMail(mailOptions);
-      console.log('Email đã gửi thành công:', result.response);
+      logger.debug('Email đã gửi thành công:', 'Component', result.response);
 
       // Cập nhật log
       emailLog.status = 'sent';
-      console.log('EMAIL LOG (cập nhật):', JSON.stringify(emailLog, null, 2));
+      logger.debug('EMAIL LOG (cập nhật):', 'Component', JSON.stringify(emailLog, null, 2));
 
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
-      console.error('Lỗi khi gửi email qua Gmail SMTP:', emailError);
+      logger.error('Lỗi khi gửi email qua Gmail SMTP:', 'Component', emailError);
 
       // Cập nhật log
       emailLog.status = 'failed';
-      console.log('EMAIL LOG (thất bại):', JSON.stringify(emailLog, null, 2));
+      logger.debug('EMAIL LOG (thất bại):', 'Component', JSON.stringify(emailLog, null, 2));
 
       // Lưu lỗi vào console với định dạng dễ đọc
-      console.log('============ CHI TIẾT LỖI GỬI EMAIL ============');
-      console.log('Thời gian:', new Date().toISOString());
-      console.log('Người nhận:', toEmail);
-      console.log(
-        'Tiêu đề:',
-        `Mi Nhon Hotel - Xác nhận đặt dịch vụ từ phòng ${serviceDetails.roomNumber}`
+      logger.debug('============ CHI TIẾT LỖI GỬI EMAIL ============', 'Component');
+      logger.debug('Thời gian:', 'Component', new Date().toISOString());
+      logger.debug('Người nhận:', 'Component', toEmail);
+      logger.debug('Tiêu đề:', 'Component', `Mi Nhon Hotel - Xác nhận đặt dịch vụ từ phòng ${serviceDetails.roomNumber}`);
+      logger.debug('Lỗi:', 'Component', emailError instanceof Error ? emailError.message : String(emailError)
       );
-      console.log(
-        'Lỗi:',
-        emailError instanceof Error ? emailError.message : String(emailError)
-      );
-      console.log('===================================================');
+      logger.debug('===================================================', 'Component');
 
       throw emailError;
     }
   } catch (error) {
-    console.error('Lỗi khi gửi email:', error);
+    logger.error('Lỗi khi gửi email:', 'Component', error);
     return { success: false, error };
   }
 };
@@ -192,7 +186,7 @@ export const sendCallSummary = async (
       </div>
     `;
 
-    console.log('Gửi email tóm tắt với Gmail SMTP');
+    logger.debug('Gửi email tóm tắt với Gmail SMTP', 'Component');
 
     // Tạo bản ghi log
     const emailLog = {
@@ -209,7 +203,7 @@ export const sendCallSummary = async (
     };
 
     // Lưu log vào console
-    console.log('EMAIL LOG:', JSON.stringify(emailLog, null, 2));
+    logger.debug('EMAIL LOG:', 'Component', JSON.stringify(emailLog, null, 2));
 
     try {
       // Thử sử dụng transporter được cấu hình
@@ -226,38 +220,38 @@ export const sendCallSummary = async (
       };
 
       const result = await transporter.sendMail(mailOptions);
-      console.log('Email tóm tắt đã gửi thành công:', result.response);
+      logger.debug('Email tóm tắt đã gửi thành công:', 'Component', result.response);
 
       // Cập nhật log
       emailLog.status = 'sent';
-      console.log('EMAIL LOG (cập nhật):', JSON.stringify(emailLog, null, 2));
+      logger.debug('EMAIL LOG (cập nhật):', 'Component', JSON.stringify(emailLog, null, 2));
 
       return { success: true, messageId: result.messageId };
     } catch (emailError: unknown) {
-      console.error('Lỗi khi gửi email tóm tắt qua Gmail SMTP:', emailError);
+      logger.error('Lỗi khi gửi email tóm tắt qua Gmail SMTP:', 'Component', emailError);
 
       // Cập nhật log
       emailLog.status = 'failed';
-      console.log('EMAIL LOG (thất bại):', JSON.stringify(emailLog, null, 2));
+      logger.debug('EMAIL LOG (thất bại):', 'Component', JSON.stringify(emailLog, null, 2));
 
       // Lưu thông tin tóm tắt vào console để người dùng có thể xem
-      console.log('============ THÔNG TIN TÓM TẮT CUỘC GỌI ============');
-      console.log('Thời gian:', callDetails.timestamp.toLocaleString());
-      console.log('Phòng:', callDetails.roomNumber);
-      console.log('Thời lượng:', callDetails.duration);
-      console.log('Mã tham chiếu:', callDetails.orderReference || 'Không có');
-      console.log('Tóm tắt nội dung:');
+      logger.debug('============ THÔNG TIN TÓM TẮT CUỘC GỌI ============', 'Component');
+      logger.debug('Thời gian:', 'Component', callDetails.timestamp.toLocaleString());
+      logger.debug('Phòng:', 'Component', callDetails.roomNumber);
+      logger.debug('Thời lượng:', 'Component', callDetails.duration);
+      logger.debug('Mã tham chiếu:', 'Component', callDetails.orderReference || 'Không có');
+      logger.debug('Tóm tắt nội dung:', 'Component');
       console.log(callDetails.summary);
-      console.log('Các dịch vụ được yêu cầu:');
+      logger.debug('Các dịch vụ được yêu cầu:', 'Component');
       callDetails.serviceRequests.forEach((req, index) => {
-        console.log(`  ${index + 1}. ${req}`);
+        logger.debug('  ${index + 1}. ${req}', 'Component');
       });
-      console.log('===================================================');
+      logger.debug('===================================================', 'Component');
 
       throw emailError;
     }
   } catch (error) {
-    console.error('Lỗi khi gửi email tóm tắt:', error);
+    logger.error('Lỗi khi gửi email tóm tắt:', 'Component', error);
     return { success: false, error };
   }
 };

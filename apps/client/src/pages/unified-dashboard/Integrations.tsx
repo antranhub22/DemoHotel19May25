@@ -79,6 +79,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface Integration {
@@ -486,7 +487,7 @@ const IntegrationModal = ({
       onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Failed to save integration:', error);
+      logger.error('Failed to save integration:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -767,7 +768,7 @@ const AddIntegrationModal = ({
         rateLimitPerMinute: 100,
       });
     } catch (error) {
-      console.error('Failed to add integration:', error);
+      logger.error('Failed to add integration:', 'Component', error);
     } finally {
       setLoading(false);
     }
@@ -1016,7 +1017,7 @@ export const Integrations: React.FC = () => {
       setWebhooks(mockWebhooks);
       setCredentials(mockCredentials);
     } catch (error) {
-      console.error('Failed to fetch integrations:', error);
+      logger.error('Failed to fetch integrations:', 'Component', error);
     } finally {
       setLoading(false);
     }

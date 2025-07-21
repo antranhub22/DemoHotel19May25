@@ -1,5 +1,6 @@
 import { db } from '@server/db';
 import { sql } from 'drizzle-orm';
+import { logger } from '@shared/utils/logger';
 
 export class AutoDatabaseFixer {
   private db: any;
@@ -11,36 +12,32 @@ export class AutoDatabaseFixer {
 
   async autoFixDatabase(): Promise<boolean> {
     if (!this.db) {
-      console.log('⚠️ Database connection not available, skipping auto-fix');
+      logger.debug('⚠️ Database connection not available, skipping auto-fix', 'Component');
       return false;
     }
 
     try {
-      console.log('🔧 Running auto database fix...');
-      console.log('🔍 Checking database schema...');
+      logger.debug('🔧 Running auto database fix...', 'Component');
+      logger.debug('🔍 Checking database schema...', 'Component');
 
       const needsFix = await this.checkIfDatabaseNeedsFix();
       if (!needsFix) {
-        console.log('✅ Database schema is already up to date');
+        logger.debug('✅ Database schema is already up to date', 'Component');
         return true;
       }
 
-      console.log('🛠️ Auto-fixing database schema...');
+      logger.debug('🛠️ Auto-fixing database schema...', 'Component');
       await this.performAutoFix();
-      console.log('✅ Auto database fix completed successfully');
+      logger.debug('✅ Auto database fix completed successfully', 'Component');
       return true;
     } catch (error) {
-      console.error(
-        '❌ Auto database fix failed:',
-        error instanceof Error ? error.message : String(error)
+      logger.error('❌ Auto database fix failed:', 'Component', error instanceof Error ? error.message : String(error)
       );
-      console.error(
-        '❌ Full error stack:',
-        error instanceof Error ? error.stack : String(error)
+      logger.error('❌ Full error stack:', 'Component', error instanceof Error ? error.stack : String(error)
       );
 
       // Don't fail server startup, just log error
-      console.log('⚠️ Server will continue without database auto-fix');
+      logger.debug('⚠️ Server will continue without database auto-fix', 'Component');
       return false;
     }
   }
@@ -50,16 +47,14 @@ export class AutoDatabaseFixer {
       // Simple check - just verify we have a database connection
       // Don't run any queries since the execute method doesn't exist
       if (this.db) {
-        console.log('🔍 Database connection test passed');
+        logger.debug('🔍 Database connection test passed', 'Component');
         return false; // Database is available, assume it's OK
       } else {
-        console.log('📋 No database connection available');
+        logger.debug('📋 No database connection available', 'Component');
         return true;
       }
     } catch (error) {
-      console.log(
-        '📋 Database check failed, assuming needs fix:',
-        error instanceof Error ? error.message : String(error)
+      logger.debug('📋 Database check failed, assuming needs fix:', 'Component', error instanceof Error ? error.message : String(error)
       );
       return true;
     }
@@ -67,16 +62,14 @@ export class AutoDatabaseFixer {
 
   private async performAutoFix(): Promise<void> {
     try {
-      console.log('🔧 Step 1: Ensuring basic database setup...');
+      logger.debug('🔧 Step 1: Ensuring basic database setup...', 'Component');
 
       // For now, just ensure we can connect and the basic structure exists
       // We'll rely on migrations for actual table creation
 
-      console.log('✅ Database auto-fix completed (basic check only)');
+      logger.debug('✅ Database auto-fix completed (basic check only)', 'Component');
     } catch (error) {
-      console.error(
-        '❌ Auto-fix step failed:',
-        error instanceof Error ? error.message : String(error)
+      logger.error('❌ Auto-fix step failed:', 'Component', error instanceof Error ? error.message : String(error)
       );
       throw error;
     }
@@ -84,7 +77,7 @@ export class AutoDatabaseFixer {
 
   async cleanup(): Promise<void> {
     // Cleanup method if needed
-    console.log('🧹 AutoDatabaseFixer cleanup completed');
+    logger.debug('🧹 AutoDatabaseFixer cleanup completed', 'Component');
   }
 }
 
@@ -95,9 +88,7 @@ export async function runAutoDbFix(): Promise<boolean> {
     await fixer.cleanup();
     return result;
   } catch (error) {
-    console.error(
-      '❌ Database auto-fix failed completely:',
-      error instanceof Error ? error.message : String(error)
+    logger.error('❌ Database auto-fix failed completely:', 'Component', error instanceof Error ? error.message : String(error)
     );
     await fixer.cleanup();
     return false;

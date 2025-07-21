@@ -4,6 +4,7 @@ import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 
 import '../../styles/voice-interface.css';
+import { logger } from '@shared/utils/logger';
 import { Language } from '@/types/interface1.types';
 
 interface SiriCallButtonProps {
@@ -32,15 +33,12 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 }) => {
   // Component render debug - Development only
   if (process.env.NODE_ENV === 'development') {
-    console.log(
-      '[SiriCallButton] Component render - Container:',
-      containerId,
+    logger.debug('[SiriCallButton] Component render - Container:', 'Component', containerId,
       'onCallStart:',
       !!onCallStart,
       'Mobile:',
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      )
+        navigator.userAgent)
     );
   }
 
@@ -50,19 +48,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // Debug utility methods - Environment aware
   const debug = (message: string, ...args: any[]) => {
     if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 2) {
-      console.log(`[SiriCallButton] ${message}`, ...args);
+      logger.debug('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
 
   const debugWarn = (message: string, ...args: any[]) => {
     if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 1) {
-      console.warn(`[SiriCallButton] ${message}`, ...args);
+      logger.warn('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
 
   const debugError = (message: string, ...args: any[]) => {
     // Always show errors, even in production
-    console.error(`[SiriCallButton] ${message}`, ...args);
+    logger.error('[SiriCallButton] ${message}', 'Component', ...args);
   };
 
   const buttonRef = useRef<SiriButton | null>(null);
@@ -325,18 +323,13 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     const isMobileDevice_local = isMobileDevice();
 
     logDeviceInfo('SiriCallButton');
-    console.log(
-      '📱 [SiriCallButton] Device detection - isMobile:',
-      isMobileDevice_local
-    );
+    logger.debug('📱 [SiriCallButton] Device detection - isMobile:', 'Component', isMobileDevice_local);
 
     // Mobile devices use JSX direct event handlers (handleDirectTouch)
     // Desktop gets mouse events for hover effects
     if (isMobileDevice_local) {
       if (process.env.NODE_ENV === 'development') {
-        console.log(
-          '[SiriCallButton] Mobile device detected - using direct JSX handlers'
-        );
+        logger.debug('[SiriCallButton] Mobile device detected - using direct JSX handlers', 'Component');
       }
       return () => {
         safeCleanup();
@@ -345,72 +338,53 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       // ✅ DESKTOP: Mouse events with hover support + Enhanced Debug
       const handleMouseEnter = () => {
         handleHover(true);
-        console.log('🖱️ [SiriCallButton] 🟢 DESKTOP Mouse enter');
+        logger.debug('🖱️ [SiriCallButton] 🟢 DESKTOP Mouse enter', 'Component');
       };
 
       const handleMouseLeave = () => {
         handleHover(false);
-        console.log('🖱️ [SiriCallButton] 🔴 DESKTOP Mouse leave');
+        logger.debug('🖱️ [SiriCallButton] 🔴 DESKTOP Mouse leave', 'Component');
       };
 
       const handleMouseDown = (e: MouseEvent) => {
-        console.log(
-          '🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:',
-          e.target
-        );
-        console.log('🖱️ [SiriCallButton] 🔽 Element ID:', element.id);
-        console.log(
-          '🖱️ [SiriCallButton] 🔽 isHandlingClick before:',
-          isHandlingClick.current
-        );
+        logger.debug('🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:', 'Component', e.target);
+        logger.debug('🖱️ [SiriCallButton] 🔽 Element ID:', 'Component', element.id);
+        logger.debug('🖱️ [SiriCallButton] 🔽 isHandlingClick before:', 'Component', isHandlingClick.current);
 
         const rect = element.getBoundingClientRect();
         handleInteractionStart(e, {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
-        console.log('🖱️ [SiriCallButton] 🔽 Mouse down completed');
+        logger.debug('🖱️ [SiriCallButton] 🔽 Mouse down completed', 'Component');
       };
 
       const handleMouseUp = (e: MouseEvent) => {
-        console.log(
-          '🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:',
-          e.target
-        );
-        console.log(
-          '🖱️ [SiriCallButton] 🔼 onCallStart available:',
-          !!onCallStart
-        );
-        console.log('🖱️ [SiriCallButton] 🔼 isListening state:', isListening);
-        console.log(
-          '🖱️ [SiriCallButton] 🔼 isHandlingClick before:',
-          isHandlingClick.current
-        );
+        logger.debug('🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:', 'Component', e.target);
+        logger.debug('🖱️ [SiriCallButton] 🔼 onCallStart available:', 'Component', !!onCallStart);
+        logger.debug('🖱️ [SiriCallButton] 🔼 isListening state:', 'Component', isListening);
+        logger.debug('🖱️ [SiriCallButton] 🔼 isHandlingClick before:', 'Component', isHandlingClick.current);
 
         handleInteractionEnd(e);
-        console.log(
-          '🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed'
-        );
+        logger.debug('🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed', 'Component');
       };
 
       // Enhanced debug for element setup
-      console.log('🖱️ [SiriCallButton] 🎯 DESKTOP EVENT SETUP:');
-      console.log('  📦 Element ID:', element.id);
-      console.log('  📦 Element tagName:', element.tagName);
-      console.log('  🎛️ onCallStart available:', !!onCallStart);
-      console.log('  🎛️ onCallEnd available:', !!onCallEnd);
-      console.log(
-        '  🎨 Element computed style:',
-        window.getComputedStyle(element).pointerEvents
+      logger.debug('🖱️ [SiriCallButton] 🎯 DESKTOP EVENT SETUP:', 'Component');
+      logger.debug('  📦 Element ID:', 'Component', element.id);
+      logger.debug('  📦 Element tagName:', 'Component', element.tagName);
+      logger.debug('  🎛️ onCallStart available:', 'Component', !!onCallStart);
+      logger.debug('  🎛️ onCallEnd available:', 'Component', !!onCallEnd);
+      logger.debug('  🎨 Element computed style:', 'Component', window.getComputedStyle(element).pointerEvents
       );
 
       // 🔧 MANUAL TEST: Add click listener for debugging
       const testClickHandler = (e: MouseEvent) => {
-        console.log('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!');
-        console.log('  🎯 Click target:', e.target);
-        console.log('  🎯 Click coordinates:', e.clientX, e.clientY);
-        console.log('  🎯 Element rect:', element.getBoundingClientRect());
-        console.log('  🎯 onCallStart available:', !!onCallStart);
+        logger.debug('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!', 'Component');
+        logger.debug('  🎯 Click target:', 'Component', e.target);
+        logger.debug('  🎯 Click coordinates:', 'Component', e.clientX, e.clientY);
+        logger.debug('  🎯 Element rect:', 'Component', element.getBoundingClientRect());
+        logger.debug('  🎯 onCallStart available:', 'Component', !!onCallStart);
       };
 
       element.addEventListener('click', testClickHandler);
@@ -420,12 +394,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       element.addEventListener('mousedown', handleMouseDown);
       element.addEventListener('mouseup', handleMouseUp);
 
-      console.log(
-        '🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully'
-      );
+      logger.debug('🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully', 'Component');
 
       return () => {
-        console.log('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events');
+        logger.debug('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events', 'Component');
 
         // 🛡️ SAFETY: Reset protection flags
         isHandlingClick.current = false;
@@ -458,9 +430,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       buttonRef.current.setListening(isListening);
       // ✅ FIX 4: Remove unnecessary resize on listening state change
       // Canvas animations handle listening state internally, no resize needed
-      console.log(
-        '🔧 [SiriCallButton] Listening state updated without resize trigger'
-      );
+      logger.debug('🔧 [SiriCallButton] Listening state updated without resize trigger', 'Component');
     }
   }, [isListening, containerId]);
 
@@ -479,16 +449,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   // Mobile touch handler - unified with desktop logic
   const handleDirectTouch = async (e: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(
-        '📱 [SiriCallButton] Mobile touch event:',
-        e.type,
+      logger.debug('📱 [SiriCallButton] Mobile touch event:', 'Component', e.type,
         'on',
-        containerId
-      );
-      console.log(
-        '📱 [SiriCallButton] Current isListening state:',
-        isListening
-      );
+        containerId);
+      logger.debug('📱 [SiriCallButton] Current isListening state:', 'Component', isListening);
     }
 
     // Handle touch end or click events
@@ -587,17 +551,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
               setTimeout(() => {
                 const container = document.getElementById('${containerId}');
                 if (container) {
-                  console.log('🔍 [SiriCallButton] CONTAINER DEBUG:');
-                  console.log('  📦 Container element:', container);
-                  console.log('  📦 Container style.pointerEvents:', container.style.pointerEvents);
-                  console.log('  📦 Container computed pointerEvents:', getComputedStyle(container).pointerEvents);
-                  console.log('  📦 Container zIndex:', getComputedStyle(container).zIndex);
-                  console.log('  📦 Container position:', getComputedStyle(container).position);
-                  console.log('  📦 Container dimensions:', container.getBoundingClientRect());
+                  logger.debug('🔍 [SiriCallButton] CONTAINER DEBUG:', 'Component');
+                  logger.debug('  📦 Container element:', 'Component', container);
+                  logger.debug('  📦 Container style.pointerEvents:', 'Component', container.style.pointerEvents);
+                  logger.debug('  📦 Container computed pointerEvents:', 'Component', getComputedStyle(container).pointerEvents);
+                  logger.debug('  📦 Container zIndex:', 'Component', getComputedStyle(container).zIndex);
+                  logger.debug('  📦 Container position:', 'Component', getComputedStyle(container).position);
+                  logger.debug('  📦 Container dimensions:', 'Component', container.getBoundingClientRect());
                   
                   // Test click detection
                   container.addEventListener('click', (e) => {
-                    console.log('🎯 [SiriCallButton] Container received click!', e);
+                    logger.debug('🎯 [SiriCallButton] Container received click!', 'Component', e);
                   }, { once: true });
                 }
               }, 500);

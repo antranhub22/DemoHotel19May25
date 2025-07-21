@@ -17,6 +17,7 @@ import {
   getHourlyActivity,
 } from '@server/analytics';
 import {
+import { logger } from '@shared/utils/logger';
   hotelProfileMapper,
   type HotelProfileDB,
   type HotelProfileCamelCase,
@@ -137,7 +138,7 @@ const checkLimits = async (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (error) {
-    console.error('Usage check failed:', error);
+    logger.error('Usage check failed:', 'Component', error);
     next(); // Continue on error to avoid blocking
   }
 };
@@ -159,7 +160,7 @@ const requireFeature = (feature: string) => {
       }
       next();
     } catch (error) {
-      console.error('Feature check failed:', error);
+      logger.error('Feature check failed:', 'Component', error);
       next(); // Continue on error to avoid blocking
     }
   };
@@ -193,9 +194,7 @@ router.post(
   checkLimits,
   async (req: Request, res: Response) => {
     try {
-      console.log(
-        `🔍 Hotel research requested by tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('🔍 Hotel research requested by tenant: ${req.tenant.hotelName}', 'Component');
 
       // Validate input
       const { hotelName, location, researchTier } = hotelResearchSchema.parse(
@@ -221,13 +220,13 @@ router.post(
       // Perform research based on tier
       let hotelData;
       if (researchTier === 'advanced') {
-        console.log(`🏨 Performing advanced research for: ${hotelName}`);
+        logger.debug('🏨 Performing advanced research for: ${hotelName}', 'Component');
         hotelData = await hotelResearchService.advancedResearch(
           hotelName,
           location
         );
       } else {
-        console.log(`🏨 Performing basic research for: ${hotelName}`);
+        logger.debug('🏨 Performing basic research for: ${hotelName}', 'Component');
         hotelData = await hotelResearchService.basicResearch(
           hotelName,
           location
@@ -250,7 +249,7 @@ router.post(
         .set(updateData)
         .where(eq(hotelProfiles.tenant_id, req.tenant.id));
 
-      console.log(`✅ Hotel research completed for ${hotelName}`);
+      logger.debug('✅ Hotel research completed for ${hotelName}', 'Component');
 
       res.json({
         success: true,
@@ -280,9 +279,7 @@ router.post(
   checkLimits,
   async (req: Request, res: Response) => {
     try {
-      console.log(
-        `🤖 Assistant generation requested by tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('🤖 Assistant generation requested by tenant: ${req.tenant.hotelName}', 'Component');
 
       // Validate input
       const { hotelData, customization } = generateAssistantSchema.parse(
@@ -332,7 +329,7 @@ router.post(
         .set(assistantUpdateData)
         .where(eq(hotelProfiles.tenant_id, req.tenant.id));
 
-      console.log(`✅ Assistant generated successfully: ${assistantId}`);
+      logger.debug('✅ Assistant generated successfully: ${assistantId}', 'Component');
 
       res.json({
         success: true,
@@ -359,9 +356,7 @@ router.post(
  */
 router.get('/hotel-profile', async (req: Request, res: Response) => {
   try {
-    console.log(
-      `📊 Hotel profile requested by tenant: ${req.tenant.hotelName}`
-    );
+    logger.debug('📊 Hotel profile requested by tenant: ${req.tenant.hotelName}', 'Component');
 
     // Get hotel profile
     const [profileDB] = await db
@@ -401,9 +396,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
         assistantStatus = 'active';
       } catch (error) {
         assistantStatus = 'error';
-        console.warn(
-          `Assistant ${profile.vapiAssistantId} may not exist:`,
-          (error as any).message
+        logger.warn('Assistant ${profile.vapiAssistantId} may not exist:', 'Component', (error as any).message
         );
       }
     }
@@ -447,9 +440,7 @@ router.put(
   checkLimits,
   async (req: Request, res: Response) => {
     try {
-      console.log(
-        `⚙️ Assistant config update requested by tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('⚙️ Assistant config update requested by tenant: ${req.tenant.hotelName}', 'Component');
 
       // Validate input
       const config = assistantConfigSchema.parse(req.body);
@@ -514,9 +505,7 @@ router.put(
         .set(configUpdateData)
         .where(eq(hotelProfiles.tenant_id, req.tenant.id));
 
-      console.log(
-        `✅ Assistant config updated for tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('✅ Assistant config updated for tenant: ${req.tenant.hotelName}', 'Component');
 
       res.json({
         success: true,
@@ -542,7 +531,7 @@ router.put(
  */
 router.get('/analytics', async (req: Request, res: Response) => {
   try {
-    console.log(`📈 Analytics requested by tenant: ${req.tenant.hotelName}`);
+    logger.debug('📈 Analytics requested by tenant: ${req.tenant.hotelName}', 'Component');
 
     // Check if analytics feature is available
     const hasAnalytics = await tenantService.hasFeatureAccess(
@@ -599,9 +588,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
  */
 router.get('/service-health', async (req: Request, res: Response) => {
   try {
-    console.log(
-      `🏥 Service health check requested by tenant: ${req.tenant.hotelName}`
-    );
+    logger.debug('🏥 Service health check requested by tenant: ${req.tenant.hotelName}', 'Component');
 
     const [hotelResearchHealth, vapiHealth, tenantHealth] =
       await Promise.allSettled([
@@ -653,9 +640,7 @@ router.delete(
   requireFeature('apiAccess'),
   async (req: Request, res: Response) => {
     try {
-      console.log(
-        `🗑️ Assistant reset requested by tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('🗑️ Assistant reset requested by tenant: ${req.tenant.hotelName}', 'Component');
 
       // Get current profile
       const [profileDB] = await db
@@ -679,9 +664,7 @@ router.delete(
       try {
         await vapiIntegrationService.deleteAssistant(profile.vapiAssistantId);
       } catch (error) {
-        console.warn(
-          `Failed to delete assistant from Vapi: ${(error as any).message}`
-        );
+        logger.warn('Failed to delete assistant from Vapi: ${(error as any).message}', 'Component');
       }
 
       // Clear assistant data from database
@@ -697,9 +680,7 @@ router.delete(
         .set(resetData)
         .where(eq(hotelProfiles.tenant_id, req.tenant.id));
 
-      console.log(
-        `✅ Assistant reset completed for tenant: ${req.tenant.hotelName}`
-      );
+      logger.debug('✅ Assistant reset completed for tenant: ${req.tenant.hotelName}', 'Component');
 
       res.json({
         success: true,

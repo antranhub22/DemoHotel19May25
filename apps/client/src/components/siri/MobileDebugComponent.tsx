@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { isMobileDevice } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 
 interface DebugInfo {
   containerSize: { width: number; height: number };

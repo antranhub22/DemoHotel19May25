@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { isMobileDevice } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 
 interface TouchDebugInfo {
   deviceInfo: {
@@ -168,22 +169,19 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
   };
 
   const testCallStart = async () => {
-    console.log('🧪 [MobileTouchDebugger] Manual test call start');
+    logger.debug('🧪 [MobileTouchDebugger] Manual test call start', 'Component');
     callAttemptsRef.current++;
     lastCallAttemptRef.current = Date.now();
 
     try {
       if (onCallStart) {
         await onCallStart();
-        console.log('✅ [MobileTouchDebugger] Manual call start successful');
+        logger.debug('✅ [MobileTouchDebugger] Manual call start successful', 'Component');
       } else {
-        console.warn('⚠️ [MobileTouchDebugger] onCallStart not available');
+        logger.warn('⚠️ [MobileTouchDebugger] onCallStart not available', 'Component');
       }
     } catch (error) {
-      console.error(
-        '❌ [MobileTouchDebugger] Manual call start failed:',
-        error
-      );
+      logger.error('❌ [MobileTouchDebugger] Manual call start failed:', 'Component', error);
     }
 
     updateDebugInfo();
@@ -196,7 +194,7 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
 
     const container = document.getElementById(containerId);
     if (!container) {
-      console.warn(`[MobileTouchDebugger] Container ${containerId} not found`);
+      logger.warn('[MobileTouchDebugger] Container ${containerId} not found', 'Component');
       return;
     }
 

@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer';
+import { logger } from '@shared/utils/logger';
 
 // Tạo transporter đơn giản chỉ dành cho thiết bị di động
 export const createSimpleMobileTransporter = () => {
-  console.log('Sử dụng transporter đơn giản cho thiết bị di động');
+  logger.debug('Sử dụng transporter đơn giản cho thiết bị di động', 'Component');
 
   // Kiểm tra xem Gmail app password có tồn tại hay không
   if (!process.env.GMAIL_APP_PASSWORD) {
-    console.error('GMAIL_APP_PASSWORD không được cấu hình');
+    logger.error('GMAIL_APP_PASSWORD không được cấu hình', 'Component');
     return createFallbackTransporter();
   }
 
@@ -30,21 +31,21 @@ export const createSimpleMobileTransporter = () => {
       disableUrlAccess: true, // Tăng cường bảo mật
     });
   } catch (error) {
-    console.error('Lỗi khi tạo mobile transporter:', error);
+    logger.error('Lỗi khi tạo mobile transporter:', 'Component', error);
     return createFallbackTransporter();
   }
 };
 
 // Transporter dự phòng luôn trả về thành công
 const createFallbackTransporter = () => {
-  console.log('Sử dụng transporter dự phòng');
+  logger.debug('Sử dụng transporter dự phòng', 'Component');
 
   return {
     sendMail: async (mailOptions: any) => {
-      console.log('=========== MOBILE EMAIL TEST (FALLBACK) ===========');
-      console.log('Đến:', mailOptions.to);
-      console.log('Tiêu đề:', mailOptions.subject);
-      console.log('================================================');
+      logger.debug('=========== MOBILE EMAIL TEST (FALLBACK) ===========', 'Component');
+      logger.debug('Đến:', 'Component', mailOptions.to);
+      logger.debug('Tiêu đề:', 'Component', mailOptions.subject);
+      logger.debug('================================================', 'Component');
 
       return {
         messageId: `fallback-${Date.now()}@example.com`,
@@ -61,9 +62,9 @@ export const sendMobileEmail = async (
   messageText: string
 ): Promise<{ success: boolean; error?: any; messageId?: string }> => {
   try {
-    console.log('==== BẮT ĐẦU GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====');
-    console.log('Người nhận:', toEmail);
-    console.log('Tiêu đề:', subject);
+    logger.debug('==== BẮT ĐẦU GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====', 'Component');
+    logger.debug('Người nhận:', 'Component', toEmail);
+    logger.debug('Tiêu đề:', 'Component', subject);
 
     const transporter = createSimpleMobileTransporter();
 
@@ -88,22 +89,22 @@ export const sendMobileEmail = async (
     };
 
     // Log trước khi gửi
-    console.log('Chuẩn bị gửi email, thiết lập xong');
+    logger.debug('Chuẩn bị gửi email, thiết lập xong', 'Component');
 
     try {
       const result = await transporter.sendMail(mailOptions);
-      console.log('EMAIL MOBILE ĐÃ GỬI THÀNH CÔNG:', result.messageId);
+      logger.debug('EMAIL MOBILE ĐÃ GỬI THÀNH CÔNG:', 'Component', result.messageId);
       return { success: true, messageId: result.messageId };
     } catch (sendError: any) {
-      console.error('LỖI KHI GỬI EMAIL MOBILE:', sendError.message);
-      console.error('CHI TIẾT LỖI:', JSON.stringify(sendError));
+      logger.error('LỖI KHI GỬI EMAIL MOBILE:', 'Component', sendError.message);
+      logger.error('CHI TIẾT LỖI:', 'Component', JSON.stringify(sendError));
       return { success: false, error: sendError.message };
     }
   } catch (error: any) {
-    console.error('Lỗi ngoại lệ khi gửi email mobile:', error);
+    logger.error('Lỗi ngoại lệ khi gửi email mobile:', 'Component', error);
     return { success: false, error: error.message };
   } finally {
-    console.log('==== KẾT THÚC QUÁ TRÌNH GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====');
+    logger.debug('==== KẾT THÚC QUÁ TRÌNH GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====', 'Component');
   }
 };
 
@@ -121,9 +122,7 @@ export const sendMobileCallSummary = async (
   }
 ): Promise<{ success: boolean; error?: any; messageId?: string }> => {
   try {
-    console.log(
-      '==== BẮT ĐẦU GỬI EMAIL TÓM TẮT CUỘC GỌI TỪ THIẾT BỊ DI ĐỘNG ===='
-    );
+    logger.debug('==== BẮT ĐẦU GỬI EMAIL TÓM TẮT CUỘC GỌI TỪ THIẾT BỊ DI ĐỘNG ====', 'Component');
 
     // Tạo danh sách dịch vụ được yêu cầu
     const serviceRequestsText = callDetails.serviceRequests.length
@@ -156,10 +155,7 @@ Cảm ơn quý khách đã sử dụng dịch vụ của Mi Nhon Hotel.
       messageText
     );
   } catch (error: any) {
-    console.error(
-      'Lỗi khi gửi email tóm tắt cuộc gọi từ thiết bị di động:',
-      error
-    );
+    logger.error('Lỗi khi gửi email tóm tắt cuộc gọi từ thiết bị di động:', 'Component', error);
     return { success: false, error: error.message };
   }
 };

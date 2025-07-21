@@ -9,6 +9,7 @@
  */
 
 import {
+import { logger } from '@shared/utils/logger';
   validateEnvironment,
   getEnvironmentStatus,
   printEnvironmentStatus,
@@ -33,12 +34,12 @@ function colorize(text: string, color: keyof typeof colors): string {
 }
 
 function printStartupBanner(): void {
-  console.log('');
+  logger.debug('', 'Component');
   console.log(colorize('🏨 Hotel Voice Assistant SaaS Platform', 'bright'));
   console.log(
     colorize('===============================================', 'cyan')
   );
-  console.log('');
+  logger.debug('', 'Component');
 }
 
 function printEnvironmentSummary(): void {
@@ -53,7 +54,7 @@ function printEnvironmentSummary(): void {
     `Database: ${colorize(config.DATABASE_URL.includes('postgres') ? 'PostgreSQL' : 'SQLite', 'yellow')}`
   );
   console.log(`Domain: ${colorize(config.TALK2GO_DOMAIN, 'yellow')}`);
-  console.log('');
+  logger.debug('', 'Component');
 
   // Feature status
   console.log(colorize('🎯 Feature Status:', 'blue'));
@@ -75,7 +76,7 @@ function printEnvironmentSummary(): void {
   console.log(
     `Monitoring: ${status.monitoring ? colorize('✅ Ready', 'green') : colorize('⚪ Not configured', 'yellow')}`
   );
-  console.log('');
+  logger.debug('', 'Component');
 }
 
 function printMissingVariables(missing: string[]): void {
@@ -88,13 +89,13 @@ function printMissingVariables(missing: string[]): void {
     console.log(`  • ${colorize(varName, 'red')}`);
   });
 
-  console.log('');
+  logger.debug('', 'Component');
   console.log(colorize('💡 To fix these issues:', 'yellow'));
-  console.log('  1. Run: npm run env:generate');
-  console.log('  2. Copy the generated template to your .env file');
-  console.log('  3. Fill in your actual API keys and values');
-  console.log('  4. Restart the server');
-  console.log('');
+  logger.debug('  1. Run: npm run env:generate', 'Component');
+  logger.debug('  2. Copy the generated template to your .env file', 'Component');
+  logger.debug('  3. Fill in your actual API keys and values', 'Component');
+  logger.debug('  4. Restart the server', 'Component');
+  logger.debug('', 'Component');
 }
 
 function printWarnings(warnings: string[]): void {
@@ -107,18 +108,18 @@ function printWarnings(warnings: string[]): void {
     console.log(`  • ${colorize(warning, 'yellow')}`);
   });
 
-  console.log('');
+  logger.debug('', 'Component');
 }
 
 function printQuickCommands(): void {
   console.log(colorize('🔧 Quick Commands:', 'cyan'));
   console.log(colorize('-'.repeat(20), 'cyan'));
-  console.log('  npm run env:status          - Check environment status');
-  console.log('  npm run env:validate        - Validate basic setup');
-  console.log('  npm run env:validate-saas   - Validate SaaS features');
-  console.log('  npm run env:health          - Complete health check');
-  console.log('  npm run env:generate        - Generate .env template');
-  console.log('');
+  logger.debug('  npm run env:status          - Check environment status', 'Component');
+  logger.debug('  npm run env:validate        - Validate basic setup', 'Component');
+  logger.debug('  npm run env:validate-saas   - Validate SaaS features', 'Component');
+  logger.debug('  npm run env:health          - Complete health check', 'Component');
+  logger.debug('  npm run env:generate        - Generate .env template', 'Component');
+  logger.debug('', 'Component');
 }
 
 function printReadyMessage(): void {
@@ -126,7 +127,7 @@ function printReadyMessage(): void {
   console.log(
     colorize('===============================================', 'cyan')
   );
-  console.log('');
+  logger.debug('', 'Component');
 }
 
 /**
@@ -149,7 +150,7 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
             'yellow'
           )
         );
-        console.log('');
+        logger.debug('', 'Component');
       } else {
         throw error;
       }
@@ -166,7 +167,7 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
         console.log(
           colorize('   Some advanced features may be disabled', 'yellow')
         );
-        console.log('');
+        logger.debug('', 'Component');
       } else {
         throw error;
       }
@@ -189,16 +190,14 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
   } catch (error) {
     console.error(colorize('💥 Critical environment error:', 'red'));
     console.error(colorize((error as Error).message, 'red'));
-    console.log('');
+    logger.debug('', 'Component');
     console.log(
       colorize('🔧 Please check your environment configuration:', 'yellow')
     );
-    console.log('  1. Run: npm run env:status');
-    console.log('  2. Run: npm run env:validate');
-    console.log(
-      '  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md'
-    );
-    console.log('');
+    logger.debug('  1. Run: npm run env:status', 'Component');
+    logger.debug('  2. Run: npm run env:validate', 'Component');
+    logger.debug('  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md', 'Component');
+    logger.debug('', 'Component');
     process.exit(1);
   }
 }
@@ -265,15 +264,15 @@ export async function validateProductionEnvironment(): Promise<void> {
         warnings.push(`⚠️  ${check.name}: ${check.message}`);
       }
     } else {
-      console.log(`✅ ${check.name}: OK`);
+      logger.debug('✅ ${check.name}: OK', 'Component');
     }
   }
 
   if (failures.length > 0) {
-    console.log('');
+    logger.debug('', 'Component');
     console.log(colorize('💥 Critical Production Issues:', 'red'));
-    failures.forEach(failure => console.log(`  ${failure}`));
-    console.log('');
+    failures.forEach(failure => logger.debug('  ${failure}', 'Component'));
+    logger.debug('', 'Component');
     console.log(
       colorize(
         '🔧 Please fix these issues before deploying to production',
@@ -284,14 +283,14 @@ export async function validateProductionEnvironment(): Promise<void> {
   }
 
   if (warnings.length > 0) {
-    console.log('');
+    logger.debug('', 'Component');
     console.log(colorize('⚠️  Production Warnings:', 'yellow'));
-    warnings.forEach(warning => console.log(`  ${warning}`));
-    console.log('');
+    warnings.forEach(warning => logger.debug('  ${warning}', 'Component'));
+    logger.debug('', 'Component');
   }
 
   console.log(colorize('✅ Production environment validation passed', 'green'));
-  console.log('');
+  logger.debug('', 'Component');
 }
 
 /**
@@ -325,9 +324,7 @@ export function printCompactEnvironmentStatus(): void {
   const statusIcon = status.basicSetup ? '✅' : '❌';
   const saasIcon = status.saasFeatures ? '✅' : '⚪';
 
-  console.log(
-    `${statusIcon} Environment: ${config.NODE_ENV} | SaaS: ${saasIcon} | Port: ${config.PORT}`
-  );
+  logger.debug('${statusIcon} Environment: ${config.NODE_ENV} | SaaS: ${saasIcon} | Port: ${config.PORT}', 'Component');
 
   if (status.missing.length > 0) {
     console.log(colorize(`   Missing: ${status.missing.join(', ')}`, 'red'));

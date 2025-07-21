@@ -40,6 +40,7 @@ import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
 import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
 import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
 import { Integrations } from '@/pages/unified-dashboard/Integrations';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Protected Route Component
@@ -303,7 +304,7 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
-  console.log('[DEBUG] Router render', { tenantInfo, isAuthenticated });
+  logger.debug('[DEBUG] Router render', 'Component', { tenantInfo, isAuthenticated });
 
   if (!tenantInfo) {
     return <LoadingFallback />;
@@ -487,7 +488,7 @@ function Router() {
 // ============================================
 
 function AppContent() {
-  console.log('[DEBUG] AppContent render');
+  logger.debug('[DEBUG] AppContent render', 'Component');
   useWebSocket();
   return (
     <ErrorBoundary>
@@ -502,7 +503,7 @@ function AppContent() {
 // ============================================
 
 function App() {
-  console.log('[DEBUG] App render');
+  logger.debug('[DEBUG] App render', 'Component');
   return (
     <BrowserRouter>
       <AuthProvider>

@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { logger } from '@shared/utils/logger';
 
 interface EmailFormProps {
   summaryContent: string;
@@ -73,7 +74,7 @@ export function EmailForm({
         throw new Error('Không gửi được email');
       }
     } catch (err) {
-      console.error('Lỗi khi gửi email:', err);
+      logger.error('Lỗi khi gửi email:', 'Component', err);
       setError('Không thể gửi email. Vui lòng thử lại sau.');
       toast({
         title: 'Lỗi',

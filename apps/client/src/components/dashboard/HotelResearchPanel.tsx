@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
+import { logger } from '@shared/utils/logger';
   Search,
   MapPin,
   Phone,

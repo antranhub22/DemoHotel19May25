@@ -1,6 +1,7 @@
 import React from 'react';
 import { t, Lang } from '@/i18n';
 import { useAssistant } from '@/context/AssistantContext';
+import { logger } from '@shared/utils/logger';
 
 interface InfographicStepsProps {
   currentStep?: number;

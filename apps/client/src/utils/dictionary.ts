@@ -1,4 +1,5 @@
 import dictionaryData from './dictionary/dictionary.json';
+import { logger } from '@shared/utils/logger';
 
 export interface DictionaryEntry {
   keyword: string;
@@ -13,7 +14,7 @@ export const loadDictionary = async (): Promise<DictionaryEntry[]> => {
   try {
     return dictionaryData.entries as DictionaryEntry[];
   } catch (error) {
-    console.error('Error loading dictionary:', error);
+    logger.error('Error loading dictionary:', 'Component', error);
     return [];
   }
 };
@@ -22,14 +23,14 @@ export const findInDictionary = (
   fragments: string[]
 ): DictionaryEntry | null => {
   if (ENABLE_DICTIONARY_LOGGING) {
-    console.log('🔍 Checking fragments:', fragments);
+    logger.debug('🔍 Checking fragments:', 'Component', fragments);
   }
 
   // Kết hợp các fragment thành chuỗi để so sánh
   const searchStr = fragments.join('').toLowerCase().replace(/[-\s]/g, '');
 
   if (ENABLE_DICTIONARY_LOGGING) {
-    console.log('📝 Normalized search string:', searchStr);
+    logger.debug('📝 Normalized search string:', 'Component', searchStr);
   }
 
   // Tìm trong dictionary
@@ -44,13 +45,13 @@ export const findInDictionary = (
         console.log(
           `\n📖 Checking against dictionary entry: "${entry.keyword}"`
         );
-        console.log('   Normalized keyword:', normalizedKeyword);
+        logger.debug('   Normalized keyword:', 'Component', normalizedKeyword);
       }
 
       // So sánh trực tiếp chuỗi đã chuẩn hóa
       if (searchStr === normalizedKeyword) {
         if (ENABLE_DICTIONARY_LOGGING) {
-          console.log('✅ Exact match found!');
+          logger.debug('✅ Exact match found!', 'Component');
         }
         return true;
       }
@@ -61,7 +62,7 @@ export const findInDictionary = (
         searchStr.includes(normalizedKeyword)
       ) {
         if (ENABLE_DICTIONARY_LOGGING) {
-          console.log('✅ Partial match found!');
+          logger.debug('✅ Partial match found!', 'Component');
         }
         return true;
       }
@@ -71,7 +72,7 @@ export const findInDictionary = (
       for (const fragment of fragments) {
         currentFragment += fragment.toLowerCase();
         if (ENABLE_DICTIONARY_LOGGING) {
-          console.log('   Building fragment:', currentFragment);
+          logger.debug('   Building fragment:', 'Component', currentFragment);
         }
         if (normalizedKeyword.includes(currentFragment)) {
           // Nếu tìm thấy một phần của từ, tiếp tục tích lũy
@@ -84,16 +85,16 @@ export const findInDictionary = (
       // Kiểm tra kết quả cuối cùng
       const isMatch = currentFragment === normalizedKeyword;
       if (isMatch && ENABLE_DICTIONARY_LOGGING) {
-        console.log('✅ Sliding window match found!');
+        logger.debug('✅ Sliding window match found!', 'Component');
       }
       return isMatch;
     }) || null;
 
   if (ENABLE_DICTIONARY_LOGGING) {
     if (match) {
-      console.log('\n🎯 Final match found:', match.keyword);
+      logger.debug('\n🎯 Final match found:', 'Component', match.keyword);
     } else {
-      console.log('\n❌ No match found in dictionary');
+      logger.debug('\n❌ No match found in dictionary', 'Component');
     }
   }
 
@@ -104,6 +105,6 @@ export const findInDictionary = (
 export const addToDictionary = (entry: DictionaryEntry) => {
   (dictionaryData.entries as DictionaryEntry[]).push(entry);
   if (ENABLE_DICTIONARY_LOGGING) {
-    console.log('📚 Added new entry to dictionary:', entry);
+    logger.debug('📚 Added new entry to dictionary:', 'Component', entry);
   }
 };

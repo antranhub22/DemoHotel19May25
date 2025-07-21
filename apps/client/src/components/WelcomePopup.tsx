@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from './ui/button';
+import { logger } from '@shared/utils/logger';
 
 interface WelcomePopupProps {
   onClose: () => void;

@@ -25,7 +25,7 @@ export const getDeviceInfo = () => ({
 
 export const logDeviceInfo = (context: string) => {
   const info = getDeviceInfo();
-  console.log(`📱 [${context}] Device Info:`, {
+  logger.debug('📱 [${context}] Device Info:', 'Component', {
     isMobile: info.isMobile,
     hasTouch: info.hasTouch,
     maxTouchPoints: info.maxTouchPoints,

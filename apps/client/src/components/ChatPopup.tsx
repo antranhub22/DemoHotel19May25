@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
+import { logger } from '@shared/utils/logger';
 import {
   STANDARD_POPUP_HEIGHT,
   STANDARD_POPUP_MAX_WIDTH,

@@ -9,6 +9,27 @@ import importPlugin from 'eslint-plugin-import';
 export default [
   js.configs.recommended,
 
+  // Global ignores (apply to all configs)
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      '.vite/**',
+      'coverage/**',
+      '*.min.js',
+      'documentation/**',
+      'tools/**',
+      'tests/**',
+      '**/*.test.*',
+      '**/*.spec.*',
+      '**/ws_test_client.*',
+      '**/debug-*.js',
+      '**/debug-*.ts',
+      '**/*.cjs',  // Exclude CommonJS files
+    ],
+  },
+
   // Browser Environment (Client-side)
   {
     files: [
@@ -28,6 +49,11 @@ export default [
       'scripts/**',
       '*.config.*',
       'tests/**',
+      '**/*.test.*',
+      '**/*.spec.*',
+      '**/ws_test_client.*',
+      '**/debug-*.js',
+      '**/debug-*.ts',
     ],
     languageOptions: {
       parser: typescriptParser,
@@ -64,6 +90,13 @@ export default [
         WebSocket: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
+        
+        // React and JSX globals
+        React: 'readonly',
+        JSX: 'readonly',
+        
+        // Node.js types in browser context
+        NodeJS: 'readonly',
       },
     },
     plugins: {

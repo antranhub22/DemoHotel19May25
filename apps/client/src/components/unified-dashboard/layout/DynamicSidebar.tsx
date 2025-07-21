@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getMenuForRole } from '@shared/constants/permissions';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { PermissionGuard, usePermissionCheck } from '../guards/PermissionGuard';
+import { logger } from '@shared/utils/logger';
 
 interface DynamicSidebarProps {
   isOpen: boolean;

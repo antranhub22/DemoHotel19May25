@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { logger } from '@shared/utils/logger';
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast';
 

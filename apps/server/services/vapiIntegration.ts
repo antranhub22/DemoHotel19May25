@@ -6,6 +6,7 @@ import {
   HotelService,
 } from './hotelResearch';
 import {
+import { logger } from '@shared/utils/logger';
   KnowledgeBaseGenerator,
   SystemPromptCustomization,
 } from './knowledgeBaseGenerator';
@@ -107,7 +108,7 @@ export class VapiIntegrationService {
     this.apiKey = process.env.VAPI_API_KEY || '';
 
     if (!this.apiKey) {
-      console.warn('Vapi API key not found. Assistant creation will fail.');
+      logger.warn('Vapi API key not found. Assistant creation will fail.', 'Component');
     }
   }
 
@@ -128,7 +129,7 @@ export class VapiIntegrationService {
     }
 
     try {
-      console.log(`🤖 Creating Vapi assistant: ${config.name}`);
+      logger.debug('🤖 Creating Vapi assistant: ${config.name}', 'Component');
 
       const response = await fetch(`${this.baseURL}/assistant`, {
         method: 'POST',
@@ -171,7 +172,7 @@ export class VapiIntegrationService {
       }
 
       const assistant: VapiResponse = JSON.parse(responseText);
-      console.log(`✅ Vapi assistant created successfully: ${assistant.id}`);
+      logger.debug('✅ Vapi assistant created successfully: ${assistant.id}', 'Component');
 
       return assistant.id;
     } catch (error: any) {
@@ -179,7 +180,7 @@ export class VapiIntegrationService {
         throw error;
       }
 
-      console.error('Failed to create Vapi assistant:', error);
+      logger.error('Failed to create Vapi assistant:', 'Component', error);
       throw new VapiIntegrationError(
         `Failed to create assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'CREATION_FAILED',
@@ -204,7 +205,7 @@ export class VapiIntegrationService {
     }
 
     try {
-      console.log(`🔄 Updating Vapi assistant: ${assistantId}`);
+      logger.debug('🔄 Updating Vapi assistant: ${assistantId}', 'Component');
 
       const updateData: any = {};
 
@@ -240,13 +241,13 @@ export class VapiIntegrationService {
         );
       }
 
-      console.log(`✅ Vapi assistant updated successfully: ${assistantId}`);
+      logger.debug('✅ Vapi assistant updated successfully: ${assistantId}', 'Component');
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
 
-      console.error('Failed to update Vapi assistant:', error);
+      logger.error('Failed to update Vapi assistant:', 'Component', error);
       throw new VapiIntegrationError(
         `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'UPDATE_FAILED',
@@ -268,7 +269,7 @@ export class VapiIntegrationService {
     }
 
     try {
-      console.log(`🗑️ Deleting Vapi assistant: ${assistantId}`);
+      logger.debug('🗑️ Deleting Vapi assistant: ${assistantId}', 'Component');
 
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
         method: 'DELETE',
@@ -286,13 +287,13 @@ export class VapiIntegrationService {
         );
       }
 
-      console.log(`✅ Vapi assistant deleted successfully: ${assistantId}`);
+      logger.debug('✅ Vapi assistant deleted successfully: ${assistantId}', 'Component');
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
 
-      console.error('Failed to delete Vapi assistant:', error);
+      logger.error('Failed to delete Vapi assistant:', 'Component', error);
       throw new VapiIntegrationError(
         `Failed to delete assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'DELETION_FAILED',
@@ -397,7 +398,7 @@ export class VapiIntegrationService {
       await this.listAssistants();
       return true;
     } catch (error) {
-      console.error('Vapi API connection test failed:', error);
+      logger.error('Vapi API connection test failed:', 'Component', error);
       return false;
     }
   }
@@ -446,7 +447,7 @@ export class AssistantGeneratorService {
     customization: AssistantCustomization
   ): Promise<string> {
     try {
-      console.log(`🏨 Generating assistant for: ${hotelData.name}`);
+      logger.debug('🏨 Generating assistant for: ${hotelData.name}', 'Component');
 
       // 1. Generate knowledge base
       const knowledgeBase =
@@ -483,15 +484,10 @@ export class AssistantGeneratorService {
       const assistantId =
         await this.vapiService.createAssistant(assistantConfig);
 
-      console.log(
-        `✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}`
-      );
+      logger.debug('✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}', 'Component');
       return assistantId;
     } catch (error) {
-      console.error(
-        `Failed to generate assistant for ${hotelData.name}:`,
-        error
-      );
+      logger.error('Failed to generate assistant for ${hotelData.name}:', 'Component', error);
       throw new VapiIntegrationError(
         `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GENERATION_FAILED',
@@ -509,9 +505,7 @@ export class AssistantGeneratorService {
     customization: AssistantCustomization
   ): Promise<void> {
     try {
-      console.log(
-        `🔄 Updating assistant ${assistantId} for: ${hotelData.name}`
-      );
+      logger.debug('🔄 Updating assistant ${assistantId} for: ${hotelData.name}', 'Component');
 
       const knowledgeBase =
         this.knowledgeGenerator.generateKnowledgeBase(hotelData);
@@ -532,9 +526,9 @@ export class AssistantGeneratorService {
       };
 
       await this.vapiService.updateAssistant(assistantId, updateConfig);
-      console.log(`✅ Assistant updated successfully: ${assistantId}`);
+      logger.debug('✅ Assistant updated successfully: ${assistantId}', 'Component');
     } catch (error) {
-      console.error(`Failed to update assistant ${assistantId}:`, error);
+      logger.error('Failed to update assistant ${assistantId}:', 'Component', error);
       throw new VapiIntegrationError(
         `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'UPDATE_FAILED',

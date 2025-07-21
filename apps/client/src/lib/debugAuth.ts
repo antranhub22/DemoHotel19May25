@@ -4,10 +4,11 @@
  */
 
 import { getAuthToken, getAuthHeaders } from './authHelper';
+import { logger } from '@shared/utils/logger';
 
 export const debugAuth = {
   async testLogin(userType = 'manager') {
-    console.log(`🔐 [DebugAuth] Testing login with ${userType}...`);
+    logger.debug('🔐 [DebugAuth] Testing login with ${userType}...', 'Component');
 
     const credentials = {
       manager: { username: 'manager', password: 'manager123' },
@@ -25,58 +26,58 @@ export const debugAuth = {
         body: JSON.stringify(cred),
       });
 
-      console.log('📋 [DebugAuth] Login response status:', response.status);
+      logger.debug('📋 [DebugAuth] Login response status:', 'Component', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ [DebugAuth] Login successful:', data);
+        logger.debug('✅ [DebugAuth] Login successful:', 'Component', data);
         return data;
       } else {
         const error = await response.text();
-        console.error('❌ [DebugAuth] Login failed:', error);
+        logger.error('❌ [DebugAuth] Login failed:', 'Component', error);
 
         // Try alternative users if manager fails
         if (userType === 'manager') {
-          console.log('🔄 [DebugAuth] Manager failed, trying frontdesk...');
+          logger.debug('🔄 [DebugAuth] Manager failed, trying frontdesk...', 'Component');
           return await this.testLogin('frontdesk');
         }
 
         return null;
       }
     } catch (error) {
-      console.error('❌ [DebugAuth] Login error:', error);
+      logger.error('❌ [DebugAuth] Login error:', 'Component', error);
       return null;
     }
   },
 
   async testGetAuthToken() {
-    console.log('🎫 [DebugAuth] Testing getAuthToken...');
+    logger.debug('🎫 [DebugAuth] Testing getAuthToken...', 'Component');
 
     try {
       const token = await getAuthToken();
-      console.log('✅ [DebugAuth] Got token:', token ? 'YES' : 'NO');
+      logger.debug('✅ [DebugAuth] Got token:', 'Component', token ? 'YES' : 'NO');
       return token;
     } catch (error) {
-      console.error('❌ [DebugAuth] getAuthToken error:', error);
+      logger.error('❌ [DebugAuth] getAuthToken error:', 'Component', error);
       return null;
     }
   },
 
   async testAuthHeaders() {
-    console.log('📋 [DebugAuth] Testing auth headers...');
+    logger.debug('📋 [DebugAuth] Testing auth headers...', 'Component');
 
     try {
       const headers = await getAuthHeaders();
-      console.log('✅ [DebugAuth] Auth headers:', headers);
+      logger.debug('✅ [DebugAuth] Auth headers:', 'Component', headers);
       return headers;
     } catch (error) {
-      console.error('❌ [DebugAuth] Auth headers error:', error);
+      logger.error('❌ [DebugAuth] Auth headers error:', 'Component', error);
       return null;
     }
   },
 
   async testApiRequest() {
-    console.log('🌐 [DebugAuth] Testing authenticated API request...');
+    logger.debug('🌐 [DebugAuth] Testing authenticated API request...', 'Component');
 
     try {
       const headers = await getAuthHeaders();
@@ -86,39 +87,39 @@ export const debugAuth = {
         headers,
       });
 
-      console.log('📋 [DebugAuth] API request status:', response.status);
+      logger.debug('📋 [DebugAuth] API request status:', 'Component', response.status);
 
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ [DebugAuth] API request successful');
+        logger.debug('✅ [DebugAuth] API request successful', 'Component');
         return data;
       } else {
         const error = await response.text();
-        console.error('❌ [DebugAuth] API request failed:', error);
+        logger.error('❌ [DebugAuth] API request failed:', 'Component', error);
         return null;
       }
     } catch (error) {
-      console.error('❌ [DebugAuth] API request error:', error);
+      logger.error('❌ [DebugAuth] API request error:', 'Component', error);
       return null;
     }
   },
 
   async clearTokens() {
-    console.log('🧹 [DebugAuth] Clearing all stored tokens...');
+    logger.debug('🧹 [DebugAuth] Clearing all stored tokens...', 'Component');
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('dev_auth_token');
-    console.log('✅ [DebugAuth] Tokens cleared');
+    logger.debug('✅ [DebugAuth] Tokens cleared', 'Component');
   },
 
   async forceRefreshToken() {
-    console.log('🔄 [DebugAuth] Force refreshing token...');
+    logger.debug('🔄 [DebugAuth] Force refreshing token...', 'Component');
     await this.clearTokens();
     return await this.testGetAuthToken();
   },
 
   async runFullTest() {
-    console.log('🧪 [DebugAuth] Running full authentication test...');
+    logger.debug('🧪 [DebugAuth] Running full authentication test...', 'Component');
 
     const results: any = {
       login: await this.testLogin(),
@@ -127,13 +128,11 @@ export const debugAuth = {
       apiRequest: await this.testApiRequest(),
     };
 
-    console.log('📊 [DebugAuth] Full test results:', results);
+    logger.debug('📊 [DebugAuth] Full test results:', 'Component', results);
 
     // If API request failed, try with fresh token
     if (!results.apiRequest) {
-      console.log(
-        '🔄 [DebugAuth] API request failed, trying with fresh token...'
-      );
+      logger.debug('🔄 [DebugAuth] API request failed, trying with fresh token...', 'Component');
       await this.forceRefreshToken();
       const retryResult = await this.testApiRequest();
       results.retryWithFreshToken = retryResult;

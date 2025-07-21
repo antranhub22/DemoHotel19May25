@@ -6,42 +6,35 @@ import './index.css';
 // ✅ FIX: Initialize auth on app startup
 import { getAuthToken } from '@/lib/authHelper';
 import '@/lib/debugAuth'; // Make debugAuth available globally
+import { logger } from '@shared/utils/logger';
 
 // Auto-authenticate for development with fresh token
 const initAuth = async () => {
   try {
-    console.log('🚀 [Main] Starting authentication initialization...');
+    logger.debug('🚀 [Main] Starting authentication initialization...', 'Component');
 
     // Clear any potentially expired tokens first
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('dev_auth_token');
-    console.log(
-      '🧹 [Main] Cleared all existing tokens to test new credentials'
-    );
+    logger.debug('🧹 [Main] Cleared all existing tokens to test new credentials', 'Component');
 
     const token = await getAuthToken();
     if (token) {
-      console.log(
-        '✅ [Main] Fresh authentication token generated successfully'
-      );
-      console.log('🎫 [Main] Token stored in localStorage');
+      logger.debug('✅ [Main] Fresh authentication token generated successfully', 'Component');
+      logger.debug('🎫 [Main] Token stored in localStorage', 'Component');
     } else {
-      console.warn('⚠️ [Main] Failed to generate authentication token');
-      console.log(
-        '🔧 [Main] You can run: debugAuth.runFullTest() in console to debug'
-      );
+      logger.warn('⚠️ [Main] Failed to generate authentication token', 'Component');
+      logger.debug('🔧 [Main] You can run: debugAuth.runFullTest() in console to debug', 'Component');
     }
   } catch (error) {
-    console.error('❌ [Main] Failed to initialize authentication:', error);
-    console.log(
-      '🔧 [Main] You can run: debugAuth.runFullTest() in console to debug'
-    );
+    logger.error('❌ [Main] Failed to initialize authentication:', 'Component', error);
+    logger.debug('🔧 [Main] You can run: debugAuth.runFullTest() in console to debug', 'Component');
   }
 };
 
 // Initialize auth before rendering
-console.log('🚀 [Main] App starting - initializing authentication...');
+logger.debug('🚀 [Main] App starting - initializing authentication...', 'Component');
 initAuth();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

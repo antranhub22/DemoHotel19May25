@@ -3,6 +3,7 @@
    ======================================== */
 
 import { Language } from './core';
+import { logger } from '@shared/utils/logger';
 
 // ========================================
 // COMPONENT PROPS TYPES

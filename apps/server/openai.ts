@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { logger } from '@shared/utils/logger';
 
 // Initialize OpenAI client only if API key is available
 const apiKey = process.env.VITE_OPENAI_API_KEY;
@@ -457,9 +458,7 @@ export async function extractServiceRequests(
 ): Promise<ServiceRequest[]> {
   // If OpenAI client is not available, return empty array
   if (!openai) {
-    console.log(
-      'OpenAI client not available, skipping service request extraction'
-    );
+    logger.debug('OpenAI client not available, skipping service request extraction', 'Component');
     return [];
   }
 
@@ -535,7 +534,7 @@ export async function extractServiceRequests(
       // Parse the JSON response
       const responseContent = response.choices[0].message.content;
       if (!responseContent) {
-        console.log('Empty response from OpenAI');
+        logger.debug('Empty response from OpenAI', 'Component');
         return [];
       }
 
@@ -553,9 +552,7 @@ export async function extractServiceRequests(
         }
 
         // Log the actual response structure for debugging
-        console.log(
-          'Unexpected response structure:',
-          JSON.stringify(parsedResponse, null, 2)
+        logger.debug('Unexpected response structure:', 'Component', JSON.stringify(parsedResponse, null, 2)
         );
 
         // Attempt to convert a non-array response to an array if it has the right format
@@ -565,19 +562,16 @@ export async function extractServiceRequests(
 
         return [];
       } catch (parseError) {
-        console.error('Error parsing OpenAI JSON response:', parseError);
-        console.error('Raw response:', responseContent);
+        logger.error('Error parsing OpenAI JSON response:', 'Component', parseError);
+        logger.error('Raw response:', 'Component', responseContent);
         return [];
       }
     } catch (apiError) {
-      console.error(
-        'Error calling OpenAI API for service extraction:',
-        apiError
-      );
+      logger.error('Error calling OpenAI API for service extraction:', 'Component', apiError);
       return [];
     }
   } catch (error) {
-    console.error('Unexpected error in extractServiceRequests:', error);
+    logger.error('Unexpected error in extractServiceRequests:', 'Component', error);
     return [];
   }
 }
@@ -590,7 +584,7 @@ export async function extractServiceRequests(
 export async function translateToVietnamese(text: string): Promise<string> {
   // If OpenAI client is not available, return original text
   if (!openai) {
-    console.log('OpenAI client not available, skipping translation');
+    logger.debug('OpenAI client not available, skipping translation', 'Component');
     return text;
   }
 
@@ -632,7 +626,7 @@ export async function translateToVietnamese(text: string): Promise<string> {
       'Không thể dịch văn bản.'
     );
   } catch (error: any) {
-    console.error('Error translating to Vietnamese with OpenAI:', error);
+    logger.error('Error translating to Vietnamese with OpenAI:', 'Component', error);
     return 'Không thể dịch văn bản. Vui lòng thử lại sau.';
   }
 }
@@ -924,7 +918,7 @@ export async function generateCallSummary(
 ): Promise<string> {
   // If OpenAI client is not available, use the basic summary generator
   if (!openai) {
-    console.log('OpenAI client not available, using basic summary generator');
+    logger.debug('OpenAI client not available, using basic summary generator', 'Component');
     return generateBasicSummary(transcripts);
   }
 
@@ -977,16 +971,14 @@ export async function generateCallSummary(
       'Failed to generate summary.'
     );
   } catch (error: any) {
-    console.error('Error generating summary with OpenAI:', error);
+    logger.error('Error generating summary with OpenAI:', 'Component', error);
 
     // Check for specific error types and provide more helpful messages
     if (error?.code === 'invalid_api_key') {
       return 'Could not generate AI summary: API key authentication failed. Please contact hotel staff to resolve this issue.';
     } else if (error?.status === 429 || error?.code === 'insufficient_quota') {
       // For rate limit errors, return just the detailed error
-      console.log(
-        'Rate limit or quota exceeded, falling back to basic summary generator'
-      );
+      logger.debug('Rate limit or quota exceeded, falling back to basic summary generator', 'Component');
       return generateBasicSummary(transcripts);
     } else if (error?.status === 500) {
       return 'Could not generate AI summary: OpenAI service is currently experiencing issues. Please try again later.';
