@@ -410,10 +410,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                     ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
                     : import.meta.env.VITE_VAPI_PUBLIC_KEY;
 
-        logger.debug(`🔑 [setupVapi] Selected publicKey for language: ${language}`, 'Component',
-          ':',
-          publicKey ? `${publicKey.substring(0, 10)}...` : 'undefined'
-        );
+        logger.debug(`🔑 [setupVapi] Selected publicKey for language: ${language}: ${publicKey ? `${publicKey.substring(0, 10)}...` : 'undefined'}`, 'Component');
 
         if (!publicKey) {
           throw new Error('Vapi public key is not configured');
@@ -669,10 +666,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
                   : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-      logger.debug(`🤖 [startCall] Selected assistantId for language: ${language}`, 'Component',
-        ':',
-        assistantId ? `${assistantId.substring(0, 10)}...` : 'undefined'
-      );
+      logger.debug(`🤖 [startCall] Selected assistantId for language: ${language}: ${assistantId ? `${assistantId.substring(0, 10)}...` : 'undefined'}`, 'Component');
 
       if (!assistantId) {
         logger.error('❌ [startCall] Assistant ID not configured for language:', 'Component', language);

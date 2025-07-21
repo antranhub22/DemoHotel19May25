@@ -76,21 +76,23 @@ export interface Call {
 }
 
 export interface Transcript {
-  id: string;
+  id?: number;
+  callId: string;
+  role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  speaker: 'user' | 'assistant';
-  language?: Language;
-  callId?: string;
+  isModelOutput?: boolean;
+  tenantId: string;
 }
 
 export interface CallSummary {
-  id: string;
+  id?: number;
   callId: string;
   content: string;
   timestamp: Date;
   roomNumber?: string;
   duration?: string;
+  tenantId: string;
 }
 
 export interface CallDetails {

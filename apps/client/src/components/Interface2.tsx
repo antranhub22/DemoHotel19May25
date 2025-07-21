@@ -155,7 +155,7 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     let currentTurn: ConversationTurn | null = null;
 
     sortedTranscripts.forEach(transcript => {
-      const turnType = transcript.speaker; // 'user' or 'assistant'
+              const turnType = transcript.role; // 'user' or 'assistant'
 
       if (!currentTurn || currentTurn.role !== turnType) {
         // Start new turn
