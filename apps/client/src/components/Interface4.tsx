@@ -152,7 +152,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
           <div className="bg-neutral p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
             <p className="font-medium text-gray-800 text-sm sm:text-base">
               {t('order_reference', language)}:{' '}
-              <span className="font-bold">{order.reference}</span>
+              <span className="font-bold">{order.id}</span>
             </p>
           </div>
           {/* Estimated Time */}
@@ -161,7 +161,7 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
               {t('estimated_delivery_time', language)}
             </p>
             <p className="font-poppins font-bold text-lg sm:text-xl">
-              {order.estimatedTime}
+              {order.deliveryTime || '30-45 minutes'}
             </p>
           </div>
           {/* Return to Home Button */}

@@ -154,44 +154,35 @@ const Interface2: React.FC<Interface2Props> = ({ isActive }) => {
     const turns: ConversationTurn[] = [];
     let currentTurn: ConversationTurn | null = null;
 
-    sortedTranscripts.forEach(message => {
-      logger.debug('[Interface2] Processing transcript:', 'Component', message);
+    sortedTranscripts.forEach(transcript => {
+      const turnType = transcript.speaker; // 'user' or 'assistant'
 
-      if (message.role === 'user') {
-        // Always create a new turn for user messages
-        currentTurn = {
-          id: message.id.toString(),
-          role: 'user',
-          timestamp: message.timestamp,
-          messages: [
-            {
-              id: message.id.toString(),
-              content: message.content,
-              timestamp: message.timestamp,
-            },
-          ],
-        };
-        turns.push(currentTurn);
-      } else {
-        // For assistant messages
-        if (!currentTurn || currentTurn.role === 'user') {
-          // Start new assistant turn
-          currentTurn = {
-            id: message.id.toString(),
-            role: 'assistant',
-            timestamp: message.timestamp,
-            messages: [],
-          };
+      if (!currentTurn || currentTurn.role !== turnType) {
+        // Start new turn
+        if (currentTurn) {
           turns.push(currentTurn);
         }
-        // Add message to current assistant turn
-        currentTurn.messages.push({
-          id: message.id.toString(),
-          content: message.content,
-          timestamp: message.timestamp,
-        });
+
+        currentTurn = {
+          id: transcript.id.toString(),
+          role: turnType,
+          messages: [],
+          timestamp: transcript.timestamp,
+        };
       }
+
+      // Add message to current turn
+      currentTurn.messages.push({
+        id: transcript.id.toString(),
+        content: transcript.content,
+        timestamp: transcript.timestamp,
+      });
     });
+
+    // Push the last turn if it exists
+    if (currentTurn) {
+      turns.push(currentTurn);
+    }
 
     logger.debug('[Interface2] Generated conversation turns:', 'Component', turns);
     setConversationTurns(turns);

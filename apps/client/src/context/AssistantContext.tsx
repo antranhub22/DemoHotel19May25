@@ -10,9 +10,6 @@ import React, {
 import {
   initVapi,
   getVapiInstance,
-  FORCE_BASIC_SUMMARY,
-  apiRequest,
-  parseSummaryToOrderDetails,
 } from '@/lib';
 import {
   Transcript,
@@ -413,7 +410,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                     ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
                     : import.meta.env.VITE_VAPI_PUBLIC_KEY;
 
-        logger.debug('🔑 [setupVapi] Selected publicKey for language', 'Component', language,
+        logger.debug(`🔑 [setupVapi] Selected publicKey for language: ${language}`, 'Component',
           ':',
           publicKey ? `${publicKey.substring(0, 10)}...` : 'undefined'
         );
@@ -672,7 +669,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
                   : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-      logger.debug('🤖 [startCall] Selected assistantId for language', 'Component', language,
+      logger.debug(`🤖 [startCall] Selected assistantId for language: ${language}`, 'Component',
         ':',
         assistantId ? `${assistantId.substring(0, 10)}...` : 'undefined'
       );

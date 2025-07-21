@@ -76,23 +76,21 @@ export interface Call {
 }
 
 export interface Transcript {
-  id?: number; // ✅ FIX: Make optional - database auto-generates
-  callId: string;
-  role: 'user' | 'assistant';
+  id: string;
   content: string;
   timestamp: Date;
-  isModelOutput?: boolean;
-  tenantId: string;
+  speaker: 'user' | 'assistant';
+  language?: Language;
+  callId?: string;
 }
 
 export interface CallSummary {
-  id?: number; // ✅ FIX: Make optional - database auto-generates
+  id: string;
   callId: string;
   content: string;
   timestamp: Date;
   roomNumber?: string;
   duration?: string;
-  tenantId: string;
 }
 
 export interface CallDetails {
@@ -101,7 +99,6 @@ export interface CallDetails {
   duration: string;
   category: string;
   language: Language;
-  serviceType?: string;
 }
 
 // ========================================
@@ -109,44 +106,41 @@ export interface CallDetails {
 // ========================================
 
 export interface OrderItem {
-  id: string;
   name: string;
-  description: string;
   quantity: number;
   price: number;
-  serviceType?: string;
+  category?: string;
+  description?: string;
 }
 
 export interface OrderSummary {
-  orderType: string;
-  deliveryTime: 'asap' | '30min' | '1hour' | 'specific';
-  roomNumber: string;
-  guestName: string;
-  guestEmail: string;
-  guestPhone: string;
-  specialInstructions: string;
   items: OrderItem[];
   totalAmount: number;
+  deliveryTime?: string;
+  specialInstructions?: string;
+  roomNumber?: string;
 }
 
 export interface ServiceRequest {
-  serviceType: string;
-  requestText: string;
-  details: {
-    date?: string;
-    time?: string;
-    location?: string;
-    people?: number;
-    amount?: string;
-    roomNumber?: string;
-    otherDetails?: string;
-  };
+  id: string;
+  type: 'roomservice' | 'housekeeping' | 'maintenance' | 'concierge';
+  description: string;
+  roomNumber: string;
+  status: 'pending' | 'in-progress' | 'completed';
+  priority: 'low' | 'medium' | 'high';
+  timestamp: Date;
 }
 
 export interface Order {
-  reference: string;
-  estimatedTime: string;
-  summary: OrderSummary;
+  id: string;
+  roomNumber: string;
+  items: OrderItem[];
+  totalAmount: number;
+  status: 'pending' | 'confirmed' | 'delivered';
+  timestamp: Date;
+  customerName?: string;
+  deliveryTime?: string;
+  specialInstructions?: string;
 }
 
 export interface Request {
@@ -161,10 +155,12 @@ export interface Request {
 }
 
 export interface ActiveOrder {
-  reference: string;
-  requestedAt: Date;
-  estimatedTime: string;
-  status?: string;
+  id: string;
+  roomNumber: string;
+  items: OrderItem[];
+  status: 'pending' | 'confirmed' | 'preparing' | 'delivered';
+  timestamp: Date;
+  estimatedDelivery?: Date;
 }
 
 // ========================================
@@ -194,69 +190,23 @@ export interface Staff {
 // INTERFACE & UI TYPES
 // ========================================
 
-export type InterfaceLayer =
-  | 'interface1'
-  | 'interface2'
-  | 'interface3'
-  | 'interface3vi'
-  | 'interface3fr'
-  | 'interface4';
+export interface InterfaceLayer {
+  id: string;
+  name: string;
+  isActive: boolean;
+}
 
 export interface AssistantContextType {
-  // Interface Management
-  currentInterface: InterfaceLayer;
-  setCurrentInterface: (layer: InterfaceLayer) => void;
-
-  // Call Management
-  startCall: () => Promise<void>;
-  endCall: () => void;
-  callDuration: number;
-  setCallDuration: (duration: number) => void;
-  isMuted: boolean;
-  toggleMute: () => void;
-
-  // Transcript Management
   transcripts: Transcript[];
-  setTranscripts: (transcripts: Transcript[]) => void;
-  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
-
-  // Order Management
-  orderSummary: OrderSummary | null;
-  setOrderSummary: (summary: OrderSummary) => void;
-  order: Order | null;
-  setOrder: (order: Order) => void;
-  activeOrders: ActiveOrder[];
-  addActiveOrder: (order: ActiveOrder) => void;
-  setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
-
-  // Service Requests
-  serviceRequests: ServiceRequest[];
-  setServiceRequests: (requests: ServiceRequest[]) => void;
-
-  // Call Details
   callDetails: CallDetails | null;
-  setCallDetails: (details: CallDetails) => void;
-  callSummary: CallSummary | null;
-  setCallSummary: (summary: CallSummary) => void;
-
-  // Language & Translation
+  callDuration: number;
   language: Language;
+  activeOrders: ActiveOrder[];
+  setActiveOrders: (orders: ActiveOrder[]) => void;
+  addTranscript: (transcript: Transcript) => void;
+  setCallDetails: (details: CallDetails) => void;
+  setCallDuration: (duration: number) => void;
   setLanguage: (lang: Language) => void;
-  vietnameseSummary: string | null;
-  setVietnameseSummary: (summary: string) => void;
-  translateToVietnamese: (text: string) => Promise<string>;
-
-  // Email & Notifications
-  emailSentForCurrentSession: boolean;
-  setEmailSentForCurrentSession: (sent: boolean) => void;
-  requestReceivedAt: Date | null;
-  setRequestReceivedAt: (date: Date | null) => void;
-
-  // Audio & Model
-  micLevel: number;
-  modelOutput: string[];
-  setModelOutput: (output: string[]) => void;
-  addModelOutput: (output: string) => void;
 }
 
 // ========================================
