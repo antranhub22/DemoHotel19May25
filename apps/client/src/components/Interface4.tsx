@@ -23,13 +23,19 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
   useEffect(() => {
     if (isActive) {
       logger.debug('Interface4 Debug Session Started', 'Interface4');
-      logger.debug('Interface4 mounted', 'Interface4', { isActive, hasOrder: !!order });
+      logger.debug('Interface4 mounted', 'Interface4', {
+        isActive,
+        hasOrder: !!order,
+      });
     }
   }, [isActive, order]);
 
   const handleReturnHome = useCallback(() => {
     logger.info('Return to Home button clicked', 'Interface4');
-    logger.debug('Current state before return', 'Interface4', { isActive, hasOrder: !!order });
+    logger.debug('Current state before return', 'Interface4', {
+      isActive,
+      hasOrder: !!order,
+    });
 
     try {
       // Xóa order để đảm bảo dialog không hiển thị lại
@@ -39,12 +45,20 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
       logger.debug('Setting interface to interface1', 'Interface4');
       // setCurrentInterface('interface1');
 
-      logger.success('Order cleared and interface reset completed', 'Interface4');
+      logger.success(
+        'Order cleared and interface reset completed',
+        'Interface4'
+      );
 
       // Force re-render bằng cách wait một chút
       setTimeout(() => {
-        logger.debug('Delayed check - Current interface should be interface1', 'Interface4');
-        logger.debug('Order should be null', 'Interface4', { orderCleared: !order });
+        logger.debug(
+          'Delayed check - Current interface should be interface1',
+          'Interface4'
+        );
+        logger.debug('Order should be null', 'Interface4', {
+          orderCleared: !order,
+        });
       }, 100);
     } catch (error) {
       logger.error('Error in handleReturnHome', 'Interface4', error);
@@ -89,7 +103,10 @@ const Interface4: React.FC<Interface4Props> = ({ isActive }) => {
 
   // Chỉ hiển thị khi isActive là true VÀ có order
   if (!isActive || !order) {
-    logger.debug('Interface4 not rendering', 'Interface4', { isActive, hasOrder: !!order });
+    logger.debug('Interface4 not rendering', 'Interface4', {
+      isActive,
+      hasOrder: !!order,
+    });
     return null;
   }
 

@@ -629,21 +629,21 @@ echo "MAINTENANCE_MODE=false" >> .env
 
 ### Staging Deployment
 
-- **Date**: ****\_\_\_****
-- **Time**: ****\_\_\_****
-- **Deployed by**: ****\_\_\_****
-- **Git Commit**: ****\_\_\_****
-- **Database Migration**: ****\_\_\_****
-- **Status**: ****\_\_\_****
+- **Date**: \***\*\_\_\_\*\***
+- **Time**: \***\*\_\_\_\*\***
+- **Deployed by**: \***\*\_\_\_\*\***
+- **Git Commit**: \***\*\_\_\_\*\***
+- **Database Migration**: \***\*\_\_\_\*\***
+- **Status**: \***\*\_\_\_\*\***
 
 ### Production Deployment
 
-- **Date**: ****\_\_\_****
-- **Time**: ****\_\_\_****
-- **Deployed by**: ****\_\_\_****
-- **Git Commit**: ****\_\_\_****
-- **Database Migration**: ****\_\_\_****
-- **Status**: ****\_\_\_****
+- **Date**: \***\*\_\_\_\*\***
+- **Time**: \***\*\_\_\_\*\***
+- **Deployed by**: \***\*\_\_\_\*\***
+- **Git Commit**: \***\*\_\_\_\*\***
+- **Database Migration**: \***\*\_\_\_\*\***
+- **Status**: \***\*\_\_\_\*\***
 
 ---
 

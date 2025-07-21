@@ -2097,28 +2097,26 @@ const Ku = () =>
                       e.jsxs('div', {
                         className: 'space-y-1 max-h-16 overflow-y-auto',
                         children: [
-                          l.items
-                            .slice(0, 3)
-                            .map((d, i) =>
-                              e.jsxs(
-                                'div',
-                                {
-                                  className:
-                                    'flex items-center gap-2 text-[10px]',
-                                  children: [
-                                    e.jsx('span', {
-                                      className:
-                                        'w-1 h-1 bg-green-500 rounded-full flex-shrink-0',
-                                    }),
-                                    e.jsx('span', {
-                                      className: 'text-gray-700 truncate',
-                                      children: d.name,
-                                    }),
-                                  ],
-                                },
-                                i
-                              )
-                            ),
+                          l.items.slice(0, 3).map((d, i) =>
+                            e.jsxs(
+                              'div',
+                              {
+                                className:
+                                  'flex items-center gap-2 text-[10px]',
+                                children: [
+                                  e.jsx('span', {
+                                    className:
+                                      'w-1 h-1 bg-green-500 rounded-full flex-shrink-0',
+                                  }),
+                                  e.jsx('span', {
+                                    className: 'text-gray-700 truncate',
+                                    children: d.name,
+                                  }),
+                                ],
+                              },
+                              i
+                            )
+                          ),
                           l.items.length > 3 &&
                             e.jsxs('div', {
                               className: 'text-[10px] text-gray-500 italic',

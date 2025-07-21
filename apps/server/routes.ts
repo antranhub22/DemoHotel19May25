@@ -311,13 +311,11 @@ function cleanSummaryContent(content: string): string {
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   if (process.env.NODE_ENV === 'development') {
     console.error(defaultMessage, error);
-    return res
-      .status(500)
-      .json({
-        error: defaultMessage,
-        message: error.message,
-        stack: error.stack,
-      });
+    return res.status(500).json({
+      error: defaultMessage,
+      message: error.message,
+      stack: error.stack,
+    });
   } else {
     // Ở production, không trả về stack trace
     console.error(defaultMessage, error.message);

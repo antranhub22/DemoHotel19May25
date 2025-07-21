@@ -16066,19 +16066,17 @@ const qt = ({ onLogin: s }) => {
                                           children: e.jsxs('div', {
                                             className: 'flex flex-wrap gap-1',
                                             children: [
-                                              v.events
-                                                .slice(0, 2)
-                                                .map((q, G) =>
-                                                  e.jsx(
-                                                    R,
-                                                    {
-                                                      variant: 'secondary',
-                                                      className: 'text-xs',
-                                                      children: q,
-                                                    },
-                                                    G
-                                                  )
-                                                ),
+                                              v.events.slice(0, 2).map((q, G) =>
+                                                e.jsx(
+                                                  R,
+                                                  {
+                                                    variant: 'secondary',
+                                                    className: 'text-xs',
+                                                    children: q,
+                                                  },
+                                                  G
+                                                )
+                                              ),
                                               v.events.length > 2 &&
                                                 e.jsxs(R, {
                                                   variant: 'secondary',

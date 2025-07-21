@@ -2255,18 +2255,16 @@ const rt = ({ isActive: o }) => {
                                     color: '#374151',
                                   },
                                 },
-                                i
-                                  .slice(0, 3)
-                                  .map((s, a) =>
-                                    e.createElement(
-                                      'li',
-                                      {
-                                        key: a,
-                                        style: { marginBottom: '4px' },
-                                      },
-                                      `${s.serviceType || 'Request'}: ${(s.requestText || s.description || 'Service request').substring(0, 50)}...`
-                                    )
+                                i.slice(0, 3).map((s, a) =>
+                                  e.createElement(
+                                    'li',
+                                    {
+                                      key: a,
+                                      style: { marginBottom: '4px' },
+                                    },
+                                    `${s.serviceType || 'Request'}: ${(s.requestText || s.description || 'Service request').substring(0, 50)}...`
                                   )
+                                )
                               ),
                             ]
                           ),

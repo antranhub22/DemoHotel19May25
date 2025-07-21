@@ -2345,13 +2345,11 @@ var s_ = class {
         this.#e.setOptions(this.options),
         t._defaulted &&
           !ar(this.options, t) &&
-          this.#t
-            .getQueryCache()
-            .notify({
-              type: 'observerOptionsUpdated',
-              query: this.#e,
-              observer: this,
-            }));
+          this.#t.getQueryCache().notify({
+            type: 'observerOptionsUpdated',
+            query: this.#e,
+            observer: this,
+          }));
       const n = this.hasListeners();
       (n && gn(this.#e, r, this.options, t) && this.#f(),
         this.updateResult(),

@@ -5044,13 +5044,11 @@ const Ho = /^\s*at (\S+?)(?::(\d+))(?::(\d+))\s*$/i,
           d.reverse(),
           Yr.test(wt(d).function || '') &&
             (d.pop(), Yr.test(wt(d).function || '') && d.pop()),
-          d
-            .slice(0, 50)
-            .map(p => ({
-              ...p,
-              filename: p.filename || wt(d).filename,
-              function: p.function || Je,
-            }))
+          d.slice(0, 50).map(p => ({
+            ...p,
+            filename: p.filename || wt(d).filename,
+            function: p.function || Je,
+          }))
         );
       })(s.slice(a));
     };

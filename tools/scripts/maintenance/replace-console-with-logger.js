@@ -25,7 +25,7 @@ class ConsoleLogReplacer {
     // Find the last import statement
     const lines = content.split('\n');
     let lastImportIndex = -1;
-    
+
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].trim().startsWith('import ') && !lines[i].includes('type')) {
         lastImportIndex = i;
@@ -33,7 +33,11 @@ class ConsoleLogReplacer {
     }
 
     if (lastImportIndex >= 0) {
-      lines.splice(lastImportIndex + 1, 0, "import { logger } from '@shared/utils/logger';");
+      lines.splice(
+        lastImportIndex + 1,
+        0,
+        "import { logger } from '@shared/utils/logger';"
+      );
       this.loggerImportAdded.add(filePath);
       return lines.join('\n');
     }
@@ -137,7 +141,7 @@ class ConsoleLogReplacer {
     const patterns = [
       'apps/client/src/**/*.tsx',
       'apps/client/src/**/*.ts',
-      'apps/server/**/*.ts'
+      'apps/server/**/*.ts',
     ];
 
     for (const pattern of patterns) {
@@ -147,8 +151,8 @@ class ConsoleLogReplacer {
           '**/dist/**',
           '**/build/**',
           '**/*.test.*',
-          '**/*.spec.*'
-        ]
+          '**/*.spec.*',
+        ],
       });
 
       console.log(`🔍 Processing ${files.length} files matching ${pattern}...`);
@@ -172,4 +176,4 @@ if (require.main === module) {
   replacer.run().catch(console.error);
 }
 
-module.exports = ConsoleLogReplacer; 
+module.exports = ConsoleLogReplacer;
