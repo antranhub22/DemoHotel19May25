@@ -34,7 +34,16 @@
     "style:fix": "npm run lint:fix && npm run format",
     "postinstall": "npm run typecheck || true",
     "build:safe": "tsc --noEmit --skipLibCheck || echo \"TypeScript check skipped\" && vite build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "validate:env": "node scripts/validate-env.cjs",
+    "validate:env:structure": "node scripts/validate-env.cjs structure",
+    "validate:env:format": "node scripts/validate-env.cjs format",
+    "switch:env": "bash scripts/switch-env.sh",
+    "env:development": "bash scripts/switch-env.sh development",
+    "env:dev": "bash scripts/switch-env.sh development",
+    "env:staging": "bash scripts/switch-env.sh staging",
+    "env:production": "bash scripts/switch-env.sh production",
+    "env:help": "node scripts/validate-env.cjs help"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
