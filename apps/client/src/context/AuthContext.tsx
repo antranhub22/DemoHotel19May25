@@ -83,7 +83,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    logger.warn('useAuth used outside AuthProvider - returning safe defaults', 'Component');
+    logger.warn(
+      'useAuth used outside AuthProvider - returning safe defaults',
+      'Component'
+    );
     // Return safe defaults instead of throwing
     return {
       user: null,
@@ -143,10 +146,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    logger.debug('[DEBUG] AuthProvider useEffect - checking token', 'Component');
+    logger.debug(
+      '[DEBUG] AuthProvider useEffect - checking token',
+      'Component'
+    );
     const token = localStorage.getItem('token');
     if (!token) {
-      logger.debug('[DEBUG] AuthProvider - no token found, setting loading false', 'Component');
+      logger.debug(
+        '[DEBUG] AuthProvider - no token found, setting loading false',
+        'Component'
+      );
       setIsLoading(false);
       return;
     }
@@ -154,7 +163,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       logger.debug('[DEBUG] AuthProvider - decoding token', 'Component');
       const decoded = jwtDecode<MyJwtPayload>(token);
-      logger.debug('[DEBUG] AuthProvider - token decoded:', 'Component', decoded);
+      logger.debug(
+        '[DEBUG] AuthProvider - token decoded:',
+        'Component',
+        decoded
+      );
 
       // Tạo user object từ token payload
       const mappedRole = mapLegacyRole(decoded.role);
@@ -179,7 +192,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
-      logger.debug('[DEBUG] AuthProvider - token decode error:', 'Component', error);
+      logger.debug(
+        '[DEBUG] AuthProvider - token decode error:',
+        'Component',
+        error
+      );
       localStorage.removeItem('token');
     } finally {
       logger.debug('[DEBUG] AuthProvider - setting loading false', 'Component');
@@ -202,6 +219,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!data.success || !data.token)
         throw new Error('Không nhận được token từ server');
       localStorage.setItem('token', data.token);
+
+      // Reset auto-login attempts after successful manual login
+      const { resetAutoLoginAttempts } = await import('@/lib/authHelper');
+      resetAutoLoginAttempts();
 
       // Sử dụng user data từ unified auth response
       const userFromResponse: AuthUser = {
@@ -265,7 +286,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [user]
   );
 
-  logger.debug('[DEBUG] AuthProvider state:', 'Component', { user, tenant, isLoading });
+  logger.debug('[DEBUG] AuthProvider state:', 'Component', {
+    user,
+    tenant,
+    isLoading,
+  });
 
   return (
     <AuthContext.Provider

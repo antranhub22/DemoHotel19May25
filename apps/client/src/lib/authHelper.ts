@@ -14,28 +14,65 @@ const DEV_CREDENTIALS: LoginCredentials[] = [
   { username: 'itmanager', password: 'itmanager123' },
 ];
 
-export const attemptLogin = async (cred: LoginCredentials): Promise<string | null> => {
+// Track auto-login attempts to prevent infinite loops
+let autoLoginAttempts = 0;
+const MAX_AUTO_LOGIN_ATTEMPTS = 3;
+let lastAutoLoginTime = 0;
+const AUTO_LOGIN_COOLDOWN = 30000; // 30 seconds
+
+export const attemptLogin = async (
+  cred: LoginCredentials
+): Promise<string | null> => {
   try {
-    logger.debug(`🔐 [AuthHelper] Trying login with ${cred.username}...`, 'Component');
+    logger.debug(
+      `🔐 [AuthHelper] Trying login with ${cred.username}...`,
+      'Component'
+    );
+
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
     const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cred),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (response.ok) {
       const data = await response.json();
       if (data.token) {
         localStorage.setItem('token', data.token);
-        logger.debug(`✅ [AuthHelper] Dev token generated with ${cred.username}`, 'Component');
+        logger.debug(
+          `✅ [AuthHelper] Dev token generated with ${cred.username}`,
+          'Component'
+        );
+        // Reset attempt counter on success
+        autoLoginAttempts = 0;
         return data.token;
       }
     } else {
-      logger.warn(`⚠️ [AuthHelper] Login failed for ${cred.username}: ${response.status}`, 'Component');
+      logger.warn(
+        `⚠️ [AuthHelper] Login failed for ${cred.username}: ${response.status}`,
+        'Component'
+      );
     }
   } catch (error) {
-    logger.warn(`⚠️ [AuthHelper] Error with ${cred.username}:`, 'Component', error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      logger.warn(
+        `⚠️ [AuthHelper] Login timeout for ${cred.username}`,
+        'Component'
+      );
+    } else {
+      logger.warn(
+        `⚠️ [AuthHelper] Error with ${cred.username}:`,
+        'Component',
+        error
+      );
+    }
   }
   return null;
 };
@@ -47,7 +84,11 @@ export const isTokenExpired = (token: string): boolean => {
       const currentTime = Math.floor(Date.now() / 1000);
       const isExpired = decoded.exp < currentTime;
       if (isExpired) {
-        logger.debug('⏰ [AuthHelper] Token expired:', 'Component', new Date(decoded.exp * 1000));
+        logger.debug(
+          '⏰ [AuthHelper] Token expired:',
+          'Component',
+          new Date(decoded.exp * 1000)
+        );
       }
       return isExpired;
     }
@@ -71,17 +112,43 @@ export const getAuthToken = async (): Promise<string | null> => {
     localStorage.removeItem('token');
   }
 
-  // Development mode: try to generate fresh token
+  // Check auto-login limits
+  const now = Date.now();
+  if (autoLoginAttempts >= MAX_AUTO_LOGIN_ATTEMPTS) {
+    if (now - lastAutoLoginTime < AUTO_LOGIN_COOLDOWN) {
+      logger.debug(
+        '🚫 [AuthHelper] Auto-login disabled due to too many attempts. Please login manually.',
+        'Component'
+      );
+      return null;
+    } else {
+      // Reset attempts after cooldown
+      autoLoginAttempts = 0;
+    }
+  }
+
+  // Development mode: try to generate fresh token (with limits)
   if (import.meta.env.DEV || import.meta.env.NODE_ENV === 'development') {
-    logger.debug('🚧 [AuthHelper] Generating fresh token for dev mode...', 'Component');
+    logger.debug(
+      '🚧 [AuthHelper] Attempting auto-login for dev mode...',
+      'Component'
+    );
+    autoLoginAttempts++;
+    lastAutoLoginTime = now;
+
     for (const cred of DEV_CREDENTIALS) {
       const token = await attemptLogin(cred);
       if (token) {
         logger.debug('✅ [AuthHelper] Fresh dev token generated', 'Component');
         return token;
       }
+      // If first attempt fails, don't try all credentials
+      break;
     }
-    logger.warn('⚠️ [AuthHelper] Failed to auto-generate dev token', 'Component');
+    logger.warn(
+      '⚠️ [AuthHelper] Failed to auto-generate dev token',
+      'Component'
+    );
   }
 
   return null;
@@ -110,7 +177,9 @@ export const authenticatedFetch = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const makeRequest = async (headers: Record<string, string>): Promise<Response> => {
+  const makeRequest = async (
+    headers: Record<string, string>
+  ): Promise<Response> => {
     return fetch(url, {
       ...options,
       headers: {
@@ -124,9 +193,12 @@ export const authenticatedFetch = async (
   let headers = await getAuthHeaders();
   let response = await makeRequest(headers);
 
-  // If 403 (forbidden/expired), try once more with fresh token
-  if (response.status === 403) {
-    logger.debug('🔄 [AuthHelper] 403 error, retrying with fresh token...', 'Component');
+  // If 401/403 (forbidden/expired), try once more with fresh token
+  if (response.status === 401 || response.status === 403) {
+    logger.debug(
+      '🔄 [AuthHelper] Auth error, retrying with fresh token...',
+      'Component'
+    );
 
     // Force refresh token
     localStorage.removeItem('token');
@@ -136,8 +208,11 @@ export const authenticatedFetch = async (
     headers = await getAuthHeaders();
     response = await makeRequest(headers);
 
-    if (response.status === 403) {
-      logger.error('❌ [AuthHelper] Still 403 after token refresh - auth may be broken', 'Component');
+    if (response.status === 401 || response.status === 403) {
+      logger.error(
+        '❌ [AuthHelper] Still auth error after token refresh - auth may be broken',
+        'Component'
+      );
     } else {
       logger.debug('✅ [AuthHelper] Success after token refresh!', 'Component');
     }
@@ -153,4 +228,13 @@ export const isAuthenticated = (): boolean => {
   const token =
     localStorage.getItem('token') || sessionStorage.getItem('token');
   return !!token;
+};
+
+/**
+ * Reset auto-login attempts (call this after successful manual login)
+ */
+export const resetAutoLoginAttempts = (): void => {
+  autoLoginAttempts = 0;
+  lastAutoLoginTime = 0;
+  logger.debug('🔄 [AuthHelper] Auto-login attempts reset', 'Component');
 };
