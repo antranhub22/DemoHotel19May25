@@ -1,30 +1,23 @@
-import express, { type Request, Response } from 'express';
-import { z } from 'zod';
+import express from 'express';
+
 import {
-  generateCallSummary,
-  generateBasicSummary,
-  extractServiceRequests,
   translateToVietnamese,
 } from '../openai';
 import {
   insertTranscriptSchema,
   insertCallSummarySchema,
 } from '@shared/schema';
-import { dateToString, getCurrentTimestamp } from '@shared/utils';
-import { sendServiceConfirmation, sendCallSummary } from '../gmail';
-import { sendMobileEmail, sendMobileCallSummary } from '../mobileMail';
+
+
 import { db } from '@shared/db';
 import {
-  request as requestTable,
   call,
   transcript,
   call_summaries,
 } from '@shared/db';
-import { eq, and } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
-import { deleteAllRequests } from '@shared/utils';
-import {
+import { eq } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
+import {
   getOverview,
   getServiceDistribution,
   getHourlyActivity,
@@ -39,7 +32,7 @@ const router = express.Router();
 // Store transcript endpoint
 router.post('/store-transcript', express.json(), async (req, res) => {
   try {
-    const { callId, role, content, timestamp, tenantId, isModelOutput } =
+    const { callId, role, content, timestamp, tenantId } =
       req.body;
 
     if (!callId || !role || !content) {
@@ -185,7 +178,7 @@ router.get('/summaries/:callId', async (req, res) => {
 router.get('/analytics/overview', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    logger.debug('📊 [API] Getting analytics overview for tenant: ${tenantId}', 'Component');
+    logger.debug(`📊 [API] Getting analytics overview for tenant: ${tenantId}`, 'Component');
 
     const overview = await getOverview();
     res.json(overview);
@@ -199,7 +192,7 @@ router.get('/analytics/overview', async (req, res) => {
 router.get('/analytics/service-distribution', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    logger.debug('📊 [API] Getting service distribution for tenant: ${tenantId}', 'Component');
+    logger.debug(`📊 [API] Getting service distribution for tenant: ${tenantId}`, 'Component');
 
     const distribution = await getServiceDistribution();
     res.json(distribution);
@@ -213,7 +206,7 @@ router.get('/analytics/service-distribution', async (req, res) => {
 router.get('/analytics/hourly-activity', async (req, res) => {
   try {
     const tenantId = (req.query.tenantId as string) || 'mi-nhon-hotel';
-    logger.debug('📊 [API] Getting hourly activity for tenant: ${tenantId}', 'Component');
+    logger.debug(`📊 [API] Getting hourly activity for tenant: ${tenantId}`, 'Component');
 
     const activity = await getHourlyActivity();
     res.json(activity);

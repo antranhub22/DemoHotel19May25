@@ -3,8 +3,8 @@
  */
 
 import { OrderSummary, OrderItem } from '@/types';
+
 import {
-import { logger } from '@shared/utils/logger';
   extractRoomNumber as extractRoomNumberShared,
   extractSpecialInstructions as extractSpecialInstructionsShared,
   extractDeliveryTime as extractDeliveryTimeShared,
@@ -18,7 +18,7 @@ import { logger } from '@shared/utils/logger';
 const PATTERNS = {
   // Enhanced room number detection with multiple formats
   roomNumber:
-    /(?:room(?:\s+number)?|room|phòng)(?:\s*[:#\-]?\s*)([0-9]{1,4}[A-Za-z]?)|(?:staying in|in room|in phòng|phòng số)(?:\s+)([0-9]{1,4}[A-Za-z]?)/i,
+    /(?:room(?:\s+number)?|room|phòng)(?:\s*[:#-]?\s*)([0-9]{1,4}[A-Za-z]?)|(?:staying in|in room|in phòng|phòng số)(?:\s+)([0-9]{1,4}[A-Za-z]?)/i,
   // General service categories with their detection patterns
   food: /food|beverage|breakfast|lunch|dinner|meal|drink|snack|restaurant/i,
   housekeeping: /housekeeping|cleaning|towel|cleaning\s*service|laundry/i,
@@ -48,11 +48,11 @@ const PATTERNS = {
     /currency\s*exchange|money\s*change|exchange\s*money|foreign\s*currency|bus\s*ticket|train\s*ticket|sell|purchase|buy/i,
 
   // Item extraction
-  items: /items?[:\s]*([^\.]+)/i,
+  items: /items?[:\s]*([^.]+)/i,
 
   // Request patterns
   request:
-    /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^\.;]+)/gi,
+    /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+([^.;]+)/gi,
 
   // Bullet points
   bullets: /(?:^|\n)[-•*]\s*([^\n]+)/g,
@@ -71,7 +71,7 @@ const PATTERNS = {
 
   // Special instructions
   specialInstructions:
-    /special(?:\s+instructions?|(?:\s+notes?)|(?:\s+requests?))(?:\s*:)?\s*([^\.]+)/i,
+    /special(?:\s+instructions?|(?:\s+notes?)|(?:\s+requests?))(?:\s*:)?\s*([^.]+)/i,
 
   // Total amount
   totalAmount:
@@ -121,7 +121,7 @@ export function extractRoomNumber(summary: string): string | null {
 
   // Also try to find room numbers in "details" or "room number" sections
   const roomDetails = summary.match(
-    /(?:room details|room number|phòng số)(?:\s*[:#\-]?\s*)([0-9]{1,4}[A-Za-z]?)/i
+    /(?:room details|room number|phòng số)(?:\s*[:#-]?\s*)([0-9]{1,4}[A-Za-z]?)/i
   );
   if (roomDetails && roomDetails[1]) {
     return roomDetails[1];
@@ -176,29 +176,6 @@ function determineOrderTypes(summary: string): string[] {
 function determineOrderType(summary: string): string {
   const types = determineOrderTypes(summary);
   return types.join(',');
-}
-
-/**
- * Determine delivery time preference based on summary text
- */
-function determineDeliveryTime(
-  summary: string
-): 'asap' | '30min' | '1hour' | 'specific' {
-  if (PATTERNS.deliveryTime.asap.test(summary)) return 'asap';
-  if (PATTERNS.deliveryTime.thirtyMin.test(summary)) return '30min';
-  if (PATTERNS.deliveryTime.oneHour.test(summary)) return '1hour';
-  if (PATTERNS.deliveryTime.specific.test(summary)) return 'specific';
-
-  // Default to ASAP if no match found
-  return 'asap';
-}
-
-/**
- * Extract special instructions from summary text
- */
-function extractSpecialInstructions(summary: string): string {
-  const match = summary.match(PATTERNS.specialInstructions);
-  return match ? match[1].trim() : '';
 }
 
 /**
@@ -283,34 +260,6 @@ function extractItems(summary: string): OrderItem[] {
     ...item,
     id: (index + 1).toString(),
   }));
-}
-
-/**
- * Calculates string similarity between 0 and 1
- * Higher values mean strings are more similar
- */
-function stringSimilarity(str1: string, str2: string): number {
-  if (str1 === str2) return 1.0;
-  if (str1.length === 0 || str2.length === 0) return 0.0;
-
-  // Get longest common substring
-  const longer = str1.length > str2.length ? str1 : str2;
-  const shorter = str1.length > str2.length ? str2 : str1;
-
-  // Check if the shorter string appears in the longer one
-  if (longer.includes(shorter)) {
-    return shorter.length / longer.length;
-  }
-
-  // Count matching characters
-  let matches = 0;
-  for (let i = 0; i < shorter.length; i++) {
-    if (longer.includes(shorter[i])) {
-      matches++;
-    }
-  }
-
-  return matches / longer.length;
 }
 
 /**
@@ -424,20 +373,6 @@ function estimatePrice(itemName: string): number {
 
   // Default price for other items
   return 10.0;
-}
-
-/**
- * Extract total amount from summary text
- */
-function extractTotalAmount(summary: string, items: OrderItem[]): number {
-  const match = summary.match(PATTERNS.totalAmount);
-
-  if (match) {
-    return parseFloat(match[1]);
-  }
-
-  // If no total found, calculate from items
-  return items.reduce((total, item) => total + item.price * item.quantity, 0);
 }
 
 /**

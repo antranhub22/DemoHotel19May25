@@ -20,19 +20,12 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   Bot,
   Settings,
-  Mic,
-  Volume2,
-  Globe,
-  Palette,
   Save,
   Play,
-  Pause,
-  RotateCcw,
-  AlertCircle,
   CheckCircle2,
   Loader2,
   Phone,
@@ -296,7 +289,7 @@ const AssistantTester = () => {
       setTestResponse(
         `Xin chào! Tôi là AI Assistant của Mi Nhon Hotel. Tôi có thể giúp bạn về ${testPhrase}. Bạn có cần tôi hỗ trợ gì thêm không?`
       );
-    } catch (error) {
+    } catch {
       setTestResponse('Đã xảy ra lỗi khi kiểm tra. Vui lòng thử lại.');
     } finally {
       setIsTesting(false);

@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
+
 import { IconType } from 'react-icons';
+
 import {
-import { logger } from '@shared/utils/logger';
   FaBed,
   FaUtensils,
   FaConciergeBell,

@@ -9,13 +9,11 @@ import {
   request,
   message,
 } from '@shared/schema';
-import { z } from 'zod';
-import {
+
 import { logger } from '@shared/utils/logger';
+import {
   tenantMapper,
   hotelProfileMapper,
-  type TenantCamelCase,
-  type InsertHotelProfileCamelCase,
 } from '@shared/db/transformers';
 
 // ============================================
@@ -80,7 +78,7 @@ export class TenantService {
    */
   async createTenant(config: TenantConfig): Promise<string> {
     try {
-      logger.debug('🏨 Creating new tenant: ${config.hotelName}', 'Component');
+      logger.debug(`🏨 Creating new tenant: ${config.hotelName}`, 'Component');
 
       // Validate subdomain availability
       await this.validateSubdomain(config.subdomain);
@@ -127,7 +125,7 @@ export class TenantService {
 
       await db.insert(hotelProfiles).values(profileData);
 
-      logger.debug('✅ Tenant created successfully: ${tenant.id}', 'Component');
+      logger.debug(`✅ Tenant created successfully: ${tenant.id}`, 'Component');
       return tenant.id;
     } catch (error) {
       logger.error('Failed to create tenant ${config.hotelName}:', 'Component', error);
@@ -233,7 +231,7 @@ export class TenantService {
     updates: Partial<TenantConfig>
   ): Promise<void> {
     try {
-      logger.debug('🔄 Updating tenant: ${tenantId}', 'Component');
+      logger.debug(`🔄 Updating tenant: ${tenantId}`, 'Component');
 
       const updateData: any = {};
 
@@ -255,7 +253,7 @@ export class TenantService {
 
       await db.update(tenants).set(updateData).where(eq(tenants.id, tenantId));
 
-      logger.debug('✅ Tenant updated successfully: ${tenantId}', 'Component');
+      logger.debug(`✅ Tenant updated successfully: ${tenantId}`, 'Component');
     } catch (error) {
       logger.error('Failed to update tenant ${tenantId}:', 'Component', error);
       throw new TenantError(
@@ -271,7 +269,7 @@ export class TenantService {
    */
   async deleteTenant(tenantId: string): Promise<void> {
     try {
-      logger.debug('🗑️ Deleting tenant: ${tenantId}', 'Component');
+      logger.debug(`🗑️ Deleting tenant: ${tenantId}`, 'Component');
 
       // Delete in order due to foreign key constraints
       await db.delete(message).where(eq(message.tenant_id, tenantId));
@@ -284,7 +282,7 @@ export class TenantService {
         .where(eq(hotelProfiles.tenant_id, tenantId));
       await db.delete(tenants).where(eq(tenants.id, tenantId));
 
-      logger.debug('✅ Tenant deleted successfully: ${tenantId}', 'Component');
+      logger.debug(`✅ Tenant deleted successfully: ${tenantId}`, 'Component');
     } catch (error) {
       logger.error('Failed to delete tenant ${tenantId}:', 'Component', error);
       throw new TenantError(
@@ -561,7 +559,7 @@ export class TenantService {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      logger.debug('🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}', 'Component');
+      logger.debug(`🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`, 'Component');
 
       // Delete old transcripts
       await db
@@ -583,7 +581,7 @@ export class TenantService {
           )
         );
 
-      logger.debug('✅ Data cleanup completed for tenant ${tenantId}', 'Component');
+      logger.debug(`✅ Data cleanup completed for tenant ${tenantId}`, 'Component');
     } catch (error) {
       logger.error('Failed to cleanup data for tenant ${tenantId}:', 'Component', error);
       throw new TenantError(

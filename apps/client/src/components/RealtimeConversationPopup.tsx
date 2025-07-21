@@ -7,11 +7,8 @@ import {
   STANDARD_POPUP_MAX_WIDTH,
   STANDARD_POPUP_MAX_HEIGHT_VH,
 } from '@/context/PopupContext';
-import {
-import { logger } from '@shared/utils/logger';
-  extractRoomNumber,
-  parseSummaryToOrderDetails,
-} from '@/lib/summaryParser';
+
+
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -31,6 +28,7 @@ interface ConversationTurn {
 }
 
 // Interface cho summary data
+/* REMOVED UNUSED INTERFACE
 interface SummaryData {
   source: string;
   roomNumber: string;
@@ -44,6 +42,7 @@ interface SummaryData {
   timestamp: Date;
   hasData: boolean;
 }
+*/
 
 // Remove PopupMode type that includes 'summary'
 // type PopupMode = 'conversation' | 'summary';
@@ -61,7 +60,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
   isRight,
   layout = 'overlay',
 }) => {
-  const { transcripts, modelOutput, language, callDuration } = useAssistant();
+  const { transcripts, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
 

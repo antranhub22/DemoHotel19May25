@@ -5,13 +5,12 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { jwtDecode, JwtPayload } from 'jwt-decode';
-import {
+import { jwtDecode } from 'jwt-decode';
 import { logger } from '@shared/utils/logger';
+import {
   UserRole,
   Permission,
   getPermissionsForRole,
-  hasRolePermission,
 } from '@shared/constants/permissions';
 
 // ============================================
@@ -304,7 +303,7 @@ export const useTenantDetection = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const host = window.location.host;
+    // const _host = window.location.host;
     const hostname = window.location.hostname;
 
     // Check if it's a subdomain (not localhost, IP, or main domain)

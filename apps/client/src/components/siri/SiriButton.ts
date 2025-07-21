@@ -1,5 +1,5 @@
-import {
 import { logger } from '@shared/utils/logger';
+import {
   DebugManager,
   EmergencyStopManager,
   CanvasRenderer,
@@ -37,11 +37,11 @@ export class SiriButton {
   private state: StateManager;
 
   // Canvas references
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private canvas!: any; // HTMLCanvasElement
+  private ctx!: any; // CanvasRenderingContext2D
 
   // Current state
-  private currentDimensions: DimensionsState;
+  private currentDimensions!: DimensionsState;
   private isInitialized: boolean = false;
 
   constructor(containerId: string, colors?: SiriButtonColors) {
@@ -83,8 +83,8 @@ export class SiriButton {
         ),
       isTouch: 'ontouchstart' in window,
       screen: {
-        width: screen.width,
-        height: screen.height,
+        width: (window as any).screen?.width || 375,
+        height: (window as any).screen?.height || 667,
         devicePixelRatio: window.devicePixelRatio,
       },
     };
@@ -400,19 +400,19 @@ if (typeof window !== 'undefined') {
     errorsOnly: () => SiriButton.setDebugLevel(1),
     verbose: () => SiriButton.setDebugLevel(2),
     help: () => {
-      logger.debug('
-🔧 SiriDebugControls Help:
-- SiriDebugControls.silent()     -> Turn off all debug logs
-- SiriDebugControls.errorsOnly() -> Show errors + warnings only  
-- SiriDebugControls.verbose()    -> Show all debug logs
-- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)
-- SiriDebugControls.getLevel()   -> Check current level
-
-🚀 NEW: Modular Architecture
-- Each module has independent debug logging
-- Better error isolation and reporting
-- Enhanced mobile debugging support
-      ', 'Component');
+      logger.debug([
+        '🔧 SiriDebugControls Help:',
+        '- SiriDebugControls.silent()     -> Turn off all debug logs',
+        '- SiriDebugControls.errorsOnly() -> Show errors + warnings only',
+        '- SiriDebugControls.verbose()    -> Show all debug logs',
+        '- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)',
+        '- SiriDebugControls.getLevel()   -> Check current level',
+        '',
+        '🚀 NEW: Modular Architecture',
+        '- Each module has independent debug logging',
+        '- Better error isolation and reporting',
+        '- Enhanced mobile debugging support'
+      ].join('\n'), 'Component');
     },
   };
 

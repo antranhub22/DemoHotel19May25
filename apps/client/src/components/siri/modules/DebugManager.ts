@@ -1,8 +1,10 @@
+import { logger } from '@shared/utils/logger';
+
 export type DebugLevel = 0 | 1 | 2; // 0: off, 1: errors only, 2: all
 
 export class DebugManager {
   private static DEBUG_LEVEL: DebugLevel =
-    process.env.NODE_ENV === 'development' ? 1 : 0;
+    (import.meta as any).env?.NODE_ENV === 'development' ? 1 : 0;
 
   /**
    * Set the global debug level
@@ -99,14 +101,14 @@ if (typeof window !== 'undefined') {
     errorsOnly: () => DebugManager.setDebugLevel(1),
     verbose: () => DebugManager.setDebugLevel(2),
     help: () => {
-      logger.debug('
-🔧 SiriDebugControls Help:
-- SiriDebugControls.silent()     -> Turn off all debug logs
-- SiriDebugControls.errorsOnly() -> Show errors + warnings only  
-- SiriDebugControls.verbose()    -> Show all debug logs
-- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)
-- SiriDebugControls.getLevel()   -> Check current level
-      ', 'Component');
+      logger.debug([
+        '🔧 SiriDebugControls Help:',
+        '- SiriDebugControls.silent()     -> Turn off all debug logs',
+        '- SiriDebugControls.errorsOnly() -> Show errors + warnings only',
+        '- SiriDebugControls.verbose()    -> Show all debug logs',
+        '- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)',
+        '- SiriDebugControls.getLevel()   -> Check current level'
+      ].join('\n'), 'Component');
     },
   };
 

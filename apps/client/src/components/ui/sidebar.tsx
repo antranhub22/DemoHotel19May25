@@ -10,8 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
+
 import {
-import { logger } from '@shared/utils/logger';
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -35,10 +35,10 @@ type SidebarContext = {
   toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContext | null>(null);
+const SidebarContextProvider = React.createContext<SidebarContext | null>(null);
 
 function useSidebar() {
-  const context = React.useContext(SidebarContext);
+  const context = React.useContext(SidebarContextProvider);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider.');
   }
@@ -128,7 +128,7 @@ const SidebarProvider = React.forwardRef<
     );
 
     return (
-      <SidebarContext.Provider value={contextValue}>
+      <SidebarContextProvider.Provider value={contextValue}>
         <TooltipProvider delayDuration={0}>
           <div
             style={
@@ -148,7 +148,7 @@ const SidebarProvider = React.forwardRef<
             {children}
           </div>
         </TooltipProvider>
-      </SidebarContext.Provider>
+      </SidebarContextProvider.Provider>
     );
   }
 );
@@ -484,7 +484,7 @@ const SidebarGroupContent = React.forwardRef<
 SidebarGroupContent.displayName = 'SidebarGroupContent';
 
 const SidebarMenu = React.forwardRef<
-  HTMLUListElement,
+  any, // HTMLUListElement
   React.ComponentProps<'ul'>
 >(({ className, ...props }, ref) => (
   <ul
@@ -497,7 +497,7 @@ const SidebarMenu = React.forwardRef<
 SidebarMenu.displayName = 'SidebarMenu';
 
 const SidebarMenuItem = React.forwardRef<
-  HTMLLIElement,
+  any, // HTMLLIElement
   React.ComponentProps<'li'>
 >(({ className, ...props }, ref) => (
   <li
@@ -681,7 +681,7 @@ const SidebarMenuSkeleton = React.forwardRef<
 SidebarMenuSkeleton.displayName = 'SidebarMenuSkeleton';
 
 const SidebarMenuSub = React.forwardRef<
-  HTMLUListElement,
+  any, // HTMLUListElement
   React.ComponentProps<'ul'>
 >(({ className, ...props }, ref) => (
   <ul
@@ -698,13 +698,13 @@ const SidebarMenuSub = React.forwardRef<
 SidebarMenuSub.displayName = 'SidebarMenuSub';
 
 const SidebarMenuSubItem = React.forwardRef<
-  HTMLLIElement,
+  any, // HTMLLIElement
   React.ComponentProps<'li'>
 >(({ ...props }, ref) => <li ref={ref} {...props} />);
 SidebarMenuSubItem.displayName = 'SidebarMenuSubItem';
 
 const SidebarMenuSubButton = React.forwardRef<
-  HTMLAnchorElement,
+  any, // HTMLAnchorElement
   React.ComponentProps<'a'> & {
     asChild?: boolean;
     size?: 'sm' | 'md';

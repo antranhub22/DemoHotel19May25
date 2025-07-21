@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -18,22 +18,16 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+
 import {
-import { logger } from '@shared/utils/logger';
   BarChart3,
   TrendingUp,
   TrendingDown,
-  Calendar,
   Download,
   RefreshCw,
-  Users,
-  Phone,
-  Clock,
-  Globe,
   Target,
   PieChart,
   LineChart,
-  Filter,
 } from 'lucide-react';
 
 // Types
@@ -92,13 +86,14 @@ const formatValue = (value: number, format?: string): string => {
         style: 'currency',
         currency: 'VND',
       }).format(value);
-    case 'duration':
+    case 'duration': {
       const hours = Math.floor(value / 3600);
       const minutes = Math.floor((value % 3600) / 60);
       if (hours > 0) {
         return `${hours}h ${minutes}m`;
       }
       return `${minutes}m`;
+    }
     case 'number':
     default:
       return value.toLocaleString('vi-VN');
@@ -160,7 +155,7 @@ const SimpleBarChart = ({
   animated?: boolean;
 }) => {
   const maxValue = Math.max(...data.map(item => item.value));
-  const hasColors = data.some(item => item.color);
+  // Check if data has colors
 
   return (
     <div className="space-y-4" style={{ height }}>
@@ -239,13 +234,12 @@ const ProgressChart = ({
     ? (primaryItem.value / threshold.value) * 100
     : primaryItem.value;
 
-  const getProgressColor = () => {
-    if (!threshold) return 'bg-primary';
-
-    if (percentage >= 90) return 'bg-red-500';
-    if (percentage >= 75) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
+  // const _getProgressColor = () => {
+  //   if (!threshold) return 'bg-primary';
+  //   if (percentage >= 90) return 'bg-red-500';
+  //   if (percentage >= 75) return 'bg-yellow-500';
+  //   return 'bg-green-500';
+  // };
 
   return (
     <div className="space-y-4">
@@ -424,10 +418,10 @@ export const UsageChart: React.FC<UsageChartProps> = ({
   onExport,
   className,
   height = 300,
-  showLegend = true,
+  showLegend: _showLegend = true,
   showGrid = true,
   animated = true,
-  interactive = true,
+  interactive: _interactive = true,
   format = 'number',
   threshold,
 }) => {

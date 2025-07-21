@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useAssistant } from '@/context/AssistantContext';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   useHotelConfiguration,
   getVapiPublicKeyByLanguage,
   getVapiAssistantIdByLanguage,
@@ -76,13 +76,8 @@ export const useCallHandler = () => {
         if (assistantId) {
           logger.debug('[useCallHandler] Starting Vapi call with assistant ID:', 'Component', assistantId);
 
-          console.log(
-            '[useCallHandler] 🔄 CALLING // setCurrentInterface("interface2")'
-          );
+          // Debug logging for interface switching
           // setCurrentInterface('interface2');
-          console.log(
-            '[useCallHandler] ✅ // setCurrentInterface("interface2") called'
-          );
 
           return { success: true };
         } else {

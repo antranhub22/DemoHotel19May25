@@ -8,7 +8,7 @@ import {
   AssistantGeneratorService,
 } from '@server/services/vapiIntegration';
 import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
-import { tenants, hotelProfiles } from '@shared/schema';
+import { hotelProfiles } from '@shared/schema';
 import { db } from '@server/db';
 import { eq } from 'drizzle-orm';
 import {
@@ -16,12 +16,10 @@ import {
   getServiceDistribution,
   getHourlyActivity,
 } from '@server/analytics';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   hotelProfileMapper,
   type HotelProfileDB,
-  type HotelProfileCamelCase,
-  type InsertHotelProfileCamelCase,
 } from '@shared/db/transformers';
 
 // ============================================
@@ -664,7 +662,7 @@ router.delete(
       try {
         await vapiIntegrationService.deleteAssistant(profile.vapiAssistantId);
       } catch (error) {
-        logger.warn('Failed to delete assistant from Vapi: ${(error as any).message}', 'Component');
+        logger.warn(`Failed to delete assistant from Vapi: ${(error as any).message}`, 'Component');
       }
 
       // Clear assistant data from database

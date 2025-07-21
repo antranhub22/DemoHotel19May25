@@ -2,8 +2,8 @@
    TYPE-SAFE API CLIENT
    ======================================== */
 
+
 import {
-import { logger } from '@shared/utils/logger';
   ApiResponse,
   ApiError,
   PaginationParams,
@@ -98,7 +98,7 @@ export class ApiClient {
     const { method, url, data, params, headers, timeout } = config;
 
     try {
-      const requestUrl = new URL(url, this.config.baseUrl);
+      const requestUrl = new (window as any).URL(url, this.config.baseUrl);
 
       // Add query parameters
       if (params) {
@@ -117,7 +117,7 @@ export class ApiClient {
         },
         body: data ? JSON.stringify(data) : undefined,
         credentials: this.config.withCredentials ? 'include' : 'omit',
-        signal: timeout ? AbortSignal.timeout(timeout) : undefined,
+        signal: timeout ? (window as any).AbortSignal?.timeout(timeout) : undefined,
       });
 
       const responseData = await response.json();
@@ -405,7 +405,7 @@ export class ApiClient {
 
   async uploadFile<T>(
     url: string,
-    file: File,
+    file: any, // File
     config?: Partial<ApiRequestConfig>
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();

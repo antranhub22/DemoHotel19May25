@@ -8,11 +8,10 @@
  * for missing or misconfigured variables.
  */
 
-import {
 import { logger } from '@shared/utils/logger';
+import {
   validateEnvironment,
   getEnvironmentStatus,
-  printEnvironmentStatus,
   loadEnvironmentConfig,
   EnvironmentValidationError,
 } from '../../../packages/config/environment';
@@ -271,7 +270,7 @@ export async function validateProductionEnvironment(): Promise<void> {
   if (failures.length > 0) {
     logger.debug('', 'Component');
     console.log(colorize('💥 Critical Production Issues:', 'red'));
-    failures.forEach(failure => logger.debug('  ${failure}', 'Component'));
+    failures.forEach(failure => logger.debug(`  ${failure}`, 'Component'));
     logger.debug('', 'Component');
     console.log(
       colorize(
@@ -285,7 +284,7 @@ export async function validateProductionEnvironment(): Promise<void> {
   if (warnings.length > 0) {
     logger.debug('', 'Component');
     console.log(colorize('⚠️  Production Warnings:', 'yellow'));
-    warnings.forEach(warning => logger.debug('  ${warning}', 'Component'));
+    warnings.forEach(warning => logger.debug(`  ${warning}`, 'Component'));
     logger.debug('', 'Component');
   }
 
@@ -319,12 +318,12 @@ export function quickEnvironmentCheck(): boolean {
  */
 export function printCompactEnvironmentStatus(): void {
   const status = getEnvironmentStatus();
-  const config = loadEnvironmentConfig();
+  const _config = loadEnvironmentConfig();
 
-  const statusIcon = status.basicSetup ? '✅' : '❌';
-  const saasIcon = status.saasFeatures ? '✅' : '⚪';
+  const _statusIcon = status.basicSetup ? '✅' : '❌';
+  const _saasIcon = status.saasFeatures ? '✅' : '⚪';
 
-  logger.debug('${statusIcon} Environment: ${config.NODE_ENV} | SaaS: ${saasIcon} | Port: ${config.PORT}', 'Component');
+  logger.debug(`${_statusIcon} Environment: ${_config.NODE_ENV} | SaaS: ${_saasIcon} | Port: ${_config.PORT}`, 'Component');
 
   if (status.missing.length > 0) {
     console.log(colorize(`   Missing: ${status.missing.join(', ')}`, 'red'));

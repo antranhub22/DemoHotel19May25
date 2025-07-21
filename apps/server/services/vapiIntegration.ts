@@ -5,10 +5,9 @@ import {
   AdvancedHotelData,
   HotelService,
 } from './hotelResearch';
-import {
 import { logger } from '@shared/utils/logger';
+import {
   KnowledgeBaseGenerator,
-  SystemPromptCustomization,
 } from './knowledgeBaseGenerator';
 
 // ============================================
@@ -450,8 +449,8 @@ export class AssistantGeneratorService {
       logger.debug('🏨 Generating assistant for: ${hotelData.name}', 'Component');
 
       // 1. Generate knowledge base
-      const knowledgeBase =
-        this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+      // const _knowledgeBase =
+      //   this.knowledgeGenerator.generateKnowledgeBase(hotelData);
 
       // 2. Build system prompt
       const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(
@@ -507,8 +506,8 @@ export class AssistantGeneratorService {
     try {
       logger.debug('🔄 Updating assistant ${assistantId} for: ${hotelData.name}', 'Component');
 
-      const knowledgeBase =
-        this.knowledgeGenerator.generateKnowledgeBase(hotelData);
+      // const _knowledgeBase =
+      //   this.knowledgeGenerator.generateKnowledgeBase(hotelData);
       const systemPrompt = this.knowledgeGenerator.generateSystemPrompt(
         hotelData,
         customization
