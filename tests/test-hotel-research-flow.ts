@@ -380,10 +380,10 @@ export class HotelResearchFlowTest {
       this.results.duration = this.results.endTime - this.results.startTime;
       this.results.errors.push({
         step: 'test-suite',
-        message: (error as Error).message,
-        stack: (error as Error).stack,
+        message: (error as any)?.message || String(error),
+        stack: (error as any)?.stack,
       });
-      this.log(`💥 Test Suite Failed: ${(error as Error).message}`, 'error');
+      this.log(`💥 Test Suite Failed: ${(error as any)?.message || String(error)}`, 'error');
       return this.results;
     }
   }
@@ -533,8 +533,8 @@ export class HotelResearchFlowTest {
         id: `profile-${Date.now()}`,
         tenantId: this.testTenantId,
         researchData: hotelData,
-        knowledgeBase: knowledgeBase,
-        systemPrompt: systemPrompt,
+        knowledgeBase,
+        systemPrompt,
         vapiAssistantId: assistantId,
         assistantConfig: {
           personality: 'professional',
@@ -569,7 +569,7 @@ export class HotelResearchFlowTest {
 
       this.log('🎉 Complete hotel research flow test passed!', 'success');
     } catch (error) {
-      this.log(`❌ Complete flow test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ Complete flow test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -612,7 +612,7 @@ export class HotelResearchFlowTest {
       );
     } catch (error) {
       this.log(
-        `❌ Google Places API integration test failed: ${(error as Error).message}`,
+        `❌ Google Places API integration test failed: ${(error as any)?.message || String(error)}`,
         'error'
       );
       throw error;
@@ -665,7 +665,7 @@ export class HotelResearchFlowTest {
         'AMENITIES',
         'POLICIES',
       ];
-      for (const section of requiredSections) {
+      for (const section of (requiredSections as any[])) {
         if (!fullKnowledgeBase.includes(section)) {
           throw new Error(
             `Knowledge base missing required section: ${section}`
@@ -677,7 +677,7 @@ export class HotelResearchFlowTest {
       this.results.coverage.knowledgeBase.validation = true;
     } catch (error) {
       this.log(
-        `❌ Knowledge base generation test failed: ${(error as Error).message}`,
+        `❌ Knowledge base generation test failed: ${(error as any)?.message || String(error)}`,
         'error'
       );
       throw error;
@@ -709,7 +709,7 @@ export class HotelResearchFlowTest {
         },
       ];
 
-      for (const config of testConfigs) {
+      for (const config of (testConfigs as any[])) {
         this.log(
           `🔧 Testing assistant with config: ${JSON.stringify(config)}`,
           'info'
@@ -750,7 +750,7 @@ export class HotelResearchFlowTest {
       }
     } catch (error) {
       this.log(
-        `❌ Vapi assistant creation test failed: ${(error as Error).message}`,
+        `❌ Vapi assistant creation test failed: ${(error as any)?.message || String(error)}`,
         'error'
       );
       throw error;
@@ -818,7 +818,7 @@ export class HotelResearchFlowTest {
 
       this.log('✅ Data update test passed', 'success');
     } catch (error) {
-      this.log(`❌ Database storage test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ Database storage test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -864,7 +864,7 @@ export class HotelResearchFlowTest {
       this.config.useMockData = originalUseMockData;
       this.config.skipApiCalls = originalSkipApiCalls;
     } catch (error) {
-      this.log(`❌ Mock data test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ Mock data test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -878,7 +878,7 @@ export class HotelResearchFlowTest {
         await this.hotelResearchService.basicResearch('', '');
         throw new Error('Should have failed with empty hotel name');
       } catch (error) {
-        if ((error as Error).message === 'Should have failed with empty hotel name') {
+        if ((error as any)?.message || String(error) === 'Should have failed with empty hotel name') {
           throw error;
         }
         this.log('✅ Empty hotel name error handling passed', 'success');
@@ -896,7 +896,7 @@ export class HotelResearchFlowTest {
           );
           throw new Error('Should have failed with invalid API key');
         } catch (error) {
-          if ((error as Error).message === 'Should have failed with invalid API key') {
+          if ((error as any)?.message || String(error) === 'Should have failed with invalid API key') {
             throw error;
           }
           this.log('✅ Invalid API key error handling passed', 'success');
@@ -910,7 +910,7 @@ export class HotelResearchFlowTest {
         this.knowledgeBaseGenerator.generateKnowledgeBase(null);
         throw new Error('Should have failed with null hotel data');
       } catch (error) {
-        if ((error as Error).message === 'Should have failed with null hotel data') {
+        if ((error as any)?.message || String(error) === 'Should have failed with null hotel data') {
           throw error;
         }
         this.log('✅ Null hotel data error handling passed', 'success');
@@ -923,7 +923,7 @@ export class HotelResearchFlowTest {
         throw new Error('Should have failed with invalid database schema');
       } catch (error) {
         if (
-          (error as Error).message === 'Should have failed with invalid database schema'
+          (error as any)?.message || String(error) === 'Should have failed with invalid database schema'
         ) {
           throw error;
         }
@@ -933,7 +933,7 @@ export class HotelResearchFlowTest {
       this.results.coverage.hotelResearch.errorHandling = true;
       this.results.coverage.vapiIntegration.errorHandling = true;
     } catch (error) {
-      this.log(`❌ Error scenarios test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ Error scenarios test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -979,7 +979,7 @@ export class HotelResearchFlowTest {
         );
       }
     } catch (error) {
-      this.log(`❌ API rate limiting test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ API rate limiting test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -1045,7 +1045,7 @@ export class HotelResearchFlowTest {
       this.log('✅ Tenant isolation test passed', 'success');
       this.results.coverage.database.tenantIsolation = true;
     } catch (error) {
-      this.log(`❌ Tenant isolation test failed: ${(error as Error).message}`, 'error');
+      this.log(`❌ Tenant isolation test failed: ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -1088,16 +1088,16 @@ export class HotelResearchFlowTest {
       step.status = 'failed';
       step.endTime = performance.now();
       step.duration = step.endTime - step.startTime;
-      step.error = (error as Error).message;
+      step.error = (error as any)?.message || String(error);
       this.results.testsFailed++;
 
       this.results.errors.push({
         step: id,
-        message: (error as Error).message,
-        stack: (error as Error).stack,
+        message: (error as any)?.message || String(error),
+        stack: (error as any)?.stack,
       });
 
-      this.log(`❌ Test failed: ${name} - ${(error as Error).message}`, 'error');
+      this.log(`❌ Test failed: ${name} - ${(error as any)?.message || String(error)}`, 'error');
       throw error;
     }
   }
@@ -1186,8 +1186,8 @@ ${
         .map(
           error => `
 ### ${error.step}
-- **Message**: ${(error as Error).message}
-${(error as Error).stack ? `- **Stack**: \`\`\`\n${(error as Error).stack}\n\`\`\`` : ''}
+- **Message**: ${(error as any)?.message || String(error)}
+${(error as any)?.stack ? `- **Stack**: \`\`\`\n${(error as any)?.stack}\n\`\`\`` : ''}
 `
         )
         .join('')

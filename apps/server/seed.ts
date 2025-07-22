@@ -128,7 +128,7 @@ async function seedCallsAndRequests() {
     ];
 
     // Insert call data
-    for (const callItem of callData) {
+    for (const callItem of (callData as any[])) {
       await db.insert(call).values(callItem).onConflictDoNothing();
     }
 
@@ -200,7 +200,7 @@ async function seedCallsAndRequests() {
     ];
 
     // Insert requests
-    for (const requestItem of requestData) {
+    for (const requestItem of (requestData as any[])) {
       await db.insert(request).values(requestItem);
     }
 

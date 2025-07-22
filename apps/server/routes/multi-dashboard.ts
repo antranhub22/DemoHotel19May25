@@ -1,5 +1,5 @@
 import express, { type Request, Response } from 'express';
-// import { tenants, staff, call } from '@shared/db';
+// import { tenants staff call  } from '@shared/db';
 import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 
@@ -47,7 +47,7 @@ router.get('/dashboard/hotel-manager', authenticateJWT, async (req, res) => {
       .limit(1);
 
     if (!hotelInfo) {
-      return res.status(404).json({ error: 'Hotel not found' });
+      return (res as any).status(404).json({ error: 'Hotel not found' });
     }
 
     // Get today's metrics
@@ -100,10 +100,10 @@ router.get('/dashboard/hotel-manager', authenticateJWT, async (req, res) => {
     };
 
     logger.debug('✅ [HOTEL-DASHBOARD] Dashboard data retrieved for: ${hotelInfo.hotel_name}', 'Component');
-    res.json(dashboardData);
+    (res as any).json(dashboardData);
   } catch (error) {
     logger.error('❌ [HOTEL-DASHBOARD] Error fetching hotel manager dashboard:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+    (res as any).status(500).json({ error: 'Failed to fetch dashboard data' });
   }
 });
 
@@ -182,10 +182,10 @@ router.get('/dashboard/saas-provider', authenticateJWT, async (req, res) => {
     };
 
     logger.debug('✅ [SAAS-DASHBOARD] Platform dashboard data retrieved', 'Component');
-    res.json(dashboardData);
+    (res as any).json(dashboardData);
   } catch (error) {
     logger.error('❌ [SAAS-DASHBOARD] Error fetching SaaS provider dashboard:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch platform dashboard data' });
+    (res as any).status(500).json({ error: 'Failed to fetch platform dashboard data' });
   }
 });
 
@@ -218,7 +218,7 @@ router.get('/dashboard/staff', authenticateJWT, async (req, res) => {
       .limit(1);
 
     if (!userInfo) {
-      return res.status(404).json({ error: 'Staff member not found' });
+      return (res as any).status(404).json({ error: 'Staff member not found' });
     }
 
     // Get assigned requests
@@ -274,10 +274,10 @@ router.get('/dashboard/staff', authenticateJWT, async (req, res) => {
     };
 
     logger.debug('✅ [STAFF-DASHBOARD] Staff dashboard data retrieved for: ${userInfo.username}', 'Component');
-    res.json(dashboardData);
+    (res as any).json(dashboardData);
   } catch (error) {
     logger.error('❌ [STAFF-DASHBOARD] Error fetching staff dashboard:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch staff dashboard data' });
+    (res as any).status(500).json({ error: 'Failed to fetch staff dashboard data' });
   }
 });
 
@@ -351,14 +351,14 @@ router.get('/dashboard/config/:type', authenticateJWT, async (req, res) => {
         break;
 
       default:
-        return res.status(400).json({ error: 'Invalid dashboard type' });
+        return (res as any).status(400).json({ error: 'Invalid dashboard type' });
     }
 
     logger.debug('✅ [DASHBOARD-CONFIG] Config retrieved for: ${type}', 'Component');
-    res.json(config);
+    (res as any).json(config);
   } catch (error) {
     logger.error('❌ [DASHBOARD-CONFIG] Error fetching dashboard config:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch dashboard configuration' });
+    (res as any).status(500).json({ error: 'Failed to fetch dashboard configuration' });
   }
 });
 */

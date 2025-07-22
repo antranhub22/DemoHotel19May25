@@ -185,7 +185,7 @@ export const useConversationState = ({
 
         // ✅ IMPROVED: Better error message handling
         const errorMessage =
-          error instanceof Error ? (error as Error).message : 'Unknown error occurred';
+          error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error occurred';
 
         // ✅ IMPROVED: Categorize and handle different error types
         if (errorMessage.includes('webCallUrl')) {

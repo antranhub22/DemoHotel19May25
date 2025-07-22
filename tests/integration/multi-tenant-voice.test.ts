@@ -8,13 +8,12 @@ import {
 } from '@jest/globals';
 import request from 'supertest';
 import { db } from '@shared/db';
-import {
-  tenants,
-  staff,
-  call,
-  transcript,
+import { tenants
+  staff
+  call
+  transcript
   request as requestTable,
-} from '@shared/db/schema';
+ } from '@shared/db/schema';
 import { eq, and } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 
@@ -350,7 +349,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
         },
       ];
 
-      for (const transcript of transcripts) {
+      for (const transcript of (transcripts as any[])) {
         const storeTranscript = await request(app)
           .post('/api/store-transcript')
           .set('Authorization', `Bearer ${token}`)
@@ -413,7 +412,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
       // Tenant A (Premium) - supports 6 languages
       const languagesA = ['en', 'vi', 'fr', 'zh', 'ko', 'ru'];
 
-      for (const lang of languagesA) {
+      for (const lang of (languagesA as any[])) {
         const response = await request(app)
           .post('/api/calls')
           .set('Authorization', `Bearer ${tokenA}`)
@@ -429,7 +428,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
       // Tenant B (Basic) - only supports 2 languages
       const languagesB = ['en', 'vi'];
 
-      for (const lang of languagesB) {
+      for (const lang of (languagesB as any[])) {
         const response = await request(app)
           .post('/api/calls')
           .set('Authorization', `Bearer ${tokenB}`)

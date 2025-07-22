@@ -19,7 +19,7 @@ export const generateDevToken = async (): Promise<string> => {
     { email: 'itmanager', password: 'itmanager123' },
   ];
 
-  for (const cred of credentials) {
+  for (const cred of (credentials as any[])) {
     try {
       console.log(`🔐 [AuthHelper] Trying login with ${cred.email}...`);
 

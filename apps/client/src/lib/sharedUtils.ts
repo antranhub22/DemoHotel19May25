@@ -55,13 +55,13 @@ export function removeSimilarItems<T extends { name: string }>(
   const uniqueItems: T[] = [];
   const nameMap = new Map<string, boolean>();
 
-  for (const item of items) {
+  for (const item of (items as any[])) {
     const normalizedName = item.name.toLowerCase().replace(/\s+/g, ' ').trim();
 
     let isDuplicate = false;
     const existingNames = Array.from(nameMap.keys());
 
-    for (const existingName of existingNames) {
+    for (const existingName of (existingNames as any[])) {
       if (
         stringSimilarity(normalizedName, existingName) > similarityThreshold
       ) {

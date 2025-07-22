@@ -304,7 +304,7 @@ export class AsyncOptimizer {
     const results: R[] = [];
     const batches = this.chunkArray(items, batchSize);
 
-    for (const batch of batches) {
+    for (const batch of (batches as any[])) {
       const batchResults = await Promise.all(
         batch.map(item =>
           this.withConcurrencyLimit('batch', concurrency, () => processor(item))
@@ -465,7 +465,7 @@ export const cacheMiddleware = (ttl: number = 300000) => {
     const cached = cache.get(cacheKey);
 
     if (cached) {
-      return res.json(cached);
+      return (res as any).json(cached);
     }
 
     const originalSend = res.json;

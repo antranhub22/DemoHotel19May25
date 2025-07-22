@@ -10,9 +10,9 @@ const router = Router();
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
-  res.status(500).json({
+  (res as any).status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
   });
 }
 
@@ -63,7 +63,7 @@ router.get('/staff/requests', authenticateJWT, async (req: Request, res: Respons
     const finalRequests = transformedRequests.length > 0 ? transformedRequests : requestList;
 
     logger.debug(`✅ [STAFF] Returning ${finalRequests.length} requests to staff interface`, 'Component');
-    res.json(finalRequests);
+    (res as any).json(finalRequests);
   } catch (error) {
     handleApiError(res, error, 'Failed to fetch staff requests');
   }
@@ -77,7 +77,7 @@ router.patch('/staff/requests/:id/status', authenticateJWT, async (req: Request,
     const tenantId = (req as any).tenant?.id || 'mi-nhon-hotel';
 
     if (!status) {
-      return res.status(400).json({ error: 'Missing status field' });
+      return (res as any).status(400).json({ error: 'Missing status field' });
     }
 
     logger.debug(`📝 [STAFF] Updating request ${id} status to: ${status}`, 'Component');
@@ -105,7 +105,7 @@ router.patch('/staff/requests/:id/status', authenticateJWT, async (req: Request,
     }
 
     logger.debug(`✅ [STAFF] Request ${id} status updated successfully`, 'Component');
-    res.json({ 
+    (res as any).json({ 
       success: true, 
       message: 'Request status updated successfully',
       requestId: id,
@@ -126,7 +126,7 @@ router.get('/staff/requests/:id/messages', authenticateJWT, (req: Request, res: 
     const messages = messageList.filter(msg => msg.requestId === id);
     
     logger.debug(`✅ [STAFF] Found ${messages.length} messages for request: ${id}`, 'Component');
-    res.json(messages);
+    (res as any).json(messages);
   } catch (error) {
     handleApiError(res, error, 'Failed to fetch request messages');
   }
@@ -139,7 +139,7 @@ router.post('/staff/requests/:id/message', authenticateJWT, (req: Request, res: 
     const { content } = req.body;
 
     if (!content) {
-      return res.status(400).json({ error: 'Missing content' });
+      return (res as any).status(400).json({ error: 'Missing content' });
     }
 
     logger.debug(`💬 [STAFF] Sending message for request ${id}`, 'Component');
@@ -156,7 +156,7 @@ router.post('/staff/requests/:id/message', authenticateJWT, (req: Request, res: 
     messageList.push(message);
 
     logger.debug(`✅ [STAFF] Message sent successfully for request: ${id}`, 'Component');
-    res.status(201).json(message);
+    (res as any).status(201).json(message);
   } catch (error) {
     handleApiError(res, error, 'Failed to send message');
   }
@@ -173,7 +173,7 @@ router.delete('/staff/requests/all', authenticateJWT, async (req: Request, res: 
 
     logger.debug(`✅ [STAFF] Deleted ${deletedCount} requests from database`, 'Component');
 
-    res.json({
+    (res as any).json({
       success: true,
       message: `Đã xóa ${deletedCount} requests`,
       deletedCount,

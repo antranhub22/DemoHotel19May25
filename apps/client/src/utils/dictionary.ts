@@ -69,7 +69,7 @@ export const findInDictionary = (
 
       // Tạo một sliding window để tìm các phần của từ
       let currentFragment = '';
-      for (const fragment of fragments) {
+      for (const fragment of (fragments as any[])) {
         currentFragment += fragment.toLowerCase();
         if (ENABLE_DICTIONARY_LOGGING) {
           logger.debug('   Building fragment:', 'Component', currentFragment);

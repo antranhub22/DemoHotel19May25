@@ -39,7 +39,7 @@ export class AnalyticsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: overview,
       });
@@ -49,7 +49,7 @@ export class AnalyticsController {
         'AnalyticsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to retrieve analytics overview',
       });
@@ -87,7 +87,7 @@ export class AnalyticsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: distribution,
       });
@@ -97,7 +97,7 @@ export class AnalyticsController {
         'AnalyticsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to retrieve service distribution',
       });
@@ -129,7 +129,7 @@ export class AnalyticsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: activity,
       });
@@ -139,7 +139,7 @@ export class AnalyticsController {
         'AnalyticsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to retrieve hourly activity',
       });
@@ -183,7 +183,7 @@ export class AnalyticsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: analytics,
         metadata: {
@@ -198,7 +198,7 @@ export class AnalyticsController {
         'AnalyticsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to retrieve dashboard analytics',
       });

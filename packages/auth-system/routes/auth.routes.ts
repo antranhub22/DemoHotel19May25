@@ -36,8 +36,8 @@ const legacyAuthLoginSchema = z.object({
 router.post('/login', async (req: Request, res: Response) => {
   try {
     console.log('🔐 [UnifiedAuth] Login attempt:', {
-      username: req.body.username || req.body.email,
-      hasPassword: !!req.body.password,
+      username: (req.body as any).username || (req.body as any).email,
+      hasPassword: !!(req.body as any).password,
     });
 
     // Validate input using unified schema
@@ -45,7 +45,7 @@ router.post('/login', async (req: Request, res: Response) => {
       req.body
     );
     if (!validation.success) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         success: false,
         error: 'Invalid login credentials',
         details: validation.error.errors,
@@ -59,7 +59,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const result = await UnifiedAuthService.login(credentials);
 
     if (!result.success) {
-      return res.status(401).json({
+      return (res as any).status(401).json({
         success: false,
         error: result.error,
         code: result.errorCode,
@@ -67,7 +67,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Return standardized success response
-    res.json({
+    (res as any).json({
       success: true,
       user: {
         id: result.user!.id,
@@ -88,7 +88,7 @@ router.post('/login', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Login error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
@@ -105,7 +105,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         success: false,
         error: 'Refresh token is required',
         code: 'REFRESH_TOKEN_MISSING',
@@ -115,14 +115,14 @@ router.post('/refresh', async (req: Request, res: Response) => {
     const result = await UnifiedAuthService.refreshToken(refreshToken);
 
     if (!result.success) {
-      return res.status(401).json({
+      return (res as any).status(401).json({
         success: false,
         error: result.error,
         code: result.errorCode,
       });
     }
 
-    res.json({
+    (res as any).json({
       success: true,
       user: {
         id: result.user!.id,
@@ -140,7 +140,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Refresh error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
@@ -154,20 +154,20 @@ router.post('/refresh', async (req: Request, res: Response) => {
  */
 router.post('/logout', authenticateJWT, async (req: Request, res: Response) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
       await UnifiedAuthService.logout(token);
     }
 
-    res.json({
+    (res as any).json({
       success: true,
       message: 'Logged out successfully',
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Logout error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
@@ -184,14 +184,14 @@ router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     if (!user) {
-      return res.status(401).json({
+      return (res as any).status(401).json({
         success: false,
         error: 'Not authenticated',
         code: 'AUTHENTICATION_REQUIRED',
       });
     }
 
-    res.json({
+    (res as any).json({
       success: true,
       user: {
         id: user.id,
@@ -209,7 +209,7 @@ router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Get user error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
@@ -235,7 +235,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
     // Validate legacy format
     const validation = legacyStaffLoginSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Username and password are required',
         deprecated: true,
         newEndpoint: '/api/auth/login',
@@ -249,7 +249,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
     const result = await UnifiedAuthService.login(credentials);
 
     if (!result.success) {
-      return res.status(401).json({
+      return (res as any).status(401).json({
         error: result.error,
         deprecated: true,
         newEndpoint: '/api/auth/login',
@@ -257,7 +257,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
     }
 
     // Return legacy format for backward compatibility
-    res.json({
+    (res as any).json({
       success: true,
       token: result.token,
       user: {
@@ -273,7 +273,7 @@ router.post('/staff/login', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [LegacyAuth] Staff login error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       error: 'Internal server error',
       deprecated: true,
       newEndpoint: '/api/auth/login',
@@ -294,14 +294,14 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     if (!user) {
-      return res.status(401).json({
+      return (res as any).status(401).json({
         error: 'Unauthorized',
         deprecated: true,
       });
     }
 
     // Return legacy format
-    res.json({
+    (res as any).json({
       success: true,
       user: {
         username: user.username,
@@ -315,7 +315,7 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [LegacyAuth] Get user error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       error: 'Internal server error',
       deprecated: true,
     });
@@ -333,7 +333,7 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
  */
 router.get('/dev/users', (req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'development') {
-    return res.status(404).json({
+    return (res as any).status(404).json({
       error: 'Not found',
       code: 'DEV_ONLY',
     });
@@ -341,7 +341,7 @@ router.get('/dev/users', (req: Request, res: Response) => {
 
   const devUsers = UnifiedAuthService.getDevUsers();
 
-  res.json({
+  (res as any).json({
     success: true,
     users: devUsers.map(user => ({
       username: user.username,

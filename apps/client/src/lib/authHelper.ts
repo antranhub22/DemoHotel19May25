@@ -141,7 +141,7 @@ export const getAuthToken = async (): Promise<string | null> => {
     autoLoginAttempts++;
     lastAutoLoginTime = now;
 
-    for (const cred of DEV_CREDENTIALS) {
+    for (const cred of (DEV_CREDENTIALS as any[])) {
       const token = await attemptLogin(cred);
       if (token) {
         logger.debug('✅ [AuthHelper] Fresh dev token generated', 'Component');

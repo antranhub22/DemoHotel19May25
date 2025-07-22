@@ -97,7 +97,7 @@ class MigrationTestRunner {
 
       return results.success;
     } catch (error) {
-      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as Error).message);
+      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as any)?.message || String(error));
       return false;
     }
   }

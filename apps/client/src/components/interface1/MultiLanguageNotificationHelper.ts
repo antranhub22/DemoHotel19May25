@@ -213,7 +213,7 @@ export function getLocalizedNotification(
 // Helper function to create multi-language notification
 export function createMultiLanguageNotification(
   template: keyof typeof NOTIFICATION_TEMPLATES,
-  currentLanguage: Language,
+  currentLanguage,
   variables: Record<string, string> = {},
   options: {
     type?: 'success' | 'error' | 'warning' | 'info' | 'call' | 'service' | 'guest';
@@ -223,17 +223,16 @@ export function createMultiLanguageNotification(
 ) {
   const { title, message } = getLocalizedNotification(template, currentLanguage, variables);
   
-  return {
-    type: options.type || 'info',
+  return { type: options.type || 'info',
     title,
-    message,
-    duration: options.duration || 3000,
+    message
+    duration: options?.duration || 3000,
     metadata: {
       template,
       language: currentLanguage,
       variables,
       ...options.metadata
-    }
+     }
   };
 }
 
@@ -250,7 +249,7 @@ export function getVoiceFeedback(
 // Helper to add notification to global notification system
 export function addMultiLanguageNotification(
   template: keyof typeof NOTIFICATION_TEMPLATES,
-  currentLanguage: Language,
+  currentLanguage,
   variables: Record<string, string> = {},
   options: {
     type?: 'success' | 'error' | 'warning' | 'info' | 'call' | 'service' | 'guest';

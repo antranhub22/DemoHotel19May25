@@ -184,7 +184,7 @@ describe('Voice Assistant Performance Tests', () => {
     it('should switch languages within performance threshold', async () => {
       const languages = ['en', 'vi', 'fr', 'zh', 'ko', 'ru'];
 
-      for (const language of languages) {
+      for (const language of (languages as any[])) {
         performanceMonitor.startMeasurement(`languageSwitch-${language}`);
 
         await voiceAssistant.switchLanguage(language);
@@ -225,7 +225,7 @@ describe('Voice Assistant Performance Tests', () => {
         'How do I contact the front desk?',
       ];
 
-      for (const transcript of transcripts) {
+      for (const transcript of (transcripts as any[])) {
         performanceMonitor.startMeasurement('transcriptProcessing');
 
         await voiceAssistant.processTranscript(transcript);
@@ -347,7 +347,7 @@ describe('Voice Assistant Performance Tests', () => {
         'SiriButtonContainer',
       ];
 
-      for (const component of components) {
+      for (const component of (components as any[])) {
         performanceMonitor.startMeasurement(`render-${component}`);
 
         // Simulate component rendering
@@ -400,7 +400,7 @@ describe('Voice Assistant Performance Tests', () => {
         'Call ended',
       ];
 
-      for (const notification of notifications) {
+      for (const notification of (notifications as any[])) {
         performanceMonitor.startMeasurement('notificationDisplay');
 
         // Simulate notification display

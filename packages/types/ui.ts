@@ -445,6 +445,6 @@ export interface I18nContextType {
   setLanguage: (lang: Language) => void;
   t: (key: string, options?: Record<string, any>) => string;
   formatDate: (date: Date, options?: Intl.DateTimeFormatOptions) => string;
-  formatNumber: (number: number, options?: Intl.NumberFormatOptions) => string;
+  formatNumber: (number, options?: Intl.NumberFormatOptions) => string;
   formatCurrency: (amount: number, currency: string) => string;
 }

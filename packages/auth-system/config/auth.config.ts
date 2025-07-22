@@ -5,7 +5,7 @@
 // Used across both client and server sides
 
 import { z } from 'zod';
-import type { UserRole, AuthErrorCode } from '../types/auth';
+
 
 // ============================================
 // JWT CONFIGURATION

@@ -60,7 +60,7 @@ const StaffDashboard: React.FC = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {return navigate('/staff');}
-      const data = await res.json();
+      const data = await (res as any).json();
       logger.debug('Fetched requests data:', 'Component', data); // Debug log
       setRequests(data);
     } catch (_error) {
@@ -118,7 +118,7 @@ const StaffDashboard: React.FC = () => {
           credentials: 'include',
         }
       );
-      const data = await res.json();
+      const data = await (res as any).json();
       setMessages(data);
     } catch (_) {
       setMessages([]);

@@ -12,9 +12,9 @@ const router = Router();
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
-  res.status(500).json({
+  (res as any).status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
   });
 }
 
@@ -34,7 +34,7 @@ router.get('/transcripts/:callId', async (req: Request, res: Response) => {
       .where(eq(transcript.call_id, callId));
 
     logger.debug(`✅ [TRANSCRIPTS] Found ${transcripts.length} transcripts for call: ${callId}`, 'Component');
-    res.json(transcripts);
+    (res as any).json(transcripts);
   } catch (error) {
     handleApiError(res, error, 'Failed to fetch transcripts');
   }
@@ -46,7 +46,7 @@ router.post('/transcripts', async (req: Request, res: Response) => {
     const { callId, role, content, timestamp, tenantId } = req.body;
 
     if (!callId || !role || !content) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Missing required fields: callId, role, content',
       });
     }
@@ -88,7 +88,7 @@ router.post('/transcripts', async (req: Request, res: Response) => {
     }
 
     logger.debug(`✅ [TRANSCRIPTS] Transcript stored successfully for call: ${callId}`, 'Component');
-    res.json({ success: true });
+    (res as any).json({ success: true });
   } catch (error) {
     handleApiError(res, error, 'Failed to store transcript');
   }
@@ -113,7 +113,7 @@ router.post('/test-transcript', async (req: Request, res: Response) => {
     await db.insert(transcript).values(validatedData);
 
     logger.debug(`✅ [TRANSCRIPTS] Test transcript stored successfully`, 'Component');
-    res.json({ 
+    (res as any).json({ 
       success: true, 
       message: 'Test transcript stored successfully',
       data: testData 

@@ -41,7 +41,7 @@ export class TenantMiddleware {
     try {
       // Check if user is authenticated
       if (!req.user) {
-        return res.status(401).json({
+        return (res as any).status(401).json({
           error: 'Authentication required',
           code: 'AUTH_REQUIRED',
         });
@@ -51,7 +51,7 @@ export class TenantMiddleware {
       const tenantId = req.user.tenantId;
 
       if (!tenantId) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Tenant ID not found in token',
           code: 'TENANT_ID_MISSING',
         });
@@ -61,7 +61,7 @@ export class TenantMiddleware {
       const tenant = await this.tenantService.getTenantById(tenantId);
 
       if (!tenant) {
-        return res.status(404).json({
+        return (res as any).status(404).json({
           error: 'Tenant not found',
           code: 'TENANT_NOT_FOUND',
         });
@@ -69,7 +69,7 @@ export class TenantMiddleware {
 
       // Check subscription status
       if (!this.tenantService.isSubscriptionActive(tenant)) {
-        return res.status(403).json({
+        return (res as any).status(403).json({
           error: 'Subscription inactive or expired',
           code: 'SUBSCRIPTION_INACTIVE',
           subscriptionStatus: tenant.subscriptionStatus,
@@ -87,13 +87,13 @@ export class TenantMiddleware {
       logger.error('Tenant identification failed:', 'Component', error);
 
       if (error instanceof TenantError) {
-        return res.status(error.statusCode).json({
-          error: (error as Error).message,
+        return (res as any).status(error.statusCode).json({
+          error: (error as any)?.message || String(error),
           code: error.code,
         });
       }
 
-      return res.status(500).json({
+      return (res as any).status(500).json({
         error: 'Tenant identification failed',
         code: 'TENANT_IDENTIFICATION_FAILED',
       });
@@ -114,7 +114,7 @@ export class TenantMiddleware {
       const subdomain = this.extractSubdomain(host);
 
       if (!subdomain) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Subdomain not found',
           code: 'SUBDOMAIN_MISSING',
         });
@@ -124,7 +124,7 @@ export class TenantMiddleware {
       const tenant = await this.tenantService.getTenantBySubdomain(subdomain);
 
       if (!tenant) {
-        return res.status(404).json({
+        return (res as any).status(404).json({
           error: 'Tenant not found',
           code: 'TENANT_NOT_FOUND',
         });
@@ -132,7 +132,7 @@ export class TenantMiddleware {
 
       // Check subscription status
       if (!this.tenantService.isSubscriptionActive(tenant)) {
-        return res.status(403).json({
+        return (res as any).status(403).json({
           error: 'Service unavailable - subscription inactive',
           code: 'SUBSCRIPTION_INACTIVE',
         });
@@ -148,13 +148,13 @@ export class TenantMiddleware {
       logger.error('Tenant identification from subdomain failed:', 'Component', error);
 
       if (error instanceof TenantError) {
-        return res.status(error.statusCode).json({
-          error: (error as Error).message,
+        return (res as any).status(error.statusCode).json({
+          error: (error as any)?.message || String(error),
           code: error.code,
         });
       }
 
-      return res.status(500).json({
+      return (res as any).status(500).json({
         error: 'Tenant identification failed',
         code: 'TENANT_IDENTIFICATION_FAILED',
       });
@@ -168,7 +168,7 @@ export class TenantMiddleware {
     try {
       // Check if tenant is identified
       if (!req.tenantId) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Tenant not identified',
           code: 'TENANT_NOT_IDENTIFIED',
         });
@@ -182,7 +182,7 @@ export class TenantMiddleware {
       next();
     } catch (error) {
       logger.error('Row-level security enforcement failed:', 'Component', error);
-      return res.status(500).json({
+      return (res as any).status(500).json({
         error: 'Security enforcement failed',
         code: 'SECURITY_ENFORCEMENT_FAILED',
       });
@@ -196,7 +196,7 @@ export class TenantMiddleware {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({
+          return (res as any).status(400).json({
             error: 'Tenant not identified',
             code: 'TENANT_NOT_IDENTIFIED',
           });
@@ -208,7 +208,7 @@ export class TenantMiddleware {
         );
 
         if (!hasAccess) {
-          return res.status(403).json({
+          return (res as any).status(403).json({
             error: `Feature '${feature}' not available in your plan`,
             code: 'FEATURE_NOT_AVAILABLE',
             feature,
@@ -221,7 +221,7 @@ export class TenantMiddleware {
         next();
       } catch (error) {
         logger.error('Feature access check failed for ${feature}:', 'Component', error);
-        return res.status(500).json({
+        return (res as any).status(500).json({
           error: 'Feature access check failed',
           code: 'FEATURE_ACCESS_CHECK_FAILED',
         });
@@ -239,7 +239,7 @@ export class TenantMiddleware {
   ) => {
     try {
       if (!req.tenant) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Tenant not identified',
           code: 'TENANT_NOT_IDENTIFIED',
         });
@@ -250,7 +250,7 @@ export class TenantMiddleware {
       );
 
       if (!limitsCheck.withinLimits) {
-        return res.status(429).json({
+        return (res as any).status(429).json({
           error: 'Subscription limits exceeded',
           code: 'SUBSCRIPTION_LIMITS_EXCEEDED',
           violations: limitsCheck.violations,
@@ -263,7 +263,7 @@ export class TenantMiddleware {
       next();
     } catch (error) {
       logger.error('Subscription limits check failed:', 'Component', error);
-      return res.status(500).json({
+      return (res as any).status(500).json({
         error: 'Subscription limits check failed',
         code: 'LIMITS_CHECK_FAILED',
       });
@@ -277,7 +277,7 @@ export class TenantMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({
+          return (res as any).status(400).json({
             error: 'Tenant not identified',
             code: 'TENANT_NOT_IDENTIFIED',
           });
@@ -292,7 +292,7 @@ export class TenantMiddleware {
         next();
       } catch (error) {
         logger.error('Tenant ownership validation setup failed:', 'Component', error);
-        return res.status(500).json({
+        return (res as any).status(500).json({
           error: 'Ownership validation setup failed',
           code: 'OWNERSHIP_VALIDATION_FAILED',
         });
@@ -312,7 +312,7 @@ export class TenantMiddleware {
     return (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!req.tenant) {
-          return res.status(400).json({
+          return (res as any).status(400).json({
             error: 'Tenant not identified',
             code: 'TENANT_NOT_IDENTIFIED',
           });
@@ -335,7 +335,7 @@ export class TenantMiddleware {
           tenantData.count++;
 
           if (tenantData.count > requestsPerMinute) {
-            return res.status(429).json({
+            return (res as any).status(429).json({
               error: 'Rate limit exceeded',
               code: 'RATE_LIMIT_EXCEEDED',
               limit: requestsPerMinute,
@@ -357,7 +357,7 @@ export class TenantMiddleware {
         next();
       } catch (error) {
         logger.error('Tenant rate limiting failed:', 'Component', error);
-        return res.status(500).json({
+        return (res as any).status(500).json({
           error: 'Rate limiting failed',
           code: 'RATE_LIMITING_FAILED',
         });

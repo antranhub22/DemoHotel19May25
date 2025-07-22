@@ -125,7 +125,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         
-        const data = await res.json();
+        const data = await (res as any).json();
         logger.debug('[OrderContext] Fetched orders from API:', 'Component', data);
         
         // Map data to ActiveOrder format

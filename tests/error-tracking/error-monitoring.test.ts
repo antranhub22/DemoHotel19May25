@@ -120,8 +120,8 @@ class ErrorTrackingSystem {
 
     const errorEvent: ErrorEvent = {
       id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      message: (error as Error).message,
-      stack: (error as Error).stack,
+      message: (error as any)?.message || String(error),
+      stack: (error as any)?.stack,
       severity: options.severity || 'medium',
       category: options.category || 'general',
       component: options.component,
@@ -418,7 +418,7 @@ describe('Error Tracking & Monitoring System Tests', () => {
       expect(error.category).toBe('voice-assistant');
       expect(error.component).toBe('VoiceActivation');
       expect(error.severity).toBe('high');
-      expect((error as Error).message).toContain('voice recognition');
+      expect((error as any)?.message || String(error)).toContain('voice recognition');
       expect(error.context.microphone).toBe('permission_denied');
     });
 

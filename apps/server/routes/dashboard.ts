@@ -120,7 +120,7 @@ const checkLimits = async (req: Request, res: Response, next: NextFunction) => {
     const usage = await tenantService.getTenantUsage(tenant.id);
 
     if (usage.callsThisMonth >= limits.monthlyCallLimit) {
-      return res.status(403).json({
+      return (res as any).status(403).json({
         error: 'Monthly call limit exceeded',
         usage: usage.callsThisMonth,
         limit: limits.monthlyCallLimit,
@@ -143,7 +143,7 @@ const requireFeature = (feature: string) => {
         feature as any
       );
       if (!hasFeature) {
-        return res.status(403).json({
+        return (res as any).status(403).json({
           error: `Feature '${feature}' not available in your plan`,
           feature,
           currentPlan: req.tenant.subscriptionPlan,
@@ -161,15 +161,15 @@ const requireFeature = (feature: string) => {
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   if (process.env.NODE_ENV === 'development') {
     console.error(defaultMessage, error);
-    return res.status(500).json({
+    return (res as any).status(500).json({
       error: defaultMessage,
-      message: (error as Error).message,
-      stack: (error as Error).stack,
+      message: (error as any)?.message || String(error),
+      stack: (error as any)?.stack,
       type: error.constructor.name,
     });
   } else {
-    console.error(defaultMessage, (error as Error).message);
-    return res.status(500).json({ error: defaultMessage });
+    console.error(defaultMessage, (error as any)?.message || String(error));
+    return (res as any).status(500).json({ error: defaultMessage });
   }
 }
 
@@ -200,7 +200,7 @@ router.post(
           'advancedAnalytics'
         );
         if (!hasAdvancedResearch) {
-          return res.status(403).json({
+          return (res as any).status(403).json({
             error: 'Advanced research not available in your plan',
             feature: 'advancedAnalytics',
             currentPlan: req.tenant.subscriptionPlan,
@@ -243,7 +243,7 @@ router.post(
 
       logger.debug('✅ Hotel research completed for ${hotelName}', 'Component');
 
-      res.json({
+      (res as any).json({
         success: true,
         hotelData,
         knowledgeBase,
@@ -252,7 +252,7 @@ router.post(
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Invalid request data',
           details: error.errors,
         });
@@ -280,7 +280,7 @@ router.post(
 
       // Check if hotel data exists
       if (!hotelData || !hotelData.name) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Hotel data is required. Please research your hotel first.',
           requiresResearch: true,
         });
@@ -323,7 +323,7 @@ router.post(
 
       logger.debug('✅ Assistant generated successfully: ${assistantId}', 'Component');
 
-      res.json({
+      (res as any).json({
         success: true,
         assistantId,
         customization,
@@ -332,7 +332,7 @@ router.post(
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Invalid request data',
           details: error.errors,
         });
@@ -363,7 +363,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
       : null;
 
     if (!profile) {
-      return res.status(404).json({
+      return (res as any).status(404).json({
         error: 'Hotel profile not found',
         setupRequired: true,
       });
@@ -393,7 +393,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
       }
     }
 
-    res.json({
+    (res as any).json({
       success: true,
       profile: {
         tenantId: profile.tenantId,
@@ -450,14 +450,14 @@ router.put(
         : null;
 
       if (!profile) {
-        return res.status(404).json({
+        return (res as any).status(404).json({
           error: 'Hotel profile not found',
           setupRequired: true,
         });
       }
 
       if (!profile.vapiAssistantId) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'No assistant found. Please generate an assistant first.',
           assistantRequired: true,
         });
@@ -499,7 +499,7 @@ router.put(
 
       logger.debug('✅ Assistant config updated for tenant: ${req.tenant.hotelName}', 'Component');
 
-      res.json({
+      (res as any).json({
         success: true,
         updatedConfig,
         assistantId: profile.vapiAssistantId,
@@ -507,7 +507,7 @@ router.put(
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        return (res as any).status(400).json({
           error: 'Invalid configuration data',
           details: error.errors,
         });
@@ -542,7 +542,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
         ]
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         analytics: {
           overview,
@@ -556,7 +556,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
       // Basic analytics with limited data
       const overview = await getOverview();
 
-      res.json({
+      (res as any).json({
         success: true,
         analytics: {
           overview: {
@@ -617,7 +617,7 @@ router.get('/service-health', async (req: Request, res: Response) => {
       health.overall = 'down';
     }
 
-    res.json(health);
+    (res as any).json(health);
   } catch (error) {
     handleApiError(res, error, 'Failed to check service health');
   }
@@ -647,7 +647,7 @@ router.delete(
         : null;
 
       if (!profile || !profile.vapiAssistantId) {
-        return res.status(404).json({
+        return (res as any).status(404).json({
           error: 'No assistant found to reset',
         });
       }
@@ -674,7 +674,7 @@ router.delete(
 
       logger.debug('✅ Assistant reset completed for tenant: ${req.tenant.hotelName}', 'Component');
 
-      res.json({
+      (res as any).json({
         success: true,
         message: 'Assistant has been reset. You can now generate a new one.',
         timestamp: new Date().toISOString(),

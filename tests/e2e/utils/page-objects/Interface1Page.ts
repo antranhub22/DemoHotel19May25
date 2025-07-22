@@ -163,7 +163,7 @@ export class Interface1Page {
       'Emergency'
     ];
 
-    for (const category of expectedCategories) {
+    for (const category of (expectedCategories as any[])) {
       await expect(this.page.locator(`text=${category}`)).toBeVisible();
     }
   }

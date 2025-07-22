@@ -44,17 +44,15 @@ class Logger {
     message: string,
     context?: string,
     data?: any
-  ): string {
-    const timestamp = new Date().toISOString();
+  ): string { const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];
 
     const logEntry: LogEntry = {
       timestamp,
       level: levelStr,
-      message,
+      message
       context,
-      data,
-    };
+      data };
 
     if (this.isDevelopment) {
       // Pretty format for development
@@ -74,8 +72,7 @@ class Logger {
     message: string,
     context?: string,
     data?: any
-  ): void {
-    if (level < this.logLevel) return;
+  ): void { if (level < this.logLevel) return;
 
     const formatted = this.formatMessage(level, message, context, data);
 
@@ -92,24 +89,20 @@ class Logger {
       case LogLevel.ERROR:
         console.error(formatted);
         break;
-    }
+     }
   }
 
-  debug(message: string, context?: string, data?: any): void {
-    this.log(LogLevel.DEBUG, message, context, data);
-  }
+  debug(message: string, context?: string, data?: any): void { this.log(LogLevel.DEBUG, message, context, data);
+   }
 
-  info(message: string, context?: string, data?: any): void {
-    this.log(LogLevel.INFO, message, context, data);
-  }
+  info(message: string, context?: string, data?: any): void { this.log(LogLevel.INFO, message, context, data);
+   }
 
-  warn(message: string, context?: string, data?: any): void {
-    this.log(LogLevel.WARN, message, context, data);
-  }
+  warn(message: string, context?: string, data?: any): void { this.log(LogLevel.WARN, message, context, data);
+   }
 
-  error(message: string, context?: string, data?: any): void {
-    this.log(LogLevel.ERROR, message, context, data);
-  }
+  error(message: string, context?: string, data?: any): void { this.log(LogLevel.ERROR, message, context, data);
+   }
 
   // Convenience methods with emojis for better readability
   success(message: string, context?: string, data?: any): void {

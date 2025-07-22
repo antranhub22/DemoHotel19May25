@@ -238,20 +238,17 @@ export function useWebSocket() {
             'Component',
             (message as { type?: string })?.type
           );
-        } catch (error) {
-          logger.error(
-            'Cannot send message, WebSocket error:',
+        } catch (error) { logger.error(
+            'Cannot send message WebSocket error:',
             'Component',
             error
           );
-        }
-      } else {
-        logger.error('Cannot send message, WebSocket not ready:', 'Component', {
+         }
+      } else { logger.error('Cannot send message WebSocket not ready:', 'Component', {
           hasSocket: !!socket,
           connected,
           readyState: socket?.readyState,
-          expectedState: WebSocket.OPEN,
-        });
+          expectedState: WebSocket.OPEN });
       }
     },
     [socket, connected]

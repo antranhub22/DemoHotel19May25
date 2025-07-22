@@ -68,7 +68,7 @@ export class RequestController {
         call_id: call_id || `CALL-${Date.now()}`,
         room_number: room_number || 'unknown',
         order_id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        request_content: content,
+        request_content,
         status: finalStatus,
         created_at: Math.floor(Date.now() / 1000), // Unix timestamp
         updated_at: Math.floor(Date.now() / 1000), // Set initial updated_at
@@ -113,17 +113,17 @@ export class RequestController {
         }
       );
 
-      res.status(201).json(response);
+      (res as any).status(201).json(response);
     } catch (error) {
       logger.error(
         '❌ [RequestController] Failed to create request',
         'RequestController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to create request',
-        details: error instanceof Error ? (error as Error).message : 'Unknown error',
+        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
       });
     }
   }
@@ -165,14 +165,14 @@ export class RequestController {
         }
       );
 
-      res.json({ success: true, data: requests });
+      (res as any).json({ success: true, data: requests });
     } catch (error) {
       logger.error(
         '❌ [RequestController] Failed to fetch requests',
         'RequestController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to fetch requests',
       });
@@ -188,7 +188,7 @@ export class RequestController {
       const requestId = parseInt(req.params.id, 10);
 
       if (isNaN(requestId)) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'Invalid request ID format',
         });
@@ -221,7 +221,7 @@ export class RequestController {
       const request = await query;
 
       if (!request || request.length === 0) {
-        res.status(404).json({
+        (res as any).status(404).json({
           success: false,
           error: 'Request not found',
         });
@@ -237,14 +237,14 @@ export class RequestController {
         }
       );
 
-      res.json({ success: true, data: request[0] });
+      (res as any).json({ success: true, data: request[0] });
     } catch (error) {
       logger.error(
         '❌ [RequestController] Failed to fetch request',
         'RequestController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to fetch request',
       });
@@ -261,7 +261,7 @@ export class RequestController {
       const { status, assignedTo } = req.body;
 
       if (isNaN(requestId)) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'Invalid request ID format',
         });
@@ -269,7 +269,7 @@ export class RequestController {
       }
 
       if (!status) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'Status is required',
         });
@@ -336,7 +336,7 @@ export class RequestController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         message: 'Request status updated successfully',
         data: {
@@ -352,7 +352,7 @@ export class RequestController {
         'RequestController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to update request status',
       });

@@ -345,7 +345,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
           duration: 3000,
           metadata: {
             serviceName: selectedService.name,
-            language: language,
+            language,
             hasVoicePrompts: true,
             promptsAvailable: Object.keys(VOICE_PROMPTS[selectedService.name] || {}).length
           }

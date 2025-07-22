@@ -24,7 +24,7 @@ export async function apiRequest({
 
   await throwIfResNotOk(res);
   try {
-    return await res.json();
+    return await (res as any).json();
   } catch (e) {
     return res;
   }
@@ -45,7 +45,7 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    return await (res as any).json();
   };
 
 export const queryClient = new QueryClient({

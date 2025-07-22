@@ -315,29 +315,26 @@ export class DashboardApi {
     }
 
     // Parse error message
-    const errorMessage = (error as Error).message || 'An unexpected error occurred';
+    const errorMessage = (error as any)?.message || String(error) || 'An unexpected error occurred';
     const statusMatch = errorMessage.match(/^(\d+):\s*(.+)$/);
 
-    if (statusMatch) {
-      const [, status, message] = statusMatch;
+    if (statusMatch) { const [, status, message] = statusMatch;
       const statusCode = parseInt(status);
 
       // Try to parse JSON error details
       try {
         const errorData = JSON.parse(message);
         return {
-          error: errorData.error || message,
-          details: errorData.details,
+          error: errorData.error || message
+          details: errorData?.details,
           feature: errorData.feature,
           currentPlan: errorData.currentPlan,
           upgradeRequired: errorData.upgradeRequired,
           setupRequired: errorData.setupRequired,
           assistantRequired: errorData.assistantRequired,
-          requiresResearch: errorData.requiresResearch,
-        };
-      } catch {
-        return {
-          error: message,
+          requiresResearch: errorData.requiresResearch };
+      } catch { return {
+          error: message
           details: { statusCode },
         };
       }

@@ -182,7 +182,7 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
     printReadyMessage();
   } catch (error) {
     console.error(colorize('💥 Critical environment error:', 'red'));
-    console.error(colorize((error as Error).message, 'red'));
+    console.error(colorize((error as any)?.message || String(error), 'red'));
     logger.debug('', 'Component');
     console.log(
       colorize('🔧 Please check your environment configuration:', 'yellow')
@@ -249,7 +249,7 @@ export async function validateProductionEnvironment(): Promise<void> {
   const failures: string[] = [];
   const warnings: string[] = [];
 
-  for (const check of productionChecks) {
+  for (const check of (productionChecks as any[])) {
     if (!check.check()) {
       if (check.critical) {
         failures.push(`❌ ${check.name}: ${check.message}`);

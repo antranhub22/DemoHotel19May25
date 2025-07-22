@@ -34,7 +34,7 @@ router.post('/store-transcript', express.json(), async (req, res) => {
       req.body;
 
     if (!callId || !role || !content) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Missing required fields: callId, role, content',
       });
     }
@@ -53,10 +53,10 @@ router.post('/store-transcript', express.json(), async (req, res) => {
     await db.insert(transcript).values(validatedData);
 
     logger.debug('✅ [API] Transcript stored successfully for call: ${callId}', 'Component');
-    res.json({ success: true });
+    (res as any).json({ success: true });
   } catch (error) {
     logger.error('❌ [API] Error storing transcript:', 'Component', error);
-    res.status(500).json({ error: 'Failed to store transcript' });
+    (res as any).status(500).json({ error: 'Failed to store transcript' });
   }
 });
 
@@ -73,10 +73,10 @@ router.get('/transcripts/:callId', async (req, res) => {
       .orderBy(transcript.timestamp);
 
     logger.debug('📝 [API] Found ${transcripts.length} transcripts for call: ${callId}', 'Component');
-    res.json(transcripts);
+    (res as any).json(transcripts);
   } catch (error) {
     logger.error('❌ [API] Error fetching transcripts:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch transcripts' });
+    (res as any).status(500).json({ error: 'Failed to fetch transcripts' });
   }
 });
 
@@ -90,7 +90,7 @@ router.post('/call-end', express.json(), async (req, res) => {
     const { callId, duration } = req.body;
 
     if (!callId || duration === undefined) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'callId and duration are required',
       });
     }
@@ -105,10 +105,10 @@ router.post('/call-end', express.json(), async (req, res) => {
       .where(eq(call.call_id_vapi, callId));
 
     logger.debug('✅ [API] Updated call duration for ${callId}: ${duration} seconds', 'Component');
-    res.json({ success: true, duration });
+    (res as any).json({ success: true, duration });
   } catch (error) {
     logger.error('❌ [API] Error updating call duration:', 'Component', error);
-    res.status(500).json({ error: 'Internal server error' });
+    (res as any).status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -122,7 +122,7 @@ router.post('/store-summary', express.json(), async (req, res) => {
     const { callId, content, roomNumber, duration } = req.body;
 
     if (!callId || !content) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'callId and content are required',
       });
     }
@@ -141,10 +141,10 @@ router.post('/store-summary', express.json(), async (req, res) => {
     await db.insert(call_summaries).values(validatedData);
 
     logger.debug('✅ [API] Summary stored successfully for call: ${callId}', 'Component');
-    res.json({ success: true });
+    (res as any).json({ success: true });
   } catch (error) {
     logger.error('❌ [API] Error storing summary:', 'Component', error);
-    res.status(500).json({ error: 'Failed to store summary' });
+    (res as any).status(500).json({ error: 'Failed to store summary' });
   }
 });
 
@@ -161,10 +161,10 @@ router.get('/summaries/:callId', async (req, res) => {
       .orderBy(call_summaries.timestamp);
 
     logger.debug('📋 [API] Found ${summaries.length} summaries for call: ${callId}', 'Component');
-    res.json(summaries);
+    (res as any).json(summaries);
   } catch (error) {
     logger.error('❌ [API] Error fetching summaries:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch summaries' });
+    (res as any).status(500).json({ error: 'Failed to fetch summaries' });
   }
 });
 
@@ -179,10 +179,10 @@ router.get('/analytics/overview', async (req, res) => {
     logger.debug(`📊 [API] Getting analytics overview for tenant: ${tenantId}`, 'Component');
 
     const overview = await getOverview();
-    res.json(overview);
+    (res as any).json(overview);
   } catch (error) {
     logger.error('❌ [API] Error fetching analytics overview:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch analytics overview' });
+    (res as any).status(500).json({ error: 'Failed to fetch analytics overview' });
   }
 });
 
@@ -193,10 +193,10 @@ router.get('/analytics/service-distribution', async (req, res) => {
     logger.debug(`📊 [API] Getting service distribution for tenant: ${tenantId}`, 'Component');
 
     const distribution = await getServiceDistribution();
-    res.json(distribution);
+    (res as any).json(distribution);
   } catch (error) {
     logger.error('❌ [API] Error fetching service distribution:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch service distribution' });
+    (res as any).status(500).json({ error: 'Failed to fetch service distribution' });
   }
 });
 
@@ -207,10 +207,10 @@ router.get('/analytics/hourly-activity', async (req, res) => {
     logger.debug(`📊 [API] Getting hourly activity for tenant: ${tenantId}`, 'Component');
 
     const activity = await getHourlyActivity();
-    res.json(activity);
+    (res as any).json(activity);
   } catch (error) {
     logger.error('❌ [API] Error fetching hourly activity:', 'Component', error);
-    res.status(500).json({ error: 'Failed to fetch hourly activity' });
+    (res as any).status(500).json({ error: 'Failed to fetch hourly activity' });
   }
 });
 
@@ -224,16 +224,16 @@ router.post('/translate-to-vietnamese', express.json(), async (req, res) => {
     const { text } = req.body;
 
     if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
+      return (res as any).status(400).json({ error: 'Text is required' });
     }
 
     logger.debug('🌐 [API] Translating text to Vietnamese: ${text.substring(0, 50)}...', 'Component');
 
     const translatedText = await translateToVietnamese(text);
-    res.json({ translatedText });
+    (res as any).json({ translatedText });
   } catch (error) {
     logger.error('❌ [API] Error translating text:', 'Component', error);
-    res.status(500).json({ error: 'Translation failed' });
+    (res as any).status(500).json({ error: 'Translation failed' });
   }
 });
 

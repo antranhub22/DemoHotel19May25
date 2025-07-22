@@ -175,7 +175,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
       const errorMessage =
-        error instanceof Error ? (error as Error).message : 'Lỗi không xác định';
+        error instanceof Error ? (error as any)?.message || String(error) : 'Lỗi không xác định';
 
       logger.error(
         '❌ [SiriButtonContainer] Call start error:',
@@ -291,7 +291,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       // ✅ IMPROVED: Show error to user for confirm as it's more critical
       if (typeof window !== 'undefined') {
         const errorMessage =
-          error instanceof Error ? (error as Error).message : 'Lỗi không xác định';
+          error instanceof Error ? (error as any)?.message || String(error) : 'Lỗi không xác định';
         alert(`Lỗi khi xác nhận cuộc gọi: ${errorMessage}`);
       }
     }

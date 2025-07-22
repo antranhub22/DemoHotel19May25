@@ -455,7 +455,7 @@ export class UnifiedAuthService {
 
       return {
         valid: false,
-        error: (error as Error).message || 'Invalid token',
+        error: (error as any)?.message || String(error) || 'Invalid token',
       };
     }
   }

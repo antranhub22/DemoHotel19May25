@@ -65,7 +65,7 @@ export async function initializeDatabaseOnStartup(): Promise<void> {
 
     console.error('\n🚨 Database Initialization Failed:');
     console.error(
-      `   Error: ${error instanceof Error ? (error as Error).message : 'Unknown error'}`
+      `   Error: ${error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error'}`
     );
     console.error('\n💡 Troubleshooting Steps:');
     console.error('   1. Check DATABASE_URL environment variable');

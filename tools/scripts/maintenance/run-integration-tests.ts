@@ -176,7 +176,7 @@ class IntegrationTestRunner {
 
       return results.success;
     } catch (error) {
-      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as Error).message);
+      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as any)?.message || String(error));
       return false;
     }
   }
@@ -279,7 +279,7 @@ class IntegrationTestRunner {
     // Run critical tests in order
     const criticalTests = ['mock', 'compatibility', 'production'];
 
-    for (const testName of criticalTests) {
+    for (const testName of (criticalTests as any[])) {
       console.log(
         `${criticalTests.indexOf(testName) + 1}️⃣ Running ${testName} test...`
       );
@@ -346,7 +346,7 @@ class IntegrationTestRunner {
     let allPassed = true;
     let criticalFailed = false;
 
-    for (const check of checks) {
+    for (const check of (checks as any[])) {
       let passed = false;
       try {
         passed = await check.check();

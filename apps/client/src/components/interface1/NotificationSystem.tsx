@@ -369,7 +369,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
         addNotification({ type: 'success', title, message });
       
       (window as any).showError = (title: string, message: string) => 
-        addNotification({ type: 'error', title, message, priority: 'high' });
+        addNotification({ type: 'error', title, message, priority: 'high'  });
       
       (window as any).showWarning = (title: string, message: string) => 
         addNotification({ type: 'warning', title, message });

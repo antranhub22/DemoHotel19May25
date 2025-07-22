@@ -98,7 +98,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(page);
+      (res as any).status(200).set({ 'Content-Type': 'text/html' }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
       next(e);
@@ -162,7 +162,7 @@ export function serveStatic(app: Express) {
       req.originalUrl.startsWith('/api/') ||
       req.originalUrl.startsWith('/ws/')
     ) {
-      return res.status(404).json({ error: 'API endpoint not found' });
+      return (res as any).status(404).json({ error: 'API endpoint not found' });
     }
 
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

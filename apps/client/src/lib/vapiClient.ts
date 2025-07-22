@@ -33,11 +33,10 @@ class VapiDebugger {
     console.log(`🔧 Vapi debug level set to: ${level}`);
   }
 
-  log(level: 'error' | 'info' | 'verbose', message: string, data?: any) {
-    const timestamp = new Date().toISOString();
+  log(level: 'error' | 'info' | 'verbose', message: string, data?: any) { const timestamp = new Date().toISOString();
 
     // Store log
-    this.logs.push({ timestamp, level, message, data });
+    this.logs.push({ timestamp, level, message, data  });
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
@@ -133,7 +132,7 @@ const loadVapi = async () => {
     logger.warn(
       '⚠️ [VAPI] Dynamic import failed:',
       'Component',
-      (error as Error).message
+      (error as any)?.message || String(error)
     );
 
     try {
@@ -565,8 +564,8 @@ export const startCall = async (
   } catch (error) {
     vapiDebugger.log('error', 'startCall failed with exception', {
       error,
-      errorMessage: error instanceof Error ? (error as Error).message : String(error),
-      errorStack: error instanceof Error ? (error as Error).stack : undefined,
+      errorMessage: error instanceof Error ? (error as any)?.message || String(error) : String(error),
+      errorStack: error instanceof Error ? (error as any)?.stack : undefined,
       assistantId: assistantId.substring(0, 15) + '...',
       vapiInstanceExists: !!vapiInstance,
     });
@@ -577,34 +576,34 @@ export const startCall = async (
     if (error instanceof Error) {
       let enhancedError: Error;
 
-      if ((error as Error).message.includes('webCallUrl')) {
+      if ((error as any)?.message || String(error).includes('webCallUrl')) {
         enhancedError = new Error(
           'Vapi call initialization failed - webCallUrl issue. Please check Vapi configuration and try again.'
         );
         vapiDebugger.log('error', 'webCallUrl issue detected', {
-          originalError: (error as Error).message,
+          originalError: (error as any)?.message || String(error),
         });
-      } else if ((error as Error).message.includes('assistant')) {
+      } else if ((error as any)?.message || String(error).includes('assistant')) {
         enhancedError = new Error(
           'Invalid assistant configuration. Please check assistant ID and permissions.'
         );
         vapiDebugger.log('error', 'Assistant configuration issue detected', {
-          originalError: (error as Error).message,
+          originalError: (error as any)?.message || String(error),
         });
       } else if (
-        (error as Error).message.includes('network') ||
-        (error as Error).message.includes('timeout')
+        (error as any)?.message || String(error).includes('network') ||
+        (error as any)?.message || String(error).includes('timeout')
       ) {
         enhancedError = new Error(
           'Network error during call start. Please check your internet connection and try again.'
         );
         vapiDebugger.log('error', 'Network/timeout issue detected', {
-          originalError: (error as Error).message,
+          originalError: (error as any)?.message || String(error),
         });
       } else {
-        enhancedError = new Error(`Vapi call failed: ${(error as Error).message}`);
+        enhancedError = new Error(`Vapi call failed: ${(error as any)?.message || String(error)}`);
         vapiDebugger.log('error', 'Generic call failure', {
-          originalError: (error as Error).message,
+          originalError: (error as any)?.message || String(error),
         });
       }
 

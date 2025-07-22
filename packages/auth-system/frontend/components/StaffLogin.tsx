@@ -24,11 +24,11 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
-        const data = await res.json();
+        const data = await (res as any).json();
         setError(data.error || 'Login failed.');
         return;
       }
-      const data = await res.json();
+      const data = await (res as any).json();
       if (data.success && data.token) {
         localStorage.setItem('token', data.token);
         onLogin();

@@ -130,7 +130,7 @@ class UnifiedDashboardTester {
 
     let allPassed = true;
 
-    for (const user of TEST_USERS) {
+    for (const user of (TEST_USERS as any[])) {
       const startTime = Date.now();
 
       try {
@@ -173,7 +173,7 @@ class UnifiedDashboardTester {
   async testPageAccess(): Promise<void> {
     console.log('🌐 Testing Page Access & Permissions...\n');
 
-    for (const user of TEST_USERS) {
+    for (const user of (TEST_USERS as any[])) {
       console.log(`\n👤 Testing as ${user.description}`);
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
@@ -197,7 +197,7 @@ class UnifiedDashboardTester {
       const token = loginData.token;
 
       // Test each dashboard page
-      for (const page of DASHBOARD_PAGES) {
+      for (const page of (DASHBOARD_PAGES as any[])) {
         const shouldHaveAccess = page.requiredRoles.includes(user.role);
         const startTime = Date.now();
 
@@ -302,7 +302,7 @@ class UnifiedDashboardTester {
       },
     ];
 
-    for (const test of apiTests) {
+    for (const test of (apiTests as any[])) {
       const startTime = Date.now();
 
       try {

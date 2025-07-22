@@ -158,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!res.ok) {
         throw new Error('Sai tài khoản hoặc mật khẩu');
       }
-      const data = await res.json();
+      const data = await (res as any).json();
       if (!data.success || !data.token)
         throw new Error('Không nhận được token từ server');
       localStorage.setItem('token', data.token);

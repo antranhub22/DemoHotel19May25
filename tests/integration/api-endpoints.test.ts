@@ -2,7 +2,7 @@ import { beforeAll, afterAll, describe, expect, it } from '@jest/globals';
 import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { db } from '../../packages/shared/db';
-import { tenants, staff } from '../../packages/shared/db/schema';
+import { tenants staff  } from '../../packages/shared/db/schema';
 import jwt from 'jsonwebtoken';
 
 const TEST_JWT_SECRET = 'test-secret-key';
@@ -19,7 +19,7 @@ app.use(express.json());
 // Mock middleware for testing
 app.use((req: AuthenticatedRequest, res: Response, next) => {
   // Basic auth middleware mock
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  const token = (req.headers as any).authorization?.replace('Bearer ', '');
   if (token) {
     try {
       const decoded = jwt.verify(token, TEST_JWT_SECRET);
@@ -33,20 +33,20 @@ app.use((req: AuthenticatedRequest, res: Response, next) => {
 
 // Basic test routes
 app.post('/api/calls', (req: Request, res: Response) => {
-  res.json({
+  (res as any).json({
     success: true,
-    call: { call_id_vapi: req.body.call_id_vapi },
+    call: { call_id_vapi: (req.body as any).call_id_vapi },
   });
 });
 
 app.post('/api/store-transcript', (req: Request, res: Response) => {
-  res.json({ success: true });
+  (res as any).json({ success: true });
 });
 
 app.post('/api/call-end', (req: Request, res: Response) => {
-  res.json({
+  (res as any).json({
     success: true,
-    duration: req.body.duration,
+    duration: (req.body as any).duration,
   });
 });
 
@@ -54,9 +54,9 @@ app.get(
   '/api/analytics/overview',
   (req: AuthenticatedRequest, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return (res as any).status(401).json({ error: 'Unauthorized' });
     }
-    res.json({ totalCalls: 0 });
+    (res as any).json({ totalCalls: 0 });
   }
 );
 
@@ -64,9 +64,9 @@ app.get(
   '/api/analytics/service-distribution',
   (req: AuthenticatedRequest, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return (res as any).status(401).json({ error: 'Unauthorized' });
     }
-    res.json([]);
+    (res as any).json([]);
   }
 );
 
@@ -74,9 +74,9 @@ app.get(
   '/api/analytics/hourly-activity',
   (req: AuthenticatedRequest, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return (res as any).status(401).json({ error: 'Unauthorized' });
     }
-    res.json([]);
+    (res as any).json([]);
   }
 );
 
@@ -85,23 +85,23 @@ app.get(
   (req: Request, res: Response) => {
     const { subdomain } = req.params;
     if (subdomain === 'api-test-hotel') {
-      res.json({
+      (res as any).json({
         name: 'API Test Hotel',
         subdomain: 'api-test-hotel',
         features: {},
         supportedLanguages: ['en', 'vi'],
       });
     } else {
-      res.status(404).json({ error: 'Hotel not found' });
+      (res as any).status(404).json({ error: 'Hotel not found' });
     }
   }
 );
 
 app.get('/api/orders', (req: AuthenticatedRequest, res: Response) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return (res as any).status(401).json({ error: 'Unauthorized' });
   }
-  res.json([]);
+  (res as any).json([]);
 });
 
 // Test tenant data

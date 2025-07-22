@@ -17,9 +17,9 @@ export const authenticateJWT = async (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers as any).authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
+      (res as any).status(401).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.TOKEN_INVALID,
         code: 'TOKEN_MISSING',
@@ -29,7 +29,7 @@ export const authenticateJWT = async (
 
     const token = authHeader.split(' ')[1];
     if (!token) {
-      res.status(401).json({
+      (res as any).status(401).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.TOKEN_INVALID,
         code: 'TOKEN_MISSING',
@@ -39,7 +39,7 @@ export const authenticateJWT = async (
 
     const user = await UnifiedAuthService.verifyToken(token);
     if (!user) {
-      res.status(401).json({
+      (res as any).status(401).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.TOKEN_INVALID,
         code: 'TOKEN_INVALID',
@@ -60,7 +60,7 @@ export const authenticateJWT = async (
     next();
   } catch (error) {
     console.error('❌ [Auth] Authentication error:', error);
-    res.status(500).json({
+    (res as any).status(500).json({
       success: false,
       error: AUTH_ERROR_MESSAGES.SERVER_ERROR,
       code: 'SERVER_ERROR',
@@ -77,7 +77,7 @@ export const requirePermission = (module: string, action: string) => {
     const user = (req as any).user as AuthUser;
 
     if (!user) {
-      res.status(401).json({
+      (res as any).status(401).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.TOKEN_INVALID,
         code: 'AUTHENTICATION_REQUIRED',
@@ -94,7 +94,7 @@ export const requirePermission = (module: string, action: string) => {
       console.log(
         `❌ [Auth] Permission denied: ${user.username} needs ${module}.${action}`
       );
-      res.status(403).json({
+      (res as any).status(403).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.PERMISSION_DENIED,
         code: 'PERMISSION_DENIED',
@@ -116,7 +116,7 @@ export const requireRole = (role: UserRole) => {
     const user = (req as any).user as AuthUser;
 
     if (!user) {
-      res.status(401).json({
+      (res as any).status(401).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.TOKEN_INVALID,
         code: 'AUTHENTICATION_REQUIRED',
@@ -129,7 +129,7 @@ export const requireRole = (role: UserRole) => {
       console.log(
         `❌ [Auth] Role denied: ${user.username} (${user.role}) needs ${role}`
       );
-      res.status(403).json({
+      (res as any).status(403).json({
         success: false,
         error: AUTH_ERROR_MESSAGES.PERMISSION_DENIED,
         code: 'ROLE_DENIED',

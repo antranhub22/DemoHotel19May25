@@ -55,7 +55,7 @@ async function runTests() {
 
   const results: { endpoint: string; success: boolean }[] = [];
 
-  for (const endpoint of endpoints) {
+  for (const endpoint of (endpoints as any[])) {
     const success = await testApiEndpoint(endpoint);
     results.push({ endpoint, success });
     console.log(''); // Empty line for readability

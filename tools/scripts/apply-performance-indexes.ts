@@ -38,7 +38,7 @@ async function applyPerformanceIndexes() {
     let errorCount = 0;
 
     // Apply each index creation statement
-    for (const statement of statements) {
+    for (const statement of (statements as any[])) {
       if (!statement.includes('CREATE INDEX')) {
         continue;
       }
@@ -59,11 +59,11 @@ async function applyPerformanceIndexes() {
         console.log(`✅ Index created successfully (${duration}ms)`);
         successCount++;
       } catch (error: any) {
-        if ((error as Error).message?.includes('already exists')) {
+        if ((error as any)?.message || String(error)?.includes('already exists')) {
           console.log(`⏭️  Index already exists, skipping`);
           skipCount++;
         } else {
-          console.error(`❌ Failed to create index: ${(error as Error).message}`);
+          console.error(`❌ Failed to create index: ${(error as any)?.message || String(error)}`);
           errorCount++;
         }
       }

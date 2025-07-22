@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 
 import { Pool } from 'pg';
-import fs from 'fs';
-import path, { dirname } from 'path';
+
+
 import { fileURLToPath } from 'url';
 
 /**
@@ -229,11 +229,11 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     }
 
     // Execute all index creation queries
-    for (const query of indexQueries) {
+    for (const query of (indexQueries as any[])) {
       try {
         await client.query(query);
       } catch (error) {
-        console.warn(`⚠️ Failed to create index: ${(error as Error).message}`);
+        console.warn(`⚠️ Failed to create index: ${(error as any)?.message || String(error)}`);
       }
     }
 
@@ -254,7 +254,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     return {
       success: false,
       migrationsRun,
-      error: error instanceof Error ? (error as Error).message : 'Unknown error',
+      error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
     };
   } finally {
     await pool.end();

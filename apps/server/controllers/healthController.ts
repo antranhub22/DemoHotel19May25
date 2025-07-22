@@ -55,7 +55,7 @@ export class HealthController {
         }
       );
 
-      res.status(statusCode).json(healthStatus);
+      (res as any).status(statusCode).json(healthStatus);
     } catch (error) {
       logger.error(
         '❌ [HealthController] Health check failed',
@@ -63,11 +63,11 @@ export class HealthController {
         error
       );
 
-      res.status(503).json({
+      (res as any).status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Health check failed',
-        details: error instanceof Error ? (error as Error).message : 'Unknown error',
+        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
       });
     }
   }
@@ -167,7 +167,7 @@ export class HealthController {
         }
       );
 
-      res.status(statusCode).json(detailedHealth);
+      (res as any).status(statusCode).json(detailedHealth);
     } catch (error) {
       logger.error(
         '❌ [HealthController] Detailed health check failed',
@@ -175,11 +175,11 @@ export class HealthController {
         error
       );
 
-      res.status(503).json({
+      (res as any).status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Detailed health check failed',
-        details: error instanceof Error ? (error as Error).message : 'Unknown error',
+        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
       });
     }
   }
@@ -269,7 +269,7 @@ export class HealthController {
         }
       );
 
-      res.status(statusCode).json(databaseHealth);
+      (res as any).status(statusCode).json(databaseHealth);
     } catch (error) {
       logger.error(
         '❌ [HealthController] Database health check failed',
@@ -277,11 +277,11 @@ export class HealthController {
         error
       );
 
-      res.status(503).json({
+      (res as any).status(503).json({
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Database health check failed',
-        details: error instanceof Error ? (error as Error).message : 'Unknown error',
+        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
       });
     }
   }
@@ -336,19 +336,19 @@ export class HealthController {
       const isDatabaseHealthy = await checkDatabaseHealth();
 
       if (isDatabaseHealthy) {
-        res.status(200).json({
+        (res as any).status(200).json({
           status: 'ready',
           timestamp: new Date().toISOString(),
         });
       } else {
-        res.status(503).json({
+        (res as any).status(503).json({
           status: 'not ready',
           reason: 'Database not accessible',
           timestamp: new Date().toISOString(),
         });
       }
     } catch {
-      res.status(503).json({
+      (res as any).status(503).json({
         status: 'not ready',
         reason: 'Health check failed',
         timestamp: new Date().toISOString(),
@@ -362,7 +362,7 @@ export class HealthController {
    */
   static async getLiveness(_req: Request, res: Response): Promise<void> {
     // Basic liveness check - if server can respond, it's alive
-    res.status(200).json({
+    (res as any).status(200).json({
       status: 'alive',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),

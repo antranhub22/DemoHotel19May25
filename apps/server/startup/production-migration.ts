@@ -93,7 +93,7 @@ export async function runProductionMigration() {
         }
       }
     } catch (error: any) {
-      logger.debug('⚠️ Error checking transcript table: ${(error as Error).message}', 'Component');
+      logger.debug('⚠️ Error checking transcript table: ${(error as any)?.message || String(error)}', 'Component');
     }
 
     // Create missing tables first - EXPLICIT transcript table fix
@@ -133,12 +133,12 @@ export async function runProductionMigration() {
       )`,
     ];
 
-    for (const statement of createTableStatements) {
+    for (const statement of (createTableStatements as any[])) {
       try {
         await sql.unsafe(statement);
         logger.debug('✅ Table created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        logger.debug('⚠️ Table creation may have failed (might be OK): ${(error as Error).message.substring(0, 100)}...', 'Component');
+        logger.debug('⚠️ Table creation may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...', 'Component');
       }
     }
 
@@ -159,13 +159,13 @@ export async function runProductionMigration() {
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS order_type VARCHAR(100)`,
     ];
 
-    for (const statement of alterStatements) {
+    for (const statement of (alterStatements as any[])) {
       try {
         await sql.unsafe(statement);
         logger.debug('✅ Executed: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
         // Column might already exist, which is OK
-        logger.debug('⚠️ Statement may have failed (might be OK): ${(error as Error).message.substring(0, 100)}...', 'Component');
+        logger.debug('⚠️ Statement may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...', 'Component');
       }
     }
 
@@ -188,18 +188,18 @@ export async function runProductionMigration() {
       `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
     ];
 
-    for (const statement of indexStatements) {
+    for (const statement of (indexStatements as any[])) {
       try {
         await sql.unsafe(statement);
         logger.debug('✅ Index created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        logger.debug('⚠️ Index creation may have failed: ${(error as Error).message.substring(0, 50)}...', 'Component');
+        logger.debug('⚠️ Index creation may have failed: ${(error as any)?.message || String(error).substring(0, 50)}...', 'Component');
       }
     }
 
     logger.debug('🎉 Production migration completed successfully!', 'Component');
   } catch (error: any) {
-    logger.error('❌ Production migration failed:', 'Component', (error as Error).message);
+    logger.error('❌ Production migration failed:', 'Component', (error as any)?.message || String(error));
     // Don't crash the server, just log the error
   } finally {
     if (sql) {

@@ -61,7 +61,7 @@ export function processText(text: string): ProcessTextResult {
   // Tính vị trí bắt đầu của từng từ (tương đối)
   const positions: number[] = [];
   let pos = 0;
-  for (const word of words) {
+  for (const word of (words as any[])) {
     positions.push(pos);
     pos += word.length + 1; // +1 cho dấu cách
   }

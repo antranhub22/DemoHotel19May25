@@ -26,7 +26,7 @@ async function main() {
   const missingBasic: string[] = [];
   const presentBasic: string[] = [];
 
-  for (const varName of REQUIRED_VARS) {
+  for (const varName of (REQUIRED_VARS as any[])) {
     const value = process.env[varName];
     if (!value || value.trim() === '') {
       missingBasic.push(varName);
@@ -40,7 +40,7 @@ async function main() {
   const missingSaaS: string[] = [];
   const presentSaaS: string[] = [];
 
-  for (const varName of SAAS_REQUIRED_VARS) {
+  for (const varName of (SAAS_REQUIRED_VARS as any[])) {
     const value = process.env[varName];
     if (!value || value.trim() === '') {
       missingSaaS.push(varName);

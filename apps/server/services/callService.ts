@@ -136,7 +136,7 @@ export class CallService {
         //   call_id_vapi: callId,
         //   room_number: roomNumber,
         //   duration: 0,
-        //   language: language,
+        //   language,
         //   created_at: getCurrentTimestamp()
         // });
 

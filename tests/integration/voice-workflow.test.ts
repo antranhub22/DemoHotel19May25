@@ -1,11 +1,10 @@
 import { beforeAll, afterAll, describe, expect, it } from '@jest/globals';
 import { db } from '../../packages/shared/db';
-import {
-  tenants,
-  call,
-  transcript,
-  request,
-} from '../../packages/shared/db/schema';
+import { tenants
+  call
+  transcript
+  request
+ } from '../../packages/shared/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 const testTenant = {

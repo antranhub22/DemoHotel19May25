@@ -157,7 +157,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           duration: 3000,
           metadata: {
             serviceName: service.name,
-            language: language,
+            language,
           }
         }
       );
@@ -180,8 +180,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           duration: 5000,
           metadata: {
             serviceName: service.name,
-            language: language,
-            error: error instanceof Error ? (error as Error).message : 'Unknown error'
+            language,
+            error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error'
           }
         }
       );
@@ -202,7 +202,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           type: 'success', 
           duration: 4000,
           metadata: {
-            language: language,
+            language,
             serviceName: selectedService.name,
             callDuration: '2 minutes', // Would come from call context
           }

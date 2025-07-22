@@ -38,7 +38,7 @@ export class CallsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: transcripts,
       });
@@ -48,11 +48,11 @@ export class CallsController {
         'CallsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Failed to retrieve transcripts',
         details:
-          process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+          process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
       });
     }
   }
@@ -65,7 +65,7 @@ export class CallsController {
       const { callId, duration } = req.body;
 
       if (!callId || duration === undefined) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'callId and duration are required',
         });
@@ -95,7 +95,7 @@ export class CallsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         duration: Math.floor(duration),
       });
@@ -105,7 +105,7 @@ export class CallsController {
         'CallsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Internal server error',
       });
@@ -121,7 +121,7 @@ export class CallsController {
         req.body;
 
       if (!call_id_vapi) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'call_id_vapi is required',
         });
@@ -161,7 +161,7 @@ export class CallsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         data: newCall,
       });
@@ -171,7 +171,7 @@ export class CallsController {
         'CallsController',
         error
       );
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: 'Internal server error',
       });
@@ -189,7 +189,7 @@ export class CallsController {
       const { callId, role, content } = req.body;
 
       if (!callId || !role || !content) {
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'Call ID, role, and content are required',
         });
@@ -264,7 +264,7 @@ export class CallsController {
         }
       );
 
-      res.json({
+      (res as any).json({
         success: true,
         message: 'Test transcript stored successfully',
         data: validatedData,
@@ -276,7 +276,7 @@ export class CallsController {
           'CallsController',
           error.errors
         );
-        res.status(400).json({
+        (res as any).status(400).json({
           success: false,
           error: 'Invalid transcript data',
           details: error.errors,
@@ -288,11 +288,11 @@ export class CallsController {
           'CallsController',
           error
         );
-        res.status(500).json({
+        (res as any).status(500).json({
           success: false,
           error: 'Failed to store test transcript',
           details:
-            process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+            process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
         });
       }
     }

@@ -1,12 +1,11 @@
 import { beforeAll, afterAll, describe, expect, it } from '@jest/globals';
 import { db } from '../../packages/shared/db';
-import {
-  tenants,
-  staff,
-  call,
-  transcript,
-  request,
-} from '../../packages/shared/db/schema';
+import { tenants
+  staff
+  call
+  transcript
+  request
+ } from '../../packages/shared/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 // Test data for multiple tenants
@@ -49,7 +48,7 @@ const testStaffData = [
 describe('Database Tenant Isolation Tests', () => {
   beforeAll(async () => {
     // Clean up existing test data
-    for (const tenant of testTenants) {
+    for (const tenant of (testTenants as any[])) {
       await db.delete(transcript).where(eq(transcript.tenant_id, tenant.id));
       await db.delete(call).where(eq(call.tenant_id, tenant.id));
       await db.delete(request).where(eq(request.tenant_id, tenant.id));
@@ -64,7 +63,7 @@ describe('Database Tenant Isolation Tests', () => {
 
   afterAll(async () => {
     // Clean up test data
-    for (const tenant of testTenants) {
+    for (const tenant of (testTenants as any[])) {
       await db.delete(transcript).where(eq(transcript.tenant_id, tenant.id));
       await db.delete(call).where(eq(call.tenant_id, tenant.id));
       await db.delete(request).where(eq(request.tenant_id, tenant.id));

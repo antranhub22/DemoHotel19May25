@@ -72,7 +72,7 @@ class HotelErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error(`Hotel configuration error: ${(error as Error).message}`, 'Component', errorInfo);
+    logger.error(`Hotel configuration error: ${(error as any)?.message || String(error)}`, 'Component', errorInfo);
   }
 
   override render() {

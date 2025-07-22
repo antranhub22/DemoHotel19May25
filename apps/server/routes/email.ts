@@ -9,9 +9,9 @@ const router = Router();
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
-  res.status(500).json({
+  (res as any).status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
   });
 }
 
@@ -33,7 +33,7 @@ router.post('/send-service-email', async (req: Request, res: Response) => {
     } = req.body;
 
     if (!orderNumber || !customerRequest) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Missing required fields: orderNumber, customerRequest',
       });
     }
@@ -60,14 +60,14 @@ router.post('/send-service-email', async (req: Request, res: Response) => {
 
     if (result.success) {
       logger.debug(`✅ [EMAIL] Service email sent successfully for order: ${orderNumber}`, 'Component');
-      res.json({ 
+      (res as any).json({ 
         success: true, 
         message: 'Email sent successfully',
         messageId: result.messageId 
       });
     } else {
       logger.error(`❌ [EMAIL] Failed to send service email for order: ${orderNumber}`, 'Component', result.error);
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send email',
       });
@@ -92,7 +92,7 @@ router.post('/send-call-summary-email', async (req: Request, res: Response) => {
     } = req.body;
 
     if (!callId || !summary) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Missing required fields: callId, summary',
       });
     }
@@ -121,14 +121,14 @@ router.post('/send-call-summary-email', async (req: Request, res: Response) => {
 
     if (result.success) {
       logger.debug(`✅ [EMAIL] Call summary email sent successfully for call: ${callId}`, 'Component');
-      res.json({ 
+      (res as any).json({ 
         success: true, 
         message: 'Call summary email sent successfully',
         messageId: result.messageId 
       });
     } else {
       logger.error(`❌ [EMAIL] Failed to send call summary email for call: ${callId}`, 'Component', result.error);
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send call summary email',
       });
@@ -165,7 +165,7 @@ router.post('/test-email', async (req: Request, res: Response) => {
 
     if (result.success) {
       logger.debug(`✅ [EMAIL] Test email sent successfully to: ${to}`, 'Component');
-      res.json({ 
+      (res as any).json({ 
         success: true, 
         message: 'Test email sent successfully',
         messageId: result.messageId,
@@ -173,7 +173,7 @@ router.post('/test-email', async (req: Request, res: Response) => {
       });
     } else {
       logger.error(`❌ [EMAIL] Failed to send test email to: ${to}`, 'Component', result.error);
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send test email',
       });
@@ -202,7 +202,7 @@ router.post('/mobile-test-email', async (req: Request, res: Response) => {
 
     if (result.success) {
       logger.debug(`✅ [EMAIL] Mobile test email sent successfully to: ${to}`, 'Component');
-      res.json({ 
+      (res as any).json({ 
         success: true, 
         message: 'Mobile test email sent successfully',
         messageId: result.messageId,
@@ -210,7 +210,7 @@ router.post('/mobile-test-email', async (req: Request, res: Response) => {
       });
     } else {
       logger.error(`❌ [EMAIL] Failed to send mobile test email to: ${to}`, 'Component', result.error);
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send mobile test email',
       });
@@ -232,7 +232,7 @@ router.post('/mobile-call-summary-email', async (req: Request, res: Response) =>
     } = req.body;
 
     if (!callId || !summary) {
-      return res.status(400).json({
+      return (res as any).status(400).json({
         error: 'Missing required fields: callId, summary',
       });
     }
@@ -258,14 +258,14 @@ router.post('/mobile-call-summary-email', async (req: Request, res: Response) =>
 
     if (result.success) {
       logger.debug(`✅ [EMAIL] Mobile call summary email sent successfully for call: ${callId}`, 'Component');
-      res.json({ 
+      (res as any).json({ 
         success: true, 
         message: 'Mobile call summary email sent successfully',
         messageId: result.messageId 
       });
     } else {
       logger.error(`❌ [EMAIL] Failed to send mobile call summary email for call: ${callId}`, 'Component', result.error);
-      res.status(500).json({
+      (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send mobile call summary email',
       });
@@ -290,7 +290,7 @@ router.get('/mailjet-status', async (req: Request, res: Response) => {
 
     const isConfigured = process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY;
 
-    res.json({
+    (res as any).json({
       success: true,
       status: isConfigured ? 'configured' : 'not configured',
       config: mailjetConfig,
@@ -330,7 +330,7 @@ router.get('/recent-emails', async (req: Request, res: Response) => {
     ];
 
     logger.debug(`✅ [EMAIL] Found ${recentEmails.length} recent emails`, 'Component');
-    res.json({
+    (res as any).json({
       success: true,
       emails: recentEmails.slice(0, limit),
       total: recentEmails.length,

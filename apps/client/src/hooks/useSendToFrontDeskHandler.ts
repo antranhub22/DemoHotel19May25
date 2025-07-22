@@ -220,7 +220,7 @@ export const useSendToFrontDeskHandler = ({
     (error: Error) => {
       logger.error('❌ [useSendToFrontDeskHandler] Failed to send request:', 'Component', error);
 
-      const errorMessage = (error as Error).message || ERROR_MESSAGES.REQUEST_FAILED;
+      const errorMessage = (error as any)?.message || String(error) || ERROR_MESSAGES.REQUEST_FAILED;
 
       if (onError) {
         onError(errorMessage);

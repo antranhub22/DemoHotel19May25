@@ -88,7 +88,7 @@ export const useCallHandler = () => {
       } catch (error) {
         logger.error('[useCallHandler] Error starting Vapi call:', 'Component', error);
         const errorMessage =
-          error instanceof Error ? (error as Error).message : String(error);
+          error instanceof Error ? (error as any)?.message || String(error) : String(error);
         return { success: false, error: errorMessage };
       }
     },

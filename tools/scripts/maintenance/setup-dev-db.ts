@@ -131,7 +131,7 @@ const users = [
   },
 ];
 
-for (const user of users) {
+for (const user of (users as any[])) {
   const checkUser = db
     .prepare('SELECT id FROM staff WHERE username = ?')
     .get(user.username);
@@ -191,7 +191,7 @@ for (const user of users) {
 console.log('\n📋 Database setup completed!');
 console.log('\n📝 Test credentials:');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-for (const user of users) {
+for (const user of (users as any[])) {
   console.log(`   ${user.username} / ${user.password} (${user.role})`);
 }
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

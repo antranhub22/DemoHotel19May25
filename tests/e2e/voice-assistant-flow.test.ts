@@ -351,7 +351,7 @@ describe('Voice Assistant E2E Flow Tests', () => {
         '[data-testid="service-housekeeping"]',
       ];
 
-      for (const element of focusableElements) {
+      for (const element of (focusableElements as any[])) {
         await browser.waitForElement(element);
         const isVisible = await browser.isVisible(element);
         expect(isVisible).toBe(true);
@@ -383,7 +383,7 @@ describe('Voice Assistant E2E Flow Tests', () => {
       // This would test multiple browser instances in real implementation
       const browsers = ['chrome', 'firefox', 'safari', 'edge'];
 
-      for (const browserType of browsers) {
+      for (const browserType of (browsers as any[])) {
         // Simulate browser-specific testing
         await browser.navigate(`${E2E_CONFIG.baseUrl}?browser=${browserType}`);
         await browser.waitForElement('[data-testid="siri-button-container"]');

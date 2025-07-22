@@ -41,7 +41,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
       
       // Show user-friendly error
       if (typeof window !== 'undefined') {
-        const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
+        const errorMessage = error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error';
         alert(`Unable to process ${service.name} request: ${errorMessage}`);
       }
     } finally {

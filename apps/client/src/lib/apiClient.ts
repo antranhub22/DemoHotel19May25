@@ -124,7 +124,7 @@ export class ApiClient {
 
       throw {
         status: 500,
-        message: error instanceof Error ? (error as Error).message : 'Unknown error',
+        message: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
         timestamp: new Date(),
       } as ApiError;
     }

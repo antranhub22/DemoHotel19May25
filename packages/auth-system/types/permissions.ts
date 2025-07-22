@@ -547,7 +547,7 @@ export const getPermissionsForRole = (role: UserRole) => {
   const permissions = [];
 
   for (const [module, actions] of Object.entries(rolePermissions)) {
-    for (const action of actions) {
+    for (const action of (actions as any[])) {
       permissions.push({
         module,
         action,

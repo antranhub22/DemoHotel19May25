@@ -2,7 +2,7 @@
 
 import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
-import path, { dirname } from 'path';
+
 import { fileURLToPath } from 'url';
 
 /**
@@ -212,7 +212,7 @@ async function seedProductionUsers(): Promise<{
         },
       ];
 
-      for (const req of sampleRequests) {
+      for (const req of (sampleRequests as any[])) {
         await client.query(
           `
           INSERT INTO request (
@@ -335,7 +335,7 @@ async function seedProductionUsers(): Promise<{
           },
         ];
 
-        for (const req of sampleRequests) {
+        for (const req of (sampleRequests as any[])) {
           await client.query(
             `
             INSERT INTO request (
@@ -416,7 +416,7 @@ async function seedProductionUsers(): Promise<{
 
     // STEP 0: Delete all existing users first
     console.log('🗑️ Cleaning up existing users...');
-    for (const user of defaultUsers) {
+    for (const user of (defaultUsers as any[])) {
       await client.query(
         `
         DELETE FROM staff WHERE username = $1
@@ -429,7 +429,7 @@ async function seedProductionUsers(): Promise<{
     // 3. Create users if they don't exist
     console.log('👤 Creating default users...');
 
-    for (const user of defaultUsers) {
+    for (const user of (defaultUsers as any[])) {
       // Hash password with consistent salt rounds
       const hashedPassword = await bcrypt.hash(user.password, 12); // Use 12 rounds consistently
 
@@ -484,7 +484,7 @@ async function seedProductionUsers(): Promise<{
     return {
       success: false,
       usersCreated,
-      error: error instanceof Error ? (error as Error).message : 'Unknown error',
+      error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
     };
   } finally {
     await pool.end();

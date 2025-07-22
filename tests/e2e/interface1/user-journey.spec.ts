@@ -168,7 +168,7 @@ test.describe('Interface1 - Complete User Journey', () => {
       // Rapid service category clicks
       const categories = ['Room Service', 'Restaurant', 'Concierge', 'Pool & Spa'];
       
-      for (const category of categories) {
+      for (const category of (categories as any[])) {
         await interface1Page.clickServiceCategory(category);
         await page.waitForTimeout(100); // Brief pause
       }

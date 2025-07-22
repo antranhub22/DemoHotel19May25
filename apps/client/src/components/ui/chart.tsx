@@ -66,7 +66,7 @@ const ChartContainer = React.forwardRef<
       .then(() => setIsRechartsLoaded(true))
       .catch(error => {
         logger.error('Failed to load recharts:', 'Component', error);
-        setLoadError((error as Error).message);
+        setLoadError((error as any)?.message || String(error));
       });
   }, []);
 

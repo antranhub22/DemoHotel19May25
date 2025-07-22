@@ -69,8 +69,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   // ✅ IMPROVED: Better error categorization
   private categorizeError(error: Error): string {
-    const message = (error as Error).message.toLowerCase();
-    const stack = (error as Error).stack?.toLowerCase() || '';
+    const message = (error as any)?.message || String(error).toLowerCase();
+    const stack = (error as any)?.stack?.toLowerCase() || '';
 
     if (message.includes('chunk') || message.includes('loading chunk')) {
       return 'chunk-loading';

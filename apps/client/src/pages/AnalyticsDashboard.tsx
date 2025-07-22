@@ -46,7 +46,7 @@ const AnalyticsDashboard: React.FC = () => {
         navigate('/staff');
         return null;
       }
-      return res.json();
+      return (res as any).json();
     } catch (err) {
       logger.error('Failed to fetch from ${url}:', 'Component', err);
       return null;

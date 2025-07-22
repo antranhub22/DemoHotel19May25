@@ -73,7 +73,7 @@ test.describe('Interface1 - Complete User Journey', () => {
       'Emergency'
     ];
     
-    for (const category of serviceCategories) {
+    for (const category of (serviceCategories as any[])) {
       await expect(page.locator(`text=${category}`)).toBeVisible();
     }
   });
@@ -101,7 +101,7 @@ test.describe('Interface1 - Complete User Journey', () => {
       // Test language options
       const languages = ['English', 'Français', '中文', 'Русский', '한국어', 'Tiếng Việt'];
       
-      for (const lang of languages) {
+      for (const lang of (languages as any[])) {
         await expect(page.locator(`text=${lang}`)).toBeVisible();
       }
     }

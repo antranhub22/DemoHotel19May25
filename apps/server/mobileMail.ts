@@ -102,7 +102,7 @@ export const sendMobileEmail = async (
     }
   } catch (error: any) {
     logger.error('Lỗi ngoại lệ khi gửi email mobile:', 'Component', error);
-    return { success: false, error: (error as Error).message };
+    return { success: false, error: (error as any)?.message || String(error) };
   } finally {
     logger.debug('==== KẾT THÚC QUÁ TRÌNH GỬI EMAIL TỪ THIẾT BỊ DI ĐỘNG ====', 'Component');
   }
@@ -156,6 +156,6 @@ Cảm ơn quý khách đã sử dụng dịch vụ của Mi Nhon Hotel.
     );
   } catch (error: any) {
     logger.error('Lỗi khi gửi email tóm tắt cuộc gọi từ thiết bị di động:', 'Component', error);
-    return { success: false, error: (error as Error).message };
+    return { success: false, error: (error as any)?.message || String(error) };
   }
 };

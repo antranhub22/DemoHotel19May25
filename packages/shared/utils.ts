@@ -14,7 +14,7 @@ export async function deleteAllRequests() {
     console.error('Error deleting all requests:', error);
     return {
       success: false,
-      error: error instanceof Error ? (error as Error).message : 'Unknown error',
+      error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
     };
   }
 }
