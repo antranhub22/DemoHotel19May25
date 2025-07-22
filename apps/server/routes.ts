@@ -3,10 +3,8 @@ import { createServer, type Server } from 'http';
 import { storage } from './storage';
 import { WebSocketServer, WebSocket } from 'ws';
 import {
-  insertTranscriptSchema,
   insertCallSummarySchema,
 } from '@shared/schema';
-import { dateToString, getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
 import {
   generateCallSummary,
@@ -22,15 +20,13 @@ import axios from 'axios';
 import express, { type Request, Response } from 'express';
 import { authenticateJWT } from '../../packages/auth-system/middleware/auth.middleware';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken'; // Moved to auth modules
 import { Staff } from './models/Staff';
 import { Request as StaffRequest } from './models/Request';
 import { Message as StaffMessage } from './models/Message';
 import { db } from '@shared/db';
-import { request as requestTable, call, transcript } from '@shared/db';
+import { request as requestTable, call } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
-import { sql } from 'drizzle-orm';
-import { deleteAllRequests } from '@shared/utils';
 import {
   getOverview,
   getServiceDistribution,
@@ -43,7 +39,7 @@ import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 
 import requestRoutes from './routes/request';
 import { TenantService } from './services/tenantService.js';
-import { UnifiedAuthService } from '../../packages/auth-system/services/UnifiedAuthService';
+// import { UnifiedAuthService } from '../../packages/auth-system/services/UnifiedAuthService'; // Moved to auth modules
 import { logger } from '@shared/utils/logger';
 
 // Initialize OpenAI client with fallback for development
@@ -57,23 +53,7 @@ interface WebSocketClient extends WebSocket {
   isAlive?: boolean;
 }
 
-// Dummy staff data (thay bằng DB thực tế)
-const staffList: Staff[] = [
-  {
-    id: 1,
-    username: 'admin',
-    passwordHash: bcrypt.hashSync('admin123', 10),
-    role: 'admin',
-    createdAt: new Date(),
-  },
-  {
-    id: 2,
-    username: 'staff1',
-    passwordHash: bcrypt.hashSync('staffpass', 10),
-    role: 'staff',
-    createdAt: new Date(),
-  },
-];
+// REMOVED: Staff list moved to auth modules
 
 function parseStaffAccounts(
   envStr: string | undefined
@@ -86,44 +66,13 @@ function parseStaffAccounts(
 }
 
 const STAFF_ACCOUNTS = parseStaffAccounts(process.env.STAFF_ACCOUNTS);
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-for-testing';
+// JWT_SECRET moved to auth modules
 
 // ============================================
 // Multi-tenant Authentication Helper Functions
 // ============================================
 
-/**
- * Extract tenant ID from request (subdomain or host)
- */
-async function extractTenantFromRequest(req: Request): Promise<string> {
-  const host = req.get('host') || '';
-  const subdomain = extractSubdomain(host);
-
-  // For development, default to Mi Nhon Hotel
-  if (subdomain === 'localhost' || subdomain === '127.0.0.1' || !subdomain) {
-    return getMiNhonTenantId();
-  }
-
-  // In production, lookup tenant by subdomain
-  try {
-    const { tenants } = await import('@shared/schema');
-    // Get tenant from subdomain
-    const [tenant] = await db
-      .select({
-        id: tenants.id,
-        hotel_name: tenants.hotel_name,
-        subdomain: tenants.subdomain,
-        subscription_status: tenants.subscription_status,
-      })
-      .from(tenants)
-      .where(eq(tenants.subdomain, subdomain))
-      .limit(1);
-    return tenant?.id || getMiNhonTenantId();
-  } catch (error) {
-    logger.error('Error looking up tenant:', 'Component', error);
-    return getMiNhonTenantId();
-  }
-}
+// REMOVED: extractTenantFromRequest moved to tenant middleware
 
 /**
  * Extract subdomain from host header
@@ -152,140 +101,11 @@ function getMiNhonTenantId(): string {
   return process.env.MINHON_TENANT_ID || 'mi-nhon-hotel';
 }
 
-/**
- * Find staff in database with tenant association
- */
-async function findStaffInDatabase(
-  username: string,
-  password: string,
-  tenantId: string
-): Promise<any> {
-  try {
-    const { staff } = await import('@shared/db');
+// REMOVED: findStaffInDatabase moved to auth modules
 
-    // Look up staff by username and tenant
-    const [staffUser] = await db
-      .select()
-      .from(staff)
-      .where(and(eq(staff.username, username), eq(staff.tenant_id, tenantId)))
-      .limit(1);
+// REMOVED: findStaffInFallback moved to auth modules
 
-    if (!staffUser) {
-      return null;
-    }
-
-    // Verify password (assuming bcrypt hashing)
-    const isPasswordValid = await bcrypt.compare(password, staffUser.password);
-
-    if (!isPasswordValid) {
-      return null;
-    }
-
-    return {
-      username: staffUser.username,
-      role: staffUser.role || 'staff',
-      tenantId: staffUser.tenant_id,
-      permissions: [],
-    };
-  } catch (error) {
-    logger.error('Error finding staff in database:', 'Component', error);
-    return null;
-  }
-}
-
-/**
- * Find staff in fallback accounts (for backward compatibility)
- */
-async function findStaffInFallback(
-  username: string,
-  password: string,
-  tenantId: string
-): Promise<any> {
-  // Hard-coded fallback accounts for when database is unavailable
-  const FALLBACK_ACCOUNTS = [
-    { username: 'staff1', password: 'password1', role: 'staff' },
-    { username: 'admin', password: 'admin123', role: 'admin' },
-    {
-      username: 'admin@hotel.com',
-      password: 'StrongPassword123',
-      role: 'admin',
-    },
-    {
-      username: 'manager@hotel.com',
-      password: 'StrongPassword456',
-      role: 'manager',
-    },
-  ];
-
-  // Try from environment variable first
-  const found = STAFF_ACCOUNTS.find(
-    acc => acc.username === username && acc.password === password
-  );
-
-  // If not found, try from fallback accounts
-  const fallbackFound =
-    !found &&
-    FALLBACK_ACCOUNTS.find(
-      acc => acc.username === username && acc.password === password
-    );
-
-  const account = found || fallbackFound;
-
-  if (!account) {
-    return null;
-  }
-
-  // For fallback accounts, always associate with the requesting tenant
-  // This ensures backward compatibility with existing Mi Nhon accounts
-  return {
-    username: account.username,
-    role: (account as any).role || 'staff',
-    tenantId,
-    permissions: [],
-  };
-}
-
-// Dummy request data
-const requestList: StaffRequest[] = [
-  {
-    id: 1,
-    room_number: '101',
-    guestName: 'Tony',
-    request_content: 'Beef burger x 2',
-    created_at: new Date(),
-    status: 'Đã ghi nhận',
-    notes: '',
-  },
-  {
-    id: 2,
-    room_number: '202',
-    guestName: 'Anna',
-    request_content: 'Spa booking at 10:00',
-    created_at: new Date(),
-    status: 'Đang thực hiện',
-    notes: '',
-  },
-];
-
-// Dummy message data
-const messageList: StaffMessage[] = [
-  {
-    id: 1,
-    requestId: 1,
-    sender: 'guest',
-    content: 'Can I get my order soon?',
-    created_at: new Date(),
-    updated_at: new Date(),
-  },
-  {
-    id: 2,
-    requestId: 1,
-    sender: 'staff',
-    content: 'We are preparing your order.',
-    created_at: new Date(),
-    updated_at: new Date(),
-  },
-];
+// REMOVED: Dummy data moved to respective modules
 
 // Hàm làm sạch nội dung summary trước khi lưu vào DB
 function cleanSummaryContent(content: string): string {
@@ -580,84 +400,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API endpoints for call summaries will be defined below
 
-  // Get transcripts by call ID
-  app.get('/api/transcripts/:callId', async (req, res) => {
-    try {
-      const callId = req.params.callId;
-      const transcripts = await storage.getTranscriptsByCallId(callId);
-      res.json(transcripts);
-    } catch (error) {
-      handleApiError(res, error, 'Failed to retrieve transcripts');
-    }
-  });
+  // REMOVED: GET /api/transcripts/:callId - moved to /routes/transcripts.ts
 
-  // Save transcript from client (VAPI integration)
-  app.post('/api/transcripts', async (req, res) => {
-    try {
-      const { callId, role, content, tenantId } = req.body;
-
-      logger.debug('POST /api/transcripts request body:', 'Component', req.body);
-
-      if (!callId || !role || !content) {
-        return res.status(400).json({
-          error: 'callId, role, and content are required',
-        });
-      }
-
-      // Convert camelCase to snake_case for database schema validation
-      // Ensure timestamp is within valid range for PostgreSQL
-      const now = Date.now();
-      const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
-
-      const transcriptDataForValidation = {
-        call_id: callId, // Convert callId to call_id
-        role,
-        content,
-        tenant_id: tenantId || 'default', // Convert tenantId to tenant_id
-        timestamp: validTimestamp, // ✅ FIXED: Use proper timestamp, storage will handle conversion
-      };
-
-      logger.debug('Converted data for validation:', 'Component', transcriptDataForValidation);
-
-      // Validate with database schema (expects snake_case)
-      const validatedData = insertTranscriptSchema.parse(
-        transcriptDataForValidation
-      );
-
-      logger.debug('Validated transcript data:', 'Component', validatedData);
-
-      // Save to database - storage.addTranscript already handles field mapping
-      const savedTranscript = await storage.addTranscript({
-        callId, // Keep original camelCase for storage function
-        role,
-        content,
-        tenantId: tenantId || 'default',
-        timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
-      });
-
-      logger.debug('Transcript saved from client for call ${callId}: ${role} - ${content.substring(0, 100)}...', 'Component');
-      logger.debug('Saved transcript result:', 'Component', savedTranscript);
-
-      res.json({
-        success: true,
-        data: savedTranscript,
-      });
-    } catch (error) {
-      logger.error('Error in POST /api/transcripts:', 'Component', error);
-      logger.error('Error stack:', 'Component', error.stack);
-
-      if (error instanceof z.ZodError) {
-        logger.error('Zod validation errors:', 'Component', error.errors);
-        return res.status(400).json({
-          error: 'Invalid transcript data',
-          details: error.errors,
-          receivedFields: Object.keys(req.body),
-        });
-      }
-
-      handleApiError(res, error, 'Failed to save transcript');
-    }
-  });
+  // REMOVED: POST /api/transcripts - moved to /routes/transcripts.ts
 
   // REMOVED: Legacy orders endpoint - use /api/request instead
 
@@ -667,23 +412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update order status
 
-  // Staff: get all orders, optionally filter by status, room, time
-  app.get(
-    '/api/staff/orders',
-    authenticateJWT,
-    async (req: Request, res: Response) => {
-      try {
-        const { status, roomNumber } = req.query;
-        const orders = await storage.getAllOrders({
-          status: status as string,
-          roomNumber: roomNumber as string,
-        });
-        res.json(orders);
-      } catch (err) {
-        handleApiError(res, err, 'Failed to retrieve staff orders');
-      }
-    }
-  );
+  // REMOVED: Staff orders endpoint - moved to /routes/orders.ts
 
   // Endpoint to update status via POST
 
@@ -1493,80 +1222,7 @@ Mi Nhon Hotel Mui Ne`
     }
   });
 
-  // Test endpoint to simulate transcript creation
-  app.post('/api/test-transcript', async (req, res) => {
-    try {
-      const { callId, role, content } = req.body;
-
-      if (!callId || !role || !content) {
-        return res
-          .status(400)
-          .json({ error: 'callId, role, and content are required' });
-      }
-
-      // Auto-create call record if it doesn't exist
-      const existingCall = await db
-        .select()
-        .from(call)
-        .where(eq(call.call_id_vapi, callId))
-        .limit(1);
-      if (existingCall.length === 0) {
-        // Extract room number from content if possible
-        const roomMatch =
-          content.match(/room (\d+)/i) || content.match(/phòng (\d+)/i);
-        const roomNumber = roomMatch ? roomMatch[1] : null;
-
-        // Determine language from content
-        const hasVietnamese =
-          /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/.test(
-            content
-          );
-        const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
-        let language = 'en';
-        if (hasVietnamese) language = 'vi';
-        else if (hasFrench) language = 'fr';
-
-        await db.insert(call).values({
-          call_id_vapi: callId,
-          // TODO: Add room_number, duration, language when schema is fixed
-        });
-
-        console.log(
-          `Test: Auto-created call record for ${callId} with room ${roomNumber || 'unknown'} and language ${language}`
-        );
-      }
-
-      // Get call ID for transcript
-      let callDbId;
-      if (existingCall.length > 0) {
-        callDbId = existingCall[0].id;
-      } else {
-        const newCall = await db
-          .select({ id: call.id })
-          .from(call)
-          .where(eq(call.call_id_vapi, callId))
-          .limit(1);
-        callDbId = newCall[0]?.id;
-      }
-
-      // TODO: Fix database schema mismatch - temporarily commented out
-      // await db.insert(transcript).values({
-      //   call_id: callId,
-      //   role,
-      //   content,
-      //   timestamp: getCurrentTimestamp()
-      // });
-
-      logger.debug('Stored transcript for call ${callId}: ${role} - ${content?.substring(0, 100)}...', 'Component');
-
-      res.json({
-        success: true,
-        message: 'Test transcript created successfully',
-      });
-    } catch (error) {
-      handleApiError(res, error, 'Error creating test transcript');
-    }
-  });
+  // REMOVED: Test transcript endpoint - moved to /routes/transcripts.ts
 
   // Get references for a specific call
   app.get('/api/references/:callId', async (req, res) => {
@@ -1638,170 +1294,15 @@ Mi Nhon Hotel Mui Ne`
   // All authentication routes have been moved to unified auth system
   // See: /api/auth/* routes mounted from './routes/auth/unified'
 
-  // Lấy danh sách request
-  app.get('/api/staff/requests', authenticateJWT, async (req, res) => {
-    logger.debug('API /api/staff/requests called', 'Component');
-    logger.debug('Authorization header:', 'Component', req.headers.authorization);
-    try {
-      // Skip database connection test since db.execute doesn't exist
-      logger.debug('Fetching requests from database...', 'Component');
-      const dbRequests = await db.select().from(requestTable);
-      logger.debug('Found ${dbRequests.length} requests in database:', 'Component', dbRequests);
+  // REMOVED: GET /api/staff/requests - moved to /routes/staff.ts
 
-      // Thêm kiểm tra nếu không có requests từ DB
-      if (dbRequests.length === 0) {
-        logger.debug('No requests found in database, returning dummy test data', 'Component');
-        // Trả về dữ liệu mẫu nếu không có dữ liệu trong DB
-        return res.json([
-          {
-            id: 1,
-            room_number: '101',
-            guestName: 'Tony',
-            request_content: 'Beef burger x 2',
-            created_at: new Date(),
-            status: 'Đã ghi nhận',
-            notes: '',
-            orderId: 'ORD-10001',
-            updated_at: new Date(),
-          },
-          {
-            id: 2,
-            room_number: '202',
-            guestName: 'Anna',
-            request_content: 'Spa booking at 10:00',
-            created_at: new Date(),
-            status: 'Đang thực hiện',
-            notes: '',
-            orderId: 'ORD-10002',
-            updated_at: new Date(),
-          },
-        ]);
-      }
+  // REMOVED: PATCH /api/staff/requests/:id/status - moved to /routes/staff.ts
 
-      res.json(dbRequests);
-    } catch (err) {
-      handleApiError(res, err, 'Error in /api/staff/requests:');
-    }
-  });
+  // REMOVED: Staff messages endpoint - moved to /routes/staff.ts
 
-  // Cập nhật trạng thái request
-  app.patch(
-    '/api/staff/requests/:id/status',
-    authenticateJWT,
-    async (req, res) => {
-      try {
-        const id = parseInt(req.params.id);
-        const { status } = req.body;
+  // REMOVED: Staff message endpoint - moved to /routes/staff.ts
 
-        if (!status) {
-          return res.status(400).json({ error: 'Status is required' });
-        }
-
-        // Cập nhật trong cơ sở dữ liệu thay vì mảng trong bộ nhớ
-        const result = await db
-          .update(requestTable)
-          .set({
-            status,
-            updated_at: getCurrentTimestamp(),
-          })
-          .where(eq(requestTable.id, id))
-          .returning();
-
-        if (result.length === 0) {
-          return res.status(404).json({ error: 'Request not found' });
-        }
-        // Đồng bộ status sang order nếu có orderId
-        const orderId = result[0].order_id;
-        if (orderId) {
-          // Tìm order theo orderId (orderReference)
-          const orders = await storage.getAllOrders({});
-          const order = orders.find((o: any) => o.order_id === orderId);
-          if (order) {
-            const updatedOrder = await storage.updateOrderStatus(
-              order.id.toString(),
-              status
-            );
-            // Emit WebSocket cho Guest UI nếu updatedOrder tồn tại
-            if (updatedOrder) {
-              // Emit qua socket.io nếu có
-              const io = req.app.get('io');
-              if (io) {
-                // Emit cho tất cả client hoặc theo room (nếu dùng join_room)
-                io.emit('order_status_update', {
-                  orderId: updatedOrder.id,
-                  reference: (updatedOrder as any).order_id, // Use orderId instead of specialInstructions
-                  status: updatedOrder.status,
-                });
-              }
-              // Giữ lại emit qua globalThis.wss nếu cần tương thích cũ
-              if ((updatedOrder as any).order_id && globalThis.wss) {
-                globalThis.wss.clients.forEach(client => {
-                  if (client.readyState === 1) {
-                    client.send(
-                      JSON.stringify({
-                        type: 'order_status_update',
-                        reference: (updatedOrder as any).order_id, // Use orderId instead of specialInstructions
-                        status: updatedOrder.status,
-                      })
-                    );
-                  }
-                });
-              }
-            }
-          }
-        }
-        res.json(result[0]);
-      } catch (error) {
-        handleApiError(res, error, 'Error updating request status:');
-      }
-    }
-  );
-
-  // Lấy lịch sử tin nhắn của request
-  app.get('/api/staff/requests/:id/messages', authenticateJWT, (req, res) => {
-    const id = parseInt(req.params.id);
-    const msgs = messageList.filter(m => m.requestId === id);
-    res.json(msgs);
-  });
-
-  // Gửi tin nhắn tới guest
-  app.post('/api/staff/requests/:id/message', authenticateJWT, (req, res) => {
-    const id = parseInt(req.params.id);
-    const { content } = req.body;
-    if (!content) return res.status(400).json({ error: 'Missing content' });
-    const msg: StaffMessage = {
-      id: messageList.length + 1,
-      requestId: id,
-      sender: 'staff',
-      content,
-      created_at: new Date(),
-      updated_at: new Date(),
-    };
-    messageList.push(msg);
-    res.status(201).json(msg);
-  });
-
-  // Xóa tất cả requests
-  app.delete('/api/staff/requests/all', authenticateJWT, async (req, res) => {
-    try {
-      logger.debug('Attempting to delete all requests', 'Component');
-      // Xóa tất cả dữ liệu từ bảng request sử dụng API function
-      const result = await deleteAllRequests();
-      const deletedCount =
-        result.success && 'deletedCount' in result
-          ? result.deletedCount || 0
-          : 0;
-      logger.debug('Deleted ${deletedCount} requests from database', 'Component');
-
-      res.json({
-        success: true,
-        message: `Đã xóa ${deletedCount} requests`,
-        deletedCount,
-      });
-    } catch (error) {
-      handleApiError(res, error, 'Error deleting all requests:');
-    }
-  });
+  // REMOVED: Delete all staff requests - moved to /routes/staff.ts
 
   // Get all orders (public, no auth)
 

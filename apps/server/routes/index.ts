@@ -6,7 +6,10 @@ import analyticsRoutes from './analytics';
 import dashboardRoutes from './dashboard';
 import healthRoutes from './health';
 import requestRoutes from './request';
-import { logger } from '@shared/utils/logger';
+import transcriptsRoutes from './transcripts';
+// import emailRoutes from './email'; // Temporarily disabled due to signature issues
+import staffRoutes from './staff';
+// import { logger } from '@shared/utils/logger'; // Not used currently
 // import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
 
 const router = express.Router();
@@ -19,6 +22,9 @@ router.use('/api', analyticsRoutes);
 router.use('/api', dashboardRoutes);
 router.use('/api', healthRoutes);
 router.use('/api', requestRoutes);
+router.use('/api', transcriptsRoutes);
+// router.use('/api', emailRoutes); // Temporarily disabled
+router.use('/api', staffRoutes);
 // router.use('/api/auth', unifiedAuthRoutes);
 
 export default router;
