@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { eq, desc } from 'drizzle-orm';
 import { deleteAllRequests } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
+import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 
 // Import legacy models for backward compatibility
 const router = Router();
