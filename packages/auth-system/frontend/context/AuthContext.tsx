@@ -5,8 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { jwtDecode } from 'jwt-decode';
-import { UserRole, getPermissionsForRole } from '../../types/permissions';
+import { getPermissionsForRole } from '../../types/permissions';
 import { AuthUser, TenantData } from '../../types/auth';
 
 // ============================================

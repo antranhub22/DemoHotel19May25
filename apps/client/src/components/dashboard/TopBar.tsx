@@ -11,7 +11,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
-import { logger } from '@shared/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';

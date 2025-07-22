@@ -1,8 +1,11 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import { useState, useEffect, useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
 import { useTenantDetection } from '@/context/AuthContext';
-import { DashboardApi, HotelProfile } from '@/services/dashboardApi';
-
 // ============================================
 // Hotel Configuration Interface
 // ============================================
@@ -193,7 +196,10 @@ export const useHotelConfiguration = () => {
   }, []);
 
   useEffect(() => {
+
     loadConfiguration();
+  
+    // no cleanup needed
   }, [loadConfiguration]);
 
   return {

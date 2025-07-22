@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import { AnalyticsController } from '../controllers/analyticsController';
 
 const router = Router();

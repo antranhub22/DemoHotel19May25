@@ -1,17 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Crown,
-  Lock,
-  Star,
-  Shield,
-  Mic,
-  BarChart3,
-  Database,
-  Palette,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
-} from 'lucide-react';
+import { Crown, Lock, Star, CheckCircle2, AlertTriangle, Sparkles,  } from 'lucide-react';
 import {
   Card,
   CardContent,

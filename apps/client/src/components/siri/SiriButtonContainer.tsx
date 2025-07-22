@@ -1,10 +1,13 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import React, { useState, useEffect } from 'react';
 import { logger } from '@shared/utils/logger';
 import SiriCallButton from './SiriCallButton';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import { designSystem } from '@/styles/designSystem';
-import { Language } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 
 interface SiriButtonContainerProps {
@@ -172,7 +175,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
       const errorMessage =
-        error instanceof Error ? error.message : 'Lỗi không xác định';
+        error instanceof Error ? (error as Error).message : 'Lỗi không xác định';
 
       logger.error(
         '❌ [SiriButtonContainer] Call start error:',
@@ -288,7 +291,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       // ✅ IMPROVED: Show error to user for confirm as it's more critical
       if (typeof window !== 'undefined') {
         const errorMessage =
-          error instanceof Error ? error.message : 'Lỗi không xác định';
+          error instanceof Error ? (error as Error).message : 'Lỗi không xác định';
         alert(`Lỗi khi xác nhận cuộc gọi: ${errorMessage}`);
       }
     }

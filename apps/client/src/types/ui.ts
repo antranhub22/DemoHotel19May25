@@ -2,9 +2,6 @@
    UI TYPES - USER INTERFACE TYPE DEFINITIONS
    ======================================== */
 
-import { logger } from '@shared/utils/logger';
-import { Language } from './core';
-
 // ========================================
 // COMPONENT PROPS TYPES
 // ========================================

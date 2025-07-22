@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SiriButton } from './SiriButton';
 import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
@@ -5,8 +10,6 @@ import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 
 import '../../styles/voice-interface.css';
 import { logger } from '@shared/utils/logger';
-import { Language } from '@/types/interface1.types';
-
 interface SiriCallButtonProps {
   isListening: boolean;
   volumeLevel: number;

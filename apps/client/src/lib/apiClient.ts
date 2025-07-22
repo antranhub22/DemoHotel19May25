@@ -1,38 +1,14 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 /* ========================================
    TYPE-SAFE API CLIENT
    ======================================== */
 
 
-import {
-  ApiResponse,
-  ApiError,
-  PaginationParams,
-  PaginatedResponse,
-  LoginRequest,
-  LoginResponse,
-  StartCallRequest,
-  StartCallResponse,
-  EndCallRequest,
-  EndCallResponse,
-  SaveTranscriptRequest,
-  SaveTranscriptResponse,
-  CreateOrderRequest,
-  CreateOrderResponse,
-  UpdateOrderStatusRequest,
-  UpdateOrderStatusResponse,
-  SendMessageRequest,
-  SendMessageResponse,
-  HotelResearchRequest,
-  HotelResearchResponse,
-  GenerateAssistantRequest,
-  GenerateAssistantResponse,
-  HotelProfileResponse,
-  UpdateAssistantConfigRequest,
-  UpdateAssistantConfigResponse,
-  AnalyticsResponse,
-  ServiceHealthResponse,
-} from '@/types/api';
-
+import { ApiResponse, PaginatedResponse, LoginResponse, StartCallResponse, EndCallResponse, SaveTranscriptResponse, CreateOrderResponse, UpdateOrderStatusResponse, SendMessageResponse, HotelResearchResponse, GenerateAssistantResponse, HotelProfileResponse, UpdateAssistantConfigResponse, AnalyticsResponse, ServiceHealthResponse,  } from '@/types/api';
 // ========================================
 // API CLIENT CONFIGURATION
 // ========================================
@@ -148,7 +124,7 @@ export class ApiClient {
 
       throw {
         status: 500,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? (error as Error).message : 'Unknown error',
         timestamp: new Date(),
       } as ApiError;
     }

@@ -9,13 +9,7 @@
  */
 
 import { logger } from '@shared/utils/logger';
-import {
-  validateEnvironment,
-  getEnvironmentStatus,
-  loadEnvironmentConfig,
-  EnvironmentValidationError,
-} from '../../../packages/config/environment';
-
+import { validateEnvironment, getEnvironmentStatus, loadEnvironmentConfig,  } from '../../../packages/config/environment';
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',

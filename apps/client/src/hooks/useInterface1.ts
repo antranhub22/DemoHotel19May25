@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import {
   useState,
   useCallback,
@@ -6,7 +11,6 @@ import {
   createElement,
 } from 'react';
 import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';

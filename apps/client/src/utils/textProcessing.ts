@@ -1,4 +1,3 @@
-import { logger } from '@shared/utils/logger';
 import { englishDictionary } from './dictionary/englishDictionary';
 import dictionaryData from './dictionary/dictionary.json';
 import { normalizeText } from '@/lib/sharedUtils';

@@ -1,9 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { SERVICE_CATEGORIES, ServiceCategory } from '@/types/interface1.types';
+import { SERVICE_CATEGORIES } from '@/types/interface1.types';
 import { designSystem } from '@/styles/designSystem';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-
 interface ServiceGridProps {
   onServiceSelect?: (service: ServiceCategory) => void;
   onVoiceServiceRequest?: (service: ServiceCategory) => Promise<void>;
@@ -43,7 +41,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
       
       // Show user-friendly error
       if (typeof window !== 'undefined') {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage = error instanceof Error ? (error as Error).message : 'Unknown error';
         alert(`Unable to process ${service.name} request: ${errorMessage}`);
       }
     } finally {

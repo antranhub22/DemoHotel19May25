@@ -1,6 +1,10 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import { useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import {
   useHotelConfiguration,
   getVapiPublicKeyByLanguage,
@@ -84,7 +88,7 @@ export const useCallHandler = () => {
       } catch (error) {
         logger.error('[useCallHandler] Error starting Vapi call:', 'Component', error);
         const errorMessage =
-          error instanceof Error ? error.message : String(error);
+          error instanceof Error ? (error as Error).message : String(error);
         return { success: false, error: errorMessage };
       }
     },

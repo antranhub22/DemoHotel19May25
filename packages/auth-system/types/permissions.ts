@@ -1,5 +1,4 @@
-import { PermissionMatrix, MenuItemConfig, UserRole } from './auth';
-
+import { UserRole } from './auth';
 // Re-export types for easier imports
 export type { UserRole } from './auth';
 

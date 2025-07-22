@@ -1,12 +1,15 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 /// <reference types="react" />
 import React, { useState, useEffect } from 'react';
 import type { ReferenceItem } from '@/services/ReferenceService';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, A11y } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { ChevronDown } from 'lucide-react';
 import { FaBookOpen } from 'react-icons/fa';
 import { FiChevronDown } from 'react-icons/fi';
 import { logger } from '@shared/utils/logger';

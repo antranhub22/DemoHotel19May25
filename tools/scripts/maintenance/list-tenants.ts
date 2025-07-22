@@ -1,8 +1,6 @@
 #!/usr/bin/env tsx
 
 import { db } from '@shared/db';
-import { tenants } from '@shared/db';
-
 async function listTenants() {
   try {
     console.log('🔍 Listing all tenants in database...');

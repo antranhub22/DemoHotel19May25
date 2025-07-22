@@ -48,19 +48,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Import API service and types  
-import {
-  dashboardApi,
-  HotelData,
-  AssistantCustomization,
-  ApiError,
-  PERSONALITY_OPTIONS,
-  TONE_OPTIONS,
-  LANGUAGE_OPTIONS,
-  BACKGROUND_SOUND_OPTIONS,
-  validateHotelData,
-  validateAssistantCustomization,
-} from '@/services/dashboardApi';
-
+import { dashboardApi, HotelData, AssistantCustomization, PERSONALITY_OPTIONS, TONE_OPTIONS, LANGUAGE_OPTIONS, BACKGROUND_SOUND_OPTIONS, validateHotelData, validateAssistantCustomization,  } from '@/services/dashboardApi';
 // ============================================
 // Types & Interfaces
 // ============================================

@@ -14,7 +14,6 @@ import {
   transcript,
   call_summaries,
 } from '@shared/db';
-import { eq } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 import {
   getOverview,

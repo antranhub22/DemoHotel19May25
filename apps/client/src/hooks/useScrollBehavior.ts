@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, RefObject } from 'react';
-import { logger } from '@shared/utils/logger';
+import { useState, useEffect } from 'react';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 
 interface UseScrollBehaviorProps {

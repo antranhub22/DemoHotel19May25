@@ -1,15 +1,9 @@
-import { Router, Request, Response } from 'express';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
-import { db } from '@shared/db';
-import { request as requestTable } from '@shared/db';
+import { Router } from 'express';
 import { eq, desc } from 'drizzle-orm';
 import { deleteAllRequests } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
 
 // Import legacy models for backward compatibility
-import { Request as StaffRequest } from '@server/models/Request';
-import { Message as StaffMessage } from '@server/models/Message';
-
 const router = Router();
 
 // Helper function for error handling
@@ -17,7 +11,7 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
   res.status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
   });
 }
 

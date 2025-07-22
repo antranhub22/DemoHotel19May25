@@ -7,7 +7,6 @@ const SummaryPopupContent = React.lazy(() =>
     default: module.SummaryPopupContent,
   }))
 );
-import { logger } from '@shared/utils/logger';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 
 interface SummaryPopupProps {

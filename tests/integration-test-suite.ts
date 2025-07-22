@@ -4,34 +4,19 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
 import postgres from 'postgres';
 import Database from 'better-sqlite3';
-import { eq, sql, and, count } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
 import fetch from 'node-fetch';
 
 // Import services
-import { HotelResearchService, BasicHotelData } from '../apps/server/services/hotelResearch';
+import { HotelResearchService } from '../apps/server/services/hotelResearch';
 import { KnowledgeBaseGenerator } from '../apps/server/services/knowledgeBaseGenerator';
-import {
-  VapiIntegrationService,
-  AssistantGeneratorService,
-} from '../apps/server/services/vapiIntegration';
-
+import {  } from '../apps/server/services/vapiIntegration';
 // Import schema
-import {
-  tenants,
-  hotelProfiles,
-  call,
-  transcript,
-  request,
-  message,
-  staff,
-} from '../packages/shared/db/schema';
-
+import { tenants, hotelProfiles, call, transcript, message,  } from '../packages/shared/db/schema';
 // Import test utils
-import { testSchema } from './utils/setup-test-db';
-
 // ============================================
 // Integration Test Configuration & Types
 // ============================================
@@ -318,10 +303,10 @@ export class IntegrationTestSuite {
       this.results.errors.push({
         suite: 'Integration Test Suite',
         test: 'main',
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
-      this.log(`💥 Integration Test Suite Failed: ${error.message}`, 'error');
+      this.log(`💥 Integration Test Suite Failed: ${(error as Error).message}`, 'error');
       return this.results;
     } finally {
       if (this.config.cleanupOnFailure || this.results.success) {
@@ -402,7 +387,7 @@ export class IntegrationTestSuite {
             this.log(`Testing endpoint: ${endpoint}`, 'info');
             // In real implementation, would make actual HTTP requests
           } catch (error) {
-            throw new Error(`Endpoint ${endpoint} failed: ${error.message}`);
+            throw new Error(`Endpoint ${endpoint} failed: ${(error as Error).message}`);
           }
         }
 
@@ -773,7 +758,7 @@ export class IntegrationTestSuite {
 
           this.results.dataIsolation.crossTenantAccessBlocked = true;
         } catch (error) {
-          if (error.message.includes('Cross-tenant access')) {
+          if ((error as Error).message.includes('Cross-tenant access')) {
             throw error;
           }
           // Expected behavior - query should be impossible
@@ -1243,10 +1228,10 @@ export class IntegrationTestSuite {
       this.results.errors.push({
         suite: name,
         test: 'suite',
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
-      this.log(`❌ Test suite failed: ${name} - ${error.message}`, 'error');
+      this.log(`❌ Test suite failed: ${name} - ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -1287,17 +1272,17 @@ export class IntegrationTestSuite {
       test.status = 'failed';
       test.endTime = performance.now();
       test.duration = test.endTime - test.startTime;
-      test.error = error.message;
+      test.error = (error as Error).message;
       this.results.testsFailed++;
 
       this.results.errors.push({
         suite: currentSuite.name,
         test: id,
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
 
-      this.log(`❌ Test failed: ${name} - ${error.message}`, 'error');
+      this.log(`❌ Test failed: ${name} - ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -1327,7 +1312,7 @@ export class IntegrationTestSuite {
 
       this.log('✅ Cleanup completed', 'success');
     } catch (error) {
-      this.log(`⚠️ Cleanup failed: ${error.message}`, 'warn');
+      this.log(`⚠️ Cleanup failed: ${(error as Error).message}`, 'warn');
     }
   }
 
@@ -1435,8 +1420,8 @@ ${
         .map(
           error => `
 ### ${error.suite} > ${error.test}
-- **Message**: ${error.message}
-${error.stack ? `- **Stack**: \`\`\`\n${error.stack}\n\`\`\`` : ''}
+- **Message**: ${(error as Error).message}
+${(error as Error).stack ? `- **Stack**: \`\`\`\n${(error as Error).stack}\n\`\`\`` : ''}
 `
         )
         .join('')

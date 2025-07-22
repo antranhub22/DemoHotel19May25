@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 
 const Drawer = ({

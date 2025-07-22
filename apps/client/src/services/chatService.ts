@@ -1,6 +1,9 @@
-import OpenAI from 'openai';
-import { logger } from '@shared/utils/logger';
+/// <reference types="vite/client" />
 
+// Type declaration for import.meta
+
+
+import OpenAI from 'openai';
 // Load the system prompt from environment or inline it here
 const SYSTEM_PROMPT = `FIRST MESSAGE: HI! Hotel ! HOW MAY I ASSIST YOU TODAY ?
 [Role]

@@ -5,14 +5,8 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import { logger } from '@shared/utils/logger';
-import {
-  UserRole,
-  Permission,
-  getPermissionsForRole,
-} from '@shared/constants/permissions';
-
+import { getPermissionsForRole,  } from '@shared/constants/permissions';
 // ============================================
 // Types & Interfaces
 // ============================================

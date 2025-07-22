@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';
 import {
@@ -9,19 +8,13 @@ import {
 } from '@server/services/vapiIntegration';
 import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
 import { hotelProfiles } from '@shared/schema';
-import { db } from '@server/db';
-import { eq } from 'drizzle-orm';
 import {
   getOverview,
   getServiceDistribution,
   getHourlyActivity,
 } from '@server/analytics';
 import { logger } from '@shared/utils/logger';
-import {
-  hotelProfileMapper,
-  type HotelProfileDB,
-} from '@shared/db/transformers';
-
+import { hotelProfileMapper,  } from '@shared/db/transformers';
 // ============================================
 // Router Setup
 // ============================================
@@ -169,12 +162,12 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
     console.error(defaultMessage, error);
     return res.status(500).json({
       error: defaultMessage,
-      message: error.message,
-      stack: error.stack,
+      message: (error as Error).message,
+      stack: (error as Error).stack,
       type: error.constructor.name,
     });
   } else {
-    console.error(defaultMessage, error.message);
+    console.error(defaultMessage, (error as Error).message);
     return res.status(500).json({ error: defaultMessage });
   }
 }

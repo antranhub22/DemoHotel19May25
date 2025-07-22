@@ -11,16 +11,7 @@ import { performance } from 'perf_hooks';
 import { createHash } from 'crypto';
 
 // Import schema
-import {
-  tenants,
-  hotelProfiles,
-  call,
-  transcript,
-  request,
-  message,
-  staff,
-} from '@shared/db';
-
+import { tenants, hotelProfiles, transcript, request, message, staff,  } from '@shared/db';
 // ============================================
 // Test Configuration
 // ============================================
@@ -190,7 +181,7 @@ export class DatabaseMigrationTest {
       this.results.success = true;
       this.log('✅ Migration test completed successfully!', 'success');
     } catch (error) {
-      this.log(`❌ Migration test failed: ${error.message}`, 'error');
+      this.log(`❌ Migration test failed: ${(error as Error).message}`, 'error');
       this.results.success = false;
 
       // Attempt rollback if not in dry run mode
@@ -262,7 +253,7 @@ export class DatabaseMigrationTest {
         this.log(`📁 Backed up table: ${tableName}`, 'info');
       } catch (error) {
         this.log(
-          `⚠️ Could not backup table ${tableName}: ${error.message}`,
+          `⚠️ Could not backup table ${tableName}: ${(error as Error).message}`,
           'warn'
         );
       }
@@ -304,7 +295,7 @@ export class DatabaseMigrationTest {
           'info'
         );
       } catch (error) {
-        this.log(`⚠️ Could not count ${name}: ${error.message}`, 'warn');
+        this.log(`⚠️ Could not count ${name}: ${(error as Error).message}`, 'warn');
         this.results.dataIntegrity.preDataCount[name] = 0;
       }
     }
@@ -644,12 +635,12 @@ export class DatabaseMigrationTest {
         await this.db.execute(sql`DROP TABLE IF EXISTS hotel_profiles`);
         await this.db.execute(sql`DROP TABLE IF EXISTS tenants`);
       } catch (error) {
-        this.log(`Could not drop tables: ${error.message}`, 'warn');
+        this.log(`Could not drop tables: ${(error as Error).message}`, 'warn');
       }
 
       this.log('✅ Rollback completed', 'success');
     } catch (error) {
-      this.log(`❌ Rollback failed: ${error.message}`, 'error');
+      this.log(`❌ Rollback failed: ${(error as Error).message}`, 'error');
       this.log('🔧 Manual intervention required - check backup files', 'error');
     }
   }
@@ -688,11 +679,11 @@ export class DatabaseMigrationTest {
         step: stepId,
         status: 'failed',
         duration: stepDuration,
-        message: `${stepName} failed: ${error.message}`,
+        message: `${stepName} failed: ${(error as Error).message}`,
         error: error,
       });
 
-      this.log(`❌ ${stepName} failed: ${error.message}`, 'error');
+      this.log(`❌ ${stepName} failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -823,7 +814,7 @@ COMMIT;
           .where(eq(request.tenant_id, this.testTenantId));
         await this.db.delete(tenants).where(eq(tenants.id, this.testTenantId));
       } catch (error) {
-        this.log(`Could not cleanup test tenant: ${error.message}`, 'warn');
+        this.log(`Could not cleanup test tenant: ${(error as Error).message}`, 'warn');
       }
     }
 

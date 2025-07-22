@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-  TrendingUp,
-  Users,
-  Phone,
-  Clock,
-  Globe,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-} from 'lucide-react';
+import { TrendingUp, Globe, Calendar, Download, Filter, RefreshCw,  } from 'lucide-react';
 import {
   Card,
   CardContent,

@@ -1,7 +1,3 @@
-import { RefObject } from 'react';
-import { logger } from '@shared/utils/logger';
-import { Language } from './interface1.types';
-
 /**
  * Interface1 Refactored - Type Definitions
  *

@@ -2,8 +2,6 @@
    TEST HELPERS - UTILITY FUNCTIONS FOR TESTING
    ======================================== */
 
-import { Language } from '@/types';
-
 // ========================================
 // TEST DATA GENERATORS
 // ========================================

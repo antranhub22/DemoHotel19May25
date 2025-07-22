@@ -1,9 +1,13 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Volume2, VolumeX, Settings, Mic, MicOff, Eye, EyeOff, X } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
-import { Language, ServiceCategory } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
+import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VoicePrompt {

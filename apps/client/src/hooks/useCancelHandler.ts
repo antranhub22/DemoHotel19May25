@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { usePopup } from '@/components/popup-system';
 
 interface UseCancelHandlerProps {

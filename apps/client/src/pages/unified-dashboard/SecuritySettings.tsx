@@ -1,39 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Shield,
-  Lock,
-  Key,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Globe,
-  Server,
-  Database,
-  FileText,
-  Download,
-  Upload,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Settings,
-  Bell,
-  Clock,
-  Activity,
-  Wifi,
-  HardDrive,
-  Save,
-  Search,
-  Filter,
-  Plus,
-  Trash2,
-  Edit,
-  AlertCircle,
-  Info,
-  Zap,
-  Cpu,
-  Monitor,
-  Terminal,
-} from 'lucide-react';
+import { Shield, Lock, AlertTriangle, CheckCircle, FileText, Download, Upload, RefreshCw, Eye, HardDrive, Save, Search, Filter, Plus, Trash2, Edit,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -65,7 +31,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
@@ -1108,7 +1073,10 @@ export const SecuritySettings: React.FC = () => {
   };
 
   useEffect(() => {
+
     fetchData();
+  
+    // no cleanup needed
   }, []);
 
   if (loading) {

@@ -1,4 +1,3 @@
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 
 function Skeleton({

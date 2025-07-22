@@ -1,5 +1,4 @@
 import React, { useEffect, Suspense } from 'react';
-import { logger } from '@shared/utils/logger';
 import { PopupStack } from './PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
 

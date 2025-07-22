@@ -1,8 +1,7 @@
 import { storage } from '@server/storage';
 import { insertTranscriptSchema } from '@shared/schema';
 import { db } from '@shared/db';
-import { call, transcript } from '@shared/db';
-import { eq } from 'drizzle-orm';
+import { call } from '@shared/db';
 import { getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
 import { logger } from '@shared/utils/logger';

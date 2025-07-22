@@ -1,66 +1,123 @@
-// Global type declarations for browser APIs
+/// <reference types="vite/client" />
+// Global type declarations for the project
 
+// Fix import.meta.env TypeScript errors
+;
+}
+
+// CSS Modules declarations
+declare module '*.module.css' {
+  const styles: { [className: string]: string };
+  export default styles;
+}
+
+declare module '*.module.scss' {
+  const styles: { [className: string]: string };
+  export default styles;
+}
+
+declare module '*.module.sass' {
+  const styles: { [className: string]: string };
+  export default styles;
+}
+
+// Image file declarations
+declare module '*.png' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.jpg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.jpeg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.gif' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.svg' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.webp' {
+  const src: string;
+  export default src;
+}
+
+// Audio file declarations
+declare module '*.mp3' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.wav' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.ogg' {
+  const src: string;
+  export default src;
+}
+
+// Font file declarations
+declare module '*.woff' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.woff2' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.ttf' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.eot' {
+  const src: string;
+  export default src;
+}
+
+// Video file declarations
+declare module '*.mp4' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.webm' {
+  const src: string;
+  export default src;
+}
+
+// Other file types
+declare module '*.json' {
+  const value: any;
+  export default value;
+}
+
+// Environment variable augmentation
 declare global {
-  interface Window {
-    SpeechSynthesisUtterance: typeof SpeechSynthesisUtterance;
-    speechSynthesis: SpeechSynthesis;
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: 'development' | 'production' | 'test';
+      VITE_OPENAI_API_KEY?: string;
+      VITE_VAPI_PUBLIC_KEY?: string;
+      VITE_VAPI_ASSISTANT_ID?: string;
+      VITE_VAPI_PUBLIC_KEY_VI?: string;
+      VITE_VAPI_ASSISTANT_ID_VI?: string;
+    }
   }
 }
-
-// Speech Synthesis API types (in case they're not available in lib.dom.d.ts)
-interface SpeechSynthesis extends EventTarget {
-  cancel(): void;
-  speak(utterance: SpeechSynthesisUtterance): void;
-  pause(): void;
-  resume(): void;
-  getVoices(): SpeechSynthesisVoice[];
-  paused: boolean;
-  pending: boolean;
-  speaking: boolean;
-}
-
-interface SpeechSynthesisUtterance extends EventTarget {
-  new(text?: string): SpeechSynthesisUtterance;
-  text: string;
-  lang: string;
-  voice: SpeechSynthesisVoice | null;
-  volume: number;
-  rate: number;
-  pitch: number;
-  onstart: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-  onend: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-  onerror: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisErrorEvent) => any) | null;
-  onpause: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-  onresume: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-  onmark: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-  onboundary: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => any) | null;
-}
-
-interface SpeechSynthesisVoice {
-  voiceURI: string;
-  name: string;
-  lang: string;
-  localService: boolean;
-  default: boolean;
-}
-
-interface SpeechSynthesisEvent extends Event {
-  utterance: SpeechSynthesisUtterance;
-  charIndex: number;
-  charLength: number;
-  elapsedTime: number;
-  name: string;
-}
-
-interface SpeechSynthesisErrorEvent extends SpeechSynthesisEvent {
-  error: 'canceled' | 'interrupted' | 'audio-busy' | 'audio-hardware' | 'network' | 'synthesis-unavailable' | 'synthesis-failed' | 'language-unavailable' | 'voice-unavailable' | 'text-too-long' | 'invalid-argument' | 'not-allowed';
-}
-
-// Extend global declarations
-declare var speechSynthesis: SpeechSynthesis;
-declare var SpeechSynthesisUtterance: {
-  prototype: SpeechSynthesisUtterance;
-  new(text?: string): SpeechSynthesisUtterance;
-};
 
 export {}; 

@@ -233,7 +233,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
       try {
         await client.query(query);
       } catch (error) {
-        console.warn(`⚠️ Failed to create index: ${error.message}`);
+        console.warn(`⚠️ Failed to create index: ${(error as Error).message}`);
       }
     }
 
@@ -254,7 +254,7 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     return {
       success: false,
       migrationsRun,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? (error as Error).message : 'Unknown error',
     };
   } finally {
     await pool.end();

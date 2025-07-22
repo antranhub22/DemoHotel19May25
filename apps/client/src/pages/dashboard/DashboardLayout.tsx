@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import {
-  Home,
-  Bot,
-  BarChart,
-  Settings,
-  CreditCard,
-  Users,
-  Bell,
-  Menu,
-  X,
-  LogOut,
-  HelpCircle,
-  Building2,
-} from 'lucide-react';
-import { logger } from '@shared/utils/logger';
+import { Settings, Bell, Menu, LogOut, HelpCircle,  } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

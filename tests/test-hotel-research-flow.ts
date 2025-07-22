@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
 import postgres from 'postgres';
 import Database from 'better-sqlite3';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
@@ -18,13 +18,7 @@ import {
 } from '../apps/server/services/vapiIntegration';
 
 // Import schema
-import {
-  tenants,
-  hotelProfiles,
-  call,
-  transcript,
-} from '../packages/shared/db/schema';
-
+import { hotelProfiles,  } from '../packages/shared/db/schema';
 // ============================================
 // Test Configuration & Types
 // ============================================
@@ -386,10 +380,10 @@ export class HotelResearchFlowTest {
       this.results.duration = this.results.endTime - this.results.startTime;
       this.results.errors.push({
         step: 'test-suite',
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
-      this.log(`💥 Test Suite Failed: ${error.message}`, 'error');
+      this.log(`💥 Test Suite Failed: ${(error as Error).message}`, 'error');
       return this.results;
     }
   }
@@ -575,7 +569,7 @@ export class HotelResearchFlowTest {
 
       this.log('🎉 Complete hotel research flow test passed!', 'success');
     } catch (error) {
-      this.log(`❌ Complete flow test failed: ${error.message}`, 'error');
+      this.log(`❌ Complete flow test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -618,7 +612,7 @@ export class HotelResearchFlowTest {
       );
     } catch (error) {
       this.log(
-        `❌ Google Places API integration test failed: ${error.message}`,
+        `❌ Google Places API integration test failed: ${(error as Error).message}`,
         'error'
       );
       throw error;
@@ -683,7 +677,7 @@ export class HotelResearchFlowTest {
       this.results.coverage.knowledgeBase.validation = true;
     } catch (error) {
       this.log(
-        `❌ Knowledge base generation test failed: ${error.message}`,
+        `❌ Knowledge base generation test failed: ${(error as Error).message}`,
         'error'
       );
       throw error;
@@ -756,7 +750,7 @@ export class HotelResearchFlowTest {
       }
     } catch (error) {
       this.log(
-        `❌ Vapi assistant creation test failed: ${error.message}`,
+        `❌ Vapi assistant creation test failed: ${(error as Error).message}`,
         'error'
       );
       throw error;
@@ -824,7 +818,7 @@ export class HotelResearchFlowTest {
 
       this.log('✅ Data update test passed', 'success');
     } catch (error) {
-      this.log(`❌ Database storage test failed: ${error.message}`, 'error');
+      this.log(`❌ Database storage test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -870,7 +864,7 @@ export class HotelResearchFlowTest {
       this.config.useMockData = originalUseMockData;
       this.config.skipApiCalls = originalSkipApiCalls;
     } catch (error) {
-      this.log(`❌ Mock data test failed: ${error.message}`, 'error');
+      this.log(`❌ Mock data test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -884,7 +878,7 @@ export class HotelResearchFlowTest {
         await this.hotelResearchService.basicResearch('', '');
         throw new Error('Should have failed with empty hotel name');
       } catch (error) {
-        if (error.message === 'Should have failed with empty hotel name') {
+        if ((error as Error).message === 'Should have failed with empty hotel name') {
           throw error;
         }
         this.log('✅ Empty hotel name error handling passed', 'success');
@@ -902,7 +896,7 @@ export class HotelResearchFlowTest {
           );
           throw new Error('Should have failed with invalid API key');
         } catch (error) {
-          if (error.message === 'Should have failed with invalid API key') {
+          if ((error as Error).message === 'Should have failed with invalid API key') {
             throw error;
           }
           this.log('✅ Invalid API key error handling passed', 'success');
@@ -916,7 +910,7 @@ export class HotelResearchFlowTest {
         this.knowledgeBaseGenerator.generateKnowledgeBase(null);
         throw new Error('Should have failed with null hotel data');
       } catch (error) {
-        if (error.message === 'Should have failed with null hotel data') {
+        if ((error as Error).message === 'Should have failed with null hotel data') {
           throw error;
         }
         this.log('✅ Null hotel data error handling passed', 'success');
@@ -929,7 +923,7 @@ export class HotelResearchFlowTest {
         throw new Error('Should have failed with invalid database schema');
       } catch (error) {
         if (
-          error.message === 'Should have failed with invalid database schema'
+          (error as Error).message === 'Should have failed with invalid database schema'
         ) {
           throw error;
         }
@@ -939,7 +933,7 @@ export class HotelResearchFlowTest {
       this.results.coverage.hotelResearch.errorHandling = true;
       this.results.coverage.vapiIntegration.errorHandling = true;
     } catch (error) {
-      this.log(`❌ Error scenarios test failed: ${error.message}`, 'error');
+      this.log(`❌ Error scenarios test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -985,7 +979,7 @@ export class HotelResearchFlowTest {
         );
       }
     } catch (error) {
-      this.log(`❌ API rate limiting test failed: ${error.message}`, 'error');
+      this.log(`❌ API rate limiting test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -1051,7 +1045,7 @@ export class HotelResearchFlowTest {
       this.log('✅ Tenant isolation test passed', 'success');
       this.results.coverage.database.tenantIsolation = true;
     } catch (error) {
-      this.log(`❌ Tenant isolation test failed: ${error.message}`, 'error');
+      this.log(`❌ Tenant isolation test failed: ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -1094,16 +1088,16 @@ export class HotelResearchFlowTest {
       step.status = 'failed';
       step.endTime = performance.now();
       step.duration = step.endTime - step.startTime;
-      step.error = error.message;
+      step.error = (error as Error).message;
       this.results.testsFailed++;
 
       this.results.errors.push({
         step: id,
-        message: error.message,
-        stack: error.stack,
+        message: (error as Error).message,
+        stack: (error as Error).stack,
       });
 
-      this.log(`❌ Test failed: ${name} - ${error.message}`, 'error');
+      this.log(`❌ Test failed: ${name} - ${(error as Error).message}`, 'error');
       throw error;
     }
   }
@@ -1192,8 +1186,8 @@ ${
         .map(
           error => `
 ### ${error.step}
-- **Message**: ${error.message}
-${error.stack ? `- **Stack**: \`\`\`\n${error.stack}\n\`\`\`` : ''}
+- **Message**: ${(error as Error).message}
+${(error as Error).stack ? `- **Stack**: \`\`\`\n${(error as Error).stack}\n\`\`\`` : ''}
 `
         )
         .join('')

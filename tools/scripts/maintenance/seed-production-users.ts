@@ -484,7 +484,7 @@ async function seedProductionUsers(): Promise<{
     return {
       success: false,
       usersCreated,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? (error as Error).message : 'Unknown error',
     };
   } finally {
     await pool.end();

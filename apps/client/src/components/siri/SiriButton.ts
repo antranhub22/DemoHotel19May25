@@ -1,16 +1,5 @@
 import { logger } from '@shared/utils/logger';
-import {
-  DebugManager,
-  EmergencyStopManager,
-  CanvasRenderer,
-  AnimationController,
-  DimensionsManager,
-  StateManager,
-  type CanvasRenderState,
-  type DimensionsState,
-  type ExternalVisualState,
-} from './modules';
-
+import { DebugManager, EmergencyStopManager, CanvasRenderer, AnimationController, DimensionsManager, StateManager,  } from './modules';
 export interface SiriButtonColors {
   primary: string;
   secondary: string;

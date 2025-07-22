@@ -1,5 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
-
+import { expect } from '@playwright/test';
 /**
  * Interface1 Page Object Model
  * 

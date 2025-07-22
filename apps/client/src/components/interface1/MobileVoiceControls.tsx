@@ -11,8 +11,6 @@ import {
 } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
-import { Language, ServiceCategory } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileVoiceControlsProps {

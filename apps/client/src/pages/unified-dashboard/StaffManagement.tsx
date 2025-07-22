@@ -1,23 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  UserPlus,
-  Edit,
-  Trash2,
-  Shield,
-  Eye,
-  EyeOff,
-  Mail,
-  Phone,
-  Calendar,
-  Search,
-  Filter,
-  RefreshCw,
-  Settings,
-  Lock,
-  Unlock,
-  Key,
-} from 'lucide-react';
+import { Users, UserPlus, Edit, Trash2, Shield, Eye, EyeOff, Search, Filter, RefreshCw, Settings, Lock, Unlock, Key,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import type { UserRole } from '@shared/constants/permissions';
 import { useAuth } from '@/context/AuthContext';
@@ -32,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -40,14 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -629,7 +603,10 @@ export const StaffManagement: React.FC = () => {
 
   // Load staff on mount
   useEffect(() => {
+
     fetchStaffList();
+  
+    // no cleanup needed
   }, []);
 
   return (

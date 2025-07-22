@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as SeparatorPrimitive from '@radix-ui/react-separator';
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 
 const Separator = React.forwardRef<

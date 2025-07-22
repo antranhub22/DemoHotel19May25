@@ -1,9 +1,8 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 // import { storage } from '@server/storage'; // Not used in current implementation
 import { insertTranscriptSchema } from '@shared/schema';
 import { db } from '@shared/db';
 import { call, transcript } from '@shared/db';
-import { eq } from 'drizzle-orm';
 import { getCurrentTimestamp } from '@shared/utils';
 // import { z } from 'zod'; // Not used currently
 import { logger } from '@shared/utils/logger';
@@ -15,7 +14,7 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
   res.status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
   });
 }
 

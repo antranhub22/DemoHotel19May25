@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 
 const Table = React.forwardRef<

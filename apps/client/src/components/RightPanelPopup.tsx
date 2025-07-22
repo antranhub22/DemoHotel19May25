@@ -1,6 +1,5 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
 import { SummaryPopupContent } from './popup-system/SummaryPopupContent';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 

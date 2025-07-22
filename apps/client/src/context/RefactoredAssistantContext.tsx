@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import React, {
   createContext,
   useContext,
@@ -22,17 +27,7 @@ import {
   ConfigurationProvider,
 } from './contexts/ConfigurationContext';
 import { useVapi, VapiProvider } from './contexts/VapiContext';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
-import {
-  Transcript,
-  OrderSummary,
-  CallDetails,
-  Order,
-  CallSummary,
-  ServiceRequest,
-  ActiveOrder,
-} from '@/types';
-
+import { Transcript, CallDetails, Order, ActiveOrder,  } from '@/types';
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

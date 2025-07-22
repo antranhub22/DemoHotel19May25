@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { sql } from 'drizzle-orm';
 import * as fs from 'fs';
 import { randomUUID } from 'crypto';
 

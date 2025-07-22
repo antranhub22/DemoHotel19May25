@@ -1,6 +1,3 @@
-import { logger } from '@shared/utils/logger';
-import { DebugManager } from './DebugManager';
-
 export interface VisualState {
   isListening: boolean;
   isHovered: boolean;

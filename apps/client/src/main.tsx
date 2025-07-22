@@ -1,9 +1,12 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import { logger } from '@shared/utils/logger';
-
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access
 

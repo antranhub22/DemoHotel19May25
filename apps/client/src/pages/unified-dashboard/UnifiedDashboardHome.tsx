@@ -1,26 +1,6 @@
 import React from 'react';
 import { Link } from 'wouter';
-import {
-  BarChart3,
-  Users,
-  MessageSquare,
-  Bot,
-  TrendingUp,
-  Calendar,
-  Clock,
-  Phone,
-  AlertCircle,
-  CheckCircle,
-  Star,
-  Activity,
-  Server,
-  Shield,
-  Wrench,
-  Database,
-  Monitor,
-  ClipboardList,
-} from 'lucide-react';
-import { logger } from '@shared/utils/logger';
+import { BarChart3, Users, MessageSquare, Bot, TrendingUp, AlertCircle, CheckCircle, Shield, Wrench, Database, Monitor, ClipboardList,  } from 'lucide-react';
 import type { UserRole } from '@shared/constants/permissions';
 import {
   Card,

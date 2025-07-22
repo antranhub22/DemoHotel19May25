@@ -1,4 +1,3 @@
-import { logger } from '@shared/utils/logger';
 import en from './en.json';
 import fr from './fr.json';
 import zh from './zh.json';

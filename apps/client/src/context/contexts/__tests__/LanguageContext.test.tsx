@@ -1,11 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import {
-  LanguageProvider,
-  useLanguage,
-  type Language,
-} from '../LanguageContext';
+import { LanguageProvider, useLanguage,  } from '../LanguageContext';
 import React from 'react';
 
 // Mock fetch for translation API tests

@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Download,
-  RefreshCw,
-  Target,
-  PieChart,
-  LineChart,
-} from 'lucide-react';
+import { BarChart3, TrendingUp, Download, RefreshCw, Target, PieChart, LineChart,  } from 'lucide-react';
 import {
   Card,
   CardContent,

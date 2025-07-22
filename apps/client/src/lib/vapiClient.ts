@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 // 🚀 REAL VAPI INTEGRATION: Enhanced for Production with better error handling
 import { logger } from '@shared/utils/logger';
 
@@ -560,8 +565,8 @@ export const startCall = async (
   } catch (error) {
     vapiDebugger.log('error', 'startCall failed with exception', {
       error,
-      errorMessage: error instanceof Error ? error.message : String(error),
-      errorStack: error instanceof Error ? error.stack : undefined,
+      errorMessage: error instanceof Error ? (error as Error).message : String(error),
+      errorStack: error instanceof Error ? (error as Error).stack : undefined,
       assistantId: assistantId.substring(0, 15) + '...',
       vapiInstanceExists: !!vapiInstance,
     });
@@ -572,34 +577,34 @@ export const startCall = async (
     if (error instanceof Error) {
       let enhancedError: Error;
 
-      if (error.message.includes('webCallUrl')) {
+      if ((error as Error).message.includes('webCallUrl')) {
         enhancedError = new Error(
           'Vapi call initialization failed - webCallUrl issue. Please check Vapi configuration and try again.'
         );
         vapiDebugger.log('error', 'webCallUrl issue detected', {
-          originalError: error.message,
+          originalError: (error as Error).message,
         });
-      } else if (error.message.includes('assistant')) {
+      } else if ((error as Error).message.includes('assistant')) {
         enhancedError = new Error(
           'Invalid assistant configuration. Please check assistant ID and permissions.'
         );
         vapiDebugger.log('error', 'Assistant configuration issue detected', {
-          originalError: error.message,
+          originalError: (error as Error).message,
         });
       } else if (
-        error.message.includes('network') ||
-        error.message.includes('timeout')
+        (error as Error).message.includes('network') ||
+        (error as Error).message.includes('timeout')
       ) {
         enhancedError = new Error(
           'Network error during call start. Please check your internet connection and try again.'
         );
         vapiDebugger.log('error', 'Network/timeout issue detected', {
-          originalError: error.message,
+          originalError: (error as Error).message,
         });
       } else {
-        enhancedError = new Error(`Vapi call failed: ${error.message}`);
+        enhancedError = new Error(`Vapi call failed: ${(error as Error).message}`);
         vapiDebugger.log('error', 'Generic call failure', {
-          originalError: error.message,
+          originalError: (error as Error).message,
         });
       }
 
@@ -611,6 +616,7 @@ export const startCall = async (
 };
 
 export const endCall = async (): Promise<void> => {
+    // Function returns void implicitly
   if (!vapiInstance) {
     logger.warn('[vapiClient] No Vapi instance to end call', 'Component');
     return;

@@ -1,6 +1,4 @@
 import * as React from 'react';
-import { logger } from '@shared/utils/logger';
-
 const MOBILE_BREAKPOINT = 768;
 
 export function useIsMobile() {

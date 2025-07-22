@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { app } from '../../server';
 import { db } from '../../lib/db';
 import {
   staff,
@@ -9,7 +8,6 @@ import {
   requests,
   messages,
 } from '../../lib/db/schema';
-import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 
 // ============================================================================

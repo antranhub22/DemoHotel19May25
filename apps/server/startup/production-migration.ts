@@ -1,4 +1,3 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { logger } from '@shared/utils/logger';
 
@@ -94,7 +93,7 @@ export async function runProductionMigration() {
         }
       }
     } catch (error: any) {
-      logger.debug('⚠️ Error checking transcript table: ${error.message}', 'Component');
+      logger.debug('⚠️ Error checking transcript table: ${(error as Error).message}', 'Component');
     }
 
     // Create missing tables first - EXPLICIT transcript table fix
@@ -139,7 +138,7 @@ export async function runProductionMigration() {
         await sql.unsafe(statement);
         logger.debug('✅ Table created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        logger.debug('⚠️ Table creation may have failed (might be OK): ${error.message.substring(0, 100)}...', 'Component');
+        logger.debug('⚠️ Table creation may have failed (might be OK): ${(error as Error).message.substring(0, 100)}...', 'Component');
       }
     }
 
@@ -166,7 +165,7 @@ export async function runProductionMigration() {
         logger.debug('✅ Executed: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
         // Column might already exist, which is OK
-        logger.debug('⚠️ Statement may have failed (might be OK): ${error.message.substring(0, 100)}...', 'Component');
+        logger.debug('⚠️ Statement may have failed (might be OK): ${(error as Error).message.substring(0, 100)}...', 'Component');
       }
     }
 
@@ -194,13 +193,13 @@ export async function runProductionMigration() {
         await sql.unsafe(statement);
         logger.debug('✅ Index created: ${statement.substring(0, 50)}...', 'Component');
       } catch (error: any) {
-        logger.debug('⚠️ Index creation may have failed: ${error.message.substring(0, 50)}...', 'Component');
+        logger.debug('⚠️ Index creation may have failed: ${(error as Error).message.substring(0, 50)}...', 'Component');
       }
     }
 
     logger.debug('🎉 Production migration completed successfully!', 'Component');
   } catch (error: any) {
-    logger.error('❌ Production migration failed:', 'Component', error.message);
+    logger.error('❌ Production migration failed:', 'Component', (error as Error).message);
     // Don't crash the server, just log the error
   } finally {
     if (sql) {

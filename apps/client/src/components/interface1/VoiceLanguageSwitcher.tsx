@@ -2,7 +2,6 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown, Mic, Volume2, CheckCircle, Smartphone } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { Language } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface LanguageOption {

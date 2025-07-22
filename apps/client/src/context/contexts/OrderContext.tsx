@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { logger } from '@shared/utils/logger';
-import { Order, OrderSummary, CallSummary, ServiceRequest, ActiveOrder, CallDetails } from '@/types';
-
+import { Order, OrderSummary, CallSummary, ServiceRequest, ActiveOrder } from '@/types';
 export interface OrderContextType {
   // Order state
   order: Order | null;

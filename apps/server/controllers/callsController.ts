@@ -1,11 +1,8 @@
-import { Request, Response } from 'express';
 import { logger } from '@shared/utils/logger';
 import { storage } from '@server/storage';
 import { insertTranscriptSchema } from '@shared/schema';
-import { db } from '@shared/db';
 import { call } from '@shared/db';
 // import { transcript } from '@shared/db'; // Used via storage service
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 /**
@@ -55,7 +52,7 @@ export class CallsController {
         success: false,
         error: 'Failed to retrieve transcripts',
         details:
-          process.env.NODE_ENV === 'development' ? error.message : undefined,
+          process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
       });
     }
   }
@@ -295,7 +292,7 @@ export class CallsController {
           success: false,
           error: 'Failed to store test transcript',
           details:
-            process.env.NODE_ENV === 'development' ? error.message : undefined,
+            process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
         });
       }
     }

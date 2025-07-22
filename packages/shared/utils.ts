@@ -1,4 +1,4 @@
-import { db, request } from './db';
+import { db } from './db';
 import { handlePostgreSQLResult } from './db/transformers';
 
 // ============================================
@@ -14,7 +14,7 @@ export async function deleteAllRequests() {
     console.error('Error deleting all requests:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? (error as Error).message : 'Unknown error',
     };
   }
 }

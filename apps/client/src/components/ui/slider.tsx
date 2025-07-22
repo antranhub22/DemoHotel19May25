@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 
 const Slider = React.forwardRef<

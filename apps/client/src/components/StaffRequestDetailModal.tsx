@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@shared/utils/logger';
-
 interface StaffRequestDetailModalProps {
   request: any;
   onClose: () => void;

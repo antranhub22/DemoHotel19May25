@@ -22,9 +22,7 @@ declare module '@/utils/dictionary' {
 }
 
 declare module './Reference' {
-  import { ReferenceItem } from '@/services/ReferenceService';
-
-  interface ReferenceProps {
+    interface ReferenceProps {
     references: ReferenceItem[];
   }
 
@@ -45,10 +43,7 @@ declare module './SiriCallButton' {
 
 // Khai báo type cho các component local
 declare namespace Components {
-  import { ReferenceItem } from '@/services/ReferenceService';
-import { logger } from '@shared/utils/logger';
-
-  export interface ReferenceProps {
+    export interface ReferenceProps {
     references: ReferenceItem[];
   }
 

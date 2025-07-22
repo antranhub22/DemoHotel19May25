@@ -1,43 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Wrench,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  RefreshCw,
-  Globe,
-  Key,
-  Webhook,
-  Database,
-  Cloud,
-  Activity,
-  TrendingUp,
-  AlertTriangle,
-  Settings,
-  Monitor,
-  Zap,
-  Link,
-  Clock,
-  BarChart3,
-  FileText,
-  Save,
-  Play,
-  Pause,
-  Download,
-  Upload,
-  Server,
-  Mail,
-  Phone,
-  CreditCard,
-  Shield,
-  Search,
-  Filter,
-} from 'lucide-react';
+import { Wrench, Plus, Edit, Trash2, Eye, EyeOff, CheckCircle, XCircle, RefreshCw, Globe, Key, Webhook, Database, TrendingUp, Zap, Link, BarChart3, Save, Mail, CreditCard, Shield, Search,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -70,15 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -475,7 +429,10 @@ const IntegrationModal = ({
   const [showApiKey, setShowApiKey] = useState(false);
 
   useEffect(() => {
+
     setFormData(integration);
+  
+    // no cleanup needed
   }, [integration]);
 
   const handleSave = async () => {
@@ -1024,7 +981,10 @@ export const Integrations: React.FC = () => {
   };
 
   useEffect(() => {
+
     fetchData();
+  
+    // no cleanup needed
   }, []);
 
   if (loading) {

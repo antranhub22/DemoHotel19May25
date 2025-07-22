@@ -6,7 +6,7 @@
  * ============================================================================
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 

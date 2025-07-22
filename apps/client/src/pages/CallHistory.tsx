@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { logger } from '@shared/utils/logger';
-import { CallSummary } from '@/types';
-
 const CallHistory: React.FC = () => {
   const [timeframe, setTimeframe] = useState<number>(24);
   const [roomFilter, setRoomFilter] = useState<string>('');

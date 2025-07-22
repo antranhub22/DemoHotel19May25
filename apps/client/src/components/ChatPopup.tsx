@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { X } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { t } from '@/i18n';
 
 // Interface cho trạng thái hiển thị của mỗi message

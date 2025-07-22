@@ -5,7 +5,7 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import {
   useHotelConfiguration,
@@ -72,7 +72,7 @@ class HotelErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error(`Hotel configuration error: ${error.message}`, 'Component', errorInfo);
+    logger.error(`Hotel configuration error: ${(error as Error).message}`, 'Component', errorInfo);
   }
 
   override render() {

@@ -1,6 +1,4 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
-
 export const InterfaceHeader: React.FC = () => {
   return (
     <div className="w-full flex justify-center items-center py-8" data-testid="interface1-header">

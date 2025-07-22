@@ -3,13 +3,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
 import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
 import { Interface1 } from '@/components/Interface1';
 import { VoiceLanguageSwitcher } from '@/components/interface1/VoiceLanguageSwitcher';
 // ✅ PERFORMANCE: Lazy load Interface3,4 to exclude from initial bundle
 // import { Interface3 } from '@/components/Interface3';
 // import { Interface4 } from '@/components/Interface4';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useAuth } from '@/context/AuthContext';
 import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -58,7 +56,10 @@ const VoiceAssistant: React.FC = () => {
 
   // Update selectedLanguage when language changes from context
   useEffect(() => {
+
     setSelectedLanguage(language);
+  
+    // no cleanup needed
   }, [language]); // Fixed: Dependencies are correct
 
   const { logout } = useAuth();

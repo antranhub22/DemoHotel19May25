@@ -227,23 +227,23 @@ export class ErrorFactory {
       // Check constraint violation
       return new AppError('Invalid data provided', 400, 'CONSTRAINT_ERROR');
     }
-    return new DatabaseError(error.message);
+    return new DatabaseError((error as Error).message);
   }
 
   static external(service: string, error: any): ExternalServiceError {
-    return new ExternalServiceError(service, error.message);
+    return new ExternalServiceError(service, (error as Error).message);
   }
 
   static vapi(error: any): VapiApiError {
-    return new VapiApiError(error.message);
+    return new VapiApiError((error as Error).message);
   }
 
   static openai(error: any): OpenAIError {
-    return new OpenAIError(error.message);
+    return new OpenAIError((error as Error).message);
   }
 
   static email(error: any): EmailError {
-    return new EmailError(error.message);
+    return new EmailError((error as Error).message);
   }
 
   // File upload errors
@@ -408,7 +408,7 @@ export const getErrorCode = (error: Error): string => {
 
 export const getErrorMessage = (error: Error): string => {
   if (error instanceof AppError) {
-    return error.message;
+    return (error as Error).message;
   }
   return ERROR_MESSAGES[ERROR_CODES.INTERNAL_ERROR];
 };

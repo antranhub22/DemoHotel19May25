@@ -1,6 +1,6 @@
-import { db, call } from '@shared/db';
+import { call } from '@shared/db';
 // import { transcript, request } from '@shared/db'; // Available for future use
-import { desc, eq, count, sql, and, gte } from 'drizzle-orm';
+import { desc, eq, count, and, gte } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 
 const isPostgres =

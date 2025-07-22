@@ -3,7 +3,6 @@
 // ============================================
 // Simplified version without TypeScript conflicts
 
-import { Request, Response, NextFunction } from 'express';
 import type { AuthUser, UserRole } from '../types';
 import { AUTH_ERROR_MESSAGES } from '../config';
 import { UnifiedAuthService } from '../services/UnifiedAuthService';

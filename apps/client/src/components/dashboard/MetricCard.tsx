@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Info,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-  ExternalLink,
-} from 'lucide-react';
+import { Info, ExternalLink,  } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';

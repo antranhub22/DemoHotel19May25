@@ -1,27 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Search,
-  MapPin,
-  Phone,
-  Globe,
-  Mail,
-  Clock,
-  Star,
-  Wifi,
-  Car,
-  Coffee,
-  Dumbbell,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  Edit3,
-  Save,
-  X,
-  ExternalLink,
-  Hotel,
-  DollarSign,
-} from 'lucide-react';
+import { Search, MapPin, Phone, Globe, Mail, Clock, Star, Car, CheckCircle2, AlertCircle, Loader2, RefreshCw, Edit3, Save, X, ExternalLink, Hotel, DollarSign,  } from 'lucide-react';
 import {
   Card,
   CardContent,

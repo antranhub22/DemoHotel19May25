@@ -1,5 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
-import { logger } from '@shared/utils/logger';
+import { useEffect, useState } from 'react';
 import RightPanelPopup from '../RightPanelPopup';
 import { usePopupContext } from '@/context/PopupContext';
 
@@ -18,8 +17,11 @@ export const RightPanelSection = forwardRef<
 
   // Listen for summary popups and show them in this desktop panel
   useEffect(() => {
+
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     setShowSummary(!!summaryPopup);
+  
+    // no cleanup needed
   }, [popups]);
 
   // Show panel if either manually opened OR if there's a summary to display

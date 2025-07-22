@@ -28,13 +28,11 @@ import { NotificationSystem } from './interface1/NotificationSystem';
 import { VoiceLanguageSwitcher } from './interface1/VoiceLanguageSwitcher';
 import { VoiceCommandContext } from './interface1/VoiceCommandContext';
 import { MobileVoiceControls } from './interface1/MobileVoiceControls';
-import { addMultiLanguageNotification, LANGUAGE_DISPLAY_NAMES } from './interface1/MultiLanguageNotificationHelper';
-
+import { addMultiLanguageNotification } from './interface1/MultiLanguageNotificationHelper';
 // Siri Components
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
 import { ServiceCategory } from '@/types/interface1.types';
 import { usePopupContext } from '@/context/PopupContext';
-import { useRefactoredAssistant as useAssistant, Language } from '@/context/RefactoredAssistantContext';
 import { useInterface1 } from '@/hooks/useInterface1';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
@@ -44,8 +42,11 @@ const MobileSummaryPopup = () => {
 
   // Listen for summary popups and show them in mobile center modal
   useEffect(() => {
+
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     setShowSummary(!!summaryPopup);
+  
+    // no cleanup needed
   }, [popups]);
 
   const handleClose = () => {
@@ -180,7 +181,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           metadata: {
             serviceName: service.name,
             language: language,
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? (error as Error).message : 'Unknown error'
           }
         }
       );

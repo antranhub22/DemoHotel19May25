@@ -315,7 +315,7 @@ export class DashboardApi {
     }
 
     // Parse error message
-    const errorMessage = error.message || 'An unexpected error occurred';
+    const errorMessage = (error as Error).message || 'An unexpected error occurred';
     const statusMatch = errorMessage.match(/^(\d+):\s*(.+)$/);
 
     if (statusMatch) {

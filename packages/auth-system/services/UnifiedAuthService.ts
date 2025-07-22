@@ -7,8 +7,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { eq, and } from 'drizzle-orm';
-import { db, staff, tenants } from '../../shared/db';
-
+import { staff } from '../../shared/db';
 // Import new unified types and config
 import type {
   JWTPayload,
@@ -22,16 +21,7 @@ import type {
   AuthError,
   AuthErrorCode,
 } from '../types';
-import {
-  JWT_CONFIG,
-  DEFAULT_PERMISSIONS,
-  SECURITY_CONFIG,
-  AUTH_ERROR_MESSAGES,
-  TENANT_CONFIG,
-  DEV_CONFIG,
-  authValidationSchemas,
-} from '../config';
-
+import { JWT_CONFIG, SECURITY_CONFIG, TENANT_CONFIG, DEV_CONFIG, authValidationSchemas,  } from '../config';
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================
@@ -465,7 +455,7 @@ export class UnifiedAuthService {
 
       return {
         valid: false,
-        error: error.message || 'Invalid token',
+        error: (error as Error).message || 'Invalid token',
       };
     }
   }

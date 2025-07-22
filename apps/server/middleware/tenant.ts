@@ -1,6 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
-import { TenantService, TenantError } from '@server/services/tenantService';
-import { eq } from 'drizzle-orm';
+import { TenantService } from '@server/services/tenantService';
 import { logger } from '@shared/utils/logger';
 
 // ============================================
@@ -90,7 +88,7 @@ export class TenantMiddleware {
 
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
-          error: error.message,
+          error: (error as Error).message,
           code: error.code,
         });
       }
@@ -151,7 +149,7 @@ export class TenantMiddleware {
 
       if (error instanceof TenantError) {
         return res.status(error.statusCode).json({
-          error: error.message,
+          error: (error as Error).message,
           code: error.code,
         });
       }

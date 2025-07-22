@@ -1,6 +1,10 @@
-import { useState, useEffect, RefObject, useCallback } from 'react';
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
+import { useState, useEffect, useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { Language } from '@/types/interface1.types';
 
@@ -181,7 +185,7 @@ export const useConversationState = ({
 
         // ✅ IMPROVED: Better error message handling
         const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error occurred';
+          error instanceof Error ? (error as Error).message : 'Unknown error occurred';
 
         // ✅ IMPROVED: Categorize and handle different error types
         if (errorMessage.includes('webCallUrl')) {

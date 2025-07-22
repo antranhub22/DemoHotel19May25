@@ -1,45 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Terminal,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Play,
-  Pause,
-  AlertCircle,
-  Info,
-  AlertTriangle,
-  XCircle,
-  CheckCircle,
-  Calendar,
-  Clock,
-  Server,
-  Database,
-  Globe,
-  Shield,
-  Users,
-  FileText,
-  Activity,
-  TrendingUp,
-  BarChart3,
-  Eye,
-  Settings,
-  Monitor,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Zap,
-} from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, AlertCircle, Info, AlertTriangle, XCircle, CheckCircle, Server, Database, Globe, Shield, FileText, Activity, TrendingUp, BarChart3, Eye, Monitor, HardDrive, Wifi, Zap,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle,  } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -540,7 +503,10 @@ export const SystemLogs: React.FC = () => {
   };
 
   useEffect(() => {
+
     fetchLogs();
+  
+    // no cleanup needed
   }, []);
 
   // Real-time log streaming simulation

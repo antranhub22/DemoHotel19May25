@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 /**
  * Authentication Helper - Auto-login for Development
  */

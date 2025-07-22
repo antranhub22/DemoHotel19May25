@@ -1,16 +1,4 @@
-import {
-  pgTable,
-  text,
-  integer,
-  // real, // Available for future use
-  // numeric, // Available for future use
-  timestamp,
-  serial,
-  // primaryKey, // Available for future use
-  boolean,
-  index,
-} from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+import { pgTable, text, integer, serial, index,  } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 

@@ -1,5 +1,3 @@
-import { db } from '@server/db';
-import { sql } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 
 export class AutoDatabaseFixer {
@@ -31,9 +29,9 @@ export class AutoDatabaseFixer {
       logger.debug('✅ Auto database fix completed successfully', 'Component');
       return true;
     } catch (error) {
-      logger.error('❌ Auto database fix failed:', 'Component', error instanceof Error ? error.message : String(error)
+      logger.error('❌ Auto database fix failed:', 'Component', error instanceof Error ? (error as Error).message : String(error)
       );
-      logger.error('❌ Full error stack:', 'Component', error instanceof Error ? error.stack : String(error)
+      logger.error('❌ Full error stack:', 'Component', error instanceof Error ? (error as Error).stack : String(error)
       );
 
       // Don't fail server startup, just log error
@@ -54,7 +52,7 @@ export class AutoDatabaseFixer {
         return true;
       }
     } catch (error) {
-      logger.debug('📋 Database check failed, assuming needs fix:', 'Component', error instanceof Error ? error.message : String(error)
+      logger.debug('📋 Database check failed, assuming needs fix:', 'Component', error instanceof Error ? (error as Error).message : String(error)
       );
       return true;
     }
@@ -69,7 +67,7 @@ export class AutoDatabaseFixer {
 
       logger.debug('✅ Database auto-fix completed (basic check only)', 'Component');
     } catch (error) {
-      logger.error('❌ Auto-fix step failed:', 'Component', error instanceof Error ? error.message : String(error)
+      logger.error('❌ Auto-fix step failed:', 'Component', error instanceof Error ? (error as Error).message : String(error)
       );
       throw error;
     }
@@ -88,7 +86,7 @@ export async function runAutoDbFix(): Promise<boolean> {
     await fixer.cleanup();
     return result;
   } catch (error) {
-    logger.error('❌ Database auto-fix failed completely:', 'Component', error instanceof Error ? error.message : String(error)
+    logger.error('❌ Database auto-fix failed completely:', 'Component', error instanceof Error ? (error as Error).message : String(error)
     );
     await fixer.cleanup();
     return false;

@@ -1,20 +1,6 @@
 import React from 'react';
-import {
-  TrendingUp,
-  Users,
-  Phone,
-  MessageSquare,
-  Clock,
-  Globe,
-  Bot,
-  AlertCircle,
-  CheckCircle2,
-  Settings,
-  BarChart3,
-  Activity,
-} from 'lucide-react';
+import { TrendingUp, Phone, MessageSquare, Clock, Globe, Bot, AlertCircle, CheckCircle2, Settings, BarChart3, Activity,  } from 'lucide-react';
 import { Link } from 'wouter';
-import { logger } from '@shared/utils/logger';
 import {
   Card,
   CardContent,

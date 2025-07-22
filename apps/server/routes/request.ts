@@ -1,5 +1,4 @@
 import express from 'express';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 import { RequestController } from '../controllers/requestController';
 
 const router = express.Router();

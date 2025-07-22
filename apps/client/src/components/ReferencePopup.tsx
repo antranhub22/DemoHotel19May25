@@ -1,6 +1,4 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
-
 interface ReferencePopupProps {
   isOpen: boolean;
   onClose: () => void;

@@ -1,43 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-} from 'recharts';
-import {
-  Monitor,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Database,
-  Server,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Zap,
-  Globe,
-  Shield,
-  RefreshCw,
-  Download,
-  Bell,
-  TrendingUp,
-  TrendingDown,
-  AlertCircle,
-  Info,
-  Terminal,
-  Eye,
-  Settings,
-} from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,  } from 'recharts';
+import { Monitor, Cpu, HardDrive, Wifi, Database, Server, Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, Download, Bell, AlertCircle, Info, Terminal, Eye, Settings,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {

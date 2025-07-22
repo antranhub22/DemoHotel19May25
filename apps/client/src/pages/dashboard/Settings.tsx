@@ -1,20 +1,6 @@
 import React, { useState } from 'react';
 import { logger } from '@shared/utils/logger';
-import {
-  Hotel,
-  Bell,
-  Shield,
-  Key,
-  Globe,
-  Phone,
-  Mail,
-  Save,
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  Database,
-  Bot,
-} from 'lucide-react';
+import { Hotel, Bell, Shield, Key, Save, AlertCircle, CheckCircle2, Loader2,  } from 'lucide-react';
 import {
   Card,
   CardContent,

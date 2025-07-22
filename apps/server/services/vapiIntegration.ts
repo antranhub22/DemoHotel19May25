@@ -1,10 +1,6 @@
 import fetch from 'node-fetch';
 import { z } from 'zod';
-import {
-  BasicHotelData,
-  AdvancedHotelData,
-  HotelService,
-} from './hotelResearch';
+import {  } from './hotelResearch';
 import { logger } from '@shared/utils/logger';
 import {
   KnowledgeBaseGenerator,

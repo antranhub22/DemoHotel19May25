@@ -2,13 +2,7 @@
  * Utility to extract service details from AI-generated summary
  */
 
-import {
-  extractRoomNumber as extractRoomNumberShared,
-  extractSpecialInstructions as extractSpecialInstructionsShared,
-  extractDeliveryTime as extractDeliveryTimeShared,
-  extractTotalAmount as extractTotalAmountShared,
-  removeSimilarItems,
-} from './sharedUtils';
+import { extractRoomNumber as extractRoomNumberShared, removeSimilarItems,  } from './sharedUtils';
 import { OrderSummary, OrderItem } from '@/types';
 
 

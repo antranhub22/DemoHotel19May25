@@ -1,11 +1,5 @@
-import { Request, Response } from 'express';
 import { logger } from '@shared/utils/logger';
-import {
-  checkDatabaseHealth,
-  getDatabaseMetrics,
-  // connectionManager // Available for future use
-} from '@shared/db';
-
+import { checkDatabaseHealth, getDatabaseMetrics } from '@shared/db';
 /**
  * Health Check Controller with Database Connection Pool Monitoring
  *
@@ -19,7 +13,7 @@ export class HealthController {
    * Basic health check endpoint
    * GET /api/health
    */
-  static async getHealth(req: Request, res: Response): Promise<void> {
+  static async getHealth(_req: Request, res: Response): Promise<void> {
     try {
       logger.api(
         '🏥 [HealthController] Basic health check requested',
@@ -73,7 +67,7 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Health check failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? (error as Error).message : 'Unknown error',
       });
     }
   }
@@ -82,7 +76,7 @@ export class HealthController {
    * Detailed health check with connection pool metrics
    * GET /api/health/detailed
    */
-  static async getDetailedHealth(req: Request, res: Response): Promise<void> {
+  static async getDetailedHealth(_req: Request, res: Response): Promise<void> {
     try {
       logger.api(
         '🏥 [HealthController] Detailed health check requested',
@@ -185,7 +179,7 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Detailed health check failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? (error as Error).message : 'Unknown error',
       });
     }
   }
@@ -194,7 +188,7 @@ export class HealthController {
    * Database-specific health check
    * GET /api/health/database
    */
-  static async getDatabaseHealth(req: Request, res: Response): Promise<void> {
+  static async getDatabaseHealth(_req: Request, res: Response): Promise<void> {
     try {
       logger.api(
         '🏥 [HealthController] Database health check requested',
@@ -287,7 +281,7 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Database health check failed',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? (error as Error).message : 'Unknown error',
       });
     }
   }
@@ -337,7 +331,7 @@ export class HealthController {
    * Readiness probe for Kubernetes/container orchestration
    * GET /api/health/ready
    */
-  static async getReadiness(req: Request, res: Response): Promise<void> {
+  static async getReadiness(_req: Request, res: Response): Promise<void> {
     try {
       const isDatabaseHealthy = await checkDatabaseHealth();
 
@@ -366,7 +360,7 @@ export class HealthController {
    * Liveness probe for Kubernetes/container orchestration
    * GET /api/health/live
    */
-  static async getLiveness(req: Request, res: Response): Promise<void> {
+  static async getLiveness(_req: Request, res: Response): Promise<void> {
     // Basic liveness check - if server can respond, it's alive
     res.status(200).json({
       status: 'alive',

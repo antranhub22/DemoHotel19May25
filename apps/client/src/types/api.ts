@@ -2,7 +2,6 @@
    API TYPES - API-RELATED TYPE DEFINITIONS
    ======================================== */
 
-import { logger } from '@shared/utils/logger';
 import { Language } from './core';
 
 // ========================================

@@ -3,7 +3,6 @@ import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { db } from '../../packages/shared/db';
 import { tenants, staff } from '../../packages/shared/db/schema';
-import { eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 
 const TEST_JWT_SECRET = 'test-secret-key';

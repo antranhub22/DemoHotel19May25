@@ -1,12 +1,5 @@
 
-import {
-  BasicHotelData,
-  AdvancedHotelData,
-  HotelService,
-  RoomType,
-  LocalAttraction,
-} from './hotelResearch';
-
+import { AdvancedHotelData,  } from './hotelResearch';
 // ============================================
 // Knowledge Base Generator Service
 // ============================================

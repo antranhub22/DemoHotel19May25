@@ -1,5 +1,4 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
 import { useTranscriptSocket } from '@/hooks/useTranscriptSocket';
 // Transcript styles are now imported in the main CSS file
 

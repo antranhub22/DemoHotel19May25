@@ -1,3 +1,8 @@
+/// <reference types="vite/client" />
+
+// Type declaration for import.meta
+
+
 import { jwtDecode } from 'jwt-decode';
 import { logger } from '@shared/utils/logger';
 

@@ -1,29 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  Eye,
-  Edit,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  Star,
-  Clock,
-  CreditCard,
-  FileText,
-  History,
-  Plus,
-  RefreshCw,
-  Download,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Save,
-  User,
-} from 'lucide-react';
+import { Users, UserPlus, Search, Eye, Edit, Phone, Mail, Star, Plus, RefreshCw, Save, User,  } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -54,14 +30,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -355,7 +324,10 @@ const GuestDetailsModal = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+
     setFormData(guest);
+  
+    // no cleanup needed
   }, [guest]);
 
   const handleSave = async () => {
@@ -1032,7 +1004,10 @@ export const GuestManagement: React.FC = () => {
   };
 
   useEffect(() => {
+
     fetchGuests();
+  
+    // no cleanup needed
   }, []);
 
   if (loading) {

@@ -1,7 +1,3 @@
-import { ReactNode, RefObject } from 'react';
-import { logger } from '@shared/utils/logger';
-import { Language } from './interface1.types';
-
 // === Hook Types ===
 
 export interface UseScrollBehaviorProps {

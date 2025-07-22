@@ -2,8 +2,6 @@
    UI TYPES - USER INTERFACE TYPE DEFINITIONS
    ======================================== */
 
-import { Language } from './core';
-
 // ========================================
 // COMPONENT PROPS TYPES
 // ========================================

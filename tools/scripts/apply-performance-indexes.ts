@@ -2,8 +2,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { db } from '../../packages/shared/db/index.js';
-import { sql } from 'drizzle-orm';
-
 /**
  * Apply Performance Indexes Migration
  *
@@ -61,11 +59,11 @@ async function applyPerformanceIndexes() {
         console.log(`✅ Index created successfully (${duration}ms)`);
         successCount++;
       } catch (error: any) {
-        if (error.message?.includes('already exists')) {
+        if ((error as Error).message?.includes('already exists')) {
           console.log(`⏭️  Index already exists, skipping`);
           skipCount++;
         } else {
-          console.error(`❌ Failed to create index: ${error.message}`);
+          console.error(`❌ Failed to create index: ${(error as Error).message}`);
           errorCount++;
         }
       }

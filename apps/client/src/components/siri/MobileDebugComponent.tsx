@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { isMobileDevice } from '@/utils/deviceDetection';
 

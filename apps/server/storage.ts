@@ -1,17 +1,6 @@
-import {
-  staff,
-  type Staff,
-  type InsertStaff,
-  transcript,
-  type Transcript,
-  type InsertTranscript,
-  request,
-  callSummaries,
-  type CallSummary,
-  type InsertCallSummary,
-} from '@shared/schema';
+import { staff, transcript, request, callSummaries,  } from '@shared/schema';
 import { db } from './db';
-import { eq, and, gte, sql } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 
 // Type aliases for backward compatibility

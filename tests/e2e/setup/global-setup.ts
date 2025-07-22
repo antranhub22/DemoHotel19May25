@@ -1,4 +1,4 @@
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium } from '@playwright/test';
 import { setupTestDatabase, cleanupTestDatabase } from '../../utils/setup-test-db';
 
 /**

@@ -1,7 +1,5 @@
 import { useCallback, useState, useMemo } from 'react';
 import { logger } from '@shared/utils/logger';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
   ORDER_TYPE_DEFAULT: 'Room Service',
@@ -222,7 +220,7 @@ export const useSendToFrontDeskHandler = ({
     (error: Error) => {
       logger.error('❌ [useSendToFrontDeskHandler] Failed to send request:', 'Component', error);
 
-      const errorMessage = error.message || ERROR_MESSAGES.REQUEST_FAILED;
+      const errorMessage = (error as Error).message || ERROR_MESSAGES.REQUEST_FAILED;
 
       if (onError) {
         onError(errorMessage);

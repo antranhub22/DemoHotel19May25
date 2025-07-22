@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { logger } from '@shared/utils/logger';
 import StaffLogin from './StaffLogin';
 import StaffDashboard from './StaffDashboard';
 

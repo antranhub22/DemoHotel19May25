@@ -7,7 +7,6 @@ import {
   it,
 } from '@jest/globals';
 import request from 'supertest';
-import { app } from '../../apps/server/index';
 import { db } from '@shared/db';
 import {
   tenants,

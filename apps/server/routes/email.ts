@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { sendServiceConfirmation, sendCallSummary } from '@server/gmail';
 import { sendMobileEmail, sendMobileCallSummary } from '@server/mobileMail';
 // import { z } from 'zod'; // Not used currently
@@ -11,7 +11,7 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
   res.status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
   });
 }
 

@@ -1,8 +1,5 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
-import { t, Lang } from '@/i18n';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-
+import { t } from '@/i18n';
 interface InfographicStepsProps {
   currentStep?: number;
   compact?: boolean;
