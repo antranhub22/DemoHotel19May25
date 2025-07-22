@@ -1,6 +1,6 @@
 import React from 'react';
 import { t, Lang } from '@/i18n';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { logger } from '@shared/utils/logger';
 
 interface InfographicStepsProps {

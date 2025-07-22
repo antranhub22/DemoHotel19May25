@@ -1,5 +1,5 @@
 import { useState, useEffect, RefObject, useCallback } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { logger } from '@shared/utils/logger';
 import { Language } from '@/types/interface1.types';

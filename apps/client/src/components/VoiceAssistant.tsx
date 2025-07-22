@@ -7,7 +7,7 @@ import { Interface1 } from '@/components/Interface1';
 // ✅ PERFORMANCE: Lazy load Interface3,4 to exclude from initial bundle
 // import { Interface3 } from '@/components/Interface3';
 // import { Interface4 } from '@/components/Interface4';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useAuth } from '@/context/AuthContext';
 import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';

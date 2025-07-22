@@ -3,7 +3,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { Switch, Route, Link, useLocation } from 'wouter';
 import { Toaster } from '@/components/ui/toaster';
 import VoiceAssistant from '@/components/VoiceAssistant';
-import { AssistantProvider } from '@/context/AssistantContext';
+import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 import {
   AuthProvider,
   useAuth,
@@ -507,9 +507,9 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <HotelProvider>
-          <AssistantProvider>
+          <RefactoredAssistantProvider>
             <AppContent />
-          </AssistantProvider>
+          </RefactoredAssistantProvider>
         </HotelProvider>
       </AuthProvider>
     </BrowserRouter>

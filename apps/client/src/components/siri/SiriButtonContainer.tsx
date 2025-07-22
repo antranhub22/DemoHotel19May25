@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { designSystem } from '@/styles/designSystem';
 import SiriCallButton from './SiriCallButton';
 import { Language } from '@/types/interface1.types';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import { logger } from '@shared/utils/logger';

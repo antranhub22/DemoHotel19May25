@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import {
   extractRoomNumber,
   parseSummaryToOrderDetails,
