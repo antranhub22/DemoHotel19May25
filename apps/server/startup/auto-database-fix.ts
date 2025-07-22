@@ -4,9 +4,9 @@ import { db } from '@shared/db';
 export class AutoDatabaseFixer {
   private db: any;
 
-  constructor() {
+  constructor(dbConnection = db) {
     // Use the existing database connection from the server
-    this.db = db;
+    this.db = dbConnection;
   }
 
   async autoFixDatabase(): Promise<boolean> {
@@ -102,7 +102,7 @@ export class AutoDatabaseFixer {
 }
 
 export async function runAutoDbFix(): Promise<boolean> {
-  const fixer = new AutoDatabaseFixer();
+  const fixer = new AutoDatabaseFixer(db);
   try {
     const result = await fixer.autoFixDatabase();
     await fixer.cleanup();
