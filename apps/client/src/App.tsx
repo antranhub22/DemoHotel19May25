@@ -74,7 +74,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (isLoading) {return;}
+    if (isLoading) {
+      return;
+    }
 
     if (requireAuth && !isAuthenticated) {
       setLocation(redirectTo);
@@ -342,8 +344,8 @@ function Router() {
         <Route path="/login" component={LoginPage} />
         <Route path="/unauthorized" component={UnauthorizedPage} />
 
-        {/* Unified Dashboard Routes (Phase 3) - New RBAC System */}
-        <Route path="/unified-dashboard">
+        {/* Hotel Dashboard Routes - Role-based Hotel Management System */}
+        <Route path="/hotel-dashboard">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <UnifiedDashboardHome />
@@ -351,7 +353,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/requests">
+        <Route path="/hotel-dashboard/requests">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <CustomerRequests />
@@ -359,7 +361,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/analytics">
+        <Route path="/hotel-dashboard/analytics">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <AdvancedAnalytics />
@@ -367,7 +369,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/staff-management">
+        <Route path="/hotel-dashboard/staff-management">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <StaffManagement />
@@ -375,7 +377,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/system-monitoring">
+        <Route path="/hotel-dashboard/system-monitoring">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <SystemMonitoring />
@@ -383,7 +385,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/settings">
+        <Route path="/hotel-dashboard/settings">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <UnifiedSettings />
@@ -391,7 +393,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/guest-management">
+        <Route path="/hotel-dashboard/guest-management">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <GuestManagement />
@@ -399,7 +401,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/security">
+        <Route path="/hotel-dashboard/security">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <SecuritySettings />
@@ -407,7 +409,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/logs">
+        <Route path="/hotel-dashboard/logs">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <SystemLogs />
@@ -415,7 +417,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/unified-dashboard/integrations">
+        <Route path="/hotel-dashboard/integrations">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <Integrations />
@@ -423,8 +425,8 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        {/* Legacy Dashboard Routes - To be migrated */}
-        <Route path="/dashboard">
+        {/* SaaS Provider Dashboard Routes - For SaaS platform management */}
+        <Route path="/saas-dashboard">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <DashboardHome />
@@ -432,7 +434,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/setup">
+        <Route path="/saas-dashboard/setup">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <SetupWizard />
@@ -440,7 +442,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/assistant">
+        <Route path="/saas-dashboard/assistant">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <AssistantManager />
@@ -448,7 +450,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/analytics">
+        <Route path="/saas-dashboard/analytics">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <Analytics />
@@ -456,7 +458,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/settings">
+        <Route path="/saas-dashboard/settings">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <Settings />
@@ -464,7 +466,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/billing">
+        <Route path="/saas-dashboard/billing">
           <ProtectedRoute requireAuth={true}>
             <DashboardLayout>
               <div className="p-6">
@@ -479,7 +481,7 @@ function Router() {
           </ProtectedRoute>
         </Route>
 
-        <Route path="/dashboard/team">
+        <Route path="/saas-dashboard/team">
           <ProtectedRoute requireAuth={true} requiredRole="admin">
             <DashboardLayout>
               <div className="p-6">

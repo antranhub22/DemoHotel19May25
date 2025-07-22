@@ -158,19 +158,19 @@ const QuickActions = () => (
       <CardDescription>Các tính năng thường dùng</CardDescription>
     </CardHeader>
     <CardContent className="space-y-3">
-      <Link href="/dashboard/setup">
+      <Link href="/saas-dashboard/setup">
         <Button variant="outline" className="w-full justify-start">
           <Bot className="h-4 w-4 mr-2" />
           Cấu hình AI Assistant
         </Button>
       </Link>
-      <Link href="/dashboard/analytics">
+      <Link href="/saas-dashboard/analytics">
         <Button variant="outline" className="w-full justify-start">
           <BarChart3 className="h-4 w-4 mr-2" />
           Xem báo cáo chi tiết
         </Button>
       </Link>
-      <Link href="/dashboard/settings">
+      <Link href="/saas-dashboard/settings">
         <Button variant="outline" className="w-full justify-start">
           <Settings className="h-4 w-4 mr-2" />
           Cài đặt khách sạn

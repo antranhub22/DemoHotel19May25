@@ -51,61 +51,61 @@ const TEST_USERS = [
 // All unified dashboard pages to test
 const DASHBOARD_PAGES = [
   {
-    path: '/unified-dashboard',
+    path: '/hotel-dashboard',
     name: 'Dashboard Home',
     description: 'Main dashboard with role-specific content',
     requiredRoles: ['hotel-manager', 'front-desk', 'it-manager'],
   },
   {
-    path: '/unified-dashboard/requests',
+    path: '/hotel-dashboard/requests',
     name: 'Customer Requests',
     description: 'Guest service requests management',
     requiredRoles: ['hotel-manager', 'front-desk'],
   },
   {
-    path: '/unified-dashboard/analytics',
+    path: '/hotel-dashboard/analytics',
     name: 'Advanced Analytics',
     description: 'Detailed analytics and reporting',
     requiredRoles: ['hotel-manager'],
   },
   {
-    path: '/unified-dashboard/staff-management',
+    path: '/hotel-dashboard/staff-management',
     name: 'Staff Management',
     description: 'Staff accounts and role management',
     requiredRoles: ['hotel-manager'],
   },
   {
-    path: '/unified-dashboard/guest-management',
+    path: '/hotel-dashboard/guest-management',
     name: 'Guest Management',
     description: 'Guest information and preferences',
     requiredRoles: ['hotel-manager', 'front-desk'],
   },
   {
-    path: '/unified-dashboard/system-monitoring',
+    path: '/hotel-dashboard/system-monitoring',
     name: 'System Monitoring',
     description: 'System health and performance monitoring',
     requiredRoles: ['it-manager'],
   },
   {
-    path: '/unified-dashboard/security',
+    path: '/hotel-dashboard/security',
     name: 'Security Settings',
     description: 'Security configuration and audit logs',
     requiredRoles: ['it-manager'],
   },
   {
-    path: '/unified-dashboard/logs',
+    path: '/hotel-dashboard/logs',
     name: 'System Logs',
     description: 'Application and system logs viewer',
     requiredRoles: ['it-manager'],
   },
   {
-    path: '/unified-dashboard/integrations',
+    path: '/hotel-dashboard/integrations',
     name: 'Integrations',
     description: 'Third-party service integrations',
     requiredRoles: ['it-manager'],
   },
   {
-    path: '/unified-dashboard/settings',
+    path: '/hotel-dashboard/settings',
     name: 'Settings',
     description: 'General system and hotel settings',
     requiredRoles: ['hotel-manager'],
@@ -209,7 +209,7 @@ class UnifiedDashboardTester {
           );
           let apiTestResult = 'N/A';
 
-          if (page.path !== '/unified-dashboard') {
+          if (page.path !== '/hotel-dashboard') {
             try {
               const apiResponse = await fetch(`${BASE_URL}${apiPath}`, {
                 headers: { Authorization: `Bearer ${token}` },

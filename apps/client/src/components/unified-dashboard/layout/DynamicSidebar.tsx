@@ -150,8 +150,12 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
   // Check if a path is active
   const isActivePath = (path: string) => {
-    if (path === '/dashboard' && location === '/dashboard') {return true;}
-    if (path !== '/dashboard' && location.startsWith(path)) {return true;}
+    if (path === '/hotel-dashboard' && location === '/hotel-dashboard') {
+      return true;
+    }
+    if (path !== '/hotel-dashboard' && location.startsWith(path)) {
+      return true;
+    }
     return false;
   };
 
@@ -204,7 +208,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Dashboard
+            Hotel Dashboard
           </h2>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">

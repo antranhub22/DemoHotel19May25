@@ -34,45 +34,45 @@ interface SidebarProps {
   };
 }
 
-// Base navigation items
+// Base navigation items for SaaS Provider Dashboard
 const baseNavItems: NavItem[] = [
   {
-    href: '/dashboard',
+    href: '/saas-dashboard',
     icon: Home,
     label: 'Tổng quan',
     description: 'Metrics và thống kê tổng quan',
   },
   {
-    href: '/dashboard/setup',
+    href: '/saas-dashboard/setup',
     icon: Bot,
     label: 'Thiết lập Assistant',
     description: 'Cấu hình và tùy chỉnh AI Assistant',
   },
   {
-    href: '/dashboard/analytics',
+    href: '/saas-dashboard/analytics',
     icon: BarChart,
     label: 'Phân tích',
     description: 'Báo cáo và thống kê chi tiết',
   },
   {
-    href: '/dashboard/settings',
+    href: '/saas-dashboard/settings',
     icon: Settings,
     label: 'Cài đặt',
     description: 'Quản lý thông tin khách sạn',
   },
 ];
 
-// Premium navigation items
+// Premium navigation items for SaaS Provider
 const premiumNavItems: NavItem[] = [
   {
-    href: '/dashboard/billing',
+    href: '/saas-dashboard/billing',
     icon: CreditCard,
     label: 'Thanh toán',
     description: 'Quản lý subscription và billing',
     requiresPlan: 'basic',
   },
   {
-    href: '/dashboard/team',
+    href: '/saas-dashboard/team',
     icon: Users,
     label: 'Nhóm',
     description: 'Quản lý team và permissions',
@@ -143,17 +143,31 @@ const SubscriptionBadge = ({
   status: string;
 }) => {
   const getVariant = () => {
-    if (status === 'expired') {return 'destructive';}
-    if (plan === 'trial') {return 'secondary';}
-    if (plan === 'enterprise') {return 'default';}
+    if (status === 'expired') {
+      return 'destructive';
+    }
+    if (plan === 'trial') {
+      return 'secondary';
+    }
+    if (plan === 'enterprise') {
+      return 'default';
+    }
     return 'outline';
   };
 
   const getLabel = () => {
-    if (plan === 'trial') {return 'Dùng thử';}
-    if (plan === 'basic') {return 'Cơ bản';}
-    if (plan === 'premium') {return 'Cao cấp';}
-    if (plan === 'enterprise') {return 'Doanh nghiệp';}
+    if (plan === 'trial') {
+      return 'Dùng thử';
+    }
+    if (plan === 'basic') {
+      return 'Cơ bản';
+    }
+    if (plan === 'premium') {
+      return 'Cao cấp';
+    }
+    if (plan === 'enterprise') {
+      return 'Doanh nghiệp';
+    }
     return plan;
   };
 
@@ -166,7 +180,9 @@ const SubscriptionBadge = ({
 
 // Plan requirement checker
 const canAccessFeature = (userPlan: string, requiredPlan?: string): boolean => {
-  if (!requiredPlan) {return true;}
+  if (!requiredPlan) {
+    return true;
+  }
 
   const planHierarchy = {
     trial: 0,
@@ -214,7 +230,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div>
               <h1 className="text-lg font-semibold">Talk2Go</h1>
-              <p className="text-sm text-muted-foreground">SaaS Dashboard</p>
+              <p className="text-sm text-muted-foreground">
+                SaaS Provider Dashboard
+              </p>
             </div>
           </div>
           <Button

@@ -6,10 +6,10 @@
 
 #### 1. **Tài khoản User đã được tạo:**
 
-- ✅ `admin/admin123` → Role: `super-admin` → Route: `/dashboard`
-- ✅ `manager/manager123` → Role: `hotel-manager` → Route: `/unified-dashboard`
-- ✅ `frontdesk/frontdesk123` → Role: `front-desk` → Route: `/unified-dashboard`
-- ✅ `itmanager/itmanager123` → Role: `it-manager` → Route: `/unified-dashboard`
+- ✅ `admin/admin123` → Role: `super-admin` → Route: `/saas-dashboard`
+- ✅ `manager/manager123` → Role: `hotel-manager` → Route: `/hotel-dashboard`
+- ✅ `frontdesk/frontdesk123` → Role: `front-desk` → Route: `/hotel-dashboard`
+- ✅ `itmanager/itmanager123` → Role: `it-manager` → Route: `/hotel-dashboard`
 - ✅ `staff/staff123` → Role: `front-desk` → Route: `/staff`
 
 #### 2. **Database Schema hoàn chỉnh:**
@@ -169,8 +169,8 @@ const { user, isAuthenticated, hasPermission, hasRole } = useAuth();
 
 #### 3. **URL Mapping theo yêu cầu:**
 
-- `/dashboard` → Admin full access dashboard
-- `/unified-dashboard` → Role-based UI (Manager/FrontDesk/IT)
+- `/saas-dashboard` → SaaS Provider dashboard (Admin access)
+- `/hotel-dashboard` → Role-based Hotel Management UI (Manager/FrontDesk/IT)
 - `/staff` → Basic staff interface
 
 ### 🔧 Authentication Service đã hoàn thiện:

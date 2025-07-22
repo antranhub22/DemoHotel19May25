@@ -113,7 +113,7 @@ const HotelManagerDashboard = () => (
     {/* Welcome section */}
     <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-lg">
       <h2 className="text-2xl font-bold mb-2">
-        Chào mừng đến với Dashboard Quản lý
+        Chào mừng đến với Hotel Manager Dashboard
       </h2>
       <p className="text-blue-100">
         Tổng quan hoạt động khách sạn và AI Assistant
@@ -164,7 +164,7 @@ const HotelManagerDashboard = () => (
         </CardHeader>
         <CardContent className="space-y-3">
           <PermissionGuard requiredPermission="assistant:configure">
-            <Link href="/unified-dashboard/settings">
+            <Link href="/hotel-dashboard/settings">
               <Button className="w-full justify-start" variant="outline">
                 <Bot className="mr-2 h-4 w-4" />
                 Cấu hình AI Assistant
@@ -172,7 +172,7 @@ const HotelManagerDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="analytics:view_advanced">
-            <Link href="/unified-dashboard/analytics">
+            <Link href="/hotel-dashboard/analytics">
               <Button className="w-full justify-start" variant="outline">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Xem báo cáo chi tiết
@@ -180,7 +180,7 @@ const HotelManagerDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="staff:manage">
-            <Link href="/unified-dashboard/staff-management">
+            <Link href="/hotel-dashboard/staff-management">
               <Button className="w-full justify-start" variant="outline">
                 <Users className="mr-2 h-4 w-4" />
                 Quản lý nhân viên
@@ -230,7 +230,7 @@ const FrontDeskDashboard = () => (
   <div className="space-y-6">
     {/* Welcome section */}
     <div className="bg-gradient-to-r from-green-600 to-green-800 text-white p-6 rounded-lg">
-      <h2 className="text-2xl font-bold mb-2">Dashboard Lễ tân</h2>
+      <h2 className="text-2xl font-bold mb-2">Front Desk Dashboard</h2>
       <p className="text-green-100">Quản lý yêu cầu khách hàng và cuộc gọi</p>
     </div>
 
@@ -364,7 +364,7 @@ const ITManagerDashboard = () => (
   <div className="space-y-6">
     {/* Welcome section */}
     <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-lg">
-      <h2 className="text-2xl font-bold mb-2">Dashboard IT Manager</h2>
+      <h2 className="text-2xl font-bold mb-2">IT System Dashboard</h2>
       <p className="text-purple-100">Giám sát hệ thống và quản lý kỹ thuật</p>
     </div>
 
@@ -497,7 +497,7 @@ export const UnifiedDashboardHome: React.FC = () => {
         return (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Chào mừng đến với Dashboard
+              Chào mừng đến với Hotel Dashboard
             </h2>
             <p className="text-gray-600">
               Vai trò của bạn chưa được cấu hình. Vui lòng liên hệ quản trị

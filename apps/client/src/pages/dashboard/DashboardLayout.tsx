@@ -154,17 +154,31 @@ const SubscriptionBadge = ({
   status: string;
 }) => {
   const getVariant = () => {
-    if (status === 'expired') {return 'destructive';}
-    if (plan === 'trial') {return 'secondary';}
-    if (plan === 'enterprise') {return 'default';}
+    if (status === 'expired') {
+      return 'destructive';
+    }
+    if (plan === 'trial') {
+      return 'secondary';
+    }
+    if (plan === 'enterprise') {
+      return 'default';
+    }
     return 'outline';
   };
 
   const getLabel = () => {
-    if (plan === 'trial') {return 'Dùng thử';}
-    if (plan === 'basic') {return 'Cơ bản';}
-    if (plan === 'premium') {return 'Cao cấp';}
-    if (plan === 'enterprise') {return 'Doanh nghiệp';}
+    if (plan === 'trial') {
+      return 'Dùng thử';
+    }
+    if (plan === 'basic') {
+      return 'Cơ bản';
+    }
+    if (plan === 'premium') {
+      return 'Cao cấp';
+    }
+    if (plan === 'enterprise') {
+      return 'Doanh nghiệp';
+    }
     return plan;
   };
 
@@ -258,7 +272,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </Button>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Dashboard
+                  SaaS Provider Dashboard
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Quản lý khách sạn và AI Assistant

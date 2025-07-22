@@ -60,7 +60,7 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   // Dashboard Overview - All roles can view
   {
-    href: '/dashboard',
+    href: '/hotel-dashboard',
     icon: Home,
     label: 'Tổng quan',
     description: 'Thống kê và metrics tổng quan',
@@ -69,7 +69,7 @@ const navigationItems: NavigationItem[] = [
 
   // Hotel Manager Features
   {
-    href: '/dashboard/setup',
+    href: '/saas-dashboard/setup',
     icon: Bot,
     label: 'Thiết lập Assistant',
     description: 'Cấu hình và tùy chỉnh AI Assistant',
@@ -77,7 +77,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['hotel-manager'],
   },
   {
-    href: '/unified-dashboard/analytics',
+    href: '/hotel-dashboard/analytics',
     icon: BarChart,
     label: 'Phân tích nâng cao',
     description: 'Báo cáo và thống kê chi tiết',
@@ -85,7 +85,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['hotel-manager'],
   },
   {
-    href: '/dashboard/billing',
+    href: '/saas-dashboard/billing',
     icon: CreditCard,
     label: 'Thanh toán',
     description: 'Quản lý subscription và billing',
@@ -93,7 +93,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['hotel-manager'],
   },
   {
-    href: '/unified-dashboard/staff-management',
+    href: '/hotel-dashboard/staff-management',
     icon: Users,
     label: 'Quản lý nhân viên',
     description: 'Thêm, sửa, xóa tài khoản nhân viên',
@@ -101,7 +101,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['hotel-manager'],
   },
   {
-    href: '/dashboard/settings',
+    href: '/hotel-dashboard/settings',
     icon: Settings,
     label: 'Cài đặt hệ thống',
     description: 'Cấu hình khách sạn và hệ thống',
@@ -111,7 +111,7 @@ const navigationItems: NavigationItem[] = [
 
   // Front Desk Staff Features
   {
-    href: '/unified-dashboard/requests',
+    href: '/hotel-dashboard/requests',
     icon: ClipboardList,
     label: 'Yêu cầu khách hàng',
     description: 'Xem và xử lý yêu cầu từ khách',
@@ -119,7 +119,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['front-desk'],
   },
   {
-    href: '/dashboard/guest-management',
+    href: '/hotel-dashboard/guest-management',
     icon: UserCog,
     label: 'Quản lý khách hàng',
     description: 'Thông tin và lịch sử khách hàng',
@@ -127,7 +127,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['front-desk'],
   },
   {
-    href: '/dashboard/basic-analytics',
+    href: '/hotel-dashboard/basic-analytics',
     icon: BarChart3,
     label: 'Thống kê cơ bản',
     description: 'Báo cáo hoạt động hàng ngày',
@@ -135,7 +135,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['front-desk'],
   },
   {
-    href: '/dashboard/calls',
+    href: '/hotel-dashboard/calls',
     icon: MessageSquare,
     label: 'Lịch sử cuộc gọi',
     description: 'Xem lịch sử cuộc gọi và transcript',
@@ -145,7 +145,7 @@ const navigationItems: NavigationItem[] = [
 
   // IT Manager Features
   {
-    href: '/unified-dashboard/system-monitoring',
+    href: '/hotel-dashboard/system-monitoring',
     icon: Monitor,
     label: 'Giám sát hệ thống',
     description: 'Theo dõi hiệu suất và sức khỏe hệ thống',
@@ -153,7 +153,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['it-manager'],
   },
   {
-    href: '/dashboard/integrations',
+    href: '/hotel-dashboard/integrations',
     icon: Wrench,
     label: 'Tích hợp',
     description: 'Quản lý API và tích hợp bên thứ 3',
@@ -161,7 +161,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['it-manager'],
   },
   {
-    href: '/dashboard/logs',
+    href: '/hotel-dashboard/logs',
     icon: Database,
     label: 'Nhật ký hệ thống',
     description: 'Xem logs và debug issues',
@@ -169,7 +169,7 @@ const navigationItems: NavigationItem[] = [
     roleSpecific: ['it-manager'],
   },
   {
-    href: '/dashboard/security',
+    href: '/hotel-dashboard/security',
     icon: Shield,
     label: 'Bảo mật',
     description: 'Cấu hình và giám sát bảo mật',
@@ -341,10 +341,14 @@ const DynamicSidebar = ({
   // Filter navigation items based on role and permissions
   const availableNavItems = navigationItems.filter(item => {
     // Check if user has permission
-    if (!hasPermission(item.permission)) {return false;}
+    if (!hasPermission(item.permission)) {
+      return false;
+    }
 
     // Check if item is role-specific
-    if (item.roleSpecific && !item.roleSpecific.includes(role)) {return false;}
+    if (item.roleSpecific && !item.roleSpecific.includes(role)) {
+      return false;
+    }
 
     return true;
   });
@@ -469,13 +473,13 @@ export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({
   const getPageTitle = () => {
     switch (role) {
       case 'hotel-manager':
-        return 'Dashboard Quản lý';
+        return 'Hotel Manager Dashboard';
       case 'front-desk':
-        return 'Dashboard Lễ tân';
+        return 'Front Desk Dashboard';
       case 'it-manager':
-        return 'Dashboard IT';
+        return 'IT System Dashboard';
       default:
-        return 'Dashboard';
+        return 'Hotel Dashboard';
     }
   };
 
