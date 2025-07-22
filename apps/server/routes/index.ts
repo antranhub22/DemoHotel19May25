@@ -1,6 +1,5 @@
 import express from 'express';
 import apiRoutes from './api';
-import ordersRoutes from './orders';
 import callsRoutes from './calls';
 import analyticsRoutes from './analytics';
 import dashboardRoutes from './dashboard';
@@ -16,7 +15,7 @@ const router = express.Router();
 
 // Mount all route modules
 router.use('/api', apiRoutes);
-router.use('/api', ordersRoutes);
+// Note: orders.ts deleted - consolidated into request.ts
 router.use('/api', callsRoutes);
 router.use('/api', analyticsRoutes);
 router.use('/api', dashboardRoutes);
