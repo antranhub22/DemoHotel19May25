@@ -107,7 +107,8 @@ const apiLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: req => {
+  // eslint-disable-next-line no-unused-vars
+  skip: (_req, _res) => {
     // Skip rate limiting in development
     return process.env.NODE_ENV === 'development';
   },
@@ -123,7 +124,8 @@ const dashboardLimiter = rateLimit({
   message: 'Too many dashboard requests, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: req => {
+  // eslint-disable-next-line no-unused-vars
+  skip: (_req, _res) => {
     // Skip rate limiting in development
     return process.env.NODE_ENV === 'development';
   },
@@ -180,7 +182,10 @@ app.use((req, res, next) => {
     logger.debug('🔄 Running auto-migration...', 'Component');
     await autoMigrateOnDeploy();
   } else {
-    logger.debug('⚠️ Auto-migration disabled by environment variable', 'Component');
+    logger.debug(
+      '⚠️ Auto-migration disabled by environment variable',
+      'Component'
+    );
   }
 
   // Seed default users (safe for production)
@@ -188,7 +193,10 @@ app.use((req, res, next) => {
     logger.debug('👥 Seeding default users...', 'Component');
     await seedProductionUsers();
   } else {
-    logger.debug('⚠️ User seeding disabled by environment variable', 'Component');
+    logger.debug(
+      '⚠️ User seeding disabled by environment variable',
+      'Component'
+    );
   }
 
   // Auto-fix database on startup (can be disabled with AUTO_DB_FIX=false)
@@ -196,9 +204,13 @@ app.use((req, res, next) => {
     logger.debug('🔧 Running auto database fix...', 'Component');
     await runAutoDbFix();
   } else {
-    logger.debug('⚠️ Auto database fix disabled by environment variable', 'Component');
+    logger.debug(
+      '⚠️ Auto database fix disabled by environment variable',
+      'Component'
+    );
   }
 
+  // eslint-disable-next-line no-unused-vars
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || 'Internal Server Error';
@@ -220,3 +232,6 @@ app.use((req, res, next) => {
     logger.debug('Server is running on port ${port}', 'Component');
   });
 })();
+
+// Export app for testing
+export { app };

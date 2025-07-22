@@ -15,20 +15,17 @@ export default [
       'node_modules/**',
       'dist/**',
       'build/**',
-      '.vite/**',
       'coverage/**',
-      '*.min.js',
-      'documentation/**',
-      'tools/**',
-      'tests/**',
-      '**/*.test.*',
-      '**/*.spec.*',
-      '**/ws_test_client.*',
-      '**/debug-*.js',
-      '**/debug-*.ts',
-      '**/*.cjs', // Exclude CommonJS files
-      '**/*.d.ts', // Skip all TypeScript declaration files
-      'packages/types/**', // Skip types package with parsing issues
+      'public/**',
+      'test-results/**', // Ignore generated test report files
+      '*.config.js',
+      '*.config.ts',
+      '.next/**',
+      '.vscode/**',
+      '.husky/**',
+      '**/*.d.ts',
+      'scripts/**/*.cjs',
+      'scripts/**/*.mjs',
     ],
   },
 

@@ -1,6 +1,13 @@
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
 
+// Add Node.js polyfills for Jest environment
+if (typeof globalThis.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  globalThis.TextEncoder = TextEncoder;
+  globalThis.TextDecoder = TextDecoder;
+}
+
 // Configure React Testing Library
 configure({
   testIdAttribute: 'data-testid',
@@ -22,24 +29,26 @@ const mockSpeechSynthesis = {
   dispatchEvent: jest.fn(),
 };
 
-const mockSpeechSynthesisUtterance = jest.fn().mockImplementation((text: string) => ({
-  text,
-  lang: 'en-US',
-  voice: null,
-  volume: 1,
-  rate: 1,
-  pitch: 1,
-  onstart: null,
-  onend: null,
-  onerror: null,
-  onpause: null,
-  onresume: null,
-  onmark: null,
-  onboundary: null,
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  dispatchEvent: jest.fn(),
-}));
+const mockSpeechSynthesisUtterance = jest
+  .fn()
+  .mockImplementation((text: string) => ({
+    text,
+    lang: 'en-US',
+    voice: null,
+    volume: 1,
+    rate: 1,
+    pitch: 1,
+    onstart: null,
+    onend: null,
+    onerror: null,
+    onpause: null,
+    onresume: null,
+    onmark: null,
+    onboundary: null,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  }));
 
 // Set up global Speech API mocks
 Object.defineProperty(global, 'speechSynthesis', {
@@ -124,7 +133,12 @@ Object.defineProperty(window, 'addNotification', {
   writable: true,
 });
 
+// Environment variable mocks for testing
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = 'test-secret-key';
+process.env.DATABASE_URL = 'sqlite://test.db';
+
 // Reset mocks after each test
 afterEach(() => {
   jest.clearAllMocks();
-}); 
+});
