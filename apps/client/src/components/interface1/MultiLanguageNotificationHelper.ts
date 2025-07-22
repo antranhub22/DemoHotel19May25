@@ -225,8 +225,8 @@ export function createMultiLanguageNotification(
   
   return { type: options.type || 'info',
     title,
-    message
-    duration: options?.duration || 3000,
+    message,
+    duration: (options?.duration || 3000),
     metadata: {
       template,
       language: currentLanguage,

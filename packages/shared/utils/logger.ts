@@ -50,7 +50,7 @@ class Logger {
     const logEntry: LogEntry = {
       timestamp,
       level: levelStr,
-      message
+      message,
       context,
       data };
 

@@ -325,7 +325,7 @@ export class DashboardApi {
       try {
         const errorData = JSON.parse(message);
         return {
-          error: errorData.error || message
+          error: errorData.error || message,
           details: errorData?.details,
           feature: errorData.feature,
           currentPlan: errorData.currentPlan,
@@ -334,7 +334,7 @@ export class DashboardApi {
           assistantRequired: errorData.assistantRequired,
           requiresResearch: errorData.requiresResearch };
       } catch { return {
-          error: message
+          error: message,
           details: { statusCode },
         };
       }
