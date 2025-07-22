@@ -1,8 +1,4 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Language, ServiceCategory } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Mic, 
   Volume2, 
@@ -14,6 +10,10 @@ import {
   Headphones
 } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
+import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
+import { Language, ServiceCategory } from '@/types/interface1.types';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceCategory | null;
@@ -52,7 +52,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
 
   // Haptic feedback for mobile interactions
   const triggerHaptic = useCallback((type: 'light' | 'medium' | 'heavy' = 'light') => {
-    if (!isMobile || !voiceSettings.haptics) return;
+    if (!isMobile || !voiceSettings.haptics) {return;}
     
     try {
       // Use Vibration API for haptic feedback

@@ -9,10 +9,9 @@ import {
   FormProvider,
   useFormContext,
 } from 'react-hook-form';
-
+import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { logger } from '@shared/utils/logger';
 
 const Form = FormProvider;
 

@@ -5,12 +5,12 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import {
   useHotelConfiguration,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {

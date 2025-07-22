@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
 import {
+  Crown,
+  Lock,
+  Star,
+  Shield,
+  Mic,
+  BarChart3,
+  Database,
+  Palette,
+  CheckCircle2,
+  AlertTriangle,
+  Sparkles,
+} from 'lucide-react';
+import {
   Card,
   CardContent,
   CardDescription,
@@ -18,19 +31,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
-import {
-  Crown,
-  Lock,
-  Star,
-  Shield,
-  Mic,
-  BarChart3,
-  Database,
-  Palette,
-  CheckCircle2,
-  AlertTriangle,
-  Sparkles,
-} from 'lucide-react';
 
 // Types
 interface Feature {
@@ -195,11 +195,11 @@ const FeatureLimitations = ({
   feature: Feature;
   currentPlan: string;
 }) => {
-  if (!feature.limitations) return null;
+  if (!feature.limitations) {return null;}
 
   const limitation =
     feature.limitations[currentPlan as keyof typeof feature.limitations];
-  if (!limitation) return null;
+  if (!limitation) {return null;}
 
   return (
     <div className="text-xs text-muted-foreground mt-1 p-2 bg-yellow-50 rounded border border-yellow-200">
@@ -292,7 +292,7 @@ const UpgradePrompt = ({
   onClose: () => void;
 }) => {
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === targetPlan);
-  if (!plan) return null;
+  if (!plan) {return null;}
 
   return (
     <DialogContent className="max-w-md">
@@ -349,7 +349,7 @@ const CurrentPlanCard = ({
   onUpgrade: (plan: string) => void;
 }) => {
   const plan = SUBSCRIPTION_PLANS.find(p => p.id === currentPlan);
-  if (!plan) return null;
+  if (!plan) {return null;}
 
   const nextPlan = SUBSCRIPTION_PLANS.find(
     p =>

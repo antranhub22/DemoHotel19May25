@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, RefObject } from 'react';
-import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { logger } from '@shared/utils/logger';
+import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 
 interface UseScrollBehaviorProps {
   isActive: boolean;

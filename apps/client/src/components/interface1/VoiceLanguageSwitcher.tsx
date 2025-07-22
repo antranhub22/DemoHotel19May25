@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { ChevronDown, Mic, Volume2, CheckCircle, Smartphone } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import { Language } from '@/types/interface1.types';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-import { ChevronDown, Mic, Volume2, CheckCircle, Smartphone } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { logger } from '@shared/utils/logger';
 
 interface LanguageOption {
   code: Language;
@@ -241,7 +241,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
     window.speechSynthesis.cancel();
 
     const option = LANGUAGE_OPTIONS.find(opt => opt.code === langCode);
-    if (!option) return;
+    if (!option) {return;}
 
     setPreviewingLanguage(langCode);
 

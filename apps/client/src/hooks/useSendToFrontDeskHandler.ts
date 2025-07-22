@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { logger } from '@shared/utils/logger';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
@@ -69,7 +69,7 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ MEMOIZED: Generated order summary from context data
   const generatedOrderSummary = useMemo(() => {
-    if (orderSummary) return orderSummary;
+    if (orderSummary) {return orderSummary;}
 
     if (!callSummary && (!serviceRequests || serviceRequests.length === 0)) {
       return null;

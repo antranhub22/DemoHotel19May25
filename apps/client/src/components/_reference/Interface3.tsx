@@ -9,6 +9,7 @@
 import React from 'react';
 // import { useEffect, useState } from 'react'; // Unused - commented for reference
 // import { useAssistant } from '@/context/_reference/AssistantContext'; // Unused - commented for reference
+import { logger } from '@shared/utils/logger';
 import { ServiceRequest } from '@/types';
 // import hotelImage from '@/assets/hotel-exterior.jpeg'; // Unused - commented for reference
 // import InfographicSteps from '../InfographicSteps'; // Unused - commented for reference
@@ -20,7 +21,6 @@ import { ServiceRequest } from '@/types';
 // import { Button } from '../ui/button'; // Unused - commented for reference
 // import { AlertCircle } from 'lucide-react'; // Unused - commented for reference
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { logger } from '@shared/utils/logger';
 
 interface Interface3Props {
   isActive: boolean;

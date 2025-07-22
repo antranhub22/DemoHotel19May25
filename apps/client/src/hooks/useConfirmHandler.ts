@@ -1,7 +1,7 @@
 import React, { useCallback, createElement, useRef } from 'react';
+import { logger } from '@shared/utils/logger';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { usePopup } from '@/components/popup-system';
-import { logger } from '@shared/utils/logger';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
@@ -219,7 +219,7 @@ export const useConfirmHandler = ({
 
         // ✅ IMPROVED: Show success message immediately instead of complex polling
         setTimeout(() => {
-          if (!isMountedRef.current) return;
+          if (!isMountedRef.current) {return;}
 
           try {
             const completionElement = createElement(

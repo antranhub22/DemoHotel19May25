@@ -74,7 +74,7 @@ const StaffMessagePopup: React.FC<StaffMessagePopupProps> = ({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
-              if (e.key === 'Enter') handleSend();
+              if (e.key === 'Enter') {handleSend();}
             }}
             disabled={loading}
           />

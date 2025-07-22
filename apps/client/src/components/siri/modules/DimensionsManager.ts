@@ -1,6 +1,6 @@
+import { logger } from '@shared/utils/logger';
 import { DebugManager } from './DebugManager';
 import { EmergencyStopManager } from './EmergencyStopManager';
-import { logger } from '@shared/utils/logger';
 
 export interface DimensionsState {
   width: number;

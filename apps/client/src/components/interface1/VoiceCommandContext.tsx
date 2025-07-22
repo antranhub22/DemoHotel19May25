@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Language, ServiceCategory } from '@/types/interface1.types';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Volume2, VolumeX, Settings, Mic, MicOff, Eye, EyeOff, X } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
+import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
+import { Language, ServiceCategory } from '@/types/interface1.types';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VoicePrompt {
   service: string;

@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
 import {
+  Hotel,
+  Bot,
+  Bell,
+  Shield,
+  Save,
+  RefreshCw,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
+import {
   Card,
   CardContent,
   CardDescription,
@@ -13,16 +23,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import {
-  Hotel,
-  Bot,
-  Bell,
-  Shield,
-  Save,
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-} from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const [loading, setLoading] = useState(false);

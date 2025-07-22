@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import StaffRequestDetailModal from '@/components/StaffRequestDetailModal';
-import StaffMessagePopup from '@/components/StaffMessagePopup';
 import { useNavigate } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
+import StaffRequestDetailModal from '@/components/StaffRequestDetailModal';
+import StaffMessagePopup from '@/components/StaffMessagePopup';
 
 const statusOptions = [
   'Tất cả',
@@ -54,12 +54,12 @@ const StaffDashboard: React.FC = () => {
   // Hàm lấy danh sách requests
   const fetchRequests = useCallback(async () => {
     const token = getToken();
-    if (!token) return navigate('/staff');
+    if (!token) {return navigate('/staff');}
     try {
       const res = await fetch('/api/request', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) return navigate('/staff');
+      if (!res.ok) {return navigate('/staff');}
       const data = await res.json();
       logger.debug('Fetched requests data:', 'Component', data); // Debug log
       setRequests(data);
@@ -83,7 +83,7 @@ const StaffDashboard: React.FC = () => {
   // Cập nhật trạng thái request
   const handleStatusChange = async (status: string, reqId: number) => {
     const token = getToken();
-    if (!token) return navigate('/staff');
+    if (!token) {return navigate('/staff');}
     try {
       await fetch(`/api/staff/requests/${reqId}/status`, {
         method: 'PATCH',
@@ -99,7 +99,7 @@ const StaffDashboard: React.FC = () => {
         reqs.map(r => (r.id === reqId ? { ...r, status } : r))
       );
       if (selectedRequest && selectedRequest.id === reqId)
-        setSelectedRequest({ ...selectedRequest, status });
+        {setSelectedRequest({ ...selectedRequest, status });}
     } catch (err) {
       logger.error('Failed to update status:', 'Component', err);
     }
@@ -107,9 +107,9 @@ const StaffDashboard: React.FC = () => {
   // Mở popup nhắn tin
   const handleOpenMessage = async () => {
     setShowMessagePopup(true);
-    if (!selectedRequest) return;
+    if (!selectedRequest) {return;}
     const token = getToken();
-    if (!token) return navigate('/staff');
+    if (!token) {return navigate('/staff');}
     try {
       const res = await fetch(
         `/api/staff/requests/${selectedRequest.id}/messages`,
@@ -130,7 +130,7 @@ const StaffDashboard: React.FC = () => {
   const handleSendMessage = async (msg: string) => {
     setLoadingMsg(true);
     const token = getToken();
-    if (!token) return navigate('/staff');
+    if (!token) {return navigate('/staff');}
     try {
       await fetch(`/api/staff/requests/${selectedRequest.id}/message`, {
         method: 'POST',
@@ -222,13 +222,13 @@ const StaffDashboard: React.FC = () => {
       if (startDate) {
         const filterStartDate = new Date(startDate);
         filterStartDate.setHours(0, 0, 0, 0);
-        if (requestDate < filterStartDate) return false;
+        if (requestDate < filterStartDate) {return false;}
       }
 
       if (endDate) {
         const filterEndDate = new Date(endDate);
         filterEndDate.setHours(23, 59, 59, 999);
-        if (requestDate > filterEndDate) return false;
+        if (requestDate > filterEndDate) {return false;}
       }
     }
 

@@ -17,7 +17,7 @@ export default [
       'build/**',
       'coverage/**',
       'public/**',
-      'test-results/**', // Ignore generated test report files
+      'test-results/**',
       '*.config.js',
       '*.config.ts',
       '.next/**',
@@ -26,10 +26,13 @@ export default [
       '**/*.d.ts',
       'scripts/**/*.cjs',
       'scripts/**/*.mjs',
+      'apps/server/routes.ts', // Legacy file
+      'tests/**/*', // Test files have different rules
+      'tools/**/*', // Tool files can be more relaxed
     ],
   },
 
-  // Browser Environment (Client-side)
+  // Browser Environment (Client-side) - OPTIMIZED
   {
     files: [
       'apps/client/**/*.{js,jsx,ts,tsx}',
@@ -42,12 +45,9 @@ export default [
       '.vite/**',
       'coverage/**',
       '*.min.js',
-      '*.d.ts', // Skip TypeScript declaration files
+      '*.d.ts',
       'documentation/**',
-      'tools/**',
-      'scripts/**',
       '*.config.*',
-      'tests/**',
       '**/*.test.*',
       '**/*.spec.*',
       '**/ws_test_client.*',
@@ -101,12 +101,10 @@ export default [
         Response: 'readonly',
         Request: 'readonly',
         URL: 'readonly',
-
         // DOM APIs
         DOMRect: 'readonly',
         getComputedStyle: 'readonly',
-
-        // Additional HTML Elements (for forms and tables)
+        // Additional HTML Elements
         HTMLTextAreaElement: 'readonly',
         HTMLFormElement: 'readonly',
         HTMLSpanElement: 'readonly',
@@ -123,18 +121,14 @@ export default [
         HTMLTableSectionElement: 'readonly',
         HTMLTableCaptionElement: 'readonly',
         HTMLCanvasElement: 'readonly',
-
         // Canvas APIs
         CanvasRenderingContext2D: 'readonly',
-
         // Browser APIs
         AbortController: 'readonly',
         AbortSignal: 'readonly',
-
         // React and JSX globals
         React: 'readonly',
         JSX: 'readonly',
-
         // Node.js types in browser context
         NodeJS: 'readonly',
       },
@@ -147,10 +141,10 @@ export default [
       import: importPlugin,
     },
     rules: {
-      // Console statements: warn only in browser
+      // Console statements: warn only in browser (stricter)
       'no-console': 'warn',
 
-      // TypeScript Rules
+      // TypeScript Rules (Enhanced) - FIXED
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -159,27 +153,36 @@ export default [
           ignoreRestSiblings: true,
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'off', // Allow any in development
-      '@typescript-eslint/no-empty-function': 'off', // Allow empty functions in development
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-empty-function': 'warn',
 
-      // React Rules
+      // React Rules (Enhanced)
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'off', // Disable for development - too noisy
-      'react-refresh/only-export-components': 'off', // Disable for development - too noisy
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-refresh/only-export-components': 'warn',
 
-      // Import Rules
+      // Import Rules (Enhanced)
       'import/no-unresolved': 'off',
-      'import/no-cycle': 'off',
+      'import/no-cycle': 'warn',
+      'import/no-unused-modules': 'off',
+      'import/order': ['warn', {
+        'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'never',
+      }],
 
-      // General Rules
-      'no-unused-vars': 'off',
+      // General Rules (Enhanced)
+      'no-unused-vars': 'off', // Use TypeScript version instead
       'no-undef': 'error',
       'prefer-const': 'warn',
       'no-var': 'error',
-      'no-useless-escape': 'off', // Allow escaped characters in regex
-      'no-unreachable': 'off', // Allow unreachable code for debugging
+      'no-useless-escape': 'warn',
+      'no-unreachable': 'warn',
+      'no-debugger': 'warn',
+      'no-duplicate-imports': 'warn',
+      'eqeqeq': ['warn', 'always'],
+      'curly': ['warn', 'all'],
     },
     settings: {
       react: {
@@ -188,13 +191,16 @@ export default [
     },
   },
 
-  // Node.js Environment (Server-side)
+  // Node.js Environment (Server-side) - OPTIMIZED
   {
     files: [
       'apps/server/**/*.{js,jsx,ts,tsx}',
       'packages/auth-system/**/*.{js,jsx,ts,tsx}',
       'packages/config/**/*.{js,jsx,ts,tsx}',
       'packages/shared/**/*.{js,jsx,ts,tsx}',
+    ],
+    ignores: [
+      'apps/server/routes.ts', // Legacy file
     ],
     languageOptions: {
       parser: typescriptParser,
@@ -227,6 +233,31 @@ export default [
     rules: {
       // Server-specific rules: allow console statements
       'no-console': 'off',
+
+      // Enhanced TypeScript rules for server - FIXED
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^(_|logger|debug)',
+          ignoreRestSiblings: true,
+        },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-empty-function': 'warn',
+
+      // Import rules for server
+      'import/order': ['warn', {
+        'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        'newlines-between': 'never',
+      }],
+
+      // General server rules
+      'prefer-const': 'warn',
+      'no-var': 'error',
+      'no-debugger': 'warn',
+      'eqeqeq': ['warn', 'always'],
+      'curly': ['warn', 'all'],
     },
   },
 ];

@@ -22,8 +22,8 @@ export function normalizeText(text: string): string {
  * Higher values mean strings are more similar
  */
 export function stringSimilarity(str1: string, str2: string): number {
-  if (str1 === str2) return 1.0;
-  if (str1.length === 0 || str2.length === 0) return 0.0;
+  if (str1 === str2) {return 1.0;}
+  if (str1.length === 0 || str2.length === 0) {return 0.0;}
 
   // Get longest common substring
   const longer = str1.length > str2.length ? str1 : str2;
@@ -310,6 +310,6 @@ export function capitalizeWords(text: string): string {
  * Truncate text to specified length
  */
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
+  if (text.length <= maxLength) {return text;}
   return `${text.substring(0, maxLength).trim()}...`;
 }

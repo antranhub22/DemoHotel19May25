@@ -1,11 +1,11 @@
 import React from 'react';
+import { logger } from '@shared/utils/logger';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import {
   extractRoomNumber,
   parseSummaryToOrderDetails,
 } from '@/lib/summaryParser';
 // Remove i18n for now - use static text
-import { logger } from '@shared/utils/logger';
 
 // Main Summary Popup Component - Uses dual summary system
 export const SummaryPopupContent: React.FC = () => {

@@ -1,8 +1,4 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import {
   TrendingUp,
   TrendingDown,
@@ -13,6 +9,10 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 // Types
 interface MetricCardProps {
@@ -48,7 +48,7 @@ const formatValue = (
   prefix?: string,
   suffix?: string
 ): string => {
-  if (typeof value === 'string') return value;
+  if (typeof value === 'string') {return value;}
 
   switch (format) {
     case 'currency':
@@ -75,7 +75,7 @@ const formatValue = (
 
 // Get trend icon and color
 const getTrendInfo = (change?: MetricCardProps['change']) => {
-  if (!change) return null;
+  if (!change) {return null;}
 
   const { type } = change;
 

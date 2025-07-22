@@ -1,6 +1,9 @@
 import React, { Suspense, useState, useEffect } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary';
 import { Switch, Route, Link, useLocation } from 'wouter';
+import { BrowserRouter } from 'react-router-dom';
+import { logger } from '@shared/utils/logger';
+import StaffDashboard from './pages/StaffDashboard';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import VoiceAssistant from '@/components/VoiceAssistant';
 import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
@@ -13,8 +16,6 @@ import { HotelProvider } from '@/context/HotelContext';
 import NotFound from '@/pages/not-found';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import StaffPage from '@/pages/staff';
-import { BrowserRouter } from 'react-router-dom';
-import StaffDashboard from './pages/StaffDashboard';
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
   () => import('./pages/AnalyticsDashboard')
@@ -51,7 +52,6 @@ import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
 import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
 import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
 import { Integrations } from '@/pages/unified-dashboard/Integrations';
-import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Protected Route Component
@@ -74,7 +74,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) {return;}
 
     if (requireAuth && !isAuthenticated) {
       setLocation(redirectTo);

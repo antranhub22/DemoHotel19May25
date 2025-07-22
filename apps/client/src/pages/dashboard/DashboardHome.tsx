@@ -1,15 +1,5 @@
 import React from 'react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import {
   TrendingUp,
   Users,
   Phone,
@@ -25,6 +15,16 @@ import {
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { logger } from '@shared/utils/logger';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 
 // Mock data - will be replaced with actual API calls
 const mockMetrics = {

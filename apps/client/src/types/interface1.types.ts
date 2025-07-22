@@ -1,6 +1,5 @@
 
 import { IconType } from 'react-icons';
-
 import {
   FaBed,
   FaUtensils,

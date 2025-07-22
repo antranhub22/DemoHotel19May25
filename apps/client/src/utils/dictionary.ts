@@ -1,5 +1,5 @@
-import dictionaryData from './dictionary/dictionary.json';
 import { logger } from '@shared/utils/logger';
+import dictionaryData from './dictionary/dictionary.json';
 
 export interface DictionaryEntry {
   keyword: string;

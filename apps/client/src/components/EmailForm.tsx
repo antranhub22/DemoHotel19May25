@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { logger } from '@shared/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +14,6 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { logger } from '@shared/utils/logger';
 
 interface EmailFormProps {
   summaryContent: string;

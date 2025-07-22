@@ -43,7 +43,7 @@ const CallDetails: React.FC = () => {
 
   // Format date for display
   const formatDate = (dateObj: Date | string | undefined) => {
-    if (!dateObj) return 'Unknown';
+    if (!dateObj) {return 'Unknown';}
 
     const date = dateObj instanceof Date ? dateObj : new Date(dateObj);
     return date.toLocaleString('en-US', {
@@ -58,13 +58,13 @@ const CallDetails: React.FC = () => {
 
   // Format duration for display
   const formatDuration = (duration: string | undefined) => {
-    if (!duration) return '00:00';
+    if (!duration) {return '00:00';}
     return duration;
   };
 
   // Handle copy to clipboard
   const handleCopyTranscript = async () => {
-    if (!transcripts?.length) return;
+    if (!transcripts?.length) {return;}
 
     try {
       setCopying(true);

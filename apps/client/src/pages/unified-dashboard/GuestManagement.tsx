@@ -1,4 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  UserPlus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Phone,
+  Mail,
+  Calendar,
+  MapPin,
+  Star,
+  Clock,
+  CreditCard,
+  FileText,
+  History,
+  Plus,
+  RefreshCw,
+  Download,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Save,
+  User,
+} from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
   Card,
@@ -36,33 +62,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  Eye,
-  Edit,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  Star,
-  Clock,
-  CreditCard,
-  FileText,
-  History,
-  Plus,
-  RefreshCw,
-  Download,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Save,
-  User,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
 
 // Types
 interface Guest {
@@ -359,7 +359,7 @@ const GuestDetailsModal = ({
   }, [guest]);
 
   const handleSave = async () => {
-    if (!formData) return;
+    if (!formData) {return;}
 
     setLoading(true);
     try {
@@ -374,7 +374,7 @@ const GuestDetailsModal = ({
     }
   };
 
-  if (!guest || !formData) return null;
+  if (!guest || !formData) {return null;}
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

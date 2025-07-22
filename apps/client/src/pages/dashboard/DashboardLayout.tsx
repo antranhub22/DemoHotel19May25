@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { cn } from '@/lib/utils';
 import {
   Home,
   Bot,
@@ -15,6 +14,8 @@ import {
   HelpCircle,
   Building2,
 } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -28,7 +29,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { useAuth } from '@/context/AuthContext';
-import { logger } from '@shared/utils/logger';
 
 // Types
 interface TenantData {
@@ -154,17 +154,17 @@ const SubscriptionBadge = ({
   status: string;
 }) => {
   const getVariant = () => {
-    if (status === 'expired') return 'destructive';
-    if (plan === 'trial') return 'secondary';
-    if (plan === 'enterprise') return 'default';
+    if (status === 'expired') {return 'destructive';}
+    if (plan === 'trial') {return 'secondary';}
+    if (plan === 'enterprise') {return 'default';}
     return 'outline';
   };
 
   const getLabel = () => {
-    if (plan === 'trial') return 'Dùng thử';
-    if (plan === 'basic') return 'Cơ bản';
-    if (plan === 'premium') return 'Cao cấp';
-    if (plan === 'enterprise') return 'Doanh nghiệp';
+    if (plan === 'trial') {return 'Dùng thử';}
+    if (plan === 'basic') {return 'Cơ bản';}
+    if (plan === 'premium') {return 'Cao cấp';}
+    if (plan === 'enterprise') {return 'Doanh nghiệp';}
     return plan;
   };
 

@@ -2,8 +2,6 @@
  * Utility to extract service details from AI-generated summary
  */
 
-import { OrderSummary, OrderItem } from '@/types';
-
 import {
   extractRoomNumber as extractRoomNumberShared,
   extractSpecialInstructions as extractSpecialInstructionsShared,
@@ -11,6 +9,8 @@ import {
   extractTotalAmount as extractTotalAmountShared,
   removeSimilarItems,
 } from './sharedUtils';
+import { OrderSummary, OrderItem } from '@/types';
+
 
 /**
  * Defines regex patterns to extract service information from summary text
@@ -146,20 +146,20 @@ function determineOrderTypes(summary: string): string[] {
   const serviceTypes: string[] = [];
 
   // Check for each service type pattern and add to the array if found
-  if (PATTERNS.food.test(summary)) serviceTypes.push('food');
-  if (PATTERNS.housekeeping.test(summary)) serviceTypes.push('housekeeping');
+  if (PATTERNS.food.test(summary)) {serviceTypes.push('food');}
+  if (PATTERNS.housekeeping.test(summary)) {serviceTypes.push('housekeeping');}
   if (PATTERNS.transportation.test(summary))
-    serviceTypes.push('transportation');
-  if (PATTERNS.roomService.test(summary)) serviceTypes.push('roomService');
-  if (PATTERNS.spa.test(summary)) serviceTypes.push('spa');
-  if (PATTERNS.tours.test(summary)) serviceTypes.push('tours');
-  if (PATTERNS.technical.test(summary)) serviceTypes.push('technical');
-  if (PATTERNS.concierge.test(summary)) serviceTypes.push('concierge');
-  if (PATTERNS.wellness.test(summary)) serviceTypes.push('wellness');
-  if (PATTERNS.security.test(summary)) serviceTypes.push('security');
+    {serviceTypes.push('transportation');}
+  if (PATTERNS.roomService.test(summary)) {serviceTypes.push('roomService');}
+  if (PATTERNS.spa.test(summary)) {serviceTypes.push('spa');}
+  if (PATTERNS.tours.test(summary)) {serviceTypes.push('tours');}
+  if (PATTERNS.technical.test(summary)) {serviceTypes.push('technical');}
+  if (PATTERNS.concierge.test(summary)) {serviceTypes.push('concierge');}
+  if (PATTERNS.wellness.test(summary)) {serviceTypes.push('wellness');}
+  if (PATTERNS.security.test(summary)) {serviceTypes.push('security');}
   if (PATTERNS.specialOccasion.test(summary))
-    serviceTypes.push('specialOccasion');
-  if (PATTERNS.other.test(summary)) serviceTypes.push('other');
+    {serviceTypes.push('specialOccasion');}
+  if (PATTERNS.other.test(summary)) {serviceTypes.push('other');}
 
   // Map the detected types to form values
   const mappedTypes = serviceTypes.map(
@@ -382,7 +382,7 @@ function estimatePrice(itemName: string): number {
 export function parseSummaryToOrderDetails(
   summary: string
 ): Partial<OrderSummary> {
-  if (!summary) return {};
+  if (!summary) {return {};}
 
   // Extract individual components using shared utilities
   const roomNumber = extractRoomNumberShared(summary) || '';

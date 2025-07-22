@@ -1,6 +1,6 @@
 import React from 'react';
-import { designSystem } from '@/styles/designSystem';
 import { logger } from '@shared/utils/logger';
+import { designSystem } from '@/styles/designSystem';
 
 interface ErrorStateProps {
   error: string;

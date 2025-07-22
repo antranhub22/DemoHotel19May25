@@ -105,7 +105,7 @@ let VapiClass: any = null;
 
 // Dynamically load Vapi to handle module format issues
 const loadVapi = async () => {
-  if (VapiClass) return VapiClass;
+  if (VapiClass) {return VapiClass;}
 
   try {
     logger.debug('🔄 [VAPI] Loading Vapi module...', 'Component');

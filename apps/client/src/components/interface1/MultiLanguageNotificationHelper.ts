@@ -197,8 +197,8 @@ export function getLocalizedNotification(
     };
   }
 
-  let title = notificationTemplate.title[language] || notificationTemplate.title.en;
-  let message = notificationTemplate.message[language] || notificationTemplate.message.en;
+  let title: string = notificationTemplate.title[language] || notificationTemplate.title.en;
+  let message: string = notificationTemplate.message[language] || notificationTemplate.message.en;
 
   // Replace variables in title and message
   Object.entries(variables).forEach(([key, value]) => {

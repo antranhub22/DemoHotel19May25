@@ -3,8 +3,8 @@
  * Test authentication functionality manually
  */
 
-import { getAuthToken, getAuthHeaders } from './authHelper';
 import { logger } from '@shared/utils/logger';
+import { getAuthToken, getAuthHeaders } from './authHelper';
 
 export const debugAuth = {
   async testLogin(userType = 'manager') {

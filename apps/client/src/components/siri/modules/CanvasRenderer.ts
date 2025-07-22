@@ -1,5 +1,5 @@
-import { DebugManager } from './DebugManager';
 import { logger } from '@shared/utils/logger';
+import { DebugManager } from './DebugManager';
 
 export interface CanvasRenderState {
   width: number;
@@ -148,7 +148,7 @@ export class CanvasRenderer {
    * Draw animated waveform around the button
    */
   public drawWaveform(state: CanvasRenderState): void {
-    if (!state.isListening) return;
+    if (!state.isListening) {return;}
 
     const { centerX, centerY, radius, waveformPhase, volumeLevel, colors } =
       state;
@@ -268,7 +268,7 @@ export class CanvasRenderer {
   public drawPulsingRing(state: CanvasRenderState): void {
     const { centerX, centerY, radius, pulsePhase, isListening, colors } = state;
 
-    if (!isListening) return;
+    if (!isListening) {return;}
 
     this.ctx.save();
 
@@ -351,7 +351,7 @@ export class CanvasRenderer {
       state;
 
     const idleMs = Date.now() - lastActiveTime;
-    if (idleMs <= 6000) return;
+    if (idleMs <= 6000) {return;}
 
     const flash = 0.7 + 0.3 * Math.abs(Math.sin(idleFlash * 1.2));
 

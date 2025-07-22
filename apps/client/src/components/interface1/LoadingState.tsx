@@ -1,6 +1,6 @@
 import React from 'react';
-import { designSystem } from '@/styles/designSystem';
 import { logger } from '@shared/utils/logger';
+import { designSystem } from '@/styles/designSystem';
 
 export const LoadingState: React.FC = () => {
   return (

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { X } from 'lucide-react';
-import { t } from '@/i18n';
 import { logger } from '@shared/utils/logger';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
+import { t } from '@/i18n';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -58,7 +58,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
 
   const cleanupAnimations = () => {
     Object.values(animationFrames.current).forEach(frameId => {
-      if (frameId) cancelAnimationFrame(frameId);
+      if (frameId) {cancelAnimationFrame(frameId);}
     });
     animationFrames.current = {};
   };
@@ -190,7 +190,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
     [isGrid]
   );
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   // Popup content component
   const PopupContent = () => (

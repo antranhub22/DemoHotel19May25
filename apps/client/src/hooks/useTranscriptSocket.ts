@@ -46,7 +46,7 @@ export const useTranscriptSocket = ({
 
   // Xử lý các events
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {return;}
 
     const handleUserTranscript = (data: { text: string }) => {
       logger.debug('[useTranscriptSocket] User transcript received:', 'Component', data);

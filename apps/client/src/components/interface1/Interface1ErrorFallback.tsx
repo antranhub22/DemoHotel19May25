@@ -1,7 +1,7 @@
 import React from 'react';
+import { logger } from '@shared/utils/logger';
 import { InterfaceContainer } from './InterfaceContainer';
 import { InterfaceHeader } from './InterfaceHeader';
-import { logger } from '@shared/utils/logger';
 
 interface Interface1ErrorFallbackProps {
   error?: Error;

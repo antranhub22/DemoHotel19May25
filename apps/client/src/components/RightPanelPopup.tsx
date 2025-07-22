@@ -1,8 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import { SummaryPopupContent } from './popup-system/SummaryPopupContent';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
-import { logger } from '@shared/utils/logger';
 
 interface RightPanelPopupProps {
   isOpen: boolean;
@@ -26,7 +26,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
     },
   });
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   return (
     <div className="relative">

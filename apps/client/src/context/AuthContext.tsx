@@ -217,7 +217,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       const data = await res.json();
       if (!data.success || !data.token)
-        throw new Error('Không nhận được token từ server');
+        {throw new Error('Không nhận được token từ server');}
       localStorage.setItem('token', data.token);
 
       // Reset auto-login attempts after successful manual login
@@ -266,7 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Permission checking function
   const hasPermission = useCallback(
     (module: string, action: string): boolean => {
-      if (!user || !user.permissions) return false;
+      if (!user || !user.permissions) {return false;}
 
       return user.permissions.some(
         permission =>
@@ -326,7 +326,7 @@ export const useTenantDetection = () => {
   } | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {return;}
 
     // const _host = window.location.host;
     const hostname = window.location.hostname;
@@ -388,7 +388,7 @@ export const useRequireAuth = (
     useAuth();
 
   const canAccess = () => {
-    if (isLoading) return null; // Still loading
+    if (isLoading) {return null;} // Still loading
 
     if (requireAuth && !isAuthenticated) {
       return false; // Not authenticated

@@ -1,4 +1,44 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Wrench,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  RefreshCw,
+  Globe,
+  Key,
+  Webhook,
+  Database,
+  Cloud,
+  Activity,
+  TrendingUp,
+  AlertTriangle,
+  Settings,
+  Monitor,
+  Zap,
+  Link,
+  Clock,
+  BarChart3,
+  FileText,
+  Save,
+  Play,
+  Pause,
+  Download,
+  Upload,
+  Server,
+  Mail,
+  Phone,
+  CreditCard,
+  Shield,
+  Search,
+  Filter,
+} from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
   Card,
@@ -39,47 +79,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Wrench,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  RefreshCw,
-  Globe,
-  Key,
-  Webhook,
-  Database,
-  Cloud,
-  Activity,
-  TrendingUp,
-  AlertTriangle,
-  Settings,
-  Monitor,
-  Zap,
-  Link,
-  Clock,
-  BarChart3,
-  FileText,
-  Save,
-  Play,
-  Pause,
-  Download,
-  Upload,
-  Server,
-  Mail,
-  Phone,
-  CreditCard,
-  Shield,
-  Search,
-  Filter,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
 
 // Types
 interface Integration {
@@ -479,7 +479,7 @@ const IntegrationModal = ({
   }, [integration]);
 
   const handleSave = async () => {
-    if (!formData) return;
+    if (!formData) {return;}
 
     setLoading(true);
     try {
@@ -505,7 +505,7 @@ const IntegrationModal = ({
     }
   };
 
-  if (!integration || !formData) return null;
+  if (!integration || !formData) {return null;}
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

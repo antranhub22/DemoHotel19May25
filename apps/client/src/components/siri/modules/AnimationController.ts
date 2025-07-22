@@ -1,7 +1,7 @@
+import { logger } from '@shared/utils/logger';
 import { DebugManager } from './DebugManager';
 import { EmergencyStopManager } from './EmergencyStopManager';
 import { CanvasRenderer, CanvasRenderState } from './CanvasRenderer';
-import { logger } from '@shared/utils/logger';
 
 export interface AnimationState {
   pulsePhase: number;

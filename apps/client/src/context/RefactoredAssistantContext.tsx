@@ -7,19 +7,10 @@ import React, {
 } from 'react';
 
 // Import types
-import {
-  Transcript,
-  OrderSummary,
-  CallDetails,
-  Order,
-  CallSummary,
-  ServiceRequest,
-  ActiveOrder,
-} from '@/types';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { logger } from '@shared/utils/logger';
+import { useCall, CallProvider } from './contexts/CallContext';
 
 // Import all new focused contexts
-import { useCall, CallProvider } from './contexts/CallContext';
 import {
   useTranscript,
   TranscriptProvider,
@@ -31,7 +22,16 @@ import {
   ConfigurationProvider,
 } from './contexts/ConfigurationContext';
 import { useVapi, VapiProvider } from './contexts/VapiContext';
-import { logger } from '@shared/utils/logger';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+import {
+  Transcript,
+  OrderSummary,
+  CallDetails,
+  Order,
+  CallSummary,
+  ServiceRequest,
+  ActiveOrder,
+} from '@/types';
 
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';

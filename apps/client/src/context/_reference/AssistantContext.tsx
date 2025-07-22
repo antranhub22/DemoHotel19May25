@@ -17,6 +17,8 @@ import React, {
   useCallback,
 } from 'react';
 // DISABLED: import { initVapi, getVapiInstance } from '@/lib';
+import ReactDOM from 'react-dom';
+import { logger } from '@shared/utils/logger';
 import {
   Transcript,
   OrderSummary,
@@ -27,14 +29,12 @@ import {
   ServiceRequest,
   ActiveOrder,
 } from '@/types';
-import ReactDOM from 'react-dom';
 import {
   HotelConfiguration,
   getVapiPublicKeyByLanguage,
   getVapiAssistantIdByLanguage,
 } from '@/hooks/useHotelConfiguration';
 // Dynamic import for code splitting - resetVapi loaded when needed
-import { logger } from '@shared/utils/logger';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

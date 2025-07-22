@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { logger } from '@shared/utils/logger';
 import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
@@ -12,7 +13,6 @@ import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssi
 import { useAuth } from '@/context/AuthContext';
 import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { logger } from '@shared/utils/logger';
 
 const VoiceAssistant: React.FC = () => {
   const navigate = useNavigate();

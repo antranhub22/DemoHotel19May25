@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { logger } from '@shared/utils/logger';
 import StaffLogin from './StaffLogin';
 import StaffDashboard from './StaffDashboard';
-import { logger } from '@shared/utils/logger';
 
 const StaffPage: React.FC = () => {
   // State giả lập đăng nhập

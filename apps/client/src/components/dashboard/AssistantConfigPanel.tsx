@@ -1,4 +1,18 @@
 import React, { useState } from 'react';
+import { logger } from '@shared/utils/logger';
+import {
+  Bot,
+  Settings,
+  Save,
+  RefreshCw,
+  Play,
+  AlertCircle,
+  Loader2,
+  MessageSquare,
+  Palette,
+  Headphones,
+  Languages,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -23,20 +37,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
-import {
-  Bot,
-  Settings,
-  Save,
-  RefreshCw,
-  Play,
-  AlertCircle,
-  Loader2,
-  MessageSquare,
-  Palette,
-  Headphones,
-  Languages,
-} from 'lucide-react';
 
 // Types
 interface AssistantConfig {
@@ -335,7 +335,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
   }, [config]);
 
   const handleConfigChange = (updates: Partial<AssistantConfig>) => {
-    if (!editConfig) return;
+    if (!editConfig) {return;}
 
     const newConfig = { ...editConfig, ...updates };
     setEditConfig(newConfig);
@@ -343,7 +343,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
   };
 
   const handleSave = async () => {
-    if (!editConfig || !hasChanges) return;
+    if (!editConfig || !hasChanges) {return;}
 
     try {
       await onSave(editConfig);
@@ -354,7 +354,7 @@ export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
   };
 
   const handleTest = async () => {
-    if (!editConfig) return;
+    if (!editConfig) {return;}
 
     try {
       await onTest(editConfig);

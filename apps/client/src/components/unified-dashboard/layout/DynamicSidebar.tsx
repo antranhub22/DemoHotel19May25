@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import { getMenuForRole } from '@shared/constants/permissions';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
+import { PermissionGuard, usePermissionCheck } from '../guards/PermissionGuard';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/AuthContext';
-import { getMenuForRole } from '@shared/constants/permissions';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { PermissionGuard, usePermissionCheck } from '../guards/PermissionGuard';
-import { logger } from '@shared/utils/logger';
 
 interface DynamicSidebarProps {
   isOpen: boolean;
@@ -150,8 +150,8 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
   // Check if a path is active
   const isActivePath = (path: string) => {
-    if (path === '/dashboard' && location === '/dashboard') return true;
-    if (path !== '/dashboard' && location.startsWith(path)) return true;
+    if (path === '/dashboard' && location === '/dashboard') {return true;}
+    if (path !== '/dashboard' && location.startsWith(path)) {return true;}
     return false;
   };
 

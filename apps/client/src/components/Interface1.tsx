@@ -4,11 +4,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Custom Hook
-import { useInterface1 } from '@/hooks/useInterface1';
-import { useRefactoredAssistant as useAssistant, Language } from '@/context/RefactoredAssistantContext';
 
 // Context
-import { usePopupContext } from '@/context/PopupContext';
 
 // Utils
 import { logger } from '@shared/utils/logger';
@@ -21,7 +18,6 @@ import { ErrorState } from './interface1/ErrorState';
 import { InterfaceContainer } from './interface1/InterfaceContainer';
 import { InterfaceHeader } from './interface1/InterfaceHeader';
 import { ServiceGridContainer } from './interface1/ServiceGridContainer';
-import { ServiceCategory } from '@/types/interface1.types';
 
 // UI Components - Popups
 import ChatPopup from './ChatPopup';
@@ -36,6 +32,10 @@ import { addMultiLanguageNotification, LANGUAGE_DISPLAY_NAMES } from './interfac
 
 // Siri Components
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
+import { ServiceCategory } from '@/types/interface1.types';
+import { usePopupContext } from '@/context/PopupContext';
+import { useRefactoredAssistant as useAssistant, Language } from '@/context/RefactoredAssistantContext';
+import { useInterface1 } from '@/hooks/useInterface1';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
 const MobileSummaryPopup = () => {

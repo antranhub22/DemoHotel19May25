@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { Order, OrderSummary, CallSummary, ServiceRequest, ActiveOrder, CallDetails } from '@/types';
 import { logger } from '@shared/utils/logger';
+import { Order, OrderSummary, CallSummary, ServiceRequest, ActiveOrder, CallDetails } from '@/types';
 
 export interface OrderContextType {
   // Order state
@@ -70,10 +70,10 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   
   // Active orders with localStorage persistence
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined') {return [];}
     try {
       const stored = localStorage.getItem('activeOrders');
-      if (!stored) return [];
+      if (!stored) {return [];}
       const parsed = JSON.parse(stored) as (ActiveOrder & { requestedAt: string })[];
       // Convert requestedAt string back into Date
       return parsed.map(o => ({
@@ -88,7 +88,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   // Persist activeOrders to localStorage whenever it changes
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {return;}
     try {
       localStorage.setItem('activeOrders', JSON.stringify(activeOrders));
     } catch {
@@ -156,7 +156,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     polling = setInterval(fetchOrders, 5000);
 
     return () => {
-      if (polling) clearInterval(polling);
+      if (polling) {clearInterval(polling);}
     };
   }, []);
 

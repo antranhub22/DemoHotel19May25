@@ -7,7 +7,7 @@ interface ReferencePopupProps {
 }
 
 const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
   return (
     <div
       className="relative z-30 overflow-hidden rounded-2xl shadow-2xl reference-popup"

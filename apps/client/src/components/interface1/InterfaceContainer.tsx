@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
+import { logger } from '@shared/utils/logger';
 import { designSystem } from '@/styles/designSystem';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
-import { logger } from '@shared/utils/logger';
 
 interface InterfaceContainerProps {
   children: ReactNode;

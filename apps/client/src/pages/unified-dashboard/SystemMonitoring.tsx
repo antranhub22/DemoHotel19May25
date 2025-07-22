@@ -1,15 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LineChart,
   Line,
@@ -49,8 +38,19 @@ import {
   Eye,
   Settings,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { logger } from '@shared/utils/logger';
+import { useAuth } from '@/context/AuthContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 // Types
 interface SystemMetrics {
@@ -258,8 +258,8 @@ const performanceData = [
 // System status component
 const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
   const getStatusColor = (usage: number) => {
-    if (usage < 50) return 'text-green-600';
-    if (usage < 80) return 'text-yellow-600';
+    if (usage < 50) {return 'text-green-600';}
+    if (usage < 80) {return 'text-yellow-600';}
     return 'text-red-600';
   };
 

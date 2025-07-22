@@ -34,7 +34,7 @@ const CallHistory: React.FC = () => {
 
   // Format call duration for display (accepts "mm:ss" or numeric seconds)
   const formatDuration = (duration: string | undefined) => {
-    if (!duration) return '00:00';
+    if (!duration) {return '00:00';}
     // If duration is pure seconds number, format to mm:ss
     const seconds = parseInt(duration, 10);
     if (!isNaN(seconds) && /^\d+$/.test(duration)) {
@@ -55,7 +55,7 @@ const CallHistory: React.FC = () => {
 
   // Filter summaries by room number if filter is set
   const filteredSummaries = data?.summaries.filter((summary: CallSummary) => {
-    if (!roomFilter) return true;
+    if (!roomFilter) {return true;}
     return (
       summary.roomNumber &&
       summary.roomNumber.toLowerCase().includes(roomFilter.toLowerCase())

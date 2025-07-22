@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import { logger } from '@shared/utils/logger';
 import { CallDetails } from '@/types';
 // Dynamic imports for code splitting - loaded when needed
 import {
@@ -13,7 +14,6 @@ import {
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
 // Dynamic import for code splitting - resetVapi loaded when needed
-import { logger } from '@shared/utils/logger';
 
 export interface VapiContextType {
   // Vapi state

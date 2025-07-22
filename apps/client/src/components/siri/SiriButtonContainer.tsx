@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { designSystem } from '@/styles/designSystem';
+import { logger } from '@shared/utils/logger';
 import SiriCallButton from './SiriCallButton';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
+import { designSystem } from '@/styles/designSystem';
 import { Language } from '@/types/interface1.types';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
-import { MobileTouchDebugger } from './MobileTouchDebugger';
-import { logger } from '@shared/utils/logger';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -15,6 +15,7 @@ interface SiriButtonContainerProps {
   onCancel?: () => void;
   onConfirm?: () => void;
   showingSummary?: boolean; // ✅ NEW: Hide Cancel/Confirm when summary is showing
+  _showingSummary?: boolean; // ✅ NEW: Internal state for summary display
 }
 
 // Màu sắc cho từng ngôn ngữ

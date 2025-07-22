@@ -16,11 +16,34 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
+    /* Enhanced Type Checking (Production Ready) */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    
+    /* Practical Settings for Large Codebase */
+    "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "alwaysStrict": true,
+
+    /* Development Experience */
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    /* Performance Optimizations */
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
 
     /* Path mapping */
     "baseUrl": ".",
@@ -29,10 +52,16 @@
       "@server/*": ["./apps/server/*"],
       "@shared/*": ["./packages/shared/*"],
       "@types/*": ["./packages/types/*"],
-      "@config/*": ["./packages/config/*"]
+      "@config/*": ["./packages/config/*"],
+      "@auth/*": ["./packages/auth-system/*"]
     }
   },
-  "include": ["apps/client/src/**/*", "apps/server/**/*", "packages/**/*", "tools/**/*"],
+  "include": [
+    "apps/client/src/**/*", 
+    "apps/server/**/*", 
+    "packages/**/*", 
+    "tools/**/*"
+  ],
   "exclude": [
     "tests/**/*",
     "**/*.test.ts",
@@ -41,6 +70,12 @@
     "integration-test-*.ts",
     "node_modules",
     "dist",
-    "build"
+    "build",
+    ".tsbuildinfo",
+    "apps/server/routes.ts",
+    "**/*.d.ts",
+    "coverage/**",
+    "test-results/**",
+    "playwright-report/**"
   ]
 }

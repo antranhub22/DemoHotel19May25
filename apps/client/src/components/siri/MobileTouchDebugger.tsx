@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { isMobileDevice } from '@/utils/deviceDetection';
 import { logger } from '@shared/utils/logger';
+import { isMobileDevice } from '@/utils/deviceDetection';
 
 interface TouchDebugInfo {
   deviceInfo: {
@@ -188,7 +188,7 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
   };
 
   useEffect(() => {
-    if (!enabled || !isMobileDevice()) return;
+    if (!enabled || !isMobileDevice()) {return;}
 
     updateDebugInfo();
 
@@ -218,7 +218,7 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
     };
   }, [containerId, enabled, onCallStart, onCallEnd, isListening]);
 
-  if (!enabled || !isMobileDevice() || !debugInfo) return null;
+  if (!enabled || !isMobileDevice() || !debugInfo) {return null;}
 
   return (
     <>

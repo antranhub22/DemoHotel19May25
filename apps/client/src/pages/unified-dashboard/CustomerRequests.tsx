@@ -1,4 +1,21 @@
 import React, { useState, useEffect } from 'react';
+import {
+  RefreshCw,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Search,
+  Filter,
+  Trash2,
+  Send,
+  User,
+  Calendar,
+  MapPin,
+  Eye,
+  Edit,
+} from 'lucide-react';
+import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
   Card,
@@ -38,24 +55,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  RefreshCw,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  Filter,
-  Trash2,
-  Send,
-  User,
-  Calendar,
-  MapPin,
-  Eye,
-  Edit,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
 
 // Types
 interface CustomerRequest {
@@ -436,7 +436,7 @@ export const CustomerRequests: React.FC = () => {
 
   // Send message
   const sendMessage = async (content: string) => {
-    if (!selectedRequest) return;
+    if (!selectedRequest) {return;}
 
     setMessageLoading(true);
     try {
@@ -502,9 +502,9 @@ export const CustomerRequests: React.FC = () => {
     // Date filter
     if (startDate || endDate) {
       const requestDate = new Date(request.createdAt);
-      if (startDate && requestDate < new Date(startDate)) return false;
+      if (startDate && requestDate < new Date(startDate)) {return false;}
       if (endDate && requestDate > new Date(`${endDate}T23:59:59`))
-        return false;
+        {return false;}
     }
 
     // Search filter
@@ -543,7 +543,7 @@ export const CustomerRequests: React.FC = () => {
 
   // Handle message modal
   const handleOpenMessage = async () => {
-    if (!selectedRequest) return;
+    if (!selectedRequest) {return;}
 
     setShowMessageModal(true);
     await fetchMessages(selectedRequest.id);

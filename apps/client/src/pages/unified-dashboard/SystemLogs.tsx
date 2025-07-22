@@ -1,33 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Terminal,
   Search,
@@ -60,8 +31,37 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { logger } from '@shared/utils/logger';
+import { useAuth } from '@/context/AuthContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 // Types
 interface LogEntry {
@@ -305,8 +305,8 @@ const formatDate = (dateString: string) => {
 };
 
 const formatDuration = (duration?: number) => {
-  if (!duration) return '-';
-  if (duration < 1000) return `${duration}ms`;
+  if (!duration) {return '-';}
+  if (duration < 1000) {return `${duration}ms`;}
   return `${(duration / 1000).toFixed(2)}s`;
 };
 
@@ -320,7 +320,7 @@ const LogDetailsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  if (!log) return null;
+  if (!log) {return null;}
 
   return (
     <div
@@ -545,7 +545,7 @@ export const SystemLogs: React.FC = () => {
 
   // Real-time log streaming simulation
   useEffect(() => {
-    if (!realTimeEnabled) return;
+    if (!realTimeEnabled) {return;}
 
     const interval = setInterval(() => {
       const newLog: LogEntry = {

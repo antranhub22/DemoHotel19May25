@@ -1,4 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  UserPlus,
+  Edit,
+  Trash2,
+  Shield,
+  Eye,
+  EyeOff,
+  Mail,
+  Phone,
+  Calendar,
+  Search,
+  Filter,
+  RefreshCw,
+  Settings,
+  Lock,
+  Unlock,
+  Key,
+} from 'lucide-react';
+import { logger } from '@shared/utils/logger';
+import type { UserRole } from '@shared/constants/permissions';
 import { useAuth } from '@/context/AuthContext';
 import {
   Card,
@@ -46,28 +67,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Users,
-  UserPlus,
-  Edit,
-  Trash2,
-  Shield,
-  Eye,
-  EyeOff,
-  Mail,
-  Phone,
-  Calendar,
-  Search,
-  Filter,
-  RefreshCw,
-  Settings,
-  Lock,
-  Unlock,
-  Key,
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
-import type { UserRole } from '@shared/constants/permissions';
 
 // Types
 interface StaffMember {
@@ -388,7 +388,7 @@ const StaffPermissionsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  if (!staff) return null;
+  if (!staff) {return null;}
 
   const roleConfig = roleConfigs[staff.role];
 

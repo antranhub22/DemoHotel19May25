@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { logger } from '@shared/utils/logger';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import {
   useHotelConfiguration,
   getVapiPublicKeyByLanguage,

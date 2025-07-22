@@ -18,7 +18,7 @@ interface SiriSizeConfig {
 export const useSiriResponsiveSize = (): SiriSizeConfig => {
   const [isDesktop, setIsDesktop] = useState(() => {
     // Safe initial state - default to mobile on SSR
-    if (typeof window === 'undefined') return false;
+    if (typeof window === 'undefined') {return false;}
     return window.innerWidth >= 768;
   });
 
@@ -64,7 +64,7 @@ export const useSiriResponsiveSize = (): SiriSizeConfig => {
  */
 export const useIsMobile = (): boolean => {
   const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return true; // SSR default to mobile
+    if (typeof window === 'undefined') {return true;} // SSR default to mobile
     return window.innerWidth < 768;
   });
 

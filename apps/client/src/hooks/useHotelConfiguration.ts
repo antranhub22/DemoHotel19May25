@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@shared/utils/logger';
 import { useTenantDetection } from '@/context/AuthContext';
 import { DashboardApi, HotelProfile } from '@/services/dashboardApi';
-import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Hotel Configuration Interface
@@ -146,7 +146,7 @@ export const useHotelConfiguration = () => {
           const response = await fetch(endpoint);
           logger.debug('[DEBUG] fetch response', 'Component', response);
           if (!response.ok)
-            throw new Error('Failed to load hotel configuration');
+            {throw new Error('Failed to load hotel configuration');}
           const hotelData = await response.json();
           logger.debug('[DEBUG] hotelData', 'Component', hotelData);
           setConfig({

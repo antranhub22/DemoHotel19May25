@@ -23,7 +23,7 @@ const StaffRequestDetailModal: React.FC<StaffRequestDetailModalProps> = ({
   onOpenMessage,
 }) => {
   const [pendingStatus, setPendingStatus] = useState<string>(request.status);
-  if (!request) return null;
+  if (!request) {return null;}
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative">
@@ -75,7 +75,7 @@ const StaffRequestDetailModal: React.FC<StaffRequestDetailModalProps> = ({
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
             onClick={() => {
               if (pendingStatus !== request.status)
-                onStatusChange(pendingStatus);
+                {onStatusChange(pendingStatus);}
             }}
           >
             Cập Nhật

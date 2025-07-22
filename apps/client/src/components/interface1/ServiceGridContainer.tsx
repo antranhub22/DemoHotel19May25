@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
+import { logger } from '@shared/utils/logger';
 import { ServiceGrid } from '../interface1/ServiceGrid';
 import { ServiceCategory } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
 
 interface ServiceGridContainerProps {
   className?: string;

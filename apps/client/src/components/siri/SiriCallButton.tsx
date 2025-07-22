@@ -77,7 +77,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
-    if (cleanupFlagRef.current) return;
+    if (cleanupFlagRef.current) {return;}
     cleanupFlagRef.current = true;
 
     try {

@@ -1,8 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Home,
   Bot,
@@ -13,6 +10,9 @@ import {
   Building2,
   X,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 // Types
 interface NavItem {
@@ -143,17 +143,17 @@ const SubscriptionBadge = ({
   status: string;
 }) => {
   const getVariant = () => {
-    if (status === 'expired') return 'destructive';
-    if (plan === 'trial') return 'secondary';
-    if (plan === 'enterprise') return 'default';
+    if (status === 'expired') {return 'destructive';}
+    if (plan === 'trial') {return 'secondary';}
+    if (plan === 'enterprise') {return 'default';}
     return 'outline';
   };
 
   const getLabel = () => {
-    if (plan === 'trial') return 'Dùng thử';
-    if (plan === 'basic') return 'Cơ bản';
-    if (plan === 'premium') return 'Cao cấp';
-    if (plan === 'enterprise') return 'Doanh nghiệp';
+    if (plan === 'trial') {return 'Dùng thử';}
+    if (plan === 'basic') {return 'Cơ bản';}
+    if (plan === 'premium') {return 'Cao cấp';}
+    if (plan === 'enterprise') {return 'Doanh nghiệp';}
     return plan;
   };
 
@@ -166,7 +166,7 @@ const SubscriptionBadge = ({
 
 // Plan requirement checker
 const canAccessFeature = (userPlan: string, requiredPlan?: string): boolean => {
-  if (!requiredPlan) return true;
+  if (!requiredPlan) {return true;}
 
   const planHierarchy = {
     trial: 0,

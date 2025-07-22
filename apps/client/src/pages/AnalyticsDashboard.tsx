@@ -61,9 +61,9 @@ const AnalyticsDashboard: React.FC = () => {
       );
       const hourlyData = await fetchData('/api/analytics/hourly-activity');
 
-      if (overviewData) setOverview(overviewData);
-      if (servicesData) setServices(servicesData);
-      if (hourlyData) setHourly(hourlyData);
+      if (overviewData) {setOverview(overviewData);}
+      if (servicesData) {setServices(servicesData);}
+      if (hourlyData) {setHourly(hourlyData);}
     };
     loadData();
   }, []);

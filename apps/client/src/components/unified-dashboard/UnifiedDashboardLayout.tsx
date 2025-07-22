@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { cn } from '@/lib/utils';
 import {
   Home,
   Bot,
@@ -23,6 +22,9 @@ import {
   Monitor,
   Wrench,
 } from 'lucide-react';
+import { logger } from '@shared/utils/logger';
+import type { UserRole } from '@shared/constants/permissions';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -39,8 +41,6 @@ import {
   usePermissionCheck,
 } from '@/components/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
-import { logger } from '@shared/utils/logger';
-import type { UserRole } from '@shared/constants/permissions';
 
 // Types
 interface UnifiedDashboardLayoutProps {
@@ -341,10 +341,10 @@ const DynamicSidebar = ({
   // Filter navigation items based on role and permissions
   const availableNavItems = navigationItems.filter(item => {
     // Check if user has permission
-    if (!hasPermission(item.permission)) return false;
+    if (!hasPermission(item.permission)) {return false;}
 
     // Check if item is role-specific
-    if (item.roleSpecific && !item.roleSpecific.includes(role)) return false;
+    if (item.roleSpecific && !item.roleSpecific.includes(role)) {return false;}
 
     return true;
   });

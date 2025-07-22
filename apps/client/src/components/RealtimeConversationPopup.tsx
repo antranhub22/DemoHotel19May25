@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { X } from 'lucide-react';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { t } from '@/i18n';
 import {
   STANDARD_POPUP_HEIGHT,
@@ -149,7 +149,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
 
     assistantMessages.forEach(message => {
       // Skip if already animated
-      if (visibleChars[message.id] === message.content.length) return;
+      if (visibleChars[message.id] === message.content.length) {return;}
 
       let currentChar = visibleChars[message.id] || 0;
       const content = message.content;
@@ -181,7 +181,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
     }
   }, [conversationTurns]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   // ✅ EXISTING LOGIC - UNCHANGED: Conditional styles based on layout
   const isGrid = layout === 'grid';

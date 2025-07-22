@@ -7,8 +7,8 @@ const SummaryPopupContent = React.lazy(() =>
     default: module.SummaryPopupContent,
   }))
 );
-import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 import { logger } from '@shared/utils/logger';
+import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 
 interface SummaryPopupProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
     },
   });
 
-  if (!isOpen) return null;
+  if (!isOpen) {return null;}
 
   const isGrid = layout === 'grid';
 

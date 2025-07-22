@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
-import { usePopupContext } from '@/context/PopupContext';
-import RightPanelPopup from '../RightPanelPopup';
 import { logger } from '@shared/utils/logger';
+import RightPanelPopup from '../RightPanelPopup';
+import { usePopupContext } from '@/context/PopupContext';
 
 interface RightPanelSectionProps {
   showPanel: boolean;
@@ -25,7 +25,7 @@ export const RightPanelSection = forwardRef<
   // Show panel if either manually opened OR if there's a summary to display
   const shouldShowPanel = showPanel || showSummary;
 
-  if (!shouldShowPanel) return null;
+  if (!shouldShowPanel) {return null;}
 
   return (
     <div

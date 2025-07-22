@@ -1,4 +1,17 @@
 import React, { useState } from 'react';
+import { logger } from '@shared/utils/logger';
+import {
+  Bot,
+  Settings,
+  Save,
+  Play,
+  CheckCircle2,
+  Loader2,
+  Phone,
+  MessageSquare,
+  Clock,
+  Activity,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -20,19 +33,6 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { logger } from '@shared/utils/logger';
-import {
-  Bot,
-  Settings,
-  Save,
-  Play,
-  CheckCircle2,
-  Loader2,
-  Phone,
-  MessageSquare,
-  Clock,
-  Activity,
-} from 'lucide-react';
 
 // Mock assistant configuration
 const mockAssistantConfig = {
@@ -280,7 +280,7 @@ const AssistantTester = () => {
   const [isTesting, setIsTesting] = useState(false);
 
   const handleTest = async () => {
-    if (!testPhrase.trim()) return;
+    if (!testPhrase.trim()) {return;}
 
     setIsTesting(true);
     try {

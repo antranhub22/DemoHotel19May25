@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { logger } from '@shared/utils/logger';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { isMobileDevice } from '@/utils/deviceDetection';
-import { logger } from '@shared/utils/logger';
 
 interface DebugInfo {
   containerSize: { width: number; height: number };
@@ -27,7 +27,7 @@ export const MobileDebugComponent: React.FC = () => {
 
   useEffect(() => {
     const updateDebugInfo = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current) {return;}
 
       const container = containerRef.current;
       const canvas = container.querySelector('canvas');
@@ -87,7 +87,7 @@ export const MobileDebugComponent: React.FC = () => {
     };
   }, [responsiveSize]);
 
-  if (!debugInfo) return <div>Loading debug info...</div>;
+  if (!debugInfo) {return <div>Loading debug info...</div>;}
 
   return (
     <div

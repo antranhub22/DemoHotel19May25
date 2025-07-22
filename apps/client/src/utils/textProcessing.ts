@@ -1,7 +1,7 @@
+import { logger } from '@shared/utils/logger';
 import { englishDictionary } from './dictionary/englishDictionary';
 import dictionaryData from './dictionary/dictionary.json';
 import { normalizeText } from '@/lib/sharedUtils';
-import { logger } from '@shared/utils/logger';
 
 interface ProcessTextResult {
   words: string[];
@@ -16,7 +16,7 @@ let maxPhraseLength = 0;
 englishDictionary.forEach(word => {
   const normalized = word.toLowerCase().replace(/\s+/g, '');
   phraseSet.add(normalized);
-  if (normalized.length > maxPhraseLength) maxPhraseLength = normalized.length;
+  if (normalized.length > maxPhraseLength) {maxPhraseLength = normalized.length;}
 });
 
 // Thêm phrase từ dictionary.json
@@ -24,7 +24,7 @@ if (dictionaryData.entries) {
   dictionaryData.entries.forEach((entry: any) => {
     const keyword = entry.keyword.toLowerCase().replace(/\s+/g, '');
     phraseSet.add(keyword);
-    if (keyword.length > maxPhraseLength) maxPhraseLength = keyword.length;
+    if (keyword.length > maxPhraseLength) {maxPhraseLength = keyword.length;}
   });
 }
 

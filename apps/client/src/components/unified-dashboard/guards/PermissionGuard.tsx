@@ -1,8 +1,8 @@
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Shield, Lock } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
+import { useAuth } from '@/context/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PermissionGuardProps {
   children: React.ReactNode;
@@ -187,7 +187,7 @@ export const usePermissionCheck = () => {
   const { user, hasPermission } = useAuth();
 
   const canAccess = (permission: string) => {
-    if (!user) return false;
+    if (!user) {return false;}
     const [module, action] = permission.split('.');
     return hasPermission(module, action);
   };

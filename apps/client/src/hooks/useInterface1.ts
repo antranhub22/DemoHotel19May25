@@ -5,7 +5,7 @@ import {
   useEffect,
   createElement,
 } from 'react';
-
+import { logger } from '@shared/utils/logger';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
@@ -14,7 +14,6 @@ import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { usePopup } from '@/components/popup-system/PopupManager';
 import { usePopupContext } from '@/context/PopupContext';
-import { logger } from '@shared/utils/logger';
 
 interface UseInterface1Props {
   isActive: boolean;
