@@ -1,10 +1,11 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Single Implementation
 
 // React hooks
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Custom Hook
 import { useInterface1 } from '@/hooks/useInterface1';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 
 // Context
 import { usePopupContext } from '@/context/PopupContext';
@@ -20,10 +21,14 @@ import { ErrorState } from './interface1/ErrorState';
 import { InterfaceContainer } from './interface1/InterfaceContainer';
 import { InterfaceHeader } from './interface1/InterfaceHeader';
 import { ServiceGridContainer } from './interface1/ServiceGridContainer';
+import { ServiceCategory } from '@/types/interface1.types';
 
 // UI Components - Popups
 import ChatPopup from './ChatPopup';
 import SummaryPopup from './SummaryPopup';
+
+// Enhanced UI Components
+import { NotificationSystem, createServiceNotification, createCallNotification } from './interface1/NotificationSystem';
 
 // Siri Components
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
@@ -61,6 +66,7 @@ interface Interface1Props {
 
 export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   // ✅ HOOKS MUST BE FIRST - NO CONDITIONAL CALLS
+  const { language } = useAssistant();
   const {
     isLoading,
     error,
@@ -103,6 +109,85 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   if (error) {
     return <ErrorState error={error} />;
   }
+
+  // ✅ ENHANCED: Add service selection state for user feedback
+  const [selectedService, setSelectedService] = useState<ServiceCategory | null>(null);
+
+  // ✅ ENHANCEMENT: Service interaction handlers
+  const handleServiceSelect = useCallback((service: ServiceCategory) => {
+    logger.debug(`🎯 [Interface1] Service selected: ${service.name}`, 'Component');
+    
+    // Show selected service feedback
+    setSelectedService(service);
+    
+    // Add notification for service selection
+    if (typeof window !== 'undefined' && (window as any).addNotification) {
+      (window as any).addNotification({
+        type: 'info',
+        title: 'Service Selected',
+        message: `${service.name} - Tap Siri button to request`,
+        duration: 4000,
+      });
+    }
+    
+    // Clear selection after 3 seconds
+    setTimeout(() => setSelectedService(null), 3000);
+  }, []);
+
+  const handleVoiceServiceRequest = useCallback(async (service: ServiceCategory) => {
+    logger.debug(`🎤 [Interface1] Voice service request: ${service.name}`, 'Component');
+    
+    try {
+      // Set service selection for immediate feedback
+      setSelectedService(service);
+      
+      // Add notification for voice request start
+      if (typeof window !== 'undefined' && (window as any).addNotification) {
+        (window as any).addNotification({
+          type: 'call',
+          title: 'Voice Request Started',
+          message: `Starting voice request for ${service.name}`,
+          duration: 3000,
+        });
+      }
+      
+      // Start call with service context
+      await handleCallStart(language); // Use existing handleCallStart
+      
+      // TODO: Pass service context to voice assistant for more targeted responses
+      logger.debug(`✅ [Interface1] Voice request started for: ${service.name}`, 'Component');
+    } catch (error) {
+      logger.error(`❌ [Interface1] Error starting voice request for: ${service.name}`, 'Component', error);
+      setSelectedService(null); // Clear on error
+      
+      // Add error notification
+      if (typeof window !== 'undefined' && (window as any).addNotification) {
+        (window as any).addNotification({
+          type: 'error',
+          title: 'Voice Request Failed',
+          message: `Unable to start voice request for ${service.name}`,
+          duration: 5000,
+        });
+      }
+      
+      throw error; // Let ServiceGrid handle the error display
+    }
+  }, [language, handleCallStart]);
+
+  // ✅ ENHANCEMENT: Add call end notification
+  useEffect(() => {
+    if (!isCallStarted && selectedService) {
+      // Call ended while a service was selected
+      if (typeof window !== 'undefined' && (window as any).addNotification) {
+        const notification = createCallNotification(
+          `call-${Date.now()}`,
+          undefined, // Room number would come from call context
+          '2 minutes' // Duration would come from call context
+        );
+        (window as any).addNotification(notification);
+      }
+    }
+  }, [isCallStarted, selectedService]);
 
   return (
     <InterfaceContainer>
@@ -198,9 +283,32 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         </div>
       </div>
 
+      {/* ✅ ENHANCEMENT: Real-time Notification System */}
+      <NotificationSystem 
+        position="top-right"
+        maxNotifications={5}
+        className="z-[9999]"
+      />
+
+      {/* ✅ ENHANCEMENT: Service selection notification */}
+      {selectedService && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-green-500 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-pulse">
+          <div className="flex items-center space-x-2">
+            <selectedService.icon className="text-white" size={20} />
+            <span className="font-medium">
+              {isCallStarted ? `🎤 Voice request for ${selectedService.name}` : `Selected: ${selectedService.name}`}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Service Categories Section - Add margin to prevent overlap */}
       <div className="mt-16 relative z-10" data-testid="service-grid">
-        <ServiceGridContainer ref={serviceGridRef} />
+        <ServiceGridContainer 
+          ref={serviceGridRef}
+          onServiceSelect={handleServiceSelect}
+          onVoiceServiceRequest={handleVoiceServiceRequest}
+        />
       </div>
 
       {/* Scroll Controls */}
