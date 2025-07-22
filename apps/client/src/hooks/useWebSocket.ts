@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { logger } from '@shared/utils/logger';
 import { ActiveOrder } from '@/types';
 

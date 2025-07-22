@@ -6,6 +6,18 @@ import React, {
   ReactNode,
 } from 'react';
 
+// Import types
+import {
+  Transcript,
+  OrderSummary,
+  CallDetails,
+  Order,
+  CallSummary,
+  ServiceRequest,
+  ActiveOrder,
+} from '@/types';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+
 // Import all new focused contexts
 import { useCall, CallProvider } from './contexts/CallContext';
 import {
@@ -21,6 +33,9 @@ import {
 import { useVapi, VapiProvider } from './contexts/VapiContext';
 import { logger } from '@shared/utils/logger';
 
+// Define Language type
+export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
+
 // Combined interface that exposes all context functionality
 export interface RefactoredAssistantContextType {
   // From CallContext
@@ -35,9 +50,9 @@ export interface RefactoredAssistantContextType {
   addCallEndListener: (listener: () => void) => () => void;
 
   // From TranscriptContext
-  transcripts: any[];
-  setTranscripts: (transcripts: any[]) => void;
-  addTranscript: (transcript: any) => void;
+  transcripts: Transcript[];
+  setTranscripts: (transcripts: Transcript[]) => void;
+  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
   modelOutput: string[];
   setModelOutput: (output: string[]) => void;
   addModelOutput: (output: string) => void;
@@ -45,42 +60,42 @@ export interface RefactoredAssistantContextType {
   clearModelOutput: () => void;
 
   // From LanguageContext
-  language: any;
-  setLanguage: (lang: any) => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
   vietnameseSummary: string | null;
   setVietnameseSummary: (summary: string) => void;
   translateToVietnamese: (text: string) => Promise<string>;
 
   // From OrderContext
-  order: any;
-  setOrder: (order: any) => void;
-  orderSummary: any;
-  setOrderSummary: (summary: any) => void;
-  callSummary: any;
-  setCallSummary: (summary: any) => void;
-  serviceRequests: any[];
-  setServiceRequests: (requests: any[]) => void;
-  activeOrders: any[];
-  setActiveOrders: any;
-  addActiveOrder: (order: any) => void;
+  order: Order | null;
+  setOrder: (order: Order | null) => void;
+  orderSummary: OrderSummary | null;
+  setOrderSummary: (summary: OrderSummary | null) => void;
+  callSummary: CallSummary | null;
+  setCallSummary: (summary: CallSummary | null) => void;
+  serviceRequests: ServiceRequest[];
+  setServiceRequests: (requests: ServiceRequest[]) => void;
+  activeOrders: ActiveOrder[];
+  setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
+  addActiveOrder: (order: ActiveOrder) => void;
   emailSentForCurrentSession: boolean;
   setEmailSentForCurrentSession: (sent: boolean) => void;
   requestReceivedAt: Date | null;
   setRequestReceivedAt: (date: Date | null) => void;
 
   // From ConfigurationContext
-  hotelConfig: any;
-  setHotelConfig: (config: any) => void;
+  hotelConfig: HotelConfiguration | null;
+  setHotelConfig: (config: HotelConfiguration | null) => void;
   tenantId: string | null;
   setTenantId: (tenantId: string | null) => void;
-  tenantConfig: any;
-  setTenantConfig: (config: any) => void;
+  tenantConfig: any | null;
+  setTenantConfig: (config: any | null) => void;
 
   // From VapiContext
   micLevel: number;
-  callDetails: any;
-  setCallDetails: (details: any) => void;
-  initializeVapi: (language: string, hotelConfig?: any) => Promise<void>;
+  callDetails: CallDetails | null;
+  setCallDetails: (details: CallDetails | null) => void;
+  initializeVapi: (language: string, hotelConfig?: HotelConfiguration | null) => Promise<void>;
   startVapiCall: (assistantId: string) => Promise<any>;
   stopVapi: () => void;
   setMuted: (muted: boolean) => void;

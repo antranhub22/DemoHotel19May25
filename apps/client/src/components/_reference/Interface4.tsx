@@ -7,7 +7,7 @@
 // ====================================================================
 
 import React, { useEffect, useCallback } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useAssistant } from '@/context/_reference/AssistantContext';
 import { t } from '@/i18n';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { logger } from '@shared/utils/logger';

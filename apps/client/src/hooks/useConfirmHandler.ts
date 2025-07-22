@@ -1,5 +1,5 @@
 import React, { useCallback, createElement, useRef } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { usePopup } from '@/components/popup-system';
 import { logger } from '@shared/utils/logger';
 

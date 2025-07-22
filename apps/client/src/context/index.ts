@@ -3,7 +3,7 @@
  */
 
 // Context providers
-export { AssistantProvider, useAssistant } from './AssistantContext';
+export { RefactoredAssistantProvider as AssistantProvider, useRefactoredAssistant as useAssistant } from './RefactoredAssistantContext';
 export { AuthProvider, useAuth } from './AuthContext';
 export { HotelProvider, useHotel } from './HotelContext';
 export { PopupProvider, usePopupContext } from './PopupContext';

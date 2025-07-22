@@ -7,7 +7,7 @@
 // ====================================================================
 
 import React, { useEffect, useState } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useAssistant } from '@/context/_reference/AssistantContext';
 import { ServiceRequest } from '@/types';
 import hotelImage from '@/assets/hotel-exterior.jpeg';
 import InfographicSteps from '../InfographicSteps';

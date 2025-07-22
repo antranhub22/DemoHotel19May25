@@ -1,5 +1,5 @@
 import { useCallback, useState, useMemo } from 'react';
-import { useAssistant } from '@/context/AssistantContext';
+import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { logger } from '@shared/utils/logger';
 
 // ✅ CONSTANTS - Moved to top level
