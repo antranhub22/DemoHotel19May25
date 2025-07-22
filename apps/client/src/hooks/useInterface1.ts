@@ -1,4 +1,10 @@
-import { useState, useCallback, useMemo, useEffect, createElement } from 'react';
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  createElement,
+} from 'react';
 
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
@@ -105,7 +111,13 @@ export const useInterface1 = ({
       setShowRightPanel,
       transcripts,
     }),
-    [conversationState, conversationPopupId, setConversationPopupId, setShowRightPanel, transcripts]
+    [
+      conversationState,
+      conversationPopupId,
+      setConversationPopupId,
+      setShowRightPanel,
+      transcripts,
+    ]
   ); // Fixed: Added all dependencies
 
   const confirmHandlerConfig = useMemo(
@@ -127,7 +139,9 @@ export const useInterface1 = ({
 
   // ✅ OPTIMIZED: Single effect for summary popup monitoring
   useEffect(() => {
-    const summaryPopup = popups.find((popup: { type: string }) => popup.type === 'summary');
+    const summaryPopup = popups.find(
+      (popup: { type: string }) => popup.type === 'summary'
+    );
     const hasSummary = !!summaryPopup;
     if (showingSummary !== hasSummary) {
       setShowingSummary(hasSummary);
@@ -150,16 +164,18 @@ export const useInterface1 = ({
       });
 
       if (import.meta.env.DEV) {
-        logger.success('Summary Popup auto-shown successfully', 'useInterface1');
+        logger.success(
+          'Summary Popup auto-shown successfully',
+          'useInterface1'
+        );
       }
     } catch (error) {
-      logger.error(
-        'Error auto-showing summary popup',
-        'useInterface1',
-        error
-      );
+      logger.error('Error auto-showing summary popup', 'useInterface1', error);
       setTimeout(() => {
-        logger.info('Call completed! Please check your conversation summary.', 'useInterface1');
+        logger.info(
+          'Call completed! Please check your conversation summary.',
+          'useInterface1'
+        );
       }, 500);
     }
   }, [showSummary]);
@@ -174,10 +190,7 @@ export const useInterface1 = ({
 
     return () => {
       if (import.meta.env.DEV) {
-        logger.debug(
-          'Unregistering auto-summary listener',
-          'useInterface1'
-        );
+        logger.debug('Unregistering auto-summary listener', 'useInterface1');
       }
       unregister();
     };
@@ -233,7 +246,7 @@ export const useInterface1 = ({
   }, [showNotification]);
 
   const handleShowSummaryDemo = useCallback(() => {
-    import('../components/popup-system/DemoPopupContent')
+    import('../components/popup-system/SummaryPopupContent')
       .then(module => {
         const { SummaryPopupContent } = module;
         showSummary(createElement(SummaryPopupContent), {

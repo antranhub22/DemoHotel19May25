@@ -1,11 +1,10 @@
 import React from 'react';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-import {
-  extractRoomNumber,
-  parseSummaryToOrderDetails,
-} from '@/lib/summaryParser';
-import { t } from '@/i18n';
-import { logger } from '@shared/utils/logger';
+
+// ===============================================
+// 🎪 DEMO POPUP CONTENT COMPONENTS
+// ===============================================
+// This file contains DEMO UI components for testing and demonstration.
+// Production components are in separate files (e.g., SummaryPopupContent.tsx)
 
 export const ConversationDemoContent: React.FC = () => {
   return (
@@ -226,127 +225,112 @@ export const AlertDemoContent: React.FC = () => {
   );
 };
 
-// Main Summary Popup Component - Uses dual summary system
-export const SummaryPopupContent: React.FC = () => {
-  const { callSummary, serviceRequests, language, callDetails } =
-    useAssistant();
-
-  // Dual Summary Logic: Vapi.ai (primary) + OpenAI (fallback)
-  const getSummaryData = () => {
-    // Priority 1: Vapi.ai callSummary (real-time, voice-optimized)
-    if (callSummary && callSummary.content) {
-      const roomNumber = extractRoomNumber(callSummary.content);
-      const orderDetails = parseSummaryToOrderDetails(callSummary.content);
-
-      return {
-        source: 'Vapi.ai',
-        roomNumber: roomNumber || 'Unknown',
-        content: callSummary.content,
-        items: orderDetails.items || [],
-        timestamp: callSummary.timestamp,
-        hasData: true,
-      };
-    }
-
-    // Priority 2: OpenAI serviceRequests (enhanced processing)
-    if (serviceRequests && serviceRequests.length > 0) {
-      const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
-
-      return {
-        source: 'OpenAI Enhanced',
-        roomNumber,
-        content: serviceRequests
-          .map(req => `${req.serviceType}: ${req.requestText}`)
-          .join('\n'),
-        items: serviceRequests.map(req => ({
-          name: req.serviceType,
-          description: req.requestText,
-          quantity: 1,
-          price: 10,
-        })),
-        timestamp: new Date(),
-        hasData: true,
-      };
-    }
-
-    // Fallback: No summary available
-    return {
-      source: 'No data',
-      roomNumber: callDetails?.roomNumber || 'Unknown',
-      content: 'Call summary not available yet',
-      items: [],
-      timestamp: new Date(),
-      hasData: false,
-    };
-  };
-
-  const summary = getSummaryData();
-
+export const StaffDemoContent: React.FC = () => {
   return (
-    <div className="space-y-3">
-      {/* Header with source indicator */}
-      <div className="flex items-center justify-between text-xs">
-        <span className="font-medium text-green-700">
-          📋 {t('summary', language)}
-        </span>
-        <span className="text-gray-500 text-[10px]">{summary.source}</span>
+    <div style={{ padding: '16px' }}>
+      <div style={{ marginBottom: '12px' }}>
+        <h4 style={{ color: '#1F2937', marginBottom: '8px', fontSize: '16px' }}>
+          👨‍💼 Staff Message
+        </h4>
+        <p style={{ color: '#6B7280', fontSize: '14px', lineHeight: '1.5' }}>
+          From: Hotel Manager
+        </p>
       </div>
 
-      {summary.hasData ? (
-        <>
-          {/* Room & Basic Info */}
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div>
-              <span className="font-medium text-gray-600">Room:</span>
-              <span className="ml-1 font-semibold text-blue-800">
-                {summary.roomNumber}
-              </span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-600">Items:</span>
-              <span className="ml-1 font-semibold text-green-700">
-                {summary.items.length}
-              </span>
-            </div>
-          </div>
+      <div
+        style={{
+          background: '#F0F9FF',
+          border: '1px solid #0EA5E9',
+          borderRadius: '8px',
+          padding: '12px',
+          marginBottom: '12px',
+        }}
+      >
+        <p style={{ margin: 0, fontSize: '14px', color: '#0F172A' }}>
+          "Good morning team! Please ensure all rooms are prepared for today's
+          VIP guests. Special attention to amenities and welcome packages."
+        </p>
+      </div>
 
-          {/* Quick Requests List */}
-          {summary.items.length > 0 && (
-            <div className="space-y-1">
-              <div className="text-[11px] font-medium text-gray-600">
-                Requests:
-              </div>
-              <div className="space-y-1 max-h-16 overflow-y-auto">
-                {summary.items.slice(0, 3).map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center gap-2 text-[10px]"
-                  >
-                    <span className="w-1 h-1 bg-green-500 rounded-full flex-shrink-0"></span>
-                    <span className="text-gray-700 truncate">{item.name}</span>
-                  </div>
-                ))}
-                {summary.items.length > 3 && (
-                  <div className="text-[10px] text-gray-500 italic">
-                    +{summary.items.length - 3} more items...
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Timestamp */}
-          <div className="text-[10px] text-gray-400 text-right">
-            {summary.timestamp.toLocaleTimeString()}
-          </div>
-        </>
-      ) : (
-        /* No Data State */
-        <div className="text-center py-2 text-gray-500">
-          <div className="text-xs">⏳ Processing call summary...</div>
-          <div className="text-[10px] mt-1">Please wait a moment</div>
-        </div>
-      )}
+      <div style={{ fontSize: '12px', color: '#6B7280', textAlign: 'right' }}>
+        5 minutes ago
+      </div>
     </div>
   );
 };
+
+export const OrderDemoContent: React.FC = () => {
+  return (
+    <div style={{ padding: '16px' }}>
+      <div style={{ marginBottom: '12px' }}>
+        <h4 style={{ color: '#1F2937', marginBottom: '8px', fontSize: '16px' }}>
+          🛎️ Room Service Order
+        </h4>
+        <p style={{ color: '#6B7280', fontSize: '14px' }}>
+          Room 205 • Order #RS-001
+        </p>
+      </div>
+
+      <div style={{ marginBottom: '12px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 12px',
+            background: '#F9FAFB',
+            borderRadius: '6px',
+            marginBottom: '6px',
+          }}
+        >
+          <span style={{ fontSize: '14px', color: '#374151' }}>
+            Club Sandwich
+          </span>
+          <span style={{ fontSize: '13px', color: '#6B7280' }}>x1</span>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '8px 12px',
+            background: '#F9FAFB',
+            borderRadius: '6px',
+          }}
+        >
+          <span style={{ fontSize: '14px', color: '#374151' }}>
+            Fresh Orange Juice
+          </span>
+          <span style={{ fontSize: '13px', color: '#6B7280' }}>x1</span>
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: '#10B981',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          textAlign: 'center',
+          fontSize: '13px',
+          fontWeight: '500',
+        }}
+      >
+        ✓ Ready for delivery
+      </div>
+    </div>
+  );
+};
+
+// ===============================================
+// 📝 DEMO COMPONENTS SUMMARY
+// ===============================================
+// Available demo components:
+// • ConversationDemoContent - Sample voice conversation
+// • NotificationDemoContent - Hotel notification example
+// • AlertDemoContent - System alert example
+// • StaffDemoContent - Staff message example
+// • OrderDemoContent - Room service order example
+//
+// 🎯 PURPOSE: UI/UX demonstration and testing
+// 🚀 PRODUCTION: Use dedicated files (SummaryPopupContent.tsx, etc.)
