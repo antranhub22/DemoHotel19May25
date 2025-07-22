@@ -4,6 +4,7 @@ import { PopupProvider, PopupManager } from '@/components/popup-system';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Interface1ErrorFallback } from '@/components/interface1/Interface1ErrorFallback';
 import { Interface1 } from '@/components/Interface1';
+import { VoiceLanguageSwitcher } from '@/components/interface1/VoiceLanguageSwitcher';
 // ✅ PERFORMANCE: Lazy load Interface3,4 to exclude from initial bundle
 // import { Interface3 } from '@/components/Interface3';
 // import { Interface4 } from '@/components/Interface4';
@@ -47,20 +48,12 @@ const VoiceAssistant: React.FC = () => {
     interface4: false,
   });
 
-  // Language options for the dropdown
-  const languageOptions = [
-    { value: 'en', label: '🇺🇸 English', flag: '🇺🇸' },
-    { value: 'vi', label: '🇻🇳 Tiếng Việt', flag: '🇻🇳' },
-    { value: 'fr', label: '🇫🇷 Français', flag: '🇫🇷' },
-    { value: 'zh', label: '🇨🇳 中文', flag: '🇨🇳' },
-    { value: 'ru', label: '🇷🇺 Русский', flag: '🇷🇺' },
-    { value: 'ko', label: '🇰🇷 한국어', flag: '🇰🇷' },
-  ];
-
-  const handleLanguageChange = (newLanguage: string) => {
-    const lang = newLanguage as Language;
-    setSelectedLanguage(lang);
-    setLanguage(lang);
+  // Enhanced language change handler
+  const handleLanguageChange = (newLanguage: Language) => {
+    setSelectedLanguage(newLanguage);
+    setLanguage(newLanguage);
+    
+    logger.debug(`🗣️ [VoiceAssistant] Language changed to: ${newLanguage}`, 'Component');
   };
 
   // Update selectedLanguage when language changes from context
@@ -94,18 +87,13 @@ const VoiceAssistant: React.FC = () => {
 
             {/* Right Controls */}
             <div className="flex items-center gap-2">
-              {/* Language Selector */}
-              <select
-                value={selectedLanguage}
-                onChange={e => handleLanguageChange(e.target.value)}
-                className="text-sm bg-white/50 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {languageOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.flag} {option.label.split(' ')[1]}
-                  </option>
-                ))}
-              </select>
+              {/* Enhanced Language Selector */}
+              <VoiceLanguageSwitcher 
+                position="header"
+                showVoicePreview={false}
+                onLanguageChange={handleLanguageChange}
+                className="scale-75 origin-right"
+              />
 
               {location.pathname.includes('/staff') && (
                 <button

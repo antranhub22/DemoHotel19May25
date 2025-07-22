@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 // Custom Hook
 import { useInterface1 } from '@/hooks/useInterface1';
-import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
+import { useRefactoredAssistant as useAssistant, Language } from '@/context/RefactoredAssistantContext';
 
 // Context
 import { usePopupContext } from '@/context/PopupContext';
@@ -28,7 +28,10 @@ import ChatPopup from './ChatPopup';
 import SummaryPopup from './SummaryPopup';
 
 // Enhanced UI Components
-import { NotificationSystem, createServiceNotification, createCallNotification } from './interface1/NotificationSystem';
+import { NotificationSystem, createCallNotification } from './interface1/NotificationSystem';
+import { VoiceLanguageSwitcher } from './interface1/VoiceLanguageSwitcher';
+import { VoiceCommandContext } from './interface1/VoiceCommandContext';
+import { addMultiLanguageNotification, LANGUAGE_DISPLAY_NAMES } from './interface1/MultiLanguageNotificationHelper';
 
 // Siri Components
 import { SiriButtonContainer } from './siri/SiriButtonContainer';
@@ -93,46 +96,47 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleShowSummaryDemo: _handleShowSummaryDemo,
   } = useInterface1({ isActive });
 
-  // 🔍 DEBUG: Log popup states
-  logger.debug('Interface1 Popup States', 'Interface1', {
-    isCallStarted,
-    showConversation,
-    chatPopupOpen: showConversation && isCallStarted,
-    summaryPopupOpen: showConversation && !isCallStarted,
-  });
-
-  // ✅ CONDITIONAL RENDERING WITHOUT EARLY RETURNS
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} />;
-  }
-
   // ✅ ENHANCED: Add service selection state for user feedback
   const [selectedService, setSelectedService] = useState<ServiceCategory | null>(null);
 
-  // ✅ ENHANCEMENT: Service interaction handlers
+  // ✅ ENHANCEMENT: Enhanced language change handler
+  const handleLanguageChange = useCallback((newLanguage: Language) => {
+    logger.debug(`🗣️ [Interface1] Language changed to: ${newLanguage}`, 'Component');
+    
+    // Add multi-language notification using helper
+    addMultiLanguageNotification(
+      'languageChanged',
+      newLanguage,
+      { language: LANGUAGE_DISPLAY_NAMES[newLanguage][newLanguage] },
+      { type: 'success', duration: 4000 }
+    );
+  }, []);
+
+  // ✅ ENHANCEMENT: Service interaction handlers with voice context
   const handleServiceSelect = useCallback((service: ServiceCategory) => {
     logger.debug(`🎯 [Interface1] Service selected: ${service.name}`, 'Component');
     
     // Show selected service feedback
     setSelectedService(service);
     
-    // Add notification for service selection
-    if (typeof window !== 'undefined' && (window as any).addNotification) {
-      (window as any).addNotification({
-        type: 'info',
-        title: 'Service Selected',
-        message: `${service.name} - Tap Siri button to request`,
+    // Add multi-language notification using helper
+    addMultiLanguageNotification(
+      'serviceSelected',
+      language,
+      { service: service.name },
+      { 
+        type: 'info', 
         duration: 4000,
-      });
-    }
+        metadata: {
+          serviceName: service.name,
+          serviceDescription: service.description,
+        }
+      }
+    );
     
     // Clear selection after 3 seconds
     setTimeout(() => setSelectedService(null), 3000);
-  }, []);
+  }, [language]);
 
   const handleVoiceServiceRequest = useCallback(async (service: ServiceCategory) => {
     logger.debug(`🎤 [Interface1] Voice service request: ${service.name}`, 'Component');
@@ -141,56 +145,99 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       // Set service selection for immediate feedback
       setSelectedService(service);
       
-      // Add notification for voice request start
-      if (typeof window !== 'undefined' && (window as any).addNotification) {
-        (window as any).addNotification({
-          type: 'call',
-          title: 'Voice Request Started',
-          message: `Starting voice request for ${service.name}`,
+      // Add multi-language notification using helper
+      addMultiLanguageNotification(
+        'voiceRequestStarted',
+        language,
+        { service: service.name },
+        { 
+          type: 'call', 
           duration: 3000,
-        });
-      }
+          metadata: {
+            serviceName: service.name,
+            language: language,
+          }
+        }
+      );
       
       // Start call with service context
       await handleCallStart(language); // Use existing handleCallStart
       
-      // TODO: Pass service context to voice assistant for more targeted responses
       logger.debug(`✅ [Interface1] Voice request started for: ${service.name}`, 'Component');
     } catch (error) {
       logger.error(`❌ [Interface1] Error starting voice request for: ${service.name}`, 'Component', error);
       setSelectedService(null); // Clear on error
       
-      // Add error notification
-      if (typeof window !== 'undefined' && (window as any).addNotification) {
-        (window as any).addNotification({
-          type: 'error',
-          title: 'Voice Request Failed',
-          message: `Unable to start voice request for ${service.name}`,
+      // Add multi-language error notification using helper
+      addMultiLanguageNotification(
+        'voiceRequestFailed',
+        language,
+        { service: service.name },
+        { 
+          type: 'error', 
           duration: 5000,
-        });
-      }
+          metadata: {
+            serviceName: service.name,
+            language: language,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          }
+        }
+      );
       
       throw error; // Let ServiceGrid handle the error display
     }
   }, [language, handleCallStart]);
 
-  // ✅ ENHANCEMENT: Add call end notification
+  // ✅ ENHANCEMENT: Add call end notification with multi-language support
   useEffect(() => {
     if (!isCallStarted && selectedService) {
       // Call ended while a service was selected
-      if (typeof window !== 'undefined' && (window as any).addNotification) {
-        const notification = createCallNotification(
-          `call-${Date.now()}`,
-          undefined, // Room number would come from call context
-          '2 minutes' // Duration would come from call context
-        );
-        (window as any).addNotification(notification);
-      }
+      addMultiLanguageNotification(
+        'voiceCallCompleted',
+        language,
+        {},
+        { 
+          type: 'success', 
+          duration: 4000,
+          metadata: {
+            language: language,
+            serviceName: selectedService.name,
+            callDuration: '2 minutes', // Would come from call context
+          }
+        }
+      );
     }
-  }, [isCallStarted, selectedService]);
+  }, [isCallStarted, selectedService, language]);
+
+  // ✅ EARLY RETURNS AFTER HOOKS
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return <ErrorState error={error} />;
+  }
 
   return (
     <InterfaceContainer>
+      {/* Enhanced Voice Language Switcher */}
+      <div className="fixed top-4 left-4 z-[9998]">
+        <VoiceLanguageSwitcher 
+          position="floating"
+          showVoicePreview={true}
+          onLanguageChange={handleLanguageChange}
+        />
+      </div>
+
+      {/* Voice Command Context (invisible but provides context) */}
+      <VoiceCommandContext 
+        selectedService={selectedService}
+        isCallActive={isCallStarted}
+        onVoicePromptReady={(prompt) => {
+          logger.debug('🎤 [Interface1] Voice prompt ready:', 'Component', prompt);
+        }}
+      />
+
       {/* Hero Section with 4-Position Layout */}
       <div
         ref={heroSectionRef}
@@ -292,13 +339,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
       {/* ✅ ENHANCEMENT: Service selection notification */}
       {selectedService && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-500 to-green-500 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-pulse">
-          <div className="flex items-center space-x-2">
-            <selectedService.icon className="text-white" size={20} />
-            <span className="font-medium">
-              {isCallStarted ? `🎤 Voice request for ${selectedService.name}` : `Selected: ${selectedService.name}`}
-            </span>
-          </div>
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md z-50">
+          🎤 {selectedService.name}...
         </div>
       )}
 
