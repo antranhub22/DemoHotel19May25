@@ -42,6 +42,7 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
   const PopupContent = () => (
     <div
       className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 overflow-hidden"
+      data-testid="summary-popup"
       style={{
         ...(isGrid
           ? {
@@ -66,6 +67,7 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
           onClick={onClose}
           className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           aria-label="Close summary"
+          data-testid="close-button"
         >
           <X size={20} className="text-gray-500" />
         </button>

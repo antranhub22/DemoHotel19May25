@@ -1,0 +1,106 @@
+{
+  "success": false,
+  "startTime": 1142.0442699994892,
+  "endTime": 1185.040378998965,
+  "duration": 42.99610899947584,
+  "testsRun": 4,
+  "testsPassed": 3,
+  "testsFailed": 1,
+  "testSuites": [
+    {
+      "name": "Mi Nhon Hotel Compatibility",
+      "status": "failed",
+      "startTime": 1170.239739999175,
+      "endTime": 1184.9990449994802,
+      "duration": 14.759305000305176,
+      "tests": [
+        {
+          "id": "verify-mi-nhon-tenant",
+          "name": "Verify Mi Nhon Hotel exists as tenant",
+          "status": "passed",
+          "startTime": 1170.5501319989562,
+          "endTime": 1175.447501000017,
+          "duration": 4.897369001060724
+        },
+        {
+          "id": "verify-existing-data",
+          "name": "Verify existing Mi Nhon data is preserved",
+          "status": "passed",
+          "startTime": 1175.549556998536,
+          "endTime": 1176.5823379997164,
+          "duration": 1.0327810011804104
+        },
+        {
+          "id": "test-voice-assistant",
+          "name": "Test Mi Nhon voice assistant functionality",
+          "status": "passed",
+          "startTime": 1176.6073309984058,
+          "endTime": 1176.8241959996521,
+          "duration": 0.21686500124633312
+        },
+        {
+          "id": "test-mi-nhon-features",
+          "name": "Test all Mi Nhon features work",
+          "status": "failed",
+          "startTime": 1176.8480960000306,
+          "endTime": 1181.8755489997566,
+          "duration": 5.027452999725938,
+          "error": "Too few parameter values were provided"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "suite": "Mi Nhon Hotel Compatibility",
+      "test": "test-mi-nhon-features",
+      "message": "Too few parameter values were provided",
+      "stack": "RangeError: Too few parameter values were provided\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "Mi Nhon Hotel Compatibility",
+      "test": "suite",
+      "message": "Too few parameter values were provided",
+      "stack": "RangeError: Too few parameter values were provided\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "Integration Test Suite",
+      "test": "main",
+      "message": "Too few parameter values were provided",
+      "stack": "RangeError: Too few parameter values were provided\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    }
+  ],
+  "miNhonCompatibility": {
+    "voiceAssistantWorking": true,
+    "existingDataPreserved": true,
+    "allFeaturesWorking": false,
+    "noPerformanceDegradation": false,
+    "apiEndpointsUnchanged": true
+  },
+  "newTenantFunctionality": {
+    "canCreateNewTenant": false,
+    "tenantHasIsolatedData": false,
+    "tenantCanUseAllFeatures": false,
+    "setupWizardWorks": false,
+    "assistantCreationWorks": false
+  },
+  "dataIsolation": {
+    "dataIsolationVerified": false,
+    "crossTenantAccessBlocked": false,
+    "tenantsCannotSeeOthersData": false,
+    "queryFiltersWorking": false
+  },
+  "dashboardApis": {
+    "hotelResearchWorks": false,
+    "assistantGenerationWorks": false,
+    "analyticsWork": false,
+    "settingsWork": false,
+    "multiTenantDataCorrect": false
+  },
+  "voiceInterface": {
+    "miNhonVoiceWorks": false,
+    "newTenantVoiceWorks": false,
+    "tenantSpecificKnowledge": false,
+    "assistantIsolation": false
+  }
+}

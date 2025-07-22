@@ -1,0 +1,2876 @@
+<testsuites id="" name="" tests="132" failures="129" skipped="0" errors="0" time="347.363504">
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="chromium-desktop" tests="16" failures="15" skipped="0" time="306.932" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="22.835">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="22.794">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="22.785">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="15.843">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="22.144">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="22.711">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="19.995">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]') to be visible
+
+
+      132 |     
+      133 |     await page.goto('/');
+    > 134 |     await page.waitForSelector('[data-testid="siri-button"]');
+          |                ^
+      135 |     
+      136 |     // Test that permission is granted and mic icon is ready
+      137 |     const siriButton = page.locator('[data-testid="siri-button"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:134:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="21.634">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      144 |     
+      145 |     // Click Siri button to start voice interaction
+    > 146 |     await page.click('[data-testid="siri-button"]');
+          |                ^
+      147 |     
+      148 |     // Check for mic level visualization
+      149 |     const micLevelIndicator = page.locator('[data-testid="mic-level"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:146:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="18.356">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="siri-button"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      161 |     
+      162 |     // Test initial state
+    > 163 |     await expect(siriButton).toBeVisible();
+          |                              ^
+      164 |     
+      165 |     // Test call start
+      166 |     await siriButton.click();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:163:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="26.824">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      176 |   test('should support English interface', async ({ page }) => {
+      177 |     await page.goto('/?lang=en');
+    > 178 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      179 |     
+      180 |     // Check English text
+      181 |     await expect(page.locator('text=Welcome to Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="26.873">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      184 |   test('should support Vietnamese interface', async ({ page }) => {
+      185 |     await page.goto('/?lang=vi');
+    > 186 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      187 |     
+      188 |     // Check Vietnamese text
+      189 |     await expect(page.locator('text=Chào mừng đến Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:186:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="26.759">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      192 |   test('should support French interface', async ({ page }) => {
+      193 |     await page.goto('/?lang=fr');
+    > 194 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      195 |     
+      196 |     // Check French text
+      197 |     await expect(page.locator('text=Bienvenue à Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:194:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="15.925">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      205 |     
+      206 |     await page.goto('/');
+    > 207 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      208 |     
+      209 |     const loadTime = Date.now() - startTime;
+      210 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:207:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="4.111">
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="2.985">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: page.goto: net::ERR_INTERNET_DISCONNECTED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      238 |     await page.context().setOffline(true);
+      239 |     
+    > 240 |     await page.goto('/');
+          |                ^
+      241 |     
+      242 |     // Should show appropriate error state
+      243 |     const errorState = page.locator('[data-testid="error-state"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:240:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/video.webm]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-chromium-desktop/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="14.358">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="interface1-container"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="interface1-container"]')
+
+
+      265 |     
+      266 |     // Verify app still functions
+    > 267 |     await expect(page.locator('[data-testid="interface1-container"]')).toBeVisible();
+          |                                                                        ^
+      268 |   });
+      269 | }); 
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:267:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="chromium-desktop" tests="6" failures="6" skipped="0" time="99.261" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="17.95">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="16.065">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="17.647">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="17.243">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="16.303">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="14.053">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [chromium-desktop] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-chromium-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-chromium-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-chromium-desktop/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-chromium-desktop/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="firefox-desktop" tests="16" failures="16" skipped="0" time="5.062" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="0.082">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="0.477">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="0.795">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="0.507">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="0.124">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="0.075">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="0.625">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="0.069">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="0.104">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="0.904">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="0.262">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="0.103">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="0.137">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="0.073">
+<failure message="interface1.spec.ts:215:3 should handle large amounts of data efficiently" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:215:3 › Interface1 - Performance Testing › should handle large amounts of data efficiently 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="0.113">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="0.612">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="firefox-desktop" tests="6" failures="6" skipped="0" time="1.978" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="0.574">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="0.072">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="0.475">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="0.059">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="0.114">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="0.684">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [firefox-desktop] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    Error: browser.newContext: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="webkit-desktop" tests="16" failures="16" skipped="0" time="25.371" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="1.408">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="1.106">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="1.467">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="1.497">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="1.142">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="1.415">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="1.112">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="1.691">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="1.985">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="1.992">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="1.992">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="1.921">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="1.371">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="1.397">
+<failure message="interface1.spec.ts:215:3 should handle large amounts of data efficiently" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:215:3 › Interface1 - Performance Testing › should handle large amounts of data efficiently 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="1.903">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="1.972">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="webkit-desktop" tests="6" failures="6" skipped="0" time="8.952" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="1.91">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="1.955">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="1.132">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="1.138">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="1.35">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="1.467">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [webkit-desktop] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="mobile-chrome" tests="16" failures="15" skipped="0" time="252.411" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="16.637">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="16.662">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="19.441">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="19.366">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="18.46">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="18.552">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="17.277">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]') to be visible
+
+
+      132 |     
+      133 |     await page.goto('/');
+    > 134 |     await page.waitForSelector('[data-testid="siri-button"]');
+          |                ^
+      135 |     
+      136 |     // Test that permission is granted and mic icon is ready
+      137 |     const siriButton = page.locator('[data-testid="siri-button"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:134:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="16.945">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      144 |     
+      145 |     // Click Siri button to start voice interaction
+    > 146 |     await page.click('[data-testid="siri-button"]');
+          |                ^
+      147 |     
+      148 |     // Check for mic level visualization
+      149 |     const micLevelIndicator = page.locator('[data-testid="mic-level"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:146:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="13.79">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="siri-button"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      161 |     
+      162 |     // Test initial state
+    > 163 |     await expect(siriButton).toBeVisible();
+          |                              ^
+      164 |     
+      165 |     // Test call start
+      166 |     await siriButton.click();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:163:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="18.469">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      176 |   test('should support English interface', async ({ page }) => {
+      177 |     await page.goto('/?lang=en');
+    > 178 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      179 |     
+      180 |     // Check English text
+      181 |     await expect(page.locator('text=Welcome to Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="19.782">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      184 |   test('should support Vietnamese interface', async ({ page }) => {
+      185 |     await page.goto('/?lang=vi');
+    > 186 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      187 |     
+      188 |     // Check Vietnamese text
+      189 |     await expect(page.locator('text=Chào mừng đến Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:186:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="19.632">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      192 |   test('should support French interface', async ({ page }) => {
+      193 |     await page.goto('/?lang=fr');
+    > 194 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      195 |     
+      196 |     // Check French text
+      197 |     await expect(page.locator('text=Bienvenue à Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:194:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="17.745">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      205 |     
+      206 |     await page.goto('/');
+    > 207 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      208 |     
+      209 |     const loadTime = Date.now() - startTime;
+      210 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:207:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="3.577">
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="3.844">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: page.goto: net::ERR_INTERNET_DISCONNECTED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      238 |     await page.context().setOffline(true);
+      239 |     
+    > 240 |     await page.goto('/');
+          |                ^
+      241 |     
+      242 |     // Should show appropriate error state
+      243 |     const errorState = page.locator('[data-testid="error-state"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:240:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/video.webm]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-mobile-chrome/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="12.232">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="interface1-container"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="interface1-container"]')
+
+
+      265 |     
+      266 |     // Verify app still functions
+    > 267 |     await expect(page.locator('[data-testid="interface1-container"]')).toBeVisible();
+          |                                                                        ^
+      268 |   });
+      269 | }); 
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:267:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="mobile-chrome" tests="6" failures="6" skipped="0" time="98.33" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="16.24">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="16.955">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="16.888">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="17.077">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="15.197">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="15.973">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [mobile-chrome] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-mobile-chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-mobile-chrome/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-mobile-chrome/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-mobile-chrome/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="mobile-safari" tests="16" failures="16" skipped="0" time="21.781" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="0.996">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="1.067">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="1.408">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="1.393">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="1.438">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="1.358">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="1.349">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="1.416">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="1.314">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="1.456">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="1.532">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="1.607">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="1.424">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="1.365">
+<failure message="interface1.spec.ts:215:3 should handle large amounts of data efficiently" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:215:3 › Interface1 - Performance Testing › should handle large amounts of data efficiently 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="1.318">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="1.34">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="mobile-safari" tests="6" failures="6" skipped="0" time="7.501" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="1.321">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="1.246">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="1.227">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="1.143">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="1.139">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="1.425">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [mobile-safari] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    Error: browserContext.newPage: Unknown permission: microphone
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="interface1/interface1.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="tablet-ipad" tests="16" failures="15" skipped="0" time="243.724" errors="0">
+<testcase name="Interface1 - Complete User Journey › should display Interface1 main layout correctly" classname="interface1/interface1.spec.ts" time="17.018">
+<failure message="interface1.spec.ts:25:3 should display Interface1 main layout correctly" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:25:3 › Interface1 - Complete User Journey › should display Interface1 main layout correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-6c912-face1-main-layout-correctly-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle responsive design correctly" classname="interface1/interface1.spec.ts" time="16.946">
+<failure message="interface1.spec.ts:46:3 should handle responsive design correctly" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:46:3 › Interface1 - Complete User Journey › should handle responsive design correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-08c43-responsive-design-correctly-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display service categories correctly" classname="interface1/interface1.spec.ts" time="17.682">
+<failure message="interface1.spec.ts:60:3 should display service categories correctly" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:60:3 › Interface1 - Complete User Journey › should display service categories correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2d8bc-ervice-categories-correctly-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle Siri button interactions" classname="interface1/interface1.spec.ts" time="18.493">
+<failure message="interface1.spec.ts:81:3 should handle Siri button interactions" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:81:3 › Interface1 - Complete User Journey › should handle Siri button interactions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-0ad90-le-Siri-button-interactions-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should display language selection correctly" classname="interface1/interface1.spec.ts" time="17.392">
+<failure message="interface1.spec.ts:96:3 should display language selection correctly" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:96:3 › Interface1 - Complete User Journey › should display language selection correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-c3419-anguage-selection-correctly-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › should handle popup system correctly" classname="interface1/interface1.spec.ts" time="16.482">
+<failure message="interface1.spec.ts:110:3 should handle popup system correctly" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:110:3 › Interface1 - Complete User Journey › should handle popup system correctly 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      15 |     
+      16 |     // Wait for Interface1 to load
+    > 17 |     await page.waitForSelector('[data-testid="interface1-container"]', { 
+         |                ^
+      18 |       timeout: 10000 
+      19 |     });
+      20 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-671d1-ndle-popup-system-correctly-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle microphone permissions" classname="interface1/interface1.spec.ts" time="17.016">
+<failure message="interface1.spec.ts:129:3 should handle microphone permissions" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:129:3 › Interface1 - Voice Assistant Integration › should handle microphone permissions 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]') to be visible
+
+
+      132 |     
+      133 |     await page.goto('/');
+    > 134 |     await page.waitForSelector('[data-testid="siri-button"]');
+          |                ^
+      135 |     
+      136 |     // Test that permission is granted and mic icon is ready
+      137 |     const siriButton = page.locator('[data-testid="siri-button"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:134:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8f101-ndle-microphone-permissions-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should display mic level visualization" classname="interface1/interface1.spec.ts" time="16.581">
+<failure message="interface1.spec.ts:141:3 should display mic level visualization" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:141:3 › Interface1 - Voice Assistant Integration › should display mic level visualization 
+
+    TimeoutError: page.click: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      144 |     
+      145 |     // Click Siri button to start voice interaction
+    > 146 |     await page.click('[data-testid="siri-button"]');
+          |                ^
+      147 |     
+      148 |     // Check for mic level visualization
+      149 |     const micLevelIndicator = page.locator('[data-testid="mic-level"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:146:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-5c144-lay-mic-level-visualization-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Voice Assistant Integration › should handle call state changes" classname="interface1/interface1.spec.ts" time="9.486">
+<failure message="interface1.spec.ts:156:3 should handle call state changes" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:156:3 › Interface1 - Voice Assistant Integration › should handle call state changes 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="siri-button"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="siri-button"]')
+
+
+      161 |     
+      162 |     // Test initial state
+    > 163 |     await expect(siriButton).toBeVisible();
+          |                              ^
+      164 |     
+      165 |     // Test call start
+      166 |     await siriButton.click();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:163:30
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-8d0c9-d-handle-call-state-changes-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support English interface" classname="interface1/interface1.spec.ts" time="18.241">
+<failure message="interface1.spec.ts:176:3 should support English interface" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:176:3 › Interface1 - Multi-language Support › should support English interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      176 |   test('should support English interface', async ({ page }) => {
+      177 |     await page.goto('/?lang=en');
+    > 178 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      179 |     
+      180 |     // Check English text
+      181 |     await expect(page.locator('text=Welcome to Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:178:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-2f0ab-d-support-English-interface-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support Vietnamese interface" classname="interface1/interface1.spec.ts" time="18.197">
+<failure message="interface1.spec.ts:184:3 should support Vietnamese interface" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:184:3 › Interface1 - Multi-language Support › should support Vietnamese interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      184 |   test('should support Vietnamese interface', async ({ page }) => {
+      185 |     await page.goto('/?lang=vi');
+    > 186 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      187 |     
+      188 |     // Check Vietnamese text
+      189 |     await expect(page.locator('text=Chào mừng đến Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:186:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-9b7ff-upport-Vietnamese-interface-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Multi-language Support › should support French interface" classname="interface1/interface1.spec.ts" time="18.283">
+<failure message="interface1.spec.ts:192:3 should support French interface" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:192:3 › Interface1 - Multi-language Support › should support French interface 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      192 |   test('should support French interface', async ({ page }) => {
+      193 |     await page.goto('/?lang=fr');
+    > 194 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      195 |     
+      196 |     // Check French text
+      197 |     await expect(page.locator('text=Bienvenue à Mi Nhon Hotel')).toBeVisible();
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:194:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-ea094-ld-support-French-interface-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should load within acceptable time limits" classname="interface1/interface1.spec.ts" time="20.02">
+<failure message="interface1.spec.ts:203:3 should load within acceptable time limits" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:203:3 › Interface1 - Performance Testing › should load within acceptable time limits 
+
+    TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+      205 |     
+      206 |     await page.goto('/');
+    > 207 |     await page.waitForSelector('[data-testid="interface1-container"]');
+          |                ^
+      208 |     
+      209 |     const loadTime = Date.now() - startTime;
+      210 |     
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:207:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-abe4f-thin-acceptable-time-limits-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Performance Testing › should handle large amounts of data efficiently" classname="interface1/interface1.spec.ts" time="5.016">
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle network errors gracefully" classname="interface1/interface1.spec.ts" time="3.119">
+<failure message="interface1.spec.ts:236:3 should handle network errors gracefully" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:236:3 › Interface1 - Error Handling › should handle network errors gracefully 
+
+    Error: page.goto: net::ERR_INTERNET_DISCONNECTED at http://localhost:3000/
+    Call log:
+      - navigating to "http://localhost:3000/", waiting until "load"
+
+
+      238 |     await page.context().setOffline(true);
+      239 |     
+    > 240 |     await page.goto('/');
+          |                ^
+      241 |     
+      242 |     // Should show appropriate error state
+      243 |     const errorState = page.locator('[data-testid="error-state"]');
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:240:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/e2e/artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/video.webm]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-3a33c-e-network-errors-gracefully-tablet-ipad/error-context.md]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Error Handling › should handle API errors gracefully" classname="interface1/interface1.spec.ts" time="13.752">
+<failure message="interface1.spec.ts:252:3 should handle API errors gracefully" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/interface1.spec.ts:252:3 › Interface1 - Error Handling › should handle API errors gracefully 
+
+    Error: Timed out 5000ms waiting for expect(locator).toBeVisible()
+
+    Locator: locator('[data-testid="interface1-container"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('[data-testid="interface1-container"]')
+
+
+      265 |     
+      266 |     // Verify app still functions
+    > 267 |     await expect(page.locator('[data-testid="interface1-container"]')).toBeVisible();
+          |                                                                        ^
+      268 |   });
+      269 | }); 
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/interface1.spec.ts:267:72
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-interface1-Inte-04656-andle-API-errors-gracefully-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="interface1/user-journey.spec.ts" timestamp="2025-07-22T05:55:34.119Z" hostname="tablet-ipad" tests="6" failures="6" skipped="0" time="95.085" errors="0">
+<testcase name="Interface1 - Complete User Journey › User Journey: Room Service Request" classname="interface1/user-journey.spec.ts" time="16.001">
+<failure message="user-journey.spec.ts:29:3 User Journey: Room Service Request" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:29:3 › Interface1 - Complete User Journey › User Journey: Room Service Request 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-1b99a-ourney-Room-Service-Request-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Multi-language Experience" classname="interface1/user-journey.spec.ts" time="15.638">
+<failure message="user-journey.spec.ts:93:3 User Journey: Multi-language Experience" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:93:3 › Interface1 - Complete User Journey › User Journey: Multi-language Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-7efe0-y-Multi-language-Experience-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Mobile Experience" classname="interface1/user-journey.spec.ts" time="16.031">
+<failure message="user-journey.spec.ts:118:3 User Journey: Mobile Experience" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:118:3 › Interface1 - Complete User Journey › User Journey: Mobile Experience 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-8e906-r-Journey-Mobile-Experience-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Error Recovery" classname="interface1/user-journey.spec.ts" time="16.281">
+<failure message="user-journey.spec.ts:140:3 User Journey: Error Recovery" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:140:3 › Interface1 - Complete User Journey › User Journey: Error Recovery 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-a25c7-User-Journey-Error-Recovery-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Performance Under Load" classname="interface1/user-journey.spec.ts" time="15.651">
+<failure message="user-journey.spec.ts:159:3 User Journey: Performance Under Load" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:159:3 › Interface1 - Complete User Journey › User Journey: Performance Under Load 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ab4ca-rney-Performance-Under-Load-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Interface1 - Complete User Journey › User Journey: Accessibility" classname="interface1/user-journey.spec.ts" time="15.483">
+<failure message="user-journey.spec.ts:194:3 User Journey: Accessibility" type="FAILURE">
+<![CDATA[  [tablet-ipad] › interface1/user-journey.spec.ts:194:3 › Interface1 - Complete User Journey › User Journey: Accessibility 
+
+    TimeoutError: locator.waitFor: Timeout 10000ms exceeded.
+    Call log:
+      - waiting for locator('[data-testid="interface1-container"]') to be visible
+
+
+       at utils/page-objects/Interface1Page.ts:83
+
+      81 |    */
+      82 |   async waitForLoad() {
+    > 83 |     await this.container.waitFor({ timeout: 10000 });
+         |                          ^
+      84 |     
+      85 |     // Wait for critical elements
+      86 |     await this.siriButton.waitFor();
+        at Interface1Page.waitForLoad (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:83:26)
+        at Interface1Page.goto (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/utils/page-objects/Interface1Page.ts:76:16)
+        at /Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/tests/e2e/interface1/user-journey.spec.ts:23:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-tablet-ipad/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../../test-results/e2e/artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-tablet-ipad/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-tablet-ipad/test-failed-1.png]]
+
+[[ATTACHMENT|artifacts/interface1-user-journey-In-ed922--User-Journey-Accessibility-tablet-ipad/video.webm]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>

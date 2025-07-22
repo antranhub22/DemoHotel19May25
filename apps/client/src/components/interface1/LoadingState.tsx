@@ -6,6 +6,7 @@ export const LoadingState: React.FC = () => {
   return (
     <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
+      data-testid="loading-state"
       style={{
         background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.secondary})`,
         fontFamily: designSystem.fonts.primary,

@@ -209,6 +209,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
     <div
       className={`relative z-30 overflow-hidden shadow-2xl chat-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${!isGrid && hasAnimated ? 'mx-auto animate-slide-up' : 'mx-auto'}`}
       style={popupStyles}
+      data-testid="chat-popup"
     >
       {/* Header */}
       <div
@@ -224,6 +225,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
         <button
           onClick={onClose}
           className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+          data-testid="close-button"
         >
           <X className="w-4 h-4 text-gray-500" />
         </button>

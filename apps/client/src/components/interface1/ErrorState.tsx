@@ -10,6 +10,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ error }) => {
   return (
     <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
+      data-testid="error-state"
       style={{
         background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.error})`,
         fontFamily: designSystem.fonts.primary,

@@ -14,6 +14,7 @@ export const ServiceGrid: React.FC = () => {
             <div
               key={index}
               className="flex items-center space-x-4 p-4 rounded-xl"
+              data-testid="service-item"
               style={{
                 background: 'rgba(255, 255, 255, 0.1)',
                 backdropFilter: 'blur(10px)',
@@ -49,6 +50,7 @@ export const ServiceGrid: React.FC = () => {
               <div
                 key={index}
                 className="relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105"
+                data-testid="service-item"
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   backdropFilter: 'blur(10px)',
@@ -86,6 +88,7 @@ export const ServiceGrid: React.FC = () => {
                 <div
                   key={index + 5}
                   className="relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105"
+                  data-testid="service-item"
                   style={{
                     background: 'rgba(255, 255, 255, 0.1)',
                     backdropFilter: 'blur(10px)',

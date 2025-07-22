@@ -206,6 +206,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   return (
     <div
       className="flex flex-col items-center justify-center w-full relative"
+      data-testid="siri-button"
       style={{
         marginBottom: designSystem.spacing.xl,
         zIndex: 9999, // Ensure highest priority

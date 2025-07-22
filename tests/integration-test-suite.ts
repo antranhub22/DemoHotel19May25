@@ -29,6 +29,9 @@ import {
   staff,
 } from '../packages/shared/db/schema';
 
+// Import test utils
+import { testSchema } from './utils/setup-test-db';
+
 // ============================================
 // Integration Test Configuration & Types
 // ============================================
@@ -200,6 +203,7 @@ export class IntegrationTestSuite {
   private testTenantId: string | null = null;
   private testAssistantId: string | null = null;
   private createdResources: string[] = [];
+  private isPostgres: boolean = false;
 
   constructor(config: Partial<IntegrationTestConfig> = {}) {
     this.config = {
@@ -412,21 +416,35 @@ export class IntegrationTestSuite {
       'test-mi-nhon-features',
       'Test all Mi Nhon features work',
       async () => {
+        const schema = this.getSchema();
         const miNhonProfile = await this.db
           .select()
-          .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenant_id, this.miNhonTenantId))
+          .from(schema.hotelProfiles)
+          .where(eq(schema.hotelProfiles.tenant_id, this.miNhonTenantId))
           .limit(1);
 
         if (!miNhonProfile || miNhonProfile.length === 0) {
           // Create Mi Nhon profile if it doesn't exist
-          await this.db.insert(hotelProfiles).values({
-            id: `mi-nhon-profile-${Date.now()}`,
-            tenantId: this.miNhonTenantId,
-            researchData: MOCK_MI_NHON_DATA,
-            vapiAssistantId:
-              process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-assistant',
-          });
+          
+          if (this.isPostgres) {
+            await this.db.insert(schema.hotelProfiles).values({
+              id: `mi-nhon-profile-${Date.now()}`,
+              tenant_id: this.miNhonTenantId,
+              research_data: MOCK_MI_NHON_DATA,
+              vapi_assistant_id:
+                process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-assistant',
+            });
+          } else {
+            await this.db.insert(schema.hotelProfiles).values({
+              id: `mi-nhon-profile-${Date.now()}`,
+              tenant_id: this.miNhonTenantId,
+              research_data: MOCK_MI_NHON_DATA,
+              vapi_assistant_id:
+                process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-assistant',
+              created_at: new Date(),
+              updated_at: new Date(),
+            });
+          }
         }
 
         this.results.miNhonCompatibility.allFeaturesWorking = true;
@@ -475,20 +493,40 @@ export class IntegrationTestSuite {
       async () => {
         this.testTenantId = `test-tenant-${Date.now()}`;
 
-        await this.db.insert(tenants).values({
-          id: this.testTenantId,
-          hotelName: MOCK_NEW_TENANT_DATA.name,
-          subdomain: MOCK_NEW_TENANT_DATA.subdomain,
-          subscriptionPlan: MOCK_NEW_TENANT_DATA.subscriptionPlan,
-          subscriptionStatus: 'active',
-          maxVoices: 5,
-          maxLanguages: 3,
-          voiceCloning: false,
-          multiLocation: false,
-          whiteLabel: false,
-          dataRetentionDays: 30,
-          monthlyCallLimit: 500,
-        });
+        const schema = this.getSchema();
+        
+        if (this.isPostgres) {
+          await this.db.insert(schema.tenants).values({
+            id: this.testTenantId,
+            hotel_name: MOCK_NEW_TENANT_DATA.name,
+            subdomain: MOCK_NEW_TENANT_DATA.subdomain,
+            subscription_plan: MOCK_NEW_TENANT_DATA.subscriptionPlan,
+            subscription_status: 'active',
+            max_voices: 5,
+            max_languages: 3,
+            voice_cloning: false,
+            multi_location: false,
+            white_label: false,
+            data_retention_days: 30,
+            monthly_call_limit: 500,
+          });
+        } else {
+          // SQLite with snake_case columns
+          await this.db.insert(schema.tenants).values({
+            id: this.testTenantId,
+            hotel_name: MOCK_NEW_TENANT_DATA.name,
+            subdomain: MOCK_NEW_TENANT_DATA.subdomain,
+            subscription_plan: MOCK_NEW_TENANT_DATA.subscriptionPlan,
+            subscription_status: 'active',
+            max_voices: 5,
+            max_languages: 3,
+            voice_cloning: false,
+            multi_location: false,
+            white_label: false,
+            data_retention_days: 30,
+            monthly_call_limit: 500,
+          });
+        }
 
         this.createdResources.push(`tenant:${this.testTenantId}`);
         this.results.newTenantFunctionality.canCreateNewTenant = true;
@@ -502,19 +540,33 @@ export class IntegrationTestSuite {
       'Test new tenant has isolated data',
       async () => {
         // Create some data for the new tenant
-        await this.db.insert(hotelProfiles).values({
-          id: `test-profile-${Date.now()}`,
-          tenantId: this.testTenantId,
-          researchData: MOCK_NEW_TENANT_DATA.hotelData,
-          knowledgeBase: 'Test knowledge base',
-          vapiAssistantId: 'test-assistant-123',
-        });
+        const schema = this.getSchema();
+        
+        if (this.isPostgres) {
+          await this.db.insert(schema.hotelProfiles).values({
+            id: `test-profile-${Date.now()}`,
+            tenant_id: this.testTenantId,
+            research_data: MOCK_NEW_TENANT_DATA.hotelData,
+            knowledge_base: 'Test knowledge base',
+            vapi_assistant_id: 'test-assistant-123',
+          });
+        } else {
+          // SQLite with snake_case columns - only use existing columns
+          await this.db.insert(schema.hotelProfiles).values({
+            id: `test-profile-${Date.now()}`,
+            tenant_id: this.testTenantId,
+            research_data: MOCK_NEW_TENANT_DATA.hotelData,
+            knowledge_base: 'Test knowledge base',
+            created_at: new Date(),
+            updated_at: new Date(),
+          });
+        }
 
         // Verify tenant can only see its own data
         const tenantData = await this.db
           .select()
-          .from(hotelProfiles)
-          .where(eq(hotelProfiles.tenant_id, this.testTenantId));
+          .from(schema.hotelProfiles)
+          .where(eq(schema.hotelProfiles.tenant_id, this.testTenantId));
 
         if (tenantData.length !== 1) {
           throw new Error('Tenant data isolation failed');
@@ -627,22 +679,47 @@ export class IntegrationTestSuite {
         const miNhonTranscriptId = `mi-nhon-transcript-${Date.now()}`;
         const testTranscriptId = `test-transcript-${Date.now()}`;
 
-        await this.db.insert(transcript).values([
-          {
-            id: miNhonTranscriptId,
-            callId: 'mi-nhon-call-123',
-            tenantId: this.miNhonTenantId,
-            transcript: 'Mi Nhon Hotel transcript',
-            createdAt: new Date(),
-          },
-          {
-            id: testTranscriptId,
-            callId: 'test-call-123',
-            tenantId: this.testTenantId,
-            transcript: 'Test Hotel transcript',
-            createdAt: new Date(),
-          },
-        ]);
+        const schema = this.getSchema();
+        
+        if (this.isPostgres) {
+          await this.db.insert(schema.transcript).values([
+            {
+              id: parseInt(miNhonTranscriptId.replace('transcript-', '')),
+              call_id: 'mi-nhon-call-123',
+              tenant_id: this.miNhonTenantId,
+              content: 'Mi Nhon Hotel transcript',
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+            {
+              id: parseInt(testTranscriptId.replace('transcript-', '')),
+              call_id: 'test-call-123',
+              tenant_id: this.testTenantId,
+              content: 'Test Hotel transcript',
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+          ]);
+        } else {
+          await this.db.insert(schema.transcript).values([
+            {
+              id: miNhonTranscriptId,
+              call_id: 'mi-nhon-call-123',
+              tenant_id: this.miNhonTenantId,
+              content: 'Mi Nhon Hotel transcript',
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+            {
+              id: testTranscriptId,
+              call_id: 'test-call-123',
+              tenant_id: this.testTenantId,
+              content: 'Test Hotel transcript',
+              role: 'assistant',
+              timestamp: new Date(),
+            },
+          ]);
+        }
 
         // Verify Mi Nhon can only see its data
         const miNhonData = await this.db
@@ -813,28 +890,57 @@ export class IntegrationTestSuite {
       'Test analytics API works',
       async () => {
         // Create some test data for analytics
-        await this.db.insert(call).values([
-          {
-            id: `analytics-call-1-${Date.now()}`,
-            callIdVapi: 'vapi-call-1',
-            tenantId: this.miNhonTenantId,
-            startTime: new Date(),
-            endTime: new Date(),
-            duration: 120,
-            language: 'en',
-            roomNumber: '101',
-          },
-          {
-            id: `analytics-call-2-${Date.now()}`,
-            callIdVapi: 'vapi-call-2',
-            tenantId: this.testTenantId,
-            startTime: new Date(),
-            endTime: new Date(),
-            duration: 180,
-            language: 'en',
-            roomNumber: '201',
-          },
-        ]);
+        const schema = this.getSchema();
+        
+        if (this.isPostgres) {
+          await this.db.insert(schema.call).values([
+            {
+              tenant_id: this.miNhonTenantId,
+              call_id_vapi: 'vapi-call-1',
+              start_time: new Date(),
+              end_time: new Date(),
+              duration: 120,
+              language: 'en',
+              room_number: '101',
+            },
+            {
+              tenant_id: this.testTenantId,
+              call_id_vapi: 'vapi-call-2',
+              start_time: new Date(),
+              end_time: new Date(),
+              duration: 180,
+              language: 'en',
+              room_number: '201',
+            },
+          ]);
+        } else {
+          await this.db.insert(schema.call).values([
+            {
+              id: `analytics-call-1-${Date.now()}`,
+              tenant_id: this.miNhonTenantId,
+              call_id_vapi: 'vapi-call-1',
+              start_time: new Date(),
+              end_time: new Date(),
+              duration: 120,
+              language: 'en',
+              room_number: '101',
+              created_at: new Date(),
+              updated_at: new Date(),
+            },
+            {
+              id: `analytics-call-2-${Date.now()}`,
+              tenant_id: this.testTenantId,
+              call_id_vapi: 'vapi-call-2',
+              start_time: new Date(),
+              end_time: new Date(),
+              duration: 180,
+              language: 'en',
+              room_number: '201',
+              created_at: new Date(),
+              updated_at: new Date(),
+            },
+          ]);
+        }
 
         // Test analytics queries work with tenant filtering
         const miNhonAnalytics = await this.db
@@ -946,13 +1052,27 @@ export class IntegrationTestSuite {
           this.results.voiceInterface.miNhonVoiceWorks = true;
         } else {
           // Create Mi Nhon profile if missing
-          await this.db.insert(hotelProfiles).values({
-            id: `mi-nhon-voice-profile-${Date.now()}`,
-            tenantId: this.miNhonTenantId,
-            vapiAssistantId:
-              process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-default',
-            researchData: MOCK_MI_NHON_DATA,
-          });
+          const schema = this.getSchema();
+          
+          if (this.isPostgres) {
+            await this.db.insert(schema.hotelProfiles).values({
+              id: `mi-nhon-voice-profile-${Date.now()}`,
+              tenant_id: this.miNhonTenantId,
+              vapi_assistant_id:
+                process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-default',
+              research_data: MOCK_MI_NHON_DATA,
+            });
+          } else {
+            await this.db.insert(schema.hotelProfiles).values({
+              id: `mi-nhon-voice-profile-${Date.now()}`,
+              tenant_id: this.miNhonTenantId,
+              vapi_assistant_id:
+                process.env.VITE_VAPI_ASSISTANT_ID || 'mi-nhon-default',
+              research_data: MOCK_MI_NHON_DATA,
+              created_at: new Date(),
+              updated_at: new Date(),
+            });
+          }
           this.results.voiceInterface.miNhonVoiceWorks = true;
         }
       }
@@ -1050,27 +1170,44 @@ export class IntegrationTestSuite {
   // Utility Methods
   // ============================================
 
+  private getSchema() {
+    return this.isPostgres ? {
+      tenants,
+      hotelProfiles,
+      call,
+      transcript,
+      request,
+      message,
+      staff,
+    } : testSchema;
+  }
+
   private async initializeTestEnvironment(): Promise<void> {
     this.log('🔧 Initializing integration test environment...', 'info');
 
     // Initialize database connection
-    const isPostgres = this.config.databaseUrl?.includes('postgres');
+    this.isPostgres = this.config.databaseUrl?.includes('postgres') || false;
 
-    if (isPostgres && this.config.databaseUrl) {
+    if (this.isPostgres && this.config.databaseUrl) {
       this.log('Connecting to PostgreSQL database...', 'info');
       const client = postgres(this.config.databaseUrl);
       this.db = drizzle(client);
+      
+      // Test database connection with PostgreSQL schema
+      const schema = this.getSchema();
+      await this.db.select().from(schema.tenants).limit(1);
     } else {
-      this.log('Using SQLite database for testing...', 'info');
-      if (fs.existsSync(this.config.testDbPath)) {
-        fs.unlinkSync(this.config.testDbPath);
-      }
-      const sqlite = new Database(this.config.testDbPath);
-      this.db = drizzleSqlite(sqlite);
+      this.log('Setting up SQLite test database...', 'info');
+      
+      // Use our test database setup utility
+      const { setupTestDatabase } = await import('./utils/setup-test-db');
+      const { db, testTenantId } = await setupTestDatabase(this.config.testDbPath);
+      
+      this.db = db;
+      this.testTenantId = testTenantId;
+      this.log(`✅ SQLite test database setup complete with tenant: ${testTenantId}`, 'success');
     }
 
-    // Test database connection
-    await this.db.select().from(tenants).limit(1);
     this.log('✅ Database connection established', 'success');
   }
 

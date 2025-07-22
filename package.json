@@ -27,6 +27,16 @@
     "test:coverage": "vitest run --coverage",
     "test:contexts": "vitest run apps/client/src/context",
     "test:api-connectivity": "tsx tools/scripts/test-api-connectivity.ts",
+    "test:integration": "tsx tools/scripts/maintenance/run-integration-tests.ts",
+    "test:integration:mock": "tsx tools/scripts/maintenance/run-integration-tests.ts scenario mock",
+    "test:integration:smoke": "tsx tools/scripts/maintenance/run-integration-tests.ts scenario smoke",
+    "test:hotel-research": "tsx tests/test-hotel-research-flow.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:interface1": "playwright test interface1",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:install": "playwright install",
     "test:build": "npm run build && npm run test:run",
     "clean": "rm -rf dist node_modules/.vite",
     "clean:install": "npm run clean && npm install",
@@ -165,7 +175,8 @@
     "tsx": "^4.20.3",
     "typescript": "5.6.3",
     "vite": "^5.4.19",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@playwright/test": "^1.40.0"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"

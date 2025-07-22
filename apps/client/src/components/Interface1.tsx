@@ -107,7 +107,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   return (
     <InterfaceContainer>
       {/* Hero Section with 4-Position Layout */}
-      <div ref={heroSectionRef} className="relative">
+      <div ref={heroSectionRef} className="relative" data-testid="interface1-container">
         <InterfaceHeader />
 
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
@@ -195,7 +195,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       </div>
 
       {/* Service Categories Section - Add margin to prevent overlap */}
-      <div className="mt-16 relative z-10">
+      <div className="mt-16 relative z-10" data-testid="service-grid">
         <ServiceGridContainer ref={serviceGridRef} />
       </div>
 
