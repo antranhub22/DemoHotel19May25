@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import http from 'http';
 import express, { type Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -175,7 +176,7 @@ app.use((req, res, next) => {
   app.use(router);
 
   // Create HTTP server for WebSocket support
-  const server = require('http').createServer(app);
+  const server = http.createServer(app);
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
