@@ -1,108 +1,97 @@
-// ✅ Support both PostgreSQL and SQLite databases
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
-import pg from 'pg';
-const { Pool } = pg;
-import Database from 'better-sqlite3';
-import {
-  tenants,
-  hotelProfiles,
-  staff,
-  call,
-  transcript,
-  request,
-  message,
-  call_summaries,
-} from './schema';
+// ✅ Enhanced Database Connection with Advanced Pooling & Monitoring
+import { connectionManager } from './connectionManager';
 
-// Check environment
-const DATABASE_URL = process.env.DATABASE_URL;
-const IS_SQLITE = DATABASE_URL?.startsWith('sqlite://');
-const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+// Initialize connection manager
+let _dbInstance: any;
 
-// Create database connection
-let db: any;
-
-if (DATABASE_URL) {
-  if (IS_SQLITE) {
-    // SQLite connection for development
-    const dbPath = DATABASE_URL.replace('sqlite://', '');
-    const sqlite = new Database(dbPath);
-    console.log(`📁 Using SQLite database: ${dbPath}`);
-
-    db = drizzleSqlite(sqlite, {
-      schema: {
-        tenants,
-        hotelProfiles,
-        staff,
-        call,
-        transcript,
-        request,
-        message,
-        call_summaries,
-      },
-    });
-  } else {
-    // PostgreSQL connection for production
-    const pool = new Pool({
-      connectionString: DATABASE_URL,
-      ssl:
-        process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
-          : false,
-      max: 10,
-      min: 2,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-    });
-
-    console.log(`🐘 Using PostgreSQL database`);
-
-    db = drizzle(pool, {
-      schema: {
-        tenants,
-        hotelProfiles,
-        staff,
-        call,
-        transcript,
-        request,
-        message,
-        call_summaries,
-      },
-    });
+/**
+ * Get database instance with advanced connection pooling
+ * Automatically initializes connection manager if not already done
+ */
+export async function getDatabase() {
+  if (!_dbInstance) {
+    _dbInstance = await connectionManager.initialize();
   }
-} else if (IS_DEVELOPMENT) {
-  // Default to SQLite in development when no DATABASE_URL
-  const sqlite = new Database('./apps/dev.db');
-  console.log(`📁 Using SQLite database: ./apps/dev.db (development default)`);
-
-  db = drizzleSqlite(sqlite, {
-    schema: {
-      tenants,
-      hotelProfiles,
-      staff,
-      call,
-      transcript,
-      request,
-      message,
-      call_summaries,
-    },
-  });
-} else {
-  throw new Error(
-    '❌ DATABASE_URL environment variable is required!\n' +
-      '📋 Please set up PostgreSQL and provide DATABASE_URL.\n' +
-      '🐳 For local development, you can use Docker:\n' +
-      '   docker run -d --name hotel-postgres \\\n' +
-      '     -e POSTGRES_DB=hotel_dev \\\n' +
-      '     -e POSTGRES_USER=hotel_user \\\n' +
-      '     -e POSTGRES_PASSWORD=dev_password \\\n' +
-      '     -p 5432:5432 postgres:15\n' +
-      '🔗 Then set: DATABASE_URL=postgresql://hotel_user:dev_password@localhost:5432/hotel_dev'
-  );
+  return _dbInstance;
 }
 
-export { db };
+/**
+ * Synchronous database access (for backwards compatibility)
+ * Note: This will throw an error if connection is not initialized
+ */
+function getDatabaseSync() {
+  try {
+    return connectionManager.getDatabase();
+  } catch (error) {
+    console.warn(
+      '⚠️ Database not initialized synchronously. Consider using getDatabase() instead.'
+    );
+    throw error;
+  }
+}
+
+// For backward compatibility - maintain existing sync access pattern
+// But log warning about migration to async pattern
+export const db = new Proxy({} as any, {
+  get(target, prop) {
+    try {
+      const database = getDatabaseSync();
+      return database[prop];
+    } catch (error) {
+      console.error(
+        '❌ Database access failed. Ensure connection is initialized first.'
+      );
+      throw error;
+    }
+  },
+});
+
+// ✅ Enhanced Database Utilities with Connection Management
+
+/**
+ * Initialize database connection explicitly
+ * Recommended for application startup
+ */
+export async function initializeDatabase() {
+  console.log('🚀 Initializing database with advanced connection pooling...');
+  const database = await connectionManager.initialize();
+  console.log('✅ Database initialization complete');
+  return database;
+}
+
+/**
+ * Get connection pool health metrics
+ */
+export function getDatabaseMetrics() {
+  return connectionManager.getMetrics();
+}
+
+/**
+ * Perform database health check
+ */
+export async function checkDatabaseHealth() {
+  return await connectionManager.healthCheck();
+}
+
+/**
+ * Gracefully shutdown database connections
+ * Important for clean application shutdown
+ */
+export async function shutdownDatabase() {
+  console.log('🔄 Shutting down database connections...');
+  await connectionManager.shutdown();
+  console.log('✅ Database shutdown complete');
+}
+
+/**
+ * Force database reconnection (for recovery scenarios)
+ */
+export async function reconnectDatabase() {
+  console.log('🔄 Reconnecting to database...');
+  const database = await connectionManager.reconnect();
+  console.log('✅ Database reconnection complete');
+  return database;
+}
 
 // Export all schema tables
 export {
@@ -156,3 +145,27 @@ export const safeNumber = (value: any): number => {
 
 export * from './schema';
 export * from './transformers';
+export * from './connectionManager';
+
+// ✅ Setup graceful shutdown handling
+const setupGracefulShutdown = () => {
+  const shutdownHandler = async (signal: string) => {
+    console.log(`📡 Received ${signal}. Initiating graceful shutdown...`);
+    try {
+      await shutdownDatabase();
+      process.exit(0);
+    } catch (error) {
+      console.error('❌ Error during graceful shutdown:', error);
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGINT', () => shutdownHandler('SIGINT'));
+  process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
+  process.on('SIGUSR2', () => shutdownHandler('SIGUSR2')); // For nodemon
+};
+
+// Setup graceful shutdown in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  setupGracefulShutdown();
+}
