@@ -158,7 +158,7 @@ export default [
         'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^(_|logger|debug|React|JSX)$',
+          varsIgnorePattern: '^(_|logger|debug|React|JSX)',
           ignoreRestSiblings: true,
         },
       ],

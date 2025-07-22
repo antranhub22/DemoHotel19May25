@@ -64,7 +64,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
         };
         navigator.vibrate(patterns[type]);
       }
-    } catch (_error) {
+    } catch {
       logger.debug('Haptic feedback not available', 'Component');
     }
   }, [isMobile, voiceSettings.haptics]);
