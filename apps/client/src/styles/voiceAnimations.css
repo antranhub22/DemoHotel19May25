@@ -1,0 +1,454 @@
+/* =====================================================
+   🎨 VOICE UI ANIMATION SYSTEM
+   Enhanced animations for voice interactions & UX polish
+   ===================================================== */
+
+/* =============== LANGUAGE SWITCHER ANIMATIONS =============== */
+
+.voice-language-switcher {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voice-language-switcher.opening {
+  animation: languageSwitcherOpen 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.voice-language-switcher.closing {
+  animation: languageSwitcherClose 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+@keyframes languageSwitcherOpen {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes languageSwitcherClose {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+/* Language option hover effects */
+.language-option {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.language-option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.language-option:hover::before {
+  left: 100%;
+}
+
+.language-option:hover {
+  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.language-option.selected {
+  animation: languageSelected 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes languageSelected {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* =============== VOICE CONTEXT ANIMATIONS =============== */
+
+.voice-context-indicator {
+  animation: voiceContextAppear 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes voiceContextAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.8);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateX(-10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.voice-context-indicator.disappearing {
+  animation: voiceContextDisappear 0.4s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+}
+
+@keyframes voiceContextDisappear {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100px) scale(0.8);
+  }
+}
+
+/* Voice context pulse effect */
+.voice-context-pulse {
+  animation: voiceContextPulse 2s ease-in-out infinite;
+}
+
+@keyframes voiceContextPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+  }
+}
+
+/* =============== NOTIFICATION ANIMATIONS =============== */
+
+.notification-enter {
+  animation: notificationSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.notification-exit {
+  animation: notificationSlideOut 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+}
+
+@keyframes notificationSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translateX(-5%) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes notificationSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+  }
+}
+
+/* Notification stack animation */
+.notification-stack-item {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.notification-stack-item.moving-up {
+  animation: notificationMoveUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes notificationMoveUp {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(-80px);
+  }
+}
+
+/* =============== VOICE BUTTON ENHANCEMENTS =============== */
+
+.siri-button-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.siri-button-container.language-changing {
+  animation: languageChangeGlow 1s ease-in-out;
+}
+
+@keyframes languageChangeGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+  }
+}
+
+.siri-button-container.service-selected {
+  animation: serviceSelectedPulse 0.8s ease-out;
+}
+
+@keyframes serviceSelectedPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 30px rgba(34, 197, 94, 0.6));
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* =============== MOBILE OPTIMIZATIONS =============== */
+
+@media (max-width: 768px) {
+  /* Mobile-optimized language switcher */
+  .voice-language-switcher.mobile {
+    transform: scale(0.9);
+    animation: mobileFadeIn 0.3s ease-out;
+  }
+  
+  @keyframes mobileFadeIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(0.9) translateY(0);
+    }
+  }
+  
+  /* Mobile voice context indicator */
+  .voice-context-indicator.mobile {
+    animation: mobileVoiceContextSlide 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  @keyframes mobileVoiceContextSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(-50px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Mobile notification adjustments */
+  .notification-enter.mobile {
+    animation: mobileNotificationSlide 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  @keyframes mobileNotificationSlide {
+    0% {
+      opacity: 0;
+      transform: translateY(-100%) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+/* =============== ENHANCED VISUAL EFFECTS =============== */
+
+/* Gradient text animation for voice feedback */
+.voice-feedback-text {
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Voice wave animation */
+.voice-wave {
+  display: inline-block;
+  animation: voiceWave 1.5s ease-in-out infinite;
+}
+
+.voice-wave:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.voice-wave:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes voiceWave {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+}
+
+/* Floating particle effect */
+.voice-particles {
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-particles::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.2), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.3), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.2), transparent);
+  background-repeat: repeat;
+  background-size: 150px 100px;
+  animation: floatingParticles 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes floatingParticles {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px);
+  }
+}
+
+/* =============== ACCESSIBILITY ENHANCEMENTS =============== */
+
+/* Focus indicators */
+.voice-control:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  animation: focusGlow 0.3s ease-out;
+}
+
+@keyframes focusGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .voice-language-switcher,
+  .voice-context-indicator,
+  .notification-enter,
+  .notification-exit,
+  .siri-button-container {
+    animation: none;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  }
+  
+  .voice-feedback-text {
+    animation: none;
+    background: #3b82f6;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: #3b82f6;
+  }
+}
+
+/* =============== LOADING STATES =============== */
+
+.voice-loading {
+  animation: voiceLoading 1.5s ease-in-out infinite;
+}
+
+@keyframes voiceLoading {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* =============== ERROR STATES =============== */
+
+.voice-error {
+  animation: voiceError 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes voiceError {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* =============== SUCCESS STATES =============== */
+
+.voice-success {
+  animation: voiceSuccess 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes voiceSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.6));
+  }
+  100% {
+    transform: scale(1);
+  }
+} 

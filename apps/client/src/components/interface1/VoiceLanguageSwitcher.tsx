@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Language } from '@/types/interface1.types';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
-import { ChevronDown, Mic, Volume2, CheckCircle } from 'lucide-react';
+import { ChevronDown, Mic, Volume2, CheckCircle, Smartphone } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { logger } from '@shared/utils/logger';
 
 interface LanguageOption {
@@ -65,14 +66,50 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
   },
 ];
 
-// Language-specific colors (matching SiriButtonContainer)
+// Enhanced language-specific colors with gradients
 const LANGUAGE_COLORS = {
-  en: { primary: '#5DB6B9', secondary: '#E8B554', bg: 'bg-blue-50', border: 'border-blue-200' },
-  vi: { primary: '#EC4899', secondary: '#F9A8D4', bg: 'bg-pink-50', border: 'border-pink-200' },
-  fr: { primary: '#8B5CF6', secondary: '#A78BFA', bg: 'bg-purple-50', border: 'border-purple-200' },
-  zh: { primary: '#EF4444', secondary: '#FCA5A5', bg: 'bg-red-50', border: 'border-red-200' },
-  ru: { primary: '#10B981', secondary: '#6EE7B7', bg: 'bg-green-50', border: 'border-green-200' },
-  ko: { primary: '#F59E0B', secondary: '#FDE68A', bg: 'bg-orange-50', border: 'border-orange-200' },
+  en: { 
+    primary: '#5DB6B9', 
+    secondary: '#E8B554', 
+    bg: 'bg-gradient-to-br from-blue-50 to-cyan-50', 
+    border: 'border-blue-200',
+    gradient: 'from-blue-500 to-cyan-500'
+  },
+  vi: { 
+    primary: '#EC4899', 
+    secondary: '#F9A8D4', 
+    bg: 'bg-gradient-to-br from-pink-50 to-rose-50', 
+    border: 'border-pink-200',
+    gradient: 'from-pink-500 to-rose-500'
+  },
+  fr: { 
+    primary: '#8B5CF6', 
+    secondary: '#A78BFA', 
+    bg: 'bg-gradient-to-br from-purple-50 to-indigo-50', 
+    border: 'border-purple-200',
+    gradient: 'from-purple-500 to-indigo-500'
+  },
+  zh: { 
+    primary: '#EF4444', 
+    secondary: '#FCA5A5', 
+    bg: 'bg-gradient-to-br from-red-50 to-orange-50', 
+    border: 'border-red-200',
+    gradient: 'from-red-500 to-orange-500'
+  },
+  ru: { 
+    primary: '#10B981', 
+    secondary: '#6EE7B7', 
+    bg: 'bg-gradient-to-br from-green-50 to-emerald-50', 
+    border: 'border-green-200',
+    gradient: 'from-green-500 to-emerald-500'
+  },
+  ko: { 
+    primary: '#F59E0B', 
+    secondary: '#FDE68A', 
+    bg: 'bg-gradient-to-br from-orange-50 to-yellow-50', 
+    border: 'border-orange-200',
+    gradient: 'from-orange-500 to-yellow-500'
+  },
 } as const;
 
 interface VoiceLanguageSwitcherProps {
@@ -92,17 +129,19 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
   const [previewingLanguage, setPreviewingLanguage] = useState<Language | null>(null);
+  const [animationState, setAnimationState] = useState<'idle' | 'opening' | 'closing'>('idle');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speechRef = useRef<any>(null);
+  const isMobile = useIsMobile();
 
   const currentOption = LANGUAGE_OPTIONS.find(opt => opt.code === language) || LANGUAGE_OPTIONS[0];
   const currentColors = LANGUAGE_COLORS[language];
 
-  // Close dropdown when clicking outside
+  // Enhanced close dropdown handler with animation
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as any)) {
+        handleCloseDropdown();
       }
     };
 
@@ -110,16 +149,38 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Stop speech synthesis on unmount
+  // Enhanced dropdown close with animation
+  const handleCloseDropdown = useCallback(() => {
+    if (isOpen) {
+      setAnimationState('closing');
+      setTimeout(() => {
+        setIsOpen(false);
+        setAnimationState('idle');
+      }, 300);
+    }
+  }, [isOpen]);
+
+  // Enhanced dropdown open with animation
+  const handleOpenDropdown = useCallback(() => {
+    if (!isOpen) {
+      setIsOpen(true);
+      setAnimationState('opening');
+      setTimeout(() => {
+        setAnimationState('idle');
+      }, 400);
+    }
+  }, [isOpen]);
+
+  // Cleanup speech synthesis on unmount
   useEffect(() => {
     return () => {
-      if (speechRef.current) {
-        speechSynthesis.cancel();
+      if (speechRef.current && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
       }
     };
   }, []);
 
-  // Handle language change with voice feedback
+  // Enhanced language change handler with visual feedback
   const handleLanguageSelect = useCallback(async (newLanguage: Language) => {
     logger.debug(`🗣️ [VoiceLanguageSwitcher] Language selected: ${newLanguage}`, 'Component');
     
@@ -143,7 +204,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
         });
       }
       
-      // Play confirmation sound/voice (optional)
+      // Enhanced voice confirmation with error handling
       if (showVoicePreview && 'speechSynthesis' in window) {
         setTimeout(() => {
           playVoicePreview(newLanguage, true);
@@ -165,32 +226,32 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
       }
     } finally {
       setIsChanging(false);
-      setIsOpen(false);
+      handleCloseDropdown();
     }
-  }, [setLanguage, onLanguageChange, showVoicePreview]);
+  }, [setLanguage, onLanguageChange, showVoicePreview, handleCloseDropdown]);
 
-  // Play voice preview for language option
+  // Enhanced voice preview with better error handling
   const playVoicePreview = useCallback((langCode: Language, isConfirmation = false) => {
-    if (!('speechSynthesis' in window)) {
+    if (!('speechSynthesis' in window) || typeof window.speechSynthesis === 'undefined') {
       logger.warn('Speech synthesis not supported', 'Component');
       return;
     }
 
     // Cancel any ongoing speech
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
 
     const option = LANGUAGE_OPTIONS.find(opt => opt.code === langCode);
     if (!option) return;
 
     setPreviewingLanguage(langCode);
 
-    const utterance = new SpeechSynthesisUtterance(
+    const utterance = new window.SpeechSynthesisUtterance(
       isConfirmation 
         ? option.sampleText 
         : `${option.name}. ${option.sampleText}`
     );
     
-    // Set language-specific voice settings
+    // Enhanced language-specific voice settings
     utterance.lang = langCode === 'en' ? 'en-US' 
                    : langCode === 'vi' ? 'vi-VN'
                    : langCode === 'fr' ? 'fr-FR'
@@ -198,88 +259,126 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
                    : langCode === 'ru' ? 'ru-RU'
                    : langCode === 'ko' ? 'ko-KR'
                    : 'en-US';
-
+    
     utterance.rate = 0.9;
-    utterance.pitch = 1.0;
-    utterance.volume = 0.8;
+    utterance.volume = 0.7;
+    utterance.pitch = 1;
+
+    // Enhanced event handlers
+    utterance.onstart = () => {
+      logger.debug(`🔊 [VoiceLanguageSwitcher] Voice preview started for ${langCode}`, 'Component');
+    };
 
     utterance.onend = () => {
       setPreviewingLanguage(null);
+      logger.debug(`🔊 [VoiceLanguageSwitcher] Voice preview ended for ${langCode}`, 'Component');
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
       setPreviewingLanguage(null);
-      logger.warn(`Voice preview failed for ${langCode}`, 'Component');
+      logger.warn(`🔊 [VoiceLanguageSwitcher] Voice preview error for ${langCode}:`, 'Component', event);
     };
 
     speechRef.current = utterance;
-    speechSynthesis.speak(utterance);
 
-    logger.debug(`🔊 [VoiceLanguageSwitcher] Playing voice preview for: ${langCode}`, 'Component');
+    try {
+      window.speechSynthesis.speak(utterance);
+      logger.debug(`🎤 [VoiceLanguageSwitcher] Playing voice preview for ${langCode}`, 'Component');
+    } catch (error) {
+      logger.error(`🔊 [VoiceLanguageSwitcher] Failed to play voice preview:`, 'Component', error);
+      setPreviewingLanguage(null);
+    }
   }, []);
 
-  // Stop current voice preview
+  // Stop voice preview
   const stopVoicePreview = useCallback(() => {
-    speechSynthesis.cancel();
-    setPreviewingLanguage(null);
+    if (speechRef.current && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setPreviewingLanguage(null);
+      speechRef.current = null;
+    }
   }, []);
 
-  // Get position-specific styles
+  // Get enhanced position-specific styles
   const getPositionStyles = () => {
+    const baseStyles = 'backdrop-blur-lg shadow-xl transition-all duration-300';
+    
     switch (position) {
       case 'header':
-        return 'bg-white/90 border shadow-sm';
+        return `${baseStyles} bg-white/95 border border-gray-200/50`;
       case 'floating':
-        return 'bg-white/95 backdrop-blur-md border border-white/20 shadow-lg';
+        return `${baseStyles} bg-white/90 border border-white/30 shadow-2xl`;
       case 'inline':
-        return 'bg-transparent border-2';
+        return `${baseStyles} bg-transparent border-2`;
       default:
-        return 'bg-white/95 backdrop-blur-md border border-white/20 shadow-lg';
+        return `${baseStyles} bg-white/90 border border-white/30`;
     }
+  };
+
+  // Get animation classes
+  const getAnimationClasses = () => {
+    const mobileClass = isMobile ? 'mobile' : '';
+    const animationClass = animationState === 'opening' ? 'opening' 
+                         : animationState === 'closing' ? 'closing' 
+                         : '';
+    return `voice-language-switcher ${mobileClass} ${animationClass}`.trim();
   };
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
-      {/* Main Button */}
+      {/* Enhanced Main Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={isOpen ? handleCloseDropdown : handleOpenDropdown}
         disabled={isChanging}
         className={`
-          flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
+          voice-control flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
           ${getPositionStyles()}
           ${currentColors.bg} ${currentColors.border}
-          hover:shadow-md hover:scale-105 active:scale-95
-          ${isChanging ? 'opacity-50 cursor-wait' : 'cursor-pointer'}
+          hover:shadow-lg hover:scale-105 active:scale-95 focus:scale-105
+          ${isChanging ? 'opacity-50 cursor-wait voice-loading' : 'cursor-pointer'}
           ${isOpen ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
+          ${isMobile ? 'px-3 py-2 text-sm' : ''}
         `}
         style={{
           borderColor: isOpen ? currentColors.primary : undefined,
         }}
+        aria-label={`Current language: ${currentOption.nativeName}. Click to change language.`}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
-        {/* Flag and Language */}
+        {/* Flag and Language Info */}
         <div className="flex items-center gap-2">
-          <span className="text-xl">{currentOption.flag}</span>
+          <span className={`${isMobile ? 'text-lg' : 'text-xl'}`} role="img" aria-label={currentOption.name}>
+            {currentOption.flag}
+          </span>
           <div className="text-left">
-            <div className="font-medium text-sm" style={{ color: currentColors.primary }}>
+            <div className={`font-medium ${isMobile ? 'text-xs' : 'text-sm'} voice-feedback-text`} 
+                 style={{ color: currentColors.primary }}>
               {currentOption.nativeName}
             </div>
-            <div className="text-xs text-gray-500">
-              {currentOption.accent}
-            </div>
+            {!isMobile && (
+              <div className="text-xs text-gray-500">
+                {currentOption.accent}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Status Indicators */}
+        {/* Enhanced Status Indicators */}
         <div className="flex items-center gap-2 ml-auto">
           {isChanging && (
             <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-blue-600"></div>
           )}
           
-          {showVoicePreview && (
-            <div className="flex items-center gap-1">
+          {showVoicePreview && !isMobile && (
+            <div className="flex items-center gap-1 voice-particles">
               <Mic className="h-3 w-3 text-gray-500" />
               <Volume2 className="h-3 w-3 text-gray-500" />
             </div>
+          )}
+
+          {isMobile && (
+            <Smartphone className="h-3 w-3 text-gray-500" />
           )}
 
           <ChevronDown 
@@ -290,9 +389,16 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
         </div>
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Enhanced Dropdown Menu with Animations */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 py-2 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl shadow-xl z-50 min-w-[300px]">
+        <div className={`
+          ${getAnimationClasses()}
+          absolute ${position === 'header' ? 'top-full right-0' : 'top-full left-0 right-0'} 
+          mt-2 py-2 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-50 
+          ${isMobile ? 'min-w-[280px]' : 'min-w-[320px]'}
+          voice-particles
+        `}>
+          {/* Enhanced Language Options */}
           {LANGUAGE_OPTIONS.map((option) => {
             const isSelected = option.code === language;
             const isPreviewing = previewingLanguage === option.code;
@@ -302,55 +408,71 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
               <div
                 key={option.code}
                 className={`
-                  flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50 cursor-pointer transition-all duration-200
-                  ${isSelected ? colors.bg : ''}
-                  ${isPreviewing ? 'bg-blue-50/50' : ''}
+                  language-option flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50 cursor-pointer transition-all duration-200
+                  ${isSelected ? `${colors.bg} ${isSelected ? 'selected' : ''}` : ''}
+                  ${isPreviewing ? 'bg-blue-50/50 voice-wave' : ''}
+                  ${isMobile ? 'px-3 py-2' : ''}
                 `}
                 onClick={() => handleLanguageSelect(option.code)}
-                onMouseEnter={() => showVoicePreview && playVoicePreview(option.code)}
+                onMouseEnter={() => showVoicePreview && !isMobile && playVoicePreview(option.code)}
                 onMouseLeave={stopVoicePreview}
+                role="option"
+                aria-selected={isSelected}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleLanguageSelect(option.code);
+                  }
+                }}
               >
                 {/* Flag and Names */}
                 <div className="flex items-center gap-3 flex-1">
-                  <span className="text-xl">{option.flag}</span>
+                  <span className={`${isMobile ? 'text-lg' : 'text-xl'}`} role="img" aria-label={option.name}>
+                    {option.flag}
+                  </span>
                   <div>
-                    <div className="font-medium text-sm" style={{ 
-                      color: isSelected ? colors.primary : '#374151' 
-                    }}>
+                    <div className={`font-medium ${isMobile ? 'text-sm' : 'text-sm'}`} 
+                         style={{ color: isSelected ? colors.primary : '#374151' }}>
                       {option.nativeName}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className={`text-xs text-gray-500 ${isMobile ? 'hidden' : ''}`}>
                       {option.name} • {option.accent}
                     </div>
                   </div>
                 </div>
 
-                {/* Status Indicators */}
+                {/* Enhanced Status Indicators */}
                 <div className="flex items-center gap-2">
                   {isPreviewing && (
                     <div className="flex items-center gap-1 text-blue-500">
                       <Volume2 className="h-3 w-3 animate-pulse" />
+                      <div className="flex gap-0.5">
+                        <div className="voice-wave w-1 h-3 bg-blue-500 rounded-full"></div>
+                        <div className="voice-wave w-1 h-3 bg-blue-500 rounded-full"></div>
+                        <div className="voice-wave w-1 h-3 bg-blue-500 rounded-full"></div>
+                      </div>
                     </div>
                   )}
                   
-                  {showVoicePreview && !isPreviewing && (
+                  {showVoicePreview && !isPreviewing && !isMobile && (
                     <div className="flex items-center gap-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Volume2 className="h-3 w-3" />
                     </div>
                   )}
 
                   {isSelected && (
-                    <CheckCircle className="h-4 w-4" style={{ color: colors.primary }} />
+                    <CheckCircle className="h-4 w-4 voice-success" style={{ color: colors.primary }} />
                   )}
                 </div>
               </div>
             );
           })}
 
-          {/* Footer */}
+          {/* Enhanced Footer */}
           <div className="border-t border-gray-200/50 mt-2 pt-2 px-4">
-            <div className="text-xs text-gray-500 text-center">
-              🎤 Hover to preview voice • Click to switch
+            <div className={`text-xs text-gray-500 text-center ${isMobile ? 'text-xs' : ''}`}>
+              {isMobile ? '🎤 Tap to preview • Tap to switch' : '🎤 Hover to preview voice • Click to switch'}
             </div>
           </div>
         </div>

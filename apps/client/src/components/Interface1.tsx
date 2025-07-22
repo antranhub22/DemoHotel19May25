@@ -28,9 +28,10 @@ import ChatPopup from './ChatPopup';
 import SummaryPopup from './SummaryPopup';
 
 // Enhanced UI Components
-import { NotificationSystem, createCallNotification } from './interface1/NotificationSystem';
+import { NotificationSystem } from './interface1/NotificationSystem';
 import { VoiceLanguageSwitcher } from './interface1/VoiceLanguageSwitcher';
 import { VoiceCommandContext } from './interface1/VoiceCommandContext';
+import { MobileVoiceControls } from './interface1/MobileVoiceControls';
 import { addMultiLanguageNotification, LANGUAGE_DISPLAY_NAMES } from './interface1/MultiLanguageNotificationHelper';
 
 // Siri Components
@@ -236,6 +237,13 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         onVoicePromptReady={(prompt) => {
           logger.debug('🎤 [Interface1] Voice prompt ready:', 'Component', prompt);
         }}
+      />
+
+      {/* Mobile Voice Controls */}
+      <MobileVoiceControls 
+        selectedService={selectedService}
+        isCallActive={isCallStarted}
+        onLanguageChange={handleLanguageChange}
       />
 
       {/* Hero Section with 4-Position Layout */}

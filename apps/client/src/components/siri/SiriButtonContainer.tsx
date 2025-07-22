@@ -64,7 +64,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   onCallEnd,
   onCancel,
   onConfirm,
-  showingSummary = false, // ✅ NEW: Default to false
+  _showingSummary = false, // ✅ NEW: Default to false
 }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
@@ -242,12 +242,12 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     }
   };
 
-  const handleCancel = () => {
+  const _handleCancel = () => {
     logger.debug('❌ [SiriButtonContainer] Cancelling call', 'Component');
 
     // ✅ IMPROVED: Better error handling for cancel
     try {
-      onCancel();
+      onCancel?.();
       logger.debug(
         '✅ [SiriButtonContainer] Call cancelled successfully',
         'Component'
@@ -259,7 +259,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         error
       );
 
-      // ✅ IMPROVED: Continue with cancel even if there's an error
+      // ✅ IMPROVED: Even if cancel fails, still show success to user
       logger.debug(
         '⚠️ [SiriButtonContainer] Cancel had errors but proceeding normally',
         'Component'
@@ -295,8 +295,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
   return (
     <div
-      className="flex flex-col items-center justify-center w-full relative"
-      data-testid="siri-button"
+      className="relative flex flex-col items-center justify-center voice-button-container"
       style={{
         marginBottom: designSystem.spacing.xl,
         zIndex: 9999, // Ensure highest priority
@@ -308,7 +307,19 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
       }}
+      role="application"
+      aria-label="Voice Assistant Control Panel"
     >
+      {/* Screen Reader Only Status */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {isConfirming 
+          ? 'Processing call summary, please wait'
+          : isCallStarted 
+            ? `Voice call active in ${LANGUAGE_COLORS[language].name}. Press space or enter to end call.`
+            : `Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Press space or enter to start speaking.`
+        }
+      </div>
+
       {/* Top Row: Cancel + Confirm - DISABLED BY USER REQUEST */}
       <div
         className="flex items-center justify-center gap-4 w-full max-w-sm px-4"
@@ -326,6 +337,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           transition: 'opacity 0.3s ease-in-out',
           zIndex: 1, // Above container but below outer z-index
         }}
+        aria-hidden="true"
       >
         {/* Cancel Button - DISABLED */}
         <button
@@ -333,6 +345,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           disabled={true}
           className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
+          aria-label="Cancel voice call"
+          tabIndex={-1}
         >
           Cancel
         </button>
@@ -343,15 +357,42 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           disabled={true}
           className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
           style={{ minWidth: '80px' }}
+          aria-label="Confirm voice call"
+          tabIndex={-1}
         >
           Confirm
         </button>
       </div>
 
-      {/* Siri Button Container - HYBRID: Desktop fixed + Mobile responsive */}
+      {/* Enhanced Siri Button Container with Full Accessibility */}
       <div
-        className={`relative transition-all duration-500 ease-in-out voice-button ${isCallStarted ? 'listening' : ''} ${isConfirming ? 'confirming' : ''}`}
+        className={`relative transition-all duration-500 ease-in-out voice-control hardware-accelerated ${isCallStarted ? 'listening active' : ''} ${isConfirming ? 'confirming' : ''} focus-ring ${isConfirming ? 'gentle-glow' : ''}`}
         data-language={language}
+        role="button"
+        tabIndex={0}
+        aria-pressed={isCallStarted}
+        aria-disabled={isConfirming}
+        aria-label={
+          isConfirming 
+            ? 'Processing call summary, please wait'
+            : isCallStarted 
+              ? `End voice call in ${LANGUAGE_COLORS[language].name}`
+              : `Start voice call in ${LANGUAGE_COLORS[language].name}`
+        }
+        aria-describedby="voice-button-status"
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !isConfirming) {
+            e.preventDefault();
+            if (isCallStarted) {
+              handleEndCall();
+            } else {
+              handleStartCall(language);
+            }
+          }
+        }}
+        onFocus={() => {
+          // Add focus ring for keyboard navigation - removed due to typing issue
+        }}
         style={{
           // 🔧 HYBRID FIX: Use responsive sizing hook
           width: responsiveSize.width,
@@ -381,6 +422,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           aspectRatio: '1', // Force perfect square
           margin: '0 auto', // Center horizontally
           contain: 'layout style', // Enhanced containment for stability
+          // Enhanced focus styles
+          outline: 'none',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         <SiriCallButton
@@ -394,21 +438,25 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         />
       </div>
 
-      {/* Status text - Shows different messages based on state */}
+      {/* Enhanced Status text with better accessibility */}
       <div
+        id="voice-button-status"
         className="block mt-4 text-center transition-all duration-300"
+        role="status"
+        aria-live="polite"
         style={{
           fontSize: '1rem',
           fontWeight: '600',
         }}
       >
-        {/* ✅ NEW: Different messages based on state */}
+        {/* ✅ Enhanced messages with better accessibility */}
         {isConfirming ? (
           <div
             style={{
               color: '#808080',
               textShadow: `0 2px 8px rgba(128, 128, 128, 0.3)`,
             }}
+            aria-label="Processing call summary, please wait"
           >
             📋 Processing call summary...
           </div>
@@ -418,6 +466,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
               color: currentColors.primary,
               textShadow: `0 2px 8px ${currentColors.glow}`,
             }}
+            aria-label={`Voice call active in ${LANGUAGE_COLORS[language].name}. Tap or press Enter to end call`}
           >
             🎤 Listening... Tap to end call
           </div>
@@ -427,10 +476,16 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
               color: currentColors.primary,
               textShadow: `0 2px 8px ${currentColors.glow}`,
             }}
+            aria-label={`Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Tap or press Enter to start speaking`}
           >
             Tap To Speak
           </div>
         )}
+      </div>
+
+      {/* Keyboard Navigation Hint */}
+      <div className="mt-2 text-xs text-gray-500 text-center opacity-70">
+        Press Space or Enter to {isCallStarted ? 'end' : 'start'} voice call
       </div>
 
       {/* 🧪 DEBUG: Mobile Touch Debugger - Development only */}

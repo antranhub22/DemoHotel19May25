@@ -573,3 +573,766 @@
   opacity: 0;
   transform: translateY(-10px);
 } 
+
+/* ========================================
+   VOICE INTERACTION ANIMATIONS
+   ======================================== */
+
+/* Voice Wave Animations */
+@keyframes voiceWave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+
+@keyframes voiceWaveStaggered {
+  0%, 100% {
+    height: 6px;
+  }
+  50% {
+    height: 20px;
+  }
+}
+
+.voice-wave {
+  animation: voiceWave 1.5s ease-in-out infinite;
+}
+
+.voice-wave:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.voice-wave:nth-child(2) {
+  animation-delay: 0.1s;
+  animation: voiceWaveStaggered 1.3s ease-in-out infinite;
+}
+
+.voice-wave:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Voice Loading Animation */
+@keyframes voiceLoading {
+  0% {
+    transform: scale(1);
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  }
+  50% {
+    transform: scale(1.05);
+    background: linear-gradient(45deg, #8b5cf6, #3b82f6);
+  }
+  100% {
+    transform: scale(1);
+    background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+  }
+}
+
+.voice-loading {
+  animation: voiceLoading 2s ease-in-out infinite;
+}
+
+/* Voice Success Animation */
+@keyframes voiceSuccess {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.voice-success {
+  animation: voiceSuccess 0.6s ease-out;
+}
+
+/* Voice Particles Animation */
+@keyframes voiceParticles {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+.voice-particles::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
+  animation: voiceParticles 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Voice Control States */
+@keyframes voiceControlPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+}
+
+.voice-control {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.voice-control:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.voice-control:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.voice-control.active {
+  animation: voiceControlPulse 2s infinite;
+}
+
+/* ========================================
+   ENHANCED NOTIFICATION ANIMATIONS
+   ======================================== */
+
+/* Notification Entry Animations */
+@keyframes notificationSlideIn {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notificationSlideOut {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes notificationBounceIn {
+  0% {
+    transform: scale(0.3) translateX(100%);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) translateX(-10%);
+  }
+  70% {
+    transform: scale(0.95) translateX(5%);
+  }
+  100% {
+    transform: scale(1) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes notificationShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Notification Progress Animation */
+@keyframes notificationProgress {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.notification-progress {
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+  animation: notificationProgress linear;
+}
+
+/* Notification Type Specific Animations */
+.notification-success {
+  animation: notificationBounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.notification-error {
+  animation: notificationSlideIn 0.4s ease-out, notificationShake 0.5s ease-in-out 0.4s;
+}
+
+.notification-warning {
+  animation: notificationSlideIn 0.4s ease-out;
+}
+
+.notification-info {
+  animation: notificationSlideIn 0.3s ease-out;
+}
+
+.notification-call {
+  animation: notificationBounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), voiceControlPulse 2s infinite 0.6s;
+}
+
+.notification-exit {
+  animation: notificationSlideOut 0.3s ease-in forwards;
+}
+
+/* ========================================
+   LANGUAGE SWITCHER ANIMATIONS
+   ======================================== */
+
+/* Language Switcher Opening/Closing */
+@keyframes languageSwitcherOpen {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes languageSwitcherClose {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+}
+
+.voice-language-switcher.opening {
+  animation: languageSwitcherOpen 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.voice-language-switcher.closing {
+  animation: languageSwitcherClose 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Language Option Hover Effects */
+@keyframes languageOptionHover {
+  0% {
+    background: transparent;
+    transform: translateX(0);
+  }
+  100% {
+    background: rgba(59, 130, 246, 0.05);
+    transform: translateX(4px);
+  }
+}
+
+.language-option:hover {
+  animation: languageOptionHover 0.2s ease-out forwards;
+}
+
+.language-option.selected {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+  border-left: 3px solid #3b82f6;
+}
+
+/* Voice Feedback Text Animation */
+@keyframes voiceFeedbackText {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.voice-feedback-text {
+  background: linear-gradient(270deg, #3b82f6, #8b5cf6, #3b82f6);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: voiceFeedbackText 3s ease-in-out infinite;
+}
+
+/* ========================================
+   MOBILE VOICE CONTROLS ANIMATIONS
+   ======================================== */
+
+/* Mobile Voice Controls Slide Up */
+@keyframes mobileControlsSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile Touch Feedback */
+@keyframes mobileTouchFeedback {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  50% {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+}
+
+.mobile-voice-controls {
+  animation: mobileControlsSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-touch-active {
+  animation: mobileTouchFeedback 0.1s ease-out;
+}
+
+/* ========================================
+   VOICE CONTEXT INDICATOR ANIMATIONS
+   ======================================== */
+
+/* Voice Context Pulse */
+@keyframes voiceContextPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+.voice-context-pulse {
+  animation: voiceContextPulse 2s ease-in-out infinite;
+}
+
+/* Voice Context Indicator Entry */
+@keyframes voiceContextEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.voice-context-indicator {
+  animation: voiceContextEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.voice-context-indicator.disappearing {
+  animation: fadeOut 0.4s ease-out forwards;
+}
+
+/* Mobile Specific Animations */
+.voice-context-indicator.mobile {
+  animation: mobileControlsSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ========================================
+   UTILITY ANIMATIONS FOR VOICE FEATURES
+   ======================================== */
+
+/* Breathing Animation for Active States */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.8;
+  }
+}
+
+.breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Gentle Glow for Voice Elements */
+@keyframes gentleGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.gentle-glow {
+  animation: gentleGlow 2s ease-in-out infinite;
+}
+
+/* Enhanced Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .voice-wave,
+  .voice-loading,
+  .voice-particles::before,
+  .voice-control.active,
+  .voice-context-pulse,
+  .breathe,
+  .gentle-glow {
+    animation: none;
+  }
+  
+  .voice-feedback-text {
+    background: #3b82f6;
+    -webkit-text-fill-color: initial;
+  }
+  
+  .notification-success,
+  .notification-error,
+  .notification-warning,
+  .notification-info,
+  .notification-call {
+    animation: fadeIn 0.3s ease-out;
+  }
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* GPU Acceleration for Smooth Animations */
+.voice-control,
+.notification-container,
+.voice-language-switcher,
+.mobile-voice-controls,
+.voice-context-indicator {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Smooth transitions with hardware acceleration */
+.hardware-accelerated {
+  transform: translateZ(0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} 
+
+/* ========================================
+   RESPONSIVE VOICE COMPONENTS
+   ======================================== */
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 640px) {
+  .voice-language-switcher {
+    max-width: 280px;
+  }
+  
+  .voice-language-switcher .language-option {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .voice-context-indicator {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    top: 4rem !important;
+    max-width: none !important;
+  }
+  
+  .mobile-voice-controls {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+  
+  .voice-control {
+    min-height: 44px; /* iOS touch target minimum */
+    min-width: 44px;
+  }
+  
+  .notification-stack-item {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0.5rem;
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .voice-language-switcher {
+    min-width: 320px;
+  }
+  
+  .voice-context-indicator {
+    max-width: 400px;
+    right: 1rem;
+    top: 5rem;
+  }
+  
+  .mobile-voice-controls {
+    display: none; /* Hide on tablet and larger */
+  }
+}
+
+/* Desktop responsive styles */
+@media (min-width: 1025px) {
+  .voice-language-switcher {
+    min-width: 340px;
+  }
+  
+  .voice-context-indicator {
+    max-width: 420px;
+    right: 1.5rem;
+    top: 6rem;
+  }
+  
+  .mobile-voice-controls {
+    display: none; /* Hide on desktop */
+  }
+  
+  .notification-stack-item {
+    width: 320px;
+  }
+}
+
+/* High DPI / Retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .voice-control,
+  .voice-language-switcher,
+  .voice-context-indicator {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+  .voice-context-indicator {
+    top: 2rem !important;
+    padding: 0.75rem !important;
+  }
+  
+  .mobile-voice-controls {
+    bottom: 0.5rem;
+    padding: 0.75rem;
+  }
+  
+  .voice-language-switcher {
+    top: 1rem !important;
+    left: 1rem !important;
+  }
+}
+
+/* Ultra-wide screen adjustments */
+@media (min-width: 1400px) {
+  .voice-context-indicator {
+    right: 2rem;
+    max-width: 480px;
+  }
+  
+  .notification-stack-item {
+    width: 360px;
+  }
+}
+
+/* Accessibility: High contrast mode */
+@media (prefers-contrast: high) {
+  .voice-control,
+  .voice-language-switcher,
+  .voice-context-indicator,
+  .mobile-voice-controls {
+    border-width: 2px;
+    border-style: solid;
+  }
+  
+  .voice-wave,
+  .voice-particles::before {
+    opacity: 1;
+    filter: contrast(2);
+  }
+}
+
+/* Accessibility: Dark mode preferences */
+@media (prefers-color-scheme: dark) {
+  .voice-language-switcher,
+  .voice-context-indicator,
+  .mobile-voice-controls {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff;
+  }
+  
+  .notification-stack-item {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff;
+  }
+}
+
+/* ========================================
+   RESPONSIVE COMPONENT UTILITIES
+   ======================================== */
+
+/* Responsive text sizing */
+.voice-text-responsive {
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .voice-text-responsive {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .voice-text-responsive {
+    font-size: 1.125rem;
+  }
+}
+
+/* Responsive spacing */
+.voice-spacing-responsive {
+  padding: 0.5rem;
+  margin: 0.25rem;
+}
+
+@media (min-width: 640px) {
+  .voice-spacing-responsive {
+    padding: 0.75rem;
+    margin: 0.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .voice-spacing-responsive {
+    padding: 1rem;
+    margin: 0.75rem;
+  }
+}
+
+/* Responsive voice control sizing */
+.voice-control-responsive {
+  width: 3rem;
+  height: 3rem;
+}
+
+@media (min-width: 640px) {
+  .voice-control-responsive {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .voice-control-responsive {
+    width: 4rem;
+    height: 4rem;
+  }
+}
+
+/* Responsive container positioning */
+.voice-container-responsive {
+  position: fixed;
+  z-index: 9990;
+}
+
+@media (max-width: 640px) {
+  .voice-container-responsive {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .voice-container-responsive {
+    top: 1rem;
+    right: 1rem;
+    left: auto;
+    bottom: auto;
+    width: auto;
+  }
+}
+
+/* ========================================
+   VOICE INTERACTION STATES - RESPONSIVE
+   ======================================== */
+
+/* Responsive hover states */
+@media (hover: hover) and (pointer: fine) {
+  .voice-control:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
+  
+  .language-option:hover {
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateX(4px);
+  }
+}
+
+/* Touch-optimized states for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .voice-control:active {
+    transform: scale(0.95);
+  }
+  
+  .language-option:active {
+    background: rgba(59, 130, 246, 0.2);
+  }
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS - RESPONSIVE
+   ======================================== */
+
+/* Mobile performance optimizations */
+@media (max-width: 640px) {
+  .voice-particles::before,
+  .gentle-glow,
+  .breathe {
+    animation-duration: 2s; /* Faster animations on mobile */
+  }
+  
+  .voice-control {
+    will-change: transform; /* Limit will-change on mobile */
+  }
+}
+
+/* Desktop performance enhancements */
+@media (min-width: 1024px) {
+  .voice-control,
+  .voice-language-switcher,
+  .voice-context-indicator,
+  .notification-stack-item {
+    will-change: transform, opacity, scale;
+    contain: layout style paint;
+  }
+} 

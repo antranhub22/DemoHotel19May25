@@ -3,7 +3,7 @@
    ======================================== */
 
 /* Material Icons */
-@import url('https://fonts.googleapis.com/css2?family=Material+Icons&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 /* Poppins font */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -14,6 +14,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Import enhanced voice animations */
+@import './styles/voiceAnimations.css';
 
 @layer base {
   * {

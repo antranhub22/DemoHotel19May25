@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Language, ServiceCategory } from '@/types/interface1.types';
 import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssistantContext';
 import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Volume2, VolumeX, Settings, Mic, MicOff, Eye, EyeOff, X } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 
 interface VoicePrompt {
@@ -250,6 +252,10 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
   const [currentPrompt, setCurrentPrompt] = useState<VoicePrompt | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [voiceGuidanceEnabled, setVoiceGuidanceEnabled] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isDisappearing, setIsDisappearing] = useState(false);
+  const isMobile = useIsMobile();
 
   // Generate voice prompt based on selected service and language
   const generateVoicePrompt = useCallback((service: ServiceCategory, lang: Language): VoicePrompt | null => {
@@ -269,8 +275,15 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
   // Update prompt when service or language changes
   useEffect(() => {
     if (!selectedService) {
-      setCurrentPrompt(null);
-      setIsReady(false);
+      // Animate out before clearing
+      if (currentPrompt) {
+        setIsDisappearing(true);
+        setTimeout(() => {
+          setCurrentPrompt(null);
+          setIsReady(false);
+          setIsDisappearing(false);
+        }, 400);
+      }
       return;
     }
 
@@ -289,7 +302,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
       
       logger.warn(`❌ [VoiceCommandContext] No prompt available for: ${selectedService.name}`, 'Component');
     }
-  }, [selectedService, language, generateVoicePrompt, onVoicePromptReady]);
+  }, [selectedService, language, generateVoicePrompt, onVoicePromptReady, currentPrompt]);
 
   // Inject voice context into window for voice assistant integration
   useEffect(() => {
@@ -337,13 +350,12 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
     }
   }, [isReady, currentPrompt, selectedService, language]);
 
-  // Voice guidance during call
+  // Enhanced voice guidance during call
   useEffect(() => {
     if (isCallActive && currentPrompt && voiceGuidanceEnabled) {
-      // Provide voice guidance after a short delay
       const guidanceTimer = setTimeout(() => {
-        if ('speechSynthesis' in window && currentPrompt) {
-          const utterance = new SpeechSynthesisUtterance(currentPrompt.prompts.greeting);
+        if ('speechSynthesis' in window && typeof window.speechSynthesis !== 'undefined' && currentPrompt) {
+          const utterance = new window.SpeechSynthesisUtterance(currentPrompt.prompts.greeting);
           utterance.lang = language === 'en' ? 'en-US' 
                          : language === 'vi' ? 'vi-VN'
                          : language === 'fr' ? 'fr-FR'
@@ -354,14 +366,28 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
           utterance.rate = 0.9;
           utterance.volume = 0.6;
           
-          speechSynthesis.speak(utterance);
+          window.speechSynthesis.speak(utterance);
           logger.debug(`🔊 [VoiceCommandContext] Voice guidance provided for ${currentPrompt.service}`, 'Component');
         }
-      }, 2000); // Wait 2 seconds after call starts
-
+      }, 2000);
       return () => clearTimeout(guidanceTimer);
     }
   }, [isCallActive, currentPrompt, voiceGuidanceEnabled, language]);
+
+  // Handle minimize/restore
+  const toggleMinimize = useCallback(() => {
+    setIsMinimized(!isMinimized);
+  }, [isMinimized]);
+
+  // Handle close
+  const handleClose = useCallback(() => {
+    setIsDisappearing(true);
+    setTimeout(() => {
+      setCurrentPrompt(null);
+      setIsReady(false);
+      setIsDisappearing(false);
+    }, 400);
+  }, []);
 
   if (!selectedService || !currentPrompt) {
     return null;
@@ -369,43 +395,137 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
 
   return (
     <div className={`voice-command-context ${className}`}>
-      {/* Enhanced Voice Context Indicator */}
+      {/* Enhanced Voice Context Indicator with Mobile Support */}
       {isCallActive && isReady && (
-        <div className="fixed top-24 right-4 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg p-4 shadow-xl z-40 max-w-sm border border-white/20 backdrop-blur-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-            <span className="text-sm font-semibold">
-              🎤 Voice Context Active
-            </span>
-          </div>
-          
-          <div className="text-xs space-y-2">
-            <div>
-              <div className="font-medium text-white/90">{selectedService.name}</div>
-              <div className="text-white/75 text-xs">{currentPrompt.prompts.instructions}</div>
+        <div className={`
+          voice-context-indicator ${isMobile ? 'mobile' : ''} ${isDisappearing ? 'disappearing' : ''}
+          fixed ${isMobile ? 'top-16 left-2 right-2' : 'top-24 right-4'} 
+          bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg shadow-xl z-40 
+          ${isMobile ? 'max-w-full' : 'max-w-sm'} 
+          border border-white/20 backdrop-blur-sm transition-all duration-300
+          ${isMinimized ? 'transform scale-95 opacity-80' : ''}
+          voice-context-pulse
+        `}>
+          {/* Enhanced Header */}
+          <div className="flex items-center justify-between p-3 pb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+              <span className={`font-semibold ${isMobile ? 'text-sm' : 'text-sm'}`}>
+                🎤 Voice Context Active
+              </span>
             </div>
             
-            {/* Voice guidance toggle */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/20">
-              <span className="text-xs text-white/75">Voice Guidance</span>
+            {/* Enhanced Controls */}
+            <div className="flex items-center gap-1">
+              {!isMobile && (
+                <button
+                  onClick={() => setShowSettings(!showSettings)}
+                  className="p-1 hover:bg-white/20 rounded transition-colors"
+                  aria-label="Settings"
+                >
+                  <Settings className="w-3 h-3" />
+                </button>
+              )}
+              
               <button
-                onClick={() => setVoiceGuidanceEnabled(!voiceGuidanceEnabled)}
-                className={`text-xs px-2 py-1 rounded transition-colors ${
-                  voiceGuidanceEnabled 
-                    ? 'bg-white/20 text-white' 
-                    : 'bg-white/10 text-white/60'
-                }`}
+                onClick={toggleMinimize}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+                aria-label={isMinimized ? "Expand" : "Minimize"}
               >
-                {voiceGuidanceEnabled ? 'ON' : 'OFF'}
+                {isMinimized ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              </button>
+              
+              <button
+                onClick={handleClose}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-3 h-3" />
               </button>
             </div>
           </div>
+          
+          {/* Enhanced Content */}
+          {!isMinimized && (
+            <div className="px-3 pb-3">
+              <div className={`space-y-2 ${isMobile ? 'text-xs' : 'text-xs'}`}>
+                <div>
+                  <div className="font-medium text-white/90">{selectedService.name}</div>
+                  <div className="text-white/75 text-xs">{currentPrompt.prompts.instructions}</div>
+                </div>
+                
+                {/* Example Commands - Mobile Condensed */}
+                {!isMobile && (
+                  <div className="space-y-1">
+                    <div className="text-white/80 font-medium text-xs">Example commands:</div>
+                    <div className="space-y-0.5">
+                      {currentPrompt.prompts.examples.slice(0, 2).map((example, index) => (
+                        <div key={index} className="text-white/70 text-xs italic">
+                          "/{example}/"
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Enhanced Settings Panel */}
+                {showSettings && !isMobile && (
+                  <div className="border-t border-white/20 pt-2 space-y-2">
+                    <div className="text-white/80 font-medium text-xs">Voice Settings:</div>
+                    
+                    {/* Voice guidance toggle */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-white/75 flex items-center gap-1">
+                        {voiceGuidanceEnabled ? <Mic className="w-3 h-3" /> : <MicOff className="w-3 h-3" />}
+                        Voice Guidance
+                      </span>
+                      <button
+                        onClick={() => setVoiceGuidanceEnabled(!voiceGuidanceEnabled)}
+                        className={`text-xs px-2 py-1 rounded transition-colors ${
+                          voiceGuidanceEnabled 
+                            ? 'bg-white/20 text-white' 
+                            : 'bg-white/10 text-white/60'
+                        }`}
+                      >
+                        {voiceGuidanceEnabled ? 'ON' : 'OFF'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Mobile-specific voice guidance toggle */}
+                {isMobile && (
+                  <div className="flex items-center justify-between pt-2 border-t border-white/20">
+                    <span className="text-xs text-white/75 flex items-center gap-1">
+                      {voiceGuidanceEnabled ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+                      Voice Guidance
+                    </span>
+                    <button
+                      onClick={() => setVoiceGuidanceEnabled(!voiceGuidanceEnabled)}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        voiceGuidanceEnabled 
+                          ? 'bg-white/20 text-white' 
+                          : 'bg-white/10 text-white/60'
+                      }`}
+                    >
+                      {voiceGuidanceEnabled ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Enhanced Debug Info (Development Only) */}
       {import.meta.env.DEV && currentPrompt && (
-        <div className="fixed bottom-4 left-4 bg-black/90 text-green-400 p-3 rounded-lg text-xs font-mono z-50 max-w-xs border border-green-500/30">
+        <div className={`
+          fixed bottom-4 left-4 bg-black/90 text-green-400 p-3 rounded-lg text-xs font-mono z-50 
+          ${isMobile ? 'max-w-xs' : 'max-w-xs'} 
+          border border-green-500/30 backdrop-blur-sm
+          ${isDisappearing ? 'opacity-50' : ''}
+        `}>
           <div className="text-green-300 font-bold mb-2">🎤 Voice Context Debug</div>
           <div className="space-y-1 text-xs">
             <div>Service: <span className="text-white">{currentPrompt.service}</span></div>
@@ -413,6 +533,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
             <div>Ready: <span className="text-white">{isReady ? '✅' : '❌'}</span></div>
             <div>Call Active: <span className="text-white">{isCallActive ? '✅' : '❌'}</span></div>
             <div>Voice Guidance: <span className="text-white">{voiceGuidanceEnabled ? '✅' : '❌'}</span></div>
+            <div>Mobile: <span className="text-white">{isMobile ? '✅' : '❌'}</span></div>
             <div className="pt-1 border-t border-green-500/30">
               Examples: <span className="text-gray-300">{currentPrompt.prompts.examples.length}</span>
             </div>
