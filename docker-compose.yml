@@ -1,0 +1,235 @@
+# ============================================================================
+# Docker Compose for Hotel Voice Assistant SaaS Platform
+# Supports development and production environments
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ======================== Main Application ========================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: hotel-voice-assistant
+    restart: unless-stopped
+    ports:
+      - "${PORT:-10000}:10000"
+    environment:
+      # Core Settings
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=10000
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:10000}
+      
+      # Database
+      - DATABASE_URL=${DATABASE_URL}
+      
+      # Authentication
+      - JWT_SECRET=${JWT_SECRET}
+      - STAFF_ACCOUNTS=${STAFF_ACCOUNTS}
+      
+      # OpenAI Integration
+      - VITE_OPENAI_API_KEY=${VITE_OPENAI_API_KEY}
+      - VITE_OPENAI_PROJECT_ID=${VITE_OPENAI_PROJECT_ID}
+      
+      # Vapi Voice Assistant
+      - VITE_VAPI_PUBLIC_KEY=${VITE_VAPI_PUBLIC_KEY}
+      - VITE_VAPI_ASSISTANT_ID=${VITE_VAPI_ASSISTANT_ID}
+      - VAPI_API_KEY=${VAPI_API_KEY}
+      
+      # Multi-language Vapi Support
+      - VITE_VAPI_PUBLIC_KEY_VI=${VITE_VAPI_PUBLIC_KEY_VI}
+      - VITE_VAPI_ASSISTANT_ID_VI=${VITE_VAPI_ASSISTANT_ID_VI}
+      - VITE_VAPI_PUBLIC_KEY_FR=${VITE_VAPI_PUBLIC_KEY_FR}
+      - VITE_VAPI_ASSISTANT_ID_FR=${VITE_VAPI_ASSISTANT_ID_FR}
+      - VITE_VAPI_PUBLIC_KEY_ZH=${VITE_VAPI_PUBLIC_KEY_ZH}
+      - VITE_VAPI_ASSISTANT_ID_ZH=${VITE_VAPI_ASSISTANT_ID_ZH}
+      - VITE_VAPI_PUBLIC_KEY_RU=${VITE_VAPI_PUBLIC_KEY_RU}
+      - VITE_VAPI_ASSISTANT_ID_RU=${VITE_VAPI_ASSISTANT_ID_RU}
+      - VITE_VAPI_PUBLIC_KEY_KO=${VITE_VAPI_PUBLIC_KEY_KO}
+      - VITE_VAPI_ASSISTANT_ID_KO=${VITE_VAPI_ASSISTANT_ID_KO}
+      
+      # External APIs
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - MAILJET_API_KEY=${MAILJET_API_KEY}
+      - MAILJET_SECRET_KEY=${MAILJET_SECRET_KEY}
+      
+      # SaaS Platform
+      - TALK2GO_DOMAIN=${TALK2GO_DOMAIN:-talk2go.online}
+      - SUBDOMAIN_SUFFIX=${SUBDOMAIN_SUFFIX:-.talk2go.online}
+      - MINHON_TENANT_ID=${MINHON_TENANT_ID}
+      
+      # Feature Flags
+      - ENABLE_HOTEL_RESEARCH=${ENABLE_HOTEL_RESEARCH:-true}
+      - ENABLE_DYNAMIC_ASSISTANT_CREATION=${ENABLE_DYNAMIC_ASSISTANT_CREATION:-true}
+      - ENABLE_MULTI_LANGUAGE_SUPPORT=${ENABLE_MULTI_LANGUAGE_SUPPORT:-true}
+      - ENABLE_ANALYTICS_DASHBOARD=${ENABLE_ANALYTICS_DASHBOARD:-true}
+      - ENABLE_BILLING_SYSTEM=${ENABLE_BILLING_SYSTEM:-false}
+      
+      # Performance & Security
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - SESSION_SECRET=${SESSION_SECRET}
+      
+      # Auto-migration
+      - AUTO_MIGRATE=${AUTO_MIGRATE:-true}
+      - AUTO_DB_FIX=${AUTO_DB_FIX:-true}
+      
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - hotel-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hotel-app.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.services.hotel-app.loadbalancer.server.port=10000"
+
+  # ======================== PostgreSQL Database ========================
+  postgres:
+    image: postgres:15-alpine
+    container_name: hotel-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-hotel_voice_assistant}
+      - POSTGRES_USER=${POSTGRES_USER:-hotel_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+      - ./tools/scripts/database:/docker-entrypoint-initdb.d
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hotel_user} -d ${POSTGRES_DB:-hotel_voice_assistant}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ======================== Redis Cache ========================
+  redis:
+    image: redis:7-alpine
+    container_name: hotel-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - hotel-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # ======================== Reverse Proxy (Optional) ========================
+  traefik:
+    image: traefik:v3.0
+    container_name: hotel-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/etc/traefik
+      - ./certs:/certs
+    networks:
+      - hotel-network
+    environment:
+      - TRAEFIK_API_DASHBOARD=true
+      - TRAEFIK_API_INSECURE=true
+    profiles:
+      - "with-proxy"
+
+  # ======================== Monitoring Stack ========================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hotel-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - hotel-network
+    profiles:
+      - "monitoring"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: hotel-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    networks:
+      - hotel-network
+    profiles:
+      - "monitoring"
+
+  # ======================== Log Management ========================
+  loki:
+    image: grafana/loki:latest
+    container_name: hotel-loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    networks:
+      - hotel-network
+    profiles:
+      - "monitoring"
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: hotel-promtail
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/log
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - hotel-network
+    profiles:
+      - "monitoring"
+
+# ======================== Networks ========================
+networks:
+  hotel-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ======================== Volumes ========================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local 

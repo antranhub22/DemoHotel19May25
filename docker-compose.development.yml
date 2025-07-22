@@ -1,0 +1,108 @@
+# ============================================================================
+# Docker Compose Development Override
+# Optimized for local development with hot reloading and debugging
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.development.yml up
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ======================== Development Application ========================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+      target: development
+    environment:
+      - NODE_ENV=development
+      - AUTO_MIGRATE=true
+      - LOG_LEVEL=debug
+      - ENABLE_HOT_RELOAD=true
+    volumes:
+      # Mount source code for hot reloading
+      - ./apps:/app/apps
+      - ./packages:/app/packages
+      - ./tools:/app/tools
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      # Node modules cache
+      - node_modules_cache:/app/node_modules
+    ports:
+      - "10000:10000"   # Backend
+      - "3000:3000"     # Frontend dev server
+      - "9229:9229"     # Node.js debugger
+    command: ["tsx", "watch", "apps/server/index.ts"]
+
+  # ======================== Development Database ========================
+  postgres:
+    environment:
+      - POSTGRES_DB=hotel_dev
+      - POSTGRES_USER=hotel_dev_user
+      - POSTGRES_PASSWORD=dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      # Use local volume for development
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./tools/scripts/database/dev-seed.sql:/docker-entrypoint-initdb.d/01-dev-seed.sql
+
+  # ======================== Development Redis ========================
+  redis:
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+
+  # ======================== Development Tools ========================
+  # Database Admin Interface
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hotel-pgadmin-dev
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@hotel.dev
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_dev_data:/var/lib/pgadmin
+    networks:
+      - hotel-network
+
+  # Redis Admin Interface
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: hotel-redis-commander-dev
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - hotel-network
+
+  # ======================== Development Monitoring ========================
+  # Lightweight monitoring for development
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: hotel-portainer-dev
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_dev_data:/data
+    networks:
+      - hotel-network
+
+# ======================== Development Volumes ========================
+volumes:
+  postgres_dev_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  pgadmin_dev_data:
+    driver: local
+  portainer_dev_data:
+    driver: local
+  node_modules_cache:
+    driver: local 

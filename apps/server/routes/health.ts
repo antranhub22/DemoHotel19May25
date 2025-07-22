@@ -1,367 +1,294 @@
+// ============================================================================
+// Health Check and Monitoring Endpoints
+// Provides comprehensive health checks for deployment and monitoring
+// ============================================================================
+
 import { Router, Request, Response } from 'express';
-import OpenAI from 'openai';
-import { translateToVietnamese } from '@server/openai';
-import { db } from '@server/db';
-import { sql } from 'drizzle-orm';
-import { runAutoDbFix } from '@server/startup/auto-database-fix';
-import fs from 'fs';
-import path from 'path';
-import { logger } from '@shared/utils/logger';
+import { db } from '../db.js';
+import { tenants } from '../../../packages/shared/db/schema.js';
+import { performance } from 'perf_hooks';
 
 const router = Router();
 
-// Health check endpoint
-router.get('/', (_req: Request, res: Response) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-  });
-});
+// ======================== Basic Health Check ========================
+/**
+ * @route GET /api/health
+ * @desc Basic health check endpoint
+ * @access Public
+ */
+router.get('/health', async (_req: Request, res: Response) => {
+  const startTime = performance.now();
 
-// Environment variables check endpoint (for debugging deployment)
-router.get('/env-check', (_req: Request, res: Response) => {
-  const requiredVars = [
-    'JWT_SECRET',
-    'DATABASE_URL',
-    'VITE_OPENAI_API_KEY',
-    'VITE_VAPI_PUBLIC_KEY',
-    'VITE_VAPI_ASSISTANT_ID',
-  ];
-
-  const envStatus = requiredVars.map(varName => ({
-    name: varName,
-    present: !!process.env[varName],
-    length: process.env[varName]?.length || 0,
-    prefix: process.env[varName]?.substring(0, 10) || 'NOT_SET',
-  }));
-
-  const missingVars = envStatus.filter(v => !v.present).map(v => v.name);
-
-  res.json({
-    status: missingVars.length === 0 ? 'ALL_OK' : 'MISSING_VARS',
-    requiredCount: requiredVars.length,
-    presentCount: envStatus.filter(v => v.present).length,
-    missingVars,
-    details: envStatus,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// ============================================
-// Health Check Endpoints
-// ============================================
-
-// Basic health check
-router.get('/health', async (req: Request, res: Response) => {
   try {
-    // Simple health check without database queries since db.execute doesn't exist
-    // Just check if the application is running
-    res.json({
+    // Basic response with minimal checks
+    const health = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      version: process.version,
-      database: 'connected', // Assume connected since app is running
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Manual database fix trigger - now includes simple setup
-router.post('/health/fix-database', async (req: Request, res: Response) => {
-  try {
-    logger.debug('🔧 Manual database fix triggered via API...', 'Component');
-
-    // For now, just return success without doing database operations
-    // since db.execute is not available in Drizzle ORM
-
-    logger.debug('✅ Database setup completed successfully!', 'Component');
-
-    res.json({
-      status: 'success',
-      message:
-        'Database setup completed successfully - simplified version without db.execute',
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('❌ Database setup API error:', 'Component', error);
-    res.status(500).json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Database setup failed',
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Database schema health check
-router.get('/health/database', async (req: Request, res: Response) => {
-  try {
-    const schemaChecks = {
-      database_connection: true, // Assume true since app is running
-      tenants_table: true, // Assume true for simplicity
-      hotel_profiles_table: true,
-      tenant_id_columns: true,
-      mi_nhon_tenant: true,
-      staff_accounts: true,
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      responseTime: Math.round(performance.now() - startTime),
     };
 
-    const allHealthy = Object.values(schemaChecks).every(
-      check => check === true
-    );
-
-    res.json({
-      status: allHealthy ? 'healthy' : 'needs_attention',
+    res.status(200).json(health);
+  } catch (_error) {
+    res.status(503).json({
+      status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      schema_checks: schemaChecks,
-      recommendations: allHealthy
-        ? []
-        : [
-            'Run manual fix: POST /api/health/fix-database',
-            'Or run: npm run db:fix-production',
-            'Check environment variables: DATABASE_URL',
-            'Verify database migrations are complete',
-          ],
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
+      error: 'Health check failed',
+      responseTime: Math.round(performance.now() - startTime),
     });
   }
 });
 
-// Environment check
-router.get('/health/environment', async (req: Request, res: Response) => {
-  const envChecks = {
-    database_url: !!process.env.DATABASE_URL,
-    node_env: process.env.NODE_ENV,
-    port: process.env.PORT || 'default',
-    jwt_secret: !!process.env.JWT_SECRET,
-    openai_api_key: !!process.env.VITE_OPENAI_API_KEY,
-    vapi_public_key: !!process.env.VITE_VAPI_PUBLIC_KEY,
-    cors_origin: process.env.CORS_ORIGIN || 'not_set',
-    client_url: process.env.CLIENT_URL || 'not_set',
+// ======================== Detailed Status Check ========================
+/**
+ * @route GET /api/status
+ * @desc Comprehensive status check with external dependencies
+ * @access Public
+ */
+router.get('/status', async (_req: Request, res: Response) => {
+  const startTime = performance.now();
+  const checks: Record<string, any> = {};
+
+  try {
+    // Database connectivity check
+    try {
+      const dbStart = performance.now();
+      await db.select().from(tenants).limit(1);
+      checks.database = {
+        status: 'healthy',
+        responseTime: Math.round(performance.now() - dbStart),
+        message: 'Database connection successful',
+      };
+    } catch (error) {
+      checks.database = {
+        status: 'unhealthy',
+        responseTime: Math.round(performance.now() - startTime),
+        message: 'Database connection failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+
+    // Memory usage check
+    const memUsage = process.memoryUsage();
+    const memoryUsageMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+    const maxMemoryMB = 1024; // 1GB threshold
+    
+    checks.memory = {
+      status: memoryUsageMB < maxMemoryMB ? 'healthy' : 'warning',
+      usage: {
+        heap: `${memoryUsageMB}MB`,
+        external: `${Math.round(memUsage.external / 1024 / 1024)}MB`,
+        rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
+      },
+      threshold: `${maxMemoryMB}MB`,
+    };
+
+    // Environment variables check
+    const requiredEnvVars = [
+      'NODE_ENV',
+      'JWT_SECRET',
+      'DATABASE_URL',
+    ];
+
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    checks.environment = {
+      status: missingVars.length === 0 ? 'healthy' : 'unhealthy',
+      required: requiredEnvVars.length,
+      present: requiredEnvVars.length - missingVars.length,
+      missing: missingVars,
+    };
+
+    // External API connectivity (optional checks)
+    checks.external_apis = {
+      openai: {
+        status: process.env.VITE_OPENAI_API_KEY ? 'configured' : 'not_configured',
+      },
+      vapi: {
+        status: process.env.VITE_VAPI_PUBLIC_KEY ? 'configured' : 'not_configured',
+      },
+      google_places: {
+        status: process.env.GOOGLE_PLACES_API_KEY ? 'configured' : 'not_configured',
+      },
+    };
+
+    // Overall health status
+    const isHealthy = 
+      checks.database.status === 'healthy' &&
+      checks.environment.status === 'healthy' &&
+      checks.memory.status !== 'unhealthy';
+
+    const status = {
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptime: process.uptime(),
+      responseTime: Math.round(performance.now() - startTime),
+      checks,
+    };
+
+    res.status(isHealthy ? 200 : 503).json(status);
+  } catch (_error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error: 'Status check failed',
+      responseTime: Math.round(performance.now() - startTime),
+      checks,
+    });
+  }
+});
+
+// ======================== Readiness Check ========================
+/**
+ * @route GET /api/ready
+ * @desc Kubernetes-style readiness check
+ * @access Public
+ */
+router.get('/ready', async (_req: Request, res: Response) => {
+  const startTime = performance.now();
+
+  try {
+    // Check if database is ready
+    await db.select().from(tenants).limit(1);
+
+    // Check if required environment variables are set
+    const required = ['JWT_SECRET', 'DATABASE_URL'];
+    const missing = required.filter(env => !process.env[env]);
+
+    if (missing.length > 0) {
+      return res.status(503).json({
+        ready: false,
+        reason: 'Missing required environment variables',
+        missing,
+        responseTime: Math.round(performance.now() - startTime),
+      });
+    }
+
+    res.status(200).json({
+      ready: true,
+      timestamp: new Date().toISOString(),
+      responseTime: Math.round(performance.now() - startTime),
+    });
+  } catch (error) {
+    res.status(503).json({
+      ready: false,
+      reason: 'Database not ready',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      responseTime: Math.round(performance.now() - startTime),
+    });
+  }
+});
+
+// ======================== Liveness Check ========================
+/**
+ * @route GET /api/live
+ * @desc Kubernetes-style liveness check
+ * @access Public
+ */
+router.get('/live', (_req: Request, res: Response) => {
+  const startTime = performance.now();
+
+  // Simple liveness check - just verify the process is running
+  res.status(200).json({
+    alive: true,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    pid: process.pid,
+    responseTime: Math.round(performance.now() - startTime),
+  });
+});
+
+// ======================== Metrics Endpoint ========================
+/**
+ * @route GET /api/metrics
+ * @desc Prometheus-style metrics endpoint
+ * @access Public
+ */
+router.get('/metrics', async (_req: Request, res: Response) => {
+  const startTime = performance.now();
+
+  try {
+    const memUsage = process.memoryUsage();
+    const cpuUsage = process.cpuUsage();
+
+    // Basic metrics in Prometheus format
+    const metrics = [
+      `# HELP hotel_voice_assistant_uptime_seconds Process uptime in seconds`,
+      `# TYPE hotel_voice_assistant_uptime_seconds counter`,
+      `hotel_voice_assistant_uptime_seconds ${process.uptime()}`,
+      '',
+      `# HELP hotel_voice_assistant_memory_usage_bytes Memory usage in bytes`,
+      `# TYPE hotel_voice_assistant_memory_usage_bytes gauge`,
+      `hotel_voice_assistant_memory_usage_bytes{type="heap_used"} ${memUsage.heapUsed}`,
+      `hotel_voice_assistant_memory_usage_bytes{type="heap_total"} ${memUsage.heapTotal}`,
+      `hotel_voice_assistant_memory_usage_bytes{type="external"} ${memUsage.external}`,
+      `hotel_voice_assistant_memory_usage_bytes{type="rss"} ${memUsage.rss}`,
+      '',
+      `# HELP hotel_voice_assistant_cpu_usage_microseconds CPU usage in microseconds`,
+      `# TYPE hotel_voice_assistant_cpu_usage_microseconds counter`,
+      `hotel_voice_assistant_cpu_usage_microseconds{type="user"} ${cpuUsage.user}`,
+      `hotel_voice_assistant_cpu_usage_microseconds{type="system"} ${cpuUsage.system}`,
+      '',
+      `# HELP hotel_voice_assistant_response_time_milliseconds Health check response time`,
+      `# TYPE hotel_voice_assistant_response_time_milliseconds gauge`,
+      `hotel_voice_assistant_response_time_milliseconds ${Math.round(performance.now() - startTime)}`,
+      '',
+    ];
+
+    // Add database metrics if available
+    try {
+      const tenantCount = await db.select().from(tenants);
+      metrics.push(
+        `# HELP hotel_voice_assistant_tenants_total Total number of tenants`,
+        `# TYPE hotel_voice_assistant_tenants_total gauge`,
+        `hotel_voice_assistant_tenants_total ${tenantCount.length}`,
+        ''
+      );
+    } catch {
+      // Ignore database errors for metrics
+    }
+
+    res.set('Content-Type', 'text/plain');
+    res.status(200).send(metrics.join('\n'));
+  } catch (_error) {
+    res.status(503).send('# Metrics unavailable\n');
+  }
+});
+
+// ======================== Version Information ========================
+/**
+ * @route GET /api/version
+ * @desc Application version and build information
+ * @access Public
+ */
+router.get('/version', (_req: Request, res: Response) => {
+  const version = {
+    application: 'Hotel Voice Assistant SaaS Platform',
+    version: process.env.npm_package_version || '1.0.0',
+    build: {
+      commit: process.env.GIT_COMMIT || 'unknown',
+      branch: process.env.GIT_BRANCH || 'unknown',
+      buildTime: process.env.BUILD_TIME || 'unknown',
+      buildNumber: process.env.BUILD_NUMBER || 'unknown',
+    },
+    runtime: {
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      environment: process.env.NODE_ENV || 'development',
+    },
+    features: {
+      multi_language: process.env.ENABLE_MULTI_LANGUAGE_SUPPORT === 'true',
+      hotel_research: process.env.ENABLE_HOTEL_RESEARCH === 'true',
+      analytics: process.env.ENABLE_ANALYTICS_DASHBOARD === 'true',
+      dynamic_assistants: process.env.ENABLE_DYNAMIC_ASSISTANT_CREATION === 'true',
+    },
   };
 
-  const criticalMissing = [];
-  if (!envChecks.database_url) criticalMissing.push('DATABASE_URL');
-  if (!envChecks.jwt_secret) criticalMissing.push('JWT_SECRET');
-
-  res.json({
-    status: criticalMissing.length === 0 ? 'healthy' : 'missing_critical_vars',
-    timestamp: new Date().toISOString(),
-    environment_checks: envChecks,
-    critical_missing: criticalMissing,
-    recommendations:
-      criticalMissing.length > 0
-        ? [
-            'Set missing environment variables in your deployment platform',
-            'Generate JWT secret: npm run env:jwt-secret',
-            'Configure API keys for full functionality',
-          ]
-        : [],
-  });
-});
-
-// Build assets health check
-router.get('/health/assets', async (req: Request, res: Response) => {
-  try {
-    const distPath = path.resolve(
-      import.meta.dirname || process.cwd(),
-      '..',
-      'dist/public'
-    );
-    const indexHtmlPath = path.resolve(distPath, 'index.html');
-    const assetsPath = path.resolve(distPath, 'assets');
-
-    // Check if build directory exists
-    if (!fs.existsSync(distPath)) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Build directory not found',
-        distPath,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Check if index.html exists
-    if (!fs.existsSync(indexHtmlPath)) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'index.html not found',
-        indexHtmlPath,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // Read index.html to check referenced assets
-    const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
-    const assetMatches = indexHtml.match(/\/assets\/[^"']+/g) || [];
-
-    // Check if assets directory exists
-    if (!fs.existsSync(assetsPath)) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Assets directory not found',
-        assetsPath,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    // List actual assets
-    const actualAssets = fs.readdirSync(assetsPath);
-
-    // Check if referenced assets exist
-    const missingAssets = [];
-    for (const assetPath of assetMatches) {
-      const assetName = path.basename(assetPath);
-      if (!actualAssets.includes(assetName)) {
-        missingAssets.push(assetName);
-      }
-    }
-
-    res.json({
-      status: missingAssets.length === 0 ? 'healthy' : 'missing_assets',
-      buildPath: distPath,
-      referencedAssets: assetMatches.map(a => path.basename(a)),
-      actualAssets: actualAssets.filter(
-        f => f.endsWith('.js') || f.endsWith('.css')
-      ),
-      missingAssets,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Simple database setup endpoint
-router.post('/health/setup-database', async (req: Request, res: Response) => {
-  try {
-    logger.debug('🔧 Simple database setup triggered via API...', 'Component');
-
-    // For now, just return success without doing database operations
-    // since db.execute is not available in Drizzle ORM
-
-    logger.debug('✅ Database setup completed successfully!', 'Component');
-
-    res.json({
-      status: 'success',
-      message: 'Database setup completed successfully - simplified version',
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    logger.error('❌ Database setup API error:', 'Component', error);
-    res.status(500).json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Database setup failed',
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Test endpoint to verify routes are working
-router.get('/health/test', async (req: Request, res: Response) => {
-  res.json({
-    status: 'success',
-    message: 'Test endpoint is working',
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.VITE_OPENAI_API_KEY || 'sk-placeholder-for-dev',
-});
-
-// Helper function for error handling
-function handleApiError(res: Response, error: any, defaultMessage: string) {
-  console.error(defaultMessage, error);
-  res.status(500).json({
-    error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-  });
-}
-
-// Test OpenAI API endpoint
-router.post('/test-openai', async (req, res) => {
-  try {
-    const { message } = req.body;
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'user',
-          content: message || 'Hello, give me a quick test response.',
-        },
-      ],
-      max_tokens: 30,
-    });
-
-    res.json({
-      success: true,
-      message: response.choices[0].message.content,
-      model: response.model,
-      usage: response.usage,
-    });
-  } catch (error: any) {
-    handleApiError(res, error, 'OpenAI API test error:');
-  }
-});
-
-// Database test endpoint
-router.get('/db-test', async (req, res) => {
-  try {
-    // Simple test without using db.execute since it doesn't exist in Drizzle
-    res.json({
-      success: true,
-      message:
-        'Database connection test - simplified (db.execute not available)',
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Database connection test failed',
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
-
-// Translate to Vietnamese endpoint
-router.post('/translate-to-vietnamese', async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ error: 'Text is required' });
-    }
-
-    const translatedText = await translateToVietnamese(text);
-
-    res.json({
-      success: true,
-      original: text,
-      translated: translatedText,
-    });
-  } catch (error) {
-    handleApiError(res, error, 'Translation failed');
-  }
+  res.status(200).json(version);
 });
 
 export default router;
