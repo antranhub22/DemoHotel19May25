@@ -15,7 +15,10 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import StaffPage from '@/pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
-import AnalyticsDashboard from './pages/AnalyticsDashboard';
+// Lazy load Analytics Dashboard to split charts bundle
+const AnalyticsDashboard = React.lazy(
+  () => import('./pages/AnalyticsDashboard')
+);
 import { Interface1 } from '@/components/Interface1';
 
 // Dashboard pages
@@ -32,9 +35,18 @@ import {
 import { UnifiedDashboardLayout } from '@/components/unified-dashboard';
 import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
 import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
-import { AdvancedAnalytics } from '@/pages/unified-dashboard/AdvancedAnalytics';
+// Lazy load charts-heavy dashboard components
+const AdvancedAnalytics = React.lazy(() =>
+  import('@/pages/unified-dashboard/AdvancedAnalytics').then(module => ({
+    default: module.AdvancedAnalytics,
+  }))
+);
+const SystemMonitoring = React.lazy(() =>
+  import('@/pages/unified-dashboard/SystemMonitoring').then(module => ({
+    default: module.SystemMonitoring,
+  }))
+);
 import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
-import { SystemMonitoring } from '@/pages/unified-dashboard/SystemMonitoring';
 import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
 import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
 import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
@@ -304,7 +316,10 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
-  logger.debug('[DEBUG] Router render', 'Component', { tenantInfo, isAuthenticated });
+  logger.debug('[DEBUG] Router render', 'Component', {
+    tenantInfo,
+    isAuthenticated,
+  });
 
   if (!tenantInfo) {
     return <LoadingFallback />;

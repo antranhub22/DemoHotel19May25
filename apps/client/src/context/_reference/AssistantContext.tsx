@@ -16,7 +16,7 @@ import React, {
   ReactNode,
   useCallback,
 } from 'react';
-import { initVapi, getVapiInstance } from '@/lib';
+// DISABLED: import { initVapi, getVapiInstance } from '@/lib';
 import {
   Transcript,
   OrderSummary,
@@ -33,7 +33,7 @@ import {
   getVapiPublicKeyByLanguage,
   getVapiAssistantIdByLanguage,
 } from '@/hooks/useHotelConfiguration';
-import { resetVapi } from '@/lib/vapiClient';
+// Dynamic import for code splitting - resetVapi loaded when needed
 import { logger } from '@shared/utils/logger';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
@@ -130,8 +130,10 @@ const AssistantContext = createContext<AssistantContextType | undefined>(
  */
 export function AssistantProvider({ children }: { children: ReactNode }) {
   // ⚠️ WARNING: This provider is for reference only
-  console.warn('AssistantProvider is disabled - use RefactoredAssistantProvider instead');
-  
+  console.warn(
+    'AssistantProvider is disabled - use RefactoredAssistantProvider instead'
+  );
+
   // Return error message instead of actual provider
   return (
     <div className="fixed inset-0 z-50 bg-red-500/20 flex items-center justify-center">
@@ -160,7 +162,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
  */
 export function useAssistant() {
   console.warn('useAssistant is disabled - use useRefactoredAssistant instead');
-  
+
   // Return safe defaults for reference components
   return {
     transcripts: [],
@@ -206,4 +208,4 @@ export function useAssistant() {
     setTenantConfig: () => {},
     addCallEndListener: () => () => {},
   } as AssistantContextType;
-} 
+}

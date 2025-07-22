@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { X } from 'lucide-react';
-import { SummaryPopupContent } from './popup-system/DemoPopupContent';
+
+// Lazy load for code splitting - NEW: Use separated file
+const SummaryPopupContent = React.lazy(() =>
+  import('./popup-system/SummaryPopupContent').then(module => ({
+    default: module.SummaryPopupContent,
+  }))
+);
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 import { logger } from '@shared/utils/logger';
 
@@ -74,7 +80,15 @@ const SummaryPopup: React.FC<SummaryPopupProps> = ({
             maxHeight: isGrid ? '320px' : '50vh',
           }}
         >
-          <SummaryPopupContent />
+          <Suspense
+            fallback={
+              <div className="p-8 text-center text-gray-500">
+                Loading summary...
+              </div>
+            }
+          >
+            <SummaryPopupContent />
+          </Suspense>
         </div>
 
         {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}

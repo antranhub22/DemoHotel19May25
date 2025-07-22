@@ -1,8 +1,9 @@
 // Core utilities
 export { cn } from './utils';
 
-// Auth utilities  
+// Auth utilities
 export { getAuthToken } from './authHelper';
 
-// Vapi integration
-export { initVapi, getVapiInstance } from './vapiClient';
+// Vapi integration - REMOVED STATIC EXPORTS FOR CODE SPLITTING
+// Use dynamic imports instead:
+// const { initVapi, getVapiInstance } = await import('./vapiClient');

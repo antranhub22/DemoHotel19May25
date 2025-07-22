@@ -1,8 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { PopupStack } from './PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
-import { SummaryPopupContent } from './DemoPopupContent';
 import { logger } from '@shared/utils/logger';
+
+// Lazy load SummaryPopupContent for code splitting
+const LazySummaryPopupContent = React.lazy(() =>
+  import('./SummaryPopupContent').then(module => ({
+    default: module.SummaryPopupContent,
+  }))
+);
 
 interface PopupManagerProps {
   position?: 'top' | 'bottom' | 'center';
@@ -201,7 +207,15 @@ export const usePopup = () => {
     return addPopup({
       type: 'summary',
       title: options?.title || 'Call Summary',
-      content: content || <SummaryPopupContent />,
+      content: content || (
+        <Suspense
+          fallback={
+            <div className="p-4 text-center text-gray-500">Loading...</div>
+          }
+        >
+          <LazySummaryPopupContent />
+        </Suspense>
+      ),
       priority: options?.priority || 'high',
       isActive: false,
     });
