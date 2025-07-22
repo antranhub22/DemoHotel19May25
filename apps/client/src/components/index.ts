@@ -5,9 +5,9 @@
 // Core components - Always loaded
 export { Interface1 } from './Interface1';
 
-// Legacy interfaces - Lazy loaded to reduce bundle size
-export const Interface3 = React.lazy(() => import('./Interface3'));
-export const Interface4 = React.lazy(() => import('./Interface4'));
+// DISABLED: Legacy interfaces moved to _reference folder
+// export const Interface3 = React.lazy(() => import('./Interface3'));
+// export const Interface4 = React.lazy(() => import('./Interface4'));
 
 // Shared components
 export { default as ErrorBoundary } from './ErrorBoundary';

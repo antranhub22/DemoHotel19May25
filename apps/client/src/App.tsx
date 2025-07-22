@@ -315,8 +315,10 @@ function Router() {
       <Switch>
         <Route path="/" component={VoiceAssistant} />
         <Route path="/interface1" component={VoiceAssistant} />
+        {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />
+        */}
         <Route path="/call-history" component={CallHistory} />
         <Route path="/call-details/:callId" component={CallDetails} />
         <Route path="/email-test" component={EmailTestPage} />
