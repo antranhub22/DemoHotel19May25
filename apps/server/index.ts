@@ -1,16 +1,16 @@
 import 'dotenv/config';
 import express, { type Request, Response, NextFunction } from 'express';
-import { registerRoutes } from './routes';
-import { setupVite, serveStatic, log } from './vite';
-import { setupSocket } from './socket';
-import { runAutoDbFix } from './startup/auto-database-fix';
-import { runProductionMigration } from './startup/production-migration';
-import { autoMigrateOnDeploy } from '../../tools/scripts/maintenance/auto-migrate-on-deploy';
-import { seedProductionUsers } from '../../tools/scripts/maintenance/seed-production-users';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { logger } from '@shared/utils/logger';
+import { autoMigrateOnDeploy } from '../../tools/scripts/maintenance/auto-migrate-on-deploy';
+import { seedProductionUsers } from '../../tools/scripts/maintenance/seed-production-users';
+import router from './routes/index';
+import { setupVite, serveStatic, log } from './vite';
+import { setupSocket } from './socket';
+import { runAutoDbFix } from './startup/auto-database-fix';
+import { runProductionMigration } from './startup/production-migration';
 
 // Fixed CSP configuration - v1.5 - FORCE REBUILD with embedded database setup
 // Force rebuild v1.6 - with authentication routes fix
@@ -68,7 +68,9 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, etc.)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        return callback(null, true);
+      }
 
       // In development, allow all origins
       if (process.env.NODE_ENV === 'development') {
@@ -169,7 +171,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  // Use the new routes system
+  app.use(router);
+
+  // Create HTTP server for WebSocket support
+  const server = require('http').createServer(app);
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
