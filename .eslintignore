@@ -1,29 +1,37 @@
-node_modules
-dist
-build
-.vite
-coverage
-*.min.js
+# Build outputs
+dist/
+build/
+node_modules/
+
+# Test files 
+*.test.ts
+*.test.tsx
+test-results/
+playwright-report/
+
+# Generated/External files
 *.d.ts
+vite.config.ts
+*.cjs
+*.js
 
-# Backup and temporary files
-*.bak
-*.backup
-*.old
-*.tmp
+# Legacy/Reference files
+apps/client/src/components/_reference/
+apps/client/src/context/_reference/
 
-# Generated files
-documentation/
-.git
+# Development tools
+tools/scripts/
+scripts/
+*.sh
 
-# Config files that don't need linting
-*.config.js
-*.config.cjs
-postcss.config.js
-tailwind.config.ts
+# Testing utilities  
+tests/
+**/ws_test_client.*
 
-# Development scripts
-tools/scripts/development/debug-console-script.js
+# Documentation
+docs/
+*.md
 
-# Legacy files
-documentation/legacy/ 
+# Config files
+.eslintrc.js
+tsconfig.json 

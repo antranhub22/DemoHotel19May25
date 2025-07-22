@@ -81,7 +81,10 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenantId;
 
-      logger.debug('🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})', 'Component');
+      logger.debug(
+        '🏨 Tenant identified: ${tenant.hotelName} (${tenant.subdomain})',
+        'Component'
+      );
       next();
     } catch (error) {
       logger.error('Tenant identification failed:', 'Component', error);
@@ -142,10 +145,17 @@ export class TenantMiddleware {
       req.tenant = tenant;
       req.tenantId = tenant.id;
 
-      logger.debug('🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})', 'Component');
+      logger.debug(
+        '🌐 Tenant identified from subdomain: ${tenant.hotelName} (${subdomain})',
+        'Component'
+      );
       next();
     } catch (error) {
-      logger.error('Tenant identification from subdomain failed:', 'Component', error);
+      logger.error(
+        'Tenant identification from subdomain failed:',
+        'Component',
+        error
+      );
 
       if (error instanceof TenantError) {
         return (res as any).status(error.statusCode).json({
@@ -178,10 +188,17 @@ export class TenantMiddleware {
       // This will be used in database queries to ensure data isolation
       req.tenantFilter = this.tenantService.getTenantFilter(req.tenantId);
 
-      logger.debug('🔒 Row-level security enabled for tenant: ${req.tenantId}', 'Component');
+      logger.debug(
+        '🔒 Row-level security enabled for tenant: ${req.tenantId}',
+        'Component'
+      );
       next();
     } catch (error) {
-      logger.error('Row-level security enforcement failed:', 'Component', error);
+      logger.error(
+        'Row-level security enforcement failed:',
+        'Component',
+        error
+      );
       return (res as any).status(500).json({
         error: 'Security enforcement failed',
         code: 'SECURITY_ENFORCEMENT_FAILED',
@@ -217,10 +234,17 @@ export class TenantMiddleware {
           });
         }
 
-        logger.debug('✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}', 'Component');
+        logger.debug(
+          '✅ Feature access granted: ${feature} for tenant ${req.tenant.hotelName}',
+          'Component'
+        );
         next();
       } catch (error) {
-        logger.error('Feature access check failed for ${feature}:', 'Component', error);
+        logger.error(
+          'Feature access check failed for ${feature}:',
+          'Component',
+          error
+        );
         return (res as any).status(500).json({
           error: 'Feature access check failed',
           code: 'FEATURE_ACCESS_CHECK_FAILED',
@@ -259,7 +283,10 @@ export class TenantMiddleware {
         });
       }
 
-      logger.debug('📊 Subscription limits check passed for tenant ${req.tenant.hotelName}', 'Component');
+      logger.debug(
+        '📊 Subscription limits check passed for tenant ${req.tenant.hotelName}',
+        'Component'
+      );
       next();
     } catch (error) {
       logger.error('Subscription limits check failed:', 'Component', error);
@@ -288,10 +315,17 @@ export class TenantMiddleware {
         req.resourceTenantIdField = resourceTenantIdField;
         req.validateOwnership = true;
 
-        logger.debug('🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}', 'Component');
+        logger.debug(
+          '🔑 Tenant ownership validation enabled for ${req.tenant.hotelName}',
+          'Component'
+        );
         next();
       } catch (error) {
-        logger.error('Tenant ownership validation setup failed:', 'Component', error);
+        logger.error(
+          'Tenant ownership validation setup failed:',
+          'Component',
+          error
+        );
         return (res as any).status(500).json({
           error: 'Ownership validation setup failed',
           code: 'OWNERSHIP_VALIDATION_FAILED',
@@ -396,7 +430,9 @@ export class TenantMiddleware {
   getTenantContext(
     req: Request
   ): { tenantId: string; tenantFilter: any } | null {
-    if (!req.tenantId) return null;
+    if (!req.tenantId) {
+      return null;
+    }
 
     return {
       tenantId: req.tenantId,

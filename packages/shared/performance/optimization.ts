@@ -47,7 +47,9 @@ class MemoryCache {
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {
+      return null;
+    }
 
     if (Date.now() - entry.timestamp > entry.ttl) {
       this.cache.delete(key);
@@ -304,7 +306,7 @@ export class AsyncOptimizer {
     const results: R[] = [];
     const batches = this.chunkArray(items, batchSize);
 
-    for (const batch of (batches as any[])) {
+    for (const batch of batches as any[]) {
       const batchResults = await Promise.all(
         batch.map(item =>
           this.withConcurrencyLimit('batch', concurrency, () => processor(item))

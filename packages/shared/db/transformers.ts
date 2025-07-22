@@ -108,18 +108,24 @@ export const hotelProfileMapper = {
   toUpdateFields: (updates: Partial<InsertHotelProfileCamelCase>): any => {
     const mapped: any = {};
 
-    if (updates.researchData !== undefined)
+    if (updates.researchData !== undefined) {
       mapped.research_data = updates.researchData;
-    if (updates.assistantConfig !== undefined)
+    }
+    if (updates.assistantConfig !== undefined) {
       mapped.assistant_config = updates.assistantConfig;
-    if (updates.vapiAssistantId !== undefined)
+    }
+    if (updates.vapiAssistantId !== undefined) {
       mapped.vapi_assistant_id = updates.vapiAssistantId;
-    if (updates.servicesConfig !== undefined)
+    }
+    if (updates.servicesConfig !== undefined) {
       mapped.services_config = updates.servicesConfig;
-    if (updates.knowledgeBase !== undefined)
+    }
+    if (updates.knowledgeBase !== undefined) {
       mapped.knowledge_base = updates.knowledgeBase;
-    if (updates.systemPrompt !== undefined)
+    }
+    if (updates.systemPrompt !== undefined) {
       mapped.system_prompt = updates.systemPrompt;
+    }
 
     return mapped;
   },
@@ -329,16 +335,24 @@ export const requestMapper = {
 export const convertToISOString = (
   date: Date | string | null | undefined
 ): string | null => {
-  if (!date) return null;
-  if (typeof date === 'string') return date;
+  if (!date) {
+    return null;
+  }
+  if (typeof date === 'string') {
+    return date;
+  }
   return date.toISOString();
 };
 
 export const convertToDate = (
   dateString: string | Date | null | undefined
 ): Date | null => {
-  if (!dateString) return null;
-  if (dateString instanceof Date) return dateString;
+  if (!dateString) {
+    return null;
+  }
+  if (dateString instanceof Date) {
+    return dateString;
+  }
   const date = new Date(dateString);
   return isNaN(date.getTime()) ? null : date;
 };

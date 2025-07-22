@@ -9,7 +9,11 @@
  */
 
 import { logger } from '@shared/utils/logger';
-import { validateEnvironment, getEnvironmentStatus, loadEnvironmentConfig,  } from '../../../packages/config/environment';
+import {
+  validateEnvironment,
+  getEnvironmentStatus,
+  loadEnvironmentConfig,
+} from '../../../packages/config/environment';
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
@@ -73,7 +77,9 @@ function printEnvironmentSummary(): void {
 }
 
 function printMissingVariables(missing: string[]): void {
-  if (missing.length === 0) return;
+  if (missing.length === 0) {
+    return;
+  }
 
   console.log(colorize('❌ Missing Environment Variables:', 'red'));
   console.log(colorize('-'.repeat(35), 'red'));
@@ -85,14 +91,19 @@ function printMissingVariables(missing: string[]): void {
   logger.debug('', 'Component');
   console.log(colorize('💡 To fix these issues:', 'yellow'));
   logger.debug('  1. Run: npm run env:generate', 'Component');
-  logger.debug('  2. Copy the generated template to your .env file', 'Component');
+  logger.debug(
+    '  2. Copy the generated template to your .env file',
+    'Component'
+  );
   logger.debug('  3. Fill in your actual API keys and values', 'Component');
   logger.debug('  4. Restart the server', 'Component');
   logger.debug('', 'Component');
 }
 
 function printWarnings(warnings: string[]): void {
-  if (warnings.length === 0) return;
+  if (warnings.length === 0) {
+    return;
+  }
 
   console.log(colorize('⚠️  Warnings:', 'yellow'));
   console.log(colorize('-'.repeat(15), 'yellow'));
@@ -107,11 +118,26 @@ function printWarnings(warnings: string[]): void {
 function printQuickCommands(): void {
   console.log(colorize('🔧 Quick Commands:', 'cyan'));
   console.log(colorize('-'.repeat(20), 'cyan'));
-  logger.debug('  npm run env:status          - Check environment status', 'Component');
-  logger.debug('  npm run env:validate        - Validate basic setup', 'Component');
-  logger.debug('  npm run env:validate-saas   - Validate SaaS features', 'Component');
-  logger.debug('  npm run env:health          - Complete health check', 'Component');
-  logger.debug('  npm run env:generate        - Generate .env template', 'Component');
+  logger.debug(
+    '  npm run env:status          - Check environment status',
+    'Component'
+  );
+  logger.debug(
+    '  npm run env:validate        - Validate basic setup',
+    'Component'
+  );
+  logger.debug(
+    '  npm run env:validate-saas   - Validate SaaS features',
+    'Component'
+  );
+  logger.debug(
+    '  npm run env:health          - Complete health check',
+    'Component'
+  );
+  logger.debug(
+    '  npm run env:generate        - Generate .env template',
+    'Component'
+  );
   logger.debug('', 'Component');
 }
 
@@ -189,7 +215,10 @@ export async function validateEnvironmentOnStartup(): Promise<void> {
     );
     logger.debug('  1. Run: npm run env:status', 'Component');
     logger.debug('  2. Run: npm run env:validate', 'Component');
-    logger.debug('  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md', 'Component');
+    logger.debug(
+      '  3. Check the Environment Setup Guide: docs/ENVIRONMENT_SETUP.md',
+      'Component'
+    );
     logger.debug('', 'Component');
     process.exit(1);
   }
@@ -249,7 +278,7 @@ export async function validateProductionEnvironment(): Promise<void> {
   const failures: string[] = [];
   const warnings: string[] = [];
 
-  for (const check of (productionChecks as any[])) {
+  for (const check of productionChecks as any[]) {
     if (!check.check()) {
       if (check.critical) {
         failures.push(`❌ ${check.name}: ${check.message}`);
@@ -317,7 +346,10 @@ export function printCompactEnvironmentStatus(): void {
   const _statusIcon = status.basicSetup ? '✅' : '❌';
   const _saasIcon = status.saasFeatures ? '✅' : '⚪';
 
-  logger.debug(`${_statusIcon} Environment: ${_config.NODE_ENV} | SaaS: ${_saasIcon} | Port: ${_config.PORT}`, 'Component');
+  logger.debug(
+    `${_statusIcon} Environment: ${_config.NODE_ENV} | SaaS: ${_saasIcon} | Port: ${_config.PORT}`,
+    'Component'
+  );
 
   if (status.missing.length > 0) {
     console.log(colorize(`   Missing: ${status.missing.join(', ')}`, 'red'));

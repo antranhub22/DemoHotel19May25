@@ -186,7 +186,10 @@ export class HotelResearchService {
     this.rateLimiter = new RateLimiter();
 
     if (!this.googlePlacesApiKey) {
-      logger.warn('Google Places API key not found. Hotel research will be limited.', 'Component');
+      logger.warn(
+        'Google Places API key not found. Hotel research will be limited.',
+        'Component'
+      );
     }
   }
 
@@ -226,7 +229,10 @@ export class HotelResearchService {
             googlePlacesData.website
           );
         } catch (error) {
-          logger.warn('Website scraping failed:', 'Component', (error as any).message || error
+          logger.warn(
+            'Website scraping failed:',
+            'Component',
+            (error as any).message || error
           );
         }
       }
@@ -255,10 +261,17 @@ export class HotelResearchService {
         ),
       };
 
-      logger.debug('✅ Basic research completed for: ${hotelName}', 'Component');
+      logger.debug(
+        '✅ Basic research completed for: ${hotelName}',
+        'Component'
+      );
       return hotelData;
     } catch (error) {
-      logger.error('Basic research failed:', 'Component', (error as any).message || error);
+      logger.error(
+        'Basic research failed:',
+        'Component',
+        (error as any).message || error
+      );
       throw new HotelResearchError(
         `Failed to research hotel: ${(error as any).message || error}`,
         'RESEARCH_FAILED',
@@ -283,7 +296,10 @@ export class HotelResearchService {
     }
 
     try {
-      logger.debug('🔍 Starting advanced research for: ${hotelName}', 'Component');
+      logger.debug(
+        '🔍 Starting advanced research for: ${hotelName}',
+        'Component'
+      );
 
       // Get basic data first
       const basicData = await this.basicResearch(hotelName, location);
@@ -312,10 +328,16 @@ export class HotelResearchService {
             : ({} as CompetitorData),
       };
 
-      logger.debug('✅ Advanced research completed for: ${hotelName}', 'Component');
+      logger.debug(
+        '✅ Advanced research completed for: ${hotelName}',
+        'Component'
+      );
       return advancedData;
     } catch (error) {
-      logger.error('Advanced research failed:', 'Component', (error as any).message || error
+      logger.error(
+        'Advanced research failed:',
+        'Component',
+        (error as any).message || error
       );
       throw new HotelResearchError(
         `Failed to perform advanced research: ${(error as any).message || error}`,
@@ -385,7 +407,9 @@ export class HotelResearchService {
   }
 
   private extractPhotoUrls(photos: any[]): string[] {
-    if (!photos || photos.length === 0) return [];
+    if (!photos || photos.length === 0) {
+      return [];
+    }
 
     return photos
       .slice(0, 10)
@@ -399,7 +423,9 @@ export class HotelResearchService {
     lat: number;
     lng: number;
   }): Promise<LocalAttraction[]> {
-    if (!location || !this.googlePlacesApiKey) return [];
+    if (!location || !this.googlePlacesApiKey) {
+      return [];
+    }
 
     try {
       const radius = 5000; // 5km radius
@@ -409,7 +435,9 @@ export class HotelResearchService {
       const data = await response.json();
 
       const dataAny = data as any;
-      if (dataAny.status !== 'OK') return [];
+      if (dataAny.status !== 'OK') {
+        return [];
+      }
 
       return dataAny.results.slice(0, 10).map((place: any) => ({
         name: place.name,
@@ -419,7 +447,10 @@ export class HotelResearchService {
         rating: place.rating,
       }));
     } catch (error) {
-      logger.warn('Failed to get nearby attractions:', 'Component', (error as any).message || error
+      logger.warn(
+        'Failed to get nearby attractions:',
+        'Component',
+        (error as any).message || error
       );
       return [];
     }
@@ -455,10 +486,16 @@ export class HotelResearchService {
         contact: this.extractContactInfo($),
       };
 
-      logger.debug('✅ Website scraping completed for: ${websiteUrl}', 'Component');
+      logger.debug(
+        '✅ Website scraping completed for: ${websiteUrl}',
+        'Component'
+      );
       return scrapedData;
     } catch (error) {
-      logger.warn('Website scraping failed for ${websiteUrl}:', 'Component', (error as any).message || error
+      logger.warn(
+        'Website scraping failed for ${websiteUrl}:',
+        'Component',
+        (error as any).message || error
       );
       return {};
     }
@@ -682,15 +719,21 @@ export class HotelResearchService {
   }
 
   private categorizeAttraction(types: string[]): LocalAttraction['category'] {
-    if (types.includes('natural_feature')) return 'nature';
-    if (types.includes('museum') || types.includes('art_gallery'))
+    if (types.includes('natural_feature')) {
+      return 'nature';
+    }
+    if (types.includes('museum') || types.includes('art_gallery')) {
       return 'cultural';
-    if (types.includes('restaurant') || types.includes('food'))
+    }
+    if (types.includes('restaurant') || types.includes('food')) {
       return 'restaurant';
-    if (types.includes('shopping_mall') || types.includes('store'))
+    }
+    if (types.includes('shopping_mall') || types.includes('store')) {
       return 'shopping';
-    if (types.includes('amusement_park') || types.includes('night_club'))
+    }
+    if (types.includes('amusement_park') || types.includes('night_club')) {
       return 'entertainment';
+    }
     return 'landmark';
   }
 
@@ -746,10 +789,18 @@ export class HotelResearchService {
 
     // Bổ sung property nếu thiếu
     const dataAny = data as any;
-    if (!dataAny.name) dataAny.name = 'Unknown Hotel';
-    if (!dataAny.categories) dataAny.categories = [];
-    if (!dataAny.roomTypes) dataAny.roomTypes = [];
-    if (!dataAny.localAttractions) dataAny.localAttractions = [];
+    if (!dataAny.name) {
+      dataAny.name = 'Unknown Hotel';
+    }
+    if (!dataAny.categories) {
+      dataAny.categories = [];
+    }
+    if (!dataAny.roomTypes) {
+      dataAny.roomTypes = [];
+    }
+    if (!dataAny.localAttractions) {
+      dataAny.localAttractions = [];
+    }
 
     return schema.parse(dataAny) as BasicHotelData;
   }
@@ -793,32 +844,38 @@ export class HotelResearchService {
   // Public wrappers for amenities, policies, roomTypes extraction
   public extractAmenities(data: any, googlePlacesData?: any): string[] {
     // Ưu tiên lấy từ data nếu có, fallback sang Google Places nếu không
-    if (data && data.amenities && Array.isArray(data.amenities))
+    if (data && data.amenities && Array.isArray(data.amenities)) {
       return data.amenities;
+    }
     if (
       googlePlacesData &&
       googlePlacesData.amenities &&
       Array.isArray(googlePlacesData.amenities)
-    )
+    ) {
       return googlePlacesData.amenities;
+    }
     return [];
   }
 
   public extractPolicies(data: any): HotelPolicies {
-    if (data && data.policies) return data.policies;
+    if (data && data.policies) {
+      return data.policies;
+    }
     // Fallback mặc định
     return { checkIn: '', checkOut: '', cancellation: '' };
   }
 
   public extractRoomTypes(data: any): RoomType[] {
-    if (data && data.roomTypes && Array.isArray(data.roomTypes))
+    if (data && data.roomTypes && Array.isArray(data.roomTypes)) {
       return data.roomTypes;
+    }
     return [];
   }
 
   public extractServices(data: any): HotelService[] {
-    if (data && data.services && Array.isArray(data.services))
+    if (data && data.services && Array.isArray(data.services)) {
       return data.services;
+    }
     return [];
   }
 }

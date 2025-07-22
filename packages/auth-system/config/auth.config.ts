@@ -6,7 +6,6 @@
 
 import { z } from 'zod';
 
-
 // ============================================
 // JWT CONFIGURATION
 // ============================================
@@ -296,7 +295,9 @@ export const getTokenExpirationTime = (expiresIn: string): number => {
   };
 
   const match = expiresIn.match(/^(\d+)([smhd])$/);
-  if (!match) throw new Error(`Invalid expiration format: ${expiresIn}`);
+  if (!match) {
+    throw new Error(`Invalid expiration format: ${expiresIn}`);
+  }
 
   const [, value, unit] = match;
   return parseInt(value) * units[unit];

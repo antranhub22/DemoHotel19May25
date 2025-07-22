@@ -227,40 +227,58 @@ export function generateBasicSummary(
 
   // Collect all possible service types that appear in the conversation
   const serviceTypes: string[] = [];
-  if (foodServiceMatches) serviceTypes.push('Food & Beverage');
-  if (housekeepingMatches) serviceTypes.push('Housekeeping');
-  if (transportMatches) serviceTypes.push('Transportation');
-  if (spaMatches) serviceTypes.push('Spa Service');
+  if (foodServiceMatches) {
+    serviceTypes.push('Food & Beverage');
+  }
+  if (housekeepingMatches) {
+    serviceTypes.push('Housekeeping');
+  }
+  if (transportMatches) {
+    serviceTypes.push('Transportation');
+  }
+  if (spaMatches) {
+    serviceTypes.push('Spa Service');
+  }
 
   // Check for additional service types
   const tourMatches = [...guestMessages, ...assistantMessages].some(m =>
     /tour|sightseeing|excursion|attraction|visit|activity/i.test(m.content)
   );
-  if (tourMatches) serviceTypes.push('Tours & Activities');
+  if (tourMatches) {
+    serviceTypes.push('Tours & Activities');
+  }
 
   const technicalMatches = [...guestMessages, ...assistantMessages].some(m =>
     /wifi|internet|tv|television|remote|device|technical|connection/i.test(
       m.content
     )
   );
-  if (technicalMatches) serviceTypes.push('Technical Support');
+  if (technicalMatches) {
+    serviceTypes.push('Technical Support');
+  }
 
   const conciergeMatches = [...guestMessages, ...assistantMessages].some(m =>
     /reservation|booking|restaurant|ticket|arrangement|concierge/i.test(
       m.content
     )
   );
-  if (conciergeMatches) serviceTypes.push('Concierge Services');
+  if (conciergeMatches) {
+    serviceTypes.push('Concierge Services');
+  }
 
   const wellnessMatches = [...guestMessages, ...assistantMessages].some(m =>
     /gym|fitness|exercise|yoga|swimming|pool|sauna/i.test(m.content)
   );
-  if (wellnessMatches) serviceTypes.push('Wellness & Fitness');
+  if (wellnessMatches) {
+    serviceTypes.push('Wellness & Fitness');
+  }
 
   const securityMatches = [...guestMessages, ...assistantMessages].some(m =>
     /safe|security|lost|found|key|card|lock|emergency/i.test(m.content)
   );
-  if (securityMatches) serviceTypes.push('Security & Lost Items');
+  if (securityMatches) {
+    serviceTypes.push('Security & Lost Items');
+  }
 
   const specialOccasionMatches = [...guestMessages, ...assistantMessages].some(
     m =>
@@ -268,7 +286,9 @@ export function generateBasicSummary(
         m.content
       )
   );
-  if (specialOccasionMatches) serviceTypes.push('Special Occasions');
+  if (specialOccasionMatches) {
+    serviceTypes.push('Special Occasions');
+  }
 
   // If no services detected, use default
   const serviceType =
@@ -458,7 +478,10 @@ export async function extractServiceRequests(
 ): Promise<ServiceRequest[]> {
   // If OpenAI client is not available, return empty array
   if (!openai) {
-    logger.debug('OpenAI client not available, skipping service request extraction', 'Component');
+    logger.debug(
+      'OpenAI client not available, skipping service request extraction',
+      'Component'
+    );
     return [];
   }
 
@@ -552,7 +575,10 @@ export async function extractServiceRequests(
         }
 
         // Log the actual response structure for debugging
-        logger.debug('Unexpected response structure:', 'Component', JSON.stringify(parsedResponse, null, 2)
+        logger.debug(
+          'Unexpected response structure:',
+          'Component',
+          JSON.stringify(parsedResponse, null, 2)
         );
 
         // Attempt to convert a non-array response to an array if it has the right format
@@ -562,16 +588,28 @@ export async function extractServiceRequests(
 
         return [];
       } catch (parseError) {
-        logger.error('Error parsing OpenAI JSON response:', 'Component', parseError);
+        logger.error(
+          'Error parsing OpenAI JSON response:',
+          'Component',
+          parseError
+        );
         logger.error('Raw response:', 'Component', responseContent);
         return [];
       }
     } catch (apiError) {
-      logger.error('Error calling OpenAI API for service extraction:', 'Component', apiError);
+      logger.error(
+        'Error calling OpenAI API for service extraction:',
+        'Component',
+        apiError
+      );
       return [];
     }
   } catch (error) {
-    logger.error('Unexpected error in extractServiceRequests:', 'Component', error);
+    logger.error(
+      'Unexpected error in extractServiceRequests:',
+      'Component',
+      error
+    );
     return [];
   }
 }
@@ -584,7 +622,10 @@ export async function extractServiceRequests(
 export async function translateToVietnamese(text: string): Promise<string> {
   // If OpenAI client is not available, return original text
   if (!openai) {
-    logger.debug('OpenAI client not available, skipping translation', 'Component');
+    logger.debug(
+      'OpenAI client not available, skipping translation',
+      'Component'
+    );
     return text;
   }
 
@@ -626,7 +667,11 @@ export async function translateToVietnamese(text: string): Promise<string> {
       'Không thể dịch văn bản.'
     );
   } catch (error: any) {
-    logger.error('Error translating to Vietnamese with OpenAI:', 'Component', error);
+    logger.error(
+      'Error translating to Vietnamese with OpenAI:',
+      'Component',
+      error
+    );
     return 'Không thể dịch văn bản. Vui lòng thử lại sau.';
   }
 }
@@ -918,7 +963,10 @@ export async function generateCallSummary(
 ): Promise<string> {
   // If OpenAI client is not available, use the basic summary generator
   if (!openai) {
-    logger.debug('OpenAI client not available, using basic summary generator', 'Component');
+    logger.debug(
+      'OpenAI client not available, using basic summary generator',
+      'Component'
+    );
     return generateBasicSummary(transcripts);
   }
 
@@ -978,7 +1026,10 @@ export async function generateCallSummary(
       return 'Could not generate AI summary: API key authentication failed. Please contact hotel staff to resolve this issue.';
     } else if (error?.status === 429 || error?.code === 'insufficient_quota') {
       // For rate limit errors, return just the detailed error
-      logger.debug('Rate limit or quota exceeded, falling back to basic summary generator', 'Component');
+      logger.debug(
+        'Rate limit or quota exceeded, falling back to basic summary generator',
+        'Component'
+      );
       return generateBasicSummary(transcripts);
     } else if (error?.status === 500) {
       return 'Could not generate AI summary: OpenAI service is currently experiencing issues. Please try again later.';

@@ -4,7 +4,7 @@ import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
 import pg from 'pg';
 const { Pool } = pg;
 import Database, { type Database as DatabaseType } from 'better-sqlite3';
-import {  } from './schema';
+import {} from './schema';
 /**
  * Advanced Connection Pool Configuration
  * Environment-specific optimizations for optimal performance
@@ -246,7 +246,9 @@ export class DatabaseConnectionManager {
    * Setup PostgreSQL pool event listeners for monitoring
    */
   private setupPoolEventListeners(): void {
-    if (!this.pool) return;
+    if (!this.pool) {
+      return;
+    }
 
     // Connection events
     this.pool.on('connect', () => {
@@ -280,7 +282,9 @@ export class DatabaseConnectionManager {
    * Test database connection
    */
   private async testConnection(): Promise<void> {
-    if (!this.pool) throw new Error('Pool not initialized');
+    if (!this.pool) {
+      throw new Error('Pool not initialized');
+    }
 
     try {
       const client = await this.pool.connect();
@@ -297,7 +301,9 @@ export class DatabaseConnectionManager {
    * Update connection metrics
    */
   private updateMetrics(): void {
-    if (!this.pool) return;
+    if (!this.pool) {
+      return;
+    }
 
     this.connectionMetrics = {
       ...this.connectionMetrics,

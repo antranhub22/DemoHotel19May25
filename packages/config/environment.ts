@@ -153,7 +153,9 @@ function parseBoolean(
   value: string | undefined,
   defaultValue: boolean = false
 ): boolean {
-  if (value === undefined) return defaultValue;
+  if (value === undefined) {
+    return defaultValue;
+  }
   return value.toLowerCase() === 'true' || value === '1';
 }
 
@@ -161,7 +163,9 @@ function parseBoolean(
  * Parse number environment variable
  */
 function parseNumber(value: string | undefined, defaultValue: number): number {
-  if (value === undefined) return defaultValue;
+  if (value === undefined) {
+    return defaultValue;
+  }
   const parsed = parseInt(value, 10);
   return isNaN(parsed) ? defaultValue : parsed;
 }
@@ -310,7 +314,7 @@ export function validateEnvironment(
   const missingVars: string[] = [];
 
   // Check basic required variables
-  for (const varName of (REQUIRED_VARS as any[])) {
+  for (const varName of REQUIRED_VARS as any[]) {
     if (!process.env[varName]) {
       missingVars.push(varName);
     }
@@ -318,7 +322,7 @@ export function validateEnvironment(
 
   // Check SaaS required variables if needed
   if (requireSaasFeatures) {
-    for (const varName of (SAAS_REQUIRED_VARS as any[])) {
+    for (const varName of SAAS_REQUIRED_VARS as any[]) {
       if (!process.env[varName]) {
         missingVars.push(varName);
       }
@@ -353,14 +357,18 @@ export function getEnvironmentStatus(): {
   // Check basic setup
   const basicSetup = REQUIRED_VARS.every(varName => {
     const exists = !!process.env[varName];
-    if (!exists) missing.push(varName);
+    if (!exists) {
+      missing.push(varName);
+    }
     return exists;
   });
 
   // Check SaaS features
   const saasFeatures = SAAS_REQUIRED_VARS.every(varName => {
     const exists = !!process.env[varName];
-    if (!exists) missing.push(varName);
+    if (!exists) {
+      missing.push(varName);
+    }
     return exists;
   });
 

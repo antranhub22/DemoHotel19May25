@@ -4,8 +4,13 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Custom Hook
+import { useAssistant } from '@/context';
 
 // Context
+
+// Types & Constants
+import type { Language } from '@/types/interface1.types';
+import { LANGUAGE_DISPLAY_NAMES } from './interface1/MultiLanguageNotificationHelper';
 
 // Utils
 import { logger } from '@shared/utils/logger';
@@ -42,10 +47,9 @@ const MobileSummaryPopup = () => {
 
   // Listen for summary popups and show them in mobile center modal
   useEffect(() => {
-
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     setShowSummary(!!summaryPopup);
-  
+
     // no cleanup needed
   }, [popups]);
 
@@ -99,12 +103,16 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   } = useInterface1({ isActive });
 
   // ✅ ENHANCED: Add service selection state for user feedback
-  const [selectedService, setSelectedService] = useState<ServiceCategory | null>(null);
+  const [selectedService, setSelectedService] =
+    useState<ServiceCategory | null>(null);
 
   // ✅ ENHANCEMENT: Enhanced language change handler
   const handleLanguageChange = useCallback((newLanguage: Language) => {
-    logger.debug(`🗣️ [Interface1] Language changed to: ${newLanguage}`, 'Component');
-    
+    logger.debug(
+      `🗣️ [Interface1] Language changed to: ${newLanguage}`,
+      'Component'
+    );
+
     // Add multi-language notification using helper
     addMultiLanguageNotification(
       'languageChanged',
@@ -115,80 +123,102 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   }, []);
 
   // ✅ ENHANCEMENT: Service interaction handlers with voice context
-  const handleServiceSelect = useCallback((service: ServiceCategory) => {
-    logger.debug(`🎯 [Interface1] Service selected: ${service.name}`, 'Component');
-    
-    // Show selected service feedback
-    setSelectedService(service);
-    
-    // Add multi-language notification using helper
-    addMultiLanguageNotification(
-      'serviceSelected',
-      language,
-      { service: service.name },
-      { 
-        type: 'info', 
-        duration: 4000,
-        metadata: {
-          serviceName: service.name,
-          serviceDescription: service.description,
-        }
-      }
-    );
-    
-    // Clear selection after 3 seconds
-    setTimeout(() => setSelectedService(null), 3000);
-  }, [language]);
+  const handleServiceSelect = useCallback(
+    (service: ServiceCategory) => {
+      logger.debug(
+        `🎯 [Interface1] Service selected: ${service.name}`,
+        'Component'
+      );
 
-  const handleVoiceServiceRequest = useCallback(async (service: ServiceCategory) => {
-    logger.debug(`🎤 [Interface1] Voice service request: ${service.name}`, 'Component');
-    
-    try {
-      // Set service selection for immediate feedback
+      // Show selected service feedback
       setSelectedService(service);
-      
+
       // Add multi-language notification using helper
       addMultiLanguageNotification(
-        'voiceRequestStarted',
+        'serviceSelected',
         language,
         { service: service.name },
-        { 
-          type: 'call', 
-          duration: 3000,
+        {
+          type: 'info',
+          duration: 4000,
           metadata: {
             serviceName: service.name,
-            language,
-          }
+            serviceDescription: service.description,
+          },
         }
       );
-      
-      // Start call with service context
-      await handleCallStart(language); // Use existing handleCallStart
-      
-      logger.debug(`✅ [Interface1] Voice request started for: ${service.name}`, 'Component');
-    } catch (error) {
-      logger.error(`❌ [Interface1] Error starting voice request for: ${service.name}`, 'Component', error);
-      setSelectedService(null); // Clear on error
-      
-      // Add multi-language error notification using helper
-      addMultiLanguageNotification(
-        'voiceRequestFailed',
-        language,
-        { service: service.name },
-        { 
-          type: 'error', 
-          duration: 5000,
-          metadata: {
-            serviceName: service.name,
-            language,
-            error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error'
-          }
-        }
+
+      // Clear selection after 3 seconds
+      setTimeout(() => setSelectedService(null), 3000);
+    },
+    [language]
+  );
+
+  const handleVoiceServiceRequest = useCallback(
+    async (service: ServiceCategory) => {
+      logger.debug(
+        `🎤 [Interface1] Voice service request: ${service.name}`,
+        'Component'
       );
-      
-      throw error; // Let ServiceGrid handle the error display
-    }
-  }, [language, handleCallStart]);
+
+      try {
+        // Set service selection for immediate feedback
+        setSelectedService(service);
+
+        // Add multi-language notification using helper
+        addMultiLanguageNotification(
+          'voiceRequestStarted',
+          language,
+          { service: service.name },
+          {
+            type: 'call',
+            duration: 3000,
+            metadata: {
+              serviceName: service.name,
+              language,
+            },
+          }
+        );
+
+        // Start call with service context
+        await handleCallStart(language); // Use existing handleCallStart
+
+        logger.debug(
+          `✅ [Interface1] Voice request started for: ${service.name}`,
+          'Component'
+        );
+      } catch (error) {
+        logger.error(
+          `❌ [Interface1] Error starting voice request for: ${service.name}`,
+          'Component',
+          error
+        );
+        setSelectedService(null); // Clear on error
+
+        // Add multi-language error notification using helper
+        addMultiLanguageNotification(
+          'voiceRequestFailed',
+          language,
+          { service: service.name },
+          {
+            type: 'error',
+            duration: 5000,
+            metadata: {
+              serviceName: service.name,
+              language,
+              error:
+                error instanceof Error
+                  ? (error as any)?.message || String(error)
+                  : 'Unknown error',
+            },
+          }
+        );
+
+        throw error; // Let ServiceGrid handle the error display
+      }
+    },
+    [language, handleCallStart]
+  );
 
   // ✅ ENHANCEMENT: Add call end notification with multi-language support
   useEffect(() => {
@@ -198,14 +228,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         'voiceCallCompleted',
         language,
         {},
-        { 
-          type: 'success', 
+        {
+          type: 'success',
           duration: 4000,
           metadata: {
             language,
             serviceName: selectedService.name,
             callDuration: '2 minutes', // Would come from call context
-          }
+          },
         }
       );
     }
@@ -224,7 +254,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     <InterfaceContainer>
       {/* Enhanced Voice Language Switcher */}
       <div className="fixed top-4 left-4 z-[9998]">
-        <VoiceLanguageSwitcher 
+        <VoiceLanguageSwitcher
           position="floating"
           showVoicePreview={true}
           onLanguageChange={handleLanguageChange}
@@ -232,16 +262,20 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       </div>
 
       {/* Voice Command Context (invisible but provides context) */}
-      <VoiceCommandContext 
+      <VoiceCommandContext
         selectedService={selectedService}
         isCallActive={isCallStarted}
-        onVoicePromptReady={(prompt) => {
-          logger.debug('🎤 [Interface1] Voice prompt ready:', 'Component', prompt);
+        onVoicePromptReady={prompt => {
+          logger.debug(
+            '🎤 [Interface1] Voice prompt ready:',
+            'Component',
+            prompt
+          );
         }}
       />
 
       {/* Mobile Voice Controls */}
-      <MobileVoiceControls 
+      <MobileVoiceControls
         selectedService={selectedService}
         isCallActive={isCallStarted}
         onLanguageChange={handleLanguageChange}
@@ -340,7 +374,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       </div>
 
       {/* ✅ ENHANCEMENT: Real-time Notification System */}
-      <NotificationSystem 
+      <NotificationSystem
         position="top-right"
         maxNotifications={5}
         className="z-[9999]"
@@ -355,7 +389,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
       {/* Service Categories Section - Add margin to prevent overlap */}
       <div className="mt-16 relative z-10" data-testid="service-grid">
-        <ServiceGridContainer 
+        <ServiceGridContainer
           ref={serviceGridRef}
           onServiceSelect={handleServiceSelect}
           onVoiceServiceRequest={handleVoiceServiceRequest}

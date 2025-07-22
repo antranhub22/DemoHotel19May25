@@ -14,7 +14,10 @@ export async function deleteAllRequests() {
     console.error('Error deleting all requests:', error);
     return {
       success: false,
-      error: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+      error:
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : 'Unknown error',
     };
   }
 }
@@ -23,8 +26,12 @@ export async function deleteAllRequests() {
 export function dateToString(
   date: Date | string | null | undefined
 ): string | null {
-  if (!date) return null;
-  if (typeof date === 'string') return date;
+  if (!date) {
+    return null;
+  }
+  if (typeof date === 'string') {
+    return date;
+  }
   return date.toISOString();
 }
 

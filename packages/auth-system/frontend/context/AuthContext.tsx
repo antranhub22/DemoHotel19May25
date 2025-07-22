@@ -159,8 +159,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error('Sai tài khoản hoặc mật khẩu');
       }
       const data = await (res as any).json();
-      if (!data.success || !data.token)
+      if (!data.success || !data.token) {
         throw new Error('Không nhận được token từ server');
+      }
       localStorage.setItem('token', data.token);
 
       // Sử dụng user data từ unified auth response
@@ -207,7 +208,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Permission checking function
   const hasPermission = useCallback(
     (module: string, action: string): boolean => {
-      if (!user || !user.permissions) return false;
+      if (!user || !user.permissions) {
+        return false;
+      }
 
       return user.permissions.some(
         permission =>
@@ -263,7 +266,9 @@ export const useTenantDetection = () => {
   } | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      return;
+    }
 
     const host = window.location.host;
     const hostname = window.location.hostname;
@@ -325,7 +330,9 @@ export const useRequireAuth = (
     useAuth();
 
   const canAccess = () => {
-    if (isLoading) return null; // Still loading
+    if (isLoading) {
+      return null;
+    } // Still loading
 
     if (requireAuth && !isAuthenticated) {
       return false; // Not authenticated

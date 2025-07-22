@@ -1,5 +1,4 @@
-
-import { AdvancedHotelData,  } from './hotelResearch';
+import { AdvancedHotelData } from './hotelResearch';
 // ============================================
 // Knowledge Base Generator Service
 // ============================================
@@ -153,7 +152,9 @@ Location: ${hotelData.location.lat}, ${hotelData.location.lng}`;
   }
 
   private generateServicesSection(services: HotelService[]): string {
-    if (services.length === 0) return '';
+    if (services.length === 0) {
+      return '';
+    }
 
     const servicesByType = this.groupServicesByType(services);
     let section = 'SERVICES AVAILABLE:\n';
@@ -162,8 +163,12 @@ Location: ${hotelData.location.lat}, ${hotelData.location.lng}`;
       section += `\n${type.toUpperCase()}:\n`;
       typeServices.forEach(service => {
         section += `- ${service.name}: ${service.description}`;
-        if (service.price) section += ` (${service.price})`;
-        if (service.hours) section += ` - Available: ${service.hours}`;
+        if (service.price) {
+          section += ` (${service.price})`;
+        }
+        if (service.hours) {
+          section += ` - Available: ${service.hours}`;
+        }
         section += '\n';
       });
     });
@@ -172,7 +177,9 @@ Location: ${hotelData.location.lat}, ${hotelData.location.lng}`;
   }
 
   private generateRoomTypesSection(roomTypes: RoomType[]): string {
-    if (roomTypes.length === 0) return '';
+    if (roomTypes.length === 0) {
+      return '';
+    }
 
     let section = 'ROOM TYPES:\n';
     roomTypes.forEach(room => {
@@ -187,7 +194,9 @@ Location: ${hotelData.location.lat}, ${hotelData.location.lng}`;
   }
 
   private generateAmenitiesSection(amenities: string[]): string {
-    if (amenities.length === 0) return '';
+    if (amenities.length === 0) {
+      return '';
+    }
 
     return `AMENITIES:
 ${amenities.map(amenity => `- ${amenity}`).join('\n')}`;
@@ -203,7 +212,9 @@ Cancellation: ${policies.cancellation}`;
   private generateLocalAttractionsSection(
     attractions: LocalAttraction[]
   ): string {
-    if (attractions.length === 0) return '';
+    if (attractions.length === 0) {
+      return '';
+    }
 
     const attractionsByCategory = this.groupAttractionsByCategory(attractions);
     let section = 'LOCAL ATTRACTIONS:\n';
@@ -213,7 +224,9 @@ Cancellation: ${policies.cancellation}`;
         section += `\n${category.toUpperCase()}:\n`;
         categoryAttractions.forEach(attraction => {
           section += `- ${attraction.name} (${attraction.distance}): ${attraction.description}`;
-          if (attraction.rating) section += ` - Rating: ${attraction.rating}/5`;
+          if (attraction.rating) {
+            section += ` - Rating: ${attraction.rating}/5`;
+          }
           section += '\n';
         });
       }
@@ -231,7 +244,9 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   }
 
   private generateReviewsSection(reviewData: any): string {
-    if (!reviewData || !reviewData.totalReviews) return '';
+    if (!reviewData || !reviewData.totalReviews) {
+      return '';
+    }
 
     return `GUEST REVIEWS:
 Average Rating: ${reviewData.averageRating}/5 (${reviewData.totalReviews} reviews)
@@ -240,7 +255,9 @@ Areas for Improvement: ${reviewData.commonComplaints?.join(', ') || 'Continuous 
   }
 
   private generateCompetitorSection(competitorData: any): string {
-    if (!competitorData || !competitorData.uniqueSellingPoints) return '';
+    if (!competitorData || !competitorData.uniqueSellingPoints) {
+      return '';
+    }
 
     return `UNIQUE SELLING POINTS:
 ${competitorData.uniqueSellingPoints.map((point: string) => `- ${point}`).join('\n')}
@@ -249,8 +266,9 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
 
   private generateFunctionDescriptions(services: HotelService[]): string {
     const availableServices = services.filter(s => s.available);
-    if (availableServices.length === 0)
+    if (availableServices.length === 0) {
       return 'Standard hotel information services';
+    }
 
     return availableServices
       .map(service => `- ${service.name}: ${service.description}`)
@@ -335,7 +353,9 @@ Market Position: ${competitorData.marketPosition || 'Mid-range'}`;
   }
 
   private getHotelCategory(hotelData: BasicHotelData): string {
-    if (hotelData.priceLevel === undefined) return 'hotel';
+    if (hotelData.priceLevel === undefined) {
+      return 'hotel';
+    }
 
     switch (hotelData.priceLevel) {
       case 0:

@@ -39,7 +39,10 @@ export class CallService {
         })
         .where(eq(call.call_id_vapi, callId));
 
-      logger.debug('Updated call duration for ${callId}: ${duration} seconds', 'Component');
+      logger.debug(
+        'Updated call duration for ${callId}: ${duration} seconds',
+        'Component'
+      );
     } catch (error) {
       logger.error('Error updating call duration:', 'Component', error);
       throw new Error('Failed to update call duration');
@@ -89,7 +92,10 @@ export class CallService {
         timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
       });
 
-      logger.debug('✅ [CallService] Transcript stored successfully', 'Component');
+      logger.debug(
+        '✅ [CallService] Transcript stored successfully',
+        'Component'
+      );
 
       return {
         success: true,
@@ -98,7 +104,11 @@ export class CallService {
       };
     } catch (error) {
       if (error instanceof z.ZodError) {
-        logger.error('Zod validation errors in callService:', 'Component', error.errors);
+        logger.error(
+          'Zod validation errors in callService:',
+          'Component',
+          error.errors
+        );
         throw new Error(
           `Invalid transcript data: ${JSON.stringify(error.errors)}`
         );
@@ -160,8 +170,12 @@ export class CallService {
       );
     const hasFrench = /[àâäéèêëîïôöùûüÿç]/.test(content) && !hasVietnamese;
 
-    if (hasVietnamese) return 'vi';
-    if (hasFrench) return 'fr';
+    if (hasVietnamese) {
+      return 'vi';
+    }
+    if (hasFrench) {
+      return 'fr';
+    }
     return 'en';
   }
 

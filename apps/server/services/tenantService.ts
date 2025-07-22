@@ -9,12 +9,8 @@ import {
   request,
   message,
 } from '@shared/schema';
-
 import { logger } from '@shared/utils/logger';
-import {
-  tenantMapper,
-  hotelProfileMapper,
-} from '@shared/db/transformers';
+import { tenantMapper, hotelProfileMapper } from '@shared/db/transformers';
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -128,7 +124,11 @@ export class TenantService {
       logger.debug(`✅ Tenant created successfully: ${tenant.id}`, 'Component');
       return tenant.id;
     } catch (error) {
-      logger.error('Failed to create tenant ${config.hotelName}:', 'Component', error);
+      logger.error(
+        'Failed to create tenant ${config.hotelName}:',
+        'Component',
+        error
+      );
       throw new TenantError(
         `Failed to create tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_CREATION_FAILED',
@@ -171,7 +171,9 @@ export class TenantService {
 
       return tenant;
     } catch (error) {
-      if (error instanceof TenantError) throw error;
+      if (error instanceof TenantError) {
+        throw error;
+      }
       throw new TenantError(
         `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_FETCH_FAILED',
@@ -214,7 +216,9 @@ export class TenantService {
 
       return tenant;
     } catch (error) {
-      if (error instanceof TenantError) throw error;
+      if (error instanceof TenantError) {
+        throw error;
+      }
       throw new TenantError(
         `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'TENANT_FETCH_FAILED',
@@ -236,8 +240,12 @@ export class TenantService {
       const updateData: any = {};
 
       // Only update provided fields
-      if (updates.hotelName) updateData.hotelName = updates.hotelName;
-      if (updates.customDomain) updateData.customDomain = updates.customDomain;
+      if (updates.hotelName) {
+        updateData.hotelName = updates.hotelName;
+      }
+      if (updates.customDomain) {
+        updateData.customDomain = updates.customDomain;
+      }
       if (updates.subscriptionPlan) {
         updateData.subscriptionPlan = updates.subscriptionPlan;
         // Update feature flags and limits based on new plan
@@ -247,9 +255,12 @@ export class TenantService {
         const limits = this.getSubscriptionLimits(updates.subscriptionPlan);
         Object.assign(updateData, featureFlags, limits);
       }
-      if (updates.subscriptionStatus)
+      if (updates.subscriptionStatus) {
         updateData.subscriptionStatus = updates.subscriptionStatus;
-      if (updates.trialEndsAt) updateData.trialEndsAt = updates.trialEndsAt;
+      }
+      if (updates.trialEndsAt) {
+        updateData.trialEndsAt = updates.trialEndsAt;
+      }
 
       await db.update(tenants).set(updateData).where(eq(tenants.id, tenantId));
 
@@ -309,7 +320,11 @@ export class TenantService {
       const featureFlags = this.getCurrentFeatureFlags(tenant);
       return featureFlags[feature] || false;
     } catch (error) {
-      logger.error('Failed to check feature access for ${tenantId}:', 'Component', error);
+      logger.error(
+        'Failed to check feature access for ${tenantId}:',
+        'Component',
+        error
+      );
       return false;
     }
   }
@@ -473,7 +488,11 @@ export class TenantService {
         violations,
       };
     } catch (error) {
-      logger.error('Failed to check subscription limits for ${tenantId}:', 'Component', error);
+      logger.error(
+        'Failed to check subscription limits for ${tenantId}:',
+        'Component',
+        error
+      );
       return { withinLimits: false, violations: ['Unable to check limits'] };
     }
   }
@@ -524,7 +543,11 @@ export class TenantService {
         dataRetentionDays: 90, // Note: Dynamic tenant settings to be implemented
       };
     } catch (error) {
-      logger.error('Failed to get tenant usage for ${tenantId}:', 'Component', error);
+      logger.error(
+        'Failed to get tenant usage for ${tenantId}:',
+        'Component',
+        error
+      );
       return {
         callsThisMonth: 0,
         voicesUsed: 0,
@@ -554,12 +577,17 @@ export class TenantService {
       const tenant = await this.getTenantById(tenantId);
       const retentionDays = tenant.dataRetentionDays || 90;
 
-      if (retentionDays <= 0) return; // Unlimited retention
+      if (retentionDays <= 0) {
+        return;
+      } // Unlimited retention
 
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
-      logger.debug(`🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`, 'Component');
+      logger.debug(
+        `🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`,
+        'Component'
+      );
 
       // Delete old transcripts
       await db
@@ -581,9 +609,16 @@ export class TenantService {
           )
         );
 
-      logger.debug(`✅ Data cleanup completed for tenant ${tenantId}`, 'Component');
+      logger.debug(
+        `✅ Data cleanup completed for tenant ${tenantId}`,
+        'Component'
+      );
     } catch (error) {
-      logger.error('Failed to cleanup data for tenant ${tenantId}:', 'Component', error);
+      logger.error(
+        'Failed to cleanup data for tenant ${tenantId}:',
+        'Component',
+        error
+      );
       throw new TenantError(
         `Failed to cleanup data: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'DATA_CLEANUP_FAILED',
@@ -634,7 +669,9 @@ export class TenantService {
    * Check if tenant subscription is active
    */
   isSubscriptionActive(tenant: any): boolean {
-    if (tenant.subscriptionStatus !== 'active') return false;
+    if (tenant.subscriptionStatus !== 'active') {
+      return false;
+    }
 
     // Check trial expiration
     if (tenant.subscriptionPlan === 'trial' && tenant.trialEndsAt) {

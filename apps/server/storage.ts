@@ -1,7 +1,7 @@
-import { staff, transcript, request, callSummaries,  } from '@shared/schema';
-import { db } from './db';
+import { staff, transcript, request, callSummaries } from '@shared/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
+import { db } from './db';
 
 // Type aliases for backward compatibility
 type Order = typeof request.$inferSelect;
@@ -29,7 +29,10 @@ const convertToPostgreSQLTimestamp = (
     const maxTimestamp = new Date('2038-01-19').getTime();
 
     if (validTimestamp < minTimestamp || validTimestamp > maxTimestamp) {
-      logger.warn('⚠️ Timestamp ${timestamp} out of range, using current time', 'Component');
+      logger.warn(
+        '⚠️ Timestamp ${timestamp} out of range, using current time',
+        'Component'
+      );
       return new Date();
     }
 
@@ -135,14 +138,18 @@ export class DatabaseStorage implements IStorage {
       // Ensure no ID field (let PostgreSQL handle SERIAL)
       delete (processedTranscript as any).id;
 
-      logger.debug('📝 [PostgreSQL Storage] Final transcript for database:', 'Component', {
-        ...processedTranscript,
-        timestampISO:
-          processedTranscript.timestamp instanceof Date
-            ? processedTranscript.timestamp.toISOString()
-            : 'Invalid Date',
-        fieldCount: Object.keys(processedTranscript).length,
-      });
+      logger.debug(
+        '📝 [PostgreSQL Storage] Final transcript for database:',
+        'Component',
+        {
+          ...processedTranscript,
+          timestampISO:
+            processedTranscript.timestamp instanceof Date
+              ? processedTranscript.timestamp.toISOString()
+              : 'Invalid Date',
+          fieldCount: Object.keys(processedTranscript).length,
+        }
+      );
 
       // ✅ PostgreSQL-optimized insert
       const result = await db
@@ -154,16 +161,28 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Failed to insert transcript - no result returned');
       }
 
-      logger.debug('✅ [PostgreSQL Storage] Transcript added successfully:', 'Component', {
-        id: result[0].id,
-        callId: result[0].call_id,
-        timestamp: result[0].timestamp,
-      });
+      logger.debug(
+        '✅ [PostgreSQL Storage] Transcript added successfully:',
+        'Component',
+        {
+          id: result[0].id,
+          callId: result[0].call_id,
+          timestamp: result[0].timestamp,
+        }
+      );
 
       return result[0];
     } catch (error) {
-      logger.error('❌ [PostgreSQL Storage] Error adding transcript:', 'Component', error);
-      logger.error('📋 [PostgreSQL Storage] Input data:', 'Component', insertTranscript);
+      logger.error(
+        '❌ [PostgreSQL Storage] Error adding transcript:',
+        'Component',
+        error
+      );
+      logger.error(
+        '📋 [PostgreSQL Storage] Input data:',
+        'Component',
+        insertTranscript
+      );
       throw error;
     }
   }
@@ -218,7 +237,11 @@ export class DatabaseStorage implements IStorage {
     roomNumber?: string;
   }): Promise<Order[]> {
     try {
-      logger.debug('🔍 [PostgreSQL Storage] getAllOrders called with filter:', 'Component', filter);
+      logger.debug(
+        '🔍 [PostgreSQL Storage] getAllOrders called with filter:',
+        'Component',
+        filter
+      );
 
       // ✅ POSTGRESQL-OPTIMIZED: Only select existing columns
       let query = db.select().from(request);
@@ -231,7 +254,11 @@ export class DatabaseStorage implements IStorage {
       }
       if (filter.roomNumber) {
         whereConditions.push(eq(request.room_number, filter.roomNumber));
-        logger.debug('🔍 Added room number filter:', 'Component', filter.roomNumber);
+        logger.debug(
+          '🔍 Added room number filter:',
+          'Component',
+          filter.roomNumber
+        );
       }
 
       if (whereConditions.length > 0) {
@@ -243,10 +270,18 @@ export class DatabaseStorage implements IStorage {
       }
 
       const result = (await query) as Order[];
-      logger.debug('✅ [PostgreSQL Storage] Query executed successfully, result count:', 'Component', result.length);
+      logger.debug(
+        '✅ [PostgreSQL Storage] Query executed successfully, result count:',
+        'Component',
+        result.length
+      );
       return result;
     } catch (error) {
-      logger.error('❌ [PostgreSQL Storage] getAllOrders error:', 'Component', error);
+      logger.error(
+        '❌ [PostgreSQL Storage] getAllOrders error:',
+        'Component',
+        error
+      );
       throw error;
     }
   }
@@ -260,11 +295,15 @@ export class DatabaseStorage implements IStorage {
     insertCallSummary: InsertCallSummary
   ): Promise<CallSummary> {
     try {
-      logger.debug('📝 [PostgreSQL Storage] Adding call summary:', 'Component', {
-        callId: insertCallSummary.call_id,
-        content: insertCallSummary.content,
-        hasTimestamp: 'timestamp' in insertCallSummary,
-      });
+      logger.debug(
+        '📝 [PostgreSQL Storage] Adding call summary:',
+        'Component',
+        {
+          callId: insertCallSummary.call_id,
+          content: insertCallSummary.content,
+          hasTimestamp: 'timestamp' in insertCallSummary,
+        }
+      );
 
       // ✅ POSTGRESQL-OPTIMIZED: Clean insert with proper timestamp conversion
       const processedSummary = {
@@ -275,22 +314,38 @@ export class DatabaseStorage implements IStorage {
         // For call_summaries, let database handle timestamp with CURRENT_TIMESTAMP
       };
 
-      logger.debug('📝 [PostgreSQL Storage] Processed summary for database:', 'Component', processedSummary);
+      logger.debug(
+        '📝 [PostgreSQL Storage] Processed summary for database:',
+        'Component',
+        processedSummary
+      );
 
       const result = await db
         .insert(callSummaries)
         .values(processedSummary)
         .returning();
 
-      logger.debug('✅ [PostgreSQL Storage] Call summary added successfully:', 'Component', {
-        id: result[0].id,
-        callId: result[0].call_id,
-      });
+      logger.debug(
+        '✅ [PostgreSQL Storage] Call summary added successfully:',
+        'Component',
+        {
+          id: result[0].id,
+          callId: result[0].call_id,
+        }
+      );
 
       return result[0];
     } catch (error) {
-      logger.error('❌ [PostgreSQL Storage] Error adding call summary:', 'Component', error);
-      logger.error('📋 [PostgreSQL Storage] Input data:', 'Component', insertCallSummary);
+      logger.error(
+        '❌ [PostgreSQL Storage] Error adding call summary:',
+        'Component',
+        error
+      );
+      logger.error(
+        '📋 [PostgreSQL Storage] Input data:',
+        'Component',
+        insertCallSummary
+      );
       throw error;
     }
   }
@@ -311,10 +366,14 @@ export class DatabaseStorage implements IStorage {
       const hoursAgo = new Date();
       hoursAgo.setHours(hoursAgo.getHours() - hours);
 
-      logger.debug('🔍 [PostgreSQL Storage] Getting recent call summaries:', 'Component', {
-        hours,
-        timestampThreshold: hoursAgo.toISOString(),
-      });
+      logger.debug(
+        '🔍 [PostgreSQL Storage] Getting recent call summaries:',
+        'Component',
+        {
+          hours,
+          timestampThreshold: hoursAgo.toISOString(),
+        }
+      );
 
       // Query summaries newer than the calculated timestamp (Date comparison)
       return await db
@@ -323,7 +382,11 @@ export class DatabaseStorage implements IStorage {
         .where(gte(callSummaries.timestamp, hoursAgo))
         .orderBy(sql`${callSummaries.timestamp} DESC`);
     } catch (error) {
-      logger.error('❌ [PostgreSQL Storage] Error getting recent call summaries:', 'Component', error);
+      logger.error(
+        '❌ [PostgreSQL Storage] Error getting recent call summaries:',
+        'Component',
+        error
+      );
       throw error;
     }
   }

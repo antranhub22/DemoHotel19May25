@@ -1,10 +1,8 @@
 import fetch from 'node-fetch';
 import { z } from 'zod';
-import {  } from './hotelResearch';
+import {} from './hotelResearch';
 import { logger } from '@shared/utils/logger';
-import {
-  KnowledgeBaseGenerator,
-} from './knowledgeBaseGenerator';
+import { KnowledgeBaseGenerator } from './knowledgeBaseGenerator';
 
 // ============================================
 // Types & Interfaces for Vapi Integration
@@ -103,7 +101,10 @@ export class VapiIntegrationService {
     this.apiKey = process.env.VAPI_API_KEY || '';
 
     if (!this.apiKey) {
-      logger.warn('Vapi API key not found. Assistant creation will fail.', 'Component');
+      logger.warn(
+        'Vapi API key not found. Assistant creation will fail.',
+        'Component'
+      );
     }
   }
 
@@ -167,7 +168,10 @@ export class VapiIntegrationService {
       }
 
       const assistant: VapiResponse = JSON.parse(responseText);
-      logger.debug('✅ Vapi assistant created successfully: ${assistant.id}', 'Component');
+      logger.debug(
+        '✅ Vapi assistant created successfully: ${assistant.id}',
+        'Component'
+      );
 
       return assistant.id;
     } catch (error: any) {
@@ -204,19 +208,33 @@ export class VapiIntegrationService {
 
       const updateData: any = {};
 
-      if (config.name) updateData.name = config.name;
-      if (config.systemPrompt) updateData.systemMessage = config.systemPrompt;
-      if (config.functions) updateData.functions = config.functions;
-      if (config.firstMessage) updateData.firstMessage = config.firstMessage;
-      if (config.voiceId)
+      if (config.name) {
+        updateData.name = config.name;
+      }
+      if (config.systemPrompt) {
+        updateData.systemMessage = config.systemPrompt;
+      }
+      if (config.functions) {
+        updateData.functions = config.functions;
+      }
+      if (config.firstMessage) {
+        updateData.firstMessage = config.firstMessage;
+      }
+      if (config.voiceId) {
         updateData.voice = { provider: 'playht', voiceId: config.voiceId };
-      if (config.model) updateData.model = config.model;
-      if (config.silenceTimeoutSeconds)
+      }
+      if (config.model) {
+        updateData.model = config.model;
+      }
+      if (config.silenceTimeoutSeconds) {
         updateData.silenceTimeoutSeconds = config.silenceTimeoutSeconds;
-      if (config.maxDurationSeconds)
+      }
+      if (config.maxDurationSeconds) {
         updateData.maxDurationSeconds = config.maxDurationSeconds;
-      if (config.backgroundSound)
+      }
+      if (config.backgroundSound) {
         updateData.backgroundSound = config.backgroundSound;
+      }
 
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
         method: 'PATCH',
@@ -236,7 +254,10 @@ export class VapiIntegrationService {
         );
       }
 
-      logger.debug('✅ Vapi assistant updated successfully: ${assistantId}', 'Component');
+      logger.debug(
+        '✅ Vapi assistant updated successfully: ${assistantId}',
+        'Component'
+      );
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
@@ -282,7 +303,10 @@ export class VapiIntegrationService {
         );
       }
 
-      logger.debug('✅ Vapi assistant deleted successfully: ${assistantId}', 'Component');
+      logger.debug(
+        '✅ Vapi assistant deleted successfully: ${assistantId}',
+        'Component'
+      );
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
@@ -442,7 +466,10 @@ export class AssistantGeneratorService {
     customization: AssistantCustomization
   ): Promise<string> {
     try {
-      logger.debug('🏨 Generating assistant for: ${hotelData.name}', 'Component');
+      logger.debug(
+        '🏨 Generating assistant for: ${hotelData.name}',
+        'Component'
+      );
 
       // 1. Generate knowledge base
       // const _knowledgeBase =
@@ -479,10 +506,17 @@ export class AssistantGeneratorService {
       const assistantId =
         await this.vapiService.createAssistant(assistantConfig);
 
-      logger.debug('✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}', 'Component');
+      logger.debug(
+        '✅ Assistant generated successfully for ${hotelData.name}: ${assistantId}',
+        'Component'
+      );
       return assistantId;
     } catch (error) {
-      logger.error('Failed to generate assistant for ${hotelData.name}:', 'Component', error);
+      logger.error(
+        'Failed to generate assistant for ${hotelData.name}:',
+        'Component',
+        error
+      );
       throw new VapiIntegrationError(
         `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'GENERATION_FAILED',
@@ -500,7 +534,10 @@ export class AssistantGeneratorService {
     customization: AssistantCustomization
   ): Promise<void> {
     try {
-      logger.debug('🔄 Updating assistant ${assistantId} for: ${hotelData.name}', 'Component');
+      logger.debug(
+        '🔄 Updating assistant ${assistantId} for: ${hotelData.name}',
+        'Component'
+      );
 
       // const _knowledgeBase =
       //   this.knowledgeGenerator.generateKnowledgeBase(hotelData);
@@ -521,9 +558,16 @@ export class AssistantGeneratorService {
       };
 
       await this.vapiService.updateAssistant(assistantId, updateConfig);
-      logger.debug('✅ Assistant updated successfully: ${assistantId}', 'Component');
+      logger.debug(
+        '✅ Assistant updated successfully: ${assistantId}',
+        'Component'
+      );
     } catch (error) {
-      logger.error('Failed to update assistant ${assistantId}:', 'Component', error);
+      logger.error(
+        'Failed to update assistant ${assistantId}:',
+        'Component',
+        error
+      );
       throw new VapiIntegrationError(
         `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
         'UPDATE_FAILED',
@@ -811,8 +855,12 @@ export class AssistantGeneratorService {
    */
   private getTimeBasedGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning!';
-    if (hour < 18) return 'Good afternoon!';
+    if (hour < 12) {
+      return 'Good morning!';
+    }
+    if (hour < 18) {
+      return 'Good afternoon!';
+    }
     return 'Good evening!';
   }
 

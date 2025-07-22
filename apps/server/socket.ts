@@ -1,5 +1,5 @@
-import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
+import { Server as SocketIOServer, Socket } from 'socket.io';
 import { logger } from '@shared/utils/logger';
 
 export function setupSocket(server: HTTPServer) {
@@ -24,7 +24,10 @@ export function setupSocket(server: HTTPServer) {
       'update_order_status',
       (data: { orderId: string; status: string }) => {
         const { orderId, status } = data;
-        logger.debug('Received status update for order ${orderId}: ${status}', 'Component');
+        logger.debug(
+          'Received status update for order ${orderId}: ${status}',
+          'Component'
+        );
         // Broadcast to clients in that room
         io.to(orderId).emit('order_status_update', { orderId, status });
       }

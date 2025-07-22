@@ -21,7 +21,13 @@ import type {
   AuthError,
   AuthErrorCode,
 } from '../types';
-import { JWT_CONFIG, SECURITY_CONFIG, TENANT_CONFIG, DEV_CONFIG, authValidationSchemas,  } from '../config';
+import {
+  JWT_CONFIG,
+  SECURITY_CONFIG,
+  TENANT_CONFIG,
+  DEV_CONFIG,
+  authValidationSchemas,
+} from '../config';
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================
@@ -264,7 +270,9 @@ export class UnifiedAuthService {
    */
   static canAccessTenant(user: AuthUser, tenantId: string): boolean {
     // Super admin can access all tenants
-    if (user.role === 'super-admin') return true;
+    if (user.role === 'super-admin') {
+      return true;
+    }
 
     // Regular users can only access their own tenant
     return user.tenantId === tenantId;
@@ -484,7 +492,9 @@ export class UnifiedAuthService {
     };
 
     const match = expiresIn.match(/^(\d+)([smhd])$/);
-    if (!match) throw new Error(`Invalid expiration format: ${expiresIn}`);
+    if (!match) {
+      throw new Error(`Invalid expiration format: ${expiresIn}`);
+    }
 
     const [, value, unit] = match;
     return parseInt(value) * units[unit];
@@ -519,7 +529,9 @@ export class UnifiedAuthService {
   static async getUserById(id: string): Promise<AuthUser | null> {
     try {
       const user = await this.findUserById(id);
-      if (!user) return null;
+      if (!user) {
+        return null;
+      }
 
       return this.createAuthUserFromDbUser(user);
     } catch (error) {

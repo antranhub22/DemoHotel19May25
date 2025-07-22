@@ -103,7 +103,9 @@ export const getConnectionString = (): string => {
   }
 
   const params = new URLSearchParams();
-  if (databaseConfig.ssl) params.append('sslmode', 'require');
+  if (databaseConfig.ssl) {
+    params.append('sslmode', 'require');
+  }
 
   return `postgresql://${databaseConfig.user}:${databaseConfig.password}@${databaseConfig.host}:${databaseConfig.port}/${databaseConfig.name}?${params.toString()}`;
 };
