@@ -6,18 +6,19 @@
 // DO NOT IMPORT OR USE IN ACTIVE DEVELOPMENT
 // ====================================================================
 
-import React, { useEffect, useState } from 'react';
-import { useAssistant } from '@/context/_reference/AssistantContext';
+import React from 'react';
+// import { useEffect, useState } from 'react'; // Unused - commented for reference
+// import { useAssistant } from '@/context/_reference/AssistantContext'; // Unused - commented for reference
 import { ServiceRequest } from '@/types';
-import hotelImage from '@/assets/hotel-exterior.jpeg';
-import InfographicSteps from '../InfographicSteps';
-import {
-  parseSummaryToOrderDetails,
-  extractRoomNumber,
-} from '@/lib/summaryParser';
-import { t } from '@/i18n';
-import { Button } from '../ui/button';
-import { AlertCircle } from 'lucide-react';
+// import hotelImage from '@/assets/hotel-exterior.jpeg'; // Unused - commented for reference
+// import InfographicSteps from '../InfographicSteps'; // Unused - commented for reference
+// import {
+//   parseSummaryToOrderDetails,
+//   extractRoomNumber,
+// } from '@/lib/summaryParser'; // Unused - commented for reference
+// import { t } from '@/i18n'; // Unused - commented for reference
+// import { Button } from '../ui/button'; // Unused - commented for reference
+// import { AlertCircle } from 'lucide-react'; // Unused - commented for reference
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { logger } from '@shared/utils/logger';
 
@@ -32,24 +33,24 @@ interface Interface3Props {
 const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
   // ⚠️ WARNING: This component is for reference only
   console.warn('Interface3 is disabled - use Interface1 instead');
-  
+
   // --- DI CHUYỂN TOÀN BỘ HOOK LÊN ĐẦU COMPONENT ---
-  const {
-    orderSummary,
-    setOrderSummary,
-    // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
-    setOrder,
-    callSummary,
-    setCallSummary,
-    serviceRequests,
-    callDuration,
-    callDetails,
-    emailSentForCurrentSession,
-    setEmailSentForCurrentSession,
-    addActiveOrder,
-    translateToVietnamese,
-    language,
-  } = useAssistant();
+  // const {
+  //   orderSummary,
+  //   setOrderSummary,
+  //   // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
+  //   setOrder,
+  //   callSummary,
+  //   setCallSummary,
+  //   serviceRequests,
+  //   callDuration,
+  //   callDetails,
+  //   emailSentForCurrentSession,
+  //   setEmailSentForCurrentSession,
+  //   addActiveOrder,
+  //   translateToVietnamese,
+  //   language,
+  // } = useAssistant();
 
   // Lấy config trực tiếp từ useHotelConfiguration thay vì từ AssistantContext
   const {
@@ -58,10 +59,10 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     error: configError,
   } = useHotelConfiguration();
 
-  const [groupedRequests, setGroupedRequests] = useState<
-    Record<string, ServiceRequest[]>
-  >({});
-  const [note, setNote] = useState('');
+  // const [groupedRequests, setGroupedRequests] = useState<
+  //   Record<string, ServiceRequest[]>
+  // >({});
+  // const [note, setNote] = useState('');
   // --- KẾT THÚC DI CHUYỂN HOOK ---
 
   // ✅ DISABLED: Always return null
@@ -74,18 +75,19 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
         <p className="text-gray-600 mb-4">
           This interface is disabled for reference only.
         </p>
-        <p className="text-gray-600">
-          Use Interface1 for all development.
-        </p>
+        <p className="text-gray-600">Use Interface1 for all development.</p>
       </div>
     </div>
   );
 
   // ========== ORIGINAL CODE BELOW (REFERENCE ONLY) ==========
-  
+
   // ✅ FIXED: Render conditionally without early returns
   if (configLoading || !hotelConfig) {
-    logger.debug('[DEBUG] Interface3 render:', 'Component', { hotelConfig, configLoading });
+    logger.debug('[DEBUG] Interface3 render:', 'Component', {
+      hotelConfig,
+      configLoading,
+    });
     return (
       <div className="absolute w-full min-h-screen h-full flex items-center justify-center z-10 bg-gray-100">
         <div className="text-center">
@@ -111,12 +113,12 @@ const Interface3: React.FC<Interface3Props> = ({ isActive }) => {
     );
   }
 
-  if (!orderSummary) {
-    return null;
-  }
+  // if (!orderSummary) {
+  //   return null;
+  // }
 
   // ... [Rest of original Interface3 code would go here as reference]
   // This section is truncated for brevity in the reference file
 };
 
-export default Interface3; 
+export default Interface3;

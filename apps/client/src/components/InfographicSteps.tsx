@@ -17,9 +17,8 @@ export default function InfographicSteps({
   language: propLanguage,
 }: InfographicStepsProps) {
   // Lấy language từ prop hoặc context
-  const { language: contextLanguage } = useAssistant
-    ? useAssistant()
-    : { language: 'en' };
+  const assistantContext = useAssistant();
+  const { language: contextLanguage } = assistantContext || { language: 'en' };
   const language: Lang = (propLanguage || contextLanguage || 'en') as Lang;
 
   const steps = [

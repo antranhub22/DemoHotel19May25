@@ -32,22 +32,25 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   colors,
 }) => {
   // Component render debug - Development only
-  if (process.env.NODE_ENV === 'development') {
-    logger.debug(`[SiriCallButton] Component render - Container: ${containerId}, onCallStart: ${!!onCallStart}, Mobile: ${/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}`, 'Component');
+  if (import.meta.env.DEV) {
+    logger.debug(
+      `[SiriCallButton] Component render - Container: ${containerId}, onCallStart: ${!!onCallStart}, Mobile: ${/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}`,
+      'Component'
+    );
   }
 
   // 🔧 PHASE 2: DEBUG CONTROL - Emergency debug level control
-  const DEBUG_LEVEL = process.env.NODE_ENV === 'development' ? 1 : 0; // 0: off, 1: errors only, 2: all
+  const DEBUG_LEVEL = import.meta.env.DEV ? 1 : 0; // 0: off, 1: errors only, 2: all
 
   // Debug utility methods - Environment aware
   const debug = (message: string, ...args: any[]) => {
-    if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 2) {
+    if (import.meta.env.DEV && DEBUG_LEVEL >= 2) {
       logger.debug('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
 
   const debugWarn = (message: string, ...args: any[]) => {
-    if (process.env.NODE_ENV === 'development' && DEBUG_LEVEL >= 1) {
+    if (import.meta.env.DEV && DEBUG_LEVEL >= 1) {
       logger.warn('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
@@ -317,13 +320,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
     const isMobileDevice_local = isMobileDevice();
 
     logDeviceInfo('SiriCallButton');
-    logger.debug('📱 [SiriCallButton] Device detection - isMobile:', 'Component', isMobileDevice_local);
+    logger.debug(
+      '📱 [SiriCallButton] Device detection - isMobile:',
+      'Component',
+      isMobileDevice_local
+    );
 
     // Mobile devices use JSX direct event handlers (handleDirectTouch)
     // Desktop gets mouse events for hover effects
     if (isMobileDevice_local) {
-      if (process.env.NODE_ENV === 'development') {
-        logger.debug('[SiriCallButton] Mobile device detected - using direct JSX handlers', 'Component');
+      if (import.meta.env.DEV) {
+        logger.debug(
+          '[SiriCallButton] Mobile device detected - using direct JSX handlers',
+          'Component'
+        );
       }
       return () => {
         safeCleanup();
@@ -341,26 +351,60 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       };
 
       const handleMouseDown = (e: MouseEvent) => {
-        logger.debug('🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:', 'Component', e.target);
-        logger.debug('🖱️ [SiriCallButton] 🔽 Element ID:', 'Component', element.id);
-        logger.debug('🖱️ [SiriCallButton] 🔽 isHandlingClick before:', 'Component', isHandlingClick.current);
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔽 DESKTOP Mouse down - event target:',
+          'Component',
+          e.target
+        );
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔽 Element ID:',
+          'Component',
+          element.id
+        );
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔽 isHandlingClick before:',
+          'Component',
+          isHandlingClick.current
+        );
 
         const rect = element.getBoundingClientRect();
         handleInteractionStart(e, {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
         });
-        logger.debug('🖱️ [SiriCallButton] 🔽 Mouse down completed', 'Component');
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔽 Mouse down completed',
+          'Component'
+        );
       };
 
       const handleMouseUp = (e: MouseEvent) => {
-        logger.debug('🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:', 'Component', e.target);
-        logger.debug('🖱️ [SiriCallButton] 🔼 onCallStart available:', 'Component', !!onCallStart);
-        logger.debug('🖱️ [SiriCallButton] 🔼 isListening state:', 'Component', isListening);
-        logger.debug('🖱️ [SiriCallButton] 🔼 isHandlingClick before:', 'Component', isHandlingClick.current);
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔼 DESKTOP Mouse up - event target:',
+          'Component',
+          e.target
+        );
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔼 onCallStart available:',
+          'Component',
+          !!onCallStart
+        );
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔼 isListening state:',
+          'Component',
+          isListening
+        );
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔼 isHandlingClick before:',
+          'Component',
+          isHandlingClick.current
+        );
 
         handleInteractionEnd(e);
-        logger.debug('🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed', 'Component');
+        logger.debug(
+          '🖱️ [SiriCallButton] 🔼 Mouse up - triggering action completed',
+          'Component'
+        );
       };
 
       // Enhanced debug for element setup
@@ -369,15 +413,28 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       logger.debug('  📦 Element tagName:', 'Component', element.tagName);
       logger.debug('  🎛️ onCallStart available:', 'Component', !!onCallStart);
       logger.debug('  🎛️ onCallEnd available:', 'Component', !!onCallEnd);
-      logger.debug('  🎨 Element computed style:', 'Component', window.getComputedStyle(element).pointerEvents
+      logger.debug(
+        '  🎨 Element computed style:',
+        'Component',
+        window.getComputedStyle(element).pointerEvents
       );
 
       // 🔧 MANUAL TEST: Add click listener for debugging
       const testClickHandler = (e: MouseEvent) => {
-        logger.debug('🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!', 'Component');
+        logger.debug(
+          '🎯 [SiriCallButton] 🔥 MANUAL TEST CLICK DETECTED!',
+          'Component'
+        );
         logger.debug('  🎯 Click target:', 'Component', e.target);
-        logger.debug(`  🎯 Click coordinates: ${e.clientX}, ${e.clientY}`, 'Component');
-        logger.debug('  🎯 Element rect:', 'Component', element.getBoundingClientRect());
+        logger.debug(
+          `  🎯 Click coordinates: ${e.clientX}, ${e.clientY}`,
+          'Component'
+        );
+        logger.debug(
+          '  🎯 Element rect:',
+          'Component',
+          element.getBoundingClientRect()
+        );
         logger.debug('  🎯 onCallStart available:', 'Component', !!onCallStart);
       };
 
@@ -388,10 +445,16 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       element.addEventListener('mousedown', handleMouseDown);
       element.addEventListener('mouseup', handleMouseUp);
 
-      logger.debug('🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully', 'Component');
+      logger.debug(
+        '🖱️ [SiriCallButton] ✅ Desktop mouse events added successfully',
+        'Component'
+      );
 
       return () => {
-        logger.debug('🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events', 'Component');
+        logger.debug(
+          '🖱️ [SiriCallButton] 🧹 Cleaning up desktop mouse events',
+          'Component'
+        );
 
         // 🛡️ SAFETY: Reset protection flags
         isHandlingClick.current = false;
@@ -425,7 +488,10 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       buttonRef.current.setListening(isListening);
       // ✅ FIX 4: Remove unnecessary resize on listening state change
       // Canvas animations handle listening state internally, no resize needed
-      logger.debug('🔧 [SiriCallButton] Listening state updated without resize trigger', 'Component');
+      logger.debug(
+        '🔧 [SiriCallButton] Listening state updated without resize trigger',
+        'Component'
+      );
     }
   }, [isListening]); // Fixed: Removed containerId as it's not used in this effect
 
@@ -443,9 +509,16 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // Mobile touch handler - unified with desktop logic
   const handleDirectTouch = async (e: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      logger.debug(`📱 [SiriCallButton] Mobile touch event: ${e.type} on ${containerId}`, 'Component');
-      logger.debug('📱 [SiriCallButton] Current isListening state:', 'Component', isListening);
+    if (import.meta.env.DEV) {
+      logger.debug(
+        `📱 [SiriCallButton] Mobile touch event: ${e.type} on ${containerId}`,
+        'Component'
+      );
+      logger.debug(
+        '📱 [SiriCallButton] Current isListening state:',
+        'Component',
+        isListening
+      );
     }
 
     // Handle touch end or click events
@@ -537,7 +610,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       }}
     >
       {/* 🔍 DEBUG: Container setup validation */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <script
           dangerouslySetInnerHTML={{
             __html: `

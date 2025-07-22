@@ -36,7 +36,6 @@ export default [
   {
     files: [
       'apps/client/**/*.{js,jsx,ts,tsx}',
-      'packages/shared/**/*.{js,jsx,ts,tsx}',
       'packages/auth-system/frontend/**/*.{js,jsx,ts,tsx}',
     ],
     ignores: [
@@ -159,7 +158,7 @@ export default [
         'warn',
         {
           argsIgnorePattern: '^_',
-          varsIgnorePattern: '^(logger|debug|React|JSX)$',
+          varsIgnorePattern: '^(_|logger|debug|React|JSX)$',
           ignoreRestSiblings: true,
         },
       ],
@@ -198,6 +197,7 @@ export default [
       'apps/server/**/*.{js,jsx,ts,tsx}',
       'packages/auth-system/**/*.{js,jsx,ts,tsx}',
       'packages/config/**/*.{js,jsx,ts,tsx}',
+      'packages/shared/**/*.{js,jsx,ts,tsx}',
     ],
     languageOptions: {
       parser: typescriptParser,
@@ -213,6 +213,14 @@ export default [
         __filename: 'readonly',
         setImmediate: 'readonly',
         clearImmediate: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        NodeJS: 'readonly',
       },
     },
     plugins: {

@@ -3,11 +3,6 @@ import { useRefactoredAssistant as useAssistant } from '@/context/RefactoredAssi
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
 import { logger } from '@shared/utils/logger';
-import {
-  STANDARD_POPUP_HEIGHT,
-  STANDARD_POPUP_MAX_WIDTH,
-  STANDARD_POPUP_MAX_HEIGHT_VH,
-} from '@/context/PopupContext';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -39,7 +34,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   layout = 'overlay',
   className = '',
 }) => {
-  const { transcripts, modelOutput, language, callDuration } = useAssistant();
+  const { transcripts, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
 
@@ -162,8 +157,6 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
     }
   }, [conversationTurns]);
 
-  if (!isOpen) return null;
-
   const isGrid = layout === 'grid';
 
   // ✅ FIX: Memoize styles to prevent recalculation
@@ -179,30 +172,25 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
             background: 'rgba(255,255,255,0.15)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: '1.5px solid rgba(255,255,255,0.3)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            borderRadius: 16,
-            marginBottom: 0,
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
           }
         : {
-            // Mobile Overlay: Bottom popup styling
-            width: '100%',
-            maxWidth: `${STANDARD_POPUP_MAX_WIDTH}px`,
-            height: `${STANDARD_POPUP_HEIGHT}px`,
-            maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
-            background: 'rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(18px)',
-            WebkitBackdropFilter: 'blur(18px)',
-            border: '1.5px solid rgba(255,255,255,0.25)',
-            boxShadow: '0 -8px 32px rgba(0,0,0,0.18)',
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-            marginBottom: 0,
+            // Full screen layout
+            width: '100vw',
+            height: '100vh',
+            maxWidth: '100vw',
+            maxHeight: '100vh',
+            background: 'linear-gradient(135deg, #1e40af 0%, #7c3aed 100%)',
+            borderRadius: '0',
+            border: 'none',
+            boxShadow: 'none',
           },
     [isGrid]
   );
+
+  if (!isOpen) return null;
 
   // Popup content component
   const PopupContent = () => (
@@ -244,7 +232,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
             {t('tap_to_speak', language)}
           </div>
         )}
-        {conversationTurns.map((turn, turnIdx) => (
+        {conversationTurns.map((turn, _turnIdx) => (
           <div key={turn.id} className="mb-2">
             <div className="flex items-start gap-2">
               <div className="flex-1">
@@ -256,7 +244,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    {turn.messages.map((message, msgIdx) => (
+                    {turn.messages.map((message, _msgIdx) => (
                       <div
                         key={message.id}
                         className="bg-blue-50 rounded-lg p-2"

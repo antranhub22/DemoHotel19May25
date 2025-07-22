@@ -65,13 +65,13 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     isLoading,
     error,
     micLevel,
-    showScrollButton,
-    scrollToTop,
-    scrollToSection,
+    showScrollButton: _showScrollButton,
+    scrollToTop: _scrollToTop,
+    scrollToSection: _scrollToSection,
     heroSectionRef,
     serviceGridRef,
-    conversationRef,
-    rightPanelRef,
+    conversationRef: _conversationRef,
+    rightPanelRef: _rightPanelRef,
     isCallStarted,
     showConversation,
     handleCallStart,
@@ -80,11 +80,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleConfirm,
     showingSummary,
     showRightPanel,
-    handleRightPanelToggle,
+    handleRightPanelToggle: _handleRightPanelToggle,
     handleRightPanelClose,
-    handleShowConversationPopup,
-    handleShowNotificationDemo,
-    handleShowSummaryDemo,
+    handleShowConversationPopup: _handleShowConversationPopup,
+    handleShowNotificationDemo: _handleShowNotificationDemo,
+    handleShowSummaryDemo: _handleShowSummaryDemo,
   } = useInterface1({ isActive });
 
   // 🔍 DEBUG: Log popup states
@@ -107,7 +107,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   return (
     <InterfaceContainer>
       {/* Hero Section with 4-Position Layout */}
-      <div ref={heroSectionRef} className="relative" data-testid="interface1-container">
+      <div
+        ref={heroSectionRef}
+        className="relative"
+        data-testid="interface1-container"
+      >
         <InterfaceHeader />
 
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}

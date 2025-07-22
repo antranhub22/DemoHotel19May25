@@ -19,7 +19,6 @@ import StaffDashboard from './pages/StaffDashboard';
 const AnalyticsDashboard = React.lazy(
   () => import('./pages/AnalyticsDashboard')
 );
-import { Interface1 } from '@/components/Interface1';
 
 // Dashboard pages
 import {
