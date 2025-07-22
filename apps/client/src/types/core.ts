@@ -199,6 +199,7 @@ export interface InterfaceLayer {
   isActive: boolean;
 }
 
+// ✅ DEPRECATED: Use RefactoredAssistantContextType instead
 export interface AssistantContextType {
   transcripts: Transcript[];
   callDetails: CallDetails | null;

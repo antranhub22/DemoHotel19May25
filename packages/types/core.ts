@@ -201,6 +201,7 @@ export type InterfaceLayer =
   | 'interface3fr'
   | 'interface4';
 
+// ✅ DEPRECATED: Use RefactoredAssistantContextType instead
 export interface AssistantContextType {
   // Interface Management
   currentInterface: InterfaceLayer;

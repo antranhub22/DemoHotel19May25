@@ -1,28 +1,28 @@
 // Core types
-export type { 
-  Transcript, 
-  OrderSummary, 
+export type {
+  Transcript,
+  OrderSummary,
   OrderItem,
-  Order, 
-  CallDetails, 
-  InterfaceLayer, 
+  Order,
+  CallDetails,
+  InterfaceLayer,
   ServiceRequest,
   ActiveOrder,
   CallSummary,
-  AssistantContextType
+  // AssistantContextType // ✅ DEPRECATED: Use RefactoredAssistantContextType
 } from './core';
 
 // API types that exist
-export type { 
-  ApiResponse, 
+export type {
+  ApiResponse,
   ApiError,
   SaveTranscriptRequest,
-  SaveTranscriptResponse
+  SaveTranscriptResponse,
 } from './api';
 
 // Interface specific types
-export type { 
+export type {
   Interface1Props,
   ServiceCategory,
-  Language 
+  Language,
 } from './interface1.types';
