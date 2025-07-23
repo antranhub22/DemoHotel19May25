@@ -3,6 +3,7 @@
 // ============================================
 // Simplified version without TypeScript conflicts
 
+import type { Request, Response, NextFunction } from 'express';
 import type { AuthUser, UserRole } from '@auth/types';
 import { AUTH_ERROR_MESSAGES } from '@auth/config';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
@@ -62,7 +63,7 @@ export const authenticateJWT = async (
     console.error('❌ [Auth] Authentication error:', error);
     (res as any).status(500).json({
       success: false,
-      error: AUTH_ERROR_MESSAGES.SERVER_ERROR,
+      error: AUTH_ERROR_MESSAGES.UNAUTHORIZED,
       code: 'SERVER_ERROR',
     });
   }
@@ -96,7 +97,7 @@ export const requirePermission = (module: string, action: string) => {
       );
       (res as any).status(403).json({
         success: false,
-        error: AUTH_ERROR_MESSAGES.PERMISSION_DENIED,
+        error: AUTH_ERROR_MESSAGES.FORBIDDEN,
         code: 'PERMISSION_DENIED',
         required: `${module}.${action}`,
         userRole: user.role,
@@ -131,7 +132,7 @@ export const requireRole = (role: UserRole) => {
       );
       (res as any).status(403).json({
         success: false,
-        error: AUTH_ERROR_MESSAGES.PERMISSION_DENIED,
+        error: AUTH_ERROR_MESSAGES.FORBIDDEN,
         code: 'ROLE_DENIED',
         required: role,
         userRole: user.role,

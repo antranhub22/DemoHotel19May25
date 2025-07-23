@@ -1,6 +1,7 @@
 import { staff, transcript, request, callSummaries } from '@shared/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
+import { authUserMapper, AuthUserCamelCase } from '@shared/db/transformers';
 import { db } from './db';
 
 // Type aliases for backward compatibility
@@ -51,60 +52,36 @@ const convertToPostgreSQLTimestamp = (
 // modify the interface with any CRUD methods
 // you might need
 
-export interface IStorage {
-  getUser(id: string): Promise<Staff | undefined>;
-  getUserByUsername(username: string): Promise<Staff | undefined>;
-  createUser(user: InsertStaff): Promise<Staff>;
-
-  // Transcript methods
-  addTranscript(transcript: InsertTranscript): Promise<Transcript>;
-  getTranscriptsByCallId(callId: string): Promise<Transcript[]>;
-
-  // Order methods
-  createOrder(order: InsertOrder): Promise<Order>;
-  getOrderById(id: string): Promise<Order | undefined>;
-  getOrdersByRoomNumber(roomNumber: string): Promise<Order[]>;
-  updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
-  getAllOrders(filter: {
-    status?: string;
-    roomNumber?: string;
-  }): Promise<Order[]>;
-  deleteAllOrders(): Promise<number>;
-
-  // Call Summary methods
-  addCallSummary(summary: InsertCallSummary): Promise<CallSummary>;
-  getCallSummaryByCallId(callId: string): Promise<CallSummary | undefined>;
-  getRecentCallSummaries(hours: number): Promise<CallSummary[]>;
-}
-
-export class DatabaseStorage implements IStorage {
-  async getUser(id: string): Promise<Staff | undefined> {
+export class DatabaseStorage {
+  async getUser(id: string): Promise<AuthUserCamelCase | undefined> {
     try {
       const result = await db.select().from(staff).where(eq(staff.id, id));
-      return result[0];
+      return result[0] ? authUserMapper.toFrontend(result[0]) : undefined;
     } catch (error) {
       logger.error('Error getting user:', 'Component', error);
       throw new Error('Failed to get user');
     }
   }
 
-  async getUserByUsername(username: string): Promise<Staff | undefined> {
+  async getUserByUsername(
+    username: string
+  ): Promise<AuthUserCamelCase | undefined> {
     try {
       const result = await db
         .select()
         .from(staff)
         .where(eq(staff.username, username));
-      return result[0];
+      return result[0] ? authUserMapper.toFrontend(result[0]) : undefined;
     } catch (error) {
       logger.error('Error getting user by username:', 'Component', error);
       throw new Error('Failed to get user by username');
     }
   }
 
-  async createUser(user: InsertStaff): Promise<Staff> {
+  async createUser(user: InsertStaff): Promise<AuthUserCamelCase> {
     try {
       const result = await db.insert(staff).values(user).returning();
-      return result[0];
+      return authUserMapper.toFrontend(result[0]);
     } catch (error) {
       logger.error('Error creating user:', 'Component', error);
       throw new Error('Failed to create user');

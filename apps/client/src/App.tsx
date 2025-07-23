@@ -3,9 +3,9 @@ import { Switch, Route, Link, useLocation } from 'wouter';
 import { BrowserRouter } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
 import StaffDashboard from '@/pages/StaffDashboard';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/layout/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
-import VoiceAssistant from '@/components/VoiceAssistant';
+import VoiceAssistant from '@/components/business/VoiceAssistant';
 import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 import {
   AuthProvider,

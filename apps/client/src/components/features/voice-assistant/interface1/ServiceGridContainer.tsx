@@ -1,11 +1,11 @@
 import { forwardRef } from 'react';
-import { ServiceGrid } from '@/components/interface1/ServiceGrid';
-import { ServiceCategory } from '@/types/interface1.types';
+import { ServiceGrid } from './ServiceGrid';
+import { ServiceItem } from '@/types/interface1.types';
 
 interface ServiceGridContainerProps {
   className?: string;
-  onServiceSelect?: (service: ServiceCategory) => void;
-  onVoiceServiceRequest?: (service: ServiceCategory) => Promise<void>;
+  onServiceSelect?: (service: ServiceItem) => void;
+  onVoiceServiceRequest?: (service: ServiceItem) => Promise<void>;
 }
 
 export const ServiceGridContainer = forwardRef<

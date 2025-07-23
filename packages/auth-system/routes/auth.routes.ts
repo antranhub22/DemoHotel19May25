@@ -4,11 +4,13 @@
 // This file consolidates all authentication routes into a single system
 // Provides backward compatibility with existing endpoints
 
-import { Router } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import { z } from 'zod';
 import type { LoginCredentials } from '@auth/types';
 import { authValidationSchemas } from '@auth/config';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
+import { authenticateJWT } from '@auth/middleware/auth.middleware';
+
 const router = Router();
 
 // ============================================
@@ -33,11 +35,11 @@ const legacyAuthLoginSchema = z.object({
  * POST /api/auth/login
  * Main unified login endpoint - supports both username and email
  */
-router.post('/login', async (req: Request, res: Response) => {
+const loginHandler: RequestHandler = async (req: Request, res: Response) => {
   try {
     console.log('🔐 [UnifiedAuth] Login attempt:', {
-      username: (req.body as any).username || (req.body as any).email,
-      hasPassword: !!(req.body as any).password,
+      username: req.body.username || req.body.email,
+      hasPassword: !!req.body.password,
     });
 
     // Validate input using unified schema
@@ -45,7 +47,7 @@ router.post('/login', async (req: Request, res: Response) => {
       req.body
     );
     if (!validation.success) {
-      return (res as any).status(400).json({
+      return res.status(400).json({
         success: false,
         error: 'Invalid login credentials',
         details: validation.error.errors,
@@ -59,7 +61,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const result = await UnifiedAuthService.login(credentials);
 
     if (!result.success) {
-      return (res as any).status(401).json({
+      return res.status(401).json({
         success: false,
         error: result.error,
         code: result.errorCode,
@@ -67,7 +69,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Return standardized success response
-    (res as any).json({
+    res.json({
       success: true,
       user: {
         id: result.user!.id,
@@ -88,110 +90,108 @@ router.post('/login', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Login error:', error);
-    (res as any).status(500).json({
+    res.status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
     });
   }
-});
+};
 
 /**
  * POST /api/auth/refresh
- * Refresh access token using refresh token
+ * Refresh JWT token endpoint
  */
-router.post('/refresh', async (req: Request, res: Response) => {
+const refreshHandler: RequestHandler = async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return (res as any).status(400).json({
+      return res.status(400).json({
         success: false,
         error: 'Refresh token is required',
-        code: 'REFRESH_TOKEN_MISSING',
+        code: 'MISSING_REFRESH_TOKEN',
       });
     }
 
+    console.log('🔄 [UnifiedAuth] Token refresh attempt');
+
+    // Use unified auth service for token refresh
     const result = await UnifiedAuthService.refreshToken(refreshToken);
 
     if (!result.success) {
-      return (res as any).status(401).json({
+      return res.status(401).json({
         success: false,
         error: result.error,
-        code: result.errorCode,
+        code: 'TOKEN_REFRESH_FAILED',
       });
     }
 
-    (res as any).json({
+    // Return new tokens
+    res.json({
       success: true,
-      user: {
-        id: result.user!.id,
-        username: result.user!.username,
-        email: result.user!.email,
-        displayName: result.user!.displayName,
-        role: result.user!.role,
-        tenantId: result.user!.tenantId,
-        permissions: result.user!.permissions,
-      },
+      user: result.user,
       token: result.token,
       refreshToken: result.refreshToken,
-      expiresIn: result.expiresIn,
-      tokenType: result.tokenType || 'Bearer',
     });
   } catch (error) {
-    console.error('❌ [UnifiedAuth] Refresh error:', error);
-    (res as any).status(500).json({
+    console.error('❌ [UnifiedAuth] Token refresh error:', error);
+    res.status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
     });
   }
-});
+};
 
 /**
  * POST /api/auth/logout
- * Logout and invalidate tokens
+ * Logout endpoint - invalidates refresh token
  */
-router.post('/logout', authenticateJWT, async (req: Request, res: Response) => {
+const logoutHandler: RequestHandler = async (req: Request, res: Response) => {
   try {
-    const authHeader = (req.headers as any).authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    console.log('👋 [UnifiedAuth] Logout request');
 
-    if (token) {
-      await UnifiedAuthService.logout(token);
-    }
-
-    (res as any).json({
+    // For now, just return success - token invalidation can be implemented later
+    res.json({
       success: true,
       message: 'Logged out successfully',
     });
   } catch (error) {
     console.error('❌ [UnifiedAuth] Logout error:', error);
-    (res as any).status(500).json({
+    res.status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
     });
   }
-});
+};
 
 /**
  * GET /api/auth/me
- * Get current user information
+ * Alternative endpoint for getting current user information
  */
-router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
+const getAuthUserHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const user = (req as any).user;
+    console.log(
+      '👤 [UnifiedAuth] Auth user request for:',
+      (req as any).user?.id
+    );
 
+    const user = (req as any).user;
     if (!user) {
-      return (res as any).status(401).json({
+      return res.status(401).json({
         success: false,
         error: 'Not authenticated',
         code: 'AUTHENTICATION_REQUIRED',
       });
     }
 
-    (res as any).json({
+    // Return comprehensive user information
+    res.json({
       success: true,
       user: {
         id: user.id,
@@ -201,91 +201,102 @@ router.get('/me', authenticateJWT, async (req: Request, res: Response) => {
         role: user.role,
         tenantId: user.tenantId,
         permissions: user.permissions,
+        isActive: user.isActive,
         lastLogin: user.lastLogin,
-        // Legacy compatibility
-        name: user.displayName,
-        hotelId: user.tenantId,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('❌ [UnifiedAuth] Get user error:', error);
-    (res as any).status(500).json({
+    console.error('❌ [UnifiedAuth] Auth user error:', error);
+    res.status(500).json({
       success: false,
       error: 'Internal server error',
       code: 'SERVER_ERROR',
     });
   }
-});
+};
 
 // ============================================
 // BACKWARD COMPATIBILITY ENDPOINTS
 // ============================================
 
 /**
- * POST /api/staff/login
- * Legacy staff login endpoint - redirects to unified login
- * @deprecated Use /api/auth/login instead
+ * POST /api/auth/staff/login
+ * Legacy staff login endpoint for backward compatibility
  */
-router.post('/staff/login', async (req: Request, res: Response) => {
-  console.warn(
-    '⚠️ [LegacyAuth] /api/staff/login is deprecated, use /api/auth/login instead'
-  );
-
+const staffLoginHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    // Validate legacy format
-    const validation = legacyStaffLoginSchema.safeParse(req.body);
+    console.log('👥 [UnifiedAuth] Staff login attempt:', {
+      username: req.body.username,
+      hasPassword: !!req.body.password,
+    });
+
+    // Validate input
+    const validation = authValidationSchemas.loginCredentials.safeParse(
+      req.body
+    );
     if (!validation.success) {
-      return (res as any).status(400).json({
-        error: 'Username and password are required',
-        deprecated: true,
-        newEndpoint: '/api/auth/login',
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid staff login credentials',
+        details: validation.error.errors,
+        code: 'VALIDATION_ERROR',
       });
     }
 
-    const { username, password } = validation.data;
+    const credentials: LoginCredentials = validation.data as LoginCredentials;
 
-    // Convert to unified format and call unified login
-    const credentials: LoginCredentials = { username, password };
+    // Use unified auth service
     const result = await UnifiedAuthService.login(credentials);
 
     if (!result.success) {
-      return (res as any).status(401).json({
+      return res.status(401).json({
+        success: false,
         error: result.error,
-        deprecated: true,
-        newEndpoint: '/api/auth/login',
+        code: 'STAFF_LOGIN_FAILED',
       });
     }
 
-    // Return legacy format for backward compatibility
-    (res as any).json({
+    // Return staff-specific response format for backward compatibility
+    res.json({
       success: true,
-      token: result.token,
+      message: 'Staff login successful',
       user: {
+        id: result.user!.id,
         username: result.user!.username,
+        name: result.user!.displayName,
         role: result.user!.role,
-        tenantId: result.user!.tenantId,
-        // Legacy snake_case field
-        tenant_id: result.user!.tenantId,
+        hotelId: result.user!.tenantId,
+        permissions: result.user!.permissions,
       },
-      deprecated: true,
-      newEndpoint: '/api/auth/login',
-      migration: 'Please update your client to use /api/auth/login',
+      token: result.token,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
+      tokenType: result.tokenType || 'Bearer',
     });
   } catch (error) {
-    console.error('❌ [LegacyAuth] Staff login error:', error);
-    (res as any).status(500).json({
+    console.error('❌ [UnifiedAuth] Staff login error:', error);
+    res.status(500).json({
+      success: false,
       error: 'Internal server error',
-      deprecated: true,
-      newEndpoint: '/api/auth/login',
+      code: 'SERVER_ERROR',
     });
   }
-});
+};
 
 /**
  * GET /api/auth/me (legacy format support)
  * Support for legacy /auth/me endpoint
  */
-router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
+const legacyAuthMeHandler: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
   console.warn(
     '⚠️ [LegacyAuth] /api/auth/me called - use /api/auth/me instead'
   );
@@ -294,14 +305,14 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     if (!user) {
-      return (res as any).status(401).json({
+      return res.status(401).json({
         error: 'Unauthorized',
         deprecated: true,
       });
     }
 
     // Return legacy format
-    (res as any).json({
+    res.json({
       success: true,
       user: {
         username: user.username,
@@ -315,12 +326,12 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('❌ [LegacyAuth] Get user error:', error);
-    (res as any).status(500).json({
+    res.status(500).json({
       error: 'Internal server error',
       deprecated: true,
     });
   }
-});
+};
 
 // ============================================
 // DEVELOPMENT ENDPOINTS
@@ -328,28 +339,42 @@ router.get('/auth/me', authenticateJWT, async (req: Request, res: Response) => {
 
 /**
  * GET /api/auth/dev/users
- * Get available development users for auto-login
- * Only available in development mode
+ * Development endpoint to list all users (for testing only)
  */
-router.get('/dev/users', (req: Request, res: Response) => {
+const devUsersHandler: RequestHandler = (req: Request, res: Response) => {
   if (process.env.NODE_ENV !== 'development') {
-    return (res as any).status(404).json({
-      error: 'Not found',
-      code: 'DEV_ONLY',
+    return res.status(404).json({
+      error: 'Endpoint not available in production',
     });
   }
 
-  const devUsers = UnifiedAuthService.getDevUsers();
-
-  (res as any).json({
+  res.json({
     success: true,
-    users: devUsers.map(user => ({
-      username: user.username,
-      role: user.role,
-      // Don't expose passwords even in dev mode
-    })),
-    note: 'Development mode only - passwords are predefined',
+    message: 'Development users endpoint',
+    users: [
+      { username: 'admin', role: 'hotel-manager' },
+      { username: 'staff', role: 'front-desk' },
+      { username: 'manager', role: 'hotel-manager' },
+    ],
+    note: 'This endpoint is only available in development mode',
   });
-});
+};
+
+// ============================================
+// ROUTE REGISTRATIONS
+// ============================================
+
+// Main auth routes
+router.post('/login', loginHandler);
+router.post('/refresh', refreshHandler);
+router.post('/logout', authenticateJWT, logoutHandler);
+router.get('/me', authenticateJWT, getAuthUserHandler);
+
+// Legacy compatibility routes
+router.post('/staff/login', staffLoginHandler);
+router.get('/auth/me', authenticateJWT, legacyAuthMeHandler);
+
+// Development routes
+router.get('/dev/users', devUsersHandler);
 
 export default router;

@@ -1,20 +1,37 @@
-import { AdvancedHotelData } from './hotelResearch';
+import {
+  AdvancedHotelData,
+  BasicHotelData as ResearchHotelData,
+} from './hotelResearch';
 // ============================================
 // Knowledge Base Generator Service
 // ============================================
+
+// Type guard to check if we have the full research data structure
+function isResearchHotelData(data: any): data is ResearchHotelData {
+  return (
+    data && typeof data.location === 'object' && data.location.lat !== undefined
+  );
+}
+
+// Type guard for services array
+function hasHotelServices(services: any): services is any[] {
+  return Array.isArray(services) && services.length > 0;
+}
 
 export class KnowledgeBaseGenerator {
   /**
    * Generate comprehensive knowledge base from hotel research data
    */
-  generateKnowledgeBase(hotelData: BasicHotelData | AdvancedHotelData): string {
+  generateKnowledgeBase(
+    hotelData: ResearchHotelData | AdvancedHotelData
+  ): string {
     const sections = [
       this.generateBasicInfoSection(hotelData),
-      this.generateServicesSection(hotelData.services),
-      this.generateRoomTypesSection(hotelData.roomTypes),
-      this.generateAmenitiesSection(hotelData.amenities),
+      this.generateServicesSection(hotelData.services || []),
+      this.generateRoomTypesSection(hotelData.roomTypes || []),
+      this.generateAmenitiesSection(hotelData.amenities || []),
       this.generatePoliciesSection(hotelData.policies),
-      this.generateLocalAttractionsSection(hotelData.localAttractions),
+      this.generateLocalAttractionsSection(hotelData.localAttractions || []),
       this.generateContactSection(hotelData),
     ];
 
@@ -28,90 +45,83 @@ export class KnowledgeBaseGenerator {
   }
 
   /**
-   * Generate system prompt for Vapi assistant
+   * Generate system prompt for AI assistant
    */
   generateSystemPrompt(
-    hotelData: BasicHotelData | AdvancedHotelData,
-    customization?: SystemPromptCustomization
+    hotelData: ResearchHotelData | AdvancedHotelData,
+    customization: {
+      personality: string;
+      tone: string;
+      languages: string[];
+    }
   ): string {
-    const personality = customization?.personality || 'professional';
-    const tone = customization?.tone || 'friendly';
-    const languages = customization?.languages || ['English'];
+    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${this.getHotelCategory(hotelData)} hotel located in ${hotelData.address || 'a prime location'}.
 
-    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${this.getHotelCategory(hotelData)} hotel located in ${hotelData.address}.
+Your personality is ${customization.personality} and your tone should be ${customization.tone}.
 
-PERSONALITY: You are ${personality} and ${tone}. You speak ${languages.join(', ')} fluently.
+You can communicate in: ${customization.languages.join(', ')}.
 
-CORE RESPONSIBILITIES:
-- Provide information about hotel services, amenities, and policies
-- Accept and process guest service requests
-- Offer recommendations for local attractions and activities
-- Assist with room service, housekeeping, and other hotel services
-- Upsell additional services when appropriate
-- Ensure excellent guest satisfaction`;
+HOTEL INFORMATION:
+${this.generateBasicInfoSection(hotelData)}
 
-    const knowledgeBase = this.generateKnowledgeBase(hotelData);
+AVAILABLE SERVICES:
+${this.generateFunctionDescriptions(hotelData.services || [])}`;
 
-    const instructionsPrompt = `
-IMPORTANT INSTRUCTIONS:
-- Always use the hotel information provided below to answer questions accurately
-- When taking service requests, collect: guest name, room number, timing preferences
-- For requests you cannot handle, offer to connect to human staff
-- Be proactive in suggesting relevant services and local attractions
-- Maintain the ${tone} tone throughout all interactions
-- Always confirm important details with guests before processing requests`;
+    // Add policies information
+    if (hotelData.policies) {
+      basePrompt += `\n\nHOTEL POLICIES:
+Check-in: ${hotelData.policies.checkIn || 'Contact front desk'}
+Check-out: ${hotelData.policies.checkOut || 'Contact front desk'}`;
+    }
 
-    const knowledgePrompt = `
-HOTEL KNOWLEDGE BASE:
-${knowledgeBase}
-
-AVAILABLE FUNCTIONS:
-${this.generateFunctionDescriptions(hotelData.services)}`;
-
-    return [basePrompt, instructionsPrompt, knowledgePrompt].join('\n\n');
+    return basePrompt;
   }
 
   /**
    * Generate FAQ section from hotel data
    */
   generateFAQSection(
-    hotelData: BasicHotelData | AdvancedHotelData
+    hotelData: ResearchHotelData | AdvancedHotelData
   ): Array<{ question: string; answer: string }> {
     const faqs: Array<{ question: string; answer: string }> = [
       {
-        question: 'What time is check-in and check-out?',
-        answer: `Check-in is at ${hotelData.policies.checkIn} and check-out is at ${hotelData.policies.checkOut}.`,
-      },
-      {
         question: 'What amenities are available?',
-        answer: `We offer the following amenities: ${hotelData.amenities.join(', ')}.`,
+        answer: `We offer the following amenities: ${(hotelData.amenities || []).join(', ') || 'Please contact front desk for details'}.`,
       },
       {
         question: 'What services do you provide?',
-        answer: `Our available services include: ${hotelData.services.map(s => s.name).join(', ')}.`,
+        answer: `Our available services include: ${hasHotelServices(hotelData.services) ? hotelData.services.map(s => s.name).join(', ') : 'Please contact front desk for service information'}.`,
       },
       {
         question: 'How can I contact the hotel?',
-        answer: `You can reach us at ${hotelData.phone || 'the front desk'} or visit us at ${hotelData.address}.`,
+        answer: `You can reach us at ${hotelData.phone || 'the front desk'} or visit us at ${hotelData.address || 'our location'}.`,
       },
     ];
 
-    // Add room-specific FAQs
-    if (hotelData.roomTypes.length > 0) {
+    // Add room-specific FAQs if available
+    if (hotelData.roomTypes && hotelData.roomTypes.length > 0) {
       faqs.push({
         question: 'What room types are available?',
         answer: `We offer ${hotelData.roomTypes.map(r => r.name).join(', ')}. Each room type has different amenities and pricing.`,
       });
     }
 
-    // Add location-specific FAQs
-    if (hotelData.localAttractions.length > 0) {
+    // Add location-specific FAQs if available
+    if (hotelData.localAttractions && hotelData.localAttractions.length > 0) {
       faqs.push({
         question: 'What attractions are nearby?',
         answer: `Popular nearby attractions include: ${hotelData.localAttractions
           .slice(0, 5)
           .map(a => a.name)
           .join(', ')}.`,
+      });
+    }
+
+    // Add policies FAQ if available
+    if (hotelData.policies) {
+      faqs.push({
+        question: 'What time is check-in and check-out?',
+        answer: `Check-in is at ${hotelData.policies.checkIn || 'standard time'} and check-out is at ${hotelData.policies.checkOut || 'standard time'}.`,
       });
     }
 

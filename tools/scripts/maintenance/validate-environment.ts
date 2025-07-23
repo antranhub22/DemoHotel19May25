@@ -22,31 +22,37 @@ const SAAS_REQUIRED_VARS = [
 async function main() {
   console.log('🔍 VALIDATING ENVIRONMENT VARIABLES...\n');
 
-  // Check basic required variables
+  // Check all required variables
+  console.log('📋 Checking required environment variables...');
+  let allValid = true;
   const missingBasic: string[] = [];
   const presentBasic: string[] = [];
 
-  for (const varName of (REQUIRED_VARS as any[])) {
+  for (const varName of REQUIRED_VARS) {
     const value = process.env[varName];
-    if (!value || value.trim() === '') {
+    if (!value) {
+      console.log(`❌ Missing: ${varName}`);
       missingBasic.push(varName);
+      allValid = false;
     } else {
+      console.log(`✅ Found: ${varName}`);
       presentBasic.push(varName);
-      console.log(`✅ ${varName}: ${value.substring(0, 10)}...`);
     }
   }
 
-  // Check SaaS optional variables
+  // Check SaaS-specific variables if needed
+  console.log('\n📋 Checking SaaS-specific variables...');
   const missingSaaS: string[] = [];
   const presentSaaS: string[] = [];
 
-  for (const varName of (SAAS_REQUIRED_VARS as any[])) {
+  for (const varName of SAAS_REQUIRED_VARS) {
     const value = process.env[varName];
-    if (!value || value.trim() === '') {
+    if (!value) {
+      console.log(`⚠️  Optional SaaS variable missing: ${varName}`);
       missingSaaS.push(varName);
     } else {
+      console.log(`✅ Found: ${varName}`);
       presentSaaS.push(varName);
-      console.log(`🌟 ${varName}: ${value.substring(0, 10)}...`);
     }
   }
 

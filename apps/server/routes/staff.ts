@@ -1,8 +1,39 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { eq, desc } from 'drizzle-orm';
 import { deleteAllRequests } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { db } from '@shared/db';
+import { request as requestTable } from '@shared/db/schema';
+
+// Legacy types for backward compatibility
+interface StaffRequest {
+  id: number;
+  roomNumber: string;
+  customerName: string;
+  requestType: string;
+  requestContent: string;
+  status: string;
+  createdAt: any;
+  updatedAt: any;
+  priority: string;
+  totalAmount: number;
+  callId: string;
+  assignedTo: string | null;
+  customer: string;
+  request: string;
+  timestamp: any;
+}
+
+interface StaffMessage {
+  id: number;
+  requestId: number;
+  content: string;
+  timestamp: Date;
+  sender: string;
+  created_at: Date;
+  updated_at: Date;
+}
 
 // Import legacy models for backward compatibility
 const router = Router();
@@ -10,7 +41,7 @@ const router = Router();
 // Helper function for error handling
 function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
-  (res as any).status(500).json({
+  res.status(500).json({
     error: defaultMessage,
     details:
       process.env.NODE_ENV === 'development'
@@ -80,7 +111,7 @@ router.get(
         `✅ [STAFF] Returning ${finalRequests.length} requests to staff interface`,
         'Component'
       );
-      (res as any).json(finalRequests);
+      res.json(finalRequests);
     } catch (error) {
       handleApiError(res, error, 'Failed to fetch staff requests');
     }
@@ -98,7 +129,7 @@ router.patch(
       const tenantId = (req as any).tenant?.id || 'mi-nhon-hotel';
 
       if (!status) {
-        return (res as any).status(400).json({ error: 'Missing status field' });
+        return res.status(400).json({ error: 'Missing status field' });
       }
 
       logger.debug(
@@ -135,7 +166,7 @@ router.patch(
         `✅ [STAFF] Request ${id} status updated successfully`,
         'Component'
       );
-      (res as any).json({
+      res.json({
         success: true,
         message: 'Request status updated successfully',
         requestId: id,
@@ -166,7 +197,7 @@ router.get(
         `✅ [STAFF] Found ${messages.length} messages for request: ${id}`,
         'Component'
       );
-      (res as any).json(messages);
+      res.json(messages);
     } catch (error) {
       handleApiError(res, error, 'Failed to fetch request messages');
     }
@@ -183,7 +214,7 @@ router.post(
       const { content } = req.body;
 
       if (!content) {
-        return (res as any).status(400).json({ error: 'Missing content' });
+        return res.status(400).json({ error: 'Missing content' });
       }
 
       logger.debug(`💬 [STAFF] Sending message for request ${id}`, 'Component');
@@ -203,7 +234,7 @@ router.post(
         `✅ [STAFF] Message sent successfully for request: ${id}`,
         'Component'
       );
-      (res as any).status(201).json(message);
+      res.status(201).json(message);
     } catch (error) {
       handleApiError(res, error, 'Failed to send message');
     }
@@ -230,7 +261,7 @@ router.delete(
         'Component'
       );
 
-      (res as any).json({
+      res.json({
         success: true,
         message: `Đã xóa ${deletedCount} requests`,
         deletedCount,

@@ -36,7 +36,7 @@ import { MobileVoiceControls } from '../features/voice-assistant/interface1/Mobi
 import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
 // Siri Components
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
-import { ServiceCategory } from '../../types/interface1.types';
+import { ServiceItem } from '../../types/interface1.types';
 import { usePopupContext } from '../../context/PopupContext';
 import { useInterface1 } from '../../hooks/useInterface1';
 
@@ -103,8 +103,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   } = useInterface1({ isActive });
 
   // ✅ ENHANCED: Add service selection state for user feedback
-  const [selectedService, setSelectedService] =
-    useState<ServiceCategory | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(
+    null
+  );
 
   // ✅ ENHANCEMENT: Enhanced language change handler
   const handleLanguageChange = useCallback((newLanguage: Language) => {
@@ -124,7 +125,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   // ✅ ENHANCEMENT: Service interaction handlers with voice context
   const handleServiceSelect = useCallback(
-    (service: ServiceCategory) => {
+    (service: ServiceItem) => {
       logger.debug(
         `🎯 [Interface1] Service selected: ${service.name}`,
         'Component'
@@ -155,7 +156,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   );
 
   const handleVoiceServiceRequest = useCallback(
-    async (service: ServiceCategory) => {
+    async (service: ServiceItem) => {
       logger.debug(
         `🎤 [Interface1] Voice service request: ${service.name}`,
         'Component'

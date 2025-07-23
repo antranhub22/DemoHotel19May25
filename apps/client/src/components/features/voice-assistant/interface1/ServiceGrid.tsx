@@ -1,13 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { SERVICE_CATEGORIES } from '@/types/interface1.types';
-import { ServiceCategory, ServiceCategoryConfig } from '@shared/types';
+import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
 import { useAssistant } from '@/context';
 import { designSystem } from '@/styles/designSystem';
 
 interface ServiceGridProps {
-  onServiceSelect?: (service: ServiceCategoryConfig) => void;
-  onVoiceServiceRequest?: (service: ServiceCategoryConfig) => Promise<void>;
+  onServiceSelect?: (service: ServiceItem) => void;
+  onVoiceServiceRequest?: (service: ServiceItem) => Promise<void>;
 }
 
 export const ServiceGrid: React.FC<ServiceGridProps> = ({
@@ -20,7 +19,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
 
   // Handle service item click
   const handleServiceClick = useCallback(
-    async (service: ServiceCategory) => {
+    async (service: ServiceItem) => {
       logger.debug(
         `🎯 [ServiceGrid] Service clicked: ${service.name}`,
         'Component'
@@ -75,7 +74,7 @@ export const ServiceGrid: React.FC<ServiceGridProps> = ({
 
   // Generate service item component
   const renderServiceItem = useCallback(
-    (service: ServiceCategory, index: number, isMobile: boolean = false) => {
+    (service: ServiceItem, index: number, isMobile: boolean = false) => {
       const Icon = service.icon;
       const isSelected = selectedService === service.name;
       const isLoading = isProcessing === service.name;

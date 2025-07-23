@@ -15,8 +15,8 @@ import type {
   InsertCall,
   Transcript,
   InsertTranscript,
-  Request,
-  InsertRequest,
+  RequestRecord,
+  InsertRequestRecord,
   Message,
   InsertMessage,
   CallSummary,
@@ -297,7 +297,7 @@ export interface RequestCamelCase {
 }
 
 export const requestMapper = {
-  toFrontend: (request: Request): RequestCamelCase => ({
+  toFrontend: (request: RequestRecord): RequestCamelCase => ({
     id: request.id,
     tenantId: request.tenant_id,
     callId: request.call_id,

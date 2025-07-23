@@ -14,8 +14,8 @@ import {
   X,
 } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
-import { addMultiLanguageNotification } from '@/components/interface1/MultiLanguageNotificationHelper';
-import { Language } from '@/types/interface1.types';
+import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
+import { Language, ServiceItem } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface VoicePrompt {
@@ -30,7 +30,7 @@ interface VoicePrompt {
 }
 
 interface VoiceCommandContextProps {
-  selectedService?: ServiceCategory | null;
+  selectedService?: ServiceItem | null;
   isCallActive?: boolean;
   onVoicePromptReady?: (prompt: VoicePrompt) => void;
   className?: string;
@@ -336,7 +336,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
 
   // Generate voice prompt based on selected service and language
   const generateVoicePrompt = useCallback(
-    (service: ServiceCategory, lang: Language): VoicePrompt | null => {
+    (service: ServiceItem, lang: Language): VoicePrompt | null => {
       const servicePrompts = VOICE_PROMPTS[service.name];
       if (!servicePrompts || !servicePrompts[lang]) {
         logger.warn(

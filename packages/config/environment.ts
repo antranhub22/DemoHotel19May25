@@ -314,7 +314,7 @@ export function validateEnvironment(
   const missingVars: string[] = [];
 
   // Check basic required variables
-  for (const varName of REQUIRED_VARS as any[]) {
+  for (const varName of REQUIRED_VARS) {
     if (!process.env[varName]) {
       missingVars.push(varName);
     }
@@ -322,7 +322,7 @@ export function validateEnvironment(
 
   // Check SaaS required variables if needed
   if (requireSaasFeatures) {
-    for (const varName of SAAS_REQUIRED_VARS as any[]) {
+    for (const varName of SAAS_REQUIRED_VARS) {
       if (!process.env[varName]) {
         missingVars.push(varName);
       }

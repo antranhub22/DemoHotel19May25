@@ -66,14 +66,10 @@ export const AUTH_ENDPOINTS = {
 
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   'super-admin': 100,
-  admin: 80,
   'hotel-manager': 70,
   'it-manager': 60,
-  manager: 50,
   'front-desk': 40,
-  frontdesk: 40, // Alias
-  itmanager: 60, // Alias
-  staff: 30,
+  guest: 10,
 } as const;
 
 // Check if role has higher or equal privilege
@@ -98,14 +94,6 @@ export const DEFAULT_PERMISSIONS = {
     { module: 'billing', action: 'manage', allowed: true },
     { module: 'users', action: 'manage', allowed: true },
   ],
-  admin: [
-    { module: 'analytics', action: 'view', allowed: true },
-    { module: 'analytics', action: 'export', allowed: true },
-    { module: 'dashboard', action: 'edit', allowed: true },
-    { module: 'calls', action: 'view', allowed: true },
-    { module: 'requests', action: 'manage', allowed: true },
-    { module: 'billing', action: 'view', allowed: true },
-  ],
   'hotel-manager': [
     { module: 'analytics', action: 'view', allowed: true },
     { module: 'analytics', action: 'export', allowed: true },
@@ -121,36 +109,13 @@ export const DEFAULT_PERMISSIONS = {
     { module: 'calls', action: 'view', allowed: true },
     { module: 'requests', action: 'view', allowed: true },
   ],
-  manager: [
-    { module: 'analytics', action: 'view', allowed: true },
-    { module: 'dashboard', action: 'view', allowed: true },
-    { module: 'calls', action: 'view', allowed: true },
-    { module: 'requests', action: 'edit', allowed: true },
-  ],
   'front-desk': [
     { module: 'dashboard', action: 'view', allowed: true },
     { module: 'calls', action: 'view', allowed: true },
     { module: 'requests', action: 'edit', allowed: true },
   ],
-  frontdesk: [
-    // Alias
-    { module: 'dashboard', action: 'view', allowed: true },
-    { module: 'calls', action: 'view', allowed: true },
-    { module: 'requests', action: 'edit', allowed: true },
-  ],
-  itmanager: [
-    // Alias
-    { module: 'system', action: 'debug', allowed: true },
-    { module: 'analytics', action: 'view', allowed: true },
-    { module: 'dashboard', action: 'view', allowed: true },
-    { module: 'calls', action: 'view', allowed: true },
-    { module: 'requests', action: 'view', allowed: true },
-  ],
-  staff: [
-    { module: 'dashboard', action: 'view', allowed: true },
-    { module: 'requests', action: 'view', allowed: true },
-  ],
-} as const;
+  guest: [{ module: 'dashboard', action: 'view', allowed: true }],
+};
 
 // ============================================
 // SECURITY CONFIGURATION
@@ -188,11 +153,11 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   INVALID_CREDENTIALS: 'Invalid username or password',
   TOKEN_EXPIRED: 'Your session has expired. Please log in again',
   TOKEN_INVALID: 'Invalid authentication token',
+  UNAUTHORIZED: 'You are not authorized to access this resource',
+  FORBIDDEN: 'Access to this resource is forbidden',
+  USER_NOT_FOUND: 'User not found',
   USER_INACTIVE: 'Your account has been deactivated',
-  PERMISSION_DENIED: 'You do not have permission to perform this action',
-  TENANT_ACCESS_DENIED: 'You do not have access to this tenant',
-  NETWORK_ERROR: 'Network error. Please check your connection',
-  SERVER_ERROR: 'Internal server error. Please try again later',
+  ACCOUNT_LOCKED: 'Your account has been locked',
 } as const;
 
 // ============================================

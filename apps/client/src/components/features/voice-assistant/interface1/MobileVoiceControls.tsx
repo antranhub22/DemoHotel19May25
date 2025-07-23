@@ -10,11 +10,12 @@ import {
   Headphones,
 } from 'lucide-react';
 import { logger } from '@shared/utils/logger';
-import { VoiceLanguageSwitcher } from '@/components/interface1/VoiceLanguageSwitcher';
+import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Language, ServiceItem } from '@/types/interface1.types';
 
 interface MobileVoiceControlsProps {
-  selectedService?: ServiceCategory | null;
+  selectedService?: ServiceItem | null;
   isCallActive?: boolean;
   onLanguageChange?: (language: Language) => void;
   className?: string;

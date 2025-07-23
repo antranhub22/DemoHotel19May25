@@ -26,14 +26,15 @@ export interface Interface1Props {
   isActive?: boolean;
 }
 
-export interface ServiceCategory {
+// ✅ RENAMED: ServiceCategory -> ServiceItem (to avoid conflict with string union)
+export interface ServiceItem {
   name: string;
   icon: IconType;
   description?: string;
 }
 
 // Constants
-export const SERVICE_CATEGORIES: ServiceCategory[] = [
+export const SERVICE_CATEGORIES: ServiceItem[] = [
   {
     name: 'Room Service',
     icon: FaBed,
