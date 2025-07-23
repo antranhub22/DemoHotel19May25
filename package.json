@@ -34,7 +34,7 @@
     "test:jest:e2e": "jest tests/e2e",
     "test:jest:ci": "jest --ci --coverage --watchAll=false",
     "test:api-connectivity": "tsx tools/scripts/test-api-connectivity.ts",
-    "test:integration": "tsx tools/scripts/maintenance/run-integration-tests.ts",
+    "test:integration:full": "tsx tools/scripts/maintenance/run-integration-tests.ts",
     "test:integration:mock": "tsx tools/scripts/maintenance/run-integration-tests.ts scenario mock",
     "test:integration:smoke": "tsx tools/scripts/maintenance/run-integration-tests.ts scenario smoke",
     "test:hotel-research": "tsx tests/test-hotel-research-flow.ts",
@@ -225,7 +225,7 @@
     "ts-jest": "^29.2.5",
     "tsx": "^4.20.3",
     "typescript": "5.6.3",
-    "vite": "^5.4.19",
+    "vite": "^6.3.5",
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
