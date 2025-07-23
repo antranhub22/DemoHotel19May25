@@ -1,4 +1,12 @@
-import { pgTable, text, integer, serial, index, timestamp, boolean } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  integer,
+  serial,
+  index,
+  timestamp,
+  boolean,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -303,8 +311,8 @@ export type Call = typeof call.$inferSelect;
 export type InsertCall = typeof call.$inferInsert;
 export type Transcript = typeof transcript.$inferSelect;
 export type InsertTranscript = typeof transcript.$inferInsert;
-export type Request = typeof request.$inferSelect;
-export type InsertRequest = typeof request.$inferInsert;
+export type RequestRecord = typeof request.$inferSelect;
+export type InsertRequestRecord = typeof request.$inferInsert;
 export type Message = typeof message.$inferSelect;
 export type InsertMessage = typeof message.$inferInsert;
 export type CallSummary = typeof call_summaries.$inferSelect;

@@ -1,8 +1,18 @@
-import { Router } from 'express';
+import express, { Request, Response } from 'express';
+import { eq, sql, and, desc } from 'drizzle-orm';
+import { db } from '@shared/db';
+import {
+  call,
+  transcript,
+  request,
+  call_summaries,
+  staff,
+} from '@shared/db/schema';
+import { logger } from '@shared/utils/logger';
 import { AnalyticsController } from '../controllers/analyticsController';
 import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
 
-const router = Router();
+const router = express.Router();
 
 // ============================================
 // OPTIMIZED ANALYTICS ENDPOINTS WITH TENANT FILTERING

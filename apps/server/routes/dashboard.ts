@@ -1,4 +1,14 @@
-import express, { type Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
+import { eq, sql, and, desc } from 'drizzle-orm';
+import { db } from '@shared/db';
+import {
+  call,
+  transcript,
+  request as requestTable,
+  call_summaries,
+  staff,
+  tenants,
+} from '@shared/db/schema';
 import { z } from 'zod';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';
@@ -28,7 +38,7 @@ router.use(authenticateJWT);
 // router.use(enforceRowLevelSecurity);
 
 // Simple middleware placeholders
-const identifyTenant = (req: Request, res: Response, next: NextFunction) => {
+const identifyTenant = (req: Request, res: Response, next: any) => {
   // Simplified tenant identification - in production this would extract from JWT
   req.tenant = req.tenant || {
     id: 'mi-nhon-hotel',
@@ -38,11 +48,7 @@ const identifyTenant = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-const enforceRowLevelSecurity = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const enforceRowLevelSecurity = (req: Request, res: Response, next: any) => {
   // Simplified security - in production this would filter database queries
   next();
 };
@@ -111,7 +117,7 @@ const tenantService = new TenantService();
 // Middleware
 // ============================================
 
-const checkLimits = async (req: Request, res: Response, next: NextFunction) => {
+const checkLimits = async (req: Request, res: Response, next: any) => {
   try {
     const tenant = req.tenant;
     const limits = tenantService.getSubscriptionLimits(tenant.subscriptionPlan);
@@ -136,7 +142,7 @@ const checkLimits = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const requireFeature = (feature: string) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: any) => {
     try {
       const hasFeature = await tenantService.hasFeatureAccess(
         req.tenant.id,

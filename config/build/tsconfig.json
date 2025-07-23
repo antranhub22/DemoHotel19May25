@@ -57,6 +57,7 @@
     }
   },
   "include": [
+    "global.d.ts",
     "apps/client/src/**/*", 
     "apps/server/**/*", 
     "packages/**/*", 

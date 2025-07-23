@@ -1,342 +1,266 @@
-/* ========================================
-   CORE TYPES - CENTRALIZED TYPE DEFINITIONS
-   ======================================== */
+// Core type definitions for the hotel management system
 
-// ========================================
-// LANGUAGE & INTERNATIONALIZATION
-// ========================================
+export type Language = 'en' | 'vi' | 'fr' | 'zh' | 'ru' | 'ko';
 
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
+export type ServiceCategory =
+  | 'room_service'
+  | 'housekeeping'
+  | 'maintenance'
+  | 'concierge'
+  | 'spa_wellness'
+  | 'dining'
+  | 'transportation'
+  | 'business_center'
+  | 'laundry'
+  | 'wake_up_call'
+  | 'other';
 
-export type SupportedLanguage = {
-  code: Language;
-  name: string;
-  nativeName: string;
-  flag: string;
-};
+export type UserRole =
+  | 'super-admin'
+  | 'hotel-manager'
+  | 'front-desk'
+  | 'it-manager'
+  | 'guest';
 
-// ========================================
-// HOTEL & TENANT TYPES
-// ========================================
+export type Permission =
+  | 'read'
+  | 'write'
+  | 'delete'
+  | 'admin'
+  | 'manage_users'
+  | 'manage_settings'
+  | 'view_analytics'
+  | 'manage_calls'
+  | 'manage_requests';
 
-export interface HotelConfig {
+export type AuthErrorCode =
+  | 'INVALID_CREDENTIALS'
+  | 'TOKEN_EXPIRED'
+  | 'TOKEN_INVALID'
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'USER_NOT_FOUND'
+  | 'USER_INACTIVE'
+  | 'ACCOUNT_LOCKED';
+
+// Database types - re-export from schema
+export type {
+  Staff,
+  InsertStaff,
+  Call,
+  InsertCall,
+  Transcript,
+  InsertTranscript,
+  RequestRecord,
+  InsertRequestRecord,
+  Message,
+  InsertMessage,
+  CallSummary,
+  InsertCallSummary,
+} from '@shared/db/schema';
+
+// UI types
+export interface BasicHotelData {
   name: string;
   location: string;
-  phone: string;
-  email: string;
-  website: string;
-  timezone: string;
-  languages: Language[];
-  defaultLanguage: Language;
-  branding: {
-    colors: {
-      primary: string;
-      secondary: string;
-      accent: string;
-    };
-    fonts: {
-      primary: string;
-      secondary: string;
-    };
-    logo: string;
-  };
+  description?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  rating?: number;
+  priceRange?: string;
+  amenities?: string[];
+  services?: string[];
 }
 
-export interface Tenant {
-  id: string;
-  hotelName: string;
-  subdomain: string;
-  customDomain?: string;
-  subscriptionPlan: 'trial' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'inactive' | 'expired' | 'cancelled';
-  trialEndsAt?: Date;
-  maxVoices: number;
-  maxLanguages: number;
-  voiceCloning: boolean;
-  multiLocation: boolean;
-  whiteLabel: boolean;
-  dataRetentionDays: number;
-  monthlyCallLimit: number;
+export interface AdvancedHotelData extends BasicHotelData {
+  rooms?: RoomType[];
+  restaurants?: any[];
+  attractions?: LocalAttraction[];
+  policies?: any;
+  images?: string[];
 }
 
-// ========================================
-// CALL & TRANSCRIPT TYPES
-// ========================================
-
-export interface Call {
-  id: string;
-  callIdVapi: string;
-  roomNumber?: string;
-  language: Language;
-  serviceType?: string;
-  duration?: number;
-  startTime: Date;
-  endTime?: Date;
-  tenantId: string;
-}
-
-export interface Transcript {
-  id?: number; // ✅ FIX: Make optional - database auto-generates
-  callId: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  isModelOutput?: boolean;
-  tenantId: string;
-}
-
-export interface CallSummary {
-  id?: number; // ✅ FIX: Make optional - database auto-generates
-  callId: string;
-  content: string;
-  timestamp: Date;
-  roomNumber?: string;
-  duration?: string;
-  tenantId: string;
-}
-
-export interface CallDetails {
-  id: string;
-  roomNumber: string;
-  duration: string;
-  category: string;
-  language: Language;
-  serviceType?: string;
-}
-
-// ========================================
-// ORDER & REQUEST TYPES
-// ========================================
-
-export interface OrderItem {
-  id: string;
+export interface RoomType {
   name: string;
   description: string;
-  quantity: number;
   price: number;
-  serviceType?: string;
+  amenities: string[];
+  capacity: number;
 }
 
-export interface OrderSummary {
-  orderType: string;
-  deliveryTime: 'asap' | '30min' | '1hour' | 'specific';
-  roomNumber: string;
-  guestName: string;
-  guestEmail: string;
-  guestPhone: string;
-  specialInstructions: string;
-  items: OrderItem[];
-  totalAmount: number;
+export interface LocalAttraction {
+  name: string;
+  description: string;
+  distance: string;
+  type: string;
+  rating?: number;
 }
 
-export interface ServiceRequest {
-  serviceType: string;
-  requestText: string;
-  details: {
-    date?: string;
-    time?: string;
-    location?: string;
-    people?: number;
-    amount?: string;
-    roomNumber?: string;
-    otherDetails?: string;
+export interface HotelService {
+  name: string;
+  description: string;
+  category: ServiceCategory;
+  available: boolean;
+  price?: number;
+}
+
+// Auth types
+export interface AuthUser {
+  id: string;
+  username: string;
+  role: UserRole;
+  tenantId: string;
+  permissions: Permission[];
+  name?: string;
+  email?: string;
+}
+
+export interface JwtPayload {
+  userId: string;
+  username: string;
+  role: UserRole;
+  tenantId: string;
+  permissions: Permission[];
+  iat?: number;
+  exp?: number;
+}
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+  tenantId?: string;
+}
+
+export interface AuthContextType {
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  logout: () => void;
+  hasPermission: (permission: Permission) => boolean;
+  hasRole: (role: UserRole) => boolean;
+}
+
+// Assistant types
+export interface AssistantConfig {
+  language: Language;
+  vapiPublicKey: string;
+  vapiAssistantId: string;
+  openaiApiKey: string;
+}
+
+export interface VapiCall {
+  id: string;
+  status: 'active' | 'ended' | 'failed';
+  duration?: number;
+  transcript?: string;
+}
+
+export interface CallState {
+  isActive: boolean;
+  callId?: string;
+  duration: number;
+  transcript: string[];
+}
+
+// API types
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: any;
+}
+
+// Configuration types
+export interface EnvironmentConfig {
+  NODE_ENV: string;
+  PORT: number;
+  DATABASE_URL?: string;
+  JWT_SECRET: string;
+  OPENAI_API_KEY: string;
+  VAPI_PUBLIC_KEY: string;
+  VAPI_ASSISTANT_ID: string;
+}
+
+export interface PermissionMatrix {
+  [role: string]: {
+    [permission: string]: boolean;
   };
 }
 
-export interface Order {
-  reference: string;
-  estimatedTime: string;
-  summary: OrderSummary;
+export interface MenuItemConfig {
+  label: string;
+  path: string;
+  icon?: string;
+  children?: MenuItemConfig[];
+  permissions?: Permission[];
 }
 
-export interface Request {
-  id: number;
-  roomNumber: string;
-  orderId: string;
-  requestContent: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-  tenantId: string;
-}
-
-export interface ActiveOrder {
-  reference: string;
-  requestedAt: Date;
-  estimatedTime: string;
-  status?: string;
-}
-
-// ========================================
-// MESSAGE & COMMUNICATION TYPES
-// ========================================
-
-export interface Message {
-  id: number;
-  requestId: number;
-  sender: string;
-  content: string;
-  timestamp: Date;
-  tenantId: string;
-}
-
-export interface Staff {
-  id: number;
-  username: string;
-  password: string;
-  role: 'admin' | 'staff' | 'manager';
-  tenantId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ========================================
-// INTERFACE & UI TYPES
-// ========================================
-
-export type InterfaceLayer =
-  | 'interface1'
-  | 'interface3'
-  | 'interface3vi'
-  | 'interface3fr'
-  | 'interface4';
-
-// ✅ DEPRECATED: Use RefactoredAssistantContextType instead
-export interface AssistantContextType {
-  // Interface Management
-  currentInterface: InterfaceLayer;
-  setCurrentInterface: (layer: InterfaceLayer) => void;
-
-  // Call Management
-  startCall: () => Promise<void>;
-  endCall: () => void;
-  callDuration: number;
-  setCallDuration: (duration: number) => void;
-  isMuted: boolean;
-  toggleMute: () => void;
-
-  // Transcript Management
-  transcripts: Transcript[];
-  setTranscripts: (transcripts: Transcript[]) => void;
-  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
-
-  // Order Management
-  orderSummary: OrderSummary | null;
-  setOrderSummary: (summary: OrderSummary) => void;
-  order: Order | null;
-  setOrder: (order: Order) => void;
-  activeOrders: ActiveOrder[];
-  addActiveOrder: (order: ActiveOrder) => void;
-  setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
-
-  // Service Requests
-  serviceRequests: ServiceRequest[];
-  setServiceRequests: (requests: ServiceRequest[]) => void;
-
-  // Call Details
-  callDetails: CallDetails | null;
-  setCallDetails: (details: CallDetails) => void;
-  callSummary: CallSummary | null;
-  setCallSummary: (summary: CallSummary) => void;
-
-  // Language & Translation
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  vietnameseSummary: string | null;
-  setVietnameseSummary: (summary: string) => void;
-  translateToVietnamese: (text: string) => Promise<string>;
-
-  // Email & Notifications
-  emailSentForCurrentSession: boolean;
-  setEmailSentForCurrentSession: (sent: boolean) => void;
-  requestReceivedAt: Date | null;
-  setRequestReceivedAt: (date: Date | null) => void;
-
-  // Audio & Model
-  micLevel: number;
-  modelOutput: string[];
-  setModelOutput: (output: string[]) => void;
-  addModelOutput: (output: string) => void;
-}
-
-// ========================================
-// ANALYTICS TYPES
-// ========================================
-
-export interface AnalyticsOverview {
-  totalCalls: number;
-  averageDuration: number;
-  totalOrders: number;
-  averageOrderValue: number;
-  languageDistribution: Record<Language, number>;
-  serviceTypeDistribution: Record<string, number>;
-}
-
-export interface ServiceDistribution {
-  serviceType: string;
-  count: number;
-  percentage: number;
-}
-
-export interface HourlyActivity {
-  hour: number;
-  calls: number;
-  orders: number;
-}
-
-// ========================================
-// REFERENCE & ASSET TYPES
-// ========================================
-
-export interface ReferenceItem {
-  url: string;
-  title: string;
-  description: string;
-  type: 'image' | 'document' | 'link';
-}
-
-export interface DictionaryEntry {
-  keyword: string;
-  fragments: string[];
-  type: 'word' | 'phrase' | 'name';
-}
-
-// ========================================
-// UTILITY TYPES
-// ========================================
-
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
-
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
-
+// Utility types
 export type Nullable<T> = T | null;
+export type Optional<T> = T | undefined;
+export type Maybe<T> = T | null | undefined;
+export type ID = string;
+export type Timestamp = number;
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONValue[]
+  | { [key: string]: JSONValue };
 
-export type NonNullable<T> = T extends null | undefined ? never : T;
+// Environment types
+export type NodeEnv = 'development' | 'production' | 'test';
 
-// ========================================
-// CONFIGURATION TYPES
-// ========================================
+// HTTP types
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type HttpStatus = 200 | 201 | 400 | 401 | 403 | 404 | 500;
 
-export interface VapiConfig {
-  publicKey: string;
-  assistantId: string;
+// Database types
+export type SortOrder = 'asc' | 'desc';
+export type FilterOperator =
+  | 'eq'
+  | 'ne'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'like'
+  | 'in';
+
+// UI state types
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
+export type Theme = 'light' | 'dark' | 'auto';
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'danger'
+  | 'success'
+  | 'warning';
+export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+// Animation types
+export type AnimationDuration = 'fast' | 'normal' | 'slow';
+export type AnimationType = 'fade' | 'slide' | 'bounce' | 'zoom';
+
+// Error types
+export interface ErrorResponse {
+  success: false;
+  error: string;
+  code?: string;
+  details?: any;
 }
 
-export interface OpenAIConfig {
-  apiKey: string;
-  model: string;
-  maxTokens: number;
-  temperature: number;
-}
-
-export interface EmailConfig {
-  service: 'gmail' | 'sendgrid' | 'smtp';
-  user: string;
-  pass: string;
-  from: string;
-  to: string;
+export interface SuccessResponse<T = any> {
+  success: true;
+  data: T;
+  message?: string;
 }

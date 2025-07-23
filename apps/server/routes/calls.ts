@@ -1,4 +1,8 @@
-import { Router } from 'express';
+import express, { Request, Response } from 'express';
+import { eq, and, desc } from 'drizzle-orm';
+import { db } from '@shared/db';
+import { call, transcript } from '@shared/db/schema';
+import { logger } from '@shared/utils/logger';
 import { CallsController } from '../controllers/callsController';
 
 const router = Router();

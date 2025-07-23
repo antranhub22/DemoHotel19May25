@@ -28,33 +28,155 @@ module.exports = {
     console: 'readonly',
     setInterval: 'readonly',
     module: 'readonly',
+    __dirname: 'readonly',
+    __filename: 'readonly',
 
     // React globals
     React: 'readonly',
     ReactNode: 'readonly',
     JSX: 'readonly',
-
-    // Custom types - mark as readonly to avoid errors
-    Language: 'readonly',
-    ServiceCategory: 'readonly',
-    UserRole: 'readonly',
-    Permission: 'readonly',
+    RefObject: 'readonly',
+    MutableRefObject: 'readonly',
 
     // Express types
     Request: 'readonly',
     Response: 'readonly',
     NextFunction: 'readonly',
 
-    // Drizzle types
+    // Drizzle ORM types
     db: 'readonly',
     eq: 'readonly',
     sql: 'readonly',
+    and: 'readonly',
+    or: 'readonly',
+    desc: 'readonly',
+    asc: 'readonly',
+    count: 'readonly',
+    avg: 'readonly',
+    sum: 'readonly',
+    max: 'readonly',
+    min: 'readonly',
 
-    // Custom app types
-    useAssistant: 'readonly',
+    // Database schema tables
+    tenants: 'readonly',
+    hotelProfiles: 'readonly',
+    staff: 'readonly',
+    call: 'readonly',
+    transcript: 'readonly',
+    request: 'readonly',
+    message: 'readonly',
+    call_summaries: 'readonly',
+
+    // Database types
     Staff: 'readonly',
+    InsertStaff: 'readonly',
+    Call: 'readonly',
+    InsertCall: 'readonly',
     Transcript: 'readonly',
+    InsertTranscript: 'readonly',
+    RequestRecord: 'readonly',
+    InsertRequestRecord: 'readonly',
+    Message: 'readonly',
+    InsertMessage: 'readonly',
     CallSummary: 'readonly',
+    InsertCallSummary: 'readonly',
+    Tenant: 'readonly',
+    InsertTenant: 'readonly',
+
+    // UI/Client types
+    Language: 'readonly',
+    ServiceCategory: 'readonly',
+    UserRole: 'readonly',
+    Permission: 'readonly',
+    AuthErrorCode: 'readonly',
+    IconType: 'readonly',
+    ButtonVariant: 'readonly',
+    Size: 'readonly',
+
+    // Service types
+    BasicHotelData: 'readonly',
+    AdvancedHotelData: 'readonly',
+    RoomType: 'readonly',
+    LocalAttraction: 'readonly',
+    HotelService: 'readonly',
+    HotelResearchService: 'readonly',
+    KnowledgeBaseGenerator: 'readonly',
+
+    // Auth types
+    AuthUser: 'readonly',
+    JwtPayload: 'readonly',
+    LoginCredentials: 'readonly',
+    AuthContextType: 'readonly',
+    authenticateJWT: 'readonly',
+    requireRole: 'readonly',
+    requirePermission: 'readonly',
+
+    // Assistant types
+    AssistantConfig: 'readonly',
+    VapiCall: 'readonly',
+    CallState: 'readonly',
+    useAssistant: 'readonly',
+    useCallHandler: 'readonly',
+    useVapiCall: 'readonly',
+
+    // Configuration types
+    EnvironmentConfig: 'readonly',
+    PermissionMatrix: 'readonly',
+    MenuItemConfig: 'readonly',
+    DEFAULT_PERMISSIONS: 'readonly',
+    AUTH_ERROR_MESSAGES: 'readonly',
+    PERMISSION_MATRIX: 'readonly',
+    ROLE_MENU_CONFIG: 'readonly',
+
+    // Third-party library types
+    jwtDecode: 'readonly',
+    ChartData: 'readonly',
+    ChartOptions: 'readonly',
+
+    // React icons
+    FaBed: 'readonly',
+    FaConcierge: 'readonly',
+    FaUtensils: 'readonly',
+    FaCar: 'readonly',
+    FaSpa: 'readonly',
+    FaPhone: 'readonly',
+    FaUser: 'readonly',
+    FaCog: 'readonly',
+
+    // Error types
+    AppError: 'readonly',
+    ValidationError: 'readonly',
+    AuthError: 'readonly',
+    DatabaseError: 'readonly',
+    TenantError: 'readonly',
+    EnvironmentValidationError: 'readonly',
+
+    // API types
+    ApiResponse: 'readonly',
+    ApiError: 'readonly',
+    ErrorResponse: 'readonly',
+    SuccessResponse: 'readonly',
+
+    // Utility types
+    Nullable: 'readonly',
+    Optional: 'readonly',
+    Maybe: 'readonly',
+    ID: 'readonly',
+    Timestamp: 'readonly',
+    JSONValue: 'readonly',
+    NodeEnv: 'readonly',
+    HttpMethod: 'readonly',
+    HttpStatus: 'readonly',
+    SortOrder: 'readonly',
+    FilterOperator: 'readonly',
+    LoadingState: 'readonly',
+    Theme: 'readonly',
+    AnimationDuration: 'readonly',
+    AnimationType: 'readonly',
+
+    // Component types
+    ComponentProps: 'readonly',
+    ButtonProps: 'readonly',
   },
   rules: {
     'react-refresh/only-export-components': [
