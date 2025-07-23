@@ -4,8 +4,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { logger } from '@shared/utils/logger';
-import SiriCallButton from '@/components/siri/SiriCallButton';
-import { MobileTouchDebugger } from '@/components/siri/MobileTouchDebugger';
+import { useAssistant } from '@/context';
+import SiriCallButton from './SiriCallButton';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
 import { designSystem } from '@/styles/designSystem';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 

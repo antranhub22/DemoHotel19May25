@@ -6,7 +6,10 @@ import {
   AnimationController,
   DimensionsManager,
   StateManager,
-} from '@/components/siri/modules';
+  type DimensionsState,
+  type CanvasRenderState,
+  type ExternalVisualState,
+} from './modules';
 export interface SiriButtonColors {
   primary: string;
   secondary: string;

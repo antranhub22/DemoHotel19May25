@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Sidebar from '@/components/dashboard/Sidebar';
+import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
 import { useAuth } from '@/context/AuthContext';
 
 // Types
