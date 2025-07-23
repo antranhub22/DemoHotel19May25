@@ -2,12 +2,14 @@
 
 // Type declaration for import.meta
 
+// ❌ DISABLED: OpenAI should not be imported on client-side
+// This was causing "Fable is not defined" errors because OpenAI types
+// include voice model enums that get bundled as variables
+//
+// import OpenAI from 'openai';
 
-import OpenAI from 'openai';
-
-
-// Initialize OpenAI client
-const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
+// Initialize OpenAI client - MOVED TO SERVER-SIDE ONLY
+// const openai = new OpenAI({ apiKey: import.meta.env.VITE_OPENAI_API_KEY });
 
 // System prompt for Mi Nhon Hotel
 const SYSTEM_PROMPT = `FIRST MESSAGE: HI! Hotel ! HOW MAY I ASSIST YOU TODAY ?
@@ -31,35 +33,47 @@ Core Responsibilities:
 ... (full prompt content pasted here) ...`;
 
 /**
- * Get a chat completion from OpenAI with optional retrieval context.
- * @param userMessage The user's question or request.
- * @param context Optional context passages from the Knowledge Base.
+ * ❌ DISABLED: Client-side OpenAI calls
+ *
+ * This service has been moved to server-side to prevent:
+ * 1. "Fable is not defined" errors from OpenAI voice model enums
+ * 2. API key exposure on client-side
+ * 3. Unnecessary client bundle bloat
+ *
+ * Use server-side API endpoints instead: /api/summary or /api/chat
  */
 export async function getAIChatResponse(
   userMessage: string,
   context?: string
 ): Promise<string> {
-  // Build messages array
-  const messages: ChatCompletionMessageParam[] = [];
-  // System prompt
-  messages.push({ role: 'system', content: SYSTEM_PROMPT });
-  // Include retrieval context if provided
-  if (context) {
-    messages.push({
-      role: 'system',
-      content: `Relevant information from Knowledge Base:\n${context}`,
-    });
-  }
-  // Finally, the user's message
-  messages.push({ role: 'user', content: userMessage });
-
-  // Call OpenAI
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
-    messages,
-  });
-  return (
-    response.choices[0]?.message?.content ||
-    "I'm sorry, I encountered an error processing your request."
+  console.warn(
+    'Client-side OpenAI service disabled. Use server-side /api/summary endpoint instead.'
   );
+
+  // Fallback to server-side API
+  try {
+    const response = await fetch('/api/summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userMessage,
+        context: context || '',
+        systemPrompt: SYSTEM_PROMPT,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return (
+      data.summary ||
+      data.response ||
+      "I'm sorry, I couldn't process your request."
+    );
+  } catch (error) {
+    console.error('OpenAI service error:', error);
+    return "I'm currently experiencing technical difficulties. Please try again later.";
+  }
 }

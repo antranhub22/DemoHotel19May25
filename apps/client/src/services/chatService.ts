@@ -2,8 +2,12 @@
 
 // Type declaration for import.meta
 
+// ❌ DISABLED: OpenAI should not be imported on client-side
+// This was causing "Fable is not defined" errors because OpenAI types
+// include voice model enums that get bundled as variables
+//
+// import OpenAI from 'openai';
 
-import OpenAI from 'openai';
 // Load the system prompt from environment or inline it here
 const SYSTEM_PROMPT = `FIRST MESSAGE: HI! Hotel ! HOW MAY I ASSIST YOU TODAY ?
 [Role]
@@ -23,31 +27,46 @@ Core Responsibilities:
 - Your responses must strictly follow the information provided in the {Knowledge Base}
 - For queries that fall outside the scope of the services offered, provide information that is helpful and aligned with the guest's needs
 
-... (rest of the full prompt content) ...
-`;
+... (rest of the full prompt content) ...`;
 
-export async function fetchAIResponse(userMessage: string): Promise<string> {
-  const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-  const url = 'https://api.openai.com/v1/chat/completions';
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'user', content: userMessage },
-  ];
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
-      messages,
-    }),
-  });
-
-  const data = await response.json();
-  return (
-    data.choices?.[0]?.message?.content ?? "I'm sorry, I encountered an error."
+/**
+ * ❌ DISABLED: Client-side OpenAI calls
+ *
+ * This service has been disabled because:
+ * 1. OpenAI imports on client-side cause "Fable is not defined" errors
+ * 2. API keys should not be exposed to client
+ * 3. OpenAI calls should be server-side only
+ *
+ * Use server-side API endpoints instead: /api/chat or /api/summary
+ */
+export async function getAIChatResponse(
+  userMessage: string,
+  context?: string
+): Promise<string> {
+  console.warn(
+    'Client-side OpenAI service disabled. Use server-side API endpoints instead.'
   );
+
+  // Return fallback response or make API call to server
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+        context: context || '',
+        systemPrompt: SYSTEM_PROMPT,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.response || "I'm sorry, I couldn't process your request.";
+  } catch (error) {
+    console.error('Chat service error:', error);
+    return "I'm currently experiencing technical difficulties. Please try again later.";
+  }
 }
