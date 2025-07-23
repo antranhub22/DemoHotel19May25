@@ -14,6 +14,9 @@ configure({
   asyncUtilTimeout: 5000,
 });
 
+// Setup React testing environment
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 // Mock Speech Synthesis API globally
 const mockSpeechSynthesis = {
   speak: jest.fn(),
