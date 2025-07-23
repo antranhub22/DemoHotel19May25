@@ -32,7 +32,7 @@ import {
 } from '@/pages/dashboard';
 
 // Unified Dashboard (Phase 3)
-import { UnifiedDashboardLayout } from '@/components/unified-dashboard';
+import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
 import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
 import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
 // Lazy load charts-heavy dashboard components

@@ -38,7 +38,7 @@ import {
 import {
   PermissionGuard,
   usePermissionCheck,
-} from '@/components/unified-dashboard/guards/PermissionGuard';
+} from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
 
 // Types

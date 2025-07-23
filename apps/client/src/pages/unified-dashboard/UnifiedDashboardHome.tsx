@@ -1,6 +1,19 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { BarChart3, Users, MessageSquare, Bot, TrendingUp, AlertCircle, CheckCircle, Shield, Wrench, Database, Monitor, ClipboardList,  } from 'lucide-react';
+import {
+  BarChart3,
+  Users,
+  MessageSquare,
+  Bot,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Shield,
+  Wrench,
+  Database,
+  Monitor,
+  ClipboardList,
+} from 'lucide-react';
 import type { UserRole } from '@shared/constants/permissions';
 import {
   Card,
@@ -12,7 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PermissionGuard } from '@/components/unified-dashboard/guards/PermissionGuard';
+import { PermissionGuard } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
 
 // Mock data - replace with real API calls
