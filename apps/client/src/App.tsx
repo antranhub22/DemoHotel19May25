@@ -1,22 +1,22 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Switch, Route, Link, useLocation } from 'wouter';
-import { Toaster } from '@/components/ui/toaster';
-import VoiceAssistant from '@/components/VoiceAssistant';
-import { AssistantProvider } from '@/context/AssistantContext';
+import { Toaster } from './components/ui/toaster';
+import VoiceAssistant from './components/VoiceAssistant';
+import { AssistantProvider } from './context/AssistantContext';
 import {
   AuthProvider,
   useAuth,
   useTenantDetection,
-} from '@/context/AuthContext';
-import { HotelProvider } from '@/context/HotelContext';
-import NotFound from '@/pages/not-found';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import StaffPage from '@/pages/staff';
+} from './context/AuthContext';
+import { HotelProvider } from './context/HotelContext';
+import NotFound from './pages/not-found';
+import { useWebSocket } from './hooks/useWebSocket';
+import StaffPage from './pages/staff';
 import { BrowserRouter } from 'react-router-dom';
 import StaffDashboard from './pages/StaffDashboard';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
-import { Interface1 } from '@/components/Interface1';
+import { Interface1 } from './components/Interface1';
 
 // Dashboard pages
 import {
@@ -26,21 +26,21 @@ import {
   AssistantManager,
   Analytics,
   Settings,
-} from '@/pages/dashboard';
+} from './pages/dashboard';
 
 // Unified Dashboard (Phase 3)
-import { UnifiedDashboardLayout } from '@/components/unified-dashboard';
-import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
-import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
-import { AdvancedAnalytics } from '@/pages/unified-dashboard/AdvancedAnalytics';
-import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
-import { SystemMonitoring } from '@/pages/unified-dashboard/SystemMonitoring';
-import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
-import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
-import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
-import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
-import { Integrations } from '@/pages/unified-dashboard/Integrations';
-import { logger } from '@shared/utils/logger';
+import { UnifiedDashboardLayout } from './components/unified-dashboard';
+import { UnifiedDashboardHome } from './pages/unified-dashboard';
+import { CustomerRequests } from './pages/unified-dashboard/CustomerRequests';
+import { AdvancedAnalytics } from './pages/unified-dashboard/AdvancedAnalytics';
+import { StaffManagement } from './pages/unified-dashboard/StaffManagement';
+import { SystemMonitoring } from './pages/unified-dashboard/SystemMonitoring';
+import { Settings as UnifiedSettings } from './pages/unified-dashboard/Settings';
+import { GuestManagement } from './pages/unified-dashboard/GuestManagement';
+import { SecuritySettings } from './pages/unified-dashboard/SecuritySettings';
+import { SystemLogs } from './pages/unified-dashboard/SystemLogs';
+import { Integrations } from './pages/unified-dashboard/Integrations';
+import { logger } from '../../../packages/shared/utils/logger';
 
 // ============================================
 // Protected Route Component
@@ -105,8 +105,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 // Lazy-loaded Components
 // ============================================
 
-const CallHistory = React.lazy(() => import('@/pages/CallHistory'));
-const CallDetails = React.lazy(() => import('@/pages/CallDetails'));
+const CallHistory = React.lazy(() => import('./pages/CallHistory'));
+const CallDetails = React.lazy(() => import('./pages/CallDetails'));
 
 // ============================================
 // Loading Fallback

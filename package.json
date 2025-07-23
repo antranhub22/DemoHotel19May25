@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --noEmit || true && vite build || true",
-    "build:client": "cd apps/client && vite build --mode production",
+    "build:client": "cd apps/client && vite build --mode production --config ../../vite.config.ts",
     "build:server": "cd apps/server && tsc --noEmit --skipLibCheck || true",
     "build:production": "NODE_ENV=production npm run build",
     "build:analyze": "vite build --mode analyze",
