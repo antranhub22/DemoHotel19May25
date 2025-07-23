@@ -53,7 +53,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
     } else if (!isOpen) {
       setHasAnimated(false);
     }
-  }, [isOpen, hasAnimated]);
+  }, [isOpen]); // 🔧 FIX: Removed hasAnimated to prevent infinite loop
 
   const cleanupAnimations = () => {
     Object.values(animationFrames.current).forEach(frameId => {

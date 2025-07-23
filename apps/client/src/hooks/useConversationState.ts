@@ -118,7 +118,7 @@ export const useConversationState = ({
         'Component'
       );
     }
-  }, [transcripts.length, manualCallStarted, callDuration, showConversation]); // Fixed: Re-added showConversation for proper comparison
+  }, [transcripts.length, manualCallStarted, callDuration]); // 🔧 FIX: Removed showConversation to prevent infinite loop
 
   // Auto scroll to conversation when it appears
   useEffect(() => {
