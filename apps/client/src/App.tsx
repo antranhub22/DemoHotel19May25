@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Switch, Route, Link, useLocation } from 'wouter';
 import { Toaster } from '@/components/ui/toaster';
 import VoiceAssistant from '@/components/VoiceAssistant';
@@ -304,7 +304,10 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
-  logger.debug('[DEBUG] Router render', 'Component', { tenantInfo, isAuthenticated });
+  logger.debug('[DEBUG] Router render', 'Component', {
+    tenantInfo,
+    isAuthenticated,
+  });
 
   if (!tenantInfo) {
     return <LoadingFallback />;

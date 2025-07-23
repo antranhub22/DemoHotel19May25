@@ -1,4 +1,3 @@
-
 import { IconType } from 'react-icons';
 
 import {
@@ -11,7 +10,7 @@ import {
   FaTaxi,
   FaMapMarkedAlt,
   FaPhoneAlt,
-} from 'react-icons/fa';
+} from 'react-icons/fa6';
 
 // Core types for Interface1
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
