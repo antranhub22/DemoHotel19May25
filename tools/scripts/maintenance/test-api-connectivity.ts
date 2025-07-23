@@ -11,12 +11,19 @@ async function testApiEndpoint(endpoint: string) {
   try {
     console.log(`Testing: ${BASE_URL}${endpoint}`);
 
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(`${BASE_URL}${endpoint}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     const contentType = response.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');
@@ -36,7 +43,11 @@ async function testApiEndpoint(endpoint: string) {
       }
     }
   } catch (error) {
-    console.log(`❌ ${endpoint} - ERROR: ${error}`);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.log(`❌ ${endpoint} - TIMEOUT: Request timed out after 10s`);
+    } else {
+      console.log(`❌ ${endpoint} - ERROR: ${error}`);
+    }
     return false;
   }
 }
