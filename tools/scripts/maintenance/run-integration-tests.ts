@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { IntegrationTestSuite } from '../../../tests/integration-test-suite';
+import { IntegrationTestSuite } from '@tests/integration-test-suite';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -176,7 +176,10 @@ class IntegrationTestRunner {
 
       return results.success;
     } catch (error) {
-      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as any)?.message || String(error));
+      console.error(
+        `\n💥 Scenario '${scenarioName}' crashed:`,
+        (error as any)?.message || String(error)
+      );
       return false;
     }
   }
@@ -279,7 +282,7 @@ class IntegrationTestRunner {
     // Run critical tests in order
     const criticalTests = ['mock', 'compatibility', 'production'];
 
-    for (const testName of (criticalTests as any[])) {
+    for (const testName of criticalTests as any[]) {
       console.log(
         `${criticalTests.indexOf(testName) + 1}️⃣ Running ${testName} test...`
       );
@@ -346,7 +349,7 @@ class IntegrationTestRunner {
     let allPassed = true;
     let criticalFailed = false;
 
-    for (const check of (checks as any[])) {
+    for (const check of checks as any[]) {
       let passed = false;
       try {
         passed = await check.check();
@@ -389,11 +392,11 @@ class IntegrationTestRunner {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch('http://localhost:3000/api/db-test', {
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
       return response.ok;
     } catch (error) {

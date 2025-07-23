@@ -31,6 +31,8 @@ export default defineConfig({
       '@shared': path.resolve(__dirname, './packages/shared'),
       '@types': path.resolve(__dirname, './packages/types'),
       '@config': path.resolve(__dirname, './packages/config'),
+      '@auth': path.resolve(__dirname, './packages/auth-system'),
+      '@tools': path.resolve(__dirname, './tools'),
       '@tests': path.resolve(__dirname, './tests'),
     },
   },

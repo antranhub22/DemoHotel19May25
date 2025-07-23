@@ -5,7 +5,7 @@
  * To run these tests, install Jest: npm install --save-dev jest @types/jest
  */
 
-import { DebugManager } from '../../../apps/client/src/components/siri/modules/DebugManager';
+import { DebugManager } from '@/components/siri/modules/DebugManager';
 
 // Example test cases for DebugManager
 export const debugManagerTests = {

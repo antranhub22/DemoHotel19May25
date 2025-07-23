@@ -3,7 +3,7 @@ import { logger } from '@shared/utils/logger';
 import bcrypt from 'bcrypt';
 
 // Import dev users from auth config
-import { DEV_CONFIG } from '../../packages/auth-system/config/auth.config';
+import { DEV_CONFIG } from '@auth/config/auth.config';
 
 export async function seedDevelopmentData() {
   try {
@@ -128,7 +128,7 @@ async function seedCallsAndRequests() {
     ];
 
     // Insert call data
-    for (const callItem of (callData as any[])) {
+    for (const callItem of callData as any[]) {
       await db.insert(call).values(callItem).onConflictDoNothing();
     }
 
@@ -200,7 +200,7 @@ async function seedCallsAndRequests() {
     ];
 
     // Insert requests
-    for (const requestItem of (requestData as any[])) {
+    for (const requestItem of requestData as any[]) {
       await db.insert(request).values(requestItem);
     }
 

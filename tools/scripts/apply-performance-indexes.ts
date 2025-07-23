@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { db } from '../../packages/shared/db/index.js';
+import { db } from '@shared/db/index.js';
 /**
  * Apply Performance Indexes Migration
  *
@@ -38,7 +38,7 @@ async function applyPerformanceIndexes() {
     let errorCount = 0;
 
     // Apply each index creation statement
-    for (const statement of (statements as any[])) {
+    for (const statement of statements as any[]) {
       if (!statement.includes('CREATE INDEX')) {
         continue;
       }
@@ -59,11 +59,16 @@ async function applyPerformanceIndexes() {
         console.log(`✅ Index created successfully (${duration}ms)`);
         successCount++;
       } catch (error: any) {
-        if ((error as any)?.message || String(error)?.includes('already exists')) {
+        if (
+          (error as any)?.message ||
+          String(error)?.includes('already exists')
+        ) {
           console.log(`⏭️  Index already exists, skipping`);
           skipCount++;
         } else {
-          console.error(`❌ Failed to create index: ${(error as any)?.message || String(error)}`);
+          console.error(
+            `❌ Failed to create index: ${(error as any)?.message || String(error)}`
+          );
           errorCount++;
         }
       }

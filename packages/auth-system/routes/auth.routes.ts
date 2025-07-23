@@ -6,9 +6,9 @@
 
 import { Router } from 'express';
 import { z } from 'zod';
-import type { LoginCredentials } from '../types';
-import { authValidationSchemas } from '../config';
-import { UnifiedAuthService } from '../services/UnifiedAuthService';
+import type { LoginCredentials } from '@auth/types';
+import { authValidationSchemas } from '@auth/config';
+import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 const router = Router();
 
 // ============================================

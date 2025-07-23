@@ -2,7 +2,7 @@ import React, { Suspense, useState, useEffect } from 'react';
 import { Switch, Route, Link, useLocation } from 'wouter';
 import { BrowserRouter } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
-import StaffDashboard from './pages/StaffDashboard';
+import StaffDashboard from '@/pages/StaffDashboard';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
 import VoiceAssistant from '@/components/VoiceAssistant';

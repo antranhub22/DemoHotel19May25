@@ -1,8 +1,8 @@
-import { cleanupTestDatabase } from '../../utils/setup-test-db';
+import { cleanupTestDatabase } from '@tests/utils/setup-test-db';
 
 /**
  * Global Teardown for E2E Tests
- * 
+ *
  * Cleans up test environment after running E2E tests
  */
 async function globalTeardown() {
@@ -23,4 +23,4 @@ async function globalTeardown() {
   console.log('🎉 E2E Test Global Teardown Complete!');
 }
 
-export default globalTeardown; 
+export default globalTeardown;

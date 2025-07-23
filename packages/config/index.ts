@@ -13,8 +13,8 @@ export * from './database.config';
 // CONFIGURATION VALIDATION
 // ========================================
 
-import { validateEnvironment } from './app.config';
-import { validateDatabaseConfig } from './database.config';
+import { validateEnvironment } from '@config/app.config';
+import { validateDatabaseConfig } from '@config/database.config';
 
 export const validateAllConfigurations = () => {
   const appValidation = validateEnvironment();

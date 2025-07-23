@@ -9,8 +9,8 @@ import {
   staff,
 } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
-import { AnalyticsController } from '../controllers/analyticsController';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
+import { AnalyticsController } from '@server/controllers/analyticsController';
+import { authenticateJWT } from '@auth/middleware/auth.middleware';
 
 const router = express.Router();
 

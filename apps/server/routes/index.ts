@@ -1,15 +1,15 @@
 import express from 'express';
-import apiRoutes from './api';
-import callsRoutes from './calls';
-import analyticsRoutes from './analytics';
-import dashboardRoutes from './dashboard';
-import healthRoutes from './health';
-import requestRoutes from './request';
-import transcriptsRoutes from './transcripts';
-// import emailRoutes from './email'; // Temporarily disabled due to signature issues
-import staffRoutes from './staff';
+import apiRoutes from '@server/routes/api';
+import callsRoutes from '@server/routes/calls';
+import analyticsRoutes from '@server/routes/analytics';
+import dashboardRoutes from '@server/routes/dashboard';
+import healthRoutes from '@server/routes/health';
+import requestRoutes from '@server/routes/request';
+import transcriptsRoutes from '@server/routes/transcripts';
+// import emailRoutes from '@server/routes/email'; // Temporarily disabled due to signature issues
+import staffRoutes from '@server/routes/staff';
 // import { logger } from '@shared/utils/logger'; // Not used currently
-// import unifiedAuthRoutes from '../../packages/auth-system/routes/auth.routes';
+// import unifiedAuthRoutes from '@auth/routes/auth.routes';
 
 const router = express.Router();
 

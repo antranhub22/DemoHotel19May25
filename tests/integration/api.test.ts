@@ -1,12 +1,13 @@
 import request from 'supertest';
-import { db } from '../../lib/db';
-import { staff
-  tenants
+import { db } from '@shared/db';
+import {
+  staff,
+  tenants,
   calls,
   transcripts,
   requests,
   messages,
- } from '../../lib/db/schema';
+} from '@shared/db/schema';
 import bcrypt from 'bcrypt';
 
 // ============================================================================

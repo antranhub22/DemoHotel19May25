@@ -3,7 +3,12 @@
  * Shows how camelCase ↔ snake_case conversion works
  */
 
-import { requestMapper, toCamelCase, toSnakeCase, transformObjectToCamelCase,  } from './transformers';
+import {
+  requestMapper,
+  toCamelCase,
+  toSnakeCase,
+  transformObjectToCamelCase,
+} from '@shared/db/transformers';
 // ✅ TEST 1: Basic string transformation
 console.log('=== String Transformation Tests ===');
 console.log('roomNumber →', toSnakeCase('roomNumber')); // → room_number

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import StaffLogin from './StaffLogin';
-import StaffDashboard from './StaffDashboard';
+import StaffLogin from '@/pages/StaffLogin';
+import StaffDashboard from '@/pages/StaffDashboard';
 
 const StaffPage: React.FC = () => {
   // State giả lập đăng nhập

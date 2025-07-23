@@ -2,10 +2,9 @@
 
 // Type declaration for import.meta
 
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App.tsx';
+import App from '@/App.tsx';
 import './index.css';
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access

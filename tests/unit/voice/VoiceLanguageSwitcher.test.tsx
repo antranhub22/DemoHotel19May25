@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { VoiceLanguageSwitcher } from '../../../apps/client/src/components/interface1/VoiceLanguageSwitcher';
-import { RefactoredAssistantProvider } from '../../../apps/client/src/context/RefactoredAssistantContext';
+import { VoiceLanguageSwitcher } from '@/components/interface1/VoiceLanguageSwitcher';
+import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 
 // Mock the Speech Synthesis API
 const mockSpeechSynthesis = {
@@ -15,7 +15,7 @@ const mockSpeechSynthesis = {
   speaking: false,
 };
 
-const mockSpeechSynthesisUtterance = jest.fn().mockImplementation((text) => ({
+const mockSpeechSynthesisUtterance = jest.fn().mockImplementation(text => ({
   text,
   lang: 'en-US',
   rate: 1,
@@ -46,10 +46,17 @@ const mockUseAssistant = {
   setLanguage: jest.fn(),
 };
 
-jest.mock('../../../apps/client/src/context/RefactoredAssistantContext', () => ({
-  useRefactoredAssistant: () => mockUseAssistant,
-  RefactoredAssistantProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock(
+  '../../../apps/client/src/context/RefactoredAssistantContext',
+  () => ({
+    useRefactoredAssistant: () => mockUseAssistant,
+    RefactoredAssistantProvider: ({
+      children,
+    }: {
+      children: React.ReactNode;
+    }) => <div>{children}</div>,
+  })
+);
 
 // Mock the useIsMobile hook
 jest.mock('../../../apps/client/src/hooks/use-mobile', () => ({
@@ -98,7 +105,7 @@ describe('VoiceLanguageSwitcher', () => {
   describe('Rendering', () => {
     it('renders the language switcher button', () => {
       renderComponent();
-      
+
       expect(screen.getByRole('button')).toBeInTheDocument();
       expect(screen.getByText('English')).toBeInTheDocument();
       expect(screen.getByText('🇺🇸')).toBeInTheDocument();
@@ -107,14 +114,14 @@ describe('VoiceLanguageSwitcher', () => {
     it('displays current language correctly', () => {
       mockUseAssistant.language = 'vi';
       renderComponent();
-      
+
       expect(screen.getByText('Tiếng Việt')).toBeInTheDocument();
       expect(screen.getByText('🇻🇳')).toBeInTheDocument();
     });
 
     it('applies correct position styles', () => {
       renderComponent({ position: 'header' });
-      
+
       const button = screen.getByRole('button');
       expect(button).toHaveClass('bg-white/95');
     });
@@ -123,9 +130,9 @@ describe('VoiceLanguageSwitcher', () => {
       jest.doMock('../../../apps/client/src/hooks/use-mobile', () => ({
         useIsMobile: () => true,
       }));
-      
+
       renderComponent();
-      
+
       // Mobile-specific checks would go here
       // This is a placeholder for mobile-specific assertions
       expect(screen.getByRole('button')).toBeInTheDocument();
@@ -136,10 +143,10 @@ describe('VoiceLanguageSwitcher', () => {
     it('opens dropdown when clicked', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       // Check if dropdown options are visible
       expect(screen.getByText('Français')).toBeInTheDocument();
       expect(screen.getByText('中文')).toBeInTheDocument();
@@ -149,36 +156,39 @@ describe('VoiceLanguageSwitcher', () => {
     it('closes dropdown when clicking outside', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       // Dropdown should be open
       expect(screen.getByText('Français')).toBeInTheDocument();
-      
+
       // For this test, let's just verify that we can close the dropdown by clicking the button again
       await user.click(button);
-      
+
       // Wait for the dropdown to close
-      await waitFor(() => {
-        expect(screen.queryByText('Français')).not.toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(screen.queryByText('Français')).not.toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
     });
 
     it('handles keyboard navigation', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       // Find the French option
       const frenchOption = screen.getByRole('option', { name: /français/i });
       expect(frenchOption).toBeInTheDocument();
-      
+
       // Click directly instead of using keyboard navigation for now
       await user.click(frenchOption);
-      
+
       expect(defaultProps.onLanguageChange).toHaveBeenCalledWith('fr');
     });
   });
@@ -188,39 +198,39 @@ describe('VoiceLanguageSwitcher', () => {
       const user = userEvent.setup();
       const onLanguageChange = jest.fn();
       renderComponent({ onLanguageChange });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.click(frenchOption);
-      
+
       expect(onLanguageChange).toHaveBeenCalledWith('fr');
     });
 
     it('updates context language', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.click(frenchOption);
-      
+
       expect(mockUseAssistant.setLanguage).toHaveBeenCalledWith('fr');
     });
 
     it('shows success notification on language change', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.click(frenchOption);
-      
+
       await waitFor(() => {
         expect(mockAddNotification).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -236,13 +246,13 @@ describe('VoiceLanguageSwitcher', () => {
     it('plays voice preview on hover when enabled', async () => {
       const user = userEvent.setup();
       renderComponent({ showVoicePreview: true });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.hover(frenchOption);
-      
+
       await waitFor(() => {
         expect(mockSpeechSynthesis.speak).toHaveBeenCalled();
       });
@@ -250,23 +260,23 @@ describe('VoiceLanguageSwitcher', () => {
 
     it('does not play voice preview when disabled', async () => {
       const user = userEvent.setup();
-      
+
       // Clear any previous calls
       mockSpeechSynthesis.speak.mockClear();
-      
+
       renderComponent({ showVoicePreview: false });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
-      
+
       // Hover over the option
       await user.hover(frenchOption);
-      
+
       // Wait longer to ensure no speech is triggered
       await new Promise(resolve => setTimeout(resolve, 300));
-      
+
       // Check that speak was not called after disabling voice preview
       expect(mockSpeechSynthesis.speak).not.toHaveBeenCalled();
     });
@@ -274,30 +284,30 @@ describe('VoiceLanguageSwitcher', () => {
     it('cancels previous speech when starting new preview', async () => {
       const user = userEvent.setup();
       renderComponent({ showVoicePreview: true });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       const chineseOption = screen.getByText('中文');
-      
+
       await user.hover(frenchOption);
       await user.hover(chineseOption);
-      
+
       expect(mockSpeechSynthesis.cancel).toHaveBeenCalled();
     });
 
     it('stops voice preview on mouse leave', async () => {
       const user = userEvent.setup();
       renderComponent({ showVoicePreview: true });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.hover(frenchOption);
       await user.unhover(frenchOption);
-      
+
       expect(mockSpeechSynthesis.cancel).toHaveBeenCalled();
     });
   });
@@ -305,7 +315,7 @@ describe('VoiceLanguageSwitcher', () => {
   describe('Accessibility', () => {
     it('has proper ARIA attributes', () => {
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-expanded', 'false');
       expect(button).toHaveAttribute('aria-haspopup', 'listbox');
@@ -315,21 +325,23 @@ describe('VoiceLanguageSwitcher', () => {
     it('updates ARIA expanded when dropdown opens', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       expect(button).toHaveAttribute('aria-expanded', 'true');
     });
 
     it('has proper role attributes for options', async () => {
       const user = userEvent.setup();
       renderComponent();
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
-      const frenchOption = screen.getByText('Français').closest('[role="option"]');
+
+      const frenchOption = screen
+        .getByText('Français')
+        .closest('[role="option"]');
       expect(frenchOption).toBeInTheDocument();
       expect(frenchOption).toHaveAttribute('aria-selected');
     });
@@ -338,42 +350,42 @@ describe('VoiceLanguageSwitcher', () => {
   describe('Error Handling', () => {
     it('handles speech synthesis errors gracefully', async () => {
       const user = userEvent.setup();
-      
+
       // Mock speech synthesis to throw error
       mockSpeechSynthesis.speak.mockImplementation(() => {
         throw new Error('Speech synthesis error');
       });
-      
+
       renderComponent({ showVoicePreview: true });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.hover(frenchOption);
-      
+
       // Should not crash the component
       expect(screen.getByText('Français')).toBeInTheDocument();
     });
 
     it('handles missing speech synthesis API', async () => {
       const user = userEvent.setup();
-      
+
       // Remove speech synthesis from window
       const originalSpeechSynthesis = window.speechSynthesis;
       delete (window as any).speechSynthesis;
-      
+
       renderComponent({ showVoicePreview: true });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
       await user.hover(frenchOption);
-      
+
       // Should not crash
       expect(screen.getByText('Français')).toBeInTheDocument();
-      
+
       // Restore speech synthesis
       Object.defineProperty(window, 'speechSynthesis', {
         value: originalSpeechSynthesis,
@@ -387,23 +399,23 @@ describe('VoiceLanguageSwitcher', () => {
       const user = userEvent.setup();
       const onLanguageChange = jest.fn();
       renderComponent({ onLanguageChange });
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       const frenchOption = screen.getByText('Français');
-      
+
       // Click multiple times in quick succession
       await user.click(frenchOption);
-      
+
       // Wait a bit then check calls
       await waitFor(() => {
         expect(onLanguageChange).toHaveBeenCalledWith('fr');
       });
-      
+
       // The actual number of calls depends on implementation
       // Just ensure it was called at least once
       expect(onLanguageChange).toHaveBeenCalled();
     });
   });
-}); 
+});

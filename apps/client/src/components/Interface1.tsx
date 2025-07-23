@@ -10,32 +10,32 @@ import { useAssistant } from '@/context';
 
 // Types & Constants
 import type { Language } from '@/types/interface1.types';
-import { LANGUAGE_DISPLAY_NAMES } from './interface1/MultiLanguageNotificationHelper';
+import { LANGUAGE_DISPLAY_NAMES } from '@/components/interface1/MultiLanguageNotificationHelper';
 
 // Utils
 import { logger } from '@shared/utils/logger';
 
 // UI Components - States
-import { LoadingState } from './interface1/LoadingState';
-import { ErrorState } from './interface1/ErrorState';
+import { LoadingState } from '@/components/interface1/LoadingState';
+import { ErrorState } from '@/components/interface1/ErrorState';
 
 // UI Components - Layout
-import { InterfaceContainer } from './interface1/InterfaceContainer';
-import { InterfaceHeader } from './interface1/InterfaceHeader';
-import { ServiceGridContainer } from './interface1/ServiceGridContainer';
+import { InterfaceContainer } from '@/components/interface1/InterfaceContainer';
+import { InterfaceHeader } from '@/components/interface1/InterfaceHeader';
+import { ServiceGridContainer } from '@/components/interface1/ServiceGridContainer';
 
 // UI Components - Popups
-import ChatPopup from './ChatPopup';
-import SummaryPopup from './SummaryPopup';
+import ChatPopup from '@/components/ChatPopup';
+import SummaryPopup from '@/components/SummaryPopup';
 
 // Enhanced UI Components
-import { NotificationSystem } from './interface1/NotificationSystem';
-import { VoiceLanguageSwitcher } from './interface1/VoiceLanguageSwitcher';
-import { VoiceCommandContext } from './interface1/VoiceCommandContext';
-import { MobileVoiceControls } from './interface1/MobileVoiceControls';
-import { addMultiLanguageNotification } from './interface1/MultiLanguageNotificationHelper';
+import { NotificationSystem } from '@/components/interface1/NotificationSystem';
+import { VoiceLanguageSwitcher } from '@/components/interface1/VoiceLanguageSwitcher';
+import { VoiceCommandContext } from '@/components/interface1/VoiceCommandContext';
+import { MobileVoiceControls } from '@/components/interface1/MobileVoiceControls';
+import { addMultiLanguageNotification } from '@/components/interface1/MultiLanguageNotificationHelper';
 // Siri Components
-import { SiriButtonContainer } from './siri/SiriButtonContainer';
+import { SiriButtonContainer } from '@/components/siri/SiriButtonContainer';
 import { ServiceCategory } from '@/types/interface1.types';
 import { usePopupContext } from '@/context/PopupContext';
 import { useInterface1 } from '@/hooks/useInterface1';

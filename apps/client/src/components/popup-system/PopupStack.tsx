@@ -1,5 +1,5 @@
 import React from 'react';
-import { PopupCard } from './PopupCard';
+import { PopupCard } from '@/components/popup-system/PopupCard';
 import styles from './PopupStack.module.css';
 import { PopupState } from '@/context/PopupContext';
 

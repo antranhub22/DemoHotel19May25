@@ -1,5 +1,5 @@
 // ✅ Enhanced Database Connection with Advanced Pooling & Monitoring
-import { connectionManager } from './connectionManager';
+import { connectionManager } from '@shared/db/connectionManager';
 
 // Initialize connection manager
 let _dbInstance: any;

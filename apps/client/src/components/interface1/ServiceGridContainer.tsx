@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { ServiceGrid } from '../interface1/ServiceGrid';
+import { ServiceGrid } from '@/components/interface1/ServiceGrid';
 import { ServiceCategory } from '@/types/interface1.types';
 
 interface ServiceGridContainerProps {

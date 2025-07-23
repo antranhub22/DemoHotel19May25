@@ -25,7 +25,7 @@ import {
 } from '@server/analytics';
 import { logger } from '@shared/utils/logger';
 import { hotelProfileMapper } from '@shared/db/transformers';
-import { authenticateJWT } from '../../../packages/auth-system/middleware/auth.middleware';
+import { authenticateJWT } from '@auth/middleware/auth.middleware';
 // ============================================
 // Router Setup
 // ============================================

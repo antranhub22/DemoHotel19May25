@@ -3,9 +3,9 @@
 // ============================================
 // Simplified version without TypeScript conflicts
 
-import type { AuthUser, UserRole } from '../types';
-import { AUTH_ERROR_MESSAGES } from '../config';
-import { UnifiedAuthService } from '../services/UnifiedAuthService';
+import type { AuthUser, UserRole } from '@auth/types';
+import { AUTH_ERROR_MESSAGES } from '@auth/config';
+import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 
 // ============================================
 // CORE AUTHENTICATION MIDDLEWARE

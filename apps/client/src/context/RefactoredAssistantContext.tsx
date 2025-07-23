@@ -2,7 +2,6 @@
 
 // Type declaration for import.meta
 
-
 import React, {
   createContext,
   useContext,
@@ -13,21 +12,24 @@ import React, {
 
 // Import types
 import { logger } from '@shared/utils/logger';
-import { useCall, CallProvider } from './contexts/CallContext';
+import { useCall, CallProvider } from '@/context/contexts/CallContext';
 
 // Import all new focused contexts
 import {
   useTranscript,
   TranscriptProvider,
 } from './contexts/TranscriptContext';
-import { useLanguage, LanguageProvider } from './contexts/LanguageContext';
-import { useOrder, OrderProvider } from './contexts/OrderContext';
+import {
+  useLanguage,
+  LanguageProvider,
+} from '@/context/contexts/LanguageContext';
+import { useOrder, OrderProvider } from '@/context/contexts/OrderContext';
 import {
   useConfiguration,
   ConfigurationProvider,
 } from './contexts/ConfigurationContext';
-import { useVapi, VapiProvider } from './contexts/VapiContext';
-import { Transcript, CallDetails, Order, ActiveOrder,  } from '@/types';
+import { useVapi, VapiProvider } from '@/context/contexts/VapiContext';
+import { Transcript, CallDetails, Order, ActiveOrder } from '@/types';
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
@@ -90,7 +92,10 @@ export interface RefactoredAssistantContextType {
   micLevel: number;
   callDetails: CallDetails | null;
   setCallDetails: (details: CallDetails | null) => void;
-  initializeVapi: (language: string, hotelConfig?: HotelConfiguration | null) => Promise<void>;
+  initializeVapi: (
+    language: string,
+    hotelConfig?: HotelConfiguration | null
+  ) => Promise<void>;
   startVapiCall: (assistantId: string) => Promise<any>;
   stopVapi: () => void;
   setMuted: (muted: boolean) => void;

@@ -11,11 +11,17 @@ import { performance } from 'perf_hooks';
 import fetch from 'node-fetch';
 
 // Import services
-import { HotelResearchService } from '../apps/server/services/hotelResearch';
-import { KnowledgeBaseGenerator } from '../apps/server/services/knowledgeBaseGenerator';
-import {  } from '../apps/server/services/vapiIntegration';
+import { HotelResearchService } from '@server/services/hotelResearch';
+import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
+import {} from '@server/services/vapiIntegration';
 // Import schema
-import { tenants, hotelProfiles, call, transcript, message,  } from '../packages/shared/db/schema';
+import {
+  tenants,
+  hotelProfiles,
+  call,
+  transcript,
+  message,
+} from '@shared/db/schema';
 // Import test utils
 // ============================================
 // Integration Test Configuration & Types
@@ -145,8 +151,20 @@ const MOCK_NEW_TENANT_DATA = {
     },
     categories: ['hotel', 'lodging'],
     services: [
-      { name: 'Room Service', description: 'In-room dining service', type: 'room_service', category: 'dining', available: true },
-      { name: 'Concierge', description: 'Guest assistance service', type: 'concierge', category: 'service', available: true },
+      {
+        name: 'Room Service',
+        description: 'In-room dining service',
+        type: 'room_service',
+        category: 'dining',
+        available: true,
+      },
+      {
+        name: 'Concierge',
+        description: 'Guest assistance service',
+        type: 'concierge',
+        category: 'service',
+        available: true,
+      },
     ],
     amenities: ['Free WiFi', 'Pool', 'Gym'],
     policies: {
@@ -306,7 +324,10 @@ export class IntegrationTestSuite {
         message: (error as Error).message,
         stack: (error as Error).stack,
       });
-      this.log(`💥 Integration Test Suite Failed: ${(error as Error).message}`, 'error');
+      this.log(
+        `💥 Integration Test Suite Failed: ${(error as Error).message}`,
+        'error'
+      );
       return this.results;
     } finally {
       if (this.config.cleanupOnFailure || this.results.success) {
@@ -387,7 +408,9 @@ export class IntegrationTestSuite {
             this.log(`Testing endpoint: ${endpoint}`, 'info');
             // In real implementation, would make actual HTTP requests
           } catch (error) {
-            throw new Error(`Endpoint ${endpoint} failed: ${(error as Error).message}`);
+            throw new Error(
+              `Endpoint ${endpoint} failed: ${(error as Error).message}`
+            );
           }
         }
 
@@ -410,7 +433,7 @@ export class IntegrationTestSuite {
 
         if (!miNhonProfile || miNhonProfile.length === 0) {
           // Create Mi Nhon profile if it doesn't exist
-          
+
           if (this.isPostgres) {
             await this.db.insert(schema.hotelProfiles).values({
               id: `mi-nhon-profile-${Date.now()}`,
@@ -479,7 +502,7 @@ export class IntegrationTestSuite {
         this.testTenantId = `test-tenant-${Date.now()}`;
 
         const schema = this.getSchema();
-        
+
         if (this.isPostgres) {
           await this.db.insert(schema.tenants).values({
             id: this.testTenantId,
@@ -526,7 +549,7 @@ export class IntegrationTestSuite {
       async () => {
         // Create some data for the new tenant
         const schema = this.getSchema();
-        
+
         if (this.isPostgres) {
           await this.db.insert(schema.hotelProfiles).values({
             id: `test-profile-${Date.now()}`,
@@ -576,8 +599,9 @@ export class IntegrationTestSuite {
           this.log('✅ Hotel research completed (mock)', 'success');
 
           // Generate knowledge base
-          const knowledgeBase =
-            knowledgeBaseGenerator.generateKnowledgeBase(hotelData as unknown as BasicHotelData);
+          const knowledgeBase = knowledgeBaseGenerator.generateKnowledgeBase(
+            hotelData as unknown as BasicHotelData
+          );
           if (!knowledgeBase || knowledgeBase.length < 100) {
             throw new Error('Knowledge base generation failed');
           }
@@ -665,7 +689,7 @@ export class IntegrationTestSuite {
         const testTranscriptId = `test-transcript-${Date.now()}`;
 
         const schema = this.getSchema();
-        
+
         if (this.isPostgres) {
           await this.db.insert(schema.transcript).values([
             {
@@ -876,7 +900,7 @@ export class IntegrationTestSuite {
       async () => {
         // Create some test data for analytics
         const schema = this.getSchema();
-        
+
         if (this.isPostgres) {
           await this.db.insert(schema.call).values([
             {
@@ -1038,7 +1062,7 @@ export class IntegrationTestSuite {
         } else {
           // Create Mi Nhon profile if missing
           const schema = this.getSchema();
-          
+
           if (this.isPostgres) {
             await this.db.insert(schema.hotelProfiles).values({
               id: `mi-nhon-voice-profile-${Date.now()}`,
@@ -1156,15 +1180,17 @@ export class IntegrationTestSuite {
   // ============================================
 
   private getSchema() {
-    return this.isPostgres ? {
-      tenants,
-      hotelProfiles,
-      call,
-      transcript,
-      request,
-      message,
-      staff,
-    } : testSchema;
+    return this.isPostgres
+      ? {
+          tenants,
+          hotelProfiles,
+          call,
+          transcript,
+          request,
+          message,
+          staff,
+        }
+      : testSchema;
   }
 
   private async initializeTestEnvironment(): Promise<void> {
@@ -1177,20 +1203,25 @@ export class IntegrationTestSuite {
       this.log('Connecting to PostgreSQL database...', 'info');
       const client = postgres(this.config.databaseUrl);
       this.db = drizzle(client);
-      
+
       // Test database connection with PostgreSQL schema
       const schema = this.getSchema();
       await this.db.select().from(schema.tenants).limit(1);
     } else {
       this.log('Setting up SQLite test database...', 'info');
-      
+
       // Use our test database setup utility
       const { setupTestDatabase } = await import('./utils/setup-test-db');
-      const { db, testTenantId } = await setupTestDatabase(this.config.testDbPath);
-      
+      const { db, testTenantId } = await setupTestDatabase(
+        this.config.testDbPath
+      );
+
       this.db = db;
       this.testTenantId = testTenantId;
-      this.log(`✅ SQLite test database setup complete with tenant: ${testTenantId}`, 'success');
+      this.log(
+        `✅ SQLite test database setup complete with tenant: ${testTenantId}`,
+        'success'
+      );
     }
 
     this.log('✅ Database connection established', 'success');
@@ -1231,7 +1262,10 @@ export class IntegrationTestSuite {
         message: (error as Error).message,
         stack: (error as Error).stack,
       });
-      this.log(`❌ Test suite failed: ${name} - ${(error as Error).message}`, 'error');
+      this.log(
+        `❌ Test suite failed: ${name} - ${(error as Error).message}`,
+        'error'
+      );
       throw error;
     }
   }
@@ -1282,7 +1316,10 @@ export class IntegrationTestSuite {
         stack: (error as Error).stack,
       });
 
-      this.log(`❌ Test failed: ${name} - ${(error as Error).message}`, 'error');
+      this.log(
+        `❌ Test failed: ${name} - ${(error as Error).message}`,
+        'error'
+      );
       throw error;
     }
   }

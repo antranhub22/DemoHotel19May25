@@ -1,7 +1,7 @@
 import React from 'react';
 import { logger } from '@shared/utils/logger';
-import { InterfaceContainer } from './InterfaceContainer';
-import { InterfaceHeader } from './InterfaceHeader';
+import { InterfaceContainer } from '@/components/interface1/InterfaceContainer';
+import { InterfaceHeader } from '@/components/interface1/InterfaceHeader';
 
 interface Interface1ErrorFallbackProps {
   error?: Error;
@@ -27,7 +27,11 @@ export const Interface1ErrorFallback: React.FC<
         window.location.reload();
       }
     } catch (resetError) {
-      logger.error('Failed to reset Interface1', 'Interface1ErrorFallback', resetError);
+      logger.error(
+        'Failed to reset Interface1',
+        'Interface1ErrorFallback',
+        resetError
+      );
       window.location.reload();
     }
   };

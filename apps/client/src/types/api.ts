@@ -2,7 +2,7 @@
    API TYPES - API-RELATED TYPE DEFINITIONS
    ======================================== */
 
-import { Language } from './core';
+import { Language } from '@/types/core';
 
 // ========================================
 // HOTEL DATA TYPES

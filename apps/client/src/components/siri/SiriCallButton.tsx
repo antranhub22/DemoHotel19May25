@@ -2,10 +2,9 @@
 
 // Type declaration for import.meta
 
-
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SiriButton } from './SiriButton';
-import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
+import { SiriButton } from '@/components/siri/SiriButton';
+import { SimpleMobileSiriVisual } from '@/components/siri/SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 
 import '../../styles/voice-interface.css';
@@ -80,7 +79,9 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // 🚨 PHASE 1: SAFE CLEANUP - Enhanced cleanup with better error handling
   const safeCleanup = useCallback(() => {
-    if (cleanupFlagRef.current) {return;}
+    if (cleanupFlagRef.current) {
+      return;
+    }
     cleanupFlagRef.current = true;
 
     try {

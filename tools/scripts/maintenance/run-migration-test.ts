@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 
-import { DatabaseMigrationTest } from '../../migrations/test-migration';
+import { DatabaseMigrationTest } from '@tools/migrations/test-migration';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -97,7 +97,10 @@ class MigrationTestRunner {
 
       return results.success;
     } catch (error) {
-      console.error(`\n💥 Scenario '${scenarioName}' crashed:`, (error as any)?.message || String(error));
+      console.error(
+        `\n💥 Scenario '${scenarioName}' crashed:`,
+        (error as any)?.message || String(error)
+      );
       return false;
     }
   }

@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense } from 'react';
-import { PopupStack } from './PopupStack';
+import { PopupStack } from '@/components/popup-system/PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
 
 // Lazy load SummaryPopupContent for code splitting
@@ -27,7 +27,9 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 
   // Auto-close popups after delay
   useEffect(() => {
-    if (!autoCloseDelay) {return;}
+    if (!autoCloseDelay) {
+      return;
+    }
 
     const timers: NodeJS.Timeout[] = [];
 

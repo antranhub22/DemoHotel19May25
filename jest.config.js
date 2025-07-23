@@ -2,10 +2,10 @@
 export default {
   // Test environment
   testEnvironment: 'jsdom',
-  
+
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.ts'],
-  
+
   // Module name mapping for path aliases
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/apps/client/src/$1',
@@ -13,29 +13,36 @@ export default {
     '^@shared/(.*)$': '<rootDir>/packages/shared/$1',
     '^@types/(.*)$': '<rootDir>/packages/types/$1',
     '^@config/(.*)$': '<rootDir>/packages/config/$1',
+    '^@auth/(.*)$': '<rootDir>/packages/auth-system/$1',
+    '^@tools/(.*)$': '<rootDir>/tools/$1',
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
     // Mock static assets
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(gif|ttf|eot|svg|png|jpg|jpeg|webp)$': '<rootDir>/tests/mocks/fileMock.js',
+    '\\.(gif|ttf|eot|svg|png|jpg|jpeg|webp)$':
+      '<rootDir>/tests/mocks/fileMock.js',
   },
-  
+
   // File patterns
   testMatch: [
     '<rootDir>/tests/**/*.test.{ts,tsx}',
     '<rootDir>/tests/**/*.spec.{ts,tsx}',
   ],
-  
+
   // Transform files
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: '<rootDir>/tsconfig.json',
-      useESM: true,
-    }],
+    '^.+\\.(ts|tsx)$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.json',
+        useESM: true,
+      },
+    ],
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
-  
+
   // File extensions to handle
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  
+
   // Coverage configuration
   collectCoverageFrom: [
     'apps/client/src/**/*.{ts,tsx}',
@@ -49,10 +56,10 @@ export default {
     '!**/dist/**',
     '!**/build/**',
   ],
-  
+
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: '<rootDir>/coverage',
-  
+
   // Coverage thresholds
   coverageThreshold: {
     global: {
@@ -68,7 +75,7 @@ export default {
       statements: 80,
     },
   },
-  
+
   // Ignore patterns
   testPathIgnorePatterns: [
     '<rootDir>/node_modules/',
@@ -76,33 +83,30 @@ export default {
     '<rootDir>/build/',
     '<rootDir>/documentation/',
   ],
-  
+
   // Module paths to ignore
-  modulePathIgnorePatterns: [
-    '<rootDir>/dist/',
-    '<rootDir>/build/',
-  ],
-  
+  modulePathIgnorePatterns: ['<rootDir>/dist/', '<rootDir>/build/'],
+
   // Clear mocks between tests
   clearMocks: true,
   restoreMocks: true,
-  
+
   // Timeout for tests
   testTimeout: 10000,
-  
+
   // Verbose output
   verbose: true,
-  
+
   // Additional Jest configuration
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  
+
   // Error handling
   bail: false,
   errorOnDeprecated: true,
-  
+
   // Watch mode settings
   watchPathIgnorePatterns: ['node_modules', 'dist', 'build'],
-  
+
   // Reporter configuration
   reporters: [
     'default',
@@ -116,13 +120,13 @@ export default {
       },
     ],
   ],
-  
+
   // Performance settings
   maxWorkers: '50%',
-  
+
   // ESM support
   preset: 'ts-jest/presets/default-esm',
-  
+
   globals: {
     'ts-jest': {
       useESM: true,
@@ -131,4 +135,4 @@ export default {
       },
     },
   },
-}; 
+};

@@ -1,9 +1,9 @@
-import en from './en.json';
-import fr from './fr.json';
-import zh from './zh.json';
-import ru from './ru.json';
-import ko from './ko.json';
-import vi from './vi.json';
+import en from '@/i18n/en.json';
+import fr from '@/i18n/fr.json';
+import zh from '@/i18n/zh.json';
+import ru from '@/i18n/ru.json';
+import ko from '@/i18n/ko.json';
+import vi from '@/i18n/vi.json';
 
 export type Lang = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

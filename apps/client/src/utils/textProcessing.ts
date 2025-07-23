@@ -1,5 +1,5 @@
-import { englishDictionary } from './dictionary/englishDictionary';
-import dictionaryData from './dictionary/dictionary.json';
+import { englishDictionary } from '@/utils/dictionary/englishDictionary';
+import dictionaryData from '@/utils/dictionary/dictionary.json';
 import { normalizeText } from '@/lib/sharedUtils';
 
 interface ProcessTextResult {
@@ -15,7 +15,9 @@ let maxPhraseLength = 0;
 englishDictionary.forEach(word => {
   const normalized = word.toLowerCase().replace(/\s+/g, '');
   phraseSet.add(normalized);
-  if (normalized.length > maxPhraseLength) {maxPhraseLength = normalized.length;}
+  if (normalized.length > maxPhraseLength) {
+    maxPhraseLength = normalized.length;
+  }
 });
 
 // Thêm phrase từ dictionary.json
@@ -23,7 +25,9 @@ if (dictionaryData.entries) {
   dictionaryData.entries.forEach((entry: any) => {
     const keyword = entry.keyword.toLowerCase().replace(/\s+/g, '');
     phraseSet.add(keyword);
-    if (keyword.length > maxPhraseLength) {maxPhraseLength = keyword.length;}
+    if (keyword.length > maxPhraseLength) {
+      maxPhraseLength = keyword.length;
+    }
   });
 }
 
@@ -61,7 +65,7 @@ export function processText(text: string): ProcessTextResult {
   // Tính vị trí bắt đầu của từng từ (tương đối)
   const positions: number[] = [];
   let pos = 0;
-  for (const word of (words as any[])) {
+  for (const word of words as any[]) {
     positions.push(pos);
     pos += word.length + 1; // +1 cho dấu cách
   }

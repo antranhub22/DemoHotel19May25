@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, describe, expect, it } from '@jest/globals';
 import request from 'supertest';
 import express, { Request, Response } from 'express';
-import { db } from '../../packages/shared/db';
-import { tenants staff  } from '../../packages/shared/db/schema';
+import { db } from '@shared/db';
+import { tenants, staff } from '@shared/db/schema';
 import jwt from 'jsonwebtoken';
 
 const TEST_JWT_SECRET = 'test-secret-key';

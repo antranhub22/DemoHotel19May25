@@ -1,5 +1,12 @@
 import { logger } from '@shared/utils/logger';
-import { DebugManager, EmergencyStopManager, CanvasRenderer, AnimationController, DimensionsManager, StateManager,  } from './modules';
+import {
+  DebugManager,
+  EmergencyStopManager,
+  CanvasRenderer,
+  AnimationController,
+  DimensionsManager,
+  StateManager,
+} from '@/components/siri/modules';
 export interface SiriButtonColors {
   primary: string;
   secondary: string;
@@ -389,19 +396,22 @@ if (typeof window !== 'undefined') {
     errorsOnly: () => SiriButton.setDebugLevel(1),
     verbose: () => SiriButton.setDebugLevel(2),
     help: () => {
-      logger.debug([
-        '🔧 SiriDebugControls Help:',
-        '- SiriDebugControls.silent()     -> Turn off all debug logs',
-        '- SiriDebugControls.errorsOnly() -> Show errors + warnings only',
-        '- SiriDebugControls.verbose()    -> Show all debug logs',
-        '- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)',
-        '- SiriDebugControls.getLevel()   -> Check current level',
-        '',
-        '🚀 NEW: Modular Architecture',
-        '- Each module has independent debug logging',
-        '- Better error isolation and reporting',
-        '- Enhanced mobile debugging support'
-      ].join('\n'), 'Component');
+      logger.debug(
+        [
+          '🔧 SiriDebugControls Help:',
+          '- SiriDebugControls.silent()     -> Turn off all debug logs',
+          '- SiriDebugControls.errorsOnly() -> Show errors + warnings only',
+          '- SiriDebugControls.verbose()    -> Show all debug logs',
+          '- SiriDebugControls.setLevel(n)  -> Set level manually (0-2)',
+          '- SiriDebugControls.getLevel()   -> Check current level',
+          '',
+          '🚀 NEW: Modular Architecture',
+          '- Each module has independent debug logging',
+          '- Better error isolation and reporting',
+          '- Enhanced mobile debugging support',
+        ].join('\n'),
+        'Component'
+      );
     },
   };
 

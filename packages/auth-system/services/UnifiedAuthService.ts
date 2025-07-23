@@ -7,7 +7,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { eq, and } from 'drizzle-orm';
-import { staff } from '../../shared/db';
+import { staff } from '@shared/db';
 // Import new unified types and config
 import type {
   JWTPayload,

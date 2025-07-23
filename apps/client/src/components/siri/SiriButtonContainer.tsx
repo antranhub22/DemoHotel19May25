@@ -2,11 +2,10 @@
 
 // Type declaration for import.meta
 
-
 import React, { useState, useEffect } from 'react';
 import { logger } from '@shared/utils/logger';
-import SiriCallButton from './SiriCallButton';
-import { MobileTouchDebugger } from './MobileTouchDebugger';
+import SiriCallButton from '@/components/siri/SiriCallButton';
+import { MobileTouchDebugger } from '@/components/siri/MobileTouchDebugger';
 import { designSystem } from '@/styles/designSystem';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 
@@ -175,7 +174,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
       const errorMessage =
-        error instanceof Error ? (error as any)?.message || String(error) : 'Lỗi không xác định';
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : 'Lỗi không xác định';
 
       logger.error(
         '❌ [SiriButtonContainer] Call start error:',
@@ -291,7 +292,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       // ✅ IMPROVED: Show error to user for confirm as it's more critical
       if (typeof window !== 'undefined') {
         const errorMessage =
-          error instanceof Error ? (error as any)?.message || String(error) : 'Lỗi không xác định';
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Lỗi không xác định';
         alert(`Lỗi khi xác nhận cuộc gọi: ${errorMessage}`);
       }
     }
@@ -316,12 +319,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     >
       {/* Screen Reader Only Status */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {isConfirming 
+        {isConfirming
           ? 'Processing call summary, please wait'
-          : isCallStarted 
+          : isCallStarted
             ? `Voice call active in ${LANGUAGE_COLORS[language].name}. Press space or enter to end call.`
-            : `Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Press space or enter to start speaking.`
-        }
+            : `Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Press space or enter to start speaking.`}
       </div>
 
       {/* Top Row: Cancel + Confirm - DISABLED BY USER REQUEST */}
@@ -377,14 +379,14 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         aria-pressed={isCallStarted}
         aria-disabled={isConfirming}
         aria-label={
-          isConfirming 
+          isConfirming
             ? 'Processing call summary, please wait'
-            : isCallStarted 
+            : isCallStarted
               ? `End voice call in ${LANGUAGE_COLORS[language].name}`
               : `Start voice call in ${LANGUAGE_COLORS[language].name}`
         }
         aria-describedby="voice-button-status"
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if ((e.key === 'Enter' || e.key === ' ') && !isConfirming) {
             e.preventDefault();
             if (isCallStarted) {

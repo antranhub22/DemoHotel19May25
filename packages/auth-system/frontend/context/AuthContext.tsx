@@ -5,8 +5,8 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { getPermissionsForRole } from '../../types/permissions';
-import { AuthUser, TenantData } from '../../types/auth';
+import { getPermissionsForRole } from '@auth/types/permissions';
+import { AuthUser, TenantData } from '@auth/types/auth';
 
 // ============================================
 // Types & Interfaces
