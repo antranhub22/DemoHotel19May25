@@ -1,3 +1,15 @@
+import { IconType } from 'react-icons';
+import {
+  FaBed,
+  FaUtensils,
+  FaConciergeBell,
+  FaSwimmingPool,
+  FaSpa,
+  FaGlassMartini,
+  FaTaxi,
+  FaMapMarkedAlt,
+  FaPhoneAlt,
+} from 'react-icons/fa';
 
 // Core types for Interface1
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
