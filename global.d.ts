@@ -424,7 +424,7 @@ declare global {
 
   interface PermissionMatrix {
     [role: string]: {
-      [permission: string]: boolean;
+      [module: string]: string[];
     };
   }
 
