@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { cva } from 'class-variance-authority';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Slot } from '@radix-ui/react-slot';
 import { PanelLeft } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';

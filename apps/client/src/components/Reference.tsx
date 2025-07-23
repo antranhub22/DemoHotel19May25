@@ -2,11 +2,11 @@
 
 // Type declaration for import.meta
 
-
 /// <reference types="react" />
 import React, { useState, useEffect } from 'react';
 import type { ReferenceItem } from '@/services/ReferenceService';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, A11y } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -60,15 +60,21 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
               [ref.url]: text,
             }));
             fetchCount++;
-            if (fetchCount === references.length) {setLoading(false);}
+            if (fetchCount === references.length) {
+              setLoading(false);
+            }
           })
           .catch(() => {
             fetchCount++;
-            if (fetchCount === references.length) {setLoading(false);}
+            if (fetchCount === references.length) {
+              setLoading(false);
+            }
           });
       } else {
         fetchCount++;
-        if (fetchCount === references.length) {setLoading(false);}
+        if (fetchCount === references.length) {
+          setLoading(false);
+        }
       }
     });
     if (
@@ -81,7 +87,9 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
   }, [references]);
 
   const getAssetUrl = (url: string) => {
-    if (/^https?:\/\//.test(url)) {return url;}
+    if (/^https?:\/\//.test(url)) {
+      return url;
+    }
     const path = url.replace(/^\//, '');
     return `${import.meta.env.BASE_URL}${path}`;
   };
@@ -209,9 +217,15 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
 
   // Responsive breakpoints
   const getSlidesPerView = () => {
-    if (window.innerWidth < 640) {return 'auto';} // mobile: cuốn auto
-    if (window.innerWidth < 1024) {return 2;}
-    if (window.innerWidth < 1280) {return 3;}
+    if (window.innerWidth < 640) {
+      return 'auto';
+    } // mobile: cuốn auto
+    if (window.innerWidth < 1024) {
+      return 2;
+    }
+    if (window.innerWidth < 1280) {
+      return 3;
+    }
     return 4;
   };
 
