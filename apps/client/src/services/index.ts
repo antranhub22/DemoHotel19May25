@@ -1,20 +1,21 @@
 /**
  * Barrel exports for services directory
  *
- * NOTE: OpenAI services moved to server-side to prevent
+ * NOTE: OpenAI services completely disabled to prevent
  * "Fable is not defined" errors from client-side bundling
  */
 
-// ❌ DISABLED: Client-side OpenAI services
-// These have been moved to server-side to prevent bundling issues
+// ❌ COMPLETELY DISABLED: All OpenAI services
+// These cause "Fable is not defined" errors due to OpenAI voice model enums
+// being bundled as variables in the client-side code
+//
 // export { fetchAIResponse } from './chatService';
 // export { getAIChatResponse } from './openaiService';
 
-// ✅ ENABLED: Server-side proxy functions (safe for client)
-export { getAIChatResponse } from './openaiService'; // Now calls server-side API
+// ✅ ENABLED: Non-OpenAI services only
 export * from './ReferenceService';
 
-// Dashboard API
+// Dashboard API (safe - no OpenAI dependencies)
 export {
   dashboardApi,
   type HotelData,
