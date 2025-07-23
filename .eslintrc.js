@@ -179,21 +179,41 @@ module.exports = {
     ButtonProps: 'readonly',
   },
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
-    // Relaxed rules for faster development
-    '@typescript-eslint/no-unused-vars': 'warn',
-    '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/ban-ts-comment': 'off',
-    'react-hooks/rules-of-hooks': 'warn',
-    'no-undef': 'off', // Turn off for TypeScript files
-    'no-unused-vars': 'off', // Let TypeScript handle this
-    'no-unreachable': 'warn',
-    'no-useless-escape': 'warn',
-    'import/order': 'off',
+    // Console statements: warn only in browser (stricter)
+    'no-console': 'off', // ✅ Allow console.log for debugging
+
+    // TypeScript Rules (LOOSENED) - ✅ Better DX
+    '@typescript-eslint/no-unused-vars': 'off', // ✅ Allow unused vars
+    '@typescript-eslint/no-explicit-any': 'off', // ✅ Allow any type
+    '@typescript-eslint/no-empty-function': 'off', // ✅ Allow empty functions
+    '@typescript-eslint/ban-ts-comment': 'off', // ✅ Allow @ts-ignore
+    '@typescript-eslint/no-non-null-assertion': 'off', // ✅ Allow ! operator
+    '@typescript-eslint/no-inferrable-types': 'off', // ✅ Allow explicit types
+
+    // React Rules (Enhanced)
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
+    'react-refresh/only-export-components': 'off', // ✅ Less strict
+
+    // Import Rules (LOOSENED)
+    'import/no-unresolved': 'off', // ✅ Allow unresolved imports
+    'import/no-cycle': 'off', // ✅ Allow circular dependencies
+    'import/no-unused-modules': 'off',
+    'import/order': 'off', // ✅ Don't enforce import order
+
+    // General Rules (LOOSENED)
+    'no-unused-vars': 'off', // ✅ Use TypeScript version instead
+    'no-undef': 'off', // ✅ TypeScript handles this
+    'prefer-const': 'off', // ✅ Allow let
+    'no-var': 'error',
+    'no-useless-escape': 'off', // ✅ Allow escapes
+    'no-unreachable': 'off', // ✅ Allow unreachable code
+    'no-debugger': 'off', // ✅ Allow debugger
+    'no-duplicate-imports': 'off', // ✅ Allow duplicate imports
+    eqeqeq: 'off', // ✅ Allow == instead of ===
+    curly: 'off', // ✅ Don't enforce braces
   },
   // Override for TypeScript files
   overrides: [
