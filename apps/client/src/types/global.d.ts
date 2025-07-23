@@ -1,10 +1,6 @@
 /// <reference types="vite/client" />
 // Global type declarations for the project
 
-// Fix import.meta.env TypeScript errors
-;
-}
-
 // CSS Modules declarations
 declare module '*.module.css' {
   const styles: { [className: string]: string };
@@ -119,5 +115,3 @@ declare global {
     }
   }
 }
-
-export {}; 
