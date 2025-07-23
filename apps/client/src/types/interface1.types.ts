@@ -1,17 +1,16 @@
-
 import { IconType } from 'react-icons';
 
 import {
   FaBed,
   FaUtensils,
-  FaConciergeBell,
-  FaSwimmingPool,
+  FaBellConcierge,
+  FaPersonSwimming,
   FaSpa,
-  FaGlassMartini,
+  FaMartiniGlass,
   FaTaxi,
-  FaMapMarkedAlt,
-  FaPhoneAlt,
-} from 'react-icons/fa';
+  FaMapLocationDot,
+  FaPhone,
+} from 'react-icons/fa6';
 
 // Core types for Interface1
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
@@ -48,12 +47,12 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   },
   {
     name: 'Concierge',
-    icon: FaConciergeBell,
+    icon: FaBellConcierge,
     description: 'Concierge and guest services',
   },
   {
     name: 'Pool & Gym',
-    icon: FaSwimmingPool,
+    icon: FaPersonSwimming,
     description: 'Swimming pool and fitness facilities',
   },
   {
@@ -63,7 +62,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   },
   {
     name: 'Bar & Lounge',
-    icon: FaGlassMartini,
+    icon: FaMartiniGlass,
     description: 'Hotel bars and lounges',
   },
   {
@@ -73,17 +72,17 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   },
   {
     name: 'Local Guide',
-    icon: FaMapMarkedAlt,
+    icon: FaMapLocationDot,
     description: 'Local area guide and information',
   },
   {
     name: 'Reception',
-    icon: FaPhoneAlt,
+    icon: FaPhone,
     description: 'Front desk and reception services',
   },
   {
     name: 'Guest Services',
-    icon: FaConciergeBell,
+    icon: FaBellConcierge,
     description: 'Additional guest services',
   },
 ];
