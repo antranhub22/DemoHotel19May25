@@ -112,7 +112,7 @@
         },
         "voice": {
           "type": "string",
-          "enum": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+          "enum": ["jennifer", "david", "linh", "duc", "marie", "playht-female", "playht-male"]
         },
         "language": {
           "type": "string",
