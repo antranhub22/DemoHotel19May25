@@ -2,21 +2,22 @@
 
 // Type declaration for import.meta
 
-
 import {
   useState,
+  useEffect,
+  useRef,
   useCallback,
   useMemo,
-  useEffect,
   createElement,
 } from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
-import { usePopup } from '@/components/popup-system/PopupManager';
+import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { usePopupContext } from '@/context/PopupContext';
 
 interface UseInterface1Props {
@@ -219,7 +220,7 @@ export const useInterface1 = ({
   }, []);
 
   const handleShowNotificationDemo = useCallback(() => {
-    import('../components/popup-system/DemoPopupContent')
+    import('../components/features/popup-system/DemoPopupContent')
       .then(module => {
         const { NotificationDemoContent } = module;
         showNotification(createElement(NotificationDemoContent), {
@@ -249,7 +250,7 @@ export const useInterface1 = ({
   }, [showNotification]);
 
   const handleShowSummaryDemo = useCallback(() => {
-    import('../components/popup-system/SummaryPopupContent')
+    import('../components/features/popup-system/SummaryPopupContent')
       .then(module => {
         const { SummaryPopupContent } = module;
         showSummary(createElement(SummaryPopupContent), {

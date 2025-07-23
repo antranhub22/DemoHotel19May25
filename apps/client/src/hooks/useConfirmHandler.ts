@@ -1,6 +1,7 @@
 import React, { useCallback, createElement, useRef } from 'react';
 import { logger } from '@shared/utils/logger';
-import { usePopup } from '@/components/popup-system';
+import { useAssistant } from '@/context';
+import { usePopup } from '@/components/features/popup-system';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
@@ -39,7 +40,10 @@ export const useConfirmHandler = ({
 
   // ✅ IMPROVED: Better error handling with fallback UI
   const handleConfirm = useCallback(() => {
-    logger.debug('✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer', 'Component');
+    logger.debug(
+      '✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer',
+      'Component'
+    );
     logger.debug('📊 [useConfirmHandler] Current state:', 'Component', {
       transcriptsCount: transcripts.length,
       hasCallSummary: !!callSummary,
@@ -50,10 +54,16 @@ export const useConfirmHandler = ({
     const executeWithFallback = async () => {
       try {
         // 🔧 STEP 1: Show loading popup BEFORE ending call
-        logger.debug('📋 [useConfirmHandler] Step 1: Showing immediate loading popup...', 'Component');
+        logger.debug(
+          '📋 [useConfirmHandler] Step 1: Showing immediate loading popup...',
+          'Component'
+        );
 
         if (!isMountedRef.current) {
-          logger.warn('⚠️ [useConfirmHandler] Component unmounted, aborting', 'Component');
+          logger.warn(
+            '⚠️ [useConfirmHandler] Component unmounted, aborting',
+            'Component'
+          );
           return;
         }
 
@@ -157,11 +167,18 @@ export const useConfirmHandler = ({
               `;
               document.head.appendChild(style);
             } catch (styleError) {
-              logger.warn('⚠️ [useConfirmHandler] Failed to add spinner styles:', 'Component', styleError);
+              logger.warn(
+                '⚠️ [useConfirmHandler] Failed to add spinner styles:',
+                'Component',
+                styleError
+              );
             }
           }
 
-          logger.debug('🚀 [useConfirmHandler] Step 1b: Calling showSummary...', 'Component');
+          logger.debug(
+            '🚀 [useConfirmHandler] Step 1b: Calling showSummary...',
+            'Component'
+          );
 
           // Show loading popup immediately with error handling
           showSummary(loadingElement, {
@@ -169,56 +186,100 @@ export const useConfirmHandler = ({
             priority: 'high' as const,
           });
 
-          logger.debug('✅ [useConfirmHandler] Step 1c: Loading popup shown successfully', 'Component');
+          logger.debug(
+            '✅ [useConfirmHandler] Step 1c: Loading popup shown successfully',
+            'Component'
+          );
         } catch (popupError) {
-          logger.error('❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:', 'Component', popupError);
+          logger.error(
+            '❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:',
+            'Component',
+            popupError
+          );
           // Continue with call end - don't let popup errors block the flow
         }
 
         // ✅ IMPROVED: Safe delay before calling endCall to prevent state conflicts
-        logger.debug('⏳ [useConfirmHandler] Step 1.5: Brief delay before ending call...', 'Component');
+        logger.debug(
+          '⏳ [useConfirmHandler] Step 1.5: Brief delay before ending call...',
+          'Component'
+        );
         await new Promise(resolve => setTimeout(resolve, 300));
 
         if (!isMountedRef.current) {
-          logger.warn('⚠️ [useConfirmHandler] Component unmounted during delay, aborting', 'Component');
+          logger.warn(
+            '⚠️ [useConfirmHandler] Component unmounted during delay, aborting',
+            'Component'
+          );
           return;
         }
 
         // 🔧 STEP 2: End call IMMEDIATELY to prevent continued conversation
-        logger.debug('🔄 [useConfirmHandler] Step 2: Ending call immediately...', 'Component');
+        logger.debug(
+          '🔄 [useConfirmHandler] Step 2: Ending call immediately...',
+          'Component'
+        );
         try {
           if (isMountedRef.current) {
-            logger.debug('📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...', 'Component');
+            logger.debug(
+              '📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...',
+              'Component'
+            );
             endCall();
-            logger.debug('✅ [useConfirmHandler] Step 2a: Call ended successfully', 'Component');
+            logger.debug(
+              '✅ [useConfirmHandler] Step 2a: Call ended successfully',
+              'Component'
+            );
 
             // ✅ ADDITIONAL: Force Vapi stop as backup to ensure no continued conversation
             try {
               const { getVapiInstance } = await import('@/lib/vapiClient');
               const vapi = getVapiInstance();
               if (vapi) {
-                logger.debug('🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...', 'Component');
+                logger.debug(
+                  '🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...',
+                  'Component'
+                );
                 vapi.stop();
-                logger.debug('✅ [useConfirmHandler] Step 2b: Vapi instance force stopped', 'Component');
+                logger.debug(
+                  '✅ [useConfirmHandler] Step 2b: Vapi instance force stopped',
+                  'Component'
+                );
               } else {
-                logger.debug('⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop', 'Component');
+                logger.debug(
+                  '⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop',
+                  'Component'
+                );
               }
             } catch (vapiError) {
-              logger.warn('⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:', 'Component', vapiError);
+              logger.warn(
+                '⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:',
+                'Component',
+                vapiError
+              );
               // Continue - not critical for main flow
             }
           }
         } catch (endCallError) {
-          logger.error('⚠️ [useConfirmHandler] endCall() failed:', 'Component', endCallError);
+          logger.error(
+            '⚠️ [useConfirmHandler] endCall() failed:',
+            'Component',
+            endCallError
+          );
           // Don't rethrow - continue with completion message
         }
 
         // 🔧 STEP 3: Show completion message immediately (don't wait for polling)
-        logger.debug('🔄 [useConfirmHandler] Step 3: Showing completion message...', 'Component');
+        logger.debug(
+          '🔄 [useConfirmHandler] Step 3: Showing completion message...',
+          'Component'
+        );
 
         // ✅ IMPROVED: Show success message immediately instead of complex polling
         setTimeout(() => {
-          if (!isMountedRef.current) {return;}
+          if (!isMountedRef.current) {
+            return;
+          }
 
           try {
             const completionElement = createElement(
@@ -392,21 +453,36 @@ export const useConfirmHandler = ({
               priority: 'high' as const,
             });
 
-            logger.debug('✅ [useConfirmHandler] Completion message shown successfully', 'Component');
+            logger.debug(
+              '✅ [useConfirmHandler] Completion message shown successfully',
+              'Component'
+            );
           } catch (completionError) {
-            logger.error('❌ [useConfirmHandler] Error showing completion message:', 'Component', completionError);
+            logger.error(
+              '❌ [useConfirmHandler] Error showing completion message:',
+              'Component',
+              completionError
+            );
             // Final fallback - simple logger instead of alert
             if (isMountedRef.current) {
               logger.success(
-                'Call completed successfully! Thank you for using our service.', 'Component'
+                'Call completed successfully! Thank you for using our service.',
+                'Component'
               );
             }
           }
         }, 1000); // Give time for endCall to process
 
-        logger.debug('✅ [useConfirmHandler] Confirm flow completed successfully', 'Component');
+        logger.debug(
+          '✅ [useConfirmHandler] Confirm flow completed successfully',
+          'Component'
+        );
       } catch (error) {
-        logger.error('❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:', 'Component', error);
+        logger.error(
+          '❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:',
+          'Component',
+          error
+        );
 
         // ✅ IMPROVED: Enhanced fallback error handling
         if (isMountedRef.current) {
@@ -482,11 +558,16 @@ export const useConfirmHandler = ({
               priority: 'medium' as const,
             });
           } catch (fallbackError) {
-            logger.error('❌ [useConfirmHandler] Fallback popup also failed:', 'Component', fallbackError);
+            logger.error(
+              '❌ [useConfirmHandler] Fallback popup also failed:',
+              'Component',
+              fallbackError
+            );
             // Ultimate fallback - simple logger instead of alert
             if (isMountedRef.current) {
               logger.error(
-                'Call completed! There was a technical issue with the summary. Please contact front desk for assistance.', 'Component'
+                'Call completed! There was a technical issue with the summary. Please contact front desk for assistance.',
+                'Component'
               );
             }
           }
@@ -498,11 +579,16 @@ export const useConfirmHandler = ({
     try {
       executeWithFallback();
     } catch (outerError) {
-      logger.error('❌ [useConfirmHandler] OUTER ERROR BOUNDARY:', 'Component', outerError);
+      logger.error(
+        '❌ [useConfirmHandler] OUTER ERROR BOUNDARY:',
+        'Component',
+        outerError
+      );
       // Prevent error from bubbling up to React ErrorBoundary
       if (isMountedRef.current) {
         logger.error(
-          'Call completed! Technical issue occurred. Please contact front desk.', 'Component'
+          'Call completed! Technical issue occurred. Please contact front desk.',
+          'Component'
         );
       }
     }

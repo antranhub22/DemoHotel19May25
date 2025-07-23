@@ -1,16 +1,9 @@
 /**
  * Barrel exports for services directory
  *
- * NOTE: OpenAI services completely disabled to prevent
- * voice model enum bundling errors from client-side bundling
+ * NOTE: OpenAI services completely removed during Layer 4 cleanup
+ * These were disabled due to voice model enum bundling errors
  */
-
-// ❌ COMPLETELY DISABLED: All OpenAI services
-// These cause voice model enum bundling errors due to OpenAI voice model enums
-// being bundled as variables in the client-side code
-//
-// export { fetchAIResponse } from './chatService';
-// export { getAIChatResponse } from './openaiService';
 
 // ✅ ENABLED: Non-OpenAI services only
 export * from './ReferenceService';

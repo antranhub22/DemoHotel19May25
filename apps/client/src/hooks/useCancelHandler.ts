@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
-import { usePopup } from '@/components/popup-system';
+import { useAssistant } from '@/context';
+import { usePopup } from '@/components/features/popup-system';
 
 interface UseCancelHandlerProps {
   conversationState: any;
@@ -36,7 +37,10 @@ export const useCancelHandler = ({
   const { removePopup } = usePopup();
 
   const handleCancel = useCallback(() => {
-    logger.debug('❌ [useCancelHandler] Cancel button clicked - Returning to Interface1 initial state', 'Component');
+    logger.debug(
+      '❌ [useCancelHandler] Cancel button clicked - Returning to Interface1 initial state',
+      'Component'
+    );
     logger.debug('📊 [useCancelHandler] Current state:', 'Component', {
       isCallStarted: conversationState.isCallStarted,
       conversationPopupId,
@@ -47,12 +51,23 @@ export const useCancelHandler = ({
       // STEP 1: Clear any active popups first
       if (conversationPopupId) {
         try {
-          logger.debug('🗑️ [useCancelHandler] Removing conversation popup:', 'Component', conversationPopupId);
+          logger.debug(
+            '🗑️ [useCancelHandler] Removing conversation popup:',
+            'Component',
+            conversationPopupId
+          );
           removePopup(conversationPopupId);
           setConversationPopupId(null);
-          logger.debug('✅ [useCancelHandler] Popup removed successfully', 'Component');
+          logger.debug(
+            '✅ [useCancelHandler] Popup removed successfully',
+            'Component'
+          );
         } catch (popupError) {
-          logger.error('⚠️ [useCancelHandler] Failed to remove popup but continuing:', 'Component', popupError);
+          logger.error(
+            '⚠️ [useCancelHandler] Failed to remove popup but continuing:',
+            'Component',
+            popupError
+          );
           setConversationPopupId(null);
         }
       }
@@ -60,9 +75,16 @@ export const useCancelHandler = ({
       // STEP 2: Reset conversation state with error isolation
       try {
         conversationState.handleCancel();
-        logger.debug('✅ [useCancelHandler] conversationState.handleCancel() completed', 'Component');
+        logger.debug(
+          '✅ [useCancelHandler] conversationState.handleCancel() completed',
+          'Component'
+        );
       } catch (stateError) {
-        logger.error('⚠️ [useCancelHandler] conversationState.handleCancel() failed:', 'Component', stateError);
+        logger.error(
+          '⚠️ [useCancelHandler] conversationState.handleCancel() failed:',
+          'Component',
+          stateError
+        );
         // Continue - the popup cleanup is more important for UI consistency
       }
 
@@ -71,7 +93,11 @@ export const useCancelHandler = ({
         setShowRightPanel(false);
         logger.debug('✅ [useCancelHandler] Right panel closed', 'Component');
       } catch (panelError) {
-        logger.error('⚠️ [useCancelHandler] Failed to close right panel:', 'Component', panelError);
+        logger.error(
+          '⚠️ [useCancelHandler] Failed to close right panel:',
+          'Component',
+          panelError
+        );
       }
 
       // STEP 4: Force scroll to top (return to initial view)
@@ -79,12 +105,23 @@ export const useCancelHandler = ({
         window.scrollTo({ top: 0, behavior: 'smooth' });
         logger.debug('✅ [useCancelHandler] Scrolled to top', 'Component');
       } catch (scrollError) {
-        logger.error('⚠️ [useCancelHandler] Failed to scroll to top:', 'Component', scrollError);
+        logger.error(
+          '⚠️ [useCancelHandler] Failed to scroll to top:',
+          'Component',
+          scrollError
+        );
       }
 
-      logger.debug('✅ [useCancelHandler] Cancel completed - Interface1 returned to initial state', 'Component');
+      logger.debug(
+        '✅ [useCancelHandler] Cancel completed - Interface1 returned to initial state',
+        'Component'
+      );
     } catch (error) {
-      logger.error('❌ [useCancelHandler] Critical error in handleCancel:', 'Component', error);
+      logger.error(
+        '❌ [useCancelHandler] Critical error in handleCancel:',
+        'Component',
+        error
+      );
 
       // EMERGENCY CLEANUP - ensure UI is always in clean state
       try {
@@ -100,13 +137,23 @@ export const useCancelHandler = ({
         // Force scroll to top
         window.scrollTo({ top: 0, behavior: 'auto' });
 
-        logger.debug('🚨 [useCancelHandler] Emergency cleanup completed', 'Component');
+        logger.debug(
+          '🚨 [useCancelHandler] Emergency cleanup completed',
+          'Component'
+        );
       } catch (emergencyError) {
-        logger.error('🚨 [useCancelHandler] Emergency cleanup failed:', 'Component', emergencyError);
+        logger.error(
+          '🚨 [useCancelHandler] Emergency cleanup failed:',
+          'Component',
+          emergencyError
+        );
       }
 
       // Prevent error propagation to avoid crash
-      logger.debug('🔄 [useCancelHandler] Cancel operation completed despite errors - UI restored', 'Component');
+      logger.debug(
+        '🔄 [useCancelHandler] Cancel operation completed despite errors - UI restored',
+        'Component'
+      );
     }
   }, [
     conversationState,

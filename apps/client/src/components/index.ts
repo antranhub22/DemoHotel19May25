@@ -1,51 +1,60 @@
 /**
- * Barrel exports for components directory
+ * 🎯 LAYER 1 REORGANIZED - Component Barrel Exports
+ * New structure: ui/ | business/ | layout/ | features/
  */
 
-// Core components - Always loaded
-export { Interface1 } from './Interface1';
+// ========================================
+// 🏢 BUSINESS LOGIC COMPONENTS
+// ========================================
+export { Interface1 } from './business/Interface1';
+export { default as VoiceAssistant } from './business/VoiceAssistant';
+export { default as Reference } from './business/Reference';
 
-// DISABLED: Legacy interfaces moved to _reference folder
-// export const Interface3 = React.lazy(() => import('./Interface3'));
-// export const Interface4 = React.lazy(() => import('./Interface4'));
+// ========================================
+// 🏗️ LAYOUT COMPONENTS
+// ========================================
+export { default as ErrorBoundary } from './layout/ErrorBoundary';
+export { default as InfographicSteps } from './layout/InfographicSteps';
 
-// Shared components
-export { default as ErrorBoundary } from './ErrorBoundary';
-export { default as Reference } from './Reference';
-export { default as SummaryPopup } from './SummaryPopup';
-export { default as ChatPopup } from './ChatPopup';
+// ========================================
+// 🎨 UI COMPONENTS
+// ========================================
+export { EmailForm } from './ui/EmailForm';
+export { default as TranscriptDisplay } from './ui/TranscriptDisplay';
 
-// Import React for lazy loading
-import React from 'react';
+// ========================================
+// 🎯 FEATURE MODULES
+// ========================================
 
-// Interface1 components
-export { InterfaceContainer } from './interface1/InterfaceContainer';
-export { InterfaceHeader } from './interface1/InterfaceHeader';
-export { ServiceGridContainer } from './interface1/ServiceGridContainer';
-export { RightPanelSection } from './interface1/RightPanelSection';
-// ConversationSection removed - replaced by unified ChatPopup component
+// Voice Assistant Features
+export { InterfaceContainer } from './features/voice-assistant/interface1/InterfaceContainer';
+export { LoadingState } from './features/voice-assistant/interface1/LoadingState';
+export { ErrorState } from './features/voice-assistant/interface1/ErrorState';
+export { SiriButton } from './features/voice-assistant/siri/SiriButton';
+export { SiriButtonContainer } from './features/voice-assistant/siri/SiriButtonContainer';
 
-// Shared components
-export { LoadingState } from './interface1/LoadingState';
-export { ErrorState } from './interface1/ErrorState';
-export { ServiceGrid } from './interface1/ServiceGrid';
-export { ScrollToTopButton } from './interface1/ScrollToTopButton';
-export { default as RealtimeConversationPopup } from './RealtimeConversationPopup';
-export { default as SiriCallButton } from './siri/SiriCallButton';
-export { default as StaffMessagePopup } from './StaffMessagePopup';
-export { default as StaffRequestDetailModal } from './StaffRequestDetailModal';
-export { default as TranscriptDisplay } from './TranscriptDisplay';
-export { default as VoiceAssistant } from './VoiceAssistant';
-export { default as WelcomePopup } from './WelcomePopup';
+// Dashboard Features
+export { default as Sidebar } from './features/dashboard/dashboard/Sidebar';
+export { default as MetricCard } from './features/dashboard/dashboard/MetricCard';
+export { default as UsageChart } from './features/dashboard/dashboard/UsageChart';
+export { default as AssistantConfigPanel } from './features/dashboard/dashboard/AssistantConfigPanel';
+export { UnifiedDashboardLayout } from './features/dashboard/unified-dashboard/UnifiedDashboardLayout';
+export { default as StaffRequestDetailModal } from './features/dashboard/StaffRequestDetailModal';
 
-// Form components
-export { EmailForm } from './EmailForm';
+// Popup System Features
+export { default as ChatPopup } from './features/popup-system/ChatPopup';
+export { default as SummaryPopup } from './features/popup-system/SummaryPopup';
+export { default as WelcomePopup } from './features/popup-system/WelcomePopup';
+export { default as RealtimeConversationPopup } from './features/popup-system/RealtimeConversationPopup';
+export { default as ReferencePopup } from './features/popup-system/ReferencePopup';
+export { default as RightPanelPopup } from './features/popup-system/RightPanelPopup';
+export { default as StaffMessagePopup } from './features/popup-system/StaffMessagePopup';
 
-// Dashboard components
-export { default as AssistantConfigPanel } from './dashboard/AssistantConfigPanel';
-export { default as FeatureToggle } from './dashboard/FeatureToggle';
-export { default as HotelResearchPanel } from './dashboard/HotelResearchPanel';
-export { default as MetricCard } from './dashboard/MetricCard';
-export { default as Sidebar } from './dashboard/Sidebar';
-export { default as TopBar } from './dashboard/TopBar';
-export { default as UsageChart } from './dashboard/UsageChart';
+// ========================================
+// 🎯 LAYER 1.2 COMPLETE - ORGANIZED BY PURPOSE
+// ========================================
+// ✅ ui/ - Pure UI components
+// ✅ business/ - Business logic components
+// ✅ layout/ - Layout and structural components
+// ✅ features/ - Feature-based modules (voice-assistant, dashboard, popup-system)
+// ✅ _archive/ - Legacy code moved out of active development
