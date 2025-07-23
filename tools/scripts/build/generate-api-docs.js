@@ -6,8 +6,13 @@
  * Usage: node scripts/generate-api-docs.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -916,7 +921,7 @@ All API responses follow this standard format:
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const generator = new ApiDocGenerator();
   generator.generateApiDocs().catch(error => {
     console.error('❌ API documentation generation error:', error);
@@ -924,4 +929,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = ApiDocGenerator;
+export default ApiDocGenerator;
+export { ApiDocGenerator };

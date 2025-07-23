@@ -6,8 +6,13 @@
  * Usage: node scripts/generate-types.js
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -505,9 +510,10 @@ function handleError(error) {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const generator = new TypeGenerator();
   generator.generateTypes().catch(handleError);
 }
 
-module.exports = TypeGenerator;
+export default TypeGenerator;
+export { TypeGenerator };

@@ -6,9 +6,14 @@
  * Usage: node scripts/check-breaking-changes.js [--since=commit] [--verbose]
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -788,7 +793,7 @@ class BreakingChangesDetector {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const detector = new BreakingChangesDetector();
   detector.detectBreakingChanges().catch(error => {
     console.error('❌ Breaking changes detection error:', error);
@@ -796,4 +801,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = BreakingChangesDetector;
+export default BreakingChangesDetector;

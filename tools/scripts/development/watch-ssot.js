@@ -6,9 +6,14 @@
  * Usage: node scripts/watch-ssot.js [--debounce=ms] [--dry-run]
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -518,7 +523,7 @@ function checkExistingWatcher() {
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   // Check for existing watcher
   checkExistingWatcher();
 
@@ -532,4 +537,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = SSOTWatcher;
+export default SSOTWatcher;

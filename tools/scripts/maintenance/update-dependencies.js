@@ -6,9 +6,14 @@
  * Usage: node scripts/update-dependencies.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Configuration
 const CONFIG = {
@@ -473,7 +478,7 @@ class DependencyUpdater {
     console.log('🏗️ Regenerating types from schema...');
 
     try {
-      const TypeGenerator = require('./generate-types');
+      const { TypeGenerator } = await import('../build/generate-types.js');
       const generator = new TypeGenerator();
       await generator.generateTypes();
       console.log('  ✅ Types regenerated successfully');
@@ -491,7 +496,7 @@ class DependencyUpdater {
     console.log('📚 Regenerating API documentation...');
 
     try {
-      const ApiDocGenerator = require('./generate-api-docs');
+      const { ApiDocGenerator } = await import('../build/generate-api-docs.js');
       const generator = new ApiDocGenerator();
       await generator.generateApiDocs();
       console.log('  ✅ API documentation regenerated successfully');
@@ -569,7 +574,7 @@ class DependencyUpdater {
     console.log('🔍 Validating updates...');
 
     try {
-      const SSOTValidator = require('./validate-ssot');
+      const { SSOTValidator } = await import('../validation/validate-ssot.js');
       const validator = new SSOTValidator();
 
       // Run validation but don't exit on failure
@@ -679,7 +684,7 @@ ${log.errors.map(e => `- ${path.basename(e.file)}: ${e.error}`).join('\n')}`
 }
 
 // Main execution
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const updater = new DependencyUpdater();
 
   updater.updateDependencies().catch(error => {
@@ -688,4 +693,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = DependencyUpdater;
+export default DependencyUpdater;
