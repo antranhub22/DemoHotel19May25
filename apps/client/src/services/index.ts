@@ -2,11 +2,11 @@
  * Barrel exports for services directory
  *
  * NOTE: OpenAI services completely disabled to prevent
- * "Fable is not defined" errors from client-side bundling
+ * voice model enum bundling errors from client-side bundling
  */
 
 // ❌ COMPLETELY DISABLED: All OpenAI services
-// These cause "Fable is not defined" errors due to OpenAI voice model enums
+// These cause voice model enum bundling errors due to OpenAI voice model enums
 // being bundled as variables in the client-side code
 //
 // export { fetchAIResponse } from './chatService';

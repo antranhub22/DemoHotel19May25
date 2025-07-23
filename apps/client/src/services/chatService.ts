@@ -3,8 +3,7 @@
 // Type declaration for import.meta
 
 // ❌ DISABLED: OpenAI should not be imported on client-side
-// This was causing "Fable is not defined" errors because OpenAI types
-// include voice model enums that get bundled as variables
+// This was causing voice model enum bundling errors in browser
 //
 // import OpenAI from 'openai';
 
@@ -33,7 +32,7 @@ Core Responsibilities:
  * ❌ DISABLED: Client-side OpenAI calls
  *
  * This service has been disabled because:
- * 1. OpenAI imports on client-side cause "Fable is not defined" errors
+ * 1. OpenAI imports on client-side cause voice model enum bundling errors
  * 2. API keys should not be exposed to client
  * 3. OpenAI calls should be server-side only
  *
