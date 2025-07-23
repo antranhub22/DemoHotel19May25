@@ -429,11 +429,13 @@ declare global {
   }
 
   interface MenuItemConfig {
+    key: string;
     label: string;
     path: string;
     icon?: string;
     children?: MenuItemConfig[];
     permissions?: Permission[];
+    requiredPermission?: string;
   }
 
   // Config constants
