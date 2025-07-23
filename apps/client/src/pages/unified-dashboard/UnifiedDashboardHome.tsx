@@ -13,6 +13,11 @@ import {
   Database,
   Monitor,
   ClipboardList,
+  Phone,
+  Star,
+  Clock,
+  Server,
+  Activity,
 } from 'lucide-react';
 import type { UserRole } from '@shared/constants/permissions';
 import {
@@ -268,7 +273,7 @@ const FrontDeskDashboard = () => (
         </CardHeader>
         <CardContent className="space-y-3">
           <PermissionGuard requiredPermission="requests:view">
-            <Link href="/unified-dashboard/requests">
+            <Link href="/hotel-dashboard/requests">
               <Button className="w-full justify-start" variant="outline">
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Xem yêu cầu khách hàng ({mockData.requests.pending})
@@ -284,7 +289,7 @@ const FrontDeskDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="guests:manage">
-            <Link href="/unified-dashboard/guest-management">
+            <Link href="/hotel-dashboard/guest-management">
               <Button className="w-full justify-start" variant="outline">
                 <Users className="mr-2 h-4 w-4" />
                 Quản lý khách hàng
@@ -404,7 +409,7 @@ const ITManagerDashboard = () => (
         </CardHeader>
         <CardContent className="space-y-3">
           <PermissionGuard requiredPermission="system:monitor">
-            <Link href="/unified-dashboard/system-monitoring">
+            <Link href="/hotel-dashboard/system-monitoring">
               <Button className="w-full justify-start" variant="outline">
                 <Monitor className="mr-2 h-4 w-4" />
                 Giám sát hệ thống
@@ -412,7 +417,7 @@ const ITManagerDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="logs:view">
-            <Link href="/unified-dashboard/logs">
+            <Link href="/hotel-dashboard/logs">
               <Button className="w-full justify-start" variant="outline">
                 <Database className="mr-2 h-4 w-4" />
                 Xem system logs
@@ -420,7 +425,7 @@ const ITManagerDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="security:manage">
-            <Link href="/unified-dashboard/security">
+            <Link href="/hotel-dashboard/security">
               <Button className="w-full justify-start" variant="outline">
                 <Shield className="mr-2 h-4 w-4" />
                 Cấu hình bảo mật
@@ -428,7 +433,7 @@ const ITManagerDashboard = () => (
             </Link>
           </PermissionGuard>
           <PermissionGuard requiredPermission="integrations:manage">
-            <Link href="/unified-dashboard/integrations">
+            <Link href="/hotel-dashboard/integrations">
               <Button className="w-full justify-start" variant="outline">
                 <Wrench className="mr-2 h-4 w-4" />
                 Quản lý tích hợp
