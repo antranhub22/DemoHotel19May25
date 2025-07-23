@@ -17,6 +17,7 @@ import { logger } from '@shared/utils/logger';
 import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
 import { Language, ServiceItem } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAssistant } from '@/context';
 
 interface VoicePrompt {
   service: string;

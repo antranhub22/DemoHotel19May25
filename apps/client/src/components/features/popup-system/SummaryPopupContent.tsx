@@ -1,5 +1,6 @@
 import React from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 import {
   extractRoomNumber,
   parseSummaryToOrderDetails,

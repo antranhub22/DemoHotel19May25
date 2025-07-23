@@ -1,5 +1,6 @@
 import { useCallback, useState, useMemo } from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
   ORDER_TYPE_DEFAULT: 'Room Service',
@@ -67,7 +68,9 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ MEMOIZED: Generated order summary from context data
   const generatedOrderSummary = useMemo(() => {
-    if (orderSummary) {return orderSummary;}
+    if (orderSummary) {
+      return orderSummary;
+    }
 
     if (!callSummary && (!serviceRequests || serviceRequests.length === 0)) {
       return null;
@@ -157,12 +160,19 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ EXTRACTED: API call logic with authentication and auto-retry
   const submitRequest = useCallback(async (payload: any) => {
-    logger.debug('📤 [useSendToFrontDeskHandler] Submitting request to /api/request:', 'Component', payload);
+    logger.debug(
+      '📤 [useSendToFrontDeskHandler] Submitting request to /api/request:',
+      'Component',
+      payload
+    );
 
     // ✅ FIX: Use authenticated fetch with auto-retry
     const { authenticatedFetch } = await import('@/lib/authHelper');
 
-    logger.debug('🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry', 'Component');
+    logger.debug(
+      '🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry',
+      'Component'
+    );
 
     const response = await authenticatedFetch('/api/request', {
       method: 'POST',
@@ -192,7 +202,10 @@ export const useSendToFrontDeskHandler = ({
   // ✅ EXTRACTED: Success handling
   const handleSuccess = useCallback(
     (requestData: any, orderData: any) => {
-      logger.debug('✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully', 'Component');
+      logger.debug(
+        '✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully',
+        'Component'
+      );
 
       // Update global order state
       setOrder({
@@ -209,7 +222,10 @@ export const useSendToFrontDeskHandler = ({
         onSuccess();
       } else {
         // Use logger instead of alert for better UX
-        logger.success('✅ Request sent to front desk successfully', 'Component');
+        logger.success(
+          '✅ Request sent to front desk successfully',
+          'Component'
+        );
       }
     },
     [setOrder, onSuccess]
@@ -218,9 +234,16 @@ export const useSendToFrontDeskHandler = ({
   // ✅ EXTRACTED: Error handling
   const handleError = useCallback(
     (error: Error) => {
-      logger.error('❌ [useSendToFrontDeskHandler] Failed to send request:', 'Component', error);
+      logger.error(
+        '❌ [useSendToFrontDeskHandler] Failed to send request:',
+        'Component',
+        error
+      );
 
-      const errorMessage = (error as any)?.message || String(error) || ERROR_MESSAGES.REQUEST_FAILED;
+      const errorMessage =
+        (error as any)?.message ||
+        String(error) ||
+        ERROR_MESSAGES.REQUEST_FAILED;
 
       if (onError) {
         onError(errorMessage);
@@ -234,11 +257,17 @@ export const useSendToFrontDeskHandler = ({
 
   // ✅ MAIN HANDLER: Clean and focused
   const handleSendToFrontDesk = useCallback(async () => {
-    logger.debug('🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated', 'Component');
+    logger.debug(
+      '🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated',
+      'Component'
+    );
 
     // Validate order data availability
     if (!generatedOrderSummary) {
-      logger.warn('⚠️ [useSendToFrontDeskHandler] No order summary available', 'Component');
+      logger.warn(
+        '⚠️ [useSendToFrontDeskHandler] No order summary available',
+        'Component'
+      );
       const errorMsg = ERROR_MESSAGES.NO_ORDER_DATA;
 
       if (onError) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
+import { useAssistant } from '@/context';
 import {
   STANDARD_POPUP_MAX_WIDTH,
   STANDARD_POPUP_HEIGHT,

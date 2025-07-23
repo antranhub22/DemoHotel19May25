@@ -2,9 +2,9 @@
 
 // Type declaration for import.meta
 
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, RefObject } from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { Language } from '@/types/interface1.types';
 
@@ -44,30 +44,46 @@ export const useConversationState = ({
   useEffect(() => {
     const isActive = callDuration > 0;
 
-    logger.debug('🔄 [useConversationState] Syncing call states:', 'Component', {
-      callDuration,
-      isActive,
-      isCallStarted,
-      manualCallStarted,
-      transcriptsCount: transcripts.length,
-    });
+    logger.debug(
+      '🔄 [useConversationState] Syncing call states:',
+      'Component',
+      {
+        callDuration,
+        isActive,
+        isCallStarted,
+        manualCallStarted,
+        transcriptsCount: transcripts.length,
+      }
+    );
 
     // Auto-sync isCallStarted with actual call state
     if (isActive && !isCallStarted && !manualCallStarted) {
       // There's an active call but UI shows inactive - sync to active
-      logger.debug('✅ [useConversationState] Active call detected - syncing isCallStarted = true', 'Component');
+      logger.debug(
+        '✅ [useConversationState] Active call detected - syncing isCallStarted = true',
+        'Component'
+      );
       setIsCallStarted(true);
     } else if (!isActive && isCallStarted && !manualCallStarted) {
       // Call ended but UI still shows active - sync to inactive
-      logger.debug('❌ [useConversationState] Call ended - syncing isCallStarted = false', 'Component');
+      logger.debug(
+        '❌ [useConversationState] Call ended - syncing isCallStarted = false',
+        'Component'
+      );
       setIsCallStarted(false);
     } else if (!manualCallStarted) {
       // No manual start and no active call - set to false
-      logger.debug('❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false', 'Component');
+      logger.debug(
+        '❌ [useConversationState] No active call and no manual start - syncing isCallStarted = false',
+        'Component'
+      );
       setIsCallStarted(false);
     } else {
       // Manual start in progress - don't override, let it stay true
-      logger.debug('⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true', 'Component');
+      logger.debug(
+        '⏳ [useConversationState] Manual call start in progress - keeping isCallStarted = true',
+        'Component'
+      );
     }
   }, [callDuration, isCallStarted, manualCallStarted, transcripts.length]); // Fixed: Added transcripts.length
 
@@ -77,20 +93,30 @@ export const useConversationState = ({
     const shouldShowConversation =
       isActive || transcripts.length > 0 || manualCallStarted;
 
-    logger.debug('🔄 [useConversationState] Evaluating showConversation:', 'Component', {
-      isActive,
-      transcriptsCount: transcripts.length,
-      manualCallStarted,
-      currentShowConversation: showConversation,
-      shouldShowConversation,
-    });
+    logger.debug(
+      '🔄 [useConversationState] Evaluating showConversation:',
+      'Component',
+      {
+        isActive,
+        transcriptsCount: transcripts.length,
+        manualCallStarted,
+        currentShowConversation: showConversation,
+        shouldShowConversation,
+      }
+    );
 
     // ✅ OPTIMIZATION: Only update if value actually changes
     if (showConversation !== shouldShowConversation) {
-      logger.debug(`🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`, 'Component');
+      logger.debug(
+        `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`,
+        'Component'
+      );
       setShowConversation(shouldShowConversation);
     } else {
-      logger.debug('✅ [useConversationState] showConversation unchanged - no re-render', 'Component');
+      logger.debug(
+        '✅ [useConversationState] showConversation unchanged - no re-render',
+        'Component'
+      );
     }
   }, [transcripts.length, manualCallStarted, callDuration, showConversation]); // Fixed: Re-added showConversation for proper comparison
 
@@ -109,13 +135,21 @@ export const useConversationState = ({
 
   const handleCallStart = useCallback(
     async (lang: Language): Promise<{ success: boolean; error?: string }> => {
-      logger.debug('🎤 [useConversationState] Starting call with language:', 'Component', lang);
-      logger.debug('🎤 [useConversationState] Current state before call:', 'Component', {
-        isCallStarted,
-        manualCallStarted,
-        callDuration,
-        transcriptsCount: transcripts.length,
-      });
+      logger.debug(
+        '🎤 [useConversationState] Starting call with language:',
+        'Component',
+        lang
+      );
+      logger.debug(
+        '🎤 [useConversationState] Current state before call:',
+        'Component',
+        {
+          isCallStarted,
+          manualCallStarted,
+          callDuration,
+          transcriptsCount: transcripts.length,
+        }
+      );
 
       // Check if we should force VAPI calls in development
       const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
@@ -123,22 +157,28 @@ export const useConversationState = ({
         import.meta.env.VITE_VAPI_PUBLIC_KEY &&
         import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-      logger.debug('🔍 [useConversationState] Environment check:', 'Component', {
-        isDevelopment: import.meta.env.DEV,
-        forceVapiInDev,
-        hasVapiCredentials: !!hasVapiCredentials,
-        publicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY ? 'EXISTS' : 'MISSING',
-        assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID
-          ? 'EXISTS'
-          : 'MISSING',
-        // Also check individual language keys
-        publicKey_VI: import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
-          ? 'EXISTS'
-          : 'MISSING',
-        assistantId_VI: import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
-          ? 'EXISTS'
-          : 'MISSING',
-      });
+      logger.debug(
+        '🔍 [useConversationState] Environment check:',
+        'Component',
+        {
+          isDevelopment: import.meta.env.DEV,
+          forceVapiInDev,
+          hasVapiCredentials: !!hasVapiCredentials,
+          publicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY
+            ? 'EXISTS'
+            : 'MISSING',
+          assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID
+            ? 'EXISTS'
+            : 'MISSING',
+          // Also check individual language keys
+          publicKey_VI: import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
+            ? 'EXISTS'
+            : 'MISSING',
+          assistantId_VI: import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+            ? 'EXISTS'
+            : 'MISSING',
+        }
+      );
 
       // DEV MODE: Check if we have ANY VAPI credentials (including language-specific ones)
       const hasAnyVapiCredentials =
@@ -149,7 +189,11 @@ export const useConversationState = ({
         import.meta.env.VITE_VAPI_PUBLIC_KEY_RU ||
         import.meta.env.VITE_VAPI_PUBLIC_KEY_KO;
 
-      logger.debug('🔍 [useConversationState] hasAnyVapiCredentials:', 'Component', !!hasAnyVapiCredentials);
+      logger.debug(
+        '🔍 [useConversationState] hasAnyVapiCredentials:',
+        'Component',
+        !!hasAnyVapiCredentials
+      );
 
       // DEV MODE: Skip actual API calls UNLESS forced or credentials available
       const isDevelopment =
@@ -158,26 +202,42 @@ export const useConversationState = ({
       // ✅ IMPROVED: Better error handling for call start
       try {
         if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
-          logger.debug('🚧 [DEV MODE] Using simulated call start - limited API calls', 'Component');
+          logger.debug(
+            '🚧 [DEV MODE] Using simulated call start - limited API calls',
+            'Component'
+          );
           setIsCallStarted(true);
           setManualCallStarted(true);
           setLanguage(lang);
-          logger.debug('✅ [DEV MODE] Simulated call started successfully', 'Component');
+          logger.debug(
+            '✅ [DEV MODE] Simulated call started successfully',
+            'Component'
+          );
           return { success: true };
         }
 
         // PRODUCTION MODE or forced VAPI in development
-        logger.debug('🚀 [PRODUCTION MODE] Using real VAPI call start', 'Component');
+        logger.debug(
+          '🚀 [PRODUCTION MODE] Using real VAPI call start',
+          'Component'
+        );
         setIsCallStarted(true);
         setManualCallStarted(true);
 
         // ✅ IMPROVED: Enhanced startCall with error handling
         await startCall();
 
-        logger.debug('✅ [useConversationState] Real call started successfully', 'Component');
+        logger.debug(
+          '✅ [useConversationState] Real call started successfully',
+          'Component'
+        );
         return { success: true };
       } catch (error) {
-        logger.error('❌ [useConversationState] Error starting call:', 'Component', error);
+        logger.error(
+          '❌ [useConversationState] Error starting call:',
+          'Component',
+          error
+        );
 
         // ✅ IMPROVED: Reset state on error
         setIsCallStarted(false);
@@ -185,7 +245,9 @@ export const useConversationState = ({
 
         // ✅ IMPROVED: Better error message handling
         const errorMessage =
-          error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error occurred';
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error occurred';
 
         // ✅ IMPROVED: Categorize and handle different error types
         if (errorMessage.includes('webCallUrl')) {
@@ -238,26 +300,46 @@ export const useConversationState = ({
 
   const handleCallEnd = useCallback(() => {
     logger.debug('🛑 [useConversationState] Ending call', 'Component');
-    logger.debug('🔍 [useConversationState] Current isCallStarted state:', 'Component', isCallStarted);
+    logger.debug(
+      '🔍 [useConversationState] Current isCallStarted state:',
+      'Component',
+      isCallStarted
+    );
 
     // ✅ FIX: ALWAYS call endCall() first to stop VAPI in all modes
-    logger.debug('📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...', 'Component');
+    logger.debug(
+      '📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...',
+      'Component'
+    );
     try {
       endCall(); // ← This MUST run to stop VAPI instance
-      logger.debug('✅ [useConversationState] endCall() completed - VAPI stopped', 'Component');
+      logger.debug(
+        '✅ [useConversationState] endCall() completed - VAPI stopped',
+        'Component'
+      );
     } catch (endCallError) {
-      logger.error('❌ [useConversationState] Error in endCall():', 'Component', endCallError);
+      logger.error(
+        '❌ [useConversationState] Error in endCall():',
+        'Component',
+        endCallError
+      );
       // Continue with state cleanup even if endCall fails
     }
 
     // ✅ FIX: ALWAYS update UI state
-    logger.debug('📞 [useConversationState] Step 2: Updating UI state...', 'Component');
+    logger.debug(
+      '📞 [useConversationState] Step 2: Updating UI state...',
+      'Component'
+    );
     setIsCallStarted(false);
     setManualCallStarted(false);
     logger.debug('✅ [useConversationState] UI state updated', 'Component');
 
     // ✅ IMPROVED: Development mode logic AFTER call ending
-    logger.debug('🔍 [useConversationState] Step 3: Checking development mode...', 'Component');
+    logger.debug(
+      '🔍 [useConversationState] Step 3: Checking development mode...',
+      'Component'
+    );
     const forceVapiInDev = import.meta.env.VITE_FORCE_VAPI_IN_DEV === 'true';
     const hasVapiCredentials =
       import.meta.env.VITE_VAPI_PUBLIC_KEY &&
@@ -266,24 +348,42 @@ export const useConversationState = ({
       import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
 
     if (isDevelopment && !forceVapiInDev && !hasVapiCredentials) {
-      logger.debug('🚧 [DEV MODE] Using simulated call end - limited API calls', 'Component');
-      logger.debug('📝 [DEV MODE] Call ended successfully with mock data', 'Component');
-      logger.debug('📝 [DEV MODE] Staying in Interface1 - No interface switching', 'Component');
+      logger.debug(
+        '🚧 [DEV MODE] Using simulated call end - limited API calls',
+        'Component'
+      );
+      logger.debug(
+        '📝 [DEV MODE] Call ended successfully with mock data',
+        'Component'
+      );
+      logger.debug(
+        '📝 [DEV MODE] Staying in Interface1 - No interface switching',
+        'Component'
+      );
       return; // Early return for development simulation
     }
 
     // Production mode or forced VAPI in development
     if (isDevelopment && (forceVapiInDev || hasVapiCredentials)) {
-      logger.debug('🔥 [DEV MODE] Using real VAPI call end - full API integration', 'Component');
+      logger.debug(
+        '🔥 [DEV MODE] Using real VAPI call end - full API integration',
+        'Component'
+      );
     } else {
       logger.debug('🚀 [PRODUCTION MODE] Real call end completed', 'Component');
     }
 
-    logger.debug('📝 [useConversationState] Staying in Interface1 - No interface switching', 'Component');
+    logger.debug(
+      '📝 [useConversationState] Staying in Interface1 - No interface switching',
+      'Component'
+    );
   }, [endCall, isCallStarted]);
 
   const handleCancel = useCallback(() => {
-    logger.debug('❌ [useConversationState] Canceling call - FULL RESET', 'Component');
+    logger.debug(
+      '❌ [useConversationState] Canceling call - FULL RESET',
+      'Component'
+    );
 
     try {
       // Reset local states first to prevent further operations
@@ -294,23 +394,43 @@ export const useConversationState = ({
       // End call with error handling
       try {
         endCall();
-        logger.debug('✅ [useConversationState] endCall() executed successfully', 'Component');
+        logger.debug(
+          '✅ [useConversationState] endCall() executed successfully',
+          'Component'
+        );
       } catch (endCallError) {
-        logger.error('⚠️ [useConversationState] endCall() failed but continuing with cancel:', 'Component', endCallError);
+        logger.error(
+          '⚠️ [useConversationState] endCall() failed but continuing with cancel:',
+          'Component',
+          endCallError
+        );
         // Don't rethrow - we still want to complete the cancel operation
       }
 
-      logger.debug('✅ [useConversationState] Cancel completed - all states reset', 'Component');
-      logger.debug('📊 [useConversationState] Final state: isCallStarted=false, showConversation=false', 'Component');
+      logger.debug(
+        '✅ [useConversationState] Cancel completed - all states reset',
+        'Component'
+      );
+      logger.debug(
+        '📊 [useConversationState] Final state: isCallStarted=false, showConversation=false',
+        'Component'
+      );
     } catch (error) {
-      logger.error('❌ [useConversationState] Error in handleCancel:', 'Component', error);
+      logger.error(
+        '❌ [useConversationState] Error in handleCancel:',
+        'Component',
+        error
+      );
 
       // Ensure states are reset even if there's an error
       setIsCallStarted(false);
       setShowConversation(false);
       setManualCallStarted(false);
 
-      logger.debug('🔄 [useConversationState] Forced state reset after error', 'Component');
+      logger.debug(
+        '🔄 [useConversationState] Forced state reset after error',
+        'Component'
+      );
     }
   }, [endCall]);
 

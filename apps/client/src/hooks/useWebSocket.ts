@@ -2,9 +2,10 @@
 
 // Type declaration for import.meta
 
-
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
+import { ActiveOrder } from '@/types/core';
 export function useWebSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -238,17 +239,20 @@ export function useWebSocket() {
             'Component',
             (message as { type?: string })?.type
           );
-        } catch (error) { logger.error(
+        } catch (error) {
+          logger.error(
             'Cannot send message WebSocket error:',
             'Component',
             error
           );
-         }
-      } else { logger.error('Cannot send message WebSocket not ready:', 'Component', {
+        }
+      } else {
+        logger.error('Cannot send message WebSocket not ready:', 'Component', {
           hasSocket: !!socket,
           connected,
           readyState: socket?.readyState,
-          expectedState: WebSocket.OPEN });
+          expectedState: WebSocket.OPEN,
+        });
       }
     },
     [socket, connected]

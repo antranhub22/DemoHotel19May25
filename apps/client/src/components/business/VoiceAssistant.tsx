@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 import {
   PopupProvider,
   PopupManager,

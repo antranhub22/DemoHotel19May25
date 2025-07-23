@@ -2,9 +2,9 @@
 
 // Type declaration for import.meta
 
-
 import { useCallback } from 'react';
 import { logger } from '@shared/utils/logger';
+import { useAssistant } from '@/context';
 import {
   useHotelConfiguration,
   getVapiPublicKeyByLanguage,
@@ -27,14 +27,25 @@ export const useCallHandler = () => {
 
   const handleCall = useCallback(
     async (lang: Language) => {
-      logger.debug('[useCallHandler] handleCall called with language:', 'Component', lang);
+      logger.debug(
+        '[useCallHandler] handleCall called with language:',
+        'Component',
+        lang
+      );
 
       if (!hotelConfig) {
-        logger.error('[useCallHandler] Hotel configuration not loaded', 'Component');
+        logger.error(
+          '[useCallHandler] Hotel configuration not loaded',
+          'Component'
+        );
         return { success: false, error: 'Hotel configuration not loaded' };
       }
 
-      logger.debug('[useCallHandler] Starting call with language:', 'Component', lang);
+      logger.debug(
+        '[useCallHandler] Starting call with language:',
+        'Component',
+        lang
+      );
 
       setEmailSentForCurrentSession(false);
       setCallDetails({
@@ -61,7 +72,10 @@ export const useCallHandler = () => {
       const isDevelopment =
         import.meta.env.DEV || import.meta.env.NODE_ENV === 'development';
       if ((!publicKey || !assistantId) && isDevelopment) {
-        logger.warn('[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing', 'Component');
+        logger.warn(
+          '[useCallHandler] DEVELOPMENT MODE: Vapi keys missing, skipping call but switching interface for testing',
+          'Component'
+        );
         setLanguage(lang);
         return { success: true, isDevelopment: true };
       }
@@ -73,11 +87,19 @@ export const useCallHandler = () => {
       }
 
       try {
-        logger.debug('[useCallHandler] Initializing Vapi with public key:', 'Component', publicKey);
+        logger.debug(
+          '[useCallHandler] Initializing Vapi with public key:',
+          'Component',
+          publicKey
+        );
         setLanguage(lang);
 
         if (assistantId) {
-          logger.debug('[useCallHandler] Starting Vapi call with assistant ID:', 'Component', assistantId);
+          logger.debug(
+            '[useCallHandler] Starting Vapi call with assistant ID:',
+            'Component',
+            assistantId
+          );
 
           return { success: true };
         } else {
@@ -86,9 +108,15 @@ export const useCallHandler = () => {
           return { success: false, error };
         }
       } catch (error) {
-        logger.error('[useCallHandler] Error starting Vapi call:', 'Component', error);
+        logger.error(
+          '[useCallHandler] Error starting Vapi call:',
+          'Component',
+          error
+        );
         const errorMessage =
-          error instanceof Error ? (error as any)?.message || String(error) : String(error);
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : String(error);
         return { success: false, error: errorMessage };
       }
     },
