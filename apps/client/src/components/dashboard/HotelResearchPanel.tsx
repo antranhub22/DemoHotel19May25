@@ -1,5 +1,27 @@
 import React, { useState } from 'react';
-import { Search, MapPin, Phone, Globe, Mail, Clock, Star, Car, CheckCircle2, AlertCircle, Loader2, RefreshCw, Edit3, Save, X, ExternalLink, Hotel, DollarSign,  } from 'lucide-react';
+import {
+  Search,
+  MapPin,
+  Phone,
+  Globe,
+  Mail,
+  Clock,
+  Star,
+  Car,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  Edit3,
+  Save,
+  X,
+  ExternalLink,
+  Hotel,
+  DollarSign,
+  Wifi,
+  Coffee,
+  Dumbbell,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -14,7 +36,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-
 
 // Types
 interface HotelData {

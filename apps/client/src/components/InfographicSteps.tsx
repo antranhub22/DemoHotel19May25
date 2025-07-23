@@ -1,10 +1,13 @@
 import React from 'react';
 import { t } from '@/i18n';
+import { useAssistant } from '@/context';
+import type { Language } from '@/types/interface1.types';
+
 interface InfographicStepsProps {
   currentStep?: number;
   compact?: boolean;
   horizontal?: boolean;
-  language?: Lang;
+  language?: Language;
 }
 
 export default function InfographicSteps({
@@ -16,7 +19,9 @@ export default function InfographicSteps({
   // Lấy language từ prop hoặc context
   const assistantContext = useAssistant();
   const { language: contextLanguage } = assistantContext || { language: 'en' };
-  const language: Lang = (propLanguage || contextLanguage || 'en') as Lang;
+  const language: Language = (propLanguage ||
+    contextLanguage ||
+    'en') as Language;
 
   const steps = [
     {

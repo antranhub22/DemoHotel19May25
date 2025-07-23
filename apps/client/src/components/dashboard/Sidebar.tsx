@@ -1,6 +1,15 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Building2, X,  } from 'lucide-react';
+import {
+  Building2,
+  X,
+  Home,
+  Bot,
+  BarChart,
+  Settings,
+  CreditCard,
+  Users,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

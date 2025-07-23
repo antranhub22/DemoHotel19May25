@@ -1,6 +1,8 @@
 import React from 'react';
 import { PopupCard } from './PopupCard';
 import styles from './PopupStack.module.css';
+import { PopupState } from '@/context/PopupContext';
+
 interface PopupStackProps {
   popups: PopupState[];
   activePopup: string | null;

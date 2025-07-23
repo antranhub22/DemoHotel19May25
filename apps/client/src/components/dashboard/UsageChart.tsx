@@ -1,5 +1,14 @@
 import React from 'react';
-import { BarChart3, TrendingUp, Download, RefreshCw, Target, PieChart, LineChart,  } from 'lucide-react';
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Download,
+  RefreshCw,
+  Target,
+  PieChart,
+  LineChart,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -18,7 +27,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-
 
 // Types
 interface ChartDataPoint {
@@ -92,7 +100,9 @@ const formatValue = (value: number, format?: string): string => {
 
 // Get trend info
 const getTrendInfo = (change?: number) => {
-  if (change === undefined) {return null;}
+  if (change === undefined) {
+    return null;
+  }
 
   return {
     icon: change > 0 ? TrendingUp : change < 0 ? TrendingDown : null,
@@ -218,7 +228,9 @@ const ProgressChart = ({
   threshold?: UsageChartProps['threshold'];
 }) => {
   const primaryItem = data[0];
-  if (!primaryItem) {return null;}
+  if (!primaryItem) {
+    return null;
+  }
 
   const percentage = threshold
     ? (primaryItem.value / threshold.value) * 100

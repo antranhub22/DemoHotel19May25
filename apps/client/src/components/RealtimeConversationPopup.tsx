@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { t } from '@/i18n';
-import {  } from '@/context/PopupContext';
+import {
+  STANDARD_POPUP_MAX_WIDTH,
+  STANDARD_POPUP_HEIGHT,
+  STANDARD_POPUP_MAX_HEIGHT_VH,
+} from '@/context/PopupContext';
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;
@@ -141,7 +145,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
 
     assistantMessages.forEach(message => {
       // Skip if already animated
-      if (visibleChars[message.id] === message.content.length) {return;}
+      if (visibleChars[message.id] === message.content.length) {
+        return;
+      }
 
       let currentChar = visibleChars[message.id] || 0;
       const content = message.content;
@@ -173,7 +179,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
     }
   }, [conversationTurns]);
 
-  if (!isOpen) {return null;}
+  if (!isOpen) {
+    return null;
+  }
 
   // ✅ EXISTING LOGIC - UNCHANGED: Conditional styles based on layout
   const isGrid = layout === 'grid';

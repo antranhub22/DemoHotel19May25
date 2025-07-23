@@ -1,6 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import styles from './PopupCard.module.css';
+import { PopupState, POPUP_TYPES } from '@/context/PopupContext';
+
 interface PopupCardProps {
   popup: PopupState;
   index: number;
@@ -34,11 +36,17 @@ export const PopupCard: React.FC<PopupCardProps> = ({
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / (1000 * 60));
 
-    if (minutes < 1) {return 'now';}
-    if (minutes < 60) {return `${minutes}m ago`;}
+    if (minutes < 1) {
+      return 'now';
+    }
+    if (minutes < 60) {
+      return `${minutes}m ago`;
+    }
 
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) {return `${hours}h ago`;}
+    if (hours < 24) {
+      return `${hours}h ago`;
+    }
 
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
