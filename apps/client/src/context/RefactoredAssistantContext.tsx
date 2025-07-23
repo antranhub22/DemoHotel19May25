@@ -29,7 +29,16 @@ import {
   ConfigurationProvider,
 } from './contexts/ConfigurationContext';
 import { useVapi, VapiProvider } from '@/context/contexts/VapiContext';
-import { Transcript, CallDetails, Order, ActiveOrder } from '@/types';
+import {
+  Transcript,
+  CallDetails,
+  Order,
+  ActiveOrder,
+  OrderSummary,
+  ServiceRequest,
+  CallSummary,
+} from '@/types';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

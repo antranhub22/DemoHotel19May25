@@ -2,7 +2,6 @@
 
 // Type declaration for import.meta
 
-
 import React, {
   createContext,
   useContext,
@@ -13,7 +12,10 @@ import React, {
 import { logger } from '@shared/utils/logger';
 import { CallDetails } from '@/types';
 // Dynamic imports for code splitting - loaded when needed
-import { getVapiPublicKeyByLanguage,  } from '@/hooks/useHotelConfiguration';
+import {
+  getVapiPublicKeyByLanguage,
+  HotelConfiguration,
+} from '@/hooks/useHotelConfiguration';
 // Dynamic import for code splitting - resetVapi loaded when needed
 
 export interface VapiContextType {

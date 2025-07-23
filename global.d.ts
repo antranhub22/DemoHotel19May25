@@ -402,7 +402,6 @@ declare global {
   }
 
   // Hooks
-  const useAssistant: () => any;
   const useCallHandler: () => any;
   const useVapiCall: () => any;
 }
