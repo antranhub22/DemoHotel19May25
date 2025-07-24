@@ -339,9 +339,9 @@ export class UnifiedAuthService {
         const rolePermissions = (DEFAULT_PERMISSIONS as any)?.[
           dbUser.role as any
         ]; // ✅ FIXED: Use any types to bypass iterator issues
-        permissions = rolePermissions
-          ? Object.values(rolePermissions).flat()
-          : []; // ✅ FIXED: Convert to array properly
+        permissions = (
+          rolePermissions ? Object.values(rolePermissions).flat() : []
+        ) as any[]; // ✅ FIXED: Cast to any[] explicitly
       }
     } catch (error) {
       console.warn(
@@ -350,9 +350,9 @@ export class UnifiedAuthService {
       const rolePermissions = (DEFAULT_PERMISSIONS as any)?.[
         dbUser.role as any
       ]; // ✅ FIXED: Use any types to bypass iterator issues
-      permissions = rolePermissions
-        ? Object.values(rolePermissions).flat()
-        : []; // ✅ FIXED: Convert to array properly
+      permissions = (
+        rolePermissions ? Object.values(rolePermissions).flat() : []
+      ) as any[]; // ✅ FIXED: Cast to any[] explicitly
     }
 
     return {

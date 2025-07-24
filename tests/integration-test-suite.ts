@@ -602,7 +602,7 @@ export class IntegrationTestSuite {
 
           // Generate knowledge base
           const knowledgeBase = knowledgeBaseGenerator.generateKnowledgeBase(
-            hotelData as unknown as BasicHotelData
+            hotelData as any // ✅ FIXED: Cast to any to bypass type conflicts
           );
           if (!knowledgeBase || knowledgeBase.length < 100) {
             throw new Error('Knowledge base generation failed');
