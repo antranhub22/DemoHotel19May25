@@ -1,0 +1,201 @@
+{
+  "version": "1.0.0",
+  "description": "Configuration for package dependency analyzer",
+  "scanning": {
+    "packageJsonPath": "package.json",
+    "lockFilePath": "package-lock.json",
+    "nodeModulesPath": "node_modules",
+    "excludePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/*.test.*",
+      "**/*.spec.*",
+      "**/*.d.ts",
+      "**/playwright-report/**",
+      "**/test-results/**"
+    ],
+    "analyzePatterns": [
+      "apps/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+      "packages/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+      "tools/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+      "tests/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+      "*.{ts,tsx,js,jsx,mjs,cjs}"
+    ]
+  },
+  "builtinModules": [
+    "assert",
+    "buffer",
+    "child_process",
+    "cluster",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "http",
+    "https",
+    "net",
+    "os",
+    "path",
+    "querystring",
+    "readline",
+    "stream",
+    "string_decoder",
+    "timers",
+    "tls",
+    "tty",
+    "url",
+    "util",
+    "v8",
+    "vm",
+    "zlib",
+    "constants",
+    "module",
+    "process",
+    "punycode",
+    "sys"
+  ],
+  "indirectPackages": [
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "typescript",
+    "vite",
+    "vitest",
+    "jest",
+    "eslint",
+    "prettier",
+    "husky",
+    "lint-staged",
+    "concurrently",
+    "nodemon",
+    "tsx",
+    "drizzle-kit",
+    "tailwindcss",
+    "postcss",
+    "autoprefixer",
+    "@vitejs/plugin-react",
+    "@replit/vite-plugin-shadcn-theme-json"
+  ],
+  "analysis": {
+    "checkUnusedPackages": true,
+    "checkMissingDependencies": true,
+    "checkVersionMismatches": true,
+    "checkDuplicatePackages": true,
+    "checkSecurityVulnerabilities": false,
+    "checkOutdatedPackages": false,
+    "ignoreTypePackages": true,
+    "ignorePeerDependencies": true
+  },
+  "reporting": {
+    "maxIssuesPerType": 50,
+    "showDetailedAnalysis": false,
+    "groupBySeverity": true,
+    "includePackageStats": true,
+    "outputFormat": "console",
+    "saveReport": false,
+    "reportPath": "./dependency-report.json"
+  },
+  "fixes": {
+    "autoRemoveUnused": false,
+    "autoInstallMissing": false,
+    "autoUpdateOutdated": false,
+    "backupPackageJson": true,
+    "dryRun": false
+  },
+  "ignoreRules": {
+    "ignoreUnusedPackages": [
+      "@types/*",
+      "typescript",
+      "eslint*",
+      "prettier*",
+      "husky",
+      "lint-staged",
+      "@vitejs/*",
+      "vite",
+      "vitest",
+      "jest*",
+      "playwright*",
+      "tailwindcss",
+      "postcss*",
+      "autoprefixer"
+    ],
+    "ignoreMissingDependencies": ["react", "react-dom", "node:*"],
+    "allowedPeerDependencies": ["react", "react-dom", "typescript"]
+  },
+  "security": {
+    "enableAudit": true,
+    "severityThreshold": "moderate",
+    "ignoreDevDependencies": false,
+    "autoFixVulnerabilities": false,
+    "excludeVulnerabilities": []
+  },
+  "updates": {
+    "checkOutdated": true,
+    "updateStrategy": "wanted",
+    "ignorePrerelease": true,
+    "respectVersionConstraints": true,
+    "excludePackages": []
+  },
+  "customRules": [
+    {
+      "name": "no-dev-in-production",
+      "description": "Prevent dev dependencies from being imported in production code",
+      "enabled": true,
+      "pattern": "apps/server/**/*.{ts,js}",
+      "exclude": ["@types/*", "typescript"],
+      "severity": "error",
+      "message": "Dev dependencies should not be used in production code"
+    },
+    {
+      "name": "prefer-specific-imports",
+      "description": "Prefer specific imports over namespace imports for large libraries",
+      "enabled": true,
+      "packages": ["lodash", "ramda"],
+      "severity": "warning",
+      "message": "Consider using specific imports to reduce bundle size"
+    },
+    {
+      "name": "version-consistency",
+      "description": "Ensure consistent versions across mono-repo packages",
+      "enabled": true,
+      "packages": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "severity": "warning",
+      "message": "React-related packages should have consistent versions"
+    }
+  ],
+  "projectSpecific": {
+    "monorepo": false,
+    "hotelManagementSystem": true,
+    "voiceAssistantFeatures": true,
+    "multiTenant": true,
+    "requiredPackages": ["react", "react-dom", "express", "drizzle-orm", "@vapi-ai/web"],
+    "recommendedDevPackages": [
+      "typescript",
+      "@types/node",
+      "@types/react",
+      "@types/react-dom",
+      "eslint",
+      "prettier",
+      "vitest"
+    ]
+  },
+  "performance": {
+    "enableCaching": true,
+    "cacheDir": ".dependency-cache",
+    "parallelProcessing": true,
+    "maxConcurrentFiles": 50,
+    "timeout": 30000
+  },
+  "integrations": {
+    "packageManager": "npm",
+    "lockFileFormat": "package-lock.json",
+    "supportYarn": false,
+    "supportPnpm": false,
+    "ciIntegration": true,
+    "githubActions": true
+  }
+}

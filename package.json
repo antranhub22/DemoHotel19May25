@@ -108,7 +108,15 @@
     "check:imports:packages": "./tools/scripts/validation/run-import-check.sh -t packages",
     "check:imports:focus:circular": "./tools/scripts/validation/run-import-check.sh --focus circular",
     "check:imports:focus:exports": "./tools/scripts/validation/run-import-check.sh --focus exports",
-    "fix:imports": "./tools/scripts/validation/run-import-check.sh --fix"
+    "fix:imports": "./tools/scripts/validation/run-import-check.sh --fix",
+    "check:deps": "./tools/scripts/validation/run-dependency-check.sh",
+    "check:deps:basic": "./tools/scripts/validation/run-dependency-check.sh -m basic",
+    "check:deps:full": "./tools/scripts/validation/run-dependency-check.sh -m full -d",
+    "check:deps:security": "./tools/scripts/validation/run-dependency-check.sh -m security",
+    "check:deps:updates": "./tools/scripts/validation/run-dependency-check.sh -m updates",
+    "check:deps:fix": "./tools/scripts/validation/run-dependency-check.sh --fix",
+    "audit:deps": "./tools/scripts/validation/run-dependency-check.sh -m security -o security-report.json",
+    "cleanup:deps": "./tools/scripts/validation/run-dependency-check.sh --fix"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
