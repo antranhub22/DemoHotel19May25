@@ -125,7 +125,14 @@
     "validate:full": "npm run lint:imports && npm run check:imports:quick && npm run check:deps",
     "validate:ci": "npm run lint:imports && npm run check:imports:ci && npm run check:deps:security",
     "lint:check": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx",
-    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx --fix"
+    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "sync:check": "./tools/scripts/validation/run-sync-checker.sh",
+    "sync:check:quick": "./tools/scripts/validation/run-sync-checker.sh -m quick",
+    "sync:check:deep": "./tools/scripts/validation/run-sync-checker.sh -m deep",
+    "sync:check:save": "./tools/scripts/validation/run-sync-checker.sh -s",
+    "sync:check:detailed": "./tools/scripts/validation/run-sync-checker.sh -d -s",
+    "validate:master": "./tools/scripts/validation/run-sync-checker.sh -m full -d",
+    "validate:complete": "./tools/scripts/validation/run-sync-checker.sh -m deep -s"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
