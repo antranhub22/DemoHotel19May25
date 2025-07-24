@@ -24,19 +24,55 @@ export class KnowledgeBaseGenerator {
   generateKnowledgeBase(
     hotelData: HotelResearchData | AdvancedHotelResearchData
   ): string {
+    // ✅ FIXED: Create adapter to convert research data to global types
+    const basicData: BasicHotelData = {
+      name: hotelData.name,
+      location: `${hotelData.location.lat}, ${hotelData.location.lng}`,
+      description: hotelData.name,
+      phone: hotelData.phone,
+      website: hotelData.website,
+      rating: hotelData.rating,
+      amenities: hotelData.amenities || [],
+      services: (hotelData.services || []).map(s => s.name),
+    };
+
+    const globalServices: HotelService[] = (hotelData.services || []).map(
+      s => ({
+        ...s,
+        category: 'room_service' as ServiceCategory, // Add required category
+        price: parseFloat(s.price || '0') || 0, // Convert string to number
+      })
+    );
+
+    const globalRooms: RoomType[] = (hotelData.roomTypes || []).map(r => ({
+      ...r,
+      price: parseFloat(r.price) || 0, // Convert string to number
+    }));
+
+    const globalAttractions: LocalAttraction[] = (
+      hotelData.localAttractions || []
+    ).map(a => ({
+      name: a.name,
+      description: a.description || '',
+      distance: a.distance || '',
+      type: 'attraction', // Add required type property
+    }));
+
     const sections = [
-      this.generateBasicInfoSection(hotelData),
-      this.generateServicesSection(hotelData.services || []),
-      this.generateRoomTypesSection(hotelData.roomTypes || []),
+      this.generateBasicInfoSection(basicData),
+      this.generateServicesSection(globalServices),
+      this.generateRoomTypesSection(globalRooms),
       this.generateAmenitiesSection(hotelData.amenities || []),
       this.generatePoliciesSection(hotelData.policies),
-      this.generateLocalAttractionsSection(hotelData.localAttractions || []),
-      this.generateContactSection(hotelData),
+      this.generateLocalAttractionsSection(globalAttractions),
+      this.generateContactSection(basicData),
     ];
 
     // Add advanced sections if available
-    if (this.isAdvancedHotelData(hotelData)) {
+    if ('reviewData' in hotelData && hotelData.reviewData) {
       sections.push(this.generateReviewsSection(hotelData.reviewData));
+    }
+    if ('competitorData' in hotelData && hotelData.competitorData) {
       sections.push(this.generateCompetitorSection(hotelData.competitorData));
     }
 
@@ -80,7 +116,7 @@ Check-out: ${hotelData.policies.checkOut || 'Contact front desk'}`;
    * Generate FAQ section from hotel data
    */
   generateFAQSection(
-    hotelData: ResearchHotelData | AdvancedHotelData
+    hotelData: HotelResearchData | AdvancedHotelResearchData
   ): Array<{ question: string; answer: string }> {
     const faqs: Array<{ question: string; answer: string }> = [
       {

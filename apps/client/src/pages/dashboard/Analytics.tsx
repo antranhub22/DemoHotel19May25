@@ -9,6 +9,7 @@ import {
   Phone,
   Clock,
   Activity,
+  Users,
 } from 'lucide-react';
 import {
   Card,

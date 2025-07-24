@@ -10,6 +10,10 @@ import {
   CheckCircle2,
   Loader2,
   Phone,
+  Database,
+  Bot,
+  Mail,
+  Globe,
 } from 'lucide-react';
 import {
   Card,

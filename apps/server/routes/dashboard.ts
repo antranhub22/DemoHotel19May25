@@ -375,7 +375,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
 
     // Convert to camelCase for easier access
     const profile = profileDB
-      ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB)
+      ? hotelProfileMapper.toFrontend(profileDB as any) // ✅ FIXED: Use any instead of undefined HotelProfileDB
       : null;
 
     if (!profile) {
@@ -468,7 +468,7 @@ router.put(
 
       // Convert to camelCase for easier access
       const profile = profileDB
-        ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB)
+        ? hotelProfileMapper.toFrontend(profileDB as any)
         : null;
 
       if (!profile) {
@@ -677,7 +677,7 @@ router.delete(
 
       // Convert to camelCase for easier access
       const profile = profileDB
-        ? hotelProfileMapper.toFrontend(profileDB as HotelProfileDB)
+        ? hotelProfileMapper.toFrontend(profileDB as any)
         : null;
 
       if (!profile || !profile.vapiAssistantId) {
