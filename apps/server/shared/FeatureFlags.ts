@@ -27,26 +27,36 @@ export interface FeatureFlag {
 
 export interface ABTestConfig {
   name: string;
-  flagName: string;
+  flagName: string; // The feature flag this A/B test controls
   variants: {
-    control: { percentage: number; enabled: boolean };
-    treatment: { percentage: number; enabled: boolean };
+    control: {
+      enabled?: boolean;
+      percentage: number;
+      metadata?: any;
+    };
+    treatment: {
+      enabled?: boolean;
+      percentage: number;
+      metadata?: any;
+    };
   };
-  targetAudience?: string[];
+  targetAudience?: string[]; // Optional: target specific user segments
   startDate: Date;
   endDate?: Date;
   active: boolean;
+  createdBy?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 interface FlagAuditEntry {
-  timestamp: Date;
   action: 'create' | 'update' | 'delete' | 'enable' | 'disable';
   flagName: string;
   oldValue?: any;
   newValue?: any;
-  updatedBy?: string;
+  updatedBy: string;
+  timestamp: Date;
   reason?: string;
-  metadata?: any;
 }
 
 /**
@@ -73,6 +83,8 @@ export class FeatureFlags {
     auditEntries: 0,
     activeABTests: 0,
   };
+  // ✅ NEW: Track initialization state
+  private static isInitializing = false;
 
   // ============================================
   // ENHANCED INITIALIZATION
@@ -82,92 +94,144 @@ export class FeatureFlags {
    * Initialize enhanced feature flags system v2.0
    */
   static initialize(): void {
+    this.isInitializing = true;
+
     logger.info(
       '🚩 [FeatureFlags v2.0] Initializing advanced feature flags system...',
       'FeatureFlags'
     );
 
-    // Module-level flags with enhanced properties
-    this.setFlag('request-module', {
-      name: 'request-module',
-      enabled: this.getEnvFlag('ENABLE_REQUEST_MODULE', true),
-      description: 'Request/Order management module',
-      module: 'request-module',
-      version: '2.0.0',
-      dependencies: ['tenant-module'],
-      tags: ['core', 'api'],
-    });
+    // Module-level flags with enhanced properties (skip dependency validation during init)
+    this.setFlag(
+      'tenant-module',
+      {
+        name: 'tenant-module',
+        enabled: this.getEnvFlag('ENABLE_TENANT_MODULE', true),
+        description: 'Multi-tenant management module',
+        module: 'tenant-module',
+        version: '2.0.0',
+        tags: ['core', 'security'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('tenant-module', {
-      name: 'tenant-module',
-      enabled: this.getEnvFlag('ENABLE_TENANT_MODULE', true),
-      description: 'Multi-tenant management module',
-      module: 'tenant-module',
-      version: '2.0.0',
-      tags: ['core', 'security'],
-    });
+    this.setFlag(
+      'request-module',
+      {
+        name: 'request-module',
+        enabled: this.getEnvFlag('ENABLE_REQUEST_MODULE', true),
+        description: 'Request/Order management module',
+        module: 'request-module',
+        version: '2.0.0',
+        dependencies: ['tenant-module'],
+        tags: ['core', 'api'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('analytics-module', {
-      name: 'analytics-module',
-      enabled: this.getEnvFlag('ENABLE_ANALYTICS_MODULE', true),
-      description: 'Analytics and reporting module',
-      module: 'analytics-module',
-      version: '2.0.0',
-      dependencies: ['tenant-module'],
-      tags: ['analytics', 'reporting'],
-    });
+    this.setFlag(
+      'analytics-module',
+      {
+        name: 'analytics-module',
+        enabled: this.getEnvFlag('ENABLE_ANALYTICS_MODULE', true),
+        description: 'Analytics and reporting module',
+        module: 'analytics-module',
+        version: '2.0.0',
+        dependencies: ['tenant-module'],
+        tags: ['analytics', 'reporting'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('assistant-module', {
-      name: 'assistant-module',
-      enabled: this.getEnvFlag('ENABLE_ASSISTANT_MODULE', true),
-      description: 'AI assistant generation module',
-      module: 'assistant-module',
-      version: '2.0.0',
-      dependencies: ['tenant-module'],
-      tags: ['ai', 'voice'],
-    });
+    this.setFlag(
+      'assistant-module',
+      {
+        name: 'assistant-module',
+        enabled: this.getEnvFlag('ENABLE_ASSISTANT_MODULE', true),
+        description: 'AI assistant generation module',
+        module: 'assistant-module',
+        version: '2.0.0',
+        dependencies: ['tenant-module'],
+        tags: ['ai', 'voice'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
     // ✅ NEW v2.0: Advanced feature flags
-    this.setFlag('advanced-analytics', {
-      name: 'advanced-analytics',
-      enabled: this.getEnvFlag('ENABLE_ADVANCED_ANALYTICS', false),
-      description: 'Advanced analytics features with ML insights',
-      module: 'analytics-module',
-      version: '2.0.0',
-      dependencies: ['analytics-module'],
-      rolloutPercentage: 25, // Gradual rollout
-      tags: ['analytics', 'ml', 'experimental'],
-    });
+    this.setFlag(
+      'advanced-analytics',
+      {
+        name: 'advanced-analytics',
+        enabled: this.getEnvFlag('ENABLE_ADVANCED_ANALYTICS', false),
+        description: 'Advanced analytics features with ML insights',
+        module: 'analytics-module',
+        version: '2.0.0',
+        dependencies: ['analytics-module'],
+        rolloutPercentage: 25, // Gradual rollout
+        tags: ['analytics', 'ml', 'experimental'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('ab-testing-framework', {
-      name: 'ab-testing-framework',
-      enabled: this.getEnvFlag('ENABLE_AB_TESTING', true),
-      description: 'A/B testing framework for feature experimentation',
-      module: 'core',
-      version: '2.0.0',
-      tags: ['experimentation', 'testing'],
-    });
+    this.setFlag(
+      'ab-testing-framework',
+      {
+        name: 'ab-testing-framework',
+        enabled: this.getEnvFlag('ENABLE_AB_TESTING', true),
+        description: 'A/B testing framework for feature experimentation',
+        module: 'core',
+        version: '2.0.0',
+        tags: ['experimentation', 'testing'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('module-health-checks', {
-      name: 'module-health-checks',
-      enabled: this.getEnvFlag('ENABLE_MODULE_HEALTH_CHECKS', true),
-      description: 'Enhanced module health monitoring',
-      version: '2.0.0',
-      tags: ['monitoring', 'health'],
-    });
+    this.setFlag(
+      'module-health-checks',
+      {
+        name: 'module-health-checks',
+        enabled: this.getEnvFlag('ENABLE_MODULE_HEALTH_CHECKS', true),
+        description: 'Enhanced module health monitoring',
+        version: '2.0.0',
+        tags: ['monitoring', 'health'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
-    this.setFlag('real-time-notifications', {
-      name: 'real-time-notifications',
-      enabled: this.getEnvFlag('ENABLE_REAL_TIME_NOTIFICATIONS', true),
-      description: 'Real-time WebSocket notifications',
-      module: 'core',
-      version: '2.0.0',
-      dependencies: ['tenant-module'],
-      tags: ['realtime', 'websocket'],
-    });
+    this.setFlag(
+      'real-time-notifications',
+      {
+        name: 'real-time-notifications',
+        enabled: this.getEnvFlag('ENABLE_REAL_TIME_NOTIFICATIONS', true),
+        description: 'Real-time WebSocket notifications',
+        module: 'core',
+        version: '2.0.0',
+        dependencies: ['tenant-module'],
+        tags: ['realtime', 'websocket'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
 
     // Update metrics
     this.updateMetrics();
+
+    this.isInitializing = false;
 
     logger.success(
       '🚩 [FeatureFlags v2.0] Advanced feature flags initialized successfully',
@@ -194,12 +258,15 @@ export class FeatureFlags {
     name: string,
     flag: FeatureFlag,
     updatedBy: string = 'system',
-    reason?: string
+    reason?: string,
+    skipDependencyValidation: boolean = false
   ): void {
     const oldFlag = this.flags.get(name);
 
-    // ✅ NEW v2.0: Validate flag dependencies
-    this.validateFlagDependencies(flag);
+    // ✅ NEW v2.0: Validate flag dependencies (skip during initialization)
+    if (!skipDependencyValidation && !this.isInitializing) {
+      this.validateFlagDependencies(flag);
+    }
 
     // ✅ NEW v2.0: Check for conflicts
     this.validateFlagConflicts(flag);
@@ -242,27 +309,23 @@ export class FeatureFlags {
   }
 
   /**
-   * Runtime flag update without restart
+   * Update an existing feature flag
    */
   static updateFlag(
-    name: string,
+    flagName: string,
     updates: Partial<FeatureFlag>,
     updatedBy: string = 'system',
     reason?: string
-  ): void {
-    const existingFlag = this.flags.get(name);
+  ): FeatureFlag | null {
+    const existingFlag = this.flags.get(flagName);
     if (!existingFlag) {
-      throw new Error(`Flag '${name}' not found`);
+      return null;
     }
 
     const updatedFlag = { ...existingFlag, ...updates, updatedBy };
-    this.setFlag(name, updatedFlag, updatedBy, reason);
+    this.setFlag(flagName, updatedFlag, updatedBy, reason);
 
-    logger.info(
-      `🚩 [FeatureFlags v2.0] Runtime update for flag '${name}'`,
-      'FeatureFlags',
-      { updates, updatedBy, reason }
-    );
+    return updatedFlag;
   }
 
   /**
@@ -400,16 +463,18 @@ export class FeatureFlags {
       }
     }
 
-    // ✅ NEW v2.0: Check dependencies
+    // ✅ NEW v2.0: Check dependencies (lenient check to avoid recursion issues)
     if (flag.dependencies) {
       for (const dependency of flag.dependencies) {
-        if (!this.isEnabled(dependency, context)) {
+        const depFlag = this.flags.get(dependency);
+        if (depFlag && !depFlag.enabled) {
           logger.debug(
             `🚩 [FeatureFlags v2.0] Flag '${flagName}' disabled due to dependency '${dependency}'`,
             'FeatureFlags'
           );
           return false;
         }
+        // If dependency flag doesn't exist, assume it's enabled (lenient mode)
       }
     }
 
@@ -417,13 +482,86 @@ export class FeatureFlags {
   }
 
   /**
-   * Check if a module is enabled (backwards compatibility)
+   * Evaluate flag with context for comprehensive analysis
    */
-  static isModuleEnabled(
-    moduleName: string,
+  static evaluateFlag(
+    flagName: string,
     context?: { userId?: string; tenantId?: string }
-  ): boolean {
-    return this.isEnabled(moduleName, context);
+  ): {
+    enabled: boolean;
+    reason: string;
+    rolloutPercentage?: number;
+    dependencies?: string[];
+    conflicts?: string[];
+  } {
+    const flag = this.flags.get(flagName);
+    if (!flag) {
+      return {
+        enabled: true,
+        reason: 'Unknown flag, defaulting to enabled',
+      };
+    }
+
+    if (!flag.enabled) {
+      return {
+        enabled: false,
+        reason: 'Flag is disabled',
+      };
+    }
+
+    // Check expiration
+    if (flag.expirationDate && new Date() > flag.expirationDate) {
+      return {
+        enabled: false,
+        reason: 'Flag has expired',
+      };
+    }
+
+    // Check rollout percentage
+    if (flag.rolloutPercentage !== undefined && flag.rolloutPercentage < 100) {
+      const userId = context?.userId || 'anonymous';
+      const hash = this.hashString(userId + flagName);
+      const userPercentile = hash % 100;
+
+      if (userPercentile >= flag.rolloutPercentage) {
+        return {
+          enabled: false,
+          reason: `User not in rollout (${userPercentile}% >= ${flag.rolloutPercentage}%)`,
+          rolloutPercentage: flag.rolloutPercentage,
+        };
+      }
+    }
+
+    // Check target audience
+    if (flag.targetAudience && context?.userId) {
+      if (!flag.targetAudience.includes(context.userId)) {
+        return {
+          enabled: false,
+          reason: 'User not in target audience',
+        };
+      }
+    }
+
+    // Check dependencies
+    if (flag.dependencies) {
+      for (const dependency of flag.dependencies) {
+        const depFlag = this.flags.get(dependency);
+        if (depFlag && !depFlag.enabled) {
+          return {
+            enabled: false,
+            reason: `Dependency '${dependency}' is disabled`,
+            dependencies: flag.dependencies,
+          };
+        }
+      }
+    }
+
+    return {
+      enabled: true,
+      reason: 'All conditions met',
+      rolloutPercentage: flag.rolloutPercentage,
+      dependencies: flag.dependencies,
+    };
   }
 
   // ============================================
@@ -473,6 +611,44 @@ export class FeatureFlags {
   }
 
   /**
+   * Update an A/B test
+   */
+  static updateABTest(
+    testName: string,
+    updates: Partial<ABTestConfig>,
+    updatedBy: string = 'system'
+  ): void {
+    const existingTest = this.abTests.get(testName);
+    if (!existingTest) {
+      throw new Error(`A/B test '${testName}' not found`);
+    }
+
+    const updatedTest = { ...existingTest, ...updates, updatedAt: new Date() };
+    this.abTests.set(testName, updatedTest);
+
+    this.logAudit(
+      'update',
+      testName,
+      existingTest,
+      updatedTest,
+      updatedBy,
+      'A/B test updated'
+    );
+
+    logger.info(
+      `🧪 [FeatureFlags v2.0] Updated A/B test: ${testName}`,
+      'FeatureFlags'
+    );
+  }
+
+  /**
+   * Get A/B test configuration
+   */
+  static getABTest(testName: string): ABTestConfig | undefined {
+    return this.abTests.get(testName);
+  }
+
+  /**
    * Evaluate A/B test for a user
    */
   static evaluateABTest(
@@ -484,17 +660,18 @@ export class FeatureFlags {
       return null;
     }
 
+    // Check if test is within date range
     const now = new Date();
     if (now < test.startDate || (test.endDate && now > test.endDate)) {
       return null;
     }
 
-    // Check if flag is enabled
-    if (!this.isEnabled(test.flagName, { userId })) {
+    // Check target audience if specified
+    if (test.targetAudience && !test.targetAudience.includes(userId)) {
       return null;
     }
 
-    // Hash user ID to get consistent assignment
+    // Determine variant based on user ID hash
     const hash = this.hashString(userId + testName);
     const userPercentile = hash % 100;
 
@@ -506,21 +683,44 @@ export class FeatureFlags {
   }
 
   /**
-   * Get active A/B tests for a user
+   * Get A/B test assignments for a user
    */
-  static getActiveABTests(userId: string): {
+  static getABTestAssignments(userId: string): {
     [testName: string]: 'control' | 'treatment';
   } {
-    const activeTests = {};
-
+    const assignments = {};
     for (const [testName] of this.abTests.entries()) {
-      const variant = this.evaluateABTest(testName, userId);
-      if (variant) {
-        activeTests[testName] = variant;
+      const assignment = this.evaluateABTest(testName, userId);
+      if (assignment) {
+        assignments[testName] = assignment;
       }
     }
+    return assignments;
+  }
 
-    return activeTests;
+  // ============================================
+  // AUDIT LOGGING
+  // ============================================
+
+  /**
+   * Get audit log entries
+   */
+  static getAuditLog(limit?: number): FlagAuditEntry[] {
+    const sortedLog = [...this.auditLog].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
+    return limit ? sortedLog.slice(0, limit) : sortedLog;
+  }
+
+  /**
+   * Get audit log for a specific flag
+   */
+  static getFlagAuditLog(flagName: string, limit?: number): FlagAuditEntry[] {
+    const flagLog = this.auditLog.filter(entry => entry.flagName === flagName);
+    const sortedLog = flagLog.sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+    );
+    return limit ? sortedLog.slice(0, limit) : sortedLog;
   }
 
   // ============================================
@@ -546,6 +746,51 @@ export class FeatureFlags {
           `Circular dependency detected: ${flag.name} -> ${dependency}`
         );
       }
+    }
+  }
+
+  /**
+   * ✅ NEW: Validate all flag dependencies (call after module registration)
+   */
+  static validateAllFlagDependencies(): { isValid: boolean; errors: string[] } {
+    const errors = [];
+    let isValid = true;
+
+    try {
+      for (const flag of this.flags.values()) {
+        if (flag.dependencies) {
+          for (const dependency of flag.dependencies) {
+            if (!this.flags.has(dependency)) {
+              const error = `Flag '${flag.name}' has invalid dependency '${dependency}'`;
+              errors.push(error);
+              isValid = false;
+              logger.warn(`🚩 [FeatureFlags v2.0] ${error}`, 'FeatureFlags');
+            }
+          }
+        }
+      }
+
+      if (isValid) {
+        logger.success(
+          '🚩 [FeatureFlags v2.0] All flag dependencies validated successfully',
+          'FeatureFlags'
+        );
+      } else {
+        logger.warn(
+          `🚩 [FeatureFlags v2.0] Flag dependency validation found ${errors.length} issues`,
+          'FeatureFlags',
+          { errors }
+        );
+      }
+
+      return { isValid, errors };
+    } catch (error) {
+      logger.error(
+        '🚩 [FeatureFlags v2.0] Dependency validation failed',
+        'FeatureFlags',
+        error
+      );
+      return { isValid: false, errors: [error.message] };
     }
   }
 
@@ -591,98 +836,34 @@ export class FeatureFlags {
   }
 
   // ============================================
-  // AUDIT LOGGING
+  // LISTENER MANAGEMENT
   // ============================================
 
   /**
-   * Log audit entry
-   */
-  private static logAudit(
-    action: FlagAuditEntry['action'],
-    flagName: string,
-    oldValue?: any,
-    newValue?: any,
-    updatedBy: string = 'system',
-    reason?: string
-  ): void {
-    const entry: FlagAuditEntry = {
-      timestamp: new Date(),
-      action,
-      flagName,
-      oldValue,
-      newValue,
-      updatedBy,
-      reason,
-      metadata: {
-        userAgent: 'server',
-        source: 'FeatureFlags v2.0',
-      },
-    };
-
-    this.auditLog.push(entry);
-    this.metrics.auditEntries++;
-
-    // Keep only last 1000 entries to prevent memory issues
-    if (this.auditLog.length > 1000) {
-      this.auditLog.shift();
-    }
-
-    logger.info(
-      `🚩 [FeatureFlags v2.0] Audit: ${action} flag '${flagName}'`,
-      'FeatureFlags',
-      entry
-    );
-  }
-
-  /**
-   * Get audit log
-   */
-  static getAuditLog(limit: number = 100): FlagAuditEntry[] {
-    return this.auditLog.slice(-limit).reverse();
-  }
-
-  /**
-   * Get audit log for specific flag
-   */
-  static getFlagAuditLog(
-    flagName: string,
-    limit: number = 50
-  ): FlagAuditEntry[] {
-    return this.auditLog
-      .filter(entry => entry.flagName === flagName)
-      .slice(-limit)
-      .reverse();
-  }
-
-  // ============================================
-  // EVENT LISTENERS
-  // ============================================
-
-  /**
-   * Add flag change listener
+   * Add a listener for flag changes
    */
   static addListener(
     flagName: string,
-    callback: (flag: FeatureFlag) => void
+    listener: (flag: FeatureFlag) => void
   ): void {
     if (!this.listeners.has(flagName)) {
       this.listeners.set(flagName, []);
     }
-    this.listeners.get(flagName)!.push(callback);
+    this.listeners.get(flagName)!.push(listener);
   }
 
   /**
-   * Remove flag change listener
+   * Remove a listener for flag changes
    */
   static removeListener(
     flagName: string,
-    callback: (flag: FeatureFlag) => void
+    listener: (flag: FeatureFlag) => void
   ): void {
-    const listeners = this.listeners.get(flagName);
-    if (listeners) {
-      const index = listeners.indexOf(callback);
+    const flagListeners = this.listeners.get(flagName);
+    if (flagListeners) {
+      const index = flagListeners.indexOf(listener);
       if (index > -1) {
-        listeners.splice(index, 1);
+        flagListeners.splice(index, 1);
       }
     }
   }
@@ -691,51 +872,72 @@ export class FeatureFlags {
    * Notify listeners of flag changes
    */
   private static notifyListeners(flagName: string, flag: FeatureFlag): void {
-    const listeners = this.listeners.get(flagName);
-    if (listeners) {
-      listeners.forEach(callback => {
+    const flagListeners = this.listeners.get(flagName);
+    if (flagListeners) {
+      for (const listener of flagListeners) {
         try {
-          callback(flag);
+          listener(flag);
         } catch (error) {
           logger.error(
-            `🚩 [FeatureFlags v2.0] Error in flag listener for '${flagName}'`,
+            `🚩 [FeatureFlags v2.0] Listener error for flag '${flagName}'`,
             'FeatureFlags',
             error
           );
         }
-      });
+      }
     }
   }
 
   // ============================================
-  // UTILITY METHODS
+  // METRICS AND DIAGNOSTICS
   // ============================================
 
   /**
-   * Hash string for consistent user assignment
+   * Get comprehensive diagnostics
    */
-  private static hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-  }
+  static getDiagnostics(): any {
+    const validation = this.validateAllFlagDependencies();
+    const conflicts = this.detectConflicts();
 
-  /**
-   * Update internal metrics
-   */
-  private static updateMetrics(): void {
-    this.metrics.totalFlags = this.flags.size;
-    this.metrics.enabledFlags = Array.from(this.flags.values()).filter(
-      f => f.enabled
-    ).length;
-    this.metrics.activeABTests = Array.from(this.abTests.values()).filter(
-      t => t.active
-    ).length;
-    this.metrics.flagUpdates++;
+    return {
+      version: '2.0',
+      timestamp: new Date().toISOString(),
+      metrics: this.metrics,
+      validation: {
+        dependenciesValid: validation.isValid,
+        dependencyErrors: validation.errors,
+        conflicts,
+        totalConflicts: conflicts.length,
+      },
+      flags: {
+        total: this.flags.size,
+        enabled: Array.from(this.flags.values()).filter(f => f.enabled).length,
+        withDependencies: Array.from(this.flags.values()).filter(
+          f => f.dependencies
+        ).length,
+        withRollout: Array.from(this.flags.values()).filter(
+          f => f.rolloutPercentage !== undefined
+        ).length,
+        withExpiration: Array.from(this.flags.values()).filter(
+          f => f.expirationDate
+        ).length,
+      },
+      abTests: {
+        total: this.abTests.size,
+        active: Array.from(this.abTests.values()).filter(t => t.active).length,
+      },
+      audit: {
+        totalEntries: this.auditLog.length,
+        recentEntries: this.getAuditLog(5),
+      },
+      listeners: {
+        totalFlags: this.listeners.size,
+        totalListeners: Array.from(this.listeners.values()).reduce(
+          (sum, listeners) => sum + listeners.length,
+          0
+        ),
+      },
+    };
   }
 
   /**
@@ -784,15 +986,6 @@ export class FeatureFlags {
     }
 
     return flags;
-  }
-
-  /**
-   * Get flags for a specific module
-   */
-  static getModuleFlags(moduleName: string): FeatureFlag[] {
-    return Array.from(this.flags.values()).filter(
-      flag => flag.module === moduleName
-    );
   }
 
   /**
@@ -853,45 +1046,43 @@ export class FeatureFlags {
     };
   }
 
+  // ============================================
+  // INTERNAL HELPER METHODS
+  // ============================================
+
   /**
-   * Get comprehensive diagnostics
+   * Update internal metrics
    */
-  static getDiagnostics(): any {
-    return {
-      version: '2.0',
-      timestamp: new Date().toISOString(),
-      health: {
-        totalFlags: this.flags.size,
-        validDependencies: this.validateAllDependencies(),
-        conflictingFlags: this.detectConflicts(),
-        expiredFlags: this.getExpiredFlags(),
-      },
-      performance: this.metrics,
-      audit: {
-        totalEntries: this.auditLog.length,
-        recentEntries: this.auditLog.slice(-10),
-      },
-      listeners: Array.from(this.listeners.keys()),
-    };
+  private static updateMetrics(): void {
+    const flags = Array.from(this.flags.values());
+    this.metrics.totalFlags = flags.length;
+    this.metrics.enabledFlags = flags.filter(f => f.enabled).length;
+    this.metrics.activeABTests = Array.from(this.abTests.values()).filter(
+      t => t.active
+    ).length;
   }
 
   /**
-   * Validate all flag dependencies
+   * Log audit entry
    */
-  private static validateAllDependencies(): boolean {
-    try {
-      for (const flag of this.flags.values()) {
-        this.validateFlagDependencies(flag);
-      }
-      return true;
-    } catch (error) {
-      logger.error(
-        '🚩 [FeatureFlags v2.0] Dependency validation failed',
-        'FeatureFlags',
-        error
-      );
-      return false;
-    }
+  private static logAudit(
+    action: 'create' | 'update' | 'delete' | 'enable' | 'disable',
+    flagName: string,
+    oldValue: any,
+    newValue: any,
+    updatedBy: string,
+    reason?: string
+  ): void {
+    this.auditLog.push({
+      action,
+      flagName,
+      oldValue,
+      newValue,
+      updatedBy,
+      timestamp: new Date(),
+      reason,
+    });
+    this.metrics.auditEntries = this.auditLog.length;
   }
 
   /**
@@ -913,13 +1104,58 @@ export class FeatureFlags {
   }
 
   /**
-   * Get expired flags
+   * Hash string for consistent user assignment
    */
-  private static getExpiredFlags(): string[] {
-    const now = new Date();
-    return Array.from(this.flags.values())
-      .filter(flag => flag.expirationDate && now > flag.expirationDate)
-      .map(flag => flag.name);
+  private static hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+
+  /**
+   * Check if module is enabled (alias for isEnabled)
+   */
+  static isModuleEnabled(
+    moduleName: string,
+    context?: { userId?: string; tenantId?: string }
+  ): boolean {
+    return this.isEnabled(moduleName, context);
+  }
+
+  /**
+   * Get flag by name
+   */
+  static getFlag(flagName: string): FeatureFlag | undefined {
+    return this.flags.get(flagName);
+  }
+
+  /**
+   * Check if flag exists
+   */
+  static hasFlag(flagName: string): boolean {
+    return this.flags.has(flagName);
+  }
+
+  /**
+   * Get all module flags
+   */
+  static getModuleFlags(moduleName: string): FeatureFlag[] {
+    return this.getAllFlags({ module: moduleName });
+  }
+
+  /**
+   * Get flags by tag
+   */
+  static getFlagsByTag(tag: string): FeatureFlag[] {
+    return this.getAllFlags({ tags: [tag] });
   }
 }
 
@@ -959,7 +1195,8 @@ export const updateFlag = (
   updates: Partial<FeatureFlag>,
   updatedBy?: string,
   reason?: string
-): void => FeatureFlags.updateFlag(name, updates, updatedBy, reason);
+): FeatureFlag | null =>
+  FeatureFlags.updateFlag(name, updates, updatedBy, reason);
 
 export const addFlagListener = (
   flagName: string,
