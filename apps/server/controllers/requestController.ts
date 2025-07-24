@@ -6,7 +6,12 @@ import { and, desc, eq } from 'drizzle-orm';
 import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 
 // ✅ ENHANCED: Import modular architecture components v2.0
-import { isModuleEnabled } from '@server/shared/FeatureFlags';
+import {
+  addFlagListener,
+  evaluateABTest,
+  isFeatureEnabled,
+  isModuleEnabled,
+} from '@server/shared/FeatureFlags';
 import {
   ServiceContainer,
   getServiceSync,
@@ -17,9 +22,40 @@ import {
  *
  * Handles all request/order-related HTTP requests and responses.
  * Now uses enhanced ServiceContainer v2.0 with lifecycle management and async service resolution.
+ * Demonstrates advanced FeatureFlags v2.0 with A/B testing and context-aware evaluation.
  * Includes automatic camelCase ↔ snake_case transformation for frontend compatibility.
  */
 export class RequestController {
+  // ✅ NEW v2.0: Initialize flag listeners for dynamic behavior
+  private static initialized = false;
+
+  static initialize(): void {
+    if (this.initialized) return;
+
+    // ✅ NEW v2.0: Listen for feature flag changes
+    addFlagListener('request-module', flag => {
+      logger.info(
+        `🚩 [RequestController] Request module flag changed: ${flag.enabled}`,
+        'RequestController',
+        { flag: flag.name, enabled: flag.enabled }
+      );
+    });
+
+    addFlagListener('advanced-analytics', flag => {
+      logger.info(
+        `🚩 [RequestController] Advanced analytics flag changed: ${flag.enabled}`,
+        'RequestController',
+        { flag: flag.name, enabled: flag.enabled }
+      );
+    });
+
+    this.initialized = true;
+    logger.debug(
+      '🚩 [RequestController] Flag listeners initialized',
+      'RequestController'
+    );
+  }
+
   // ✅ NEW: Enhanced service retrieval with async support
   private static async getTenantServiceAsync() {
     try {
@@ -47,12 +83,21 @@ export class RequestController {
   /**
    * Create new request/order
    * POST /api/request
-   * ✅ ENHANCED: Now with module checks and ServiceContainer v2.0
+   * ✅ ENHANCED: Now with advanced FeatureFlags v2.0 A/B testing and context evaluation
    */
   static async createRequest(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ ENHANCED: Check if request module is enabled
-      if (!isModuleEnabled('request-module')) {
+      // ✅ NEW v2.0: Initialize flag listeners on first use
+      this.initialize();
+
+      // ✅ ENHANCED v2.0: Context-aware feature flag evaluation
+      const context = {
+        userId: req.headers['x-user-id'] as string,
+        tenantId: (req as any).tenant?.id,
+      };
+
+      // ✅ ENHANCED v2.0: Check if request module is enabled with context
+      if (!isModuleEnabled('request-module', context)) {
         (res as any).status(503).json({
           success: false,
           error: 'Request module is currently disabled',
@@ -61,15 +106,39 @@ export class RequestController {
             module: 'request-module',
             version: '2.0.0',
             architecture: 'modular-enhanced',
+            context,
           },
         });
         return;
       }
 
+      // ✅ NEW v2.0: A/B test for advanced analytics
+      const advancedAnalyticsVariant = context.userId
+        ? evaluateABTest('advanced-analytics-test', context.userId)
+        : null;
+
+      // ✅ NEW v2.0: Feature-specific flags with context
+      const enableRealTimeNotifications = isFeatureEnabled(
+        'real-time-notifications',
+        context
+      );
+      const enableAdvancedAnalytics = isFeatureEnabled(
+        'advanced-analytics',
+        context
+      );
+
       logger.api(
         '📝 [RequestController] Creating new request (camelCase) - Modular v2.0',
         'RequestController',
-        req.body
+        {
+          body: req.body,
+          context,
+          features: {
+            realTimeNotifications: enableRealTimeNotifications,
+            advancedAnalytics: enableAdvancedAnalytics,
+            abTest: advancedAnalyticsVariant,
+          },
+        }
       );
 
       // ✅ TRANSFORM: camelCase frontend data → snake_case database data
@@ -146,12 +215,34 @@ export class RequestController {
         );
       }
 
+      // ✅ NEW v2.0: Enhanced ID generation based on A/B test
+      let orderId;
+      if (advancedAnalyticsVariant === 'treatment') {
+        // Treatment group gets enhanced ID with analytics tracking
+        orderId = generateShortId('request') + '_A';
+        logger.debug(
+          '🧪 [RequestController] A/B Test Treatment: Enhanced ID generation',
+          'RequestController',
+          { variant: advancedAnalyticsVariant, orderId }
+        );
+      } else {
+        // Control group gets standard ID
+        orderId = generateShortId('request');
+        if (advancedAnalyticsVariant === 'control') {
+          logger.debug(
+            '🧪 [RequestController] A/B Test Control: Standard ID generation',
+            'RequestController',
+            { variant: advancedAnalyticsVariant, orderId }
+          );
+        }
+      }
+
       // Create request record compatible with schema (id will be auto-generated)
       const newRequest = {
         tenant_id: req.tenant.id, // ✅ OPTIMIZED: No fallback - require valid tenant
         call_id: call_id || generateId('call'),
         room_number: room_number || 'unknown',
-        order_id: generateShortId('request'), // ✅ OPTIMIZED: Use UUID-based ID generation
+        order_id: orderId, // ✅ ENHANCED v2.0: A/B test influenced ID generation
         request_content: content,
         status: finalStatus,
         created_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
@@ -177,6 +268,21 @@ export class RequestController {
       // ✅ TRANSFORM: snake_case database response → camelCase frontend response
       const frontendResponse = requestMapper.toFrontend(createdRequest);
 
+      // ✅ NEW v2.0: Enhanced analytics tracking (if enabled)
+      if (enableAdvancedAnalytics) {
+        logger.info(
+          '📊 [RequestController] Advanced analytics tracking enabled',
+          'RequestController',
+          {
+            orderId: newRequest.order_id,
+            roomNumber: newRequest.room_number,
+            abTestVariant: advancedAnalyticsVariant,
+            userId: context.userId,
+            tenantId: context.tenantId,
+          }
+        );
+      }
+
       // Return success response
       const response = {
         success: true,
@@ -186,13 +292,24 @@ export class RequestController {
           reference: newRequest.order_id,
           estimatedTime: delivery_time || 'asap',
         },
-        // ✅ ENHANCED: Module metadata v2.0
+        // ✅ ENHANCED: Module metadata v2.0 with A/B testing info
         _metadata: {
           module: 'request-module',
           version: '2.0.0',
           architecture: 'modular-enhanced',
           serviceContainer: 'v2.0',
           tenantValidated: true,
+          features: {
+            realTimeNotifications: enableRealTimeNotifications,
+            advancedAnalytics: enableAdvancedAnalytics,
+          },
+          abTest: advancedAnalyticsVariant
+            ? {
+                testName: 'advanced-analytics-test',
+                variant: advancedAnalyticsVariant,
+                userId: context.userId,
+              }
+            : undefined,
         },
       };
 
@@ -202,6 +319,8 @@ export class RequestController {
         {
           orderId: newRequest.order_id,
           roomNumber: newRequest.room_number,
+          abTest: advancedAnalyticsVariant,
+          features: { enableAdvancedAnalytics, enableRealTimeNotifications },
         }
       );
 
@@ -399,12 +518,23 @@ export class RequestController {
 
       const tenantId = req.tenant.id;
 
+      // ✅ NEW v2.0: Context-aware real-time notifications
+      const context = {
+        userId: req.headers['x-user-id'] as string,
+        tenantId: req.tenant.id,
+      };
+      const enableRealTimeNotifications = isFeatureEnabled(
+        'real-time-notifications',
+        context
+      );
+
       logger.api(
         `📝 [RequestController] Updating request ${requestId} status to: ${status}`,
         'RequestController',
         {
           tenantId,
           assignedTo,
+          realTimeNotifications: enableRealTimeNotifications,
         }
       );
 
@@ -428,17 +558,25 @@ export class RequestController {
           )
         );
 
-      // WebSocket notification (if available)
-      const io = (req as any).app?.get('io');
-      if (io) {
-        io.emit('requestStatusUpdate', {
-          requestId,
-          status,
-          assignedTo,
-          timestamp: new Date().toISOString(),
-        });
+      // ✅ ENHANCED v2.0: Feature flag controlled WebSocket notification
+      if (enableRealTimeNotifications) {
+        const io = (req as any).app?.get('io');
+        if (io) {
+          io.emit('requestStatusUpdate', {
+            requestId,
+            status,
+            assignedTo,
+            timestamp: new Date().toISOString(),
+            tenantId,
+          });
+          logger.debug(
+            `📡 [RequestController] WebSocket notification sent for request ${requestId}`,
+            'RequestController'
+          );
+        }
+      } else {
         logger.debug(
-          `📡 [RequestController] WebSocket notification sent for request ${requestId}`,
+          `📡 [RequestController] Real-time notifications disabled for request ${requestId}`,
           'RequestController'
         );
       }
@@ -449,6 +587,7 @@ export class RequestController {
         {
           requestId,
           newStatus: status,
+          realTimeNotified: enableRealTimeNotifications,
         }
       );
 
@@ -460,6 +599,9 @@ export class RequestController {
           status,
           assignedTo,
           updatedAt: updateData.updated_at,
+        },
+        _metadata: {
+          realTimeNotifications: enableRealTimeNotifications,
         },
       });
     } catch (error) {
