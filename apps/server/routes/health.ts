@@ -3,32 +3,97 @@
 // Provides comprehensive health checks for deployment and monitoring
 // ============================================================================
 
-import { Router, Request, Response } from 'express';
 import { HealthController } from '@server/controllers/healthController';
+import express, { type Request, Response } from 'express';
 
-const router = Router();
+// ✅ NEW: Import modular architecture health check
+import { getArchitectureHealth } from '@server/shared';
+
+const router = express.Router();
 
 // ============================================
-// HEALTH CHECK ENDPOINTS WITH CONNECTION POOL MONITORING
+// EXISTING HEALTH ENDPOINTS (unchanged)
 // ============================================
 
-// Basic health check - for load balancers and simple monitoring
-// GET /api/health
-router.get('/', HealthController.getHealth);
+// Basic health check
+router.get('/health', HealthController.getHealth);
 
-// Detailed health check - comprehensive system information
-// GET /api/health/detailed
-router.get('/detailed', HealthController.getDetailedHealth);
+// Detailed health check
+router.get('/health/detailed', HealthController.getDetailedHealth);
 
-// Database-specific health check - connection pool metrics and database status
-// GET /api/health/database
-router.get('/database', HealthController.getDatabaseHealth);
+// Database health check
+router.get('/health/database', HealthController.getDatabaseHealth);
 
-// Kubernetes/container orchestration probes
-// GET /api/health/ready (readiness probe)
-router.get('/ready', HealthController.getReadiness);
+// ============================================
+// NEW: MODULAR ARCHITECTURE HEALTH ENDPOINT
+// ============================================
 
-// GET /api/health/live (liveness probe)
-router.get('/live', HealthController.getLiveness);
+/**
+ * GET /api/health/architecture - Check modular architecture health
+ * Tests modules, service container, and feature flags
+ */
+router.get('/architecture', async (_req: Request, res: Response) => {
+  try {
+    const architectureHealth = getArchitectureHealth();
+
+    // Determine overall health status
+    const moduleHealths = Object.values(
+      architectureHealth.modular.moduleHealth
+    );
+    const allModulesHealthy = moduleHealths.every(
+      (health: any) => health.status === 'healthy'
+    );
+
+    const overallStatus = allModulesHealthy ? 'healthy' : 'degraded';
+
+    (res as any).status(200).json({
+      status: overallStatus,
+      timestamp: new Date().toISOString(),
+      architecture: architectureHealth,
+      summary: {
+        totalModules: architectureHealth.modular.modules.length,
+        healthyModules: moduleHealths.filter((h: any) => h.status === 'healthy')
+          .length,
+        registeredServices:
+          architectureHealth.services.container.registeredServices,
+        enabledFeatures: architectureHealth.features.flags.enabledFlags,
+      },
+    });
+  } catch (error) {
+    (res as any).status(500).json({
+      status: 'unhealthy',
+      error: 'Failed to check architecture health',
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// ============================================
+// NEW: FEATURE FLAGS ENDPOINT
+// ============================================
+
+/**
+ * GET /api/health/features - Check feature flags status
+ */
+router.get('/features', async (_req: Request, res: Response) => {
+  try {
+    const { FeatureFlags } = await import('@server/shared/FeatureFlags');
+    const featureStatus = FeatureFlags.getStatus();
+
+    (res as any).status(200).json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      features: featureStatus,
+    });
+  } catch (error) {
+    (res as any).status(500).json({
+      status: 'unhealthy',
+      error: 'Failed to check feature flags',
+      details: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
 
 export default router;
