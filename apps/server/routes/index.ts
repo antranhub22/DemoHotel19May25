@@ -11,8 +11,12 @@ import staffRoutes from '@server/routes/staff';
 // import { logger } from '@shared/utils/logger'; // Not used currently
 // import unifiedAuthRoutes from '@auth/routes/auth.routes';
 import tempAuthRoutes from '@server/routes/temp-auth'; // EMERGENCY FIX for production 401 errors
+import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
 
 const router = express.Router();
+
+// ✅ PRIORITY: Public routes first (no middleware)
+router.use('/api/public', tempPublicRoutes);
 
 // Mount all route modules
 router.use('/api', apiRoutes);
