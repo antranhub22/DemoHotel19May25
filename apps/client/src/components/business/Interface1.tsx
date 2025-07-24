@@ -1,19 +1,19 @@
 // Interface1 component - Multi-tenant version v2.0.0 - Single Implementation
 
 // React hooks
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Custom Hook
-import { logger } from '../../../../../packages/shared/utils/logger';
-import { useAssistant } from '../../context';
+import { useAssistant } from '@/context';
+import { logger } from '@shared/utils/logger';
 
 // Context
 
 // Types & Constants
-import { usePopupContext } from '../../context/PopupContext';
-import { useInterface1 } from '../../hooks/useInterface1';
-import type { Language } from '../../types/interface1.types';
-import { ServiceItem } from '../../types/interface1.types';
+import { usePopupContext } from '@/context/PopupContext';
+import { useInterface1 } from '@/hooks/useInterface1';
+import type { Language } from '@/types/interface1.types';
+import { ServiceItem } from '@/types/interface1.types';
 import ChatPopup from '../features/popup-system/ChatPopup';
 import SummaryPopup from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';

@@ -139,7 +139,10 @@
     "diag:deps": "echo '=== Dependency Check ===' && npx depcheck",
     "diag:circular": "echo '=== Circular Dependencies ===' && npx madge --circular src/",
     "diag:lint": "echo '=== ESLint Check ===' && npm run lint",
-    "diag:git": "echo '=== Git Status ===' && git status --porcelain"
+    "diag:git": "echo '=== Git Status ===' && git status --porcelain",
+    "validate:final": "./tools/scripts/validation/final-validation.sh",
+    "validate:final:demo": "./tools/scripts/validation/final-validation-demo.sh",
+    "validate:business-ready": "./tools/scripts/validation/final-validation.sh"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

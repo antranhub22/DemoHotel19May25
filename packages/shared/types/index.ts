@@ -8,25 +8,25 @@
 
 // Core types (confirmed exports)
 export type {
-  Language,
-  ServiceCategory,
-  UserRole,
-  Permission,
-  AuthErrorCode,
-  ID,
-  Timestamp,
-  BasicHotelData,
-  RoomType,
-  HotelService,
-  ApiResponse,
   ApiError,
+  ApiResponse,
+  AuthErrorCode,
+  BasicHotelData,
+  HotelService,
+  ID,
+  Language,
+  Permission,
+  RoomType,
+  ServiceCategory,
+  Timestamp,
+  UserRole,
 } from '../../types/core';
 
 // API types (confirmed exports)
 export type {
+  AssistantCustomization,
   HotelData,
   HotelProfile,
-  AssistantCustomization,
   SaveTranscriptRequest,
   SaveTranscriptResponse,
   WebSocketMessage,
@@ -34,20 +34,20 @@ export type {
 
 // Database types
 export type {
-  Staff,
-  InsertStaff,
   Call,
-  InsertCall,
-  Transcript,
-  InsertTranscript,
-  RequestRecord,
-  InsertRequestRecord,
-  Message,
-  InsertMessage,
   CallSummary,
+  InsertCall,
   InsertCallSummary,
-  Tenant,
+  InsertMessage,
+  InsertRequestRecord,
+  InsertStaff,
   InsertTenant,
+  InsertTranscript,
+  Message,
+  RequestRecord,
+  Staff,
+  Tenant,
+  Transcript,
 } from '@shared/db/schema';
 
 // ========================================

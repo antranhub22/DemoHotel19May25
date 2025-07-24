@@ -1,6 +1,6 @@
+import { logger } from '@shared/utils/logger';
 import * as express from 'express';
 import * as jwt from 'jsonwebtoken';
-import { logger } from '../../../packages/shared/utils/logger';
 
 const router = express.Router();
 
@@ -167,7 +167,7 @@ router.get('/me', async (req, res) => {
 });
 
 // ✅ POST /api/auth/logout - Logout endpoint
-router.post('/logout', (req, res) => {
+router.post('/logout', (_req, res) => {
   (res as any).json({
     success: true,
     message: 'Logged out successfully',
