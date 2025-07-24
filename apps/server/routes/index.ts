@@ -16,10 +16,13 @@ import featureFlagsRoutes from '@server/routes/feature-flags';
 // ✅ NEW v2.0: Module lifecycle management API
 import moduleLifecycleRoutes from '@server/routes/module-lifecycle';
 
+// ✅ NEW v2.0: Enhanced Logging & Metrics monitoring API
+import monitoringRoutes from '@server/routes/monitoring';
+
 const router = express.Router();
 
 // ============================================
-// MAIN API ROUTES WITH ENHANCED ARCHITECTURE
+// MAIN API ROUTES WITH ENHANCED ARCHITECTURE v2.0
 // ============================================
 
 // ✅ AUTH ROUTES - COMPLETELY OUTSIDE /api/* PREFIX (no rate limiting, no middleware)
@@ -39,6 +42,9 @@ router.use('/api/feature-flags', featureFlagsRoutes);
 
 // ✅ NEW v2.0: Module lifecycle management API
 router.use('/api/module-lifecycle', moduleLifecycleRoutes);
+
+// ✅ NEW v2.0: Enhanced Logging & Metrics monitoring API
+router.use('/api/monitoring', monitoringRoutes);
 
 // ✅ PUBLIC ROUTES - For development and testing
 router.use('/public', tempPublicRoutes);

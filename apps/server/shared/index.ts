@@ -2,11 +2,17 @@
 // SHARED UTILITIES INDEX - Modular Architecture v2.0
 // ============================================
 // Central export for all cross-cutting concerns and utilities
+// Enhanced with Logging & Metrics v2.0 integration
 
 // Core utilities
 export * from './FeatureFlags';
-export * from './ModuleLifecycleManager'; // ✅ NEW v2.0: Module lifecycle management
+export * from './ModuleLifecycleManager';
 export * from './ServiceContainer';
+
+// ✅ NEW v2.0: Enhanced Logging & Metrics System
+export * from './EnhancedLogger';
+export * from './MetricsCollector';
+export * from './MonitoringIntegration';
 
 // Import for usage in health check
 import {
@@ -14,8 +20,11 @@ import {
   checkAllModulesHealth,
   getAvailableModules,
 } from '../modules';
+import { EnhancedLogger } from './EnhancedLogger'; // ✅ NEW v2.0
 import { FeatureFlags } from './FeatureFlags';
-import { ModuleLifecycleManager } from './ModuleLifecycleManager'; // ✅ NEW v2.0
+import { MetricsCollector } from './MetricsCollector'; // ✅ NEW v2.0
+import { ModuleLifecycleManager } from './ModuleLifecycleManager';
+import { MonitoringIntegration } from './MonitoringIntegration'; // ✅ NEW v2.0
 import { ServiceContainer } from './ServiceContainer';
 
 // Re-export existing shared utilities for convenience
@@ -25,7 +34,7 @@ export { logger } from '@shared/utils/logger';
 // Module system exports
 export { MODULE_REGISTRY, checkAllModulesHealth, getAvailableModules };
 
-// ✅ ENHANCED v2.0: Architecture health check with lifecycle management
+// ✅ ENHANCED v2.0: Architecture health check with comprehensive monitoring
 export const getArchitectureHealth = () => {
   return {
     modular: {
@@ -38,13 +47,70 @@ export const getArchitectureHealth = () => {
     features: {
       flags: FeatureFlags.getStatus(),
     },
-    // ✅ NEW v2.0: Module lifecycle management health
     lifecycle: {
       systemHealth: ModuleLifecycleManager.getSystemHealth(),
       modulesStatus: ModuleLifecycleManager.getModulesStatus(),
       diagnostics: ModuleLifecycleManager.getDiagnostics(),
     },
+    // ✅ NEW v2.0: Enhanced Logging & Metrics Health
+    monitoring: {
+      logger: EnhancedLogger.getHealthStatus(),
+      metrics: MetricsCollector.getHealthSummary(),
+      integration: MonitoringIntegration.getMonitoringStatus(),
+      overall: MonitoringIntegration.getMonitoringStatus().health,
+    },
     timestamp: new Date().toISOString(),
-    architecture: 'Modular v2.0 with Lifecycle Management',
+    architecture: 'Modular v2.0 with Enhanced Logging & Metrics',
   };
 };
+
+// ✅ NEW v2.0: Initialize monitoring integration on import
+let monitoringInitialized = false;
+
+export const initializeMonitoring = async (config?: any) => {
+  if (monitoringInitialized) {
+    return;
+  }
+
+  try {
+    // Initialize monitoring integration
+    await MonitoringIntegration.initialize({
+      enableEnhancedLogging: true,
+      enableMetricsCollection: true,
+      enablePerformanceTracing: true,
+      enableAutoAlerts: true,
+      logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      metricsInterval: 30000,
+      ...config,
+    });
+
+    monitoringInitialized = true;
+
+    // Create integrated logger for reporting
+    const systemLogger = EnhancedLogger.createModuleLogger('System', '2.0.0');
+    systemLogger.success(
+      '🎉 Enhanced Logging & Metrics v2.0 initialized successfully',
+      {
+        architecture: 'Modular v2.0',
+        components: [
+          'EnhancedLogger',
+          'MetricsCollector',
+          'MonitoringIntegration',
+        ],
+      }
+    );
+  } catch (error) {
+    console.error('❌ Failed to initialize monitoring system:', error);
+    throw error;
+  }
+};
+
+// ✅ NEW v2.0: Auto-initialize monitoring in non-test environments
+if (process.env.NODE_ENV !== 'test') {
+  // Use setTimeout to ensure this runs after module system is ready
+  setTimeout(() => {
+    initializeMonitoring().catch(error => {
+      console.error('❌ Auto-initialization of monitoring failed:', error);
+    });
+  }, 1000);
+}
