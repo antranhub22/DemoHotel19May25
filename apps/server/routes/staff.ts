@@ -224,6 +224,7 @@ router.post(
         requestId: id,
         sender: 'staff',
         content,
+        timestamp: new Date(), // ✅ FIXED: Add required timestamp property
         created_at: new Date(),
         updated_at: new Date(),
       };

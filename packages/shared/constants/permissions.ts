@@ -22,6 +22,7 @@ export interface Permission {
 }
 
 // Simple permission matrix for frontend
+// ✅ FIXED: Add all missing UserRole entries to match global definition
 export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
   'hotel-manager': {
     dashboard: ['view', 'edit'],
@@ -71,6 +72,9 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     calls: ['view', 'manage'],
     requests: ['view', 'manage'],
     system: ['view', 'debug', 'manage'],
+  },
+  guest: {
+    dashboard: ['view'], // Add missing guest permissions
   },
 };
 
@@ -282,6 +286,15 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       icon: '⚙️',
       path: '/saas-dashboard/system',
       requiredPermission: 'system.view',
+    },
+  ],
+  guest: [
+    {
+      key: 'dashboard',
+      label: 'Tổng quan',
+      icon: '📊',
+      path: '/saas-dashboard',
+      requiredPermission: 'dashboard.view',
     },
   ],
 };

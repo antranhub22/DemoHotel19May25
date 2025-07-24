@@ -19,7 +19,8 @@ import {
   Server,
   Activity,
 } from 'lucide-react';
-import type { UserRole } from '@shared/constants/permissions';
+// ✅ FIXED: Use global UserRole type instead of shared constants export
+// import type { UserRole } from '@shared/constants/permissions';
 import {
   Card,
   CardContent,

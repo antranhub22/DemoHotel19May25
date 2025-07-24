@@ -64,11 +64,17 @@ export const AUTH_ENDPOINTS = {
 // ROLE HIERARCHY & PERMISSIONS
 // ============================================
 
+// ✅ FIXED: Add missing UserRole mappings to match global definition
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
   'super-admin': 100,
   'hotel-manager': 70,
   'it-manager': 60,
   'front-desk': 40,
+  admin: 80, // Added missing roles
+  staff: 30,
+  manager: 60,
+  frontdesk: 40,
+  itmanager: 60,
   guest: 10,
 } as const;
 

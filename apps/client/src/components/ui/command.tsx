@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
+import type { DialogProps } from '@radix-ui/react-dialog'; // ✅ FIXED: Add missing DialogProps import
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -21,7 +22,10 @@ Command.displayName = CommandPrimitive.displayName;
 
 interface CommandDialogProps extends DialogProps {}
 
-const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
+const CommandDialog = ({
+  children,
+  ...props
+}: CommandDialogProps & { children: React.ReactNode }) => {
   return (
     <Dialog {...props}>
       <DialogContent className="overflow-hidden p-0 shadow-lg">

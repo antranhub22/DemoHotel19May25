@@ -407,10 +407,16 @@ export function parseSummaryToOrderDetails(
   // Extract individual components using shared utilities
   const roomNumber = extractRoomNumberShared(summary) || '';
   const orderType = determineOrderType(summary);
-  const deliveryTime = extractDeliveryTimeShared(summary) || '';
-  const specialInstructions = extractSpecialInstructionsShared(summary) || '';
+  // ✅ FIXED: Use inline extraction instead of missing shared functions
+  const deliveryTime =
+    summary.match(/delivery.*?time:?\s*([^.\n]+)/i)?.[1]?.trim() || '';
+  const specialInstructions =
+    summary.match(/special.*?instructions?:?\s*([^.\n]+)/i)?.[1]?.trim() || '';
   const items = extractItems(summary);
-  const totalAmount = extractTotalAmountShared(summary) || 0;
+  const totalAmount =
+    parseFloat(
+      summary.match(/total.*?amount?:?\s*(\d+(?:\.\d+)?)/i)?.[1] || '0'
+    ) || 0;
 
   return {
     roomNumber,

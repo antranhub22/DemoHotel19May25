@@ -31,11 +31,10 @@ export async function apiRequest({
 }
 
 type UnauthorizedBehavior = 'returnNull' | 'throw';
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
+// ✅ FIXED: Simplified function signature to avoid complex type issues
+export const getQueryFn = <T>(options: { on401: UnauthorizedBehavior }) => {
+  return async ({ queryKey }: any): Promise<T> => {
+    const { on401: unauthorizedBehavior } = options;
     const res = await fetch(queryKey[0] as string, {
       credentials: 'include',
     });
@@ -47,6 +46,7 @@ export const getQueryFn: <T>(options: {
     await throwIfResNotOk(res);
     return await (res as any).json();
   };
+};
 
 export const queryClient = new QueryClient({
   defaultOptions: {

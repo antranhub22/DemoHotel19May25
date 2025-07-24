@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Edit, Trash2, Shield, Eye, EyeOff, Search, Filter, RefreshCw, Settings, Lock, Unlock, Key,  } from 'lucide-react';
+import {
+  Users,
+  UserPlus,
+  Edit,
+  Trash2,
+  Shield,
+  Eye,
+  EyeOff,
+  Search,
+  Filter,
+  RefreshCw,
+  Settings,
+  Lock,
+  Unlock,
+  Key,
+} from 'lucide-react';
 import { logger } from '@shared/utils/logger';
-import type { UserRole } from '@shared/constants/permissions';
+// ✅ FIXED: Use global UserRole type instead of shared constants export
+// import type { UserRole } from '@shared/constants/permissions';
 import { useAuth } from '@/context/AuthContext';
 import {
   Card,
@@ -21,7 +37,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -362,7 +384,9 @@ const StaffPermissionsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  if (!staff) {return null;}
+  if (!staff) {
+    return null;
+  }
 
   const roleConfig = roleConfigs[staff.role];
 
@@ -603,9 +627,8 @@ export const StaffManagement: React.FC = () => {
 
   // Load staff on mount
   useEffect(() => {
-
     fetchStaffList();
-  
+
     // no cleanup needed
   }, []);
 

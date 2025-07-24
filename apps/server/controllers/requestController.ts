@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 import { logger } from '@shared/utils/logger';
 import { request as requestTable } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
@@ -123,7 +123,10 @@ export class RequestController {
       (res as any).status(500).json({
         success: false,
         error: 'Failed to create request',
-        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+        details:
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error',
       });
     }
   }

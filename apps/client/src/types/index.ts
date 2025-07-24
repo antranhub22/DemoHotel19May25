@@ -23,6 +23,6 @@ export type {
 // Interface specific types
 export type {
   Interface1Props,
-  ServiceCategory,
+  SERVICE_CATEGORIES, // ✅ FIXED: Use correct export name
   Language,
 } from './interface1.types';

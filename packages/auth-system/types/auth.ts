@@ -9,17 +9,19 @@
 // ============================================
 
 // Legacy RBAC roles (maintain backward compatibility)
+// ✅ FIXED: Use global UserRole type to avoid conflicts
+// Re-export the global UserRole type for backward compatibility
 export type UserRole =
+  | 'super-admin'
   | 'hotel-manager'
   | 'front-desk'
   | 'it-manager'
-  // Extended roles for compatibility with existing auth system
   | 'admin'
   | 'staff'
   | 'manager'
   | 'frontdesk'
   | 'itmanager'
-  | 'super-admin';
+  | 'guest';
 
 // ============================================
 // PERMISSION SYSTEM
