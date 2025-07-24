@@ -10,6 +10,7 @@ import express from 'express';
 
 // ✅ Import admin module routes
 import cacheRoutes from './cache.routes';
+import databaseOptimizationRoutes from './database-optimization.routes';
 import featureFlagsRoutes from './feature-flags.routes';
 import loadTestingRoutes from './load-testing.routes';
 import metricsRoutes from './metrics.routes';
@@ -102,6 +103,12 @@ router.use('/cache', cacheRoutes);
 router.use('/load-testing', loadTestingRoutes);
 
 /**
+ * Database optimization and performance management
+ * Mounted at: /api/admin/database/*
+ */
+router.use('/database', databaseOptimizationRoutes);
+
+/**
  * GET /api/admin - Admin module information
  */
 router.get('/', (_req, res) => {
@@ -123,6 +130,7 @@ router.get('/', (_req, res) => {
       performanceAudit: isFeatureEnabled('performance-audit') || true, // Always available
       cacheManagement: isFeatureEnabled('cache-management') || true, // Always available
       loadTesting: isFeatureEnabled('load-testing') || true, // Always available
+      databaseOptimization: isFeatureEnabled('database-optimization') || true, // Always available
     },
 
     endpoints: {
@@ -133,6 +141,7 @@ router.get('/', (_req, res) => {
       performance: '/api/admin/performance',
       cache: '/api/admin/cache',
       loadTesting: '/api/admin/load-testing',
+      database: '/api/admin/database',
     },
 
     integrations: {
@@ -144,6 +153,8 @@ router.get('/', (_req, res) => {
       performanceAuditor: true,
       cacheManager: true,
       loadTestManager: true,
+      databaseOptimizer: true,
+      connectionPoolManager: true,
     },
 
     timestamp: new Date().toISOString(),

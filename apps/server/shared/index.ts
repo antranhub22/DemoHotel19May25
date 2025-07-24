@@ -106,6 +106,35 @@ export {
   type StressTestConfig,
 } from './LoadTestManager';
 
+// ✅ v3.0: NEW Database Optimization System
+export {
+  analyzeQuery,
+  createDatabaseOptimizer,
+  DatabaseOptimizer,
+  getDatabaseHealth,
+  initializeDatabaseOptimizer,
+  optimizeDatabase,
+  type DatabaseConfig,
+  type DatabaseHealthStatus,
+  type IndexSuggestion,
+  type OptimizationReport,
+  type QueryAnalysis,
+} from './DatabaseOptimizer';
+
+// ✅ v3.0: NEW Connection Pool Management System
+export {
+  ConnectionPoolManager,
+  createConnectionPoolManager,
+  executeQuery,
+  getPoolStatus,
+  initializeConnectionPool,
+  type AutoScalingEvent,
+  type ConnectionInfo,
+  type ConnectionLeak,
+  type PoolConfiguration,
+  type PoolMetrics,
+} from './ConnectionPoolManager';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -261,7 +290,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring, metrics collection, performance auditing, caching, and load testing
+ * Now includes advanced health monitoring, metrics collection, performance auditing, caching, load testing, and database optimization
  */
 export async function initializeMonitoring() {
   try {
@@ -285,6 +314,10 @@ export async function initializeMonitoring() {
     );
     const { initializeCache } = await import('./CacheManager');
     const { initializeLoadTesting } = await import('./LoadTestManager');
+    const { initializeDatabaseOptimizer } = await import('./DatabaseOptimizer');
+    const { initializeConnectionPool } = await import(
+      './ConnectionPoolManager'
+    );
 
     // Initialize components in order (using available methods)
     // Note: EnhancedLogger and MetricsCollector don't have initialize methods
@@ -336,8 +369,94 @@ export async function initializeMonitoring() {
     // v3.0: Initialize load testing system
     await initializeLoadTesting();
 
+    // v3.0: Initialize database optimization system
+    const databaseConfig = {
+      type: (process.env.DATABASE_URL?.includes('postgresql')
+        ? 'postgresql'
+        : 'sqlite') as 'postgresql' | 'sqlite',
+      url: process.env.DATABASE_URL || 'file:./dev.db',
+      pool: {
+        min: 5,
+        max: 20,
+        acquireTimeoutMillis: 30000,
+        createTimeoutMillis: 30000,
+        destroyTimeoutMillis: 5000,
+        idleTimeoutMillis: 300000,
+        reapIntervalMillis: 10000,
+        createRetryIntervalMillis: 200,
+        propagateCreateError: false,
+      },
+      optimization: {
+        enableQueryCache: true,
+        enablePreparedStatements: true,
+        enableIndexOptimization: true,
+        enableSlowQueryLogging: true,
+        slowQueryThreshold: 1000,
+        maxQueryComplexity: 10,
+        enableAutoVacuum: true,
+        enableAutoAnalyze: true,
+      },
+      monitoring: {
+        enablePerformanceTracking: true,
+        enableConnectionTracking: true,
+        enableQueryAnalysis: true,
+        metricsInterval: 30,
+        alertThresholds: {
+          connectionUsage: 80,
+          queryResponseTime: 2000,
+          deadlockCount: 5,
+          errorRate: 0.05,
+        },
+      },
+    };
+
+    await initializeDatabaseOptimizer(databaseConfig);
+
+    // v3.0: Initialize connection pool management
+    const poolConfig = {
+      database: {
+        type: databaseConfig.type,
+        url: databaseConfig.url,
+        database: 'hotel_management',
+      },
+      pool: {
+        min: 5,
+        max: 20,
+        acquireTimeoutMs: 30000,
+        createTimeoutMs: 30000,
+        destroyTimeoutMs: 5000,
+        idleTimeoutMs: 300000,
+        reapIntervalMs: 10000,
+        createRetryIntervalMs: 200,
+        maxRetries: 3,
+        enableAutoScaling: true,
+        enableHealthChecks: true,
+        enableLoadBalancing: false,
+      },
+      monitoring: {
+        metricsInterval: 30000,
+        healthCheckInterval: 60000,
+        enableDetailedLogging: process.env.NODE_ENV === 'development',
+        alertThresholds: {
+          highConnectionUsage: 80,
+          longAcquireTime: 1000,
+          highErrorRate: 0.05,
+          connectionLeaks: 5,
+        },
+      },
+      optimization: {
+        enablePreparedStatements: true,
+        enableQueryCache: true,
+        enableConnectionReuse: true,
+        maxQueryCacheSize: 1000,
+        connectionWarmupQueries: ['SELECT 1', 'SELECT NOW()'],
+      },
+    };
+
+    await initializeConnectionPool(poolConfig);
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with load testing',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with database optimization',
       'Monitoring'
     );
   } catch (error) {

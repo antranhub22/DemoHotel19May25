@@ -155,7 +155,15 @@
     "load-test:heavy": "TEST_DURATION=300 TEST_CONCURRENCY=25 npm run load-test",
     "load-test:stress": "TEST_DURATION=60 TEST_CONCURRENCY=50 npm run load-test",
     "load-test:local": "TEST_URL=http://localhost:10000 npm run load-test:light",
-    "load-test:production": "TEST_URL=https://your-production-url.com npm run load-test:moderate"
+    "load-test:production": "TEST_URL=https://your-production-url.com npm run load-test:moderate",
+    "🗄️ DATABASE OPTIMIZATION": "===============================",
+    "db:optimize": "node tools/scripts/database/optimize-database.cjs",
+    "db:analyze": "node tools/scripts/database/optimize-database.cjs --analysis-only",
+    "db:indexes": "node tools/scripts/database/optimize-database.cjs --indexes-only",
+    "db:vacuum": "node tools/scripts/database/optimize-database.cjs --vacuum-only",
+    "db:health": "curl -s http://localhost:10000/api/admin/database/health | jq || echo '⚠️ Database health check failed'",
+    "db:pool-status": "curl -s http://localhost:10000/api/admin/database/pool/status | jq || echo '⚠️ Pool status check failed'",
+    "db:slow-queries": "curl -s http://localhost:10000/api/admin/database/slow-queries | jq || echo '⚠️ Slow queries check failed'"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

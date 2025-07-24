@@ -1,0 +1,725 @@
+{
+  "timestamp": "2025-07-24T18:31:24.841Z",
+  "databaseInfo": {
+    "type": "SQLite",
+    "url": "file:./dev.db",
+    "analyzed": true,
+    "version": "Simulated v14.0",
+    "encoding": "UTF8",
+    "collation": "en_US.UTF-8",
+    "size": "15.2 MB"
+  },
+  "tables": [
+    {
+      "name": "users",
+      "rowCount": 8321,
+      "sizeKB": 3730,
+      "sizeMB": 3.64,
+      "columns": 9,
+      "indexes": 1,
+      "lastAnalyzed": "2025-07-24T18:31:24.867Z",
+      "fragmentationPercent": 10,
+      "avgRowSize": 459,
+      "issues": []
+    },
+    {
+      "name": "tenants",
+      "rowCount": 4906,
+      "sizeKB": 1049,
+      "sizeMB": 1.02,
+      "columns": 10,
+      "indexes": 1,
+      "lastAnalyzed": "2025-07-24T18:31:24.873Z",
+      "fragmentationPercent": 2,
+      "avgRowSize": 219,
+      "issues": []
+    },
+    {
+      "name": "hotels",
+      "rowCount": 7044,
+      "sizeKB": 2518,
+      "sizeMB": 2.46,
+      "columns": 8,
+      "indexes": 4,
+      "lastAnalyzed": "2025-07-24T18:31:24.873Z",
+      "fragmentationPercent": 4,
+      "avgRowSize": 366,
+      "issues": []
+    },
+    {
+      "name": "requests",
+      "rowCount": 4105,
+      "sizeKB": 1772,
+      "sizeMB": 1.73,
+      "columns": 6,
+      "indexes": 2,
+      "lastAnalyzed": "2025-07-24T18:31:24.874Z",
+      "fragmentationPercent": 28,
+      "avgRowSize": 442,
+      "issues": ["High fragmentation: 28%"]
+    },
+    {
+      "name": "calls",
+      "rowCount": 9591,
+      "sizeKB": 3924,
+      "sizeMB": 3.83,
+      "columns": 13,
+      "indexes": 4,
+      "lastAnalyzed": "2025-07-24T18:31:24.874Z",
+      "fragmentationPercent": 23,
+      "avgRowSize": 419,
+      "issues": ["High fragmentation: 23%"]
+    },
+    {
+      "name": "voice_transcripts",
+      "rowCount": 9291,
+      "sizeKB": 4636,
+      "sizeMB": 4.53,
+      "columns": 19,
+      "indexes": 3,
+      "lastAnalyzed": "2025-07-24T18:31:24.875Z",
+      "fragmentationPercent": 7,
+      "avgRowSize": 511,
+      "issues": []
+    },
+    {
+      "name": "analytics_events",
+      "rowCount": 552,
+      "sizeKB": 284,
+      "sizeMB": 0.28,
+      "columns": 15,
+      "indexes": 3,
+      "lastAnalyzed": "2025-07-24T18:31:24.875Z",
+      "fragmentationPercent": 9,
+      "avgRowSize": 526,
+      "issues": []
+    },
+    {
+      "name": "email_logs",
+      "rowCount": 7578,
+      "sizeKB": 4647,
+      "sizeMB": 4.54,
+      "columns": 14,
+      "indexes": 3,
+      "lastAnalyzed": "2025-07-24T18:31:24.875Z",
+      "fragmentationPercent": 5,
+      "avgRowSize": 628,
+      "issues": []
+    }
+  ],
+  "indexes": [
+    {
+      "name": "users_idx_1",
+      "table": "users",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": true,
+      "usagePercent": 58,
+      "scanCount": 342,
+      "seekCount": 289,
+      "efficiency": 45.800316957210775,
+      "sizeKB": 69,
+      "issues": ["Low efficiency: 46%"]
+    },
+    {
+      "name": "tenants_idx_1",
+      "table": "tenants",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 38,
+      "scanCount": 902,
+      "seekCount": 2512,
+      "efficiency": 73.57937902753369,
+      "sizeKB": 481,
+      "issues": ["Low efficiency: 74%"]
+    },
+    {
+      "name": "hotels_idx_1",
+      "table": "hotels",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 59,
+      "scanCount": 857,
+      "seekCount": 598,
+      "efficiency": 41.09965635738831,
+      "sizeKB": 268,
+      "issues": ["Low efficiency: 41%"]
+    },
+    {
+      "name": "hotels_idx_2",
+      "table": "hotels",
+      "columns": ["column_2"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 44,
+      "scanCount": 363,
+      "seekCount": 2495,
+      "efficiency": 87.29881035689293,
+      "sizeKB": 83,
+      "issues": []
+    },
+    {
+      "name": "hotels_idx_3",
+      "table": "hotels",
+      "columns": ["column_3", "column_4"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 50,
+      "scanCount": 585,
+      "seekCount": 4337,
+      "efficiency": 88.11458756603007,
+      "sizeKB": 139,
+      "issues": []
+    },
+    {
+      "name": "hotels_idx_4",
+      "table": "hotels",
+      "columns": ["column_4", "column_5"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 51,
+      "scanCount": 722,
+      "seekCount": 2183,
+      "efficiency": 75.14629948364887,
+      "sizeKB": 528,
+      "issues": ["Low efficiency: 75%"]
+    },
+    {
+      "name": "requests_idx_1",
+      "table": "requests",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": true,
+      "usagePercent": 19,
+      "scanCount": 267,
+      "seekCount": 2766,
+      "efficiency": 91.19683481701286,
+      "sizeKB": 153,
+      "issues": []
+    },
+    {
+      "name": "requests_idx_2",
+      "table": "requests",
+      "columns": ["column_2", "column_3"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 41,
+      "scanCount": 483,
+      "seekCount": 3524,
+      "efficiency": 87.94609433491391,
+      "sizeKB": 100,
+      "issues": []
+    },
+    {
+      "name": "calls_idx_1",
+      "table": "calls",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 55,
+      "scanCount": 502,
+      "seekCount": 3453,
+      "efficiency": 87.30720606826802,
+      "sizeKB": 110,
+      "issues": []
+    },
+    {
+      "name": "calls_idx_2",
+      "table": "calls",
+      "columns": ["column_2"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 59,
+      "scanCount": 868,
+      "seekCount": 4986,
+      "efficiency": 85.1725316023232,
+      "sizeKB": 360,
+      "issues": []
+    },
+    {
+      "name": "calls_idx_3",
+      "table": "calls",
+      "columns": ["column_3"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 85,
+      "scanCount": 103,
+      "seekCount": 4905,
+      "efficiency": 97.94329073482429,
+      "sizeKB": 187,
+      "issues": []
+    },
+    {
+      "name": "calls_idx_4",
+      "table": "calls",
+      "columns": ["column_4"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 48,
+      "scanCount": 727,
+      "seekCount": 2935,
+      "efficiency": 80.14746040415073,
+      "sizeKB": 95,
+      "issues": []
+    },
+    {
+      "name": "voice_transcripts_idx_1",
+      "table": "voice_transcripts",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 95,
+      "scanCount": 424,
+      "seekCount": 10,
+      "efficiency": 2.3041474654377883,
+      "sizeKB": 401,
+      "issues": ["Low efficiency: 2%"]
+    },
+    {
+      "name": "voice_transcripts_idx_2",
+      "table": "voice_transcripts",
+      "columns": ["column_2"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 60,
+      "scanCount": 492,
+      "seekCount": 3780,
+      "efficiency": 88.48314606741573,
+      "sizeKB": 191,
+      "issues": []
+    },
+    {
+      "name": "voice_transcripts_idx_3",
+      "table": "voice_transcripts",
+      "columns": ["column_3"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 42,
+      "scanCount": 15,
+      "seekCount": 4430,
+      "efficiency": 99.66254218222723,
+      "sizeKB": 302,
+      "issues": []
+    },
+    {
+      "name": "analytics_events_idx_1",
+      "table": "analytics_events",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 63,
+      "scanCount": 84,
+      "seekCount": 284,
+      "efficiency": 77.17391304347827,
+      "sizeKB": 210,
+      "issues": ["Low efficiency: 77%"]
+    },
+    {
+      "name": "analytics_events_idx_2",
+      "table": "analytics_events",
+      "columns": ["column_2"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 37,
+      "scanCount": 980,
+      "seekCount": 4509,
+      "efficiency": 82.14611040262344,
+      "sizeKB": 272,
+      "issues": []
+    },
+    {
+      "name": "analytics_events_idx_3",
+      "table": "analytics_events",
+      "columns": ["column_3", "column_4"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 52,
+      "scanCount": 717,
+      "seekCount": 854,
+      "efficiency": 54.36028007638447,
+      "sizeKB": 405,
+      "issues": ["Low efficiency: 54%"]
+    },
+    {
+      "name": "email_logs_idx_1",
+      "table": "email_logs",
+      "columns": ["column_1"],
+      "type": "btree",
+      "unique": true,
+      "usagePercent": 90,
+      "scanCount": 381,
+      "seekCount": 1420,
+      "efficiency": 78.84508606329817,
+      "sizeKB": 539,
+      "issues": ["Low efficiency: 79%"]
+    },
+    {
+      "name": "email_logs_idx_2",
+      "table": "email_logs",
+      "columns": ["column_2", "column_3"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 19,
+      "scanCount": 783,
+      "seekCount": 2690,
+      "efficiency": 77.45465015836453,
+      "sizeKB": 182,
+      "issues": ["Low efficiency: 77%"]
+    },
+    {
+      "name": "email_logs_idx_3",
+      "table": "email_logs",
+      "columns": ["column_3", "column_4"],
+      "type": "btree",
+      "unique": false,
+      "usagePercent": 27,
+      "scanCount": 555,
+      "seekCount": 4425,
+      "efficiency": 88.85542168674698,
+      "sizeKB": 479,
+      "issues": []
+    }
+  ],
+  "slowQueries": [
+    {
+      "query": "SELECT * FROM requests WHERE hotel_id = ? AND status = ?",
+      "executionTimeMs": 2207,
+      "frequency": 74,
+      "totalTimeMs": 163318,
+      "impact": "high",
+      "recommendations": ["Avoid SELECT * - specify only needed columns"]
+    },
+    {
+      "query": "SELECT * FROM calls WHERE created_at > ? ORDER BY created_at DESC",
+      "executionTimeMs": 2425,
+      "frequency": 792,
+      "totalTimeMs": 1920600,
+      "impact": "high",
+      "recommendations": [
+        "Avoid SELECT * - specify only needed columns",
+        "Consider adding LIMIT clause to ORDER BY queries"
+      ]
+    },
+    {
+      "query": "SELECT u.*, h.name FROM users u JOIN hotels h ON u.hotel_id = h.id",
+      "executionTimeMs": 1254,
+      "frequency": 1009,
+      "totalTimeMs": 1265286,
+      "impact": "medium",
+      "recommendations": ["Add indexes on JOIN columns", "Consider query restructuring"]
+    },
+    {
+      "query": "SELECT COUNT(*) FROM requests WHERE created_at >= ?",
+      "executionTimeMs": 2721,
+      "frequency": 179,
+      "totalTimeMs": 487059,
+      "impact": "high",
+      "recommendations": []
+    },
+    {
+      "query": "UPDATE requests SET status = ? WHERE id = ?",
+      "executionTimeMs": 2381,
+      "frequency": 207,
+      "totalTimeMs": 492867,
+      "impact": "high",
+      "recommendations": []
+    }
+  ],
+  "recommendations": [
+    {
+      "type": "general",
+      "priority": "high",
+      "issue": "5 slow queries detected",
+      "recommendation": "Implement query performance monitoring and optimization",
+      "impact": "Significant improvement in application response times"
+    },
+    {
+      "type": "slow_query",
+      "priority": "high",
+      "query": "SELECT * FROM requests WHERE hotel_id = ? AND status = ?...",
+      "issue": "Slow query: 2207ms execution time",
+      "recommendation": "Avoid SELECT * - specify only needed columns",
+      "impact": "Query runs 74 times with total impact of 163318ms"
+    },
+    {
+      "type": "slow_query",
+      "priority": "high",
+      "query": "SELECT * FROM calls WHERE created_at > ? ORDER BY created_at DESC...",
+      "issue": "Slow query: 2425ms execution time",
+      "recommendation": "Avoid SELECT * - specify only needed columns; Consider adding LIMIT clause to ORDER BY queries",
+      "impact": "Query runs 792 times with total impact of 1920600ms"
+    },
+    {
+      "type": "slow_query",
+      "priority": "high",
+      "query": "SELECT COUNT(*) FROM requests WHERE created_at >= ?...",
+      "issue": "Slow query: 2721ms execution time",
+      "recommendation": "",
+      "impact": "Query runs 179 times with total impact of 487059ms"
+    },
+    {
+      "type": "slow_query",
+      "priority": "high",
+      "query": "UPDATE requests SET status = ? WHERE id = ?...",
+      "issue": "Slow query: 2381ms execution time",
+      "recommendation": "",
+      "impact": "Query runs 207 times with total impact of 492867ms"
+    },
+    {
+      "type": "missing_index",
+      "priority": "high",
+      "table": "requests",
+      "issue": "Missing index on requests(hotel_id, status)",
+      "recommendation": "CREATE INDEX idx_requests_hotel_id_status ON requests(hotel_id, status)",
+      "impact": "Frequently filtered columns in WHERE clauses. Expected improvement: 60-80% faster queries"
+    },
+    {
+      "type": "missing_index",
+      "priority": "high",
+      "table": "users",
+      "issue": "Missing index on users(email)",
+      "recommendation": "CREATE INDEX idx_users_email ON users(email)",
+      "impact": "Used for user authentication lookups. Expected improvement: 70-90% faster lookups"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "users",
+      "index": "users_idx_1",
+      "issue": "Index users_idx_1 has low efficiency (46%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "tenants",
+      "index": "tenants_idx_1",
+      "issue": "Index tenants_idx_1 has low efficiency (74%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "hotels",
+      "index": "hotels_idx_1",
+      "issue": "Index hotels_idx_1 has low efficiency (41%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "hotels",
+      "index": "hotels_idx_4",
+      "issue": "Index hotels_idx_4 has low efficiency (75%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "voice_transcripts",
+      "index": "voice_transcripts_idx_1",
+      "issue": "Index voice_transcripts_idx_1 has low efficiency (2%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "analytics_events",
+      "index": "analytics_events_idx_1",
+      "issue": "Index analytics_events_idx_1 has low efficiency (77%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "analytics_events",
+      "index": "analytics_events_idx_3",
+      "issue": "Index analytics_events_idx_3 has low efficiency (54%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "email_logs",
+      "index": "email_logs_idx_1",
+      "issue": "Index email_logs_idx_1 has low efficiency (79%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "index_efficiency",
+      "priority": "medium",
+      "table": "email_logs",
+      "index": "email_logs_idx_2",
+      "issue": "Index email_logs_idx_2 has low efficiency (77%)",
+      "recommendation": "Consider dropping unused index or updating statistics",
+      "impact": "Wasted storage and maintenance overhead"
+    },
+    {
+      "type": "slow_query",
+      "priority": "medium",
+      "query": "SELECT u.*, h.name FROM users u JOIN hotels h ON u.hotel_id = h.id...",
+      "issue": "Slow query: 1254ms execution time",
+      "recommendation": "Add indexes on JOIN columns; Consider query restructuring",
+      "impact": "Query runs 1009 times with total impact of 1265286ms"
+    },
+    {
+      "type": "missing_index",
+      "priority": "medium",
+      "table": "calls",
+      "issue": "Missing index on calls(created_at)",
+      "recommendation": "CREATE INDEX idx_calls_created_at ON calls(created_at)",
+      "impact": "Used in time-based queries and sorting. Expected improvement: 30-50% faster queries"
+    },
+    {
+      "type": "fragmentation",
+      "priority": "low",
+      "table": "requests",
+      "issue": "Table requests has 28% fragmentation",
+      "recommendation": "Run VACUUM FULL or equivalent defragmentation",
+      "impact": "Reduced I/O efficiency and increased storage usage"
+    },
+    {
+      "type": "fragmentation",
+      "priority": "low",
+      "table": "calls",
+      "issue": "Table calls has 23% fragmentation",
+      "recommendation": "Run VACUUM FULL or equivalent defragmentation",
+      "impact": "Reduced I/O efficiency and increased storage usage"
+    }
+  ],
+  "optimizations": [
+    {
+      "type": "maintenance",
+      "table": "users",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:26.373Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "tenants",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:28.374Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "hotels",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:29.923Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "requests",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:31.118Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "calls",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:33.083Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "voice_transcripts",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:34.917Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "analytics_events",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:36.794Z"
+    },
+    {
+      "type": "maintenance",
+      "table": "email_logs",
+      "operation": "VACUUM ANALYZE",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:39.568Z"
+    },
+    {
+      "type": "statistics",
+      "table": "users",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:40.133Z"
+    },
+    {
+      "type": "statistics",
+      "table": "tenants",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:40.883Z"
+    },
+    {
+      "type": "statistics",
+      "table": "hotels",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:41.235Z"
+    },
+    {
+      "type": "statistics",
+      "table": "requests",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:42.024Z"
+    },
+    {
+      "type": "statistics",
+      "table": "calls",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:42.470Z"
+    },
+    {
+      "type": "statistics",
+      "table": "voice_transcripts",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:43.089Z"
+    },
+    {
+      "type": "statistics",
+      "table": "analytics_events",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:43.927Z"
+    },
+    {
+      "type": "statistics",
+      "table": "email_logs",
+      "operation": "UPDATE STATISTICS",
+      "status": "completed",
+      "timestamp": "2025-07-24T18:31:44.702Z"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "totalTables": 8,
+    "totalIndexes": 21,
+    "slowQueries": 5,
+    "recommendations": 20,
+    "highPriorityIssues": 7,
+    "optimizationsPerformed": 16,
+    "errors": 0,
+    "overallScore": 0
+  }
+}
