@@ -1,112 +1,246 @@
 // ============================================
-// SHARED UTILITIES INDEX - Modular Architecture v2.0
+// SHARED CROSS-CUTTING CONCERNS v3.0 - Enhanced with Advanced Health Monitoring
 // ============================================
-// Central export for all cross-cutting concerns and utilities
-// Enhanced with Logging & Metrics v2.0 integration
+// Central export hub for all cross-cutting concerns and utilities including
+// enhanced monitoring, modular architecture, and advanced health checking
 
-// Core utilities
-export * from './FeatureFlags';
-export * from './ModuleLifecycleManager';
-export * from './ServiceContainer';
+import { logger } from '@shared/utils/logger';
 
-// ✅ NEW v2.0: Enhanced Logging & Metrics System
-export * from './EnhancedLogger';
-export * from './MetricsCollector';
-export * from './MonitoringIntegration';
+// ✅ v2.0: Enhanced Architecture Components
+export {
+  addFlagListener,
+  createABTest,
+  evaluateABTest,
+  FeatureFlags,
+  isFeatureEnabled,
+  isModuleEnabled,
+} from './FeatureFlags';
+export { ModuleLifecycleManager } from './ModuleLifecycleManager';
+export {
+  getService,
+  getServiceSync,
+  initializeServiceContainer,
+  ServiceContainer,
+} from './ServiceContainer';
 
-// Import for usage in health check
-import {
-  MODULE_REGISTRY,
-  checkAllModulesHealth,
-  getAvailableModules,
-} from '../modules';
-import { EnhancedLogger } from './EnhancedLogger'; // ✅ NEW v2.0
-import { FeatureFlags } from './FeatureFlags';
-import { MetricsCollector } from './MetricsCollector'; // ✅ NEW v2.0
-import { ModuleLifecycleManager } from './ModuleLifecycleManager';
-import { MonitoringIntegration } from './MonitoringIntegration'; // ✅ NEW v2.0
-import { ServiceContainer } from './ServiceContainer';
+// ✅ v3.0: NEW Advanced Health Check System
+export {
+  AdvancedHealthCheck,
+  advancedHealthCheck,
+  getModuleHealth,
+  getSystemHealth,
+  initializeAdvancedHealthCheck,
+  registerModuleHealthChecker,
+  type CascadeFailure,
+  type DependencyHealth,
+  type HealthIssue,
+  type HealthRecommendation,
+  type ModuleHealthStatus,
+  type ModuleMetrics,
+  type SystemHealthSummary,
+} from './AdvancedHealthCheck';
 
-// Re-export existing shared utilities for convenience
-export { generateId, generateShortId } from '@shared/utils/idGenerator';
-export { logger } from '@shared/utils/logger';
+// ✅ v2.0: Enhanced Monitoring Components
+export { EnhancedLogger } from './EnhancedLogger';
+export { MetricsCollector } from './MetricsCollector';
+export { MonitoringIntegration } from './MonitoringIntegration';
 
-// Module system exports
-export { MODULE_REGISTRY, checkAllModulesHealth, getAvailableModules };
+// ============================================
+// v3.0: ENHANCED ARCHITECTURE HEALTH
+// ============================================
 
-// ✅ ENHANCED v2.0: Architecture health check with comprehensive monitoring
-export const getArchitectureHealth = () => {
-  return {
-    modular: {
-      modules: getAvailableModules(),
-      moduleHealth: checkAllModulesHealth(),
-    },
-    services: {
-      container: ServiceContainer.getHealthStatus(),
-    },
-    features: {
-      flags: FeatureFlags.getStatus(),
-    },
-    lifecycle: {
-      systemHealth: ModuleLifecycleManager.getSystemHealth(),
-      modulesStatus: ModuleLifecycleManager.getModulesStatus(),
-      diagnostics: ModuleLifecycleManager.getDiagnostics(),
-    },
-    // ✅ NEW v2.0: Enhanced Logging & Metrics Health
-    monitoring: {
-      logger: EnhancedLogger.getHealthStatus(),
-      metrics: MetricsCollector.getHealthSummary(),
-      integration: MonitoringIntegration.getMonitoringStatus(),
-      overall: MonitoringIntegration.getMonitoringStatus().health,
-    },
-    timestamp: new Date().toISOString(),
-    architecture: 'Modular v2.0 with Enhanced Logging & Metrics',
-  };
-};
-
-// ✅ NEW v2.0: Initialize monitoring integration on import
-let monitoringInitialized = false;
-
-export const initializeMonitoring = async (config?: any) => {
-  if (monitoringInitialized) {
-    return;
-  }
-
+/**
+ * Get comprehensive health status of entire modular architecture v3.0
+ * Now includes advanced health monitoring
+ */
+export async function getArchitectureHealth() {
   try {
-    // Initialize monitoring integration
-    await MonitoringIntegration.initialize({
-      enableEnhancedLogging: true,
-      enableMetricsCollection: true,
-      enablePerformanceTracing: true,
-      enableAutoAlerts: true,
-      logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-      metricsInterval: 30000,
-      ...config,
-    });
+    logger.debug(
+      '🏗️ [Architecture] Getting comprehensive health status v3.0',
+      'Architecture'
+    );
 
-    monitoringInitialized = true;
+    // Import dynamically to avoid circular dependencies
+    const { ServiceContainer } = await import('./ServiceContainer');
+    const { FeatureFlags } = await import('./FeatureFlags');
+    const { ModuleLifecycleManager } = await import('./ModuleLifecycleManager');
+    const { MonitoringIntegration } = await import('./MonitoringIntegration');
+    const { advancedHealthCheck } = await import('./AdvancedHealthCheck');
 
-    // Create integrated logger for reporting
-    const systemLogger = EnhancedLogger.createModuleLogger('System', '2.0.0');
-    systemLogger.success(
-      '🎉 Enhanced Logging & Metrics v2.0 initialized successfully',
-      {
-        architecture: 'Modular v2.0',
-        components: [
-          'EnhancedLogger',
-          'MetricsCollector',
-          'MonitoringIntegration',
-        ],
-      }
+    // Get health from all systems
+    const containerHealth = ServiceContainer.getHealthStatus();
+    const featureFlagsHealth = FeatureFlags.getDiagnostics();
+    const lifecycleHealth = ModuleLifecycleManager.getDiagnostics();
+    const monitoringHealth = MonitoringIntegration.getMonitoringStatus();
+
+    // v3.0: Get advanced health system status
+    const advancedHealthDiagnostics = advancedHealthCheck.getDiagnostics();
+    let systemHealthSummary = null;
+    try {
+      systemHealthSummary = await advancedHealthCheck.getSystemHealth();
+    } catch (error) {
+      logger.warn(
+        '⚠️ [Architecture] Advanced health system not fully initialized',
+        'Architecture'
+      );
+    }
+
+    return {
+      version: '3.0.0',
+      timestamp: new Date().toISOString(),
+
+      // v2.0 Health Status (maintained for compatibility)
+      services: {
+        container: {
+          status: containerHealth.healthy ? 'healthy' : 'unhealthy',
+          registeredServices: containerHealth.registeredServices,
+          instantiatedServices: containerHealth.instantiatedServices,
+          errors: containerHealth.errors.length,
+          metrics: containerHealth.metrics,
+        },
+        featureFlags: {
+          status: featureFlagsHealth.isInitialized ? 'healthy' : 'unhealthy',
+          totalFlags: featureFlagsHealth.totalFlags,
+          enabledFlags: featureFlagsHealth.enabledFlags,
+          abTests: featureFlagsHealth.abTests,
+        },
+        lifecycle: {
+          status: lifecycleHealth.isInitialized ? 'healthy' : 'unhealthy',
+          totalModules: lifecycleHealth.registeredModules,
+          runningModules: lifecycleHealth.runningModules,
+          failedModules: lifecycleHealth.failedModules,
+        },
+        monitoring: {
+          status: monitoringHealth.initialized ? 'healthy' : 'unhealthy',
+          health: monitoringHealth.health,
+          metrics: monitoringHealth.metrics,
+        },
+      },
+
+      // v3.0: NEW Advanced Health Monitoring
+      advancedHealth: {
+        initialized: advancedHealthDiagnostics.initialized,
+        monitoringActive: advancedHealthDiagnostics.monitoringActive,
+        registeredCheckers: advancedHealthDiagnostics.registeredCheckers,
+        totalHistoryEntries: advancedHealthDiagnostics.totalHistoryEntries,
+        systemSummary: systemHealthSummary
+          ? {
+              overallStatus: systemHealthSummary.overallStatus,
+              totalModules: systemHealthSummary.systemMetrics.totalModules,
+              healthyModules: systemHealthSummary.systemMetrics.healthyModules,
+              cascadeFailures: systemHealthSummary.cascadeFailures.length,
+              recommendations: systemHealthSummary.recommendations.length,
+            }
+          : null,
+      },
+
+      // Overall architecture status
+      overall: {
+        status:
+          containerHealth.healthy &&
+          featureFlagsHealth.isInitialized &&
+          lifecycleHealth.isInitialized &&
+          monitoringHealth.initialized
+            ? 'healthy'
+            : 'degraded',
+        readiness: 'ready',
+        features: {
+          serviceContainer: true,
+          featureFlags: true,
+          moduleLifecycle: true,
+          enhancedMonitoring: true,
+          advancedHealthCheck: true, // v3.0
+        },
+      },
+
+      // System performance metrics
+      performance: {
+        uptime: process.uptime(),
+        memoryUsage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        nodeVersion: process.version,
+        platform: process.platform,
+      },
+    };
+  } catch (error) {
+    logger.error(
+      '❌ [Architecture] Failed to get architecture health',
+      'Architecture',
+      error
+    );
+
+    return {
+      version: '3.0.0',
+      timestamp: new Date().toISOString(),
+      overall: {
+        status: 'unhealthy',
+        error: (error as Error).message,
+      },
+      services: {
+        container: { status: 'unknown' },
+        featureFlags: { status: 'unknown' },
+        lifecycle: { status: 'unknown' },
+        monitoring: { status: 'unknown' },
+      },
+      advancedHealth: {
+        initialized: false,
+        error: 'Failed to initialize advanced health monitoring',
+      },
+    };
+  }
+}
+
+// ============================================
+// v3.0: ENHANCED MONITORING INITIALIZATION
+// ============================================
+
+/**
+ * Initialize complete monitoring system v3.0
+ * Now includes advanced health monitoring
+ */
+export async function initializeMonitoring() {
+  try {
+    logger.info(
+      '🚀 [Monitoring] Initializing complete monitoring system v3.0',
+      'Monitoring'
+    );
+
+    // Import all monitoring components
+    const { EnhancedLogger } = await import('./EnhancedLogger');
+    const { MetricsCollector } = await import('./MetricsCollector');
+    const { MonitoringIntegration } = await import('./MonitoringIntegration');
+    const { initializeAdvancedHealthCheck } = await import(
+      './AdvancedHealthCheck'
+    );
+
+    // Initialize components in order
+    await EnhancedLogger.initialize();
+    await MetricsCollector.initialize();
+    await MonitoringIntegration.initialize();
+
+    // v3.0: Initialize advanced health check system
+    await initializeAdvancedHealthCheck();
+
+    logger.success(
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized',
+      'Monitoring'
     );
   } catch (error) {
-    console.error('❌ Failed to initialize monitoring system:', error);
-    // Don't throw error in production - graceful degradation
-    if (process.env.NODE_ENV !== 'production') {
+    logger.error(
+      '❌ [Monitoring] Failed to initialize monitoring system',
+      'Monitoring',
+      error
+    );
+    if (process.env.NODE_ENV === 'production') {
+      // Graceful degradation in production
+      logger.warn(
+        '⚠️ [Monitoring] Continuing without full monitoring capabilities',
+        'Monitoring'
+      );
+    } else {
       throw error;
     }
   }
-};
+}
 
 // ✅ TEMPORARILY DISABLED: Auto-initialization for deployment safety
 // Will be re-enabled after successful deployment verification
@@ -121,8 +255,3 @@ if (process.env.NODE_ENV !== 'test' && process.env.ENABLE_MONITORING !== 'false'
   }, 2000); // Increased delay to 2 seconds
 }
 */
-
-// 📋 TO RE-ENABLE MONITORING AFTER DEPLOYMENT:
-// 1. Uncomment the above code block
-// 2. Set ENABLE_MONITORING=true in environment
-// 3. Rebuild and deploy

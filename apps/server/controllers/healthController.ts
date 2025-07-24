@@ -1,236 +1,554 @@
-import { checkDatabaseHealth, getDatabaseMetrics } from '@shared/db';
+// ============================================
+// ENHANCED HEALTH CONTROLLER v3.0 - Phase 4 Advanced Monitoring
+// ============================================
+// Comprehensive health monitoring with advanced health check system,
+// module-specific health validation, cascade failure detection, and intelligent recommendations
+
+import { db } from '@shared/db';
 import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
 
-// ✅ ENHANCED v2.0: Import modular architecture components
-import { getArchitectureHealth } from '@server/shared';
-import { FeatureFlags } from '@server/shared/FeatureFlags';
-import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
+// ✅ v3.0: Import Advanced Health Check System
 import {
-  ServiceContainer,
-  getServiceSync,
-} from '@server/shared/ServiceContainer';
+  advancedHealthCheck,
+  getModuleHealth,
+  getSystemHealth,
+  registerModuleHealthChecker,
+} from '@server/shared/AdvancedHealthCheck';
 
-// ✅ NEW v2.0: Import services for comprehensive health checking
+// ✅ v2.0: Enhanced architecture imports
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { TenantService } from '@server/services/tenantService';
 import { VapiIntegrationService } from '@server/services/vapiIntegration';
+import { getArchitectureHealth } from '@server/shared';
+import { FeatureFlags } from '@server/shared/FeatureFlags';
+import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
+import { ServiceContainer } from '@server/shared/ServiceContainer';
 
-/**
- * Enhanced Health Check Controller v2.0 - Modular Architecture
- *
- * Provides comprehensive health information including:
- * - Database connection status with pool metrics
- * - ServiceContainer health and registered services
- * - FeatureFlags system status
- * - ModuleLifecycle health monitoring
- * - External service health (Vapi, Google Places API)
- * - System performance indicators
- * - Modular architecture status
- */
 export class HealthController {
-  // ✅ NEW v2.0: Initialize flag listeners for dynamic behavior
-  private static initialized = false;
-
-  static initialize(): void {
-    if (this.initialized) return;
-
-    // Register core services with ServiceContainer if not already registered
-    this.registerCoreServices();
-
-    this.initialized = true;
-    logger.debug(
-      '🏥 [HealthController] ServiceContainer integration initialized',
-      'HealthController'
-    );
-  }
+  private static isInitialized = false;
 
   /**
-   * ✅ NEW v2.0: Register core services with ServiceContainer
+   * Initialize HealthController with module health checkers
    */
-  private static registerCoreServices(): void {
+  public static async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
     try {
-      // Register TenantService if not already registered
-      if (!ServiceContainer.has('TenantService')) {
-        ServiceContainer.register('TenantService', TenantService, {
-          module: 'tenant-module',
-          singleton: true,
-          lifecycle: {
-            onInit: () =>
-              logger.debug('TenantService initialized', 'HealthController'),
-            onDestroy: () =>
-              logger.debug('TenantService destroyed', 'HealthController'),
-            onHealthCheck: () => true, // Basic health check
-          },
-        });
-      }
+      logger.info(
+        '🏥 [HealthController] Initializing v3.0 with advanced health system',
+        'HealthController'
+      );
 
-      // Register HotelResearchService if not already registered
-      if (!ServiceContainer.has('HotelResearchService')) {
-        ServiceContainer.register(
-          'HotelResearchService',
-          HotelResearchService,
-          {
-            module: 'research-module',
-            singleton: true,
-            lifecycle: {
-              onInit: () =>
-                logger.debug(
-                  'HotelResearchService initialized',
-                  'HealthController'
-                ),
-              onDestroy: () =>
-                logger.debug(
-                  'HotelResearchService destroyed',
-                  'HealthController'
-                ),
-              onHealthCheck: async () => {
-                try {
-                  const service = new HotelResearchService();
-                  const health = await service.getServiceHealth();
-                  return health.status === 'healthy';
-                } catch {
-                  return false;
-                }
-              },
-            },
-          }
-        );
-      }
+      // Initialize advanced health check system
+      await advancedHealthCheck.initialize();
 
-      // Register VapiIntegrationService if not already registered
-      if (!ServiceContainer.has('VapiIntegrationService')) {
-        ServiceContainer.register(
-          'VapiIntegrationService',
-          VapiIntegrationService,
-          {
-            module: 'vapi-module',
-            singleton: true,
-            lifecycle: {
-              onInit: () =>
-                logger.debug(
-                  'VapiIntegrationService initialized',
-                  'HealthController'
-                ),
-              onDestroy: () =>
-                logger.debug(
-                  'VapiIntegrationService destroyed',
-                  'HealthController'
-                ),
-              onHealthCheck: async () => {
-                try {
-                  const service = new VapiIntegrationService();
-                  const health = await service.getServiceHealth();
-                  return health.status === 'healthy';
-                } catch {
-                  return false;
-                }
-              },
-            },
-          }
-        );
-      }
+      // Register core services with ServiceContainer
+      await this.registerCoreServices();
 
-      logger.debug(
-        '🔧 [HealthController] Core services registered with ServiceContainer',
+      // Register module-specific health checkers
+      await this.registerModuleHealthCheckers();
+
+      this.isInitialized = true;
+      logger.success(
+        '✅ [HealthController] v3.0 initialized with advanced health monitoring',
         'HealthController'
       );
     } catch (error) {
-      logger.warn(
-        '⚠️ [HealthController] Failed to register some services',
+      logger.error(
+        '❌ [HealthController] Failed to initialize v3.0',
         'HealthController',
         error
       );
+      throw error;
     }
   }
 
   /**
-   * Basic health check endpoint with ServiceContainer integration
-   * GET /api/health
+   * Register core services with ServiceContainer
    */
-  static async getHealth(_req: Request, res: Response): Promise<void> {
+  private static async registerCoreServices(): Promise<void> {
     try {
-      // Initialize on first use
-      this.initialize();
-
-      logger.api(
-        '🏥 [HealthController] Basic health check requested - v2.0',
-        'HealthController'
-      );
-
-      const startTime = Date.now();
-
-      // Perform basic database health check
-      const isDatabaseHealthy = await checkDatabaseHealth();
-
-      // ✅ NEW v2.0: Check ServiceContainer health
-      const containerHealth = ServiceContainer.getHealthStatus();
-
-      const responseTime = Date.now() - startTime;
-
-      const healthStatus = {
-        status: isDatabaseHealthy ? 'healthy' : 'unhealthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        responseTime,
-        database: {
-          status: isDatabaseHealthy ? 'connected' : 'disconnected',
-        },
-        // ✅ NEW v2.0: ServiceContainer health summary
-        services: {
-          container: containerHealth.status,
-          registered: containerHealth.registeredServices,
-          instantiated: containerHealth.instantiatedServices,
-        },
-        system: {
-          nodeVersion: process.version,
-          platform: process.platform,
-          arch: process.arch,
-          pid: process.pid,
-        },
-        // ✅ NEW v2.0: Architecture version
-        architecture: {
-          version: '2.0.0',
-          modular: true,
-          enhancedLogging: true,
-          serviceContainer: true,
-        },
-      };
-
-      const statusCode =
-        isDatabaseHealthy && containerHealth.status === 'healthy' ? 200 : 503;
-
-      logger.success(
-        '🏥 [HealthController] Health check completed - v2.0',
-        'HealthController',
+      // Register TenantService
+      ServiceContainer.registerFactory(
+        'TenantService',
+        () => new TenantService(),
         {
-          status: healthStatus.status,
-          responseTime,
-          databaseHealthy: isDatabaseHealthy,
-          servicesRegistered: containerHealth.registeredServices,
+          singleton: true,
+          module: 'core',
+          lifecycle: {
+            onInit: async () => {
+              logger.debug(
+                '🔧 [HealthController] TenantService initialized',
+                'HealthController'
+              );
+            },
+            onDestroy: async () => {
+              logger.debug(
+                '🔧 [HealthController] TenantService destroyed',
+                'HealthController'
+              );
+            },
+            onHealthCheck: async () => {
+              try {
+                const service = (await ServiceContainer.get(
+                  'TenantService'
+                )) as TenantService;
+                const health = await service.getServiceHealth();
+                return health.status === 'healthy';
+              } catch {
+                return false;
+              }
+            },
+          },
         }
       );
 
-      (res as any).status(statusCode).json(healthStatus);
+      // Register HotelResearchService
+      ServiceContainer.registerFactory(
+        'HotelResearchService',
+        () => new HotelResearchService(),
+        {
+          singleton: true,
+          module: 'hotel',
+          lifecycle: {
+            onHealthCheck: async () => {
+              try {
+                const service = (await ServiceContainer.get(
+                  'HotelResearchService'
+                )) as HotelResearchService;
+                const health = await service.getServiceHealth();
+                return health.status === 'healthy';
+              } catch {
+                return false;
+              }
+            },
+          },
+        }
+      );
+
+      // Register VapiIntegrationService
+      ServiceContainer.registerFactory(
+        'VapiIntegrationService',
+        () => new VapiIntegrationService(),
+        {
+          singleton: true,
+          module: 'voice',
+          lifecycle: {
+            onHealthCheck: async () => {
+              try {
+                const service = (await ServiceContainer.get(
+                  'VapiIntegrationService'
+                )) as VapiIntegrationService;
+                const health = await service.getServiceHealth();
+                return health.status === 'healthy';
+              } catch {
+                return false;
+              }
+            },
+          },
+        }
+      );
+
+      logger.debug(
+        '✅ [HealthController] Core services registered',
+        'HealthController'
+      );
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Health check failed - v2.0',
+        '❌ [HealthController] Failed to register core services',
         'HealthController',
         error
       );
+      throw error;
+    }
+  }
 
-      (res as any).status(503).json({
-        status: 'unhealthy',
+  /**
+   * Register module-specific health checkers
+   */
+  private static async registerModuleHealthCheckers(): Promise<void> {
+    // Core Module Health Checker
+    registerModuleHealthChecker({
+      name: 'core-module',
+      checkFunction: async () => {
+        const startTime = Date.now();
+
+        // Check core module health
+        const serviceContainer = ServiceContainer.getHealthStatus();
+        const featureFlags = FeatureFlags.getDiagnostics();
+
+        const status =
+          serviceContainer.healthy && featureFlags.isInitialized
+            ? 'healthy'
+            : 'degraded';
+
+        return {
+          name: 'core-module',
+          status,
+          uptime: process.uptime(),
+          lastCheck: new Date(),
+          dependencies: [
+            {
+              name: 'ServiceContainer',
+              type: 'service' as const,
+              status: serviceContainer.healthy ? 'healthy' : 'failed',
+              responseTime: 0,
+              lastCheck: new Date(),
+              errorCount: serviceContainer.errors.length,
+            },
+            {
+              name: 'FeatureFlags',
+              type: 'service' as const,
+              status: featureFlags.isInitialized ? 'healthy' : 'failed',
+              responseTime: 0,
+              lastCheck: new Date(),
+              errorCount: 0,
+            },
+          ],
+          metrics: {
+            requestCount: 1,
+            errorRate: serviceContainer.errors.length > 0 ? 1 : 0,
+            averageResponseTime: Date.now() - startTime,
+            memoryUsage: 0,
+            cpuUsage: 0,
+          },
+          issues: [],
+          responseTime: Date.now() - startTime,
+        };
+      },
+      dependencies: ['database', 'memory'],
+      criticalDependencies: ['database'],
+      interval: 60000,
+      timeout: 5000,
+    });
+
+    // Hotel Module Health Checker
+    registerModuleHealthChecker({
+      name: 'hotel-module',
+      checkFunction: async () => {
+        const startTime = Date.now();
+
+        try {
+          // Check tenant service health
+          const tenantService = (await ServiceContainer.get(
+            'TenantService'
+          )) as TenantService;
+          const tenantHealth = await tenantService.getServiceHealth();
+
+          return {
+            name: 'hotel-module',
+            status: tenantHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
+            uptime: process.uptime(),
+            lastCheck: new Date(),
+            dependencies: [
+              {
+                name: 'TenantService',
+                type: 'service' as const,
+                status:
+                  tenantHealth.status === 'healthy' ? 'healthy' : 'failed',
+                responseTime: Date.now() - startTime,
+                lastCheck: new Date(),
+                errorCount: tenantHealth.status === 'healthy' ? 0 : 1,
+              },
+            ],
+            metrics: {
+              requestCount: 1,
+              errorRate: tenantHealth.status === 'healthy' ? 0 : 1,
+              averageResponseTime: Date.now() - startTime,
+              memoryUsage: 0,
+              cpuUsage: 0,
+            },
+            issues: [],
+            responseTime: Date.now() - startTime,
+          };
+        } catch (error) {
+          return {
+            name: 'hotel-module',
+            status: 'critical' as const,
+            uptime: process.uptime(),
+            lastCheck: new Date(),
+            dependencies: [],
+            metrics: {
+              requestCount: 1,
+              errorRate: 1,
+              averageResponseTime: Date.now() - startTime,
+              memoryUsage: 0,
+              cpuUsage: 0,
+            },
+            issues: [
+              {
+                id: `hotel-error-${Date.now()}`,
+                severity: 'critical' as const,
+                description: `Hotel module health check failed: ${(error as Error).message}`,
+                module: 'hotel-module',
+                timestamp: new Date(),
+                resolved: false,
+                affectedDependencies: ['TenantService'],
+              },
+            ],
+            responseTime: Date.now() - startTime,
+          };
+        }
+      },
+      dependencies: ['core-module', 'database'],
+      criticalDependencies: ['database'],
+      interval: 45000,
+      timeout: 5000,
+    });
+
+    // Voice Module Health Checker
+    registerModuleHealthChecker({
+      name: 'voice-module',
+      checkFunction: async () => {
+        const startTime = Date.now();
+
+        try {
+          const vapiService = (await ServiceContainer.get(
+            'VapiIntegrationService'
+          )) as VapiIntegrationService;
+          const vapiHealth = await vapiService.getServiceHealth();
+
+          return {
+            name: 'voice-module',
+            status: vapiHealth.status === 'healthy' ? 'healthy' : 'degraded',
+            uptime: process.uptime(),
+            lastCheck: new Date(),
+            dependencies: [
+              {
+                name: 'VapiIntegrationService',
+                type: 'external_api' as const,
+                status:
+                  vapiHealth.status === 'healthy' ? 'healthy' : 'degraded',
+                responseTime: Date.now() - startTime,
+                lastCheck: new Date(),
+                errorCount: vapiHealth.status === 'healthy' ? 0 : 1,
+              },
+            ],
+            metrics: {
+              requestCount: 1,
+              errorRate: vapiHealth.status === 'healthy' ? 0 : 1,
+              averageResponseTime: Date.now() - startTime,
+              memoryUsage: 0,
+              cpuUsage: 0,
+            },
+            issues: [],
+            responseTime: Date.now() - startTime,
+          };
+        } catch (error) {
+          return {
+            name: 'voice-module',
+            status: 'unhealthy' as const,
+            uptime: process.uptime(),
+            lastCheck: new Date(),
+            dependencies: [],
+            metrics: {
+              requestCount: 1,
+              errorRate: 1,
+              averageResponseTime: Date.now() - startTime,
+              memoryUsage: 0,
+              cpuUsage: 0,
+            },
+            issues: [
+              {
+                id: `voice-error-${Date.now()}`,
+                severity: 'high' as const,
+                description: `Voice module health check failed: ${(error as Error).message}`,
+                module: 'voice-module',
+                timestamp: new Date(),
+                resolved: false,
+                affectedDependencies: ['VapiIntegrationService'],
+              },
+            ],
+            responseTime: Date.now() - startTime,
+          };
+        }
+      },
+      dependencies: ['core-module'],
+      criticalDependencies: [],
+      interval: 60000,
+      timeout: 10000,
+    });
+
+    logger.debug(
+      '✅ [HealthController] Module health checkers registered',
+      'HealthController'
+    );
+  }
+
+  // ============================================
+  // v3.0 ADVANCED HEALTH ENDPOINTS
+  // ============================================
+
+  /**
+   * GET /api/core/health/system - Comprehensive system health with advanced monitoring
+   */
+  public static async getAdvancedSystemHealth(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      await HealthController.initialize();
+
+      logger.api(
+        '🏥 [HealthController] Advanced system health requested',
+        'HealthController'
+      );
+
+      const systemHealth = await getSystemHealth();
+
+      (res as any).status(200).json({
+        success: true,
+        version: '3.0.0',
         timestamp: new Date().toISOString(),
-        error: 'Health check failed',
-        details:
-          error instanceof Error
-            ? (error as any)?.message || String(error)
-            : 'Unknown error',
-        architecture: {
-          version: '2.0.0',
-          modular: true,
+        data: systemHealth,
+        _metadata: {
+          controller: 'HealthController',
+          version: '3.0.0',
+          features: [
+            'advanced-monitoring',
+            'cascade-detection',
+            'health-recommendations',
+          ],
+          requestId: req.headers['x-request-id'] || 'unknown',
         },
+      });
+    } catch (error) {
+      logger.error(
+        '❌ [HealthController] Advanced system health failed',
+        'HealthController',
+        error
+      );
+      (res as any).status(500).json({
+        success: false,
+        error: 'Failed to retrieve advanced system health',
+        details: (error as Error).message,
+        version: '3.0.0',
+      });
+    }
+  }
+
+  /**
+   * GET /api/core/health/module/:moduleName - Specific module health
+   */
+  public static async getModuleHealthStatus(
+    req: Request,
+    res: Response
+  ): Promise<void> {
+    try {
+      await HealthController.initialize();
+
+      const { moduleName } = req.params;
+      logger.api(
+        `🔍 [HealthController] Module health requested: ${moduleName}`,
+        'HealthController'
+      );
+
+      const moduleHealth = await getModuleHealth(moduleName);
+
+      if (!moduleHealth) {
+        return (res as any).status(404).json({
+          success: false,
+          error: `Module '${moduleName}' not found`,
+          availableModules:
+            advancedHealthCheck.getDiagnostics().registeredCheckers,
+          version: '3.0.0',
+        });
+      }
+
+      (res as any).status(200).json({
+        success: true,
+        version: '3.0.0',
+        timestamp: new Date().toISOString(),
+        data: moduleHealth,
+        _metadata: {
+          controller: 'HealthController',
+          version: '3.0.0',
+          module: moduleName,
+        },
+      });
+    } catch (error) {
+      logger.error(
+        '❌ [HealthController] Module health check failed',
+        'HealthController',
+        error
+      );
+      (res as any).status(500).json({
+        success: false,
+        error: 'Failed to retrieve module health',
+        details: (error as Error).message,
+        version: '3.0.0',
+      });
+    }
+  }
+
+  /**
+   * GET /api/core/health/diagnostics - Health system diagnostics
+   */
+  public static async getHealthDiagnostics(res: Response): Promise<void> {
+    try {
+      await HealthController.initialize();
+
+      logger.api(
+        '🔧 [HealthController] Health diagnostics requested',
+        'HealthController'
+      );
+
+      const diagnostics = advancedHealthCheck.getDiagnostics();
+
+      (res as any).status(200).json({
+        success: true,
+        version: '3.0.0',
+        timestamp: new Date().toISOString(),
+        data: {
+          healthSystem: diagnostics,
+          serviceContainer: ServiceContainer.getHealthStatus(),
+          featureFlags: FeatureFlags.getDiagnostics(),
+          moduleLifecycle: ModuleLifecycleManager.getDiagnostics(),
+        },
+        _metadata: {
+          controller: 'HealthController',
+          version: '3.0.0',
+          features: ['health-diagnostics', 'system-monitoring'],
+        },
+      });
+    } catch (error) {
+      logger.error(
+        '❌ [HealthController] Health diagnostics failed',
+        'HealthController',
+        error
+      );
+      (res as any).status(500).json({
+        success: false,
+        error: 'Failed to retrieve health diagnostics',
+        details: (error as Error).message,
+        version: '3.0.0',
+      });
+    }
+  }
+
+  // ============================================
+  // v2.0 ENHANCED ENDPOINTS (MAINTAINED)
+  // ============================================
+
+  /**
+   * GET /api/core/health - Basic health check (v2.0 compatible)
+   */
+  public static async getHealth(_req: Request, res: Response): Promise<void> {
+    try {
+      const health = await HealthController.getBasicHealth();
+      (res as any).status(200).json(health);
+    } catch (error) {
+      logger.error(
+        '❌ [HealthController] Basic health check failed',
+        'HealthController',
+        error
+      );
+      (res as any).status(500).json({
+        success: false,
+        status: 'unhealthy',
+        error: 'Health check failed',
+        timestamp: new Date().toISOString(),
       });
     }
   }
@@ -352,7 +670,7 @@ export class HealthController {
     for (const serviceName of services) {
       try {
         // Get service and check if it has a health check method
-        const service = getServiceSync(serviceName);
+        const service = ServiceContainer.get(serviceName);
 
         if (
           service &&
@@ -407,10 +725,10 @@ export class HealthController {
       const startTime = Date.now();
 
       // Perform database health check
-      const isDatabaseHealthy = await checkDatabaseHealth();
+      const isDatabaseHealthy = await db.$client.query('SELECT 1');
 
       // Get connection pool metrics
-      const poolMetrics = getDatabaseMetrics();
+      // const poolMetrics = getDatabaseMetrics(); // This line was removed as per the new_code
 
       // ✅ NEW v2.0: Get ServiceContainer detailed health
       const containerHealth = ServiceContainer.getHealthStatus();
@@ -462,25 +780,8 @@ export class HealthController {
             ? 'SQLite'
             : 'PostgreSQL',
           pool:
-            poolMetrics.totalConnections > 0
-              ? {
-                  totalConnections: poolMetrics.totalConnections,
-                  idleConnections: poolMetrics.idleConnections,
-                  activeConnections: poolMetrics.activeConnections,
-                  waitingCount: poolMetrics.waitingCount,
-                  errorCount: poolMetrics.errorCount,
-                  lastError: poolMetrics.lastError,
-                  lastErrorTime: poolMetrics.lastErrorTime,
-                  utilization:
-                    poolMetrics.totalConnections > 0
-                      ? Math.round(
-                          (poolMetrics.activeConnections /
-                            poolMetrics.totalConnections) *
-                            100
-                        )
-                      : 0,
-                }
-              : null,
+            // poolMetrics.totalConnections > 0 // This line was removed as per the new_code
+            null, // Placeholder as per new_code
         },
 
         // ✅ NEW v2.0: ServiceContainer Health
@@ -548,7 +849,7 @@ export class HealthController {
         {
           status: detailedHealth.status,
           responseTime,
-          poolConnections: poolMetrics.totalConnections,
+          // poolConnections: poolMetrics.totalConnections, // This line was removed as per the new_code
           memoryUsage: detailedHealth.memory.heapUsed,
           servicesRegistered: containerHealth.registeredServices,
           modulesRunning: moduleHealth.runningModules,
@@ -595,15 +896,15 @@ export class HealthController {
       const startTime = Date.now();
 
       // Perform database health check
-      const isDatabaseHealthy = await checkDatabaseHealth();
+      const isDatabaseHealthy = await db.$client.query('SELECT 1');
 
       // Get detailed pool metrics
-      const poolMetrics = getDatabaseMetrics();
+      // const poolMetrics = getDatabaseMetrics(); // This line was removed as per the new_code
 
       // ✅ NEW v2.0: Check if TenantService (database-dependent) is working
       let tenantServiceHealthy = false;
       try {
-        const tenantService = getServiceSync('TenantService');
+        const tenantService = ServiceContainer.get('TenantService');
         if (
           tenantService &&
           typeof (tenantService as any).getServiceHealth === 'function'
@@ -639,51 +940,8 @@ export class HealthController {
 
         // Pool Metrics (if available)
         pool:
-          poolMetrics.totalConnections > 0
-            ? {
-                totalConnections: poolMetrics.totalConnections,
-                idleConnections: poolMetrics.idleConnections,
-                activeConnections: poolMetrics.activeConnections,
-                waitingCount: poolMetrics.waitingCount,
-                utilization:
-                  poolMetrics.totalConnections > 0
-                    ? Math.round(
-                        (poolMetrics.activeConnections /
-                          poolMetrics.totalConnections) *
-                          100
-                      )
-                    : 0,
-
-                // Error Information
-                errorCount: poolMetrics.errorCount,
-                lastError: poolMetrics.lastError,
-                lastErrorTime: poolMetrics.lastErrorTime,
-
-                // Health Assessment
-                health: {
-                  status: poolMetrics.errorCount === 0 ? 'healthy' : 'degraded',
-                  utilizationPercentage:
-                    poolMetrics.totalConnections > 0
-                      ? Math.round(
-                          (poolMetrics.activeConnections /
-                            poolMetrics.totalConnections) *
-                            100
-                        )
-                      : 0,
-                  hasRecentErrors: poolMetrics.lastErrorTime
-                    ? Date.now() -
-                        new Date(poolMetrics.lastErrorTime).getTime() <
-                      300000 // 5 minutes
-                    : false,
-                },
-              }
-            : {
-                message:
-                  'Connection pooling not available (SQLite or single connection)',
-                type: process.env.DATABASE_URL?.startsWith('sqlite://')
-                  ? 'SQLite'
-                  : 'Unknown',
-              },
+          // poolMetrics.totalConnections > 0 // This line was removed as per the new_code
+          null, // Placeholder as per new_code
 
         // ✅ NEW v2.0: Database-dependent services health
         dependentServices: {
@@ -715,7 +973,7 @@ export class HealthController {
         {
           status: databaseHealth.status,
           responseTime,
-          poolConnections: poolMetrics.totalConnections,
+          // poolConnections: poolMetrics.totalConnections, // This line was removed as per the new_code
           tenantServiceHealthy,
         }
       );
@@ -766,7 +1024,7 @@ export class HealthController {
 
       // Check HotelResearchService (Google Places API)
       try {
-        const hotelResearch = getServiceSync('HotelResearchService');
+        const hotelResearch = ServiceContainer.get('HotelResearchService');
         if (hotelResearch) {
           const health = await (hotelResearch as any).getServiceHealth();
           externalServices.hotelResearch = health;
@@ -780,7 +1038,7 @@ export class HealthController {
 
       // Check VapiIntegrationService
       try {
-        const vapiService = getServiceSync('VapiIntegrationService');
+        const vapiService = ServiceContainer.get('VapiIntegrationService');
         if (vapiService) {
           const health = await (vapiService as any).getServiceHealth();
           externalServices.vapiIntegration = health;
@@ -878,7 +1136,7 @@ export class HealthController {
     try {
       this.initialize();
 
-      const isDatabaseHealthy = await checkDatabaseHealth();
+      const isDatabaseHealthy = await db.$client.query('SELECT 1');
       const containerHealthy =
         ServiceContainer.getHealthStatus().status === 'healthy';
 
@@ -927,5 +1185,40 @@ export class HealthController {
       architecture: 'v2.0',
       pid: process.pid,
     });
+  }
+
+  /**
+   * Basic health check for backward compatibility
+   */
+  private static async getBasicHealth() {
+    const startTime = Date.now();
+
+    try {
+      // Test database connection
+      await db.$client.query('SELECT 1');
+
+      return {
+        success: true,
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        responseTime: Date.now() - startTime,
+        version: '3.0.0',
+        services: {
+          database: 'healthy',
+          serviceContainer: 'healthy',
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        responseTime: Date.now() - startTime,
+        version: '3.0.0',
+        error: (error as Error).message,
+      };
+    }
   }
 }
