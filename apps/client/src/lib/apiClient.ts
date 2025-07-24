@@ -2,13 +2,46 @@
 
 // Type declaration for import.meta
 
-
 /* ========================================
    TYPE-SAFE API CLIENT
    ======================================== */
 
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 
-import { ApiResponse, PaginatedResponse, LoginResponse, StartCallResponse, EndCallResponse, SaveTranscriptResponse, CreateOrderResponse, UpdateOrderStatusResponse, SendMessageResponse, HotelResearchResponse, GenerateAssistantResponse, HotelProfileResponse, UpdateAssistantConfigResponse, AnalyticsResponse, ServiceHealthResponse,  } from '@/types/api';
+// ✅ FIXED: Import all missing API types
+import type {
+  LoginRequest,
+  LoginResponse,
+  StartCallRequest,
+  StartCallResponse,
+  EndCallRequest,
+  EndCallResponse,
+  SaveTranscriptRequest,
+  SaveTranscriptResponse,
+  CreateOrderRequest,
+  CreateOrderResponse,
+  UpdateOrderStatusRequest,
+  UpdateOrderStatusResponse,
+  SendMessageRequest,
+  SendMessageResponse,
+  HotelResearchRequest,
+  HotelResearchResponse,
+  GenerateAssistantRequest,
+  GenerateAssistantResponse,
+  UpdateAssistantConfigRequest,
+  UpdateAssistantConfigResponse,
+  PaginationParams,
+  PaginatedResponse,
+  ApiResponse,
+  ApiError,
+  HotelProfileResponse,
+  AnalyticsResponse,
+  ServiceHealthResponse,
+} from '@/types/api';
+
+// ✅ FIXED: Import utility types
+import type { QueryFunction } from '@tanstack/react-query';
+
 // ========================================
 // API CLIENT CONFIGURATION
 // ========================================
@@ -93,7 +126,9 @@ export class ApiClient {
         },
         body: data ? JSON.stringify(data) : undefined,
         credentials: this.config.withCredentials ? 'include' : 'omit',
-        signal: timeout ? (window as any).AbortSignal?.timeout(timeout) : undefined,
+        signal: timeout
+          ? (window as any).AbortSignal?.timeout(timeout)
+          : undefined,
       });
 
       const responseData = await response.json();
@@ -124,7 +159,10 @@ export class ApiClient {
 
       throw {
         status: 500,
-        message: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+        message:
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error',
         timestamp: new Date(),
       } as ApiError;
     }

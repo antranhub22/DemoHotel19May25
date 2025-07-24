@@ -105,6 +105,29 @@ export {
   call_summaries,
 } from './schema';
 
+// ✅ FIXED: Export common drizzle-orm functions to fix missing imports
+export {
+  eq,
+  and,
+  or,
+  desc,
+  asc,
+  count,
+  avg,
+  sum,
+  max,
+  min,
+  sql,
+  like,
+  between,
+  isNull,
+  isNotNull,
+  inArray,
+  notInArray,
+  exists,
+  notExists,
+} from 'drizzle-orm';
+
 // ✅ POSTGRESQL-OPTIMIZED UTILITIES
 export const getCurrentTimestamp = (): Date => {
   return new Date();

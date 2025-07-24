@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from 'express';
 import { TenantService } from '@server/services/tenantService';
 import { logger } from '@shared/utils/logger';
 

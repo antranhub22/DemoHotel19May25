@@ -57,7 +57,7 @@ export type {
   InsertMessage,
   CallSummary,
   InsertCallSummary,
-} from '@shared/db/schema';
+} from '@shared/db';
 
 // UI types
 export interface BasicHotelData {
