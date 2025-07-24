@@ -17,6 +17,9 @@ import http from 'http';
 // Monitoring system fully implemented but temporarily disabled for deployment safety
 // To re-enable: Follow MONITORING_RE_ENABLE_GUIDE.md
 
+// ✅ MONITORING REMINDER: Show status and reminders during startup
+import { initializeMonitoringReminder } from '@server/startup/monitoring-reminder';
+
 const app = express();
 
 // Trust proxy for deployment on Render/Heroku/etc
@@ -218,6 +221,9 @@ app.use((req, res, next) => {
     );
   }
 
+  // Initialize monitoring reminder
+  await initializeMonitoringReminder();
+
   // eslint-disable-next-line no-unused-vars
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -238,6 +244,11 @@ app.use((req, res, next) => {
   const port = process.env.PORT || 10000;
   server.listen(port, () => {
     logger.debug('Server is running on port ${port}', 'Component');
+
+    // ✅ Show monitoring status and reminders after startup
+    setTimeout(() => {
+      initializeMonitoringReminder();
+    }, 1000);
   });
 })();
 

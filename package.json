@@ -140,9 +140,14 @@
     "diag:circular": "echo '=== Circular Dependencies ===' && npx madge --circular src/",
     "diag:lint": "echo '=== ESLint Check ===' && npm run lint",
     "diag:git": "echo '=== Git Status ===' && git status --porcelain",
-    "validate:final": "./tools/scripts/validation/final-validation.sh",
-    "validate:final:demo": "./tools/scripts/validation/final-validation-demo.sh",
-    "validate:business-ready": "./tools/scripts/validation/final-validation.sh"
+    "validate:final": "bash tools/scripts/validation/final-validation.sh",
+    "validate:final:demo": "bash tools/scripts/validation/final-validation-demo.sh",
+    "validate:business-ready": "bash tools/scripts/validation/final-validation.sh && echo '🎯 System ready for production deployment'",
+    "🔔 MONITORING REMINDERS": "===============================",
+    "check-monitoring": "node tools/scripts/validation/check-monitoring-status.cjs",
+    "remind-monitoring": "echo '⚠️  REMINDER: Enhanced Logging & Metrics v2.0 is currently DISABLED' && echo '📋 To re-enable: npm run enable-monitoring' && echo '📖 Guide: MONITORING_RE_ENABLE_GUIDE.md'",
+    "enable-monitoring": "node tools/scripts/validation/enable-monitoring.cjs",
+    "status-monitoring": "echo '📊 Checking monitoring status...' && curl -s http://localhost:10000/api/monitoring/status || echo '⚠️  Monitoring not active'"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
