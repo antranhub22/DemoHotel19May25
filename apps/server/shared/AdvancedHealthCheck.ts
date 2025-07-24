@@ -557,7 +557,7 @@ export class AdvancedHealthCheck {
           rootCause: failedModule.name,
           affectedModules,
           severity:
-            moduleChecker.criticalDependencies.length > 0 ? 'critical' : 'high',
+            checker.criticalDependencies.length > 0 ? 'critical' : 'high',
           estimatedImpact: `${affectedModules.length} modules potentially affected`,
           detectedAt: new Date(),
         });

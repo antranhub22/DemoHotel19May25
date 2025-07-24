@@ -554,14 +554,14 @@ export class HealthController {
   }
 
   /**
-   * ✅ ENHANCED v2.0: Comprehensive modular architecture health check
-   * GET /api/health/architecture
+   * GET /api/core/health/architecture - Complete modular architecture health
    */
   static async getArchitectureHealth(
     _req: Request,
     res: Response
   ): Promise<void> {
     try {
+      // Initialize on first use
       this.initialize();
 
       logger.api(
@@ -571,64 +571,61 @@ export class HealthController {
 
       const startTime = Date.now();
 
-      // Get comprehensive architecture health
-      const architectureHealth = getArchitectureHealth();
+      // ✅ NEW v2.0: Get enhanced architecture health
+      const architectureHealth = await getArchitectureHealth();
+      const responseTime = Date.now() - startTime;
 
-      // ✅ NEW v2.0: Enhanced with ServiceContainer v2.0 details
-      const containerHealth = ServiceContainer.getHealthStatus();
-      const dependencyGraph = ServiceContainer.getDependencyGraph();
-
-      // Add additional ServiceContainer details to the services section
+      // ✅ NEW v2.0: Enhanced health status with all components
       const enhancedArchitectureHealth = {
         ...architectureHealth,
-        services: {
-          ...architectureHealth.services,
-          containerHealth,
-          dependencyGraph,
-          serviceHealth: {}, // Will be populated below
-        },
-        responseTime: 0, // Will be set below
+        responseTime,
       };
 
-      // ✅ NEW v2.0: Add service health checks
-      const serviceHealth = await this.checkAllServices();
-      enhancedArchitectureHealth.services.serviceHealth = serviceHealth;
-
-      const responseTime = Date.now() - startTime;
-      enhancedArchitectureHealth.responseTime = responseTime;
-
       // Determine overall health status
-      const overallHealthy =
-        enhancedArchitectureHealth.services.container.status === 'healthy' &&
-        enhancedArchitectureHealth.features.flags.summary?.totalFlags > 0 &&
-        serviceHealth.healthy >= serviceHealth.total * 0.7; // 70% services healthy
-
-      const statusCode = overallHealthy ? 200 : 503;
+      const isSystemHealthy =
+        architectureHealth.overall.status === 'healthy' &&
+        architectureHealth.services.container.status === 'healthy' &&
+        architectureHealth.services.featureFlags.status === 'healthy' &&
+        architectureHealth.services.lifecycle.status === 'healthy';
 
       logger.success(
         '🏗️ [HealthController] Architecture health completed - v2.0',
         'HealthController',
         {
+          status: isSystemHealthy ? 'healthy' : 'degraded',
           responseTime,
-          servicesHealthy: `${serviceHealth.healthy}/${serviceHealth.total}`,
-          modulesRunning:
-            enhancedArchitectureHealth.lifecycle.systemHealth.runningModules,
-          flagsEnabled:
-            enhancedArchitectureHealth.features.flags.summary?.enabledFlags,
+          components: {
+            container: architectureHealth.services.container.status,
+            featureFlags: architectureHealth.services.featureFlags.status,
+            lifecycle: architectureHealth.services.lifecycle.status,
+            monitoring: architectureHealth.services.monitoring.status,
+          },
         }
       );
 
-      (res as any).status(statusCode).json({
+      (res as any).status(isSystemHealthy ? 200 : 503).json({
         success: true,
-        status: overallHealthy ? 'healthy' : 'degraded',
+        status: isSystemHealthy ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),
+        version: '3.0.0',
         responseTime,
-        architecture: enhancedArchitectureHealth,
-        version: '2.0.0',
+        data: enhancedArchitectureHealth,
+        summary: {
+          overall: architectureHealth.overall.status,
+          servicesHealthy: Object.values(architectureHealth.services).filter(
+            (s: any) => s.status === 'healthy'
+          ).length,
+          totalServices: Object.keys(architectureHealth.services).length,
+        },
+        architecture: {
+          version: '3.0.0',
+          modular: true,
+          enhancedHealthCheck: true,
+        },
       });
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Architecture health check failed',
+        '❌ [HealthController] Architecture health failed - v2.0',
         'HealthController',
         error
       );
@@ -636,12 +633,14 @@ export class HealthController {
       (res as any).status(503).json({
         success: false,
         status: 'unhealthy',
-        timestamp: new Date().toISOString(),
         error: 'Architecture health check failed',
-        details:
-          error instanceof Error
-            ? (error as any)?.message || String(error)
-            : 'Unknown error',
+        details: (error as Error).message,
+        timestamp: new Date().toISOString(),
+        version: '3.0.0',
+        architecture: {
+          version: '3.0.0',
+          modular: true,
+        },
       });
     }
   }
