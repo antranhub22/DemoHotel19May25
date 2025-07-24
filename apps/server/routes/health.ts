@@ -9,6 +9,7 @@ import express, { type Request, Response } from 'express';
 // ✅ ENHANCED: Import modular architecture health check v2.0
 import { getArchitectureHealth } from '@server/shared';
 import { ServiceContainer } from '@server/shared/ServiceContainer';
+import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
@@ -30,12 +31,14 @@ router.get('/health/database', HealthController.getDatabaseHealth);
 // ============================================
 
 /**
- * GET /api/health/architecture - Check enhanced modular architecture health
- * Tests modules, ServiceContainer v2.0, and feature flags
+ * GET /api/health/architecture - Enhanced architecture health with ServiceContainer v2.0
  */
 router.get('/architecture', async (_req: Request, res: Response) => {
   try {
-    const architectureHealth = getArchitectureHealth();
+    logger.api('🏗️ [Health] Architecture health requested', 'Health');
+
+    // ✅ ENHANCED: Get architecture health with await
+    const architectureHealth = await getArchitectureHealth();
 
     // ✅ ENHANCED: Get ServiceContainer v2.0 health
     const containerHealth = ServiceContainer.getHealthStatus();
@@ -43,50 +46,43 @@ router.get('/architecture', async (_req: Request, res: Response) => {
     const serviceHealth = await ServiceContainer.healthCheck();
 
     // Determine overall health status
-    const moduleHealths = Object.values(
-      architectureHealth.modular.moduleHealth
-    );
-    const allModulesHealthy = moduleHealths.every(
-      (health: any) => health.status === 'healthy'
-    );
-
-    const allServicesHealthy = Object.values(serviceHealth).every(
-      (healthy: boolean) => healthy
-    );
-
-    const overallStatus =
-      allModulesHealthy && allServicesHealthy ? 'healthy' : 'degraded';
+    const overallStatus = architectureHealth.overall.status;
 
     (res as any).status(200).json({
       status: overallStatus,
       timestamp: new Date().toISOString(),
-      version: '2.0',
+      version: '3.0',
       architecture: {
         ...architectureHealth,
         // ✅ ENHANCED: Add ServiceContainer v2.0 details
         services: {
+          ...architectureHealth.services,
           container: containerHealth,
           health: serviceHealth,
           dependencyGraph,
         },
       },
       summary: {
-        totalModules: architectureHealth.modular.modules.length,
-        healthyModules: moduleHealths.filter((h: any) => h.status === 'healthy')
-          .length,
+        overallStatus: architectureHealth.overall.status,
+        servicesHealthy: Object.values(architectureHealth.services).filter(
+          (s: any) => s.status === 'healthy'
+        ).length,
+        totalServices: Object.keys(architectureHealth.services).length,
         registeredServices: containerHealth.registeredServices,
         instantiatedServices: containerHealth.instantiatedServices,
         healthyServices: Object.values(serviceHealth).filter(Boolean).length,
-        enabledFeatures: architectureHealth.features.flags.enabledFlags,
         containerVersion: containerHealth.version,
+        advancedHealthEnabled: !!architectureHealth.advancedHealth?.initialized,
       },
     });
   } catch (error) {
+    logger.error('❌ [Health] Architecture health failed', 'Health', error);
     (res as any).status(500).json({
       status: 'unhealthy',
-      error: 'Failed to check architecture health',
-      details: error.message,
+      error: 'Architecture health check failed',
+      details: (error as Error).message,
       timestamp: new Date().toISOString(),
+      version: '3.0',
     });
   }
 });
