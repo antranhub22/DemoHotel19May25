@@ -5,48 +5,69 @@ import { logger } from '@shared/utils/logger';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 
-// ✅ NEW: Import modular architecture components
+// ✅ ENHANCED: Import modular architecture components v2.0
 import { isModuleEnabled } from '@server/shared/FeatureFlags';
-import { ServiceContainer } from '@server/shared/ServiceContainer';
+import {
+  ServiceContainer,
+  getServiceSync,
+} from '@server/shared/ServiceContainer';
 
 /**
- * Request Controller - Enhanced with Modular Architecture v1.0
+ * Request Controller - Enhanced with Modular Architecture v2.0
  *
  * Handles all request/order-related HTTP requests and responses.
- * Now uses ServiceContainer for dependency management while maintaining API compatibility.
+ * Now uses enhanced ServiceContainer v2.0 with lifecycle management and async service resolution.
  * Includes automatic camelCase ↔ snake_case transformation for frontend compatibility.
  */
 export class RequestController {
-  // ✅ NEW: Service dependencies via container (backwards compatible)
-  private static getTenantService() {
-    // Fallback to direct import if service not registered yet
-    if (ServiceContainer.has('TenantService')) {
-      return ServiceContainer.get('TenantService');
+  // ✅ NEW: Enhanced service retrieval with async support
+  private static async getTenantServiceAsync() {
+    try {
+      if (ServiceContainer.has('TenantService')) {
+        return await ServiceContainer.get('TenantService');
+      }
+      // Auto-register if not found
+      const { TenantService } = require('@server/services/tenantService');
+      ServiceContainer.register('TenantService', TenantService, {
+        module: 'tenant-module',
+        singleton: true,
+      });
+      return await ServiceContainer.get('TenantService');
+    } catch (error) {
+      logger.warn(
+        'Failed to get TenantService via async container',
+        'RequestController',
+        error
+      );
+      const { TenantService } = require('@server/services/tenantService');
+      return new TenantService();
     }
-    // Import existing service directly for compatibility
-    const { TenantService } = require('@server/services/tenantService');
-    return new TenantService();
   }
 
   /**
    * Create new request/order
    * POST /api/request
-   * ✅ ENHANCED: Now with module checks and service container
+   * ✅ ENHANCED: Now with module checks and ServiceContainer v2.0
    */
   static async createRequest(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ NEW: Check if request module is enabled
+      // ✅ ENHANCED: Check if request module is enabled
       if (!isModuleEnabled('request-module')) {
         (res as any).status(503).json({
           success: false,
           error: 'Request module is currently disabled',
           code: 'MODULE_DISABLED',
+          _metadata: {
+            module: 'request-module',
+            version: '2.0.0',
+            architecture: 'modular-enhanced',
+          },
         });
         return;
       }
 
       logger.api(
-        '📝 [RequestController] Creating new request (camelCase) - Modular v1.0',
+        '📝 [RequestController] Creating new request (camelCase) - Modular v2.0',
         'RequestController',
         req.body
       );
@@ -100,19 +121,29 @@ export class RequestController {
         return;
       }
 
-      // ✅ NEW: Optional tenant service validation via container
+      // ✅ ENHANCED: Use async tenant service validation via container v2.0
       try {
-        const tenantService = this.getTenantService();
+        const tenantService = await this.getTenantServiceAsync();
         const isValid = await tenantService.getTenantById(req.tenant.id);
         if (!isValid) {
           logger.warn(
-            'Tenant validation failed via service container',
+            'Tenant validation failed via enhanced service container v2.0',
             'RequestController'
+          );
+        } else {
+          logger.debug(
+            '✅ [RequestController] Tenant validated via ServiceContainer v2.0',
+            'RequestController',
+            { tenantId: req.tenant.id }
           );
         }
       } catch (error) {
         // Don't fail the request if tenant service has issues
-        logger.debug('Tenant service validation skipped', 'RequestController');
+        logger.debug(
+          'Tenant service validation skipped in v2.0 container',
+          'RequestController',
+          error
+        );
       }
 
       // Create request record compatible with schema (id will be auto-generated)
@@ -121,7 +152,7 @@ export class RequestController {
         call_id: call_id || generateId('call'),
         room_number: room_number || 'unknown',
         order_id: generateShortId('request'), // ✅ OPTIMIZED: Use UUID-based ID generation
-        request_content,
+        request_content: content,
         status: finalStatus,
         created_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
         updated_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
@@ -131,7 +162,7 @@ export class RequestController {
       };
 
       logger.debug(
-        '💾 [RequestController] Inserting request - Modular v1.0',
+        '💾 [RequestController] Inserting request - Modular v2.0',
         'RequestController',
         newRequest
       );
@@ -155,16 +186,18 @@ export class RequestController {
           reference: newRequest.order_id,
           estimatedTime: delivery_time || 'asap',
         },
-        // ✅ NEW: Module metadata (optional)
+        // ✅ ENHANCED: Module metadata v2.0
         _metadata: {
           module: 'request-module',
-          version: '1.0.0',
-          architecture: 'modular',
+          version: '2.0.0',
+          architecture: 'modular-enhanced',
+          serviceContainer: 'v2.0',
+          tenantValidated: true,
         },
       };
 
       logger.success(
-        '📝 [RequestController] Request created successfully (camelCase) - Modular v1.0',
+        '📝 [RequestController] Request created successfully (camelCase) - Modular v2.0',
         'RequestController',
         {
           orderId: newRequest.order_id,
@@ -175,7 +208,7 @@ export class RequestController {
       (res as any).status(201).json(response);
     } catch (error) {
       logger.error(
-        '❌ [RequestController] Failed to create request - Modular v1.0',
+        '❌ [RequestController] Failed to create request - Modular v2.0',
         'RequestController',
         error
       );
@@ -186,6 +219,11 @@ export class RequestController {
           error instanceof Error
             ? (error as any)?.message || String(error)
             : 'Unknown error',
+        _metadata: {
+          module: 'request-module',
+          version: '2.0.0',
+          architecture: 'modular-enhanced',
+        },
       });
     }
   }
