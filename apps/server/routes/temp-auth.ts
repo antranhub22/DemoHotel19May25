@@ -1,6 +1,6 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import { logger } from '@shared/utils/logger';
+import * as express from 'express';
+import * as jwt from 'jsonwebtoken';
+import { logger } from '../../../packages/shared/utils/logger';
 
 const router = express.Router();
 
