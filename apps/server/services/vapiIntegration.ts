@@ -459,6 +459,52 @@ export class AssistantGeneratorService {
   }
 
   /**
+   * Generate assistant - Main method used by dashboard
+   */
+  async generateAssistant(
+    hotelData: any,
+    customization: any = {}
+  ): Promise<string> {
+    try {
+      logger.debug('🤖 [Vapi] Generating assistant...', 'Service');
+
+      // Generate assistant configuration based on language preference
+      const primaryLanguage = customization.languages?.[0] || 'en';
+      let assistantConfig: any;
+
+      if (primaryLanguage === 'vi' || primaryLanguage === 'vietnamese') {
+        assistantConfig = await this.generateVietnameseAssistant(
+          hotelData,
+          customization
+        );
+      } else {
+        assistantConfig = await this.generateEnglishAssistant(
+          hotelData,
+          customization
+        );
+      }
+
+      // Create assistant via Vapi API
+      const assistantId =
+        await this.vapiService.createAssistant(assistantConfig);
+
+      logger.success(
+        '✅ [Vapi] Assistant generated successfully:',
+        'Service',
+        assistantId
+      );
+      return assistantId;
+    } catch (error) {
+      logger.error('❌ [Vapi] Assistant generation failed:', 'Service', error);
+      throw new VapiIntegrationError(
+        `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
+        'GENERATION_FAILED',
+        500
+      );
+    }
+  }
+
+  /**
    * Generate optimized assistant configuration for Vietnamese hotels
    */
   async generateVietnameseAssistant(

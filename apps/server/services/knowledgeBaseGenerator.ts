@@ -66,6 +66,46 @@ class KnowledgeBaseGenerator {
   }
 
   /**
+   * Generate system prompt for assistant configuration
+   */
+  generateSystemPrompt(hotelData: any, customization: any = {}): string {
+    // ✅ FIXED: Use any type
+    try {
+      logger.debug('🤖 [SystemPrompt] Generating system prompt...', 'Service');
+
+      const adaptedData = this.adaptHotelData(hotelData);
+      const knowledgeBase = this.generateKnowledgeBase(hotelData);
+
+      const personality = customization.personality || 'professional';
+      const tone = customization.tone || 'friendly';
+      const languages = customization.languages || ['en'];
+      const primaryLanguage = languages[0] || 'en';
+
+      let systemPrompt: string;
+
+      if (primaryLanguage === 'vi' || primaryLanguage === 'vietnamese') {
+        systemPrompt = this.buildVietnameseSystemPrompt(
+          adaptedData,
+          knowledgeBase,
+          customization
+        );
+      } else {
+        systemPrompt = this.buildEnglishSystemPrompt(
+          adaptedData,
+          knowledgeBase,
+          customization
+        );
+      }
+
+      logger.success('✅ [SystemPrompt] Generated successfully', 'Service');
+      return systemPrompt;
+    } catch (error) {
+      logger.error('❌ [SystemPrompt] Generation failed:', 'Service', error);
+      return this.generateFallbackSystemPrompt(hotelData);
+    }
+  }
+
+  /**
    * Generate assistant prompt with knowledge base
    */
   generateAssistantPrompt(hotelData: any): string {
@@ -433,6 +473,84 @@ Phone: Contact front desk
 Location: ${hotelData.location || hotelData.address || 'Prime location'}
 
 We're here to make your stay comfortable and memorable!`;
+  }
+
+  /**
+   * Build Vietnamese system prompt
+   */
+  private buildVietnameseSystemPrompt(
+    hotelData: any,
+    knowledgeBase: string,
+    customization: any = {}
+  ): string {
+    const hotelName = hotelData.name || 'khách sạn';
+    const personality = customization.personality || 'professional';
+    const tone = customization.tone || 'friendly';
+
+    let personalityText = '';
+    if (personality === 'friendly') {
+      personalityText = 'Tôi có tính cách thân thiện và vui vẻ.';
+    } else if (personality === 'luxurious') {
+      personalityText = 'Tôi có phong cách lịch lãm và sang trọng.';
+    } else {
+      personalityText = 'Tôi có thái độ chuyên nghiệp và lịch sự.';
+    }
+
+    return `Tôi là trợ lý ảo của ${hotelName}. ${personalityText}
+
+Kiến thức về khách sạn:
+${knowledgeBase}
+
+Tôi có thể hỗ trợ quý khách:
+- Thông tin về khách sạn và dịch vụ
+- Đặt dịch vụ phòng và tiện ích
+- Hướng dẫn về các địa điểm lân cận
+- Giải đáp thắc mắc về chính sách khách sạn
+
+Tôi luôn sẵn sàng hỗ trợ quý khách một cách tốt nhất!`;
+  }
+
+  /**
+   * Build English system prompt
+   */
+  private buildEnglishSystemPrompt(
+    hotelData: any,
+    knowledgeBase: string,
+    customization: any = {}
+  ): string {
+    const hotelName = hotelData.name || 'hotel';
+    const personality = customization.personality || 'professional';
+    const tone = customization.tone || 'friendly';
+
+    let personalityText = '';
+    if (personality === 'friendly') {
+      personalityText = 'I have a friendly and cheerful personality.';
+    } else if (personality === 'luxurious') {
+      personalityText = 'I have an elegant and sophisticated style.';
+    } else {
+      personalityText = 'I maintain a professional and courteous demeanor.';
+    }
+
+    return `I am the virtual concierge for ${hotelName}. ${personalityText}
+
+Hotel Knowledge Base:
+${knowledgeBase}
+
+I can assist you with:
+- Hotel information and services
+- Room service and amenity bookings
+- Local area recommendations
+- Hotel policy inquiries
+
+I'm here to ensure you have the best possible experience during your stay!`;
+  }
+
+  /**
+   * Generate fallback system prompt
+   */
+  private generateFallbackSystemPrompt(hotelData: any): string {
+    const hotelName = hotelData.name || 'Hotel';
+    return `I am the virtual concierge for ${hotelName}. I'm here to assist you with information about our hotel, services, and local area. How may I help you today?`;
   }
 }
 

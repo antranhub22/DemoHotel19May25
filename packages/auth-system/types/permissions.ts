@@ -123,6 +123,23 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     integrations: ['view', 'manage'],
     logs: ['view', 'export'],
   },
+  guest: {
+    dashboard: ['view'], // Basic dashboard access for guests
+    profile: ['view', 'edit'], // Can view and edit their own profile
+    requests: ['view'], // Can view their own requests
+    notifications: ['view'], // Can see their notifications
+    system: [], // No system access
+    analytics: [], // No analytics access
+    billing: [], // No billing access
+    staff: [], // No staff management
+    calls: [], // No call management
+    settings: [], // No settings access
+    assistant: [], // No assistant configuration
+    guests: [], // No guest management
+    security: [], // No security access
+    integrations: [], // No integrations access
+    logs: [], // No logs access
+  },
 };
 
 // Menu Configuration for each role
@@ -539,6 +556,29 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       requiredPermission: 'system.view',
     },
   ],
+  guest: [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      icon: '📊',
+      path: '/guest-dashboard',
+      requiredPermission: 'dashboard.view',
+    },
+    {
+      key: 'profile',
+      label: 'My Profile',
+      icon: '👤',
+      path: '/guest-dashboard/profile',
+      requiredPermission: 'profile.view',
+    },
+    {
+      key: 'requests',
+      label: 'My Requests',
+      icon: '📋',
+      path: '/guest-dashboard/requests',
+      requiredPermission: 'requests.view',
+    },
+  ],
 };
 
 // Helper function to get permissions for a role
@@ -547,7 +587,7 @@ export const getPermissionsForRole = (role: UserRole) => {
   const permissions = [];
 
   for (const [module, actions] of Object.entries(rolePermissions)) {
-    for (const action of (actions as any[])) {
+    for (const action of actions as any[]) {
       permissions.push({
         module,
         action,
@@ -642,4 +682,5 @@ export const DASHBOARD_COMPONENTS: Record<UserRole, string[]> = {
     'SystemHealth',
     'SecurityAlerts',
   ],
+  guest: ['GuestProfile', 'MyRequests', 'BasicInfo'],
 };
