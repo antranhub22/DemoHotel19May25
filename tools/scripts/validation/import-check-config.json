@@ -1,0 +1,171 @@
+{
+  "version": "1.0.0",
+  "description": "Configuration for import/export consistency checker",
+  "scanning": {
+    "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+    "includePatterns": [
+      "apps/**/*.{ts,tsx,js,jsx}",
+      "packages/**/*.{ts,tsx,js,jsx}",
+      "tools/**/*.{ts,tsx,js,jsx}",
+      "tests/**/*.{ts,tsx,js,jsx}",
+      "*.{ts,tsx,js,jsx}"
+    ],
+    "excludePatterns": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.d.ts",
+      "**/*.test.*",
+      "**/*.spec.*",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "**/backup/**",
+      "**/*.backup.*",
+      "**/*.old.*"
+    ],
+    "maxFileSize": "10MB",
+    "timeout": 30000
+  },
+  "pathAliases": {
+    "@/": "apps/client/src/",
+    "@shared/": "packages/shared/",
+    "@server/": "apps/server/",
+    "@types/": "packages/types/",
+    "@config/": "packages/config/",
+    "@tools/": "tools/",
+    "@tests/": "tests/",
+    "@auth/": "packages/auth-system/"
+  },
+  "analysis": {
+    "checkMissingExports": true,
+    "checkUnusedExports": true,
+    "checkCircularDependencies": true,
+    "checkPathMismatches": true,
+    "checkTypeImports": true,
+    "allowDynamicImports": true,
+    "allowRequireStatements": true,
+    "warnOnDeepImports": true,
+    "maxCircularDependencyLength": 10
+  },
+  "reporting": {
+    "maxIssuesPerType": 50,
+    "showDetailedAnalysis": false,
+    "groupBySeverity": true,
+    "includeFileStats": true,
+    "outputFormat": "console",
+    "saveReport": false,
+    "reportPath": "./import-export-report.json"
+  },
+  "fixes": {
+    "autoFixPaths": false,
+    "createMissingExports": false,
+    "removeUnusedExports": false,
+    "updateImportPaths": false,
+    "backupBeforeFix": true
+  },
+  "ignoreRules": {
+    "ignoreUnusedExports": ["index.ts", "index.tsx", "*.config.*", "*.setup.*", "**/types/**"],
+    "ignoreMissingExports": ["react", "react-dom", "@types/*", "vite/*", "node:*"],
+    "ignoreCircularDependencies": ["**/types/**", "**/*.types.*"],
+    "allowedExternalModules": [
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "axios",
+      "lodash",
+      "@radix-ui/*",
+      "@vapi-ai/*",
+      "recharts",
+      "zod",
+      "drizzle-orm",
+      "express",
+      "cors",
+      "helmet",
+      "jsonwebtoken",
+      "bcryptjs",
+      "nodemailer",
+      "better-sqlite3",
+      "pg",
+      "vite",
+      "vitest",
+      "jest",
+      "@vitejs/*",
+      "@testing-library/*"
+    ]
+  },
+  "severity": {
+    "missingExports": "error",
+    "unusedExports": "warning",
+    "circularDependencies": "error",
+    "pathMismatches": "error",
+    "deepImports": "warning",
+    "typeImportIssues": "warning"
+  },
+  "performance": {
+    "enableCaching": true,
+    "cacheDir": ".import-check-cache",
+    "parallelProcessing": true,
+    "maxWorkers": 4,
+    "chunkSize": 100
+  },
+  "integrations": {
+    "eslintCompatible": true,
+    "vscodeIntegration": true,
+    "githubActions": true,
+    "preCommitHook": false
+  },
+  "customRules": [
+    {
+      "name": "prefer-absolute-imports",
+      "description": "Prefer absolute imports over relative imports beyond 2 levels",
+      "enabled": true,
+      "pattern": "\\.\\..*\\.\\..*\\.\\..*",
+      "severity": "warning",
+      "message": "Consider using absolute imports instead of deep relative imports"
+    },
+    {
+      "name": "no-cross-domain-imports",
+      "description": "Prevent imports between frontend and backend",
+      "enabled": true,
+      "from": "apps/client/**",
+      "to": "apps/server/**",
+      "severity": "error",
+      "message": "Frontend code should not import from backend"
+    },
+    {
+      "name": "prefer-index-imports",
+      "description": "Prefer importing from index files",
+      "enabled": true,
+      "pattern": ".*components.*/.*(?<!index)$",
+      "severity": "info",
+      "message": "Consider importing from the index file"
+    }
+  ],
+  "presets": {
+    "strict": {
+      "checkUnusedExports": true,
+      "checkMissingExports": true,
+      "checkCircularDependencies": true,
+      "checkPathMismatches": true,
+      "warnOnDeepImports": true,
+      "maxCircularDependencyLength": 5
+    },
+    "development": {
+      "checkUnusedExports": false,
+      "checkMissingExports": true,
+      "checkCircularDependencies": true,
+      "checkPathMismatches": true,
+      "warnOnDeepImports": false
+    },
+    "ci": {
+      "checkUnusedExports": true,
+      "checkMissingExports": true,
+      "checkCircularDependencies": true,
+      "checkPathMismatches": true,
+      "outputFormat": "json",
+      "saveReport": true
+    }
+  }
+}

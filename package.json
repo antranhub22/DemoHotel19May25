@@ -98,7 +98,17 @@
     "backup:restore": "test -n \"$BACKUP_FILE\" && psql $DATABASE_URL < $BACKUP_FILE || echo 'Set BACKUP_FILE environment variable'",
     "ci:check": "npm run lint && npm run typecheck && npm run test:jest:ci",
     "ci:build": "npm run build:production && npm run docker:build",
-    "lint:check": "eslint apps/client/src apps/server packages --ext .ts,.tsx"
+    "lint:check": "eslint apps/client/src apps/server packages --ext .ts,.tsx",
+    "check:imports": "./tools/scripts/validation/run-import-check.sh",
+    "check:imports:quick": "./tools/scripts/validation/run-import-check.sh -m quick",
+    "check:imports:full": "./tools/scripts/validation/run-import-check.sh -m full -d",
+    "check:imports:ci": "./tools/scripts/validation/run-import-check.sh -m ci",
+    "check:imports:frontend": "./tools/scripts/validation/run-import-check.sh -t apps/client",
+    "check:imports:backend": "./tools/scripts/validation/run-import-check.sh -t apps/server",
+    "check:imports:packages": "./tools/scripts/validation/run-import-check.sh -t packages",
+    "check:imports:focus:circular": "./tools/scripts/validation/run-import-check.sh --focus circular",
+    "check:imports:focus:exports": "./tools/scripts/validation/run-import-check.sh --focus exports",
+    "fix:imports": "./tools/scripts/validation/run-import-check.sh --fix"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -156,6 +166,7 @@
     "embla-carousel-react": "^8.3.0",
     "express": "^4.21.2",
     "express-rate-limit": "^7.5.1",
+    "glob": "^10.4.5",
     "helmet": "^8.1.0",
     "input-otp": "^1.2.4",
     "jsonwebtoken": "^9.0.2",
