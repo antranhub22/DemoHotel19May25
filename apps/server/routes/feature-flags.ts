@@ -429,7 +429,7 @@ router.post('/ab-tests', async (req: Request, res: Response) => {
 router.get('/ab-tests/:userId', async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const assignments = FeatureFlags.getActiveABTests(userId);
+    const assignments = FeatureFlags.getABTestAssignments(userId);
 
     (res as any).status(200).json({
       success: true,

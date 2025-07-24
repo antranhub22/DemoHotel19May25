@@ -698,6 +698,16 @@ export class FeatureFlags {
     return assignments;
   }
 
+  /**
+   * ✅ BACKWARD COMPATIBILITY: Alias for getABTestAssignments
+   * @deprecated Use getABTestAssignments instead
+   */
+  static getActiveABTests(userId: string): {
+    [testName: string]: 'control' | 'treatment';
+  } {
+    return this.getABTestAssignments(userId);
+  }
+
   // ============================================
   // AUDIT LOGGING
   // ============================================
@@ -1207,3 +1217,10 @@ export const getFlagAuditLog = (
   flagName: string,
   limit?: number
 ): FlagAuditEntry[] => FeatureFlags.getFlagAuditLog(flagName, limit);
+
+// ✅ BACKWARD COMPATIBILITY: Export getActiveABTests alias
+export const getActiveABTests = (
+  userId: string
+): {
+  [testName: string]: 'control' | 'treatment';
+} => FeatureFlags.getActiveABTests(userId);
