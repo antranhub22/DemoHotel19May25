@@ -18,7 +18,10 @@ const router = express.Router();
 // ✅ PRIORITY: Public routes first (no middleware)
 router.use('/api/public', tempPublicRoutes);
 
-// Mount all route modules
+// ✅ AUTH ROUTES SECOND (before protected routes)
+router.use('/api/auth', tempAuthRoutes);
+
+// Mount all route modules (protected routes)
 router.use('/api', apiRoutes);
 // Note: orders.ts deleted - consolidated into request.ts
 router.use('/api', callsRoutes);
@@ -28,8 +31,6 @@ router.use('/api', healthRoutes);
 router.use('/api', requestRoutes);
 router.use('/api', transcriptsRoutes);
 // router.use('/api', emailRoutes); // Temporarily disabled
-router.use('/api', staffRoutes);
-// router.use('/api/auth', unifiedAuthRoutes);
-router.use('/api/auth', tempAuthRoutes); // ✅ EMERGENCY FIX: Enable auth routes
+router.use('/api', staffRoutes); // ✅ EMERGENCY FIX: Enable auth routes
 
 export default router;
