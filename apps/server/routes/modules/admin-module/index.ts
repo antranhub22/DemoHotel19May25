@@ -11,6 +11,7 @@ import express from 'express';
 // ✅ Import admin module routes
 import cacheRoutes from './cache.routes';
 import featureFlagsRoutes from './feature-flags.routes';
+import loadTestingRoutes from './load-testing.routes';
 import metricsRoutes from './metrics.routes';
 import moduleLifecycleRoutes from './module-lifecycle.routes';
 import monitoringRoutes from './monitoring.routes';
@@ -93,5 +94,60 @@ router.use('/performance', performanceRoutes);
  * Mounted at: /api/admin/cache/*
  */
 router.use('/cache', cacheRoutes);
+
+/**
+ * Load testing and performance benchmarking
+ * Mounted at: /api/admin/load-testing/*
+ */
+router.use('/load-testing', loadTestingRoutes);
+
+/**
+ * GET /api/admin - Admin module information
+ */
+router.get('/', (_req, res) => {
+  logger.api('⚙️ [Admin-Module] Root endpoint accessed', 'AdminModule');
+
+  (res as any).json({
+    module: 'admin-module',
+    version: '2.0.0',
+    description: 'System administration and management functionality',
+    architecture: 'Modular v2.0',
+    status: 'active',
+
+    features: {
+      featureFlagsManagement: isFeatureEnabled('feature-flags-admin'),
+      moduleLifecycleControl: isFeatureEnabled('module-lifecycle-admin'),
+      systemMonitoring: isFeatureEnabled('system-monitoring-admin'),
+      advancedDiagnostics: isFeatureEnabled('advanced-diagnostics'),
+      metricsCollection: isFeatureEnabled('metrics-collection'),
+      performanceAudit: isFeatureEnabled('performance-audit') || true, // Always available
+      cacheManagement: isFeatureEnabled('cache-management') || true, // Always available
+      loadTesting: isFeatureEnabled('load-testing') || true, // Always available
+    },
+
+    endpoints: {
+      featureFlags: '/api/admin/feature-flags',
+      moduleLifecycle: '/api/admin/module-lifecycle',
+      monitoring: '/api/admin/monitoring',
+      metrics: '/api/admin/metrics',
+      performance: '/api/admin/performance',
+      cache: '/api/admin/cache',
+      loadTesting: '/api/admin/load-testing',
+    },
+
+    integrations: {
+      serviceContainer: true,
+      featureFlags: true,
+      enhancedLogging: true,
+      metricsCollector: true,
+      moduleLifecycleManager: true,
+      performanceAuditor: true,
+      cacheManager: true,
+      loadTestManager: true,
+    },
+
+    timestamp: new Date().toISOString(),
+  });
+});
 
 export default router;

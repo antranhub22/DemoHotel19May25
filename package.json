@@ -147,7 +147,15 @@
     "check-monitoring": "node tools/scripts/validation/check-monitoring-status.cjs",
     "remind-monitoring": "echo '⚠️  REMINDER: Enhanced Logging & Metrics v2.0 is currently DISABLED' && echo '📋 To re-enable: npm run enable-monitoring' && echo '📖 Guide: MONITORING_RE_ENABLE_GUIDE.md'",
     "enable-monitoring": "node tools/scripts/validation/enable-monitoring.cjs",
-    "status-monitoring": "echo '📊 Checking monitoring status...' && curl -s http://localhost:10000/api/monitoring/status || echo '⚠️  Monitoring not active'"
+    "status-monitoring": "echo '📊 Checking monitoring status...' && curl -s http://localhost:10000/api/monitoring/status || echo '⚠️  Monitoring not active'",
+    "📈 LOAD TESTING": "===============================",
+    "load-test": "node tools/scripts/load-testing/basic-load-test.js",
+    "load-test:light": "TEST_DURATION=30 TEST_CONCURRENCY=3 npm run load-test",
+    "load-test:moderate": "TEST_DURATION=120 TEST_CONCURRENCY=10 npm run load-test",
+    "load-test:heavy": "TEST_DURATION=300 TEST_CONCURRENCY=25 npm run load-test",
+    "load-test:stress": "TEST_DURATION=60 TEST_CONCURRENCY=50 npm run load-test",
+    "load-test:local": "TEST_URL=http://localhost:10000 npm run load-test:light",
+    "load-test:production": "TEST_URL=https://your-production-url.com npm run load-test:moderate"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

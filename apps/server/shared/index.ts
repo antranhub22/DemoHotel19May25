@@ -88,6 +88,24 @@ export {
   type CacheTag,
 } from './CacheManager';
 
+// ✅ v3.0: NEW Load Testing System
+export {
+  getActiveTests,
+  getTestResults,
+  initializeLoadTesting,
+  LoadTestManager,
+  loadTestManager,
+  runLoadTest,
+  runStressTest,
+  runUserSimulation,
+  type ConcurrentUserSimulation,
+  type LoadTestEndpoint,
+  type LoadTestEndpointResult,
+  type LoadTestResult,
+  type LoadTestScenario,
+  type StressTestConfig,
+} from './LoadTestManager';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -243,7 +261,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring, metrics collection, performance auditing, and caching
+ * Now includes advanced health monitoring, metrics collection, performance auditing, caching, and load testing
  */
 export async function initializeMonitoring() {
   try {
@@ -266,6 +284,7 @@ export async function initializeMonitoring() {
       './PerformanceAuditor'
     );
     const { initializeCache } = await import('./CacheManager');
+    const { initializeLoadTesting } = await import('./LoadTestManager');
 
     // Initialize components in order (using available methods)
     // Note: EnhancedLogger and MetricsCollector don't have initialize methods
@@ -314,8 +333,11 @@ export async function initializeMonitoring() {
       evictionPolicy: 'lru',
     });
 
+    // v3.0: Initialize load testing system
+    await initializeLoadTesting();
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with caching',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with load testing',
       'Monitoring'
     );
   } catch (error) {
