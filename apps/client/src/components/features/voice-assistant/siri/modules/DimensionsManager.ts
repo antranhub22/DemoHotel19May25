@@ -1,3 +1,7 @@
+// ✅ FIXED: Import missing types
+import type { DebugManager } from './DebugManager';
+import type { EmergencyStopManager } from './EmergencyStopManager';
+
 export interface DimensionsState {
   width: number;
   height: number;

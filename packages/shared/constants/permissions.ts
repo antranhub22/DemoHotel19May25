@@ -12,16 +12,8 @@
 // FALLBACK PERMISSIONS FOR FRONTEND
 // ============================================
 
-export type UserRole =
-  | 'hotel-manager'
-  | 'front-desk'
-  | 'it-manager'
-  | 'admin'
-  | 'staff'
-  | 'manager'
-  | 'frontdesk'
-  | 'itmanager'
-  | 'super-admin';
+// ✅ FIXED: Use global UserRole type to prevent conflicts
+// export type UserRole - removed to prevent conflicts
 
 export interface Permission {
   module: string;
@@ -87,7 +79,7 @@ export const getPermissionsForRole = (role: UserRole): Permission[] => {
   const permissions: Permission[] = [];
 
   for (const [module, actions] of Object.entries(rolePermissions)) {
-    for (const action of (actions as any[])) {
+    for (const action of actions as any[]) {
       permissions.push({
         module,
         action,

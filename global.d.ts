@@ -202,6 +202,11 @@ declare global {
     | 'hotel-manager'
     | 'front-desk'
     | 'it-manager'
+    | 'admin'
+    | 'staff'
+    | 'manager'
+    | 'frontdesk'
+    | 'itmanager'
     | 'guest';
 
   type Permission =

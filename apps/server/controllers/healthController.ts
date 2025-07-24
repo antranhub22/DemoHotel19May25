@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { logger } from '@shared/utils/logger';
 import { checkDatabaseHealth, getDatabaseMetrics } from '@shared/db';
 /**
@@ -67,7 +68,10 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Health check failed',
-        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+        details:
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error',
       });
     }
   }
@@ -179,7 +183,10 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Detailed health check failed',
-        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+        details:
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error',
       });
     }
   }
@@ -281,7 +288,10 @@ export class HealthController {
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         error: 'Database health check failed',
-        details: error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error',
+        details:
+          error instanceof Error
+            ? (error as any)?.message || String(error)
+            : 'Unknown error',
       });
     }
   }

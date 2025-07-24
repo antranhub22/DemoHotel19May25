@@ -32,6 +32,9 @@ export interface ExternalVisualState {
   mousePosition?: { x: number; y: number };
 }
 
+// ✅ FIXED: Import missing types
+import type { DebugManager } from './DebugManager';
+
 export class StateManager {
   private state: VisualState;
   private debug: DebugManager;

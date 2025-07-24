@@ -1,13 +1,10 @@
-import {
-  AdvancedHotelData,
-  BasicHotelData as ResearchHotelData,
-} from './hotelResearch';
+import { AdvancedHotelResearchData, HotelResearchData } from './hotelResearch';
 // ============================================
 // Knowledge Base Generator Service
 // ============================================
 
 // Type guard to check if we have the full research data structure
-function isResearchHotelData(data: any): data is ResearchHotelData {
+function isResearchHotelData(data: any): data is HotelResearchData {
   return (
     data && typeof data.location === 'object' && data.location.lat !== undefined
   );
@@ -23,7 +20,7 @@ export class KnowledgeBaseGenerator {
    * Generate comprehensive knowledge base from hotel research data
    */
   generateKnowledgeBase(
-    hotelData: ResearchHotelData | AdvancedHotelData
+    hotelData: HotelResearchData | AdvancedHotelResearchData
   ): string {
     const sections = [
       this.generateBasicInfoSection(hotelData),

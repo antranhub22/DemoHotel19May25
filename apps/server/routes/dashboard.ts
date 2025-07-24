@@ -1,14 +1,7 @@
 import express, { Request, Response } from 'express';
 import { eq, sql, and, desc } from 'drizzle-orm';
 import { db } from '@shared/db';
-import {
-  call,
-  transcript,
-  request as requestTable,
-  call_summaries,
-  staff,
-  tenants,
-} from '@shared/db/schema';
+import { hotelProfiles } from '@shared/db/schema';
 import { z } from 'zod';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';

@@ -22,7 +22,8 @@ import {
   Database,
   Shield,
 } from 'lucide-react';
-import type { UserRole } from '@shared/constants/permissions';
+// ✅ FIXED: Use global UserRole type instead of importing from constants
+// import type { UserRole } from '@shared/constants/permissions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

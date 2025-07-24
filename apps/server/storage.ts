@@ -1,8 +1,17 @@
 import { staff, transcript, request, callSummaries } from '@shared/schema';
-import { eq, and, gte } from 'drizzle-orm';
+import { eq, and, gte, sql } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 import { authUserMapper, AuthUserCamelCase } from '@shared/db/transformers';
 import { db } from './db';
+
+// ✅ Import missing types from shared/db
+import type {
+  InsertStaff,
+  InsertTranscript,
+  Transcript,
+  InsertCallSummary,
+  CallSummary,
+} from '@shared/db';
 
 // Type aliases for backward compatibility
 type Order = typeof request.$inferSelect;

@@ -1,7 +1,6 @@
 import { storage } from '@server/storage';
 import { insertTranscriptSchema } from '@shared/schema';
-import { db } from '@shared/db';
-import { call } from '@shared/db';
+import { db, eq, call, transcript } from '@shared/db';
 import { getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
 import { logger } from '@shared/utils/logger';

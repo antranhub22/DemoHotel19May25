@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { sendServiceConfirmation, sendCallSummary } from '@server/gmail';
 import { sendMobileEmail, sendMobileCallSummary } from '@server/mobileMail';
 // import { z } from 'zod'; // Not used currently
@@ -11,7 +11,10 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
   logger.error(defaultMessage, 'Component', error);
   (res as any).status(500).json({
     error: defaultMessage,
-    details: process.env.NODE_ENV === 'development' ? (error as any)?.message || String(error) : undefined,
+    details:
+      process.env.NODE_ENV === 'development'
+        ? (error as any)?.message || String(error)
+        : undefined,
   });
 }
 
@@ -38,7 +41,10 @@ router.post('/send-service-email', async (req: Request, res: Response) => {
       });
     }
 
-    logger.debug(`📧 [EMAIL] Sending service email for order: ${orderNumber}`, 'Component');
+    logger.debug(
+      `📧 [EMAIL] Sending service email for order: ${orderNumber}`,
+      'Component'
+    );
 
     const emailData = {
       to,
@@ -59,14 +65,21 @@ router.post('/send-service-email', async (req: Request, res: Response) => {
     });
 
     if (result.success) {
-      logger.debug(`✅ [EMAIL] Service email sent successfully for order: ${orderNumber}`, 'Component');
-      (res as any).json({ 
-        success: true, 
+      logger.debug(
+        `✅ [EMAIL] Service email sent successfully for order: ${orderNumber}`,
+        'Component'
+      );
+      (res as any).json({
+        success: true,
         message: 'Email sent successfully',
-        messageId: result.messageId 
+        messageId: result.messageId,
       });
     } else {
-      logger.error(`❌ [EMAIL] Failed to send service email for order: ${orderNumber}`, 'Component', result.error);
+      logger.error(
+        `❌ [EMAIL] Failed to send service email for order: ${orderNumber}`,
+        'Component',
+        result.error
+      );
       (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send email',
@@ -97,7 +110,10 @@ router.post('/send-call-summary-email', async (req: Request, res: Response) => {
       });
     }
 
-    logger.debug(`📧 [EMAIL] Sending call summary email for call: ${callId}`, 'Component');
+    logger.debug(
+      `📧 [EMAIL] Sending call summary email for call: ${callId}`,
+      'Component'
+    );
 
     const emailData = {
       to,
@@ -120,14 +136,21 @@ router.post('/send-call-summary-email', async (req: Request, res: Response) => {
     });
 
     if (result.success) {
-      logger.debug(`✅ [EMAIL] Call summary email sent successfully for call: ${callId}`, 'Component');
-      (res as any).json({ 
-        success: true, 
+      logger.debug(
+        `✅ [EMAIL] Call summary email sent successfully for call: ${callId}`,
+        'Component'
+      );
+      (res as any).json({
+        success: true,
         message: 'Call summary email sent successfully',
-        messageId: result.messageId 
+        messageId: result.messageId,
       });
     } else {
-      logger.error(`❌ [EMAIL] Failed to send call summary email for call: ${callId}`, 'Component', result.error);
+      logger.error(
+        `❌ [EMAIL] Failed to send call summary email for call: ${callId}`,
+        'Component',
+        result.error
+      );
       (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send call summary email',
@@ -164,15 +187,22 @@ router.post('/test-email', async (req: Request, res: Response) => {
     });
 
     if (result.success) {
-      logger.debug(`✅ [EMAIL] Test email sent successfully to: ${to}`, 'Component');
-      (res as any).json({ 
-        success: true, 
+      logger.debug(
+        `✅ [EMAIL] Test email sent successfully to: ${to}`,
+        'Component'
+      );
+      (res as any).json({
+        success: true,
         message: 'Test email sent successfully',
         messageId: result.messageId,
-        testData: testEmailData
+        testData: testEmailData,
       });
     } else {
-      logger.error(`❌ [EMAIL] Failed to send test email to: ${to}`, 'Component', result.error);
+      logger.error(
+        `❌ [EMAIL] Failed to send test email to: ${to}`,
+        'Component',
+        result.error
+      );
       (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send test email',
@@ -195,21 +225,33 @@ router.post('/mobile-test-email', async (req: Request, res: Response) => {
       subject: 'Mobile Test Email',
       orderNumber: 'MOBILE-' + Math.random().toString(36).substr(2, 9),
       customerRequest: 'Mobile test service request',
-      details: 'This is a mobile test email from the hotel voice assistant system.',
+      details:
+        'This is a mobile test email from the hotel voice assistant system.',
     };
 
-    const result = await sendMobileEmail(to, testData.subject, testData.details);
+    const result = await sendMobileEmail(
+      to,
+      testData.subject,
+      testData.details
+    );
 
     if (result.success) {
-      logger.debug(`✅ [EMAIL] Mobile test email sent successfully to: ${to}`, 'Component');
-      (res as any).json({ 
-        success: true, 
+      logger.debug(
+        `✅ [EMAIL] Mobile test email sent successfully to: ${to}`,
+        'Component'
+      );
+      (res as any).json({
+        success: true,
         message: 'Mobile test email sent successfully',
         messageId: result.messageId,
-        testData
+        testData,
       });
     } else {
-      logger.error(`❌ [EMAIL] Failed to send mobile test email to: ${to}`, 'Component', result.error);
+      logger.error(
+        `❌ [EMAIL] Failed to send mobile test email to: ${to}`,
+        'Component',
+        result.error
+      );
       (res as any).status(500).json({
         success: false,
         error: result.error || 'Failed to send mobile test email',
@@ -221,59 +263,72 @@ router.post('/mobile-test-email', async (req: Request, res: Response) => {
 });
 
 // Mobile call summary email endpoint
-router.post('/mobile-call-summary-email', async (req: Request, res: Response) => {
-  try {
-    const {
-      to = 'staff@hotel.com',
-      callId,
-      summary,
-      roomNumber,
-      timestamp,
-    } = req.body;
+router.post(
+  '/mobile-call-summary-email',
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        to = 'staff@hotel.com',
+        callId,
+        summary,
+        roomNumber,
+        timestamp,
+      } = req.body;
 
-    if (!callId || !summary) {
-      return (res as any).status(400).json({
-        error: 'Missing required fields: callId, summary',
+      if (!callId || !summary) {
+        return (res as any).status(400).json({
+          error: 'Missing required fields: callId, summary',
+        });
+      }
+
+      logger.debug(
+        `📱 [EMAIL] Sending mobile call summary email for call: ${callId}`,
+        'Component'
+      );
+
+      const emailData = {
+        to,
+        callId,
+        summary,
+        roomNumber: roomNumber || 'N/A',
+        timestamp: timestamp || new Date().toISOString(),
+      };
+
+      const result = await sendMobileCallSummary(to, {
+        callId,
+        summary,
+        roomNumber,
+        timestamp: new Date(timestamp),
+        duration: '0:00',
+        serviceRequests: [],
       });
+
+      if (result.success) {
+        logger.debug(
+          `✅ [EMAIL] Mobile call summary email sent successfully for call: ${callId}`,
+          'Component'
+        );
+        (res as any).json({
+          success: true,
+          message: 'Mobile call summary email sent successfully',
+          messageId: result.messageId,
+        });
+      } else {
+        logger.error(
+          `❌ [EMAIL] Failed to send mobile call summary email for call: ${callId}`,
+          'Component',
+          result.error
+        );
+        (res as any).status(500).json({
+          success: false,
+          error: result.error || 'Failed to send mobile call summary email',
+        });
+      }
+    } catch (error) {
+      handleApiError(res, error, 'Failed to send mobile call summary email');
     }
-
-    logger.debug(`📱 [EMAIL] Sending mobile call summary email for call: ${callId}`, 'Component');
-
-    const emailData = {
-      to,
-      callId,
-      summary,
-      roomNumber: roomNumber || 'N/A',
-      timestamp: timestamp || new Date().toISOString(),
-    };
-
-    const result = await sendMobileCallSummary(to, {
-      callId,
-      summary,
-      roomNumber,
-      timestamp: new Date(timestamp),
-      duration: '0:00',
-      serviceRequests: [],
-    });
-
-    if (result.success) {
-      logger.debug(`✅ [EMAIL] Mobile call summary email sent successfully for call: ${callId}`, 'Component');
-      (res as any).json({ 
-        success: true, 
-        message: 'Mobile call summary email sent successfully',
-        messageId: result.messageId 
-      });
-    } else {
-      logger.error(`❌ [EMAIL] Failed to send mobile call summary email for call: ${callId}`, 'Component', result.error);
-      (res as any).status(500).json({
-        success: false,
-        error: result.error || 'Failed to send mobile call summary email',
-      });
-    }
-  } catch (error) {
-    handleApiError(res, error, 'Failed to send mobile call summary email');
   }
-});
+);
 
 // Get Mailjet status
 router.get('/mailjet-status', async (req: Request, res: Response) => {
@@ -282,19 +337,26 @@ router.get('/mailjet-status', async (req: Request, res: Response) => {
 
     // Basic Mailjet configuration check
     const mailjetConfig = {
-      apiKey: process.env.MAILJET_API_KEY ? '***configured***' : 'not configured',
-      secretKey: process.env.MAILJET_SECRET_KEY ? '***configured***' : 'not configured',
+      apiKey: process.env.MAILJET_API_KEY
+        ? '***configured***'
+        : 'not configured',
+      secretKey: process.env.MAILJET_SECRET_KEY
+        ? '***configured***'
+        : 'not configured',
       fromEmail: process.env.MAILJET_FROM_EMAIL || 'not configured',
       fromName: process.env.MAILJET_FROM_NAME || 'not configured',
     };
 
-    const isConfigured = process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY;
+    const isConfigured =
+      process.env.MAILJET_API_KEY && process.env.MAILJET_SECRET_KEY;
 
     (res as any).json({
       success: true,
       status: isConfigured ? 'configured' : 'not configured',
       config: mailjetConfig,
-      message: isConfigured ? 'Mailjet is properly configured' : 'Mailjet configuration missing',
+      message: isConfigured
+        ? 'Mailjet is properly configured'
+        : 'Mailjet configuration missing',
     });
   } catch (error) {
     handleApiError(res, error, 'Failed to check Mailjet status');
@@ -306,7 +368,10 @@ router.get('/recent-emails', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 10;
 
-    logger.debug(`📧 [EMAIL] Getting recent emails (limit: ${limit})`, 'Component');
+    logger.debug(
+      `📧 [EMAIL] Getting recent emails (limit: ${limit})`,
+      'Component'
+    );
 
     // Note: This is a placeholder implementation
     // In a real system, you would query your email sending logs/database
@@ -329,7 +394,10 @@ router.get('/recent-emails', async (req: Request, res: Response) => {
       },
     ];
 
-    logger.debug(`✅ [EMAIL] Found ${recentEmails.length} recent emails`, 'Component');
+    logger.debug(
+      `✅ [EMAIL] Found ${recentEmails.length} recent emails`,
+      'Component'
+    );
     (res as any).json({
       success: true,
       emails: recentEmails.slice(0, limit),
@@ -340,4 +408,4 @@ router.get('/recent-emails', async (req: Request, res: Response) => {
   }
 });
 
-export default router; 
+export default router;

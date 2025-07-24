@@ -1,5 +1,5 @@
 import { useEffect, useState, forwardRef } from 'react';
-import RightPanelPopup from '@/components/RightPanelPopup';
+import RightPanelPopup from '@/components/features/popup-system/RightPanelPopup';
 import { usePopupContext } from '@/context/PopupContext';
 
 interface RightPanelSectionProps {

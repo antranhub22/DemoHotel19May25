@@ -1,6 +1,7 @@
 import { storage } from '@server/storage';
 import { insertRequestSchema } from '@shared/schema';
 import { db } from '@shared/db';
+import { request as requestTable } from '@shared/db';
 import { z } from 'zod';
 import { logger } from '@shared/utils/logger';
 
@@ -153,7 +154,11 @@ export class OrderService {
         updated_at: new Date().toISOString(),
       });
     } catch (syncErr) {
-      logger.error('Failed to sync order to request table:', 'Component', syncErr);
+      logger.error(
+        'Failed to sync order to request table:',
+        'Component',
+        syncErr
+      );
       // Don't throw error, just log it
     }
   }

@@ -1,3 +1,6 @@
+// ✅ FIXED: Import missing types
+import type { DebugManager } from './DebugManager';
+
 export interface EmergencyState {
   emergencyStopRequested: boolean;
   resizeInProgress: boolean;

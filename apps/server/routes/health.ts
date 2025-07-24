@@ -3,7 +3,7 @@
 // Provides comprehensive health checks for deployment and monitoring
 // ============================================================================
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { HealthController } from '@server/controllers/healthController';
 
 const router = Router();

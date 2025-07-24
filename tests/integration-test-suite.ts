@@ -76,6 +76,7 @@ interface Test {
 }
 
 interface TestError {
+  name: string; // ✅ FIXED: Added missing name property required by Error type
   suite: string;
   test: string;
   message: string;
@@ -1180,6 +1181,17 @@ export class IntegrationTestSuite {
   // ============================================
 
   private getSchema() {
+    // ✅ FIXED: Define testSchema for SQLite case
+    const testSchema = {
+      tenants,
+      hotelProfiles,
+      call,
+      transcript,
+      request,
+      message,
+      staff,
+    };
+
     return this.isPostgres
       ? {
           tenants,

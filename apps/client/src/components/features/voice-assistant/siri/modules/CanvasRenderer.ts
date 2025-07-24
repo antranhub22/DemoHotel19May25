@@ -1,3 +1,6 @@
+// ✅ FIXED: Import missing types
+import type { DebugManager } from './DebugManager';
+
 export interface CanvasRenderState {
   width: number;
   height: number;

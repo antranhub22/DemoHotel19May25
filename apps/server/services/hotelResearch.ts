@@ -7,7 +7,8 @@ import { logger } from '@shared/utils/logger';
 // Types & Interfaces for Hotel Research
 // ============================================
 
-export interface BasicHotelData {
+// ✅ FIXED: Renamed to avoid conflicts with global BasicHotelData
+export interface HotelResearchData {
   name: string;
   address: string;
   phone?: string;
@@ -28,7 +29,7 @@ export interface BasicHotelData {
   localAttractions: LocalAttraction[];
 }
 
-export interface AdvancedHotelData extends BasicHotelData {
+export interface AdvancedHotelResearchData extends HotelResearchData {
   socialMediaData: SocialMediaData;
   reviewData: ReviewData;
   competitorData: CompetitorData;
@@ -203,7 +204,7 @@ export class HotelResearchService {
   async basicResearch(
     hotelName: string,
     location?: string
-  ): Promise<BasicHotelData> {
+  ): Promise<HotelResearchData> {
     if (!this.rateLimiter.canMakeRequest('basic_research')) {
       throw new HotelResearchError(
         'Rate limit exceeded',
@@ -238,7 +239,7 @@ export class HotelResearchService {
       }
 
       // 3. Combine and structure data
-      const hotelData: BasicHotelData = {
+      const hotelData: HotelResearchData = {
         name: googlePlacesData.name || hotelName,
         address: googlePlacesData.formatted_address || location || '',
         phone: googlePlacesData.formatted_phone_number,
@@ -286,7 +287,7 @@ export class HotelResearchService {
   async advancedResearch(
     hotelName: string,
     location?: string
-  ): Promise<AdvancedHotelData> {
+  ): Promise<AdvancedHotelResearchData> {
     if (!this.rateLimiter.canMakeRequest('advanced_research')) {
       throw new HotelResearchError(
         'Rate limit exceeded',
@@ -312,7 +313,7 @@ export class HotelResearchService {
           this.getCompetitorAnalysis(hotelName, basicData.location),
         ]);
 
-      const advancedData: AdvancedHotelData = {
+      const advancedData: AdvancedHotelResearchData = {
         ...basicData,
         socialMediaData:
           socialMediaData.status === 'fulfilled'
@@ -765,7 +766,7 @@ export class HotelResearchService {
   /**
    * Validate hotel research data
    */
-  static validateHotelData(data: any): BasicHotelData {
+  static validateHotelData(data: any): HotelResearchData {
     const schema = z.object({
       name: z.string().min(1),
       address: z.string().min(1),
@@ -802,7 +803,7 @@ export class HotelResearchService {
       dataAny.localAttractions = [];
     }
 
-    return schema.parse(dataAny) as BasicHotelData;
+    return schema.parse(dataAny) as HotelResearchData;
   }
 
   /**
