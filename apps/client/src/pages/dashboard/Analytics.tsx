@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { TrendingUp, Globe, Calendar, Download, Filter, RefreshCw,  } from 'lucide-react';
+import {
+  TrendingUp,
+  Globe,
+  Calendar,
+  Download,
+  Filter,
+  RefreshCw,
+  Phone,
+  Clock,
+  Activity,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -17,7 +27,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 
 // Mock analytics data
 const mockAnalytics = {

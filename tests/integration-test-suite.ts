@@ -320,6 +320,7 @@ export class IntegrationTestSuite {
       this.results.endTime = performance.now();
       this.results.duration = this.results.endTime - this.results.startTime;
       this.results.errors.push({
+        name: 'IntegrationTestError', // ✅ FIXED: Added name property
         suite: 'Integration Test Suite',
         test: 'main',
         message: (error as Error).message,
@@ -1269,6 +1270,7 @@ export class IntegrationTestSuite {
       suite.endTime = performance.now();
       suite.duration = suite.endTime - suite.startTime;
       this.results.errors.push({
+        name: 'TestSuiteError', // ✅ FIXED: Added name property
         suite: name,
         test: 'suite',
         message: (error as Error).message,
@@ -1322,6 +1324,7 @@ export class IntegrationTestSuite {
       this.results.testsFailed++;
 
       this.results.errors.push({
+        name: 'TestCaseError', // ✅ FIXED: Added name property
         suite: currentSuite.name,
         test: id,
         message: (error as Error).message,

@@ -15,7 +15,17 @@ import {
   Area,
   AreaChart,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Download, RefreshCw, PieChart as PieChartIcon, TrendingUp as TrendIcon,  } from 'lucide-react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Download,
+  RefreshCw,
+  PieChart as PieChartIcon,
+  TrendingUp as TrendIcon,
+  Phone,
+  Clock,
+  Activity,
+} from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -249,9 +259,8 @@ export const AdvancedAnalytics: React.FC = () => {
   };
 
   useEffect(() => {
-
     fetchAnalytics();
-  
+
     // no cleanup needed
   }, [dateRange]);
 

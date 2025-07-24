@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 import { eq, sql, and, desc } from 'drizzle-orm';
 import { db } from '@shared/db';
-import { hotelProfiles } from '@shared/db/schema';
 import { z } from 'zod';
 import { TenantService } from '@server/services/tenantService';
 import { HotelResearchService } from '@server/services/hotelResearch';
@@ -10,7 +9,7 @@ import {
   AssistantGeneratorService,
 } from '@server/services/vapiIntegration';
 import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
-import { hotelProfiles } from '@shared/schema';
+// ✅ FIXED: Removed duplicate hotelProfiles import
 import {
   getOverview,
   getServiceDistribution,

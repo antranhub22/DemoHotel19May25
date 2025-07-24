@@ -3,6 +3,8 @@ import { AdvancedHotelResearchData, HotelResearchData } from './hotelResearch';
 // Knowledge Base Generator Service
 // ============================================
 
+// ✅ FIXED: Use global types from global.d.ts instead of imports
+
 // Type guard to check if we have the full research data structure
 function isResearchHotelData(data: any): data is HotelResearchData {
   return (
@@ -45,14 +47,14 @@ export class KnowledgeBaseGenerator {
    * Generate system prompt for AI assistant
    */
   generateSystemPrompt(
-    hotelData: ResearchHotelData | AdvancedHotelData,
+    hotelData: HotelResearchData | AdvancedHotelResearchData,
     customization: {
       personality: string;
       tone: string;
       languages: string[];
     }
   ): string {
-    const basePrompt = `You are the AI concierge for ${hotelData.name}, a ${this.getHotelCategory(hotelData)} hotel located in ${hotelData.address || 'a prime location'}.
+    let basePrompt = `You are the AI concierge for ${hotelData.name}, a ${this.getHotelCategory(hotelData)} hotel located in ${hotelData.address || 'a prime location'}.
 
 Your personality is ${customization.personality} and your tone should be ${customization.tone}.
 
