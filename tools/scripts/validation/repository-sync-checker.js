@@ -84,6 +84,24 @@ const CONFIG = {
       namingPattern: /^[a-z][a-zA-Z0-9-]*$/,
     },
   },
+
+  // Git consistency checks
+  gitConsistency: {
+    checkUncommittedFiles: true,
+    checkBranchSync: true,
+    checkMergeConflicts: true,
+    checkUnmergedChanges: true,
+    maxUncommittedFiles: 10, // Warning threshold
+    excludePatterns: [
+      'node_modules/',
+      'dist/',
+      'build/',
+      '.DS_Store',
+      '*.log',
+      'test-results/',
+      'playwright-report/',
+    ],
+  },
 };
 
 // Results storage
@@ -139,6 +157,15 @@ const results = {
     incorrectFileLocations: [],
     patternViolations: [],
     organizationIssues: [],
+  },
+
+  // Git consistency results
+  gitConsistency: {
+    uncommittedFiles: [],
+    mergeConflicts: [],
+    branchSyncIssues: [],
+    unmergedChanges: [],
+    gitStatus: 'unknown',
   },
 
   // Suggestions and recommendations
@@ -732,6 +759,338 @@ class ExtendedValidators {
 }
 
 /**
+ * 🔀 Git-based consistency checks
+ */
+class GitConsistencyValidator {
+  /**
+   * 9. Check Git repository consistency
+   */
+  static async checkGitConsistency() {
+    console.log('🔀 Checking Git repository consistency...');
+
+    const issues = [];
+
+    try {
+      // Check if we're in a git repository
+      const { execSync } = await import('child_process');
+
+      try {
+        execSync('git rev-parse --git-dir', {
+          cwd: ROOT_DIR,
+          stdio: 'pipe',
+        });
+      } catch (error) {
+        console.log('   ⚠️  Not a git repository, skipping git checks...');
+        return [];
+      }
+
+      // 1. Check uncommitted files
+      if (CONFIG.gitConsistency.checkUncommittedFiles) {
+        await this.checkUncommittedFiles(issues);
+      }
+
+      // 2. Check merge conflicts
+      if (CONFIG.gitConsistency.checkMergeConflicts) {
+        await this.checkMergeConflicts(issues);
+      }
+
+      // 3. Check branch synchronization
+      if (CONFIG.gitConsistency.checkBranchSync) {
+        await this.checkBranchSync(issues);
+      }
+
+      // 4. Check unmerged changes
+      if (CONFIG.gitConsistency.checkUnmergedChanges) {
+        await this.checkUnmergedChanges(issues);
+      }
+
+      // Update results
+      results.gitConsistency.uncommittedFiles = issues.filter(
+        i => i.type === 'uncommitted_files'
+      );
+      results.gitConsistency.mergeConflicts = issues.filter(
+        i => i.type === 'merge_conflicts'
+      );
+      results.gitConsistency.branchSyncIssues = issues.filter(
+        i => i.type === 'branch_sync'
+      );
+      results.gitConsistency.unmergedChanges = issues.filter(
+        i => i.type === 'unmerged_changes'
+      );
+
+      // Set overall git status
+      if (issues.length === 0) {
+        results.gitConsistency.gitStatus = 'clean';
+      } else if (issues.some(i => i.severity === 'error')) {
+        results.gitConsistency.gitStatus = 'critical';
+      } else {
+        results.gitConsistency.gitStatus = 'needs_attention';
+      }
+    } catch (error) {
+      console.log('   ⚠️  Error during git consistency check:', error.message);
+
+      issues.push({
+        type: 'git_error',
+        file: '.git',
+        line: 1,
+        issue: `Git consistency check failed: ${error.message}`,
+        severity: 'warning',
+        suggestion:
+          'Ensure git is installed and repository is properly initialized',
+      });
+    }
+
+    console.log(`   ✅ Found ${issues.length} git consistency issues`);
+    return issues;
+  }
+
+  /**
+   * Check for uncommitted files
+   */
+  static async checkUncommittedFiles(issues) {
+    try {
+      const { execSync } = await import('child_process');
+      const output = execSync('git status --porcelain', {
+        cwd: ROOT_DIR,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+
+      if (output.trim()) {
+        const lines = output.trim().split('\n');
+        const uncommittedFiles = [];
+
+        lines.forEach(line => {
+          const status = line.substring(0, 2);
+          const filePath = line.substring(3);
+
+          // Filter out excluded patterns
+          const isExcluded = CONFIG.gitConsistency.excludePatterns.some(
+            pattern => filePath.includes(pattern)
+          );
+
+          if (!isExcluded) {
+            uncommittedFiles.push({
+              file: filePath,
+              status: status.trim(),
+              statusDescription: this.getGitStatusDescription(status),
+            });
+          }
+        });
+
+        if (uncommittedFiles.length > 0) {
+          const severity =
+            uncommittedFiles.length > CONFIG.gitConsistency.maxUncommittedFiles
+              ? 'warning'
+              : 'info';
+
+          issues.push({
+            type: 'uncommitted_files',
+            file: '.git',
+            line: 1,
+            issue: `${uncommittedFiles.length} uncommitted files detected`,
+            severity: severity,
+            suggestion: 'Commit or stash changes before deployment',
+            details: uncommittedFiles,
+          });
+        }
+      }
+    } catch (error) {
+      // Git status failed - might not be in a repo
+    }
+  }
+
+  /**
+   * Check for merge conflicts
+   */
+  static async checkMergeConflicts(issues) {
+    try {
+      const { execSync } = await import('child_process');
+      const output = execSync('git diff --name-only --diff-filter=U', {
+        cwd: ROOT_DIR,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+
+      if (output.trim()) {
+        const conflictFiles = output.trim().split('\n');
+
+        issues.push({
+          type: 'merge_conflicts',
+          file: '.git',
+          line: 1,
+          issue: `${conflictFiles.length} files with merge conflicts`,
+          severity: 'error',
+          suggestion: 'Resolve merge conflicts before proceeding',
+          details: conflictFiles,
+        });
+      }
+    } catch (error) {
+      // No merge conflicts or git command failed
+    }
+  }
+
+  /**
+   * Check branch synchronization
+   */
+  static async checkBranchSync(issues) {
+    try {
+      const { execSync } = await import('child_process');
+
+      // Update remote information
+      try {
+        execSync('git remote update', {
+          cwd: ROOT_DIR,
+          stdio: 'pipe',
+        });
+      } catch (error) {
+        // Remote update failed - might be offline
+        issues.push({
+          type: 'branch_sync',
+          file: '.git',
+          line: 1,
+          issue: 'Unable to check remote branch status (offline?)',
+          severity: 'info',
+          suggestion: 'Check internet connection and remote repository access',
+        });
+        return;
+      }
+
+      // Check if branch is up to date
+      const statusOutput = execSync('git status -uno', {
+        cwd: ROOT_DIR,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      });
+
+      if (statusOutput.includes('Your branch is behind')) {
+        issues.push({
+          type: 'branch_sync',
+          file: '.git',
+          line: 1,
+          issue: 'Local branch is behind remote',
+          severity: 'warning',
+          suggestion: 'Pull latest changes from remote repository',
+        });
+      } else if (statusOutput.includes('Your branch is ahead')) {
+        issues.push({
+          type: 'branch_sync',
+          file: '.git',
+          line: 1,
+          issue: 'Local branch is ahead of remote',
+          severity: 'info',
+          suggestion: 'Push local changes to remote repository',
+        });
+      } else if (statusOutput.includes('have diverged')) {
+        issues.push({
+          type: 'branch_sync',
+          file: '.git',
+          line: 1,
+          issue: 'Local and remote branches have diverged',
+          severity: 'warning',
+          suggestion: 'Merge or rebase to synchronize branches',
+        });
+      }
+    } catch (error) {
+      // Branch sync check failed
+    }
+  }
+
+  /**
+   * Check for unmerged changes
+   */
+  static async checkUnmergedChanges(issues) {
+    try {
+      const { execSync } = await import('child_process');
+
+      // Get current branch
+      const currentBranch = execSync('git branch --show-current', {
+        cwd: ROOT_DIR,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      }).trim();
+
+      if (!currentBranch) {
+        return; // Detached HEAD or other special state
+      }
+
+      // Check for commits that haven't been merged to main/master
+      const mainBranches = ['main', 'master', 'develop'];
+
+      for (const mainBranch of mainBranches) {
+        try {
+          // Check if main branch exists
+          execSync(`git rev-parse --verify ${mainBranch}`, {
+            cwd: ROOT_DIR,
+            stdio: 'pipe',
+          });
+
+          // Check for unmerged commits
+          const unmergedOutput = execSync(
+            `git log ${mainBranch}..${currentBranch} --oneline`,
+            {
+              cwd: ROOT_DIR,
+              encoding: 'utf-8',
+              stdio: 'pipe',
+            }
+          );
+
+          if (unmergedOutput.trim()) {
+            const commitCount = unmergedOutput.trim().split('\n').length;
+
+            issues.push({
+              type: 'unmerged_changes',
+              file: '.git',
+              line: 1,
+              issue: `${commitCount} commits on ${currentBranch} not merged to ${mainBranch}`,
+              severity: 'info',
+              suggestion: `Consider merging ${currentBranch} to ${mainBranch}`,
+              details: {
+                currentBranch,
+                targetBranch: mainBranch,
+                commitCount,
+              },
+            });
+          }
+
+          break; // Found a main branch, stop checking others
+        } catch (error) {
+          // Main branch doesn't exist, try next one
+          continue;
+        }
+      }
+    } catch (error) {
+      // Unmerged changes check failed
+    }
+  }
+
+  /**
+   * Get human-readable description of git status
+   */
+  static getGitStatusDescription(status) {
+    const statusMap = {
+      'M ': 'Modified (staged)',
+      ' M': 'Modified (unstaged)',
+      MM: 'Modified (staged and unstaged)',
+      'A ': 'Added (staged)',
+      ' A': 'Added (unstaged)',
+      'D ': 'Deleted (staged)',
+      ' D': 'Deleted (unstaged)',
+      'R ': 'Renamed (staged)',
+      ' R': 'Renamed (unstaged)',
+      'C ': 'Copied (staged)',
+      ' C': 'Copied (unstaged)',
+      'U ': 'Unmerged',
+      ' U': 'Unmerged',
+      '??': 'Untracked',
+      '!!': 'Ignored',
+    };
+
+    return statusMap[status] || `Unknown status: ${status}`;
+  }
+}
+
+/**
  * 📊 Report generator
  */
 class ReportGenerator {
@@ -758,6 +1117,10 @@ class ReportGenerator {
       ...results.typescript.anyTypeUsage,
       ...results.fileStructure.missingRequiredFiles,
       ...results.fileStructure.patternViolations,
+      ...results.gitConsistency.uncommittedFiles,
+      ...results.gitConsistency.mergeConflicts,
+      ...results.gitConsistency.branchSyncIssues,
+      ...results.gitConsistency.unmergedChanges,
     ];
 
     results.summary.totalIssues = allIssues.length;
@@ -837,6 +1200,37 @@ class ReportGenerator {
         action: 'Reduce any type usage',
         description: `${results.typescript.anyTypeUsage.length} instances of "any" type found`,
         command: 'Manual type improvement required',
+      });
+    }
+
+    // Git consistency suggestions
+    if (results.gitConsistency.mergeConflicts.length > 0) {
+      suggestions.push({
+        category: 'Git',
+        priority: 'high',
+        action: 'Resolve merge conflicts',
+        description: `${results.gitConsistency.mergeConflicts.length} files have merge conflicts`,
+        command: 'git status && git mergetool',
+      });
+    }
+
+    if (results.gitConsistency.uncommittedFiles.length > 10) {
+      suggestions.push({
+        category: 'Git',
+        priority: 'medium',
+        action: 'Commit or stash changes',
+        description: `${results.gitConsistency.uncommittedFiles.length} uncommitted files`,
+        command: 'git add . && git commit -m "..." or git stash',
+      });
+    }
+
+    if (results.gitConsistency.branchSyncIssues.length > 0) {
+      suggestions.push({
+        category: 'Git',
+        priority: 'medium',
+        action: 'Synchronize with remote',
+        description: 'Branch is out of sync with remote',
+        command: 'git pull or git push',
       });
     }
 
@@ -942,6 +1336,26 @@ class ReportGenerator {
       ...results.fileStructure.patternViolations,
     ]);
 
+    this.displayCategoryIssues('🔀 GIT CONSISTENCY ISSUES', [
+      ...results.gitConsistency.uncommittedFiles,
+      ...results.gitConsistency.mergeConflicts,
+      ...results.gitConsistency.branchSyncIssues,
+      ...results.gitConsistency.unmergedChanges,
+    ]);
+
+    // Git status summary
+    if (results.gitConsistency.gitStatus !== 'unknown') {
+      const statusIcon =
+        results.gitConsistency.gitStatus === 'clean'
+          ? '✅'
+          : results.gitConsistency.gitStatus === 'critical'
+            ? '❌'
+            : '⚠️';
+      console.log(
+        `\n🔀 GIT STATUS: ${statusIcon} ${results.gitConsistency.gitStatus.toUpperCase()}`
+      );
+    }
+
     // Suggestions
     if (results.suggestions.length > 0) {
       console.log('\n💡 SUGGESTIONS:');
@@ -1027,6 +1441,7 @@ async function main() {
     await ExtendedValidators.detectDeadCode();
     await ExtendedValidators.checkTypeScriptConsistency();
     await ExtendedValidators.validateFileStructure();
+    await GitConsistencyValidator.checkGitConsistency();
 
     // Phase 3: Generate and display report
     console.log('\n📋 Phase 3: Generating comprehensive report...');

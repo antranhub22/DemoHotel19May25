@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-07-24T08:14:20.280Z",
+  "timestamp": "2025-07-24T08:25:32.139Z",
   "summary": {
-    "totalIssues": 755,
+    "totalIssues": 757,
     "criticalIssues": 1,
     "warningIssues": 686,
-    "infoIssues": 68,
+    "infoIssues": 70,
     "filesAnalyzed": 0,
     "linesAnalyzed": 0
   },
@@ -1506,6 +1506,14 @@
       },
       {
         "type": "unreachable_code",
+        "file": "apps/server/startup/database-initialization.ts",
+        "line": 156,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
         "file": "apps/server/services/vapiIntegration.ts",
         "line": 441,
         "issue": "Potentially unreachable code after return statement",
@@ -1828,14 +1836,6 @@
         "type": "unreachable_code",
         "file": "apps/server/services/callService.ts",
         "line": 190,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/server/startup/database-initialization.ts",
-        "line": 156,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -2283,7 +2283,7 @@
       {
         "type": "unreachable_code",
         "file": "tools/scripts/validation/repository-sync-checker.js",
-        "line": 285,
+        "line": 339,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -2291,7 +2291,7 @@
       {
         "type": "unreachable_code",
         "file": "tools/scripts/validation/repository-sync-checker.js",
-        "line": 300,
+        "line": 354,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -3554,46 +3554,6 @@
       },
       {
         "type": "unreachable_code",
-        "file": "apps/client/src/components/business/VoiceAssistant.tsx",
-        "line": 100,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/client/src/components/business/Reference.tsx",
-        "line": 130,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/client/src/components/business/Reference.tsx",
-        "line": 242,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/client/src/components/business/Interface1.tsx",
-        "line": 64,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/client/src/components/business/Interface1.tsx",
-        "line": 255,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
         "file": "apps/client/src/components/ui/toggle-group.tsx",
         "line": 40,
         "issue": "Potentially unreachable code after return statement",
@@ -4122,6 +4082,46 @@
       },
       {
         "type": "unreachable_code",
+        "file": "apps/client/src/components/business/VoiceAssistant.tsx",
+        "line": 100,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "apps/client/src/components/business/Reference.tsx",
+        "line": 130,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "apps/client/src/components/business/Reference.tsx",
+        "line": 242,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "apps/client/src/components/business/Interface1.tsx",
+        "line": 64,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "apps/client/src/components/business/Interface1.tsx",
+        "line": 255,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
         "file": "tools/scripts/development/db/index.js",
         "line": 7,
         "issue": "Potentially unreachable code after return statement",
@@ -4194,14 +4194,6 @@
       },
       {
         "type": "unreachable_code",
-        "file": "packages/auth-system/frontend/utils/authHelper.ts",
-        "line": 141,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
         "file": "packages/auth-system/frontend/context/AuthContext.tsx",
         "line": 45,
         "issue": "Potentially unreachable code after return statement",
@@ -4228,6 +4220,14 @@
         "type": "unreachable_code",
         "file": "packages/auth-system/frontend/context/AuthContext.tsx",
         "line": 351,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "packages/auth-system/frontend/utils/authHelper.ts",
+        "line": 141,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -4292,14 +4292,6 @@
         "type": "unreachable_code",
         "file": "apps/client/src/context/contexts/__tests__/CallContext.test.tsx",
         "line": 22,
-        "issue": "Potentially unreachable code after return statement",
-        "severity": "warning",
-        "suggestion": "Remove unreachable code or restructure logic"
-      },
-      {
-        "type": "unreachable_code",
-        "file": "apps/client/src/components/features/dashboard/StaffRequestDetailModal.tsx",
-        "line": 28,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -4540,6 +4532,14 @@
         "type": "unreachable_code",
         "file": "apps/client/src/components/features/popup-system/ChatPopup.tsx",
         "line": 287,
+        "issue": "Potentially unreachable code after return statement",
+        "severity": "warning",
+        "suggestion": "Remove unreachable code or restructure logic"
+      },
+      {
+        "type": "unreachable_code",
+        "file": "apps/client/src/components/features/dashboard/StaffRequestDetailModal.tsx",
+        "line": 28,
         "issue": "Potentially unreachable code after return statement",
         "severity": "warning",
         "suggestion": "Remove unreachable code or restructure logic"
@@ -5835,6 +5835,46 @@
       },
       {
         "type": "any_type_usage",
+        "file": "tests/integration/multi-tenant-voice.test.ts",
+        "line": 185,
+        "issue": "Usage of \"any\" type detected",
+        "severity": "info",
+        "suggestion": "Consider using more specific types"
+      },
+      {
+        "type": "any_type_usage",
+        "file": "tests/integration/api.test.ts",
+        "line": 325,
+        "issue": "Usage of \"any\" type detected",
+        "severity": "info",
+        "suggestion": "Consider using more specific types"
+      },
+      {
+        "type": "any_type_usage",
+        "file": "tests/integration/api.test.ts",
+        "line": 341,
+        "issue": "Usage of \"any\" type detected",
+        "severity": "info",
+        "suggestion": "Consider using more specific types"
+      },
+      {
+        "type": "any_type_usage",
+        "file": "tests/integration/api.test.ts",
+        "line": 519,
+        "issue": "Usage of \"any\" type detected",
+        "severity": "info",
+        "suggestion": "Consider using more specific types"
+      },
+      {
+        "type": "any_type_usage",
+        "file": "tests/integration/api-endpoints.test.ts",
+        "line": 12,
+        "issue": "Usage of \"any\" type detected",
+        "severity": "info",
+        "suggestion": "Consider using more specific types"
+      },
+      {
+        "type": "any_type_usage",
         "file": "packages/types/ui.ts",
         "line": 185,
         "issue": "Usage of \"any\" type detected",
@@ -5901,46 +5941,6 @@
         "type": "any_type_usage",
         "file": "packages/types/api.ts",
         "line": 392,
-        "issue": "Usage of \"any\" type detected",
-        "severity": "info",
-        "suggestion": "Consider using more specific types"
-      },
-      {
-        "type": "any_type_usage",
-        "file": "tests/integration/multi-tenant-voice.test.ts",
-        "line": 185,
-        "issue": "Usage of \"any\" type detected",
-        "severity": "info",
-        "suggestion": "Consider using more specific types"
-      },
-      {
-        "type": "any_type_usage",
-        "file": "tests/integration/api.test.ts",
-        "line": 325,
-        "issue": "Usage of \"any\" type detected",
-        "severity": "info",
-        "suggestion": "Consider using more specific types"
-      },
-      {
-        "type": "any_type_usage",
-        "file": "tests/integration/api.test.ts",
-        "line": 341,
-        "issue": "Usage of \"any\" type detected",
-        "severity": "info",
-        "suggestion": "Consider using more specific types"
-      },
-      {
-        "type": "any_type_usage",
-        "file": "tests/integration/api.test.ts",
-        "line": 519,
-        "issue": "Usage of \"any\" type detected",
-        "severity": "info",
-        "suggestion": "Consider using more specific types"
-      },
-      {
-        "type": "any_type_usage",
-        "file": "tests/integration/api-endpoints.test.ts",
-        "line": 12,
         "issue": "Usage of \"any\" type detected",
         "severity": "info",
         "suggestion": "Consider using more specific types"
@@ -6207,6 +6207,43 @@
       }
     ],
     "organizationIssues": []
+  },
+  "gitConsistency": {
+    "uncommittedFiles": [
+      {
+        "type": "uncommitted_files",
+        "file": ".git",
+        "line": 1,
+        "issue": "1 uncommitted files detected",
+        "severity": "info",
+        "suggestion": "Commit or stash changes before deployment",
+        "details": [
+          {
+            "file": "ools/scripts/validation/repository-sync-checker.js",
+            "status": "M",
+            "statusDescription": "Modified (staged)"
+          }
+        ]
+      }
+    ],
+    "mergeConflicts": [],
+    "branchSyncIssues": [],
+    "unmergedChanges": [
+      {
+        "type": "unmerged_changes",
+        "file": ".git",
+        "line": 1,
+        "issue": "80 commits on refactor-phase1-routes-splitting not merged to main",
+        "severity": "info",
+        "suggestion": "Consider merging refactor-phase1-routes-splitting to main",
+        "details": {
+          "currentBranch": "refactor-phase1-routes-splitting",
+          "targetBranch": "main",
+          "commitCount": 80
+        }
+      }
+    ],
+    "gitStatus": "needs_attention"
   },
   "suggestions": [
     {
