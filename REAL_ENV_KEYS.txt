@@ -57,4 +57,4 @@ CLIENT_URL=https://minhonmuine.talk2go.online
 # ==================== FEATURE FLAGS ====================
 VITE_ENABLE_VOICE_ASSISTANT=true
 VITE_ENABLE_MULTI_LANGUAGE=true
-VITE_ENABLE_ANALYTICS=true
+VITE_ENABLE_ANALYTICS=true 
