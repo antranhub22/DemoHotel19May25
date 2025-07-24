@@ -163,7 +163,17 @@
     "db:vacuum": "node tools/scripts/database/optimize-database.cjs --vacuum-only",
     "db:health": "curl -s http://localhost:10000/api/admin/database/health | jq || echo '⚠️ Database health check failed'",
     "db:pool-status": "curl -s http://localhost:10000/api/admin/database/pool/status | jq || echo '⚠️ Pool status check failed'",
-    "db:slow-queries": "curl -s http://localhost:10000/api/admin/database/slow-queries | jq || echo '⚠️ Slow queries check failed'"
+    "db:slow-queries": "curl -s http://localhost:10000/api/admin/database/slow-queries | jq || echo '⚠️ Slow queries check failed'",
+    "📊 MONITORING DASHBOARD": "===============================",
+    "dashboard:overview": "curl -s http://localhost:10000/api/admin/dashboard | jq || echo '⚠️ Dashboard overview failed'",
+    "dashboard:metrics": "curl -s http://localhost:10000/api/admin/dashboard/metrics | jq || echo '⚠️ Dashboard metrics failed'",
+    "dashboard:system": "curl -s http://localhost:10000/api/admin/dashboard/metrics/system | jq || echo '⚠️ System metrics failed'",
+    "dashboard:database": "curl -s http://localhost:10000/api/admin/dashboard/metrics/database | jq || echo '⚠️ Database metrics failed'",
+    "dashboard:application": "curl -s http://localhost:10000/api/admin/dashboard/metrics/application | jq || echo '⚠️ Application metrics failed'",
+    "dashboard:business": "curl -s http://localhost:10000/api/admin/dashboard/metrics/business | jq || echo '⚠️ Business metrics failed'",
+    "dashboard:alerts": "curl -s http://localhost:10000/api/admin/dashboard/alerts | jq || echo '⚠️ Dashboard alerts failed'",
+    "dashboard:performance": "curl -s http://localhost:10000/api/admin/dashboard/performance | jq || echo '⚠️ Performance analytics failed'",
+    "dashboard:test": "node tools/scripts/dashboard/test-dashboard.cjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

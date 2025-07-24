@@ -15,6 +15,7 @@ import featureFlagsRoutes from './feature-flags.routes';
 import loadTestingRoutes from './load-testing.routes';
 import metricsRoutes from './metrics.routes';
 import moduleLifecycleRoutes from './module-lifecycle.routes';
+import monitoringDashboardRoutes from './monitoring-dashboard.routes';
 import monitoringRoutes from './monitoring.routes';
 import performanceRoutes from './performance.routes';
 
@@ -109,6 +110,12 @@ router.use('/load-testing', loadTestingRoutes);
 router.use('/database', databaseOptimizationRoutes);
 
 /**
+ * Real-time monitoring dashboard and analytics
+ * Mounted at: /api/admin/dashboard/*
+ */
+router.use('/dashboard', monitoringDashboardRoutes);
+
+/**
  * GET /api/admin - Admin module information
  */
 router.get('/', (_req, res) => {
@@ -131,6 +138,7 @@ router.get('/', (_req, res) => {
       cacheManagement: isFeatureEnabled('cache-management') || true, // Always available
       loadTesting: isFeatureEnabled('load-testing') || true, // Always available
       databaseOptimization: isFeatureEnabled('database-optimization') || true, // Always available
+      monitoringDashboard: isFeatureEnabled('monitoring-dashboard') || true, // Always available
     },
 
     endpoints: {
@@ -142,6 +150,7 @@ router.get('/', (_req, res) => {
       cache: '/api/admin/cache',
       loadTesting: '/api/admin/load-testing',
       database: '/api/admin/database',
+      dashboard: '/api/admin/dashboard',
     },
 
     integrations: {
@@ -155,6 +164,7 @@ router.get('/', (_req, res) => {
       loadTestManager: true,
       databaseOptimizer: true,
       connectionPoolManager: true,
+      monitoringDashboard: true,
     },
 
     timestamp: new Date().toISOString(),

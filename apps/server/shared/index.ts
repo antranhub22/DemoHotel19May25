@@ -135,6 +135,38 @@ export {
   type PoolMetrics,
 } from './ConnectionPoolManager';
 
+// ✅ v3.0: NEW Real-time Monitoring Dashboard System
+export {
+  createDashboardAlert,
+  createMonitoringDashboard,
+  getCurrentDashboardMetrics,
+  initializeMonitoringDashboard,
+  MonitoringDashboard,
+  type AlertThresholds,
+  type ApplicationMetrics,
+  type BusinessMetrics,
+  type Alert as DashboardAlert,
+  type DashboardConfig,
+  type DashboardMetrics,
+  type PerformanceMetrics as DashboardPerformanceMetrics,
+  type DatabaseMetrics,
+  type SystemMetrics,
+  type WebSocketConnection,
+} from './MonitoringDashboard';
+
+// ✅ v3.0: NEW WebSocket Dashboard Integration
+export {
+  broadcastDashboardUpdate,
+  getWebSocketClientStats,
+  initializeWebSocketDashboard,
+  WebSocketDashboard,
+  webSocketDashboard,
+  type WebSocketClient,
+  type WebSocketMessage,
+  type WebSocketResponse,
+  type WebSocketSubscription,
+} from './WebSocketDashboard';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -290,7 +322,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring, metrics collection, performance auditing, caching, load testing, and database optimization
+ * Now includes advanced health monitoring, metrics collection, performance auditing, caching, load testing, database optimization, and real-time monitoring dashboard
  */
 export async function initializeMonitoring() {
   try {
@@ -317,6 +349,9 @@ export async function initializeMonitoring() {
     const { initializeDatabaseOptimizer } = await import('./DatabaseOptimizer');
     const { initializeConnectionPool } = await import(
       './ConnectionPoolManager'
+    );
+    const { initializeMonitoringDashboard } = await import(
+      './MonitoringDashboard'
     );
 
     // Initialize components in order (using available methods)
@@ -455,8 +490,65 @@ export async function initializeMonitoring() {
 
     await initializeConnectionPool(poolConfig);
 
+    // v3.0: Initialize real-time monitoring dashboard
+    const dashboardConfig = {
+      updateInterval: 30000, // 30 seconds
+      retentionPeriod: 24, // 24 hours
+      enableRealTimeUpdates: true,
+      enableAlerts: true,
+      enablePerformanceAnalytics: true,
+      alertThresholds: {
+        system: {
+          cpuUsage: 80,
+          memoryUsage: 85,
+          diskUsage: 90,
+          responseTime: 2000,
+          errorRate: 0.05,
+        },
+        database: {
+          connectionUsage: 80,
+          queryTime: 1000,
+          deadlocks: 5,
+          slowQueries: 10,
+        },
+        application: {
+          requestRate: 1000,
+          cacheHitRate: 70,
+          queueLength: 100,
+          activeUsers: 500,
+        },
+        business: {
+          hotelUtilization: 60,
+          requestCompletionRate: 80,
+          voiceCallSuccess: 85,
+          customerSatisfaction: 7,
+        },
+      },
+      visualization: {
+        charts: {
+          enableRealtimeCharts: true,
+          updateFrequency: 5, // 5 seconds
+          historicalDataPoints: 100,
+          enableTrendAnalysis: true,
+        },
+        widgets: {
+          enableSystemHealth: true,
+          enableDatabaseMetrics: true,
+          enableApplicationMetrics: true,
+          enableBusinessKPIs: true,
+          enableAlertSummary: true,
+        },
+        themes: {
+          defaultTheme: 'dark' as const,
+          enableCustomThemes: true,
+        },
+      },
+    };
+
+    await initializeMonitoringDashboard(dashboardConfig);
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with database optimization',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with real-time dashboard',
       'Monitoring'
     );
   } catch (error) {

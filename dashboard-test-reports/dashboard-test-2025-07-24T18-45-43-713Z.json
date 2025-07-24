@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-07-24T18:45:43.711Z",
+  "summary": {
+    "totalTests": 25,
+    "passed": 23,
+    "failed": 2,
+    "warnings": 1
+  },
+  "performance": {
+    "averageResponseTime": 153,
+    "peakMemoryUsage": 188,
+    "totalTestDuration": 71
+  },
+  "features": {
+    "dashboardEndpoints": "operational",
+    "metricsGeneration": "operational",
+    "alertSystem": "operational",
+    "webSocketIntegration": "operational",
+    "realTimeUpdates": "operational"
+  }
+}
