@@ -9,6 +9,7 @@ import { logger } from '@shared/utils/logger';
 import express from 'express';
 
 // ✅ Import admin module routes
+import apiGatewayRoutes from './api-gateway.routes';
 import cacheRoutes from './cache.routes';
 import databaseOptimizationRoutes from './database-optimization.routes';
 import featureFlagsRoutes from './feature-flags.routes';
@@ -116,9 +117,15 @@ router.use('/database', databaseOptimizationRoutes);
 router.use('/dashboard', monitoringDashboardRoutes);
 
 /**
+ * API Gateway management and configuration
+ * Mounted at: /api/admin/api-gateway/*
+ */
+router.use('/api-gateway', apiGatewayRoutes);
+
+/**
  * GET /api/admin - Admin module information
  */
-router.get('/', (_req, res) => {
+router.get('/', (req, res) => {
   logger.api('⚙️ [Admin-Module] Root endpoint accessed', 'AdminModule');
 
   (res as any).json({
@@ -139,6 +146,7 @@ router.get('/', (_req, res) => {
       loadTesting: isFeatureEnabled('load-testing') || true, // Always available
       databaseOptimization: isFeatureEnabled('database-optimization') || true, // Always available
       monitoringDashboard: isFeatureEnabled('monitoring-dashboard') || true, // Always available
+      apiGateway: isFeatureEnabled('api-gateway') || true, // Always available
     },
 
     endpoints: {
@@ -151,6 +159,7 @@ router.get('/', (_req, res) => {
       loadTesting: '/api/admin/load-testing',
       database: '/api/admin/database',
       dashboard: '/api/admin/dashboard',
+      apiGateway: '/api/admin/api-gateway',
     },
 
     integrations: {
@@ -165,6 +174,7 @@ router.get('/', (_req, res) => {
       databaseOptimizer: true,
       connectionPoolManager: true,
       monitoringDashboard: true,
+      apiGateway: true,
     },
 
     timestamp: new Date().toISOString(),

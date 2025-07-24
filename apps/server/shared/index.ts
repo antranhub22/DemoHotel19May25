@@ -167,6 +167,25 @@ export {
   type WebSocketSubscription,
 } from './WebSocketDashboard';
 
+// ✅ v3.0: NEW API Gateway System
+export {
+  APIGateway,
+  createAPIGateway,
+  getGatewayDiagnostics,
+  getGatewayMetrics,
+  initializeAPIGateway,
+  type AuthConfig,
+  type CachingConfig,
+  type GatewayConfig,
+  type GatewayMetrics,
+  type RateLimitConfig,
+  type RateLimitStatus,
+  type RequestContext,
+  type RoutingConfig,
+  type SecurityConfig,
+  type VersionConfig,
+} from './APIGateway';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -353,6 +372,7 @@ export async function initializeMonitoring() {
     const { initializeMonitoringDashboard } = await import(
       './MonitoringDashboard'
     );
+    const { initializeAPIGateway } = await import('./APIGateway');
 
     // Initialize components in order (using available methods)
     // Note: EnhancedLogger and MetricsCollector don't have initialize methods
@@ -547,8 +567,175 @@ export async function initializeMonitoring() {
 
     await initializeMonitoringDashboard(dashboardConfig);
 
+    // v3.0: Initialize API Gateway system
+    const gatewayConfig = {
+      rateLimiting: {
+        enabled: true,
+        strategies: [
+          {
+            name: 'global_rate_limit',
+            type: 'fixed_window' as const,
+            windowSize: 60,
+            maxRequests: 1000,
+            targets: [{ type: 'global' as const }],
+            actions: [
+              { threshold: 80, action: 'warn' as const },
+              { threshold: 100, action: 'block' as const, duration: 60 },
+            ],
+          },
+        ],
+        storage: 'memory' as const,
+        globalLimits: {
+          requestsPerMinute: 1000,
+          requestsPerHour: 50000,
+          requestsPerDay: 1000000,
+          burstLimit: 100,
+        },
+        keyGenerators: {
+          ip: true,
+          apiKey: true,
+          userId: true,
+          tenantId: true,
+          custom: false,
+        },
+        exemptions: ['127.0.0.1', '::1'],
+      },
+      authentication: {
+        strategies: [
+          {
+            name: 'jwt_auth',
+            type: 'jwt' as const,
+            priority: 1,
+            config: {
+              secretKey: process.env.JWT_SECRET_KEY,
+              algorithms: ['HS256'],
+              issuer: 'hotel-management-system',
+            },
+            endpoints: ['^/api/(?!auth|health).*'],
+          },
+        ],
+        exemptions: ['^/api/auth/.*', '^/api/.*/health$'],
+        tokenValidation: {
+          verifyExpiration: true,
+          verifySignature: true,
+          verifyIssuer: true,
+          allowedIssuers: ['hotel-management-system'],
+        },
+        sessionManagement: {
+          enabled: true,
+          maxSessions: 5,
+          sessionTimeout: 60,
+        },
+      },
+      versioning: {
+        enabled: true,
+        strategies: [
+          { type: 'header' as const, parameter: 'X-API-Version' },
+          { type: 'query' as const, parameter: 'version' },
+        ],
+        defaultVersion: 'v1',
+        supportedVersions: ['v1', 'v2'],
+        deprecationWarnings: [],
+      },
+      routing: {
+        rules: [
+          {
+            id: 'hotel-api',
+            pattern: '^/api/hotel/.*',
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            targets: [
+              {
+                id: 'hotel-service',
+                url: 'http://localhost:10000',
+                weight: 100,
+                health: 'healthy' as const,
+                priority: 1,
+                timeout: 30000,
+              },
+            ],
+            middleware: ['auth', 'rate-limit'],
+          },
+        ],
+        loadBalancing: {
+          strategy: 'round_robin' as const,
+          healthCheckInterval: 30,
+          maxRetries: 3,
+          retryDelay: 1000,
+        },
+        healthChecks: {
+          enabled: true,
+          endpoint: '/health',
+          interval: 30,
+          timeout: 5000,
+          healthyThreshold: 2,
+          unhealthyThreshold: 3,
+        },
+        circuitBreaker: {
+          enabled: true,
+          failureThreshold: 50,
+          recoveryTimeout: 60,
+          monitoringWindow: 300,
+        },
+      },
+      transformation: {
+        enabled: true,
+        rules: [],
+      },
+      caching: {
+        enabled: true,
+        strategies: [],
+        storage: 'memory' as const,
+        defaultTTL: 300,
+        maxSize: 256,
+      },
+      analytics: {
+        enabled: true,
+        metrics: [],
+        retention: 7,
+        sampling: 100,
+        realTimeUpdates: true,
+      },
+      security: {
+        cors: {
+          enabled: true,
+          origins: ['http://localhost:3000'],
+          methods: ['GET', 'POST', 'PUT', 'DELETE'],
+          headers: ['Content-Type', 'Authorization'],
+          credentials: true,
+          maxAge: 86400,
+        },
+        headers: {
+          enabled: true,
+          headers: {
+            'X-Frame-Options': 'DENY',
+            'X-Content-Type-Options': 'nosniff',
+          },
+        },
+        validation: {
+          enabled: true,
+          maxBodySize: 10 * 1024 * 1024,
+          maxHeaderSize: 8 * 1024,
+          maxQueryParams: 50,
+          requiredHeaders: [],
+        },
+        filtering: {
+          enabled: true,
+          blacklist: [],
+          whitelist: [],
+          geoBlocking: {
+            enabled: false,
+            allowedCountries: [],
+            blockedCountries: [],
+            action: 'block' as const,
+          },
+        },
+      },
+    };
+
+    await initializeAPIGateway(gatewayConfig);
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with real-time dashboard',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with API Gateway',
       'Monitoring'
     );
   } catch (error) {

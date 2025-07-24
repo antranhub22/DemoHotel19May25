@@ -173,7 +173,17 @@
     "dashboard:business": "curl -s http://localhost:10000/api/admin/dashboard/metrics/business | jq || echo '⚠️ Business metrics failed'",
     "dashboard:alerts": "curl -s http://localhost:10000/api/admin/dashboard/alerts | jq || echo '⚠️ Dashboard alerts failed'",
     "dashboard:performance": "curl -s http://localhost:10000/api/admin/dashboard/performance | jq || echo '⚠️ Performance analytics failed'",
-    "dashboard:test": "node tools/scripts/dashboard/test-dashboard.cjs"
+    "dashboard:test": "node tools/scripts/dashboard/test-dashboard.cjs",
+    "🌐 API GATEWAY": "===============================",
+    "gateway:overview": "curl -s http://localhost:10000/api/admin/api-gateway | jq || echo '⚠️ Gateway overview failed'",
+    "gateway:metrics": "curl -s http://localhost:10000/api/admin/api-gateway/metrics | jq || echo '⚠️ Gateway metrics failed'",
+    "gateway:rate-limits": "curl -s http://localhost:10000/api/admin/api-gateway/rate-limits | jq || echo '⚠️ Rate limits failed'",
+    "gateway:routes": "curl -s http://localhost:10000/api/admin/api-gateway/routes | jq || echo '⚠️ Gateway routes failed'",
+    "gateway:cache": "curl -s http://localhost:10000/api/admin/api-gateway/cache | jq || echo '⚠️ Gateway cache failed'",
+    "gateway:security": "curl -s http://localhost:10000/api/admin/api-gateway/security | jq || echo '⚠️ Gateway security failed'",
+    "gateway:config": "curl -s http://localhost:10000/api/admin/api-gateway/config | jq || echo '⚠️ Gateway config failed'",
+    "gateway:diagnostics": "curl -s http://localhost:10000/api/admin/api-gateway/diagnostics | jq || echo '⚠️ Gateway diagnostics failed'",
+    "gateway:test": "node tools/scripts/gateway/test-gateway.cjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
