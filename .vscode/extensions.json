@@ -1,0 +1,45 @@
+{
+  "recommendations": [
+    // Essential TypeScript & JavaScript Support
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "esbenp.prettier-vscode",
+    // ESLint & Code Quality
+    "dbaeumer.vscode-eslint",
+    "ms-vscode.vscode-json",
+    "redhat.vscode-yaml",
+    // Git Integration & Version Control
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "donjayamanne.githistory",
+    // Real-time Monitoring & Validation
+    "ms-vscode.vscode-typescript-next",
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    // Database & Schema Support
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss",
+    // Development Productivity
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.npm-intellisense",
+    "ms-vscode.vscode-typescript-next",
+    // File Management & Organization
+    "ms-vscode.vscode-typescript-next",
+    "gruntfuggly.todo-tree",
+    "alefragnani.bookmarks",
+    // Testing & Debugging
+    "ms-playwright.playwright",
+    "hbenl.vscode-test-explorer",
+    "ms-vscode.test-adapter-converter",
+    // Performance & Optimization
+    "ms-vscode.vscode-typescript-next",
+    "wix.vscode-import-cost",
+    "formulahendry.auto-close-tag"
+  ],
+  "unwantedRecommendations": [
+    // Extensions that might conflict with our setup
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-css"
+  ]
+}

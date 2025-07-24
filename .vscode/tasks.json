@@ -2,10 +2,156 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "🔄 Real-time: Repository Sync Check",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "sync:check:quick"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": [
+        {
+          "owner": "repository-sync",
+          "fileLocation": "relative",
+          "pattern": {
+            "regexp": "^\\s*[⚠️❌ℹ️]\\s+(.*):(\\d+)\\s*$",
+            "file": 1,
+            "line": 2,
+            "severity": "warning",
+            "message": "Repository sync issue detected"
+          }
+        }
+      ],
+      "detail": "Run real-time repository synchronization check on workspace open"
+    },
+    {
+      "label": "🔄 Real-time: Watch for Changes",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "tools/scripts/validation/repository-sync-checker.js",
+        "--watch"
+      ],
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "never",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": [
+        {
+          "owner": "repository-sync-watcher",
+          "fileLocation": "relative",
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "🔄 Repository Synchronization Checker",
+            "endsPattern": "🎉 Analysis completed"
+          },
+          "pattern": {
+            "regexp": "^\\s*[⚠️❌ℹ️]\\s+(.*):(\\d+)\\s*$",
+            "file": 1,
+            "line": 2,
+            "severity": "warning",
+            "message": "Repository sync issue detected"
+          }
+        }
+      ],
+      "detail": "Watch files and run repository sync checks on changes"
+    },
+    {
+      "label": "🔧 Real-time: Fix All Issues",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "npm run lint:fix && npm run check:imports:fix && npm run check:deps:fix"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [
+        "$eslint-stylish",
+        "$tsc"
+      ],
+      "detail": "Auto-fix all detectable repository sync issues"
+    },
+    {
+      "label": "🔍 Real-time: Git Consistency Check",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "git status --porcelain && git diff --name-only --diff-filter=U && git status -uno"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Check git repository consistency in real-time"
+    },
+    {
+      "label": "📊 Real-time: Full Analysis Report",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "tools/scripts/validation/repository-sync-checker.js",
+        "--save",
+        "--output=real-time-report.json"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": true
+      },
+      "problemMatcher": [],
+      "detail": "Generate comprehensive real-time analysis report"
+    },
+    {
       "label": "SSOT: Generate All",
       "type": "shell",
       "command": "npm",
-      "args": ["run", "ssot:generate"],
+      "args": [
+        "run",
+        "ssot:generate"
+      ],
       "group": "build",
       "presentation": {
         "echo": true,
@@ -19,378 +165,12 @@
       "detail": "Generate types and API documentation from SSOT"
     },
     {
-      "label": "SSOT: Generate Types",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/generate-types.js"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [
-        {
-          "owner": "typescript",
-          "fileLocation": "relative",
-          "pattern": {
-            "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error)\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
-          }
-        }
-      ],
-      "detail": "Generate TypeScript types from database schema"
-    },
-    {
-      "label": "SSOT: Generate API Docs",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/generate-api-docs.js"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Generate API documentation from route files"
-    },
-    {
       "label": "SSOT: Validate",
       "type": "shell",
       "command": "node",
-      "args": ["scripts/validate-ssot.js"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [
-        {
-          "owner": "ssot-validator",
-          "fileLocation": "relative",
-          "pattern": {
-            "regexp": "^\\[(.*)\\]\\s+(.*?):\\s+(.*)$",
-            "severity": 1,
-            "file": 2,
-            "message": 3
-          }
-        }
-      ],
-      "detail": "Validate SSOT consistency across schema, types, and API"
-    },
-    {
-      "label": "SSOT: Check Breaking Changes",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/check-breaking-changes.js", "--verbose"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Check for breaking changes in SSOT files"
-    },
-    {
-      "label": "SSOT: Update Dependencies",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/update-dependencies.js"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Update dependent files when SSOT changes"
-    },
-    {
-      "label": "SSOT: Generate Migration Guide",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/generate-migration-guide.js"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Generate migration guide for breaking changes"
-    },
-    {
-      "label": "SSOT: Watch and Auto-Update",
-      "type": "shell",
-      "command": "node",
-      "args": ["scripts/watch-ssot.js"],
-      "group": "build",
-      "isBackground": true,
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": true
-      },
-      "problemMatcher": [
-        {
-          "owner": "ssot-watcher",
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": "^🔍 SSOT Watcher started",
-            "endsPattern": "^(✅|❌)"
-          },
-          "pattern": {
-            "regexp": "^(.*)$",
-            "message": 1
-          }
-        }
-      ],
-      "detail": "Watch SSOT files and auto-update dependencies"
-    },
-    {
-      "label": "Database: Push Schema",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "db:push"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Push database schema changes",
-      "dependsOn": "SSOT: Generate Types"
-    },
-    {
-      "label": "Database: Generate Migration",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "db:generate"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Generate database migration from schema changes"
-    },
-    {
-      "label": "TypeScript: Check",
-      "type": "shell",
-      "command": "npx",
-      "args": ["tsc", "--noEmit"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": ["$tsc"],
-      "detail": "Check TypeScript compilation without emitting files",
-      "dependsOn": "SSOT: Generate Types"
-    },
-    {
-      "label": "Lint: SSOT Scripts",
-      "type": "shell",
-      "command": "npx",
-      "args": ["eslint", "scripts/*.js", "--fix"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": ["$eslint-stylish"],
-      "detail": "Lint and fix SSOT automation scripts"
-    },
-    {
-      "label": "Test: SSOT Scripts",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "test:ssot"],
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Test SSOT automation scripts"
-    },
-    {
-      "label": "Dev: Start with SSOT Watch",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "dev"],
-      "group": "build",
-      "isBackground": true,
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "dedicated",
-        "showReuseMessage": false,
-        "clear": true
-      },
-      "problemMatcher": [
-        {
-          "owner": "dev-server",
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": "^.*Server.*starting",
-            "endsPattern": "^.*Server.*ready"
-          },
-          "pattern": {
-            "regexp": "^(.*)$",
-            "message": 1
-          }
-        }
-      ],
-      "detail": "Start development server with SSOT watching",
-      "dependsOrder": "sequence",
-      "dependsOn": ["SSOT: Generate All", "SSOT: Watch and Auto-Update"]
-    },
-    {
-      "label": "Build: Full",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "build"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": ["$tsc"],
-      "detail": "Full production build with SSOT validation",
-      "dependsOrder": "sequence",
-      "dependsOn": ["SSOT: Generate All", "SSOT: Validate", "TypeScript: Check"]
-    },
-    {
-      "label": "Clean: Generated Files",
-      "type": "shell",
-      "command": "node",
       "args": [
-        "-e",
-        "const fs = require('fs'); const path = require('path'); ['packages/types', 'docs/api', 'backup'].forEach(dir => { const fullPath = path.join(process.cwd(), dir); if (fs.existsSync(fullPath)) { fs.rmSync(fullPath, { recursive: true, force: true }); console.log(`🗑️ Cleaned ${dir}`); } });"
+        "scripts/validate-ssot.js"
       ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Clean all generated SSOT files"
-    },
-    {
-      "label": "Setup: SSOT Development",
-      "type": "shell",
-      "command": "node",
-      "args": [
-        "-e",
-        "console.log('🚀 Setting up SSOT development environment...'); require('child_process').execSync('npm install', {stdio: 'inherit'}); console.log('✅ Dependencies installed'); console.log('📝 Running initial SSOT generation...'); require('child_process').execSync('node scripts/generate-types.js', {stdio: 'inherit'}); console.log('✅ SSOT setup complete!');"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": true
-      },
-      "problemMatcher": [],
-      "detail": "Setup SSOT development environment"
-    },
-    {
-      "label": "🏗️ Validate Architecture",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "validate:architecture"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "🎯 Change Guidance",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "guide:change"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
-        "panel": "shared",
-        "showReuseMessage": false,
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "✅ Check Siri Components",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "check:siri-components"],
       "group": "test",
       "presentation": {
         "echo": true,
@@ -398,37 +178,10 @@
         "focus": false,
         "panel": "shared",
         "showReuseMessage": true,
-        "clear": false
+        "clear": true
       },
-      "problemMatcher": []
-    },
-    {
-      "label": "🔍 Validate All",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "validate:all"],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "problemMatcher": []
-    }
-  ],
-  "inputs": [
-    {
-      "id": "commitMessage",
-      "type": "promptString",
-      "description": "Enter commit message for SSOT changes"
-    },
-    {
-      "id": "migrationReason",
-      "type": "promptString",
-      "description": "Reason for breaking changes migration"
+      "problemMatcher": [],
+      "detail": "Validate SSOT consistency across the project"
     }
   ]
 }
