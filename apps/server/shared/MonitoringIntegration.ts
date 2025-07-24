@@ -102,6 +102,11 @@ export class MonitoringIntegration {
     });
 
     try {
+      // ✅ SAFETY CHECK: Verify dependencies are available
+      if (!this.checkDependencies()) {
+        throw new Error('Required dependencies not available');
+      }
+
       // Initialize Enhanced Logger if enabled
       if (this.config.enableEnhancedLogging) {
         this.logger.info('🔍 Initializing Enhanced Logging system...');
@@ -118,7 +123,7 @@ export class MonitoringIntegration {
         });
       }
 
-      // Set up integrations
+      // Set up integrations (with safety checks)
       await this.setupServiceContainerIntegration();
       await this.setupFeatureFlagsIntegration();
       await this.setupModuleLifecycleIntegration();
@@ -135,6 +140,16 @@ export class MonitoringIntegration {
       await this.logSystemSnapshot();
     } catch (error) {
       this.logger.error('❌ Failed to initialize MonitoringIntegration', error);
+
+      // ✅ PRODUCTION SAFETY: Don't crash in production, use graceful degradation
+      if (process.env.NODE_ENV === 'production') {
+        this.logger.warn(
+          '🔄 Running in degraded mode without full monitoring capabilities'
+        );
+        this.isInitialized = true; // Mark as initialized to prevent retries
+        return;
+      }
+
       throw error;
     }
   }
@@ -755,5 +770,43 @@ export class MonitoringIntegration {
         correlations: this.performCorrelationAnalysis(),
       },
     };
+  }
+
+  /**
+   * ✅ NEW: Check if required dependencies are available
+   */
+  private static checkDependencies(): boolean {
+    try {
+      // Check if core classes are available
+      if (typeof EnhancedLogger === 'undefined') {
+        console.warn('⚠️ EnhancedLogger not available');
+        return false;
+      }
+
+      if (typeof MetricsCollector === 'undefined') {
+        console.warn('⚠️ MetricsCollector not available');
+        return false;
+      }
+
+      if (typeof ServiceContainer === 'undefined') {
+        console.warn('⚠️ ServiceContainer not available');
+        return false;
+      }
+
+      if (typeof FeatureFlags === 'undefined') {
+        console.warn('⚠️ FeatureFlags not available');
+        return false;
+      }
+
+      if (typeof ModuleLifecycleManager === 'undefined') {
+        console.warn('⚠️ ModuleLifecycleManager not available');
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.warn('⚠️ Dependency check failed:', error);
+      return false;
+    }
   }
 }

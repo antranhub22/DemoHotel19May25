@@ -101,16 +101,28 @@ export const initializeMonitoring = async (config?: any) => {
     );
   } catch (error) {
     console.error('❌ Failed to initialize monitoring system:', error);
-    throw error;
+    // Don't throw error in production - graceful degradation
+    if (process.env.NODE_ENV !== 'production') {
+      throw error;
+    }
   }
 };
 
-// ✅ NEW v2.0: Auto-initialize monitoring in non-test environments
-if (process.env.NODE_ENV !== 'test') {
+// ✅ TEMPORARILY DISABLED: Auto-initialization for deployment safety
+// Will be re-enabled after successful deployment verification
+/*
+if (process.env.NODE_ENV !== 'test' && process.env.ENABLE_MONITORING !== 'false') {
   // Use setTimeout to ensure this runs after module system is ready
   setTimeout(() => {
     initializeMonitoring().catch(error => {
       console.error('❌ Auto-initialization of monitoring failed:', error);
+      // Graceful degradation - don't crash the app
     });
-  }, 1000);
+  }, 2000); // Increased delay to 2 seconds
 }
+*/
+
+// 📋 TO RE-ENABLE MONITORING AFTER DEPLOYMENT:
+// 1. Uncomment the above code block
+// 2. Set ENABLE_MONITORING=true in environment
+// 3. Rebuild and deploy

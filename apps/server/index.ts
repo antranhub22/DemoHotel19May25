@@ -1,20 +1,21 @@
-import 'dotenv/config';
-import http from 'http';
-import cors from 'cors';
-import express, { type Request, Response, NextFunction } from 'express';
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
 import router from '@server/routes/index';
 import { setupSocket } from '@server/socket';
 import { runAutoDbFix } from '@server/startup/auto-database-fix';
 import { runProductionMigration } from '@server/startup/production-migration';
-import { setupVite, serveStatic, log } from '@server/vite';
+import { log, serveStatic, setupVite } from '@server/vite';
 import { logger } from '@shared/utils/logger';
 import { autoMigrateOnDeploy } from '@tools/scripts/maintenance/auto-migrate-on-deploy';
 import { seedProductionUsers } from '@tools/scripts/maintenance/seed-production-users';
+import cors from 'cors';
+import 'dotenv/config';
+import express, { NextFunction, type Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import http from 'http';
 
-// Fixed CSP configuration - v1.5 - FORCE REBUILD with embedded database setup
-// Force rebuild v1.6 - with authentication routes fix
+// ✅ MONITORING DISABLED: Auto-initialization commented out in shared/index.ts
+// Monitoring system fully implemented but temporarily disabled for deployment safety
+// To re-enable: Follow MONITORING_RE_ENABLE_GUIDE.md
 
 const app = express();
 
