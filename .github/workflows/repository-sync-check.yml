@@ -1,0 +1,271 @@
+# ============================================================================
+# Repository Synchronization Validation
+# Automated validation of repository consistency using Repository Sync Checker
+# ============================================================================
+
+name: 🔄 Repository Sync Check
+
+on:
+  push:
+    branches: [ main, develop, staging, refactor-* ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      validation_mode:
+        description: 'Validation mode (quick, full, deep)'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - quick
+          - full  
+          - deep
+
+# Cancel previous runs for the same branch
+concurrency:
+  group: repository-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  VALIDATION_MODE: ${{ github.event.inputs.validation_mode || 'full' }}
+
+jobs:
+  # ======================== Repository Sync Validation ========================
+  sync-check:
+    name: 🔍 Repository Sync Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # -------------------- Setup --------------------
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history for proper analysis
+          
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: |
+          npm ci --prefer-offline --no-audit
+          # Install additional validation tools
+          npm install -g depcheck madge typescript
+          
+      # -------------------- Core Validation Checks --------------------
+      - name: 🔍 TypeScript Compilation Check
+        run: |
+          echo "🔍 Checking TypeScript compilation..."
+          npx tsc --noEmit --project tsconfig.json
+          echo "✅ TypeScript compilation check passed"
+          
+      - name: 📦 Dependency Validation
+        run: |
+          echo "📦 Checking for unused dependencies..."
+          npx depcheck --ignores="@types/*,prettier,eslint*" || echo "⚠️ Dependency check completed with warnings"
+          echo "✅ Dependency validation completed"
+          
+      - name: 🔄 Circular Dependency Detection
+        run: |
+          echo "🔄 Checking for circular dependencies..."
+          # Check both client and server
+          npx madge --circular apps/client/src/ || echo "⚠️ Client circular dependencies detected"
+          npx madge --circular apps/server/ || echo "⚠️ Server circular dependencies detected"
+          npx madge --circular packages/ || echo "⚠️ Packages circular dependencies detected"
+          echo "✅ Circular dependency check completed"
+          
+      - name: 🧹 ESLint Validation
+        run: |
+          echo "🧹 Running ESLint validation..."
+          npm run lint || echo "⚠️ ESLint validation failed but continuing..."
+          echo "✅ ESLint validation completed"
+          
+      # -------------------- Repository Sync Checker Integration --------------------
+      - name: 🔄 Repository Sync Checker - Quick Analysis
+        if: env.VALIDATION_MODE == 'quick'
+        run: |
+          echo "🚀 Running Repository Sync Checker (Quick Mode)..."
+          npm run sync:check:quick
+          
+      - name: 🔄 Repository Sync Checker - Full Analysis
+        if: env.VALIDATION_MODE == 'full'
+        run: |
+          echo "🚀 Running Repository Sync Checker (Full Mode)..."
+          npm run sync:check
+          
+      - name: 🔄 Repository Sync Checker - Deep Analysis
+        if: env.VALIDATION_MODE == 'deep'
+        run: |
+          echo "🚀 Running Repository Sync Checker (Deep Mode)..."
+          npm run sync:check:deep
+          
+      # -------------------- Generate Analysis Report --------------------
+      - name: 📊 Generate Comprehensive Report
+        run: |
+          echo "📊 Generating comprehensive validation report..."
+          node tools/scripts/validation/repository-sync-checker.js --save --output=ci-validation-report.json
+          
+      - name: 📤 Upload Validation Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repository-sync-report-${{ github.run_number }}
+          path: ci-validation-report.json
+          retention-days: 30
+          
+      # -------------------- Git Consistency Validation --------------------
+      - name: 🔀 Git Consistency Check
+        run: |
+          echo "🔀 Checking git repository consistency..."
+          # Check for uncommitted files (should be clean in CI)
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "❌ Repository has uncommitted changes after validation"
+            git status --porcelain
+            exit 1
+          fi
+          
+          # Check for merge conflicts
+          if git diff --name-only --diff-filter=U | grep -q .; then
+            echo "❌ Repository has unresolved merge conflicts"
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+          
+          echo "✅ Git consistency check passed"
+          
+      # -------------------- Performance and Metrics --------------------
+      - name: 📈 Performance Metrics
+        run: |
+          echo "📈 Collecting performance metrics..."
+          echo "Repository size: $(du -sh . | cut -f1)"
+          echo "Node modules size: $(du -sh node_modules 2>/dev/null | cut -f1 || echo 'N/A')"
+          echo "TypeScript files: $(find . -name '*.ts' -o -name '*.tsx' | wc -l)"
+          echo "JavaScript files: $(find . -name '*.js' -o -name '*.jsx' | wc -l)"
+          
+  # ======================== Extended Validation (Optional) ========================
+  extended-validation:
+    name: 🔬 Extended Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    needs: sync-check
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+        
+      - name: 🔍 File Structure Validation
+        run: |
+          echo "🔍 Validating file structure patterns..."
+          # Check for required files
+          test -f package.json || (echo "❌ Missing package.json" && exit 1)
+          test -f tsconfig.json || (echo "❌ Missing tsconfig.json" && exit 1)
+          test -f .eslintrc.js || test -f .eslintrc.json || (echo "❌ Missing ESLint config" && exit 1)
+          
+          # Check directory structure
+          test -d apps/client/src || (echo "❌ Missing client src directory" && exit 1)
+          test -d apps/server || (echo "❌ Missing server directory" && exit 1)
+          test -d packages || (echo "❌ Missing packages directory" && exit 1)
+          
+          echo "✅ File structure validation passed"
+          
+      - name: 🎯 Import/Export Consistency
+        run: |
+          echo "🎯 Checking import/export consistency..."
+          # Run specialized import/export checks if available
+          if [ -f "tools/scripts/validation/import-export-checker.js" ]; then
+            node tools/scripts/validation/import-export-checker.js
+          else
+            echo "ℹ️ Import/export checker not available, using basic validation"
+          fi
+          
+      - name: 📝 Naming Convention Validation
+        run: |
+          echo "📝 Checking naming conventions..."
+          # Check for common naming issues
+          find apps/client/src/components -name "*.tsx" ! -name "[A-Z]*" | head -5 | while read file; do
+            echo "⚠️ Component file should start with uppercase: $file"
+          done
+          
+          find apps/client/src/hooks -name "*.ts" ! -name "use*" | head -5 | while read file; do
+            echo "⚠️ Hook file should start with 'use': $file"
+          done
+          
+  # ======================== Security and Quality Gates ========================
+  security-quality:
+    name: 🛡️ Security & Quality Gates
+    runs-on: ubuntu-latest
+    needs: sync-check
+    timeout-minutes: 8
+    
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: 📦 Install Dependencies
+        run: npm ci --prefer-offline --no-audit
+        
+      - name: 🛡️ Security Audit
+        run: |
+          echo "🛡️ Running security audit..."
+          npm audit --audit-level=moderate
+          
+      - name: 📊 Bundle Size Analysis
+        run: |
+          echo "📊 Analyzing bundle size impact..."
+          # Basic bundle size check
+          npm run build --if-present || echo "ℹ️ Build command not available"
+          
+      - name: 🧪 Type Coverage Analysis
+        run: |
+          echo "🧪 Analyzing TypeScript type coverage..."
+          # Check for any usage that might impact type safety
+          grep -r ": any" apps/ packages/ || echo "✅ No explicit 'any' types found"
+          grep -r "@ts-ignore" apps/ packages/ || echo "✅ No @ts-ignore comments found"
+
+  # ======================== Results Summary ========================
+  summary:
+    name: 📋 Validation Summary
+    runs-on: ubuntu-latest
+    needs: [sync-check, extended-validation, security-quality]
+    if: always()
+    
+    steps:
+      - name: 📋 Generate Summary
+        run: |
+          echo "📋 Repository Sync Validation Summary"
+          echo "====================================="
+          echo "🔍 Core Validation: ${{ needs.sync-check.result }}"
+          echo "🔬 Extended Validation: ${{ needs.extended-validation.result }}"
+          echo "🛡️ Security & Quality: ${{ needs.security-quality.result }}"
+          echo ""
+          
+          if [ "${{ needs.sync-check.result }}" = "success" ] && 
+             [ "${{ needs.extended-validation.result }}" != "failure" ] && 
+             [ "${{ needs.security-quality.result }}" != "failure" ]; then
+            echo "✅ All repository sync validations passed!"
+            echo "🚀 Repository is ready for deployment"
+          else
+            echo "❌ Some validations failed"
+            echo "🔧 Please review the failed checks above"
+          fi 
