@@ -18,8 +18,8 @@ const router = express.Router();
 // ✅ PRIORITY: Public routes first (no middleware)
 router.use('/api/public', tempPublicRoutes);
 
-// ✅ AUTH ROUTES SECOND (before protected routes)
-router.use('/api/auth', tempAuthRoutes);
+// ✅ AUTH ROUTES - COMPLETELY OUTSIDE /api/* PREFIX (no rate limiting, no middleware)
+router.use('/auth', tempAuthRoutes);
 
 // Mount all route modules (protected routes)
 router.use('/api', apiRoutes);

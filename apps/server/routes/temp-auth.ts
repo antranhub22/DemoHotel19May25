@@ -7,12 +7,18 @@ const router = express.Router();
 // ==========================================
 // TEMPORARY AUTH ROUTES - EMERGENCY FIX
 // ==========================================
-// These routes enable authentication in production
+// IMPORTANT: These routes are now mounted at /auth/* (NOT /api/auth/*)
+// This bypasses ALL /api/* middleware including rate limiting and auth middleware
 // TODO: Replace with full auth system later
 
 const JWT_SECRET = process.env.JWT_SECRET || 'emergency-secret-mi-nhon-2024';
 const STAFF_ACCOUNTS =
   process.env.STAFF_ACCOUNTS || 'admin:admin123,manager:manager123';
+
+logger.info(
+  '🔐 [TEMP-AUTH] Auth routes initialized at /auth/* endpoints',
+  'Component'
+);
 
 // Parse staff accounts from environment
 const parseStaffAccounts = () => {
