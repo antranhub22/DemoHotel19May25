@@ -1,0 +1,63 @@
+# PRODUCTION ENVIRONMENT VARIABLES - COPY VÀ PASTE TRỰC TIẾP
+# Cho website: minhonmuine.talk2go.online
+
+# ==================== CORE SETTINGS ====================
+NODE_ENV=production
+PORT=10000
+
+# ==================== CORS & SECURITY (FIX CHÍNH) ====================
+CORS_ORIGIN=https://minhonmuine.talk2go.online
+CLIENT_URL=https://minhonmuine.talk2go.online
+
+# ==================== AUTHENTICATION (BẮT BUỘC) ====================
+JWT_SECRET=minhon-production-jwt-secret-2024-minimum-32-characters
+STAFF_ACCOUNTS=admin:admin123,manager:manager123,frontdesk:frontdesk123,itmanager:itmanager123
+
+# ==================== DATABASE ====================
+# THAY THẾ với PostgreSQL URL thật của bạn
+DATABASE_URL=postgresql://username:password@hostname:5432/database_name
+
+# ==================== AI SERVICES (NÊN CÓ) ====================
+# Nếu có real API keys, uncomment và thay thế
+# VITE_OPENAI_API_KEY=sk-your-real-openai-key-here
+# VITE_VAPI_PUBLIC_KEY=pk_your-real-vapi-key-here  
+# VITE_VAPI_ASSISTANT_ID=asst_your-real-assistant-id-here
+# VAPI_API_KEY=your-real-vapi-api-key-here
+
+# ==================== FEATURE FLAGS ====================
+ENABLE_ANALYTICS=true
+ENABLE_STAFF_DASHBOARD=true
+ENABLE_AUTH_SYSTEM=true
+ENABLE_DATABASE_FEATURES=true
+
+# Tắt tạm thời features cần API keys
+ENABLE_VOICE_ASSISTANT=false
+ENABLE_MULTI_LANGUAGE=false
+ENABLE_HOTEL_RESEARCH=false
+
+# ==================== PRODUCTION SECURITY ====================
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+LOG_LEVEL=info
+SESSION_SECRET=minhon-session-secret-2024-minimum-32-characters
+
+# ==================== AUTO FEATURES ====================
+AUTO_MIGRATE=true
+AUTO_DB_FIX=true
+SEED_USERS=true
+
+# ==================== PLATFORM SETTINGS ====================
+TALK2GO_DOMAIN=minhonmuine.talk2go.online
+SUBDOMAIN_SUFFIX=.talk2go.online
+MINHON_TENANT_ID=minhon-production-tenant-2024
+
+# ==================== EMAIL (OPTIONAL) ====================
+# GMAIL_APP_PASSWORD=your-gmail-app-password
+# SUMMARY_EMAILS=admin@minhonhotel.com
+
+# ==================== INSTRUCTIONS ====================
+# 1. Copy toàn bộ nội dung này
+# 2. Paste vào Environment Variables của hosting platform
+# 3. Thay thế DATABASE_URL với PostgreSQL URL thật
+# 4. Save và restart service
+# 5. Test website: https://minhonmuine.talk2go.online 
