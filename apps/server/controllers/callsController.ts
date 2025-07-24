@@ -1,10 +1,10 @@
-import { eq } from 'drizzle-orm';
-import { Request, Response } from 'express';
-import { z } from 'zod';
 import { storage } from '@server/storage';
 import { call, db } from '@shared/db';
 import { insertTranscriptSchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
+import { eq } from 'drizzle-orm';
+import { Request, Response } from 'express';
+import { z } from 'zod';
 // import { transcript } from '@shared/db'; // Used via storage service
 
 /**
@@ -210,16 +210,13 @@ export class CallsController {
       );
 
       // Convert camelCase to snake_case for database schema validation
-      // Ensure timestamp is within valid range for PostgreSQL
-      const now = Date.now();
-      const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
-
+      // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format consistently
       const transcriptDataForValidation = {
         call_id: callId,
         role,
         content,
         tenant_id: 'default',
-        timestamp: validTimestamp,
+        timestamp: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
       };
 
       // Validate with database schema (expects snake_case)
@@ -256,7 +253,7 @@ export class CallsController {
         role,
         content,
         tenantId: 'default',
-        timestamp: validTimestamp,
+        timestamp: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
       });
 
       logger.success(

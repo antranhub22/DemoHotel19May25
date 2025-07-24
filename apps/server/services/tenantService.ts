@@ -1,16 +1,17 @@
-import { eq, and, sql } from 'drizzle-orm';
 import { db } from '@server/db';
-import { tenantMapper, hotelProfileMapper } from '@shared/db/transformers';
+import { hotelProfileMapper, tenantMapper } from '@shared/db/transformers';
 import {
-  tenants,
-  hotelProfiles,
-  staff,
   call,
-  transcript,
-  request,
+  hotelProfiles,
   message,
+  request,
+  staff,
+  tenants,
+  transcript,
 } from '@shared/schema';
+import { generateId } from '@shared/utils/idGenerator';
 import { logger } from '@shared/utils/logger';
+import { and, eq, sql } from 'drizzle-orm';
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -86,7 +87,7 @@ export class TenantService {
       );
 
       // Create tenant using field mapper
-      const tenantId = `tenant-${Date.now()}`;
+      const tenantId = generateId('tenant');
       const tenantData = tenantMapper.toDatabase({
         id: tenantId,
         hotelName: config.hotelName,
@@ -109,7 +110,7 @@ export class TenantService {
 
       // Create default hotel profile using field mapper
       const profileData = hotelProfileMapper.toDatabase({
-        id: `profile-${tenant.id}`,
+        id: generateId('hotel-profile'),
         tenantId: tenant.id,
         researchData: null,
         assistantConfig: null,

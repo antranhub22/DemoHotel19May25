@@ -1,20 +1,21 @@
-import { eq, sql, and, desc } from 'drizzle-orm';
-import express, { Request, Response } from 'express';
-import { z } from 'zod';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import {
+  getHourlyActivity,
   getOverview,
   getServiceDistribution,
-  getHourlyActivity,
 } from '@server/analytics';
+import { TenantMiddleware } from '@server/middleware/tenant';
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
 import { TenantService } from '@server/services/tenantService';
 import {
-  VapiIntegrationService,
   AssistantGeneratorService,
+  VapiIntegrationService,
 } from '@server/services/vapiIntegration';
 import { db } from '@shared/db';
+import { eq } from 'drizzle-orm';
+import express, { Request, Response } from 'express';
+import { z } from 'zod';
 // ✅ FIXED: Removed duplicate hotelProfiles import
 import { hotelProfileMapper } from '@shared/db/transformers';
 import { logger } from '@shared/utils/logger';
@@ -30,7 +31,7 @@ router.use(authenticateJWT);
 // router.use(enforceRowLevelSecurity);
 
 // Simple middleware placeholders
-const identifyTenant = (req: Request, res: Response, next: any) => {
+const identifyTenant = (req: Request, _res: Response, next: any) => {
   // Simplified tenant identification - in production this would extract from JWT
   req.tenant = req.tenant || {
     id: 'mi-nhon-hotel',
@@ -40,7 +41,7 @@ const identifyTenant = (req: Request, res: Response, next: any) => {
   next();
 };
 
-const enforceRowLevelSecurity = (req: Request, res: Response, next: any) => {
+const enforceRowLevelSecurity = (_req: Request, _res: Response, next: any) => {
   // Simplified security - in production this would filter database queries
   next();
 };
@@ -104,34 +105,13 @@ const assistantGeneratorService = new AssistantGeneratorService();
 const vapiIntegrationService = new VapiIntegrationService();
 const knowledgeBaseGenerator = new KnowledgeBaseGenerator();
 const tenantService = new TenantService();
+const tenantMiddleware = new TenantMiddleware();
 
 // ============================================
 // Middleware
 // ============================================
 
-const checkLimits = async (req: Request, res: Response, next: any) => {
-  try {
-    const tenant = req.tenant;
-    const limits = tenantService.getSubscriptionLimits(tenant.subscriptionPlan);
-
-    // Check usage against limits
-    const usage = await tenantService.getTenantUsage(tenant.id);
-
-    if (usage.callsThisMonth >= limits.monthlyCallLimit) {
-      return (res as any).status(403).json({
-        error: 'Monthly call limit exceeded',
-        usage: usage.callsThisMonth,
-        limit: limits.monthlyCallLimit,
-        upgradeRequired: true,
-      });
-    }
-
-    next();
-  } catch (error) {
-    logger.error('Usage check failed:', 'Component', error);
-    next(); // Continue on error to avoid blocking
-  }
-};
+// Remove duplicate checkLimits - use TenantMiddleware.checkSubscriptionLimits instead
 
 const requireFeature = (feature: string) => {
   return async (req: Request, res: Response, next: any) => {
@@ -179,9 +159,10 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
  * POST /api/dashboard/research-hotel
  * Research hotel information automatically
  */
+// ✅ Hotel Research Route with subscription validation
 router.post(
   '/research-hotel',
-  checkLimits,
+  tenantMiddleware.checkSubscriptionLimits,
   async (req: Request, res: Response) => {
     try {
       logger.debug(
@@ -273,87 +254,83 @@ router.post(
  * POST /api/dashboard/generate-assistant
  * Generate Vapi assistant from hotel data
  */
-router.post(
-  '/generate-assistant',
-  checkLimits,
-  async (req: Request, res: Response) => {
-    try {
-      logger.debug(
-        '🤖 Assistant generation requested by tenant: ${req.tenant.hotelName}',
-        'Component'
-      );
+router.post('/generate-assistant', async (req: Request, res: Response) => {
+  try {
+    logger.debug(
+      '🤖 Assistant generation requested by tenant: ${req.tenant.hotelName}',
+      'Component'
+    );
 
-      // Validate input
-      const { hotelData, customization } = generateAssistantSchema.parse(
-        req.body
-      );
+    // Validate input
+    const { hotelData, customization } = generateAssistantSchema.parse(
+      req.body
+    );
 
-      // Check if hotel data exists
-      if (!hotelData || !hotelData.name) {
-        return (res as any).status(400).json({
-          error: 'Hotel data is required. Please research your hotel first.',
-          requiresResearch: true,
-        });
-      }
-
-      // Generate assistant
-      const assistantId = await assistantGeneratorService.generateAssistant(
-        hotelData,
-        {
-          personality: customization.personality || 'professional',
-          tone: customization.tone || 'friendly',
-          languages: customization.languages || ['en'],
-          ...customization,
-        }
-      );
-
-      // Generate system prompt for storage
-      const systemPrompt = knowledgeBaseGenerator.generateSystemPrompt(
-        hotelData,
-        {
-          personality: customization.personality || 'professional',
-          tone: customization.tone || 'friendly',
-          languages: customization.languages || ['en'],
-          ...customization,
-        }
-      );
-
-      // Update hotel profile with assistant info
-      const assistantUpdateData = hotelProfileMapper.toUpdateFields({
-        vapiAssistantId: assistantId,
-        assistantConfig: JSON.stringify(customization),
-        systemPrompt,
+    // Check if hotel data exists
+    if (!hotelData || !hotelData.name) {
+      return (res as any).status(400).json({
+        error: 'Hotel data is required. Please research your hotel first.',
+        requiresResearch: true,
       });
-      assistantUpdateData.updated_at = new Date();
-
-      await db
-        .update(hotelProfiles)
-        .set(assistantUpdateData)
-        .where(eq(hotelProfiles.tenant_id, req.tenant.id));
-
-      logger.debug(
-        '✅ Assistant generated successfully: ${assistantId}',
-        'Component'
-      );
-
-      (res as any).json({
-        success: true,
-        assistantId,
-        customization,
-        systemPrompt,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return (res as any).status(400).json({
-          error: 'Invalid request data',
-          details: error.errors,
-        });
-      }
-      handleApiError(res, error, 'Assistant generation failed');
     }
+
+    // Generate assistant
+    const assistantId = await assistantGeneratorService.generateAssistant(
+      hotelData,
+      {
+        personality: customization.personality || 'professional',
+        tone: customization.tone || 'friendly',
+        languages: customization.languages || ['en'],
+        ...customization,
+      }
+    );
+
+    // Generate system prompt for storage
+    const systemPrompt = knowledgeBaseGenerator.generateSystemPrompt(
+      hotelData,
+      {
+        personality: customization.personality || 'professional',
+        tone: customization.tone || 'friendly',
+        languages: customization.languages || ['en'],
+        ...customization,
+      }
+    );
+
+    // Update hotel profile with assistant info
+    const assistantUpdateData = hotelProfileMapper.toUpdateFields({
+      vapiAssistantId: assistantId,
+      assistantConfig: JSON.stringify(customization),
+      systemPrompt,
+    });
+    assistantUpdateData.updated_at = new Date();
+
+    await db
+      .update(hotelProfiles)
+      .set(assistantUpdateData)
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
+
+    logger.debug(
+      '✅ Assistant generated successfully: ${assistantId}',
+      'Component'
+    );
+
+    (res as any).json({
+      success: true,
+      assistantId,
+      customization,
+      systemPrompt,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return (res as any).status(400).json({
+        error: 'Invalid request data',
+        details: error.errors,
+      });
+    }
+    handleApiError(res, error, 'Assistant generation failed');
   }
-);
+});
 
 /**
  * GET /api/dashboard/hotel-profile
@@ -446,101 +423,97 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
  * PUT /api/dashboard/assistant-config
  * Update assistant configuration
  */
-router.put(
-  '/assistant-config',
-  checkLimits,
-  async (req: Request, res: Response) => {
-    try {
-      logger.debug(
-        '⚙️ Assistant config update requested by tenant: ${req.tenant.hotelName}',
-        'Component'
+router.put('/assistant-config', async (req: Request, res: Response) => {
+  try {
+    logger.debug(
+      '⚙️ Assistant config update requested by tenant: ${req.tenant.hotelName}',
+      'Component'
+    );
+
+    // Validate input
+    const config = assistantConfigSchema.parse(req.body);
+
+    // Get current profile
+    const [profileDB] = await db
+      .select()
+      .from(hotelProfiles)
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id))
+      .limit(1);
+
+    // Convert to camelCase for easier access
+    const profile = profileDB
+      ? hotelProfileMapper.toFrontend(profileDB as any)
+      : null;
+
+    if (!profile) {
+      return (res as any).status(404).json({
+        error: 'Hotel profile not found',
+        setupRequired: true,
+      });
+    }
+
+    if (!profile.vapiAssistantId) {
+      return (res as any).status(400).json({
+        error: 'No assistant found. Please generate an assistant first.',
+        assistantRequired: true,
+      });
+    }
+
+    // Merge current config with updates
+    const currentConfig = JSON.parse(profile.assistantConfig || '{}');
+    const updatedConfig = { ...currentConfig, ...config };
+
+    // Update assistant via Vapi API if hotel data exists
+    if (profile.researchData) {
+      await assistantGeneratorService.updateAssistant(
+        profile.vapiAssistantId,
+        JSON.parse(profile.researchData),
+        updatedConfig
       );
-
-      // Validate input
-      const config = assistantConfigSchema.parse(req.body);
-
-      // Get current profile
-      const [profileDB] = await db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.tenant_id, req.tenant.id))
-        .limit(1);
-
-      // Convert to camelCase for easier access
-      const profile = profileDB
-        ? hotelProfileMapper.toFrontend(profileDB as any)
-        : null;
-
-      if (!profile) {
-        return (res as any).status(404).json({
-          error: 'Hotel profile not found',
-          setupRequired: true,
-        });
-      }
-
-      if (!profile.vapiAssistantId) {
-        return (res as any).status(400).json({
-          error: 'No assistant found. Please generate an assistant first.',
-          assistantRequired: true,
-        });
-      }
-
-      // Merge current config with updates
-      const currentConfig = JSON.parse(profile.assistantConfig || '{}');
-      const updatedConfig = { ...currentConfig, ...config };
-
-      // Update assistant via Vapi API if hotel data exists
-      if (profile.researchData) {
-        await assistantGeneratorService.updateAssistant(
-          profile.vapiAssistantId,
-          JSON.parse(profile.researchData),
-          updatedConfig
-        );
-      } else {
-        // Update specific configs only
-        await vapiIntegrationService.updateAssistant(profile.vapiAssistantId, {
-          voiceId: config.voiceId,
-          silenceTimeoutSeconds: config.silenceTimeout,
-          maxDurationSeconds: config.maxDuration,
-          backgroundSound: config.backgroundSound,
-          systemPrompt: config.systemPrompt || profile.systemPrompt,
-        });
-      }
-
-      // Update database
-      const configUpdateData = hotelProfileMapper.toUpdateFields({
-        assistantConfig: JSON.stringify(updatedConfig),
+    } else {
+      // Update specific configs only
+      await vapiIntegrationService.updateAssistant(profile.vapiAssistantId, {
+        voiceId: config.voiceId,
+        silenceTimeoutSeconds: config.silenceTimeout,
+        maxDurationSeconds: config.maxDuration,
+        backgroundSound: config.backgroundSound,
         systemPrompt: config.systemPrompt || profile.systemPrompt,
       });
-      configUpdateData.updated_at = new Date();
-
-      await db
-        .update(hotelProfiles)
-        .set(configUpdateData)
-        .where(eq(hotelProfiles.tenant_id, req.tenant.id));
-
-      logger.debug(
-        '✅ Assistant config updated for tenant: ${req.tenant.hotelName}',
-        'Component'
-      );
-
-      (res as any).json({
-        success: true,
-        updatedConfig,
-        assistantId: profile.vapiAssistantId,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return (res as any).status(400).json({
-          error: 'Invalid configuration data',
-          details: error.errors,
-        });
-      }
-      handleApiError(res, error, 'Failed to update assistant configuration');
     }
+
+    // Update database
+    const configUpdateData = hotelProfileMapper.toUpdateFields({
+      assistantConfig: JSON.stringify(updatedConfig),
+      systemPrompt: config.systemPrompt || profile.systemPrompt,
+    });
+    configUpdateData.updated_at = new Date();
+
+    await db
+      .update(hotelProfiles)
+      .set(configUpdateData)
+      .where(eq(hotelProfiles.tenant_id, req.tenant.id));
+
+    logger.debug(
+      '✅ Assistant config updated for tenant: ${req.tenant.hotelName}',
+      'Component'
+    );
+
+    (res as any).json({
+      success: true,
+      updatedConfig,
+      assistantId: profile.vapiAssistantId,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return (res as any).status(400).json({
+        error: 'Invalid configuration data',
+        details: error.errors,
+      });
+    }
+    handleApiError(res, error, 'Failed to update assistant configuration');
   }
-);
+});
 
 /**
  * GET /api/dashboard/analytics
@@ -606,7 +579,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
  * GET /api/dashboard/service-health
  * Check health of all integrated services
  */
-router.get('/service-health', async (req: Request, res: Response) => {
+router.get('/service-health', async (_req: Request, res: Response) => {
   try {
     logger.debug(
       '🏥 Service health check requested by tenant: ${req.tenant.hotelName}',

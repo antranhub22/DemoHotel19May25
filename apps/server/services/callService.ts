@@ -1,9 +1,8 @@
-import { z } from 'zod';
 import { storage } from '@server/storage';
-import { db, eq, call, transcript } from '@shared/db';
+import { call, db, eq, transcript } from '@shared/db';
 import { insertTranscriptSchema } from '@shared/schema';
-import { getCurrentTimestamp } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
+import { z } from 'zod';
 
 export class CallService {
   /**
@@ -62,16 +61,13 @@ export class CallService {
       }
 
       // Convert camelCase to snake_case for database schema validation
-      // Ensure timestamp is within valid range for PostgreSQL
-      const now = Date.now();
-      const validTimestamp = Math.min(now, 2147483647000); // PostgreSQL max timestamp
-
+      // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format consistently
       const transcriptDataForValidation = {
         call_id: callId,
         role,
         content,
         tenant_id: 'default',
-        timestamp: validTimestamp, // ✅ FIXED: Use proper timestamp, storage will handle conversion
+        timestamp: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
       };
 
       // Validate with database schema (expects snake_case)
@@ -88,7 +84,7 @@ export class CallService {
         role,
         content,
         tenantId: 'default',
-        timestamp: validTimestamp, // ✅ FIXED: Let storage.addTranscript handle conversion properly
+        timestamp: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
       });
 
       logger.debug(

@@ -1,8 +1,9 @@
-import { eq, and } from 'drizzle-orm';
-import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 import { request as requestTable } from '@shared/db';
 import { requestMapper } from '@shared/db/transformers';
+import { generateId, generateShortId } from '@shared/utils/idGenerator';
 import { logger } from '@shared/utils/logger';
+import { and, desc, eq } from 'drizzle-orm';
+import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 
 /**
  * Request Controller
@@ -62,16 +63,26 @@ export class RequestController {
         content = order_type || type || 'Service Request';
       }
 
+      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
+      if (!req.tenant?.id) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Tenant not identified',
+          code: 'TENANT_NOT_IDENTIFIED',
+        });
+        return;
+      }
+
       // Create request record compatible with schema (id will be auto-generated)
       const newRequest = {
-        tenant_id: (req as any).tenant?.id || 'default-tenant',
-        call_id: call_id || `CALL-${Date.now()}`,
+        tenant_id: req.tenant.id, // ✅ OPTIMIZED: No fallback - require valid tenant
+        call_id: call_id || generateId('call'),
         room_number: room_number || 'unknown',
-        order_id: `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        order_id: generateShortId('request'), // ✅ OPTIMIZED: Use UUID-based ID generation
         request_content,
         status: finalStatus,
-        created_at: Math.floor(Date.now() / 1000), // Unix timestamp
-        updated_at: Math.floor(Date.now() / 1000), // Set initial updated_at
+        created_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
+        updated_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
         description: special_instructions || null, // Use specialInstructions as description
         priority: 'medium', // Default priority
         assigned_to: null, // Will be assigned by staff later
@@ -137,7 +148,17 @@ export class RequestController {
    */
   static async getAllRequests(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = (req as any).tenant?.id;
+      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
+      if (!req.tenant?.id) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Tenant not identified',
+          code: 'TENANT_NOT_IDENTIFIED',
+        });
+        return;
+      }
+
+      const tenantId = req.tenant.id;
 
       logger.api(
         '📋 [RequestController] Getting all requests',
@@ -145,19 +166,12 @@ export class RequestController {
         { tenantId }
       );
 
-      let requests;
-      if (tenantId) {
-        requests = await db
-          .select()
-          .from(requestTable)
-          .where(eq(requestTable.tenant_id, tenantId))
-          .orderBy(requestTable.created_at);
-      } else {
-        requests = await db
-          .select()
-          .from(requestTable)
-          .orderBy(requestTable.created_at);
-      }
+      // Always filter by tenant for data isolation
+      const requests = await db
+        .select()
+        .from(requestTable)
+        .where(eq(requestTable.tenant_id, tenantId))
+        .orderBy(desc(requestTable.created_at));
 
       logger.success(
         '📋 [RequestController] Requests retrieved successfully',
@@ -198,7 +212,17 @@ export class RequestController {
         return;
       }
 
-      const tenantId = (req as any).tenant?.id;
+      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
+      if (!req.tenant?.id) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Tenant not identified',
+          code: 'TENANT_NOT_IDENTIFIED',
+        });
+        return;
+      }
+
+      const tenantId = req.tenant.id;
 
       logger.api(
         `📄 [RequestController] Getting request by ID: ${requestId}`,
@@ -206,22 +230,16 @@ export class RequestController {
         { tenantId }
       );
 
-      // Build query with proper condition chaining
-      const whereConditions = [eq(requestTable.id, requestId)];
-      if (tenantId) {
-        whereConditions.push(eq(requestTable.tenant_id, tenantId));
-      }
-
-      const query = db
+      // Always filter by tenant for data isolation - required, not optional
+      const request = await db
         .select()
         .from(requestTable)
         .where(
-          whereConditions.length === 1
-            ? whereConditions[0]
-            : and(...whereConditions)
+          and(
+            eq(requestTable.id, requestId),
+            eq(requestTable.tenant_id, tenantId)
+          )
         );
-
-      const request = await query;
 
       if (!request || request.length === 0) {
         (res as any).status(404).json({
@@ -279,7 +297,17 @@ export class RequestController {
         return;
       }
 
-      const tenantId = (req as any).tenant?.id;
+      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
+      if (!req.tenant?.id) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Tenant not identified',
+          code: 'TENANT_NOT_IDENTIFIED',
+        });
+        return;
+      }
+
+      const tenantId = req.tenant.id;
 
       logger.api(
         `📝 [RequestController] Updating request ${requestId} status to: ${status}`,
@@ -290,15 +318,10 @@ export class RequestController {
         }
       );
 
-      // Update the request with proper condition chaining
-      const updateConditions = [eq(requestTable.id, requestId)];
-      if (tenantId) {
-        updateConditions.push(eq(requestTable.tenant_id, tenantId));
-      }
-
+      // Always filter by tenant for data isolation - required, not optional
       const updateData: any = {
         status,
-        updated_at: Math.floor(Date.now() / 1000),
+        updated_at: new Date(), // ✅ OPTIMIZED: Use PostgreSQL TIMESTAMP format
       };
 
       if (assignedTo !== undefined) {
@@ -309,9 +332,10 @@ export class RequestController {
         .update(requestTable)
         .set(updateData)
         .where(
-          updateConditions.length === 1
-            ? updateConditions[0]
-            : and(...updateConditions)
+          and(
+            eq(requestTable.id, requestId),
+            eq(requestTable.tenant_id, tenantId)
+          )
         );
 
       // WebSocket notification (if available)
