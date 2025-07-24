@@ -1,10 +1,11 @@
 // ============================================
-// SHARED UTILITIES INDEX - Modular Architecture v1.0
+// SHARED UTILITIES INDEX - Modular Architecture v2.0
 // ============================================
 // Central export for all cross-cutting concerns and utilities
 
 // Core utilities
 export * from './FeatureFlags';
+export * from './ModuleLifecycleManager'; // ✅ NEW v2.0: Module lifecycle management
 export * from './ServiceContainer';
 
 // Import for usage in health check
@@ -14,6 +15,7 @@ import {
   getAvailableModules,
 } from '../modules';
 import { FeatureFlags } from './FeatureFlags';
+import { ModuleLifecycleManager } from './ModuleLifecycleManager'; // ✅ NEW v2.0
 import { ServiceContainer } from './ServiceContainer';
 
 // Re-export existing shared utilities for convenience
@@ -23,7 +25,7 @@ export { logger } from '@shared/utils/logger';
 // Module system exports
 export { MODULE_REGISTRY, checkAllModulesHealth, getAvailableModules };
 
-// Architecture health check
+// ✅ ENHANCED v2.0: Architecture health check with lifecycle management
 export const getArchitectureHealth = () => {
   return {
     modular: {
@@ -36,7 +38,13 @@ export const getArchitectureHealth = () => {
     features: {
       flags: FeatureFlags.getStatus(),
     },
+    // ✅ NEW v2.0: Module lifecycle management health
+    lifecycle: {
+      systemHealth: ModuleLifecycleManager.getSystemHealth(),
+      modulesStatus: ModuleLifecycleManager.getModulesStatus(),
+      diagnostics: ModuleLifecycleManager.getDiagnostics(),
+    },
     timestamp: new Date().toISOString(),
-    architecture: 'Modular v1.0',
+    architecture: 'Modular v2.0 with Lifecycle Management',
   };
 };

@@ -13,6 +13,9 @@ import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
 // ✅ NEW v2.0: Enhanced feature flags management API
 import featureFlagsRoutes from '@server/routes/feature-flags';
 
+// ✅ NEW v2.0: Module lifecycle management API
+import moduleLifecycleRoutes from '@server/routes/module-lifecycle';
+
 const router = express.Router();
 
 // ============================================
@@ -33,6 +36,9 @@ router.use('/api/staff', staffRoutes);
 
 // ✅ NEW v2.0: Enhanced feature flags management API
 router.use('/api/feature-flags', featureFlagsRoutes);
+
+// ✅ NEW v2.0: Module lifecycle management API
+router.use('/api/module-lifecycle', moduleLifecycleRoutes);
 
 // ✅ PUBLIC ROUTES - For development and testing
 router.use('/public', tempPublicRoutes);
