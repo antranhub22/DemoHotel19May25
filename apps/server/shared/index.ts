@@ -71,6 +71,23 @@ export {
   type PerformanceIssue,
 } from './PerformanceAuditor';
 
+// ✅ v3.0: NEW Cache Management System
+export {
+  CacheManager,
+  cacheManager,
+  clearCacheNamespace,
+  getCacheStats,
+  getFromCache,
+  getOrSetCache,
+  initializeCache,
+  setInCache,
+  type CacheConfig,
+  type CacheEntry,
+  type CacheNamespace,
+  type CacheStats,
+  type CacheTag,
+} from './CacheManager';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -226,7 +243,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring, metrics collection, and performance auditing
+ * Now includes advanced health monitoring, metrics collection, performance auditing, and caching
  */
 export async function initializeMonitoring() {
   try {
@@ -248,6 +265,7 @@ export async function initializeMonitoring() {
     const { initializePerformanceAuditor } = await import(
       './PerformanceAuditor'
     );
+    const { initializeCache } = await import('./CacheManager');
 
     // Initialize components in order (using available methods)
     // Note: EnhancedLogger and MetricsCollector don't have initialize methods
@@ -284,8 +302,20 @@ export async function initializeMonitoring() {
     // v3.0: Initialize performance auditor system
     await initializePerformanceAuditor();
 
+    // v3.0: Initialize cache management system
+    await initializeCache({
+      maxSize: 10000, // 10k entries
+      maxMemorySize: 256, // 256MB
+      defaultTTL: 3600, // 1 hour
+      cleanupInterval: 300000, // 5 minutes
+      enableRedis: false, // Memory only for now
+      enableCompression: true,
+      enableMetrics: true,
+      evictionPolicy: 'lru',
+    });
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with performance auditing',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with caching',
       'Monitoring'
     );
   } catch (error) {

@@ -22,6 +22,15 @@ import {
   metricsMiddleware,
 } from '@server/middleware/metricsMiddleware';
 
+// ✅ Import caching middleware for automatic response caching
+import {
+  analyticsCacheMiddleware,
+  apiCacheMiddleware,
+  cacheInvalidationMiddleware,
+  hotelDataCacheMiddleware,
+  staticDataCacheMiddleware,
+} from '@server/middleware/cachingMiddleware';
+
 // ✅ MONITORING DISABLED: Auto-initialization commented out in shared/index.ts
 // Monitoring system fully implemented but temporarily disabled for deployment safety
 // To re-enable: Follow MONITORING_RE_ENABLE_GUIDE.md
@@ -173,6 +182,28 @@ app.use(
 app.use(
   '/api/dashboard/generate-assistant',
   businessMetricsMiddleware('assistant-creation', 'operations')
+);
+
+// ✅ NEW v3.0: Advanced Caching Middleware
+// Automatic cache invalidation on data mutations
+app.use(cacheInvalidationMiddleware());
+
+// Smart caching for different endpoint types
+app.use('/api/hotel', hotelDataCacheMiddleware({ ttl: 1800 })); // 30 minutes
+app.use('/api/analytics', analyticsCacheMiddleware({ ttl: 120 })); // 2 minutes
+app.use('/api/config', staticDataCacheMiddleware({ ttl: 3600 })); // 1 hour
+app.use('/api/features', staticDataCacheMiddleware({ ttl: 1800 })); // 30 minutes
+app.use('/api/health', staticDataCacheMiddleware({ ttl: 60 })); // 1 minute
+
+// General API response caching (fallback)
+app.use(
+  '/api',
+  apiCacheMiddleware({
+    ttl: 300, // 5 minutes default
+    namespace: 'api',
+    strategy: 'cache-first',
+    varyBy: ['authorization', 'x-tenant-id'],
+  })
 );
 
 app.use((req, res, next) => {

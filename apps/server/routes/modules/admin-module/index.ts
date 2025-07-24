@@ -8,15 +8,16 @@
 import { logger } from '@shared/utils/logger';
 import express from 'express';
 
-// ✅ ENHANCED v2.0: Import modular architecture components
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
-
 // ✅ Import admin module routes
+import cacheRoutes from './cache.routes';
 import featureFlagsRoutes from './feature-flags.routes';
 import metricsRoutes from './metrics.routes';
 import moduleLifecycleRoutes from './module-lifecycle.routes';
 import monitoringRoutes from './monitoring.routes';
 import performanceRoutes from './performance.routes';
+
+// ✅ ENHANCED v2.0: Import modular architecture components
+import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 
 const router = express.Router();
 
@@ -86,5 +87,11 @@ router.use('/metrics', metricsRoutes);
  * Mounted at: /api/admin/performance/*
  */
 router.use('/performance', performanceRoutes);
+
+/**
+ * Cache management and monitoring
+ * Mounted at: /api/admin/cache/*
+ */
+router.use('/cache', cacheRoutes);
 
 export default router;
