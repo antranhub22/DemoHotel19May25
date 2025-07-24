@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
-import { ServiceGrid } from './ServiceGrid';
 import { ServiceItem } from '@/types/interface1.types';
+import { ServiceGrid } from './ServiceGrid';
 
 interface ServiceGridContainerProps {
   className?: string;

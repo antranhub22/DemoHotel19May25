@@ -1,12 +1,11 @@
 import express from 'express';
+import { translateToVietnamese } from '@server/openai';
+import { db, call, transcript, call_summaries } from '@shared/db';
 import {
   insertTranscriptSchema,
   insertCallSummarySchema,
 } from '@shared/schema';
-import { db } from '@shared/db';
-import { call, transcript, call_summaries } from '@shared/db';
 import { logger } from '@shared/utils/logger';
-import { translateToVietnamese } from '@server/openai';
 import {
   getOverview,
   getServiceDistribution,

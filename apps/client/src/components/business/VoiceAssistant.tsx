@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { logger } from '@shared/utils/logger';
-import { useAssistant } from '@/context';
+import { Interface1 } from '@/components/business/Interface1';
 import {
   PopupProvider,
   PopupManager,
 } from '@/components/features/popup-system';
-import ErrorBoundary from '@/components/layout/ErrorBoundary';
-import { Interface1 } from '@/components/business/Interface1';
 import { VoiceLanguageSwitcher } from '@/components/features/voice-assistant/interface1/VoiceLanguageSwitcher';
+import ErrorBoundary from '@/components/layout/ErrorBoundary';
+import { useAssistant } from '@/context';
 import { useAuth } from '@/context/AuthContext';
-import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Language } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 
 // Error fallback component for Interface1
 const Interface1ErrorFallback: React.FC<{

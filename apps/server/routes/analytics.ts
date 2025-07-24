@@ -1,5 +1,7 @@
-import express, { Request, Response } from 'express';
 import { eq, sql, and, desc } from 'drizzle-orm';
+import express, { Request, Response } from 'express';
+import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { AnalyticsController } from '@server/controllers/analyticsController';
 import { db } from '@shared/db';
 import {
   call,
@@ -9,8 +11,6 @@ import {
   staff,
 } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
-import { AnalyticsController } from '@server/controllers/analyticsController';
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
 
 const router = express.Router();
 

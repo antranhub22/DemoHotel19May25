@@ -4,11 +4,18 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { eq, and } from 'drizzle-orm';
+import jwt from 'jsonwebtoken';
 import { staff } from '@shared/db';
 // Import new unified types and config
+import {
+  JWT_CONFIG,
+  SECURITY_CONFIG,
+  TENANT_CONFIG,
+  DEV_CONFIG,
+  authValidationSchemas,
+} from '../config';
 import type {
   JWTPayload,
   AuthUser,
@@ -21,13 +28,6 @@ import type {
   AuthError,
   AuthErrorCode,
 } from '../types';
-import {
-  JWT_CONFIG,
-  SECURITY_CONFIG,
-  TENANT_CONFIG,
-  DEV_CONFIG,
-  authValidationSchemas,
-} from '../config';
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================

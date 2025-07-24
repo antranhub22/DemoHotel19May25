@@ -5,8 +5,8 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { logger } from '@shared/utils/logger';
 import { getPermissionsForRole } from '@shared/constants/permissions';
+import { logger } from '@shared/utils/logger';
 // ============================================
 // Types & Interfaces
 // ============================================

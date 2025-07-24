@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense } from 'react';
-import { PopupStack } from './PopupStack';
 import { usePopupContext } from '@/context/PopupContext';
+import { PopupStack } from './PopupStack';
 
 // Lazy load SummaryPopupContent for code splitting
 const LazySummaryPopupContent = React.lazy(() =>

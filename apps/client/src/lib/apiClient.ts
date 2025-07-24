@@ -6,6 +6,7 @@
    TYPE-SAFE API CLIENT
    ======================================== */
 
+import type { QueryFunction } from '@tanstack/react-query';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 
 // ✅ FIXED: Import all missing API types
@@ -40,7 +41,6 @@ import type {
 } from '@/types/api';
 
 // ✅ FIXED: Import utility types
-import type { QueryFunction } from '@tanstack/react-query';
 
 // ========================================
 // API CLIENT CONFIGURATION

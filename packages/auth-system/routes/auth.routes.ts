@@ -6,10 +6,10 @@
 
 import { Router, Request, Response, RequestHandler } from 'express';
 import { z } from 'zod';
-import type { LoginCredentials } from '@auth/types';
 import { authValidationSchemas } from '@auth/config';
-import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
+import type { LoginCredentials } from '@auth/types';
 
 const router = Router();
 

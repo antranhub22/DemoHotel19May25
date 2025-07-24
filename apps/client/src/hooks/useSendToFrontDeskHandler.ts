@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useAssistant } from '@/context';
+import { logger } from '@shared/utils/logger';
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
   ORDER_TYPE_DEFAULT: 'Room Service',

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
-import { logger } from '@shared/utils/logger';
 import { initializeDatabase, getDatabaseMetrics } from '@shared/db';
+import { logger } from '@shared/utils/logger';
 
 /**
  * Database Initialization Script

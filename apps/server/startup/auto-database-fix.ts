@@ -1,5 +1,5 @@
-import { logger } from '@shared/utils/logger';
 import { db } from '@shared/db';
+import { logger } from '@shared/utils/logger';
 
 export class AutoDatabaseFixer {
   private db: any;
@@ -36,7 +36,9 @@ export class AutoDatabaseFixer {
       logger.error(
         '❌ Auto database fix failed:',
         'Component',
-        error instanceof Error ? (error as any)?.message || String(error) : String(error)
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : String(error)
       );
       logger.error(
         '❌ Full error stack:',
@@ -68,7 +70,9 @@ export class AutoDatabaseFixer {
       logger.debug(
         '📋 Database check failed, assuming needs fix:',
         'Component',
-        error instanceof Error ? (error as any)?.message || String(error) : String(error)
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : String(error)
       );
       return true;
     }
@@ -89,7 +93,9 @@ export class AutoDatabaseFixer {
       logger.error(
         '❌ Auto-fix step failed:',
         'Component',
-        error instanceof Error ? (error as any)?.message || String(error) : String(error)
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : String(error)
       );
       throw error;
     }
@@ -111,7 +117,9 @@ export async function runAutoDbFix(): Promise<boolean> {
     logger.error(
       '❌ Database auto-fix failed completely:',
       'Component',
-      error instanceof Error ? (error as any)?.message || String(error) : String(error)
+      error instanceof Error
+        ? (error as any)?.message || String(error)
+        : String(error)
     );
     await fixer.cleanup();
     return false;

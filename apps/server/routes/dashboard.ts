@@ -1,23 +1,23 @@
-import express, { Request, Response } from 'express';
 import { eq, sql, and, desc } from 'drizzle-orm';
-import { db } from '@shared/db';
+import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { TenantService } from '@server/services/tenantService';
-import { HotelResearchService } from '@server/services/hotelResearch';
-import {
-  VapiIntegrationService,
-  AssistantGeneratorService,
-} from '@server/services/vapiIntegration';
-import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
-// ✅ FIXED: Removed duplicate hotelProfiles import
+import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import {
   getOverview,
   getServiceDistribution,
   getHourlyActivity,
 } from '@server/analytics';
-import { logger } from '@shared/utils/logger';
+import { HotelResearchService } from '@server/services/hotelResearch';
+import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
+import { TenantService } from '@server/services/tenantService';
+import {
+  VapiIntegrationService,
+  AssistantGeneratorService,
+} from '@server/services/vapiIntegration';
+import { db } from '@shared/db';
+// ✅ FIXED: Removed duplicate hotelProfiles import
 import { hotelProfileMapper } from '@shared/db/transformers';
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { logger } from '@shared/utils/logger';
 // ============================================
 // Router Setup
 // ============================================

@@ -1,9 +1,9 @@
-import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
+import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright Configuration for DemoHotel19May E2E Testing
- * 
+ *
  * Comprehensive E2E testing setup for Interface1 and hotel management features
  */
 export default defineConfig({
@@ -16,22 +16,22 @@ export default defineConfig({
   reporter: [
     ['html'],
     ['json', { outputFile: './test-results/e2e/results.json' }],
-    ['junit', { outputFile: './test-results/e2e/results.xml' }]
+    ['junit', { outputFile: './test-results/e2e/results.xml' }],
   ],
-  
+
   // Global test settings
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    
+
     // Media permissions for voice assistant testing
     permissions: ['microphone', 'camera'],
-    
+
     // Ignore HTTPS errors for development
     ignoreHTTPSErrors: true,
-    
+
     // Extended timeout for voice operations
     actionTimeout: 10000,
     navigationTimeout: 30000,
@@ -39,52 +39,52 @@ export default defineConfig({
 
   // Output directories
   outputDir: './test-results/e2e/artifacts',
-  
+
   // Projects for different browsers and devices
   projects: [
     {
       name: 'chromium-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
       },
     },
-    
+
     {
       name: 'firefox-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
         viewport: { width: 1280, height: 720 },
       },
     },
-    
+
     {
       name: 'webkit-desktop',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
         viewport: { width: 1280, height: 720 },
       },
     },
-    
+
     // Mobile testing
     {
       name: 'mobile-chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
       },
     },
-    
+
     {
       name: 'mobile-safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
       },
     },
-    
+
     // Tablet testing
     {
       name: 'tablet-ipad',
-      use: { 
+      use: {
         ...devices['iPad Pro'],
       },
     },
@@ -106,4 +106,4 @@ export default defineConfig({
   // Global setup and teardown
   globalSetup: path.resolve('./tests/e2e/setup/global-setup.ts'),
   globalTeardown: path.resolve('./tests/e2e/setup/global-teardown.ts'),
-}); 
+});

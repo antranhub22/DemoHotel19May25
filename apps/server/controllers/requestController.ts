@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
-import { logger } from '@shared/utils/logger';
-import { request as requestTable } from '@shared/db';
 import { eq, and } from 'drizzle-orm';
+import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
+import { request as requestTable } from '@shared/db';
 import { requestMapper } from '@shared/db/transformers';
+import { logger } from '@shared/utils/logger';
 
 /**
  * Request Controller

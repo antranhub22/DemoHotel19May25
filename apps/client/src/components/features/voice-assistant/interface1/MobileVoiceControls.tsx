@@ -1,4 +1,3 @@
-import React, { useState, useCallback, useEffect } from 'react';
 import {
   Mic,
   Volume2,
@@ -9,11 +8,12 @@ import {
   Smartphone,
   Headphones,
 } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAssistant } from '@/context';
-import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
+import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;

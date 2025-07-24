@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Info,
   ExternalLink,
@@ -9,8 +8,9 @@ import {
   AlertTriangle,
   Clock,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 

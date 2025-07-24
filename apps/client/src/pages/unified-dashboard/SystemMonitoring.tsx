@@ -1,8 +1,35 @@
+import {
+  Monitor,
+  Cpu,
+  HardDrive,
+  Wifi,
+  Database,
+  Server,
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Download,
+  Bell,
+  AlertCircle,
+  Info,
+  Terminal,
+  Eye,
+  Settings,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,  } from 'recharts';
-import { Monitor, Cpu, HardDrive, Wifi, Database, Server, Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, Download, Bell, AlertCircle, Info, Terminal, Eye, Settings,  } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -10,10 +37,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface SystemMetrics {
@@ -221,8 +248,12 @@ const performanceData = [
 // System status component
 const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
   const getStatusColor = (usage: number) => {
-    if (usage < 50) {return 'text-green-600';}
-    if (usage < 80) {return 'text-yellow-600';}
+    if (usage < 50) {
+      return 'text-green-600';
+    }
+    if (usage < 80) {
+      return 'text-yellow-600';
+    }
     return 'text-red-600';
   };
 

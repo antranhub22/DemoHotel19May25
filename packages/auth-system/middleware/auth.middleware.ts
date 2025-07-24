@@ -4,9 +4,9 @@
 // Simplified version without TypeScript conflicts
 
 import type { Request, Response, NextFunction } from 'express';
-import type { AuthUser, UserRole } from '@auth/types';
 import { AUTH_ERROR_MESSAGES } from '@auth/config';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
+import type { AuthUser, UserRole } from '@auth/types';
 
 // ============================================
 // CORE AUTHENTICATION MIDDLEWARE

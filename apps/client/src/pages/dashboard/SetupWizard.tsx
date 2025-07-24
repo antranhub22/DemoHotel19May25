@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
 import {
   Search,
   Loader2,
@@ -25,6 +23,11 @@ import {
   ChevronRight,
   ChevronDown,
 } from 'lucide-react';
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -33,10 +36,9 @@ import {
   CardTitle,
   CardFooter,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
   Select,
@@ -45,8 +47,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Import API service and types
 import {

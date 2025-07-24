@@ -1,26 +1,38 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
+import {
+  Order,
+  OrderSummary,
+  CallSummary,
+  ServiceRequest,
+  ActiveOrder,
+} from '@/types';
 import { logger } from '@shared/utils/logger';
-import { Order, OrderSummary, CallSummary, ServiceRequest, ActiveOrder } from '@/types';
 export interface OrderContextType {
   // Order state
   order: Order | null;
   setOrder: (order: Order | null) => void;
   orderSummary: OrderSummary | null;
   setOrderSummary: (summary: OrderSummary) => void;
-  
+
   // Call summary state
   callSummary: CallSummary | null;
   setCallSummary: (summary: CallSummary) => void;
-  
+
   // Service requests state
   serviceRequests: ServiceRequest[];
   setServiceRequests: (requests: ServiceRequest[]) => void;
-  
+
   // Active orders state
   activeOrders: ActiveOrder[];
   setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
   addActiveOrder: (order: ActiveOrder) => void;
-  
+
   // Email state
   emailSentForCurrentSession: boolean;
   setEmailSentForCurrentSession: (sent: boolean) => void;
@@ -59,39 +71,55 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: React.ReactNode }) {
   logger.debug('[OrderProvider] Initializing...', 'Component');
-  
+
   const [order, setOrder] = useState<Order | null>(null);
   const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
   const [callSummary, setCallSummary] = useState<CallSummary | null>(null);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
-  const [emailSentForCurrentSession, setEmailSentForCurrentSession] = useState<boolean>(false);
+  const [emailSentForCurrentSession, setEmailSentForCurrentSession] =
+    useState<boolean>(false);
   const [requestReceivedAt, setRequestReceivedAt] = useState<Date | null>(null);
-  
+
   // Active orders with localStorage persistence
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
-    if (typeof window === 'undefined') {return [];}
+    if (typeof window === 'undefined') {
+      return [];
+    }
     try {
       const stored = localStorage.getItem('activeOrders');
-      if (!stored) {return [];}
-      const parsed = JSON.parse(stored) as (ActiveOrder & { requestedAt: string })[];
+      if (!stored) {
+        return [];
+      }
+      const parsed = JSON.parse(stored) as (ActiveOrder & {
+        requestedAt: string;
+      })[];
       // Convert requestedAt string back into Date
       return parsed.map(o => ({
         ...o,
         requestedAt: new Date(o.requestedAt),
       }));
     } catch (err) {
-      logger.error('[OrderContext] Failed to parse activeOrders from localStorage', 'Component', err);
+      logger.error(
+        '[OrderContext] Failed to parse activeOrders from localStorage',
+        'Component',
+        err
+      );
       return [];
     }
   });
 
   // Persist activeOrders to localStorage whenever it changes
   useEffect(() => {
-    if (typeof window === 'undefined') {return;}
+    if (typeof window === 'undefined') {
+      return;
+    }
     try {
       localStorage.setItem('activeOrders', JSON.stringify(activeOrders));
     } catch {
-      logger.error('[OrderContext] Failed to persist activeOrders to localStorage', 'Component');
+      logger.error(
+        '[OrderContext] Failed to persist activeOrders to localStorage',
+        'Component'
+      );
     }
   }, [activeOrders]);
 
@@ -110,24 +138,31 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   // Polling API để lấy trạng thái order mới nhất mỗi 5 giây
   useEffect(() => {
     let polling: NodeJS.Timeout | null = null;
-    
+
     const fetchOrders = async () => {
       try {
         // Use authenticated fetch with auto-retry
         const { authenticatedFetch } = await import('@/lib/authHelper');
-        
+
         // Use relative URL to call API from same domain
         const res = await authenticatedFetch(`/api/request`);
         if (!res.ok) {
           if (res.status === 401 || res.status === 403) {
-            logger.warn('[OrderContext] Auth failed - token may be invalid or missing', 'Component');
+            logger.warn(
+              '[OrderContext] Auth failed - token may be invalid or missing',
+              'Component'
+            );
           }
           return;
         }
-        
+
         const data = await (res as any).json();
-        logger.debug('[OrderContext] Fetched orders from API:', 'Component', data);
-        
+        logger.debug(
+          '[OrderContext] Fetched orders from API:',
+          'Component',
+          data
+        );
+
         // Map data to ActiveOrder format
         if (Array.isArray(data)) {
           setActiveOrders(
@@ -149,13 +184,15 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         // Ignore polling errors to prevent spam
       }
     };
-    
+
     // Start polling
     fetchOrders();
     polling = setInterval(fetchOrders, 5000);
 
     return () => {
-      if (polling) {clearInterval(polling);}
+      if (polling) {
+        clearInterval(polling);
+      }
     };
   }, []);
 
@@ -178,9 +215,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <OrderContext.Provider value={value}>
-      {children}
-    </OrderContext.Provider>
+    <OrderContext.Provider value={value}>{children}</OrderContext.Provider>
   );
 }
 
@@ -192,4 +227,4 @@ export function useOrder() {
   return context;
 }
 
-export { initialOrderSummary }; 
+export { initialOrderSummary };

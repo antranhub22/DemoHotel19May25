@@ -2,7 +2,6 @@
 
 // Type declaration for import.meta
 
-import React, { useState, useEffect, useCallback } from 'react';
 import {
   Volume2,
   VolumeX,
@@ -13,11 +12,12 @@ import {
   EyeOff,
   X,
 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAssistant } from '@/context';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Language, ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
-import { Language, ServiceItem } from '@/types/interface1.types';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useAssistant } from '@/context';
 
 interface VoicePrompt {
   service: string;

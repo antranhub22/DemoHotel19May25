@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
-import { t } from '@/i18n';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context';
 import {
   STANDARD_POPUP_MAX_WIDTH,
   STANDARD_POPUP_HEIGHT,
   STANDARD_POPUP_MAX_HEIGHT_VH,
 } from '@/context/PopupContext';
+import { t } from '@/i18n';
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;

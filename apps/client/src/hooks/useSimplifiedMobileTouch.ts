@@ -2,10 +2,9 @@
 
 // Type declaration for import.meta
 
-
 import { useCallback } from 'react';
-import { logger } from '@shared/utils/logger';
 import { isMobileDevice } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 
 interface UseSimplifiedMobileTouchProps {
   containerId: string;

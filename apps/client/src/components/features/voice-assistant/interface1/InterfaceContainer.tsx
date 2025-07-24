@@ -1,5 +1,5 @@
-import { designSystem } from '@/styles/designSystem';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
+import { designSystem } from '@/styles/designSystem';
 
 interface InterfaceContainerProps {
   children: ReactNode;

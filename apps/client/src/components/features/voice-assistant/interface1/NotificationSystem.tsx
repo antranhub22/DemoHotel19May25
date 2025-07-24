@@ -1,4 +1,3 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   X,
   CheckCircle,
@@ -10,8 +9,9 @@ import {
   Settings,
   Smartphone,
 } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { logger } from '@shared/utils/logger';
 
 // Enhanced notification types with better categorization
 export type NotificationType =

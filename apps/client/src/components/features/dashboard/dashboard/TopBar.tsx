@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Bell,
   Menu,
@@ -10,10 +9,11 @@ import {
   Moon,
   ChevronRight,
 } from 'lucide-react';
+import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,

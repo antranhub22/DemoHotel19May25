@@ -1,9 +1,9 @@
+import bcrypt from 'bcrypt';
+import { DEV_CONFIG } from '@auth/config/auth.config';
 import { db, tenants, eq, staff, call, request } from '@shared/db';
 import { logger } from '@shared/utils/logger';
-import bcrypt from 'bcrypt';
 
 // Import dev users from auth config
-import { DEV_CONFIG } from '@auth/config/auth.config';
 
 export async function seedDevelopmentData() {
   try {

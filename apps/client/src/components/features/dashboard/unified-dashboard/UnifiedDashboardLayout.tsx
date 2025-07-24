@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
 import {
   Settings,
   Bell,
@@ -22,12 +20,17 @@ import {
   Database,
   Shield,
 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'wouter';
 // ✅ FIXED: Use global UserRole type instead of importing from constants
 // import type { UserRole } from '@shared/constants/permissions';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import {
+  PermissionGuard,
+  usePermissionCheck,
+} from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,11 +39,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  PermissionGuard,
-  usePermissionCheck,
-} from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
 // Types
 interface UnifiedDashboardLayoutProps {

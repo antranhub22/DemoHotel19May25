@@ -1,6 +1,6 @@
+import { eq, and, desc } from 'drizzle-orm';
 import express, { type Request, Response } from 'express';
 // import { tenants staff call  } from '@shared/db';
-import { eq, and, desc } from 'drizzle-orm';
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

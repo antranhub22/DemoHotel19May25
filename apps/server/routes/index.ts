@@ -1,17 +1,17 @@
 import express from 'express';
+import analyticsRoutes from '@server/routes/analytics';
 import apiRoutes from '@server/routes/api';
 import callsRoutes from '@server/routes/calls';
-import analyticsRoutes from '@server/routes/analytics';
 import dashboardRoutes from '@server/routes/dashboard';
 import healthRoutes from '@server/routes/health';
 import requestRoutes from '@server/routes/request';
-import transcriptsRoutes from '@server/routes/transcripts';
 // import emailRoutes from '@server/routes/email'; // Temporarily disabled due to signature issues
 import staffRoutes from '@server/routes/staff';
 // import { logger } from '@shared/utils/logger'; // Not used currently
 // import unifiedAuthRoutes from '@auth/routes/auth.routes';
 import tempAuthRoutes from '@server/routes/temp-auth'; // EMERGENCY FIX for production 401 errors
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
+import transcriptsRoutes from '@server/routes/transcripts';
 
 const router = express.Router();
 

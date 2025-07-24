@@ -10,15 +10,15 @@ import {
   useMemo,
   createElement,
 } from 'react';
-import { logger } from '@shared/utils/logger';
+import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
-import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { useScrollBehavior } from '@/hooks/useScrollBehavior';
-import { useConversationState } from '@/hooks/useConversationState';
+import { usePopupContext } from '@/context/PopupContext';
 import { useCancelHandler } from '@/hooks/useCancelHandler';
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
-import { usePopup } from '@/components/features/popup-system/PopupManager';
-import { usePopupContext } from '@/context/PopupContext';
+import { useConversationState } from '@/hooks/useConversationState';
+import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { useScrollBehavior } from '@/hooks/useScrollBehavior';
+import { logger } from '@shared/utils/logger';
 
 interface UseInterface1Props {
   isActive: boolean;

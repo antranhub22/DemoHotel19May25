@@ -1,17 +1,17 @@
 import 'dotenv/config';
 import http from 'http';
-import express, { type Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
+import express, { type Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
-import { logger } from '@shared/utils/logger';
-import { autoMigrateOnDeploy } from '@tools/scripts/maintenance/auto-migrate-on-deploy';
-import { seedProductionUsers } from '@tools/scripts/maintenance/seed-production-users';
+import helmet from 'helmet';
 import router from '@server/routes/index';
-import { setupVite, serveStatic, log } from '@server/vite';
 import { setupSocket } from '@server/socket';
 import { runAutoDbFix } from '@server/startup/auto-database-fix';
 import { runProductionMigration } from '@server/startup/production-migration';
+import { setupVite, serveStatic, log } from '@server/vite';
+import { logger } from '@shared/utils/logger';
+import { autoMigrateOnDeploy } from '@tools/scripts/maintenance/auto-migrate-on-deploy';
+import { seedProductionUsers } from '@tools/scripts/maintenance/seed-production-users';
 
 // Fixed CSP configuration - v1.5 - FORCE REBUILD with embedded database setup
 // Force rebuild v1.6 - with authentication routes fix

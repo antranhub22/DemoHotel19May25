@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { logger } from '@shared/utils/logger';
 import {
   Hotel,
   Bell,
@@ -15,6 +13,9 @@ import {
   Mail,
   Globe,
 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -22,13 +23,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { logger } from '@shared/utils/logger';
 
 // Mock hotel settings data
 const mockHotelSettings = {

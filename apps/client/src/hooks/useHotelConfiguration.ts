@@ -2,10 +2,9 @@
 
 // Type declaration for import.meta
 
-
 import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useTenantDetection } from '@/context/AuthContext';
+import { logger } from '@shared/utils/logger';
 // ============================================
 // Hotel Configuration Interface
 // ============================================
@@ -136,7 +135,10 @@ export const useHotelConfiguration = () => {
       setIsLoading(true);
       setError(null);
       const { type, identifier } = extractHotelIdentifier();
-      logger.debug('[DEBUG] extractHotelIdentifier', 'Component', { type, identifier });
+      logger.debug('[DEBUG] extractHotelIdentifier', 'Component', {
+        type,
+        identifier,
+      });
       if (type === 'default') {
         setConfig(MI_NHON_DEFAULT_CONFIG);
         return;
@@ -144,12 +146,17 @@ export const useHotelConfiguration = () => {
       if (type === 'subdomain') {
         // Gọi API public lấy config
         const endpoint = `/api/hotels/by-subdomain/${identifier}`;
-        logger.debug('[DEBUG] Fetching hotel config from', 'Component', endpoint);
+        logger.debug(
+          '[DEBUG] Fetching hotel config from',
+          'Component',
+          endpoint
+        );
         try {
           const response = await fetch(endpoint);
           logger.debug('[DEBUG] fetch response', 'Component', response);
-          if (!response.ok)
-            {throw new Error('Failed to load hotel configuration');}
+          if (!response.ok) {
+            throw new Error('Failed to load hotel configuration');
+          }
           const hotelData = await response.json();
           logger.debug('[DEBUG] hotelData', 'Component', hotelData);
           setConfig({
@@ -196,9 +203,8 @@ export const useHotelConfiguration = () => {
   }, []);
 
   useEffect(() => {
-
     loadConfiguration();
-  
+
     // no cleanup needed
   }, [loadConfiguration]);
 
@@ -235,21 +241,29 @@ const fetchVapiConfig = async (
     }
 
     const config = await response.json();
-    logger.debug('🔧 [fetchVapiConfig] Received config for ${language}:', 'Component', {
-      publicKey: config.publicKey
-        ? `${config.publicKey.substring(0, 10)}...`
-        : 'NOT SET',
-      assistantId: config.assistantId
-        ? `${config.assistantId.substring(0, 10)}...`
-        : 'NOT SET',
-      fallback: config.fallback,
-    });
+    logger.debug(
+      '🔧 [fetchVapiConfig] Received config for ${language}:',
+      'Component',
+      {
+        publicKey: config.publicKey
+          ? `${config.publicKey.substring(0, 10)}...`
+          : 'NOT SET',
+        assistantId: config.assistantId
+          ? `${config.assistantId.substring(0, 10)}...`
+          : 'NOT SET',
+        fallback: config.fallback,
+      }
+    );
 
     // Cache the result
     vapiConfigCache[language] = config;
     return config;
   } catch (error) {
-    logger.error('[fetchVapiConfig] Error fetching Vapi config for ${language}:', 'Component', error);
+    logger.error(
+      '[fetchVapiConfig] Error fetching Vapi config for ${language}:',
+      'Component',
+      error
+    );
 
     // Fallback to build-time environment variables if API fails
     const fallbackConfig = {
@@ -270,14 +284,18 @@ const fetchVapiConfig = async (
       fallback: true,
     };
 
-    logger.debug('[fetchVapiConfig] Using fallback config for ${language}:', 'Component', {
-      publicKey: fallbackConfig.publicKey
-        ? `${fallbackConfig.publicKey.substring(0, 10)}...`
-        : 'NOT SET',
-      assistantId: fallbackConfig.assistantId
-        ? `${fallbackConfig.assistantId.substring(0, 10)}...`
-        : 'NOT SET',
-    });
+    logger.debug(
+      '[fetchVapiConfig] Using fallback config for ${language}:',
+      'Component',
+      {
+        publicKey: fallbackConfig.publicKey
+          ? `${fallbackConfig.publicKey.substring(0, 10)}...`
+          : 'NOT SET',
+        assistantId: fallbackConfig.assistantId
+          ? `${fallbackConfig.assistantId.substring(0, 10)}...`
+          : 'NOT SET',
+      }
+    );
 
     vapiConfigCache[language] = fallbackConfig;
     return fallbackConfig;
@@ -294,7 +312,11 @@ export const getVapiPublicKeyByLanguage = async (
       const vapiConfig = await fetchVapiConfig(language);
       return vapiConfig.publicKey || config.vapiPublicKey;
     } catch (error) {
-      logger.error('[getVapiPublicKeyByLanguage] Error for ${language}:', 'Component', error);
+      logger.error(
+        '[getVapiPublicKeyByLanguage] Error for ${language}:',
+        'Component',
+        error
+      );
       return config.vapiPublicKey;
     }
   }
@@ -311,7 +333,10 @@ export const getVapiAssistantIdByLanguage = async (
   if (config.hotelName === 'Mi Nhon Hotel Mui Ne') {
     try {
       const vapiConfig = await fetchVapiConfig(language);
-      logger.debug('🤖 [getVapiAssistantIdByLanguage] Selected assistant for ${language}:', 'Component', {
+      logger.debug(
+        '🤖 [getVapiAssistantIdByLanguage] Selected assistant for ${language}:',
+        'Component',
+        {
           assistantId: vapiConfig.assistantId
             ? `${vapiConfig.assistantId.substring(0, 10)}...`
             : 'NOT SET',
@@ -320,7 +345,11 @@ export const getVapiAssistantIdByLanguage = async (
       );
       return vapiConfig.assistantId || config.vapiAssistantId;
     } catch (error) {
-      logger.error('[getVapiAssistantIdByLanguage] Error for ${language}:', 'Component', error);
+      logger.error(
+        '[getVapiAssistantIdByLanguage] Error for ${language}:',
+        'Component',
+        error
+      );
       return config.vapiAssistantId;
     }
   }

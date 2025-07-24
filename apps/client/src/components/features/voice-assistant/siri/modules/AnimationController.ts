@@ -1,7 +1,7 @@
 // ✅ FIXED: Import missing types from local modules
+import type { CanvasRenderer, CanvasRenderState } from './CanvasRenderer';
 import type { DebugManager } from './DebugManager';
 import type { EmergencyStopManager } from './EmergencyStopManager';
-import type { CanvasRenderer, CanvasRenderState } from './CanvasRenderer';
 
 export interface AnimationState {
   pulsePhase: number;

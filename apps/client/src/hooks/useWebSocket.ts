@@ -3,9 +3,9 @@
 // Type declaration for import.meta
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useAssistant } from '@/context';
 import { ActiveOrder } from '@/types/core';
+import { logger } from '@shared/utils/logger';
 export function useWebSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);

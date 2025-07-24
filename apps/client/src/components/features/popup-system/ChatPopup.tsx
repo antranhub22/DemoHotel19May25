@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { X } from 'lucide-react';
-import { t } from '@/i18n';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAssistant } from '@/context';
+import { t } from '@/i18n';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {

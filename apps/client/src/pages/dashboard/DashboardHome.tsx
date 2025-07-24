@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   TrendingUp,
   Phone,
@@ -13,7 +12,10 @@ import {
   Activity,
   Users,
 } from 'lucide-react';
+import React from 'react';
 import { Link } from 'wouter';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -21,8 +23,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 
 // Mock data - will be replaced with actual API calls

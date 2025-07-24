@@ -1,8 +1,8 @@
+import { eq } from 'drizzle-orm';
 import express from 'express';
+import { z } from 'zod';
 import { db } from '@shared/db';
 import { transcript } from '@shared/db/schema';
-import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

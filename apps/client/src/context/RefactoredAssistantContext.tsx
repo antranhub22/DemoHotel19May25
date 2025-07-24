@@ -11,24 +11,16 @@ import React, {
 } from 'react';
 
 // Import types
-import { logger } from '@shared/utils/logger';
 import { useCall, CallProvider } from '@/context/contexts/CallContext';
 
 // Import all new focused contexts
-import {
-  useTranscript,
-  TranscriptProvider,
-} from './contexts/TranscriptContext';
 import {
   useLanguage,
   LanguageProvider,
 } from '@/context/contexts/LanguageContext';
 import { useOrder, OrderProvider } from '@/context/contexts/OrderContext';
-import {
-  useConfiguration,
-  ConfigurationProvider,
-} from './contexts/ConfigurationContext';
 import { useVapi, VapiProvider } from '@/context/contexts/VapiContext';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import {
   Transcript,
   CallDetails,
@@ -38,7 +30,15 @@ import {
   ServiceRequest,
   CallSummary,
 } from '@/types';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { logger } from '@shared/utils/logger';
+import {
+  useConfiguration,
+  ConfigurationProvider,
+} from './contexts/ConfigurationContext';
+import {
+  useTranscript,
+  TranscriptProvider,
+} from './contexts/TranscriptContext';
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

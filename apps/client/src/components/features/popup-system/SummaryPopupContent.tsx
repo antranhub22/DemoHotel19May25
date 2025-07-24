@@ -1,10 +1,10 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
 import { useAssistant } from '@/context';
 import {
   extractRoomNumber,
   parseSummaryToOrderDetails,
 } from '@/lib/summaryParser';
+import { logger } from '@shared/utils/logger';
 // Remove i18n for now - use static text
 
 // Main Summary Popup Component - Uses dual summary system

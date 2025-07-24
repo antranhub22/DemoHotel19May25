@@ -1,7 +1,20 @@
+import {
+  Users,
+  UserPlus,
+  Search,
+  Eye,
+  Edit,
+  Phone,
+  Mail,
+  Star,
+  Plus,
+  RefreshCw,
+  Save,
+  User,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, Eye, Edit, Phone, Mail, Star, Plus, RefreshCw, Save, User,  } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,11 +22,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -30,8 +47,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface Guest {
@@ -324,14 +343,15 @@ const GuestDetailsModal = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     setFormData(guest);
-  
+
     // no cleanup needed
   }, [guest]);
 
   const handleSave = async () => {
-    if (!formData) {return;}
+    if (!formData) {
+      return;
+    }
 
     setLoading(true);
     try {
@@ -346,7 +366,9 @@ const GuestDetailsModal = ({
     }
   };
 
-  if (!guest || !formData) {return null;}
+  if (!guest || !formData) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -1004,9 +1026,8 @@ export const GuestManagement: React.FC = () => {
   };
 
   useEffect(() => {
-
     fetchGuests();
-  
+
     // no cleanup needed
   }, []);
 

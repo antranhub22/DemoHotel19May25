@@ -3,7 +3,6 @@
 // Type declaration for import.meta
 
 import { useCallback } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useAssistant } from '@/context';
 import {
   useHotelConfiguration,
@@ -11,6 +10,7 @@ import {
   getVapiAssistantIdByLanguage,
 } from '@/hooks/useHotelConfiguration';
 import { Language } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 
 export const useCallHandler = () => {
   const {

@@ -1,5 +1,5 @@
-import { logger } from '@shared/utils/logger';
 import { apiRequest } from '@/lib/queryClient';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Types & Interfaces
@@ -315,10 +315,14 @@ export class DashboardApi {
     }
 
     // Parse error message
-    const errorMessage = (error as any)?.message || String(error) || 'An unexpected error occurred';
+    const errorMessage =
+      (error as any)?.message ||
+      String(error) ||
+      'An unexpected error occurred';
     const statusMatch = errorMessage.match(/^(\d+):\s*(.+)$/);
 
-    if (statusMatch) { const [, status, message] = statusMatch;
+    if (statusMatch) {
+      const [, status, message] = statusMatch;
       const statusCode = parseInt(status);
 
       // Try to parse JSON error details
@@ -332,8 +336,10 @@ export class DashboardApi {
           upgradeRequired: errorData.upgradeRequired,
           setupRequired: errorData.setupRequired,
           assistantRequired: errorData.assistantRequired,
-          requiresResearch: errorData.requiresResearch };
-      } catch { return {
+          requiresResearch: errorData.requiresResearch,
+        };
+      } catch {
+        return {
           error: message,
           details: { statusCode },
         };

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { logger } from '@shared/utils/logger';
 import { checkDatabaseHealth, getDatabaseMetrics } from '@shared/db';
+import { logger } from '@shared/utils/logger';
 /**
  * Health Check Controller with Database Connection Pool Monitoring
  *

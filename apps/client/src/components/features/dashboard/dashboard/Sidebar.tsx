@@ -1,5 +1,3 @@
-import React from 'react';
-import { Link, useLocation } from 'wouter';
 import {
   Building2,
   X,
@@ -10,9 +8,11 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Link, useLocation } from 'wouter';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 // Types
 interface NavItem {

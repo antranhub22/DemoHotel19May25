@@ -1,5 +1,6 @@
 import { eq, and, sql } from 'drizzle-orm';
 import { db } from '@server/db';
+import { tenantMapper, hotelProfileMapper } from '@shared/db/transformers';
 import {
   tenants,
   hotelProfiles,
@@ -10,7 +11,6 @@ import {
   message,
 } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
-import { tenantMapper, hotelProfileMapper } from '@shared/db/transformers';
 
 // ============================================
 // Types & Interfaces for Tenant Management

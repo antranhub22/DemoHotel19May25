@@ -3,12 +3,12 @@
 // Type declaration for import.meta
 
 import React, { useState, useEffect } from 'react';
-import { logger } from '@shared/utils/logger';
 import { useAssistant } from '@/context';
-import SiriCallButton from './SiriCallButton';
-import { MobileTouchDebugger } from './MobileTouchDebugger';
-import { designSystem } from '@/styles/designSystem';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
+import { designSystem } from '@/styles/designSystem';
+import { logger } from '@shared/utils/logger';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
+import SiriCallButton from './SiriCallButton';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;

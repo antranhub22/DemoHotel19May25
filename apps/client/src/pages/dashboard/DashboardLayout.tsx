@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
 import {
   Settings,
   Bell,
@@ -12,10 +10,12 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,8 +24,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
 import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
 // Types
 interface TenantData {

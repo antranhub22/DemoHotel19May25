@@ -1,5 +1,3 @@
-import React from 'react';
-import { Link } from 'wouter';
 import {
   BarChart3,
   Users,
@@ -19,8 +17,13 @@ import {
   Server,
   Activity,
 } from 'lucide-react';
+import React from 'react';
+import { Link } from 'wouter';
 // ✅ FIXED: Use global UserRole type instead of shared constants export
 // import type { UserRole } from '@shared/constants/permissions';
+import { PermissionGuard } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -28,10 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { PermissionGuard } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { useAuth } from '@/context/AuthContext';
 
 // Mock data - replace with real API calls

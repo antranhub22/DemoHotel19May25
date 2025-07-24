@@ -3,10 +3,10 @@
 // Type declaration for import.meta
 
 import { useState, useEffect, useCallback, RefObject } from 'react';
-import { logger } from '@shared/utils/logger';
-import { useAssistant } from '@/context';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
+import { useAssistant } from '@/context';
 import { Language } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 
 interface UseConversationStateProps {
   conversationRef: RefObject<HTMLDivElement>;

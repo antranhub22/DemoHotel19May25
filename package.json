@@ -116,7 +116,16 @@
     "check:deps:updates": "./tools/scripts/validation/run-dependency-check.sh -m updates",
     "check:deps:fix": "./tools/scripts/validation/run-dependency-check.sh --fix",
     "audit:deps": "./tools/scripts/validation/run-dependency-check.sh -m security -o security-report.json",
-    "cleanup:deps": "./tools/scripts/validation/run-dependency-check.sh --fix"
+    "cleanup:deps": "./tools/scripts/validation/run-dependency-check.sh --fix",
+    "migrate:eslint": "./tools/scripts/validation/migrate-eslint-import-rules.sh",
+    "migrate:eslint:phase2": "./tools/scripts/validation/migrate-eslint-import-rules.sh -p 2",
+    "migrate:eslint:phase3": "./tools/scripts/validation/migrate-eslint-import-rules.sh -p 3",
+    "migrate:eslint:dry-run": "./tools/scripts/validation/migrate-eslint-import-rules.sh -d",
+    "lint:imports": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "validate:full": "npm run lint:imports && npm run check:imports:quick && npm run check:deps",
+    "validate:ci": "npm run lint:imports && npm run check:imports:ci && npm run check:deps:security",
+    "lint:check": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx --fix"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -225,6 +234,8 @@
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-alias": "^1.1.2",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-react": "^7.37.5",

@@ -1,7 +1,24 @@
+import {
+  Shield,
+  Lock,
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  Download,
+  Upload,
+  RefreshCw,
+  Eye,
+  HardDrive,
+  Save,
+  Search,
+  Filter,
+  Plus,
+  Trash2,
+  Edit,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { Shield, Lock, AlertTriangle, CheckCircle, FileText, Download, Upload, RefreshCw, Eye, HardDrive, Save, Search, Filter, Plus, Trash2, Edit,  } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -9,12 +26,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import {
   Select,
   SelectContent,
@@ -22,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -31,8 +45,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface SecurityConfig {
@@ -1073,9 +1090,8 @@ export const SecuritySettings: React.FC = () => {
   };
 
   useEffect(() => {
-
     fetchData();
-  
+
     // no cleanup needed
   }, []);
 

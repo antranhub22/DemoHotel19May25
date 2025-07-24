@@ -1,4 +1,3 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   ChevronDown,
   Mic,
@@ -6,10 +5,11 @@ import {
   CheckCircle,
   Smartphone,
 } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useAssistant } from '@/context';
-import { Language } from '@/types/interface1.types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Language } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 
 interface LanguageOption {
   code: Language;

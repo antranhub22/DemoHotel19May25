@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
   RefreshCw,
   MessageSquare,
@@ -15,28 +14,7 @@ import {
   Eye,
   Edit,
 } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useAuth } from '@/context/AuthContext';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,  } from '@/components/ui/dialog';
+import React, { useState, useEffect } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +26,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface CustomerRequest {
@@ -429,7 +435,9 @@ export const CustomerRequests: React.FC = () => {
 
   // Send message
   const sendMessage = async (content: string) => {
-    if (!selectedRequest) {return;}
+    if (!selectedRequest) {
+      return;
+    }
 
     setMessageLoading(true);
     try {
@@ -495,9 +503,12 @@ export const CustomerRequests: React.FC = () => {
     // Date filter
     if (startDate || endDate) {
       const requestDate = new Date(request.createdAt);
-      if (startDate && requestDate < new Date(startDate)) {return false;}
-      if (endDate && requestDate > new Date(`${endDate}T23:59:59`))
-        {return false;}
+      if (startDate && requestDate < new Date(startDate)) {
+        return false;
+      }
+      if (endDate && requestDate > new Date(`${endDate}T23:59:59`)) {
+        return false;
+      }
     }
 
     // Search filter
@@ -536,7 +547,9 @@ export const CustomerRequests: React.FC = () => {
 
   // Handle message modal
   const handleOpenMessage = async () => {
-    if (!selectedRequest) {return;}
+    if (!selectedRequest) {
+      return;
+    }
 
     setShowMessageModal(true);
     await fetchMessages(selectedRequest.id);

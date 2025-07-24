@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
+import fetch from 'node-fetch';
 import { z } from 'zod';
 import { logger } from '@shared/utils/logger';
 

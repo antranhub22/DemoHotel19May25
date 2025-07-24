@@ -1,5 +1,5 @@
-import React, { Suspense } from 'react';
 import { X } from 'lucide-react';
+import React, { Suspense } from 'react';
 
 // Lazy load for code splitting - NEW: Use separated file
 const SummaryPopupContent = React.lazy(() =>

@@ -4,41 +4,41 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // Custom Hook
+import { logger } from '../../../../../packages/shared/utils/logger';
 import { useAssistant } from '../../context';
 
 // Context
 
 // Types & Constants
+import { usePopupContext } from '../../context/PopupContext';
+import { useInterface1 } from '../../hooks/useInterface1';
 import type { Language } from '../../types/interface1.types';
+import { ServiceItem } from '../../types/interface1.types';
+import ChatPopup from '../features/popup-system/ChatPopup';
+import SummaryPopup from '../features/popup-system/SummaryPopup';
+import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
+import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
+import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
+import { LoadingState } from '../features/voice-assistant/interface1/LoadingState';
+import { MobileVoiceControls } from '../features/voice-assistant/interface1/MobileVoiceControls';
 import { LANGUAGE_DISPLAY_NAMES } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
 
 // Utils
-import { logger } from '../../../../../packages/shared/utils/logger';
 
 // UI Components - States
-import { LoadingState } from '../features/voice-assistant/interface1/LoadingState';
-import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
 
 // UI Components - Layout
-import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
-import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
+import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
+import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
 import { ServiceGridContainer } from '../features/voice-assistant/interface1/ServiceGridContainer';
 
 // UI Components - Popups
-import ChatPopup from '../features/popup-system/ChatPopup';
-import SummaryPopup from '../features/popup-system/SummaryPopup';
 
 // Enhanced UI Components
-import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
-import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
-import { MobileVoiceControls } from '../features/voice-assistant/interface1/MobileVoiceControls';
-import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
+import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 // Siri Components
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
-import { ServiceItem } from '../../types/interface1.types';
-import { usePopupContext } from '../../context/PopupContext';
-import { useInterface1 } from '../../hooks/useInterface1';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
 const MobileSummaryPopup = () => {

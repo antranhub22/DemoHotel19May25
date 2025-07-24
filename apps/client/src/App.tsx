@@ -1,20 +1,19 @@
 import React, { Suspense, useState, useEffect } from 'react';
-import { Switch, Route, Link, useLocation } from 'wouter';
 import { BrowserRouter } from 'react-router-dom';
-import { logger } from '@shared/utils/logger';
-import StaffDashboard from '@/pages/StaffDashboard';
+import { Switch, Route, Link, useLocation } from 'wouter';
+import VoiceAssistant from '@/components/business/VoiceAssistant';
+import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
 import ErrorBoundary from '@/components/layout/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
-import VoiceAssistant from '@/components/business/VoiceAssistant';
-import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 import {
   AuthProvider,
   useAuth,
   useTenantDetection,
 } from '@/context/AuthContext';
 import { HotelProvider } from '@/context/HotelContext';
-import NotFound from '@/pages/not-found';
+import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import NotFound from '@/pages/not-found';
 import StaffPage from '@/pages/staff';
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
@@ -32,7 +31,7 @@ import {
 } from '@/pages/dashboard';
 
 // Unified Dashboard (Phase 3)
-import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
+import StaffDashboard from '@/pages/StaffDashboard';
 import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
 import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
 // Lazy load charts-heavy dashboard components
@@ -46,12 +45,13 @@ const SystemMonitoring = React.lazy(() =>
     default: module.SystemMonitoring,
   }))
 );
-import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
-import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
 import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
-import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
-import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
 import { Integrations } from '@/pages/unified-dashboard/Integrations';
+import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
+import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
+import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
+import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
+import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Protected Route Component

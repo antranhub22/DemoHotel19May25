@@ -1,12 +1,12 @@
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { getMenuForRole } from '@shared/constants/permissions';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { usePermissionCheck } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
+import { getMenuForRole } from '@shared/constants/permissions';
 
 interface DynamicSidebarProps {
   isOpen: boolean;

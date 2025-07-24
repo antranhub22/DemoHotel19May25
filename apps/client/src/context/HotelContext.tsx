@@ -1,3 +1,4 @@
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import React, {
   createContext,
   useContext,
@@ -5,12 +6,11 @@ import React, {
   useState,
   ReactNode,
 } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
-import { logger } from '@shared/utils/logger';
 import {
   useHotelConfiguration,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
+import { logger } from '@shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {
@@ -72,7 +72,11 @@ class HotelErrorBoundary extends React.Component<
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    logger.error(`Hotel configuration error: ${(error as any)?.message || String(error)}`, 'Component', errorInfo);
+    logger.error(
+      `Hotel configuration error: ${(error as any)?.message || String(error)}`,
+      'Component',
+      errorInfo
+    );
   }
 
   override render() {
@@ -171,7 +175,10 @@ export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
 export const useHotel = (): HotelContextValue => {
   const context = useContext(HotelContext);
   if (context === undefined) {
-    logger.warn('useHotel used outside HotelProvider - returning safe defaults', 'Component');
+    logger.warn(
+      'useHotel used outside HotelProvider - returning safe defaults',
+      'Component'
+    );
     // Return safe defaults instead of throwing
     return {
       config: null,

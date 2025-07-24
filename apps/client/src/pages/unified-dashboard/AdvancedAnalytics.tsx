@@ -1,3 +1,14 @@
+import {
+  TrendingUp,
+  TrendingDown,
+  Download,
+  RefreshCw,
+  PieChart as PieChartIcon,
+  TrendingUp as TrendIcon,
+  Phone,
+  Clock,
+  Activity,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import {
   BarChart,
@@ -15,19 +26,8 @@ import {
   Area,
   AreaChart,
 } from 'recharts';
-import {
-  TrendingUp,
-  TrendingDown,
-  Download,
-  RefreshCw,
-  PieChart as PieChartIcon,
-  TrendingUp as TrendIcon,
-  Phone,
-  Clock,
-  Activity,
-} from 'lucide-react';
-import { logger } from '@shared/utils/logger';
-import { useAuth } from '@/context/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -35,8 +35,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -45,7 +43,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // Types
 interface AnalyticsData {

@@ -1,10 +1,10 @@
-import { Router, Request, Response } from 'express';
 import { eq, desc } from 'drizzle-orm';
-import { deleteAllRequests } from '@shared/utils';
-import { logger } from '@shared/utils/logger';
+import { Router, Request, Response } from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db/schema';
+import { deleteAllRequests } from '@shared/utils';
+import { logger } from '@shared/utils/logger';
 
 // Legacy types for backward compatibility
 interface StaffRequest {

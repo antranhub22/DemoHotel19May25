@@ -1,6 +1,6 @@
 import React from 'react';
-import { t } from '@/i18n';
 import { useAssistant } from '@/context';
+import { t } from '@/i18n';
 import type { Language } from '@/types/interface1.types';
 
 interface InfographicStepsProps {

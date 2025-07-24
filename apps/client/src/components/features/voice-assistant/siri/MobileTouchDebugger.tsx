@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { logger } from '@shared/utils/logger';
 import { isMobileDevice } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 
 interface TouchDebugInfo {
   deviceInfo: {

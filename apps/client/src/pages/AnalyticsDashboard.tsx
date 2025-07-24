@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -14,7 +15,6 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { useNavigate } from 'react-router-dom';
 import { logger } from '@shared/utils/logger';
 
 const COLORS = [
@@ -61,9 +61,15 @@ const AnalyticsDashboard: React.FC = () => {
       );
       const hourlyData = await fetchData('/api/analytics/hourly-activity');
 
-      if (overviewData) {setOverview(overviewData);}
-      if (servicesData) {setServices(servicesData);}
-      if (hourlyData) {setHourly(hourlyData);}
+      if (overviewData) {
+        setOverview(overviewData);
+      }
+      if (servicesData) {
+        setServices(servicesData);
+      }
+      if (hourlyData) {
+        setHourly(hourlyData);
+      }
     };
     loadData();
   }, []);

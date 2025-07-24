@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { logger } from '@shared/utils/logger';
 import { cn } from '@/lib/utils';
+import { logger } from '@shared/utils/logger';
 
 // ✅ FIX: Dynamic recharts import to prevent initialization errors
 let RechartsPrimitive: any = null;
 
 const loadRecharts = async () => {
-  if (RechartsPrimitive) {return RechartsPrimitive;}
+  if (RechartsPrimitive) {
+    return RechartsPrimitive;
+  }
 
   try {
     logger.debug('🔄 [Charts] Loading recharts module...', 'Component');
@@ -151,7 +153,9 @@ ${colorConfig
 
 // ✅ FIX: Dynamic ChartTooltip component
 const ChartTooltip = React.forwardRef<any, any>((props, ref) => {
-  if (!RechartsPrimitive?.Tooltip) {return null;}
+  if (!RechartsPrimitive?.Tooltip) {
+    return null;
+  }
   const TooltipComponent = RechartsPrimitive.Tooltip;
   return <TooltipComponent {...props} ref={ref} />;
 });
@@ -313,7 +317,9 @@ ChartTooltipContent.displayName = 'ChartTooltip';
 
 // ✅ FIX: Dynamic ChartLegend component
 const ChartLegend = React.forwardRef<any, any>((props, ref) => {
-  if (!RechartsPrimitive?.Legend) {return null;}
+  if (!RechartsPrimitive?.Legend) {
+    return null;
+  }
   const LegendComponent = RechartsPrimitive.Legend;
   return <LegendComponent {...props} ref={ref} />;
 });

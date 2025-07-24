@@ -1,7 +1,7 @@
-import React from 'react';
 import { Shield, Lock } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import React from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/context/AuthContext';
 
 interface PermissionGuardProps {
   children: React.ReactNode;

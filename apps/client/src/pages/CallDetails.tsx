@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import { useParams, Link } from 'wouter';
-import { logger } from '@shared/utils/logger';
 import type { Transcript } from '@/types'; // ✅ FIXED: Add missing Transcript import
+import { logger } from '@shared/utils/logger';
 
 const CallDetails: React.FC = () => {
   const params = useParams() as { callId: string };

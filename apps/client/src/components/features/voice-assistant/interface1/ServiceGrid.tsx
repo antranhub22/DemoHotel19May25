@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { logger } from '@shared/utils/logger';
-import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
 import { useAssistant } from '@/context';
 import { designSystem } from '@/styles/designSystem';
+import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 
 interface ServiceGridProps {
   onServiceSelect?: (service: ServiceItem) => void;

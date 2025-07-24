@@ -1,8 +1,8 @@
-import { storage } from '@server/storage';
-import { insertTranscriptSchema } from '@shared/schema';
-import { db, eq, call, transcript } from '@shared/db';
-import { getCurrentTimestamp } from '@shared/utils';
 import { z } from 'zod';
+import { storage } from '@server/storage';
+import { db, eq, call, transcript } from '@shared/db';
+import { insertTranscriptSchema } from '@shared/schema';
+import { getCurrentTimestamp } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
 
 export class CallService {
