@@ -40,6 +40,22 @@ export {
   type SystemHealthSummary,
 } from './AdvancedHealthCheck';
 
+// ✅ v3.0: NEW Advanced Metrics Collection System
+export {
+  AdvancedMetricsCollector,
+  advancedMetricsCollector,
+  getCurrentMetricsSnapshot,
+  getSystemHealthFromMetrics,
+  initializeAdvancedMetrics,
+  recordBusinessKPI,
+  recordPerformanceMetrics,
+  type Alert,
+  type BusinessKPI,
+  type MetricsConfig,
+  type MetricsSnapshot,
+  type PerformanceMetrics,
+} from './AdvancedMetricsCollector';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -195,7 +211,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring
+ * Now includes advanced health monitoring and metrics collection
  */
 export async function initializeMonitoring() {
   try {
@@ -210,6 +226,9 @@ export async function initializeMonitoring() {
     const { MonitoringIntegration } = await import('./MonitoringIntegration');
     const { initializeAdvancedHealthCheck } = await import(
       './AdvancedHealthCheck'
+    );
+    const { initializeAdvancedMetrics } = await import(
+      './AdvancedMetricsCollector'
     );
 
     // Initialize components in order (using available methods)
@@ -230,8 +249,22 @@ export async function initializeMonitoring() {
     // v3.0: Initialize advanced health check system
     await initializeAdvancedHealthCheck();
 
+    // v3.0: Initialize advanced metrics collection system
+    await initializeAdvancedMetrics({
+      collectionInterval: 30000, // 30 seconds
+      retentionDays: 7,
+      alertingEnabled: true,
+      businessKPITracking: true,
+      performanceThresholds: {
+        responseTime: 2000, // 2 seconds
+        errorRate: 0.05, // 5%
+        memoryUsage: 512, // 512MB
+        cpuUsage: 80, // 80%
+      },
+    });
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with advanced metrics',
       'Monitoring'
     );
   } catch (error) {

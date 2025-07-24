@@ -13,6 +13,15 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import http from 'http';
 
+// ✅ Import middleware
+
+// ✅ Import metrics middleware for automatic performance tracking
+import {
+  businessMetricsMiddleware,
+  criticalEndpointMiddleware,
+  metricsMiddleware,
+} from '@server/middleware/metricsMiddleware';
+
 // ✅ MONITORING DISABLED: Auto-initialization commented out in shared/index.ts
 // Monitoring system fully implemented but temporarily disabled for deployment safety
 // To re-enable: Follow MONITORING_RE_ENABLE_GUIDE.md
@@ -144,6 +153,27 @@ app.use('/api/dashboard', dashboardLimiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+// ✅ NEW v3.0: Advanced Metrics Collection Middleware
+// Track performance metrics for all API requests
+app.use('/api', metricsMiddleware);
+
+// Track critical endpoints with enhanced monitoring
+app.use(criticalEndpointMiddleware);
+
+// Business metrics for specific endpoints
+app.use(
+  '/api/hotel/requests',
+  businessMetricsMiddleware('booking-conversion', 'operations')
+);
+app.use(
+  '/api/voice/calls',
+  businessMetricsMiddleware('call-efficiency', 'performance')
+);
+app.use(
+  '/api/dashboard/generate-assistant',
+  businessMetricsMiddleware('assistant-creation', 'operations')
+);
 
 app.use((req, res, next) => {
   const start = Date.now();
