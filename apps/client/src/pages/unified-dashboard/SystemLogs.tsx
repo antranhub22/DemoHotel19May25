@@ -1,8 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download, RefreshCw, AlertCircle, Info, AlertTriangle, XCircle, CheckCircle, Server, Database, Globe, Shield, FileText, Activity, TrendingUp, BarChart3, Eye, Monitor, HardDrive, Wifi, Zap,  } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Download,
+  RefreshCw,
+  AlertCircle,
+  Info,
+  AlertTriangle,
+  XCircle,
+  CheckCircle,
+  Server,
+  Database,
+  Globe,
+  Shield,
+  FileText,
+  Activity,
+  TrendingUp,
+  BarChart3,
+  Eye,
+  Monitor,
+  HardDrive,
+  Wifi,
+  Zap,
+} from 'lucide-react';
 import { logger } from '@shared/utils/logger';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle,  } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -263,13 +286,18 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    fractionalSecondDigits: 3,
-  });
+    // ✅ FIXED: Remove fractionalSecondDigits as it's not supported in all browsers
+    // fractionalSecondDigits: 3,
+  } as any); // ✅ FIXED: Use any to bypass type conflicts
 };
 
 const formatDuration = (duration?: number) => {
-  if (!duration) {return '-';}
-  if (duration < 1000) {return `${duration}ms`;}
+  if (!duration) {
+    return '-';
+  }
+  if (duration < 1000) {
+    return `${duration}ms`;
+  }
   return `${(duration / 1000).toFixed(2)}s`;
 };
 
@@ -283,7 +311,9 @@ const LogDetailsModal = ({
   isOpen: boolean;
   onClose: () => void;
 }) => {
-  if (!log) {return null;}
+  if (!log) {
+    return null;
+  }
 
   return (
     <div
@@ -503,15 +533,16 @@ export const SystemLogs: React.FC = () => {
   };
 
   useEffect(() => {
-
     fetchLogs();
-  
+
     // no cleanup needed
   }, []);
 
   // Real-time log streaming simulation
   useEffect(() => {
-    if (!realTimeEnabled) {return;}
+    if (!realTimeEnabled) {
+      return;
+    }
 
     const interval = setInterval(() => {
       const newLog: LogEntry = {

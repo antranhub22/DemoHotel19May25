@@ -6,43 +6,86 @@ import React from 'react';
 
 // Mock data
 const mockOrder = {
-  id: 'order-123',
-  items: [
-    { name: 'Club Sandwich', quantity: 1, price: 15 },
-    { name: 'Coffee', quantity: 2, price: 5 },
-  ],
-  total: 25,
-  roomNumber: '205',
-  customerName: 'John Doe',
+  reference: 'order-123',
+  estimatedTime: '30 minutes',
+  summary: {
+    orderType: 'Room Service',
+    deliveryTime: 'asap' as const,
+    roomNumber: '205',
+    guestName: 'John Doe',
+    guestEmail: 'john@example.com',
+    guestPhone: '+1234567890',
+    specialInstructions: 'No onions please',
+    items: [
+      {
+        id: '1',
+        name: 'Club Sandwich',
+        description: 'Served with fries',
+        quantity: 1,
+        price: 15,
+      },
+      {
+        id: '2',
+        name: 'Coffee',
+        description: 'Hot coffee',
+        quantity: 2,
+        price: 5,
+      },
+    ],
+    totalAmount: 25,
+  },
 };
 
 const mockOrderSummary = {
-  orderItems: ['Club Sandwich', 'Coffee'],
-  totalAmount: 25,
+  orderType: 'Room Service',
+  deliveryTime: 'asap' as const,
   roomNumber: '205',
-  customerName: 'John Doe',
-  specialRequests: 'No onions please',
+  guestName: 'John Doe',
+  guestEmail: 'john@example.com',
+  guestPhone: '+1234567890',
+  specialInstructions: 'No onions please',
+  items: [
+    {
+      id: '1',
+      name: 'Club Sandwich',
+      description: 'Served with fries',
+      quantity: 1,
+      price: 15,
+    },
+    {
+      id: '2',
+      name: 'Coffee',
+      description: 'Hot coffee',
+      quantity: 2,
+      price: 5,
+    },
+  ],
+  totalAmount: 25,
 };
 
 const mockCallSummary = {
+  callId: 'call-123',
   content: 'Guest ordered club sandwich and coffee',
   timestamp: new Date(),
   roomNumber: '205',
+  tenantId: 'tenant-123',
 };
 
 const mockServiceRequest = {
-  id: 'req-123',
   serviceType: 'Room Service',
   requestText: 'Please deliver to room 205',
-  timestamp: new Date(),
-  status: 'pending' as const,
+  details: {
+    roomNumber: '205',
+    time: 'asap',
+    otherDetails: 'Please deliver to room 205',
+  },
 };
 
 const mockActiveOrder = {
-  id: 'active-123',
-  items: ['Pizza', 'Salad'],
-  status: 'preparing' as const,
-  timestamp: new Date(),
+  reference: 'active-123',
+  requestedAt: new Date(),
+  estimatedTime: '30 minutes',
+  status: 'preparing',
 };
 
 // Test component

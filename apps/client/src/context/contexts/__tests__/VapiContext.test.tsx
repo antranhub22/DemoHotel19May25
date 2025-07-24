@@ -29,9 +29,9 @@ vi.mock('@/hooks/useHotelConfiguration', () => ({
 const mockCallDetails = {
   id: 'call-123',
   roomNumber: '205',
-  duration: 120,
-  status: 'completed' as const,
-  timestamp: new Date(),
+  duration: '120 seconds',
+  category: 'room_service',
+  language: 'en' as const,
 };
 
 // Test component that uses VapiContext
@@ -152,7 +152,7 @@ describe('VapiContext', () => {
 
     expect(screen.getByTestId('call-details')).toHaveTextContent('call-123');
     expect(screen.getByTestId('call-details')).toHaveTextContent('205');
-    expect(screen.getByTestId('call-details')).toHaveTextContent('120');
+    expect(screen.getByTestId('call-details')).toHaveTextContent('120 seconds');
   });
 
   it('should clear call details', async () => {

@@ -9,14 +9,35 @@ import React from 'react';
 
 // Mock hotel configuration data
 const mockHotelConfig = {
-  hotelId: 'hotel-123',
   hotelName: 'Test Hotel',
-  location: 'Test City',
-  features: ['room-service', 'concierge'],
+  logoUrl: 'test-logo.png',
+  primaryColor: '#1F2937',
+  headerText: 'Test Hotel',
+  vapiPublicKey: 'test-key',
+  vapiAssistantId: 'test-assistant',
   branding: {
-    primaryColor: '#1F2937',
     logo: 'test-logo.png',
+    colors: {
+      primary: '#1F2937',
+      secondary: '#374151',
+      accent: '#E74C3C',
+    },
+    fonts: {
+      primary: 'Poppins',
+      secondary: 'Inter',
+    },
   },
+  features: {
+    callHistory: true,
+    multiLanguage: true,
+    analytics: true,
+    customization: true,
+  },
+  services: [
+    { type: 'room_service', name: 'Room Service', enabled: true },
+    { type: 'concierge', name: 'Concierge', enabled: true },
+  ],
+  supportedLanguages: ['en', 'vi'],
 };
 
 const mockTenantConfig = {

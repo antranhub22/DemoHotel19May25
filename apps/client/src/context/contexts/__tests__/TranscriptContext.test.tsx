@@ -9,12 +9,16 @@ const mockTranscript1 = {
   role: 'user' as const,
   content: 'Hello, I need room service',
   callId: 'call-123',
+  timestamp: new Date(),
+  tenantId: 'tenant-123',
 };
 
 const mockTranscript2 = {
   role: 'assistant' as const,
   content: 'Sure! I can help you with room service.',
   callId: 'call-123',
+  timestamp: new Date(),
+  tenantId: 'tenant-123',
 };
 
 // Test component that uses TranscriptContext

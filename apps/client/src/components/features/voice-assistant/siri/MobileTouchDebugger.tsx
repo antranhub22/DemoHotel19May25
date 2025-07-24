@@ -220,8 +220,12 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
     const touchEvents = ['touchstart', 'touchend', 'touchmove', 'touchcancel'];
 
     touchEvents.forEach(eventType => {
-      container.addEventListener(eventType, logTouchEvent, { passive: false });
-      document.addEventListener(eventType, logTouchEvent, { passive: false });
+      container.addEventListener(eventType, logTouchEvent as EventListener, {
+        passive: false,
+      }); // ✅ FIXED: Cast to EventListener
+      document.addEventListener(eventType, logTouchEvent as EventListener, {
+        passive: false,
+      }); // ✅ FIXED: Cast to EventListener
     });
 
     // Periodic updates
@@ -229,8 +233,11 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
 
     return () => {
       touchEvents.forEach(eventType => {
-        container.removeEventListener(eventType, logTouchEvent);
-        document.removeEventListener(eventType, logTouchEvent);
+        container.removeEventListener(
+          eventType,
+          logTouchEvent as EventListener
+        ); // ✅ FIXED: Cast to EventListener
+        document.removeEventListener(eventType, logTouchEvent as EventListener); // ✅ FIXED: Cast to EventListener
       });
       clearInterval(interval);
     };
