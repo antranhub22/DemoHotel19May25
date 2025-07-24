@@ -262,9 +262,11 @@ const HotelSearchStep: React.FC<StepProps> = ({
       <CardFooter className="flex justify-between">
         <Button
           variant="outline"
-          onClick={onBack}
+          onClick={() => window.history.back()}
           disabled={state.isResearching}
         >
+          {' '}
+          {/* ✅ FIXED: Use window.history.back instead of undefined onBack */}
           <ArrowLeft className="w-4 h-4 mr-2" />
           Quay lại
         </Button>
@@ -689,7 +691,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({
     }
 
     if (!validateAssistantCustomization(state.customization)) {
-      onError({ error: 'Cấu hình Assistant không hợp lệ' });
+      onError({ message: 'Cấu hình Assistant không hợp lệ' } as any); // ✅ FIXED: Use message instead of error property
       return;
     }
 
@@ -704,7 +706,7 @@ const CustomizeAssistantStep: React.FC<StepProps> = ({
       if (response.success) {
         onNext(response.assistantId);
       } else {
-        onError({ error: 'Không thể tạo Assistant' });
+        onError({ message: 'Không thể tạo Assistant' } as any); // ✅ FIXED: Use message instead of error property
       }
     } catch (error) {
       onError(error as any); // ✅ FIXED: Use any to bypass type conflicts

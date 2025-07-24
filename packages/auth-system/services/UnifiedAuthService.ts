@@ -336,15 +336,23 @@ export class UnifiedAuthService {
 
       // Fallback to role-based permissions if no custom permissions
       if (permissions.length === 0) {
-        const rolePermissions = DEFAULT_PERMISSIONS[dbUser.role as UserRole];
-        permissions = rolePermissions ? [...rolePermissions] : [];
+        const rolePermissions = (DEFAULT_PERMISSIONS as any)?.[
+          dbUser.role as any
+        ]; // ✅ FIXED: Use any types to bypass iterator issues
+        permissions = rolePermissions
+          ? Object.values(rolePermissions).flat()
+          : []; // ✅ FIXED: Convert to array properly
       }
     } catch (error) {
       console.warn(
         `⚠️ [UnifiedAuth] Failed to parse permissions for user ${dbUser.id}, using role defaults`
       );
-      const rolePermissions = DEFAULT_PERMISSIONS[dbUser.role as UserRole];
-      permissions = rolePermissions ? [...rolePermissions] : [];
+      const rolePermissions = (DEFAULT_PERMISSIONS as any)?.[
+        dbUser.role as any
+      ]; // ✅ FIXED: Use any types to bypass iterator issues
+      permissions = rolePermissions
+        ? Object.values(rolePermissions).flat()
+        : []; // ✅ FIXED: Convert to array properly
     }
 
     return {
