@@ -56,6 +56,21 @@ export {
   type PerformanceMetrics,
 } from './AdvancedMetricsCollector';
 
+// ✅ v3.0: NEW Performance Auditor System
+export {
+  getPerformanceTrends,
+  initializePerformanceAuditor,
+  PerformanceAuditor,
+  performanceAuditor,
+  runComprehensiveAudit,
+  runQuickAudit,
+  type ModulePerformance,
+  type OptimizationRecommendation,
+  type PerformanceAuditReport,
+  type PerformanceBottleneck,
+  type PerformanceIssue,
+} from './PerformanceAuditor';
+
 // ✅ v2.0: Enhanced Monitoring Components
 export { EnhancedLogger } from './EnhancedLogger';
 export { MetricsCollector } from './MetricsCollector';
@@ -211,7 +226,7 @@ export async function getArchitectureHealth() {
 
 /**
  * Initialize complete monitoring system v3.0
- * Now includes advanced health monitoring and metrics collection
+ * Now includes advanced health monitoring, metrics collection, and performance auditing
  */
 export async function initializeMonitoring() {
   try {
@@ -229,6 +244,9 @@ export async function initializeMonitoring() {
     );
     const { initializeAdvancedMetrics } = await import(
       './AdvancedMetricsCollector'
+    );
+    const { initializePerformanceAuditor } = await import(
+      './PerformanceAuditor'
     );
 
     // Initialize components in order (using available methods)
@@ -263,8 +281,11 @@ export async function initializeMonitoring() {
       },
     });
 
+    // v3.0: Initialize performance auditor system
+    await initializePerformanceAuditor();
+
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with advanced metrics',
+      '✅ [Monitoring] Complete monitoring system v3.0 initialized with performance auditing',
       'Monitoring'
     );
   } catch (error) {
