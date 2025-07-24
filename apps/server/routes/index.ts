@@ -10,6 +10,7 @@ import transcriptsRoutes from '@server/routes/transcripts';
 import staffRoutes from '@server/routes/staff';
 // import { logger } from '@shared/utils/logger'; // Not used currently
 // import unifiedAuthRoutes from '@auth/routes/auth.routes';
+import tempAuthRoutes from '@server/routes/temp-auth'; // EMERGENCY FIX for production 401 errors
 
 const router = express.Router();
 
@@ -25,5 +26,6 @@ router.use('/api', transcriptsRoutes);
 // router.use('/api', emailRoutes); // Temporarily disabled
 router.use('/api', staffRoutes);
 // router.use('/api/auth', unifiedAuthRoutes);
+router.use('/api/auth', tempAuthRoutes); // ✅ EMERGENCY FIX: Enable auth routes
 
 export default router;
