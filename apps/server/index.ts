@@ -311,7 +311,10 @@ app.use((req, res, next) => {
 
   const port = process.env.PORT || 10000;
   server.listen(port, () => {
-    logger.debug('Server is running on port ${port}', 'Component');
+    logger.debug(`Server is running on port ${port}`, 'Component');
+    console.log(`🚀 Server started successfully on port ${port}`);
+    console.log(`🔗 API available at: http://localhost:${port}/api`);
+    console.log(`📊 Health check: http://localhost:${port}/api/health`);
 
     // ✅ Show monitoring status and reminders after startup
     setTimeout(() => {
