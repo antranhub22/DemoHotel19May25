@@ -13,8 +13,9 @@ async function runMigrationTest() {
   return true;
 }
 
-// Run if called directly
-if (require.main === module) {
+// Run directly if this file is executed
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   runMigrationTest().catch(console.error);
 }
 

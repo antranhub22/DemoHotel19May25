@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
+import { db } from '@shared/db/index.js';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { db } from '@shared/db/index.js';
 /**
  * Apply Performance Indexes Migration
  *
@@ -100,8 +100,9 @@ async function applyPerformanceIndexes() {
   }
 }
 
-// Run migration if called directly
-if (require.main === module) {
+// Run directly if this file is executed
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   applyPerformanceIndexes()
     .then(() => {
       console.log('\n✨ Script completed successfully');

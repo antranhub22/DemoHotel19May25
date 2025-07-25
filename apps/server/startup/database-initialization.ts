@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-import { initializeDatabase, getDatabaseMetrics } from '@shared/db';
+import { getDatabaseMetrics, initializeDatabase } from '@shared/db';
 import { logger } from '@shared/utils/logger';
 
 /**
@@ -211,7 +211,8 @@ export async function startupDatabaseSequence(): Promise<void> {
 }
 
 // Run startup sequence if called directly
-if (require.main === module) {
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   startupDatabaseSequence()
     .then(() => {
       console.log('✨ Startup script completed successfully');
