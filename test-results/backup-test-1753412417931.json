@@ -1,0 +1,87 @@
+{
+  "summary": {
+    "duration": "12s",
+    "totalTests": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "successRate": "100.0%"
+  },
+  "metrics": {
+    "backupSpeed": 7.6555023923444985,
+    "recoverySpeed": 0,
+    "compressionRatio": 0.929413799062895,
+    "errorRate": 0
+  },
+  "details": [
+    {
+      "name": "Database Backup Creation",
+      "status": "PASSED",
+      "duration": 2448,
+      "result": {
+        "duration": 2447.2184850000776,
+        "size": 6636592,
+        "compressionRatio": 0.8633930322515757
+      }
+    },
+    {
+      "name": "Filesystem Backup Creation",
+      "status": "PASSED",
+      "duration": 1772,
+      "result": {
+        "size": 51568052
+      }
+    },
+    {
+      "name": "Configuration Backup Creation",
+      "status": "PASSED",
+      "duration": 1440,
+      "result": {
+        "size": 21014823
+      }
+    },
+    {
+      "name": "Application State Backup",
+      "status": "PASSED",
+      "duration": 1285,
+      "result": {
+        "size": 10480528
+      }
+    },
+    {
+      "name": "Backup Scheduling",
+      "status": "PASSED",
+      "duration": 501,
+      "result": {
+        "schedulesCreated": 2
+      }
+    },
+    {
+      "name": "Backup Retention Policy",
+      "status": "PASSED",
+      "duration": 1002,
+      "result": {
+        "expiredBackups": 5,
+        "cleanedUp": 5
+      }
+    },
+    {
+      "name": "Backup Compression",
+      "status": "PASSED",
+      "duration": 800,
+      "result": {
+        "compressionRatio": 0.9954345658742144
+      }
+    },
+    {
+      "name": "Backup Encryption",
+      "status": "PASSED",
+      "duration": 1202,
+      "result": {
+        "encrypted": true,
+        "keyRotation": true
+      }
+    }
+  ],
+  "timestamp": "2025-07-25T03:00:17.931Z"
+}
