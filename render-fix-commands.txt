@@ -1,0 +1,15 @@
+# ===========================================
+# RENDER ENVIRONMENT VARIABLES FIX
+# Copy these to Render Dashboard → Environment
+# ===========================================
+
+NODE_ENV=production
+PORT=10000
+CORS_ORIGIN=https://minhonmuine.talk2go.online
+CLIENT_URL=https://minhonmuine.talk2go.online
+JWT_SECRET=minhon-hotel-production-secret-2024-minimum-32-characters
+STAFF_ACCOUNTS=admin:admin123,manager:manager123,frontdesk:frontdesk123
+ENABLE_ANALYTICS=true
+ENABLE_STAFF_DASHBOARD=true
+AUTO_MIGRATE=true
+LOG_LEVEL=info

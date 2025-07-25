@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-07-25T18:11:28.604Z",
+  "productionUrl": "minhonmuine.talk2go.online",
+  "testResults": {
+    "endpoints": {
+      "/api/auth/login [invalid]": {
+        "method": "POST",
+        "success": true,
+        "statusCode": 400,
+        "details": "Correctly rejected invalid credentials",
+        "timestamp": "2025-07-25T18:11:26.509Z"
+      },
+      "/api/auth/login": {
+        "method": "POST",
+        "success": true,
+        "statusCode": 200,
+        "details": "Login successful with valid token",
+        "timestamp": "2025-07-25T18:11:27.058Z"
+      },
+      "/api/auth/me": {
+        "method": "GET",
+        "success": true,
+        "statusCode": 200,
+        "details": "User info retrieved: admin",
+        "timestamp": "2025-07-25T18:11:27.357Z"
+      },
+      "/api/auth/permissions": {
+        "method": "GET",
+        "success": false,
+        "statusCode": 404,
+        "details": "Failed: API endpoint not found",
+        "timestamp": "2025-07-25T18:11:27.642Z"
+      },
+      "/api/auth/refresh": {
+        "method": "POST",
+        "success": false,
+        "statusCode": 400,
+        "details": "Refresh failed: Refresh token is required",
+        "timestamp": "2025-07-25T18:11:27.921Z"
+      },
+      "/api/auth/logout": {
+        "method": "POST",
+        "success": true,
+        "statusCode": 200,
+        "details": "Logout successful",
+        "timestamp": "2025-07-25T18:11:28.604Z"
+      }
+    },
+    "summary": {
+      "passed": 4,
+      "failed": 2,
+      "total": 6
+    }
+  },
+  "authFlowStatus": "FAIR",
+  "recommendations": ["Endpoint /api/auth/permissions not found - check routing"]
+}
