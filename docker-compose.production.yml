@@ -1,25 +1,370 @@
-# ============================================================================
-# Docker Compose Production Override
-# Optimized for production with security, performance, and reliability
-# Usage: docker-compose -f docker-compose.yml -f docker-compose.production.yml up
-# ============================================================================
+# =============================================================================
+# Hotel Management SaaS Platform - Production Docker Compose
+# High availability, security, and performance optimized configuration
+# =============================================================================
 
 version: '3.8'
 
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ Networks                                                                │
+# └─────────────────────────────────────────────────────────────────────────┘
+
+networks:
+  hotel-prod:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+  hotel-internal:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ Volumes                                                                 │
+# └─────────────────────────────────────────────────────────────────────────┘
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/postgres
+  postgres_backups:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/postgres-backups
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/redis
+  mongo_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/mongo
+  minio_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/minio
+  app_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/log/hotel
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/prometheus
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/grafana
+
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │ Services                                                                │
+# └─────────────────────────────────────────────────────────────────────────┘
+
 services:
-  # ======================== Production Application ========================
-  app:
+  # ═══════════════════════════════════════════════════════════════════════
+  # Load Balancer & Reverse Proxy
+  # ═══════════════════════════════════════════════════════════════════════
+
+  nginx:
+    image: nginx:alpine
+    container_name: hotel-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./scripts/docker/nginx/prod.conf:/etc/nginx/conf.d/default.conf
+      - ./scripts/docker/nginx/ssl:/etc/nginx/ssl
+      - ./scripts/docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - app_logs:/var/log/nginx
+    networks:
+      - hotel-prod
+    depends_on:
+      - app-1
+      - app-2
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Application Services (High Availability)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Application Instance 1
+  app-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+        BUILD_VERSION: ${BUILD_VERSION}
+    container_name: hotel-app-1
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=10000
+      - INSTANCE_ID=app-1
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_REPLICA_URL=${DATABASE_REPLICA_URL}
+      - REDIS_URL=redis://redis-master:6379
+      - REDIS_SENTINEL_URL=redis://redis-sentinel:26379
+      - MONGODB_URL=${MONGODB_URL}
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - VAPI_PUBLIC_KEY=${VAPI_PUBLIC_KEY}
+      - VAPI_ASSISTANT_ID=${VAPI_ASSISTANT_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - MAILJET_API_KEY=${MAILJET_API_KEY}
+      - MAILJET_SECRET_KEY=${MAILJET_SECRET_KEY}
+      - PROMETHEUS_ENDPOINT=http://prometheus:9090
+      - GRAFANA_ENDPOINT=http://grafana:3000
+      - LOG_LEVEL=info
+      - RATE_LIMIT_ENABLED=true
+      - SECURITY_HARDENING_ENABLED=true
+      - BACKUP_ENABLED=true
+      - MONITORING_ENABLED=true
+    volumes:
+      - app_logs:/app/logs
+      - ./backups:/app/backups
+      - ./uploads:/app/uploads
+    networks:
+      - hotel-prod
+      - hotel-internal
+    depends_on:
+      - postgres-master
+      - redis-master
+      - mongo
+      - minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
     deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 30s
-        order: start-first
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # Application Instance 2 (Replica)
+  app-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        BUILD_DATE: ${BUILD_DATE}
+        VCS_REF: ${VCS_REF}
+        BUILD_VERSION: ${BUILD_VERSION}
+    container_name: hotel-app-2
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=10000
+      - INSTANCE_ID=app-2
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_REPLICA_URL=${DATABASE_REPLICA_URL}
+      - REDIS_URL=redis://redis-master:6379
+      - REDIS_SENTINEL_URL=redis://redis-sentinel:26379
+      - MONGODB_URL=${MONGODB_URL}
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - VAPI_PUBLIC_KEY=${VAPI_PUBLIC_KEY}
+      - VAPI_ASSISTANT_ID=${VAPI_ASSISTANT_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_PLACES_API_KEY=${GOOGLE_PLACES_API_KEY}
+      - MAILJET_API_KEY=${MAILJET_API_KEY}
+      - MAILJET_SECRET_KEY=${MAILJET_SECRET_KEY}
+      - PROMETHEUS_ENDPOINT=http://prometheus:9090
+      - GRAFANA_ENDPOINT=http://grafana:3000
+      - LOG_LEVEL=info
+      - RATE_LIMIT_ENABLED=true
+      - SECURITY_HARDENING_ENABLED=true
+      - BACKUP_ENABLED=true
+      - MONITORING_ENABLED=true
+    volumes:
+      - app_logs:/app/logs
+      - ./backups:/app/backups
+      - ./uploads:/app/uploads
+    networks:
+      - hotel-prod
+      - hotel-internal
+    depends_on:
+      - postgres-master
+      - redis-master
+      - mongo
+      - minio
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Database Services (High Availability)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # PostgreSQL Master
+  postgres-master:
+    image: postgres:15-alpine
+    container_name: hotel-postgres-master
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_REPLICATION_MODE: master
+      POSTGRES_REPLICATION_USER: replicator
+      POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+      - ./scripts/docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./scripts/docker/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    networks:
+      - hotel-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+
+  # PostgreSQL Replica (Read-only)
+  postgres-replica:
+    image: postgres:15-alpine
+    container_name: hotel-postgres-replica
+    restart: unless-stopped
+    environment:
+      POSTGRES_REPLICATION_MODE: slave
+      POSTGRES_REPLICATION_USER: replicator
+      POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPLICATION_PASSWORD}
+      POSTGRES_MASTER_SERVICE: postgres-master
+    networks:
+      - hotel-internal
+    depends_on:
+      - postgres-master
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Redis Cluster (High Availability)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Redis Master
+  redis-master:
+    image: redis:7-alpine
+    container_name: hotel-redis-master
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+      - ./scripts/docker/redis/redis-master.conf:/etc/redis/redis.conf
+    networks:
+      - hotel-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    command: redis-server /etc/redis/redis.conf
+    deploy:
       resources:
         limits:
           cpus: '1.0'
@@ -27,204 +372,324 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+
+  # Redis Sentinel
+  redis-sentinel:
+    image: redis:7-alpine
+    container_name: hotel-redis-sentinel
+    restart: unless-stopped
+    volumes:
+      - ./scripts/docker/redis/sentinel.conf:/etc/redis/sentinel.conf
+    networks:
+      - hotel-internal
+    depends_on:
+      - redis-master
+    command: redis-sentinel /etc/redis/sentinel.conf
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # MongoDB (Analytics & Logs)
+  # ═══════════════════════════════════════════════════════════════════════
+
+  mongo:
+    image: mongo:6
+    container_name: hotel-mongo-prod
+    restart: unless-stopped
     environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=info
-      - AUTO_MIGRATE=true
-      - ENABLE_METRICS=true
-      - ENABLE_HEALTH_CHECKS=true
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/docker/mongo/mongod.conf:/etc/mongod.conf
+    networks:
+      - hotel-internal
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:10000/api/health"]
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # ======================== Production Database ========================
-  postgres:
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    environment:
-      - POSTGRES_DB=hotel_production
-      - POSTGRES_USER=hotel_prod_user
-      # Password should be set via Docker secrets in real production
-    volumes:
-      - postgres_prod_data:/var/lib/postgresql/data
-      - ./backups:/backups:ro
-      - ./tools/scripts/database/prod-init.sql:/docker-entrypoint-initdb.d/01-prod-init.sql:ro
+      retries: 5
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "5"
-    command: >
-      postgres
-      -c shared_preload_libraries=pg_stat_statements
-      -c pg_stat_statements.track=all
-      -c max_connections=100
-      -c shared_buffers=256MB
-      -c effective_cache_size=1GB
-      -c work_mem=4MB
-      -c maintenance_work_mem=64MB
-      -c random_page_cost=1.1
-      -c temp_file_limit=2GB
-      -c log_min_duration_statement=1000
-      -c log_statement=mod
-      -c log_destination=stderr
-      -c logging_collector=on
-      -c log_filename=postgresql-%Y-%m-%d_%H%M%S.log
-      -c log_rotation_age=1d
-      -c log_rotation_size=1GB
-
-  # ======================== Production Redis ========================
-  redis:
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
-    volumes:
-      - redis_prod_data:/data
-      - ./redis.production.conf:/usr/local/etc/redis/redis.conf:ro
-    command: redis-server /usr/local/etc/redis/redis.conf
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
+        max-size: "100m"
         max-file: "3"
-
-  # ======================== Production Reverse Proxy ========================
-  traefik:
-    profiles:
-      - "production"
+    command: ["mongod", "--config", "/etc/mongod.conf"]
     deploy:
       resources:
         limits:
-          cpus: '0.25'
-          memory: 256M
+          cpus: '1.5'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Storage Services
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: hotel-minio-prod
+    restart: unless-stopped
     environment:
-      - TRAEFIK_API_DASHBOARD=false
-      - TRAEFIK_API_INSECURE=false
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=${ACME_EMAIL}
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE=/certs/acme.json
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT=web
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
     volumes:
-      - ./traefik/traefik.production.yml:/etc/traefik/traefik.yml:ro
-      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
-    command:
-      - --api=false
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
-      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
-
-  # ======================== Production Monitoring ========================
-  prometheus:
-    profiles:
-      - "production"
-      - "monitoring"
+      - minio_data:/data
+    networks:
+      - hotel-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    command: server /data --console-address ":9001"
     deploy:
       resources:
         limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
           cpus: '0.5'
           memory: 512M
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Monitoring & Observability
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hotel-prometheus-prod
+    restart: unless-stopped
     volumes:
-      - ./monitoring/prometheus.production.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_prod_data:/prometheus
+      - prometheus_data:/prometheus
+      - ./scripts/docker/prometheus/prometheus-prod.yml:/etc/prometheus/prometheus.yml
+      - ./scripts/docker/prometheus/rules:/etc/prometheus/rules
+    networks:
+      - hotel-internal
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=720h'
       - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
 
+  # Grafana
   grafana:
-    profiles:
-      - "production"
-      - "monitoring"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-    volumes:
-      - grafana_prod_data:/var/lib/grafana
-      - ./monitoring/grafana/production:/etc/grafana/provisioning:ro
-
-  loki:
-    profiles:
-      - "production"
-      - "monitoring"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-    volumes:
-      - ./monitoring/loki.production.yml:/etc/loki/local-config.yaml:ro
-      - loki_prod_data:/loki
-
-  # ======================== Production Backup Service ========================
-  backup:
-    image: postgres:15-alpine
-    container_name: hotel-backup-service
+    image: grafana/grafana:latest
+    container_name: hotel-grafana-prod
+    restart: unless-stopped
     environment:
-      - PGPASSWORD=${POSTGRES_PASSWORD}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-worldmap-panel
+      GF_SERVER_DOMAIN: ${GRAFANA_DOMAIN}
+      GF_SERVER_ROOT_URL: https://${GRAFANA_DOMAIN}
+      GF_SECURITY_SECRET_KEY: ${GRAFANA_SECRET_KEY}
     volumes:
-      - ./backups:/backups
-      - ./tools/scripts/backup:/scripts:ro
+      - grafana_data:/var/lib/grafana
+      - ./scripts/docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./scripts/docker/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
-      - hotel-network
-    profiles:
-      - "production"
-      - "backup"
-    command: |
-      sh -c '
-        while true; do
-          echo "Starting automated backup at $$(date)"
-          pg_dump -h postgres -U hotel_prod_user -d hotel_production > /backups/auto-backup-$$(date +%Y%m%d-%H%M%S).sql
-          find /backups -name "auto-backup-*.sql" -mtime +7 -delete
-          echo "Backup completed at $$(date)"
-          sleep 86400
-        done
-      '
+      - hotel-internal
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
 
-# ======================== Production Volumes ========================
-volumes:
-  postgres_prod_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /opt/hotel-voice-assistant/data/postgres
-  redis_prod_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /opt/hotel-voice-assistant/data/redis
-  prometheus_prod_data:
-    driver: local
-  grafana_prod_data:
-    driver: local
-  loki_prod_data:
-    driver: local 
+  # Alertmanager
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: hotel-alertmanager-prod
+    restart: unless-stopped
+    volumes:
+      - ./scripts/docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - hotel-internal
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Backup & Recovery Services
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Automated Backup Service
+  backup-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: hotel-backup-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - BACKUP_MODE=true
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis-master:6379
+      - MONGODB_URL=${MONGODB_URL}
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - BACKUP_SCHEDULE=0 2 * * *  # Daily at 2 AM
+      - BACKUP_RETENTION_DAYS=30
+      - BACKUP_ENCRYPTION_KEY=${BACKUP_ENCRYPTION_KEY}
+    volumes:
+      - postgres_backups:/app/backups/postgres
+      - ./backups:/app/backups/files
+      - app_logs:/app/logs
+    networks:
+      - hotel-internal
+    depends_on:
+      - postgres-master
+      - redis-master
+      - mongo
+      - minio
+    command: ["node", "dist/tools/scripts/backup/automated-backup.js"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # ═══════════════════════════════════════════════════════════════════════
+  # Security & Utilities
+  # ═══════════════════════════════════════════════════════════════════════
+
+  # Watchtower (Automatic Updates)
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: hotel-watchtower
+    restart: unless-stopped
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 3600  # Check every hour
+      WATCHTOWER_CLEANUP: true
+      WATCHTOWER_INCLUDE_STOPPED: true
+      WATCHTOWER_NOTIFICATIONS: slack
+      WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL: ${SLACK_WEBHOOK_URL}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Fail2Ban (Security)
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: hotel-fail2ban
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      F2B_LOG_LEVEL: INFO
+      F2B_DB_PURGE_AGE: 1d
+    volumes:
+      - ./scripts/docker/fail2ban:/data
+      - app_logs:/var/log/hotel:ro
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+
+# =============================================================================
+# Production Deployment Instructions:
+#
+# 1. Environment Setup:
+#    - Copy .env.production.example to .env.production
+#    - Fill in all required environment variables
+#    - Generate secure secrets for all services
+#
+# 2. Infrastructure Preparation:
+#    - Ensure adequate disk space for data volumes
+#    - Configure firewall rules
+#    - Setup SSL certificates
+#    - Configure DNS records
+#
+# 3. Deployment:
+#    docker-compose -f docker-compose.production.yml up -d
+#
+# 4. Post-deployment:
+#    - Verify all services are healthy
+#    - Run database migrations
+#    - Test backup/restore procedures
+#    - Configure monitoring alerts
+#
+# 5. Monitoring URLs (Internal):
+#    - Prometheus: http://prometheus:9090
+#    - Grafana: http://grafana:3000
+#    - Alertmanager: http://alertmanager:9093
+#
+# 6. Scaling:
+#    docker-compose -f docker-compose.production.yml up -d --scale app-1=3 app-2=3
+#
+# 7. Backup:
+#    docker exec hotel-backup-service node dist/tools/scripts/backup/manual-backup.js
+#
+# 8. Rolling Updates:
+#    - Update image tags
+#    - Run: docker-compose -f docker-compose.production.yml up -d --no-deps app-1
+#    - Wait for health check
+#    - Run: docker-compose -f docker-compose.production.yml up -d --no-deps app-2
+# ============================================================================= 
