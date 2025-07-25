@@ -261,7 +261,6 @@ export class BackupManager extends EventEmitter {
   private activeJobs: Map<string, BackupJob> = new Map();
   private scheduledJobs: Map<string, NodeJS.Timeout> = new Map();
   private backupMetadata: Map<string, BackupMetadata> = new Map();
-  private restoreJobs: Map<string, RestoreJob> = new Map();
   private statistics: BackupStatistics;
 
   constructor(config: Partial<BackupConfig> = {}) {
@@ -966,7 +965,6 @@ export class BackupManager extends EventEmitter {
 
     // Simple encryption using crypto (in production, use proper key management)
     const key = crypto.randomBytes(32);
-    const iv = crypto.randomBytes(16);
 
     const cipher = crypto.createCipher('aes-256-cbc', key);
     const readStream = require('fs').createReadStream(filePath);
@@ -1059,8 +1057,6 @@ export class BackupManager extends EventEmitter {
     schedule: BackupSchedule,
     type: 'database' | 'filesystem' | 'configuration' | 'application_state'
   ) {
-    const cronExpression = this.convertToCron(schedule);
-
     // For simplicity, we'll use setTimeout with calculated intervals
     const interval = this.calculateInterval(schedule);
 
@@ -1070,7 +1066,13 @@ export class BackupManager extends EventEmitter {
 
         switch (type) {
           case 'database':
-            await this.createDatabaseBackup(schedule.id, schedule.type);
+            // Map differential to incremental for database backups
+            const backupType =
+              schedule.type === 'differential' ? 'incremental' : schedule.type;
+            await this.createDatabaseBackup(
+              schedule.id,
+              backupType as 'full' | 'incremental'
+            );
             break;
           case 'filesystem':
             await this.createFilesystemBackup(schedule.id);
@@ -1212,7 +1214,6 @@ export class BackupManager extends EventEmitter {
       );
 
       // Get available disk space
-      const stats = await fs.stat('./');
       // Note: fs.stat doesn't provide disk space info, using placeholder
       const availableSpace = 100 * 1024 * 1024 * 1024; // 100GB placeholder
 
@@ -1380,7 +1381,7 @@ export class BackupManager extends EventEmitter {
     this.config = { ...this.config, ...newConfig };
 
     // Reschedule jobs if needed
-    for (const [scheduleId, timeoutId] of this.scheduledJobs) {
+    for (const [, timeoutId] of this.scheduledJobs) {
       clearInterval(timeoutId);
     }
     this.scheduledJobs.clear();

@@ -25,6 +25,7 @@ export interface DisasterRecoveryConfig {
     secondarySites: SiteConfig[];
     healthCheckInterval: number; // seconds
     failoverThreshold: number; // failed health checks
+    automaticFailover: boolean;
     automaticFailback: boolean;
     dnsFailover: boolean;
   };
@@ -257,6 +258,7 @@ const defaultDisasterRecoveryConfig: DisasterRecoveryConfig = {
     secondarySites: [],
     healthCheckInterval: 30, // 30 seconds
     failoverThreshold: 3, // 3 failed checks
+    automaticFailover: true,
     automaticFailback: false,
     dnsFailover: false,
   },
@@ -626,7 +628,7 @@ export class DisasterRecovery extends EventEmitter {
 
   async approveRecoveryPlan(
     planId: string,
-    approver: string,
+    _approver: string,
     comments?: string
   ): Promise<boolean> {
     const plan = this.recoveryPlans.get(planId);
@@ -806,7 +808,7 @@ export class DisasterRecovery extends EventEmitter {
     return this.executeCommand(`bash ${scriptPath}`, timeout);
   }
 
-  private async executeDatabaseRestore(step: RecoveryStep): Promise<void> {
+  private async executeDatabaseRestore(_step: RecoveryStep): Promise<void> {
     // Get latest backup
     const backups = this.backupManager.getBackupHistory(10);
     const latestDbBackup = backups.find(backup => backup.type === 'database');
@@ -1170,7 +1172,7 @@ export class DisasterRecovery extends EventEmitter {
     }
   }
 
-  private executeEscalationAction(action: string, event: DisasterEvent) {
+  private executeEscalationAction(action: string, _event: DisasterEvent) {
     switch (action) {
       case 'notify_ops':
         console.log('📧 Notifying operations team');

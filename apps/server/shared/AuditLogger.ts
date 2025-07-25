@@ -594,6 +594,17 @@ export class AuditLogger extends EventEmitter {
   // Threat Detection & Analysis
   // ============================================
 
+  private runThreatDetection() {
+    // Run periodic threat detection analysis
+    const recentLogs = this.logBuffer.filter(
+      log => log.timestamp.getTime() > Date.now() - 5 * 60 * 1000 // Last 5 minutes
+    );
+
+    for (const log of recentLogs) {
+      this.analyzeThreat(log);
+    }
+  }
+
   private analyzeThreat(entry: AuditLogEntry) {
     for (const rule of this.threatRules) {
       if (!rule.enabled) continue;

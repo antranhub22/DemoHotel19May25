@@ -329,7 +329,7 @@ export class SecurityMiddleware {
         timestamp: new Date().toISOString(),
       });
 
-      originalEnd.call(this, chunk, encoding);
+      return originalEnd.call(this, chunk, encoding) as any;
     };
 
     next();
@@ -456,14 +456,14 @@ export const defaultSecurityConfig: Partial<SecurityConfig> = {
   sqlInjectionProtection: {
     enabled: true,
     patterns: [
-      "(%27)|(')|(--)|(%23)|(#)",
-      "((%3D)|(=))[^\\n]*((%27)|(')|(--)|(%3B)|(;))",
-      'union.*select',
-      'select.*from',
-      'insert.*into',
-      'delete.*from',
-      'update.*set',
-      'drop.*table',
+      /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,
+      /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i,
+      /union.*select/i,
+      /select.*from/i,
+      /insert.*into/i,
+      /delete.*from/i,
+      /update.*set/i,
+      /drop.*table/i,
     ],
     blockSuspiciousQueries: true,
     logAttempts: true,

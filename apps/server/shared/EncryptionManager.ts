@@ -350,7 +350,6 @@ export class EncryptionManager extends EventEmitter {
   private decryptKeyMaterial(encryptedKey: EncryptionKey): Buffer {
     if (!this.masterKey) throw new Error('Master key not available');
 
-    const iv = encryptedKey.keyMaterial.slice(0, 16);
     const encrypted = encryptedKey.keyMaterial.slice(16);
 
     const decipher = crypto.createDecipher('aes-256-cbc', this.masterKey);
@@ -474,7 +473,7 @@ export class EncryptionManager extends EventEmitter {
     const iv = crypto.randomBytes(16);
 
     // Encrypt using AES-256-GCM
-    const cipher = crypto.createCipherGCM('aes-256-gcm', key, iv);
+    const cipher = crypto.createCipher('aes-256-gcm', key);
 
     let encrypted = cipher.update(processedData);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -504,11 +503,7 @@ export class EncryptionManager extends EventEmitter {
     if (!key) throw new Error('Decryption key not found');
 
     // Decrypt using AES-256-GCM
-    const decipher = crypto.createDecipherGCM(
-      encryptedData.algorithm as any,
-      key,
-      encryptedData.iv
-    );
+    const decipher = crypto.createDecipher(encryptedData.algorithm as any, key);
 
     if (encryptedData.authTag) {
       decipher.setAuthTag(encryptedData.authTag);

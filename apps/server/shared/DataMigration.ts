@@ -372,7 +372,9 @@ export class DataMigration extends EventEmitter {
   // ============================================
 
   async createMigration(
-    migration: Omit<Migration, 'id' | 'metadata'>
+    migration: Omit<Migration, 'id' | 'metadata'> & {
+      metadata?: Partial<Migration['metadata']>;
+    }
   ): Promise<string> {
     const migrationId = crypto.randomUUID();
 
