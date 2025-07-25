@@ -607,7 +607,7 @@ export async function initializeMonitoring() {
             type: 'jwt' as const,
             priority: 1,
             config: {
-              secretKey: process.env.JWT_SECRET_KEY,
+              secretKey: process.env.JWT_SECRET_KEY || process.env.JWT_SECRET,
               algorithms: ['HS256'],
               issuer: 'hotel-management-system',
             },

@@ -2,21 +2,21 @@
 
 // Type declaration for import.meta
 
-import {
-  Volume2,
-  VolumeX,
-  Settings,
-  Mic,
-  MicOff,
-  Eye,
-  EyeOff,
-  X,
-} from 'lucide-react';
-import React, { useState, useEffect, useCallback } from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
+import {
+  Eye,
+  EyeOff,
+  Mic,
+  MicOff,
+  Settings,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
 
 interface VoicePrompt {
@@ -395,13 +395,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
         'Component'
       );
     }
-  }, [
-    selectedService,
-    language,
-    generateVoicePrompt,
-    onVoicePromptReady,
-    currentPrompt,
-  ]);
+  }, [selectedService, language, generateVoicePrompt, onVoicePromptReady]); // ✅ FIXED: Removed currentPrompt to prevent infinite loop
 
   // Inject voice context into window for voice assistant integration
   useEffect(() => {
