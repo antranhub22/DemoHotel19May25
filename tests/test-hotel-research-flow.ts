@@ -1,20 +1,17 @@
 #!/usr/bin/env tsx
 
-import { drizzle } from 'drizzle-orm/postgres-js';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
-import postgres from 'postgres';
 import Database from 'better-sqlite3';
 import { eq } from 'drizzle-orm';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/postgres-js';
 import * as fs from 'fs';
-import * as path from 'path';
-import { performance } from 'perf_hooks';
 
 // Import services
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
 import {
-  VapiIntegrationService,
   AssistantGeneratorService,
+  VapiIntegrationService,
 } from '@server/services/vapiIntegration';
 
 // Import schema
@@ -403,6 +400,7 @@ export class HotelResearchFlowTest {
 
     if (isPostgres && this.config.databaseUrl) {
       this.log('Connecting to PostgreSQL database...', 'info');
+      const { postgres } = await import('postgres');
       const client = postgres(this.config.databaseUrl);
       this.db = drizzle(client);
     } else {

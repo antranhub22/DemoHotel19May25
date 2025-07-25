@@ -1,14 +1,9 @@
 #!/usr/bin/env tsx
 
+import { and, count, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
-import postgres from 'postgres';
-import Database from 'better-sqlite3';
-import { eq, and, count } from 'drizzle-orm';
 import * as fs from 'fs';
-import * as path from 'path';
 import { performance } from 'perf_hooks';
-import fetch from 'node-fetch';
 
 // Import services
 import { HotelResearchService } from '@server/services/hotelResearch';
@@ -16,11 +11,11 @@ import { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator'
 import {} from '@server/services/vapiIntegration';
 // Import schema
 import {
-  tenants,
-  hotelProfiles,
   call,
-  transcript,
+  hotelProfiles,
   message,
+  tenants,
+  transcript,
 } from '@shared/db/schema';
 // Import test utils
 // ============================================
@@ -592,7 +587,6 @@ export class IntegrationTestSuite {
       'Test setup wizard works for new tenant',
       async () => {
         // Mock the setup wizard flow
-        const hotelResearchService = new HotelResearchService();
         const knowledgeBaseGenerator = new KnowledgeBaseGenerator();
 
         if (this.config.useMockData) {
@@ -861,11 +855,6 @@ export class IntegrationTestSuite {
       async () => {
         if (this.config.useMockData) {
           // Mock API test
-          const mockResponse = {
-            success: true,
-            hotelData: MOCK_NEW_TENANT_DATA.hotelData,
-            knowledgeBase: 'Generated knowledge base',
-          };
 
           this.log('✅ Hotel research API works (mock)', 'success');
           this.results.dashboardApis.hotelResearchWorks = true;
@@ -1214,12 +1203,21 @@ export class IntegrationTestSuite {
 
     if (this.isPostgres && this.config.databaseUrl) {
       this.log('Connecting to PostgreSQL database...', 'info');
-      const client = postgres(this.config.databaseUrl);
-      this.db = drizzle(client);
-
-      // Test database connection with PostgreSQL schema
-      const schema = this.getSchema();
-      await this.db.select().from(schema.tenants).limit(1);
+      try {
+        // @ts-ignore - Dynamic import for optional dependency
+        const postgresModule = await import('postgres');
+        const postgres = postgresModule.default;
+        const client = postgres(this.config.databaseUrl);
+        this.db = drizzle(client);
+      } catch (error) {
+        this.log(
+          '⚠️ postgres package not available - skipping PostgreSQL tests',
+          'warn'
+        );
+        throw new Error(
+          'postgres package required for PostgreSQL integration tests'
+        );
+      }
     } else {
       this.log('Setting up SQLite test database...', 'info');
 
