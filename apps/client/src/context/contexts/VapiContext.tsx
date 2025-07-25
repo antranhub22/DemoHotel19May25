@@ -2,19 +2,19 @@
 
 // Type declaration for import.meta
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
 import {
   getVapiPublicKeyByLanguage,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
 import { CallDetails } from '@/types';
 import { logger } from '@shared/utils/logger';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 // Dynamic imports for code splitting - loaded when needed
 // Dynamic import for code splitting - resetVapi loaded when needed
 
@@ -88,9 +88,14 @@ export function VapiProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      if (!publicKey.startsWith('pk_')) {
+      // ✅ FIXED: Support both UUID and pk_ prefixed formats for public key
+      if (
+        !publicKey.match(
+          /^(pk_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+        )
+      ) {
         throw new Error(
-          'Invalid Vapi public key format. Key should start with "pk_"'
+          'Invalid Vapi public key format. Key should start with "pk_" or be a valid UUID'
         );
       }
 
@@ -159,9 +164,14 @@ export function VapiProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Vapi instance not initialized');
       }
 
-      if (!assistantId.startsWith('asst_')) {
+      // ✅ FIXED: Support both asst_ prefixed and UUID formats for assistant ID
+      if (
+        !assistantId.match(
+          /^(asst_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+        )
+      ) {
         throw new Error(
-          'Invalid assistant ID format. ID should start with "asst_"'
+          'Invalid assistant ID format. ID should start with "asst_" or be a valid UUID'
         );
       }
 

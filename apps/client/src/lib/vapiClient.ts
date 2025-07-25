@@ -2,7 +2,6 @@
 
 // Type declaration for import.meta
 
-
 // 🚀 REAL VAPI INTEGRATION: Enhanced for Production with better error handling
 import { logger } from '@shared/utils/logger';
 
@@ -33,10 +32,11 @@ class VapiDebugger {
     console.log(`🔧 Vapi debug level set to: ${level}`);
   }
 
-  log(level: 'error' | 'info' | 'verbose', message: string, data?: any) { const timestamp = new Date().toISOString();
+  log(level: 'error' | 'info' | 'verbose', message: string, data?: any) {
+    const timestamp = new Date().toISOString();
 
     // Store log
-    this.logs.push({ timestamp, level, message, data  });
+    this.logs.push({ timestamp, level, message, data });
     if (this.logs.length > this.maxLogs) {
       this.logs.shift();
     }
@@ -109,7 +109,9 @@ let VapiClass: any = null;
 
 // Dynamically load Vapi to handle module format issues
 const loadVapi = async () => {
-  if (VapiClass) {return VapiClass;}
+  if (VapiClass) {
+    return VapiClass;
+  }
 
   try {
     logger.debug('🔄 [VAPI] Loading Vapi module...', 'Component');
@@ -208,8 +210,13 @@ export const initVapi = async (publicKey: string): Promise<any> => {
       timestamp: new Date().toISOString(),
     });
 
-    // ✅ PRODUCTION: Validate public key format
-    if (!publicKey || !publicKey.startsWith('pk_')) {
+    // ✅ PRODUCTION: Validate public key format - Support both pk_ prefix and UUID format
+    if (
+      !publicKey ||
+      !publicKey.match(
+        /^(pk_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+      )
+    ) {
       const error = `Invalid Vapi public key format: ${publicKey ? 'invalid format' : 'missing'}`;
       vapiDebugger.log('error', 'Public key validation failed', {
         publicKey: publicKey?.substring(0, 10) + '...',
@@ -408,8 +415,13 @@ export const startCall = async (
     throw new Error('Vapi not initialized. Call initVapi first.');
   }
 
-  // ✅ PRODUCTION: Validate assistant ID format
-  if (!assistantId || !assistantId.startsWith('asst_')) {
+  // ✅ PRODUCTION: Validate assistant ID format - Support both asst_ prefix and UUID format
+  if (
+    !assistantId ||
+    !assistantId.match(
+      /^(asst_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
+    )
+  ) {
     const error = `Invalid assistant ID format: ${assistantId ? 'invalid format' : 'missing'}`;
     vapiDebugger.log('error', 'Assistant ID validation failed', {
       assistantId: assistantId?.substring(0, 10) + '...',
@@ -564,7 +576,10 @@ export const startCall = async (
   } catch (error) {
     vapiDebugger.log('error', 'startCall failed with exception', {
       error,
-      errorMessage: error instanceof Error ? (error as any)?.message || String(error) : String(error),
+      errorMessage:
+        error instanceof Error
+          ? (error as any)?.message || String(error)
+          : String(error),
       errorStack: error instanceof Error ? (error as any)?.stack : undefined,
       assistantId: assistantId.substring(0, 15) + '...',
       vapiInstanceExists: !!vapiInstance,
@@ -583,7 +598,10 @@ export const startCall = async (
         vapiDebugger.log('error', 'webCallUrl issue detected', {
           originalError: (error as any)?.message || String(error),
         });
-      } else if ((error as any)?.message || String(error).includes('assistant')) {
+      } else if (
+        (error as any)?.message ||
+        String(error).includes('assistant')
+      ) {
         enhancedError = new Error(
           'Invalid assistant configuration. Please check assistant ID and permissions.'
         );
@@ -591,8 +609,10 @@ export const startCall = async (
           originalError: (error as any)?.message || String(error),
         });
       } else if (
-        (error as any)?.message || String(error).includes('network') ||
-        (error as any)?.message || String(error).includes('timeout')
+        (error as any)?.message ||
+        String(error).includes('network') ||
+        (error as any)?.message ||
+        String(error).includes('timeout')
       ) {
         enhancedError = new Error(
           'Network error during call start. Please check your internet connection and try again.'
@@ -601,7 +621,9 @@ export const startCall = async (
           originalError: (error as any)?.message || String(error),
         });
       } else {
-        enhancedError = new Error(`Vapi call failed: ${(error as any)?.message || String(error)}`);
+        enhancedError = new Error(
+          `Vapi call failed: ${(error as any)?.message || String(error)}`
+        );
         vapiDebugger.log('error', 'Generic call failure', {
           originalError: (error as any)?.message || String(error),
         });
@@ -615,7 +637,7 @@ export const startCall = async (
 };
 
 export const endCall = async (): Promise<void> => {
-    // Function returns void implicitly
+  // Function returns void implicitly
   if (!vapiInstance) {
     logger.warn('[vapiClient] No Vapi instance to end call', 'Component');
     return;
