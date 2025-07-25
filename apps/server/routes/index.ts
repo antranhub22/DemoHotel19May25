@@ -26,6 +26,7 @@ import healthRoutes from '@server/routes/health';
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
+import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
 import featureFlagsRoutes from '@server/routes/feature-flags';
@@ -43,58 +44,59 @@ logger.debug(
   'MainRouter'
 );
 
-// ✅ CORE MODULE: Essential system functionality
+// Business domain modules (v3.0)
+router.use('/api/admin', adminModuleRoutes);
+router.use('/api/analytics-module', analyticsModuleRoutes);
 router.use('/api/core', coreModuleRoutes);
-
-// ✅ HOTEL MODULE: Hotel operations & management
 router.use('/api/hotel', hotelModuleRoutes);
-
-// ✅ VOICE MODULE: Voice assistant & call management
 router.use('/api/voice', voiceModuleRoutes);
 
-// ✅ ANALYTICS MODULE: Analytics & business intelligence
-router.use('/api/analytics-module', analyticsModuleRoutes);
-
-// ✅ ADMIN MODULE: System administration & management
-router.use('/api/admin', adminModuleRoutes);
-
 // ============================================
-// LEGACY API ROUTES - BACKWARD COMPATIBILITY
+// LEGACY ROUTES (v1.0-v2.0) - Backward Compatible
 // ============================================
 
-logger.debug(
-  '🔄 [Router v3.0] Mounting legacy routes for backward compatibility',
-  'MainRouter'
-);
+logger.debug('📡 [Router] Setting up legacy API routes...', 'MainRouter');
 
-// ✅ AUTH ROUTES - COMPLETELY OUTSIDE /api/* PREFIX (no rate limiting, no middleware)
-router.use('/auth', unifiedAuthRoutes);
+// Core API routes
+router.use('/api', apiRoutes); // ✅ CRITICAL: Main API functionality
 
-// ✅ CRITICAL FIX: Main API routes for Siri functionality
-router.use('/api', apiRoutes);
-
-// ✅ LEGACY API ROUTES - Keep existing structure for backward compatibility
-router.use('/api/analytics', analyticsRoutes);
-router.use('/api/calls', callsRoutes);
-router.use('/api/saas-dashboard', dashboardRoutes);
-router.use('/api/email', emailRoutes);
-router.use('/api/health', healthRoutes);
-router.use('/api/request', requestRoutes);
+// Authentication (Unified System)
+router.use('/api/auth', unifiedAuthRoutes);
 router.use('/api/staff', staffRoutes);
 
-// ✅ v2.0 ENHANCED ROUTES - Direct access (also available under /api/admin)
+// Business Logic
+router.use('/api/calls', callsRoutes);
+router.use('/api/request', requestRoutes);
+router.use('/api/email', emailRoutes);
+router.use('/api', dashboardRoutes);
+
+// Analytics & Reporting
+router.use('/api/analytics', analyticsRoutes);
+
+// System Routes
+router.use('/api/health', healthRoutes);
+
+// ✅ NEW: Vapi Proxy for CORS bypass
+router.use('/api/vapi-proxy', vapiProxyRoutes);
+
+// System Management (v2.0)
 router.use('/api/feature-flags', featureFlagsRoutes);
 router.use('/api/module-lifecycle', moduleLifecycleRoutes);
 router.use('/api/monitoring', monitoringRoutes);
 
-// ✅ PUBLIC ROUTES - For development and testing
-router.use('/public', tempPublicRoutes);
+// Development & Testing
+router.use('/api/temp-public', tempPublicRoutes);
 
-;
+// ============================================
+// ROUTE REGISTRATION SUCCESS
+// ============================================
 
-logger.success(
-  '✅ [Router v3.0] Modular route architecture initialized successfully',
-  'MainRouter'
-);
+logger.debug('✅ [Router v3.0] All routes registered successfully', 'MainRouter');
+logger.debug('📊 [Router] Route structure:', 'MainRouter', {
+  modular: ['admin', 'analytics-module', 'core', 'hotel', 'voice'],
+  legacy: ['api', 'auth', 'calls', 'request', 'analytics', 'health'],
+  system: ['feature-flags', 'module-lifecycle', 'monitoring'],
+  new: ['vapi-proxy'], // ✅ Added
+});
 
 export default router;

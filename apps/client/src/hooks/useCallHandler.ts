@@ -153,13 +153,13 @@ export const useCallHandler = () => {
 
       try {
         logger.debug(
-          '[useCallHandler] Initializing Vapi with public key:',
+          '[useCallHandler] Starting Vapi call via proxy (CORS bypass):',
           'Component',
           publicKey
         );
 
-        // ✅ NEW: Debug before Vapi initialization
-        console.log('🚀 [DEBUG] Starting Vapi initialization:', {
+        // ✅ NEW: Debug before Vapi proxy call
+        console.log('🚀 [DEBUG] Starting Vapi call via proxy (CORS bypass):', {
           publicKey: publicKey ? `${publicKey.substring(0, 15)}...` : 'MISSING',
           assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
           language: lang,
@@ -170,25 +170,43 @@ export const useCallHandler = () => {
 
         if (assistantId) {
           logger.debug(
-            '[useCallHandler] Starting Vapi call with assistant ID:',
+            '[useCallHandler] Starting Vapi call via server proxy:',
             'Component',
             assistantId
           );
 
-          // ✅ NEW: Debug Vapi call start
-          console.log('📞 [DEBUG] About to start Vapi call:', {
+          // ✅ NEW: Debug Vapi proxy call start
+          console.log('📞 [DEBUG] About to start Vapi call via proxy:', {
             assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
             language: lang,
             timestamp: new Date().toISOString()
           });
 
-          // ✅ NEW: This is where actual Vapi call should happen
-          // TODO: Add actual Vapi SDK call here
-          console.log('⚠️ [DEBUG] NOTE: Actual Vapi SDK call should happen here!');
+          // ✅ FIXED: Use Vapi proxy instead of direct SDK call
+          const { startVapiCallViaProxy } = await import('@/lib/vapiProxyClient');
 
-          return { success: true };
+          console.log('🔄 [DEBUG] Calling Vapi proxy...');
+
+          const result = await startVapiCallViaProxy(assistantId, publicKey, {
+            metadata: { language: lang, source: 'siri-button' }
+          });
+
+          console.log('📡 [DEBUG] Vapi proxy result:', {
+            success: result.success,
+            error: result.error,
+            callId: result.data?.id,
+            timestamp: new Date().toISOString()
+          });
+
+          if (result.success) {
+            console.log('✅ [DEBUG] Vapi call started successfully via proxy!');
+            return { success: true, data: result.data };
+          } else {
+            console.error('❌ [DEBUG] Vapi proxy call failed:', result.error);
+            return { success: false, error: result.error || 'Vapi proxy call failed' };
+          }
         } else {
-          const error = 'Failed to get Vapi instance or assistant ID';
+          const error = 'Failed to get assistant ID';
           logger.error('[useCallHandler]', 'Component', error);
 
           // ✅ NEW: Debug assistant ID missing
@@ -202,13 +220,13 @@ export const useCallHandler = () => {
         }
       } catch (error) {
         logger.error(
-          '[useCallHandler] Error starting Vapi call:',
+          '[useCallHandler] Error starting Vapi call via proxy:',
           'Component',
           error
         );
 
         // ✅ NEW: Enhanced error debug
-        console.error('❌ [DEBUG] Vapi call error details:', {
+        console.error('❌ [DEBUG] Vapi proxy call error details:', {
           error,
           errorMessage: error instanceof Error ? error.message : String(error),
           errorStack: error instanceof Error ? error.stack : 'No stack',
