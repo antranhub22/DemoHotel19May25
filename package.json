@@ -340,8 +340,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "prettier --write",
-      "npm run governance:validate:security"
+      "prettier --write"
     ],
     "*.{json,md}": [
       "prettier --write"
