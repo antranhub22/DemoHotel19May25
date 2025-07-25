@@ -70,9 +70,9 @@ router.use('/staff', staffRoutes);
 
 /**
  * Hotel dashboard and configuration
- * Mounted at: /api/hotel/dashboard/*
+    * Mounted at: /api/hotel/hotel-dashboard/*
  */
-router.use('/dashboard', dashboardRoutes);
+router.use('/hotel-dashboard', dashboardRoutes);
 
 /**
  * Email notifications and communication
@@ -87,7 +87,7 @@ router.use('/email', emailRoutes);
 /**
  * GET /api/hotel - Hotel module information
  */
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   logger.api('📊 [Hotel-Module] Root endpoint accessed', 'HotelModule');
 
   (res as any).json({
@@ -108,7 +108,7 @@ router.get('/', (req, res) => {
     endpoints: {
       requests: '/api/hotel/requests',
       staff: '/api/hotel/staff',
-      dashboard: '/api/hotel/dashboard',
+      dashboard: '/api/hotel/hotel-dashboard',
       email: '/api/hotel/email',
     },
 
@@ -126,7 +126,7 @@ router.get('/', (req, res) => {
 /**
  * GET /api/hotel/status - Quick status check
  */
-router.get('/status', (req, res) => {
+router.get('/status', (_req, res) => {
   logger.api('⚡ [Hotel-Module] Status check requested', 'HotelModule');
 
   (res as any).json({
@@ -147,7 +147,7 @@ router.get('/status', (req, res) => {
 /**
  * GET /api/hotel/meta - Module metadata and API documentation
  */
-router.get('/meta', (req, res) => {
+router.get('/meta', (_req, res) => {
   logger.api('📖 [Hotel-Module] Metadata requested', 'HotelModule');
 
   (res as any).json({

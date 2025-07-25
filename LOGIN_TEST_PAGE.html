@@ -131,7 +131,7 @@
         <p>Click on any account card to test login with that role:</p>
 
         <div class="account-grid">
-            <div class="account-card admin" onclick="testLogin('admin', 'admin123', 'super-admin', '/dashboard')">
+            <div class="account-card admin" onclick="testLogin('admin', 'admin123', 'super-admin', '/saas-dashboard')">
                 <div class="role-title">🔴 System Administrator</div>
                 <div class="credentials">admin / admin123</div>
                 <div class="expected-route">→ /dashboard (Full admin interface)</div>
@@ -256,7 +256,7 @@
             log('='.repeat(80), 'info');
 
             const accounts = [
-                { username: 'admin', password: 'admin123', role: 'super-admin', route: '/dashboard' },
+                { username: 'admin', password: 'admin123', role: 'super-admin', route: '/saas-dashboard' },
                 { username: 'manager', password: 'manager123', role: 'hotel-manager', route: '/unified-dashboard' },
                 { username: 'frontdesk', password: 'frontdesk123', role: 'front-desk', route: '/unified-dashboard' },
                 { username: 'itmanager', password: 'itmanager123', role: 'it-manager', route: '/unified-dashboard' },

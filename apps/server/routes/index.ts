@@ -76,7 +76,7 @@ router.use('/api', apiRoutes);
 // ✅ LEGACY API ROUTES - Keep existing structure for backward compatibility
 router.use('/api/analytics', analyticsRoutes);
 router.use('/api/calls', callsRoutes);
-router.use('/api/dashboard', dashboardRoutes);
+router.use('/api/saas-dashboard', dashboardRoutes);
 router.use('/api/email', emailRoutes);
 router.use('/api/health', healthRoutes);
 router.use('/api/request', requestRoutes);

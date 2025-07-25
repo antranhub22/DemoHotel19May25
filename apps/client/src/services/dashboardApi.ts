@@ -42,11 +42,11 @@ export interface HotelData {
 
 export interface AssistantCustomization {
   personality:
-    | 'professional'
-    | 'friendly'
-    | 'luxurious'
-    | 'casual'
-    | 'enthusiastic';
+  | 'professional'
+  | 'friendly'
+  | 'luxurious'
+  | 'casual'
+  | 'enthusiastic';
   tone: 'formal' | 'friendly' | 'warm' | 'energetic' | 'calm';
   languages: string[];
   voiceId?: string;
@@ -177,7 +177,7 @@ export interface ApiError {
 // ============================================
 
 export class DashboardApi {
-  private baseUrl = '/api/dashboard';
+  private baseUrl = '/api/saas-dashboard';
 
   // ============================================
   // Hotel Research & Setup

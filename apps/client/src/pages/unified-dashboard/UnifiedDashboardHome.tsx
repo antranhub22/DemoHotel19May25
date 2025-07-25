@@ -1,21 +1,21 @@
 import {
-  BarChart3,
-  Users,
-  MessageSquare,
-  Bot,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  Shield,
-  Wrench,
-  Database,
-  Monitor,
-  ClipboardList,
-  Phone,
-  Star,
-  Clock,
-  Server,
   Activity,
+  AlertCircle,
+  BarChart3,
+  Bot,
+  CheckCircle,
+  ClipboardList,
+  Clock,
+  Database,
+  MessageSquare,
+  Monitor,
+  Phone,
+  Server,
+  Shield,
+  Star,
+  TrendingUp,
+  Users,
+  Wrench,
 } from 'lucide-react';
 import React from 'react';
 import { Link } from 'wouter';
@@ -76,13 +76,6 @@ const MetricCard = ({
   trend?: string;
   color?: 'blue' | 'green' | 'red' | 'orange' | 'purple';
 }) => {
-  const colorClasses = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    red: 'bg-red-500',
-    orange: 'bg-orange-500',
-    purple: 'bg-purple-500',
-  };
 
   return (
     <Card>

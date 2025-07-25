@@ -137,11 +137,11 @@ export interface RouteTarget {
 
 export interface LoadBalancingConfig {
   strategy:
-    | 'round_robin'
-    | 'weighted'
-    | 'least_connections'
-    | 'ip_hash'
-    | 'random';
+  | 'round_robin'
+  | 'weighted'
+  | 'least_connections'
+  | 'ip_hash'
+  | 'random';
   healthCheckInterval: number; // seconds
   maxRetries: number;
   retryDelay: number; // milliseconds
@@ -543,7 +543,7 @@ export class APIGateway extends EventEmitter {
     const averageResponseTime =
       responseTimes.length > 0
         ? responseTimes.reduce((sum, time) => sum + time, 0) /
-          responseTimes.length
+        responseTimes.length
         : 0;
     const p95ResponseTime =
       responseTimes.length > 0
@@ -684,19 +684,21 @@ export class APIGateway extends EventEmitter {
         case 'query':
           version = req.query[strategy.parameter] as string;
           break;
-        case 'path':
+        case 'path': {
           const pathMatch = req.path.match(
             new RegExp(`^${strategy.prefix}/(v\\d+(?:\\.\\d+)?)`)
           );
           version = pathMatch?.[1];
           break;
-        case 'subdomain':
+        }
+        case 'subdomain': {
           const host = req.get('Host') || '';
           const subdomainMatch = host.match(
             new RegExp(`^(v\\d+(?:\\.\\d+)?)\\.`)
           );
           version = subdomainMatch?.[1];
           break;
+        }
       }
 
       if (
@@ -914,7 +916,7 @@ export class APIGateway extends EventEmitter {
     req: Request,
     context: RequestContext
   ): RoutingRule | null {
-    for (const [id, rule] of this.routingTable) {
+    for (const [, rule] of this.routingTable) {
       const patternMatch = new RegExp(rule.pattern).test(req.path);
       const methodMatch =
         rule.methods.includes('*') || rule.methods.includes(req.method);

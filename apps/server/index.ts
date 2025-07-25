@@ -158,7 +158,7 @@ const dashboardLimiter = rateLimit({
 });
 
 // Apply stricter rate limiting to dashboard routes
-app.use('/api/dashboard', dashboardLimiter);
+app.use('/api/saas-dashboard', dashboardLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -181,7 +181,7 @@ app.use(
   businessMetricsMiddleware('call-efficiency', 'performance')
 );
 app.use(
-  '/api/dashboard/generate-assistant',
+  '/api/saas-dashboard/generate-assistant',
   businessMetricsMiddleware('assistant-creation', 'operations')
 );
 

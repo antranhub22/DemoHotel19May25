@@ -102,7 +102,8 @@ function determineModule(path: string): string {
   if (path.startsWith('/api/health')) return 'core-module';
   if (path.startsWith('/api/request')) return 'hotel-module';
   if (path.startsWith('/api/staff')) return 'hotel-module';
-  if (path.startsWith('/api/dashboard')) return 'hotel-module';
+  if (path.startsWith('/api/saas-dashboard')) return 'saas-module';
+  if (path.startsWith('/api/hotel-dashboard')) return 'hotel-module';
   if (path.startsWith('/api/email')) return 'hotel-module';
   if (path.startsWith('/api/calls')) return 'voice-module';
   if (path.startsWith('/auth')) return 'auth-module';
@@ -155,11 +156,12 @@ export const businessMetricsMiddleware = (
                 unit = 'rating';
               }
               break;
-            case 'response-efficiency':
+            case 'response-efficiency': {
               const responseTime = Date.now() - (req.startTime || Date.now());
               value = responseTime < 1000 ? 100 : responseTime < 2000 ? 80 : 60;
               unit = '%';
               break;
+            }
             default:
               value = 1;
               unit = 'count';

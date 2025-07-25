@@ -112,9 +112,9 @@ router.use('/database', databaseOptimizationRoutes);
 
 /**
  * Real-time monitoring dashboard and analytics
- * Mounted at: /api/admin/dashboard/*
+    * Mounted at: /api/admin/admin-dashboard/*
  */
-router.use('/dashboard', monitoringDashboardRoutes);
+router.use('/admin-dashboard', monitoringDashboardRoutes);
 
 /**
  * API Gateway management and configuration
@@ -125,7 +125,7 @@ router.use('/api-gateway', apiGatewayRoutes);
 /**
  * GET /api/admin - Admin module information
  */
-router.get('/', (req, res) => {
+router.get('/', (___req, res) => {
   logger.api('⚙️ [Admin-Module] Root endpoint accessed', 'AdminModule');
 
   (res as any).json({
@@ -158,7 +158,7 @@ router.get('/', (req, res) => {
       cache: '/api/admin/cache',
       loadTesting: '/api/admin/load-testing',
       database: '/api/admin/database',
-      dashboard: '/api/admin/dashboard',
+      dashboard: '/api/admin/admin-dashboard',
       apiGateway: '/api/admin/api-gateway',
     },
 

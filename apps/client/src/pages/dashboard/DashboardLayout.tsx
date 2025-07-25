@@ -1,19 +1,5 @@
-import {
-  Settings,
-  Bell,
-  Menu,
-  LogOut,
-  HelpCircle,
-  Home,
-  Bot,
-  BarChart,
-  CreditCard,
-  Users,
-} from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
 import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +12,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import {
+  BarChart,
+  Bell,
+  Bot,
+  CreditCard,
+  HelpCircle,
+  Home,
+  LogOut,
+  Menu,
+  Settings,
+  Users,
+} from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'wouter';
 
 // Types
 interface TenantData {
@@ -53,7 +53,7 @@ const mockTenant: TenantData = {
 // Navigation items
 const navigationItems = [
   {
-    href: '/dashboard',
+    href: '/saas-dashboard',
     icon: Home,
     label: 'Tổng quan',
     description: 'Metrics và thống kê tổng quan',

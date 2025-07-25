@@ -211,7 +211,7 @@ export function cacheQuery<T = any>(
 
       try {
         // Execute the database query function safely
-        const queryResult = await queryFunction();
+        const queryResult = await Promise.resolve(queryFunction());
         const queryTime = Date.now() - startTime;
 
         logger.debug(
@@ -283,7 +283,7 @@ export function analyticsCacheMiddleware(
     namespace: 'analytics',
     tags: ['analytics-data'],
     condition: req => {
-      return req.path.includes('/analytics') || req.path.includes('/dashboard');
+      return req.path.includes('/analytics') || req.path.includes('/hotel-dashboard') || req.path.includes('/saas-dashboard');
     },
     keyGenerator: req => {
       const tenantId = req.headers['x-tenant-id'] || 'default';

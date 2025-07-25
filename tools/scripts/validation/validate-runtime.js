@@ -95,7 +95,7 @@ class RuntimeValidator {
       this.config.monitoring.logLevel === 'debug' ||
       ['error', 'warn', 'info'].includes(level)
     ) {
-      await fs.appendFile(this.logFile, logEntry).catch(() => {});
+      await fs.appendFile(this.logFile, logEntry).catch(() => { });
     }
   }
 
@@ -239,7 +239,7 @@ class RuntimeValidator {
     const testEndpoints = [
       { path: '/api/health', method: 'GET', expectSchema: 'api.response' },
       {
-        path: '/api/dashboard/analytics',
+        path: '/api/saas-dashboard/analytics',
         method: 'GET',
         expectSchema: 'api.analytics.dashboard.response',
       },
@@ -477,10 +477,10 @@ class RuntimeValidator {
     summary.successRate =
       summary.totalValidations > 0
         ? (
-            ((summary.totalValidations - summary.totalErrors) /
-              summary.totalValidations) *
-            100
-          ).toFixed(2)
+          ((summary.totalValidations - summary.totalErrors) /
+            summary.totalValidations) *
+          100
+        ).toFixed(2)
         : 100;
 
     return summary;
@@ -538,8 +538,8 @@ class RuntimeValidator {
                 <th>Error Rate</th>
             </tr>
             ${Object.entries(reportData.summary.categories)
-              .map(
-                ([category, data]) => `
+        .map(
+          ([category, data]) => `
             <tr>
                 <td>${category}</td>
                 <td>${data.total}</td>
@@ -548,8 +548,8 @@ class RuntimeValidator {
                 <td>${data.errorRate}%</td>
             </tr>
             `
-              )
-              .join('')}
+        )
+        .join('')}
         </table>
     </div>
     

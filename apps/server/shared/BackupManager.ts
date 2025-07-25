@@ -683,7 +683,7 @@ export class BackupManager extends EventEmitter {
         location: backupPath,
         expiryDate: new Date(
           Date.now() +
-            this.config.filesystem.retentionDays * 24 * 60 * 60 * 1000
+          this.config.filesystem.retentionDays * 24 * 60 * 60 * 1000
         ),
         dependencies: [],
         restoration: {
@@ -799,7 +799,7 @@ export class BackupManager extends EventEmitter {
         location: finalPath,
         expiryDate: new Date(
           Date.now() +
-            this.config.configuration.retentionDays * 24 * 60 * 60 * 1000
+          this.config.configuration.retentionDays * 24 * 60 * 60 * 1000
         ),
         dependencies: [],
         restoration: {
@@ -908,7 +908,7 @@ export class BackupManager extends EventEmitter {
         location: backupPath,
         expiryDate: new Date(
           Date.now() +
-            this.config.applicationState.retentionDays * 24 * 60 * 60 * 1000
+          this.config.applicationState.retentionDays * 24 * 60 * 60 * 1000
         ),
         dependencies: [],
         restoration: {
@@ -1065,7 +1065,7 @@ export class BackupManager extends EventEmitter {
         console.log(`🔄 Running scheduled backup: ${schedule.name}`);
 
         switch (type) {
-          case 'database':
+          case 'database': {
             // Map differential to incremental for database backups
             const backupType =
               schedule.type === 'differential' ? 'incremental' : schedule.type;
@@ -1074,6 +1074,7 @@ export class BackupManager extends EventEmitter {
               backupType as 'full' | 'incremental'
             );
             break;
+          }
           case 'filesystem':
             await this.createFilesystemBackup(schedule.id);
             break;
@@ -1251,14 +1252,14 @@ export class BackupManager extends EventEmitter {
     this.statistics.averageDuration =
       durations.length > 0
         ? durations.reduce((sum, duration) => sum + duration, 0) /
-          durations.length
+        durations.length
         : 0;
 
     this.statistics.lastBackupTime =
       backups.length > 0
         ? new Date(
-            Math.max(...backups.map(backup => backup.timestamp.getTime()))
-          )
+          Math.max(...backups.map(backup => backup.timestamp.getTime()))
+        )
         : undefined;
 
     // Group by type

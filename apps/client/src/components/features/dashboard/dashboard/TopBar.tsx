@@ -1,17 +1,4 @@
-import {
-  Bell,
-  Menu,
-  Settings,
-  LogOut,
-  HelpCircle,
-  User,
-  Sun,
-  Moon,
-  ChevronRight,
-} from 'lucide-react';
-import React from 'react';
-import { Link, useLocation } from 'wouter';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +9,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Bell,
+  ChevronRight,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Moon,
+  Settings,
+  Sun,
+  User,
+} from 'lucide-react';
+import React from 'react';
+import { Link, useLocation } from 'wouter';
 
 // Types
 interface TopBarProps {
@@ -342,7 +342,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   const getCurrentPageInfo = () => {
     const path = window.location.pathname;
 
-    if (path === '/dashboard') {
+    if (path === '/saas-dashboard') {
       return {
         title: 'Tổng quan',
         description: 'Theo dõi hiệu suất AI Assistant',

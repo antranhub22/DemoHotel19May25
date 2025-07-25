@@ -156,7 +156,7 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
 // ============================================
 
 /**
- * POST /api/dashboard/research-hotel
+ * POST /api/saas-dashboard/research-hotel
  * Research hotel information automatically
  */
 // ✅ Hotel Research Route with subscription validation
@@ -251,7 +251,7 @@ router.post(
 );
 
 /**
- * POST /api/dashboard/generate-assistant
+ * POST /api/saas-dashboard/generate-assistant
  * Generate Vapi assistant from hotel data
  */
 router.post('/generate-assistant', async (req: Request, res: Response) => {
@@ -333,7 +333,7 @@ router.post('/generate-assistant', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/dashboard/hotel-profile
+ * GET /api/saas-dashboard/hotel-profile
  * Get hotel profile and assistant information
  */
 router.get('/hotel-profile', async (req: Request, res: Response) => {
@@ -420,7 +420,7 @@ router.get('/hotel-profile', async (req: Request, res: Response) => {
 });
 
 /**
- * PUT /api/dashboard/assistant-config
+ * PUT /api/saas-dashboard/assistant-config
  * Update assistant configuration
  */
 router.put('/assistant-config', async (req: Request, res: Response) => {
@@ -516,7 +516,7 @@ router.put('/assistant-config', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/dashboard/analytics
+ * GET /api/saas-dashboard/analytics
  * Get tenant-filtered analytics data
  */
 router.get('/analytics', async (req: Request, res: Response) => {
@@ -576,7 +576,7 @@ router.get('/analytics', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/dashboard/service-health
+ * GET /api/saas-dashboard/service-health
  * Check health of all integrated services
  */
 router.get('/service-health', async (_req: Request, res: Response) => {
@@ -628,7 +628,7 @@ router.get('/service-health', async (_req: Request, res: Response) => {
 });
 
 /**
- * DELETE /api/dashboard/reset-assistant
+ * DELETE /api/saas-dashboard/reset-assistant
  * Delete and reset assistant (for testing/development)
  */
 router.delete(

@@ -8,7 +8,7 @@ export { HotelResearchService } from '@server/services/hotelResearch';
 export { KnowledgeBaseGenerator } from '@server/services/knowledgeBaseGenerator';
 export {
   AssistantGeneratorService,
-  VapiIntegrationService,
+  VapiIntegrationService
 } from '@server/services/vapiIntegration';
 
 // Module metadata
@@ -18,10 +18,10 @@ export const AssistantModuleInfo = {
   description: 'AI voice assistant generation and management',
   dependencies: ['tenant-module'],
   endpoints: [
-    'POST /api/dashboard/research-hotel',
-    'POST /api/dashboard/generate-assistant',
-    'PUT /api/dashboard/assistant-config',
-    'GET /api/dashboard/hotel-profile',
+    'POST /api/saas-dashboard/research-hotel',
+    'POST /api/saas-dashboard/generate-assistant',
+    'PUT /api/saas-dashboard/assistant-config',
+    'GET /api/saas-dashboard/hotel-profile',
   ],
   features: [
     'hotel-research',

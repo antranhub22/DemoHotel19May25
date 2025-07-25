@@ -1,16 +1,6 @@
-import { eq, sql, and, desc } from 'drizzle-orm';
-import express, { Request, Response } from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { AnalyticsController } from '@server/controllers/analyticsController';
-import { db } from '@shared/db';
-import {
-  call,
-  transcript,
-  request,
-  call_summaries,
-  staff,
-} from '@shared/db/schema';
-import { logger } from '@shared/utils/logger';
+import express from 'express';
 
 const router = express.Router();
 
@@ -42,7 +32,7 @@ router.get(
 // Returns: overview + serviceDistribution + hourlyActivity + languageDistribution
 // Query params: ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD OR ?days=30
 router.get(
-  '/dashboard',
+  '/analytics-dashboard',
   authenticateJWT,
   AnalyticsController.getDashboardAnalytics
 );
