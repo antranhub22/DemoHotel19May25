@@ -1,15 +1,14 @@
-import { eq, and, gte, sql } from 'drizzle-orm';
 import type {
+  CallSummary,
+  InsertCallSummary,
   InsertStaff,
   InsertTranscript,
   Transcript,
-  InsertCallSummary,
-  CallSummary,
 } from '@shared/db';
-import { authUserMapper, AuthUserCamelCase } from '@shared/db/transformers';
-import { staff, transcript, request, callSummaries } from '@shared/schema';
+import { call_summaries, db, request, staff, transcript } from '@shared/db';
+import { AuthUserCamelCase, authUserMapper } from '@shared/db/transformers';
 import { logger } from '@shared/utils/logger';
-import { db } from './db';
+import { and, eq, gte, sql } from 'drizzle-orm';
 
 // ✅ Import missing types from shared/db
 
@@ -307,7 +306,7 @@ export class DatabaseStorage {
       );
 
       const result = await db
-        .insert(callSummaries)
+        .insert(call_summaries)
         .values(processedSummary)
         .returning();
 
@@ -341,8 +340,8 @@ export class DatabaseStorage {
   ): Promise<CallSummary | undefined> {
     const result = await db
       .select()
-      .from(callSummaries)
-      .where(eq(callSummaries.call_id, callId));
+      .from(call_summaries)
+      .where(eq(call_summaries.call_id, callId));
     return result.length > 0 ? result[0] : undefined;
   }
 
@@ -364,9 +363,9 @@ export class DatabaseStorage {
       // Query summaries newer than the calculated timestamp (Date comparison)
       return await db
         .select()
-        .from(callSummaries)
-        .where(gte(callSummaries.timestamp, hoursAgo))
-        .orderBy(sql`${callSummaries.timestamp} DESC`);
+        .from(call_summaries)
+        .where(gte(call_summaries.timestamp, hoursAgo))
+        .orderBy(sql`${call_summaries.timestamp} DESC`);
     } catch (error) {
       logger.error(
         '❌ [PostgreSQL Storage] Error getting recent call summaries:',

@@ -1,4 +1,4 @@
-import { db } from './db';
+import { db, request } from './db';
 import { handlePostgreSQLResult } from './db/transformers';
 
 // ============================================
