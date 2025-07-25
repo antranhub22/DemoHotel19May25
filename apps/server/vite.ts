@@ -1,10 +1,10 @@
+import { logger } from '@shared/utils/logger';
+import express, { type Express } from 'express';
 import fs from 'fs';
 import type { Server } from 'http';
-import path from 'path';
-import express, { type Express } from 'express';
 import { nanoid } from 'nanoid';
+import path from 'path';
 import { createLogger, createServer as createViteServer } from 'vite';
-import { logger } from '@shared/utils/logger';
 
 const viteLogger = createLogger();
 
@@ -161,7 +161,23 @@ export function serveStatic(app: Express) {
       req.originalUrl.startsWith('/api/') ||
       req.originalUrl.startsWith('/ws/')
     ) {
-      return (res as any).status(404).json({ error: 'API endpoint not found' });
+      // Enhanced logging for debugging API endpoint issues
+      console.warn(
+        `❌ [API] Endpoint not found: ${req.method} ${req.originalUrl}`,
+        {
+          host: req.get('host'),
+          userAgent: req.get('user-agent'),
+          referer: req.get('referer'),
+          timestamp: new Date().toISOString(),
+        }
+      );
+
+      return (res as any).status(404).json({
+        error: 'API endpoint not found',
+        path: req.originalUrl,
+        method: req.method,
+        suggestion: 'Ensure your API calls start with /api/ prefix',
+      });
     }
 
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');

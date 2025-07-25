@@ -442,6 +442,29 @@ export class ApiClient {
 // DEFAULT API CLIENT INSTANCE
 // ========================================
 
+/**
+ * Normalize API endpoint to ensure proper format
+ */
+function normalizeApiUrl(url: string): string {
+  // If URL is already absolute, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Ensure URL starts with /api/ for relative URLs
+  if (!url.startsWith('/api/')) {
+    // If it starts with /, replace with /api
+    if (url.startsWith('/')) {
+      url = '/api' + url;
+    } else {
+      // Add /api/ prefix
+      url = '/api/' + url;
+    }
+  }
+
+  return url;
+}
+
 export const apiClient = new ApiClient({
   baseUrl:
     import.meta.env.VITE_API_URL ||
@@ -452,6 +475,34 @@ export const apiClient = new ApiClient({
   timeout: 30000,
   withCredentials: true,
 });
+
+/**
+ * Enhanced apiClient with URL normalization
+ */
+export const safeApiClient = {
+  ...apiClient,
+  async get<T>(
+    url: string,
+    params?: Record<string, any>
+  ): Promise<ApiResponse<T>> {
+    return apiClient.get<T>(normalizeApiUrl(url), params);
+  },
+  async post<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return apiClient.post<T>(normalizeApiUrl(url), data);
+  },
+  async put<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return apiClient.put<T>(normalizeApiUrl(url), data);
+  },
+  async patch<T>(url: string, data?: any): Promise<ApiResponse<T>> {
+    return apiClient.patch<T>(normalizeApiUrl(url), data);
+  },
+  async delete<T>(url: string): Promise<ApiResponse<T>> {
+    return apiClient.delete<T>(normalizeApiUrl(url));
+  },
+};
+
+// Export both for backward compatibility
+export default apiClient;
 
 // ========================================
 // HOOKS FOR REACT COMPONENTS
