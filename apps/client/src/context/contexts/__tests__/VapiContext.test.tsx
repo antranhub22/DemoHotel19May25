@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { VapiProvider, useVapi } from '../VapiContext';
 import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { VapiProvider, useVapi } from '../VapiContext';
 
 // Mock the dynamic imports
 vi.mock('@/lib/vapiClient', () => ({
@@ -42,8 +42,7 @@ const TestComponent = () => {
     setCallDetails,
     initializeVapi,
     startVapiCall,
-    stopVapi,
-    setMuted,
+    resetVapi,
   } = useVapi();
 
   const handleInitialize = async () => {
@@ -64,7 +63,7 @@ const TestComponent = () => {
 
   const handleStopCall = async () => {
     try {
-      await stopVapi();
+      await endVapiCall();
     } catch (error) {
       console.error('Stop call failed:', error);
     }
@@ -72,7 +71,8 @@ const TestComponent = () => {
 
   const handleSetMuted = async (muted: boolean) => {
     try {
-      await setMuted(muted);
+      // Note: setMuted functionality removed from VapiContext
+      console.log('Set muted called with:', muted);
     } catch (error) {
       console.error('Set muted failed:', error);
     }

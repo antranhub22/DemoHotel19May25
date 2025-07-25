@@ -4,40 +4,39 @@
 
 import React, {
   createContext,
-  useContext,
-  useEffect,
-  useCallback,
   ReactNode,
+  useCallback,
+  useContext,
 } from 'react';
 
 // Import types
-import { useCall, CallProvider } from '@/context/contexts/CallContext';
+import { CallProvider, useCall } from '@/context/contexts/CallContext';
 
 // Import all new focused contexts
 import {
-  useLanguage,
   LanguageProvider,
+  useLanguage,
 } from '@/context/contexts/LanguageContext';
-import { useOrder, OrderProvider } from '@/context/contexts/OrderContext';
+import { OrderProvider, useOrder } from '@/context/contexts/OrderContext';
 import { useVapi, VapiProvider } from '@/context/contexts/VapiContext';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import {
-  Transcript,
-  CallDetails,
-  Order,
   ActiveOrder,
+  CallDetails,
+  CallSummary,
+  Order,
   OrderSummary,
   ServiceRequest,
-  CallSummary,
+  Transcript,
 } from '@/types';
 import { logger } from '@shared/utils/logger';
 import {
-  useConfiguration,
   ConfigurationProvider,
+  useConfiguration,
 } from './contexts/ConfigurationContext';
 import {
-  useTranscript,
   TranscriptProvider,
+  useTranscript,
 } from './contexts/TranscriptContext';
 // Define Language type
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
@@ -106,8 +105,8 @@ export interface RefactoredAssistantContextType {
     hotelConfig?: HotelConfiguration | null
   ) => Promise<void>;
   startVapiCall: (assistantId: string) => Promise<any>;
-  stopVapi: () => void;
-  setMuted: (muted: boolean) => void;
+  endVapiCall: () => void;
+  resetVapi: () => Promise<void>;
 }
 
 const RefactoredAssistantContext = createContext<
@@ -153,7 +152,6 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       }
 
       // Start Vapi call
-      const vapiCall = await vapi.startVapiCall(assistantId);
 
       // Update call details
       const callId = `call-${Date.now()}`;
@@ -192,7 +190,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     logger.debug('[RefactoredAssistant] Ending enhanced call...', 'Component');
 
     // Stop Vapi first
-    vapi.stopVapi();
+    vapi.endVapiCall();
 
     // End call timer
     call.endCall();
@@ -212,9 +210,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
   // Enhanced toggleMute that integrates both contexts
   const enhancedToggleMute = useCallback(() => {
-    const newMutedState = !call.isMuted;
     call.toggleMute();
-    vapi.setMuted(newMutedState);
+    // Note: setMuted functionality removed from VapiContext
   }, [call, vapi]);
 
   return {
