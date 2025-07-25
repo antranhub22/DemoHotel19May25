@@ -22,7 +22,7 @@ export const generateDevToken = async (): Promise<string> => {
     try {
       console.log(`🔐 [AuthHelper] Trying login with ${cred.email}...`);
 
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cred),
