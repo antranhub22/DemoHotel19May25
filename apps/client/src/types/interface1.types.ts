@@ -1,15 +1,15 @@
-import { IconType } from 'react-icons';
+import type { LucideIcon } from 'lucide-react';
 import {
-  FaBed,
-  FaUtensils,
-  FaConciergeBell,
-  FaSwimmingPool,
-  FaSpa,
-  FaGlassMartini,
-  FaTaxi,
-  FaMapMarkedAlt,
-  FaPhoneAlt,
-} from 'react-icons/fa';
+  Bed,
+  Bell,
+  Car,
+  MapPin,
+  Phone,
+  Sparkles,
+  Utensils,
+  Waves,
+  Wine,
+} from 'lucide-react';
 
 // Core types for Interface1
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
@@ -29,7 +29,7 @@ export interface Interface1Props {
 // ✅ RENAMED: ServiceCategory -> ServiceItem (to avoid conflict with string union)
 export interface ServiceItem {
   name: string;
-  icon: IconType;
+  icon: LucideIcon;
   description?: string;
 }
 
@@ -37,52 +37,52 @@ export interface ServiceItem {
 export const SERVICE_CATEGORIES: ServiceItem[] = [
   {
     name: 'Room Service',
-    icon: FaBed,
+    icon: Bed,
     description: 'In-room dining and housekeeping services',
   },
   {
     name: 'Restaurant',
-    icon: FaUtensils,
+    icon: Utensils,
     description: 'Hotel restaurants and dining options',
   },
   {
     name: 'Concierge',
-    icon: FaConciergeBell,
+    icon: Bell,
     description: 'Concierge and guest services',
   },
   {
     name: 'Pool & Gym',
-    icon: FaSwimmingPool,
+    icon: Waves,
     description: 'Swimming pool and fitness facilities',
   },
   {
     name: 'Spa & Wellness',
-    icon: FaSpa,
+    icon: Sparkles,
     description: 'Spa treatments and wellness services',
   },
   {
     name: 'Bar & Lounge',
-    icon: FaGlassMartini,
+    icon: Wine,
     description: 'Hotel bars and lounges',
   },
   {
     name: 'Transportation',
-    icon: FaTaxi,
+    icon: Car,
     description: 'Transportation and taxi services',
   },
   {
     name: 'Local Guide',
-    icon: FaMapMarkedAlt,
+    icon: MapPin,
     description: 'Local area guide and information',
   },
   {
     name: 'Reception',
-    icon: FaPhoneAlt,
+    icon: Phone,
     description: 'Front desk and reception services',
   },
   {
     name: 'Guest Services',
-    icon: FaConciergeBell,
+    icon: Bell,
     description: 'Additional guest services',
   },
 ];

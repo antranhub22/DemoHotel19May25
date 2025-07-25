@@ -168,8 +168,8 @@ export class AdvancedHealthCheck {
         async checker => {
           try {
             const health = await Promise.race([
-              // eslint-disable-next-line security/detect-non-literal-require
-              checker.checkFunction(),
+              // Execute health check safely
+              await checker.checkFunction(),
               new Promise<ModuleHealthStatus>((_, reject) =>
                 setTimeout(
                   () => reject(new Error('Health check timeout')),
@@ -248,8 +248,8 @@ export class AdvancedHealthCheck {
 
     try {
       const health = await Promise.race([
-        // eslint-disable-next-line security/detect-non-literal-require
-        checker.checkFunction(),
+        // Execute health check safely
+        await checker.checkFunction(),
         new Promise<ModuleHealthStatus>((_, reject) =>
           setTimeout(
             () => reject(new Error('Health check timeout')),

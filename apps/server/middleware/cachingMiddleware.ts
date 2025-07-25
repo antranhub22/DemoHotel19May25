@@ -210,8 +210,8 @@ export function cacheQuery<T = any>(
       const startTime = Date.now();
 
       try {
-        // eslint-disable-next-line security/detect-non-literal-require
-        const result = await queryFunction();
+        // Execute the database query function safely
+        const queryResult = await queryFunction();
         const queryTime = Date.now() - startTime;
 
         logger.debug(
@@ -219,7 +219,7 @@ export function cacheQuery<T = any>(
           'CacheMiddleware'
         );
 
-        return result;
+        return queryResult;
       } catch (error) {
         logger.error(
           '❌ [DbCache] Query execution failed',
@@ -451,7 +451,7 @@ export function cacheWarmingMiddleware(
     tags: CacheTag[];
   }>
 ) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (_req: Request, _res: Response, next: NextFunction) => {
     // Run cache warming in background (don't block request)
     setImmediate(async () => {
       for (const warming of warmingFunctions) {

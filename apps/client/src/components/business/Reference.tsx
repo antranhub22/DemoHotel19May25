@@ -3,16 +3,15 @@
 // Type declaration for import.meta
 
 /// <reference types="react" />
-import React, { useState, useEffect } from 'react';
 import type { ReferenceItem } from '@/services/ReferenceService';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, A11y } from 'swiper/modules';
+import { logger } from '@shared/utils/logger';
+import { BookOpen, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { FaBookOpen } from 'react-icons/fa';
-import { FiChevronDown } from 'react-icons/fi';
-import { logger } from '@shared/utils/logger';
+import { A11y, Navigation, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 const CATEGORIES = [
   'Landmark',
@@ -234,7 +233,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
     ref =>
       (ref as any).category &&
       (ref as any).category.trim().toLowerCase() ===
-        activeCategory.trim().toLowerCase()
+      activeCategory.trim().toLowerCase()
   );
 
   // Main render
@@ -283,7 +282,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
             border: '1px solid rgba(255, 255, 255, 0.1)',
           }}
         >
-          <FaBookOpen
+          <BookOpen
             className="text-[#F9BF3B] text-xl mr-1.5"
             style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.2))' }}
           />
@@ -312,7 +311,7 @@ const Reference = ({ references }: ReferenceProps): JSX.Element => {
                 </option>
               ))}
             </select>
-            <FiChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[#F9BF3B] pointer-events-none text-lg" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[#F9BF3B] pointer-events-none text-lg" />
           </div>
         </div>
       </div>
