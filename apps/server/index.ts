@@ -238,7 +238,16 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Use the new routes system
+  // 🔧 CRITICAL FIX: Initialize database connection FIRST
+  // This prevents "Database not initialized" errors when any API is called
+  logger.debug(
+    '🚀 Initializing database connection before routes...',
+    'Component'
+  );
+  await initializeDatabaseOnStartup();
+  logger.debug('✅ Database connection initialized successfully', 'Component');
+
+  // Use the new routes system - NOW database is ready for any auth requests
   app.use(router);
 
   // Create HTTP server for WebSocket support
@@ -246,12 +255,6 @@ app.use((req, res, next) => {
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
-
-  // 🔧 CRITICAL FIX: Initialize database connection FIRST
-  // This prevents "Database not initialized" errors when Siri button is pressed
-  logger.debug('🚀 Initializing database connection...', 'Component');
-  await initializeDatabaseOnStartup();
-  logger.debug('✅ Database connection initialized successfully', 'Component');
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();
