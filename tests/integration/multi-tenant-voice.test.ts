@@ -1,21 +1,22 @@
 import {
-  beforeAll,
   afterAll,
+  beforeAll,
   beforeEach,
   describe,
   expect,
   it,
 } from '@jest/globals';
-import request from 'supertest';
 import { db } from '@shared/db';
-import { tenants
-  staff
-  call
-  transcript
+import {
+  call,
   request as requestTable,
- } from '@shared/db/schema';
-import { eq, and } from 'drizzle-orm';
+  staff,
+  tenants,
+  transcript,
+} from '@shared/db/schema';
+import { and, eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
+import request from 'supertest';
 
 // Test Configuration
 const TEST_JWT_SECRET = 'test-secret-key';
@@ -349,7 +350,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
         },
       ];
 
-      for (const transcript of (transcripts as any[])) {
+      for (const transcript of transcripts as any[]) {
         const storeTranscript = await request(app)
           .post('/api/store-transcript')
           .set('Authorization', `Bearer ${token}`)
@@ -412,7 +413,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
       // Tenant A (Premium) - supports 6 languages
       const languagesA = ['en', 'vi', 'fr', 'zh', 'ko', 'ru'];
 
-      for (const lang of (languagesA as any[])) {
+      for (const lang of languagesA as any[]) {
         const response = await request(app)
           .post('/api/calls')
           .set('Authorization', `Bearer ${tokenA}`)
@@ -428,7 +429,7 @@ describe('Multi-Tenant Voice Integration Tests', () => {
       // Tenant B (Basic) - only supports 2 languages
       const languagesB = ['en', 'vi'];
 
-      for (const lang of (languagesB as any[])) {
+      for (const lang of languagesB as any[]) {
         const response = await request(app)
           .post('/api/calls')
           .set('Authorization', `Bearer ${tokenB}`)
@@ -461,9 +462,6 @@ describe('Multi-Tenant Voice Integration Tests', () => {
 
   describe('Subscription Plan Feature Access', () => {
     it('should enforce voice cloning feature based on subscription plan', async () => {
-      const tokenA = generateTestJWT('staff-a-admin', 'tenant-hotel-a'); // Premium - voice cloning enabled
-      const tokenB = generateTestJWT('staff-b-manager', 'tenant-hotel-b'); // Basic - voice cloning disabled
-
       // Check tenant A has voice cloning access
       const tenantA = await db
         .select()

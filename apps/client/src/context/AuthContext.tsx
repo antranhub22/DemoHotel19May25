@@ -197,7 +197,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const res = await fetch('/auth/login', {
+      // ✅ FIXED: Use proper API base URL
+      const API_BASE_URL =
+        import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email, password }),

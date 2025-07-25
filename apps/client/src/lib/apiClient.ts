@@ -6,38 +6,35 @@
    TYPE-SAFE API CLIENT
    ======================================== */
 
-import type { QueryFunction } from '@tanstack/react-query';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
-
 // ✅ FIXED: Import all missing API types
 import type {
-  LoginRequest,
-  LoginResponse,
-  StartCallRequest,
-  StartCallResponse,
-  EndCallRequest,
-  EndCallResponse,
-  SaveTranscriptRequest,
-  SaveTranscriptResponse,
+  AnalyticsResponse,
+  ApiError,
+  ApiResponse,
   CreateOrderRequest,
   CreateOrderResponse,
-  UpdateOrderStatusRequest,
-  UpdateOrderStatusResponse,
-  SendMessageRequest,
-  SendMessageResponse,
-  HotelResearchRequest,
-  HotelResearchResponse,
+  EndCallRequest,
+  EndCallResponse,
   GenerateAssistantRequest,
   GenerateAssistantResponse,
+  HotelProfileResponse,
+  HotelResearchRequest,
+  HotelResearchResponse,
+  LoginRequest,
+  LoginResponse,
+  PaginatedResponse,
+  PaginationParams,
+  SaveTranscriptRequest,
+  SaveTranscriptResponse,
+  SendMessageRequest,
+  SendMessageResponse,
+  ServiceHealthResponse,
+  StartCallRequest,
+  StartCallResponse,
   UpdateAssistantConfigRequest,
   UpdateAssistantConfigResponse,
-  PaginationParams,
-  PaginatedResponse,
-  ApiResponse,
-  ApiError,
-  HotelProfileResponse,
-  AnalyticsResponse,
-  ServiceHealthResponse,
+  UpdateOrderStatusRequest,
+  UpdateOrderStatusResponse,
 } from '@/types/api';
 
 // ✅ FIXED: Import utility types
@@ -92,8 +89,10 @@ export class ApiClient {
       ...this.config.headers,
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    // ✅ FIXED: Auto get token from localStorage if not set manually
+    const token = this.token || localStorage.getItem('token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     return headers;
