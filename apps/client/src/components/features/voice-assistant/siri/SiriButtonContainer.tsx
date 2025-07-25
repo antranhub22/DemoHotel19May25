@@ -2,11 +2,11 @@
 
 // Type declaration for import.meta
 
-import React, { useState, useEffect } from 'react';
 import { useAssistant } from '@/context';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { designSystem } from '@/styles/designSystem';
 import { logger } from '@shared/utils/logger';
+import React, { useEffect, useState } from 'react';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import SiriCallButton from './SiriCallButton';
 
@@ -159,9 +159,30 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       lang
     );
 
+    // ✅ NEW: Enhanced debug logging for call start
+    console.log('🎬 [DEBUG] SiriButtonContainer.handleStartCall called:', {
+      language: lang,
+      timestamp: new Date().toISOString(),
+      onCallStartFunction: !!onCallStart,
+      onCallStartType: typeof onCallStart
+    });
+
     // ✅ IMPROVED: Better error handling for call start
     try {
+      // ✅ NEW: Pre-call debug
+      console.log('🚀 [DEBUG] About to call onCallStart:', {
+        language: lang,
+        timestamp: new Date().toISOString()
+      });
+
       await onCallStart(lang);
+
+      // ✅ NEW: Post-call success debug
+      console.log('✅ [DEBUG] onCallStart completed successfully:', {
+        language: lang,
+        timestamp: new Date().toISOString()
+      });
+
       logger.debug(
         '✅ [SiriButtonContainer] Call started successfully',
         'Component'

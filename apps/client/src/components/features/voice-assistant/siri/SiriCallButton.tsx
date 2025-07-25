@@ -2,13 +2,13 @@
 
 // Type declaration for import.meta
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SiriButton } from './SiriButton';
-import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
+import { SiriButton } from './SiriButton';
 
-import '../../../../styles/voice-interface.css';
 import { logger } from '@shared/utils/logger';
+import '../../../../styles/voice-interface.css';
 interface SiriCallButtonProps {
   isListening: boolean;
   volumeLevel: number;
@@ -45,19 +45,19 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   const DEBUG_LEVEL = import.meta.env.DEV ? 1 : 0; // 0: off, 1: errors only, 2: all
 
   // Debug utility methods - Environment aware
-  const debug = (message: string, ...args: any[]) => {
+  const debug = (_message: string, ...args: any[]) => {
     if (import.meta.env.DEV && DEBUG_LEVEL >= 2) {
       logger.debug('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
 
-  const debugWarn = (message: string, ...args: any[]) => {
+  const debugWarn = (_message: string, ...args: any[]) => {
     if (import.meta.env.DEV && DEBUG_LEVEL >= 1) {
       logger.warn('[SiriCallButton] ${message}', 'Component', ...args);
     }
   };
 
-  const debugError = (message: string, ...args: any[]) => {
+  const debugError = (_message: string, ...args: any[]) => {
     // Always show errors, even in production
     logger.error('[SiriCallButton] ${message}', 'Component', ...args);
   };
@@ -142,7 +142,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
   // ✅ CENTRALIZED interaction handlers
   const handleInteractionStart = useCallback(
-    (e: Event, position?: { x: number; y: number }) => {
+    (_e: Event, position?: { x: number; y: number }) => {
       if (buttonRef.current) {
         buttonRef.current.setInteractionMode('active');
         if (position) {
@@ -160,6 +160,17 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       debug('  🎯 Event type:', e.type);
       debug('  🎯 Event target:', e.target);
 
+      // ✅ NEW: Enhanced debug logging for Siri button clicks
+      console.log('🚀 [DEBUG] Siri Button Click Event:', {
+        eventType: e.type,
+        isListening,
+        onCallStartAvailable: !!onCallStart,
+        onCallEndAvailable: !!onCallEnd,
+        timestamp: new Date().toISOString(),
+        language,
+        containerId
+      });
+
       if (buttonRef.current) {
         buttonRef.current.setInteractionMode('idle');
         debug('  ✅ Visual state set to idle');
@@ -170,6 +181,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
         debug(
           '🔔 [SiriCallButton] ⚠️ Click already being handled, ignoring...'
         );
+        console.warn('🚨 [DEBUG] Double-click protection triggered');
         return;
       }
 
@@ -179,32 +191,85 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       debug('  ✅ onCallStart available:', !!onCallStart);
       debug('  ✅ onCallEnd available:', !!onCallEnd);
 
+      // ✅ NEW: Detailed debug for call flow decision
+      console.log('🎯 [DEBUG] Call Flow Decision:', {
+        shouldStartCall: !isListening && !!onCallStart,
+        shouldEndCall: isListening && !!onCallEnd,
+        isListening,
+        onCallStart: !!onCallStart,
+        onCallEnd: !!onCallEnd
+      });
+
       try {
         if (!isListening && onCallStart) {
           setStatus('listening');
           debug(
             '🎤 [SiriCallButton] 🟢 STARTING CALL - Calling onCallStart()...'
           );
+
+          // ✅ NEW: Pre-call debug info
+          console.log('🟢 [DEBUG] About to start call:', {
+            language,
+            timestamp: new Date().toISOString(),
+            callStartFunction: onCallStart.toString().substring(0, 100) + '...'
+          });
+
           try {
-            await onCallStart();
+            const result = await onCallStart();
             debug(
               '🎤 [SiriCallButton] ✅ onCallStart() completed successfully'
             );
+
+            // ✅ NEW: Post-call success debug
+            console.log('✅ [DEBUG] Call start result:', {
+              result,
+              timestamp: new Date().toISOString()
+            });
           } catch (error) {
             debugError('🎤 [SiriCallButton] ❌ onCallStart() error:', error);
+
+            // ✅ NEW: Enhanced error logging
+            console.error('❌ [DEBUG] Call start error details:', {
+              error,
+              errorMessage: error instanceof Error ? error.message : String(error),
+              errorStack: error instanceof Error ? error.stack : 'No stack',
+              timestamp: new Date().toISOString()
+            });
+
             setStatus('idle');
           }
         } else if (isListening && onCallEnd) {
           setStatus('processing');
           debug('🛑 [SiriCallButton] 🔴 ENDING CALL - Calling onCallEnd()...');
+
+          // ✅ NEW: Pre-end debug info
+          console.log('🔴 [DEBUG] About to end call:', {
+            timestamp: new Date().toISOString()
+          });
+
           onCallEnd();
           debug('🛑 [SiriCallButton] ✅ onCallEnd() completed');
+
+          // ✅ NEW: Post-end debug info
+          console.log('✅ [DEBUG] Call end completed:', {
+            timestamp: new Date().toISOString()
+          });
+
           setTimeout(() => setStatus('idle'), 500);
         } else {
           debug('🔔 [SiriCallButton] ⚠️ NO ACTION TAKEN:');
           debug('  🎧 isListening:', isListening);
           debug('  🎤 onCallStart available:', !!onCallStart);
           debug('  🛑 onCallEnd available:', !!onCallEnd);
+
+          // ✅ NEW: No action debug
+          console.warn('⚠️ [DEBUG] No action taken:', {
+            reason: 'Conditions not met',
+            isListening,
+            onCallStartAvailable: !!onCallStart,
+            onCallEndAvailable: !!onCallEnd,
+            timestamp: new Date().toISOString()
+          });
         }
       } finally {
         setTimeout(() => {
@@ -215,7 +280,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
 
       debug('🔔 [SiriCallButton] 🎯 INTERACTION END COMPLETED');
     },
-    [isListening, onCallStart, onCallEnd]
+    [isListening, onCallStart, onCallEnd, language, containerId]
   );
 
   const handleHover = useCallback((isHovered: boolean) => {
