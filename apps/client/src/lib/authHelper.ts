@@ -37,9 +37,12 @@ export const attemptLogin = async (
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    // ✅ FIXED: Use proper API base URL
+    // ✅ FIXED: Use proper API base URL - detect production
     const API_BASE_URL =
-      import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      import.meta.env.VITE_API_URL ||
+      (window.location.hostname.includes('talk2go.online')
+        ? `https://${window.location.hostname}`
+        : 'http://localhost:3000');
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

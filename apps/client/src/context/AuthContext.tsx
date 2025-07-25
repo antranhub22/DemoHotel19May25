@@ -198,9 +198,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // ✅ FIXED: Use proper API base URL
+      // ✅ FIXED: Use proper API base URL - detect production
       const API_BASE_URL =
-        import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        import.meta.env.VITE_API_URL ||
+        (window.location.hostname.includes('talk2go.online')
+          ? `https://${window.location.hostname}`
+          : 'http://localhost:3000');
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

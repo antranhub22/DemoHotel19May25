@@ -443,7 +443,12 @@ export class ApiClient {
 // ========================================
 
 export const apiClient = new ApiClient({
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseUrl:
+    import.meta.env.VITE_API_URL ||
+    (typeof window !== 'undefined' &&
+    window.location.hostname.includes('talk2go.online')
+      ? `https://${window.location.hostname}`
+      : 'http://localhost:3000'),
   timeout: 30000,
   withCredentials: true,
 });

@@ -53,7 +53,12 @@ export const getConfigurationSummary = () => {
       staffDashboard: true,
     },
     api: {
-      url: process.env.VITE_API_URL || 'http://localhost:3000',
+      url:
+        process.env.VITE_API_URL ||
+        (typeof window !== 'undefined' &&
+        window.location.hostname.includes('talk2go.online')
+          ? `https://${window.location.hostname}`
+          : 'http://localhost:3000'),
       version: 'v1',
     },
     hotel: {
