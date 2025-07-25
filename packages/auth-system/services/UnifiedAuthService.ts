@@ -4,7 +4,7 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import { db, staff } from '@shared/db';
+import { db, getDatabase, staff } from '@shared/db';
 import bcrypt from 'bcrypt';
 import { and, eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
@@ -60,6 +60,60 @@ class TokenBlacklist {
 // ============================================
 
 export class UnifiedAuthService {
+  // ============================================
+  // DATABASE CONNECTIVITY HELPERS
+  // ============================================
+
+  /**
+   * Ensure database is ready before operations
+   */
+  private static async ensureDatabaseReady(): Promise<boolean> {
+    try {
+      // Try to get database instance to ensure it's initialized
+      await getDatabase();
+      return true;
+    } catch (error) {
+      console.error('❌ [UnifiedAuth] Database not ready:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Safe database operation wrapper with retry logic
+   */
+  private static async safeDatabaseOperation<T>(
+    operation: () => Promise<T>,
+    retries: number = 3,
+    delay: number = 1000
+  ): Promise<T> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        // Check if database is ready
+        const isReady = await this.ensureDatabaseReady();
+        if (!isReady) {
+          throw new Error('Database not ready');
+        }
+
+        // Execute operation
+        return await operation();
+      } catch (error) {
+        console.error(
+          `❌ [UnifiedAuth] Database operation failed (attempt ${attempt}/${retries}):`,
+          error
+        );
+
+        if (attempt === retries) {
+          throw error;
+        }
+
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    throw new Error('Database operation failed after all retries');
+  }
+
   // ============================================
   // AUTHENTICATION METHODS
   // ============================================
@@ -285,38 +339,42 @@ export class UnifiedAuthService {
     loginIdentifier: string,
     tenantId?: string
   ): Promise<any> {
-    const whereConditions = [eq(staff.is_active, true)];
+    return await this.safeDatabaseOperation(async () => {
+      const whereConditions = [eq(staff.is_active, true)];
 
-    // Search by username or email
-    const isEmail = loginIdentifier.includes('@');
-    if (isEmail) {
-      whereConditions.push(eq(staff.email, loginIdentifier));
-    } else {
-      whereConditions.push(eq(staff.username, loginIdentifier));
-    }
+      // Search by username or email
+      const isEmail = loginIdentifier.includes('@');
+      if (isEmail) {
+        whereConditions.push(eq(staff.email, loginIdentifier));
+      } else {
+        whereConditions.push(eq(staff.username, loginIdentifier));
+      }
 
-    // Filter by tenant if provided
-    if (tenantId) {
-      whereConditions.push(eq(staff.tenant_id, tenantId));
-    }
+      // Filter by tenant if provided
+      if (tenantId) {
+        whereConditions.push(eq(staff.tenant_id, tenantId));
+      }
 
-    const users = await db
-      .select()
-      .from(staff)
-      .where(and(...whereConditions))
-      .limit(1);
+      const users = await db
+        .select()
+        .from(staff)
+        .where(and(...whereConditions))
+        .limit(1);
 
-    return users[0] || null;
+      return users[0] || null;
+    });
   }
 
   private static async findUserById(userId: string): Promise<any> {
-    const users = await db
-      .select()
-      .from(staff)
-      .where(eq(staff.id, userId))
-      .limit(1);
+    return await this.safeDatabaseOperation(async () => {
+      const users = await db
+        .select()
+        .from(staff)
+        .where(eq(staff.id, userId))
+        .limit(1);
 
-    return users[0] || null;
+      return users[0] || null;
+    });
   }
 
   private static async createAuthUserFromDbUser(
@@ -477,13 +535,15 @@ export class UnifiedAuthService {
 
   private static async updateLastLogin(userId: string): Promise<void> {
     try {
-      await db
-        .update(staff)
-        .set({
-          last_login: new Date(),
-          updated_at: new Date(),
-        } as any) // Type cast to avoid strict typing issues
-        .where(eq(staff.id, userId));
+      await this.safeDatabaseOperation(async () => {
+        await db
+          .update(staff)
+          .set({
+            last_login: new Date(),
+            updated_at: new Date(),
+          } as any) // Type cast to avoid strict typing issues
+          .where(eq(staff.id, userId));
+      });
     } catch (error) {
       console.error('❌ [UnifiedAuth] Failed to update last login:', error);
       // Don't throw error, just log it

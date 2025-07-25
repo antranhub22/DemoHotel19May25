@@ -1,6 +1,7 @@
 import router from '@server/routes/index';
 import { setupSocket } from '@server/socket';
 import { runAutoDbFix } from '@server/startup/auto-database-fix';
+import { initializeDatabaseOnStartup } from '@server/startup/database-initialization';
 import { runProductionMigration } from '@server/startup/production-migration';
 import { log, serveStatic, setupVite } from '@server/vite';
 import { logger } from '@shared/utils/logger';
@@ -245,6 +246,12 @@ app.use((req, res, next) => {
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
+
+  // 🔧 CRITICAL FIX: Initialize database connection FIRST
+  // This prevents "Database not initialized" errors when Siri button is pressed
+  logger.debug('🚀 Initializing database connection...', 'Component');
+  await initializeDatabaseOnStartup();
+  logger.debug('✅ Database connection initialized successfully', 'Component');
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();
