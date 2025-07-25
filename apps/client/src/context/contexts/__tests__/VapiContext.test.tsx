@@ -42,6 +42,7 @@ const TestComponent = () => {
     setCallDetails,
     initializeVapi,
     startVapiCall,
+    endVapiCall,
     resetVapi,
   } = useVapi();
 
