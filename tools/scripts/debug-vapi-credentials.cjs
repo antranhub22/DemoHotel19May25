@@ -1,17 +1,24 @@
 #!/usr/bin/env node
 
 /**
- * 🔧 VAPI Credentials Debug Tool
+ * 🔧 VAPI Credentials Debug Tool - UPDATED WITH RELAXED VALIDATION
  * 
  * Kiểm tra và debug các vấn đề về VAPI authentication token
  * Giúp xác định nguyên nhân gây ra lỗi "Invalid authentication token"
+ * 
+ * ⚠️  IMPORTANT UPDATE: 
+ * - VAPI AI does NOT require credentials to start with pk_ or asst_
+ * - Any format that worked before should continue to work
+ * - This tool now focuses on actual authentication issues, not format requirements
  */
 
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔧 VAPI Credentials Debug Tool');
-console.log('===============================\n');
+console.log('🔧 VAPI Credentials Debug Tool - RELAXED VALIDATION');
+console.log('==================================================');
+console.log('ℹ️  NOTE: No longer enforces pk_ or asst_ format requirements');
+console.log('ℹ️  VAPI AI accepts various credential formats\n');
 
 // 1. Kiểm tra Environment Variables
 console.log('📋 1. KIỂM TRA ENVIRONMENT VARIABLES');
@@ -69,54 +76,69 @@ for (const varName of optionalVapiVars) {
   }
 }
 
-// 2. Validate VAPI Credentials Format
-console.log('\n🔍 2. VALIDATE VAPI CREDENTIALS FORMAT');
-console.log('=====================================');
+// 2. Basic VAPI Credentials Validation (Relaxed)
+console.log('\n🔍 2. BASIC VAPI CREDENTIALS VALIDATION (RELAXED)');
+console.log('================================================');
+console.log('ℹ️  NOTE: VAPI AI does NOT require specific prefixes like pk_ or asst_');
+console.log('ℹ️  Any format that worked before should continue to work!');
 
 function validateVapiFormat() {
   const publicKey = process.env.VITE_VAPI_PUBLIC_KEY;
   const assistantId = process.env.VITE_VAPI_ASSISTANT_ID;
   const apiKey = process.env.VAPI_API_KEY;
   
-  let formatValid = true;
+  let hasIssues = false;
   
   // Validate Public Key
   if (publicKey) {
-    if (!publicKey.startsWith('pk_')) {
-      console.log(`❌ Public Key format invalid: should start with 'pk_' but starts with '${publicKey.substring(0, 5)}'`);
-      formatValid = false;
-    } else if (publicKey.length < 20) {
-      console.log(`❌ Public Key too short: ${publicKey.length} characters (should be longer)`);
-      formatValid = false;
+    if (publicKey.length < 10) {
+      console.log(`⚠️  Public Key might be too short: ${publicKey.length} characters`);
+      console.log(`   Preview: ${publicKey.substring(0, 10)}...`);
+      hasIssues = true;
     } else {
-      console.log(`✅ Public Key format valid: pk_... (${publicKey.length} chars)`);
+      console.log(`✅ Public Key present: ${publicKey.length} characters`);
+      console.log(`   Preview: ${publicKey.substring(0, 15)}...`);
+      console.log(`   Format: Any format is acceptable`);
     }
+  } else {
+    console.log('❌ Public Key missing');
+    hasIssues = true;
   }
   
   // Validate Assistant ID
   if (assistantId) {
-    if (!assistantId.startsWith('asst_')) {
-      console.log(`❌ Assistant ID format invalid: should start with 'asst_' but starts with '${assistantId.substring(0, 5)}'`);
-      formatValid = false;
-    } else if (assistantId.length < 20) {
-      console.log(`❌ Assistant ID too short: ${assistantId.length} characters (should be longer)`);
-      formatValid = false;
+    if (assistantId.length < 10) {
+      console.log(`⚠️  Assistant ID might be too short: ${assistantId.length} characters`);
+      console.log(`   Preview: ${assistantId.substring(0, 10)}...`);
+      hasIssues = true;
     } else {
-      console.log(`✅ Assistant ID format valid: asst_... (${assistantId.length} chars)`);
+      console.log(`✅ Assistant ID present: ${assistantId.length} characters`);
+      console.log(`   Preview: ${assistantId.substring(0, 15)}...`);
+      console.log(`   Format: Any format is acceptable`);
     }
+  } else {
+    console.log('❌ Assistant ID missing');
+    hasIssues = true;
   }
   
   // Validate API Key
   if (apiKey) {
-    if (apiKey.length < 20) {
-      console.log(`❌ API Key too short: ${apiKey.length} characters (should be longer)`);
-      formatValid = false;
+    if (apiKey.length < 15) {
+      console.log(`⚠️  API Key might be too short: ${apiKey.length} characters`);
+      hasIssues = true;
     } else {
-      console.log(`✅ API Key format appears valid (${apiKey.length} chars)`);
+      console.log(`✅ API Key present: ${apiKey.length} characters`);
+      console.log(`   Used for: Server-side API calls`);
     }
+  } else {
+    console.log('⚠️  API Key missing (might be needed for server-side calls)');
   }
   
-  return formatValid;
+  if (!hasIssues) {
+    console.log('\n🎉 All credentials look reasonable for your format!');
+  }
+  
+  return !hasIssues;
 }
 
 const formatValid = validateVapiFormat();
@@ -232,11 +254,15 @@ const recommendations = generateRecommendations();
 recommendations.forEach(rec => console.log(rec));
 
 // 6. Export Debug Report
-console.log('\n📄 6. DEBUG REPORT SUMMARY');
-console.log('==========================');
+console.log('\n📄 6. DEBUG REPORT SUMMARY (RELAXED VALIDATION)');
+console.log('===============================================');
+console.log('ℹ️  NOTE: This debug tool no longer enforces specific credential formats');
+console.log('ℹ️  VAPI AI accepts various formats - use what worked before!');
 
 const debugReport = {
   timestamp: new Date().toISOString(),
+  validationType: 'RELAXED - No format requirements',
+  note: 'VAPI AI does not require pk_ or asst_ prefixes',
   environment: {
     isRender: !!(process.env.RENDER || process.env.RENDER_SERVICE_NAME),
     nodeEnv: process.env.NODE_ENV,
@@ -246,20 +272,21 @@ const debugReport = {
     hasPublicKey: !!process.env.VITE_VAPI_PUBLIC_KEY,
     hasAssistantId: !!process.env.VITE_VAPI_ASSISTANT_ID,
     hasApiKey: !!process.env.VAPI_API_KEY,
-    publicKeyFormat: process.env.VITE_VAPI_PUBLIC_KEY?.startsWith('pk_'),
-    assistantIdFormat: process.env.VITE_VAPI_ASSISTANT_ID?.startsWith('asst_'),
-    hasLanguageSupport: hasAnyLanguageVars
+    publicKeyLength: process.env.VITE_VAPI_PUBLIC_KEY?.length || 0,
+    assistantIdLength: process.env.VITE_VAPI_ASSISTANT_ID?.length || 0,
+    hasLanguageSupport: hasAnyLanguageVars,
+    formatNote: 'Any format is acceptable'
   },
   issues: [],
   recommendations: recommendations
 };
 
-// Add detected issues
+// Add detected issues (only for missing credentials, not format)
 if (!hasRequiredVars) {
   debugReport.issues.push('Missing required VAPI environment variables');
 }
 if (!formatValid) {
-  debugReport.issues.push('Invalid VAPI credential formats');
+  debugReport.issues.push('Credentials might be too short or missing');
 }
 
 console.log(JSON.stringify(debugReport, null, 2));
