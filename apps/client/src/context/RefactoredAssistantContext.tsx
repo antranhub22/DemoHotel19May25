@@ -18,7 +18,7 @@ import {
   useLanguage,
 } from '@/context/contexts/LanguageContext';
 import { OrderProvider, useOrder } from '@/context/contexts/OrderContext';
-import { useVapi, VapiProvider } from '@/context/contexts/VapiContext';
+import { useVapi, VapiProvider } from '@/context/contexts/VapiContextSimple';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import {
   ActiveOrder,

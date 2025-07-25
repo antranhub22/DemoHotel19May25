@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎙️ Test Vapi Official Implementation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: rgba(46, 204, 113, 0.3);
+        }
+
+        .status.error {
+            background: rgba(231, 76, 60, 0.3);
+        }
+
+        .status.info {
+            background: rgba(52, 152, 219, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎙️ Vapi Official Implementation Test</h1>
+        <p>Testing official Vapi setup pattern from docs.vapi.ai</p>
+
+        <div class="input-group">
+            <label>Public Key:</label>
+            <input type="text" id="publicKey" placeholder="pk_your_public_key_here"
+                value="4fba1458-6ea8-45c5-9653-76bbb54e64b5">
+        </div>
+
+        <div class="input-group">
+            <label>Assistant ID:</label>
+            <input type="text" id="assistantId" placeholder="asst_your_assistant_id_here"
+                value="18414a64-d242-447a-8162-ce3efd2cc8f1">
+        </div>
+
+        <div>
+            <button class="button" id="initBtn">🚀 Initialize Vapi</button>
+            <button class="button" id="startBtn" disabled>📞 Start Call</button>
+            <button class="button" id="endBtn" disabled>⏹️ End Call</button>
+            <button class="button" id="clearBtn">🧹 Clear Log</button>
+        </div>
+
+        <div id="status" class="status info">Ready to test</div>
+
+        <div class="log" id="log">
+            <div>🔍 Test Log (Following official docs pattern):</div>
+        </div>
+
+        <div>
+            <h3>📋 What this tests:</h3>
+            <ul>
+                <li>✅ Simple import: <code>import Vapi from '@vapi-ai/web'</code></li>
+                <li>✅ Direct initialization: <code>new Vapi(publicKey)</code></li>
+                <li>✅ Direct call start: <code>vapi.start(assistantId)</code></li>
+                <li>✅ Event listeners: call-start, call-end, message</li>
+                <li>❌ No proxy layers</li>
+                <li>❌ No complex state management</li>
+                <li>❌ No dynamic imports</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Official Vapi SDK -->
+    <script src="https://unpkg.com/@vapi-ai/web@latest"></script>
+
+    <script>
+        let vapi = null;
+
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+        const initBtn = document.getElementById('initBtn');
+        const startBtn = document.getElementById('startBtn');
+        const endBtn = document.getElementById('endBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            log.appendChild(logEntry);
+            log.scrollTop = log.scrollHeight;
+
+            console.log(`[VAPI-TEST] ${message}`);
+        }
+
+        function updateStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Initialize Vapi (Official Pattern)
+        initBtn.addEventListener('click', () => {
+            try {
+                const publicKey = document.getElementById('publicKey').value;
+
+                if (!publicKey) {
+                    updateStatus('Please enter a public key', 'error');
+                    return;
+                }
+
+                addLog('🚀 Initializing Vapi (Official Pattern)...');
+                addLog(`📋 Using pattern: new Vapi('${publicKey.substring(0, 10)}...')`);
+
+                // ✅ OFFICIAL PATTERN: Direct initialization
+                vapi = new Vapi(publicKey);
+
+                // ✅ OFFICIAL PATTERN: Event listeners
+                vapi.on('call-start', () => {
+                    addLog('🎙️ Call started!', 'success');
+                    updateStatus('Call active', 'success');
+                    startBtn.disabled = true;
+                    endBtn.disabled = false;
+                });
+
+                vapi.on('call-end', () => {
+                    addLog('📞 Call ended!', 'info');
+                    updateStatus('Call ended', 'info');
+                    startBtn.disabled = false;
+                    endBtn.disabled = true;
+                });
+
+                vapi.on('message', (message) => {
+                    if (message.type === 'transcript') {
+                        addLog(`💬 ${message.role}: ${message.transcript}`);
+                    } else {
+                        addLog(`📨 Message: ${JSON.stringify(message)}`);
+                    }
+                });
+
+                vapi.on('error', (error) => {
+                    addLog(`❌ Error: ${error.message || error}`, 'error');
+                    updateStatus('Error occurred', 'error');
+                });
+
+                vapi.on('speech-start', () => {
+                    addLog('🗣️ Speech started');
+                });
+
+                vapi.on('speech-end', () => {
+                    addLog('🤐 Speech ended');
+                });
+
+                addLog('✅ Vapi initialized successfully!');
+                updateStatus('Vapi ready', 'success');
+                initBtn.disabled = true;
+                startBtn.disabled = false;
+
+            } catch (error) {
+                addLog(`❌ Initialization failed: ${error.message}`, 'error');
+                updateStatus('Initialization failed', 'error');
+            }
+        });
+
+        // Start Call (Official Pattern)
+        startBtn.addEventListener('click', () => {
+            try {
+                const assistantId = document.getElementById('assistantId').value;
+
+                if (!assistantId) {
+                    updateStatus('Please enter an assistant ID', 'error');
+                    return;
+                }
+
+                addLog(`📞 Starting call with assistant: ${assistantId.substring(0, 15)}...`);
+                addLog(`📋 Using pattern: vapi.start('${assistantId.substring(0, 15)}...')`);
+
+                // ✅ OFFICIAL PATTERN: Direct call start
+                vapi.start(assistantId);
+
+                updateStatus('Starting call...', 'info');
+
+            } catch (error) {
+                addLog(`❌ Call start failed: ${error.message}`, 'error');
+                updateStatus('Call start failed', 'error');
+            }
+        });
+
+        // End Call (Official Pattern)
+        endBtn.addEventListener('click', () => {
+            try {
+                addLog('⏹️ Ending call...');
+                addLog('📋 Using pattern: vapi.stop()');
+
+                // ✅ OFFICIAL PATTERN: Direct call end
+                vapi.stop();
+
+            } catch (error) {
+                addLog(`❌ Call end failed: ${error.message}`, 'error');
+                updateStatus('Call end failed', 'error');
+            }
+        });
+
+        // Clear log
+        clearBtn.addEventListener('click', () => {
+            log.innerHTML = '<div>🔍 Test Log (Following official docs pattern):</div>';
+        });
+
+        // Initial log
+        addLog('🎯 Ready to test official Vapi implementation');
+        addLog('📖 Pattern: https://docs.vapi.ai/quickstart/web');
+        addLog('🔗 No proxies, no complex layers, just official SDK');
+    </script>
+</body>
+
+</html>
