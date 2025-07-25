@@ -1,4 +1,3 @@
-import postgres from 'postgres';
 import { logger } from '@shared/utils/logger';
 
 /**
@@ -13,18 +12,45 @@ export async function runProductionMigration() {
     (databaseUrl.includes('postgres') || databaseUrl.includes('postgresql'));
 
   if (!isPostgreSQL) {
-    logger.debug('⏭️ Skipping production migration (not PostgreSQL environment)', 'Component');
+    logger.debug(
+      '⏭️ Skipping production migration (not PostgreSQL environment)',
+      'Component'
+    );
     console.log(
       `🔍 DATABASE_URL check: ${databaseUrl ? 'exists' : 'missing'}, isPostgreSQL: ${isPostgreSQL}`
     );
     return;
   }
 
-  logger.debug('🚀 [Production Migration] Starting - PostgreSQL detected!', 'Component');
-  logger.debug('📊 Environment: NODE_ENV=${process.env.NODE_ENV}', 'Component');
-  logger.debug('🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}', 'Component');
+  // Dynamic import postgres only when needed (production)
+  let postgres: any;
+  try {
+    // @ts-ignore - Dynamic import for optional dependency
+    const postgresModule = await import('postgres');
+    postgres = postgresModule.default;
+  } catch (error) {
+    logger.warn(
+      '⚠️ postgres package not available - skipping production migration',
+      'Component'
+    );
+    console.log('💡 This is expected in development environment using SQLite');
+    return;
+  }
 
-  logger.debug('🔧 [Production Migration] Checking database schema...', 'Component');
+  logger.debug(
+    '🚀 [Production Migration] Starting - PostgreSQL detected!',
+    'Component'
+  );
+  logger.debug('📊 Environment: NODE_ENV=${process.env.NODE_ENV}', 'Component');
+  logger.debug(
+    '🔗 Database: ${databaseUrl.substring(0, 20)}...${databaseUrl.substring(databaseUrl.length - 20)}',
+    'Component'
+  );
+
+  logger.debug(
+    '🔧 [Production Migration] Checking database schema...',
+    'Component'
+  );
 
   let sql: any;
   try {
@@ -50,11 +76,17 @@ export async function runProductionMigration() {
     const hasTranscriptTable = transcriptTable.length > 0;
 
     if (hasCallId && hasTranscriptTable) {
-      logger.debug('✅ Database schema already updated - migration not needed', 'Component');
+      logger.debug(
+        '✅ Database schema already updated - migration not needed',
+        'Component'
+      );
       return;
     }
 
-    logger.debug('📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}', 'Component');
+    logger.debug(
+      '📊 Migration needed - call_id: ${hasCallId}, transcript: ${hasTranscriptTable}',
+      'Component'
+    );
 
     logger.debug('🚀 Creating missing tables and columns...', 'Component');
 
@@ -78,22 +110,32 @@ export async function runProductionMigration() {
           !idColumn.column_default ||
           !idColumn.column_default.includes('nextval')
         ) {
-          logger.debug('🚨 Transcript table has wrong ID column - recreating!', 'Component');
+          logger.debug(
+            '🚨 Transcript table has wrong ID column - recreating!',
+            'Component'
+          );
 
           // Backup existing data
-          const existingTranscripts =
-            await sql`SELECT * FROM transcript LIMIT 10`;
-          logger.debug('📦 Found ${existingTranscripts.length} existing transcripts', 'Component');
+          logger.debug(
+            '📦 Found ${existingTranscripts.length} existing transcripts',
+            'Component'
+          );
 
           // Drop and recreate table with proper structure
           await sql`DROP TABLE IF EXISTS transcript CASCADE`;
           logger.debug('✅ Dropped old transcript table', 'Component');
         } else {
-          logger.debug('✅ Transcript table has proper SERIAL PRIMARY KEY', 'Component');
+          logger.debug(
+            '✅ Transcript table has proper SERIAL PRIMARY KEY',
+            'Component'
+          );
         }
       }
     } catch (error: any) {
-      logger.debug('⚠️ Error checking transcript table: ${(error as any)?.message || String(error)}', 'Component');
+      logger.debug(
+        '⚠️ Error checking transcript table: ${(error as any)?.message || String(error)}',
+        'Component'
+      );
     }
 
     // Create missing tables first - EXPLICIT transcript table fix
@@ -133,12 +175,18 @@ export async function runProductionMigration() {
       )`,
     ];
 
-    for (const statement of (createTableStatements as any[])) {
+    for (const statement of createTableStatements as any[]) {
       try {
         await sql.unsafe(statement);
-        logger.debug('✅ Table created: ${statement.substring(0, 50)}...', 'Component');
+        logger.debug(
+          '✅ Table created: ${statement.substring(0, 50)}...',
+          'Component'
+        );
       } catch (error: any) {
-        logger.debug('⚠️ Table creation may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...', 'Component');
+        logger.debug(
+          '⚠️ Table creation may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...',
+          'Component'
+        );
       }
     }
 
@@ -159,13 +207,19 @@ export async function runProductionMigration() {
       `ALTER TABLE request ADD COLUMN IF NOT EXISTS order_type VARCHAR(100)`,
     ];
 
-    for (const statement of (alterStatements as any[])) {
+    for (const statement of alterStatements as any[]) {
       try {
         await sql.unsafe(statement);
-        logger.debug('✅ Executed: ${statement.substring(0, 50)}...', 'Component');
+        logger.debug(
+          '✅ Executed: ${statement.substring(0, 50)}...',
+          'Component'
+        );
       } catch (error: any) {
         // Column might already exist, which is OK
-        logger.debug('⚠️ Statement may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...', 'Component');
+        logger.debug(
+          '⚠️ Statement may have failed (might be OK): ${(error as any)?.message || String(error).substring(0, 100)}...',
+          'Component'
+        );
       }
     }
 
@@ -188,18 +242,31 @@ export async function runProductionMigration() {
       `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
     ];
 
-    for (const statement of (indexStatements as any[])) {
+    for (const statement of indexStatements as any[]) {
       try {
         await sql.unsafe(statement);
-        logger.debug('✅ Index created: ${statement.substring(0, 50)}...', 'Component');
+        logger.debug(
+          '✅ Index created: ${statement.substring(0, 50)}...',
+          'Component'
+        );
       } catch (error: any) {
-        logger.debug('⚠️ Index creation may have failed: ${(error as any)?.message || String(error).substring(0, 50)}...', 'Component');
+        logger.debug(
+          '⚠️ Index creation may have failed: ${(error as any)?.message || String(error).substring(0, 50)}...',
+          'Component'
+        );
       }
     }
 
-    logger.debug('🎉 Production migration completed successfully!', 'Component');
+    logger.debug(
+      '🎉 Production migration completed successfully!',
+      'Component'
+    );
   } catch (error: any) {
-    logger.error('❌ Production migration failed:', 'Component', (error as any)?.message || String(error));
+    logger.error(
+      '❌ Production migration failed:',
+      'Component',
+      (error as any)?.message || String(error)
+    );
     // Don't crash the server, just log the error
   } finally {
     if (sql) {
