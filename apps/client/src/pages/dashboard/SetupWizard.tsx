@@ -1,30 +1,3 @@
-import {
-  Search,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Bot,
-  Settings,
-  ArrowRight,
-  ArrowLeft,
-  Hotel,
-  Globe,
-  Mic,
-  Palette,
-  Volume2,
-  RefreshCw,
-  ExternalLink,
-  Phone,
-  MapPin,
-  Clock,
-  Star,
-  Users,
-  Wifi,
-  ChevronRight,
-  ChevronDown,
-} from 'lucide-react';
-import React, { useState } from 'react';
-import { useLocation } from 'wouter';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,9 +5,9 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -47,18 +20,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  ExternalLink,
+  Globe,
+  Hotel,
+  Loader2,
+  MapPin,
+  Mic,
+  Palette,
+  Phone,
+  RefreshCw,
+  Search,
+  Settings,
+  Star,
+  Users,
+  Volume2,
+  Wifi,
+} from 'lucide-react';
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 
 // Import API service and types
 import {
+  AssistantCustomization,
+  BACKGROUND_SOUND_OPTIONS,
   dashboardApi,
   HotelData,
-  AssistantCustomization,
+  LANGUAGE_OPTIONS,
   PERSONALITY_OPTIONS,
   TONE_OPTIONS,
-  LANGUAGE_OPTIONS,
-  BACKGROUND_SOUND_OPTIONS,
-  validateHotelData,
   validateAssistantCustomization,
+  validateHotelData,
 } from '@/services/dashboardApi';
 // ============================================
 // Types & Interfaces
@@ -979,12 +979,12 @@ const SuccessStep: React.FC<StepProps> = ({
   const [, setLocation] = useLocation();
 
   const handleFinish = () => {
-    setLocation('/dashboard');
+    setLocation('/hotel-dashboard');
   };
 
   const handleTestAssistant = () => {
     // Navigate to test page or open assistant
-    setLocation('/dashboard/assistant');
+    setLocation('/hotel-dashboard/assistant');
   };
 
   return (

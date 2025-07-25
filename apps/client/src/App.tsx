@@ -177,8 +177,8 @@ const LoginPage = () => {
 
     try {
       await login(email, password);
-      // Redirect to legacy dashboard
-      setLocation('/dashboard');
+      // Redirect to modern hotel dashboard instead of legacy dashboard
+      setLocation('/hotel-dashboard');
     } catch (err: any) {
       setError(err.message || 'Đăng nhập thất bại');
     }
