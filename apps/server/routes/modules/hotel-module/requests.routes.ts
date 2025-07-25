@@ -4,9 +4,9 @@
 // Guest service request management with enhanced ServiceContainer integration
 // Handles room service, housekeeping, concierge, and maintenance requests
 
+import express from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { RequestController } from '@server/controllers/requestController';
-import express from 'express';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
 import { isFeatureEnabled } from '@server/shared/FeatureFlags';

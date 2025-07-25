@@ -1,6 +1,3 @@
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { CallDetails } from '@/types';
-import { logger } from '@shared/utils/logger';
 import React, {
   createContext,
   useContext,
@@ -8,6 +5,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { CallDetails } from '@/types';
+import { logger } from '@shared/utils/logger';
 // Dynamic imports for code splitting - loaded when needed
 // Dynamic import for code splitting - resetVapi loaded when needed
 

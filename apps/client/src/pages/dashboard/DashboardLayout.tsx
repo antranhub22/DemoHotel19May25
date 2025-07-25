@@ -1,17 +1,3 @@
-import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
 import {
   BarChart,
   Bell,
@@ -26,6 +12,20 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 
 // Types
 interface TenantData {

@@ -1,5 +1,3 @@
-import { getPermissionsForRole } from '@shared/constants/permissions';
-import { logger } from '@shared/utils/logger';
 import { jwtDecode } from 'jwt-decode';
 import React, {
   createContext,
@@ -8,6 +6,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { getPermissionsForRole } from '@shared/constants/permissions';
+import { logger } from '@shared/utils/logger';
 // ============================================
 // Types & Interfaces
 // ============================================

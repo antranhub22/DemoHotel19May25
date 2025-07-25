@@ -4,26 +4,26 @@
 // Comprehensive health monitoring with advanced health check system,
 // module-specific health validation, cascade failure detection, and intelligent recommendations
 
-import { db } from '@shared/db';
-import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
 
 // ✅ v3.0: Import Advanced Health Check System
-import {
-  advancedHealthCheck,
-  getModuleHealth,
-  getSystemHealth,
-  registerModuleHealthChecker,
-} from '@server/shared/AdvancedHealthCheck';
 
 // ✅ v2.0: Enhanced architecture imports
 import { HotelResearchService } from '@server/services/hotelResearch';
 import { TenantService } from '@server/services/tenantService';
 import { VapiIntegrationService } from '@server/services/vapiIntegration';
 import { getArchitectureHealth } from '@server/shared';
+import {
+  advancedHealthCheck,
+  getModuleHealth,
+  getSystemHealth,
+  registerModuleHealthChecker,
+} from '@server/shared/AdvancedHealthCheck';
 import { FeatureFlags } from '@server/shared/FeatureFlags';
 import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
 import { ServiceContainer } from '@server/shared/ServiceContainer';
+import { db } from '@shared/db';
+import { logger } from '@shared/utils/logger';
 
 export class HealthController {
   private static isInitialized = false;

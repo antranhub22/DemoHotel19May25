@@ -211,7 +211,7 @@ export function cacheQuery<T = any>(
 
       try {
         // Execute the database query function safely
-        const queryResult = await Promise.resolve(queryFunction());
+        const queryResult = await queryFunction();
         const queryTime = Date.now() - startTime;
 
         logger.debug(

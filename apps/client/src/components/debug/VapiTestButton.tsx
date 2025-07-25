@@ -1,6 +1,6 @@
+import React, { useEffect, useState } from 'react';
 import { createSimpleVapiClient, getSimpleVapiClient, type SimpleVapiConfig } from '@/lib/simpleVapiClient';
 import { logger } from '@shared/utils/logger';
-import React, { useEffect, useState } from 'react';
 
 const VapiTestButton: React.FC = () => {
     const [isInitialized, setIsInitialized] = useState(false);

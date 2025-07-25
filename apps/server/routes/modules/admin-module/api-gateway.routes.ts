@@ -12,7 +12,6 @@ import {
   getGatewayDiagnostics,
   getGatewayMetrics,
 } from '@server/shared/APIGateway';
-
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

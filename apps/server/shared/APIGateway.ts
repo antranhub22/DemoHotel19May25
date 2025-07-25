@@ -4,9 +4,9 @@
 // Comprehensive enterprise API Gateway with rate limiting, request routing, API versioning,
 // authentication middleware, request transformation, and comprehensive analytics
 
-import { logger } from '@shared/utils/logger';
 import { EventEmitter } from 'events';
 import { NextFunction, Request, Response } from 'express';
+import { logger } from '@shared/utils/logger';
 
 // API Gateway interfaces
 export interface GatewayConfig {

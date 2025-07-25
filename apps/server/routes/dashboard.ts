@@ -1,3 +1,6 @@
+import { eq } from 'drizzle-orm';
+import express, { Request, Response } from 'express';
+import { z } from 'zod';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import {
   getHourlyActivity,
@@ -13,9 +16,6 @@ import {
   VapiIntegrationService,
 } from '@server/services/vapiIntegration';
 import { db } from '@shared/db';
-import { eq } from 'drizzle-orm';
-import express, { Request, Response } from 'express';
-import { z } from 'zod';
 // ✅ FIXED: Removed duplicate hotelProfiles import
 import { hotelProfileMapper } from '@shared/db/transformers';
 import { logger } from '@shared/utils/logger';

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 // Custom Hook
 import { useAssistant } from '@/context';
-import { logger } from '@shared/utils/logger';
 
 // Context
 
@@ -14,6 +13,7 @@ import { usePopupContext } from '@/context/PopupContext';
 import { useInterface1 } from '@/hooks/useInterface1';
 import type { Language } from '@/types/interface1.types';
 import { ServiceItem } from '@/types/interface1.types';
+import { logger } from '@shared/utils/logger';
 import ChatPopup from '../features/popup-system/ChatPopup';
 import SummaryPopup from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';

@@ -2,11 +2,11 @@
 
 // Type declaration for import.meta
 
+import React, { useEffect, useState } from 'react';
 import { useAssistant } from '@/context';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { designSystem } from '@/styles/designSystem';
 import { logger } from '@shared/utils/logger';
-import React, { useEffect, useState } from 'react';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import SiriCallButton from './SiriCallButton';
 

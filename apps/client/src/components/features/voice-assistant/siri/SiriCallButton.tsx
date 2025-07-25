@@ -2,12 +2,11 @@
 
 // Type declaration for import.meta
 
-import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { isMobileDevice, logDeviceInfo } from '@/utils/deviceDetection';
+import { logger } from '@shared/utils/logger';
 import { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
 import { SiriButton } from './SiriButton';
-
-import { logger } from '@shared/utils/logger';
 import '../../../../styles/voice-interface.css';
 interface SiriCallButtonProps {
   isListening: boolean;

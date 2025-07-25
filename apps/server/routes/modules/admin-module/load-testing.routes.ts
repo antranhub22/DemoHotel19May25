@@ -18,7 +18,6 @@ import {
   type LoadTestScenario,
   type StressTestConfig,
 } from '@server/shared/LoadTestManager';
-
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

@@ -1,4 +1,8 @@
 // ✅ Advanced Database Connection Manager with Pooling & Monitoring
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
 import {
   call,
   call_summaries,
@@ -9,10 +13,6 @@ import {
   tenants,
   transcript,
 } from '@shared/db/schema';
-import Database, { type Database as DatabaseType } from 'better-sqlite3';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
 const { Pool } = pg;
 /**
  * Advanced Connection Pool Configuration

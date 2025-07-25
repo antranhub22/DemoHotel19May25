@@ -4,9 +4,9 @@
 // Middleware for automatic collection of performance metrics from all API requests
 // Integrated with Advanced Metrics Collection system
 
+import { NextFunction, Request, Response } from 'express';
 import { recordPerformanceMetrics } from '@server/shared/AdvancedMetricsCollector';
 import { logger } from '@shared/utils/logger';
-import { NextFunction, Request, Response } from 'express';
 
 interface MetricsRequest extends Request {
   startTime?: number;

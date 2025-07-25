@@ -4,8 +4,8 @@
 // Comprehensive health checks for deployment, monitoring, and diagnostics
 // Integrated with AdvancedHealthCheck system, ServiceContainer v2.0, FeatureFlags, and ModuleLifecycle
 
-import { HealthController } from '@server/controllers/healthController';
 import express, { type Request, Response } from 'express';
+import { HealthController } from '@server/controllers/healthController';
 
 // ✅ v3.0: Import Advanced Health Check System
 import {

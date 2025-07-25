@@ -3,8 +3,8 @@
 // Provides comprehensive health checks for deployment and monitoring
 // ============================================================================
 
-import { HealthController } from '@server/controllers/healthController';
 import express, { type Request, Response } from 'express';
+import { HealthController } from '@server/controllers/healthController';
 
 // ✅ ENHANCED: Import modular architecture health check v2.0
 import { getArchitectureHealth } from '@server/shared';

@@ -8,20 +8,18 @@ import express, { Request, Response } from 'express';
 
 // ✅ Import Database Optimization System
 import {
-  DatabaseOptimizer,
-  analyzeQuery,
-  getDatabaseHealth,
-  optimizeDatabase,
-} from '@server/shared/DatabaseOptimizer';
-
-import {
   ConnectionPoolManager,
   executeQuery,
   getPoolStatus,
   type AutoScalingEvent,
   type PoolMetrics,
 } from '@server/shared/ConnectionPoolManager';
-
+import {
+  DatabaseOptimizer,
+  analyzeQuery,
+  getDatabaseHealth,
+  optimizeDatabase,
+} from '@server/shared/DatabaseOptimizer';
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

@@ -5,14 +5,14 @@
 // business intelligence, and comprehensive reporting capabilities
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import { logger } from '@shared/utils/logger';
 import express from 'express';
+import { isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { logger } from '@shared/utils/logger';
 
 // ✅ Import analytics module routes
 import analyticsRoutes from './analytics.routes';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 
 const router = express.Router();
 

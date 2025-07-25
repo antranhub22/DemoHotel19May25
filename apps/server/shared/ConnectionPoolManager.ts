@@ -4,8 +4,8 @@
 // Sophisticated connection pool management with health monitoring, automatic scaling,
 // performance optimization, and intelligent connection routing
 
-import { logger } from '@shared/utils/logger';
 import { EventEmitter } from 'events';
+import { logger } from '@shared/utils/logger';
 import { recordPerformanceMetrics } from './AdvancedMetricsCollector';
 
 // Connection pool interfaces

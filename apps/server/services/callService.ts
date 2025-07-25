@@ -1,8 +1,8 @@
+import { z } from 'zod';
 import { storage } from '@server/storage';
 import { call, db, eq, transcript } from '@shared/db';
 import { insertTranscriptSchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
-import { z } from 'zod';
 
 export class CallService {
   /**

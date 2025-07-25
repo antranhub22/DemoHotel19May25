@@ -4,7 +4,6 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import { db, staff } from '@shared/db';
 import bcrypt from 'bcrypt';
 import { and, eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
@@ -27,6 +26,7 @@ import type {
   TokenPair,
   TokenValidationResult,
 } from '@auth/types';
+import { db, staff } from '@shared/db';
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================

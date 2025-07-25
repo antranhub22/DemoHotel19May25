@@ -4,9 +4,9 @@
 // REST API for monitoring and managing module lifecycle
 // Provides comprehensive module health, status, and control capabilities
 
+import express, { type Request, Response } from 'express';
 import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
 import { logger } from '@shared/utils/logger';
-import express, { type Request, Response } from 'express';
 
 const router = express.Router();
 

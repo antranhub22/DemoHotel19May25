@@ -1,5 +1,3 @@
-import { AuthUser, TenantData } from '@auth/types/auth';
-import { getPermissionsForRole } from '@auth/types/permissions';
 import React, {
   createContext,
   useCallback,
@@ -7,6 +5,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { AuthUser, TenantData } from '@auth/types/auth';
+import { getPermissionsForRole } from '@auth/types/permissions';
 
 // ============================================
 // Types & Interfaces

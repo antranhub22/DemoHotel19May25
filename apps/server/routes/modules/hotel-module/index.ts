@@ -5,8 +5,9 @@
 // staff management, dashboard, and communication features
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import { logger } from '@shared/utils/logger';
 import express from 'express';
+import { isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { logger } from '@shared/utils/logger';
 
 // ✅ Import hotel module routes
 import dashboardRoutes from './dashboard.routes';
@@ -15,7 +16,6 @@ import requestsRoutes from './requests.routes';
 import staffRoutes from './staff.routes';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 
 const router = express.Router();
 

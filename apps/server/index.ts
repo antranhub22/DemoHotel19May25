@@ -1,13 +1,14 @@
+import cors from 'cors';
 import router from '@server/routes/index';
 import { setupSocket } from '@server/socket';
 import { runAutoDbFix } from '@server/startup/auto-database-fix';
 import { initializeDatabaseOnStartup } from '@server/startup/database-initialization';
+import { initializeMonitoringReminder } from '@server/startup/monitoring-reminder';
 import { runProductionMigration } from '@server/startup/production-migration';
 import { log, serveStatic, setupVite } from '@server/vite';
 import { logger } from '@shared/utils/logger';
 import { autoMigrateOnDeploy } from '@tools/scripts/maintenance/auto-migrate-on-deploy';
 import { seedProductionUsers } from '@tools/scripts/maintenance/seed-production-users';
-import cors from 'cors';
 import 'dotenv/config';
 import express, { NextFunction, type Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -37,7 +38,6 @@ import {
 // To re-enable: Follow MONITORING_RE_ENABLE_GUIDE.md
 
 // ✅ MONITORING REMINDER: Show status and reminders during startup
-import { initializeMonitoringReminder } from '@server/startup/monitoring-reminder';
 
 const app = express();
 

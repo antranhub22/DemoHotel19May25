@@ -3,12 +3,12 @@
 // Comprehensive production configuration with security and optimization
 // =============================================================================
 
-import { config } from 'dotenv';
+import { config as dotenvConfig } from 'dotenv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
 // Load environment variables
-config();
+dotenvConfig();
 
 // ┌─────────────────────────────────────────────────────────────────────────┐
 // │ Environment Configuration Interface                                     │
@@ -394,17 +394,17 @@ class ConfigurationManager {
         },
         replica: process.env.DATABASE_REPLICA_HOST
           ? {
-              host: process.env.DATABASE_REPLICA_HOST,
-              port: parseInt(process.env.DATABASE_REPLICA_PORT || '5432', 10),
-              username:
-                process.env.DATABASE_REPLICA_USER ||
-                process.env.DATABASE_USER ||
-                'hotel_admin',
-              password: this.secretManager.getSecretOrDefault(
-                'DATABASE_REPLICA_PASSWORD',
-                this.secretManager.getSecret('DATABASE_PASSWORD')
-              ),
-            }
+            host: process.env.DATABASE_REPLICA_HOST,
+            port: parseInt(process.env.DATABASE_REPLICA_PORT || '5432', 10),
+            username:
+              process.env.DATABASE_REPLICA_USER ||
+              process.env.DATABASE_USER ||
+              'hotel_admin',
+            password: this.secretManager.getSecretOrDefault(
+              'DATABASE_REPLICA_PASSWORD',
+              this.secretManager.getSecret('DATABASE_PASSWORD')
+            ),
+          }
           : undefined,
       },
 
@@ -419,51 +419,51 @@ class ConfigurationManager {
         cluster:
           process.env.REDIS_CLUSTER_ENABLED === 'true'
             ? {
-                enableAutoPipelining: true,
-                redisOptions: {
-                  password: this.secretManager.getSecretOrDefault(
-                    'REDIS_PASSWORD',
-                    ''
-                  ),
+              enableAutoPipelining: true,
+              redisOptions: {
+                password: this.secretManager.getSecretOrDefault(
+                  'REDIS_PASSWORD',
+                  ''
+                ),
+              },
+              nodes: [
+                {
+                  host: process.env.REDIS_NODE1_HOST || 'redis-1',
+                  port: 6379,
                 },
-                nodes: [
-                  {
-                    host: process.env.REDIS_NODE1_HOST || 'redis-1',
-                    port: 6379,
-                  },
-                  {
-                    host: process.env.REDIS_NODE2_HOST || 'redis-2',
-                    port: 6379,
-                  },
-                  {
-                    host: process.env.REDIS_NODE3_HOST || 'redis-3',
-                    port: 6379,
-                  },
-                ],
-              }
+                {
+                  host: process.env.REDIS_NODE2_HOST || 'redis-2',
+                  port: 6379,
+                },
+                {
+                  host: process.env.REDIS_NODE3_HOST || 'redis-3',
+                  port: 6379,
+                },
+              ],
+            }
             : undefined,
         sentinel:
           process.env.REDIS_SENTINEL_ENABLED === 'true'
             ? {
-                name: 'hotel-redis',
-                sentinels: [
-                  {
-                    host:
-                      process.env.REDIS_SENTINEL1_HOST || 'redis-sentinel-1',
-                    port: 26379,
-                  },
-                  {
-                    host:
-                      process.env.REDIS_SENTINEL2_HOST || 'redis-sentinel-2',
-                    port: 26379,
-                  },
-                  {
-                    host:
-                      process.env.REDIS_SENTINEL3_HOST || 'redis-sentinel-3',
-                    port: 26379,
-                  },
-                ],
-              }
+              name: 'hotel-redis',
+              sentinels: [
+                {
+                  host:
+                    process.env.REDIS_SENTINEL1_HOST || 'redis-sentinel-1',
+                  port: 26379,
+                },
+                {
+                  host:
+                    process.env.REDIS_SENTINEL2_HOST || 'redis-sentinel-2',
+                  port: 26379,
+                },
+                {
+                  host:
+                    process.env.REDIS_SENTINEL3_HOST || 'redis-sentinel-3',
+                  port: 26379,
+                },
+              ],
+            }
             : undefined,
       },
 
@@ -563,16 +563,16 @@ class ConfigurationManager {
           ),
           slack: this.secretManager.hasSecret('SLACK_WEBHOOK_URL')
             ? {
-                webhook: this.secretManager.getSecret('SLACK_WEBHOOK_URL'),
-                channel: process.env.SLACK_CHANNEL || '#alerts',
-              }
+              webhook: this.secretManager.getSecret('SLACK_WEBHOOK_URL'),
+              channel: process.env.SLACK_CHANNEL || '#alerts',
+            }
             : undefined,
           email: process.env.SMTP_HOST
             ? {
-                smtp: process.env.SMTP_HOST,
-                from: process.env.SMTP_FROM || 'alerts@hotel-management.com',
-                to: (process.env.ALERT_EMAILS || '').split(',').filter(Boolean),
-              }
+              smtp: process.env.SMTP_HOST,
+              from: process.env.SMTP_FROM || 'alerts@hotel-management.com',
+              to: (process.env.ALERT_EMAILS || '').split(',').filter(Boolean),
+            }
             : undefined,
         },
         apm: {

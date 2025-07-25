@@ -1,11 +1,5 @@
-import { db, request as requestTable } from '@shared/db';
-import { requestMapper } from '@shared/db/transformers';
-import { generateId, generateShortId } from '@shared/utils/idGenerator';
-import { logger } from '@shared/utils/logger';
 import { and, desc, eq } from 'drizzle-orm';
 import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
-
-// ✅ ENHANCED: Import modular architecture components v2.0
 import {
   addFlagListener,
   evaluateABTest,
@@ -16,6 +10,12 @@ import {
   ServiceContainer,
   getServiceSync,
 } from '@server/shared/ServiceContainer';
+import { db, request as requestTable } from '@shared/db';
+import { requestMapper } from '@shared/db/transformers';
+import { generateId, generateShortId } from '@shared/utils/idGenerator';
+import { logger } from '@shared/utils/logger';
+
+// ✅ ENHANCED: Import modular architecture components v2.0
 
 /**
  * Request Controller - Enhanced with Modular Architecture v2.0

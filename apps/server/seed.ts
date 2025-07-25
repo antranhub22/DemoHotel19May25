@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { DEV_CONFIG } from '@auth/config/auth.config';
-import { db, tenants, eq, staff, call, request } from '@shared/db';
+import { call, db, eq, request, staff, tenants } from '@shared/db';
 import { logger } from '@shared/utils/logger';
 
 // Import dev users from auth config
@@ -209,3 +209,14 @@ async function seedCallsAndRequests() {
     logger.error('Error seeding call and request data:', 'Component', error);
   }
 }
+
+// Run seeding immediately
+seedDevelopmentData()
+  .then(() => {
+    console.log('✅ Database seeding completed successfully!');
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error('❌ Database seeding failed:', error);
+    process.exit(1);
+  });

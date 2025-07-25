@@ -1,11 +1,10 @@
+import { Request, Response } from 'express';
 import {
   getDashboardAnalytics,
   getHourlyActivity,
   getOverview,
   getServiceDistribution,
 } from '@server/analytics';
-import { logger } from '@shared/utils/logger';
-import { Request, Response } from 'express';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
 import { TenantService } from '@server/services/tenantService';
@@ -14,6 +13,7 @@ import {
   ServiceContainer,
   getServiceSync,
 } from '@server/shared/ServiceContainer';
+import { logger } from '@shared/utils/logger';
 
 /**
  * Enhanced Analytics Controller v2.0 - Modular Architecture

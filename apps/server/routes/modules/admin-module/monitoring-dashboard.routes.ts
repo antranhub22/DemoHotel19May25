@@ -12,7 +12,6 @@ import {
   createDashboardAlert,
   type DashboardMetrics,
 } from '@server/shared/MonitoringDashboard';
-
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

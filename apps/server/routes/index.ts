@@ -5,10 +5,18 @@
 // Backward compatible with existing API structure
 // Integrated with ServiceContainer v2.0, FeatureFlags v2.0, and ModuleLifecycle
 
-import { logger } from '@shared/utils/logger';
 import express from 'express';
 
 // ✅ NEW v3.0: MODULAR ROUTE IMPORTS - Business Domain Aligned
+import unifiedAuthRoutes from '@auth/routes/auth.routes';
+import analyticsRoutes from '@server/routes/analytics';
+import apiRoutes from '@server/routes/api'; // CRITICAL FIX: Main API routes
+import callsRoutes from '@server/routes/calls';
+import dashboardRoutes from '@server/routes/dashboard';
+import emailRoutes from '@server/routes/email';
+import featureFlagsRoutes from '@server/routes/feature-flags';
+import healthRoutes from '@server/routes/health';
+import moduleLifecycleRoutes from '@server/routes/module-lifecycle';
 import adminModuleRoutes from '@server/routes/modules/admin-module';
 import analyticsModuleRoutes from '@server/routes/modules/analytics-module';
 import coreModuleRoutes from '@server/routes/modules/core-module';
@@ -16,22 +24,14 @@ import hotelModuleRoutes from '@server/routes/modules/hotel-module';
 import voiceModuleRoutes from '@server/routes/modules/voice-module';
 
 // ✅ LEGACY: Keep existing imports for backward compatibility
-import unifiedAuthRoutes from '@auth/routes/auth.routes';
-import analyticsRoutes from '@server/routes/analytics';
-import apiRoutes from '@server/routes/api'; // CRITICAL FIX: Main API routes
-import callsRoutes from '@server/routes/calls';
-import dashboardRoutes from '@server/routes/dashboard';
-import emailRoutes from '@server/routes/email';
-import healthRoutes from '@server/routes/health';
+import monitoringRoutes from '@server/routes/monitoring';
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
-import featureFlagsRoutes from '@server/routes/feature-flags';
-import moduleLifecycleRoutes from '@server/routes/module-lifecycle';
-import monitoringRoutes from '@server/routes/monitoring';
+import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 

@@ -5,16 +5,16 @@
 // testing utilities, and system administration endpoints
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import { logger } from '@shared/utils/logger';
 import express from 'express';
+import { FeatureFlags, isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { ServiceContainer } from '@server/shared/ServiceContainer';
+import { logger } from '@shared/utils/logger';
 
 // ✅ Import core module routes
 import healthRoutes from './health.routes';
 import utilsRoutes from './utils.routes';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { FeatureFlags, isFeatureEnabled } from '@server/shared/FeatureFlags';
-import { ServiceContainer } from '@server/shared/ServiceContainer';
 
 const router = express.Router();
 

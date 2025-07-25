@@ -13,7 +13,6 @@ import {
   getCacheStats,
   type CacheNamespace,
 } from '@server/shared/CacheManager';
-
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

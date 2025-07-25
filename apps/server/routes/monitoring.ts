@@ -4,11 +4,11 @@
 // REST API endpoints for accessing Enhanced Logger, Metrics Collector,
 // and Monitoring Integration data with comprehensive observability
 
+import express, { type Request, Response } from 'express';
 import { EnhancedLogger } from '@server/shared/EnhancedLogger';
 import { MetricsCollector } from '@server/shared/MetricsCollector';
 import { MonitoringIntegration } from '@server/shared/MonitoringIntegration';
 import { logger } from '@shared/utils/logger';
-import express, { type Request, Response } from 'express';
 
 const router = express.Router();
 

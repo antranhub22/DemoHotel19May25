@@ -5,8 +5,9 @@
 // module lifecycle management, monitoring, and system administration
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import { logger } from '@shared/utils/logger';
 import express from 'express';
+import { isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { logger } from '@shared/utils/logger';
 
 // ✅ Import admin module routes
 import apiGatewayRoutes from './api-gateway.routes';
@@ -21,7 +22,6 @@ import monitoringRoutes from './monitoring.routes';
 import performanceRoutes from './performance.routes';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 
 const router = express.Router();
 

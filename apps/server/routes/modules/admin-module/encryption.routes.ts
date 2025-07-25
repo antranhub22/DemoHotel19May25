@@ -1,5 +1,5 @@
-import { encryptionManager } from '@server/shared/EncryptionManager';
 import { Request, Response, Router } from 'express';
+import { encryptionManager } from '@server/shared/EncryptionManager';
 
 const router = Router();
 

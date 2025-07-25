@@ -4,12 +4,12 @@
 // This file consolidates all authentication routes into a single system
 // Provides backward compatibility with existing endpoints
 
+import { Request, RequestHandler, Response, Router } from 'express';
+import { z } from 'zod';
 import { authValidationSchemas } from '@auth/config';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 import type { LoginCredentials } from '@auth/types';
-import { Request, RequestHandler, Response, Router } from 'express';
-import { z } from 'zod';
 
 const router = Router();
 

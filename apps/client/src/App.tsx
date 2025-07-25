@@ -1,3 +1,9 @@
+import NotFound from '@/pages/not-found';
+import StaffPage from '@/pages/staff';
+import VapiTest from '@/pages/VapiTest';
+import React, { Suspense, useEffect, useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Link, Route, Switch, useLocation } from 'wouter';
 import VoiceAssistant from '@/components/business/VoiceAssistant';
 import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
 import ErrorBoundary from '@/components/layout/ErrorBoundary';
@@ -10,12 +16,6 @@ import {
 import { HotelProvider } from '@/context/HotelContext';
 import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import NotFound from '@/pages/not-found';
-import StaffPage from '@/pages/staff';
-import VapiTest from '@/pages/VapiTest';
-import React, { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Link, Route, Switch, useLocation } from 'wouter';
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
   () => import('./pages/AnalyticsDashboard')

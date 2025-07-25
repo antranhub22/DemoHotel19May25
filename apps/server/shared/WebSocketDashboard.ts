@@ -4,9 +4,9 @@
 // WebSocket integration for real-time monitoring dashboard with live metrics streaming,
 // alert notifications, and interactive dashboard updates
 
-import { logger } from '@shared/utils/logger';
 import { EventEmitter } from 'events';
 import { WebSocket, WebSocketServer } from 'ws';
+import { logger } from '@shared/utils/logger';
 import { MonitoringDashboard } from './MonitoringDashboard';
 
 // WebSocket interfaces

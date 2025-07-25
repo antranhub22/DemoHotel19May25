@@ -1,6 +1,6 @@
+import express from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { AnalyticsController } from '@server/controllers/analyticsController';
-import express from 'express';
 
 const router = express.Router();
 

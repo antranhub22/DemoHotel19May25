@@ -4,8 +4,8 @@
 // Comprehensive real-time monitoring dashboard with WebSocket integration, metrics aggregation,
 // alert management, performance analytics, and system health visualization
 
-import { logger } from '@shared/utils/logger';
 import { EventEmitter } from 'events';
+import { logger } from '@shared/utils/logger';
 
 // Dashboard interfaces
 export interface DashboardConfig {
