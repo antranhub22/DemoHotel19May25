@@ -3,7 +3,7 @@
  * Test authentication functionality manually
  */
 
-import { getAuthToken, getAuthHeaders } from '@/lib/authHelper';
+import { getAuthHeaders, getAuthToken } from '@/lib/authHelper';
 import { logger } from '@shared/utils/logger';
 
 export const debugAuth = {
@@ -23,7 +23,7 @@ export const debugAuth = {
       credentials[userType as keyof typeof credentials] || credentials.manager;
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cred),

@@ -2,9 +2,8 @@
 
 // Type declaration for import.meta
 
-
-import { jwtDecode } from 'jwt-decode';
 import { logger } from '@shared/utils/logger';
+import { jwtDecode } from 'jwt-decode';
 
 export interface LoginCredentials {
   username: string;
@@ -38,7 +37,7 @@ export const attemptLogin = async (
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(cred),
@@ -141,7 +140,7 @@ export const getAuthToken = async (): Promise<string | null> => {
     autoLoginAttempts++;
     lastAutoLoginTime = now;
 
-    for (const cred of (DEV_CREDENTIALS as any[])) {
+    for (const cred of DEV_CREDENTIALS as any[]) {
       const token = await attemptLogin(cred);
       if (token) {
         logger.debug('✅ [AuthHelper] Fresh dev token generated', 'Component');
