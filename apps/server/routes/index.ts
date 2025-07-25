@@ -18,6 +18,7 @@ import voiceModuleRoutes from '@server/routes/modules/voice-module';
 // ✅ LEGACY: Keep existing imports for backward compatibility
 import unifiedAuthRoutes from '@auth/routes/auth.routes';
 import analyticsRoutes from '@server/routes/analytics';
+import apiRoutes from '@server/routes/api'; // CRITICAL FIX: Main API routes
 import callsRoutes from '@server/routes/calls';
 import dashboardRoutes from '@server/routes/dashboard';
 import emailRoutes from '@server/routes/email';
@@ -69,6 +70,9 @@ logger.debug(
 // ✅ AUTH ROUTES - COMPLETELY OUTSIDE /api/* PREFIX (no rate limiting, no middleware)
 router.use('/auth', unifiedAuthRoutes);
 
+// ✅ CRITICAL FIX: Main API routes for Siri functionality
+router.use('/api', apiRoutes);
+
 // ✅ LEGACY API ROUTES - Keep existing structure for backward compatibility
 router.use('/api/analytics', analyticsRoutes);
 router.use('/api/calls', callsRoutes);
@@ -86,74 +90,7 @@ router.use('/api/monitoring', monitoringRoutes);
 // ✅ PUBLIC ROUTES - For development and testing
 router.use('/public', tempPublicRoutes);
 
-// ============================================
-// ROUTE DISCOVERY & DOCUMENTATION
-// ============================================
-
-/**
- * GET /api - Main API information and route discovery
- */
-router.get('/api', (req, res) => {
-  logger.api('📍 [Router v3.0] API discovery endpoint accessed', 'MainRouter');
-
-  (res as any).json({
-    api: 'DemoHotel19May',
-    version: '3.0.0',
-    architecture: 'Modular Business Domain Aligned',
-    description: 'Multi-tenant hotel voice assistant SaaS platform',
-
-    modularRoutes: {
-      core: '/api/core - Essential system functionality',
-      hotel: '/api/hotel - Hotel operations & management',
-      voice: '/api/voice - Voice assistant & call management',
-      analytics: '/api/analytics-module - Analytics & business intelligence',
-      admin: '/api/admin - System administration & management',
-    },
-
-    legacyRoutes: {
-      analytics: '/api/analytics - Legacy analytics endpoints',
-      calls: '/api/calls - Legacy call management',
-      dashboard: '/api/dashboard - Legacy dashboard endpoints',
-      email: '/api/email - Legacy email endpoints',
-      health: '/api/health - Legacy health checks',
-      request: '/api/request - Legacy request endpoints',
-      staff: '/api/staff - Legacy staff management',
-    },
-
-    directAccess: {
-      featureFlags: '/api/feature-flags - Feature flag management',
-      moduleLifecycle: '/api/module-lifecycle - Module lifecycle control',
-      monitoring: '/api/monitoring - Enhanced monitoring & metrics',
-    },
-
-    authentication: {
-      auth: '/auth - Authentication endpoints (no /api prefix)',
-    },
-
-    development: {
-      public: '/public - Development and testing endpoints',
-    },
-
-    features: {
-      modularArchitecture: true,
-      backwardCompatibility: true,
-      serviceContainer: '2.0.0',
-      featureFlags: '2.0.0',
-      moduleLifecycle: '2.0.0',
-      enhancedMonitoring: '2.0.0',
-    },
-
-    migration: {
-      status: 'Phase 3 - Route Modularization Complete',
-      nextPhase: 'Phase 4 - Advanced Monitoring',
-      backwardCompatible: true,
-      recommendedApproach:
-        'Use modular routes for new development, legacy routes remain functional',
-    },
-
-    timestamp: new Date().toISOString(),
-  });
-});
+;
 
 logger.success(
   '✅ [Router v3.0] Modular route architecture initialized successfully',
