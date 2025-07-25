@@ -4,12 +4,13 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import { staff } from '@shared/db';
+import { db, staff } from '@shared/db';
 import bcrypt from 'bcrypt';
 import { and, eq } from 'drizzle-orm';
 import jwt from 'jsonwebtoken';
 // Import new unified types and config
 import {
+  AUTH_ERROR_MESSAGES,
   DEV_CONFIG,
   JWT_CONFIG,
   SECURITY_CONFIG,
