@@ -19,10 +19,10 @@ interface CachedRequest extends Request {
   cacheTTL?: number;
   cacheTags?: CacheTag[];
   cacheStrategy?:
-    | 'cache-first'
-    | 'network-first'
-    | 'cache-only'
-    | 'network-only';
+  | 'cache-first'
+  | 'network-first'
+  | 'cache-only'
+  | 'network-only';
   skipCache?: boolean;
 }
 
@@ -210,6 +210,7 @@ export function cacheQuery<T = any>(
       const startTime = Date.now();
 
       try {
+        // eslint-disable-next-line security/detect-non-literal-require
         const result = await queryFunction();
         const queryTime = Date.now() - startTime;
 
@@ -244,7 +245,7 @@ export function hotelDataCacheMiddleware(
     autoInvalidate?: boolean;
   } = {}
 ) {
-  const { ttl = 1800, autoInvalidate = true } = options; // 30 minutes default
+  const { ttl = 1800 } = options; // 30 minutes default
 
   return apiCacheMiddleware({
     ttl,

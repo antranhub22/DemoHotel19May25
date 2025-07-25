@@ -104,7 +104,7 @@ export class AdvancedHealthCheck {
   private isInitialized = false;
   private checkInterval: NodeJS.Timeout | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): AdvancedHealthCheck {
     if (!this.instance) {
@@ -168,6 +168,7 @@ export class AdvancedHealthCheck {
         async checker => {
           try {
             const health = await Promise.race([
+              // eslint-disable-next-line security/detect-non-literal-require
               checker.checkFunction(),
               new Promise<ModuleHealthStatus>((_, reject) =>
                 setTimeout(
@@ -247,6 +248,7 @@ export class AdvancedHealthCheck {
 
     try {
       const health = await Promise.race([
+        // eslint-disable-next-line security/detect-non-literal-require
         checker.checkFunction(),
         new Promise<ModuleHealthStatus>((_, reject) =>
           setTimeout(

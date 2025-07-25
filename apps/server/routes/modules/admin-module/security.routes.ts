@@ -1,6 +1,6 @@
+import { securityMiddleware } from '@server/middleware/securityMiddleware';
+import { securityHardening } from '@server/shared/SecurityHardening';
 import { Request, Response, Router } from 'express';
-import { securityMiddleware } from '../../../middleware/securityMiddleware';
-import { securityHardening } from '../../../shared/SecurityHardening';
 
 const router = Router();
 

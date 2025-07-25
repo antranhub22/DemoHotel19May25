@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vapi Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: #45a049;
+        }
+
+        .button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .button.danger {
+            background: #f44336;
+        }
+
+        .button.danger:hover {
+            background: #da190b;
+        }
+
+        .status {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 100px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+        }
+
+        .info {
+            color: #74c0fc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎙️ Vapi Integration Test</h1>
+        <p>Testing Vapi SDK according to official documentation</p>
+
+        <div>
+            <button id="initButton" class="button">Initialize Vapi</button>
+            <button id="startButton" class="button" disabled>Start Call</button>
+            <button id="stopButton" class="button danger" disabled>Stop Call</button>
+        </div>
+
+        <div class="status" id="statusLog">
+            <div class="log-entry info">Click "Initialize Vapi" to begin...</div>
+        </div>
+
+        <div>
+            <h3>Environment Info:</h3>
+            <div id="envInfo"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@vapi-ai/web@latest"></script>
+    <script>
+        // Environment variables (these should be loaded from .env in real app)
+        const PUBLIC_KEY = '4fba1458-6ea8-45c5-9653-76bbb54e64b5';
+        const ASSISTANT_ID = '18414a64-d242-447a-8162-ce3efd2cc8f1';
+
+        let vapi = null;
+        let isCallActive = false;
+
+        const statusLog = document.getElementById('statusLog');
+        const initButton = document.getElementById('initButton');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            statusLog.appendChild(entry);
+            statusLog.scrollTop = statusLog.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function updateButtons() {
+            initButton.disabled = !!vapi;
+            startButton.disabled = !vapi || isCallActive;
+            stopButton.disabled = !vapi || !isCallActive;
+        }
+
+        function showEnvironmentInfo() {
+            const envInfo = document.getElementById('envInfo');
+            envInfo.innerHTML = `
+                <div><strong>Public Key:</strong> ${PUBLIC_KEY ? PUBLIC_KEY.substring(0, 15) + '...' : 'NOT SET'}</div>
+                <div><strong>Assistant ID:</strong> ${ASSISTANT_ID ? ASSISTANT_ID.substring(0, 15) + '...' : 'NOT SET'}</div>
+                <div><strong>Browser:</strong> ${navigator.userAgent}</div>
+                <div><strong>Protocol:</strong> ${window.location.protocol}</div>
+            `;
+        }
+
+        // Initialize Vapi according to official documentation
+        initButton.addEventListener('click', async () => {
+            try {
+                log('Initializing Vapi instance...', 'info');
+
+                if (!PUBLIC_KEY) {
+                    throw new Error('PUBLIC_KEY not set');
+                }
+
+                if (!ASSISTANT_ID) {
+                    throw new Error('ASSISTANT_ID not set');
+                }
+
+                // Create Vapi instance exactly as shown in documentation
+                vapi = new window.Vapi(PUBLIC_KEY);
+
+                log('Setting up event listeners...', 'info');
+
+                // Set up event listeners exactly as shown in documentation
+                vapi.on('call-start', () => {
+                    log('✅ Call started!', 'success');
+                    isCallActive = true;
+                    updateButtons();
+                });
+
+                vapi.on('call-end', () => {
+                    log('🛑 Call ended!', 'info');
+                    isCallActive = false;
+                    updateButtons();
+                });
+
+                vapi.on('speech-start', () => {
+                    log('🗣️ Speech started', 'info');
+                });
+
+                vapi.on('speech-end', () => {
+                    log('🤐 Speech ended', 'info');
+                });
+
+                vapi.on('volume-level', (volume) => {
+                    // Log volume occasionally to avoid spam
+                    if (Math.random() < 0.1) {
+                        log(`🔊 Volume: ${volume}`, 'info');
+                    }
+                });
+
+                vapi.on('message', (message) => {
+                    log(`📨 Message: ${message.type} - ${JSON.stringify(message).substring(0, 100)}...`, 'info');
+
+                    if (message.type === 'transcript') {
+                        log(`💬 ${message.role}: ${message.transcript}`, 'success');
+                    }
+                });
+
+                vapi.on('error', (error) => {
+                    log(`❌ Vapi Error: ${error.message || error}`, 'error');
+                    console.error('Vapi Error:', error);
+                });
+
+                log('✅ Vapi initialized successfully!', 'success');
+                updateButtons();
+
+            } catch (error) {
+                log(`❌ Failed to initialize Vapi: ${error.message}`, 'error');
+                console.error('Initialization error:', error);
+            }
+        });
+
+        // Start call exactly as shown in documentation
+        startButton.addEventListener('click', async () => {
+            try {
+                if (!vapi) {
+                    throw new Error('Vapi not initialized');
+                }
+
+                log('Starting call...', 'info');
+
+                // Start call exactly as shown in documentation
+                const call = await vapi.start(ASSISTANT_ID);
+
+                log(`📞 Call initiated: ${call?.id || 'unknown'}`, 'success');
+
+            } catch (error) {
+                log(`❌ Failed to start call: ${error.message}`, 'error');
+                console.error('Start call error:', error);
+            }
+        });
+
+        // Stop call
+        stopButton.addEventListener('click', () => {
+            try {
+                if (!vapi) {
+                    throw new Error('Vapi not initialized');
+                }
+
+                log('Stopping call...', 'info');
+                vapi.stop();
+
+            } catch (error) {
+                log(`❌ Failed to stop call: ${error.message}`, 'error');
+                console.error('Stop call error:', error);
+            }
+        });
+
+        // Initialize display
+        showEnvironmentInfo();
+        updateButtons();
+
+        log('Test page loaded. Click "Initialize Vapi" to begin.', 'info');
+    </script>
+</body>
+
+</html>

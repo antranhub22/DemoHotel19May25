@@ -1,6 +1,3 @@
-import React, { Suspense, useState, useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Switch, Route, Link, useLocation } from 'wouter';
 import VoiceAssistant from '@/components/business/VoiceAssistant';
 import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
 import ErrorBoundary from '@/components/layout/ErrorBoundary';
@@ -15,6 +12,10 @@ import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContex
 import { useWebSocket } from '@/hooks/useWebSocket';
 import NotFound from '@/pages/not-found';
 import StaffPage from '@/pages/staff';
+import VapiTest from '@/pages/VapiTest';
+import React, { Suspense, useEffect, useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Link, Route, Switch, useLocation } from 'wouter';
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
   () => import('./pages/AnalyticsDashboard')
@@ -22,18 +23,25 @@ const AnalyticsDashboard = React.lazy(
 
 // Dashboard pages
 import {
-  DashboardLayout,
-  DashboardHome,
-  SetupWizard,
-  AssistantManager,
   Analytics,
+  AssistantManager,
+  DashboardHome,
+  DashboardLayout,
   Settings,
+  SetupWizard,
 } from '@/pages/dashboard';
 
 // Unified Dashboard (Phase 3)
 import StaffDashboard from '@/pages/StaffDashboard';
 import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
 import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
+import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
+import { Integrations } from '@/pages/unified-dashboard/Integrations';
+import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
+import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
+import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
+import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
+import { logger } from '@shared/utils/logger';
 // Lazy load charts-heavy dashboard components
 const AdvancedAnalytics = React.lazy(() =>
   import('@/pages/unified-dashboard/AdvancedAnalytics').then(module => ({
@@ -45,13 +53,6 @@ const SystemMonitoring = React.lazy(() =>
     default: module.SystemMonitoring,
   }))
 );
-import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
-import { Integrations } from '@/pages/unified-dashboard/Integrations';
-import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
-import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
-import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
-import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
-import { logger } from '@shared/utils/logger';
 
 // ============================================
 // Protected Route Component
@@ -331,6 +332,7 @@ function Router() {
       <Switch>
         <Route path="/" component={VoiceAssistant} />
         <Route path="/interface1" component={VoiceAssistant} />
+        <Route path="/vapi-test" component={VapiTest} />
         {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />
