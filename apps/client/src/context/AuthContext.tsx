@@ -186,10 +186,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
-      console.log('[DEBUG] AuthProvider - token decode error:', error);
+      // [SECURITY] Console.log removed for security compliance
       localStorage.removeItem('token');
     } finally {
-      console.log('[DEBUG] AuthProvider - setting loading false');
+      // [SECURITY] Console.log removed for security compliance
       setIsLoading(false);
     }
   }, []);
@@ -246,7 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(() => {
-    console.log('[DEBUG] AuthProvider logout called');
+    // [SECURITY] Console.log removed for security compliance
     setUser(null);
     setTenant(null);
     localStorage.removeItem('token');

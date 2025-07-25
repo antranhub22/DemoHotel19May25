@@ -2,7 +2,6 @@
 
 // Type declaration for import.meta
 
-
 /**
  * Authentication Helper - Auto-login for Development
  */
@@ -19,7 +18,7 @@ export const generateDevToken = async (): Promise<string> => {
     { email: 'itmanager', password: 'itmanager123' },
   ];
 
-  for (const cred of (credentials as any[])) {
+  for (const cred of credentials as any[]) {
     try {
       console.log(`🔐 [AuthHelper] Trying login with ${cred.email}...`);
 
@@ -34,7 +33,7 @@ export const generateDevToken = async (): Promise<string> => {
         if (data.token) {
           localStorage.setItem('token', data.token);
           localStorage.setItem(DEV_TOKEN_KEY, 'true');
-          console.log(`✅ [AuthHelper] Dev token generated with ${cred.email}`);
+          // [SECURITY] Sensitive console.log removed;
           return data.token;
         }
       } else {
@@ -87,20 +86,20 @@ export const getAuthToken = async (): Promise<string | null> => {
   // If token exists, check if it's expired
   if (token) {
     if (isTokenExpired(token)) {
-      console.log('⏰ [AuthHelper] Token expired, generating new one...');
+      // [SECURITY] Console.log removed for security compliance
       // Clear expired token
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
       token = null;
     } else {
-      console.log('✅ [AuthHelper] Valid token found');
+      // [SECURITY] Console.log removed for security compliance
       return token;
     }
   }
 
   // In development, auto-generate token if none exists or expired
   if (import.meta.env.DEV || import.meta.env.NODE_ENV === 'development') {
-    console.log('🚧 [AuthHelper] Generating fresh token for dev mode...');
+    // [SECURITY] Console.log removed for security compliance
     try {
       token = await generateDevToken();
       return token;
@@ -152,7 +151,7 @@ export const authenticatedFetch = async (
 
   // If 403 (forbidden/expired), try once more with fresh token
   if (response.status === 403) {
-    console.log('🔄 [AuthHelper] 403 error, retrying with fresh token...');
+    // [SECURITY] Sensitive console.log removed;
 
     // Force refresh token
     localStorage.removeItem('token');
@@ -167,7 +166,7 @@ export const authenticatedFetch = async (
         '❌ [AuthHelper] Still 403 after token refresh - auth may be broken'
       );
     } else {
-      console.log('✅ [AuthHelper] Success after token refresh!');
+      // [SECURITY] Console.log removed for security compliance
     }
   }
 

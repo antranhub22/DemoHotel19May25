@@ -10,4 +10,24 @@ npm run typecheck || {
   echo "ℹ️ Use 'git commit --no-verify' to bypass if needed."
 }
 
-echo "✅ All style checks passed!"
+echo "🏛️ Running architectural governance validation..."
+npm run governance:validate:security || {
+  echo "❌ Security governance validation failed!"
+  echo "🔒 Critical security issues detected. Fix before committing."
+  echo "ℹ️ Use 'git commit --no-verify' to bypass if absolutely necessary."
+  exit 1
+}
+
+npm run governance:validate:ssot || {
+  echo "⚠️ SSOT governance validation failed!"
+  echo "📋 Single Source of Truth violations detected."
+  echo "ℹ️ Consider fixing these issues or use 'git commit --no-verify' to bypass."
+}
+
+echo "🎯 Running quick architecture check..."
+npm run governance:validate:architecture || {
+  echo "⚠️ Architecture governance issues detected."
+  echo "🏗️ Review architecture patterns and module boundaries."
+}
+
+echo "✅ All governance and style checks completed!"

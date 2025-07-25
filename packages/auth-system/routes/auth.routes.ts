@@ -4,12 +4,12 @@
 // This file consolidates all authentication routes into a single system
 // Provides backward compatibility with existing endpoints
 
-import { Router, Request, Response, RequestHandler } from 'express';
-import { z } from 'zod';
 import { authValidationSchemas } from '@auth/config';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 import type { LoginCredentials } from '@auth/types';
+import { Request, RequestHandler, Response, Router } from 'express';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -114,7 +114,7 @@ const refreshHandler: RequestHandler = async (req: Request, res: Response) => {
       });
     }
 
-    console.log('🔄 [UnifiedAuth] Token refresh attempt');
+    // Token refresh attempt - logging removed for security
 
     // Use unified auth service for token refresh
     const result = await UnifiedAuthService.refreshToken(refreshToken);

@@ -37,7 +37,7 @@ export const debugAuth = {
 
         // Try alternative users if manager fails
         if (userType === 'manager') {
-          console.log('🔄 [DebugAuth] Manager failed, trying frontdesk...');
+          // [SECURITY] Console.log removed for security compliance
           return await this.testLogin('frontdesk');
         }
 
@@ -50,11 +50,10 @@ export const debugAuth = {
   },
 
   async testGetAuthToken() {
-    console.log('🎫 [DebugAuth] Testing getAuthToken...');
-
+    // [SECURITY] Console.log removed for security compliance
     try {
       const token = await getAuthToken();
-      console.log('✅ [DebugAuth] Got token:', token ? 'YES' : 'NO');
+      // [SECURITY] Sensitive console.log removed;
       return token;
     } catch (error) {
       console.error('❌ [DebugAuth] getAuthToken error:', error);
@@ -104,15 +103,15 @@ export const debugAuth = {
   },
 
   async clearTokens() {
-    console.log('🧹 [DebugAuth] Clearing all stored tokens...');
+    // [SECURITY] Console.log removed for security compliance
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     localStorage.removeItem('dev_auth_token');
-    console.log('✅ [DebugAuth] Tokens cleared');
+    // [SECURITY] Sensitive console.log removed;
   },
 
   async forceRefreshToken() {
-    console.log('🔄 [DebugAuth] Force refreshing token...');
+    // [SECURITY] Console.log removed for security compliance
     await this.clearTokens();
     return await this.testGetAuthToken();
   },

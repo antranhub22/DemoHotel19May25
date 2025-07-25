@@ -92,14 +92,13 @@ const mapLegacyRole = (legacyRole: string): UserRole => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  console.log('[DEBUG] AuthProvider render');
-
+  // [SECURITY] Console.log removed for security compliance
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('[DEBUG] AuthProvider useEffect - checking token');
+    // [SECURITY] Console.log removed for security compliance
     const token = localStorage.getItem('token');
     if (!token) {
       console.log(
@@ -110,10 +109,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
-      console.log('[DEBUG] AuthProvider - decoding token');
+      // [SECURITY] Console.log removed for security compliance
       const decoded = jwtDecode<MyJwtPayload>(token);
-      console.log('[DEBUG] AuthProvider - token decoded:', decoded);
-
+      // [SECURITY] Console.log removed for security compliance
       // Tạo user object từ token payload
       const mappedRole = mapLegacyRole(decoded.role);
       const userFromToken: AuthUser = {
@@ -139,10 +137,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
-      console.log('[DEBUG] AuthProvider - token decode error:', error);
+      // [SECURITY] Console.log removed for security compliance
       localStorage.removeItem('token');
     } finally {
-      console.log('[DEBUG] AuthProvider - setting loading false');
+      // [SECURITY] Console.log removed for security compliance
       setIsLoading(false);
     }
   }, []);
@@ -198,7 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(() => {
-    console.log('[DEBUG] AuthProvider logout called');
+    // [SECURITY] Console.log removed for security compliance
     setUser(null);
     setTenant(null);
     localStorage.removeItem('token');
@@ -230,8 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     [user]
   );
 
-  console.log('[DEBUG] AuthProvider state:', { user, tenant, isLoading });
-
+  // [SECURITY] Console.log removed for security compliance
   return (
     <AuthContext.Provider
       value={{

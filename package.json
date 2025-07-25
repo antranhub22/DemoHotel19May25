@@ -183,7 +183,26 @@
     "gateway:security": "curl -s http://localhost:10000/api/admin/api-gateway/security | jq || echo '⚠️ Gateway security failed'",
     "gateway:config": "curl -s http://localhost:10000/api/admin/api-gateway/config | jq || echo '⚠️ Gateway config failed'",
     "gateway:diagnostics": "curl -s http://localhost:10000/api/admin/api-gateway/diagnostics | jq || echo '⚠️ Gateway diagnostics failed'",
-    "gateway:test": "node tools/scripts/gateway/test-gateway.cjs"
+    "gateway:test": "node tools/scripts/gateway/test-gateway.cjs",
+    "🏛️ GOVERNANCE RULES": "===============================",
+    "governance:validate": "node tools/governance/governance-validator.js",
+    "governance:validate:json": "node tools/governance/governance-validator.js --json",
+    "governance:validate:verbose": "node tools/governance/governance-validator.js --verbose",
+    "governance:validate:ssot": "node tools/governance/governance-validator.js --rules=ssot",
+    "governance:validate:security": "node tools/governance/governance-validator.js --rules=security",
+    "governance:validate:architecture": "node tools/governance/governance-validator.js --rules=architecture",
+    "governance:validate:quality": "node tools/governance/governance-validator.js --rules=quality",
+    "governance:validate:multitenant": "node tools/governance/governance-validator.js --rules=multitenant",
+    "governance:validate:performance": "node tools/governance/governance-validator.js --rules=performance",
+    "governance:report": "node tools/governance/governance-validator.js --json --output=governance-report.json",
+    "governance:report:html": "node tools/governance/governance-validator.js --json --output=governance-report.json && node tools/governance/generate-html-report.js",
+    "governance:check": "npm run governance:validate && echo '✅ Governance validation passed'",
+    "governance:ci": "node tools/governance/governance-validator.js --json --output=governance-report.json --rules=ssot,security,architecture",
+    "governance:fix": "node tools/governance/governance-validator.js --fix",
+    "pre-commit:governance": "npm run governance:validate:security && npm run governance:validate:ssot",
+    "🔧 SECURITY FIX": "===============================",
+    "security:fix": "node tools/governance/fix-security-violations.js",
+    "security:fix:dry-run": "node tools/governance/fix-security-violations.js --dry-run"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -321,10 +340,79 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "prettier --write"
+      "prettier --write",
+      "npm run governance:validate:security"
     ],
     "*.{json,md}": [
       "prettier --write"
+    ],
+    "apps/server/routes/*.ts": [
+      "npm run governance:validate:ssot"
+    ],
+    "packages/shared/db/schema.ts": [
+      "npm run governance:validate:ssot",
+      "npm run governance:validate:multitenant"
+    ],
+    "apps/client/src/components/**/*.{ts,tsx}": [
+      "npm run governance:validate:architecture"
     ]
+  },
+  "governance": {
+    "rules": {
+      "ssot": {
+        "enabled": true,
+        "severity": "error",
+        "autoFix": false
+      },
+      "architecture": {
+        "enabled": true,
+        "severity": "error",
+        "autoFix": false
+      },
+      "security": {
+        "enabled": true,
+        "severity": "error",
+        "autoFix": false
+      },
+      "quality": {
+        "enabled": true,
+        "severity": "warning",
+        "autoFix": true
+      },
+      "multitenant": {
+        "enabled": true,
+        "severity": "error",
+        "autoFix": false
+      },
+      "performance": {
+        "enabled": true,
+        "severity": "warning",
+        "autoFix": false
+      }
+    },
+    "reporting": {
+      "format": "console",
+      "outputFile": "governance-report.json",
+      "includeWarnings": true,
+      "verboseMode": false
+    },
+    "enforcement": {
+      "blockCommitOnFailure": true,
+      "blockDeployOnFailure": true,
+      "allowWarnings": true
+    },
+    "exemptions": {
+      "files": [
+        "*.test.ts",
+        "*.spec.ts",
+        "tools/",
+        "tests/"
+      ],
+      "rules": {
+        "legacy": [
+          "quality.documentation"
+        ]
+      }
+    }
   }
 }

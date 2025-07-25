@@ -1,12 +1,21 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🚀 Running pre-push validations..."
+echo "🚀 Running comprehensive pre-push validations..."
 
 echo "🔧 TypeScript compilation check..."
 npm run typecheck || {
   echo "⚠️ TypeScript errors found. Consider fixing them."
   echo "ℹ️ Use 'git push --no-verify' to bypass if needed."
+}
+
+echo "🏛️ Running comprehensive architectural governance validation..."
+npm run governance:validate || {
+  echo "❌ Architectural governance validation failed!"
+  echo "📋 Review governance report for detailed violations."
+  echo "🔧 Run 'npm run governance:report' for detailed analysis."
+  echo "ℹ️ Use 'git push --no-verify' to bypass if absolutely necessary."
+  exit 1
 }
 
 echo "🧪 Running tests (optional)..."
@@ -21,4 +30,10 @@ npm run style:check || {
   echo "ℹ️ Use 'git push --no-verify' to skip all checks if needed."
 }
 
-echo "✅ All pre-push checks passed!" 
+echo "📊 Generating governance compliance report..."
+npm run governance:report || {
+  echo "⚠️ Could not generate governance report."
+}
+
+echo "✅ All pre-push validations completed!"
+echo "🎯 Governance compliance verified for deployment readiness." 

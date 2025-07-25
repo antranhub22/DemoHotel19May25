@@ -148,7 +148,7 @@ export class UnifiedAuthService {
 
       // Check if token is blacklisted
       if (payload.jti && TokenBlacklist.isBlacklisted(payload.jti)) {
-        console.log(`❌ [UnifiedAuth] Token blacklisted: ${payload.jti}`);
+        // Token blacklisted - logging removed for security
         return null;
       }
 
