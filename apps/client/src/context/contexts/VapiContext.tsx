@@ -1,11 +1,4 @@
-/// <reference types="vite/client" />
-
-// Type declaration for import.meta
-
-import {
-  getVapiPublicKeyByLanguage,
-  HotelConfiguration,
-} from '@/hooks/useHotelConfiguration';
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { CallDetails } from '@/types';
 import { logger } from '@shared/utils/logger';
 import React, {
@@ -30,90 +23,137 @@ export interface VapiContextType {
     hotelConfig?: HotelConfiguration | null
   ) => Promise<void>;
   startVapiCall: (assistantId: string) => Promise<any>;
-  stopVapi: () => void;
-  setMuted: (muted: boolean) => void;
+  endVapiCall: () => void;
+  resetVapi: () => Promise<void>;
 }
 
 const VapiContext = createContext<VapiContextType | undefined>(undefined);
 
-export function VapiProvider({ children }: { children: React.ReactNode }) {
-  logger.debug('[VapiProvider] Initializing...', 'Component');
+export const useVapi = (): VapiContextType => {
+  const context = useContext(VapiContext);
+  if (!context) {
+    throw new Error('useVapi must be used within a VapiProvider');
+  }
+  return context;
+};
 
+interface VapiProviderProps {
+  children: React.ReactNode;
+}
+
+export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
+  // Vapi state
   const [micLevel, setMicLevel] = useState<number>(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
 
-  // Refs for cleanup
-  const isMountedRef = useRef(true);
+  // Refs for Vapi instance and cleanup
+  const vapiInstanceRef = useRef<any>(null);
+  const eventListenersRef = useRef<{ [key: string]: Function }>({});
 
-  // Initialize Vapi with language and configuration
+  // ✅ Initialize Vapi with hotel configuration
   const initializeVapi = async (
-    language: string,
+    language: string = 'en',
     hotelConfig?: HotelConfiguration | null
-  ) => {
+  ): Promise<void> => {
     try {
       logger.debug(
-        '[VapiContext] Initializing Vapi for language:',
+        '[VapiContext] Initializing Vapi with language:',
         'Component',
         language
       );
 
-      // Get public key based on language
+      // Determine public key from hotel configuration or environment
       let publicKey: string | undefined;
-      try {
-        publicKey = hotelConfig
-          ? await getVapiPublicKeyByLanguage(language as any, hotelConfig)
-          : language === 'fr'
-            ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
-            : language === 'zh'
-              ? import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH
-              : language === 'ru'
-                ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
-                : language === 'ko'
-                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
-                  : language === 'vi'
-                    ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
-                    : import.meta.env.VITE_VAPI_PUBLIC_KEY;
-      } catch (configError) {
-        logger.error(
-          '[VapiContext] Error getting public key from config:',
-          'Component',
-          configError
+
+      if (hotelConfig?.vapiPublicKey) {
+        publicKey = hotelConfig.vapiPublicKey;
+        logger.debug(
+          '[VapiContext] Using hotel config public key',
+          'Component'
         );
-        publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+      } else {
+        // Fallback to environment variables by language
+        publicKey =
+          language === 'vi'
+            ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
+            : language === 'fr'
+              ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
+              : language === 'zh'
+                ? import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH
+                : language === 'ru'
+                  ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
+                  : language === 'ko'
+                    ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
+                    : import.meta.env.VITE_VAPI_PUBLIC_KEY;
+        logger.debug(
+          '[VapiContext] Using environment public key for language:',
+          'Component',
+          language
+        );
       }
 
       if (!publicKey) {
         throw new Error(
-          `Vapi public key not configured for language: ${language}`
+          `No Vapi public key available for language: ${language}`
         );
       }
 
-      // ✅ FIXED: Support both UUID and pk_ prefixed formats for public key
-      if (
-        !publicKey.match(
-          /^(pk_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
-        )
-      ) {
-        throw new Error(
-          'Invalid Vapi public key format. Key should start with "pk_" or be a valid UUID'
-        );
-      }
-
-      // Initialize Vapi - Dynamic import for code splitting
+      // Dynamic import to reduce initial bundle size
       const { initVapi } = await import('@/lib/vapiClient');
-      const vapi = await initVapi(publicKey);
 
-      if (!vapi) {
-        throw new Error('Failed to initialize Vapi');
-      }
+      // Initialize Vapi with the public key
+      const vapiInstance = await initVapi(publicKey);
+      vapiInstanceRef.current = vapiInstance;
 
-      // Setup event listeners
-      setupVapiEventListeners(vapi);
+      // Set up event listeners for Vapi events
+      const speechStartListener = () => {
+        logger.debug('[VapiContext] Speech started', 'Component');
+      };
+
+      const speechEndListener = () => {
+        logger.debug('[VapiContext] Speech ended', 'Component');
+        setMicLevel(0);
+      };
+
+      const volumeListener = (volume: { level: number }) => {
+        setMicLevel(volume.level || 0);
+      };
+
+      const callStartListener = () => {
+        logger.debug('[VapiContext] Call started', 'Component');
+      };
+
+      const callEndListener = () => {
+        logger.debug('[VapiContext] Call ended', 'Component');
+        setMicLevel(0);
+      };
+
+      const errorListener = (error: any) => {
+        logger.error('[VapiContext] Vapi error:', 'Component', error);
+      };
+
+      // Add event listeners
+      vapiInstance.on('speech-start', speechStartListener);
+      vapiInstance.on('speech-end', speechEndListener);
+      vapiInstance.on('volume-level', volumeListener);
+      vapiInstance.on('call-start', callStartListener);
+      vapiInstance.on('call-end', callEndListener);
+      vapiInstance.on('error', errorListener);
+
+      // Store event listeners for cleanup
+      eventListenersRef.current = {
+        speechStartListener,
+        speechEndListener,
+        volumeListener,
+        callStartListener,
+        callEndListener,
+        errorListener,
+      };
 
       logger.debug('[VapiContext] Vapi initialized successfully', 'Component');
     } catch (error) {
       logger.error(
-        '[VapiContext] Error initializing Vapi:',
+        '[VapiContext] Failed to initialize Vapi:',
         'Component',
         error
       );
@@ -121,51 +161,24 @@ export function VapiProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Setup Vapi event listeners
-  const setupVapiEventListeners = (vapi: any) => {
-    // Throttle micLevel updates to prevent excessive re-renders
-    let lastMicLevelUpdate = 0;
-    const MIC_LEVEL_THROTTLE = 100; // Only update every 100ms
-
-    vapi.on('volume-level', (level: number) => {
-      try {
-        const now = Date.now();
-        if (now - lastMicLevelUpdate > MIC_LEVEL_THROTTLE) {
-          setMicLevel(level);
-          lastMicLevelUpdate = now;
-        }
-      } catch (error) {
-        logger.warn(
-          '[VapiContext] Error handling volume-level:',
-          'Component',
-          error
-        );
-      }
-    });
-
-    vapi.on('error', (error: any) => {
-      logger.error('[VapiContext] Vapi error:', 'Component', error);
-    });
-  };
-
-  // Start Vapi call with assistant ID
-  const startVapiCall = async (assistantId: string) => {
+  // ✅ Start Vapi call using proxy to bypass CORS
+  const startVapiCall = async (assistantId: string): Promise<any> => {
     try {
       logger.debug(
-        '[VapiContext] Starting Vapi call with assistant:',
+        '[VapiContext] Starting Vapi call via proxy for assistant:',
         'Component',
-        assistantId
+        assistantId?.substring(0, 15) + '...'
       );
 
-      // Dynamic import for code splitting
-      const { getVapiInstance } = await import('@/lib/vapiClient');
-      const vapi = getVapiInstance();
-      if (!vapi) {
-        throw new Error('Vapi instance not initialized');
-      }
+      // ✅ NEW: Enhanced debug logging
+      console.log('🚀 [DEBUG] VapiContext starting call via proxy:', {
+        assistantId: assistantId?.substring(0, 15) + '...',
+        timestamp: new Date().toISOString(),
+      });
 
-      // ✅ FIXED: Support both asst_ prefixed and UUID formats for assistant ID
+      // Validate assistant ID format
       if (
+        !assistantId ||
         !assistantId.match(
           /^(asst_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
         )
@@ -175,103 +188,140 @@ export function VapiProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      const call = await vapi.start(assistantId);
+      // ✅ FIXED: Use Vapi proxy instead of direct SDK call
+      const { startVapiCallViaProxy } = await import('@/lib/vapiProxyClient');
 
-      if (!call) {
-        throw new Error('Failed to start Vapi call');
+      // Get public key - try multiple sources
+      let publicKey: string | undefined;
+
+      // Try to get from current Vapi instance if available
+      if (vapiInstanceRef.current?.publicKey) {
+        publicKey = vapiInstanceRef.current.publicKey;
+      } else {
+        // Fallback to environment variable
+        publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+      }
+
+      if (!publicKey) {
+        throw new Error('No Vapi public key available');
+      }
+
+      console.log('🔄 [DEBUG] VapiContext calling proxy...');
+
+      const result = await startVapiCallViaProxy(assistantId, publicKey, {
+        metadata: { source: 'vapi-context' },
+      });
+
+      console.log('📡 [DEBUG] VapiContext proxy result:', {
+        success: result.success,
+        error: result.error,
+        callId: result.data?.id,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to start Vapi call via proxy');
       }
 
       logger.debug(
-        '[VapiContext] Vapi call started successfully:',
+        '[VapiContext] Vapi call started successfully via proxy:',
         'Component',
-        call?.id || 'unknown'
+        result.data?.id || 'unknown'
       );
-      return call;
+
+      console.log(
+        '✅ [DEBUG] VapiContext call started successfully via proxy!'
+      );
+
+      return result.data;
     } catch (error) {
       logger.error(
         '[VapiContext] Error starting Vapi call:',
         'Component',
         error
       );
+
+      console.error('❌ [DEBUG] VapiContext call error:', {
+        error: error instanceof Error ? error.message : String(error),
+        assistantId: assistantId?.substring(0, 15) + '...',
+        timestamp: new Date().toISOString(),
+      });
+
       throw error;
     }
   };
 
-  // Stop Vapi
-  const stopVapi = async () => {
+  // ✅ End Vapi call
+  const endVapiCall = (): void => {
     try {
-      logger.debug('[VapiContext] Stopping Vapi...', 'Component');
+      logger.debug('[VapiContext] Ending Vapi call', 'Component');
 
-      // Dynamic import for code splitting
-      const { getVapiInstance } = await import('@/lib/vapiClient');
-      const vapi = getVapiInstance();
-      if (vapi) {
-        vapi.stop();
+      if (vapiInstanceRef.current) {
+        vapiInstanceRef.current.stop();
+        logger.debug('[VapiContext] Vapi call ended', 'Component');
+      } else {
+        logger.warn(
+          '[VapiContext] No active Vapi instance to end',
+          'Component'
+        );
+      }
+    } catch (error) {
+      logger.error('[VapiContext] Error ending Vapi call:', 'Component', error);
+    }
+  };
 
-        // Additional cleanup if available
-        if (typeof vapi.cleanup === 'function') {
-          vapi.cleanup();
-        }
+  // ✅ Reset Vapi instance and clean up
+  const resetVapi = async (): Promise<void> => {
+    try {
+      logger.debug('[VapiContext] Resetting Vapi instance', 'Component');
 
-        if (typeof vapi.disconnect === 'function') {
-          vapi.disconnect();
-        }
+      // Clean up event listeners
+      if (vapiInstanceRef.current && eventListenersRef.current) {
+        const vapi = vapiInstanceRef.current;
+        const listeners = eventListenersRef.current;
+
+        vapi.off('speech-start', listeners.speechStartListener);
+        vapi.off('speech-end', listeners.speechEndListener);
+        vapi.off('volume-level', listeners.volumeListener);
+        vapi.off('call-start', listeners.callStartListener);
+        vapi.off('call-end', listeners.callEndListener);
+        vapi.off('error', listeners.errorListener);
       }
 
-      // Reset mic level
+      // Reset state
+      vapiInstanceRef.current = null;
+      eventListenersRef.current = {};
       setMicLevel(0);
+      setCallDetails(null);
 
-      logger.debug('[VapiContext] Vapi stopped successfully', 'Component');
+      logger.debug('[VapiContext] Vapi instance reset complete', 'Component');
     } catch (error) {
-      logger.error('[VapiContext] Error stopping Vapi:', 'Component', error);
+      logger.error('[VapiContext] Error resetting Vapi:', 'Component', error);
+      throw error;
     }
   };
 
-  // Set muted state
-  const setMuted = async (muted: boolean) => {
-    try {
-      // Dynamic import for code splitting
-      const { getVapiInstance } = await import('@/lib/vapiClient');
-      const vapi = getVapiInstance();
-      if (vapi && typeof vapi.setMuted === 'function') {
-        vapi.setMuted(muted);
-        logger.debug('[VapiContext] Mute state set to:', 'Component', muted);
-      }
-    } catch (error) {
-      logger.error(
-        '[VapiContext] Error setting mute state:',
-        'Component',
-        error
-      );
-    }
-  };
-
-  // Cleanup on unmount
+  // ✅ Cleanup on unmount
   useEffect(() => {
-    isMountedRef.current = true;
     return () => {
-      isMountedRef.current = false;
-      stopVapi();
+      resetVapi();
     };
   }, []);
 
-  const value: VapiContextType = {
+  const contextValue: VapiContextType = {
+    // State
     micLevel,
     callDetails,
     setCallDetails,
+
+    // Actions
     initializeVapi,
     startVapiCall,
-    stopVapi,
-    setMuted,
+    endVapiCall,
+    resetVapi,
   };
 
-  return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;
-}
-
-export function useVapi() {
-  const context = useContext(VapiContext);
-  if (context === undefined) {
-    throw new Error('useVapi must be used within a VapiProvider');
-  }
-  return context;
-}
+  return (
+    <VapiContext.Provider value={contextValue}>{children}</VapiContext.Provider>
+  );
+};
