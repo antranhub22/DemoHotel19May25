@@ -5,6 +5,48 @@
 /// <reference types="vite/client" />
 
 // ==============================================================
+// VITE TYPES - Fix ImportMeta.env errors
+// ==============================================================
+
+interface ImportMetaEnv
+  extends Readonly<Record<string, string | boolean | undefined>> {
+  readonly VITE_APP_TITLE?: string;
+  readonly VITE_API_URL?: string;
+  readonly VITE_OPENAI_API_KEY?: string;
+  readonly VITE_VAPI_PUBLIC_KEY?: string;
+  readonly VITE_VAPI_ASSISTANT_ID?: string;
+  readonly VITE_VAPI_PUBLIC_KEY_VI?: string;
+  readonly VITE_VAPI_ASSISTANT_ID_VI?: string;
+  readonly VITE_VAPI_PUBLIC_KEY_FR?: string;
+  readonly VITE_VAPI_ASSISTANT_ID_FR?: string;
+  readonly VITE_VAPI_PUBLIC_KEY_ZH?: string;
+  readonly VITE_VAPI_ASSISTANT_ID_ZH?: string;
+  readonly VITE_VAPI_PUBLIC_KEY_RU?: string;
+  readonly VITE_VAPI_ASSISTANT_ID_RU?: string;
+  readonly VITE_VAPI_PUBLIC_KEY_KO?: string;
+  readonly VITE_VAPI_ASSISTANT_ID_KO?: string;
+  readonly NODE_ENV?: string;
+  readonly DEV?: boolean;
+  readonly PROD?: boolean;
+  readonly SSR?: boolean;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+  readonly hot?: {
+    readonly data: any;
+    accept(): void;
+    accept(cb: (mod: any) => void): void;
+    accept(dep: string, cb: (mod: any) => void): void;
+    accept(deps: readonly string[], cb: (mods: any[]) => void): void;
+    dispose(cb: (data: any) => void): void;
+    decline(): void;
+    invalidate(): void;
+    on<T extends string>(event: T, cb: (payload: any) => void): void;
+  };
+}
+
+// ==============================================================
 // EXPRESS TYPES - Extended for auth middleware
 // ==============================================================
 
