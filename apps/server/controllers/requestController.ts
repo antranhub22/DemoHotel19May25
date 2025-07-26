@@ -4,7 +4,6 @@ import {
   isFeatureEnabled,
   isModuleEnabled,
 } from '@server/shared/FeatureFlags';
-import { ServiceContainer } from '@server/shared/ServiceContainer';
 import { db, request as requestTable } from '@shared/db';
 import { requestMapper } from '@shared/db/transformers';
 import { generateId, generateShortId } from '@shared/utils/idGenerator';
@@ -53,31 +52,23 @@ export class RequestController {
     );
   }
 
-  // ✅ NEW: Enhanced service retrieval with async support
+  // ✅ SIMPLIFIED: Direct import without ServiceContainer complexity
   private static async getTenantServiceAsync() {
     try {
-      if (ServiceContainer.has('TenantService')) {
-        return await ServiceContainer.get('TenantService');
-      }
-      // Auto-register if not found
-      const { TenantService } = require('@server/services/tenantService');
-      ServiceContainer.register('TenantService', TenantService, {
-        module: 'tenant-module',
-        singleton: true,
-      });
-      return await ServiceContainer.get('TenantService');
+      const tenantServiceModule = await import('@server/services/tenantService');
+      const TenantService = tenantServiceModule.TenantService;
+      return new TenantService();
     } catch (error) {
       logger.warn(
-        'Failed to get TenantService via async container',
+        'Failed to import TenantService',
         'RequestController',
         error
       );
-      const { TenantService } = require('@server/services/tenantService');
-      return new TenantService();
+      return null;
     }
   }
 
-  // ✅ NEW: Helper method to extract tenant ID for guest requests
+  // ✅ SIMPLIFIED: Simple tenant extraction without dynamic imports
   static extractTenantId(req: Request): string | null {
     // First try authenticated tenant
     if (req.tenant?.id) {
@@ -85,11 +76,10 @@ export class RequestController {
     }
 
     // For guest requests (voice assistant), extract tenant from hostname
-    const { GuestAuthService } = require('@server/services/guestAuthService');
     const hostname = req.get('host') || '';
-    const subdomain = GuestAuthService.extractSubdomain(hostname);
+    const subdomain = hostname.split('.')[0];
 
-    if (subdomain) {
+    if (subdomain && subdomain !== 'localhost' && subdomain !== '127') {
       return `tenant-${subdomain}`;
     }
 
@@ -375,10 +365,10 @@ export class RequestController {
           },
           abTest: advancedAnalyticsVariant
             ? {
-                testName: 'advanced-analytics-test',
-                variant: advancedAnalyticsVariant,
-                userId: context.userId,
-              }
+              testName: 'advanced-analytics-test',
+              variant: advancedAnalyticsVariant,
+              userId: context.userId,
+            }
             : undefined,
         },
       };
@@ -458,19 +448,28 @@ export class RequestController {
 
       if (!tenantId) {
         // For guest requests (voice assistant), extract tenant from hostname
-        const {
-          GuestAuthService,
-        } = require('@server/services/guestAuthService');
-        const hostname = req.get('host') || '';
-        const subdomain = GuestAuthService.extractSubdomain(hostname);
+        try {
+          const guestAuthModule = await import('@server/services/guestAuthService');
+          const GuestAuthService = guestAuthModule.GuestAuthService;
+          const hostname = req.get('host') || '';
+          const subdomain = GuestAuthService.extractSubdomain(hostname);
 
-        if (subdomain) {
-          tenantId = `tenant-${subdomain}`;
-        } else {
-          (res as any).status(400).json({
+          if (subdomain) {
+            tenantId = `tenant-${subdomain}`;
+          } else {
+            (res as any).status(400).json({
+              success: false,
+              error: 'Unable to identify hotel from request',
+              code: 'TENANT_NOT_IDENTIFIED',
+            });
+            return;
+          }
+        } catch (error) {
+          logger.error('Failed to import GuestAuthService', 'RequestController', error);
+          (res as any).status(500).json({
             success: false,
-            error: 'Unable to identify hotel from request',
-            code: 'TENANT_NOT_IDENTIFIED',
+            error: 'Service import failed',
+            code: 'SERVICE_IMPORT_ERROR',
           });
           return;
         }

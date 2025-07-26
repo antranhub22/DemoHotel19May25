@@ -2,8 +2,13 @@ import express from 'express';
 // ✅ REMOVED: authenticateJWT middleware for voice assistant compatibility
 // import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { RequestController } from '@server/controllers/requestController';
+import { DebuggingMiddleware, requestDebugging } from '@server/middleware/debuggingMiddleware';
 
 const router = express.Router();
+
+// ✅ ENHANCED: Add debugging middleware for troubleshooting 500 errors
+router.use(requestDebugging);
+router.use(DebuggingMiddleware.errorCapture);
 
 // ============================================
 // REQUEST/ORDER ENDPOINTS - USING CONTROLLERS
