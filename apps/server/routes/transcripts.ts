@@ -1,9 +1,10 @@
-import { eq } from 'drizzle-orm';
-import express from 'express';
-import { z } from 'zod';
+import { GuestAuthService } from '@server/services/guestAuthService';
 import { db } from '@shared/db';
 import { transcript } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
+import { eq } from 'drizzle-orm';
+import express from 'express';
+import { z } from 'zod';
 
 const router = express.Router();
 
@@ -15,6 +16,20 @@ const insertTranscriptSchema = z.object({
   timestamp: z.date(),
   tenant_id: z.string(),
 });
+
+// ✅ SECURITY FIX: Extract tenant ID from request hostname
+const extractTenantIdFromRequest = (req: express.Request): string => {
+  const hostname = req.get('host') || '';
+  const subdomain = GuestAuthService.extractSubdomain(hostname);
+
+  if (subdomain) {
+    return `tenant-${subdomain}`;
+  }
+
+  // Fallback to default but log warning
+  logger.warn(`⚠️ [TRANSCRIPTS] Could not extract tenant from hostname: ${hostname}`, 'Component');
+  return 'tenant-default';
+};
 
 // Error handler
 const handleApiError = (
@@ -36,21 +51,26 @@ router.get(
     const handleRequest = async () => {
       try {
         const { callId } = req.params;
+
+        // ✅ SECURITY: Get tenant ID from hostname for proper isolation
+        const tenantId = extractTenantIdFromRequest(req);
+
         logger.debug(
-          `📋 [TRANSCRIPTS] Getting transcripts for call: ${callId}`,
+          `📋 [TRANSCRIPTS] Getting transcripts for call: ${callId}, tenant: ${tenantId}`,
           'Component'
         );
 
         const transcripts = await db
           .select()
           .from(transcript)
-          .where(eq(transcript.call_id, callId));
+          .where(eq(transcript.call_id, callId))
+          .where(eq(transcript.tenant_id, tenantId)); // ✅ SECURITY: Filter by tenant
 
         logger.debug(
-          `✅ [TRANSCRIPTS] Found ${transcripts.length} transcripts for call: ${callId}`,
+          `✅ [TRANSCRIPTS] Found ${transcripts.length} transcripts for call: ${callId}, tenant: ${tenantId}`,
           'Component'
         );
-        res.json(transcripts);
+        res.json({ success: true, data: transcripts });
       } catch (error) {
         handleApiError(res, error, 'Failed to fetch transcripts');
       }
@@ -64,7 +84,7 @@ router.get(
 router.post('/transcripts', (req: express.Request, res: express.Response) => {
   const handleRequest = async () => {
     try {
-      const { callId, role, content, timestamp, tenantId } = req.body;
+      const { callId, role, content, timestamp } = req.body;
 
       if (!callId || !role || !content) {
         return res.status(400).json({
@@ -72,8 +92,11 @@ router.post('/transcripts', (req: express.Request, res: express.Response) => {
         });
       }
 
+      // ✅ SECURITY FIX: Extract tenant ID from hostname instead of trusting client
+      const tenantId = extractTenantIdFromRequest(req);
+
       logger.debug(
-        `📝 [TRANSCRIPTS] Storing transcript - Call: ${callId}, Role: ${role}, Content length: ${content.length}`,
+        `📝 [TRANSCRIPTS] Storing transcript - Call: ${callId}, Role: ${role}, Tenant: ${tenantId}, Content length: ${content.length}`,
         'Component'
       );
 
@@ -82,16 +105,16 @@ router.post('/transcripts', (req: express.Request, res: express.Response) => {
         role,
         content,
         timestamp: timestamp ? new Date(timestamp) : new Date(),
-        tenant_id: tenantId || 'mi-nhon-hotel',
+        tenant_id: tenantId, // ✅ SECURITY: Use server-side detected tenant ID
       });
 
       await db.insert(transcript).values(validatedData);
 
       logger.debug(
-        `✅ [TRANSCRIPTS] Transcript stored successfully for call: ${callId}`,
+        `✅ [TRANSCRIPTS] Transcript stored successfully for call: ${callId}, tenant: ${tenantId}`,
         'Component'
       );
-      res.json({ success: true });
+      res.json({ success: true, tenantId }); // ✅ Return tenant ID for verification
     } catch (error) {
       logger.error(
         '❌ [TRANSCRIPTS] Error storing transcript:',
