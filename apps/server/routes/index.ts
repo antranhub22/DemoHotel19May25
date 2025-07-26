@@ -30,6 +30,7 @@ import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
 import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add transcript routes
+import vapiConfigRoutes from '@server/routes/vapi-config'; // ✅ NEW: VAPI Configuration for language-specific settings
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
@@ -86,6 +87,9 @@ router.use('/api/health', healthRoutes);
 
 // ✅ NEW: Vapi Proxy for CORS bypass
 router.use('/api/vapi-proxy', vapiProxyRoutes);
+
+// ✅ NEW: Vapi Configuration for language-specific settings
+router.use('/api/vapi', vapiConfigRoutes);
 
 // System Management (v2.0)
 router.use('/api/feature-flags', featureFlagsRoutes);
