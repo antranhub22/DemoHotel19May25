@@ -12,6 +12,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useTranscript } from './TranscriptContext';
 
 export interface VapiContextType {
   // Call state
@@ -48,6 +49,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
   const [isCallActive, setIsCallActive] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
+
+  // Add transcript integration
+  const { addTranscript } = useTranscript();
 
   // Refs
   const vapiClientRef = useRef<VapiSimple | null>(null);
@@ -139,6 +143,14 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
                 role: message.role,
               }) as CallDetails
           );
+
+          // ✅ ADD: Add transcript to transcript context for realtime chat popup
+          addTranscript({
+            callId: `call-${Date.now()}`, // Same as callDetails id
+            content: message.transcript,
+            role: message.role as 'user' | 'assistant',
+            tenantId: 'default', // Will be updated later
+          });
         }
 
         if (message.type === 'function-call') {
