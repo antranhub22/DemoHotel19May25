@@ -109,11 +109,17 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
                 ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
                 : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
-    logger.debug('🔑 [VapiProvider] Getting credentials for language:', 'VapiProvider', {
-      language,
-      publicKey: publicKey ? `${publicKey.substring(0, 15)}...` : 'MISSING',
-      assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
-    });
+    logger.debug(
+      '🔑 [VapiProvider] Getting credentials for language:',
+      'VapiProvider',
+      {
+        language,
+        publicKey: publicKey ? `${publicKey.substring(0, 15)}...` : 'MISSING',
+        assistantId: assistantId
+          ? `${assistantId.substring(0, 15)}...`
+          : 'MISSING',
+      }
+    );
 
     return { publicKey, assistantId };
   };
@@ -131,7 +137,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
 
     logger.debug('🚀 [VapiProvider] Initializing Vapi client', 'VapiProvider', {
       language,
-      assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
+      assistantId: assistantId
+        ? `${assistantId.substring(0, 15)}...`
+        : 'MISSING',
     });
 
     // ✅ FIX: Use correct VapiConfig structure
@@ -203,38 +211,6 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     return vapi;
   };
 
-  // ✅ NEW: Reinitialize Vapi for language change (without starting call)
-  const reinitializeForLanguage = (language: string) => {
-    logger.debug('🔄 [VapiProvider] Reinitializing for language:', 'VapiProvider', language);
-
-    // Only reinitialize if language actually changed
-    if (language === currentLanguage) {
-      logger.debug('🔄 [VapiProvider] Language unchanged, skipping reinitialization', 'VapiProvider');
-      return;
-    }
-
-    // Clean up existing client if any (but don't end active calls)
-    if (vapiClientRef.current && !isCallActive) {
-      vapiClientRef.current.destroy();
-    }
-
-    // Update current language
-    setCurrentLanguage(language);
-
-    // Initialize new client for the language (but don't start call)
-    if (!isCallActive) {
-      vapiClientRef.current = initializeVapi(language);
-
-      if (vapiClientRef.current) {
-        logger.debug('✅ [VapiProvider] Vapi reinitialized for language:', 'VapiProvider', language);
-      } else {
-        logger.error('❌ [VapiProvider] Failed to reinitialize Vapi for language:', 'VapiProvider', language);
-      }
-    } else {
-      logger.debug('📞 [VapiProvider] Call active, will reinitialize on next call', 'VapiProvider');
-    }
-  };
-
   // Start call function
   const startCall = async (
     language: string = 'en',
@@ -273,7 +249,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
 
       logger.debug('✅ Call started successfully', 'VapiProvider', {
         language,
-        assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'from-config',
+        assistantId: assistantId
+          ? `${assistantId.substring(0, 15)}...`
+          : 'from-config',
       });
     } catch (error) {
       logger.error('❌ Failed to start call', 'VapiProvider', error);
@@ -294,6 +272,56 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     } finally {
       setIsCallActive(false);
       setMicLevel(0);
+    }
+  };
+
+  // ✅ NEW: Reinitialize Vapi for language change
+  const reinitializeForLanguage = (language: string): void => {
+    logger.debug(
+      '🌐 [VapiProvider] Reinitializing for language change',
+      'VapiProvider',
+      {
+        oldLanguage: currentLanguage,
+        newLanguage: language,
+      }
+    );
+
+    // Only reinitialize if language actually changed
+    if (language !== currentLanguage) {
+      // Destroy existing client if active
+      if (vapiClientRef.current) {
+        if (isCallActive) {
+          vapiClientRef.current.endCall().catch(error => {
+            logger.error(
+              '❌ Error ending call during language switch',
+              'VapiProvider',
+              error
+            );
+          });
+        }
+        vapiClientRef.current.destroy();
+      }
+
+      // Update current language
+      setCurrentLanguage(language);
+
+      // Initialize new client for the language (but don't start call)
+      vapiClientRef.current = initializeVapi(language);
+
+      logger.debug(
+        '✅ [VapiProvider] Vapi reinitialized for language',
+        'VapiProvider',
+        {
+          language,
+          clientReady: !!vapiClientRef.current,
+        }
+      );
+    } else {
+      logger.debug(
+        '⚠️ [VapiProvider] Language unchanged, skipping reinitialize',
+        'VapiProvider',
+        { language }
+      );
     }
   };
 
