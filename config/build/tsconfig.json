@@ -70,12 +70,7 @@
       "@auth/*": [
         "packages/auth-system/*"
       ]
-    },
-    /* Vite specific - Fix ImportMeta and type issues */
-    "types": [
-      "vite/client",
-      "node"
-    ]
+    }
   },
   "include": [
     "apps/client/src",
