@@ -27,7 +27,7 @@ export class RequestController {
   private static initialized = false;
 
   static initialize(): void {
-    if (this.initialized) return;
+    if (RequestController.initialized) return;
 
     // ✅ CLEAN: Follow same pattern as other controllers
     addFlagListener('request-module', flag => {
@@ -46,7 +46,7 @@ export class RequestController {
       );
     });
 
-    this.initialized = true;
+    RequestController.initialized = true;
     logger.debug(
       '🚩 [RequestController] Flag listeners initialized',
       'RequestController'
@@ -105,7 +105,7 @@ export class RequestController {
     try {
       // ✅ FIXED: Safe initialization with error handling
       try {
-        this.initialize();
+        RequestController.initialize();
       } catch (initError) {
         logger.warn(
           'Flag initialization failed, continuing without flags',
@@ -257,7 +257,7 @@ export class RequestController {
 
       // ✅ FIXED: Safe tenant service validation (non-blocking)
       try {
-        const tenantService = await this.getTenantServiceAsync();
+        const tenantService = await RequestController.getTenantServiceAsync();
         if (
           tenantService &&
           typeof tenantService.getTenantById === 'function'
