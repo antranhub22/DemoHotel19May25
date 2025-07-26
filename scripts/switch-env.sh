@@ -1,47 +1,33 @@
 #!/bin/bash
 
 # ================================================================
-# 🏨 MI NHON HOTEL - ENVIRONMENT SWITCHER
+# 🏨 MI NHON HOTEL - ENVIRONMENT SWITCHER (SIMPLIFIED)
 # ================================================================
-# Usage: ./scripts/switch-env.sh [development|staging|production]
+# Usage: ./scripts/switch-env.sh [local|production]
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-ENV_TYPE="${1:-development}"
+ENV_TYPE="${1:-local}"
 
 echo "🔧 Switching to $ENV_TYPE environment..."
 
 cd "$PROJECT_ROOT"
 
 case "$ENV_TYPE" in
-  "development"|"dev")
-    echo "📚 Setting up development environment..."
-    if [ -f ".env.development" ]; then
-      cp .env.development .env
-      echo "✅ Copied .env.development to .env"
+  "local"|"dev")
+    echo "💻 Setting up local development environment..."
+    if [ -f ".env.local" ]; then
+      cp .env.local .env
+      echo "✅ Copied .env.local to .env"
     else
-      echo "❌ .env.development not found!"
+      echo "❌ .env.local not found!"
       echo "💡 Creating from template..."
-      cp .env.example .env.development
-      cp .env.development .env
-      echo "⚠️  Please update .env.development with your development values"
-    fi
-    ;;
-    
-  "staging")
-    echo "🎭 Setting up staging environment..."
-    if [ -f ".env.staging" ]; then
-      cp .env.staging .env
-      echo "✅ Copied .env.staging to .env"
-    else
-      echo "❌ .env.staging not found!"
-      echo "💡 Creating from template..."
-      cp .env.example .env.staging
-      cp .env.staging .env
-      echo "⚠️  Please update .env.staging with your staging values"
+      cp .env.example .env.local
+      cp .env.local .env
+      echo "⚠️  Please update .env.local with your local development values"
     fi
     ;;
     
@@ -70,13 +56,11 @@ case "$ENV_TYPE" in
   *)
     echo "❌ Invalid environment type: $ENV_TYPE"
     echo "📋 Available options:"
-    echo "   - development (or dev)"
-    echo "   - staging"
-    echo "   - production (or prod)"
+    echo "   - local (or dev) - for local development"
+    echo "   - production (or prod) - for production deployment"
     echo ""
     echo "📖 Usage:"
-    echo "   ./scripts/switch-env.sh development"
-    echo "   ./scripts/switch-env.sh staging"
+    echo "   ./scripts/switch-env.sh local"
     echo "   ./scripts/switch-env.sh production"
     exit 1
     ;;

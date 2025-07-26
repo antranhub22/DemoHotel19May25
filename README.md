@@ -60,6 +60,9 @@ cd DemoHotel19May
 # Install dependencies
 npm install
 
+# Setup local environment
+npm run env:local
+
 # Start development server
 npm run dev
 
@@ -67,27 +70,29 @@ npm run dev
 npm run dev:client
 ```
 
-### Production Deployment
+### Production Deployment (Simplified)
+
+**Local Build & Test:**
 
 ```bash
-# Clean build for production
-./clean-build.sh
-
-# Or manually:
 npm run build:production
-npm run start:production
+npm run start
 ```
 
-## 🛠️ Available Scripts
+**Production Deployment:**
+
+- Push to `main` branch → Automatic deployment via GitHub Actions
+- Manual deployment: Use hosting platform's dashboard (Render, Vercel, etc.)
+- Environment variables are managed directly on hosting platform
+
+## 🛠️ Available Scripts (Simplified)
 
 ### Build Commands
 
 ```bash
-npm run build              # Build both client and server
+npm run build              # Build for production
 npm run build:production   # Optimized production build
-npm run build:client       # Build frontend only
-npm run build:server       # Validate server TypeScript
-npm run build:analyze      # Analyze bundle size
+npm run preview            # Preview production build
 ```
 
 ### Development Commands
@@ -95,8 +100,14 @@ npm run build:analyze      # Analyze bundle size
 ```bash
 npm run dev                # Start backend server (port 10000)
 npm run dev:client         # Start frontend dev server (port 3000)
-npm run dev:server         # Start backend only
-npm run preview            # Preview production build
+```
+
+### Environment Management
+
+```bash
+npm run env:local          # Switch to local development
+npm run env:production     # Switch to production (guidance only)
+npm run validate:env       # Validate environment variables
 ```
 
 ### Database Commands
@@ -413,6 +424,30 @@ Please read our [Contributing Guidelines](docs/CONTRIBUTING.md) for details on:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔄 Simplified Workflow
+
+This project now uses a **streamlined 2-environment approach**:
+
+### 🏠 Local Development
+
+- Use `.env.local` for local development settings
+- Run `npm run env:local` to activate local environment
+- SQLite database for local development
+
+### 🚀 Production
+
+- Environment variables managed on hosting platform
+- PostgreSQL database for production
+- Automatic deployment when pushing to `main` branch
+
+### 🎯 Benefits of Simplification
+
+✅ **Faster Development** - Removed complex development/staging/production workflow  
+✅ **Easier Deployment** - Direct main → production deployment  
+✅ **Cleaner Scripts** - Reduced from 150+ to 25 essential npm scripts  
+✅ **Simpler CI/CD** - Streamlined GitHub Actions workflows  
+✅ **Better Maintenance** - Fewer configuration files to manage
 
 ## 🎯 Next Steps
 

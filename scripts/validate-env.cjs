@@ -218,8 +218,7 @@ function checkEnvironmentStructure() {
 
   const envFiles = [
     { name: '.env.example', description: 'Template file', required: true },
-    { name: '.env.development', description: 'Development config', required: false },
-    { name: '.env.staging', description: 'Staging config', required: false },
+    { name: '.env.local', description: 'Local development config', required: false },
     { name: '.env', description: 'Active config', required: true }
   ];
 

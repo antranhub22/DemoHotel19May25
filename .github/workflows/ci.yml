@@ -7,24 +7,15 @@ name: 🔄 Continuous Integration
 
 on:
   push:
-    branches: [ main, develop, 'feature/*', 'hotfix/*' ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       debug_enabled:
         type: boolean
         description: 'Enable debug mode'
         default: false
-      skip_tests:
-        type: choice
-        description: 'Skip specific test suites'
-        options:
-        - 'none'
-        - 'unit'
-        - 'integration'
-        - 'e2e'
-        default: 'none'
 
 # ┌─────────────────────────────────────────────────────────────────────────┐
 # │ Environment Variables                                                   │

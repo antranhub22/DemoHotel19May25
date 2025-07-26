@@ -12,31 +12,8 @@ on:
       - completed
     branches:
       - main
-      - develop
-      - staging
   workflow_dispatch:
     inputs:
-      environment:
-        type: choice
-        description: 'Target deployment environment'
-        options:
-        - 'development'
-        - 'staging'
-        - 'production'
-        default: 'staging'
-      deployment_strategy:
-        type: choice
-        description: 'Deployment strategy'
-        options:
-        - 'blue-green'
-        - 'rolling'
-        - 'canary'
-        - 'immediate'
-        default: 'blue-green'
-      skip_tests:
-        type: boolean
-        description: 'Skip deployment tests'
-        default: false
       force_deploy:
         type: boolean
         description: 'Force deployment (skip safety checks)'
