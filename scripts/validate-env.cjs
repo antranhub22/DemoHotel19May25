@@ -73,7 +73,7 @@ const envRequirements = {
 // Load environment variables
 function loadEnvFile(envPath = '.env') {
   const fullPath = path.resolve(process.cwd(), envPath);
-  
+
   if (!fs.existsSync(fullPath)) {
     return { exists: false, variables: {} };
   }
@@ -96,9 +96,9 @@ function loadEnvFile(envPath = '.env') {
 // Validate environment variables
 function validateEnvironment() {
   log.section('Environment Variables Validation');
-  
+
   const envFile = loadEnvFile();
-  
+
   if (!envFile.exists) {
     log.error('.env file not found!');
     log.info('Run: ./scripts/switch-env.sh development');
@@ -106,28 +106,28 @@ function validateEnvironment() {
   }
 
   log.success('.env file found');
-  
+
   let isValid = true;
   let totalRequired = 0;
   let totalFound = 0;
   let totalOptional = 0;
   let optionalFound = 0;
 
-  Object.entries(envRequirements).forEach(([category, config]) => {
+  Object.entries(envRequirements).forEach(([, config]) => {
     log.section(config.title);
-    
+
     // Check required variables
     config.required.forEach(varName => {
       totalRequired++;
       if (envFile.variables[varName]) {
         totalFound++;
         const value = envFile.variables[varName];
-        const maskedValue = varName.toLowerCase().includes('secret') || 
-                           varName.toLowerCase().includes('key') || 
-                           varName.toLowerCase().includes('password')
+        const maskedValue = varName.toLowerCase().includes('secret') ||
+          varName.toLowerCase().includes('key') ||
+          varName.toLowerCase().includes('password')
           ? '*'.repeat(Math.min(value.length, 8))
           : value.length > 50 ? value.substring(0, 50) + '...' : value;
-        
+
         log.success(`${varName} = ${maskedValue}`);
       } else {
         log.error(`${varName} is required but not set`);
@@ -151,7 +151,7 @@ function validateEnvironment() {
   log.section('Validation Summary');
   log.info(`Required variables: ${totalFound}/${totalRequired}`);
   log.info(`Optional variables: ${optionalFound}/${totalOptional}`);
-  
+
   if (isValid) {
     log.success('✅ Environment validation passed!');
   } else {
@@ -165,7 +165,7 @@ function validateEnvironment() {
 // Validate specific formats
 function validateFormats() {
   log.section('Format Validation');
-  
+
   const envFile = loadEnvFile();
   if (!envFile.exists) return false;
 
@@ -185,13 +185,13 @@ function validateFormats() {
   // Validate API key formats
   const apiKeyValidations = [
     { key: 'VITE_OPENAI_API_KEY', prefix: 'sk-', name: 'OpenAI API Key' },
-    { key: 'VITE_VAPI_PUBLIC_KEY', prefix: 'pk_', name: 'Vapi Public Key' },
-    { key: 'VITE_VAPI_ASSISTANT_ID', prefix: 'asst_', name: 'Vapi Assistant ID' }
+    { key: 'VITE_VAPI_PUBLIC_KEY', prefix: null, name: 'Vapi Public Key' },
+    { key: 'VITE_VAPI_ASSISTANT_ID', prefix: null, name: 'Vapi Assistant ID' }
   ];
 
   apiKeyValidations.forEach(({ key, prefix, name }) => {
     if (vars[key]) {
-      if (vars[key].startsWith(prefix)) {
+      if (prefix === null || vars[key].startsWith(prefix)) {
         log.success(`${name} format is correct`);
       } else {
         log.error(`${name} should start with '${prefix}'`);
@@ -215,7 +215,7 @@ function validateFormats() {
 // Check environment file structure
 function checkEnvironmentStructure() {
   log.section('Environment Structure Check');
-  
+
   const envFiles = [
     { name: '.env.example', description: 'Template file', required: true },
     { name: '.env.development', description: 'Development config', required: false },
@@ -237,7 +237,7 @@ function checkEnvironmentStructure() {
 // Main validation function
 function main() {
   console.log(`${colors.bold}${colors.cyan}🏨 Mi Nhon Hotel - Environment Validation${colors.reset}\n`);
-  
+
   const args = process.argv.slice(2);
   const command = args[0] || 'validate';
 
@@ -247,7 +247,7 @@ function main() {
       checkEnvironmentStructure();
       const isValid = validateEnvironment();
       const formatValid = validateFormats();
-      
+
       log.section('Final Result');
       if (isValid && formatValid) {
         log.success('🎉 All environment checks passed!');

@@ -210,14 +210,9 @@ export const initVapi = async (publicKey: string): Promise<any> => {
       timestamp: new Date().toISOString(),
     });
 
-    // ✅ PRODUCTION: Validate public key format - Support both pk_ prefix and UUID format
-    if (
-      !publicKey ||
-      !publicKey.match(
-        /^(pk_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
-      )
-    ) {
-      const error = `Invalid Vapi public key format: ${publicKey ? 'invalid format' : 'missing'}`;
+    // ✅ PRODUCTION: Validate public key exists
+    if (!publicKey || publicKey.trim() === '') {
+      const error = `Vapi public key is required`;
       vapiDebugger.log('error', 'Public key validation failed', {
         publicKey: publicKey?.substring(0, 10) + '...',
         error,
@@ -415,14 +410,9 @@ export const startCall = async (
     throw new Error('Vapi not initialized. Call initVapi first.');
   }
 
-  // ✅ PRODUCTION: Validate assistant ID format - Support both asst_ prefix and UUID format
-  if (
-    !assistantId ||
-    !assistantId.match(
-      /^(asst_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
-    )
-  ) {
-    const error = `Invalid assistant ID format: ${assistantId ? 'invalid format' : 'missing'}`;
+  // ✅ PRODUCTION: Validate assistant ID exists
+  if (!assistantId || assistantId.trim() === '') {
+    const error = `Assistant ID is required`;
     vapiDebugger.log('error', 'Assistant ID validation failed', {
       assistantId: assistantId?.substring(0, 10) + '...',
       error,

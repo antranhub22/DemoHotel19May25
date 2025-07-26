@@ -1,3 +1,6 @@
+import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+import { CallDetails } from '@/types';
+import { logger } from '@shared/utils/logger';
 import React, {
   createContext,
   useContext,
@@ -5,9 +8,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { CallDetails } from '@/types';
-import { logger } from '@shared/utils/logger';
 // Dynamic imports for code splitting - loaded when needed
 // Dynamic import for code splitting - resetVapi loaded when needed
 
@@ -176,16 +176,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         timestamp: new Date().toISOString(),
       });
 
-      // Validate assistant ID format
-      if (
-        !assistantId ||
-        !assistantId.match(
-          /^(asst_|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i
-        )
-      ) {
-        throw new Error(
-          'Invalid assistant ID format. ID should start with "asst_" or be a valid UUID'
-        );
+      // Validate assistant ID exists
+      if (!assistantId || assistantId.trim() === '') {
+        throw new Error('Assistant ID is required');
       }
 
       // ✅ FIXED: Use Vapi proxy instead of direct SDK call

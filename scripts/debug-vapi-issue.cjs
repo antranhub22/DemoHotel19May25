@@ -52,12 +52,9 @@ function isValidUUID(str) {
 function isValidVapiFormat(key, type) {
   if (!key) return false;
 
-  if (type === 'publicKey') {
-    return key.startsWith('pk_') || isValidUUID(key);
-  }
-
-  if (type === 'assistantId') {
-    return key.startsWith('asst_') || isValidUUID(key);
+  // Accept any non-empty string for both public key and assistant ID
+  if (type === 'publicKey' || type === 'assistantId') {
+    return key.length > 0;
   }
 
   return false;

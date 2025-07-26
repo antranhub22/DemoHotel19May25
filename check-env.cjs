@@ -19,16 +19,16 @@ const checks = [
   },
   {
     name: 'Vapi Public Key',
-    env: 'VITE_VAPI_PUBLIC_KEY', 
+    env: 'VITE_VAPI_PUBLIC_KEY',
     required: true,
-    validator: (value) => value && value.startsWith('pk_') && value.length > 10 && !value.includes('development'),
+    validator: (value) => value && value.length > 10 && !value.includes('development'),
     instruction: 'Get from https://vapi.ai/ → Dashboard → Public Key'
   },
   {
     name: 'Vapi Assistant ID',
     env: 'VITE_VAPI_ASSISTANT_ID',
     required: true,
-    validator: (value) => value && value.startsWith('asst_') && value.length > 10 && !value.includes('development'),
+    validator: (value) => value && value.length > 10 && !value.includes('development'),
     instruction: 'Get from https://vapi.ai/ → Dashboard → Assistant ID'
   },
   {
@@ -68,9 +68,9 @@ checks.forEach(check => {
   const value = process.env[check.env];
   const isValid = check.validator(value);
   const status = isValid ? '✅' : (check.required ? '❌' : '⚠️');
-  
+
   console.log(`${status} ${check.name}:`);
-  
+
   if (isValid) {
     if (value.length > 20) {
       console.log(`   ${value.substring(0, 15)}...${value.substring(value.length - 5)}`);
@@ -90,9 +90,9 @@ checks.forEach(check => {
       console.log(`   📋 ${check.instruction}`);
     }
   }
-  
+
   console.log('');
-  
+
   if (!isValid && check.required) {
     allPassed = false;
   }

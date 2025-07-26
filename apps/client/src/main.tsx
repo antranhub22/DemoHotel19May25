@@ -2,9 +2,9 @@
 
 // Type declaration for import.meta
 
+import App from '@/App.tsx';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from '@/App.tsx';
 import './index.css';
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access
@@ -54,16 +54,6 @@ if (import.meta.env.PROD) {
   Object.entries({ ...criticalEnvs, ...multiLangEnvs }).forEach(
     ([key, value]) => {
       if (value) {
-        if (key.includes('PUBLIC_KEY') && !value.startsWith('pk_')) {
-          console.error(
-            `🚨 Invalid format for ${key}: should start with 'pk_'`
-          );
-        }
-        if (key.includes('ASSISTANT_ID') && !value.startsWith('asst_')) {
-          console.error(
-            `🚨 Invalid format for ${key}: should start with 'asst_'`
-          );
-        }
         if (key.includes('OPENAI') && !value.startsWith('sk-')) {
           console.error(
             `🚨 Invalid format for ${key}: should start with 'sk-'`
