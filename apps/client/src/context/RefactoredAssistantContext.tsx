@@ -130,38 +130,10 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         'Component'
       );
 
-      // Initialize Vapi first
-      await vapi.initializeVapi(language.language, configuration.hotelConfig);
+      // Note: VapiContextSimple handles initialization automatically
 
-      // Get assistant ID based on language
-      let assistantId: string;
-      try {
-        // This logic would be moved to a utility function
-        assistantId =
-          language.language === 'vi'
-            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
-            : import.meta.env.VITE_VAPI_ASSISTANT_ID;
-      } catch (error) {
-        assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID;
-      }
-
-      if (!assistantId) {
-        throw new Error(
-          `Assistant not configured for language: ${language.language}`
-        );
-      }
-
-      // Start Vapi call
-
-      // Update call details
-      const callId = `call-${Date.now()}`;
-      vapi.setCallDetails({
-        id: callId,
-        roomNumber: '',
-        duration: '',
-        category: '',
-        language: language.language,
-      });
+      // Start call with language (VapiContextSimple handles assistant ID selection)
+      await vapi.startCall(language.language);
 
       // Start call timer
       await call.startCall();
@@ -190,7 +162,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     logger.debug('[RefactoredAssistant] Ending enhanced call...', 'Component');
 
     // Stop Vapi first
-    vapi.endVapiCall();
+    await vapi.endCall();
 
     // End call timer
     call.endCall();

@@ -24,6 +24,7 @@ import hotelModuleRoutes from '@server/routes/modules/hotel-module';
 import voiceModuleRoutes from '@server/routes/modules/voice-module';
 
 // ✅ LEGACY: Keep existing imports for backward compatibility
+import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
@@ -86,6 +87,9 @@ router.use('/api/monitoring', monitoringRoutes);
 
 // Development & Testing
 router.use('/api/temp-public', tempPublicRoutes);
+
+// ✅ NEW: Guest endpoints for voice assistant (no auth required)
+router.use('/api/guest', guestPublicRoutes);
 
 // ============================================
 // ROUTE REGISTRATION SUCCESS

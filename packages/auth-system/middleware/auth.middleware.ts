@@ -3,10 +3,10 @@
 // ============================================
 // Simplified version without TypeScript conflicts
 
-import type { Request, Response, NextFunction } from 'express';
 import { AUTH_ERROR_MESSAGES } from '@auth/config';
 import { UnifiedAuthService } from '@auth/services/UnifiedAuthService';
 import type { AuthUser, UserRole } from '@auth/types';
+import type { NextFunction, Request, Response } from 'express';
 
 // ============================================
 // CORE AUTHENTICATION MIDDLEWARE
@@ -18,6 +18,17 @@ export const authenticateJWT = async (
   next: NextFunction
 ) => {
   try {
+    // ✅ BYPASS: Guest endpoints don't require authentication
+    const isGuestEndpoint = req.path.startsWith('/guest/') ||
+      req.path.startsWith('/api/guest/') ||
+      req.path.startsWith('/temp-public/') ||
+      req.path.startsWith('/api/temp-public/');
+
+    if (isGuestEndpoint) {
+      console.log(`✅ [Auth] Bypassing auth for guest endpoint: ${req.path}`);
+      return next();
+    }
+
     const authHeader = (req.headers as any).authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       (res as any).status(401).json({

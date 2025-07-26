@@ -1,6 +1,6 @@
-import { useCallback, useState, useMemo } from 'react';
 import { useAssistant } from '@/context';
 import { logger } from '@shared/utils/logger';
+import { useCallback, useMemo, useState } from 'react';
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
   ORDER_TYPE_DEFAULT: 'Room Service',
@@ -20,9 +20,6 @@ const ERROR_MESSAGES = {
   SERVER_ERROR: 'Server error occurred while processing request',
 } as const;
 
-const SUCCESS_MESSAGES = {
-  REQUEST_SENT: '✅ Request sent to Front Desk successfully!',
-} as const;
 
 interface UseSendToFrontDeskHandlerProps {
   onSuccess?: () => void;
@@ -174,8 +171,14 @@ export const useSendToFrontDeskHandler = ({
       'Component'
     );
 
-    const response = await authenticatedFetch('/api/request', {
+    // ✅ FIXED: Use guest endpoint for voice assistant requests (no auth required)
+    const response = await fetch('/api/guest/request', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add guest session ID for tracking
+        'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      },
       body: JSON.stringify(payload),
     });
 
@@ -283,7 +286,46 @@ export const useSendToFrontDeskHandler = ({
     try {
       // Build and submit request
       const requestPayload = buildRequestPayload(generatedOrderSummary);
-      const requestData = await submitRequest(requestPayload);
+
+      logger.debug(
+        '📤 [useSendToFrontDeskHandler] Submitting request to guest endpoint:',
+        'Component',
+        {
+          orderType: requestPayload.orderType,
+          items: requestPayload.items?.length || 0,
+          roomNumber: requestPayload.roomNumber,
+        }
+      );
+
+      // ✅ FIXED: Use guest endpoint for voice assistant requests (no auth required)
+      const response = await fetch('/api/guest/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add guest session ID for tracking
+          'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        },
+        body: JSON.stringify(requestPayload),
+      });
+
+      if (!response.ok) {
+        const status = response.status;
+        if (status >= 500) {
+          throw new Error(ERROR_MESSAGES.SERVER_ERROR);
+        } else if (status >= 400) {
+          throw new Error(ERROR_MESSAGES.REQUEST_FAILED);
+        } else {
+          throw new Error(ERROR_MESSAGES.NETWORK_ERROR);
+        }
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || ERROR_MESSAGES.REQUEST_FAILED);
+      }
+
+      const requestData = result.data;
 
       // Handle success
       handleSuccess(requestData, generatedOrderSummary);

@@ -4,9 +4,9 @@
 // Express middleware integration for API Gateway functionality including
 // rate limiting, authentication, caching, and request analytics
 
-import { NextFunction, Request, Response } from 'express';
 import { APIGateway, type GatewayConfig } from '@server/shared/APIGateway';
 import { logger } from '@shared/utils/logger';
+import { NextFunction, Request, Response } from 'express';
 
 // Default gateway configuration
 const defaultGatewayConfig: GatewayConfig = {
@@ -80,6 +80,8 @@ const defaultGatewayConfig: GatewayConfig = {
       '^/api/auth/.*',
       '^/api/.*/health$',
       '^/api/core/health$',
+      '^/api/guest/.*',
+      '^/api/temp-public/.*',
       '^/docs/.*',
       '^/swagger/.*',
     ],
