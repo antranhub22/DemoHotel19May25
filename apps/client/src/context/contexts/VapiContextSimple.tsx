@@ -233,9 +233,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         throw new Error('Failed to initialize Vapi client');
       }
 
-      // Prepare call options
+      // ✅ FIX: Only include assistantId in options when provided
+      // This allows VapiSimple to fallback to config.assistantId from initializeVapi()
       const options: CallOptions = {
-        assistantId,
         timeout: 5 * 60 * 1000, // 5 minutes timeout
         metadata: {
           language,
@@ -243,6 +243,18 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
           source: 'hotel-voice-assistant',
         },
       };
+
+      // Only add assistantId if explicitly provided
+      if (assistantId) {
+        options.assistantId = assistantId;
+      }
+
+      logger.debug('🚀 [VapiProvider] Starting call with options:', 'VapiProvider', {
+        language,
+        hasExplicitAssistantId: !!assistantId,
+        explicitAssistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'none',
+        willFallbackToConfig: !assistantId,
+      });
 
       // Start the call
       await vapiClientRef.current.startCall(options);
