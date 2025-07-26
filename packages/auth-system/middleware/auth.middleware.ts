@@ -22,7 +22,9 @@ export const authenticateJWT = async (
     const isGuestEndpoint = req.path.startsWith('/guest/') ||
       req.path.startsWith('/api/guest/') ||
       req.path.startsWith('/temp-public/') ||
-      req.path.startsWith('/api/temp-public/');
+      req.path.startsWith('/api/temp-public/') ||
+      req.path.startsWith('/api/transcripts') || // ✅ FIX: Voice assistant transcript API
+      req.path.startsWith('/api/request'); // ✅ FIX: Voice assistant request API
 
     if (isGuestEndpoint) {
       console.log(`✅ [Auth] Bypassing auth for guest endpoint: ${req.path}`);
