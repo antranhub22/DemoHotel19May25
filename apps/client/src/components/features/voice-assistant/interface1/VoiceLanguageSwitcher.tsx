@@ -132,6 +132,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   position = 'floating',
   showVoicePreview = true,
   onLanguageChange,
+  className = '',
 }) => {
   const { language, setLanguage } = useAssistant();
   const [isOpen, setIsOpen] = useState(false);
