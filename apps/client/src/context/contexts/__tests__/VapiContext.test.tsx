@@ -22,7 +22,7 @@ vi.mock('@/lib/vapiClient', () => ({
 
 vi.mock('@/hooks/useHotelConfiguration', () => ({
   getVapiPublicKeyByLanguage: vi.fn().mockReturnValue('pk-test-key'),
-  getVapiAssistantIdByLanguage: vi.fn().mockReturnValue('asst_test-id'), // Fix format
+  getVapiAssistantIdByLanguage: vi.fn().mockReturnValue('asst_test-id'), // Test ID
 }));
 
 // Mock call details data

@@ -48,7 +48,7 @@ function isValidUUID(str) {
   return uuidRegex.test(str);
 }
 
-// Vapi key format validation
+// Vapi key validation
 function isValidVapiFormat(key, type) {
   if (!key) return false;
 
@@ -200,13 +200,13 @@ async function main() {
     }
 
     if (config.hasPublicKey && !config.validPublicKey) {
-      issues.push('Invalid public key format');
+      issues.push('Missing public key');
       totalIssues++;
       criticalIssues++;
     }
 
     if (config.hasAssistantId && !config.validAssistantId) {
-      issues.push('Invalid assistant ID format');
+      issues.push('Missing assistant ID');
       totalIssues++;
       criticalIssues++;
     }
@@ -229,7 +229,7 @@ async function main() {
 
     if (criticalIssues > 0) {
       log('\n🚨 Critical Issues (will prevent Vapi from working):', 'red');
-      log('1. Check format validation in vapiClient.ts and VapiContext.tsx', 'yellow');
+      log('1. Check validation in vapiClient.ts and VapiContext.tsx', 'yellow');
       log('2. Ensure all keys are properly set in environment variables', 'yellow');
       log('3. Verify assistant IDs exist in your Vapi account', 'yellow');
     }
