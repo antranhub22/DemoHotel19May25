@@ -15,6 +15,10 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import http from 'http';
 
+// ✅ CRITICAL: Initialize FeatureFlags early to prevent 500 errors
+import { FeatureFlags } from '@server/shared/FeatureFlags';
+FeatureFlags.initialize();
+
 // ✅ Import middleware
 
 // ✅ Import metrics middleware for automatic performance tracking
@@ -241,7 +245,10 @@ app.use((req, res, next) => {
 
 (async () => {
   // ✅ TEMPORARY DISABLE: Skip API Gateway for testing transcript API
-  logger.debug('⚠️ API Gateway middleware DISABLED for voice assistant testing', 'Component');
+  logger.debug(
+    '⚠️ API Gateway middleware DISABLED for voice assistant testing',
+    'Component'
+  );
 
   // Use the new routes system
   app.use(router);

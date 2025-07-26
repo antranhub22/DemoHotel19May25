@@ -29,39 +29,28 @@ export class RequestController {
   static initialize(): void {
     if (this.initialized) return;
 
-    try {
-      // ✅ FIXED: Safe feature flag initialization
-      if (typeof addFlagListener === 'function') {
-        addFlagListener('request-module', flag => {
-          logger.info(
-            `🚩 [RequestController] Request module flag changed: ${flag.enabled}`,
-            'RequestController',
-            { flag: flag.name, enabled: flag.enabled }
-          );
-        });
-
-        addFlagListener('advanced-analytics', flag => {
-          logger.info(
-            `🚩 [RequestController] Advanced analytics flag changed: ${flag.enabled}`,
-            'RequestController',
-            { flag: flag.name, enabled: flag.enabled }
-          );
-        });
-      }
-
-      this.initialized = true;
-      logger.debug(
-        '🚩 [RequestController] Flag listeners initialized',
-        'RequestController'
-      );
-    } catch (error) {
-      logger.warn(
-        'Failed to initialize flag listeners, continuing without them',
+    // ✅ CLEAN: Follow same pattern as other controllers
+    addFlagListener('request-module', flag => {
+      logger.info(
+        `🚩 [RequestController] Request module flag changed: ${flag.enabled}`,
         'RequestController',
-        error
+        { flag: flag.name, enabled: flag.enabled }
       );
-      this.initialized = true; // Mark as initialized to prevent retries
-    }
+    });
+
+    addFlagListener('advanced-analytics', flag => {
+      logger.info(
+        `🚩 [RequestController] Advanced analytics flag changed: ${flag.enabled}`,
+        'RequestController',
+        { flag: flag.name, enabled: flag.enabled }
+      );
+    });
+
+    this.initialized = true;
+    logger.debug(
+      '🚩 [RequestController] Flag listeners initialized',
+      'RequestController'
+    );
   }
 
   // ✅ NEW: Enhanced service retrieval with async support
