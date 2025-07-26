@@ -82,6 +82,7 @@ const defaultGatewayConfig: GatewayConfig = {
       '^/api/core/health$',
       '^/api/guest/.*',
       '^/api/temp-public/.*',
+      '^/api/transcripts.*', // ✅ FIX: Allow transcript API for realtime voice data
       '^/docs/.*',
       '^/swagger/.*',
     ],

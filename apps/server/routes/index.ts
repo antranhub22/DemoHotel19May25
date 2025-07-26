@@ -29,6 +29,7 @@ import monitoringRoutes from '@server/routes/monitoring';
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
+import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add transcript routes
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
@@ -70,6 +71,9 @@ router.use('/api/calls', callsRoutes);
 router.use('/api/request', requestRoutes);
 router.use('/api/email', emailRoutes);
 router.use('/api', dashboardRoutes);
+
+// ✅ FIX: Add transcript routes
+router.use('/api', transcriptRoutes);
 
 // Analytics & Reporting
 router.use('/api/analytics', analyticsRoutes);
