@@ -6,8 +6,8 @@
  * ============================================================================
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -237,21 +237,65 @@ interface ValidationRule {
 const VALIDATION_RULES: Record<string, ValidationRule[]> = {
   common: [
     { name: 'NODE_ENV', required: true, description: 'Environment type' },
-    { name: 'PORT', required: true, pattern: /^\d+$/, description: 'Port number' },
-    { name: 'JWT_SECRET', required: true, minLength: 32, description: 'JWT secret key' },
-    { name: 'DATABASE_URL', required: true, description: 'Database connection string' },
+    {
+      name: 'PORT',
+      required: true,
+      pattern: /^\d+$/,
+      description: 'Port number',
+    },
+    {
+      name: 'JWT_SECRET',
+      required: true,
+      minLength: 32,
+      description: 'JWT secret key',
+    },
+    {
+      name: 'DATABASE_URL',
+      required: true,
+      description: 'Database connection string',
+    },
   ],
   production: [
-    { name: 'CORS_ORIGIN', required: true, pattern: /^https:\/\//, description: 'CORS origin must use HTTPS' },
-    { name: 'SSL_CERT_PATH', required: true, description: 'SSL certificate path' },
-    { name: 'SSL_KEY_PATH', required: true, description: 'SSL private key path' },
-    { name: 'SENTRY_DSN', required: true, description: 'Sentry DSN for error tracking' },
+    {
+      name: 'CORS_ORIGIN',
+      required: true,
+      pattern: /^https:\/\//,
+      description: 'CORS origin must use HTTPS',
+    },
+    {
+      name: 'SSL_CERT_PATH',
+      required: true,
+      description: 'SSL certificate path',
+    },
+    {
+      name: 'SSL_KEY_PATH',
+      required: true,
+      description: 'SSL private key path',
+    },
+    {
+      name: 'SENTRY_DSN',
+      required: true,
+      description: 'Sentry DSN for error tracking',
+    },
   ],
   apis: [
-    { name: 'VITE_OPENAI_API_KEY', required: true, pattern: /^sk-/, description: 'OpenAI API key' },
-    { name: 'VITE_VAPI_PUBLIC_KEY', required: true, pattern: /^pk_/, description: 'Vapi public key' },
-    { name: 'VITE_VAPI_ASSISTANT_ID', required: true, pattern: /^asst_/, description: 'Vapi assistant ID' },
-  ]
+    {
+      name: 'VITE_OPENAI_API_KEY',
+      required: true,
+      pattern: /^sk-/,
+      description: 'OpenAI API key',
+    },
+    {
+      name: 'VITE_VAPI_PUBLIC_KEY',
+      required: true,
+      description: 'Vapi public key',
+    },
+    {
+      name: 'VITE_VAPI_ASSISTANT_ID',
+      required: true,
+      description: 'Vapi assistant ID',
+    },
+  ],
 };
 
 // ======================== Utility Functions ========================
@@ -277,7 +321,10 @@ function parseEnvFile(filePath: string): Record<string, string> {
   return env;
 }
 
-function validateEnvironment(env: Record<string, string>, environment: string): { valid: boolean; errors: string[]; warnings: string[] } {
+function validateEnvironment(
+  env: Record<string, string>,
+  environment: string
+): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
 
@@ -285,14 +332,16 @@ function validateEnvironment(env: Record<string, string>, environment: string): 
   const rules = [
     ...VALIDATION_RULES.common,
     ...VALIDATION_RULES.apis,
-    ...(environment === 'production' ? VALIDATION_RULES.production : [])
+    ...(environment === 'production' ? VALIDATION_RULES.production : []),
   ];
 
   rules.forEach(rule => {
     const value = env[rule.name];
 
     if (rule.required && !value) {
-      errors.push(`Missing required variable: ${rule.name} - ${rule.description}`);
+      errors.push(
+        `Missing required variable: ${rule.name} - ${rule.description}`
+      );
       return;
     }
 
@@ -302,12 +351,16 @@ function validateEnvironment(env: Record<string, string>, environment: string): 
       }
 
       if (rule.minLength && value.length < rule.minLength) {
-        errors.push(`${rule.name} must be at least ${rule.minLength} characters long`);
+        errors.push(
+          `${rule.name} must be at least ${rule.minLength} characters long`
+        );
       }
 
       if (value.includes('CHANGE_ME')) {
         if (environment === 'production') {
-          errors.push(`Production variable ${rule.name} still contains CHANGE_ME placeholder`);
+          errors.push(
+            `Production variable ${rule.name} still contains CHANGE_ME placeholder`
+          );
         } else {
           warnings.push(`Variable ${rule.name} contains CHANGE_ME placeholder`);
         }
@@ -319,7 +372,8 @@ function validateEnvironment(env: Record<string, string>, environment: string): 
 }
 
 function generateSecureSecret(length: number = 32): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -329,7 +383,9 @@ function generateSecureSecret(length: number = 32): string {
 
 // ======================== Main Functions ========================
 
-function generateEnvironment(environment: 'development' | 'staging' | 'production'): void {
+function generateEnvironment(
+  environment: 'development' | 'staging' | 'production'
+): void {
   console.log(`🔧 Generating ${environment} environment configuration...`);
 
   let template = '';
@@ -343,9 +399,18 @@ function generateEnvironment(environment: 'development' | 'staging' | 'productio
     case 'production':
       template = PRODUCTION_TEMPLATE;
       // Generate secure secrets for production
-      template = template.replace(/CHANGE_ME_PRODUCTION_JWT_SECRET_MINIMUM_32_CHARACTERS/, generateSecureSecret(64));
-      template = template.replace(/CHANGE_ME_PRODUCTION_REFRESH_SECRET_DIFFERENT_FROM_JWT/, generateSecureSecret(64));
-      template = template.replace(/CHANGE_ME_PRODUCTION_SESSION_SECRET_32_CHARS/, generateSecureSecret(48));
+      template = template.replace(
+        /CHANGE_ME_PRODUCTION_JWT_SECRET_MINIMUM_32_CHARACTERS/,
+        generateSecureSecret(64)
+      );
+      template = template.replace(
+        /CHANGE_ME_PRODUCTION_REFRESH_SECRET_DIFFERENT_FROM_JWT/,
+        generateSecureSecret(64)
+      );
+      template = template.replace(
+        /CHANGE_ME_PRODUCTION_SESSION_SECRET_32_CHARS/,
+        generateSecureSecret(48)
+      );
       break;
   }
 
@@ -354,7 +419,9 @@ function generateEnvironment(environment: 'development' | 'staging' | 'productio
 
   console.log(`✅ Generated ${environment} environment file: ${envPath}`);
   if (environment === 'production') {
-    console.log('⚠️  WARNING: Replace all CHANGE_ME values with actual production values!');
+    console.log(
+      '⚠️  WARNING: Replace all CHANGE_ME values with actual production values!'
+    );
   }
 }
 
@@ -446,7 +513,9 @@ function main(): void {
     case 'generate':
       const env = args[1] as 'development' | 'staging' | 'production';
       if (!env || !['development', 'staging', 'production'].includes(env)) {
-        console.error('❌ Please specify environment: development, staging, or production');
+        console.error(
+          '❌ Please specify environment: development, staging, or production'
+        );
         process.exit(1);
       }
       generateEnvironment(env);
@@ -486,4 +555,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { generateEnvironment, validateEnvironmentFile, copyEnvironment }; 
+export { copyEnvironment, generateEnvironment, validateEnvironmentFile };
