@@ -4,7 +4,7 @@
 import { useTenantDetection } from '@/context/AuthContext';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { CallOptions, VapiSimple } from '@/lib/vapiSimple';
-import { CallDetails } from '@/types';
+import { CallDetails, Language } from '@/types';
 import { logger } from '@shared/utils/logger';
 import React, {
   createContext,
@@ -125,8 +125,10 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
       assistantId,
     });
 
-    // Create Vapi client with callbacks
-    const vapi = new VapiSimple(publicKey, {
+    // ✅ FIX: Use correct VapiConfig structure
+    const vapi = new VapiSimple({
+      publicKey: publicKey,
+      assistantId: assistantId,
       onMessage: message => {
         // Handle different message types
         if (message.type === 'transcript') {
@@ -251,89 +253,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     }
   };
 
-  // Initialize Vapi when provider mounts or hotelConfig changes
-  useEffect(() => {
-    if (!hotelConfig?.vapiPublicKey || !hotelConfig?.vapiAssistantId) {
-      logger.warn(
-        '⚠️ [VapiProvider] Missing Vapi configuration',
-        'VapiProvider'
-      );
-      return;
-    }
-
-    const language = 'en'; // Default language, can be made dynamic
-
-    const vapi = new VapiSimple(hotelConfig.vapiPublicKey, {
-      onMessage: message => {
-        // Handle different message types
-        if (message.type === 'transcript') {
-          // Update call details with transcript
-          setCallDetails(
-            prev =>
-              ({
-                id: prev?.id || `call-${Date.now()}`,
-                roomNumber: prev?.roomNumber || 'Unknown',
-                duration: prev?.duration || '0:00',
-                category: prev?.category || 'voice-assistant',
-                language: language as Language,
-                transcript: message.transcript,
-                role: message.role,
-              }) as CallDetails
-          );
-
-          // ✅ FIX: Use proper tenant ID from subdomain detection
-          addTranscript({
-            callId: `call-${Date.now()}`, // Same as callDetails id
-            content: message.transcript,
-            role: message.role as 'user' | 'assistant',
-            tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
-          });
-        }
-
-        if (message.type === 'function-call') {
-          // Handle function calls (room service, etc.)
-          logger.debug('🔧 Function call', 'VapiProvider', message);
-        }
-      },
-
-      onError: error => {
-        logger.error('❌ Vapi error', 'VapiProvider', error);
-        setIsCallActive(false);
-        setMicLevel(0);
-      },
-
-      onSpeechStart: () => {
-        logger.debug('🗣️ Speech started', 'VapiProvider');
-        setMicLevel(0.8); // Simulate mic level
-      },
-
-      onSpeechEnd: () => {
-        logger.debug('🔇 Speech ended', 'VapiProvider');
-        setMicLevel(0);
-      },
-
-      onCallStart: () => {
-        logger.debug('📞 Call started', 'VapiProvider');
-        setIsCallActive(true);
-        setMicLevel(0);
-      },
-
-      onCallEnd: () => {
-        logger.debug('📴 Call ended', 'VapiProvider');
-        setIsCallActive(false);
-        setMicLevel(0);
-        setCallDetails(null);
-      },
-    });
-
-    vapiClientRef.current = vapi;
-
-    return () => {
-      if (vapiClientRef.current) {
-        vapiClientRef.current.destroy();
-      }
-    };
-  }, [hotelConfig, addTranscript, tenantInfo]); // ✅ Add tenantInfo dependency
+  // ✅ REMOVED: Duplicate useEffect - only keep one clean initialization
 
   // Cleanup on unmount
   useEffect(() => {
@@ -346,12 +266,15 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
 
   // Context value
   const contextValue: VapiContextType = {
+    // Call state
     isCallActive,
     micLevel,
     callDetails,
+
+    // Call functions
     startCall,
     endCall,
-    setCallDetails,
+    setCallDetails, // ✅ FIX: Add missing function from interface
   };
 
   return (
