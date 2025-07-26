@@ -4,6 +4,8 @@
 
 // 🚀 REAL VAPI INTEGRATION: Enhanced for Production with better error handling
 import { logger } from '@shared/utils/logger';
+// ✅ SIMPLIFIED: Direct import for better compatibility
+import Vapi from '@vapi-ai/web';
 
 /* eslint-disable no-console */
 // Vapi debug system requires console access for troubleshooting
@@ -105,96 +107,22 @@ if (typeof window !== 'undefined') {
   };
 }
 
-let VapiClass: any = null;
+// ✅ SIMPLIFIED: Direct import for better compatibility
 
-// Dynamically load Vapi to handle module format issues
+// Simple function to get Vapi class
 const loadVapi = async () => {
-  if (VapiClass) {
-    return VapiClass;
-  }
-
   try {
-    logger.debug('🔄 [VAPI] Loading Vapi module...', 'Component');
+    logger.debug('🔄 [VAPI] Loading Vapi class...', 'Component');
 
-    // Try dynamic import first
-    const vapiModule = await import('@vapi-ai/web');
-    VapiClass = vapiModule.default || vapiModule;
-
-    if (typeof VapiClass === 'function') {
-      logger.debug(
-        '✅ [VAPI] Successfully loaded via dynamic import',
-        'Component'
-      );
-      return VapiClass;
+    if (typeof Vapi === 'function') {
+      logger.debug('✅ [VAPI] Vapi class loaded successfully', 'Component');
+      return Vapi;
     }
 
-    // If dynamic import doesn't work, try require
-    throw new Error('Dynamic import failed, trying alternative...');
+    throw new Error('Vapi is not a constructor function');
   } catch (error) {
-    logger.warn(
-      '⚠️ [VAPI] Dynamic import failed:',
-      'Component',
-      (error as any)?.message || String(error)
-    );
-
-    try {
-      // Alternative: Try to access from window if available
-      if (typeof window !== 'undefined' && (window as any).Vapi) {
-        VapiClass = (window as any).Vapi;
-        logger.debug('✅ [VAPI] Found Vapi on window object', 'Component');
-        return VapiClass;
-      }
-
-      // ✅ NEW: Try CDN fallback for production
-      if (import.meta.env.PROD) {
-        logger.debug(
-          '🌐 [VAPI] Trying CDN fallback for production...',
-          'Component'
-        );
-
-        // Load from CDN as fallback
-        const script = document.createElement('script');
-        script.src = 'https://cdn.vapi.ai/web/latest.js';
-        script.async = true;
-
-        return new Promise((resolve, reject) => {
-          script.onload = () => {
-            if ((window as any).Vapi) {
-              VapiClass = (window as any).Vapi;
-              logger.debug(
-                '✅ [VAPI] Successfully loaded from CDN',
-                'Component'
-              );
-              resolve(VapiClass);
-            } else {
-              reject(new Error('Vapi not found on window after CDN load'));
-            }
-          };
-
-          script.onerror = () => {
-            reject(new Error('Failed to load Vapi from CDN'));
-          };
-
-          document.head.appendChild(script);
-
-          // Timeout after 10 seconds
-          setTimeout(() => {
-            reject(new Error('CDN load timeout'));
-          }, 10000);
-        });
-      }
-
-      throw new Error('No Vapi available');
-    } catch (fallbackError) {
-      logger.error(
-        '❌ [VAPI] All import methods failed:',
-        'Component',
-        fallbackError
-      );
-      throw new Error(
-        `Failed to load Vapi: ${(fallbackError as Error).message}`
-      );
-    }
+    logger.error('❌ [VAPI] Failed to load Vapi class:', 'Component', error);
+    throw new Error(`Failed to load Vapi: ${(error as Error).message}`);
   }
 };
 
@@ -309,15 +237,8 @@ export const initVapi = async (publicKey: string): Promise<any> => {
     logger.debug('🚀 [REAL VAPI] Creating new Vapi instance...', 'Component');
 
     try {
-      vapiInstance = new Vapi({
-        publicKey,
-        // ✅ NEW: Production-specific settings
-        ...(import.meta.env.PROD && {
-          baseUrl: 'https://api.vapi.ai',
-          timeout: 30000,
-          retries: 3,
-        }),
-      });
+      // ✅ FIXED: Vapi constructor expects only publicKey string
+      vapiInstance = new Vapi(publicKey);
 
       vapiDebugger.log('info', 'Vapi instance created successfully', {
         instanceType: typeof vapiInstance,
