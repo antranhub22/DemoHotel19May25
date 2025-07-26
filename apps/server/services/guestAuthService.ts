@@ -209,7 +209,7 @@ export class GuestAuthService {
     const sessionId = `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const tokenPayload: GuestTokenPayload = {
       sessionId,
-      tenantId: 'default-' + subdomain,
+      tenantId: 'tenant-' + subdomain,
       role: 'guest',
       type: 'guest-session',
       iat: Math.floor(Date.now() / 1000),
@@ -233,7 +233,7 @@ export class GuestAuthService {
   ): Promise<GuestSession> {
     return {
       sessionId: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      tenantId: 'default-' + subdomain,
+      tenantId: 'tenant-' + subdomain,
       hotelName:
         subdomain.charAt(0).toUpperCase() + subdomain.slice(1) + ' Hotel',
       subdomain,
