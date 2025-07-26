@@ -4,8 +4,6 @@
 
 // 🚀 REAL VAPI INTEGRATION: Enhanced for Production with better error handling
 import { logger } from '@shared/utils/logger';
-// ✅ SIMPLIFIED: Direct import for better compatibility
-import Vapi from '@vapi-ai/web';
 
 /* eslint-disable no-console */
 // Vapi debug system requires console access for troubleshooting
@@ -109,19 +107,65 @@ if (typeof window !== 'undefined') {
 
 // ✅ SIMPLIFIED: Direct import for better compatibility
 
-// Simple function to get Vapi class
-const loadVapi = async () => {
-  try {
-    logger.debug('🔄 [VAPI] Loading Vapi class...', 'Component');
+// ✅ MULTIPLE IMPORT STRATEGIES: Handle different module formats
+let VapiClass: any = null;
 
-    if (typeof Vapi === 'function') {
-      logger.debug('✅ [VAPI] Vapi class loaded successfully', 'Component');
-      return Vapi;
+const loadVapi = async () => {
+  if (VapiClass) {
+    return VapiClass;
+  }
+
+  try {
+    logger.debug('🔄 [VAPI] Loading Vapi module...', 'Component');
+
+    // Strategy 1: Try dynamic import with default
+    try {
+      const vapiModule = await import('@vapi-ai/web');
+      VapiClass = vapiModule.default;
+
+      if (typeof VapiClass === 'function') {
+        logger.debug(
+          '✅ [VAPI] Loaded via dynamic import (default)',
+          'Component'
+        );
+        return VapiClass;
+      }
+    } catch (importError) {
+      logger.debug(
+        '⚠️ [VAPI] Dynamic import failed, trying alternatives...',
+        'Component'
+      );
     }
 
-    throw new Error('Vapi is not a constructor function');
+    // Strategy 2: Try named import
+    try {
+      const vapiModule = await import('@vapi-ai/web');
+      VapiClass = (vapiModule as any).Vapi;
+
+      if (typeof VapiClass === 'function') {
+        logger.debug('✅ [VAPI] Loaded via named import (Vapi)', 'Component');
+        return VapiClass;
+      }
+    } catch (namedError) {
+      logger.debug('⚠️ [VAPI] Named import failed', 'Component');
+    }
+
+    // Strategy 3: Try whole module
+    try {
+      const vapiModule = await import('@vapi-ai/web');
+      VapiClass = vapiModule;
+
+      if (typeof VapiClass === 'function') {
+        logger.debug('✅ [VAPI] Loaded via whole module', 'Component');
+        return VapiClass;
+      }
+    } catch (wholeError) {
+      logger.debug('⚠️ [VAPI] Whole module import failed', 'Component');
+    }
+
+    throw new Error('All import strategies failed');
   } catch (error) {
-    logger.error('❌ [VAPI] Failed to load Vapi class:', 'Component', error);
+    logger.error('❌ [VAPI] Failed to load Vapi:', 'Component', error);
     throw new Error(`Failed to load Vapi: ${(error as Error).message}`);
   }
 };
