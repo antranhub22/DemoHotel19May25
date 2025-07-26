@@ -4,9 +4,7 @@ import {
   isFeatureEnabled,
   isModuleEnabled,
 } from '@server/shared/FeatureFlags';
-import {
-  ServiceContainer
-} from '@server/shared/ServiceContainer';
+import { ServiceContainer } from '@server/shared/ServiceContainer';
 import { db, request as requestTable } from '@shared/db';
 import { requestMapper } from '@shared/db/transformers';
 import { generateId, generateShortId } from '@shared/utils/idGenerator';
@@ -31,28 +29,39 @@ export class RequestController {
   static initialize(): void {
     if (this.initialized) return;
 
-    // ✅ NEW v2.0: Listen for feature flag changes
-    addFlagListener('request-module', flag => {
-      logger.info(
-        `🚩 [RequestController] Request module flag changed: ${flag.enabled}`,
-        'RequestController',
-        { flag: flag.name, enabled: flag.enabled }
-      );
-    });
+    try {
+      // ✅ FIXED: Safe feature flag initialization
+      if (typeof addFlagListener === 'function') {
+        addFlagListener('request-module', flag => {
+          logger.info(
+            `🚩 [RequestController] Request module flag changed: ${flag.enabled}`,
+            'RequestController',
+            { flag: flag.name, enabled: flag.enabled }
+          );
+        });
 
-    addFlagListener('advanced-analytics', flag => {
-      logger.info(
-        `🚩 [RequestController] Advanced analytics flag changed: ${flag.enabled}`,
-        'RequestController',
-        { flag: flag.name, enabled: flag.enabled }
-      );
-    });
+        addFlagListener('advanced-analytics', flag => {
+          logger.info(
+            `🚩 [RequestController] Advanced analytics flag changed: ${flag.enabled}`,
+            'RequestController',
+            { flag: flag.name, enabled: flag.enabled }
+          );
+        });
+      }
 
-    this.initialized = true;
-    logger.debug(
-      '🚩 [RequestController] Flag listeners initialized',
-      'RequestController'
-    );
+      this.initialized = true;
+      logger.debug(
+        '🚩 [RequestController] Flag listeners initialized',
+        'RequestController'
+      );
+    } catch (error) {
+      logger.warn(
+        'Failed to initialize flag listeners, continuing without them',
+        'RequestController',
+        error
+      );
+      this.initialized = true; // Mark as initialized to prevent retries
+    }
   }
 
   // ✅ NEW: Enhanced service retrieval with async support
@@ -105,8 +114,16 @@ export class RequestController {
    */
   static async createRequest(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ NEW v2.0: Initialize flag listeners on first use
-      this.initialize();
+      // ✅ FIXED: Safe initialization with error handling
+      try {
+        this.initialize();
+      } catch (initError) {
+        logger.warn(
+          'Flag initialization failed, continuing without flags',
+          'RequestController',
+          initError
+        );
+      }
 
       // ✅ ENHANCED v2.0: Context-aware feature flag evaluation
       const context = {
@@ -114,8 +131,22 @@ export class RequestController {
         tenantId: (req as any).tenant?.id,
       };
 
-      // ✅ ENHANCED v2.0: Check if request module is enabled with context
-      if (!isModuleEnabled('request-module', context)) {
+      // ✅ FIXED: Safe feature flag check with fallback
+      let moduleEnabled = true;
+      try {
+        if (typeof isModuleEnabled === 'function') {
+          moduleEnabled = isModuleEnabled('request-module', context);
+        }
+      } catch (flagError) {
+        logger.warn(
+          'Feature flag check failed, assuming module enabled',
+          'RequestController',
+          flagError
+        );
+        moduleEnabled = true;
+      }
+
+      if (!moduleEnabled) {
         (res as any).status(503).json({
           success: false,
           error: 'Request module is currently disabled',
@@ -130,16 +161,41 @@ export class RequestController {
         return;
       }
 
-      // ✅ NEW v2.0: A/B test for advanced analytics
-      const advancedAnalyticsVariant = context.userId
-        ? evaluateABTest('advanced-analytics-test', context.userId)
-        : null;
+      // ✅ FIXED: Safe A/B test evaluation
+      let advancedAnalyticsVariant = null;
+      try {
+        if (typeof evaluateABTest === 'function' && context.userId) {
+          advancedAnalyticsVariant = evaluateABTest(
+            'advanced-analytics-test',
+            context.userId
+          );
+        }
+      } catch (abTestError) {
+        logger.warn(
+          'A/B test evaluation failed, using default',
+          'RequestController',
+          abTestError
+        );
+        advancedAnalyticsVariant = null;
+      }
 
-      // ✅ NEW v2.0: Feature-specific flags with context
-      const enableRealTimeNotifications = isFeatureEnabled(
-        'real-time-notifications',
-        context
-      );
+      // ✅ FIXED: Safe feature flag evaluation for notifications
+      let enableRealTimeNotifications = false;
+      try {
+        if (typeof isFeatureEnabled === 'function') {
+          enableRealTimeNotifications = isFeatureEnabled(
+            'real-time-notifications',
+            context
+          );
+        }
+      } catch (featureError) {
+        logger.warn(
+          'Notification feature flag check failed, using default',
+          'RequestController',
+          featureError
+        );
+        enableRealTimeNotifications = false;
+      }
       const enableAdvancedAnalytics = isFeatureEnabled(
         'advanced-analytics',
         context
@@ -210,26 +266,31 @@ export class RequestController {
         return;
       }
 
-      // ✅ ENHANCED: Use async tenant service validation via container v2.0
+      // ✅ FIXED: Safe tenant service validation (non-blocking)
       try {
         const tenantService = await this.getTenantServiceAsync();
-        const isValid = await tenantService.getTenantById(tenantId);
-        if (!isValid) {
-          logger.warn(
-            'Tenant validation failed via enhanced service container v2.0',
-            'RequestController'
-          );
-        } else {
-          logger.debug(
-            '✅ [RequestController] Tenant validated via ServiceContainer v2.0',
-            'RequestController',
-            { tenantId }
-          );
+        if (
+          tenantService &&
+          typeof tenantService.getTenantById === 'function'
+        ) {
+          const isValid = await tenantService.getTenantById(tenantId);
+          if (!isValid) {
+            logger.warn(
+              'Tenant validation failed, continuing anyway',
+              'RequestController'
+            );
+          } else {
+            logger.debug(
+              '✅ [RequestController] Tenant validated',
+              'RequestController',
+              { tenantId }
+            );
+          }
         }
       } catch (error) {
         // Don't fail the request if tenant service has issues
         logger.debug(
-          'Tenant service validation skipped in v2.0 container',
+          'Tenant service validation skipped due to error',
           'RequestController',
           error
         );
@@ -325,10 +386,10 @@ export class RequestController {
           },
           abTest: advancedAnalyticsVariant
             ? {
-              testName: 'advanced-analytics-test',
-              variant: advancedAnalyticsVariant,
-              userId: context.userId,
-            }
+                testName: 'advanced-analytics-test',
+                variant: advancedAnalyticsVariant,
+                userId: context.userId,
+              }
             : undefined,
         },
       };
@@ -394,7 +455,9 @@ export class RequestController {
 
       if (!tenantId) {
         // For guest requests (voice assistant), extract tenant from hostname
-        const { GuestAuthService } = require('@server/services/guestAuthService');
+        const {
+          GuestAuthService,
+        } = require('@server/services/guestAuthService');
         const hostname = req.get('host') || '';
         const subdomain = GuestAuthService.extractSubdomain(hostname);
 
