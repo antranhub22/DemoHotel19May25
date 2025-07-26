@@ -2,14 +2,6 @@
 
 // Type declaration for import.meta
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  createElement,
-} from 'react';
 import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
@@ -19,6 +11,13 @@ import { useConversationState } from '@/hooks/useConversationState';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { logger } from '@shared/utils/logger';
+import {
+  createElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -213,11 +212,25 @@ export const useInterface1 = ({
   const handleShowConversationPopup = useCallback(() => {
     if (import.meta.env.DEV) {
       logger.info(
-        'Conversation demo disabled - using unified ChatPopup instead',
+        '🎭 [DEMO] Starting mock conversation to show ChatPopup',
         'useInterface1'
       );
+
+      // Trigger mock conversation by calling handleCallStart
+      conversationState
+        .handleCallStart('vi')
+        .then(() => {
+          logger.info('✅ [DEMO] Mock conversation started', 'useInterface1');
+        })
+        .catch(error => {
+          logger.error(
+            '❌ [DEMO] Failed to start mock conversation:',
+            'useInterface1',
+            error
+          );
+        });
     }
-  }, []);
+  }, [conversationState]);
 
   const handleShowNotificationDemo = useCallback(() => {
     import('../components/features/popup-system/DemoPopupContent')

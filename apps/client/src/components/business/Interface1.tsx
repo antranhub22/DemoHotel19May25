@@ -262,6 +262,19 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         />
       </div>
 
+      {/* 🎭 DEBUG: Mock Conversation Button (Development Only) */}
+      {import.meta.env.DEV && (
+        <div className="fixed top-4 right-4 z-[9998]">
+          <button
+            onClick={_handleShowConversationPopup}
+            className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-lg transition-colors"
+            title="Start Mock Conversation (DEV)"
+          >
+            🎭 Demo Chat
+          </button>
+        </div>
+      )}
+
       {/* Voice Command Context (invisible but provides context) */}
       <VoiceCommandContext
         selectedService={selectedService}

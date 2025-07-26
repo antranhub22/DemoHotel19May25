@@ -2,8 +2,94 @@
 // Replaces complex implementation with simple, official pattern
 
 import { logger } from '@shared/utils/logger';
-import Vapi from '@vapi-ai/web';
 import React from 'react';
+
+// ✅ CDN APPROACH: Load Vapi from CDN to avoid module bundling issues
+let VapiClass: any = null;
+
+const loadVapi = async (): Promise<any> => {
+  if (VapiClass) {
+    return VapiClass;
+  }
+
+  try {
+    logger.debug('🔄 [VapiSimple] Loading Vapi via CDN...', 'VapiSimple');
+
+    // Check if already loaded on window
+    if (typeof window !== 'undefined' && (window as any).Vapi) {
+      VapiClass = (window as any).Vapi;
+      logger.debug(
+        '✅ [VapiSimple] Found existing Vapi on window',
+        'VapiSimple'
+      );
+      return VapiClass;
+    }
+
+    // Load from CDN
+    const script = document.createElement('script');
+    script.src =
+      'https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi.js';
+    script.async = true;
+    script.defer = true;
+
+    return new Promise((resolve, reject) => {
+      script.onload = () => {
+        try {
+          // Check multiple possible locations
+          const possibleVapi =
+            (window as any).Vapi ||
+            (window as any).VapiSDK ||
+            (window as any).default?.Vapi ||
+            (window as any).vapiSDK?.Vapi;
+
+          if (possibleVapi && typeof possibleVapi === 'function') {
+            VapiClass = possibleVapi;
+            logger.debug(
+              '✅ [VapiSimple] Successfully loaded from CDN',
+              'VapiSimple'
+            );
+            resolve(VapiClass);
+          } else {
+            logger.error(
+              '❌ [VapiSimple] Vapi not found on window after CDN load',
+              'VapiSimple'
+            );
+            reject(new Error('Vapi not found on window after CDN load'));
+          }
+        } catch (windowError) {
+          logger.error(
+            '❌ [VapiSimple] Error accessing Vapi from window:',
+            'VapiSimple',
+            windowError
+          );
+          reject(windowError);
+        }
+      };
+
+      script.onerror = error => {
+        logger.error(
+          '❌ [VapiSimple] Failed to load Vapi from CDN:',
+          'VapiSimple',
+          error
+        );
+        reject(new Error('Failed to load Vapi from CDN'));
+      };
+
+      document.head.appendChild(script);
+
+      // Timeout after 15 seconds
+      setTimeout(() => {
+        if (!VapiClass) {
+          document.head.removeChild(script);
+          reject(new Error('CDN load timeout after 15 seconds'));
+        }
+      }, 15000);
+    });
+  } catch (error) {
+    logger.error('❌ [VapiSimple] Failed to load Vapi:', 'VapiSimple', error);
+    throw new Error(`Failed to load Vapi: ${(error as Error).message}`);
+  }
+};
 
 export interface VapiConfig {
   publicKey: string;
@@ -33,13 +119,14 @@ export class VapiSimple {
     this.initializeVapi();
   }
 
-  private initializeVapi() {
+  private async initializeVapi() {
     try {
-      logger.debug('🚀 Initializing Vapi (Official Pattern)', 'VapiSimple', {
+      logger.debug('🚀 Initializing Vapi (CDN Pattern)', 'VapiSimple', {
         publicKey: this.config.publicKey.substring(0, 10) + '...',
       });
 
-      // ✅ OFFICIAL PATTERN: Direct initialization
+      // ✅ CDN PATTERN: Load Vapi dynamically
+      const Vapi = await loadVapi();
       this.vapi = new Vapi(this.config.publicKey);
 
       this.setupEventListeners();

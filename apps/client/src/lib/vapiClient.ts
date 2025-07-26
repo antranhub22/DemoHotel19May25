@@ -107,66 +107,97 @@ if (typeof window !== 'undefined') {
 
 // ✅ SIMPLIFIED: Direct import for better compatibility
 
-// ✅ MULTIPLE IMPORT STRATEGIES: Handle different module formats
+// ✅ CDN APPROACH: Load Vapi from CDN to avoid module bundling issues
 let VapiClass: any = null;
+let isLoadingVapi = false;
 
-const loadVapi = async () => {
+const loadVapi = async (): Promise<any> => {
   if (VapiClass) {
     return VapiClass;
   }
 
+  if (isLoadingVapi) {
+    // Wait for existing load operation
+    while (isLoadingVapi && !VapiClass) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return VapiClass;
+  }
+
+  isLoadingVapi = true;
+
   try {
-    logger.debug('🔄 [VAPI] Loading Vapi module...', 'Component');
+    logger.debug('🔄 [VAPI] Loading Vapi via CDN...', 'Component');
 
-    // Strategy 1: Try dynamic import with default
-    try {
-      const vapiModule = await import('@vapi-ai/web');
-      VapiClass = vapiModule.default;
+    // Check if already loaded on window
+    if (typeof window !== 'undefined' && (window as any).Vapi) {
+      VapiClass = (window as any).Vapi;
+      logger.debug('✅ [VAPI] Found existing Vapi on window', 'Component');
+      return VapiClass;
+    }
 
-      if (typeof VapiClass === 'function') {
-        logger.debug(
-          '✅ [VAPI] Loaded via dynamic import (default)',
-          'Component'
+    // Load from CDN
+    const script = document.createElement('script');
+    script.src =
+      'https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi.js';
+    script.async = true;
+    script.defer = true;
+
+    return new Promise((resolve, reject) => {
+      script.onload = () => {
+        try {
+          // Check multiple possible locations
+          const possibleVapi =
+            (window as any).Vapi ||
+            (window as any).VapiSDK ||
+            (window as any).default?.Vapi ||
+            (window as any).vapiSDK?.Vapi;
+
+          if (possibleVapi && typeof possibleVapi === 'function') {
+            VapiClass = possibleVapi;
+            logger.debug('✅ [VAPI] Successfully loaded from CDN', 'Component');
+            resolve(VapiClass);
+          } else {
+            logger.error(
+              '❌ [VAPI] Vapi not found on window after CDN load',
+              'Component'
+            );
+            reject(new Error('Vapi not found on window after CDN load'));
+          }
+        } catch (windowError) {
+          logger.error(
+            '❌ [VAPI] Error accessing Vapi from window:',
+            'Component',
+            windowError
+          );
+          reject(windowError);
+        }
+      };
+
+      script.onerror = error => {
+        logger.error(
+          '❌ [VAPI] Failed to load Vapi from CDN:',
+          'Component',
+          error
         );
-        return VapiClass;
-      }
-    } catch (importError) {
-      logger.debug(
-        '⚠️ [VAPI] Dynamic import failed, trying alternatives...',
-        'Component'
-      );
-    }
+        reject(new Error('Failed to load Vapi from CDN'));
+      };
 
-    // Strategy 2: Try named import
-    try {
-      const vapiModule = await import('@vapi-ai/web');
-      VapiClass = (vapiModule as any).Vapi;
+      document.head.appendChild(script);
 
-      if (typeof VapiClass === 'function') {
-        logger.debug('✅ [VAPI] Loaded via named import (Vapi)', 'Component');
-        return VapiClass;
-      }
-    } catch (namedError) {
-      logger.debug('⚠️ [VAPI] Named import failed', 'Component');
-    }
-
-    // Strategy 3: Try whole module
-    try {
-      const vapiModule = await import('@vapi-ai/web');
-      VapiClass = vapiModule;
-
-      if (typeof VapiClass === 'function') {
-        logger.debug('✅ [VAPI] Loaded via whole module', 'Component');
-        return VapiClass;
-      }
-    } catch (wholeError) {
-      logger.debug('⚠️ [VAPI] Whole module import failed', 'Component');
-    }
-
-    throw new Error('All import strategies failed');
+      // Timeout after 15 seconds
+      setTimeout(() => {
+        if (!VapiClass) {
+          document.head.removeChild(script);
+          reject(new Error('CDN load timeout after 15 seconds'));
+        }
+      }, 15000);
+    });
   } catch (error) {
     logger.error('❌ [VAPI] Failed to load Vapi:', 'Component', error);
     throw new Error(`Failed to load Vapi: ${(error as Error).message}`);
+  } finally {
+    isLoadingVapi = false;
   }
 };
 
