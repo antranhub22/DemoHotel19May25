@@ -244,7 +244,7 @@ export class RequestController {
       }
 
       // ✅ FIXED: Extract tenant ID using helper method
-      const tenantId = this.extractTenantId(req);
+      const tenantId = RequestController.extractTenantId(req);
 
       if (!tenantId) {
         (res as any).status(400).json({
@@ -427,8 +427,8 @@ export class RequestController {
    */
   static async getAllRequests(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ FIXED: Extract tenant ID using helper method
-      const extractedTenantId = this.extractTenantId(req);
+      // ✅ FIXED: Extract tenant ID using static helper method
+      const extractedTenantId = RequestController.extractTenantId(req);
 
       if (!extractedTenantId) {
         (res as any).status(400).json({
