@@ -158,7 +158,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   }, [call, vapi, language, configuration, transcript, order]);
 
   // Enhanced endCall that integrates all contexts
-  const enhancedEndCall = useCallback(() => {
+  const enhancedEndCall = useCallback(async () => {
     logger.debug('[RefactoredAssistant] Ending enhanced call...', 'Component');
 
     // Stop Vapi first
@@ -199,6 +199,25 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     ...order,
     ...configuration,
     ...vapi,
+
+    // Additional Vapi methods for compatibility
+    initializeVapi: async (
+      language: string,
+      hotelConfig?: HotelConfiguration | null
+    ) => {
+      // VapiContextSimple handles initialization automatically
+      return Promise.resolve();
+    },
+    startVapiCall: async (assistantId: string) => {
+      return vapi.startCall(language.language, assistantId);
+    },
+    endVapiCall: () => {
+      return vapi.endCall();
+    },
+    resetVapi: async () => {
+      // Reset functionality if needed
+      return Promise.resolve();
+    },
   };
 }
 
