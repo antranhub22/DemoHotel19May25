@@ -79,11 +79,11 @@ router.use('/api/email', emailRoutes);
 // Analytics & Reporting
 router.use('/api/analytics', analyticsRoutes);
 
+// System Routes (NO AUTH REQUIRED - must come before dashboard routes)
+router.use('/api/health', healthRoutes);
+
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
-
-// System Routes
-router.use('/api/health', healthRoutes);
 
 // ✅ NEW: Vapi Proxy for CORS bypass
 router.use('/api/vapi-proxy', vapiProxyRoutes);
