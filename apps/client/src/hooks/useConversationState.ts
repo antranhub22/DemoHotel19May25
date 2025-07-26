@@ -2,11 +2,11 @@
 
 // Type declaration for import.meta
 
-import { useState, useEffect, useCallback, RefObject } from 'react';
 import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
 import { useAssistant } from '@/context';
 import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
+import { RefObject, useCallback, useEffect, useState } from 'react';
 
 interface UseConversationStateProps {
   conversationRef: RefObject<HTMLDivElement>;
@@ -224,8 +224,16 @@ export const useConversationState = ({
         setIsCallStarted(true);
         setManualCallStarted(true);
 
-        // ✅ IMPROVED: Enhanced startCall with error handling
-        await startCall();
+        // ✅ FIXED: Pass language directly to startCall to ensure correct assistant is used
+        logger.debug(
+          '🌍 [useConversationState] Starting call with specific language:',
+          'Component',
+          lang
+        );
+        await startCall(lang); // Pass language directly instead of relying on context
+
+        // ✅ IMPROVED: Update context language after successful call start
+        setLanguage(lang);
 
         logger.debug(
           '✅ [useConversationState] Real call started successfully',

@@ -49,7 +49,7 @@ export interface RefactoredAssistantContextType {
   setCallDuration: (duration: number) => void;
   isMuted: boolean;
   toggleMute: () => void;
-  startCall: () => Promise<void>;
+  startCall: (language?: string) => Promise<void>; // ✅ FIXED: Add optional language parameter
   endCall: () => void;
   isCallActive: boolean;
   isEndingCall: boolean;
@@ -128,7 +128,10 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     logger.debug(
       '[RefactoredAssistant] Language changed, reinitializing Vapi...',
       'Component',
-      { newLanguage: language.language, currentVapiLanguage: vapi.currentLanguage }
+      {
+        newLanguage: language.language,
+        currentVapiLanguage: vapi.currentLanguage,
+      }
     );
 
     // Reinitialize Vapi for the new language (only if language actually changed)
@@ -144,39 +147,60 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   }, [language.language, vapi]); // Depend on language changes
 
   // Enhanced startCall that integrates with VapiContext
-  const enhancedStartCall = useCallback(async () => {
-    try {
-      logger.debug(
-        '[RefactoredAssistant] Starting enhanced call...',
-        'Component'
-      );
+  const enhancedStartCall = useCallback(
+    async (targetLanguage?: string) => {
+      try {
+        // ✅ FIXED: Use provided language or fallback to context language
+        const languageToUse = targetLanguage || language.language;
 
-      // Note: VapiContextSimple handles initialization automatically
+        logger.debug(
+          '[RefactoredAssistant] Starting enhanced call...',
+          'Component',
+          {
+            targetLanguage,
+            contextLanguage: language.language,
+            languageToUse,
+          }
+        );
 
-      // Start call with language (VapiContextSimple handles assistant ID selection)
-      await vapi.startCall(language.language);
+        // Note: VapiContextSimple handles initialization automatically
 
-      // Start call timer
-      await call.startCall();
+        // Start call with language (VapiContextSimple handles assistant ID selection)
+        await vapi.startCall(languageToUse);
 
-      // Clear previous data
-      transcript.clearTranscripts();
-      transcript.clearModelOutput();
-      order.setEmailSentForCurrentSession(false);
+        // Start call timer
+        await call.startCall();
 
-      logger.debug(
-        '[RefactoredAssistant] Enhanced call started successfully',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '[RefactoredAssistant] Error starting enhanced call:',
-        'Component',
-        error
-      );
-      throw error;
-    }
-  }, [call, vapi, language, configuration, transcript, order]);
+        // Clear previous data
+        transcript.clearTranscripts();
+        transcript.clearModelOutput();
+        order.setEmailSentForCurrentSession(false);
+
+        // ✅ FIXED: Update language context if different language was used
+        if (targetLanguage && targetLanguage !== language.language) {
+          logger.debug(
+            '[RefactoredAssistant] Updating language context to match call',
+            'Component',
+            { from: language.language, to: targetLanguage }
+          );
+          language.setLanguage(targetLanguage as any);
+        }
+
+        logger.debug(
+          '[RefactoredAssistant] Enhanced call started successfully',
+          'Component'
+        );
+      } catch (error) {
+        logger.error(
+          '[RefactoredAssistant] Error starting enhanced call:',
+          'Component',
+          error
+        );
+        throw error;
+      }
+    },
+    [call, vapi, language, configuration, transcript, order]
+  );
 
   // Enhanced endCall that integrates all contexts
   const enhancedEndCall = useCallback(async () => {
