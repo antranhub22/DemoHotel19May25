@@ -59,6 +59,10 @@ router.use('/api/voice', voiceModuleRoutes);
 
 logger.debug('📡 [Router] Setting up legacy API routes...', 'MainRouter');
 
+// ✅ CRITICAL FIX: Specific routes MUST come before general routes to avoid conflicts
+// Voice Assistant APIs (no auth required)
+router.use('/api/transcripts', transcriptRoutes);
+
 // Core API routes
 router.use('/api', apiRoutes); // ✅ CRITICAL: Main API functionality
 
@@ -70,13 +74,12 @@ router.use('/api/staff', staffRoutes);
 router.use('/api/calls', callsRoutes);
 router.use('/api/request', requestRoutes);
 router.use('/api/email', emailRoutes);
-router.use('/api', dashboardRoutes);
-
-// ✅ FIX: Add transcript routes
-router.use('/api', transcriptRoutes);
 
 // Analytics & Reporting
 router.use('/api/analytics', analyticsRoutes);
+
+// Dashboard routes (apply auth globally) - MUST come after specific routes
+router.use('/api', dashboardRoutes);
 
 // System Routes
 router.use('/api/health', healthRoutes);

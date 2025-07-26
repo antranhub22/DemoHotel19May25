@@ -1,5 +1,3 @@
-import { and, desc, eq } from 'drizzle-orm';
-import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 import {
   addFlagListener,
   evaluateABTest,
@@ -7,13 +5,14 @@ import {
   isModuleEnabled,
 } from '@server/shared/FeatureFlags';
 import {
-  ServiceContainer,
-  getServiceSync,
+  ServiceContainer
 } from '@server/shared/ServiceContainer';
 import { db, request as requestTable } from '@shared/db';
 import { requestMapper } from '@shared/db/transformers';
 import { generateId, generateShortId } from '@shared/utils/idGenerator';
 import { logger } from '@shared/utils/logger';
+import { and, desc, eq } from 'drizzle-orm';
+import type { Request, Response } from 'express'; // ✅ FIXED: Add Response import
 
 // ✅ ENHANCED: Import modular architecture components v2.0
 
@@ -78,6 +77,25 @@ export class RequestController {
       const { TenantService } = require('@server/services/tenantService');
       return new TenantService();
     }
+  }
+
+  // ✅ NEW: Helper method to extract tenant ID for guest requests
+  static extractTenantId(req: Request): string | null {
+    // First try authenticated tenant
+    if (req.tenant?.id) {
+      return req.tenant.id;
+    }
+
+    // For guest requests (voice assistant), extract tenant from hostname
+    const { GuestAuthService } = require('@server/services/guestAuthService');
+    const hostname = req.get('host') || '';
+    const subdomain = GuestAuthService.extractSubdomain(hostname);
+
+    if (subdomain) {
+      return `tenant-${subdomain}`;
+    }
+
+    return null;
   }
 
   /**
@@ -180,11 +198,13 @@ export class RequestController {
         content = order_type || type || 'Service Request';
       }
 
-      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
-      if (!req.tenant?.id) {
+      // ✅ FIXED: Extract tenant ID using helper method
+      const tenantId = this.extractTenantId(req);
+
+      if (!tenantId) {
         (res as any).status(400).json({
           success: false,
-          error: 'Tenant not identified',
+          error: 'Unable to identify hotel from request',
           code: 'TENANT_NOT_IDENTIFIED',
         });
         return;
@@ -193,7 +213,7 @@ export class RequestController {
       // ✅ ENHANCED: Use async tenant service validation via container v2.0
       try {
         const tenantService = await this.getTenantServiceAsync();
-        const isValid = await tenantService.getTenantById(req.tenant.id);
+        const isValid = await tenantService.getTenantById(tenantId);
         if (!isValid) {
           logger.warn(
             'Tenant validation failed via enhanced service container v2.0',
@@ -203,7 +223,7 @@ export class RequestController {
           logger.debug(
             '✅ [RequestController] Tenant validated via ServiceContainer v2.0',
             'RequestController',
-            { tenantId: req.tenant.id }
+            { tenantId }
           );
         }
       } catch (error) {
@@ -239,7 +259,7 @@ export class RequestController {
 
       // Create request record compatible with schema (id will be auto-generated)
       const newRequest = {
-        tenant_id: req.tenant.id, // ✅ OPTIMIZED: No fallback - require valid tenant
+        tenant_id: tenantId, // ✅ FIXED: Use tenant ID from guest auth or authenticated user
         call_id: call_id || generateId('call'),
         room_number: room_number || 'unknown',
         order_id: orderId, // ✅ ENHANCED v2.0: A/B test influenced ID generation
@@ -305,10 +325,10 @@ export class RequestController {
           },
           abTest: advancedAnalyticsVariant
             ? {
-                testName: 'advanced-analytics-test',
-                variant: advancedAnalyticsVariant,
-                userId: context.userId,
-              }
+              testName: 'advanced-analytics-test',
+              variant: advancedAnalyticsVariant,
+              userId: context.userId,
+            }
             : undefined,
         },
       };
@@ -357,17 +377,38 @@ export class RequestController {
    */
   static async getAllRequests(req: Request, res: Response): Promise<void> {
     try {
-      // ✅ OPTIMIZED: Ensure proper tenant validation - no fallbacks
-      if (!req.tenant?.id) {
+      // ✅ FIXED: Extract tenant ID using helper method
+      const extractedTenantId = this.extractTenantId(req);
+
+      if (!extractedTenantId) {
         (res as any).status(400).json({
           success: false,
-          error: 'Tenant not identified',
+          error: 'Unable to identify hotel from request',
           code: 'TENANT_NOT_IDENTIFIED',
         });
         return;
       }
 
-      const tenantId = req.tenant.id;
+      // ✅ FIXED: Handle guest requests - extract tenant from hostname if not authenticated
+      let tenantId = req.tenant?.id;
+
+      if (!tenantId) {
+        // For guest requests (voice assistant), extract tenant from hostname
+        const { GuestAuthService } = require('@server/services/guestAuthService');
+        const hostname = req.get('host') || '';
+        const subdomain = GuestAuthService.extractSubdomain(hostname);
+
+        if (subdomain) {
+          tenantId = `tenant-${subdomain}`;
+        } else {
+          (res as any).status(400).json({
+            success: false,
+            error: 'Unable to identify hotel from request',
+            code: 'TENANT_NOT_IDENTIFIED',
+          });
+          return;
+        }
+      }
 
       logger.api(
         '📋 [RequestController] Getting all requests',

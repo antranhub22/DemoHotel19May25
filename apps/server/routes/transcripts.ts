@@ -46,7 +46,7 @@ const handleApiError = (
 
 // Get transcripts for a specific call
 router.get(
-  '/transcripts/:callId',
+  '/:callId',
   (req: express.Request, res: express.Response) => {
     const handleRequest = async () => {
       try {
@@ -81,7 +81,7 @@ router.get(
 );
 
 // Store transcript data
-router.post('/transcripts', (req: express.Request, res: express.Response) => {
+router.post('/', (req: express.Request, res: express.Response) => {
   const handleRequest = async () => {
     try {
       const { callId, role, content, timestamp } = req.body;
