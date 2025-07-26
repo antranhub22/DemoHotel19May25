@@ -155,30 +155,31 @@ export const useSendToFrontDeskHandler = ({
     ]
   );
 
-  // ✅ EXTRACTED: API call logic with authentication and auto-retry
+  // ✅ EXTRACTED: Submit request to server
   const submitRequest = useCallback(async (payload: any) => {
     logger.debug(
-      '📤 [useSendToFrontDeskHandler] Submitting request to /api/request:',
-      'Component',
-      payload
-    );
-
-    // ✅ FIX: Use authenticated fetch with auto-retry
-    const { authenticatedFetch } = await import('@/lib/authHelper');
-
-    logger.debug(
-      '🔐 [useSendToFrontDeskHandler] Using authenticated fetch with auto-retry',
+      '🔐 [useSendToFrontDeskHandler] Using guest authentication with tenant context',
       'Component'
     );
 
-    // ✅ FIXED: Use guest endpoint for voice assistant requests (no auth required)
+    // ✅ STEP 1: Get guest session token
+    let guestToken = localStorage.getItem('guest_token');
+
+
+    // ✅ STEP 2: Submit request with guest token
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    };
+
+    // Add authorization header if we have a guest token
+    if (guestToken) {
+      headers.Authorization = `Bearer ${guestToken}`;
+    }
+
     const response = await fetch('/api/guest/request', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        // Add guest session ID for tracking
-        'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      },
+      headers,
       body: JSON.stringify(payload),
     });
 
