@@ -250,17 +250,17 @@ export function RefactoredAssistantProvider({
   return (
     <ConfigurationProvider>
       <LanguageProvider>
-        <VapiProvider>
-          <CallProvider>
-            <TranscriptProvider>
+        <TranscriptProvider>
+          <VapiProvider>
+            <CallProvider>
               <OrderProvider>
                 <RefactoredAssistantProviderInternal>
                   {children}
                 </RefactoredAssistantProviderInternal>
               </OrderProvider>
-            </TranscriptProvider>
-          </CallProvider>
-        </VapiProvider>
+            </CallProvider>
+          </VapiProvider>
+        </TranscriptProvider>
       </LanguageProvider>
     </ConfigurationProvider>
   );
