@@ -6,7 +6,7 @@ export interface TranscriptContextType {
   // Transcript state
   transcripts: Transcript[];
   setTranscripts: (transcripts: Transcript[]) => void;
-  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
+  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void; // ✅ FIXED: Include callId and tenantId
 
   // Model output state
   modelOutput: string[];
@@ -34,20 +34,53 @@ export function TranscriptProvider({
 
   // Add transcript to the list
   const addTranscript = useCallback(
-    (transcript: Omit<Transcript, 'id' | 'timestamp' | 'callId'>) => {
+    (transcript: Omit<Transcript, 'id' | 'timestamp'>) => {
+      // ✅ FIXED: Include callId and tenantId
       const newTranscript: Transcript = {
         ...transcript,
-        callId: `call-${Date.now()}`, // Will be updated with actual callId later
+        id: Date.now(), // ✅ FIXED: Generate numeric ID
+        callId: transcript.callId || `call-${Date.now()}`, // ✅ IMPROVED: Use provided callId or fallback
         timestamp: new Date(),
-        tenantId: 'default', // Will be updated with actual tenantId later
+        tenantId: transcript.tenantId || 'default', // ✅ IMPROVED: Use provided tenantId or fallback
       };
 
+      logger.debug('[TranscriptContext] Adding new transcript:', 'Component', {
+        id: newTranscript.id,
+        callId: newTranscript.callId,
+        role: newTranscript.role,
+        contentPreview: newTranscript.content.substring(0, 50) + '...',
+        tenantId: newTranscript.tenantId,
+        timestamp: newTranscript.timestamp.toISOString(),
+      });
+
       // Add to local state immediately
-      setTranscripts(prev => [...prev, newTranscript]);
+      setTranscripts(prev => {
+        const updated = [...prev, newTranscript];
+        logger.debug(
+          '[TranscriptContext] Transcript state updated:',
+          'Component',
+          {
+            previousCount: prev.length,
+            newCount: updated.length,
+            callId: newTranscript.callId,
+          }
+        );
+        return updated;
+      });
 
       // Send to server database asynchronously
       const saveToServer = async () => {
         try {
+          logger.debug(
+            '[TranscriptContext] Saving transcript to server:',
+            'Component',
+            {
+              callId: newTranscript.callId,
+              role: newTranscript.role,
+              contentLength: newTranscript.content.length,
+            }
+          );
+
           const response = await fetch('/api/transcripts', {
             method: 'POST',
             headers: {
@@ -67,45 +100,76 @@ export function TranscriptProvider({
 
           const data = await response.json();
           logger.debug(
-            '[TranscriptContext] Transcript saved to database:',
+            '[TranscriptContext] Transcript saved to database successfully:',
             'Component',
-            data
+            {
+              serverId: data.id,
+              callId: newTranscript.callId,
+              role: newTranscript.role,
+            }
           );
         } catch (error) {
           logger.error(
             '[TranscriptContext] Error saving transcript to server:',
             'Component',
-            error
+            {
+              error: error instanceof Error ? error.message : String(error),
+              callId: newTranscript.callId,
+              role: newTranscript.role,
+              contentLength: newTranscript.content.length,
+            }
           );
           // Still keep in local state even if server save fails
         }
       };
 
-      saveToServer();
+      // ✅ IMPROVED: Only save to server in production or when API is available
+      if (
+        !import.meta.env.DEV ||
+        import.meta.env.VITE_SAVE_TRANSCRIPTS === 'true'
+      ) {
+        saveToServer();
+      } else {
+        logger.debug(
+          '[TranscriptContext] Skipping server save in development mode',
+          'Component',
+          {
+            callId: newTranscript.callId,
+            role: newTranscript.role,
+          }
+        );
+      }
     },
     []
   );
 
   // Add model output
   const addModelOutput = useCallback((output: string) => {
-    setModelOutput(prev => [...prev, output]);
-    logger.debug(
-      '[TranscriptContext] Model output added:',
-      'Component',
-      output
-    );
+    setModelOutput(prev => {
+      const updated = [...prev, output];
+      logger.debug('[TranscriptContext] Model output added:', 'Component', {
+        output: output.substring(0, 50) + '...',
+        previousCount: prev.length,
+        newCount: updated.length,
+      });
+      return updated;
+    });
   }, []);
 
   // Clear functions
   const clearTranscripts = useCallback(() => {
+    logger.debug('[TranscriptContext] Clearing all transcripts', 'Component', {
+      clearedCount: transcripts.length,
+    });
     setTranscripts([]);
-    logger.debug('[TranscriptContext] Transcripts cleared', 'Component');
-  }, []);
+  }, [transcripts.length]);
 
   const clearModelOutput = useCallback(() => {
+    logger.debug('[TranscriptContext] Clearing all model output', 'Component', {
+      clearedCount: modelOutput.length,
+    });
     setModelOutput([]);
-    logger.debug('[TranscriptContext] Model output cleared', 'Component');
-  }, []);
+  }, [modelOutput.length]);
 
   const value: TranscriptContextType = {
     transcripts,

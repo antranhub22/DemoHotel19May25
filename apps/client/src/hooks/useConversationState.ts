@@ -34,6 +34,7 @@ export const useConversationState = ({
     // setCurrentInterface, // ✅ REMOVED: Interface switching (focus Interface1 only)
     transcripts,
     setLanguage,
+    addTranscript, // ✅ ADD: Import addTranscript for mock generation
   } = useAssistant();
 
   const [isCallStarted, setIsCallStarted] = useState(false);
@@ -203,14 +204,77 @@ export const useConversationState = ({
       try {
         if (isDevelopment && !forceVapiInDev && !hasAnyVapiCredentials) {
           logger.debug(
-            '🚧 [DEV MODE] Using simulated call start - limited API calls',
+            '🚧 [DEV MODE] Using simulated call start with mock transcripts',
             'Component'
           );
           setIsCallStarted(true);
           setManualCallStarted(true);
           setLanguage(lang);
+
+          // ✅ NEW: Generate mock transcript conversation for UI testing
+          const mockCallId = `dev-call-${Date.now()}`;
           logger.debug(
-            '✅ [DEV MODE] Simulated call started successfully',
+            '📝 [DEV MODE] Generating mock transcripts for conversation testing',
+            'Component',
+            { mockCallId }
+          );
+
+          // Mock conversation sequence with realistic timing
+          const mockConversation = [
+            {
+              role: 'user',
+              content: 'Xin chào, tôi muốn đặt room service',
+              delay: 1000,
+            },
+            {
+              role: 'assistant',
+              content:
+                'Chào bạn! Tôi có thể giúp bạn đặt room service. Bạn muốn đặt gì ạ?',
+              delay: 2000,
+            },
+            {
+              role: 'user',
+              content: 'Tôi muốn đặt một ly cà phê và bánh mì sandwich',
+              delay: 3000,
+            },
+            {
+              role: 'assistant',
+              content:
+                'Được rồi ạ! Tôi sẽ đặt cho bạn 1 ly cà phê và 1 bánh mì sandwich. Bạn ở phòng số mấy ạ?',
+              delay: 4000,
+            },
+            { role: 'user', content: 'Phòng 205', delay: 5000 },
+            {
+              role: 'assistant',
+              content:
+                'Perfect! Tôi đã ghi nhận đơn hàng cho phòng 205: 1 ly cà phê và 1 bánh mì sandwich. Đơn hàng sẽ được giao trong 15-20 phút. Bạn có cần gì thêm không ạ?',
+              delay: 6000,
+            },
+          ];
+
+          // Generate mock transcripts with realistic timing
+          mockConversation.forEach((msg, index) => {
+            setTimeout(() => {
+              logger.debug(
+                `📝 [DEV MODE] Adding mock transcript ${index + 1}/${mockConversation.length}:`,
+                'Component',
+                {
+                  role: msg.role,
+                  content: msg.content.substring(0, 30) + '...',
+                }
+              );
+
+              addTranscript({
+                callId: mockCallId,
+                content: msg.content,
+                role: msg.role as 'user' | 'assistant',
+                tenantId: 'tenant-default',
+              });
+            }, msg.delay);
+          });
+
+          logger.debug(
+            '✅ [DEV MODE] Mock call started successfully with transcript generation',
             'Component'
           );
           return { success: true };
@@ -303,6 +367,7 @@ export const useConversationState = ({
       transcripts,
       startCall,
       setLanguage,
+      addTranscript, // ✅ ADD: Add to dependencies
     ]
   );
 

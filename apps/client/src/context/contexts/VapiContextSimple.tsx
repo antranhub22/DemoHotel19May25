@@ -53,6 +53,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<string>('en'); // Track current language
+  const [currentCallId, setCurrentCallId] = useState<string | null>(null); // ✅ NEW: Track consistent call ID
 
   // References
   const vapiClientRef = useRef<VapiSimple | null>(null);
@@ -149,11 +150,22 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
       onMessage: message => {
         // Handle different message types
         if (message.type === 'transcript') {
+          // ✅ FIX: Use consistent call ID throughout the call session
+          const callId = currentCallId || `call-${Date.now()}`;
+          if (!currentCallId) {
+            setCurrentCallId(callId);
+            logger.debug(
+              '🆔 [VapiProvider] Setting new call ID:',
+              'VapiProvider',
+              callId
+            );
+          }
+
           // Update call details with transcript
           setCallDetails(
             prev =>
               ({
-                id: prev?.id || `call-${Date.now()}`,
+                id: callId, // ✅ FIXED: Use consistent call ID
                 roomNumber: prev?.roomNumber || 'Unknown',
                 duration: prev?.duration || '0:00',
                 category: prev?.category || 'voice-assistant',
@@ -163,9 +175,20 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
               }) as CallDetails
           );
 
-          // ✅ FIX: Use proper tenant ID from subdomain detection
+          logger.debug(
+            '📝 [VapiProvider] Adding transcript with consistent call ID:',
+            'VapiProvider',
+            {
+              callId,
+              role: message.role,
+              content: message.transcript.substring(0, 50) + '...',
+              tenantId: getTenantId(),
+            }
+          );
+
+          // ✅ FIX: Use consistent call ID and proper tenant ID
           addTranscript({
-            callId: `call-${Date.now()}`, // Same as callDetails id
+            callId: callId, // ✅ FIXED: Use consistent call ID
             content: message.transcript,
             role: message.role as 'user' | 'assistant',
             tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
@@ -182,6 +205,8 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         logger.error('❌ Vapi error', 'VapiProvider', error);
         setIsCallActive(false);
         setMicLevel(0);
+        // ✅ NEW: Reset call ID on error
+        setCurrentCallId(null);
       },
 
       onSpeechStart: () => {
@@ -198,16 +223,33 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         logger.debug('📞 Call started', 'VapiProvider');
         setIsCallActive(true);
         setMicLevel(0);
+        // ✅ NEW: Generate new call ID when call starts
+        const newCallId = `call-${Date.now()}`;
+        setCurrentCallId(newCallId);
+        logger.debug(
+          '🆔 [VapiProvider] Call started with new call ID:',
+          'VapiProvider',
+          newCallId
+        );
       },
 
       onCallEnd: () => {
-        logger.debug('📴 Call ended', 'VapiProvider');
+        logger.debug('📞 Call ended', 'VapiProvider');
         setIsCallActive(false);
         setMicLevel(0);
-        setCallDetails(null);
+        // ✅ NEW: Keep call ID for a bit to allow final transcripts, then reset
+        setTimeout(() => {
+          logger.debug(
+            '🆔 [VapiProvider] Resetting call ID after call end',
+            'VapiProvider'
+          );
+          setCurrentCallId(null);
+        }, 2000); // 2 second delay to allow final transcripts
       },
     });
 
+    vapiClientRef.current = vapi;
+    setCurrentLanguage(language);
     return vapi;
   };
 
@@ -249,12 +291,18 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         options.assistantId = assistantId;
       }
 
-      logger.debug('🚀 [VapiProvider] Starting call with options:', 'VapiProvider', {
-        language,
-        hasExplicitAssistantId: !!assistantId,
-        explicitAssistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'none',
-        willFallbackToConfig: !assistantId,
-      });
+      logger.debug(
+        '🚀 [VapiProvider] Starting call with options:',
+        'VapiProvider',
+        {
+          language,
+          hasExplicitAssistantId: !!assistantId,
+          explicitAssistantId: assistantId
+            ? `${assistantId.substring(0, 15)}...`
+            : 'none',
+          willFallbackToConfig: !assistantId,
+        }
+      );
 
       // Start the call
       await vapiClientRef.current.startCall(options);

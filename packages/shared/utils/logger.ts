@@ -20,11 +20,38 @@ class Logger {
 
   constructor() {
     this.logLevel = this.getLogLevel();
-    this.isDevelopment = process.env.NODE_ENV !== 'production';
+    // ✅ FIX: Handle browser environment where process is not defined
+    this.isDevelopment = this.getEnvironment() !== 'production';
+  }
+
+  // ✅ NEW: Helper to get environment safely
+  private getEnvironment(): string {
+    // Browser environment (client-side)
+    if (typeof window !== 'undefined' && typeof import.meta !== 'undefined') {
+      return (
+        import.meta.env?.MODE || import.meta.env?.NODE_ENV || 'development'
+      );
+    }
+    // Node.js environment (server-side)
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.NODE_ENV || 'development';
+    }
+    // Fallback
+    return 'development';
   }
 
   private getLogLevel(): LogLevel {
-    const level = process.env.LOG_LEVEL?.toUpperCase();
+    let level: string | undefined;
+
+    // ✅ FIX: Handle browser environment where process is not defined
+    if (typeof window !== 'undefined' && typeof import.meta !== 'undefined') {
+      // Browser environment (client-side)
+      level = import.meta.env?.VITE_LOG_LEVEL?.toUpperCase();
+    } else if (typeof process !== 'undefined' && process.env) {
+      // Node.js environment (server-side)
+      level = process.env.LOG_LEVEL?.toUpperCase();
+    }
+
     switch (level) {
       case 'DEBUG':
         return LogLevel.DEBUG;
