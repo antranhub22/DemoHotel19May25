@@ -1,10 +1,10 @@
+import { logger } from '@shared/utils/logger';
+import express, { type Express } from 'express';
 import fs from 'fs';
 import type { Server } from 'http';
-import path from 'path';
-import express, { type Express } from 'express';
 import { nanoid } from 'nanoid';
+import path from 'path';
 import { createLogger, createServer as createViteServer } from 'vite';
-import { logger } from '@shared/utils/logger';
 
 const viteLogger = createLogger();
 
@@ -154,32 +154,48 @@ export function serveStatic(app: Express) {
   );
 
   // fall through to index.html for SPA routing; ensure no-cache of HTML
-  // BUT exclude API routes to avoid serving HTML instead of JSON
+  // BUT exclude API routes AND asset requests to avoid serving HTML instead of proper files
   app.use('*', (req, res) => {
+    const url = req.originalUrl;
+
     // Don't intercept API routes
-    if (
-      req.originalUrl.startsWith('/api/') ||
-      req.originalUrl.startsWith('/ws/')
-    ) {
+    if (url.startsWith('/api/') || url.startsWith('/ws/')) {
       // Enhanced logging for debugging API endpoint issues
-      console.warn(
-        `❌ [API] Endpoint not found: ${req.method} ${req.originalUrl}`,
-        {
-          host: req.get('host'),
-          userAgent: req.get('user-agent'),
-          referer: req.get('referer'),
-          timestamp: new Date().toISOString(),
-        }
-      );
+      console.warn(`❌ [API] Endpoint not found: ${req.method} ${url}`, {
+        host: req.get('host'),
+        userAgent: req.get('user-agent'),
+        referer: req.get('referer'),
+        timestamp: new Date().toISOString(),
+      });
 
       return (res as any).status(404).json({
         error: 'API endpoint not found',
-        path: req.originalUrl,
+        path: url,
         method: req.method,
         suggestion: 'Ensure your API calls start with /api/ prefix',
       });
     }
 
+    // ✅ FIX: Don't intercept asset requests - let express.static handle them
+    if (
+      url.startsWith('/assets/') ||
+      url.endsWith('.js') ||
+      url.endsWith('.css') ||
+      url.endsWith('.map') ||
+      url.endsWith('.ico') ||
+      url.endsWith('.png') ||
+      url.endsWith('.jpg') ||
+      url.endsWith('.jpeg') ||
+      url.endsWith('.svg') ||
+      url.endsWith('.woff') ||
+      url.endsWith('.woff2') ||
+      url.endsWith('.ttf')
+    ) {
+      // Let this fall through to 404 instead of serving index.html
+      return (res as any).status(404).send('Asset not found');
+    }
+
+    // Serve index.html for SPA routing (HTML pages only)
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
