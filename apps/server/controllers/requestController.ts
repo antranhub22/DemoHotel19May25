@@ -427,6 +427,20 @@ export class RequestController {
    */
   static async getAllRequests(req: Request, res: Response): Promise<void> {
     try {
+      // ✅ ENHANCED: Database readiness check
+      if (!db) {
+        logger.error(
+          '❌ [RequestController] Database not available',
+          'RequestController'
+        );
+        (res as any).status(503).json({
+          success: false,
+          error: 'Database service temporarily unavailable',
+          code: 'DATABASE_NOT_READY',
+        });
+        return;
+      }
+
       // ✅ FIXED: Extract tenant ID using static helper method
       const extractedTenantId = RequestController.extractTenantId(req);
 
@@ -486,6 +500,27 @@ export class RequestController {
 
       (res as any).json({ success: true, data: requests });
     } catch (error) {
+      // ✅ ENHANCED: Better error detection and reporting
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+
+      if (
+        errorMessage.includes('Database not initialized') ||
+        errorMessage.includes('connection')
+      ) {
+        logger.error(
+          '❌ [RequestController] Database connection error',
+          'RequestController',
+          error
+        );
+        (res as any).status(503).json({
+          success: false,
+          error: 'Database service temporarily unavailable. Please try again.',
+          code: 'DATABASE_CONNECTION_ERROR',
+        });
+        return;
+      }
+
       logger.error(
         '❌ [RequestController] Failed to fetch requests',
         'RequestController',
@@ -494,6 +529,8 @@ export class RequestController {
       (res as any).status(500).json({
         success: false,
         error: 'Failed to fetch requests',
+        details:
+          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       });
     }
   }

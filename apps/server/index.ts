@@ -244,13 +244,19 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // ✅ TEMPORARY DISABLE: Skip API Gateway for testing transcript API
+  // ✅ CRITICAL FIX: Initialize database connection BEFORE routes registration
+  // This prevents "Database not initialized" race condition errors
+  logger.debug('🚀 Initializing database connection...', 'Component');
+  await initializeDatabaseOnStartup();
+  logger.debug('✅ Database connection initialized successfully', 'Component');
+
+  // ✅ NOW SAFE: Register routes after database initialization
   logger.debug(
     '⚠️ API Gateway middleware DISABLED for voice assistant testing',
     'Component'
   );
 
-  // Use the new routes system
+  // Use the new routes system - NOW SAFE with database ready
   app.use(router);
 
   // Create HTTP server for WebSocket support
@@ -258,12 +264,6 @@ app.use((req, res, next) => {
   // Setup WebSocket server for real-time notifications and save instance on Express app
   const io = setupSocket(server);
   app.set('io', io);
-
-  // 🔧 IMPROVED: Initialize database connection EARLY but after basic setup
-  // This prevents "Database not initialized" errors while respecting module lifecycle
-  logger.debug('🚀 Initializing database connection...', 'Component');
-  await initializeDatabaseOnStartup();
-  logger.debug('✅ Database connection initialized successfully', 'Component');
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();
