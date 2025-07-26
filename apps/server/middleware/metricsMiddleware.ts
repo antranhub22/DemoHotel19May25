@@ -200,7 +200,8 @@ export const moduleMetricsMiddleware = (moduleName: string) => {
  */
 export const criticalEndpointMiddleware = (
   req: MetricsRequest,
-  res: Response) => {
+  res: Response,
+  next: NextFunction) => {
   const criticalPaths = [
     '/api/health',
     '/api/core/health',
@@ -212,7 +213,7 @@ export const criticalEndpointMiddleware = (
 
   if (criticalPaths.some(path => req.path.startsWith(path))) {
     const originalSend = res.send;
-    res.send = function () {
+    res.send = function (data: any) {
       const responseTime = Date.now() - (req.startTime || Date.now());
 
       // Create alert for critical endpoint issues
