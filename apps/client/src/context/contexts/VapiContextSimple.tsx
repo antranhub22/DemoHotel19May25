@@ -20,11 +20,13 @@ export interface VapiContextType {
   isCallActive: boolean;
   micLevel: number;
   callDetails: CallDetails | null;
+  currentLanguage: string; // Add current language tracking
 
   // Actions
   startCall: (language?: string, assistantId?: string) => Promise<void>;
   endCall: () => Promise<void>;
   setCallDetails: (details: CallDetails | null) => void;
+  reinitializeForLanguage: (language: string) => void; // Add language reinitialization
 }
 
 const VapiContext = createContext<VapiContextType | undefined>(undefined);
@@ -50,6 +52,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
   const [isCallActive, setIsCallActive] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('en'); // Track current language
 
   // References
   const vapiClientRef = useRef<VapiSimple | null>(null);
@@ -106,6 +109,12 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
                 ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
                 : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
+    logger.debug('🔑 [VapiProvider] Getting credentials for language:', 'VapiProvider', {
+      language,
+      publicKey: publicKey ? `${publicKey.substring(0, 15)}...` : 'MISSING',
+      assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
+    });
+
     return { publicKey, assistantId };
   };
 
@@ -122,7 +131,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
 
     logger.debug('🚀 [VapiProvider] Initializing Vapi client', 'VapiProvider', {
       language,
-      assistantId,
+      assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'MISSING',
     });
 
     // ✅ FIX: Use correct VapiConfig structure
@@ -194,12 +203,47 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     return vapi;
   };
 
+  // ✅ NEW: Reinitialize Vapi for language change (without starting call)
+  const reinitializeForLanguage = (language: string) => {
+    logger.debug('🔄 [VapiProvider] Reinitializing for language:', 'VapiProvider', language);
+
+    // Only reinitialize if language actually changed
+    if (language === currentLanguage) {
+      logger.debug('🔄 [VapiProvider] Language unchanged, skipping reinitialization', 'VapiProvider');
+      return;
+    }
+
+    // Clean up existing client if any (but don't end active calls)
+    if (vapiClientRef.current && !isCallActive) {
+      vapiClientRef.current.destroy();
+    }
+
+    // Update current language
+    setCurrentLanguage(language);
+
+    // Initialize new client for the language (but don't start call)
+    if (!isCallActive) {
+      vapiClientRef.current = initializeVapi(language);
+
+      if (vapiClientRef.current) {
+        logger.debug('✅ [VapiProvider] Vapi reinitialized for language:', 'VapiProvider', language);
+      } else {
+        logger.error('❌ [VapiProvider] Failed to reinitialize Vapi for language:', 'VapiProvider', language);
+      }
+    } else {
+      logger.debug('📞 [VapiProvider] Call active, will reinitialize on next call', 'VapiProvider');
+    }
+  };
+
   // Start call function
   const startCall = async (
     language: string = 'en',
     assistantId?: string
   ): Promise<void> => {
     try {
+      // Update current language
+      setCurrentLanguage(language);
+
       // End any existing call first
       if (vapiClientRef.current && isCallActive) {
         await vapiClientRef.current.endCall();
@@ -229,7 +273,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
 
       logger.debug('✅ Call started successfully', 'VapiProvider', {
         language,
-        assistantId,
+        assistantId: assistantId ? `${assistantId.substring(0, 15)}...` : 'from-config',
       });
     } catch (error) {
       logger.error('❌ Failed to start call', 'VapiProvider', error);
@@ -270,11 +314,13 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     isCallActive,
     micLevel,
     callDetails,
+    currentLanguage, // Expose current language
 
     // Call functions
     startCall,
     endCall,
     setCallDetails, // ✅ FIX: Add missing function from interface
+    reinitializeForLanguage, // ✅ NEW: Add language reinitialization
   };
 
   return (

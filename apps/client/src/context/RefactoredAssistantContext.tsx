@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
 } from 'react';
 
 // Import types
@@ -122,6 +123,26 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const configuration = useConfiguration();
   const vapi = useVapi();
 
+  // ✅ NEW: Listen for language changes and reinitialize Vapi
+  useEffect(() => {
+    logger.debug(
+      '[RefactoredAssistant] Language changed, reinitializing Vapi...',
+      'Component',
+      { newLanguage: language.language, currentVapiLanguage: vapi.currentLanguage }
+    );
+
+    // Reinitialize Vapi for the new language (only if language actually changed)
+    if (language.language !== vapi.currentLanguage) {
+      vapi.reinitializeForLanguage(language.language);
+
+      logger.debug(
+        '[RefactoredAssistant] Vapi reinitialized for language:',
+        'Component',
+        language.language
+      );
+    }
+  }, [language.language, vapi]); // Depend on language changes
+
   // Enhanced startCall that integrates with VapiContext
   const enhancedStartCall = useCallback(async () => {
     try {
@@ -202,8 +223,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
     // Additional Vapi methods for compatibility
     initializeVapi: async (
-      language: string,
-      hotelConfig?: HotelConfiguration | null
+      _language: string,
+      _hotelConfig?: HotelConfiguration | null
     ) => {
       // VapiContextSimple handles initialization automatically
       return Promise.resolve();

@@ -1,15 +1,15 @@
-import {
-  ChevronDown,
-  Mic,
-  Volume2,
-  CheckCircle,
-  Smartphone,
-} from 'lucide-react';
-import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
+import {
+  CheckCircle,
+  ChevronDown,
+  Mic,
+  Smartphone,
+  Volume2,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface LanguageOption {
   code: Language;
@@ -132,7 +132,6 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   position = 'floating',
   showVoicePreview = true,
   onLanguageChange,
-  className = '',
 }) => {
   const { language, setLanguage } = useAssistant();
   const [isOpen, setIsOpen] = useState(false);
@@ -214,16 +213,30 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
         // Notify parent component
         onLanguageChange?.(newLanguage);
 
-        // Add notification
+        // ✅ ENHANCED: Better notification with assistant info
         if (typeof window !== 'undefined' && (window as any).addNotification) {
           const selectedOption = LANGUAGE_OPTIONS.find(
             opt => opt.code === newLanguage
           );
+
+          // Get assistant ID for this language (for display purposes)
+          const assistantId = newLanguage === 'vi'
+            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+            : newLanguage === 'fr'
+              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
+              : newLanguage === 'zh'
+                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
+                : newLanguage === 'ru'
+                  ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
+                  : newLanguage === 'ko'
+                    ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
+                    : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+
           (window as any).addNotification({
             type: 'success',
-            title: 'Language Changed',
-            message: `Voice assistant switched to ${selectedOption?.name || newLanguage}`,
-            duration: 3000,
+            title: '🤖 Voice Assistant Switched',
+            message: `${selectedOption?.name || newLanguage} assistant ready (${assistantId ? assistantId.substring(0, 8) + '...' : 'default'})`,
+            duration: 4000,
           });
         }
 
@@ -453,9 +466,8 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
           {isMobile && <Smartphone className="h-3 w-3 text-gray-500" />}
 
           <ChevronDown
-            className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
-              isOpen ? 'rotate-180' : ''
-            }`}
+            className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+              }`}
           />
         </div>
       </button>

@@ -243,4 +243,4 @@ export class GuestAuthService {
       expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
     };
   }
-}
+} 
