@@ -13,14 +13,14 @@ export {
   evaluateABTest,
   FeatureFlags,
   isFeatureEnabled,
-  isModuleEnabled,
+  isModuleEnabled
 } from './FeatureFlags';
 export { ModuleLifecycleManager } from './ModuleLifecycleManager';
 export {
   getService,
   getServiceSync,
   initializeServiceContainer,
-  ServiceContainer,
+  ServiceContainer
 } from './ServiceContainer';
 
 // ✅ v3.0: NEW Advanced Health Check System
@@ -37,7 +37,7 @@ export {
   type HealthRecommendation,
   type ModuleHealthStatus,
   type ModuleMetrics,
-  type SystemHealthSummary,
+  type SystemHealthSummary
 } from './AdvancedHealthCheck';
 
 // ✅ v3.0: NEW Advanced Metrics Collection System
@@ -53,7 +53,7 @@ export {
   type BusinessKPI,
   type MetricsConfig,
   type MetricsSnapshot,
-  type PerformanceMetrics,
+  type PerformanceMetrics
 } from './AdvancedMetricsCollector';
 
 // ✅ v3.0: NEW Performance Auditor System
@@ -68,7 +68,7 @@ export {
   type OptimizationRecommendation,
   type PerformanceAuditReport,
   type PerformanceBottleneck,
-  type PerformanceIssue,
+  type PerformanceIssue
 } from './PerformanceAuditor';
 
 // ✅ v3.0: NEW Cache Management System
@@ -85,7 +85,7 @@ export {
   type CacheEntry,
   type CacheNamespace,
   type CacheStats,
-  type CacheTag,
+  type CacheTag
 } from './CacheManager';
 
 // ✅ v3.0: NEW Load Testing System
@@ -103,7 +103,7 @@ export {
   type LoadTestEndpointResult,
   type LoadTestResult,
   type LoadTestScenario,
-  type StressTestConfig,
+  type StressTestConfig
 } from './LoadTestManager';
 
 // ✅ v3.0: NEW Database Optimization System
@@ -118,7 +118,7 @@ export {
   type DatabaseHealthStatus,
   type IndexSuggestion,
   type OptimizationReport,
-  type QueryAnalysis,
+  type QueryAnalysis
 } from './DatabaseOptimizer';
 
 // ✅ v3.0: NEW Connection Pool Management System
@@ -132,7 +132,7 @@ export {
   type ConnectionInfo,
   type ConnectionLeak,
   type PoolConfiguration,
-  type PoolMetrics,
+  type PoolMetrics
 } from './ConnectionPoolManager';
 
 // ✅ v3.0: NEW Real-time Monitoring Dashboard System
@@ -151,7 +151,7 @@ export {
   type PerformanceMetrics as DashboardPerformanceMetrics,
   type DatabaseMetrics,
   type SystemMetrics,
-  type WebSocketConnection,
+  type WebSocketConnection
 } from './MonitoringDashboard';
 
 // ✅ v3.0: NEW WebSocket Dashboard Integration
@@ -164,7 +164,7 @@ export {
   type WebSocketClient,
   type WebSocketMessage,
   type WebSocketResponse,
-  type WebSocketSubscription,
+  type WebSocketSubscription
 } from './WebSocketDashboard';
 
 // ✅ v3.0: NEW API Gateway System
@@ -183,7 +183,7 @@ export {
   type RequestContext,
   type RoutingConfig,
   type SecurityConfig,
-  type VersionConfig,
+  type VersionConfig
 } from './APIGateway';
 
 // ✅ v2.0: Enhanced Monitoring Components
@@ -271,12 +271,12 @@ export async function getArchitectureHealth() {
         totalHistoryEntries: advancedHealthDiagnostics.totalHistoryEntries,
         systemSummary: systemHealthSummary
           ? {
-              overallStatus: systemHealthSummary.overallStatus,
-              totalModules: systemHealthSummary.systemMetrics.totalModules,
-              healthyModules: systemHealthSummary.systemMetrics.healthyModules,
-              cascadeFailures: systemHealthSummary.cascadeFailures.length,
-              recommendations: systemHealthSummary.recommendations.length,
-            }
+            overallStatus: systemHealthSummary.overallStatus,
+            totalModules: systemHealthSummary.systemMetrics.totalModules,
+            healthyModules: systemHealthSummary.systemMetrics.healthyModules,
+            cascadeFailures: systemHealthSummary.cascadeFailures.length,
+            recommendations: systemHealthSummary.recommendations.length,
+          }
           : null,
       },
 
@@ -284,9 +284,9 @@ export async function getArchitectureHealth() {
       overall: {
         status:
           containerHealth.healthy &&
-          featureFlagsHealth.isInitialized &&
-          lifecycleHealth.isInitialized &&
-          monitoringHealth.initialized
+            featureFlagsHealth.isInitialized &&
+            lifecycleHealth.isInitialized &&
+            monitoringHealth.initialized
             ? 'healthy'
             : 'degraded',
         readiness: 'ready',
@@ -614,7 +614,14 @@ export async function initializeMonitoring() {
             endpoints: ['^/api/(?!auth|health).*'],
           },
         ],
-        exemptions: ['^/api/auth/.*', '^/api/.*/health$'],
+        exemptions: [
+          '^/api/auth/.*',
+          '^/api/.*/health$',
+          '^/api/transcripts.*', // ✅ FIX: Allow transcript API for realtime voice data
+          '^/api/request.*', // ✅ FIX: Allow request API for voice assistant
+          '^/api/guest/.*', // ✅ FIX: Allow guest APIs for public voice features
+          '^/api/temp-public/.*', // ✅ FIX: Allow temp public APIs
+        ],
         tokenValidation: {
           verifyExpiration: true,
           verifySignature: true,

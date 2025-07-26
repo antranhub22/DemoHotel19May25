@@ -1,5 +1,6 @@
 import express from 'express';
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
+// ✅ REMOVED: authenticateJWT middleware for voice assistant compatibility
+// import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { RequestController } from '@server/controllers/requestController';
 
 const router = express.Router();
@@ -7,20 +8,20 @@ const router = express.Router();
 // ============================================
 // REQUEST/ORDER ENDPOINTS - USING CONTROLLERS
 // ============================================
+// ✅ NOTE: Auth middleware removed to support voice assistant requests
 
-// ✅ POST /api/request - Create new request (WITH AUTO TRANSFORMATION)
-router.post('/', authenticateJWT, RequestController.createRequest);
+// ✅ POST /api/request - Create new request (NO AUTH for voice assistant)
+router.post('/', RequestController.createRequest);
 
-// ✅ GET /api/request - Get all requests
-router.get('/', authenticateJWT, RequestController.getAllRequests);
+// ✅ GET /api/request - Get all requests (NO AUTH for voice assistant)
+router.get('/', RequestController.getAllRequests);
 
-// ✅ GET /api/request/:id - Get specific request
-router.get('/:id', authenticateJWT, RequestController.getRequestById);
+// ✅ GET /api/request/:id - Get specific request (NO AUTH for voice assistant)
+router.get('/:id', RequestController.getRequestById);
 
-// ✅ PATCH /api/request/:id/status - Update request status
+// ✅ PATCH /api/request/:id/status - Update request status (NO AUTH for voice assistant)
 router.patch(
   '/:id/status',
-  authenticateJWT,
   RequestController.updateRequestStatus
 );
 
