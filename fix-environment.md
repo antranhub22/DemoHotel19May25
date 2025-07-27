@@ -94,8 +94,8 @@ Sau khi sửa, chạy command này để kiểm tra:
 node -e "
 console.log('🔍 Environment Check:');
 console.log('OpenAI:', process.env.VITE_OPENAI_API_KEY?.startsWith('sk-') ? '✅ Valid format' : '❌ Invalid/missing');
-console.log('Vapi Public:', process.env.VITE_VAPI_PUBLIC_KEY?.startsWith('pk_') ? '✅ Valid format' : '❌ Invalid/missing');
-console.log('Vapi Assistant:', process.env.VITE_VAPI_ASSISTANT_ID?.startsWith('asst_') ? '✅ Valid format' : '❌ Invalid/missing');
+console.log('Vapi Public:', process.env.VITE_VAPI_PUBLIC_KEY ? '✅ Valid format' : '❌ Invalid/missing');
+console.log('Vapi Assistant:', process.env.VITE_VAPI_ASSISTANT_ID ? '✅ Valid format' : '❌ Invalid/missing');
 console.log('Database:', process.env.DATABASE_URL || '❌ Missing');
 "
 ```

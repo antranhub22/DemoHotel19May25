@@ -83,7 +83,7 @@
             let statusText = '❌ MISSING';
 
             if (value) {
-                if (value.startsWith('pk_dev-') || value.startsWith('asst_dev-')) {
+                if (value.includes('dev-') || value.includes('placeholder') || value.includes('your-')) {
                     status = 'partial';
                     statusText = '⚠️ DUMMY VALUE';
                 } else {
