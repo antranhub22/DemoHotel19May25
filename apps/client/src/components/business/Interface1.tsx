@@ -316,8 +316,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   onClose={() => {}}
                   layout="grid"
                 />
-                {/* ✅ DEBUG: Add logging */}
-                {(() => {
+                {/* ✅ DEBUG: Add logging - COMMENTED OUT FOR CLEAN CONSOLE */}
+                {/*{(() => {
                   console.log(
                     '🔍 [Interface1] ChatPopup Desktop render state (SOLUTION 1):',
                     {
@@ -328,7 +328,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                     }
                   );
                   return null;
-                })()}
+                })()}*/}
               </div>
 
               {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
@@ -393,8 +393,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               layout="overlay" // Mobile: overlay positioning
               className="fixed bottom-0 left-0 right-0 z-30"
             />
-            {/* ✅ DEBUG: Mobile layout logging */}
-            {(() => {
+            {/* ✅ DEBUG: Mobile layout logging - COMMENTED OUT FOR CLEAN CONSOLE */}
+            {/*{(() => {
               console.log(
                 '🔍 [Interface1] ChatPopup Mobile render state (SOLUTION 1):',
                 {
@@ -405,7 +405,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 }
               );
               return null;
-            })()}
+            })()}*/}
 
             {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
             <MobileSummaryPopup />
