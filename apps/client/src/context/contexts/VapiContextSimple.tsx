@@ -167,7 +167,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
             role: message.role,
             transcript: message.transcript?.substring(0, 50) + '...',
             callId,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
 
           // Update call details with transcript
@@ -200,7 +200,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
             callId,
             content: message.transcript?.substring(0, 50) + '...',
             role: message.role,
-            tenantId: getTenantId()
+            tenantId: getTenantId(),
           });
 
           addTranscript({
@@ -277,14 +277,31 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     assistantId?: string
   ): Promise<void> => {
     try {
+      // ✅ NEW: Enhanced debug logging for VapiContextSimple
+      console.log('🎨 [DEBUG] VapiContextSimple.startCall called:', {
+        language,
+        assistantId,
+        timestamp: new Date().toISOString(),
+        isCallActive,
+        currentLanguage,
+        vapiClientExists: !!vapiClientRef.current,
+      });
+
       // Update current language
       setCurrentLanguage(language);
 
       // End any existing call first
       if (vapiClientRef.current && isCallActive) {
+        console.log('🔄 [DEBUG] Ending existing call before starting new one');
         await vapiClientRef.current.endCall();
         vapiClientRef.current.destroy();
       }
+
+      // ✅ NEW: Debug before initializing client
+      console.log('🚀 [DEBUG] Initializing new Vapi client:', {
+        language,
+        timestamp: new Date().toISOString(),
+      });
 
       // Initialize new client
       vapiClientRef.current = initializeVapi(language);
@@ -292,6 +309,13 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
       if (!vapiClientRef.current) {
         throw new Error('Failed to initialize Vapi client');
       }
+
+      // ✅ NEW: Debug after client initialization
+      console.log('✅ [DEBUG] Vapi client initialized successfully:', {
+        language,
+        clientExists: !!vapiClientRef.current,
+        timestamp: new Date().toISOString(),
+      });
 
       // ✅ FIX: Only include assistantId in options when provided
       // This allows VapiSimple to fallback to config.assistantId from initializeVapi()
@@ -322,8 +346,32 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         }
       );
 
+      // ✅ NEW: Debug before actual Vapi call
+      console.log(
+        '🎯 [DEBUG] About to call vapiClientRef.current.startCall():',
+        {
+          language,
+          options,
+          clientExists: !!vapiClientRef.current,
+          clientStartCallExists: !!(
+            vapiClientRef.current && vapiClientRef.current.startCall
+          ),
+          timestamp: new Date().toISOString(),
+        }
+      );
+
       // Start the call
       await vapiClientRef.current.startCall(options);
+
+      // ✅ NEW: Debug after successful Vapi call
+      console.log(
+        '🎉 [DEBUG] vapiClientRef.current.startCall() completed successfully:',
+        {
+          language,
+          assistantId,
+          timestamp: new Date().toISOString(),
+        }
+      );
 
       logger.debug('✅ Call started successfully', 'VapiProvider', {
         language,
@@ -332,6 +380,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
           : 'from-config',
       });
     } catch (error) {
+      // ✅ NEW: Enhanced error debugging for VapiContextSimple
+      console.error('💥 [DEBUG] Error in VapiContextSimple.startCall:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : 'No stack',
+        timestamp: new Date().toISOString(),
+        language,
+        assistantId,
+        isCallActive,
+        vapiClientExists: !!vapiClientRef.current,
+        vapiClientStartCallExists: !!(
+          vapiClientRef.current && vapiClientRef.current.startCall
+        ),
+      });
+
       logger.error('❌ Failed to start call', 'VapiProvider', error);
       setIsCallActive(false);
       throw error;

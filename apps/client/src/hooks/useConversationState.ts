@@ -95,16 +95,23 @@ export const useConversationState = ({
       isActive || transcripts.length > 0 || manualCallStarted;
 
     // ✅ ENHANCED DEBUG: More detailed logging
-    console.log('🔄 [useConversationState] Evaluating showConversation (DETAILED):', {
-      callDuration,
-      isActive,
-      transcriptsCount: transcripts.length,
-      transcriptsData: transcripts.map(t => ({ id: t.id, role: t.role, content: t.content?.substring(0, 30) })),
-      manualCallStarted,
-      currentShowConversation: showConversation,
-      shouldShowConversation,
-      willUpdate: showConversation !== shouldShowConversation
-    });
+    console.log(
+      '🔄 [useConversationState] Evaluating showConversation (DETAILED):',
+      {
+        callDuration,
+        isActive,
+        transcriptsCount: transcripts.length,
+        transcriptsData: transcripts.map(t => ({
+          id: t.id,
+          role: t.role,
+          content: t.content?.substring(0, 30),
+        })),
+        manualCallStarted,
+        currentShowConversation: showConversation,
+        shouldShowConversation,
+        willUpdate: showConversation !== shouldShowConversation,
+      }
+    );
 
     logger.debug(
       '🔄 [useConversationState] Evaluating showConversation:',
@@ -121,7 +128,7 @@ export const useConversationState = ({
     // ✅ OPTIMIZATION: Only update if value actually changes
     if (showConversation !== shouldShowConversation) {
       console.log(
-        `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`,
+        `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`
       );
 
       logger.debug(
@@ -131,7 +138,7 @@ export const useConversationState = ({
       setShowConversation(shouldShowConversation);
     } else {
       console.log(
-        '✅ [useConversationState] showConversation unchanged - no re-render',
+        '✅ [useConversationState] showConversation unchanged - no re-render'
       );
 
       logger.debug(
@@ -305,6 +312,21 @@ export const useConversationState = ({
           '🚀 [PRODUCTION MODE] Using real VAPI call start',
           'Component'
         );
+
+        // ✅ NEW: Enhanced debug logging before calling startCall
+        console.log(
+          '🔥 [DEBUG] useConversationState about to call startCall:',
+          {
+            language: lang,
+            timestamp: new Date().toISOString(),
+            startCallFunction: !!startCall,
+            startCallType: typeof startCall,
+            forceVapiInDev,
+            hasAnyVapiCredentials: !!hasAnyVapiCredentials,
+            isDevelopment,
+          }
+        );
+
         setIsCallStarted(true);
         setManualCallStarted(true);
 
@@ -314,7 +336,20 @@ export const useConversationState = ({
           'Component',
           lang
         );
+
+        // ✅ NEW: Detailed debug before startCall
+        console.log('🎯 [DEBUG] Calling startCall function:', {
+          language: lang,
+          timestamp: new Date().toISOString(),
+        });
+
         await startCall(lang); // Pass language directly instead of relying on context
+
+        // ✅ NEW: Debug after successful startCall
+        console.log('🎉 [DEBUG] startCall completed successfully:', {
+          language: lang,
+          timestamp: new Date().toISOString(),
+        });
 
         // ✅ IMPROVED: Update context language after successful call start
         setLanguage(lang);
@@ -325,6 +360,22 @@ export const useConversationState = ({
         );
         return { success: true };
       } catch (error) {
+        // ✅ NEW: Enhanced error debugging
+        console.error(
+          '💥 [DEBUG] Error in useConversationState.handleCallStart:',
+          {
+            error,
+            errorMessage:
+              error instanceof Error ? error.message : String(error),
+            errorStack: error instanceof Error ? error.stack : 'No stack',
+            timestamp: new Date().toISOString(),
+            language: lang,
+            isDevelopment,
+            forceVapiInDev,
+            hasAnyVapiCredentials: !!hasAnyVapiCredentials,
+          }
+        );
+
         logger.error(
           '❌ [useConversationState] Error starting call:',
           'Component',

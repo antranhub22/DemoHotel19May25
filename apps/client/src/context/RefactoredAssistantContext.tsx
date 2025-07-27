@@ -153,6 +153,19 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         // ✅ FIXED: Use provided language or fallback to context language
         const languageToUse = targetLanguage || language.language;
 
+        // ✅ NEW: Enhanced debug logging
+        console.log(
+          '🎪 [DEBUG] RefactoredAssistant.enhancedStartCall called:',
+          {
+            targetLanguage,
+            contextLanguage: language.language,
+            languageToUse,
+            timestamp: new Date().toISOString(),
+            vapiAvailable: !!vapi,
+            vapiStartCallAvailable: !!(vapi && vapi.startCall),
+          }
+        );
+
         logger.debug(
           '[RefactoredAssistant] Starting enhanced call...',
           'Component',
@@ -170,8 +183,20 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
         // Note: VapiContextSimple handles initialization automatically
 
+        // ✅ NEW: Debug before vapi.startCall
+        console.log('🎯 [DEBUG] About to call vapi.startCall:', {
+          languageToUse,
+          timestamp: new Date().toISOString(),
+        });
+
         // Start call with language (VapiContextSimple handles assistant ID selection)
         await vapi.startCall(languageToUse);
+
+        // ✅ NEW: Debug after vapi.startCall success
+        console.log('🎉 [DEBUG] vapi.startCall completed successfully:', {
+          languageToUse,
+          timestamp: new Date().toISOString(),
+        });
 
         // Start call timer
         await call.startCall();
@@ -191,6 +216,22 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           'Component'
         );
       } catch (error) {
+        // ✅ NEW: Enhanced error debugging for RefactoredAssistant
+        console.error(
+          '💥 [DEBUG] Error in RefactoredAssistant.enhancedStartCall:',
+          {
+            error,
+            errorMessage:
+              error instanceof Error ? error.message : String(error),
+            errorStack: error instanceof Error ? error.stack : 'No stack',
+            timestamp: new Date().toISOString(),
+            targetLanguage,
+            languageToUse: targetLanguage || language.language,
+            vapiAvailable: !!vapi,
+            vapiStartCallAvailable: !!(vapi && vapi.startCall),
+          }
+        );
+
         logger.error(
           '[RefactoredAssistant] Error starting enhanced call:',
           'Component',
