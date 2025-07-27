@@ -438,7 +438,7 @@ export const useConversationState = ({
       transcripts,
       startCall,
       setLanguage,
-      addTranscript, // ✅ ADD: Add to dependencies
+      // ✅ REMOVED: addTranscript - has stable reference and causes circular dependency
     ]
   );
 
