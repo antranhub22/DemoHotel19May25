@@ -8,14 +8,7 @@ import { createLogger, createServer as createViteServer } from 'vite';
 
 const viteLogger = createLogger();
 
-export function log(message: string, source = 'express') {
-  const formattedTime = new Date().toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  });
-
+export function log(_source = 'express') {
   logger.debug('${formattedTime} [${source}] ${message}', 'Component');
 }
 
@@ -26,11 +19,11 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   // Add CSP middleware
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     res.setHeader(
       'Content-Security-Policy',
       "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com https://cdn.jsdelivr.net https://unpkg.com; " +
         "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://demohotel19may25.onrender.com https://minhnhotelben.onrender.com; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "font-src 'self' https://fonts.gstatic.com; " +
@@ -116,11 +109,11 @@ export function serveStatic(app: Express) {
   }
 
   // Add CSP headers for static files too
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     res.setHeader(
       'Content-Security-Policy',
       "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://c.daily.co https://*.daily.co https://replit.com https://*.replit.com https://cdn.jsdelivr.net https://unpkg.com; " +
         "connect-src 'self' https://c.daily.co https://*.daily.co wss://*.daily.co https://api.daily.co https://*.vapi.ai wss://*.vapi.ai https://api.vapi.ai https://demohotel19may25.onrender.com https://minhnhotelben.onrender.com; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
         "font-src 'self' https://fonts.gstatic.com; " +
