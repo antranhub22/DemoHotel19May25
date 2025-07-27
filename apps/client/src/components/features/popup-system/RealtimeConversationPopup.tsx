@@ -1,12 +1,12 @@
-import { X } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
 import { useAssistant } from '@/context';
 import {
-  STANDARD_POPUP_MAX_WIDTH,
   STANDARD_POPUP_HEIGHT,
   STANDARD_POPUP_MAX_HEIGHT_VH,
+  STANDARD_POPUP_MAX_WIDTH,
 } from '@/context/PopupContext';
 import { t } from '@/i18n';
+import { X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;
@@ -61,6 +61,20 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
 
+  // ✅ DEBUG: Add logging to track transcripts
+  useEffect(() => {
+    console.log('🔍 [RealtimeConversationPopup] Transcripts changed:', {
+      count: transcripts?.length || 0,
+      transcripts:
+        transcripts?.map(t => ({
+          id: t.id,
+          role: t.role,
+          content: t.content?.substring(0, 50) + '...',
+          timestamp: t.timestamp,
+        })) || [],
+    });
+  }, [transcripts]);
+
   // ✅ SIMPLIFIED: Remove tab state - only conversation now
   // Remove: const [mode, setMode] = useState<PopupMode>('conversation');
   // Remove: const [showSummaryTab, setShowSummaryTab] = useState(false);
@@ -71,6 +85,20 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
   const [conversationTurns, setConversationTurns] = useState<
     ConversationTurn[]
   >([]);
+
+  // ✅ DEBUG: Add logging to track conversationTurns
+  useEffect(() => {
+    console.log('🔍 [RealtimeConversationPopup] ConversationTurns changed:', {
+      count: conversationTurns.length,
+      turns: conversationTurns.map(turn => ({
+        id: turn.id,
+        role: turn.role,
+        messagesCount: turn.messages.length,
+        firstMessage:
+          turn.messages[0]?.content?.substring(0, 50) + '...' || 'No content',
+      })),
+    });
+  }, [conversationTurns]);
 
   // ✅ EXISTING FUNCTIONS - UNCHANGED
   const cleanupAnimations = () => {
@@ -87,6 +115,14 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
 
   // ✅ EXISTING EFFECT - UNCHANGED: Process transcripts into conversation turns
   useEffect(() => {
+    console.log(
+      '🔍 [RealtimeConversationPopup] Processing transcripts into turns:',
+      {
+        transcriptsCount: transcripts?.length || 0,
+        transcriptsData: transcripts,
+      }
+    );
+
     const sortedTranscripts = [...transcripts].sort(
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
     );
@@ -129,6 +165,15 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
           timestamp: message.timestamp,
         });
       }
+    });
+
+    console.log('🔍 [RealtimeConversationPopup] Generated turns:', {
+      turnsCount: turns.length,
+      turns: turns.map(turn => ({
+        id: turn.id,
+        role: turn.role,
+        messagesCount: turn.messages.length,
+      })),
     });
 
     setConversationTurns(turns);

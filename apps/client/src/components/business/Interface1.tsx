@@ -312,10 +312,23 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               {/* Column 1: Chat Popup (Left) */}
               <div className="w-full max-w-sm">
                 <ChatPopup
-                  isOpen={showConversation && isCallStarted}
+                  isOpen={showConversation}
                   onClose={() => {}}
                   layout="grid"
                 />
+                {/* ✅ DEBUG: Add logging */}
+                {(() => {
+                  console.log(
+                    '🔍 [Interface1] ChatPopup Desktop render state (SOLUTION 1):',
+                    {
+                      showConversation,
+                      isCallStarted,
+                      isOpen: showConversation, // ✅ SOLUTION 1: Simplified condition
+                      transcriptsCount: micLevel, // Using micLevel as proxy for debug
+                    }
+                  );
+                  return null;
+                })()}
               </div>
 
               {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
@@ -380,6 +393,19 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               layout="overlay" // Mobile: overlay positioning
               className="fixed bottom-0 left-0 right-0 z-40"
             />
+            {/* ✅ DEBUG: Mobile layout logging */}
+            {(() => {
+              console.log(
+                '🔍 [Interface1] ChatPopup Mobile render state (SOLUTION 1):',
+                {
+                  showConversation,
+                  isCallStarted,
+                  isOpen: showConversation, // ✅ SOLUTION 1: Already simplified
+                  layout: 'overlay',
+                }
+              );
+              return null;
+            })()}
 
             {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
             <MobileSummaryPopup />

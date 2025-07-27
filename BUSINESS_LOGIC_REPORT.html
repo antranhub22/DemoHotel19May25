@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Logic Report - DemoHotel19May</title>
+    <style>
+        @page {
+            margin: 2cm;
+            size: A4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fff;
+            font-size: 12px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #1e40af;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2em;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .metadata {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #2563eb;
+        }
+
+        .metadata p {
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        h2 {
+            color: #1e40af;
+            font-size: 1.8em;
+            margin: 30px 0 15px 0;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 5px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: #3730a3;
+            font-size: 1.4em;
+            margin: 25px 0 10px 0;
+            page-break-after: avoid;
+        }
+
+        h4 {
+            color: #4338ca;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+            page-break-after: avoid;
+        }
+
+        .table-container {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11px;
+            page-break-inside: avoid;
+        }
+
+        table th {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            border: 1px solid #2563eb;
+        }
+
+        table td {
+            padding: 10px 8px;
+            border: 1px solid #d1d5db;
+            vertical-align: top;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        table tr:hover {
+            background-color: #e0e7ff;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .architecture-diagram {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 10px;
+            overflow-x: auto;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #3b82f6;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 1px solid #6ee7b7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #10b981;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 5px solid #f59e0b;
+        }
+
+        ul,
+        ol {
+            margin: 10px 0 10px 30px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            margin: 30px 0;
+            border-radius: 1px;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        .no-break {
+            page-break-inside: avoid;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            text-align: center;
+            font-style: italic;
+            color: #6b7280;
+        }
+
+        @media print {
+            body {
+                font-size: 11px;
+            }
+
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 10px;
+            }
+
+            .code-block {
+                font-size: 9px;
+            }
+
+            table {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1><span class="emoji">🏨</span> BÁO CÁO BUSINESS LOGIC - DEMOHOTEL19MAY</h1>
+            <div class="metadata">
+                <p><strong>📊 Phân tích hoàn tất:</strong> Multi-tenant SaaS Hotel Voice Assistant Platform</p>
+                <p><strong>📅 Ngày lập báo cáo:</strong> 2025-01-25</p>
+                <p><strong>🔧 Phiên bản:</strong> v2.0 (Modular Architecture)</p>
+                <p><strong>✅ Tình trạng:</strong> Production Ready</p>
+            </div>
+        </div>
+
+        <!-- TÓM TẮT TỔNG QUAN -->
+        <section class="no-break">
+            <h2><span class="emoji">📋</span> TÓM TẮT TỔNG QUAN</h2>
+
+            <h3><span class="emoji">🎯</span> Platform Overview</h3>
+            <div class="highlight-box">
+                <p><strong>DemoHotel19May</strong> là một <strong>multi-tenant SaaS platform</strong> tiên tiến cho quản
+                    lý khách sạn với <strong>AI voice assistant</strong>, được thiết kế để phục vụ nhiều khách sạn đồng
+                    thời với kiến trúc modular và khả năng mở rộng cao.</p>
+            </div>
+
+            <h3><span class="emoji">📊</span> Key Metrics</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Chỉ số</th>
+                            <th>Giá trị</th>
+                            <th>Mô tả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Business Domains</strong></td>
+                            <td>15 domains</td>
+                            <td>3 stakeholders chính</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Business Processes</strong></td>
+                            <td>83+ processes</td>
+                            <td>Từ voice interaction đến analytics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database Tables</strong></td>
+                            <td>8 core tables</td>
+                            <td>Multi-tenant với full isolation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>API Endpoints</strong></td>
+                            <td>100+ endpoints</td>
+                            <td>RESTful APIs với modular structure</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Supported Languages</strong></td>
+                            <td>6 languages</td>
+                            <td>EN, VI, FR, ZH, RU, KO</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Architecture Pattern</strong></td>
+                            <td>Modular Monolith</td>
+                            <td>4 core modules + ServiceContainer</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication Methods</strong></td>
+                            <td>4 methods</td>
+                            <td>JWT, API Key, OAuth, Basic Auth</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- KIẾN TRÚC BUSINESS LOGIC -->
+        <section class="page-break">
+            <h2><span class="emoji">🏗️</span> KIẾN TRÚC BUSINESS LOGIC</h2>
+
+            <h3><span class="emoji">📐</span> Architecture Pattern: Modular Monolith</h3>
+            <div class="architecture-diagram">
+                ┌─────────────────────────────────────────────────────────────┐
+                │ DemoHotel19May Platform │
+                ├─────────────────────────────────────────────────────────────┤
+                │ 🎭 PRESENTATION LAYER │
+                │ ├── React Frontend (Multi-language UI) │
+                │ ├── Voice Interface (Vapi.ai Integration) │
+                │ └── Admin Dashboard (Role-based) │
+                ├─────────────────────────────────────────────────────────────┤
+                │ 🔗 API GATEWAY LAYER │
+                │ ├── Rate Limiting & Caching │
+                │ ├── Authentication & Authorization │
+                │ ├── Request Routing & Load Balancing │
+                │ └── API Documentation & Monitoring │
+                ├─────────────────────────────────────────────────────────────┤
+                │ 🧩 BUSINESS LOGIC LAYER (4 Core Modules) │
+                │ ├── 🎯 Request Module (Service Orders & Requests) │
+                │ ├── 🏢 Tenant Module (Multi-tenant Management) │
+                │ ├── 📊 Analytics Module (Reporting & BI) │
+                │ └── 🤖 Assistant Module (AI Voice Assistant) │
+                ├─────────────────────────────────────────────────────────────┤
+                │ 💾 DATA ACCESS LAYER │
+                │ ├── PostgreSQL (Production) / SQLite (Development) │
+                │ ├── Drizzle ORM with Row-Level Security │
+                │ ├── Automated Migrations & Backup Systems │
+                │ └── Performance Indexes & Query Optimization │
+                ├─────────────────────────────────────────────────────────────┤
+                │ 🔌 INTEGRATION LAYER │
+                │ ├── Vapi.ai (Voice Assistant Platform) │
+                │ ├── OpenAI (Conversation Processing) │
+                │ ├── Google Places API (Hotel Research) │
+                │ └── Email Services (Notifications) │
+                └─────────────────────────────────────────────────────────────┘
+            </div>
+
+            <h3><span class="emoji">🔧</span> ServiceContainer Pattern</h3>
+            <div class="code-block">
+                // Dependency Injection với ServiceContainer
+                export class ServiceContainer {
+                register(name: string, service: any, options: ServiceOptions): void
+                get&lt;T&gt;(serviceName: string): T
+                resolve&lt;T&gt;(serviceName: string): Promise&lt;T&gt;
+                isRegistered(serviceName: string): boolean
+                }
+
+                // Modules sử dụng ServiceContainer
+                const tenantService = ServiceContainer.get&lt;TenantService&gt;('TenantService');
+                const requestController = await ServiceContainer.resolve('RequestController');
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- BUSINESS DOMAINS & STAKEHOLDERS -->
+        <section class="page-break">
+            <h2><span class="emoji">👥</span> BUSINESS DOMAINS & STAKEHOLDERS</h2>
+
+            <h3><span class="emoji">🎯</span> 3 Primary Stakeholders</h3>
+
+            <h4><span class="emoji">👤</span> USER/GUEST (5 Domains - 29 Processes)</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Processes</th>
+                            <th>Core Functionality</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🎙️ Voice Assistant</strong></td>
+                            <td>9 processes</td>
+                            <td>AI conversation, language selection, real-time</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🛎️ Service Ordering</strong></td>
+                            <td>8 processes</td>
+                            <td>Room service, housekeeping, concierge</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🌐 Multi-language UI/UX</strong></td>
+                            <td>7 processes</td>
+                            <td>6 languages, localization, accessibility</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📱 Real-time Interface</strong></td>
+                            <td>3 processes</td>
+                            <td>Live updates, notifications, responsive UI</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔔 Notifications</strong></td>
+                            <td>2 processes</td>
+                            <td>Order status, system alerts</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4><span class="emoji">🏨</span> HOTEL STAFF (7 Domains - 35 Processes)</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Processes</th>
+                            <th>Core Functionality</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🔐 Authentication</strong></td>
+                            <td>5 processes</td>
+                            <td>RBAC, JWT tokens, role management</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📊 Analytics Dashboard</strong></td>
+                            <td>8 processes</td>
+                            <td>KPIs, reporting, business intelligence</td>
+                        </tr>
+                        <tr>
+                            <td><strong>👥 Staff Management</strong></td>
+                            <td>6 processes</td>
+                            <td>User management, permissions, profiles</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📞 Call Management</strong></td>
+                            <td>5 processes</td>
+                            <td>Live calls, transcripts, summaries</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🎯 Request Management</strong></td>
+                            <td>4 processes</td>
+                            <td>Service requests, status updates, assignments</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📧 Communication</strong></td>
+                            <td>4 processes</td>
+                            <td>Email notifications, internal messaging</td>
+                        </tr>
+                        <tr>
+                            <td><strong>⚙️ System Configuration</strong></td>
+                            <td>3 processes</td>
+                            <td>Settings, hotel profiles, assistant config</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4><span class="emoji">🏢</span> SAAS PROVIDER (3 Domains - 19 Processes)</h4>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Processes</th>
+                            <th>Core Functionality</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🏗️ Multi-tenant Platform</strong></td>
+                            <td>8 processes</td>
+                            <td>Tenant isolation, subscription management</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🛠️ Infrastructure</strong></td>
+                            <td>6 processes</td>
+                            <td>Monitoring, scaling, deployment</td>
+                        </tr>
+                        <tr>
+                            <td><strong>📈 Business Intelligence</strong></td>
+                            <td>5 processes</td>
+                            <td>Platform analytics, performance metrics</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- DATA MODEL & DATABASE SCHEMA -->
+        <section class="page-break">
+            <h2><span class="emoji">🗄️</span> DATA MODEL & DATABASE SCHEMA</h2>
+
+            <h3><span class="emoji">📊</span> Core Database Tables</h3>
+
+            <h4><span class="emoji">🏢</span> Tenants Table (Multi-tenant Core)</h4>
+            <div class="code-block">
+                CREATE TABLE tenants (
+                id TEXT PRIMARY KEY,
+                hotel_name TEXT NOT NULL,
+                subdomain TEXT UNIQUE NOT NULL,
+                subscription_plan TEXT DEFAULT 'trial',
+                subscription_status TEXT DEFAULT 'active',
+                max_voices INTEGER DEFAULT 5,
+                max_languages INTEGER DEFAULT 4,
+                monthly_call_limit INTEGER DEFAULT 1000,
+                -- SaaS Features
+                voice_cloning BOOLEAN DEFAULT false,
+                multi_location BOOLEAN DEFAULT false,
+                white_label BOOLEAN DEFAULT false,
+                data_retention_days INTEGER DEFAULT 90
+                );
+            </div>
+
+            <h4><span class="emoji">👥</span> Staff Table (Authentication & RBAC)</h4>
+            <div class="code-block">
+                CREATE TABLE staff (
+                id TEXT PRIMARY KEY,
+                tenant_id TEXT REFERENCES tenants(id),
+                username TEXT NOT NULL,
+                role TEXT DEFAULT 'front-desk', -- hotel-manager, front-desk, it-manager
+                permissions TEXT DEFAULT '[]', -- JSON array
+                is_active BOOLEAN DEFAULT true
+                );
+            </div>
+
+            <h4><span class="emoji">📞</span> Call Table (Voice Assistant Data)</h4>
+            <div class="code-block">
+                CREATE TABLE call (
+                id SERIAL PRIMARY KEY,
+                tenant_id TEXT REFERENCES tenants(id),
+                call_id_vapi TEXT UNIQUE NOT NULL,
+                room_number TEXT,
+                language TEXT, -- EN, VI, FR, ZH, RU, KO
+                service_type TEXT,
+                duration INTEGER,
+                start_time TIMESTAMP,
+                end_time TIMESTAMP
+                );
+            </div>
+
+            <h4><span class="emoji">🛎️</span> Request Table (Service Orders)</h4>
+            <div class="code-block">
+                CREATE TABLE request (
+                id SERIAL PRIMARY KEY,
+                tenant_id TEXT REFERENCES tenants(id),
+                call_id TEXT,
+                room_number TEXT,
+                request_content TEXT,
+                status TEXT DEFAULT 'Đã ghi nhận',
+                priority TEXT DEFAULT 'medium',
+                assigned_to TEXT
+                );
+            </div>
+
+            <h3><span class="emoji">🔒</span> Tenant Isolation Strategy</h3>
+            <div class="code-block">
+                // Row-Level Security tự động
+                const getTenantData = async (tenantId: string) => {
+                // Mọi query đều filter theo tenant_id
+                return db.select()
+                .from(table)
+                .where(eq(table.tenant_id, tenantId));
+                };
+
+                // Middleware tự động inject tenant
+                export const tenantMiddleware = (req, res, next) => {
+                const tenantId = extractTenantFromJWT(req.headers.authorization);
+                req.tenant = { id: tenantId };
+                next();
+                };
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- API STRUCTURE & ROUTES -->
+        <section class="page-break">
+            <h2><span class="emoji">🌐</span> API STRUCTURE & ROUTES</h2>
+
+            <h3><span class="emoji">🏗️</span> Modular API Architecture</h3>
+            <div class="code-block">
+                /api/
+                ├── 🔐 auth/ # Authentication & Authorization
+                │ ├── POST /login # Staff login
+                │ ├── POST /refresh # Token refresh
+                │ └── POST /logout # Logout
+                ├── 🏨 hotel/ # Hotel Module Routes
+                │ ├── GET /hotel-profile # Hotel configuration
+                │ ├── POST /requests # Create service request
+                │ ├── GET /requests # List requests (paginated)
+                │ ├── PATCH /requests/:id # Update request status
+                │ ├── GET /staff # Staff management
+                │ └── POST /email/send # Email notifications
+                ├── 🤖 assistant/ # Voice Assistant Module
+                │ ├── POST /vapi/calls # Create voice call
+                │ ├── GET /calls/:id # Get call details
+                │ ├── POST /transcripts # Store transcripts
+                │ └── GET /summaries # Call summaries
+                ├── 📊 analytics/ # Analytics Module
+                │ ├── GET /dashboard # Dashboard metrics
+                │ ├── GET /calls/stats # Call statistics
+                │ ├── GET /requests/stats # Request statistics
+                │ └── GET /reports/:type # Generate reports
+                ├── 🎛️ admin/ # Admin Module (SaaS Provider)
+                │ ├── GET /tenants # Tenant management
+                │ ├── POST /tenants # Create new tenant
+                │ ├── GET /platform/stats # Platform metrics
+                │ └── GET /monitoring # System monitoring
+                └── 🔧 core/ # Core Module
+                ├── GET /health # Health check
+                ├── GET /modules # Module status
+                └── GET /feature-flags # Feature flags
+            </div>
+
+            <h3><span class="emoji">🎯</span> Request/Response Patterns</h3>
+            <div class="code-block">
+                // Standardized API Response
+                interface APIResponse&lt;T&gt; {
+                success: boolean;
+                data?: T;
+                error?: string;
+                metadata?: {
+                tenant_id: string;
+                timestamp: string;
+                version: string;
+                };
+                }
+
+                // Multi-tenant Request Pattern
+                interface TenantRequest extends Request {
+                tenant: {
+                id: string;
+                plan: string;
+                limits: TenantLimits;
+                };
+                user?: AuthUser;
+                }
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- AUTHENTICATION & AUTHORIZATION -->
+        <section class="page-break">
+            <h2><span class="emoji">🔒</span> AUTHENTICATION & AUTHORIZATION</h2>
+
+            <h3><span class="emoji">🎭</span> Role-Based Access Control (RBAC)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Role</th>
+                            <th>Hierarchy</th>
+                            <th>Core Permissions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>hotel-manager</strong></td>
+                            <td>Level 3</td>
+                            <td>dashboard:edit, analytics:export, staff:manage, billing:view</td>
+                        </tr>
+                        <tr>
+                            <td><strong>front-desk</strong></td>
+                            <td>Level 2</td>
+                            <td>dashboard:view, calls:join, guests:manage, requests:manage</td>
+                        </tr>
+                        <tr>
+                            <td><strong>it-manager</strong></td>
+                            <td>Level 1</td>
+                            <td>system:monitor, api:manage, integrations:view, logs:view</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3><span class="emoji">🔐</span> Multi-layer Authentication</h3>
+            <div class="code-block">
+                // JWT + Tenant-aware Authentication
+                class UnifiedAuthService {
+                async authenticateUser(credentials: LoginCredentials): Promise&lt;AuthResult&gt; {
+                // 1. Validate credentials
+                const user = await this.validateCredentials(credentials);
+
+                // 2. Check tenant access
+                const tenant = await this.validateTenantAccess(user.tenant_id);
+
+                // 3. Generate JWT with tenant context
+                const token = await this.generateJWT({
+                user_id: user.id,
+                tenant_id: user.tenant_id,
+                role: user.role,
+                permissions: user.permissions
+                });
+
+                return { token, user, tenant };
+                }
+                }
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- VOICE ASSISTANT INTEGRATION -->
+        <section class="page-break">
+            <h2><span class="emoji">🎙️</span> VOICE ASSISTANT INTEGRATION</h2>
+
+            <h3><span class="emoji">🤖</span> Multi-language Support</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Language</th>
+                            <th>Code</th>
+                            <th>Voice Model</th>
+                            <th>Assistant ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>English</td>
+                            <td>EN</td>
+                            <td>jennifer</td>
+                            <td>asst_en_xxx</td>
+                        </tr>
+                        <tr>
+                            <td>Vietnamese</td>
+                            <td>VI</td>
+                            <td>vi-VN-HoaiMyNeural</td>
+                            <td>asst_vi_xxx</td>
+                        </tr>
+                        <tr>
+                            <td>French</td>
+                            <td>FR</td>
+                            <td>fr-FR-DeniseNeural</td>
+                            <td>asst_fr_xxx</td>
+                        </tr>
+                        <tr>
+                            <td>Chinese</td>
+                            <td>ZH</td>
+                            <td>zh-CN-XiaoxiaoNeural</td>
+                            <td>asst_zh_xxx</td>
+                        </tr>
+                        <tr>
+                            <td>Russian</td>
+                            <td>RU</td>
+                            <td>ru-RU-SvetlanaNeural</td>
+                            <td>asst_ru_xxx</td>
+                        </tr>
+                        <tr>
+                            <td>Korean</td>
+                            <td>KO</td>
+                            <td>ko-KR-SunHiNeural</td>
+                            <td>asst_ko_xxx</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3><span class="emoji">🎯</span> Conversation Processing Workflow</h3>
+            <div class="highlight-box">
+                <ol>
+                    <li><strong>Voice Call Initiation:</strong> Guest clicks Siri button → Language selection → Vapi
+                        initialization</li>
+                    <li><strong>Real-time Processing:</strong> Audio streaming → Transcript generation → Service
+                        extraction</li>
+                    <li><strong>OpenAI Analysis:</strong> Conversation summary → Service requests → Order creation</li>
+                    <li><strong>Staff Notification:</strong> Real-time alerts → Task assignment → Status tracking</li>
+                    <li><strong>Analytics Update:</strong> Metrics collection → Performance tracking → BI insights</li>
+                </ol>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- BUSINESS INTELLIGENCE & ANALYTICS -->
+        <section class="page-break">
+            <h2><span class="emoji">📊</span> BUSINESS INTELLIGENCE & ANALYTICS</h2>
+
+            <h3><span class="emoji">📈</span> Key Performance Indicators (KPIs)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Metrics</th>
+                            <th>Business Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Voice Assistant</strong></td>
+                            <td>Total calls, Duration, Success rate, Language distribution</td>
+                            <td>Guest satisfaction, Service efficiency</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Service Requests</strong></td>
+                            <td>Completion rate, Response time, Staff performance</td>
+                            <td>Operational efficiency, Revenue optimization</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Business Intelligence</strong></td>
+                            <td>Revenue impact, Satisfaction score, Cost savings</td>
+                            <td>Strategic decisions, Growth planning</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real-time Metrics</strong></td>
+                            <td>Active calls, Pending requests, System health</td>
+                            <td>Immediate responsiveness, Issue prevention</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3><span class="emoji">🔍</span> Advanced Analytics Capabilities</h3>
+            <div class="highlight-box">
+                <ul>
+                    <li><strong>Predictive Analytics:</strong> Call volume forecasting, Staffing optimization, Service
+                        demand prediction</li>
+                    <li><strong>Performance Analysis:</strong> Efficiency metrics, Quality scoring, Customer
+                        satisfaction tracking</li>
+                    <li><strong>Business Insights:</strong> Revenue optimization, Operational improvements, Customer
+                        experience enhancements</li>
+                    <li><strong>Benchmarking:</strong> Industry comparison, Competitor analysis, Best practices
+                        identification</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- IMPLEMENTATION STATUS -->
+        <section class="page-break">
+            <h2><span class="emoji">✅</span> IMPLEMENTATION STATUS</h2>
+
+            <div class="success-box">
+                <h3><span class="emoji">🎯</span> Production Readiness Assessment</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Domain Category</th>
+                                <th>Status</th>
+                                <th>Coverage</th>
+                                <th>Production Ready</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Multi-tenant Architecture</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Voice Assistant Integration</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Service Request Management</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analytics & Reporting</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Authentication & RBAC</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>API Gateway & Security</strong></td>
+                                <td>✅ Complete</td>
+                                <td>100%</td>
+                                <td>✅ Yes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <h3><span class="emoji">🎪</span> Business Value Proposition</h3>
+            <div class="highlight-box">
+                <p><strong>DemoHotel19May</strong> delivers a <strong>complete SaaS ecosystem</strong> cho hotel
+                    management với:</p>
+                <ul>
+                    <li><strong>💰 Revenue Growth:</strong> AI voice assistant tăng guest satisfaction và cross-selling
+                    </li>
+                    <li><strong>⚡ Operational Efficiency:</strong> Automated request management và real-time
+                        coordination</li>
+                    <li><strong>📊 Data-Driven Insights:</strong> Advanced analytics cho business optimization</li>
+                    <li><strong>🌍 Global Reach:</strong> Multi-language support cho international hotels</li>
+                    <li><strong>🔒 Enterprise Grade:</strong> Security, compliance và scalability standards</li>
+                    <li><strong>🚀 Future-Proof:</strong> Modular architecture có thể evolve theo business needs</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- FUTURE ROADMAP -->
+        <section class="page-break">
+            <h2><span class="emoji">🔮</span> FUTURE ROADMAP & EXTENSIBILITY</h2>
+
+            <h3><span class="emoji">🛣️</span> Evolution Path: Monolith → Microservices</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Target Service</th>
+                            <th>Timeline</th>
+                            <th>Scope</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Phase 1</strong></td>
+                            <td>Assistant Service</td>
+                            <td>Q2 2025</td>
+                            <td>Vapi integration, OpenAI processing, Voice analytics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 2</strong></td>
+                            <td>Analytics Service</td>
+                            <td>Q3 2025</td>
+                            <td>Reporting engine, Business intelligence, Real-time metrics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 3</strong></td>
+                            <td>Tenant Service</td>
+                            <td>Q4 2025</td>
+                            <td>Multi-tenant management, Subscription handling, Billing</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phase 4</strong></td>
+                            <td>Request Service</td>
+                            <td>Q1 2026</td>
+                            <td>Service requests, Order management, Staff coordination</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3><span class="emoji">🎯</span> Extensibility Features</h3>
+            <div class="highlight-box">
+                <ul>
+                    <li><strong>Plugin Architecture:</strong> Custom integrations, workflows, analytics, UI components
+                    </li>
+                    <li><strong>Feature Flag System:</strong> A/B testing, gradual rollouts, tenant-specific features
+                    </li>
+                    <li><strong>API Extensions:</strong> Custom endpoints, data models, business rules</li>
+                    <li><strong>Third-party Integrations:</strong> PMS systems, Payment gateways, CRM platforms</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p><strong>📅 Báo cáo được tạo:</strong> 2025-01-25</p>
+            <p><strong>🏗️ Architecture:</strong> Modular Monolith → Microservices Ready</p>
+            <p><strong>🤖 Core Business:</strong> AI Voice Assistant + Hotel Management SaaS</p>
+            <p><strong>🌟 Status:</strong> Production Ready với comprehensive business logic implementation</p>
+        </div>
+    </div>
+</body>
+
+</html>

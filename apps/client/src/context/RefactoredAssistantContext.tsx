@@ -163,6 +163,11 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           }
         );
 
+        // ✅ FIXED: Clear previous data BEFORE starting new call to prevent race condition
+        transcript.clearTranscripts();
+        transcript.clearModelOutput();
+        order.setEmailSentForCurrentSession(false);
+
         // Note: VapiContextSimple handles initialization automatically
 
         // Start call with language (VapiContextSimple handles assistant ID selection)
@@ -170,11 +175,6 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
         // Start call timer
         await call.startCall();
-
-        // Clear previous data
-        transcript.clearTranscripts();
-        transcript.clearModelOutput();
-        order.setEmailSentForCurrentSession(false);
 
         // ✅ FIXED: Update language context if different language was used
         if (targetLanguage && targetLanguage !== language.language) {

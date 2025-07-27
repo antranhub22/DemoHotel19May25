@@ -161,6 +161,15 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
             );
           }
 
+          // ✅ DEBUG: Enhanced logging for transcript handling
+          console.log('📝 [VapiProvider] Received transcript message:', {
+            type: message.type,
+            role: message.role,
+            transcript: message.transcript?.substring(0, 50) + '...',
+            callId,
+            timestamp: new Date().toISOString()
+          });
+
           // Update call details with transcript
           setCallDetails(
             prev =>
@@ -187,12 +196,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
           );
 
           // ✅ FIX: Use consistent call ID and proper tenant ID
+          console.log('📝 [VapiProvider] About to call addTranscript:', {
+            callId,
+            content: message.transcript?.substring(0, 50) + '...',
+            role: message.role,
+            tenantId: getTenantId()
+          });
+
           addTranscript({
             callId: callId, // ✅ FIXED: Use consistent call ID
             content: message.transcript,
             role: message.role as 'user' | 'assistant',
             tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
           });
+
+          console.log('✅ [VapiProvider] addTranscript called successfully');
         }
 
         if (message.type === 'function-call') {

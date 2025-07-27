@@ -1,7 +1,7 @@
-import { X } from 'lucide-react';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { useAssistant } from '@/context';
 import { t } from '@/i18n';
+import { X } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
@@ -37,6 +37,21 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
 
+  // ✅ DEBUG: Add logging to track isOpen and transcripts
+  useEffect(() => {
+    console.log('🔍 [ChatPopup] Props and state changed:', {
+      isOpen,
+      layout,
+      transcriptsCount: transcripts?.length || 0,
+      transcriptsData:
+        transcripts?.map(t => ({
+          id: t.id,
+          role: t.role,
+          content: t.content?.substring(0, 30) + '...',
+        })) || [],
+    });
+  }, [isOpen, layout, transcripts]);
+
   // ✅ FIX: Track animation state to prevent re-animation on re-renders
   const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -45,6 +60,18 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
   const [conversationTurns, setConversationTurns] = useState<
     ConversationTurn[]
   >([]);
+
+  // ✅ DEBUG: Add logging to track conversationTurns
+  useEffect(() => {
+    console.log('🔍 [ChatPopup] ConversationTurns changed:', {
+      count: conversationTurns.length,
+      turns: conversationTurns.map(turn => ({
+        id: turn.id,
+        role: turn.role,
+        messagesCount: turn.messages.length,
+      })),
+    });
+  }, [conversationTurns]);
 
   // ✅ FIX: Reset animation state when popup opens/closes
   useEffect(() => {

@@ -94,6 +94,18 @@ export const useConversationState = ({
     const shouldShowConversation =
       isActive || transcripts.length > 0 || manualCallStarted;
 
+    // ✅ ENHANCED DEBUG: More detailed logging
+    console.log('🔄 [useConversationState] Evaluating showConversation (DETAILED):', {
+      callDuration,
+      isActive,
+      transcriptsCount: transcripts.length,
+      transcriptsData: transcripts.map(t => ({ id: t.id, role: t.role, content: t.content?.substring(0, 30) })),
+      manualCallStarted,
+      currentShowConversation: showConversation,
+      shouldShowConversation,
+      willUpdate: showConversation !== shouldShowConversation
+    });
+
     logger.debug(
       '🔄 [useConversationState] Evaluating showConversation:',
       'Component',
@@ -108,12 +120,20 @@ export const useConversationState = ({
 
     // ✅ OPTIMIZATION: Only update if value actually changes
     if (showConversation !== shouldShowConversation) {
+      console.log(
+        `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`,
+      );
+
       logger.debug(
         `🔄 [useConversationState] Updating showConversation: ${showConversation} → ${shouldShowConversation}`,
         'Component'
       );
       setShowConversation(shouldShowConversation);
     } else {
+      console.log(
+        '✅ [useConversationState] showConversation unchanged - no re-render',
+      );
+
       logger.debug(
         '✅ [useConversationState] showConversation unchanged - no re-render',
         'Component'
