@@ -2,11 +2,11 @@
 
 // Type declaration for import.meta
 
-import React, { useEffect, useState } from 'react';
 import { useAssistant } from '@/context';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { designSystem } from '@/styles/designSystem';
 import { logger } from '@shared/utils/logger';
+import React, { useEffect, useState } from 'react';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import SiriCallButton from './SiriCallButton';
 
@@ -67,8 +67,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   onCallStart,
   onCallEnd,
   onCancel,
-  onConfirm,
-  _showingSummary = false, // ✅ NEW: Default to false
+  onConfirm, // ✅ NEW: Default to false
 }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
@@ -164,7 +163,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       language: lang,
       timestamp: new Date().toISOString(),
       onCallStartFunction: !!onCallStart,
-      onCallStartType: typeof onCallStart
+      onCallStartType: typeof onCallStart,
     });
 
     // ✅ IMPROVED: Better error handling for call start
@@ -172,7 +171,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       // ✅ NEW: Pre-call debug
       console.log('🚀 [DEBUG] About to call onCallStart:', {
         language: lang,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       await onCallStart(lang);
@@ -180,7 +179,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       // ✅ NEW: Post-call success debug
       console.log('✅ [DEBUG] onCallStart completed successfully:', {
         language: lang,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       logger.debug(
@@ -269,31 +268,6 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     }
   };
 
-  const _handleCancel = () => {
-    logger.debug('❌ [SiriButtonContainer] Cancelling call', 'Component');
-
-    // ✅ IMPROVED: Better error handling for cancel
-    try {
-      onCancel?.();
-      logger.debug(
-        '✅ [SiriButtonContainer] Call cancelled successfully',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [SiriButtonContainer] Error cancelling call:',
-        'Component',
-        error
-      );
-
-      // ✅ IMPROVED: Even if cancel fails, still show success to user
-      logger.debug(
-        '⚠️ [SiriButtonContainer] Cancel had errors but proceeding normally',
-        'Component'
-      );
-    }
-  };
-
   const handleConfirm = () => {
     logger.debug('✅ [SiriButtonContainer] Confirming call', 'Component');
 
@@ -327,7 +301,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       className="relative flex flex-col items-center justify-center voice-button-container"
       style={{
         marginBottom: designSystem.spacing.xl,
-        zIndex: 9999, // Ensure highest priority
+        zIndex: 10000, // 🔧 FIX: Ensure highest priority above ChatPopup (35)
         pointerEvents: 'auto',
         // 🔧 HYBRID FIX: Fixed height to prevent layout shift
         height: '400px', // Fixed height container

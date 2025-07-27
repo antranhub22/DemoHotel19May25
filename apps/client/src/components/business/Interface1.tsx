@@ -391,7 +391,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               isOpen={showConversation}
               onClose={() => {}} // Will be handled by popup context
               layout="overlay" // Mobile: overlay positioning
-              className="fixed bottom-0 left-0 right-0 z-40"
+              className="fixed bottom-0 left-0 right-0 z-30"
             />
             {/* ✅ DEBUG: Mobile layout logging */}
             {(() => {

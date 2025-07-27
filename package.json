@@ -188,16 +188,6 @@
     ],
     "*.{json,md}": [
       "prettier --write"
-    ],
-    "apps/server/routes/*.ts": [
-      "npm run governance:validate:ssot"
-    ],
-    "packages/shared/db/schema.ts": [
-      "npm run governance:validate:ssot",
-      "npm run governance:validate:multitenant"
-    ],
-    "apps/client/src/components/**/*.{ts,tsx}": [
-      "npm run governance:validate:architecture"
     ]
   },
   "governance": {

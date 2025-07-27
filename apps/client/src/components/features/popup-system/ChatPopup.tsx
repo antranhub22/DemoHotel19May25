@@ -319,7 +319,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
           bottom: '40px', // Minimal space above bottom
           left: 0,
           right: 0,
-          zIndex: 40, // Lower than SiriButton canvas
+          zIndex: 35, // 🔧 FIX: Lower than SiriButton (9999) to avoid conflict
           pointerEvents: 'none', // Allow click-through container
           // ✅ FIX: Prevent mobile viewport issues
           transform: 'translateZ(0)', // Force layer creation
@@ -332,6 +332,9 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
             // ✅ FIX: Ensure content doesn't shift
             position: 'relative',
             transform: 'translateZ(0)',
+            // 🔧 FIX: Limit max height to prevent overlap with SiriButton
+            maxHeight: '25vh', // Prevent covering center area where SiriButton is
+            overflow: 'hidden',
           }}
         >
           <PopupContent />
