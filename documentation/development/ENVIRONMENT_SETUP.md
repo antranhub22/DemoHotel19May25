@@ -169,8 +169,8 @@ REDIS_PASSWORD=your-redis-password
 1. Visit [Vapi.ai](https://vapi.ai/)
 2. Create account and subscribe to plan
 3. Go to Dashboard
-4. Copy Public Key (starts with `pk_`) for `VITE_VAPI_PUBLIC_KEY`
-5. Copy Assistant ID (starts with `asst_`) for `VITE_VAPI_ASSISTANT_ID`
+4. Copy Public Key for `VITE_VAPI_PUBLIC_KEY`
+5. Copy Assistant ID for `VITE_VAPI_ASSISTANT_ID`
 6. Copy API Key for `VAPI_API_KEY` (for dynamic creation)
 
 ### 3. Google Places API Key
@@ -315,8 +315,8 @@ npm run env:validate
 
 **3. "Vapi connection failed"**
 
-- Verify public key starts with `pk_`
-- Check assistant ID starts with `asst_`
+- Verify public key format is valid
+- Check assistant ID format is valid
 - Ensure API key is valid
 
 **4. "Google Places API error"**

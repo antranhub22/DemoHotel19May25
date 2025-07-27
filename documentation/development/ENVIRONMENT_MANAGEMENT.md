@@ -328,7 +328,7 @@ npm run env:development
 #### **2. Invalid API key format**
 
 ```bash
-Error: VITE_VAPI_PUBLIC_KEY should start with 'pk_'
+Error: VITE_VAPI_PUBLIC_KEY format is invalid
 
 # Fix: Check your Vapi dashboard for correct key format
 ```

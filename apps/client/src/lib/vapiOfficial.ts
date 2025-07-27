@@ -151,8 +151,8 @@ export const createVapiClient = (config: VapiOfficialConfig): VapiOfficial => {
 // Example usage:
 /*
 const vapiClient = createVapiClient({
-  publicKey: 'pk_your_public_key_here',
-  assistantId: 'asst_your_assistant_id_here',
+  publicKey: 'your_public_key_here',
+  assistantId: 'your_assistant_id_here',
   onCallStart: () => console.log('Call started!'),
   onCallEnd: () => console.log('Call ended!'),
   onMessage: (message) => {
