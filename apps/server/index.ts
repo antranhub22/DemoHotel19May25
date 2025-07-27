@@ -67,6 +67,8 @@ app.use(
           'https://*.vapi.ai',
           'https://cdn.jsdelivr.net',
           'https://unpkg.com',
+          'https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/',
+          'https://unpkg.com/@vapi-ai/web@latest/dist/',
         ],
         connectSrc: [
           "'self'",
