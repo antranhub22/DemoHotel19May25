@@ -1,0 +1,298 @@
+{
+  "timestamp": "2025-07-28T09:01:47.309Z",
+  "environment": "development",
+  "scope": "smoke",
+  "testResults": {
+    "summary": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 48,
+      "coverage": 100
+    },
+    "results": [
+      {
+        "testSuite": "Quick Smoke Test",
+        "testCase": "API Health Check",
+        "status": "passed",
+        "duration": 39,
+        "response": {
+          "success": true,
+          "data": {
+            "status": "healthy",
+            "version": {
+              "requested": "v2.2",
+              "supported": true
+            },
+            "features": ["CI Automation", "Quality Gates"],
+            "timestamp": "2025-07-28T09:01:47.247Z"
+          }
+        },
+        "timestamp": "2025-07-28T09:01:47.261Z",
+        "version": "v2.2",
+        "metadata": {
+          "statusCode": 200,
+          "statusMatch": true,
+          "customValidationResult": true,
+          "responseMatch": true,
+          "endpoint": "/api/health/versioned",
+          "method": "GET",
+          "tags": ["health"],
+          "category": "integration"
+        }
+      },
+      {
+        "testSuite": "Quick Smoke Test",
+        "testCase": "Version Detection",
+        "status": "passed",
+        "duration": 4,
+        "response": {
+          "success": true,
+          "data": {
+            "version": {
+              "version": "v2.2",
+              "status": "stable"
+            },
+            "client": {
+              "platform": "ci-test"
+            }
+          }
+        },
+        "timestamp": "2025-07-28T09:01:47.265Z",
+        "version": "v2.2",
+        "metadata": {
+          "statusCode": 200,
+          "statusMatch": true,
+          "customValidationResult": {
+            "version": "v2.2",
+            "status": "stable"
+          },
+          "responseMatch": true,
+          "endpoint": "/api/version/current",
+          "method": "GET",
+          "tags": ["version"],
+          "category": "integration"
+        }
+      },
+      {
+        "testSuite": "Quick Smoke Test",
+        "testCase": "Basic Call List",
+        "status": "passed",
+        "duration": 5,
+        "response": {
+          "success": true,
+          "data": [
+            {
+              "id": "test-call-1",
+              "roomNumber": "101",
+              "duration": 300
+            }
+          ],
+          "meta": {
+            "pagination": {
+              "page": 1,
+              "limit": 20,
+              "total": 1
+            },
+            "apiVersion": "v2.2"
+          }
+        },
+        "timestamp": "2025-07-28T09:01:47.270Z",
+        "version": "v2.2",
+        "metadata": {
+          "statusCode": 200,
+          "statusMatch": true,
+          "customValidationResult": true,
+          "responseMatch": true,
+          "endpoint": "/api/calls",
+          "method": "GET",
+          "tags": ["calls"],
+          "category": "integration"
+        }
+      }
+    ],
+    "performance": {
+      "averageResponseTime": 16,
+      "slowestEndpoint": "",
+      "fastestEndpoint": "",
+      "timeouts": 0
+    },
+    "versions": {
+      "tested": ["v2.2"],
+      "compatibility": {
+        "v2.2": true
+      }
+    },
+    "categories": {
+      "smoke": {
+        "passed": 3,
+        "failed": 0,
+        "total": 3
+      }
+    }
+  },
+  "qualityGate": {
+    "passed": true,
+    "score": 90,
+    "evaluation": {
+      "totalRules": 7,
+      "passedRules": 7,
+      "failedRules": 0,
+      "criticalFailures": 0
+    },
+    "ruleResults": [
+      {
+        "rule": {
+          "id": "smoke-tests-pass",
+          "name": "Smoke Tests Must Pass",
+          "description": "All smoke tests must pass for basic functionality validation",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Smoke tests failed - basic functionality is broken",
+          "recommendations": [
+            "Check API endpoints for basic functionality",
+            "Verify database connectivity",
+            "Review authentication mechanisms"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Smoke Tests Must Pass: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "integration-pass-rate",
+          "name": "Integration Test Pass Rate",
+          "description": "Integration tests must have at least 95% pass rate",
+          "type": "threshold",
+          "severity": "high",
+          "errorMessage": "Integration test pass rate below minimum threshold",
+          "recommendations": [
+            "Review failed integration tests",
+            "Check API endpoint implementations",
+            "Verify database schema consistency"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Integration Test Pass Rate: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "performance-thresholds",
+          "name": "Performance Thresholds",
+          "description": "API endpoints must meet performance requirements",
+          "type": "threshold",
+          "severity": "high",
+          "errorMessage": "Performance thresholds exceeded",
+          "recommendations": [
+            "Optimize slow API endpoints",
+            "Review database query performance",
+            "Consider implementing caching",
+            "Analyze resource usage patterns"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Performance Thresholds: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "version-compatibility",
+          "name": "Version Compatibility",
+          "description": "All supported API versions must remain compatible",
+          "type": "mandatory",
+          "severity": "high",
+          "errorMessage": "Version compatibility broken",
+          "recommendations": [
+            "Review API changes for breaking modifications",
+            "Update version compatibility documentation",
+            "Consider deprecation warnings for older versions"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Version Compatibility: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "error-rate-threshold",
+          "name": "Error Rate Threshold",
+          "description": "Overall test error rate must be below 5%",
+          "type": "threshold",
+          "severity": "medium",
+          "errorMessage": "Test error rate exceeds acceptable threshold",
+          "recommendations": [
+            "Investigate and fix failing tests",
+            "Review test data consistency",
+            "Check environment configuration"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Error Rate Threshold: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "critical-endpoints",
+          "name": "Critical Endpoints",
+          "description": "Critical Guest Journey endpoints must be functional",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Critical Guest Journey endpoints failing",
+          "recommendations": [
+            "Prioritize fixing guest authentication issues",
+            "Ensure voice call functionality is operational",
+            "Verify transcript processing is working"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Critical Endpoints: Passed",
+        "impact": 0
+      },
+      {
+        "rule": {
+          "id": "security-validation",
+          "name": "Security Validation",
+          "description": "Security-related tests must pass",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Security validation failed",
+          "recommendations": [
+            "Review authentication mechanisms",
+            "Check input validation functions",
+            "Verify authorization controls",
+            "Audit security-related code changes"
+          ]
+        },
+        "passed": true,
+        "message": "✅ Security Validation: Passed",
+        "impact": 0
+      }
+    ],
+    "deployment": {
+      "allowed": true,
+      "reason": "All quality gate criteria met"
+    },
+    "recommendations": [],
+    "summary": "Quality Gate PASSED: 7/7 rules passed, Score: 90%. All quality gate criteria met",
+    "timestamp": "2025-07-28T09:01:47.273Z"
+  },
+  "ci": {
+    "config": {
+      "environment": "development",
+      "testScope": "smoke",
+      "parallel": true,
+      "maxRetries": 2,
+      "timeout": 30000,
+      "outputFormats": ["json", "html"],
+      "qualityGateEnabled": true,
+      "blockOnFailure": true,
+      "notifications": {}
+    },
+    "buildInfo": {
+      "pr": null
+    }
+  }
+}

@@ -1,0 +1,263 @@
+{
+  "qualityGate": {
+    "config": {
+      "name": "Development Quality Gate",
+      "description": "Quality standards for development environment",
+      "enabled": true,
+      "thresholds": {
+        "minimumPassRate": 90,
+        "maximumFailureRate": 10,
+        "minimumCoverage": 70,
+        "maximumResponseTime": 1000,
+        "minimumPerformanceScore": 80,
+        "requiredTestCategories": ["integration"],
+        "blockedOnFailure": false
+      },
+      "rules": [
+        {
+          "id": "smoke-tests-pass",
+          "name": "Smoke Tests Must Pass",
+          "description": "All smoke tests must pass for basic functionality validation",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Smoke tests failed - basic functionality is broken",
+          "recommendations": [
+            "Check API endpoints for basic functionality",
+            "Verify database connectivity",
+            "Review authentication mechanisms"
+          ]
+        },
+        {
+          "id": "integration-pass-rate",
+          "name": "Integration Test Pass Rate",
+          "description": "Integration tests must have at least 95% pass rate",
+          "type": "threshold",
+          "severity": "high",
+          "errorMessage": "Integration test pass rate below minimum threshold",
+          "recommendations": [
+            "Review failed integration tests",
+            "Check API endpoint implementations",
+            "Verify database schema consistency"
+          ]
+        },
+        {
+          "id": "performance-thresholds",
+          "name": "Performance Thresholds",
+          "description": "API endpoints must meet performance requirements",
+          "type": "threshold",
+          "severity": "high",
+          "errorMessage": "Performance thresholds exceeded",
+          "recommendations": [
+            "Optimize slow API endpoints",
+            "Review database query performance",
+            "Consider implementing caching",
+            "Analyze resource usage patterns"
+          ]
+        },
+        {
+          "id": "version-compatibility",
+          "name": "Version Compatibility",
+          "description": "All supported API versions must remain compatible",
+          "type": "mandatory",
+          "severity": "high",
+          "errorMessage": "Version compatibility broken",
+          "recommendations": [
+            "Review API changes for breaking modifications",
+            "Update version compatibility documentation",
+            "Consider deprecation warnings for older versions"
+          ]
+        },
+        {
+          "id": "error-rate-threshold",
+          "name": "Error Rate Threshold",
+          "description": "Overall test error rate must be below 5%",
+          "type": "threshold",
+          "severity": "medium",
+          "errorMessage": "Test error rate exceeds acceptable threshold",
+          "recommendations": [
+            "Investigate and fix failing tests",
+            "Review test data consistency",
+            "Check environment configuration"
+          ]
+        },
+        {
+          "id": "critical-endpoints",
+          "name": "Critical Endpoints",
+          "description": "Critical Guest Journey endpoints must be functional",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Critical Guest Journey endpoints failing",
+          "recommendations": [
+            "Prioritize fixing guest authentication issues",
+            "Ensure voice call functionality is operational",
+            "Verify transcript processing is working"
+          ]
+        },
+        {
+          "id": "security-validation",
+          "name": "Security Validation",
+          "description": "Security-related tests must pass",
+          "type": "mandatory",
+          "severity": "critical",
+          "errorMessage": "Security validation failed",
+          "recommendations": [
+            "Review authentication mechanisms",
+            "Check input validation functions",
+            "Verify authorization controls",
+            "Audit security-related code changes"
+          ]
+        }
+      ],
+      "environment": "development"
+    },
+    "result": {
+      "passed": true,
+      "score": 90,
+      "evaluation": {
+        "totalRules": 7,
+        "passedRules": 7,
+        "failedRules": 0,
+        "criticalFailures": 0
+      },
+      "ruleResults": [
+        {
+          "rule": {
+            "id": "smoke-tests-pass",
+            "name": "Smoke Tests Must Pass",
+            "description": "All smoke tests must pass for basic functionality validation",
+            "type": "mandatory",
+            "severity": "critical",
+            "errorMessage": "Smoke tests failed - basic functionality is broken",
+            "recommendations": [
+              "Check API endpoints for basic functionality",
+              "Verify database connectivity",
+              "Review authentication mechanisms"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Smoke Tests Must Pass: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "integration-pass-rate",
+            "name": "Integration Test Pass Rate",
+            "description": "Integration tests must have at least 95% pass rate",
+            "type": "threshold",
+            "severity": "high",
+            "errorMessage": "Integration test pass rate below minimum threshold",
+            "recommendations": [
+              "Review failed integration tests",
+              "Check API endpoint implementations",
+              "Verify database schema consistency"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Integration Test Pass Rate: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "performance-thresholds",
+            "name": "Performance Thresholds",
+            "description": "API endpoints must meet performance requirements",
+            "type": "threshold",
+            "severity": "high",
+            "errorMessage": "Performance thresholds exceeded",
+            "recommendations": [
+              "Optimize slow API endpoints",
+              "Review database query performance",
+              "Consider implementing caching",
+              "Analyze resource usage patterns"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Performance Thresholds: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "version-compatibility",
+            "name": "Version Compatibility",
+            "description": "All supported API versions must remain compatible",
+            "type": "mandatory",
+            "severity": "high",
+            "errorMessage": "Version compatibility broken",
+            "recommendations": [
+              "Review API changes for breaking modifications",
+              "Update version compatibility documentation",
+              "Consider deprecation warnings for older versions"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Version Compatibility: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "error-rate-threshold",
+            "name": "Error Rate Threshold",
+            "description": "Overall test error rate must be below 5%",
+            "type": "threshold",
+            "severity": "medium",
+            "errorMessage": "Test error rate exceeds acceptable threshold",
+            "recommendations": [
+              "Investigate and fix failing tests",
+              "Review test data consistency",
+              "Check environment configuration"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Error Rate Threshold: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "critical-endpoints",
+            "name": "Critical Endpoints",
+            "description": "Critical Guest Journey endpoints must be functional",
+            "type": "mandatory",
+            "severity": "critical",
+            "errorMessage": "Critical Guest Journey endpoints failing",
+            "recommendations": [
+              "Prioritize fixing guest authentication issues",
+              "Ensure voice call functionality is operational",
+              "Verify transcript processing is working"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Critical Endpoints: Passed",
+          "impact": 0
+        },
+        {
+          "rule": {
+            "id": "security-validation",
+            "name": "Security Validation",
+            "description": "Security-related tests must pass",
+            "type": "mandatory",
+            "severity": "critical",
+            "errorMessage": "Security validation failed",
+            "recommendations": [
+              "Review authentication mechanisms",
+              "Check input validation functions",
+              "Verify authorization controls",
+              "Audit security-related code changes"
+            ]
+          },
+          "passed": true,
+          "message": "✅ Security Validation: Passed",
+          "impact": 0
+        }
+      ],
+      "deployment": {
+        "allowed": true,
+        "reason": "All quality gate criteria met"
+      },
+      "recommendations": [],
+      "summary": "Quality Gate PASSED: 7/7 rules passed, Score: 90%. All quality gate criteria met",
+      "timestamp": "2025-07-28T09:01:47.273Z"
+    },
+    "generatedAt": "2025-07-28T09:01:47.274Z",
+    "environment": "development"
+  }
+}
