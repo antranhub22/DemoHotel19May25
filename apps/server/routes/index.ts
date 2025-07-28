@@ -25,6 +25,9 @@ import voiceModuleRoutes from '@server/routes/modules/voice-module';
 import summariesRoutes from '@server/routes/summaries'; // ✅ NEW: RESTful summaries
 import translationsRoutes from '@server/routes/translations'; // ✅ NEW: RESTful translations
 
+// ✅ NEW v2.2: ADVANCED FILTERING & SORTING API
+import advancedCallsRoutes from './advanced-calls'; // ✅ NEW: Advanced filtering API
+
 // ✅ LEGACY: Keep existing imports for backward compatibility
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
@@ -69,6 +72,13 @@ router.use('/api/calls', callsRoutes); // Call management
 router.use('/api/summaries', summariesRoutes); // ✅ NEW: Call summaries (RESTful)
 router.use('/api/emails', emailsRoutes); // ✅ RENAMED: Email services (RESTful)
 router.use('/api/translations', translationsRoutes); // ✅ NEW: Translation services (RESTful)
+
+// ✅ NEW v2.2: ADVANCED API ROUTES WITH ENHANCED FILTERING
+logger.debug(
+  '🚀 [Router] Setting up Advanced API v2.2 routes...',
+  'MainRouter'
+);
+router.use('/api/v2/calls', advancedCallsRoutes); // ✅ NEW: Advanced calls with complex filtering & sorting
 
 // ✅ VOICE ASSISTANT APIs
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language

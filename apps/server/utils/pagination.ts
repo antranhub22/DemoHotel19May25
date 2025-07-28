@@ -1,7 +1,16 @@
+import {
+  AdvancedFilterQuery,
+  AdvancedSortQuery,
+  SortRule,
+  applyFilterPreset,
+  buildAdvancedWhereConditions,
+  buildOrderByClause,
+  parseAdvancedSorting,
+} from './advancedFiltering';
 import type { PaginationMeta } from './apiHelpers';
 
 // ============================================
-// PAGINATION INTERFACES
+// PAGINATION INTERFACES (BACKWARD COMPATIBLE)
 // ============================================
 
 export interface PaginationQuery {
@@ -21,7 +30,7 @@ export interface PaginationResult<T> {
 }
 
 // ============================================
-// ADVANCED FILTERING & SORTING INTERFACES
+// ENHANCED QUERY INTERFACES
 // ============================================
 
 export interface SortQuery {
@@ -31,15 +40,15 @@ export interface SortQuery {
 
 export interface FilterQuery {
   filter?: Record<string, any>;
-  search?: string; // ✅ NEW: Global search
-  dateFrom?: string; // ✅ NEW: Date range filtering
+  search?: string;
+  dateFrom?: string;
   dateTo?: string;
-  tenantId?: string; // ✅ NEW: Tenant filtering
+  tenantId?: string;
 }
 
 export interface SearchQuery {
   search?: string;
-  searchFields?: string[]; // ✅ NEW: Specify which fields to search
+  searchFields?: string[];
 }
 
 export type QueryWithPagination = PaginationQuery &
@@ -47,7 +56,23 @@ export type QueryWithPagination = PaginationQuery &
   FilterQuery &
   SearchQuery;
 
-// ✅ NEW: Advanced query parameters for Guest Journey APIs
+// ✅ NEW v2.0: Enhanced query with advanced filtering
+export interface AdvancedQueryWithPagination
+  extends PaginationQuery,
+    AdvancedSortQuery {
+  // Advanced filtering
+  advancedFilter?: AdvancedFilterQuery;
+  preset?: string; // Filter preset ID
+
+  // Backward compatibility
+  filter?: Record<string, any>;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  tenantId?: string;
+  searchFields?: string[];
+}
+
 export interface GuestJourneyQuery extends QueryWithPagination {
   callId?: string;
   roomNumber?: string;
@@ -56,17 +81,19 @@ export interface GuestJourneyQuery extends QueryWithPagination {
   serviceType?: string;
 }
 
+// ✅ NEW v2.0: Enhanced Guest Journey Query
+export interface AdvancedGuestJourneyQuery extends AdvancedQueryWithPagination {
+  callId?: string;
+  roomNumber?: string;
+  language?: string;
+  status?: string;
+  serviceType?: string;
+}
+
 // ============================================
-// PAGINATION UTILITIES
+// BACKWARD COMPATIBLE PAGINATION UTILITIES
 // ============================================
 
-/**
- * Parse pagination query parameters with enhanced validation
- * @param query Request query object
- * @param defaultLimit Default limit if not specified
- * @param maxLimit Maximum allowed limit
- * @returns Parsed pagination parameters
- */
 export const parsePagination = (
   query: PaginationQuery,
   defaultLimit = 20,
@@ -82,13 +109,6 @@ export const parsePagination = (
   return { page, limit, offset };
 };
 
-/**
- * Create pagination metadata with enhanced information
- * @param page Current page number
- * @param limit Items per page
- * @param total Total number of items
- * @returns Enhanced pagination metadata object
- */
 export const createPaginationMeta = (
   page: number,
   limit: number,
@@ -106,14 +126,6 @@ export const createPaginationMeta = (
   };
 };
 
-/**
- * Create paginated response with metadata
- * @param data Array of data items
- * @param page Current page
- * @param limit Items per page
- * @param total Total count
- * @returns Paginated result object
- */
 export const createPaginatedResponse = <T>(
   data: T[],
   page: number,
@@ -127,16 +139,9 @@ export const createPaginatedResponse = <T>(
 };
 
 // ============================================
-// ADVANCED SORTING UTILITIES
+// ENHANCED SORTING UTILITIES (BACKWARD COMPATIBLE)
 // ============================================
 
-/**
- * Parse sorting query parameters with enhanced validation
- * @param query Request query object
- * @param defaultSort Default sort field
- * @param allowedSortFields Array of allowed sort fields
- * @returns Parsed sort parameters
- */
 export const parseSorting = (
   query: SortQuery,
   defaultSort = 'created_at',
@@ -150,7 +155,6 @@ export const parseSorting = (
   return { sort, order };
 };
 
-// ✅ NEW: Guest Journey specific sort fields
 export const GUEST_JOURNEY_SORT_FIELDS = [
   'created_at',
   'updated_at',
@@ -163,15 +167,9 @@ export const GUEST_JOURNEY_SORT_FIELDS = [
 ] as const;
 
 // ============================================
-// ADVANCED FILTERING UTILITIES
+// ENHANCED FILTERING UTILITIES (BACKWARD COMPATIBLE)
 // ============================================
 
-/**
- * Parse filter query parameters with enhanced validation
- * @param query Request query object
- * @param allowedFilters Array of allowed filter fields
- * @returns Parsed filter object
- */
 export const parseFilters = (
   query: FilterQuery,
   allowedFilters: string[] = []
@@ -189,11 +187,6 @@ export const parseFilters = (
   return filters;
 };
 
-/**
- * ✅ NEW: Parse date range filters
- * @param query Request query object
- * @returns Parsed date range
- */
 export const parseDateRange = (query: FilterQuery) => {
   const dateRange: { from?: Date; to?: Date } = {};
 
@@ -214,12 +207,6 @@ export const parseDateRange = (query: FilterQuery) => {
   return dateRange;
 };
 
-/**
- * ✅ NEW: Parse search parameters
- * @param query Request query object
- * @param defaultSearchFields Default fields to search in
- * @returns Parsed search parameters
- */
 export const parseSearch = (
   query: SearchQuery,
   defaultSearchFields: string[] = ['content', 'name', 'description']
@@ -230,12 +217,10 @@ export const parseSearch = (
   return { search, searchFields };
 };
 
-/**
- * ✅ NEW: Parse complete query with all advanced features
- * @param query Request query object
- * @param options Configuration options
- * @returns Parsed query parameters
- */
+// ============================================
+// BACKWARD COMPATIBLE COMPLETE QUERY PARSER
+// ============================================
+
 export const parseCompleteQuery = (
   query: QueryWithPagination,
   options: {
@@ -274,15 +259,173 @@ export const parseCompleteQuery = (
 };
 
 // ============================================
-// DATABASE QUERY HELPERS
+// NEW v2.0: ADVANCED QUERY PARSER
 // ============================================
 
 /**
- * Build WHERE clause from filters (for use with Drizzle ORM)
- * @param filters Filter object
- * @param tableColumns Table column definitions
- * @returns Array of where conditions
+ * Parse advanced query with enhanced filtering and sorting capabilities
+ * @param query Advanced query parameters
+ * @param options Configuration options
+ * @returns Parsed advanced query parameters
  */
+export const parseAdvancedQuery = (
+  query: AdvancedQueryWithPagination,
+  options: {
+    defaultLimit?: number;
+    maxLimit?: number;
+    defaultSort?: SortRule;
+    allowedSortFields?: string[];
+    allowedFilters?: string[];
+    defaultSearchFields?: string[];
+    tableColumns?: Record<string, any>;
+  } = {}
+) => {
+  const {
+    defaultLimit = 20,
+    maxLimit = 100,
+    defaultSort = { field: 'created_at', order: 'desc' },
+    allowedSortFields = GUEST_JOURNEY_SORT_FIELDS.slice(),
+    allowedFilters = [],
+    defaultSearchFields = ['content', 'name', 'description'],
+    tableColumns = {},
+  } = options;
+
+  // Basic pagination
+  const pagination = parsePagination(query, defaultLimit, maxLimit);
+
+  // Enhanced sorting with multi-column support
+  const sortQuery: AdvancedSortQuery = {
+    sort: query.sort,
+    order: query.order,
+    sortBy: query.sortBy,
+  };
+  const sortRules = parseAdvancedSorting(
+    sortQuery,
+    allowedSortFields,
+    defaultSort
+  );
+
+  // Advanced filtering with presets
+  let advancedFilter: AdvancedFilterQuery = {};
+
+  // Apply filter preset if specified
+  if (query.preset) {
+    advancedFilter = applyFilterPreset(query.preset);
+  }
+
+  // Merge with advanced filter if provided
+  if (query.advancedFilter) {
+    if (query.preset) {
+      // Combine preset with additional filters
+      advancedFilter = applyFilterPreset(query.preset, query.advancedFilter);
+    } else {
+      advancedFilter = query.advancedFilter;
+    }
+  }
+
+  // Backward compatibility: Convert simple filters to advanced format
+  if (!query.advancedFilter && !query.preset) {
+    const simpleFilters = parseFilters(query, allowedFilters);
+    const dateRange = parseDateRange(query);
+    const search = parseSearch(query, defaultSearchFields);
+
+    // Convert to advanced filter format
+    const conditions: any[] = [];
+
+    // Add simple filters
+    Object.keys(simpleFilters).forEach(key => {
+      if (simpleFilters[key] !== undefined) {
+        conditions.push({
+          field: key,
+          operator: 'eq',
+          value: simpleFilters[key],
+        });
+      }
+    });
+
+    // Add tenant filter
+    if (query.tenantId) {
+      conditions.push({
+        field: 'tenant_id',
+        operator: 'eq',
+        value: query.tenantId,
+      });
+    }
+
+    // Add date range
+    if (dateRange.from) {
+      conditions.push({
+        field: 'created_at',
+        operator: 'gte',
+        value: dateRange.from,
+      });
+    }
+    if (dateRange.to) {
+      conditions.push({
+        field: 'created_at',
+        operator: 'lte',
+        value: dateRange.to,
+      });
+    }
+
+    // Add search
+    if (search.search) {
+      const searchConditions = search.searchFields.map(field => ({
+        field,
+        operator: 'contains' as const,
+        value: search.search,
+      }));
+
+      if (searchConditions.length > 0) {
+        if (conditions.length > 0) {
+          advancedFilter = {
+            AND: conditions,
+            OR: searchConditions,
+          };
+        } else {
+          advancedFilter = {
+            OR: searchConditions,
+          };
+        }
+      } else {
+        advancedFilter = {
+          AND: conditions,
+        };
+      }
+    } else {
+      advancedFilter = {
+        AND: conditions,
+      };
+    }
+  }
+
+  // Build SQL conditions if table columns provided
+  const whereCondition = tableColumns
+    ? buildAdvancedWhereConditions(advancedFilter, tableColumns)
+    : undefined;
+  const orderByClause = tableColumns
+    ? buildOrderByClause(sortRules, tableColumns)
+    : undefined;
+
+  return {
+    ...pagination,
+    sortRules,
+    advancedFilter,
+    whereCondition,
+    orderByClause,
+    preset: query.preset || null,
+    hasAdvancedFeatures: !!(
+      query.advancedFilter ||
+      query.preset ||
+      query.sortBy
+    ),
+  };
+};
+
+// ============================================
+// DATABASE QUERY HELPERS (BACKWARD COMPATIBLE)
+// ============================================
+
 export const buildWhereConditions = (
   filters: Record<string, any>,
   tableColumns: Record<string, any>
@@ -291,15 +434,11 @@ export const buildWhereConditions = (
 
   Object.entries(filters).forEach(([key, value]) => {
     if (tableColumns[key] && value !== undefined && value !== null) {
-      // Handle different filter types
       if (Array.isArray(value)) {
-        // IN condition for arrays
         conditions.push(tableColumns[key].in(value));
       } else if (typeof value === 'string' && value.includes('%')) {
-        // LIKE condition for strings with wildcards
         conditions.push(tableColumns[key].like(value));
       } else {
-        // Exact match
         conditions.push(tableColumns[key].eq(value));
       }
     }
@@ -308,13 +447,6 @@ export const buildWhereConditions = (
   return conditions;
 };
 
-/**
- * ✅ NEW: Build search conditions for text search
- * @param searchTerm Search term
- * @param searchFields Fields to search in
- * @param tableColumns Table column definitions
- * @returns Array of search conditions
- */
 export const buildSearchConditions = (
   searchTerm: string,
   searchFields: string[],
@@ -329,7 +461,6 @@ export const buildSearchConditions = (
 
   searchFields.forEach(field => {
     if (tableColumns[field]) {
-      // Use LIKE for text search (case-insensitive)
       searchConditions.push(tableColumns[field].like(searchPattern));
     }
   });
@@ -337,12 +468,6 @@ export const buildSearchConditions = (
   return searchConditions;
 };
 
-/**
- * ✅ NEW: Build date range conditions
- * @param dateRange Date range object
- * @param dateColumn Date column to filter on
- * @returns Array of date conditions
- */
 export const buildDateRangeConditions = (
   dateRange: { from?: Date; to?: Date },
   dateColumn: any
@@ -361,7 +486,7 @@ export const buildDateRangeConditions = (
 };
 
 // ============================================
-// PAGINATION CONSTANTS
+// PAGINATION CONSTANTS & DEFAULTS
 // ============================================
 
 export const PAGINATION_DEFAULTS = {
@@ -380,7 +505,6 @@ export const COMMON_SORT_FIELDS = [
   'status',
 ] as const;
 
-// ✅ NEW: Guest Journey specific defaults
 export const GUEST_JOURNEY_DEFAULTS = {
   CALLS: {
     sort: 'start_time',
