@@ -38,7 +38,7 @@ export interface InterfaceHeaderProps {
   className?: string;
 }
 
-// ConversationSectionProps removed - replaced by unified ChatPopup component
+// ConversationSectionProps removed - replaced by unified RealtimeConversationPopup component
 
 export interface ScrollToTopButtonProps {
   show: boolean;

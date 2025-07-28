@@ -212,7 +212,7 @@ export const useInterface1 = ({
   const handleShowConversationPopup = useCallback(() => {
     if (import.meta.env.DEV) {
       logger.info(
-        '🎭 [DEMO] Starting mock conversation to show ChatPopup',
+        '🎭 [DEMO] Starting mock conversation to show RealtimeConversationPopup',
         'useInterface1'
       );
 

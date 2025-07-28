@@ -14,7 +14,7 @@ import { useInterface1 } from '@/hooks/useInterface1';
 import type { Language } from '@/types/interface1.types';
 import { ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
-import ChatPopup from '../features/popup-system/ChatPopup';
+import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
 import SummaryPopup from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
 import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
@@ -310,9 +310,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           <div className="hidden md:block">
             {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}
             <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
-              {/* Column 1: Chat Popup (Left) */}
+              {/* Column 1: Real-time Conversation (Left) */}
               <div className="w-full max-w-sm">
-                <ChatPopup
+                <RealtimeConversationPopup
                   isOpen={showConversation}
                   onClose={() => {}}
                   layout="grid"
@@ -320,11 +320,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 {/* ✅ DEBUG: Add logging - COMMENTED OUT FOR CLEAN CONSOLE */}
                 {/*{(() => {
                   console.log(
-                    '🔍 [Interface1] ChatPopup Desktop render state (SOLUTION 1):',
+                    '🔍 [Interface1] RealtimeConversationPopup Desktop render state:',
                     {
                       showConversation,
                       isCallStarted,
-                      isOpen: showConversation, // ✅ SOLUTION 1: Simplified condition
+                      isOpen: showConversation, // ✅ Real-time conversation display
                       transcriptsCount: micLevel, // Using micLevel as proxy for debug
                     }
                   );
@@ -387,21 +387,20 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               </div>
             </div>
 
-            {/* Mobile: Chat popup (overlay) - UNIFIED COMPONENT */}
-            <ChatPopup
+            {/* Mobile: Real-time conversation (overlay) - ADVANCED COMPONENT */}
+            <RealtimeConversationPopup
               isOpen={showConversation}
               onClose={() => {}} // Will be handled by popup context
-              layout="overlay" // Mobile: overlay positioning
-              className="fixed bottom-0 left-0 right-0 z-30"
+              layout="overlay" // Mobile: overlay positioning with built-in responsive design
             />
             {/* ✅ DEBUG: Mobile layout logging - COMMENTED OUT FOR CLEAN CONSOLE */}
             {/*{(() => {
               console.log(
-                '🔍 [Interface1] ChatPopup Mobile render state (SOLUTION 1):',
+                '🔍 [Interface1] RealtimeConversationPopup Mobile render state:',
                 {
                   showConversation,
                   isCallStarted,
-                  isOpen: showConversation, // ✅ SOLUTION 1: Already simplified
+                  isOpen: showConversation, // ✅ Real-time conversation with advanced features
                   layout: 'overlay',
                 }
               );

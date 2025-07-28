@@ -301,7 +301,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       className="relative flex flex-col items-center justify-center voice-button-container"
       style={{
         marginBottom: designSystem.spacing.xl,
-        zIndex: 10000, // 🔧 FIX: Ensure highest priority above ChatPopup (35)
+        zIndex: 10000, // 🔧 FIX: Ensure highest priority above RealtimeConversationPopup (35)
         pointerEvents: 'auto',
         // 🔧 HYBRID FIX: Fixed height to prevent layout shift
         height: '400px', // Fixed height container
