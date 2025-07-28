@@ -28,6 +28,9 @@ import translationsRoutes from '@server/routes/translations'; // ✅ NEW: RESTfu
 // ✅ NEW v2.2: ADVANCED FILTERING & SORTING API
 import advancedCallsRoutes from './advanced-calls'; // ✅ NEW: Advanced filtering API
 
+// ✅ NEW v2.3: API VERSIONING SYSTEM
+import versionedApiRoutes from './versioned-api'; // ✅ NEW: API versioning & migration
+
 // ✅ LEGACY: Keep existing imports for backward compatibility
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
@@ -79,6 +82,13 @@ logger.debug(
   'MainRouter'
 );
 router.use('/api/v2/calls', advancedCallsRoutes); // ✅ NEW: Advanced calls with complex filtering & sorting
+
+// ✅ NEW v2.3: API VERSIONING & MIGRATION SYSTEM
+logger.debug(
+  '🔧 [Router] Setting up API Versioning v2.3 routes...',
+  'MainRouter'
+);
+router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migration utilities, compatibility
 
 // ✅ VOICE ASSISTANT APIs
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
@@ -136,6 +146,8 @@ logger.debug('📊 [Router] Route structure:', 'MainRouter', {
     'emails',
     'translations',
   ], // ✅ NEW
+  advancedV2: ['v2/calls'], // ✅ NEW v2.2
+  versioning: ['versions', 'version/*', 'migration/*', 'compatibility/*'], // ✅ NEW v2.3
   voiceAssistant: ['vapi', 'vapi-proxy'], // ✅ NEW
   legacy: ['api', 'auth', 'request', 'analytics', 'health'],
   system: ['feature-flags', 'module-lifecycle', 'monitoring'],
