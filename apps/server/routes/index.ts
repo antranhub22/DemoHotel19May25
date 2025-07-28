@@ -10,10 +10,10 @@ import express from 'express';
 // ✅ NEW v3.0: MODULAR ROUTE IMPORTS - Business Domain Aligned
 import unifiedAuthRoutes from '@auth/routes/auth.routes';
 import analyticsRoutes from '@server/routes/analytics';
-import apiRoutes from '@server/routes/api'; // CRITICAL FIX: Main API routes
+import apiRoutes from '@server/routes/api'; // ⚠️ TO BE DEPRECATED - endpoints moved to specific routes
 import callsRoutes from '@server/routes/calls';
 import dashboardRoutes from '@server/routes/dashboard';
-import emailRoutes from '@server/routes/email';
+import emailsRoutes from '@server/routes/emails'; // ✅ RENAMED: email.ts → emails.ts (RESTful)
 import featureFlagsRoutes from '@server/routes/feature-flags';
 import healthRoutes from '@server/routes/health';
 import moduleLifecycleRoutes from '@server/routes/module-lifecycle';
@@ -22,6 +22,8 @@ import analyticsModuleRoutes from '@server/routes/modules/analytics-module';
 import coreModuleRoutes from '@server/routes/modules/core-module';
 import hotelModuleRoutes from '@server/routes/modules/hotel-module';
 import voiceModuleRoutes from '@server/routes/modules/voice-module';
+import summariesRoutes from '@server/routes/summaries'; // ✅ NEW: RESTful summaries
+import translationsRoutes from '@server/routes/translations'; // ✅ NEW: RESTful translations
 
 // ✅ LEGACY: Keep existing imports for backward compatibility
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
@@ -55,26 +57,39 @@ router.use('/api/hotel', hotelModuleRoutes);
 router.use('/api/voice', voiceModuleRoutes);
 
 // ============================================
+// RESTful API ROUTES - GUEST JOURNEY PRIORITY
+// ============================================
+
+logger.debug('📡 [Router] Setting up RESTful API routes...', 'MainRouter');
+
+// ✅ GUEST JOURNEY APIs (High Priority - Standardized)
+router.use('/api/guest', guestPublicRoutes); // Guest authentication & requests
+router.use('/api/transcripts', transcriptRoutes); // Voice transcripts
+router.use('/api/calls', callsRoutes); // Call management
+router.use('/api/summaries', summariesRoutes); // ✅ NEW: Call summaries (RESTful)
+router.use('/api/emails', emailsRoutes); // ✅ RENAMED: Email services (RESTful)
+router.use('/api/translations', translationsRoutes); // ✅ NEW: Translation services (RESTful)
+
+// ✅ VOICE ASSISTANT APIs
+router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
+router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
+
+// ============================================
 // LEGACY ROUTES (v1.0-v2.0) - Backward Compatible
 // ============================================
 
 logger.debug('📡 [Router] Setting up legacy API routes...', 'MainRouter');
 
-// ✅ CRITICAL FIX: Specific routes MUST come before general routes to avoid conflicts
-// Voice Assistant APIs (no auth required)
-router.use('/api/transcripts', transcriptRoutes);
-
-// Core API routes
-router.use('/api', apiRoutes); // ✅ CRITICAL: Main API functionality
+// ⚠️ DEPRECATED: General API routes - endpoints moved to specific routes
+// Keep for backward compatibility during transition
+router.use('/api', apiRoutes);
 
 // Authentication (Unified System)
 router.use('/api/auth', unifiedAuthRoutes);
 router.use('/api/staff', staffRoutes);
 
 // Business Logic
-router.use('/api/calls', callsRoutes);
 router.use('/api/request', requestRoutes);
-router.use('/api/email', emailRoutes);
 
 // Analytics & Reporting
 router.use('/api/analytics', analyticsRoutes);
@@ -85,12 +100,6 @@ router.use('/api/health', healthRoutes);
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
 
-// ✅ NEW: Vapi Proxy for CORS bypass
-router.use('/api/vapi-proxy', vapiProxyRoutes);
-
-// ✅ NEW: Vapi Configuration for language-specific settings
-router.use('/api/vapi', vapiConfigRoutes);
-
 // System Management (v2.0)
 router.use('/api/feature-flags', featureFlagsRoutes);
 router.use('/api/module-lifecycle', moduleLifecycleRoutes);
@@ -99,19 +108,27 @@ router.use('/api/monitoring', monitoringRoutes);
 // Development & Testing
 router.use('/api/temp-public', tempPublicRoutes);
 
-// ✅ NEW: Guest endpoints for voice assistant (no auth required)
-router.use('/api/guest', guestPublicRoutes);
-
 // ============================================
 // ROUTE REGISTRATION SUCCESS
 // ============================================
 
-logger.debug('✅ [Router v3.0] All routes registered successfully', 'MainRouter');
+logger.debug(
+  '✅ [Router v3.0] All routes registered successfully',
+  'MainRouter'
+);
 logger.debug('📊 [Router] Route structure:', 'MainRouter', {
   modular: ['admin', 'analytics-module', 'core', 'hotel', 'voice'],
-  legacy: ['api', 'auth', 'calls', 'request', 'analytics', 'health'],
+  guestJourney: [
+    'guest',
+    'transcripts',
+    'calls',
+    'summaries',
+    'emails',
+    'translations',
+  ], // ✅ NEW
+  voiceAssistant: ['vapi', 'vapi-proxy'], // ✅ NEW
+  legacy: ['api', 'auth', 'request', 'analytics', 'health'],
   system: ['feature-flags', 'module-lifecycle', 'monitoring'],
-  new: ['vapi-proxy'], // ✅ Added
 });
 
 export default router;

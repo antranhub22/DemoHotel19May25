@@ -1,15 +1,21 @@
-import express from 'express';
 import { translateToVietnamese } from '@server/openai';
-import { db, call, transcript, call_summaries } from '@shared/db';
 import {
-  insertTranscriptSchema,
+  apiResponse,
+  commonErrors,
+  ErrorCodes,
+} from '@server/utils/apiHelpers';
+import { call, call_summaries, db, transcript } from '@shared/db';
+import {
   insertCallSummarySchema,
+  insertTranscriptSchema,
 } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
+import { eq } from 'drizzle-orm';
+import express from 'express';
 import {
+  getHourlyActivity,
   getOverview,
   getServiceDistribution,
-  getHourlyActivity,
 } from '../analytics';
 
 const router = express.Router();
@@ -24,35 +30,57 @@ router.post('/store-transcript', express.json(), async (req, res) => {
     const { callId, role, content, timestamp, tenantId } = req.body;
 
     if (!callId || !role || !content) {
-      return (res as any).status(400).json({
-        error: 'Missing required fields: callId, role, content',
-      });
+      return commonErrors.missingFields(res, ['callId', 'role', 'content']);
     }
 
     logger.debug(
-      '📝 [API] Storing transcript - Call: ${callId}, Role: ${role}, Content length: ${content.length}',
+      `📝 [API] Storing transcript - Call: ${callId}, Role: ${role}, Content length: ${content.length}`,
       'Component'
     );
 
-    // Validate and store transcript
-    const validatedData = insertTranscriptSchema.parse({
-      call_id: callId,
-      role,
-      content,
-      timestamp: timestamp ? new Date(timestamp) : new Date(),
-      tenant_id: tenantId || 'mi-nhon-hotel',
-    });
+    try {
+      // Validate and store transcript
+      const validatedData = insertTranscriptSchema.parse({
+        call_id: callId,
+        role,
+        content,
+        timestamp: timestamp ? new Date(timestamp) : new Date(),
+        tenant_id: tenantId || 'mi-nhon-hotel',
+      });
 
-    await db.insert(transcript).values(validatedData);
+      await db.insert(transcript).values(validatedData);
 
-    logger.debug(
-      '✅ [API] Transcript stored successfully for call: ${callId}',
-      'Component'
-    );
-    (res as any).json({ success: true });
+      logger.debug(
+        `✅ [API] Transcript stored successfully for call: ${callId}`,
+        'Component'
+      );
+
+      return apiResponse.created(
+        res,
+        {
+          callId,
+          role,
+          tenantId: tenantId || 'mi-nhon-hotel',
+          storedAt: new Date().toISOString(),
+        },
+        'Transcript stored successfully'
+      );
+    } catch (validationError) {
+      return commonErrors.validation(
+        res,
+        'Invalid transcript data',
+        validationError
+      );
+    }
   } catch (error) {
     logger.error('❌ [API] Error storing transcript:', 'Component', error);
-    (res as any).status(500).json({ error: 'Failed to store transcript' });
+    return apiResponse.error(
+      res,
+      500,
+      ErrorCodes.TRANSCRIPT_STORAGE_ERROR,
+      'Failed to store transcript',
+      error
+    );
   }
 });
 
@@ -60,8 +88,13 @@ router.post('/store-transcript', express.json(), async (req, res) => {
 router.get('/transcripts/:callId', async (req, res) => {
   try {
     const { callId } = req.params;
+
+    if (!callId) {
+      return commonErrors.validation(res, 'Call ID is required');
+    }
+
     logger.debug(
-      '🔍 [API] Getting transcripts for call: ${callId}',
+      `🔍 [API] Getting transcripts for call: ${callId}`,
       'Component'
     );
 
@@ -72,13 +105,19 @@ router.get('/transcripts/:callId', async (req, res) => {
       .orderBy(transcript.timestamp);
 
     logger.debug(
-      '📝 [API] Found ${transcripts.length} transcripts for call: ${callId}',
+      `📝 [API] Found ${transcripts.length} transcripts for call: ${callId}`,
       'Component'
     );
-    (res as any).json(transcripts);
+
+    return apiResponse.success(
+      res,
+      transcripts,
+      `Retrieved ${transcripts.length} transcripts for call`,
+      { callId, count: transcripts.length }
+    );
   } catch (error) {
     logger.error('❌ [API] Error fetching transcripts:', 'Component', error);
-    (res as any).status(500).json({ error: 'Failed to fetch transcripts' });
+    return commonErrors.database(res, 'Failed to fetch transcripts', error);
   }
 });
 
@@ -92,9 +131,11 @@ router.post('/call-end', express.json(), async (req, res) => {
     const { callId, duration } = req.body;
 
     if (!callId || duration === undefined) {
-      return (res as any).status(400).json({
-        error: 'callId and duration are required',
-      });
+      return commonErrors.missingFields(res, ['callId', 'duration']);
+    }
+
+    if (typeof duration !== 'number' || duration < 0) {
+      return commonErrors.validation(res, 'Duration must be a positive number');
     }
 
     // Update call duration and end time using existing schema fields
@@ -107,13 +148,28 @@ router.post('/call-end', express.json(), async (req, res) => {
       .where(eq(call.call_id_vapi, callId));
 
     logger.debug(
-      '✅ [API] Updated call duration for ${callId}: ${duration} seconds',
+      `✅ [API] Updated call duration for ${callId}: ${duration} seconds`,
       'Component'
     );
-    (res as any).json({ success: true, duration });
+
+    return apiResponse.success(
+      res,
+      {
+        callId,
+        duration: Math.floor(duration),
+        endTime: new Date().toISOString(),
+      },
+      'Call duration updated successfully'
+    );
   } catch (error) {
     logger.error('❌ [API] Error updating call duration:', 'Component', error);
-    (res as any).status(500).json({ error: 'Internal server error' });
+    return apiResponse.error(
+      res,
+      500,
+      ErrorCodes.CALL_NOT_FOUND,
+      'Failed to update call duration',
+      error
+    );
   }
 });
 
@@ -127,32 +183,48 @@ router.post('/store-summary', express.json(), async (req, res) => {
     const { callId, content, roomNumber, duration } = req.body;
 
     if (!callId || !content) {
-      return (res as any).status(400).json({
-        error: 'callId and content are required',
-      });
+      return commonErrors.missingFields(res, ['callId', 'content']);
     }
 
-    logger.debug('📋 [API] Storing summary for call: ${callId}', 'Component');
+    logger.debug(`📋 [API] Storing summary for call: ${callId}`, 'Component');
 
-    // Validate and store summary
-    const validatedData = insertCallSummarySchema.parse({
-      call_id: callId,
-      content,
-      room_number: roomNumber || null,
-      duration: duration || null,
-      timestamp: new Date(),
-    });
+    try {
+      // Validate and store summary
+      const validatedData = insertCallSummarySchema.parse({
+        call_id: callId,
+        content,
+        room_number: roomNumber || null,
+        duration: duration || null,
+        timestamp: new Date(),
+      });
 
-    await db.insert(call_summaries).values(validatedData);
+      await db.insert(call_summaries).values(validatedData);
 
-    logger.debug(
-      '✅ [API] Summary stored successfully for call: ${callId}',
-      'Component'
-    );
-    (res as any).json({ success: true });
+      logger.debug(
+        `✅ [API] Summary stored successfully for call: ${callId}`,
+        'Component'
+      );
+
+      return apiResponse.created(
+        res,
+        {
+          callId,
+          roomNumber,
+          duration,
+          storedAt: new Date().toISOString(),
+        },
+        'Call summary stored successfully'
+      );
+    } catch (validationError) {
+      return commonErrors.validation(
+        res,
+        'Invalid summary data',
+        validationError
+      );
+    }
   } catch (error) {
     logger.error('❌ [API] Error storing summary:', 'Component', error);
-    (res as any).status(500).json({ error: 'Failed to store summary' });
+    return commonErrors.database(res, 'Failed to store summary', error);
   }
 });
 
@@ -160,7 +232,12 @@ router.post('/store-summary', express.json(), async (req, res) => {
 router.get('/summaries/:callId', async (req, res) => {
   try {
     const { callId } = req.params;
-    logger.debug('🔍 [API] Getting summary for call: ${callId}', 'Component');
+
+    if (!callId) {
+      return commonErrors.validation(res, 'Call ID is required');
+    }
+
+    logger.debug(`🔍 [API] Getting summary for call: ${callId}`, 'Component');
 
     const summaries = await db
       .select()
@@ -169,13 +246,19 @@ router.get('/summaries/:callId', async (req, res) => {
       .orderBy(call_summaries.timestamp);
 
     logger.debug(
-      '📋 [API] Found ${summaries.length} summaries for call: ${callId}',
+      `📋 [API] Found ${summaries.length} summaries for call: ${callId}`,
       'Component'
     );
-    (res as any).json(summaries);
+
+    return apiResponse.success(
+      res,
+      summaries,
+      `Retrieved ${summaries.length} summaries for call`,
+      { callId, count: summaries.length }
+    );
   } catch (error) {
     logger.error('❌ [API] Error fetching summaries:', 'Component', error);
-    (res as any).status(500).json({ error: 'Failed to fetch summaries' });
+    return commonErrors.database(res, 'Failed to fetch summaries', error);
   }
 });
 
@@ -193,16 +276,24 @@ router.get('/analytics/overview', async (req, res) => {
     );
 
     const overview = await getOverview();
-    (res as any).json(overview);
+
+    return apiResponse.success(
+      res,
+      overview,
+      'Analytics overview retrieved successfully',
+      { tenantId }
+    );
   } catch (error) {
     logger.error(
       '❌ [API] Error fetching analytics overview:',
       'Component',
       error
     );
-    (res as any)
-      .status(500)
-      .json({ error: 'Failed to fetch analytics overview' });
+    return commonErrors.database(
+      res,
+      'Failed to fetch analytics overview',
+      error
+    );
   }
 });
 
@@ -216,16 +307,24 @@ router.get('/analytics/service-distribution', async (req, res) => {
     );
 
     const distribution = await getServiceDistribution();
-    (res as any).json(distribution);
+
+    return apiResponse.success(
+      res,
+      distribution,
+      'Service distribution retrieved successfully',
+      { tenantId }
+    );
   } catch (error) {
     logger.error(
       '❌ [API] Error fetching service distribution:',
       'Component',
       error
     );
-    (res as any)
-      .status(500)
-      .json({ error: 'Failed to fetch service distribution' });
+    return commonErrors.database(
+      res,
+      'Failed to fetch service distribution',
+      error
+    );
   }
 });
 
@@ -239,14 +338,20 @@ router.get('/analytics/hourly-activity', async (req, res) => {
     );
 
     const activity = await getHourlyActivity();
-    (res as any).json(activity);
+
+    return apiResponse.success(
+      res,
+      activity,
+      'Hourly activity retrieved successfully',
+      { tenantId }
+    );
   } catch (error) {
     logger.error(
       '❌ [API] Error fetching hourly activity:',
       'Component',
       error
     );
-    (res as any).status(500).json({ error: 'Failed to fetch hourly activity' });
+    return commonErrors.database(res, 'Failed to fetch hourly activity', error);
   }
 });
 
@@ -260,19 +365,38 @@ router.post('/translate-to-vietnamese', express.json(), async (req, res) => {
     const { text } = req.body;
 
     if (!text) {
-      return (res as any).status(400).json({ error: 'Text is required' });
+      return commonErrors.missingFields(res, ['text']);
+    }
+
+    if (typeof text !== 'string' || text.length === 0) {
+      return commonErrors.validation(res, 'Text must be a non-empty string');
     }
 
     logger.debug(
-      '🌐 [API] Translating text to Vietnamese: ${text.substring(0, 50)}...',
+      `🌐 [API] Translating text to Vietnamese: ${text.substring(0, 50)}...`,
       'Component'
     );
 
     const translatedText = await translateToVietnamese(text);
-    (res as any).json({ translatedText });
+
+    return apiResponse.success(
+      res,
+      {
+        originalText: text,
+        translatedText,
+        language: 'vi',
+      },
+      'Text translated successfully'
+    );
   } catch (error) {
     logger.error('❌ [API] Error translating text:', 'Component', error);
-    (res as any).status(500).json({ error: 'Translation failed' });
+    return apiResponse.error(
+      res,
+      500,
+      ErrorCodes.EXTERNAL_SERVICE_ERROR,
+      'Translation failed',
+      error
+    );
   }
 });
 

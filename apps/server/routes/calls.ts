@@ -1,9 +1,13 @@
-import { eq, and, desc } from 'drizzle-orm';
-import express, { Request, Response, Router } from 'express';
-import { storage } from '@server/storage';
+import {
+  apiResponse,
+  commonErrors,
+  ErrorCodes,
+} from '@server/utils/apiHelpers';
 import { db } from '@shared/db';
-import { call, transcript } from '@shared/db/schema';
+import { call } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
+import { eq } from 'drizzle-orm';
+import { Request, Response, Router } from 'express';
 
 const router = Router();
 
@@ -11,6 +15,10 @@ const router = Router();
 router.get('/transcripts/:callId', async (req: Request, res: Response) => {
   try {
     const callId = req.params.callId;
+
+    if (!callId) {
+      return commonErrors.validation(res, 'Call ID is required');
+    }
 
     logger.api(`📞 [Calls] Getting transcripts for call: ${callId}`, 'Routes');
 
@@ -21,20 +29,15 @@ router.get('/transcripts/:callId', async (req: Request, res: Response) => {
       transcriptCount: transcripts.length,
     });
 
-    res.json({
-      success: true,
-      data: transcripts,
-    });
+    return apiResponse.success(
+      res,
+      transcripts,
+      `Retrieved ${transcripts.length} transcripts for call`,
+      { callId, count: transcripts.length }
+    );
   } catch (error) {
     logger.error('❌ [Calls] Failed to get transcripts', 'Routes', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to retrieve transcripts',
-      details:
-        process.env.NODE_ENV === 'development'
-          ? (error as any)?.message || String(error)
-          : undefined,
-    });
+    return commonErrors.database(res, 'Failed to retrieve transcripts', error);
   }
 });
 
@@ -44,11 +47,11 @@ router.post('/call-end', async (req: Request, res: Response) => {
     const { callId, duration } = req.body;
 
     if (!callId || duration === undefined) {
-      res.status(400).json({
-        success: false,
-        error: 'callId and duration are required',
-      });
-      return;
+      return commonErrors.missingFields(res, ['callId', 'duration']);
+    }
+
+    if (typeof duration !== 'number' || duration < 0) {
+      return commonErrors.validation(res, 'Duration must be a positive number');
     }
 
     logger.api(
@@ -70,31 +73,35 @@ router.post('/call-end', async (req: Request, res: Response) => {
       duration: Math.floor(duration),
     });
 
-    res.json({
-      success: true,
-      duration: Math.floor(duration),
-    });
+    return apiResponse.success(
+      res,
+      {
+        callId,
+        duration: Math.floor(duration),
+        endTime: new Date().toISOString(),
+      },
+      'Call ended successfully'
+    );
   } catch (error) {
     logger.error('❌ [Calls] Error ending call', 'Routes', error);
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-    });
+    return apiResponse.error(
+      res,
+      500,
+      ErrorCodes.CALL_NOT_FOUND,
+      'Failed to end call',
+      error
+    );
   }
 });
 
 // Create call endpoint
-router.post('/calls', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const { call_id_vapi, room_number, language, service_type, tenant_id } =
       req.body;
 
     if (!call_id_vapi) {
-      res.status(400).json({
-        success: false,
-        error: 'call_id_vapi is required',
-      });
-      return;
+      return commonErrors.missingFields(res, ['call_id_vapi']);
     }
 
     logger.api(`📞 [Calls] Creating call: ${call_id_vapi}`, 'Routes', {
@@ -122,16 +129,10 @@ router.post('/calls', async (req: Request, res: Response) => {
       room_number: newCall.room_number,
     });
 
-    res.json({
-      success: true,
-      data: newCall,
-    });
+    return apiResponse.created(res, newCall, 'Call created successfully');
   } catch (error) {
     logger.error('❌ [Calls] Error creating call', 'Routes', error);
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error',
-    });
+    return commonErrors.database(res, 'Failed to create call', error);
   }
 });
 
@@ -141,11 +142,7 @@ router.post('/test-transcript', async (req: Request, res: Response) => {
     const { callId, role, content } = req.body;
 
     if (!callId || !role || !content) {
-      res.status(400).json({
-        success: false,
-        error: 'Call ID, role, and content are required',
-      });
-      return;
+      return commonErrors.missingFields(res, ['callId', 'role', 'content']);
     }
 
     logger.api(
@@ -175,20 +172,26 @@ router.post('/test-transcript', async (req: Request, res: Response) => {
       }
     );
 
-    res.json({
-      success: true,
-      message: 'Test transcript stored successfully',
-    });
+    return apiResponse.created(
+      res,
+      {
+        callId,
+        role,
+        content,
+        tenantId: 'default',
+        timestamp: new Date().toISOString(),
+      },
+      'Test transcript stored successfully'
+    );
   } catch (error) {
     logger.error('❌ [Calls] Failed to store test transcript', 'Routes', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to store test transcript',
-      details:
-        process.env.NODE_ENV === 'development'
-          ? (error as any)?.message || String(error)
-          : undefined,
-    });
+    return apiResponse.error(
+      res,
+      500,
+      ErrorCodes.TRANSCRIPT_STORAGE_ERROR,
+      'Failed to store test transcript',
+      error
+    );
   }
 });
 
