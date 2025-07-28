@@ -38,10 +38,6 @@ export interface InterfaceHeaderProps {
   className?: string;
 }
 
-export interface ServiceGridContainerProps {
-  className?: string;
-}
-
 // ConversationSectionProps removed - replaced by unified ChatPopup component
 
 export interface ScrollToTopButtonProps {

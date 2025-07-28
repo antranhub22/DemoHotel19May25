@@ -3,6 +3,7 @@ import {
   PopupManager,
   PopupProvider,
 } from '@/components/features/popup-system';
+import WelcomePopup from '@/components/features/popup-system/WelcomePopup';
 import { VoiceLanguageSwitcher } from '@/components/features/voice-assistant/interface1/VoiceLanguageSwitcher';
 import ErrorBoundary from '@/components/layout/ErrorBoundary';
 import { useAssistant } from '@/context';
@@ -11,7 +12,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // Error fallback component for Interface1
 const Interface1ErrorFallback: React.FC<{
@@ -33,32 +34,6 @@ const Interface1ErrorFallback: React.FC<{
     >
       Try Again
     </button>
-  </div>
-);
-
-// Simple Welcome Modal Component
-const WelcomeModal: React.FC<{ onClose: () => void; isMobile: boolean }> = ({
-  onClose,
-  isMobile,
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div
-      className={`bg-white rounded-xl p-6 mx-4 ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'}`}
-    >
-      <h2 className="text-xl font-bold text-center mb-4">
-        🏨 Welcome to Hotel Voice Assistant
-      </h2>
-      <p className="text-gray-600 text-center mb-6">
-        Experience seamless hotel services through our AI-powered voice
-        assistant
-      </p>
-      <button
-        onClick={onClose}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        Get Started
-      </button>
-    </div>
   </div>
 );
 
@@ -191,7 +166,7 @@ const VoiceAssistant: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
         {/* ✅ STEP 1: Welcome Modal (First-time users only) */}
         {guestJourneyState.showWelcome && (
-          <WelcomeModal onClose={handleWelcomeComplete} isMobile={isMobile} />
+          <WelcomePopup onClose={handleWelcomeComplete} />
         )}
 
         {/* ✅ STEP 2: Language Selection (Mobile-First, Manual Only) */}

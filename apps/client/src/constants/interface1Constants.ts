@@ -133,3 +133,23 @@ export const INTERFACE1_ACCESSIBILITY = {
   // Screen Reader
   SR_ONLY: 'sr-only',
 } as const;
+
+// ✅ MERGED: General interface constants (from interfaceConstants.ts)
+export const INTERFACE_CONSTANTS = {
+  SCROLL_THRESHOLD: 300,
+  THROTTLE_DELAY: 100,
+  AUTO_SCROLL_DELAY: 300,
+  COLORS: {
+    BACKGROUND: '#2C3E50',
+  },
+  SPACING: {
+    CONTAINER_MARGIN_TOP: '42px',
+    MIN_HEIGHT: 'calc(100vh - 42px)',
+  },
+  SCROLL_OFFSETS: {
+    NEGATIVE_TOP_THRESHOLD: -100,
+    HERO_SCROLL_TRIGGER: 300,
+  },
+} as const;
+
+export type InterfaceConstants = typeof INTERFACE_CONSTANTS;

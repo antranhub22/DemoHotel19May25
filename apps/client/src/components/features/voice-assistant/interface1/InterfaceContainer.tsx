@@ -1,4 +1,4 @@
-import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
+import { INTERFACE_CONSTANTS } from '@/constants/interface1Constants';
 import { designSystem } from '@/styles/designSystem';
 
 interface InterfaceContainerProps {

@@ -30,7 +30,7 @@ import { LANGUAGE_DISPLAY_NAMES } from '../features/voice-assistant/interface1/M
 // UI Components - Layout
 import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
 import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
-import { ServiceGridContainer } from '../features/voice-assistant/interface1/ServiceGridContainer';
+import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
 
 // UI Components - Popups
 
@@ -429,7 +429,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
       {/* Service Categories Section - Add margin to prevent overlap */}
       <div className="mt-16 relative z-10" data-testid="service-grid">
-        <ServiceGridContainer
+        <ServiceGrid
           ref={serviceGridRef}
           onServiceSelect={handleServiceSelect}
           onVoiceServiceRequest={handleVoiceServiceRequest}

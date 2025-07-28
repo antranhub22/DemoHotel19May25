@@ -2,7 +2,7 @@
 
 // Type declaration for import.meta
 
-import { INTERFACE_CONSTANTS } from '@/constants/interfaceConstants';
+import { INTERFACE_CONSTANTS } from '@/constants/interface1Constants';
 import { useAssistant } from '@/context';
 import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
