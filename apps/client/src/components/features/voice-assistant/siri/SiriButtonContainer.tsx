@@ -369,6 +369,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       {/* Enhanced Siri Button Container with Full Accessibility */}
       <div
         className={`relative transition-all duration-500 ease-in-out voice-control hardware-accelerated ${isCallStarted ? 'listening active' : ''} ${isConfirming ? 'confirming' : ''} focus-ring ${isConfirming ? 'gentle-glow' : ''}`}
+        data-testid="siri-button"
         data-language={language}
         role="button"
         tabIndex={0}

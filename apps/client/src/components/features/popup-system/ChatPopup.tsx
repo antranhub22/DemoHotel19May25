@@ -1,3 +1,4 @@
+import { INTERFACE1_LAYOUT } from '@/constants/interface1Constants';
 import { useAssistant } from '@/context';
 import { t } from '@/i18n';
 import { X } from 'lucide-react';
@@ -319,7 +320,7 @@ const ChatPopup: React.FC<ChatPopupProps> = ({
           bottom: '40px', // Minimal space above bottom
           left: 0,
           right: 0,
-          zIndex: 35, // 🔧 FIX: Lower than SiriButton (9999) to avoid conflict
+          zIndex: INTERFACE1_LAYOUT.Z_INDICES.CONVERSATION_MOBILE, // ✅ Use constant: Lower than SiriButton for proper layering
           pointerEvents: 'none', // Allow click-through container
           // ✅ FIX: Prevent mobile viewport issues
           transform: 'translateZ(0)', // Force layer creation
