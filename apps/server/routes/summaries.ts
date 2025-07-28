@@ -1,9 +1,15 @@
 import { apiResponse, commonErrors } from '@server/utils/apiHelpers';
-import { parsePagination } from '@server/utils/pagination';
+import {
+  buildDateRangeConditions,
+  buildSearchConditions,
+  buildWhereConditions,
+  GUEST_JOURNEY_DEFAULTS,
+  parseCompleteQuery,
+} from '@server/utils/pagination';
 import { call_summaries, db } from '@shared/db';
 import { insertCallSummarySchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
-import { eq } from 'drizzle-orm';
+import { and, asc, desc, eq, or } from 'drizzle-orm';
 import express from 'express';
 
 const router = express.Router();
@@ -21,16 +27,67 @@ router.get('/:callId', async (req, res) => {
       return commonErrors.validation(res, 'Call ID is required');
     }
 
+    // ✅ NEW: Add pagination for call-specific summaries
+    const queryParams = parseCompleteQuery(req.query, {
+      defaultLimit: 10, // Smaller limit for single call
+      maxLimit: 50,
+      defaultSort: 'timestamp',
+      allowedSortFields: ['timestamp', 'room_number', 'duration'],
+      allowedFilters: ['room_number'],
+      defaultSearchFields: ['content'],
+    });
+
+    const { page, limit, offset, sort, order, filters, search } = queryParams;
+
     logger.debug(
-      `🔍 [SUMMARIES] Getting summaries for call: ${callId}`,
+      `🔍 [SUMMARIES] Getting summaries for call: ${callId} (page: ${page})`,
       'Summaries'
     );
+
+    // Build WHERE conditions
+    const whereConditions = [eq(call_summaries.call_id, callId)];
+
+    // Add filter conditions
+    if (filters.room_number) {
+      whereConditions.push(eq(call_summaries.room_number, filters.room_number));
+    }
+
+    // Add search conditions
+    if (search) {
+      const searchConditions = buildSearchConditions(search, ['content'], {
+        content: call_summaries.content,
+      });
+      if (searchConditions.length > 0) {
+        whereConditions.push(or(...searchConditions));
+      }
+    }
+
+    const whereClause = and(...whereConditions);
+
+    // Order by - fix column reference
+    const sortColumn =
+      sort === 'room_number'
+        ? call_summaries.room_number
+        : sort === 'duration'
+          ? call_summaries.duration
+          : call_summaries.timestamp;
+
+    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
 
     const summaries = await db
       .select()
       .from(call_summaries)
-      .where(eq(call_summaries.call_id, callId))
-      .orderBy(call_summaries.timestamp);
+      .where(whereClause)
+      .orderBy(orderClause)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const totalCountResult = await db
+      .select({ count: call_summaries.id })
+      .from(call_summaries)
+      .where(whereClause);
+    const total = totalCountResult.length;
 
     logger.debug(
       `📋 [SUMMARIES] Found ${summaries.length} summaries for call: ${callId}`,
@@ -41,7 +98,20 @@ router.get('/:callId', async (req, res) => {
       res,
       summaries,
       `Retrieved ${summaries.length} summaries for call`,
-      { callId, count: summaries.length }
+      {
+        callId,
+        count: summaries.length,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: offset + limit < total,
+          hasPrev: page > 1,
+        },
+        search: search || null,
+        filters: Object.keys(filters).length > 0 ? filters : null,
+      }
     );
   } catch (error) {
     logger.error(
@@ -111,37 +181,114 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/summaries/ - Get all summaries with pagination
+// GET /api/summaries/ - Get all summaries with advanced pagination, filtering, and search
 router.get('/', async (req, res) => {
   try {
-    const { page, limit, offset } = parsePagination(req.query, 20, 100);
-    const { tenantId } = req.query;
+    // Parse query with advanced features
+    const queryParams = parseCompleteQuery(req.query, {
+      defaultLimit: GUEST_JOURNEY_DEFAULTS.SUMMARIES.limit,
+      maxLimit: 100,
+      defaultSort: GUEST_JOURNEY_DEFAULTS.SUMMARIES.sort,
+      allowedSortFields: ['timestamp', 'call_id', 'room_number', 'duration'],
+      allowedFilters: [...GUEST_JOURNEY_DEFAULTS.SUMMARIES.allowedFilters],
+      defaultSearchFields: [...GUEST_JOURNEY_DEFAULTS.SUMMARIES.searchFields],
+    });
+
+    const {
+      page,
+      limit,
+      offset,
+      sort,
+      order,
+      filters,
+      dateRange,
+      search,
+      tenantId,
+    } = queryParams;
 
     logger.debug(
-      `📋 [SUMMARIES] Getting summaries (page: ${page}, limit: ${limit})`,
+      `📋 [SUMMARIES] Getting summaries with pagination (page: ${page}, limit: ${limit}, search: "${search}")`,
       'Summaries'
     );
 
-    let query = db.select().from(call_summaries);
+    // Build WHERE conditions
+    const whereConditions = [];
 
     // Add tenant filtering if provided
-    if (tenantId && typeof tenantId === 'string') {
-      // Note: Assuming tenant_id field exists or can be joined
+    if (tenantId) {
+      // Note: Assuming tenant filtering via call relationship
       logger.debug(
         `🏨 [SUMMARIES] Filtering by tenant: ${tenantId}`,
         'Summaries'
       );
+      // TODO: Add JOIN with calls table for tenant filtering when schema supports it
     }
 
-    const summaries = await query
-      .orderBy(call_summaries.timestamp)
+    // Add filter conditions
+    const filterConditions = buildWhereConditions(filters, {
+      call_id: call_summaries.call_id,
+      room_number: call_summaries.room_number,
+    });
+    whereConditions.push(...filterConditions);
+
+    // Add search conditions
+    if (search) {
+      const searchConditions = buildSearchConditions(search, ['content'], {
+        content: call_summaries.content,
+      });
+      if (searchConditions.length > 0) {
+        whereConditions.push(or(...searchConditions));
+      }
+    }
+
+    // Add date range conditions
+    if (dateRange.from || dateRange.to) {
+      const dateConditions = buildDateRangeConditions(
+        dateRange,
+        call_summaries.timestamp
+      );
+      whereConditions.push(...dateConditions);
+    }
+
+    // Build query
+    const whereClause =
+      whereConditions.length > 0
+        ? whereConditions.length > 1
+          ? and(...whereConditions)
+          : whereConditions[0]
+        : undefined;
+
+    // Order by - fix column reference
+    const sortColumn =
+      sort === 'call_id'
+        ? call_summaries.call_id
+        : sort === 'room_number'
+          ? call_summaries.room_number
+          : sort === 'duration'
+            ? call_summaries.duration
+            : call_summaries.timestamp;
+
+    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
+
+    // Get paginated data
+    const summaries = await db
+      .select()
+      .from(call_summaries)
+      .where(whereClause)
+      .orderBy(orderClause)
       .limit(limit)
       .offset(offset);
 
     // Get total count for pagination
-    const totalCountResult = await db
+    const totalCountQuery = db
       .select({ count: call_summaries.id })
       .from(call_summaries);
+
+    if (whereClause) {
+      totalCountQuery.where(whereClause);
+    }
+
+    const totalCountResult = await totalCountQuery;
     const total = totalCountResult.length;
 
     logger.debug(
@@ -162,6 +309,10 @@ router.get('/', async (req, res) => {
           hasNext: offset + limit < total,
           hasPrev: page > 1,
         },
+        search: search || null,
+        filters: Object.keys(filters).length > 0 ? filters : null,
+        sorting: { sort, order },
+        tenantId: tenantId || null,
       }
     );
   } catch (error) {

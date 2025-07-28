@@ -4,10 +4,17 @@ import {
   commonErrors,
   ErrorCodes,
 } from '@server/utils/apiHelpers';
+import {
+  buildDateRangeConditions,
+  buildSearchConditions,
+  buildWhereConditions,
+  GUEST_JOURNEY_DEFAULTS,
+  parseCompleteQuery,
+} from '@server/utils/pagination';
 import { db } from '@shared/db';
 import { transcript } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
-import { eq } from 'drizzle-orm';
+import { and, asc, desc, eq, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 
@@ -39,6 +46,129 @@ const extractTenantIdFromRequest = (req: express.Request): string => {
   return 'tenant-default';
 };
 
+// ✅ NEW: Get all transcripts with advanced pagination, filtering, and search
+router.get('/', async (req, res) => {
+  try {
+    const tenantId = extractTenantIdFromRequest(req);
+
+    // Parse query with advanced features
+    const queryParams = parseCompleteQuery(req.query, {
+      defaultLimit: GUEST_JOURNEY_DEFAULTS.TRANSCRIPTS.limit,
+      maxLimit: 100,
+      defaultSort: GUEST_JOURNEY_DEFAULTS.TRANSCRIPTS.sort,
+      allowedSortFields: ['timestamp', 'created_at', 'call_id', 'role'],
+      allowedFilters: [...GUEST_JOURNEY_DEFAULTS.TRANSCRIPTS.allowedFilters],
+      defaultSearchFields: [...GUEST_JOURNEY_DEFAULTS.TRANSCRIPTS.searchFields],
+    });
+
+    const { page, limit, offset, sort, order, filters, dateRange, search } =
+      queryParams;
+
+    logger.debug(
+      `📋 [TRANSCRIPTS] Getting transcripts with pagination (page: ${page}, limit: ${limit}, search: "${search}")`,
+      'Component'
+    );
+
+    // Build WHERE conditions
+    const whereConditions = [];
+
+    // Always filter by tenant for security
+    whereConditions.push(eq(transcript.tenant_id, tenantId));
+
+    // Add filter conditions
+    const filterConditions = buildWhereConditions(filters, {
+      call_id: transcript.call_id,
+      role: transcript.role,
+    });
+    whereConditions.push(...filterConditions);
+
+    // Add search conditions
+    if (search) {
+      const searchConditions = buildSearchConditions(search, ['content'], {
+        content: transcript.content,
+      });
+      if (searchConditions.length > 0) {
+        whereConditions.push(or(...searchConditions));
+      }
+    }
+
+    // Add date range conditions
+    if (dateRange.from || dateRange.to) {
+      const dateConditions = buildDateRangeConditions(
+        dateRange,
+        transcript.timestamp
+      );
+      whereConditions.push(...dateConditions);
+    }
+
+    // Build query
+    const whereClause =
+      whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0];
+
+    // Order by - fix column reference
+    const sortColumn =
+      sort === 'timestamp'
+        ? transcript.timestamp
+        : sort === 'created_at'
+          ? transcript.timestamp
+          : sort === 'call_id'
+            ? transcript.call_id
+            : sort === 'role'
+              ? transcript.role
+              : transcript.timestamp;
+
+    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
+
+    // Get paginated data
+    const transcripts = await db
+      .select()
+      .from(transcript)
+      .where(whereClause)
+      .orderBy(orderClause)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count for pagination
+    const totalCountResult = await db
+      .select({ count: transcript.id })
+      .from(transcript)
+      .where(whereClause);
+    const total = totalCountResult.length;
+
+    logger.debug(
+      `✅ [TRANSCRIPTS] Retrieved ${transcripts.length} transcripts (total: ${total}, tenant: ${tenantId})`,
+      'Component'
+    );
+
+    return apiResponse.success(
+      res,
+      transcripts,
+      `Retrieved ${transcripts.length} transcripts`,
+      {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: offset + limit < total,
+          hasPrev: page > 1,
+        },
+        search: search || null,
+        filters: Object.keys(filters).length > 0 ? filters : null,
+        sorting: { sort, order },
+        tenantId,
+      }
+    );
+  } catch (error) {
+    logger.error(
+      '❌ [TRANSCRIPTS] Failed to fetch transcripts:',
+      'Component',
+      error
+    );
+    return commonErrors.database(res, 'Failed to fetch transcripts', error);
+  }
+});
+
 // Get transcripts for a specific call
 router.get('/:callId', async (req, res) => {
   try {
@@ -51,16 +181,64 @@ router.get('/:callId', async (req, res) => {
     // ✅ SECURITY: Get tenant ID from hostname for proper isolation
     const tenantId = extractTenantIdFromRequest(req);
 
+    // ✅ NEW: Add pagination for call-specific transcripts
+    const queryParams = parseCompleteQuery(req.query, {
+      defaultLimit: 100, // Higher limit for single call
+      maxLimit: 500,
+      defaultSort: 'timestamp',
+      allowedSortFields: ['timestamp', 'role'],
+      allowedFilters: ['role'],
+      defaultSearchFields: ['content'],
+    });
+
+    const { page, limit, offset, sort, order, filters, search } = queryParams;
+
     logger.debug(
-      `📋 [TRANSCRIPTS] Getting transcripts for call: ${callId}, tenant: ${tenantId}`,
+      `📋 [TRANSCRIPTS] Getting transcripts for call: ${callId}, tenant: ${tenantId} (page: ${page})`,
       'Component'
     );
+
+    // Build WHERE conditions
+    const whereConditions = [
+      eq(transcript.call_id, callId),
+      eq(transcript.tenant_id, tenantId), // ✅ SECURITY: Filter by tenant
+    ];
+
+    // Add filter conditions
+    if (filters.role) {
+      whereConditions.push(eq(transcript.role, filters.role));
+    }
+
+    // Add search conditions
+    if (search) {
+      const searchConditions = buildSearchConditions(search, ['content'], {
+        content: transcript.content,
+      });
+      if (searchConditions.length > 0) {
+        whereConditions.push(or(...searchConditions));
+      }
+    }
+
+    const whereClause = and(...whereConditions);
+
+    // Order by - fix column reference
+    const sortColumn = sort === 'role' ? transcript.role : transcript.timestamp;
+    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
 
     const transcripts = await db
       .select()
       .from(transcript)
-      .where(eq(transcript.call_id, callId))
-      .where(eq(transcript.tenant_id, tenantId)); // ✅ SECURITY: Filter by tenant
+      .where(whereClause)
+      .orderBy(orderClause)
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const totalCountResult = await db
+      .select({ count: transcript.id })
+      .from(transcript)
+      .where(whereClause);
+    const total = totalCountResult.length;
 
     logger.debug(
       `✅ [TRANSCRIPTS] Found ${transcripts.length} transcripts for call: ${callId}, tenant: ${tenantId}`,
@@ -71,7 +249,21 @@ router.get('/:callId', async (req, res) => {
       res,
       transcripts,
       `Retrieved ${transcripts.length} transcripts for call`,
-      { callId, tenantId, count: transcripts.length }
+      {
+        callId,
+        tenantId,
+        count: transcripts.length,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          hasNext: offset + limit < total,
+          hasPrev: page > 1,
+        },
+        search: search || null,
+        filters: Object.keys(filters).length > 0 ? filters : null,
+      }
     );
   } catch (error) {
     logger.error(
