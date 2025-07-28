@@ -278,6 +278,24 @@ export function addMultiLanguageNotification(
     metadata?: Record<string, any>;
   } = {}
 ) {
+  // ✅ MIGRATION: Use PopupSystem instead of NotificationSystem
+  // First try to use PopupSystem if available (new unified approach)
+  if (typeof window !== 'undefined' && (window as any).unifiedPopupSystem) {
+    const { showQuickNotification } = (window as any).unifiedPopupSystem;
+    const { title, message } = getLocalizedNotification(
+      template,
+      currentLanguage,
+      variables
+    );
+
+    return showQuickNotification(message, {
+      type: options.type || 'info',
+      title,
+      duration: options.duration || 3000,
+    });
+  }
+
+  // Fallback to old NotificationSystem (for backward compatibility during migration)
   if (typeof window !== 'undefined' && (window as any).addNotification) {
     const notification = createMultiLanguageNotification(
       template,
@@ -288,5 +306,16 @@ export function addMultiLanguageNotification(
     (window as any).addNotification(notification);
     return notification;
   }
+
+  // If neither system is available, log for debugging
+  if (typeof window !== 'undefined') {
+    console.warn('🔄 [Migration] No notification system available:', {
+      template,
+      currentLanguage,
+      variables,
+      options,
+    });
+  }
+
   return null;
 }

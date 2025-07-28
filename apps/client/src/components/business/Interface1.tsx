@@ -29,7 +29,8 @@ import { LANGUAGE_DISPLAY_NAMES } from '../features/voice-assistant/interface1/M
 
 // UI Components - Layout
 import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
-import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
+// ✅ MIGRATION: NotificationSystem removed - now using unified PopupSystem in VoiceAssistant
+// import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
 import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
 
 // UI Components - Popups
@@ -414,11 +415,12 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       </div>
 
       {/* ✅ ENHANCEMENT: Real-time Notification System */}
-      <NotificationSystem
+      {/* ✅ MIGRATION: NotificationSystem removed - now using unified PopupSystem in VoiceAssistant */}
+      {/* <NotificationSystem
         position="top-right"
         maxNotifications={5}
         className="z-[9999]"
-      />
+      /> */}
 
       {/* ✅ ENHANCEMENT: Service selection notification */}
       {selectedService && (

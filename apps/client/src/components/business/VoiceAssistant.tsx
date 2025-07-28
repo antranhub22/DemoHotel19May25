@@ -2,6 +2,7 @@ import { Interface1 } from '@/components/business/Interface1';
 import {
   PopupManager,
   PopupProvider,
+  usePopup,
 } from '@/components/features/popup-system';
 import WelcomePopup from '@/components/features/popup-system/WelcomePopup';
 import { VoiceLanguageSwitcher } from '@/components/features/voice-assistant/interface1/VoiceLanguageSwitcher';
@@ -13,6 +14,32 @@ import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// ✅ NEW: Component to expose PopupSystem globally for migration
+const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const popupSystem = usePopup();
+
+  // Expose PopupSystem globally for migration from NotificationSystem
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).unifiedPopupSystem = popupSystem;
+      logger.debug(
+        '🔄 [Migration] PopupSystem exposed globally',
+        'VoiceAssistant'
+      );
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).unifiedPopupSystem;
+      }
+    };
+  }, [popupSystem]);
+
+  return <>{children}</>;
+};
 
 // Error fallback component for Interface1
 const Interface1ErrorFallback: React.FC<{
@@ -163,87 +190,91 @@ const VoiceAssistant: React.FC = () => {
   // ✅ NEW: Mobile-First UI Rendering
   return (
     <PopupProvider>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-        {/* ✅ STEP 1: Welcome Modal (First-time users only) */}
-        {guestJourneyState.showWelcome && (
-          <WelcomePopup onClose={handleWelcomeComplete} />
-        )}
-
-        {/* ✅ STEP 2: Language Selection (Mobile-First, Manual Only) */}
-        {!guestJourneyState.showWelcome &&
-          !guestJourneyState.hasSelectedLanguage && (
-            <LanguageSelectionModal
-              onLanguageSelect={handleLanguageSelection}
-              isMobile={isMobile}
-            />
+      <GlobalPopupSystemProvider>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+          {/* ✅ STEP 1: Welcome Modal (First-time users only) */}
+          {guestJourneyState.showWelcome && (
+            <WelcomePopup onClose={handleWelcomeComplete} />
           )}
 
-        {/* Mobile-First Header */}
-        <div className="fixed top-0 left-0 right-0 z-[9997] bg-white/90 backdrop-blur-sm border-b">
-          <div className="flex items-center justify-between px-4 py-2">
-            {/* Logo/Title */}
-            <div className="text-lg font-bold text-blue-900">
-              {isMobile ? 'Hotel Assistant' : 'Hotel Voice Assistant'}
-            </div>
-
-            {/* Language Switcher (Mobile-Optimized) */}
-            {guestJourneyState.hasSelectedLanguage && (
-              <div className="flex items-center space-x-2">
-                <VoiceLanguageSwitcher
-                  position="header"
-                  showVoicePreview={false}
-                  onLanguageChange={handleLanguageSelection}
-                />
-                {!isMobile && (
-                  <button
-                    onClick={handleLogout}
-                    className="text-sm text-gray-600 hover:text-gray-900"
-                  >
-                    Logout
-                  </button>
-                )}
-              </div>
+          {/* ✅ STEP 2: Language Selection (Mobile-First, Manual Only) */}
+          {!guestJourneyState.showWelcome &&
+            !guestJourneyState.hasSelectedLanguage && (
+              <LanguageSelectionModal
+                onLanguageSelect={handleLanguageSelection}
+                isMobile={isMobile}
+              />
             )}
-          </div>
-        </div>
 
-        {/* ✅ STEP 3-5: Main Interface (Voice Call + Real-time Conversation + Summary) */}
-        {guestJourneyState.hasSelectedLanguage && (
-          <div
-            className="relative w-full h-full"
-            style={{
-              marginTop: isMobile ? '50px' : '60px',
-              minHeight: isMobile ? 'calc(100vh - 50px)' : 'calc(100vh - 60px)',
-            }}
-          >
-            <ErrorBoundary
-              fallbackComponent={Interface1ErrorFallback}
-              onError={(error, errorInfo) => {
-                logger.error(
-                  '🚨 [VoiceAssistant] Interface1 Error:',
-                  'Component',
-                  error
-                );
-                logger.error(
-                  '🚨 [VoiceAssistant] Error Info:',
-                  'Component',
-                  errorInfo
-                );
+          {/* Mobile-First Header */}
+          <div className="fixed top-0 left-0 right-0 z-[9997] bg-white/90 backdrop-blur-sm border-b">
+            <div className="flex items-center justify-between px-4 py-2">
+              {/* Logo/Title */}
+              <div className="text-lg font-bold text-blue-900">
+                {isMobile ? 'Hotel Assistant' : 'Hotel Voice Assistant'}
+              </div>
+
+              {/* Language Switcher (Mobile-Optimized) */}
+              {guestJourneyState.hasSelectedLanguage && (
+                <div className="flex items-center space-x-2">
+                  <VoiceLanguageSwitcher
+                    position="header"
+                    showVoicePreview={false}
+                    onLanguageChange={handleLanguageSelection}
+                  />
+                  {!isMobile && (
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      Logout
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ✅ STEP 3-5: Main Interface (Voice Call + Real-time Conversation + Summary) */}
+          {guestJourneyState.hasSelectedLanguage && (
+            <div
+              className="relative w-full h-full"
+              style={{
+                marginTop: isMobile ? '50px' : '60px',
+                minHeight: isMobile
+                  ? 'calc(100vh - 50px)'
+                  : 'calc(100vh - 60px)',
               }}
             >
-              <Interface1 key="mobile-first-interface1" isActive={true} />
-            </ErrorBoundary>
-          </div>
-        )}
+              <ErrorBoundary
+                fallbackComponent={Interface1ErrorFallback}
+                onError={(error, errorInfo) => {
+                  logger.error(
+                    '🚨 [VoiceAssistant] Interface1 Error:',
+                    'Component',
+                    error
+                  );
+                  logger.error(
+                    '🚨 [VoiceAssistant] Error Info:',
+                    'Component',
+                    errorInfo
+                  );
+                }}
+              >
+                <Interface1 key="mobile-first-interface1" isActive={true} />
+              </ErrorBoundary>
+            </div>
+          )}
 
-        {/* Mobile-First Popup System */}
-        <PopupManager
-          position="bottom"
-          maxVisible={isMobile ? 2 : 4}
-          autoCloseDelay={isMobile ? 8000 : 10000}
-          isMobile={isMobile}
-        />
-      </div>
+          {/* Mobile-First Popup System */}
+          <PopupManager
+            position="bottom"
+            maxVisible={isMobile ? 2 : 4}
+            autoCloseDelay={isMobile ? 8000 : 10000}
+            isMobile={isMobile}
+          />
+        </div>
+      </GlobalPopupSystemProvider>
     </PopupProvider>
   );
 };

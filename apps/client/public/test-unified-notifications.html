@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified PopupSystem Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005bb5;
+        }
+
+        .success {
+            background: #34C759;
+        }
+
+        .error {
+            background: #FF3B30;
+        }
+
+        .warning {
+            background: #FF9500;
+        }
+
+        .info {
+            background: #007AFF;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8f4fd;
+            border-left: 4px solid #007AFF;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-container">
+        <h1>🔄 Unified PopupSystem Test</h1>
+        <p>This page tests the migration from NotificationSystem to unified PopupSystem</p>
+
+        <div class="test-section">
+            <h3>📊 System Status</h3>
+            <div id="status-old" class="status">
+                <strong>Old NotificationSystem:</strong> <span id="old-status">Checking...</span>
+            </div>
+            <div id="status-new" class="status">
+                <strong>New PopupSystem:</strong> <span id="new-status">Checking...</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Notification Type Tests</h3>
+            <p>Test different notification types with the unified system:</p>
+
+            <button class="success" onclick="testSuccess()">✅ Success</button>
+            <button class="error" onclick="testError()">❌ Error</button>
+            <button class="warning" onclick="testWarning()">⚠️ Warning</button>
+            <button class="info" onclick="testInfo()">ℹ️ Info</button>
+            <button onclick="testCall()">📞 Call</button>
+            <button onclick="testService()">🛎️ Service</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📱 Mobile vs Desktop Test</h3>
+            <p>Test mobile responsiveness:</p>
+            <button onclick="testMobileNotifications()">📱 Mobile Test</button>
+            <button onclick="testDesktopNotifications()">💻 Desktop Test</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Migration Test</h3>
+            <p>Test backward compatibility:</p>
+            <button onclick="testOldAPI()">🔄 Old API Call</button>
+            <button onclick="testNewAPI()">✨ New API Call</button>
+            <button onclick="testMultiLanguage()">🌍 Multi-language</button>
+        </div>
+
+        <div id="results" class="test-section">
+            <h3>📝 Test Results</h3>
+            <div id="test-log"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test functions
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? '#34C759' :
+                type === 'error' ? '#FF3B30' :
+                    type === 'warning' ? '#FF9500' : '#007AFF';
+
+            logDiv.innerHTML += `<div style="color: ${color}; margin: 5px 0;">
+                [${timestamp}] ${message}
+            </div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Check system availability
+        function checkSystems() {
+            // Check old NotificationSystem
+            if (typeof window.addNotification === 'function') {
+                document.getElementById('old-status').textContent = '✅ Available';
+                log('Old NotificationSystem detected', 'success');
+            } else {
+                document.getElementById('old-status').textContent = '❌ Not Available';
+                log('Old NotificationSystem not available', 'warning');
+            }
+
+            // Check new PopupSystem
+            if (typeof window.unifiedPopupSystem === 'object' && window.unifiedPopupSystem) {
+                document.getElementById('new-status').textContent = '✅ Available';
+                log('New PopupSystem detected', 'success');
+
+                // Check methods
+                const methods = ['showQuickNotification', 'showMultiLanguageNotification'];
+                methods.forEach(method => {
+                    if (typeof window.unifiedPopupSystem[method] === 'function') {
+                        log(`✅ Method ${method} available`, 'success');
+                    } else {
+                        log(`❌ Method ${method} missing`, 'error');
+                    }
+                });
+            } else {
+                document.getElementById('new-status').textContent = '❌ Not Available';
+                log('New PopupSystem not available', 'error');
+            }
+        }
+
+        // Test functions
+        function testSuccess() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Operation completed successfully!', {
+                    type: 'success',
+                    title: 'Success Test',
+                    duration: 3000
+                });
+                log('Success notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for success test', 'error');
+            }
+        }
+
+        function testError() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Something went wrong!', {
+                    type: 'error',
+                    title: 'Error Test',
+                    duration: 4000
+                });
+                log('Error notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for error test', 'error');
+            }
+        }
+
+        function testWarning() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Please check your settings', {
+                    type: 'warning',
+                    title: 'Warning Test',
+                    duration: 3500
+                });
+                log('Warning notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for warning test', 'error');
+            }
+        }
+
+        function testInfo() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Here is some helpful information', {
+                    type: 'info',
+                    title: 'Info Test',
+                    duration: 3000
+                });
+                log('Info notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for info test', 'error');
+            }
+        }
+
+        function testCall() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Voice call started', {
+                    type: 'call',
+                    title: 'Call Status',
+                    duration: 2000
+                });
+                log('Call notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for call test', 'error');
+            }
+        }
+
+        function testService() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('Room service request confirmed', {
+                    type: 'service',
+                    title: 'Service Request',
+                    duration: 4000
+                });
+                log('Service notification sent via unified system', 'success');
+            } else {
+                log('Unified system not available for service test', 'error');
+            }
+        }
+
+        function testMobileNotifications() {
+            log('Testing mobile-optimized notifications...', 'info');
+            ['success', 'error', 'warning'].forEach((type, index) => {
+                setTimeout(() => {
+                    if (window.unifiedPopupSystem?.showQuickNotification) {
+                        window.unifiedPopupSystem.showQuickNotification(`Mobile ${type} test`, {
+                            type: type,
+                            duration: 2000,
+                            position: 'bottom'
+                        });
+                    }
+                }, index * 500);
+            });
+        }
+
+        function testDesktopNotifications() {
+            log('Testing desktop-optimized notifications...', 'info');
+            ['info', 'call', 'service'].forEach((type, index) => {
+                setTimeout(() => {
+                    if (window.unifiedPopupSystem?.showQuickNotification) {
+                        window.unifiedPopupSystem.showQuickNotification(`Desktop ${type} test`, {
+                            type: type,
+                            duration: 3000,
+                            position: 'top-right'
+                        });
+                    }
+                }, index * 700);
+            });
+        }
+
+        function testOldAPI() {
+            if (typeof window.addNotification === 'function') {
+                window.addNotification({
+                    type: 'success',
+                    title: 'Old API Test',
+                    message: 'Testing backward compatibility',
+                    duration: 3000
+                });
+                log('Old API call sent', 'warning');
+            } else {
+                log('Old API not available (expected after migration)', 'info');
+            }
+        }
+
+        function testNewAPI() {
+            if (window.unifiedPopupSystem?.showQuickNotification) {
+                window.unifiedPopupSystem.showQuickNotification('New API working perfectly!', {
+                    type: 'success',
+                    title: 'New API Test',
+                    duration: 3000
+                });
+                log('New API call sent', 'success');
+            } else {
+                log('New API not available', 'error');
+            }
+        }
+
+        function testMultiLanguage() {
+            if (window.unifiedPopupSystem?.showMultiLanguageNotification) {
+                window.unifiedPopupSystem.showMultiLanguageNotification(
+                    'languageChanged',
+                    'vi',
+                    { language: 'Vietnamese' },
+                    { type: 'info', duration: 3000 }
+                );
+                log('Multi-language notification sent', 'success');
+            } else {
+                log('Multi-language method not available', 'error');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            log('🚀 Starting unified PopupSystem tests...', 'info');
+
+            // Wait a bit for systems to load
+            setTimeout(() => {
+                checkSystems();
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>
