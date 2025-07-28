@@ -1,18 +1,18 @@
-import {
-  Mic,
-  Volume2,
-  VolumeX,
-  Settings,
-  ChevronUp,
-  ChevronDown,
-  Smartphone,
-  Headphones,
-} from 'lucide-react';
-import React, { useState, useCallback, useEffect } from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
+import {
+  ChevronDown,
+  ChevronUp,
+  Headphones,
+  Mic,
+  Settings,
+  Smartphone,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
 
 interface MobileVoiceControlsProps {
@@ -272,7 +272,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
               </div>
               <VoiceLanguageSwitcher
                 position="inline"
-                showVoicePreview={voiceSettings.feedback}
+                showVoicePreview={false}
                 onLanguageChange={handleLanguageChange}
                 className="w-full"
               />

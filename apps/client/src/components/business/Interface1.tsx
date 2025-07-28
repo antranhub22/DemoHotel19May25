@@ -258,7 +258,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       <div className="fixed top-4 left-4 z-[9998]">
         <VoiceLanguageSwitcher
           position="floating"
-          showVoicePreview={true}
+          showVoicePreview={false}
           onLanguageChange={handleLanguageChange}
         />
       </div>

@@ -221,17 +221,18 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
           );
 
           // Get assistant ID for this language (for display purposes)
-          const assistantId = newLanguage === 'vi'
-            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
-            : newLanguage === 'fr'
-              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
-              : newLanguage === 'zh'
-                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
-                : newLanguage === 'ru'
-                  ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
-                  : newLanguage === 'ko'
-                    ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
-                    : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+          const assistantId =
+            newLanguage === 'vi'
+              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
+              : newLanguage === 'fr'
+                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
+                : newLanguage === 'zh'
+                  ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
+                  : newLanguage === 'ru'
+                    ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
+                    : newLanguage === 'ko'
+                      ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
+                      : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
           (window as any).addNotification({
             type: 'success',
@@ -279,6 +280,12 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   // Enhanced voice preview with better error handling
   const playVoicePreview = useCallback(
     (langCode: Language, isConfirmation = false) => {
+      // ✅ BUSINESS LOGIC: No voice preview - manual selection only
+      if (!showVoicePreview) {
+        logger.debug('Voice preview disabled by business logic', 'Component');
+        return;
+      }
+
       if (
         !('speechSynthesis' in window) ||
         typeof window.speechSynthesis === 'undefined'
@@ -467,8 +474,9 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
           {isMobile && <Smartphone className="h-3 w-3 text-gray-500" />}
 
           <ChevronDown
-            className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
-              }`}
+            className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
+              isOpen ? 'rotate-180' : ''
+            }`}
           />
         </div>
       </button>
