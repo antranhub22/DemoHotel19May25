@@ -1,6 +1,4 @@
-import React, { useCallback, createElement, useRef } from 'react';
 import { usePopup } from '@/components/features/popup-system';
-import { useAssistant } from '@/context';
 import { logger } from '@shared/utils/logger';
 
 interface UseConfirmHandlerProps {
@@ -231,34 +229,11 @@ export const useConfirmHandler = ({
               'Component'
             );
 
-            // ✅ ADDITIONAL: Force Vapi stop as backup to ensure no continued conversation
-            try {
-              const { getVapiInstance } = await import('@/lib/vapiClient');
-              const vapi = getVapiInstance();
-              if (vapi) {
-                logger.debug(
-                  '🔧 [useConfirmHandler] Step 2b: Force stopping Vapi instance as backup...',
-                  'Component'
-                );
-                vapi.stop();
-                logger.debug(
-                  '✅ [useConfirmHandler] Step 2b: Vapi instance force stopped',
-                  'Component'
-                );
-              } else {
-                logger.debug(
-                  '⚠️ [useConfirmHandler] Step 2b: No Vapi instance found to force stop',
-                  'Component'
-                );
-              }
-            } catch (vapiError) {
-              logger.warn(
-                '⚠️ [useConfirmHandler] Step 2b: Backup Vapi stop failed:',
-                'Component',
-                vapiError
-              );
-              // Continue - not critical for main flow
-            }
+            // ✅ REMOVED: Force Vapi stop - now handled by VapiOfficial in VapiContextSimple
+            logger.debug(
+              '🔧 [useConfirmHandler] Step 2b: Call ended via VapiOfficial - no manual stop needed',
+              'Component'
+            );
           }
         } catch (endCallError) {
           logger.error(

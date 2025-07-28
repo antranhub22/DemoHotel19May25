@@ -1,10 +1,10 @@
 import {
-  createSimpleVapiClient,
-  getSimpleVapiClient,
-  type SimpleVapiConfig,
-} from '@/lib/simpleVapiClient';
+  createVapiClient,
+  VapiOfficial,
+  VapiOfficialConfig,
+} from '@/lib/vapiOfficial';
 import { logger } from '@shared/utils/logger';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 const VapiTestButton: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -12,6 +12,7 @@ const VapiTestButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
+  const [vapiClient, setVapiClient] = useState<VapiOfficial | null>(null);
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
@@ -19,9 +20,26 @@ const VapiTestButton: React.FC = () => {
     logger.debug(message, 'VapiTestButton');
   };
 
-  const config: SimpleVapiConfig = {
+  const config: VapiOfficialConfig = {
     publicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
     assistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
+    onCallStart: () => {
+      setIsCallActive(true);
+      addLog('📞 Call started');
+    },
+    onCallEnd: () => {
+      setIsCallActive(false);
+      addLog('📞 Call ended');
+    },
+    onMessage: message => {
+      if (message.type === 'transcript') {
+        addLog(`💬 ${message.role}: ${message.transcript.substring(0, 50)}...`);
+      }
+    },
+    onError: error => {
+      addLog(`❌ Error: ${error.message || error}`);
+      setError(error.message || String(error));
+    },
   };
 
   const checkEnvironmentVars = (): boolean => {
@@ -46,15 +64,15 @@ const VapiTestButton: React.FC = () => {
     setError(null);
 
     try {
-      addLog('🚀 Initializing Vapi...');
+      addLog('🚀 Initializing VapiOfficial...');
 
-      const client = createSimpleVapiClient(config);
-      await client.initialize();
-
+      const client = createVapiClient(config);
+      setVapiClient(client);
       setIsInitialized(true);
-      addLog('✅ Vapi initialized successfully');
+
+      addLog('✅ VapiOfficial initialized successfully');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
       addLog(`❌ Initialization failed: ${errorMessage}`);
     } finally {
@@ -63,23 +81,18 @@ const VapiTestButton: React.FC = () => {
   };
 
   const handleStartCall = async () => {
-    const client = getSimpleVapiClient();
-    if (!client) {
-      setError('Vapi not initialized');
+    if (!vapiClient) {
+      addLog('❌ Vapi not initialized');
       return;
     }
 
     setIsLoading(true);
-    setError(null);
-
     try {
       addLog('📞 Starting call...');
-
-      const call = await client.startCall();
-      setIsCallActive(true);
-      addLog(`✅ Call started: ${call?.id || 'unknown'}`);
+      await vapiClient.startCall();
+      addLog('✅ Call started successfully');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
       addLog(`❌ Call start failed: ${errorMessage}`);
     } finally {
@@ -87,130 +100,152 @@ const VapiTestButton: React.FC = () => {
     }
   };
 
-  const handleStopCall = () => {
-    const client = getSimpleVapiClient();
-    if (!client) return;
+  const handleEndCall = async () => {
+    if (!vapiClient) {
+      addLog('❌ Vapi not initialized');
+      return;
+    }
 
+    setIsLoading(true);
     try {
-      addLog('🛑 Stopping call...');
-      client.stopCall();
-      setIsCallActive(false);
-      addLog('✅ Call stopped');
+      addLog('⏹️ Ending call...');
+      await vapiClient.endCall();
+      addLog('✅ Call ended successfully');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage);
-      addLog(`❌ Stop call failed: ${errorMessage}`);
+      addLog(`❌ Call end failed: ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Check call status periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const client = getSimpleVapiClient();
-      if (client) {
-        const isActive = client.isActive();
-        if (isActive !== isCallActive) {
-          setIsCallActive(isActive);
-          addLog(
-            isActive ? '📞 Call became active' : '📴 Call became inactive'
-          );
-        }
-      }
-    }, 1000);
+  const clearLogs = () => {
+    setLogs([]);
+    setError(null);
+  };
 
-    return () => clearInterval(interval);
-  }, [isCallActive]);
+  const getButtonStyle = (variant: 'primary' | 'success' | 'danger') => {
+    const baseStyle =
+      'px-4 py-2 rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+
+    switch (variant) {
+      case 'primary':
+        return `${baseStyle} bg-blue-500 hover:bg-blue-600 text-white`;
+      case 'success':
+        return `${baseStyle} bg-green-500 hover:bg-green-600 text-white`;
+      case 'danger':
+        return `${baseStyle} bg-red-500 hover:bg-red-600 text-white`;
+      default:
+        return baseStyle;
+    }
+  };
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">🎙️ Vapi Integration Test</h2>
+    <div className="p-6 max-w-2xl mx-auto bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">
+        🎙️ VapiOfficial Test Button
+      </h2>
 
-      {/* Environment Info */}
-      <div className="mb-4 p-3 bg-gray-100 rounded">
-        <h3 className="font-semibold mb-2">Environment Info:</h3>
-        <div className="text-sm">
-          <div>
-            Public Key:{' '}
-            {config.publicKey
-              ? `${config.publicKey.substring(0, 15)}...`
-              : '❌ Not Set'}
+      <div className="space-y-4">
+        {/* Status */}
+        <div className="flex items-center space-x-4">
+          <div
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              isInitialized
+                ? 'bg-green-100 text-green-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {isInitialized ? '✅ Initialized' : '⚪ Not Initialized'}
           </div>
-          <div>
-            Assistant ID:{' '}
-            {config.assistantId
-              ? `${config.assistantId.substring(0, 15)}...`
-              : '❌ Not Set'}
+
+          <div
+            className={`px-3 py-1 rounded-full text-sm font-medium ${
+              isCallActive
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {isCallActive ? '📞 Call Active' : '📴 No Call'}
           </div>
         </div>
-      </div>
 
-      {/* Control Buttons */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={handleInitialize}
-          disabled={isInitialized || isLoading}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
-          {isLoading && !isInitialized
-            ? '⏳ Initializing...'
-            : '🚀 Initialize Vapi'}
-        </button>
+        {/* Buttons */}
+        <div className="flex space-x-3">
+          <button
+            onClick={handleInitialize}
+            disabled={isLoading || isInitialized}
+            className={getButtonStyle('primary')}
+          >
+            {isLoading ? '⏳ Initializing...' : '🚀 Initialize'}
+          </button>
 
-        <button
-          onClick={handleStartCall}
-          disabled={!isInitialized || isCallActive || isLoading}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-        >
-          {isLoading && isInitialized ? '⏳ Starting...' : '📞 Start Call'}
-        </button>
+          <button
+            onClick={handleStartCall}
+            disabled={isLoading || !isInitialized || isCallActive}
+            className={getButtonStyle('success')}
+          >
+            {isLoading ? '⏳ Starting...' : '📞 Start Call'}
+          </button>
 
-        <button
-          onClick={handleStopCall}
-          disabled={!isCallActive}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400"
-        >
-          🛑 Stop Call
-        </button>
-      </div>
+          <button
+            onClick={handleEndCall}
+            disabled={isLoading || !isCallActive}
+            className={getButtonStyle('danger')}
+          >
+            {isLoading ? '⏳ Ending...' : '⏹️ End Call'}
+          </button>
 
-      {/* Status */}
-      <div className="mb-4">
-        <div
-          className={`px-3 py-1 rounded text-sm ${
-            isInitialized
-              ? 'bg-green-100 text-green-800'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}
-        >
-          Status:{' '}
-          {isInitialized
-            ? isCallActive
-              ? '📞 Call Active'
-              : '✅ Ready'
-            : '⏳ Not Initialized'}
+          <button
+            onClick={clearLogs}
+            className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded font-medium transition-colors"
+          >
+            🗑️ Clear
+          </button>
         </div>
-      </div>
 
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          <strong>Error:</strong> {error}
-        </div>
-      )}
-
-      {/* Logs */}
-      <div className="bg-black text-green-400 p-3 rounded h-40 overflow-y-auto font-mono text-sm">
-        <div className="font-bold mb-2">📋 Activity Log:</div>
-        {logs.length === 0 && (
-          <div className="text-gray-500">No activity yet...</div>
+        {/* Error Display */}
+        {error && (
+          <div className="p-3 bg-red-100 border border-red-300 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-red-500">❌</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
-        {logs.map((log, index) => (
-          <div key={index}>{log}</div>
-        ))}
-      </div>
 
-      <div className="mt-4 text-xs text-gray-500">
-        💡 Open DevTools Console to see detailed logs
+        {/* Logs */}
+        <div className="bg-gray-50 p-4 rounded-md">
+          <h3 className="text-sm font-medium text-gray-800 mb-2">📋 Logs</h3>
+          <div className="space-y-1 max-h-60 overflow-y-auto">
+            {logs.length === 0 ? (
+              <p className="text-sm text-gray-500">No logs yet...</p>
+            ) : (
+              logs.map((log, index) => (
+                <div
+                  key={index}
+                  className="text-xs font-mono text-gray-700 bg-white p-2 rounded border"
+                >
+                  {log}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Environment Info */}
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>Public Key: {config.publicKey ? '✅ Set' : '❌ Missing'}</p>
+          <p>Assistant ID: {config.assistantId ? '✅ Set' : '❌ Missing'}</p>
+        </div>
       </div>
     </div>
   );

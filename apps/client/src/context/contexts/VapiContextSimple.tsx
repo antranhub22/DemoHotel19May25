@@ -1,9 +1,14 @@
 // 🎯 SIMPLIFIED VAPI CONTEXT - Using Official Pattern
 // Replaces complex VapiContext with simple, official implementation
+// ✅ UPDATED: Now uses vapiOfficial.ts instead of vapiSimple.ts
 
 import { useTenantDetection } from '@/context/AuthContext';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
-import { CallOptions, VapiSimple } from '@/lib/vapiSimple';
+import {
+  CallOptions,
+  VapiOfficial,
+  VapiOfficialConfig,
+} from '@/lib/vapiOfficial';
 import { CallDetails, Language } from '@/types';
 import { logger } from '@shared/utils/logger';
 import React, {
@@ -44,25 +49,22 @@ interface VapiProviderProps {
   hotelConfig?: HotelConfiguration | null;
 }
 
-export const VapiProvider: React.FC<VapiProviderProps> = ({
-  children,
-  hotelConfig,
-}) => {
-  // State
+export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
+  // State management
   const [isCallActive, setIsCallActive] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState<string>('en'); // Track current language
-  const [currentCallId, setCurrentCallId] = useState<string | null>(null); // ✅ NEW: Track consistent call ID
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [currentCallId, setCurrentCallId] = useState<string | null>(null);
 
-  // References
-  const vapiClientRef = useRef<VapiSimple | null>(null);
+  // Refs
+  const vapiClientRef = useRef<VapiOfficial | null>(null);
+
+  // Context dependencies
   const { addTranscript } = useTranscript();
-
-  // ✅ FIX: Get proper tenant ID from subdomain
   const tenantInfo = useTenantDetection();
 
-  // Get tenant ID - priority: subdomain -> customDomain -> default
+  // Get tenant ID function
   const getTenantId = (): string => {
     if (tenantInfo?.subdomain) {
       return `tenant-${tenantInfo.subdomain}`;
@@ -73,82 +75,85 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
     return 'tenant-default';
   };
 
-  // Get environment credentials
-  const getCredentials = (language: string = 'en') => {
-    // Try hotel config first
-    if (hotelConfig?.vapiPublicKey) {
-      return {
-        publicKey: hotelConfig.vapiPublicKey,
-        assistantId: hotelConfig.vapiAssistantId,
-      };
+  // ✅ UPDATED: Using VapiOfficial instead of VapiSimple
+  const initializeVapi = (language: string): VapiOfficial => {
+    // Get environment variables with proper validation
+    const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
+
+    // Language-specific assistant IDs
+    const assistantIds: Record<string, string> = {
+      en: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
+      vi:
+        import.meta.env.VITE_VAPI_ASSISTANT_ID_VI ||
+        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+        '',
+      fr:
+        import.meta.env.VITE_VAPI_ASSISTANT_ID_FR ||
+        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+        '',
+      zh:
+        import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH ||
+        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+        '',
+      ru:
+        import.meta.env.VITE_VAPI_ASSISTANT_ID_RU ||
+        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+        '',
+      ko:
+        import.meta.env.VITE_VAPI_ASSISTANT_ID_KO ||
+        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+        '',
+    };
+
+    const assistantId = assistantIds[language] || assistantIds.en;
+
+    if (!publicKey || !assistantId) {
+      throw new Error(
+        `Missing Vapi credentials for language ${language}: publicKey=${!!publicKey}, assistantId=${!!assistantId}`
+      );
     }
 
-    // Fallback to environment variables
-    const publicKey =
-      language === 'vi'
-        ? import.meta.env.VITE_VAPI_PUBLIC_KEY_VI
-        : language === 'fr'
-          ? import.meta.env.VITE_VAPI_PUBLIC_KEY_FR
-          : language === 'zh'
-            ? import.meta.env.VITE_VAPI_PUBLIC_KEY_ZH
-            : language === 'ru'
-              ? import.meta.env.VITE_VAPI_PUBLIC_KEY_RU
-              : language === 'ko'
-                ? import.meta.env.VITE_VAPI_PUBLIC_KEY_KO
-                : import.meta.env.VITE_VAPI_PUBLIC_KEY;
-
-    const assistantId =
-      language === 'vi'
-        ? import.meta.env.VITE_VAPI_ASSISTANT_ID_VI
-        : language === 'fr'
-          ? import.meta.env.VITE_VAPI_ASSISTANT_ID_FR
-          : language === 'zh'
-            ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
-            : language === 'ru'
-              ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
-              : language === 'ko'
-                ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
-                : import.meta.env.VITE_VAPI_ASSISTANT_ID;
-
     logger.debug(
-      '🔑 [VapiProvider] Getting credentials for language:',
+      '🔧 [VapiProvider] Initializing VapiOfficial:',
       'VapiProvider',
       {
         language,
-        publicKey: publicKey ? `${publicKey.substring(0, 15)}...` : 'MISSING',
-        assistantId: assistantId
-          ? `${assistantId.substring(0, 15)}...`
-          : 'MISSING',
+        publicKey: publicKey.substring(0, 10) + '...',
+        assistantId: assistantId.substring(0, 15) + '...',
       }
     );
 
-    return { publicKey, assistantId };
-  };
-
-  // Initialize Vapi
-  const initializeVapi = (language: string = 'en') => {
-    // ✅ REVERT: Remove async
-    const credentials = getCredentials(language);
-    const { publicKey, assistantId } = credentials;
-
-    if (!publicKey) {
-      logger.error('❌ [VapiProvider] Missing Vapi public key', 'VapiProvider');
-      return null;
-    }
-
-    logger.debug('🚀 [VapiProvider] Initializing Vapi client', 'VapiProvider', {
-      language,
-      assistantId: assistantId
-        ? `${assistantId.substring(0, 15)}...`
-        : 'MISSING',
-    });
-
-    // ✅ FIX: Use correct VapiConfig structure
-    const vapi = new VapiSimple({
-      publicKey: publicKey,
-      assistantId: assistantId,
+    // ✅ UPDATED: Create VapiOfficial config
+    const config: VapiOfficialConfig = {
+      publicKey,
+      assistantId,
+      onCallStart: () => {
+        logger.debug('📞 [VapiProvider] Call started', 'VapiProvider');
+        setIsCallActive(true);
+        setMicLevel(0);
+        // Generate new call ID when call starts
+        const newCallId = `call-${Date.now()}`;
+        setCurrentCallId(newCallId);
+        logger.debug(
+          '🆔 [VapiProvider] Call started with new call ID:',
+          'VapiProvider',
+          newCallId
+        );
+      },
+      onCallEnd: () => {
+        logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
+        setIsCallActive(false);
+        setMicLevel(0);
+        // Keep call ID for a bit to allow final transcripts, then reset
+        setTimeout(() => {
+          logger.debug(
+            '🆔 [VapiProvider] Resetting call ID after call end',
+            'VapiProvider'
+          );
+          setCurrentCallId(null);
+        }, 2000); // 2 second delay to allow final transcripts
+      },
       onMessage: message => {
-        // Handle different message types
         if (message.type === 'transcript') {
           // ✅ FIX: Use consistent call ID throughout the call session
           const callId = currentCallId || `call-${Date.now()}`;
@@ -218,53 +223,25 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
           logger.debug('🔧 Function call', 'VapiProvider', message);
         }
       },
-
       onError: error => {
         logger.error('❌ Vapi error', 'VapiProvider', error);
         setIsCallActive(false);
         setMicLevel(0);
-        // ✅ NEW: Reset call ID on error
+        // Reset call ID on error
         setCurrentCallId(null);
       },
-
       onSpeechStart: () => {
         logger.debug('🗣️ Speech started', 'VapiProvider');
         setMicLevel(0.8); // Simulate mic level
       },
-
       onSpeechEnd: () => {
         logger.debug('🔇 Speech ended', 'VapiProvider');
         setMicLevel(0);
       },
+    };
 
-      onCallStart: () => {
-        logger.debug('📞 Call started', 'VapiProvider');
-        setIsCallActive(true);
-        setMicLevel(0);
-        // ✅ NEW: Generate new call ID when call starts
-        const newCallId = `call-${Date.now()}`;
-        setCurrentCallId(newCallId);
-        logger.debug(
-          '🆔 [VapiProvider] Call started with new call ID:',
-          'VapiProvider',
-          newCallId
-        );
-      },
-
-      onCallEnd: () => {
-        logger.debug('📞 Call ended', 'VapiProvider');
-        setIsCallActive(false);
-        setMicLevel(0);
-        // ✅ NEW: Keep call ID for a bit to allow final transcripts, then reset
-        setTimeout(() => {
-          logger.debug(
-            '🆔 [VapiProvider] Resetting call ID after call end',
-            'VapiProvider'
-          );
-          setCurrentCallId(null);
-        }, 2000); // 2 second delay to allow final transcripts
-      },
-    });
+    // ✅ UPDATED: Create VapiOfficial instance
+    const vapi = new VapiOfficial(config);
 
     vapiClientRef.current = vapi;
     setCurrentLanguage(language);
@@ -317,8 +294,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         timestamp: new Date().toISOString(),
       });
 
-      // ✅ FIX: Only include assistantId in options when provided
-      // This allows VapiSimple to fallback to config.assistantId from initializeVapi()
+      // ✅ UPDATED: Use CallOptions interface from vapiOfficial
       const options: CallOptions = {
         timeout: 5 * 60 * 1000, // 5 minutes timeout
         metadata: {
@@ -333,70 +309,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
         options.assistantId = assistantId;
       }
 
-      logger.debug(
-        '🚀 [VapiProvider] Starting call with options:',
-        'VapiProvider',
-        {
-          language,
-          hasExplicitAssistantId: !!assistantId,
-          explicitAssistantId: assistantId
-            ? `${assistantId.substring(0, 15)}...`
-            : 'none',
-          willFallbackToConfig: !assistantId,
-        }
-      );
+      console.log('🚀 [DEBUG] Starting call with options:', {
+        options: {
+          ...options,
+          assistantId: options.assistantId?.substring(0, 15) + '...',
+        },
+        timestamp: new Date().toISOString(),
+      });
 
-      // ✅ NEW: Debug before actual Vapi call
-      console.log(
-        '🎯 [DEBUG] About to call vapiClientRef.current.startCall():',
-        {
-          language,
-          options,
-          clientExists: !!vapiClientRef.current,
-          clientStartCallExists: !!(
-            vapiClientRef.current && vapiClientRef.current.startCall
-          ),
-          timestamp: new Date().toISOString(),
-        }
-      );
-
-      // Start the call
+      // ✅ UPDATED: Start call using VapiOfficial
       await vapiClientRef.current.startCall(options);
 
-      // ✅ NEW: Debug after successful Vapi call
-      console.log(
-        '🎉 [DEBUG] vapiClientRef.current.startCall() completed successfully:',
-        {
-          language,
-          assistantId,
-          timestamp: new Date().toISOString(),
-        }
-      );
-
-      logger.debug('✅ Call started successfully', 'VapiProvider', {
-        language,
-        assistantId: assistantId
-          ? `${assistantId.substring(0, 15)}...`
-          : 'from-config',
-      });
+      console.log('✅ [DEBUG] Call started successfully');
     } catch (error) {
-      // ✅ NEW: Enhanced error debugging for VapiContextSimple
-      console.error('💥 [DEBUG] Error in VapiContextSimple.startCall:', {
-        error,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        errorStack: error instanceof Error ? error.stack : 'No stack',
-        timestamp: new Date().toISOString(),
-        language,
-        assistantId,
-        isCallActive,
-        vapiClientExists: !!vapiClientRef.current,
-        vapiClientStartCallExists: !!(
-          vapiClientRef.current && vapiClientRef.current.startCall
-        ),
-      });
-
+      console.error('❌ [DEBUG] Error starting call:', error);
       logger.error('❌ Failed to start call', 'VapiProvider', error);
-      setIsCallActive(false);
       throw error;
     }
   };
@@ -405,96 +332,77 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({
   const endCall = async (): Promise<void> => {
     try {
       if (vapiClientRef.current) {
+        console.log('🛑 [DEBUG] Ending call via VapiOfficial');
         await vapiClientRef.current.endCall();
-        logger.debug('✅ Call ended successfully', 'VapiProvider');
+        console.log('✅ [DEBUG] Call ended successfully');
       }
     } catch (error) {
+      console.error('❌ [DEBUG] Error ending call:', error);
       logger.error('❌ Failed to end call', 'VapiProvider', error);
-    } finally {
-      setIsCallActive(false);
-      setMicLevel(0);
+      throw error;
     }
   };
 
-  // ✅ NEW: Reinitialize Vapi for language change
+  // Reinitialize for language change
   const reinitializeForLanguage = (language: string): void => {
-    logger.debug(
-      '🌐 [VapiProvider] Reinitializing for language change',
-      'VapiProvider',
-      {
-        oldLanguage: currentLanguage,
-        newLanguage: language,
-      }
-    );
+    if (isCallActive) {
+      logger.warn('⚠️ Cannot reinitialize during active call', 'VapiProvider');
+      return;
+    }
 
-    // Only reinitialize if language actually changed
-    if (language !== currentLanguage) {
-      // Destroy existing client if active
+    try {
+      // Destroy current instance
       if (vapiClientRef.current) {
-        if (isCallActive) {
-          vapiClientRef.current.endCall().catch(error => {
-            logger.error(
-              '❌ Error ending call during language switch',
-              'VapiProvider',
-              error
-            );
-          });
-        }
         vapiClientRef.current.destroy();
       }
 
-      // Update current language
+      // Initialize for new language
+      vapiClientRef.current = initializeVapi(language);
       setCurrentLanguage(language);
 
-      // Initialize new client for the language (but don't start call)
-      vapiClientRef.current = initializeVapi(language);
-
-      logger.debug(
-        '✅ [VapiProvider] Vapi reinitialized for language',
+      logger.debug('🔄 Reinitialized for language:', 'VapiProvider', language);
+    } catch (error) {
+      logger.error(
+        '❌ Failed to reinitialize for language:',
         'VapiProvider',
-        {
-          language,
-          clientReady: !!vapiClientRef.current,
-        }
-      );
-    } else {
-      logger.debug(
-        '⚠️ [VapiProvider] Language unchanged, skipping reinitialize',
-        'VapiProvider',
-        { language }
+        error
       );
     }
   };
 
-  // ✅ REMOVED: Duplicate useEffect - only keep one clean initialization
-
-  // Cleanup on unmount
+  // Initialize on mount
   useEffect(() => {
+    if (!vapiClientRef.current) {
+      try {
+        vapiClientRef.current = initializeVapi(currentLanguage);
+      } catch (error) {
+        logger.error(
+          '❌ Failed to initialize Vapi on mount:',
+          'VapiProvider',
+          error
+        );
+      }
+    }
+
+    // Cleanup on unmount
     return () => {
       if (vapiClientRef.current) {
         vapiClientRef.current.destroy();
+        vapiClientRef.current = null;
       }
     };
   }, []);
 
-  // Context value
-  const contextValue: VapiContextType = {
-    // Call state
+  const value: VapiContextType = {
     isCallActive,
     micLevel,
     callDetails,
-    currentLanguage, // Expose current language
-
-    // Call functions
+    currentLanguage,
     startCall,
     endCall,
-    setCallDetails, // ✅ FIX: Add missing function from interface
-    reinitializeForLanguage, // ✅ NEW: Add language reinitialization
+    setCallDetails,
+    reinitializeForLanguage,
   };
 
-  return (
-    <VapiContext.Provider value={contextValue}>{children}</VapiContext.Provider>
-  );
+  return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;
 };
-
-export default VapiProvider;

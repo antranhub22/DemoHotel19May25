@@ -1,5 +1,6 @@
 // Official Vapi Implementation - Following docs.vapi.ai exactly
 // Based on: https://docs.vapi.ai/quickstart/web
+// Enhanced for compatibility with existing codebase
 
 import { logger } from '@shared/utils/logger';
 import Vapi from '@vapi-ai/web';
@@ -11,11 +12,22 @@ export interface VapiOfficialConfig {
   onCallEnd?: () => void;
   onMessage?: (message: any) => void;
   onError?: (error: any) => void;
+  onSpeechStart?: () => void;
+  onSpeechEnd?: () => void;
+}
+
+// ✅ NEW: CallOptions interface for compatibility with existing code
+export interface CallOptions {
+  assistantId?: string;
+  metadata?: Record<string, any>;
+  timeout?: number; // Auto-end call after N seconds
 }
 
 export class VapiOfficial {
   private vapi: any;
   private config: VapiOfficialConfig;
+  private callTimeout: NodeJS.Timeout | null = null;
+  private _isCallActive = false;
 
   constructor(config: VapiOfficialConfig) {
     this.config = config;
@@ -32,12 +44,15 @@ export class VapiOfficial {
     // Call start event
     this.vapi.on('call-start', () => {
       logger.debug('🎙️ Call started', 'VapiOfficial');
+      this._isCallActive = true;
       this.config.onCallStart?.();
     });
 
     // Call end event
     this.vapi.on('call-end', () => {
       logger.debug('📞 Call ended', 'VapiOfficial');
+      this._isCallActive = false;
+      this.clearCallTimeout();
       this.config.onCallEnd?.();
     });
 
@@ -55,50 +70,111 @@ export class VapiOfficial {
     // Error handling
     this.vapi.on('error', (error: any) => {
       logger.error('❌ Vapi error:', 'VapiOfficial', error);
+      this._isCallActive = false;
+      this.clearCallTimeout();
       this.config.onError?.(error);
     });
 
     // Speech start/end for UI feedback
     this.vapi.on('speech-start', () => {
       logger.debug('🗣️ Speech started', 'VapiOfficial');
+      this.config.onSpeechStart?.();
     });
 
     this.vapi.on('speech-end', () => {
       logger.debug('🤐 Speech ended', 'VapiOfficial');
+      this.config.onSpeechEnd?.();
     });
   }
 
   /**
-   * Start a voice call with the assistant
+   * Start a voice call with options (enhanced for compatibility)
+   * @param options - Call options including assistantId, metadata, timeout
+   */
+  async startCall(options: CallOptions = {}): Promise<void> {
+    try {
+      const assistantId = options.assistantId || this.config.assistantId;
+
+      if (!assistantId) {
+        throw new Error('Assistant ID is required to start a call');
+      }
+
+      if (this._isCallActive) {
+        logger.warn(
+          '⚠️ Call already active, ending previous call first',
+          'VapiOfficial'
+        );
+        await this.endCall();
+        // Wait a moment before starting new call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      logger.debug('🚀 Starting Vapi call', 'VapiOfficial', {
+        assistantId: assistantId.substring(0, 15) + '...',
+        timeout: options.timeout,
+        metadata: options.metadata,
+      });
+
+      // Start the call with metadata if provided
+      await this.vapi.start(assistantId, {
+        metadata: options.metadata,
+      });
+
+      // Set auto-timeout if specified
+      if (options.timeout) {
+        this.setCallTimeout(options.timeout);
+      }
+
+      logger.debug('✅ Call started successfully', 'VapiOfficial');
+    } catch (error) {
+      logger.error('❌ Failed to start call', 'VapiOfficial', error);
+      this._isCallActive = false;
+      this.config.onError?.(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Start call with just assistantId (backward compatibility)
    * @param assistantId - The assistant ID to use for the call
    */
-  startCall(assistantId?: string): Promise<void> {
-    const id = assistantId || this.config.assistantId;
-
-    if (!id) {
-      throw new Error('Assistant ID is required to start a call');
-    }
-
-    logger.debug('🚀 Starting Vapi call', 'VapiOfficial', {
-      assistantId: id.substring(0, 15) + '...',
-    });
-
-    return this.vapi.start(id);
+  startCallWithId(assistantId?: string): Promise<void> {
+    return this.startCall({ assistantId });
   }
 
   /**
    * End the current call
    */
-  endCall(): Promise<void> {
-    logger.debug('⏹️ Ending Vapi call', 'VapiOfficial');
-    return this.vapi.stop();
+  async endCall(): Promise<void> {
+    try {
+      if (!this._isCallActive) {
+        logger.debug('⚠️ No active call to end', 'VapiOfficial');
+        return;
+      }
+
+      logger.debug('⏹️ Ending Vapi call', 'VapiOfficial');
+
+      this.clearCallTimeout();
+      await this.vapi.stop();
+
+      // Reset state
+      this._isCallActive = false;
+
+      logger.debug('✅ Call ended successfully', 'VapiOfficial');
+    } catch (error) {
+      logger.error('❌ Failed to end call', 'VapiOfficial', error);
+      // Reset state even on error
+      this._isCallActive = false;
+      this.clearCallTimeout();
+      throw error;
+    }
   }
 
   /**
    * Check if currently in a call
    */
   isCallActive(): boolean {
-    return this.vapi.isCallActive;
+    return this._isCallActive;
   }
 
   /**
@@ -112,6 +188,39 @@ export class VapiOfficial {
 
     this.vapi.send(message);
     logger.debug('📤 Message sent', 'VapiOfficial', { message });
+  }
+
+  /**
+   * Set call timeout
+   */
+  private setCallTimeout(timeoutMs: number): void {
+    this.clearCallTimeout();
+
+    this.callTimeout = setTimeout(async () => {
+      logger.debug('⏰ Call timeout reached, ending call', 'VapiOfficial');
+      try {
+        await this.endCall();
+      } catch (error) {
+        logger.error(
+          '❌ Error during timeout call end:',
+          'VapiOfficial',
+          error
+        );
+      }
+    }, timeoutMs);
+
+    logger.debug(`⏰ Call timeout set for ${timeoutMs}ms`, 'VapiOfficial');
+  }
+
+  /**
+   * Clear call timeout
+   */
+  private clearCallTimeout(): void {
+    if (this.callTimeout) {
+      clearTimeout(this.callTimeout);
+      this.callTimeout = null;
+      logger.debug('⏰ Call timeout cleared', 'VapiOfficial');
+    }
   }
 
   /**
@@ -136,8 +245,10 @@ export class VapiOfficial {
    */
   destroy(): void {
     if (this.vapi) {
+      this.clearCallTimeout();
       this.vapi.stop();
       this.vapi = null;
+      this._isCallActive = false;
       logger.debug('🗑️ Vapi instance destroyed', 'VapiOfficial');
     }
   }
@@ -147,6 +258,9 @@ export class VapiOfficial {
 export const createVapiClient = (config: VapiOfficialConfig): VapiOfficial => {
   return new VapiOfficial(config);
 };
+
+// Backward compatibility alias
+export type { VapiOfficialConfig as VapiConfig };
 
 // Example usage:
 /*
@@ -163,12 +277,16 @@ const vapiClient = createVapiClient({
   onError: (error) => console.error('Vapi error:', error)
 });
 
-// Start a call
-vapiClient.startCall();
+// Start a call with options
+await vapiClient.startCall({
+  assistantId: 'asst_different_assistant',
+  timeout: 300000, // 5 minutes
+  metadata: { source: 'hotel-voice-assistant' }
+});
 
-// Or start with different assistant
-vapiClient.startCall('asst_different_assistant');
+// Or start with default assistant
+await vapiClient.startCall();
 
 // End call
-vapiClient.endCall();
+await vapiClient.endCall();
 */
