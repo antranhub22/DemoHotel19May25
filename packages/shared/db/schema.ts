@@ -8,6 +8,7 @@ import {
   serial,
   text,
   timestamp,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -20,11 +21,15 @@ export const tenants = pgTable(
   'tenants',
   {
     id: text('id').primaryKey(),
-    hotel_name: text('hotel_name').notNull(),
-    subdomain: text('subdomain').notNull().unique(),
-    custom_domain: text('custom_domain'),
-    subscription_plan: text('subscription_plan').default('trial'),
-    subscription_status: text('subscription_status').default('active'),
+    hotel_name: varchar('hotel_name', { length: 200 }),
+    subdomain: varchar('subdomain', { length: 50 }).notNull().unique(),
+    custom_domain: varchar('custom_domain', { length: 100 }),
+    subscription_plan: varchar('subscription_plan', { length: 50 }).default(
+      'trial'
+    ),
+    subscription_status: varchar('subscription_status', { length: 50 }).default(
+      'active'
+    ),
     trial_ends_at: timestamp('trial_ends_at'),
     created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
     max_voices: integer('max_voices').default(5),
@@ -35,11 +40,11 @@ export const tenants = pgTable(
     data_retention_days: integer('data_retention_days').default(90),
     monthly_call_limit: integer('monthly_call_limit').default(1000),
     // Legacy columns that exist in actual database
-    name: text('name'),
+    name: varchar('name', { length: 200 }),
     updated_at: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
     is_active: boolean('is_active').default(true),
     settings: text('settings'), // JSON stored as text
-    tier: text('tier').default('free'),
+    tier: varchar('tier', { length: 50 }).default('free'),
     max_calls: integer('max_calls').default(1000),
     max_users: integer('max_users').default(10),
     features: text('features'), // JSON stored as text
@@ -63,12 +68,12 @@ export const services = pgTable(
     tenant_id: text('tenant_id')
       .references(() => tenants.id)
       .notNull(),
-    name: text('name').notNull(),
-    description: text('description'),
+    name: varchar('name', { length: 100 }).notNull(),
+    description: varchar('description', { length: 500 }),
     price: real('price').notNull(),
-    currency: text('currency').default('VND'),
-    category: text('category').notNull(), // room-service, housekeeping, spa, etc.
-    subcategory: text('subcategory'),
+    currency: varchar('currency', { length: 10 }).default('VND'),
+    category: varchar('category', { length: 50 }).notNull(), // room-service, housekeeping, spa, etc.
+    subcategory: varchar('subcategory', { length: 50 }),
     is_active: boolean('is_active').default(true),
     estimated_time: integer('estimated_time'), // minutes
     created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
@@ -80,6 +85,11 @@ export const services = pgTable(
     categoryIdx: index('services_category_idx').on(table.category),
     isActiveIdx: index('services_is_active_idx').on(table.is_active),
     priceIdx: index('services_price_idx').on(table.price),
+    nameIdx: index('services_name_idx').on(table.name),
+    categoryActiveIdx: index('services_category_active_idx').on(
+      table.category,
+      table.is_active
+    ),
   })
 );
 
@@ -111,16 +121,16 @@ export const staff = pgTable(
   {
     id: text('id').primaryKey(),
     tenant_id: text('tenant_id').references(() => tenants.id),
-    username: text('username').notNull(),
-    password: text('password').notNull(),
-    first_name: text('first_name'),
-    last_name: text('last_name'),
-    email: text('email'),
-    phone: text('phone'),
-    role: text('role').default('front-desk'), // enum: hotel-manager, front-desk, it-manager
+    username: varchar('username', { length: 50 }).notNull(),
+    password: varchar('password', { length: 255 }).notNull(),
+    first_name: varchar('first_name', { length: 100 }),
+    last_name: varchar('last_name', { length: 100 }),
+    email: varchar('email', { length: 100 }),
+    phone: varchar('phone', { length: 20 }),
+    role: varchar('role', { length: 50 }).default('front-desk'), // enum: hotel-manager, front-desk, it-manager
     permissions: text('permissions').default('[]'), // JSON array as text
-    display_name: text('display_name'),
-    avatar_url: text('avatar_url'),
+    display_name: varchar('display_name', { length: 100 }),
+    avatar_url: varchar('avatar_url', { length: 500 }),
     last_login: timestamp('last_login'),
     is_active: boolean('is_active').default(true),
     created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
@@ -147,9 +157,9 @@ export const call = pgTable(
     id: serial('id').primaryKey(),
     tenant_id: text('tenant_id').references(() => tenants.id),
     call_id_vapi: text('call_id_vapi').notNull().unique(),
-    room_number: text('room_number'),
-    language: text('language'),
-    service_type: text('service_type'),
+    room_number: varchar('room_number', { length: 10 }),
+    language: varchar('language', { length: 10 }),
+    service_type: varchar('service_type', { length: 50 }),
     start_time: timestamp('start_time'),
     end_time: timestamp('end_time'),
     duration: integer('duration'),
@@ -187,7 +197,7 @@ export const transcript = pgTable(
     id: serial('id').primaryKey(),
     call_id: text('call_id').notNull(),
     content: text('content').notNull(),
-    role: text('role').notNull(),
+    role: varchar('role', { length: 20 }).notNull(),
     timestamp: timestamp('timestamp').default(sql`CURRENT_TIMESTAMP`), // ✅ PostgreSQL TIMESTAMP
     tenant_id: text('tenant_id').references(() => tenants.id),
   },
@@ -214,29 +224,31 @@ export const request = pgTable(
   'request',
   {
     id: serial('id').primaryKey(),
-    tenant_id: text('tenant_id').references(() => tenants.id),
+    tenant_id: text('tenant_id')
+      .references(() => tenants.id)
+      .notNull(),
     call_id: text('call_id'),
-    room_number: text('room_number'),
-    order_id: text('order_id'),
-    request_content: text('request_content'),
-    status: text('status').default('Đã ghi nhận'),
+    room_number: varchar('room_number', { length: 10 }).notNull(),
+    order_id: varchar('order_id', { length: 50 }),
+    request_content: varchar('request_content', { length: 1000 }),
+    status: varchar('status', { length: 50 }).default('Đã ghi nhận').notNull(),
     created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
     updated_at: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
-    description: text('description'),
-    priority: text('priority').default('medium'),
-    assigned_to: text('assigned_to'),
+    description: varchar('description', { length: 500 }),
+    priority: varchar('priority', { length: 20 }).default('medium'),
+    assigned_to: varchar('assigned_to', { length: 100 }),
     // ✅ NEW: Service integration fields
     service_id: integer('service_id').references(() => services.id),
-    guest_name: text('guest_name'),
-    phone_number: text('phone_number'),
+    guest_name: varchar('guest_name', { length: 100 }),
+    phone_number: varchar('phone_number', { length: 20 }),
     total_amount: real('total_amount'),
-    currency: text('currency').default('VND'),
+    currency: varchar('currency', { length: 10 }).default('VND'),
     estimated_completion: timestamp('estimated_completion'),
     actual_completion: timestamp('actual_completion'),
-    special_instructions: text('special_instructions'),
-    urgency: text('urgency').default('normal'),
-    order_type: text('order_type'),
-    delivery_time: text('delivery_time'),
+    special_instructions: varchar('special_instructions', { length: 500 }),
+    urgency: varchar('urgency', { length: 20 }).default('normal'),
+    order_type: varchar('order_type', { length: 50 }),
+    delivery_time: varchar('delivery_time', { length: 100 }),
     items: text('items'), // JSON stored as text
   },
   table => ({
@@ -288,7 +300,7 @@ export const orderItems = pgTable(
     quantity: integer('quantity').default(1),
     unit_price: real('unit_price').notNull(),
     total_price: real('total_price').notNull(),
-    special_notes: text('special_notes'),
+    special_notes: varchar('special_notes', { length: 500 }),
     created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
   },
   table => ({
@@ -310,7 +322,7 @@ export const message = pgTable(
   {
     id: serial('id').primaryKey(),
     request_id: integer('request_id').references(() => request.id),
-    sender: text('sender').notNull(),
+    sender: varchar('sender', { length: 50 }).notNull(),
     content: text('content').notNull(),
     timestamp: timestamp('timestamp').default(sql`CURRENT_TIMESTAMP`),
     tenant_id: text('tenant_id').references(() => tenants.id),
@@ -336,8 +348,8 @@ export const call_summaries = pgTable(
     call_id: text('call_id').notNull(),
     content: text('content').notNull(),
     timestamp: timestamp('timestamp').default(sql`CURRENT_TIMESTAMP`), // ✅ PostgreSQL TIMESTAMP
-    room_number: text('room_number'),
-    duration: text('duration'),
+    room_number: varchar('room_number', { length: 10 }),
+    duration: varchar('duration', { length: 20 }),
   },
   table => ({
     // Performance indexes

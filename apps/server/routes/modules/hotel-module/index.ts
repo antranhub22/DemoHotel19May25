@@ -5,304 +5,66 @@
 // staff management, dashboard, and communication features
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 import { logger } from '@shared/utils/logger';
 import express from 'express';
 
-// ✅ Import hotel module routes
+// Import route modules
 import dashboardRoutes from './dashboard.routes';
 import emailRoutes from './email.routes';
 import requestsRoutes from './requests.routes';
 import servicesRoutes from './services.routes'; // ✅ NEW: Services routes
 import staffRoutes from './staff.routes';
 
-// ✅ ENHANCED v2.0: Import modular architecture components
-
 const router = express.Router();
 
 // ============================================
-// HOTEL MODULE INITIALIZATION
+// Hotel Module Routes
 // ============================================
 
-/**
- * Initialize Hotel Module with ServiceContainer registration
- */
-const initializeHotelModule = () => {
-  try {
-    logger.debug(
-      '🏨 [Hotel-Module] Initializing hotel module v2.0',
-      'HotelModule'
-    );
+logger.debug(
+  '🏨 [Hotel-Module] Initializing hotel module routes',
+  'HotelModule'
+);
 
-    // Hotel module services are already registered via individual controllers
-    // This module primarily routes to enhanced controllers
-
-    logger.success(
-      '✅ [Hotel-Module] Hotel module v2.0 initialized successfully',
-      'HotelModule'
-    );
-  } catch (error) {
-    logger.error(
-      '❌ [Hotel-Module] Failed to initialize hotel module',
-      'HotelModule',
-      error
-    );
-  }
-};
-
-// Initialize on module load
-initializeHotelModule();
-
-// ============================================
-// HOTEL MODULE ROUTE MOUNTING
-// ============================================
-
-/**
- * Guest service requests and order management
- * Mounted at: /api/hotel/requests/*
- */
+// Mount sub-routes
 router.use('/requests', requestsRoutes);
-
-/**
- * Staff management and role-based access
- * Mounted at: /api/hotel/staff/*
- */
 router.use('/staff', staffRoutes);
-
-/**
- * Hotel dashboard and configuration
- * Mounted at: /api/hotel/hotel-dashboard/*
- */
-router.use('/hotel-dashboard', dashboardRoutes);
-
-/**
- * Email notifications and communication
- * Mounted at: /api/hotel/email/*
- */
+router.use('/dashboard', dashboardRoutes);
 router.use('/email', emailRoutes);
-
-/**
- * Services management and booking
- * Mounted at: /api/hotel/services/*
- */
 router.use('/services', servicesRoutes); // ✅ NEW: Services routes
 
 // ============================================
-// HOTEL MODULE METADATA ENDPOINTS
+// GET /api/hotel - Module information
 // ============================================
-
-/**
- * GET /api/hotel - Hotel module information
- */
 router.get('/', (_req, res) => {
-  logger.api('📊 [Hotel-Module] Root endpoint accessed', 'HotelModule');
-
-  (res as any).json({
-    module: 'hotel-module',
-    version: '2.0.0',
-    description: 'Hotel operations and management functionality',
-    architecture: 'Modular v2.0',
-    status: 'active',
-
-    features: {
-      guestServices: isFeatureEnabled('guest-services'),
-      staffManagement: isFeatureEnabled('staff-management'),
-      emailNotifications: isFeatureEnabled('email-notifications'),
-      advancedDashboard: isFeatureEnabled('advanced-dashboard'),
-      realTimeUpdates: isFeatureEnabled('real-time-notifications'),
-    },
-
-    endpoints: {
-      requests: '/api/hotel/requests',
-      staff: '/api/hotel/staff',
-      dashboard: '/api/hotel/hotel-dashboard',
-      email: '/api/hotel/email',
-      services: '/api/hotel/services', // ✅ NEW: Services endpoint
-    },
-
-    integrations: {
-      serviceContainer: true,
-      featureFlags: true,
-      enhancedLogging: true,
-      tenantIsolation: true,
-    },
-
-    timestamp: new Date().toISOString(),
-  });
-});
-
-/**
- * GET /api/hotel/status - Quick status check
- */
-router.get('/status', (_req, res) => {
-  logger.api('⚡ [Hotel-Module] Status check requested', 'HotelModule');
-
-  (res as any).json({
-    module: 'hotel-module',
-    status: 'healthy',
-    version: '2.0.0',
-    uptime: process.uptime(),
-    features: {
-      requests: 'active',
-      staff: 'active',
-      dashboard: 'active',
-      email: 'active',
-    },
-    timestamp: new Date().toISOString(),
-  });
-});
-
-/**
- * GET /api/hotel/meta - Module metadata and API documentation
- */
-router.get('/meta', (_req, res) => {
-  logger.api('📖 [Hotel-Module] Metadata requested', 'HotelModule');
+  logger.debug('🏨 [Hotel-Module] Module info requested', 'HotelModule');
 
   (res as any).json({
     module: 'hotel-module',
     version: '2.0.0',
     description: 'Complete hotel operations and management suite',
     architecture: 'Modular v2.0',
-
-    businessDomains: [
-      'Guest Service Management',
-      'Staff Operations',
-      'Hotel Administration',
-      'Communication Systems',
-    ],
-
     endpoints: {
-      root: [
-        'GET /api/hotel - Module information',
-        'GET /api/hotel/status - Quick status check',
-        'GET /api/hotel/meta - This metadata endpoint',
-      ],
-      requests: [
-        'POST /api/hotel/requests - Create service request',
-        'GET /api/hotel/requests/:id - Get request details',
-        'PATCH /api/hotel/requests/:id/status - Update request status',
-        'GET /api/hotel/requests - List requests (paginated)',
-      ],
-      staff: [
-        'GET /api/hotel/staff - List staff members',
-        'POST /api/hotel/staff - Create staff member',
-        'GET /api/hotel/staff/:id - Get staff details',
-        'PATCH /api/hotel/staff/:id - Update staff member',
-        'DELETE /api/hotel/staff/:id - Delete staff member',
-      ],
-      dashboard: [
-        'POST /api/hotel/dashboard/research-hotel - Research hotel data',
-        'POST /api/hotel/dashboard/generate-assistant - Generate AI assistant',
-        'GET /api/hotel/dashboard/hotel-profile - Get hotel profile',
-        'PATCH /api/hotel/dashboard/hotel-profile - Update hotel profile',
-        'GET /api/hotel/dashboard/analytics - Get dashboard analytics',
-      ],
-      email: [
-        'POST /api/hotel/email/send - Send email notification',
-        'GET /api/hotel/email/templates - Get email templates',
-        'POST /api/hotel/email/templates - Create email template',
-      ],
+      requests: '/api/hotel/requests',
+      staff: '/api/hotel/staff',
+      dashboard: '/api/hotel/dashboard',
+      email: '/api/hotel/email',
+      services: '/api/hotel/services', // ✅ NEW: Services endpoint
     },
-
-    features: {
-      multiTenant: true,
-      realTimeUpdates: true,
-      featureFlagsEnabled: true,
-      rbacSupport: true,
-      auditLogging: true,
-      performanceMonitoring: true,
-    },
-
-    dependencies: {
-      serviceContainer: '2.0.0',
-      featureFlags: '2.0.0',
-      enhancedLogger: '2.0.0',
-      metricsCollector: '2.0.0',
-    },
-
-    timestamp: new Date().toISOString(),
   });
 });
 
 // ============================================
-// HOTEL CONFIGURATION ENDPOINTS
+// GET /api/hotel/status - Quick status check
 // ============================================
+router.get('/status', (_req, res) => {
+  logger.debug('🏨 [Hotel-Module] Status check requested', 'HotelModule');
 
-/**
- * GET /api/hotel/by-subdomain/:subdomain - Get hotel configuration by subdomain
- * Public endpoint for frontend hotel configuration
- */
-router.get('/by-subdomain/:subdomain', async (req, res) => {
-  try {
-    const { subdomain } = req.params;
-
-    logger.debug(
-      '🏨 [Hotel-Module] Getting hotel config for subdomain:',
-      'HotelModule',
-      {
-        subdomain,
-      }
-    );
-
-    // Default hotel configuration for Mi Nhon Hotel
-    const hotelConfig = {
-      name: 'Mi Nhon Hotel',
-      subdomain: 'minhonmuine',
-      location: 'Mui Ne, Vietnam',
-      description: 'Luxury beachfront hotel in Mui Ne',
-      contact: {
-        phone: '+84 252 3847 123',
-        email: 'info@minhonhotel.com',
-        address: '123 Nguyen Dinh Chieu, Mui Ne, Binh Thuan, Vietnam',
-      },
-      services: [
-        'Room Service',
-        'Spa & Wellness',
-        'Swimming Pool',
-        'Restaurant',
-        'Beach Access',
-        'Concierge',
-      ],
-      features: {
-        hasVoiceAssistant: true,
-        hasMultiLanguage: true,
-        hasRoomService: true,
-        hasSpa: true,
-        hasPool: true,
-        hasRestaurant: true,
-      },
-      branding: {
-        logo: `https://via.placeholder.com/200x80/2C3E50/FFFFFF?text=${encodeURIComponent('Mi Nhon Hotel')}`,
-        primaryColor: '#2C3E50',
-        secondaryColor: '#34495E',
-        accentColor: '#E74C3C',
-        primaryFont: 'Inter',
-        secondaryFont: 'Roboto',
-      },
-      supportedLanguages: ['en', 'vi', 'fr', 'zh', 'ru', 'ko'],
-    };
-
-    logger.success(
-      '🏨 [Hotel-Module] Hotel config retrieved successfully',
-      'HotelModule',
-      {
-        subdomain,
-        hotelName: hotelConfig.name,
-      }
-    );
-
-    (res as any).json(hotelConfig);
-  } catch (error) {
-    logger.error(
-      '❌ [Hotel-Module] Failed to get hotel config:',
-      'HotelModule',
-      error
-    );
-    (res as any).status(500).json({
-      error: 'Failed to get hotel configuration',
-      code: 'HOTEL_CONFIG_ERROR',
-    });
-  }
+  (res as any).json({
+    status: 'healthy',
+    module: 'hotel-module',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 export default router;
