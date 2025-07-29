@@ -13,6 +13,7 @@ import express from 'express';
 import dashboardRoutes from './dashboard.routes';
 import emailRoutes from './email.routes';
 import requestsRoutes from './requests.routes';
+import servicesRoutes from './services.routes'; // ✅ NEW: Services routes
 import staffRoutes from './staff.routes';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
@@ -80,6 +81,12 @@ router.use('/hotel-dashboard', dashboardRoutes);
  */
 router.use('/email', emailRoutes);
 
+/**
+ * Services management and booking
+ * Mounted at: /api/hotel/services/*
+ */
+router.use('/services', servicesRoutes); // ✅ NEW: Services routes
+
 // ============================================
 // HOTEL MODULE METADATA ENDPOINTS
 // ============================================
@@ -110,6 +117,7 @@ router.get('/', (_req, res) => {
       staff: '/api/hotel/staff',
       dashboard: '/api/hotel/hotel-dashboard',
       email: '/api/hotel/email',
+      services: '/api/hotel/services', // ✅ NEW: Services endpoint
     },
 
     integrations: {

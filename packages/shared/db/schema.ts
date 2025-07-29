@@ -1,12 +1,13 @@
 import { sql } from 'drizzle-orm';
 import {
-  pgTable,
-  text,
-  integer,
-  serial,
-  index,
-  timestamp,
   boolean,
+  index,
+  integer,
+  pgTable,
+  real,
+  serial,
+  text,
+  timestamp,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
@@ -51,6 +52,34 @@ export const tenants = pgTable(
     ),
     isActiveIdx: index('tenants_is_active_idx').on(table.is_active),
     createdAtIdx: index('tenants_created_at_idx').on(table.created_at),
+  })
+);
+
+// ✅ NEW: Services table for hotel service management
+export const services = pgTable(
+  'services',
+  {
+    id: serial('id').primaryKey(),
+    tenant_id: text('tenant_id')
+      .references(() => tenants.id)
+      .notNull(),
+    name: text('name').notNull(),
+    description: text('description'),
+    price: real('price').notNull(),
+    currency: text('currency').default('VND'),
+    category: text('category').notNull(), // room-service, housekeeping, spa, etc.
+    subcategory: text('subcategory'),
+    is_active: boolean('is_active').default(true),
+    estimated_time: integer('estimated_time'), // minutes
+    created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updated_at: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  table => ({
+    // Performance indexes
+    tenantIdIdx: index('services_tenant_id_idx').on(table.tenant_id),
+    categoryIdx: index('services_category_idx').on(table.category),
+    isActiveIdx: index('services_is_active_idx').on(table.is_active),
+    priceIdx: index('services_price_idx').on(table.price),
   })
 );
 
@@ -180,6 +209,7 @@ export const transcript = pgTable(
   })
 );
 
+// ✅ ENHANCED: Request table with service integration
 export const request = pgTable(
   'request',
   {
@@ -195,6 +225,19 @@ export const request = pgTable(
     description: text('description'),
     priority: text('priority').default('medium'),
     assigned_to: text('assigned_to'),
+    // ✅ NEW: Service integration fields
+    service_id: integer('service_id').references(() => services.id),
+    guest_name: text('guest_name'),
+    phone_number: text('phone_number'),
+    total_amount: real('total_amount'),
+    currency: text('currency').default('VND'),
+    estimated_completion: timestamp('estimated_completion'),
+    actual_completion: timestamp('actual_completion'),
+    special_instructions: text('special_instructions'),
+    urgency: text('urgency').default('normal'),
+    order_type: text('order_type'),
+    delivery_time: text('delivery_time'),
+    items: text('items'), // JSON stored as text
   },
   table => ({
     // Critical performance indexes for staff dashboard
@@ -207,6 +250,10 @@ export const request = pgTable(
     priorityIdx: index('request_priority_idx').on(table.priority),
     createdAtIdx: index('request_created_at_idx').on(table.created_at),
     updatedAtIdx: index('request_updated_at_idx').on(table.updated_at),
+    // ✅ NEW: Service-related indexes
+    serviceIdIdx: index('request_service_id_idx').on(table.service_id),
+    guestNameIdx: index('request_guest_name_idx').on(table.guest_name),
+    totalAmountIdx: index('request_total_amount_idx').on(table.total_amount),
     // Composite indexes for dashboard queries
     tenantStatusIdx: index('request_tenant_status_idx').on(
       table.tenant_id,
@@ -223,6 +270,37 @@ export const request = pgTable(
     tenantCreatedIdx: index('request_tenant_created_idx').on(
       table.tenant_id,
       table.created_at
+    ),
+  })
+);
+
+// ✅ NEW: Order items table for detailed order management
+export const orderItems = pgTable(
+  'order_items',
+  {
+    id: serial('id').primaryKey(),
+    request_id: integer('request_id')
+      .references(() => request.id)
+      .notNull(),
+    service_id: integer('service_id')
+      .references(() => services.id)
+      .notNull(),
+    quantity: integer('quantity').default(1),
+    unit_price: real('unit_price').notNull(),
+    total_price: real('total_price').notNull(),
+    special_notes: text('special_notes'),
+    created_at: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  table => ({
+    // Performance indexes
+    requestIdIdx: index('order_items_request_id_idx').on(table.request_id),
+    serviceIdIdx: index('order_items_service_id_idx').on(table.service_id),
+    quantityIdx: index('order_items_quantity_idx').on(table.quantity),
+    totalPriceIdx: index('order_items_total_price_idx').on(table.total_price),
+    // Composite indexes for order management
+    requestServiceIdx: index('order_items_request_service_idx').on(
+      table.request_id,
+      table.service_id
     ),
   })
 );
@@ -298,6 +376,10 @@ export const insertCallSummarySchema = createInsertSchema(
     .optional(),
 });
 
+// ✅ NEW: Validation schemas for new tables
+export const insertServiceSchema = createInsertSchema(services);
+export const insertOrderItemSchema = createInsertSchema(orderItems);
+
 export const insertRequestSchema = createInsertSchema(request);
 export const insertStaffSchema = createInsertSchema(staff);
 export const insertTenantSchema = createInsertSchema(tenants);
@@ -317,3 +399,8 @@ export type Message = typeof message.$inferSelect;
 export type InsertMessage = typeof message.$inferInsert;
 export type CallSummary = typeof call_summaries.$inferSelect;
 export type InsertCallSummary = typeof call_summaries.$inferInsert;
+// ✅ NEW: Type exports for new tables
+export type Service = typeof services.$inferSelect;
+export type InsertService = typeof services.$inferInsert;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type InsertOrderItem = typeof orderItems.$inferInsert;

@@ -1,0 +1,6 @@
+mi-nhon-hotel|Mi Nhon Hotel|minhonmuine|premium|active|1753001116|1753001116|1|premium|5000|50
+admin-1753001116896|mi-nhon-hotel|admin|$2b$10$y0HEj9hFb/SgPzutXGvjKOp7D5bidC4ws4tY3GYFPqd96s3zOnZ1i|admin@minhonhotel.com|super-admin|System Administrator|||1|1753001116|1753446075||
+manager-1753001116963|mi-nhon-hotel|manager|$2b$10$gRMA28QGSCzOpAO9xUXZF.lw1jTUinFuPKlz8EXYj8o4l1bTXGdye|manager@minhonhotel.com|hotel-manager|Hotel Manager|||1|1753001116|1753446075||
+frontdesk-1753001117032|mi-nhon-hotel|frontdesk|$2b$10$.4BrxyA.kjQXkwhEvsIZreGuWOHA4upkxP0d/Kc6.DB9iO6AXPxMq|frontdesk@minhonhotel.com|front-desk|Front Desk Staff|||1|1753001117|1753446075||
+itmanager-1753001117099|mi-nhon-hotel|itmanager|$2b$10$GjkKUP6KQEnbBqOLZvbywuQjm3LoMnJzsBS51T/wfSTIGbBm8GB1i|itmanager@minhonhotel.com|it-manager|IT Manager|||1|1753001117|1753446075||
+staff-1753136366806|mi-nhon-hotel|staff|$2b$10$k37k8nW4cW16ZPHPwIfy7.zOzO8E9oJv1h5R05v3BMdUTwcPh1G1C|staff@minhonhotel.com|front-desk|General Staff|||1|1753136366|1753446075||
