@@ -1,25 +1,8 @@
-import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+import * as React from 'react';
 
-// ✅ FIX: Dynamic recharts import to prevent initialization errors
-let RechartsPrimitive: any = null;
-
-const loadRecharts = async () => {
-  if (RechartsPrimitive) {
-    return RechartsPrimitive;
-  }
-
-  try {
-    logger.debug('🔄 [Charts] Loading recharts module...', 'Component');
-    RechartsPrimitive = await import('recharts');
-    logger.debug('✅ [Charts] Recharts loaded successfully', 'Component');
-    return RechartsPrimitive;
-  } catch (error) {
-    logger.error('❌ [Charts] Failed to load recharts:', 'Component', error);
-    throw new Error('Failed to load recharts module');
-  }
-};
+// ✅ FIX: Static import thay vì dynamic import để tránh race conditions
+import { Legend, ResponsiveContainer, Tooltip } from 'recharts';
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: '', dark: '.dark' } as const;
@@ -50,7 +33,7 @@ function useChart() {
   return context;
 }
 
-// ✅ FIX: Enhanced ChartContainer with error boundary and dynamic loading
+// ✅ FIX: Simplified ChartContainer với static import
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<'div'> & {
@@ -60,44 +43,6 @@ const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
   const chartId = `chart-${id || uniqueId.replace(/:/g, '')}`;
-  const [isRechartsLoaded, setIsRechartsLoaded] = React.useState(false);
-  const [loadError, setLoadError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    loadRecharts()
-      .then(() => setIsRechartsLoaded(true))
-      .catch(error => {
-        logger.error('Failed to load recharts:', 'Component', error);
-        setLoadError((error as any)?.message || String(error));
-      });
-  }, []);
-
-  if (loadError) {
-    return (
-      <div className="flex items-center justify-center p-4 text-red-500">
-        <p>Error loading charts: {loadError}</p>
-      </div>
-    );
-  }
-
-  if (!isRechartsLoaded) {
-    return (
-      <div className="flex items-center justify-center p-4">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2">Loading charts...</span>
-      </div>
-    );
-  }
-
-  const ResponsiveContainer = RechartsPrimitive?.ResponsiveContainer;
-
-  if (!ResponsiveContainer) {
-    return (
-      <div className="flex items-center justify-center p-4 text-yellow-600">
-        <p>Charts component not available</p>
-      </div>
-    );
-  }
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -151,13 +96,9 @@ ${colorConfig
   );
 };
 
-// ✅ FIX: Dynamic ChartTooltip component
+// ✅ FIX: Static ChartTooltip component
 const ChartTooltip = React.forwardRef<any, any>((props, ref) => {
-  if (!RechartsPrimitive?.Tooltip) {
-    return null;
-  }
-  const TooltipComponent = RechartsPrimitive.Tooltip;
-  return <TooltipComponent {...props} ref={ref} />;
+  return <Tooltip {...props} ref={ref} />;
 });
 ChartTooltip.displayName = 'ChartTooltip';
 
@@ -315,13 +256,9 @@ const ChartTooltipContent = React.forwardRef<
 );
 ChartTooltipContent.displayName = 'ChartTooltip';
 
-// ✅ FIX: Dynamic ChartLegend component
+// ✅ FIX: Static ChartLegend component
 const ChartLegend = React.forwardRef<any, any>((props, ref) => {
-  if (!RechartsPrimitive?.Legend) {
-    return null;
-  }
-  const LegendComponent = RechartsPrimitive.Legend;
-  return <LegendComponent {...props} ref={ref} />;
+  return <Legend {...props} ref={ref} />;
 });
 ChartLegend.displayName = 'ChartLegend';
 
@@ -424,9 +361,9 @@ function getPayloadConfigFromPayload(
 
 export {
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  ChartTooltip,
+  ChartTooltipContent,
 };

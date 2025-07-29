@@ -309,9 +309,9 @@ export const useInterface1 = ({
 
   return {
     // Loading & Error states
-    isLoading: configLoading || !hotelConfig,
+    isLoading: configLoading,
     error: configError,
-    hotelConfig,
+    hotelConfig: hotelConfig || null,
 
     // Assistant integration
     micLevel,

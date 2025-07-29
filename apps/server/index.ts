@@ -69,6 +69,9 @@ app.use(
           'https://unpkg.com',
           'https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/',
           'https://unpkg.com/@vapi-ai/web@latest/dist/',
+          // ✅ FIX: Add recharts CDN paths
+          'https://cdn.jsdelivr.net/npm/recharts@latest/',
+          'https://unpkg.com/recharts@latest/',
         ],
         connectSrc: [
           "'self'",

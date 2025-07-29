@@ -1,9 +1,7 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import themePlugin from '@replit/vite-plugin-shadcn-theme-json';
-import path from 'path';
+import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { defineConfig } from 'vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,15 +38,16 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        // Add cache-busting suffix
+        // ✅ FIX: Optimize bundle splitting for better caching and error reduction
         manualChunks: {
+          'vendor': ['react', 'react-dom'],
           'charts': ['recharts'],
-          'react-core': ['react', 'react-dom'],
-          'vendor': ['lodash', 'date-fns']
+          'vapi': ['@vapi-ai/web'],
+          'utils': ['lodash', 'date-fns']
         }
       },
       // ✅ IMPROVED: External dependencies handling
-      external: id => {
+      external: () => {
         // Don't externalize these dependencies as they need to be bundled
         return false;
       },
@@ -101,7 +100,7 @@ export default defineConfig({
       },
     },
   },
-  // Optimize dependencies
+  // ✅ FIX: Optimize dependencies for production
   optimizeDeps: {
     include: [
       'react',
@@ -110,10 +109,11 @@ export default defineConfig({
       '@radix-ui/react-dialog',
       '@radix-ui/react-dropdown-menu',
       'recharts',
+      '@vapi-ai/web',
       'axios',
       'zod',
     ],
-    exclude: ['@vapi-ai/web', '@daily-co/daily-js'],
+    exclude: ['@daily-co/daily-js'],
   },
   // CSS optimization
   css: {

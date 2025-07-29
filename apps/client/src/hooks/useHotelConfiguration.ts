@@ -153,7 +153,18 @@ export const useHotelConfiguration = () => {
           const response = await fetch(endpoint);
           logger.debug('[DEBUG] fetch response', 'Component', response);
           if (!response.ok) {
-            throw new Error('Failed to load hotel configuration');
+            logger.warn(
+              '[DEBUG] Hotel config endpoint failed, using default config',
+              'Component',
+              {
+                status: response.status,
+                statusText: response.statusText,
+                endpoint,
+              }
+            );
+            // Fall back to default config instead of throwing error
+            setConfig(MI_NHON_DEFAULT_CONFIG);
+            return;
           }
           const hotelData = await response.json();
           logger.debug('[DEBUG] hotelData', 'Component', hotelData);
