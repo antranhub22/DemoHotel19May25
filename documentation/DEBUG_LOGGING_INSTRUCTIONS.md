@@ -5,12 +5,13 @@
 Bạn đang ở **Network tab**, cần chuyển sang **Console tab**:
 
 1. ✅ Đang ở Developer Tools (F12)
-2. ❌ Đang ở **Network** tab 
+2. ❌ Đang ở **Network** tab
 3. 🎯 **CLICK "Console" tab** (bên cạnh Elements, Sources)
 
 ## 🎯 **BƯỚC 2: Start Voice Call và Monitor Logs**
 
 ### **Thực hiện cuộc gọi:**
+
 1. Click vào **microphone button** để bắt đầu call
 2. Nói một vài câu (ví dụ: "Hello, I want to order room service")
 3. Chờ assistant response
@@ -18,6 +19,7 @@ Bạn đang ở **Network tab**, cần chuyển sang **Console tab**:
 ### **Logs cần quan sát:**
 
 #### **🟢 EXPECTED SUCCESS LOGS:**
+
 ```
 🔄 [useConversationState] Evaluating showConversation (DETAILED):
 📝 [VapiProvider] Received transcript message:
@@ -26,6 +28,7 @@ Bạn đang ở **Network tab**, cần chuyển sang **Console tab**:
 ```
 
 #### **🔴 POTENTIAL ERROR LOGS:**
+
 ```
 ❌ Race condition detected
 ❌ Transcripts cleared after VAPI start
@@ -36,10 +39,13 @@ Bạn đang ở **Network tab**, cần chuyển sang **Console tab**:
 ## 🧪 **BƯỚC 3: Filter Logs**
 
 Trong Console, type để filter:
+
 ```
 🔍 [ChatPopup]
 ```
+
 hoặc
+
 ```
 🔍 [VapiProvider]
 ```
@@ -47,6 +53,7 @@ hoặc
 ## 📊 **BƯỚC 4: Copy Logs và Report**
 
 Nếu vẫn không hoạt động:
+
 1. Right-click trong Console → "Save as..."
 2. Hoặc copy relevant logs
 3. Share với developer để analysis
@@ -58,4 +65,4 @@ Nếu vẫn không hoạt động:
 - [ ] Transcript logs visible
 - [ ] showConversation = true
 - [ ] ChatPopup isOpen = true
-- [ ] Transcripts array populated 
+- [ ] Transcripts array populated
