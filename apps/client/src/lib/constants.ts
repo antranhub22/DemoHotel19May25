@@ -12,11 +12,11 @@ export const API_ENDPOINTS = {
 
   // Call Management
   TRANSCRIPTS: '/api/transcripts/:callId',
-  STORE_SUMMARY: '/api/store-summary',
+  STORE_SUMMARY: '/api/summaries', // ✅ UPDATED: RESTful endpoint
   SUMMARIES: '/api/summaries/:callId',
   RECENT_SUMMARIES: '/api/summaries/recent/:hours',
-  TRANSLATE: '/api/translate-to-vietnamese',
-  CALL_END: '/api/call-end',
+  TRANSLATE: '/api/translations', // ✅ UPDATED: RESTful endpoint
+  CALL_END: '/api/calls/:callId/end', // ✅ UPDATED: RESTful endpoint
 
   // Orders Management
   REQUESTS: '/api/request',
@@ -31,7 +31,6 @@ export const API_ENDPOINTS = {
   ANALYTICS_OVERVIEW: '/api/analytics/overview',
   ANALYTICS_SERVICE_DISTRIBUTION: '/api/analytics/service-distribution',
   ANALYTICS_HOURLY_ACTIVITY: '/api/analytics/hourly-activity',
-  ANALYTICS_LANGUAGE_DISTRIBUTION: '/api/analytics/language-distribution',
 
   // Hotel Research
   HOTEL_RESEARCH: '/api/hotel-research',

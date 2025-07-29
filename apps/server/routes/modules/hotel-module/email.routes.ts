@@ -7,7 +7,7 @@
 import express from 'express';
 
 // Import existing email route logic
-import emailRouter from '@server/routes/email';
+import emailRouter from '@server/routes/emails';
 
 const router = express.Router();
 

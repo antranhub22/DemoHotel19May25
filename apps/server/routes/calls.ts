@@ -195,12 +195,17 @@ router.get('/transcripts/:callId', async (req: Request, res: Response) => {
 });
 
 // Update call duration when call ends
-router.post('/call-end', async (req: Request, res: Response) => {
+router.patch('/:callId/end', async (req: Request, res: Response) => {
   try {
-    const { callId, duration } = req.body;
+    const { callId } = req.params;
+    const { duration } = req.body;
 
-    if (!callId || duration === undefined) {
-      return commonErrors.missingFields(res, ['callId', 'duration']);
+    if (!callId) {
+      return commonErrors.missingFields(res, ['callId']);
+    }
+
+    if (duration === undefined) {
+      return commonErrors.missingFields(res, ['duration']);
     }
 
     if (typeof duration !== 'number' || duration < 0) {
