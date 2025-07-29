@@ -43,9 +43,13 @@ export class VapiOfficial {
       });
     } catch (error) {
       // ✅ FIX: Handle KrispSDK errors gracefully
-      if (error instanceof Error && error.message.includes('KrispSDK')) {
+      if (
+        error instanceof Error &&
+        (error.message.includes('KrispSDK') ||
+          error.message.includes('worklet'))
+      ) {
         logger.warn(
-          '⚠️ KrispSDK error detected, continuing without noise filtering',
+          '⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering',
           'VapiOfficial',
           error
         );
@@ -106,10 +110,13 @@ export class VapiOfficial {
       if (
         error &&
         typeof error === 'object' &&
-        (error.message?.includes('KrispSDK') || error.name?.includes('Krisp'))
+        (error.message?.includes('KrispSDK') ||
+          error.name?.includes('Krisp') ||
+          error.message?.includes('worklet') ||
+          error.message?.includes('AbortError'))
       ) {
         logger.warn(
-          '⚠️ KrispSDK error detected, continuing without noise filtering',
+          '⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering',
           'VapiOfficial',
           error
         );
@@ -157,6 +164,27 @@ export class VapiOfficial {
           '⚠️ Microphone access issue, continuing anyway',
           'VapiOfficial',
           micError
+        );
+      }
+
+      // ✅ FIX: Test audio context for worklet support
+      try {
+        const audioContext = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+        if (audioContext.audioWorklet) {
+          logger.debug('✅ Audio worklet support available', 'VapiOfficial');
+        } else {
+          logger.warn(
+            '⚠️ Audio worklet not supported, KrispSDK may fail',
+            'VapiOfficial'
+          );
+        }
+        audioContext.close();
+      } catch (audioError) {
+        logger.warn(
+          '⚠️ Audio context test failed, continuing anyway',
+          'VapiOfficial',
+          audioError
         );
       }
 

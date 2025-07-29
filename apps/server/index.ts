@@ -62,6 +62,7 @@ app.use(
           "'self'",
           "'unsafe-inline'",
           "'unsafe-eval'",
+          'blob:', // ✅ FIX: Allow blob URLs for KrispSDK worklets
           'https://replit.com',
           'https://vapi.ai',
           'https://*.vapi.ai',
@@ -93,8 +94,9 @@ app.use(
           'http://localhost:*',
           'https://localhost:*',
         ],
-        imgSrc: ["'self'", 'data:', 'https:'],
-        mediaSrc: ["'self'", 'https:'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+        mediaSrc: ["'self'", 'blob:', 'https:'],
+        workerSrc: ["'self'", 'blob:', 'data:'], // ✅ FIX: Allow blob workers for KrispSDK
         objectSrc: ["'none'"],
         upgradeInsecureRequests:
           process.env.NODE_ENV === 'production' ? [] : null,
