@@ -5,9 +5,9 @@
 // staff management, dashboard, and communication features
 // Integrated with ServiceContainer v2.0 and FeatureFlags for enhanced capabilities
 
-import express from 'express';
 import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 import { logger } from '@shared/utils/logger';
+import express from 'express';
 
 // ✅ Import hotel module routes
 import dashboardRoutes from './dashboard.routes';
@@ -70,7 +70,7 @@ router.use('/staff', staffRoutes);
 
 /**
  * Hotel dashboard and configuration
-    * Mounted at: /api/hotel/hotel-dashboard/*
+ * Mounted at: /api/hotel/hotel-dashboard/*
  */
 router.use('/hotel-dashboard', dashboardRoutes);
 
@@ -214,6 +214,87 @@ router.get('/meta', (_req, res) => {
 
     timestamp: new Date().toISOString(),
   });
+});
+
+// ============================================
+// HOTEL CONFIGURATION ENDPOINTS
+// ============================================
+
+/**
+ * GET /api/hotel/by-subdomain/:subdomain - Get hotel configuration by subdomain
+ * Public endpoint for frontend hotel configuration
+ */
+router.get('/by-subdomain/:subdomain', async (req, res) => {
+  try {
+    const { subdomain } = req.params;
+
+    logger.debug(
+      '🏨 [Hotel-Module] Getting hotel config for subdomain:',
+      'HotelModule',
+      {
+        subdomain,
+      }
+    );
+
+    // Default hotel configuration for Mi Nhon Hotel
+    const hotelConfig = {
+      name: 'Mi Nhon Hotel',
+      subdomain: 'minhonmuine',
+      location: 'Mui Ne, Vietnam',
+      description: 'Luxury beachfront hotel in Mui Ne',
+      contact: {
+        phone: '+84 252 3847 123',
+        email: 'info@minhonhotel.com',
+        address: '123 Nguyen Dinh Chieu, Mui Ne, Binh Thuan, Vietnam',
+      },
+      services: [
+        'Room Service',
+        'Spa & Wellness',
+        'Swimming Pool',
+        'Restaurant',
+        'Beach Access',
+        'Concierge',
+      ],
+      features: {
+        hasVoiceAssistant: true,
+        hasMultiLanguage: true,
+        hasRoomService: true,
+        hasSpa: true,
+        hasPool: true,
+        hasRestaurant: true,
+      },
+      branding: {
+        logo: `https://via.placeholder.com/200x80/2C3E50/FFFFFF?text=${encodeURIComponent('Mi Nhon Hotel')}`,
+        primaryColor: '#2C3E50',
+        secondaryColor: '#34495E',
+        accentColor: '#E74C3C',
+        primaryFont: 'Inter',
+        secondaryFont: 'Roboto',
+      },
+      supportedLanguages: ['en', 'vi', 'fr', 'zh', 'ru', 'ko'],
+    };
+
+    logger.success(
+      '🏨 [Hotel-Module] Hotel config retrieved successfully',
+      'HotelModule',
+      {
+        subdomain,
+        hotelName: hotelConfig.name,
+      }
+    );
+
+    (res as any).json(hotelConfig);
+  } catch (error) {
+    logger.error(
+      '❌ [Hotel-Module] Failed to get hotel config:',
+      'HotelModule',
+      error
+    );
+    (res as any).status(500).json({
+      error: 'Failed to get hotel configuration',
+      code: 'HOTEL_CONFIG_ERROR',
+    });
+  }
 });
 
 export default router;

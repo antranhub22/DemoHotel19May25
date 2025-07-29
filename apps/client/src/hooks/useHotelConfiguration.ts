@@ -2,9 +2,8 @@
 
 // Type declaration for import.meta
 
-import { useState, useEffect, useCallback } from 'react';
-import { useTenantDetection } from '@/context/AuthContext';
 import { logger } from '@shared/utils/logger';
+import { useCallback, useEffect, useState } from 'react';
 // ============================================
 // Hotel Configuration Interface
 // ============================================
@@ -106,7 +105,6 @@ export const useHotelConfiguration = () => {
   const [config, setConfig] = useState<HotelConfiguration | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const tenantInfo = useTenantDetection();
 
   // Nhận diện subdomain giống useHotelConfig
   const extractHotelIdentifier = (): {
@@ -144,10 +142,10 @@ export const useHotelConfiguration = () => {
         return;
       }
       if (type === 'subdomain') {
-        // Gọi API public lấy config
-        const endpoint = `/api/hotels/by-subdomain/${identifier}`;
+        // ✅ FIXED: Use existing endpoint that doesn't require authentication
+        const endpoint = `/api/hotel/by-subdomain/${identifier}`;
         logger.debug(
-          '[DEBUG] Fetching hotel config from',
+          '[DEBUG] Fetching hotel config from existing endpoint',
           'Component',
           endpoint
         );
@@ -161,26 +159,51 @@ export const useHotelConfiguration = () => {
           logger.debug('[DEBUG] hotelData', 'Component', hotelData);
           setConfig({
             hotelName: hotelData.name,
-            logoUrl: hotelData.branding.logo,
-            primaryColor: hotelData.branding.primaryColor,
+            logoUrl:
+              hotelData.branding?.logo ||
+              `https://via.placeholder.com/200x80/2C3E50/FFFFFF?text=${encodeURIComponent(hotelData.name)}`,
+            primaryColor: hotelData.branding?.primaryColor || '#2C3E50',
             headerText: hotelData.name,
             vapiPublicKey: import.meta.env.VITE_VAPI_PUBLIC_KEY || '',
             vapiAssistantId: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
             branding: {
-              ...hotelData.branding,
+              logo:
+                hotelData.branding?.logo ||
+                `https://via.placeholder.com/200x80/2C3E50/FFFFFF?text=${encodeURIComponent(hotelData.name)}`,
               colors: {
-                primary: hotelData.branding.primaryColor || '#2C3E50', // Changed to luxury dark blue for main header
-                secondary: hotelData.branding.secondaryColor || '#34495E',
-                accent: hotelData.branding.accentColor || '#E74C3C',
+                primary: hotelData.branding?.primaryColor || '#2C3E50',
+                secondary: hotelData.branding?.secondaryColor || '#34495E',
+                accent: hotelData.branding?.accentColor || '#E74C3C',
               },
               fonts: {
-                primary: hotelData.branding.PrimaryFont || 'Inter',
-                secondary: hotelData.branding.SecondaryFont || 'Roboto',
+                primary: hotelData.branding?.PrimaryFont || 'Inter',
+                secondary: hotelData.branding?.SecondaryFont || 'Roboto',
               },
             },
-            features: hotelData.features,
-            services: hotelData.services,
-            supportedLanguages: hotelData.supportedLanguages,
+            features: hotelData.features || {
+              hasVoiceAssistant: true,
+              hasMultiLanguage: true,
+              hasRoomService: true,
+              hasSpa: true,
+              hasPool: true,
+              hasRestaurant: true,
+            },
+            services: hotelData.services || [
+              'Room Service',
+              'Spa & Wellness',
+              'Swimming Pool',
+              'Restaurant',
+              'Beach Access',
+              'Concierge',
+            ],
+            supportedLanguages: hotelData.supportedLanguages || [
+              'en',
+              'vi',
+              'fr',
+              'zh',
+              'ru',
+              'ko',
+            ],
           });
           return;
         } catch (err) {

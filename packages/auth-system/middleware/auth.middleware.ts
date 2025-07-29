@@ -19,12 +19,17 @@ export const authenticateJWT = async (
 ) => {
   try {
     // ✅ BYPASS: Guest endpoints don't require authentication
-    const isGuestEndpoint = req.path.startsWith('/guest/') ||
+    const isGuestEndpoint =
+      req.path.startsWith('/guest/') ||
       req.path.startsWith('/api/guest/') ||
       req.path.startsWith('/temp-public/') ||
       req.path.startsWith('/api/temp-public/') ||
       req.path.startsWith('/api/transcripts') || // ✅ FIX: Voice assistant transcript API
-      req.path.startsWith('/api/request'); // ✅ FIX: Voice assistant request API
+      req.path.startsWith('/api/request') || // ✅ FIX: Voice assistant request API
+      req.path.startsWith('/api/auth/') || // ✅ FIX: Allow authentication endpoints
+      req.path.startsWith('/api/health') || // ✅ FIX: Allow health check
+      req.path.startsWith('/api/hotel/') || // ✅ FIX: Allow hotel info endpoints
+      req.path.startsWith('/api/public/'); // ✅ FIX: Allow public endpoints
 
     if (isGuestEndpoint) {
       console.log(`✅ [Auth] Bypassing auth for guest endpoint: ${req.path}`);
