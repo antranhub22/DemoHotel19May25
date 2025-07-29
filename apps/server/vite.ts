@@ -99,8 +99,16 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // Fix: build directory is in project root/dist/public, not ../dist/public from server
-  const distPath = path.resolve(process.cwd(), '../../dist/public');
+  // ✅ FIX: Handle both local development and production paths
+  let distPath: string;
+
+  if (process.env.NODE_ENV === 'production') {
+    // Production: /opt/render/project/src/dist/public
+    distPath = path.resolve(process.cwd(), 'dist/public');
+  } else {
+    // Local development: ../../dist/public (from apps/server/)
+    distPath = path.resolve(process.cwd(), '../../dist/public');
+  }
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
