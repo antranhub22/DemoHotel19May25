@@ -1,0 +1,44 @@
+# Thông tin dự án
+
+## 📁 Tài liệu trong thư mục này
+
+- [AUTO_MIGRATION_SYSTEM](./AUTO_MIGRATION_SYSTEM.md)
+- [CHANGELOG](./CHANGELOG.md)
+- [DEPENDENCY_ANALYZER_README](./DEPENDENCY_ANALYZER_README.md)
+- [IMPLEMENTATION_ROADMAP](./IMPLEMENTATION_ROADMAP.md)
+- [PROJECT_COMPLETE_SUMMARY](./PROJECT_COMPLETE_SUMMARY.md)
+- [README_2025-07-29T01-02-07-820Z](./README_2025-07-29T01-02-07-820Z.md)
+- [README_2025-07-29T01-02-07-867Z](./README_2025-07-29T01-02-07-867Z.md)
+- [README_2025-07-29T01-02-07-872Z](./README_2025-07-29T01-02-07-872Z.md)
+- [README_2025-07-29T01-02-07-903Z](./README_2025-07-29T01-02-07-903Z.md)
+- [README_2025-07-29T01-02-07-904Z](./README_2025-07-29T01-02-07-904Z.md)
+- [README_2025-07-29T01-02-07-906Z](./README_2025-07-29T01-02-07-906Z.md)
+- [README_2025-07-29T01-02-07-915Z](./README_2025-07-29T01-02-07-915Z.md)
+- [README_2025-07-29T01-02-07-941Z](./README_2025-07-29T01-02-07-941Z.md)
+- [README_2025-07-29T01-02-07-959Z](./README_2025-07-29T01-02-07-959Z.md)
+- [README_2025-07-29T01-02-07-988Z](./README_2025-07-29T01-02-07-988Z.md)
+- [README_2025-07-29T01-02-07-990Z](./README_2025-07-29T01-02-07-990Z.md)
+- [README_2025-07-29T01-02-07-991Z](./README_2025-07-29T01-02-07-991Z.md)
+- [README_2025-07-29T01-02-07-994Z](./README_2025-07-29T01-02-07-994Z.md)
+- [README_2025-07-29T01-02-07-996Z](./README_2025-07-29T01-02-07-996Z.md)
+- [integration-testing-README](./integration-testing-README.md)
+
+## 📝 Mô tả
+
+Thông tin dự án
+
+## 🔍 Tìm kiếm
+
+Để tìm kiếm trong thư mục này:
+
+```bash
+# Tìm kiếm theo từ khóa
+grep -r "keyword" ./docs/project-info/
+
+# Tìm kiếm file
+find ./docs/project-info/ -name "*.md" | grep "keyword"
+```
+
+---
+
+_📚 Tài liệu này được tổ chức tự động bởi script organize-docs.cjs_
