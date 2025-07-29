@@ -123,7 +123,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       }
     );
 
-    // ✅ UPDATED: Create VapiOfficial config
+    // ✅ UPDATED: Create VapiOfficial config with error handling
     const config: VapiOfficialConfig = {
       publicKey,
       assistantId,

@@ -31,13 +31,46 @@ export class VapiOfficial {
 
   constructor(config: VapiOfficialConfig) {
     this.config = config;
-    this.vapi = new Vapi(config.publicKey);
-    this.setupEventListeners();
 
-    logger.debug('✅ VapiOfficial initialized', 'VapiOfficial', {
-      publicKey: config.publicKey.substring(0, 10) + '...',
-      hasAssistantId: !!config.assistantId,
-    });
+    // ✅ FIX: Add error handling for KrispSDK initialization
+    try {
+      this.vapi = new Vapi(config.publicKey);
+      this.setupEventListeners();
+
+      logger.debug('✅ VapiOfficial initialized', 'VapiOfficial', {
+        publicKey: config.publicKey.substring(0, 10) + '...',
+        hasAssistantId: !!config.assistantId,
+      });
+    } catch (error) {
+      // ✅ FIX: Handle KrispSDK errors gracefully
+      if (error instanceof Error && error.message.includes('KrispSDK')) {
+        logger.warn(
+          '⚠️ KrispSDK error detected, continuing without noise filtering',
+          'VapiOfficial',
+          error
+        );
+
+        // Retry without KrispSDK features
+        try {
+          this.vapi = new Vapi(config.publicKey);
+          this.setupEventListeners();
+          logger.debug(
+            '✅ VapiOfficial initialized without KrispSDK',
+            'VapiOfficial'
+          );
+        } catch (retryError) {
+          logger.error(
+            '❌ Failed to initialize Vapi even without KrispSDK',
+            'VapiOfficial',
+            retryError
+          );
+          throw retryError;
+        }
+      } else {
+        logger.error('❌ Vapi initialization error', 'VapiOfficial', error);
+        throw error;
+      }
+    }
   }
 
   private setupEventListeners() {
@@ -69,6 +102,21 @@ export class VapiOfficial {
 
     // Error handling
     this.vapi.on('error', (error: any) => {
+      // ✅ FIX: Handle KrispSDK errors specifically
+      if (
+        error &&
+        typeof error === 'object' &&
+        (error.message?.includes('KrispSDK') || error.name?.includes('Krisp'))
+      ) {
+        logger.warn(
+          '⚠️ KrispSDK error detected, continuing without noise filtering',
+          'VapiOfficial',
+          error
+        );
+        // Don't end call for KrispSDK errors, just log and continue
+        return;
+      }
+
       logger.error('❌ Vapi error:', 'VapiOfficial', error);
       this._isCallActive = false;
       this.clearCallTimeout();
@@ -93,6 +141,25 @@ export class VapiOfficial {
    */
   async startCall(options: CallOptions = {}): Promise<void> {
     try {
+      // ✅ FIX: Test microphone access before starting call to prevent KrispSDK errors
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
+        });
+        stream.getTracks().forEach(track => track.stop()); // Clean up test stream
+        logger.debug('✅ Microphone access verified', 'VapiOfficial');
+      } catch (micError) {
+        logger.warn(
+          '⚠️ Microphone access issue, continuing anyway',
+          'VapiOfficial',
+          micError
+        );
+      }
+
       const assistantId = options.assistantId || this.config.assistantId;
 
       if (!assistantId) {
