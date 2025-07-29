@@ -134,7 +134,8 @@ export const useInterface1 = ({
   ); // Dependencies are correct
 
   const { handleCancel } = useCancelHandler(cancelHandlerConfig);
-  const { handleConfirm } = useConfirmHandler(confirmHandlerConfig);
+  const { handleConfirm, autoTriggerSummary } =
+    useConfirmHandler(confirmHandlerConfig);
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
@@ -151,7 +152,7 @@ export const useInterface1 = ({
     }
   }, [popups, showingSummary]);
 
-  // ✅ OPTIMIZED: Memoized auto-summary callback
+  // ✅ REFACTORED: Use autoTriggerSummary from useConfirmHandler instead of autoShowSummary
   const autoShowSummary = useCallback(() => {
     if (import.meta.env.DEV) {
       logger.debug(
@@ -161,10 +162,8 @@ export const useInterface1 = ({
     }
 
     try {
-      showSummary(undefined, {
-        title: 'Call Summary',
-        priority: 'high',
-      });
+      // ✅ NEW: Use autoTriggerSummary instead of showSummary directly
+      autoTriggerSummary();
 
       if (import.meta.env.DEV) {
         logger.success(
@@ -181,7 +180,7 @@ export const useInterface1 = ({
         );
       }, 500);
     }
-  }, [showSummary]);
+  }, [autoTriggerSummary]);
 
   // ✅ OPTIMIZED: Auto-summary listener registration
   useEffect(() => {

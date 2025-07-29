@@ -15,8 +15,8 @@ interface SiriButtonContainerProps {
   micLevel: number;
   onCallStart: (lang: Language) => Promise<void>;
   onCallEnd: () => void;
-  onCancel?: () => void;
-  onConfirm?: () => void;
+  // ✅ REMOVED: onCancel and onConfirm are no longer needed
+  // Summary popup will auto-show when call ends via Siri button tap
   showingSummary?: boolean; // ✅ NEW: Hide Cancel/Confirm when summary is showing
   _showingSummary?: boolean; // ✅ NEW: Internal state for summary display
 }
@@ -66,8 +66,6 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   micLevel,
   onCallStart,
   onCallEnd,
-  onCancel,
-  onConfirm, // ✅ NEW: Default to false
 }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
@@ -268,33 +266,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     }
   };
 
-  const handleConfirm = () => {
-    logger.debug('✅ [SiriButtonContainer] Confirming call', 'Component');
-
-    // ✅ IMPROVED: Better error handling for confirm
-    try {
-      onConfirm();
-      logger.debug(
-        '✅ [SiriButtonContainer] Call confirmed successfully',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [SiriButtonContainer] Error confirming call:',
-        'Component',
-        error
-      );
-
-      // ✅ IMPROVED: Show error to user for confirm as it's more critical
-      if (typeof window !== 'undefined') {
-        const errorMessage =
-          error instanceof Error
-            ? (error as any)?.message || String(error)
-            : 'Lỗi không xác định';
-        alert(`Lỗi khi xác nhận cuộc gọi: ${errorMessage}`);
-      }
-    }
-  };
+  // ✅ REMOVED: handleConfirm function is no longer needed
+  // Summary popup will auto-show when call ends via Siri button tap
 
   return (
     <div
@@ -322,49 +295,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
             : `Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Press space or enter to start speaking.`}
       </div>
 
-      {/* Top Row: Cancel + Confirm - DISABLED BY USER REQUEST */}
-      <div
-        className="flex items-center justify-center gap-4 w-full max-w-sm px-4"
-        style={{
-          // 🔧 HYBRID FIX: Absolute positioning to prevent layout shifts
-          position: 'absolute',
-          top: '20px', // Fixed position above Siri button
-          left: '50%',
-          transform: 'translateX(-50%)',
-          height: '40px', // Fixed height for buttons
-          // 🚫 DISABLED: Hide Cancel and Confirm buttons completely
-          opacity: 0,
-          visibility: 'hidden',
-          pointerEvents: 'none', // Disable all interactions
-          transition: 'opacity 0.3s ease-in-out',
-          zIndex: 1, // Above container but below outer z-index
-        }}
-        aria-hidden="true"
-      >
-        {/* Cancel Button - DISABLED */}
-        <button
-          onClick={onCancel}
-          disabled={true}
-          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
-          style={{ minWidth: '80px' }}
-          aria-label="Cancel voice call"
-          tabIndex={-1}
-        >
-          Cancel
-        </button>
-
-        {/* Confirm Button - DISABLED */}
-        <button
-          onClick={handleConfirm}
-          disabled={true}
-          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-full text-sm font-semibold transition-all duration-200 active:scale-95"
-          style={{ minWidth: '80px' }}
-          aria-label="Confirm voice call"
-          tabIndex={-1}
-        >
-          Confirm
-        </button>
-      </div>
+      {/* Top Row: Cancel + Confirm - COMPLETELY REMOVED */}
+      {/* ✅ REMOVED: Cancel and Confirm buttons are no longer needed */}
+      {/* Summary popup will auto-show when call ends via Siri button tap */}
 
       {/* Enhanced Siri Button Container with Full Accessibility */}
       <div

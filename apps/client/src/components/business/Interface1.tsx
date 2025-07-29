@@ -92,8 +92,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     showConversation,
     handleCallStart,
     handleCallEnd,
-    handleCancel,
-    handleConfirm,
     showingSummary,
     showRightPanel,
     handleRightPanelToggle: _handleRightPanelToggle,
@@ -335,6 +333,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
               <div className="flex flex-col items-center justify-center w-full max-w-md">
                 <div className="flex items-center justify-center p-4">
+                  {/* Siri Button Container */}
                   <SiriButtonContainer
                     isCallStarted={isCallStarted}
                     micLevel={micLevel}
@@ -342,8 +341,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                       await handleCallStart(lang);
                     }}
                     onCallEnd={handleCallEnd}
-                    onCancel={handleCancel}
-                    onConfirm={handleConfirm}
+                    // ✅ REMOVED: onCancel and onConfirm are no longer needed
+                    // Summary popup will auto-show when call ends via Siri button tap
                     showingSummary={showingSummary}
                   />
                 </div>
@@ -373,6 +372,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           <div className="block md:hidden">
             <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
               <div className="flex flex-col items-center justify-center">
+                {/* Siri Button Container */}
                 <SiriButtonContainer
                   isCallStarted={isCallStarted}
                   micLevel={micLevel}
@@ -380,8 +380,8 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                     await handleCallStart(lang);
                   }}
                   onCallEnd={handleCallEnd}
-                  onCancel={handleCancel}
-                  onConfirm={handleConfirm}
+                  // ✅ REMOVED: onCancel and onConfirm are no longer needed
+                  // Summary popup will auto-show when call ends via Siri button tap
                   showingSummary={showingSummary}
                 />
               </div>

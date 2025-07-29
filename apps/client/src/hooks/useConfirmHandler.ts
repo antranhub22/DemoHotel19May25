@@ -1,6 +1,6 @@
 import { usePopup } from '@/components/features/popup-system';
 import { logger } from '@shared/utils/logger';
-import React, { createElement, useCallback, useRef } from 'react';
+import { createElement, useCallback, useRef } from 'react';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
@@ -11,20 +11,19 @@ interface UseConfirmHandlerProps {
 
 interface UseConfirmHandlerReturn {
   handleConfirm: () => void;
+  // ✅ NEW: Auto-trigger summary when call ends
+  autoTriggerSummary: () => void;
 }
 
 /**
- * useConfirmHandler - Dedicated handler for Confirm button logic
+ * ✅ REFACTORED: Simplified confirm handler that auto-triggers summary
  *
- * Handles the complete confirm flow when user confirms a call:
- * 1. End the call via conversationState
- * 2. Show immediate loading popup
- * 3. Poll for AI summary generation with proper cleanup
- * 4. Update popup when summary is ready
- * 5. Handle all error scenarios gracefully
- *
- * @param props - Dependencies needed for confirm operation
- * @returns handleConfirm function
+ * Flow:
+ * 1. User taps Siri button to end call
+ * 2. handleCallEnd() calls endCall()
+ * 3. endCall() triggers call end listeners
+ * 4. autoShowSummary() shows summary popup
+ * 5. No need for Confirm button anymore
  */
 export const useConfirmHandler = ({
   endCall,
@@ -32,561 +31,225 @@ export const useConfirmHandler = ({
   callSummary,
   serviceRequests,
 }: UseConfirmHandlerProps): UseConfirmHandlerReturn => {
+  const isMountedRef = useRef(true);
   const { showSummary } = usePopup();
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const isPollingRef = useRef(false);
-  const isMountedRef = useRef(true); // ✅ NEW: Track if component is still mounted
 
-  // ✅ IMPROVED: Better error handling with fallback UI
-  const handleConfirm = useCallback(() => {
+  // ✅ NEW: Auto-trigger summary when call ends
+  const autoTriggerSummary = useCallback(() => {
     logger.debug(
-      '✅ [useConfirmHandler] Confirm button clicked in SiriButtonContainer',
+      '🚀 [useConfirmHandler] Auto-triggering summary after call end',
       'Component'
     );
-    logger.debug('📊 [useConfirmHandler] Current state:', 'Component', {
-      transcriptsCount: transcripts.length,
-      hasCallSummary: !!callSummary,
-      hasServiceRequests: serviceRequests?.length > 0,
-    });
 
-    // ✅ IMPROVED: Comprehensive error handling with multiple fallback levels
-    const executeWithFallback = async () => {
-      try {
-        // 🔧 STEP 1: Show loading popup BEFORE ending call
-        logger.debug(
-          '📋 [useConfirmHandler] Step 1: Showing immediate loading popup...',
-          'Component'
-        );
-
-        if (!isMountedRef.current) {
-          logger.warn(
-            '⚠️ [useConfirmHandler] Component unmounted, aborting',
-            'Component'
-          );
-          return;
-        }
-
-        // Show loading popup with safe error handling
-        try {
-          const loadingElement = createElement(
-            'div',
+    // ✅ IMPROVED: Show summary immediately without loading popup
+    try {
+      const summaryElement = createElement(
+        'div',
+        {
+          style: {
+            padding: '20px',
+            textAlign: 'center',
+            maxWidth: '400px',
+          },
+        },
+        [
+          createElement(
+            'h3',
             {
-              id: 'summary-loading-popup',
+              key: 'title',
               style: {
-                padding: '20px',
-                textAlign: 'center',
-                maxWidth: '400px',
+                marginBottom: '16px',
+                color: '#333',
+                fontSize: '18px',
+                fontWeight: '600',
               },
             },
-            [
-              createElement(
-                'h3',
-                {
-                  key: 'title',
-                  style: {
-                    marginBottom: '16px',
-                    color: '#333',
-                    fontSize: '18px',
-                    fontWeight: '600',
-                  },
-                },
-                '📋 Call Summary'
-              ),
+            '📋 Call Summary'
+          ),
 
-              // Loading Spinner
-              createElement(
-                'div',
-                { key: 'loading', style: { marginBottom: '16px' } },
-                [
-                  createElement('div', {
-                    key: 'spinner',
-                    style: {
-                      display: 'inline-block',
-                      width: '24px',
-                      height: '24px',
-                      border: '3px solid #f3f3f3',
-                      borderTop: '3px solid #3498db',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                      marginRight: '12px',
-                    },
-                  }),
-                  createElement(
-                    'span',
-                    {
-                      key: 'text',
-                      style: {
-                        fontSize: '16px',
-                        color: '#555',
-                        fontWeight: '500',
-                      },
-                    },
-                    'Processing call...'
-                  ),
-                ]
-              ),
+          createElement(
+            'div',
+            {
+              key: 'icon',
+              style: { fontSize: '48px', marginBottom: '16px' },
+            },
+            '✅'
+          ),
 
-              // Progress Message
-              createElement(
-                'p',
-                {
-                  key: 'message',
-                  style: {
-                    fontSize: '14px',
-                    color: '#666',
-                    lineHeight: '1.5',
-                    marginBottom: '16px',
-                  },
-                },
-                'Please wait while we finalize your conversation.'
-              ),
+          createElement(
+            'p',
+            {
+              key: 'message',
+              style: {
+                marginBottom: '16px',
+                lineHeight: '1.5',
+                color: '#333',
+                fontSize: '16px',
+              },
+            },
+            'Your call has been completed successfully!'
+          ),
 
-              // Timestamp
-              createElement(
-                'div',
-                {
-                  key: 'time',
-                  style: { fontSize: '12px', color: '#999', marginTop: '12px' },
-                },
-                `Call ended at: ${new Date().toLocaleTimeString()}`
-              ),
-            ]
-          );
-
-          // Add spinner CSS animation safely
-          if (!document.getElementById('spinner-animation')) {
-            try {
-              const style = document.createElement('style');
-              style.id = 'spinner-animation';
-              style.textContent = `
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `;
-              document.head.appendChild(style);
-            } catch (styleError) {
-              logger.warn(
-                '⚠️ [useConfirmHandler] Failed to add spinner styles:',
-                'Component',
-                styleError
-              );
-            }
-          }
-
-          logger.debug(
-            '🚀 [useConfirmHandler] Step 1b: Calling showSummary...',
-            'Component'
-          );
-
-          // Show loading popup immediately with error handling
-          showSummary(loadingElement, {
-            title: 'Processing Call...',
-            priority: 'high' as const,
-          });
-
-          logger.debug(
-            '✅ [useConfirmHandler] Step 1c: Loading popup shown successfully',
-            'Component'
-          );
-        } catch (popupError) {
-          logger.error(
-            '❌ [useConfirmHandler] Step 1 ERROR: Loading popup creation failed:',
-            'Component',
-            popupError
-          );
-          // Continue with call end - don't let popup errors block the flow
-        }
-
-        // ✅ IMPROVED: Safe delay before calling endCall to prevent state conflicts
-        logger.debug(
-          '⏳ [useConfirmHandler] Step 1.5: Brief delay before ending call...',
-          'Component'
-        );
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        if (!isMountedRef.current) {
-          logger.warn(
-            '⚠️ [useConfirmHandler] Component unmounted during delay, aborting',
-            'Component'
-          );
-          return;
-        }
-
-        // 🔧 STEP 2: End call IMMEDIATELY to prevent continued conversation
-        logger.debug(
-          '🔄 [useConfirmHandler] Step 2: Ending call immediately...',
-          'Component'
-        );
-        try {
-          if (isMountedRef.current) {
-            logger.debug(
-              '📞 [useConfirmHandler] Step 2a: Calling endCall() immediately...',
-              'Component'
-            );
-            endCall();
-            logger.debug(
-              '✅ [useConfirmHandler] Step 2a: Call ended successfully',
-              'Component'
-            );
-
-            // ✅ REMOVED: Force Vapi stop - now handled by VapiOfficial in VapiContextSimple
-            logger.debug(
-              '🔧 [useConfirmHandler] Step 2b: Call ended via VapiOfficial - no manual stop needed',
-              'Component'
-            );
-          }
-        } catch (endCallError) {
-          logger.error(
-            '⚠️ [useConfirmHandler] endCall() failed:',
-            'Component',
-            endCallError
-          );
-          // Don't rethrow - continue with completion message
-        }
-
-        // 🔧 STEP 3: Show completion message immediately (don't wait for polling)
-        logger.debug(
-          '🔄 [useConfirmHandler] Step 3: Showing completion message...',
-          'Component'
-        );
-
-        // ✅ IMPROVED: Show success message immediately instead of complex polling
-        setTimeout(() => {
-          if (!isMountedRef.current) {
-            return;
-          }
-
-          try {
-            const completionElement = createElement(
+          // Show transcript count if available
+          transcripts.length > 0 &&
+            createElement(
               'div',
               {
+                key: 'transcript-info',
                 style: {
-                  padding: '20px',
-                  textAlign: 'center',
-                  maxWidth: '400px',
+                  marginBottom: '16px',
+                  padding: '12px',
+                  backgroundColor: '#f0f9ff',
+                  borderRadius: '6px',
+                  fontSize: '14px',
                 },
               },
               [
                 createElement(
-                  'h3',
+                  'div',
                   {
-                    key: 'title',
+                    key: 'transcript-title',
                     style: {
-                      marginBottom: '16px',
-                      color: '#333',
-                      fontSize: '18px',
                       fontWeight: '600',
+                      marginBottom: '4px',
+                      color: '#1e40af',
                     },
                   },
-                  '📋 Call Complete'
+                  'Conversation Summary:'
                 ),
-
                 createElement(
                   'div',
                   {
-                    key: 'icon',
-                    style: { fontSize: '48px', marginBottom: '16px' },
+                    key: 'transcript-count',
+                    style: { color: '#374151' },
                   },
-                  '✅'
-                ),
-
-                createElement(
-                  'p',
-                  {
-                    key: 'message',
-                    style: {
-                      marginBottom: '16px',
-                      lineHeight: '1.5',
-                      color: '#333',
-                      fontSize: '16px',
-                    },
-                  },
-                  'Your call has been completed successfully!'
-                ),
-
-                // Show transcript count if available
-                transcripts.length > 0 &&
-                  createElement(
-                    'div',
-                    {
-                      key: 'transcript-info',
-                      style: {
-                        marginBottom: '16px',
-                        padding: '12px',
-                        backgroundColor: '#f0f9ff',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      },
-                    },
-                    [
-                      createElement(
-                        'div',
-                        {
-                          key: 'transcript-title',
-                          style: {
-                            fontWeight: '600',
-                            marginBottom: '4px',
-                            color: '#1e40af',
-                          },
-                        },
-                        'Conversation Summary:'
-                      ),
-                      createElement(
-                        'div',
-                        {
-                          key: 'transcript-count',
-                          style: { color: '#374151' },
-                        },
-                        `${transcripts.length} messages recorded`
-                      ),
-                    ]
-                  ),
-
-                // Show service requests if available
-                serviceRequests?.length > 0 &&
-                  createElement(
-                    'div',
-                    {
-                      key: 'requests',
-                      style: {
-                        marginBottom: '16px',
-                        padding: '12px',
-                        backgroundColor: '#f0fdf4',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                      },
-                    },
-                    [
-                      createElement(
-                        'div',
-                        {
-                          key: 'req-title',
-                          style: {
-                            fontWeight: '600',
-                            marginBottom: '8px',
-                            color: '#15803d',
-                          },
-                        },
-                        'Service Requests:'
-                      ),
-                      createElement(
-                        'ul',
-                        {
-                          key: 'req-list',
-                          style: {
-                            listStyle: 'disc',
-                            marginLeft: '20px',
-                            color: '#374151',
-                          },
-                        },
-                        serviceRequests.slice(0, 3).map((req, idx) =>
-                          createElement(
-                            'li',
-                            {
-                              key: idx,
-                              style: { marginBottom: '4px' },
-                            },
-                            `${req.serviceType || 'Request'}: ${(req.requestText || req.description || 'Service request').substring(0, 50)}...`
-                          )
-                        )
-                      ),
-                    ]
-                  ),
-
-                createElement(
-                  'p',
-                  {
-                    key: 'note',
-                    style: {
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '16px',
-                    },
-                  },
-                  'Thank you for using our voice assistant service.'
-                ),
-
-                createElement(
-                  'div',
-                  {
-                    key: 'contact',
-                    style: {
-                      fontSize: '12px',
-                      color: '#999',
-                      borderTop: '1px solid #eee',
-                      paddingTop: '12px',
-                      marginTop: '16px',
-                    },
-                  },
-                  'For immediate assistance, please contact the front desk.'
+                  `${transcripts.length} messages recorded`
                 ),
               ]
-            );
+            ),
 
-            showSummary(completionElement, {
-              title: 'Call Complete',
-              priority: 'high' as const,
-            });
-
-            logger.debug(
-              '✅ [useConfirmHandler] Completion message shown successfully',
-              'Component'
-            );
-          } catch (completionError) {
-            logger.error(
-              '❌ [useConfirmHandler] Error showing completion message:',
-              'Component',
-              completionError
-            );
-            // Final fallback - simple logger instead of alert
-            if (isMountedRef.current) {
-              logger.success(
-                'Call completed successfully! Thank you for using our service.',
-                'Component'
-              );
-            }
-          }
-        }, 1000); // Give time for endCall to process
-
-        logger.debug(
-          '✅ [useConfirmHandler] Confirm flow completed successfully',
-          'Component'
-        );
-      } catch (error) {
-        logger.error(
-          '❌ [useConfirmHandler] CRITICAL ERROR in handleConfirm:',
-          'Component',
-          error
-        );
-
-        // ✅ IMPROVED: Enhanced fallback error handling
-        if (isMountedRef.current) {
-          try {
-            // Try to show error popup first
-            const errorElement = createElement(
+          // Show service requests if available
+          serviceRequests?.length > 0 &&
+            createElement(
               'div',
               {
+                key: 'requests',
                 style: {
-                  padding: '20px',
-                  textAlign: 'center',
-                  maxWidth: '400px',
+                  marginBottom: '16px',
+                  padding: '12px',
+                  backgroundColor: '#f0fdf4',
+                  borderRadius: '6px',
+                  fontSize: '14px',
                 },
               },
               [
                 createElement(
-                  'h3',
+                  'div',
                   {
-                    key: 'title',
+                    key: 'req-title',
                     style: {
-                      marginBottom: '16px',
-                      color: '#dc2626',
-                      fontSize: '18px',
                       fontWeight: '600',
+                      marginBottom: '8px',
+                      color: '#15803d',
                     },
                   },
-                  '⚠️ Call Processing Issue'
+                  'Service Requests:'
                 ),
-
                 createElement(
-                  'p',
+                  'ul',
                   {
-                    key: 'message',
+                    key: 'req-list',
                     style: {
-                      marginBottom: '16px',
+                      listStyle: 'disc',
+                      marginLeft: '20px',
                       color: '#374151',
-                      fontSize: '16px',
                     },
                   },
-                  'Your call was completed, but there was an issue processing the summary.'
-                ),
-
-                createElement(
-                  'p',
-                  {
-                    key: 'instruction',
-                    style: {
-                      fontSize: '14px',
-                      color: '#666',
-                      marginBottom: '16px',
-                    },
-                  },
-                  'Please contact the front desk if you need assistance with your requests.'
-                ),
-
-                createElement(
-                  'div',
-                  {
-                    key: 'timestamp',
-                    style: {
-                      fontSize: '12px',
-                      color: '#999',
-                      marginTop: '12px',
-                    },
-                  },
-                  `Call ended at: ${new Date().toLocaleTimeString()}`
+                  serviceRequests.slice(0, 3).map((req, idx) =>
+                    createElement(
+                      'li',
+                      {
+                        key: idx,
+                        style: { marginBottom: '4px' },
+                      },
+                      `${req.serviceType || 'Request'}: ${(req.requestText || req.description || 'Service request').substring(0, 50)}...`
+                    )
+                  )
                 ),
               ]
-            );
+            ),
 
-            showSummary(errorElement, {
-              title: 'Call Complete (with issue)',
-              priority: 'medium' as const,
-            });
-          } catch (fallbackError) {
-            logger.error(
-              '❌ [useConfirmHandler] Fallback popup also failed:',
-              'Component',
-              fallbackError
-            );
-            // Ultimate fallback - simple logger instead of alert
-            if (isMountedRef.current) {
-              logger.error(
-                'Call completed! There was a technical issue with the summary. Please contact front desk for assistance.',
-                'Component'
-              );
-            }
-          }
-        }
-      }
-    };
+          createElement(
+            'p',
+            {
+              key: 'note',
+              style: {
+                fontSize: '14px',
+                color: '#666',
+                marginBottom: '16px',
+              },
+            },
+            'Thank you for using our voice assistant service.'
+          ),
 
-    // ✅ IMPROVED: Execute with additional error boundary to prevent ErrorBoundary trigger
-    try {
-      executeWithFallback();
-    } catch (outerError) {
-      logger.error(
-        '❌ [useConfirmHandler] OUTER ERROR BOUNDARY:',
-        'Component',
-        outerError
+          createElement(
+            'div',
+            {
+              key: 'contact',
+              style: {
+                fontSize: '12px',
+                color: '#999',
+                borderTop: '1px solid #eee',
+                paddingTop: '12px',
+                marginTop: '16px',
+              },
+            },
+            'For immediate assistance, please contact the front desk.'
+          ),
+        ]
       );
-      // Prevent error from bubbling up to React ErrorBoundary
+
+      showSummary(summaryElement, {
+        title: 'Call Complete',
+        priority: 'high' as const,
+      });
+
+      logger.debug(
+        '✅ [useConfirmHandler] Summary popup shown successfully',
+        'Component'
+      );
+    } catch (error) {
+      logger.error(
+        '❌ [useConfirmHandler] Error showing summary:',
+        'Component',
+        error
+      );
+      // Final fallback - simple logger
       if (isMountedRef.current) {
-        logger.error(
-          'Call completed! Technical issue occurred. Please contact front desk.',
+        logger.success(
+          'Call completed successfully! Thank you for using our service.',
           'Component'
         );
       }
     }
-  }, [endCall, transcripts, callSummary, serviceRequests, showSummary]);
+  }, [showSummary, transcripts, serviceRequests]);
 
-  // ✅ NEW: Cleanup on unmount
-  const cleanup = useCallback(() => {
+  // ✅ SIMPLIFIED: handleConfirm now just calls autoTriggerSummary
+  const handleConfirm = useCallback(() => {
+    logger.debug(
+      '✅ [useConfirmHandler] Confirm button clicked (legacy support)',
+      'Component'
+    );
+    autoTriggerSummary();
+  }, [autoTriggerSummary]);
+
+  // Cleanup on unmount
+  useCallback(() => {
     isMountedRef.current = false;
-    isPollingRef.current = false;
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
-    }
   }, []);
-
-  // ✅ NEW: Set mounted ref and return cleanup
-  React.useEffect(() => {
-    isMountedRef.current = true;
-    return cleanup;
-  }, [cleanup]);
 
   return {
     handleConfirm,
+    autoTriggerSummary, // ✅ NEW: Export for use in call end listeners
   };
 };
