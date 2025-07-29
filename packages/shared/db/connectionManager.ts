@@ -1,8 +1,4 @@
 // ✅ Advanced Database Connection Manager with Pooling & Monitoring
-import Database, { type Database as DatabaseType } from 'better-sqlite3';
-import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import pg from 'pg';
 import {
   call,
   call_summaries,
@@ -13,6 +9,10 @@ import {
   tenants,
   transcript,
 } from '@shared/db/schema';
+import Database, { type Database as DatabaseType } from 'better-sqlite3';
+import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
 const { Pool } = pg;
 /**
  * Advanced Connection Pool Configuration
@@ -127,7 +127,8 @@ export class DatabaseConnectionManager {
 
     const DATABASE_URL = process.env.DATABASE_URL;
     const IS_SQLITE = DATABASE_URL?.startsWith('sqlite://');
-    const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
+    const IS_LOCAL = process.env.NODE_ENV === 'local';
+    const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
     try {
       if (DATABASE_URL && !IS_SQLITE) {
@@ -136,11 +137,18 @@ export class DatabaseConnectionManager {
       } else if (DATABASE_URL && IS_SQLITE) {
         // 📁 SQLite Connection
         await this.initializeSQLite(DATABASE_URL);
-      } else if (IS_DEVELOPMENT) {
-        // 📁 Default SQLite for Development
-        await this.initializeSQLite('sqlite://./apps/dev.db');
+      } else if (IS_LOCAL) {
+        // 📁 Default SQLite for Local Development
+        await this.initializeSQLite('sqlite://../dev.db');
+      } else if (IS_PRODUCTION) {
+        // 🐘 Production requires DATABASE_URL
+        throw new Error(
+          '❌ DATABASE_URL environment variable is required for production!'
+        );
       } else {
-        throw new Error('❌ DATABASE_URL environment variable is required!');
+        throw new Error(
+          '❌ Invalid NODE_ENV. Use "local" for SQLite or "production" for PostgreSQL'
+        );
       }
 
       this.isConnected = true;
