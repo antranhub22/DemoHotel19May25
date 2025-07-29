@@ -48,7 +48,8 @@
     "docs:organize": "node scripts/organize-docs.cjs",
     "docs:cleanup": "node scripts/cleanup-docs.cjs",
     "docs:update": "npm run docs:organize && npm run docs:cleanup",
-    "docs:validate": "node scripts/validate-docs.cjs"
+    "docs:validate": "node scripts/validate-docs.cjs",
+    "migrate:production": "tsx tools/scripts/apply-production-migration.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
