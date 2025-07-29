@@ -1,5 +1,6 @@
 import { usePopup } from '@/components/features/popup-system';
 import { logger } from '@shared/utils/logger';
+import React, { createElement, useCallback, useRef } from 'react';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
