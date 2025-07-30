@@ -154,8 +154,22 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         );
       },
       onCallEnd: () => {
-        console.log('📞 [DEBUG] VapiProvider onCallEnd triggered');
+        console.log(
+          '📞 [DEBUG] VapiProvider onCallEnd triggered, checking call state...'
+        );
         logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
+
+        // ✅ FIX: Only process if there was actually an active call
+        if (!isCallActive) {
+          console.log(
+            '📞 [DEBUG] VapiProvider: No active call, skipping onCallEnd processing'
+          );
+          return;
+        }
+
+        console.log(
+          '📞 [DEBUG] VapiProvider: Active call detected, processing call end'
+        );
 
         // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
         if (callEndCallback) {
