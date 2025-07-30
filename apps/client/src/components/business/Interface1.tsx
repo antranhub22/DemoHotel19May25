@@ -41,6 +41,7 @@ import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/Vo
 // Siri Components
 import { createElement } from 'react';
 import { usePopup } from '../features/popup-system/PopupManager';
+import { SummaryPopupContent } from '../features/popup-system/SummaryPopupContent';
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
@@ -51,19 +52,51 @@ const MobileSummaryPopup = () => {
   // Listen for summary popups and show them in mobile center modal
   useEffect(() => {
     const summaryPopup = popups.find(popup => popup.type === 'summary');
-    setShowSummary(!!summaryPopup);
+    const hasSummary = !!summaryPopup;
+    setShowSummary(hasSummary);
+    console.log(
+      '📱 [DEBUG] MobileSummaryPopup - showSummary:',
+      hasSummary,
+      'popups count:',
+      popups.length
+    );
+
+    if (hasSummary) {
+      console.log(
+        '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
+        summaryPopup
+      );
+    }
 
     // no cleanup needed
   }, [popups]);
 
   const handleClose = () => {
+    console.log('📱 [DEBUG] MobileSummaryPopup - handleClose called');
     // Remove all summary popups
     popups
       .filter(popup => popup.type === 'summary')
       .forEach(popup => removePopup(popup.id));
   };
 
-  return <SummaryPopup isOpen={showSummary} onClose={handleClose} />;
+  if (!showSummary) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">📋 Call Summary</h2>
+          <button
+            onClick={handleClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+        <SummaryPopupContent />
+      </div>
+    </div>
+  );
 };
 
 interface Interface1Props {

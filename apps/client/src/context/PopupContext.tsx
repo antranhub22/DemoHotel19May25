@@ -1,12 +1,11 @@
+import { logger } from '@shared/utils/logger';
 import React, {
   createContext,
+  ReactNode,
+  useCallback,
   useContext,
   useState,
-  useCallback,
-  ReactNode,
 } from 'react';
-import { logger } from '@shared/utils/logger';
-
 
 // STANDARD POPUP DIMENSIONS - Không che nút Siri Button
 export const STANDARD_POPUP_HEIGHT = 120; // px - Further reduced for better mobile clearance
@@ -111,10 +110,22 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
         timestamp: new Date(),
       };
 
+      console.log('➕ [DEBUG] PopupContext.addPopup called:', {
+        id,
+        type: popup.type,
+        title: popup.title,
+        priority: popup.priority,
+        isActive: popup.isActive,
+      });
+
       setPopups(prev => {
         // Remove any existing popup of the same type if priority is high
         if (popup.priority === 'high') {
           const filtered = prev.filter(p => p.type !== popup.type);
+          console.log(
+            '🔄 [DEBUG] Removed existing popups of same type:',
+            popup.type
+          );
           return [newPopup, ...filtered];
         }
         return [newPopup, ...prev];
@@ -123,6 +134,7 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
       // Auto-set as active if high priority or no active popup
       if (popup.priority === 'high' || popup.isActive) {
         setActivePopupState(id);
+        console.log('🎯 [DEBUG] Set as active popup:', id);
       }
 
       return id;
@@ -131,7 +143,19 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const removePopup = useCallback((id: string) => {
-    setPopups(prev => prev.filter(p => p.id !== id));
+    console.log('🗑️ [DEBUG] PopupContext.removePopup called for id:', id);
+    setPopups(prev => {
+      const popupToRemove = prev.find(p => p.id === id);
+      if (popupToRemove) {
+        console.log('🗑️ [DEBUG] Removing popup:', {
+          id: popupToRemove.id,
+          type: popupToRemove.type,
+          title: popupToRemove.title,
+          priority: popupToRemove.priority,
+        });
+      }
+      return prev.filter(p => p.id !== id);
+    });
     setActivePopupState(prev => (prev === id ? null : prev));
   }, []);
 
@@ -189,7 +213,10 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
 export const usePopupContext = (): PopupContextValue => {
   const context = useContext(PopupContext);
   if (!context) {
-    logger.warn('usePopupContext used outside PopupProvider - returning safe defaults', 'Component');
+    logger.warn(
+      'usePopupContext used outside PopupProvider - returning safe defaults',
+      'Component'
+    );
     // Return safe defaults instead of throwing
     return {
       popups: [],
