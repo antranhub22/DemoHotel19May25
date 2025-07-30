@@ -188,7 +188,10 @@ export const useInterface1 = ({
 
   // ✅ OPTIMIZED: Auto-summary listener registration
   useEffect(() => {
-    console.log('📞 [DEBUG] Registering auto-summary listener');
+    console.log(
+      '📞 [DEBUG] Registering auto-summary listener - CALL ID:',
+      Date.now()
+    );
     if (import.meta.env.DEV) {
       logger.debug('Registering auto-summary listener', 'useInterface1');
     }
@@ -197,7 +200,10 @@ export const useInterface1 = ({
     console.log('✅ [DEBUG] Auto-summary listener registered successfully');
 
     return () => {
-      console.log('📞 [DEBUG] Unregistering auto-summary listener');
+      console.log(
+        '📞 [DEBUG] Unregistering auto-summary listener - CALL ID:',
+        Date.now()
+      );
       if (import.meta.env.DEV) {
         logger.debug('Unregistering auto-summary listener', 'useInterface1');
       }

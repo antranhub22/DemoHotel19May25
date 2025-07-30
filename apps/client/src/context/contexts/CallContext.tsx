@@ -89,13 +89,17 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
     // Trigger call end listeners
     console.log(
-      `📞 [DEBUG] Triggering ${callEndListeners.length} call end listeners`
+      `📞 [DEBUG] Triggering ${callEndListeners.length} call end listeners - CALL ID: ${Date.now()}`
     );
     callEndListeners.forEach((listener, index) => {
       try {
-        console.log(`📞 [DEBUG] Executing listener ${index + 1}`);
+        console.log(
+          `📞 [DEBUG] Executing listener ${index + 1} - CALL ID: ${Date.now()}`
+        );
         listener();
-        console.log(`✅ [DEBUG] Listener ${index + 1} executed successfully`);
+        console.log(
+          `✅ [DEBUG] Listener ${index + 1} executed successfully - CALL ID: ${Date.now()}`
+        );
       } catch (error) {
         console.error(`❌ [DEBUG] Error in listener ${index + 1}:`, error);
         logger.error(

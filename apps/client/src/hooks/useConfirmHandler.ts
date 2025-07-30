@@ -31,10 +31,21 @@ export const useConfirmHandler = ({
 }: UseConfirmHandlerProps): UseConfirmHandlerReturn => {
   const isMountedRef = useRef(true);
   const { showSummary } = usePopup();
+  const isTriggeringRef = useRef(false); // ✅ NEW: Prevent multiple calls
 
   // ✅ NEW: Auto-trigger summary when call ends
   const autoTriggerSummary = useCallback(() => {
-    console.log('🚀 [DEBUG] Auto-triggering summary after call end');
+    // ✅ FIX: Prevent multiple calls
+    if (isTriggeringRef.current) {
+      console.log('🚫 [DEBUG] Auto-trigger already in progress, skipping...');
+      return;
+    }
+
+    isTriggeringRef.current = true;
+    console.log(
+      '🚀 [DEBUG] Auto-triggering summary after call end - CALL ID:',
+      Date.now()
+    );
     logger.debug(
       '🚀 [useConfirmHandler] Auto-triggering summary after call end',
       'Component'
@@ -232,6 +243,9 @@ export const useConfirmHandler = ({
           'Component'
         );
       }
+    } finally {
+      // ✅ FIX: Reset trigger flag after completion
+      isTriggeringRef.current = false;
     }
   }, [showSummary, transcripts, serviceRequests]);
 
