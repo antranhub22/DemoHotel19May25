@@ -15,7 +15,7 @@ import type { Language } from '@/types/interface1.types';
 import { ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
-import SummaryPopup from '../features/popup-system/SummaryPopup';
+import { SummaryPopup } from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
 import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
 import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
@@ -39,6 +39,7 @@ import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid'
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 // Siri Components
+import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
@@ -61,13 +62,7 @@ const MobileSummaryPopup = () => {
       .forEach(popup => removePopup(popup.id));
   };
 
-  return (
-    <SummaryPopup
-      isOpen={showSummary}
-      onClose={handleClose}
-      layout="center-modal"
-    />
-  );
+  return <SummaryPopup isOpen={showSummary} onClose={handleClose} />;
 };
 
 interface Interface1Props {
@@ -353,10 +348,54 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 <SummaryPopup
                   isOpen={showRightPanel}
                   onClose={handleRightPanelClose}
-                  layout="grid"
-                  className="relative z-30 ml-10"
                 />
               </div>
+            </div>
+
+            {/* ✅ NEW: Test Summary Popup Button - Desktop */}
+            <div
+              className="fixed bottom-4 right-4 z-[9999] hidden md:block"
+              style={{
+                position: 'fixed',
+                bottom: '16px',
+                right: '16px',
+                zIndex: 9999,
+                backgroundColor: '#10b981',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                outline: 'none',
+              }}
+            >
+              <button
+                onClick={() => {
+                  console.log('🧪 Test Summary button clicked! (Desktop)');
+                  // Test summary popup without Vapi call
+                  const { autoTriggerSummary } = useConfirmHandler({
+                    endCall: () => {},
+                    transcripts: [],
+                    callSummary: null,
+                    serviceRequests: [],
+                  });
+                  autoTriggerSummary();
+                }}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
+              >
+                🧪 Test Summary
+              </button>
             </div>
 
             {/* Row 2: Notification (Center, below Siri) */}
@@ -384,6 +423,52 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   // Summary popup will auto-show when call ends via Siri button tap
                   showingSummary={showingSummary}
                 />
+
+                {/* ✅ NEW: Test Summary Popup Button */}
+                <div
+                  className="fixed bottom-4 right-4 z-[9999]"
+                  style={{
+                    position: 'fixed',
+                    bottom: '16px',
+                    right: '16px',
+                    zIndex: 9999,
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    border: 'none',
+                    outline: 'none',
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      console.log('🧪 Test Summary button clicked!');
+                      // Test summary popup without Vapi call
+                      const { autoTriggerSummary } = useConfirmHandler({
+                        endCall: () => {},
+                        transcripts: [],
+                        callSummary: null,
+                        serviceRequests: [],
+                      });
+                      autoTriggerSummary();
+                    }}
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'white',
+                      border: 'none',
+                      outline: 'none',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                    }}
+                  >
+                    🧪 Test Summary
+                  </button>
+                </div>
               </div>
             </div>
 

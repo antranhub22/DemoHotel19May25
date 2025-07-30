@@ -97,7 +97,7 @@ if (import.meta.env.DEV) {
 
     testVapi: async () => {
       try {
-        const { initVapi } = await import('./lib/vapiClient');
+        const { VapiProxyClient } = await import('./lib/vapiProxyClient');
         const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
 
         if (!publicKey) {
@@ -105,14 +105,14 @@ if (import.meta.env.DEV) {
           return;
         }
 
-        console.log('🔄 Testing Vapi initialization...');
-        const vapi = await initVapi(publicKey);
+        console.log('🔄 Testing Vapi proxy client...');
+        const vapiClient = new VapiProxyClient();
 
-        if (vapi) {
-          console.log('✅ Vapi initialized successfully');
-          console.log('🔍 Vapi instance:', vapi);
+        if (vapiClient) {
+          console.log('✅ Vapi proxy client initialized successfully');
+          console.log('🔍 Vapi proxy client:', vapiClient);
         } else {
-          console.error('❌ Vapi initialization returned null');
+          console.error('❌ Vapi proxy client initialization returned null');
         }
       } catch (error) {
         console.error('❌ Vapi test failed:', error);
