@@ -1,19 +1,16 @@
-// Interface1 component - Multi-tenant version v2.0.0 - Single Implementation
-
 // React hooks
 import { useCallback, useEffect, useState } from 'react';
 
 // Custom Hook
 import { useAssistant } from '@/context';
 
-// Context
-
 // Types & Constants
-import { usePopupContext } from '@/context/PopupContext';
 import { useInterface1 } from '@/hooks/useInterface1';
 import type { Language } from '@/types/interface1.types';
 import { ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
+
+// UI Components
 import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
 import { SummaryPopup } from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
@@ -21,139 +18,18 @@ import { InterfaceContainer } from '../features/voice-assistant/interface1/Inter
 import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
 import { LoadingState } from '../features/voice-assistant/interface1/LoadingState';
 import { MobileVoiceControls } from '../features/voice-assistant/interface1/MobileVoiceControls';
-import { LANGUAGE_DISPLAY_NAMES } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
-
-// Utils
-
-// UI Components - States
-
-// UI Components - Layout
-import { addMultiLanguageNotification } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
-// ✅ MIGRATION: NotificationSystem removed - now using unified PopupSystem in VoiceAssistant
-// import { NotificationSystem } from '../features/voice-assistant/interface1/NotificationSystem';
+import {
+  addMultiLanguageNotification,
+  LANGUAGE_DISPLAY_NAMES,
+} from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
 import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
-
-// UI Components - Popups
-
-// Enhanced UI Components
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
-// Siri Components
-import { createElement } from 'react';
-import { usePopup } from '../features/popup-system/PopupManager';
-import { SummaryPopupContent } from '../features/popup-system/SummaryPopupContent';
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
-// Mobile Summary Popup Component - Similar to RightPanelSection logic
-const MobileSummaryPopup = () => {
-  console.log(
-    '📱 [DEBUG] MobileSummaryPopup component rendered - NEW CODE VERSION'
-  );
-  const { popups, removePopup } = usePopupContext();
-
-  // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
-  const summaryPopup = popups.find(popup => popup.type === 'summary');
-  const showSummary = !!summaryPopup;
-
-  console.log('📱 [DEBUG] MobileSummaryPopup - Direct calculation:');
-  console.log('📱 [DEBUG] - popups count:', popups.length);
-  console.log(
-    '📱 [DEBUG] - popups types:',
-    popups.map(p => p.type)
-  );
-  console.log('📱 [DEBUG] - summaryPopup found:', !!summaryPopup);
-  console.log('📱 [DEBUG] - showSummary:', showSummary);
-
-  // ✅ NEW: useEffect only for cleanup, not for state management
-  useEffect(() => {
-    console.log('📱 [DEBUG] MobileSummaryPopup useEffect triggered');
-    console.log(
-      '📱 [DEBUG] All popups:',
-      popups.map(p => ({ id: p.id, type: p.type, title: p.title }))
-    );
-
-    if (summaryPopup) {
-      console.log(
-        '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
-        summaryPopup
-      );
-    } else {
-      console.log('📱 [DEBUG] MobileSummaryPopup - No summary popup found');
-    }
-
-    console.log(
-      '📱 [DEBUG] MobileSummaryPopup - showSummary:',
-      showSummary,
-      'popups count:',
-      popups.length,
-      'summaryPopup:',
-      summaryPopup
-    );
-
-    if (showSummary) {
-      console.log(
-        '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
-        summaryPopup
-      );
-    } else {
-      console.log('📱 [DEBUG] MobileSummaryPopup - No summary popup found');
-    }
-
-    // ✅ NEW: Auto-cleanup old summary popups to prevent accumulation
-    if (popups.length > 10) {
-      console.log('🧹 [DEBUG] Too many popups, cleaning up old ones');
-      const summaryPopups = popups.filter(popup => popup.type === 'summary');
-      if (summaryPopups.length > 1) {
-        // Keep only the newest summary popup
-        summaryPopups.slice(1).forEach(popup => {
-          console.log('🗑️ [DEBUG] Removing old summary popup:', popup.id);
-          removePopup(popup.id);
-        });
-      }
-    }
-  }, [popups, removePopup]);
-
-  const handleClose = () => {
-    console.log('📱 [DEBUG] MobileSummaryPopup - handleClose called');
-    // Remove all summary popups
-    popups
-      .filter(popup => popup.type === 'summary')
-      .forEach(popup => {
-        console.log('🗑️ [DEBUG] Removing summary popup on close:', popup.id);
-        removePopup(popup.id);
-      });
-  };
-
-  // ✅ DEBUG: Log render state
-  console.log(
-    '📱 [DEBUG] MobileSummaryPopup render - showSummary:',
-    showSummary
-  );
-
-  if (!showSummary) {
-    console.log('📱 [DEBUG] MobileSummaryPopup - Not showing, returning null');
-    return null;
-  }
-
-  console.log('📱 [DEBUG] MobileSummaryPopup - Rendering modal');
-
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">📋 Call Summary</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-        <SummaryPopupContent />
-      </div>
-    </div>
-  );
-};
+// Import extracted components
+import { DebugButtons } from '../features/debug/DebugButtons';
+import { MobileSummaryPopup } from '../features/popup-system/MobileSummaryPopup';
 
 interface Interface1Props {
   isActive: boolean;
@@ -192,7 +68,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   );
 
   // ✅ ENHANCEMENT: Enhanced language change handler
-  const handleLanguageChange = useCallback((newLanguage: Language) => {
+  const handleLanguageChange = (newLanguage: Language) => {
     logger.debug(
       `🗣️ [Interface1] Language changed to: ${newLanguage}`,
       'Component'
@@ -205,39 +81,36 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       { language: LANGUAGE_DISPLAY_NAMES[newLanguage][newLanguage] },
       { type: 'success', duration: 4000 }
     );
-  }, []);
+  };
 
   // ✅ ENHANCEMENT: Service interaction handlers with voice context
-  const handleServiceSelect = useCallback(
-    (service: ServiceItem) => {
-      logger.debug(
-        `🎯 [Interface1] Service selected: ${service.name}`,
-        'Component'
-      );
+  const handleServiceSelect = (service: ServiceItem) => {
+    logger.debug(
+      `🎯 [Interface1] Service selected: ${service.name}`,
+      'Component'
+    );
 
-      // Show selected service feedback
-      setSelectedService(service);
+    // Show selected service feedback
+    setSelectedService(service);
 
-      // Add multi-language notification using helper
-      addMultiLanguageNotification(
-        'serviceSelected',
-        language,
-        { service: service.name },
-        {
-          type: 'info',
-          duration: 4000,
-          metadata: {
-            serviceName: service.name,
-            serviceDescription: service.description,
-          },
-        }
-      );
+    // Add multi-language notification using helper
+    addMultiLanguageNotification(
+      'serviceSelected',
+      language,
+      { service: service.name },
+      {
+        type: 'info',
+        duration: 4000,
+        metadata: {
+          serviceName: service.name,
+          serviceDescription: service.description,
+        },
+      }
+    );
 
-      // Clear selection after 3 seconds
-      setTimeout(() => setSelectedService(null), 3000);
-    },
-    [language]
-  );
+    // Clear selection after 3 seconds
+    setTimeout(() => setSelectedService(null), 3000);
+  };
 
   const handleVoiceServiceRequest = useCallback(
     async (service: ServiceItem) => {
@@ -442,189 +315,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               </div>
             </div>
 
-            {/* ✅ NEW: Test Summary Popup Button - Desktop */}
-            <div
-              className="fixed bottom-4 right-4 z-[9999] hidden md:block"
-              style={{
-                position: 'fixed',
-                bottom: '16px',
-                right: '16px',
-                zIndex: 9999,
-                backgroundColor: '#10b981',
-                color: 'white',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                outline: 'none',
-              }}
-            >
-              <button
-                onClick={() => {
-                  console.log('🧪 Test Summary button clicked! (Desktop)');
-                  // Test summary popup without Vapi call
-                  const { showSummary } = usePopup();
-                  const testSummaryElement = createElement(
-                    'div',
-                    {
-                      style: {
-                        padding: '20px',
-                        textAlign: 'center',
-                        maxWidth: '400px',
-                      },
-                    },
-                    [
-                      createElement(
-                        'h3',
-                        {
-                          key: 'title',
-                          style: {
-                            marginBottom: '16px',
-                            color: '#333',
-                            fontSize: '18px',
-                            fontWeight: '600',
-                          },
-                        },
-                        '🧪 Test Summary'
-                      ),
-                      createElement(
-                        'p',
-                        {
-                          key: 'message',
-                          style: {
-                            marginBottom: '16px',
-                            lineHeight: '1.5',
-                            color: '#333',
-                            fontSize: '16px',
-                          },
-                        },
-                        'This is a test summary popup!'
-                      ),
-                    ]
-                  );
-                  const popupId = showSummary(testSummaryElement, {
-                    title: 'Test Summary',
-                    priority: 'medium' as const,
-                  });
-                  console.log(
-                    '🧪 [DEBUG] Test summary popup created with ID:',
-                    popupId
-                  );
-                }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'white',
-                  border: 'none',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                }}
-              >
-                🧪 Test Summary
-              </button>
-            </div>
-
-            {/* ✅ NEW: Emergency Cleanup Button - Desktop */}
-            <div
-              className="fixed bottom-4 right-32 z-[9999] hidden md:block"
-              style={{
-                position: 'fixed',
-                bottom: '16px',
-                right: '128px',
-                zIndex: 9999,
-                backgroundColor: '#ef4444',
-                color: 'white',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                outline: 'none',
-              }}
-            >
-              <button
-                onClick={() => {
-                  console.log('🚨 Emergency cleanup button clicked!');
-                  const { emergencyCleanup, resetSummarySystem } = usePopup();
-
-                  // First reset summary system
-                  resetSummarySystem();
-
-                  // Then emergency cleanup if needed
-                  setTimeout(() => {
-                    emergencyCleanup();
-                  }, 100);
-
-                  alert(
-                    '🧹 Emergency cleanup completed! Check console for details.'
-                  );
-                }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'white',
-                  border: 'none',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                }}
-              >
-                🚨 Cleanup
-              </button>
-            </div>
-
-            {/* ✅ NEW: Force Display Summary Button - Desktop */}
-            <div
-              className="fixed bottom-4 right-48 z-[9999] hidden md:block"
-              style={{
-                position: 'fixed',
-                bottom: '16px',
-                right: '192px',
-                zIndex: 9999,
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                outline: 'none',
-              }}
-            >
-              <button
-                onClick={() => {
-                  console.log('🚀 Force display summary button clicked!');
-                  const { forceShowSummary } = usePopup();
-
-                  // Force display summary popup
-                  forceShowSummary();
-
-                  alert(
-                    '🚀 Force summary popup triggered! Check console for details.'
-                  );
-                }}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: 'white',
-                  border: 'none',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                }}
-              >
-                🚀 Force Summary
-              </button>
-            </div>
-
             {/* Row 2: Notification (Center, below Siri) */}
             <div className="flex justify-center mb-8">
               <div className="w-full max-w-sm">
@@ -651,113 +341,30 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   showingSummary={showingSummary}
                 />
 
-                {/* ✅ NEW: Test Summary Popup Button */}
-                <div
-                  className="fixed bottom-4 right-4 z-[9999]"
-                  style={{
-                    position: 'fixed',
-                    bottom: '16px',
-                    right: '16px',
-                    zIndex: 9999,
-                    backgroundColor: '#10b981',
-                    color: 'white',
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    border: 'none',
-                    outline: 'none',
-                  }}
-                >
-                  <button
-                    onClick={() => {
-                      console.log('🧪 Test Summary button clicked!');
-                      // Test summary popup without Vapi call
-                      // Create a temporary confirm handler for testing
-                      const { showSummary } = usePopup();
-                      const testSummaryElement = createElement(
-                        'div',
-                        {
-                          style: {
-                            padding: '20px',
-                            textAlign: 'center',
-                            maxWidth: '400px',
-                          },
-                        },
-                        [
-                          createElement(
-                            'h3',
-                            {
-                              key: 'title',
-                              style: {
-                                marginBottom: '16px',
-                                color: '#333',
-                                fontSize: '18px',
-                                fontWeight: '600',
-                              },
-                            },
-                            '🧪 Test Summary'
-                          ),
-                          createElement(
-                            'p',
-                            {
-                              key: 'message',
-                              style: {
-                                marginBottom: '16px',
-                                lineHeight: '1.5',
-                                color: '#333',
-                                fontSize: '16px',
-                              },
-                            },
-                            'This is a test summary popup!'
-                          ),
-                        ]
-                      );
-                      showSummary(testSummaryElement, {
-                        title: 'Test Summary',
-                        priority: 'medium' as const,
-                      });
-                    }}
-                    style={{
-                      backgroundColor: 'transparent',
-                      color: 'white',
-                      border: 'none',
-                      outline: 'none',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                    }}
-                  >
-                    🧪 Test Summary
-                  </button>
-                </div>
+                {/* Mobile: Real-time conversation (overlay) - ADVANCED COMPONENT */}
+                <RealtimeConversationPopup
+                  isOpen={showConversation}
+                  onClose={() => {}} // Will be handled by popup context
+                  layout="overlay" // Mobile: overlay positioning with built-in responsive design
+                />
+                {/* ✅ DEBUG: Mobile layout logging - COMMENTED OUT FOR CLEAN CONSOLE */}
+                {/*{(() => {
+                  console.log(
+                    '🔍 [Interface1] RealtimeConversationPopup Mobile render state:',
+                    {
+                      showConversation,
+                      isCallStarted,
+                      isOpen: showConversation, // ✅ Real-time conversation with advanced features
+                      layout: 'overlay',
+                    }
+                  );
+                  return null;
+                })()}*/}
+
+                {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
+                <MobileSummaryPopup />
               </div>
             </div>
-
-            {/* Mobile: Real-time conversation (overlay) - ADVANCED COMPONENT */}
-            <RealtimeConversationPopup
-              isOpen={showConversation}
-              onClose={() => {}} // Will be handled by popup context
-              layout="overlay" // Mobile: overlay positioning with built-in responsive design
-            />
-            {/* ✅ DEBUG: Mobile layout logging - COMMENTED OUT FOR CLEAN CONSOLE */}
-            {/*{(() => {
-              console.log(
-                '🔍 [Interface1] RealtimeConversationPopup Mobile render state:',
-                {
-                  showConversation,
-                  isCallStarted,
-                  isOpen: showConversation, // ✅ Real-time conversation with advanced features
-                  layout: 'overlay',
-                }
-              );
-              return null;
-            })()}*/}
-
-            {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
-            <MobileSummaryPopup />
           </div>
         </div>
       </div>
@@ -794,6 +401,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           onScrollToServices={() => scrollToSection('services')}
         />
         */}
+      <DebugButtons />
     </InterfaceContainer>
   );
 };
