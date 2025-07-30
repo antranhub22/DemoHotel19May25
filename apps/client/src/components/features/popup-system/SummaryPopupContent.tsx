@@ -9,7 +9,7 @@ export const SummaryPopupContent: React.FC = () => {
 
   // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
-    // Priority 1: OpenAI serviceRequests (enhanced processing)
+    // OpenAI serviceRequests (enhanced processing)
     if (serviceRequests && serviceRequests.length > 0) {
       const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
 

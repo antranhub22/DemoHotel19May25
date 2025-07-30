@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { logger } from '@shared/utils/logger';
+import { useState } from 'react';
 
 interface EmailFormProps {
   summaryContent: string;
@@ -58,7 +58,7 @@ export function EmailForm({
       };
 
       const response = (await apiRequest({
-        url: '/api/send-call-summary-email',
+        url: '/api/emails/call-summary',
         method: 'POST',
         body: requestData,
       })) as any;
