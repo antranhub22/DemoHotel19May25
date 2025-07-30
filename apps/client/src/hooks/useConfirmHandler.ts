@@ -220,12 +220,17 @@ export const useConfirmHandler = ({
       );
 
       console.log('📋 [DEBUG] About to show summary popup');
-      showSummary(summaryElement, {
-        title: 'Call Complete',
-        priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
-      });
 
-      console.log('✅ [DEBUG] Summary popup shown successfully');
+      // ✅ TEST: Add delay to prevent race condition
+      setTimeout(() => {
+        showSummary(summaryElement, {
+          title: 'Call Complete',
+          priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
+        });
+        console.log('✅ [DEBUG] Summary popup shown successfully (with delay)');
+      }, 100); // 100ms delay
+
+      console.log('✅ [DEBUG] Summary popup trigger scheduled');
       logger.debug(
         '✅ [useConfirmHandler] Summary popup shown successfully',
         'Component'
