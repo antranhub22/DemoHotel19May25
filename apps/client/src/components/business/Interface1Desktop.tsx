@@ -1,7 +1,7 @@
 import { DebugButtons } from '../features/debug/DebugButtons';
 import { DebugWrapper } from '../features/debug/DebugWrapper';
+import { DesktopSummaryPopup } from '../features/popup-system/DesktopSummaryPopup';
 import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
-import { SummaryPopup } from '../features/popup-system/SummaryPopup';
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
 interface Interface1DesktopProps {
@@ -56,7 +56,7 @@ export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({
 
         {/* Column 3: Summary Popup (Right) */}
         <div className="w-full max-w-sm">
-          <SummaryPopup
+          <DesktopSummaryPopup
             isOpen={showRightPanel}
             onClose={handleRightPanelClose}
           />

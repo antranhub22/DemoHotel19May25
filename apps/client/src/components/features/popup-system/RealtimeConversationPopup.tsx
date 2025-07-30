@@ -356,7 +356,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
     <>
       {/* Popup */}
       <div
-        className={`relative z-30 overflow-hidden shadow-2xl realtime-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isRight ? 'popup-right' : ''} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
+        className={`relative z-[9998] overflow-hidden shadow-2xl realtime-popup ${isGrid ? 'grid-layout' : 'overlay-layout'} ${isRight ? 'popup-right' : ''} ${isGrid ? '' : 'mx-auto animate-slide-up'}`}
         style={popupStyles}
       >
         {/* ✅ SIMPLIFIED Header - No tabs needed */}

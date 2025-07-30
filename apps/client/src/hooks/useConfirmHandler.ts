@@ -17,14 +17,14 @@ interface UseConfirmHandlerReturn {
 }
 
 /**
- * ✅ REFACTORED: Simplified confirm handler that auto-triggers summary
+ * ✅ REFACTORED: Auto-trigger summary handler (no longer needs Confirm button)
  *
  * Flow:
  * 1. User taps Siri button to end call
  * 2. handleCallEnd() calls endCall()
  * 3. endCall() triggers call end listeners
  * 4. autoShowSummary() shows summary popup
- * 5. No need for Confirm button anymore
+ * 5. No need for Confirm button anymore - auto-trigger only
  */
 export const useConfirmHandler = ({
   transcripts,
