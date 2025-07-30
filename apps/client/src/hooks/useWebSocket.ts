@@ -151,6 +151,25 @@ export function useWebSocket() {
           );
         }
 
+        // ✅ REMOVED: Call summary received from webhook - now using OpenAI only
+        // if (data.type === 'call-summary-received') {
+        //   logger.debug(
+        //     '[useWebSocket] Call summary received from webhook:',
+        //     'Component',
+        //     data
+        //   );
+
+        //   // Update call summary in assistant context
+        //   if (data.summary) {
+        //     assistant.setCallSummary({
+        //       callId: data.callId || 'unknown',
+        //       tenantId: 'default',
+        //       content: data.summary,
+        //       timestamp: data.timestamp,
+        //     });
+        //   }
+        // }
+
         // Handle error messages
         if (data.type === 'error') {
           logger.error('[useWebSocket] Server error:', 'Component', data);

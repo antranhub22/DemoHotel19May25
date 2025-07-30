@@ -35,6 +35,9 @@ export interface VapiContextType {
 
   // ✅ NEW: Callback for external call end handling
   setCallEndCallback: (callback: () => void) => void;
+
+  // ✅ REMOVED: Call summary handling - now using OpenAI only
+  // setCallSummaryCallback: (callback: (summary: any) => void) => void;
 }
 
 const VapiContext = createContext<VapiContextType | undefined>(undefined);
@@ -58,6 +61,10 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(
     null
   );
+  // ✅ REMOVED: Call summary callback - now using OpenAI only
+  // const [callSummaryCallback, setCallSummaryCallback] = useState<((summary: any) => void) | null>(
+  //   null
+  // );
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
@@ -240,6 +247,33 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           // Handle function calls (room service, etc.)
           logger.debug('🔧 Function call', 'VapiProvider', message);
         }
+
+        // ✅ REMOVED: Call summary handling - now using OpenAI only
+        // if (message.type === 'call-summary' || message.type === 'summary' || message.type === 'end-of-call-report') {
+        //   logger.debug('📋 Call Summary received', 'VapiProvider', message);
+
+        //   // Extract call summary data
+        //   const callSummaryData = {
+        //     callId: currentCallId || `call-${Date.now()}`,
+        //     content: message.summary || message.content || message.data?.summary,
+        //     timestamp: new Date(),
+        //     source: 'Vapi.ai Web SDK',
+        //   };
+
+        //   // Trigger call summary callback
+        //   if (callSummaryCallback) {
+        //     console.log('📋 [DEBUG] VapiProvider calling call summary callback');
+        //     callSummaryCallback(callSummaryData);
+        //   } else {
+        //     console.log('📋 [DEBUG] VapiProvider no call summary callback available');
+        //   }
+
+        //   // Also update assistant context directly
+        //   if (callSummaryData.content) {
+        //     console.log('📋 [DEBUG] VapiProvider updating assistant context with call summary');
+        //     // TODO: Update assistant context with call summary
+        //   }
+        // }
       },
       onError: error => {
         logger.error('❌ Vapi error', 'VapiProvider', error);
@@ -421,6 +455,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     setCallDetails,
     reinitializeForLanguage,
     setCallEndCallback,
+    // ✅ REMOVED: setCallSummaryCallback - now using OpenAI only
   };
 
   return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;

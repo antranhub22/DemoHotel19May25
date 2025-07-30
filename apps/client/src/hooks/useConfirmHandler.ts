@@ -1,4 +1,5 @@
 import { usePopup } from '@/components/features/popup-system';
+import { useAssistant } from '@/context';
 import { logger } from '@shared/utils/logger';
 import { createElement, useCallback, useEffect, useRef } from 'react';
 
@@ -17,14 +18,14 @@ interface UseConfirmHandlerReturn {
 }
 
 /**
- * ✅ REFACTORED: Auto-trigger summary handler (no longer needs Confirm button)
+ * ✅ REFACTORED: Auto-trigger summary handler with OpenAI transcript analysis
  *
  * Flow:
  * 1. User taps Siri button to end call
  * 2. handleCallEnd() calls endCall()
  * 3. endCall() triggers call end listeners
- * 4. autoShowSummary() shows summary popup
- * 5. No need for Confirm button anymore - auto-trigger only
+ * 4. autoTriggerSummary() processes transcript with OpenAI
+ * 5. Shows summary popup with analyzed data
  */
 export const useConfirmHandler = ({
   transcripts,
@@ -32,6 +33,7 @@ export const useConfirmHandler = ({
 }: UseConfirmHandlerProps): UseConfirmHandlerReturn => {
   const isMountedRef = useRef(true);
   const { showSummary, removePopup } = usePopup();
+  const { setServiceRequests, setCallSummary } = useAssistant();
   const isTriggeringRef = useRef(false); // ✅ NEW: Prevent multiple calls
   const summaryPopupIdRef = useRef<string | null>(null); // ✅ NEW: Track summary popup ID
 
@@ -55,8 +57,90 @@ export const useConfirmHandler = ({
     };
   }, [cleanupSummaryPopups]);
 
+  // ✅ NEW: Process transcript with OpenAI to generate summary and service requests
+  const processTranscriptWithOpenAI = useCallback(async () => {
+    if (transcripts.length === 0) {
+      console.log('📝 [DEBUG] No transcripts to process');
+      return { summary: null, serviceRequests: [] };
+    }
+
+    try {
+      console.log('🤖 [DEBUG] Processing transcript with OpenAI...');
+
+      // Convert transcripts to conversation format
+      const conversationText = transcripts
+        .map(
+          t =>
+            `${t.role === 'assistant' ? 'Hotel Assistant' : 'Guest'}: ${t.content}`
+        )
+        .join('\n');
+
+      // Call OpenAI to generate summary
+      const summaryResponse = await fetch('/api/openai/summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transcripts: transcripts.map(t => ({
+            role: t.role,
+            content: t.content,
+          })),
+          language: 'en', // Default to English, can be made dynamic
+        }),
+      });
+
+      if (!summaryResponse.ok) {
+        throw new Error(
+          `OpenAI summary request failed: ${summaryResponse.status}`
+        );
+      }
+
+      const summaryData = await summaryResponse.json();
+      const summary = summaryData.summary;
+
+      // Call OpenAI to extract service requests from summary
+      const serviceRequestsResponse = await fetch(
+        '/api/openai/service-requests',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            summary,
+          }),
+        }
+      );
+
+      if (!serviceRequestsResponse.ok) {
+        throw new Error(
+          `OpenAI service requests request failed: ${serviceRequestsResponse.status}`
+        );
+      }
+
+      const serviceRequestsData = await serviceRequestsResponse.json();
+      const serviceRequests = serviceRequestsData.requests || [];
+
+      console.log('✅ [DEBUG] OpenAI processing completed:', {
+        summaryLength: summary?.length || 0,
+        serviceRequestsCount: serviceRequests.length,
+      });
+
+      return { summary, serviceRequests };
+    } catch (error) {
+      console.error('❌ [DEBUG] OpenAI processing failed:', error);
+      logger.error(
+        '[useConfirmHandler] OpenAI processing failed:',
+        'Component',
+        error
+      );
+      return { summary: null, serviceRequests: [] };
+    }
+  }, [transcripts]);
+
   // ✅ NEW: Auto-trigger summary when call ends
-  const autoTriggerSummary = useCallback(() => {
+  const autoTriggerSummary = useCallback(async () => {
     // ✅ DEBUG: Track trigger state
     console.log(
       '🔍 [DEBUG] autoTriggerSummary called - isTriggeringRef.current:',
@@ -89,8 +173,25 @@ export const useConfirmHandler = ({
       'Component'
     );
 
-    // ✅ IMPROVED: Show summary immediately without loading popup
     try {
+      // ✅ NEW: Process transcript with OpenAI
+      const { summary, serviceRequests } = await processTranscriptWithOpenAI();
+
+      // ✅ NEW: Update assistant context with processed data
+      if (summary) {
+        setCallSummary({
+          callId: `call-${Date.now()}`,
+          tenantId: 'default',
+          content: summary,
+          timestamp: new Date(),
+        });
+      }
+
+      if (serviceRequests.length > 0) {
+        setServiceRequests(serviceRequests);
+      }
+
+      // ✅ IMPROVED: Show summary with processed data
       const summaryElement = createElement(
         'div',
         {
@@ -185,7 +286,7 @@ export const useConfirmHandler = ({
                 style: {
                   marginBottom: '16px',
                   padding: '12px',
-                  backgroundColor: '#f0fdf4',
+                  backgroundColor: '#f0df4',
                   borderRadius: '6px',
                   fontSize: '14px',
                 },
@@ -305,7 +406,15 @@ export const useConfirmHandler = ({
       isTriggeringRef.current = false;
       console.log('🔍 [DEBUG] Reset isTriggeringRef.current = false (error)');
     }
-  }, [showSummary, transcripts, serviceRequests, cleanupSummaryPopups]);
+  }, [
+    showSummary,
+    transcripts,
+    serviceRequests,
+    cleanupSummaryPopups,
+    processTranscriptWithOpenAI,
+    setServiceRequests,
+    setCallSummary,
+  ]);
 
   // ✅ NEW: Test function to force reset auto-trigger state
   const forceResetAutoTrigger = useCallback(() => {

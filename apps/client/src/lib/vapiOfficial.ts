@@ -14,6 +14,8 @@ export interface VapiOfficialConfig {
   onError?: (error: any) => void;
   onSpeechStart?: () => void;
   onSpeechEnd?: () => void;
+  // ✅ REMOVED: Call summary callback - now using OpenAI only
+  // onCallSummary?: (summary: any) => void;
 }
 
 // ✅ NEW: CallOptions interface for compatibility with existing code
@@ -101,6 +103,16 @@ export class VapiOfficial {
           'VapiOfficial'
         );
       }
+
+      // ✅ REMOVED: Call summary handling - now using OpenAI only
+      // if (message.type === 'call-summary' || message.type === 'summary' || message.type === 'end-of-call-report') {
+      //   logger.debug(
+      //     `📋 Call Summary received: ${JSON.stringify(message, null, 2)}`,
+      //     'VapiOfficial'
+      //   );
+      //   this.config.onCallSummary?.(message);
+      // }
+
       this.config.onMessage?.(message);
     });
 

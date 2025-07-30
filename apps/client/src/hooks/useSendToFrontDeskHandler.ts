@@ -20,7 +20,6 @@ const ERROR_MESSAGES = {
   SERVER_ERROR: 'Server error occurred while processing request',
 } as const;
 
-
 interface UseSendToFrontDeskHandlerProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
@@ -137,7 +136,10 @@ export const useSendToFrontDeskHandler = ({
 
       return {
         callId: orderReference,
-        roomNumber: extractRoomNumber(orderData, callSummary?.content),
+        roomNumber: extractRoomNumber(
+          orderData,
+          serviceRequests?.[0]?.details?.roomNumber || ''
+        ),
         orderType: orderData.orderType || CONSTANTS.ORDER_TYPE_DEFAULT,
         deliveryTime: orderData.deliveryTime || CONSTANTS.DELIVERY_TIME_DEFAULT,
         specialInstructions: orderReference,
@@ -151,7 +153,7 @@ export const useSendToFrontDeskHandler = ({
       extractRoomNumber,
       generateOrderReference,
       defaultServiceItem,
-      callSummary?.content,
+      serviceRequests,
     ]
   );
 
@@ -164,7 +166,6 @@ export const useSendToFrontDeskHandler = ({
 
     // ✅ STEP 1: Get guest session token
     let guestToken = localStorage.getItem('guest_token');
-
 
     // ✅ STEP 2: Submit request with guest token
     const headers: Record<string, string> = {

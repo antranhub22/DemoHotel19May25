@@ -1,3 +1,4 @@
+import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 import { useEffect } from 'react';
 import { DebugLog } from '../debug/DebugWrapper';
@@ -6,6 +7,7 @@ import { SummaryPopupContent } from './SummaryPopupContent';
 // Mobile Summary Popup Component - Extracted from Interface1.tsx
 export const MobileSummaryPopup = () => {
   const { popups, removePopup } = usePopupContext();
+  const { isCallActive } = useAssistant();
 
   // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
   const summaryPopup = popups.find(popup => popup.type === 'summary');
@@ -37,7 +39,16 @@ export const MobileSummaryPopup = () => {
         removePopup(popup.id);
       });
     }
-  }, [popups, removePopup]);
+
+    // ✅ NEW: Cleanup summary popups if call is active
+    // Summary should only show when call has ended
+    if (isCallActive && summaryPopup) {
+      console.log(
+        '📱 [MobileSummaryPopup] Call is active, cleaning up summary popup'
+      );
+      removePopup(summaryPopup.id);
+    }
+  }, [popups, removePopup, isCallActive, summaryPopup]);
 
   const handleClose = () => {
     // Remove all summary popups
@@ -48,8 +59,8 @@ export const MobileSummaryPopup = () => {
       });
   };
 
-  // ✅ NEW: Only show if there's actually a summary popup AND it's not empty
-  if (!showSummary || !summaryPopup) {
+  // ✅ NEW: Only show if call is NOT active AND there's actually a summary popup AND it's not empty
+  if (!showSummary || !summaryPopup || isCallActive) {
     return null;
   }
 
@@ -62,6 +73,7 @@ export const MobileSummaryPopup = () => {
           popupsCount: popups.length,
           summaryPopupFound: !!summaryPopup,
           summaryPopupId: summaryPopup?.id,
+          isCallActive,
         }}
       />
 

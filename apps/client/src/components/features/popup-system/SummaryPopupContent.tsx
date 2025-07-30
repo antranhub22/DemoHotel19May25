@@ -1,40 +1,20 @@
-import React from 'react';
 import { useAssistant } from '@/context';
-import {
-  extractRoomNumber,
-  parseSummaryToOrderDetails,
-} from '@/lib/summaryParser';
 import { logger } from '@shared/utils/logger';
+import React from 'react';
 // Remove i18n for now - use static text
 
-// Main Summary Popup Component - Uses dual summary system
+// Main Summary Popup Component - Uses OpenAI-only summary system
 export const SummaryPopupContent: React.FC = () => {
-  const { callSummary, serviceRequests, language, callDetails } =
-    useAssistant();
+  const { serviceRequests, language, callDetails } = useAssistant();
 
-  // Dual Summary Logic: Vapi.ai (primary) + OpenAI (fallback)
+  // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
-    // Priority 1: Vapi.ai callSummary (real-time, voice-optimized)
-    if (callSummary && callSummary.content) {
-      const roomNumber = extractRoomNumber(callSummary.content);
-      const orderDetails = parseSummaryToOrderDetails(callSummary.content);
-
-      return {
-        source: 'Vapi.ai',
-        roomNumber: roomNumber || 'Unknown',
-        content: callSummary.content,
-        items: orderDetails.items || [],
-        timestamp: callSummary.timestamp,
-        hasData: true,
-      };
-    }
-
-    // Priority 2: OpenAI serviceRequests (enhanced processing)
+    // Priority 1: OpenAI serviceRequests (enhanced processing)
     if (serviceRequests && serviceRequests.length > 0) {
       const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
 
       return {
-        source: 'OpenAI Enhanced',
+        source: 'OpenAI Analysis',
         roomNumber,
         content: serviceRequests
           .map(req => `${req.serviceType}: ${req.requestText}`)

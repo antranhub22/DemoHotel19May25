@@ -1,3 +1,4 @@
+import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 import { useEffect } from 'react';
 import { DebugLog } from '../debug/DebugWrapper';
@@ -6,6 +7,7 @@ import { SummaryPopupContent } from './SummaryPopupContent';
 // Desktop Summary Popup Component - Similar to MobileSummaryPopup but for desktop layout
 export const DesktopSummaryPopup = () => {
   const { popups, removePopup } = usePopupContext();
+  const { isCallActive } = useAssistant();
 
   // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
   const summaryPopup = popups.find(popup => popup.type === 'summary');
@@ -23,7 +25,16 @@ export const DesktopSummaryPopup = () => {
         });
       }
     }
-  }, [popups, removePopup]);
+
+    // ✅ NEW: Cleanup summary popups if call is active
+    // Summary should only show when call has ended
+    if (isCallActive && summaryPopup) {
+      console.log(
+        '🖥️ [DesktopSummaryPopup] Call is active, cleaning up summary popup'
+      );
+      removePopup(summaryPopup.id);
+    }
+  }, [popups, removePopup, isCallActive, summaryPopup]);
 
   const handleClose = () => {
     // Remove all summary popups
@@ -34,7 +45,20 @@ export const DesktopSummaryPopup = () => {
       });
   };
 
-  if (!showSummary) {
+  // ✅ DEBUG: Log render state
+  console.log('🖥️ [DesktopSummaryPopup] Render check:', {
+    showSummary,
+    popupsCount: popups.length,
+    summaryPopupFound: !!summaryPopup,
+    summaryPopupId: summaryPopup?.id,
+    isCallActive,
+  });
+
+  // ✅ NEW: Only show if call is NOT active AND there's a summary popup
+  if (!showSummary || isCallActive) {
+    console.log(
+      '🖥️ [DesktopSummaryPopup] Not showing - no summary popup or call is active'
+    );
     return null;
   }
 
@@ -46,6 +70,7 @@ export const DesktopSummaryPopup = () => {
           showSummary,
           popupsCount: popups.length,
           summaryPopupFound: !!summaryPopup,
+          isCallActive,
         }}
       />
 

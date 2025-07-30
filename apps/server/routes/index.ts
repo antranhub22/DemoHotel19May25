@@ -34,6 +34,7 @@ import versionedApiRoutes from './versioned-api'; // ✅ NEW: API versioning & m
 // ✅ LEGACY: Keep existing imports for backward compatibility
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
+import openaiRoutes from '@server/routes/openai'; // ✅ NEW: OpenAI processing endpoints
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
@@ -93,6 +94,8 @@ router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migratio
 // ✅ VOICE ASSISTANT APIs
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
 router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
+router.use('/api/openai', openaiRoutes); // ✅ NEW: OpenAI processing endpoints
+// ✅ REMOVED: VAPI Webhook endpoints - now using OpenAI only
 
 // ============================================
 // LEGACY ROUTES (v1.0-v2.0) - Backward Compatible
