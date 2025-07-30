@@ -11,13 +11,7 @@ import { useConversationState } from '@/hooks/useConversationState';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { logger } from '@shared/utils/logger';
-import {
-  createElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createElement, useCallback, useEffect, useState } from 'react';
 
 interface UseInterface1Props {
   isActive: boolean;
@@ -129,11 +123,17 @@ export const useInterface1 = ({
   const autoShowSummary = useCallback(() => {
     console.log('📞 [DEBUG] autoShowSummary callback triggered');
 
-    // ✅ FIX: Only trigger if call was actually active
-    if (!conversationState.isCallStarted) {
-      console.log('🚫 [DEBUG] No call was active, skipping summary trigger');
-      return;
-    }
+    // ✅ TEMP FIX: Disable conversationState check to test if it's the issue
+    console.log('📞 [DEBUG] Conversation state check:', {
+      isCallStarted: conversationState.isCallStarted,
+      tempSkipped: true, // Temporarily skip this check
+    });
+
+    // Temporarily comment out this check to test
+    // if (!conversationState.isCallStarted) {
+    //   console.log('🚫 [DEBUG] No call was active, skipping summary trigger');
+    //   return;
+    // }
 
     if (import.meta.env.DEV) {
       logger.debug(
