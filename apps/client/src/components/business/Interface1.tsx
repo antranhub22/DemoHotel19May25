@@ -68,15 +68,29 @@ const MobileSummaryPopup = () => {
       );
     }
 
-    // no cleanup needed
-  }, [popups]);
+    // ✅ NEW: Auto-cleanup old summary popups to prevent accumulation
+    if (popups.length > 10) {
+      console.log('🧹 [DEBUG] Too many popups, cleaning up old ones');
+      const summaryPopups = popups.filter(popup => popup.type === 'summary');
+      if (summaryPopups.length > 1) {
+        // Keep only the newest summary popup
+        summaryPopups.slice(1).forEach(popup => {
+          console.log('🗑️ [DEBUG] Removing old summary popup:', popup.id);
+          removePopup(popup.id);
+        });
+      }
+    }
+  }, [popups, removePopup]);
 
   const handleClose = () => {
     console.log('📱 [DEBUG] MobileSummaryPopup - handleClose called');
     // Remove all summary popups
     popups
       .filter(popup => popup.type === 'summary')
-      .forEach(popup => removePopup(popup.id));
+      .forEach(popup => {
+        console.log('🗑️ [DEBUG] Removing summary popup on close:', popup.id);
+        removePopup(popup.id);
+      });
   };
 
   if (!showSummary) return null;
@@ -465,6 +479,57 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 }}
               >
                 🧪 Test Summary
+              </button>
+            </div>
+
+            {/* ✅ NEW: Emergency Cleanup Button - Desktop */}
+            <div
+              className="fixed bottom-4 right-32 z-[9999] hidden md:block"
+              style={{
+                position: 'fixed',
+                bottom: '16px',
+                right: '128px',
+                zIndex: 9999,
+                backgroundColor: '#ef4444',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                outline: 'none',
+              }}
+            >
+              <button
+                onClick={() => {
+                  console.log('🚨 Emergency cleanup button clicked!');
+                  const { emergencyCleanup, resetSummarySystem } = usePopup();
+
+                  // First reset summary system
+                  resetSummarySystem();
+
+                  // Then emergency cleanup if needed
+                  setTimeout(() => {
+                    emergencyCleanup();
+                  }, 100);
+
+                  alert(
+                    '🧹 Emergency cleanup completed! Check console for details.'
+                  );
+                }}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
+              >
+                🚨 Cleanup
               </button>
             </div>
 

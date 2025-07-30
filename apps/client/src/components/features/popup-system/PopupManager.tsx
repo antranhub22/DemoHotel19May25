@@ -204,28 +204,81 @@ export const usePopup = () => {
       priority?: 'high' | 'medium' | 'low';
     }
   ) => {
-    console.log('📋 [DEBUG] showSummary called with options:', {
-      title: options?.title,
-      priority: options?.priority || 'medium',
-      hasContent: !!content,
-    });
-    console.log('📋 [DEBUG] showSummary call stack:', new Error().stack);
+    try {
+      console.log('📋 [DEBUG] showSummary called with options:', {
+        title: options?.title,
+        priority: options?.priority || 'medium',
+        hasContent: !!content,
+      });
+      console.log('📋 [DEBUG] showSummary call stack:', new Error().stack);
 
-    return addPopup({
-      type: 'summary',
-      title: options?.title || 'Call Summary',
-      content: content || (
-        <Suspense
-          fallback={
-            <div className="p-4 text-center text-gray-500">Loading...</div>
-          }
-        >
-          <LazySummaryPopupContent />
-        </Suspense>
-      ),
-      priority: options?.priority || 'medium', // ✅ FIX: Default to 'medium' instead of 'high'
-      isActive: false,
-    });
+      // ✅ NEW: Prevent multiple rapid calls
+      const now = Date.now();
+      if (showSummary.lastCall && now - showSummary.lastCall < 100) {
+        console.log('🚫 [DEBUG] showSummary called too rapidly, skipping...');
+        return '';
+      }
+      showSummary.lastCall = now;
+
+      const popupId = addPopup({
+        type: 'summary',
+        title: options?.title || 'Call Summary',
+        content: content || (
+          <Suspense
+            fallback={
+              <div className="p-4 text-center text-gray-500">Loading...</div>
+            }
+          >
+            <LazySummaryPopupContent />
+          </Suspense>
+        ),
+        priority: options?.priority || 'medium', // ✅ FIX: Default to 'medium' instead of 'high'
+        isActive: false,
+      });
+
+      console.log(
+        '✅ [DEBUG] Summary popup created successfully, ID:',
+        popupId
+      );
+      return popupId;
+    } catch (error) {
+      console.error('❌ [DEBUG] Error in showSummary:', error);
+      // Assuming logger is defined elsewhere or needs to be imported
+      // logger.error('Error creating summary popup', 'PopupManager', error);
+      return '';
+    }
+  };
+
+  // ✅ NEW: Add static property to track last call time
+  showSummary.lastCall = 0;
+
+  // ✅ NEW: Emergency cleanup function
+  const emergencyCleanup = () => {
+    console.log('🚨 [DEBUG] Emergency cleanup triggered');
+    const { clearAllPopups } = usePopupContext();
+    clearAllPopups();
+    showSummary.lastCall = 0;
+    console.log('✅ [DEBUG] Emergency cleanup completed');
+  };
+
+  // ✅ NEW: Reset summary system
+  const resetSummarySystem = () => {
+    console.log('🔄 [DEBUG] Resetting summary system');
+    const { popups, removePopup } = usePopupContext();
+
+    // Remove all summary popups
+    popups
+      .filter(popup => popup.type === 'summary')
+      .forEach(popup => {
+        console.log(
+          '🗑️ [DEBUG] Removing summary popup during reset:',
+          popup.id
+        );
+        removePopup(popup.id);
+      });
+
+    showSummary.lastCall = 0;
+    console.log('✅ [DEBUG] Summary system reset completed');
   };
 
   // ✅ NEW: Quick notification method to replace NotificationSystem
@@ -309,6 +362,8 @@ export const usePopup = () => {
     showSummary,
     showQuickNotification, // ✅ NEW: Quick notifications
     showMultiLanguageNotification, // ✅ NEW: Multi-language support
+    emergencyCleanup, // ✅ NEW: Export cleanup function
+    resetSummarySystem, // ✅ NEW: Export reset function
     removePopup,
     setActivePopup,
   };

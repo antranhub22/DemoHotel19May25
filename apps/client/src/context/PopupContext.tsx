@@ -120,6 +120,16 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
       console.log('➕ [DEBUG] addPopup call stack:', new Error().stack);
 
       setPopups(prev => {
+        // ✅ NEW: Limit total number of popups to prevent memory issues
+        const maxPopups = 50; // Limit to 50 popups max
+        if (prev.length >= maxPopups) {
+          console.log('⚠️ [DEBUG] Too many popups, removing oldest ones');
+          // Remove oldest popups (keep newest 30)
+          const keepCount = 30;
+          const filtered = prev.slice(0, keepCount);
+          return [newPopup, ...filtered];
+        }
+
         // ✅ FIX: Don't auto-remove summary popups - they should persist
         if (popup.priority === 'high' && popup.type !== 'summary') {
           const filtered = prev.filter(p => p.type !== popup.type);
@@ -129,6 +139,14 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
           );
           return [newPopup, ...filtered];
         }
+
+        // ✅ NEW: For summary popups, remove old ones to prevent accumulation
+        if (popup.type === 'summary') {
+          const filtered = prev.filter(p => p.type !== 'summary');
+          console.log('🔄 [DEBUG] Removed old summary popups, keeping new one');
+          return [newPopup, ...filtered];
+        }
+
         return [newPopup, ...prev];
       });
 

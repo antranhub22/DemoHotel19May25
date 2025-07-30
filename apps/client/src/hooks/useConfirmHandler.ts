@@ -1,6 +1,6 @@
 import { usePopup } from '@/components/features/popup-system';
 import { logger } from '@shared/utils/logger';
-import { createElement, useCallback, useRef } from 'react';
+import { createElement, useCallback, useEffect, useRef } from 'react';
 
 interface UseConfirmHandlerProps {
   endCall: () => void; // ✅ FIXED: Use direct endCall function
@@ -30,8 +30,29 @@ export const useConfirmHandler = ({
   serviceRequests,
 }: UseConfirmHandlerProps): UseConfirmHandlerReturn => {
   const isMountedRef = useRef(true);
-  const { showSummary } = usePopup();
+  const { showSummary, removePopup } = usePopup();
   const isTriggeringRef = useRef(false); // ✅ NEW: Prevent multiple calls
+  const summaryPopupIdRef = useRef<string | null>(null); // ✅ NEW: Track summary popup ID
+
+  // ✅ NEW: Cleanup function to remove existing summary popups
+  const cleanupSummaryPopups = useCallback(() => {
+    if (summaryPopupIdRef.current) {
+      console.log(
+        '🧹 [DEBUG] Cleaning up existing summary popup:',
+        summaryPopupIdRef.current
+      );
+      removePopup(summaryPopupIdRef.current);
+      summaryPopupIdRef.current = null;
+    }
+  }, [removePopup]);
+
+  // ✅ NEW: Auto-cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      cleanupSummaryPopups();
+    };
+  }, [cleanupSummaryPopups]);
 
   // ✅ NEW: Auto-trigger summary when call ends
   const autoTriggerSummary = useCallback(() => {
@@ -40,6 +61,9 @@ export const useConfirmHandler = ({
       console.log('🚫 [DEBUG] Auto-trigger already in progress, skipping...');
       return;
     }
+
+    // ✅ NEW: Cleanup existing summary popups first
+    cleanupSummaryPopups();
 
     isTriggeringRef.current = true;
     console.log(
@@ -223,11 +247,23 @@ export const useConfirmHandler = ({
 
       // ✅ TEST: Add delay to prevent race condition
       setTimeout(() => {
-        showSummary(summaryElement, {
+        if (!isMountedRef.current) {
+          console.log('🚫 [DEBUG] Component unmounted, skipping summary popup');
+          return;
+        }
+
+        const popupId = showSummary(summaryElement, {
           title: 'Call Complete',
           priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
         });
-        console.log('✅ [DEBUG] Summary popup shown successfully (with delay)');
+
+        // ✅ NEW: Track the popup ID for cleanup
+        summaryPopupIdRef.current = popupId;
+
+        console.log(
+          '✅ [DEBUG] Summary popup shown successfully (with delay), ID:',
+          popupId
+        );
       }, 100); // 100ms delay
 
       console.log('✅ [DEBUG] Summary popup trigger scheduled');
@@ -250,9 +286,11 @@ export const useConfirmHandler = ({
       }
     } finally {
       // ✅ FIX: Reset trigger flag after completion
-      isTriggeringRef.current = false;
+      setTimeout(() => {
+        isTriggeringRef.current = false;
+      }, 200); // Small delay to prevent rapid re-triggers
     }
-  }, [showSummary, transcripts, serviceRequests]);
+  }, [showSummary, transcripts, serviceRequests, cleanupSummaryPopups]);
 
   // ✅ SIMPLIFIED: handleConfirm now just calls autoTriggerSummary
   const handleConfirm = useCallback(() => {
@@ -262,11 +300,6 @@ export const useConfirmHandler = ({
     );
     autoTriggerSummary();
   }, [autoTriggerSummary]);
-
-  // Cleanup on unmount
-  useCallback(() => {
-    isMountedRef.current = false;
-  }, []);
 
   return {
     handleConfirm,
