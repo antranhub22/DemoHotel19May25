@@ -280,7 +280,7 @@ export const useInterface1 = ({
         const { SummaryPopupContent } = module;
         showSummary(createElement(SummaryPopupContent), {
           title: 'Call Summary',
-          priority: 'high' as const,
+          priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
         });
       })
       .catch(() => {

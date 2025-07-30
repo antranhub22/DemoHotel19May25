@@ -451,7 +451,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                   );
                   showSummary(testSummaryElement, {
                     title: 'Test Summary',
-                    priority: 'high' as const,
+                    priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
                   });
                 }}
                 style={{
@@ -560,7 +560,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                       );
                       showSummary(testSummaryElement, {
                         title: 'Test Summary',
-                        priority: 'high' as const,
+                        priority: 'medium' as const,
                       });
                     }}
                     style={{
