@@ -51,6 +51,12 @@ const MobileSummaryPopup = () => {
 
   // Listen for summary popups and show them in mobile center modal
   useEffect(() => {
+    console.log('📱 [DEBUG] MobileSummaryPopup useEffect triggered');
+    console.log(
+      '📱 [DEBUG] All popups:',
+      popups.map(p => ({ id: p.id, type: p.type, title: p.title }))
+    );
+
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     const hasSummary = !!summaryPopup;
 
@@ -481,10 +487,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                       ),
                     ]
                   );
-                  showSummary(testSummaryElement, {
+                  const popupId = showSummary(testSummaryElement, {
                     title: 'Test Summary',
-                    priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
+                    priority: 'medium' as const,
                   });
+                  console.log(
+                    '🧪 [DEBUG] Test summary popup created with ID:',
+                    popupId
+                  );
                 }}
                 style={{
                   backgroundColor: 'transparent',

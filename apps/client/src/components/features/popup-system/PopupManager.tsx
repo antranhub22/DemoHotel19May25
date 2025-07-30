@@ -212,10 +212,15 @@ export const usePopup = () => {
       });
       console.log('📋 [DEBUG] showSummary call stack:', new Error().stack);
 
-      // ✅ NEW: Prevent multiple rapid calls
+      // ✅ FIXED: Prevent multiple rapid calls with better logic
       const now = Date.now();
-      if (showSummary.lastCall && now - showSummary.lastCall < 100) {
+      if (showSummary.lastCall && now - showSummary.lastCall < 50) {
         console.log('🚫 [DEBUG] showSummary called too rapidly, skipping...');
+        console.log(
+          '🚫 [DEBUG] Time since last call:',
+          now - showSummary.lastCall,
+          'ms'
+        );
         return '';
       }
       showSummary.lastCall = now;

@@ -120,6 +120,16 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
       console.log('➕ [DEBUG] addPopup call stack:', new Error().stack);
 
       setPopups(prev => {
+        console.log(
+          '🔄 [DEBUG] PopupContext setPopups called with prev length:',
+          prev.length
+        );
+        console.log('🔄 [DEBUG] New popup:', {
+          id: newPopup.id,
+          type: newPopup.type,
+          title: newPopup.title,
+        });
+
         // ✅ EMERGENCY: If too many popups, clear all and start fresh
         if (prev.length > 100) {
           console.log(
@@ -152,10 +162,20 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
         if (popup.type === 'summary') {
           const filtered = prev.filter(p => p.type !== 'summary');
           console.log('🔄 [DEBUG] Removed old summary popups, keeping new one');
+          console.log(
+            '🔄 [DEBUG] Summary popups after filter:',
+            filtered.filter(p => p.type === 'summary').length
+          );
           return [newPopup, ...filtered];
         }
 
-        return [newPopup, ...prev];
+        const result = [newPopup, ...prev];
+        console.log('🔄 [DEBUG] Final popups count:', result.length);
+        console.log(
+          '🔄 [DEBUG] Summary popups in result:',
+          result.filter(p => p.type === 'summary').length
+        );
+        return result;
       });
 
       // Auto-set as active if high priority or no active popup
