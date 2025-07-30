@@ -154,6 +154,7 @@ export const useInterface1 = ({
 
   // ✅ REFACTORED: Use autoTriggerSummary from useConfirmHandler instead of autoShowSummary
   const autoShowSummary = useCallback(() => {
+    console.log('📞 [DEBUG] autoShowSummary callback triggered');
     if (import.meta.env.DEV) {
       logger.debug(
         'Auto-showing Summary Popup after call end',
@@ -163,8 +164,10 @@ export const useInterface1 = ({
 
     try {
       // ✅ NEW: Use autoTriggerSummary instead of showSummary directly
+      console.log('📞 [DEBUG] Calling autoTriggerSummary()');
       autoTriggerSummary();
 
+      console.log('✅ [DEBUG] autoTriggerSummary() completed successfully');
       if (import.meta.env.DEV) {
         logger.success(
           'Summary Popup auto-shown successfully',
@@ -172,6 +175,7 @@ export const useInterface1 = ({
         );
       }
     } catch (error) {
+      console.error('❌ [DEBUG] Error in autoShowSummary:', error);
       logger.error('Error auto-showing summary popup', 'useInterface1', error);
       setTimeout(() => {
         logger.info(
@@ -184,13 +188,16 @@ export const useInterface1 = ({
 
   // ✅ OPTIMIZED: Auto-summary listener registration
   useEffect(() => {
+    console.log('📞 [DEBUG] Registering auto-summary listener');
     if (import.meta.env.DEV) {
       logger.debug('Registering auto-summary listener', 'useInterface1');
     }
 
     const unregister = addCallEndListener(autoShowSummary);
+    console.log('✅ [DEBUG] Auto-summary listener registered successfully');
 
     return () => {
+      console.log('📞 [DEBUG] Unregistering auto-summary listener');
       if (import.meta.env.DEV) {
         logger.debug('Unregistering auto-summary listener', 'useInterface1');
       }

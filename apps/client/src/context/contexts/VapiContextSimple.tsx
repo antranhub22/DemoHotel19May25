@@ -32,6 +32,9 @@ export interface VapiContextType {
   endCall: () => Promise<void>;
   setCallDetails: (details: CallDetails | null) => void;
   reinitializeForLanguage: (language: string) => void; // Add language reinitialization
+
+  // ✅ NEW: Callback for external call end handling
+  setCallEndCallback: (callback: () => void) => void;
 }
 
 const VapiContext = createContext<VapiContextType | undefined>(undefined);
@@ -52,6 +55,9 @@ interface VapiProviderProps {
 export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // State management
   const [isCallActive, setIsCallActive] = useState(false);
+  const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(
+    null
+  );
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState('en');
@@ -141,9 +147,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         );
       },
       onCallEnd: () => {
+        console.log('📞 [DEBUG] VapiProvider onCallEnd triggered');
         logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
+
+        // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
+        if (callEndCallback) {
+          console.log('📞 [DEBUG] VapiProvider calling external callback');
+          callEndCallback();
+        } else {
+          console.log('📞 [DEBUG] VapiProvider no external callback available');
+        }
+
+        // Update state after callback
         setIsCallActive(false);
         setMicLevel(0);
+
         // Keep call ID for a bit to allow final transcripts, then reset
         setTimeout(() => {
           logger.debug(
@@ -402,6 +420,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     endCall,
     setCallDetails,
     reinitializeForLanguage,
+    setCallEndCallback,
   };
 
   return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;

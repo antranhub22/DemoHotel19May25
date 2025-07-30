@@ -451,17 +451,27 @@ export const useConversationState = ({
     );
 
     // ✅ FIX: ALWAYS call endCall() first to stop VAPI in all modes
+    console.log(
+      '📞 [DEBUG] useConversationState.handleCallEnd - Step 1: Calling endCall()'
+    );
     logger.debug(
       '📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...',
       'Component'
     );
     try {
       endCall(); // ← This MUST run to stop VAPI instance
+      console.log(
+        '✅ [DEBUG] useConversationState.handleCallEnd - endCall() completed successfully'
+      );
       logger.debug(
         '✅ [useConversationState] endCall() completed - VAPI stopped',
         'Component'
       );
     } catch (endCallError) {
+      console.error(
+        '❌ [DEBUG] useConversationState.handleCallEnd - Error in endCall():',
+        endCallError
+      );
       logger.error(
         '❌ [useConversationState] Error in endCall():',
         'Component',

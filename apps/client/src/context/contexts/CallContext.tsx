@@ -75,6 +75,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   // End call function
   const endCall = useCallback(() => {
+    console.log('📞 [DEBUG] CallContext.endCall() called');
     logger.debug('[CallContext] Ending call...', 'Component');
 
     setIsEndingCall(true);
@@ -87,10 +88,16 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Trigger call end listeners
-    callEndListeners.forEach(listener => {
+    console.log(
+      `📞 [DEBUG] Triggering ${callEndListeners.length} call end listeners`
+    );
+    callEndListeners.forEach((listener, index) => {
       try {
+        console.log(`📞 [DEBUG] Executing listener ${index + 1}`);
         listener();
+        console.log(`✅ [DEBUG] Listener ${index + 1} executed successfully`);
       } catch (error) {
+        console.error(`❌ [DEBUG] Error in listener ${index + 1}:`, error);
         logger.error(
           '[CallContext] Error in call end listener:',
           'Component',

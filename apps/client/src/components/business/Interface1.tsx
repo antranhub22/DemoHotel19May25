@@ -39,7 +39,8 @@ import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid'
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 // Siri Components
-import { useConfirmHandler } from '@/hooks/useConfirmHandler';
+import { createElement } from 'react';
+import { usePopup } from '../features/popup-system/PopupManager';
 import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
@@ -376,13 +377,49 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 onClick={() => {
                   console.log('🧪 Test Summary button clicked! (Desktop)');
                   // Test summary popup without Vapi call
-                  const { autoTriggerSummary } = useConfirmHandler({
-                    endCall: () => {},
-                    transcripts: [],
-                    callSummary: null,
-                    serviceRequests: [],
+                  const { showSummary } = usePopup();
+                  const testSummaryElement = createElement(
+                    'div',
+                    {
+                      style: {
+                        padding: '20px',
+                        textAlign: 'center',
+                        maxWidth: '400px',
+                      },
+                    },
+                    [
+                      createElement(
+                        'h3',
+                        {
+                          key: 'title',
+                          style: {
+                            marginBottom: '16px',
+                            color: '#333',
+                            fontSize: '18px',
+                            fontWeight: '600',
+                          },
+                        },
+                        '🧪 Test Summary'
+                      ),
+                      createElement(
+                        'p',
+                        {
+                          key: 'message',
+                          style: {
+                            marginBottom: '16px',
+                            lineHeight: '1.5',
+                            color: '#333',
+                            fontSize: '16px',
+                          },
+                        },
+                        'This is a test summary popup!'
+                      ),
+                    ]
+                  );
+                  showSummary(testSummaryElement, {
+                    title: 'Test Summary',
+                    priority: 'high' as const,
                   });
-                  autoTriggerSummary();
                 }}
                 style={{
                   backgroundColor: 'transparent',
@@ -448,13 +485,50 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                     onClick={() => {
                       console.log('🧪 Test Summary button clicked!');
                       // Test summary popup without Vapi call
-                      const { autoTriggerSummary } = useConfirmHandler({
-                        endCall: () => {},
-                        transcripts: [],
-                        callSummary: null,
-                        serviceRequests: [],
+                      // Create a temporary confirm handler for testing
+                      const { showSummary } = usePopup();
+                      const testSummaryElement = createElement(
+                        'div',
+                        {
+                          style: {
+                            padding: '20px',
+                            textAlign: 'center',
+                            maxWidth: '400px',
+                          },
+                        },
+                        [
+                          createElement(
+                            'h3',
+                            {
+                              key: 'title',
+                              style: {
+                                marginBottom: '16px',
+                                color: '#333',
+                                fontSize: '18px',
+                                fontWeight: '600',
+                              },
+                            },
+                            '🧪 Test Summary'
+                          ),
+                          createElement(
+                            'p',
+                            {
+                              key: 'message',
+                              style: {
+                                marginBottom: '16px',
+                                lineHeight: '1.5',
+                                color: '#333',
+                                fontSize: '16px',
+                              },
+                            },
+                            'This is a test summary popup!'
+                          ),
+                        ]
+                      );
+                      showSummary(testSummaryElement, {
+                        title: 'Test Summary',
+                        priority: 'high' as const,
                       });
-                      autoTriggerSummary();
                     }}
                     style={{
                       backgroundColor: 'transparent',

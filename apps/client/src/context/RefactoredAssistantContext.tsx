@@ -123,6 +123,23 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const configuration = useConfiguration();
   const vapi = useVapi();
 
+  // ✅ NEW: Setup VapiProvider callback to trigger CallContext.endCall()
+  useEffect(() => {
+    console.log('📞 [DEBUG] Setting up VapiProvider callback');
+    vapi.setCallEndCallback(() => {
+      console.log(
+        '📞 [DEBUG] VapiProvider callback triggered, calling CallContext.endCall()'
+      );
+      call.endCall();
+    });
+
+    // ✅ FIX: Cleanup callback on unmount
+    return () => {
+      console.log('📞 [DEBUG] Cleaning up VapiProvider callback');
+      vapi.setCallEndCallback(() => {}); // Clear callback
+    };
+  }, [vapi, call]);
+
   // ✅ NEW: Listen for language changes and reinitialize Vapi
   useEffect(() => {
     logger.debug(
@@ -245,25 +262,49 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
   // Enhanced endCall that integrates all contexts
   const enhancedEndCall = useCallback(async () => {
+    console.log('📞 [DEBUG] RefactoredAssistant.enhancedEndCall called');
     logger.debug('[RefactoredAssistant] Ending enhanced call...', 'Component');
 
-    // Stop Vapi first
-    await vapi.endCall();
+    try {
+      // Stop Vapi first
+      console.log('📞 [DEBUG] Calling vapi.endCall()');
+      await vapi.endCall();
+      console.log('✅ [DEBUG] vapi.endCall() completed');
 
-    // End call timer
-    call.endCall();
+      // End call timer
+      console.log('📞 [DEBUG] Calling call.endCall()');
+      call.endCall();
+      console.log('✅ [DEBUG] call.endCall() completed');
 
-    // Process summary if we have transcripts
-    if (transcript.transcripts.length >= 2) {
-      // This would trigger summary generation
-      logger.debug(
-        '[RefactoredAssistant] Processing call summary...',
-        'Component'
+      // Process summary if we have transcripts
+      if (transcript.transcripts.length >= 2) {
+        console.log(
+          '📞 [DEBUG] Processing call summary with transcripts:',
+          transcript.transcripts.length
+        );
+        // This would trigger summary generation
+        logger.debug(
+          '[RefactoredAssistant] Processing call summary...',
+          'Component'
+        );
+        // Summary processing logic would go here
+      } else {
+        console.log(
+          '📞 [DEBUG] No transcripts to process:',
+          transcript.transcripts.length
+        );
+      }
+
+      console.log('✅ [DEBUG] RefactoredAssistant.enhancedEndCall completed');
+      logger.debug('[RefactoredAssistant] Enhanced call ended', 'Component');
+    } catch (error) {
+      console.error('❌ [DEBUG] Error in enhancedEndCall:', error);
+      logger.error(
+        '[RefactoredAssistant] Error ending call:',
+        'Component',
+        error
       );
-      // Summary processing logic would go here
     }
-
-    logger.debug('[RefactoredAssistant] Enhanced call ended', 'Component');
   }, [call, vapi, transcript]);
 
   // Enhanced toggleMute that integrates both contexts

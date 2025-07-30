@@ -26,9 +26,7 @@ interface UseConfirmHandlerReturn {
  * 5. No need for Confirm button anymore
  */
 export const useConfirmHandler = ({
-  endCall,
   transcripts,
-  callSummary,
   serviceRequests,
 }: UseConfirmHandlerProps): UseConfirmHandlerReturn => {
   const isMountedRef = useRef(true);
@@ -36,6 +34,7 @@ export const useConfirmHandler = ({
 
   // ✅ NEW: Auto-trigger summary when call ends
   const autoTriggerSummary = useCallback(() => {
+    console.log('🚀 [DEBUG] Auto-triggering summary after call end');
     logger.debug(
       '🚀 [useConfirmHandler] Auto-triggering summary after call end',
       'Component'
@@ -209,11 +208,13 @@ export const useConfirmHandler = ({
         ]
       );
 
+      console.log('📋 [DEBUG] About to show summary popup');
       showSummary(summaryElement, {
         title: 'Call Complete',
         priority: 'high' as const,
       });
 
+      console.log('✅ [DEBUG] Summary popup shown successfully');
       logger.debug(
         '✅ [useConfirmHandler] Summary popup shown successfully',
         'Component'
