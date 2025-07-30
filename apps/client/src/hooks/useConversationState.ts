@@ -19,7 +19,7 @@ interface UseConversationStateReturn {
     lang: Language
   ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
-  handleCancel: () => void;
+  // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // 🔧 REMOVE: handleConfirm is now in useConfirmHandler
 }
 
@@ -533,66 +533,13 @@ export const useConversationState = ({
     );
   }, [endCall, isCallStarted]);
 
-  const handleCancel = useCallback(() => {
-    logger.debug(
-      '❌ [useConversationState] Canceling call - FULL RESET',
-      'Component'
-    );
-
-    try {
-      // Reset local states first to prevent further operations
-      setIsCallStarted(false);
-      setShowConversation(false);
-      setManualCallStarted(false); // Clear manual flag on cancel
-
-      // End call with error handling
-      try {
-        endCall();
-        logger.debug(
-          '✅ [useConversationState] endCall() executed successfully',
-          'Component'
-        );
-      } catch (endCallError) {
-        logger.error(
-          '⚠️ [useConversationState] endCall() failed but continuing with cancel:',
-          'Component',
-          endCallError
-        );
-        // Don't rethrow - we still want to complete the cancel operation
-      }
-
-      logger.debug(
-        '✅ [useConversationState] Cancel completed - all states reset',
-        'Component'
-      );
-      logger.debug(
-        '📊 [useConversationState] Final state: isCallStarted=false, showConversation=false',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [useConversationState] Error in handleCancel:',
-        'Component',
-        error
-      );
-
-      // Ensure states are reset even if there's an error
-      setIsCallStarted(false);
-      setShowConversation(false);
-      setManualCallStarted(false);
-
-      logger.debug(
-        '🔄 [useConversationState] Forced state reset after error',
-        'Component'
-      );
-    }
-  }, [endCall]);
+  // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
 
   return {
     isCallStarted,
     showConversation,
     handleCallStart,
     handleCallEnd,
-    handleCancel,
+    // ✅ REMOVED: handleCancel is no longer needed
   };
 };

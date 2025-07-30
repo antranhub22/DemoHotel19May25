@@ -32,8 +32,7 @@ export interface SiriButtonContainerProps {
   micLevel: number;
   onCallStart: (lang: Language) => Promise<void>;
   onCallEnd: () => void;
-  onCancel?: () => void;
-  onConfirm?: () => void;
+  // ✅ REMOVED: onCancel and onConfirm are no longer needed
   showingSummary?: boolean;
   _showingSummary?: boolean;
 }

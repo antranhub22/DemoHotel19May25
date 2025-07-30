@@ -57,7 +57,7 @@ export interface Interface1Handlers {
     lang: Language
   ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
-  handleCancel: () => void;
+  // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
 
   // UI handlers
@@ -127,7 +127,7 @@ export interface CallSectionProps {
       lang: Language
     ) => Promise<{ success: boolean; error?: string }>;
     handleCallEnd: () => void;
-    handleCancel: () => void;
+    // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
     // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
     handleRightPanelClose: () => void;
   };
@@ -180,7 +180,7 @@ export interface UseInterface1Return {
     lang: Language
   ) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
-  handleCancel: () => void;
+  // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
 
   // Right panel state

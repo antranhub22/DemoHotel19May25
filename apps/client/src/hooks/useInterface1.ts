@@ -5,7 +5,7 @@
 import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
-import { useCancelHandler } from '@/hooks/useCancelHandler';
+// ✅ REMOVED: useCancelHandler import - no longer needed
 import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
@@ -46,7 +46,7 @@ interface UseInterface1Return {
   showConversation: boolean;
   handleCallStart: (lang: any) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
-  handleCancel: () => void;
+  // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
 
   // Summary popup state
@@ -106,22 +106,6 @@ export const useInterface1 = ({
   const [showRightPanel, setShowRightPanel] = useState(false);
 
   // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
-  const cancelHandlerConfig = useMemo(
-    () => ({
-      conversationState,
-      conversationPopupId,
-      setConversationPopupId,
-      setShowRightPanel,
-      transcripts,
-    }),
-    [
-      conversationState,
-      conversationPopupId,
-      setConversationPopupId,
-      setShowRightPanel,
-      transcripts,
-    ]
-  ); // Fixed: Added all dependencies
 
   const confirmHandlerConfig = useMemo(
     () => ({
@@ -133,7 +117,7 @@ export const useInterface1 = ({
     [endCall, transcripts, callSummary, serviceRequests]
   ); // Dependencies are correct
 
-  const { handleCancel } = useCancelHandler(cancelHandlerConfig);
+  // ✅ REMOVED: handleCancel is no longer needed
   const { autoTriggerSummary } = useConfirmHandler(confirmHandlerConfig);
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
@@ -337,7 +321,7 @@ export const useInterface1 = ({
     showConversation: conversationState.showConversation,
     handleCallStart: conversationState.handleCallStart,
     handleCallEnd: conversationState.handleCallEnd,
-    handleCancel,
+    // ✅ REMOVED: handleCancel is no longer needed
     // ✅ REMOVED: handleConfirm is no longer needed
 
     // Summary popup state
