@@ -119,8 +119,8 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
       });
 
       setPopups(prev => {
-        // Remove any existing popup of the same type if priority is high
-        if (popup.priority === 'high') {
+        // ✅ FIX: Don't auto-remove summary popups - they should persist
+        if (popup.priority === 'high' && popup.type !== 'summary') {
           const filtered = prev.filter(p => p.type !== popup.type);
           console.log(
             '🔄 [DEBUG] Removed existing popups of same type:',

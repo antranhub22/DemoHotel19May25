@@ -307,7 +307,7 @@ export const useInterface1 = ({
           ),
           {
             title: 'Call Summary',
-            priority: 'high' as const,
+            priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
           }
         );
       });

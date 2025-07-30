@@ -216,7 +216,7 @@ export const usePopup = () => {
           <LazySummaryPopupContent />
         </Suspense>
       ),
-      priority: options?.priority || 'high',
+      priority: options?.priority || 'medium', // ✅ FIX: Default to 'medium' instead of 'high'
       isActive: false,
     });
   };
@@ -278,7 +278,7 @@ export const usePopup = () => {
   const showMultiLanguageNotification = (
     template: string,
     language: string,
-    variables: Record<string, string> = {},
+    _variables: Record<string, string> = {},
     options?: {
       type?: 'success' | 'error' | 'warning' | 'info' | 'call' | 'service';
       duration?: number;

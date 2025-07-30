@@ -211,7 +211,7 @@ export const useConfirmHandler = ({
       console.log('📋 [DEBUG] About to show summary popup');
       showSummary(summaryElement, {
         title: 'Call Complete',
-        priority: 'high' as const,
+        priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
       });
 
       console.log('✅ [DEBUG] Summary popup shown successfully');
