@@ -588,14 +588,11 @@ export const useConversationState = ({
     }
   }, [endCall]);
 
-  // 🔧 REMOVE: Old handleConfirm - now in useConfirmHandler
-
   return {
     isCallStarted,
     showConversation,
     handleCallStart,
     handleCallEnd,
     handleCancel,
-    // 🔧 REMOVE: handleConfirm from return
   };
 };

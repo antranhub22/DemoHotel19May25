@@ -47,7 +47,7 @@ interface UseInterface1Return {
   handleCallStart: (lang: any) => Promise<{ success: boolean; error?: string }>;
   handleCallEnd: () => void;
   handleCancel: () => void;
-  handleConfirm: () => void;
+  // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
 
   // Summary popup state
   showingSummary: boolean;
@@ -134,8 +134,7 @@ export const useInterface1 = ({
   ); // Dependencies are correct
 
   const { handleCancel } = useCancelHandler(cancelHandlerConfig);
-  const { handleConfirm, autoTriggerSummary } =
-    useConfirmHandler(confirmHandlerConfig);
+  const { autoTriggerSummary } = useConfirmHandler(confirmHandlerConfig);
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
@@ -186,7 +185,7 @@ export const useInterface1 = ({
     }
   }, [autoTriggerSummary]);
 
-  // ✅ OPTIMIZED: Auto-summary listener registration
+  // ✅ FIXED: Stable listener registration to prevent re-register
   useEffect(() => {
     console.log(
       '📞 [DEBUG] Registering auto-summary listener - CALL ID:',
@@ -209,7 +208,9 @@ export const useInterface1 = ({
       }
       unregister();
     };
-  }, [addCallEndListener, autoShowSummary]);
+  }, [addCallEndListener]); // ✅ FIXED: Remove autoShowSummary dependency to prevent re-register
+
+  // ✅ REMOVED: Duplicate listener registration - now handled above
 
   // ✅ OPTIMIZED: Memoized right panel handlers
   const handleRightPanelToggle = useCallback(() => {
@@ -337,7 +338,7 @@ export const useInterface1 = ({
     handleCallStart: conversationState.handleCallStart,
     handleCallEnd: conversationState.handleCallEnd,
     handleCancel,
-    handleConfirm,
+    // ✅ REMOVED: handleConfirm is no longer needed
 
     // Summary popup state
     showingSummary,

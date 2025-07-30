@@ -10,9 +10,10 @@ interface UseConfirmHandlerProps {
 }
 
 interface UseConfirmHandlerReturn {
-  handleConfirm: () => void;
   // ✅ NEW: Auto-trigger summary when call ends
   autoTriggerSummary: () => void;
+  // ✅ NEW: Test function to force reset auto-trigger state
+  forceResetAutoTrigger: () => void;
 }
 
 /**
@@ -56,9 +57,20 @@ export const useConfirmHandler = ({
 
   // ✅ NEW: Auto-trigger summary when call ends
   const autoTriggerSummary = useCallback(() => {
+    // ✅ DEBUG: Track trigger state
+    console.log(
+      '🔍 [DEBUG] autoTriggerSummary called - isTriggeringRef.current:',
+      isTriggeringRef.current
+    );
+
     // ✅ FIX: Prevent multiple calls
     if (isTriggeringRef.current) {
       console.log('🚫 [DEBUG] Auto-trigger already in progress, skipping...');
+      console.log(
+        '🚫 [DEBUG] isTriggeringRef.current =',
+        isTriggeringRef.current
+      );
+      console.log('🚫 [DEBUG] Call stack:', new Error().stack);
       return;
     }
 
@@ -66,6 +78,8 @@ export const useConfirmHandler = ({
     cleanupSummaryPopups();
 
     isTriggeringRef.current = true;
+    console.log('🔍 [DEBUG] Set isTriggeringRef.current = true');
+
     console.log(
       '🚀 [DEBUG] Auto-triggering summary after call end - CALL ID:',
       Date.now()
@@ -249,6 +263,9 @@ export const useConfirmHandler = ({
       if (!isMountedRef.current) {
         console.log('🚫 [DEBUG] Component unmounted, skipping summary popup');
         isTriggeringRef.current = false; // ✅ FIX: Reset immediately
+        console.log(
+          '🔍 [DEBUG] Reset isTriggeringRef.current = false (unmounted)'
+        );
         return;
       }
 
@@ -270,6 +287,7 @@ export const useConfirmHandler = ({
 
       // ✅ FIX: Reset trigger flag immediately after success
       isTriggeringRef.current = false;
+      console.log('🔍 [DEBUG] Reset isTriggeringRef.current = false (success)');
     } catch (error) {
       logger.error(
         '❌ [useConfirmHandler] Error showing summary:',
@@ -285,20 +303,30 @@ export const useConfirmHandler = ({
       }
       // ✅ FIX: Reset trigger flag on error
       isTriggeringRef.current = false;
+      console.log('🔍 [DEBUG] Reset isTriggeringRef.current = false (error)');
     }
   }, [showSummary, transcripts, serviceRequests, cleanupSummaryPopups]);
 
-  // ✅ SIMPLIFIED: handleConfirm now just calls autoTriggerSummary
-  const handleConfirm = useCallback(() => {
-    logger.debug(
-      '✅ [useConfirmHandler] Confirm button clicked (legacy support)',
-      'Component'
+  // ✅ NEW: Test function to force reset auto-trigger state
+  const forceResetAutoTrigger = useCallback(() => {
+    console.log('🔄 [DEBUG] Force resetting auto-trigger state');
+    console.log(
+      '🔄 [DEBUG] Before reset - isTriggeringRef.current:',
+      isTriggeringRef.current
     );
-    autoTriggerSummary();
-  }, [autoTriggerSummary]);
+
+    // Reset trigger state
+    isTriggeringRef.current = false;
+
+    console.log(
+      '🔄 [DEBUG] After reset - isTriggeringRef.current:',
+      isTriggeringRef.current
+    );
+    console.log('✅ [DEBUG] Auto-trigger state reset completed');
+  }, []);
 
   return {
-    handleConfirm,
     autoTriggerSummary, // ✅ NEW: Export for use in call end listeners
+    forceResetAutoTrigger, // ✅ NEW: Export for testing
   };
 };
