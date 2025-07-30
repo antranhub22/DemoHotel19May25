@@ -70,8 +70,11 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   const [currentLanguage, setCurrentLanguage] = useState('en');
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
 
+  // ✅ NEW: Track if we had an active call (to detect genuine call ends)
+
   // Refs
   const vapiClientRef = useRef<VapiOfficial | null>(null);
+  const hadActiveCallRef = useRef(false);
 
   // Context dependencies
   const { addTranscript } = useTranscript();
@@ -143,6 +146,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       onCallStart: () => {
         logger.debug('📞 [VapiProvider] Call started', 'VapiProvider');
         setIsCallActive(true);
+        hadActiveCallRef.current = true; // ✅ Track that we had an active call
         setMicLevel(0);
         // Generate new call ID when call starts
         const newCallId = `call-${Date.now()}`;
@@ -155,20 +159,20 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       },
       onCallEnd: () => {
         console.log(
-          '📞 [DEBUG] VapiProvider onCallEnd triggered, checking call state...'
+          '📞 [DEBUG] VapiProvider onCallEnd triggered, checking call history...'
         );
         logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
 
-        // ✅ FIX: Only process if there was actually an active call
-        if (!isCallActive) {
+        // ✅ FIX: Check if we ever had an active call (more reliable than current state)
+        if (!hadActiveCallRef.current) {
           console.log(
-            '📞 [DEBUG] VapiProvider: No active call, skipping onCallEnd processing'
+            '📞 [DEBUG] VapiProvider: No call history found, skipping onCallEnd processing'
           );
           return;
         }
 
         console.log(
-          '📞 [DEBUG] VapiProvider: Active call detected, processing call end'
+          '📞 [DEBUG] VapiProvider: Call history detected, processing call end'
         );
 
         // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
@@ -182,6 +186,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         // Update state after callback
         setIsCallActive(false);
         setMicLevel(0);
+        hadActiveCallRef.current = false; // ✅ Reset call history after processing
 
         // Keep call ID for a bit to allow final transcripts, then reset
         setTimeout(() => {
