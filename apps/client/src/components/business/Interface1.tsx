@@ -46,7 +46,9 @@ import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButton
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
 const MobileSummaryPopup = () => {
-  console.log('📱 [DEBUG] MobileSummaryPopup component rendered');
+  console.log(
+    '📱 [DEBUG] MobileSummaryPopup component rendered - NEW CODE VERSION'
+  );
   const { popups, removePopup } = usePopupContext();
 
   // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
@@ -55,6 +57,10 @@ const MobileSummaryPopup = () => {
 
   console.log('📱 [DEBUG] MobileSummaryPopup - Direct calculation:');
   console.log('📱 [DEBUG] - popups count:', popups.length);
+  console.log(
+    '📱 [DEBUG] - popups types:',
+    popups.map(p => p.type)
+  );
   console.log('📱 [DEBUG] - summaryPopup found:', !!summaryPopup);
   console.log('📱 [DEBUG] - showSummary:', showSummary);
 
