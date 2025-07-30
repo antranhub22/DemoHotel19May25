@@ -70,14 +70,8 @@ export const useInterface1 = ({
   isActive,
 }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const {
-    micLevel,
-    transcripts,
-    callSummary,
-    serviceRequests,
-    endCall,
-    addCallEndListener,
-  } = useAssistant();
+  const { micLevel, transcripts, addCallEndListener, callDuration } =
+    useAssistant();
   const {
     config: hotelConfig,
     isLoading: configLoading,
@@ -123,17 +117,22 @@ export const useInterface1 = ({
   const autoShowSummary = useCallback(() => {
     console.log('📞 [DEBUG] autoShowSummary callback triggered');
 
-    // ✅ TEMP FIX: Disable conversationState check to test if it's the issue
+    // ✅ IMPROVED: Better logic to check if call actually happened
     console.log('📞 [DEBUG] Conversation state check:', {
       isCallStarted: conversationState.isCallStarted,
-      tempSkipped: true, // Temporarily skip this check
+      callDuration: callDuration,
+      transcriptsCount: transcripts.length,
+      hasCallActivity: callDuration > 0 || transcripts.length > 0,
     });
 
-    // Temporarily comment out this check to test
-    // if (!conversationState.isCallStarted) {
-    //   console.log('🚫 [DEBUG] No call was active, skipping summary trigger');
-    //   return;
-    // }
+    // ✅ FIX: Use more reliable indicators of call activity
+    const hadCallActivity = callDuration > 0 || transcripts.length > 0;
+    if (!hadCallActivity) {
+      console.log(
+        '🚫 [DEBUG] No call activity detected (no duration/transcripts), skipping summary trigger'
+      );
+      return;
+    }
 
     if (import.meta.env.DEV) {
       logger.debug(

@@ -12,29 +12,45 @@ const storage = new DatabaseStorage();
  */
 router.post('/vapi', express.json(), async (req, res) => {
   try {
-    const { transcript, 'end-of-call-report': endOfCallReport } = req.body;
+    // ✅ FIX: Parse Vapi.ai payload structure correctly
+    const message = req.body.message || req.body;
 
     logger.debug('[Webhook] Received data from Vapi.ai:', 'Component', {
-      hasTranscript: !!transcript,
-      hasEndOfCallReport: !!endOfCallReport,
-      callId: endOfCallReport?.callId || 'unknown',
+      fullPayload: req.body,
+      messageType: message?.type,
+      hasCall: !!message?.call,
+      hasTranscript: !!message?.transcript,
+      hasMessages: !!message?.messages,
     });
+
+    // Extract data according to Vapi.ai format
+    const endOfCallReport =
+      message?.type === 'end-of-call-report' ? message : null;
+    const transcript = message?.messages || []; // Use messages array as transcript
+    const callId = message?.call?.id || `call-${Date.now()}`;
 
     // ✅ STEP 1: Lưu trữ end-of-call-report cho stakeholders
     if (endOfCallReport) {
       try {
         await storage.addCallSummary({
-          call_id: endOfCallReport.callId || `call-${Date.now()}`,
+          call_id: callId,
           content: JSON.stringify(endOfCallReport),
-          room_number: endOfCallReport.roomNumber || null,
-          duration: endOfCallReport.duration || null,
+          room_number: endOfCallReport.call?.customer?.number || null,
+          duration:
+            endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
+              ? Math.floor(
+                  (new Date(endOfCallReport.call.endedAt).getTime() -
+                    new Date(endOfCallReport.call.startedAt).getTime()) /
+                    1000
+                ).toString()
+              : null,
         });
 
         logger.success(
           '[Webhook] End-of-call-report saved for stakeholders',
           'Component',
           {
-            callId: endOfCallReport.callId,
+            callId: callId,
           }
         );
       } catch (error) {
@@ -96,7 +112,7 @@ router.post('/vapi', express.json(), async (req, res) => {
           if (io) {
             io.emit('call-summary-received', {
               type: 'call-summary-received',
-              callId: endOfCallReport?.callId || 'unknown',
+              callId: callId,
               summary,
               serviceRequests,
               timestamp: new Date().toISOString(),
@@ -106,7 +122,7 @@ router.post('/vapi', express.json(), async (req, res) => {
               '[Webhook] WebSocket notification sent successfully',
               'Component',
               {
-                callId: endOfCallReport?.callId,
+                callId: callId,
                 summaryLength: summary?.length || 0,
                 serviceRequestsCount: serviceRequests?.length || 0,
               }
@@ -131,7 +147,7 @@ router.post('/vapi', express.json(), async (req, res) => {
           data: {
             summary,
             serviceRequests,
-            callId: endOfCallReport?.callId || 'unknown',
+            callId: callId,
             timestamp: new Date().toISOString(),
           },
         });
@@ -149,7 +165,7 @@ router.post('/vapi', express.json(), async (req, res) => {
       success: true,
       message: 'Webhook received (no transcript to process)',
       data: {
-        callId: endOfCallReport?.callId || 'unknown',
+        callId: callId,
         timestamp: new Date().toISOString(),
       },
     });
