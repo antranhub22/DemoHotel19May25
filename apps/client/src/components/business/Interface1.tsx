@@ -11,8 +11,6 @@ import { ServiceItem } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 
 // UI Components
-import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
-import { SummaryPopup } from '../features/popup-system/SummaryPopup';
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
 import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
 import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
@@ -25,11 +23,10 @@ import {
 import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
-import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
 
 // Import extracted components
-import { DebugButtons } from '../features/debug/DebugButtons';
-import { MobileSummaryPopup } from '../features/popup-system/MobileSummaryPopup';
+import { Interface1Desktop } from './Interface1Desktop';
+import { Interface1Mobile } from './Interface1Mobile';
 
 interface Interface1Props {
   isActive: boolean;
@@ -107,9 +104,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         },
       }
     );
-
-    // Clear selection after 3 seconds
-    setTimeout(() => setSelectedService(null), 3000);
   };
 
   const handleVoiceServiceRequest = useCallback(
@@ -197,7 +191,20 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         }
       );
     }
-  }, [isCallStarted, selectedService, language]);
+  }, [isCallStarted, selectedService?.name, language]);
+
+  // ✅ OPTIMIZATION: Auto-clear selected service after timeout
+  useEffect(() => {
+    if (selectedService) {
+      const timeoutId = setTimeout(() => {
+        setSelectedService(null);
+      }, 3000);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [selectedService]);
 
   // ✅ EARLY RETURNS AFTER HOOKS
   if (isLoading) {
@@ -262,110 +269,27 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
         <div className="relative min-h-[400px] px-4">
-          {/* Desktop: 4-Position Grid Layout */}
-          <div className="hidden md:block">
-            {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}
-            <div className="grid grid-cols-3 gap-8 items-center justify-items-center min-h-[400px] mb-8">
-              {/* Column 1: Real-time Conversation (Left) */}
-              <div className="w-full max-w-sm">
-                <RealtimeConversationPopup
-                  isOpen={showConversation}
-                  onClose={() => {}}
-                  layout="grid"
-                />
-                {/* ✅ DEBUG: Add logging - COMMENTED OUT FOR CLEAN CONSOLE */}
-                {/*{(() => {
-                  console.log(
-                    '🔍 [Interface1] RealtimeConversationPopup Desktop render state:',
-                    {
-                      showConversation,
-                      isCallStarted,
-                      isOpen: showConversation, // ✅ Real-time conversation display
-                      transcriptsCount: micLevel, // Using micLevel as proxy for debug
-                    }
-                  );
-                  return null;
-                })()}*/}
-              </div>
+          {/* Desktop Layout */}
+          <Interface1Desktop
+            isCallStarted={isCallStarted}
+            micLevel={micLevel}
+            showConversation={showConversation}
+            showRightPanel={showRightPanel}
+            showingSummary={showingSummary}
+            handleCallStart={handleCallStart}
+            handleCallEnd={handleCallEnd}
+            handleRightPanelClose={handleRightPanelClose}
+          />
 
-              {/* Column 2: Siri Button (Center) - Improved sizing and positioning */}
-              <div className="flex flex-col items-center justify-center w-full max-w-md">
-                <div className="flex items-center justify-center p-4">
-                  {/* Siri Button Container */}
-                  <SiriButtonContainer
-                    isCallStarted={isCallStarted}
-                    micLevel={micLevel}
-                    onCallStart={async lang => {
-                      await handleCallStart(lang);
-                    }}
-                    onCallEnd={handleCallEnd}
-                    // ✅ REMOVED: onCancel and onConfirm are no longer needed
-                    // Summary popup will auto-show when call ends via Siri button tap
-                    showingSummary={showingSummary}
-                  />
-                </div>
-              </div>
-
-              {/* Column 3: Summary Popup (Right) */}
-              <div className="w-full max-w-sm">
-                <SummaryPopup
-                  isOpen={showRightPanel}
-                  onClose={handleRightPanelClose}
-                />
-              </div>
-            </div>
-
-            {/* Row 2: Notification (Center, below Siri) */}
-            <div className="flex justify-center mb-8">
-              <div className="w-full max-w-sm">
-                {/* Placeholder for future Notification popup */}
-                {/* <NotificationSection /> */}
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile: Original center layout with overlay popups */}
-          <div className="block md:hidden">
-            <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
-              <div className="flex flex-col items-center justify-center">
-                {/* Siri Button Container */}
-                <SiriButtonContainer
-                  isCallStarted={isCallStarted}
-                  micLevel={micLevel}
-                  onCallStart={async lang => {
-                    await handleCallStart(lang);
-                  }}
-                  onCallEnd={handleCallEnd}
-                  // ✅ REMOVED: onCancel and onConfirm are no longer needed
-                  // Summary popup will auto-show when call ends via Siri button tap
-                  showingSummary={showingSummary}
-                />
-
-                {/* Mobile: Real-time conversation (overlay) - ADVANCED COMPONENT */}
-                <RealtimeConversationPopup
-                  isOpen={showConversation}
-                  onClose={() => {}} // Will be handled by popup context
-                  layout="overlay" // Mobile: overlay positioning with built-in responsive design
-                />
-                {/* ✅ DEBUG: Mobile layout logging - COMMENTED OUT FOR CLEAN CONSOLE */}
-                {/*{(() => {
-                  console.log(
-                    '🔍 [Interface1] RealtimeConversationPopup Mobile render state:',
-                    {
-                      showConversation,
-                      isCallStarted,
-                      isOpen: showConversation, // ✅ Real-time conversation with advanced features
-                      layout: 'overlay',
-                    }
-                  );
-                  return null;
-                })()}*/}
-
-                {/* Mobile: Summary popup (center modal) - UNIFIED COMPONENT */}
-                <MobileSummaryPopup />
-              </div>
-            </div>
-          </div>
+          {/* Mobile Layout */}
+          <Interface1Mobile
+            isCallStarted={isCallStarted}
+            micLevel={micLevel}
+            showConversation={showConversation}
+            showingSummary={showingSummary}
+            handleCallStart={handleCallStart}
+            handleCallEnd={handleCallEnd}
+          />
         </div>
       </div>
 
@@ -401,7 +325,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
           onScrollToServices={() => scrollToSection('services')}
         />
         */}
-      <DebugButtons />
     </InterfaceContainer>
   );
 };

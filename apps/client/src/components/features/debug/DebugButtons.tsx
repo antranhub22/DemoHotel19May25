@@ -1,5 +1,6 @@
 import { createElement } from 'react';
 import { usePopup } from '../popup-system/PopupManager';
+import { DebugWrapper } from './DebugWrapper';
 
 // Debug Buttons Component - Extracted from Interface1.tsx
 export const DebugButtons = () => {
@@ -83,114 +84,116 @@ export const DebugButtons = () => {
   };
 
   return (
-    <>
-      {/* Test Summary Popup Button */}
-      <div
-        className="fixed bottom-4 right-4 z-[9999]"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '16px',
-          zIndex: 9999,
-          backgroundColor: '#10b981',
-          color: 'white',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          border: 'none',
-          outline: 'none',
-        }}
-      >
-        <button
-          onClick={handleTestSummary}
+    <DebugWrapper>
+      <>
+        {/* Test Summary Popup Button */}
+        <div
+          className="fixed bottom-4 right-4 z-[9999]"
           style={{
-            backgroundColor: 'transparent',
+            position: 'fixed',
+            bottom: '16px',
+            right: '16px',
+            zIndex: 9999,
+            backgroundColor: '#10b981',
             color: 'white',
-            border: 'none',
-            outline: 'none',
-            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             fontSize: '14px',
             fontWeight: '600',
+            cursor: 'pointer',
+            border: 'none',
+            outline: 'none',
           }}
         >
-          🧪 Test Summary
-        </button>
-      </div>
+          <button
+            onClick={handleTestSummary}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'white',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+            }}
+          >
+            🧪 Test Summary
+          </button>
+        </div>
 
-      {/* Emergency Cleanup Button */}
-      <div
-        className="fixed bottom-4 right-32 z-[9999]"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '128px',
-          zIndex: 9999,
-          backgroundColor: '#ef4444',
-          color: 'white',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          border: 'none',
-          outline: 'none',
-        }}
-      >
-        <button
-          onClick={handleEmergencyCleanup}
+        {/* Emergency Cleanup Button */}
+        <div
+          className="fixed bottom-4 right-32 z-[9999]"
           style={{
-            backgroundColor: 'transparent',
+            position: 'fixed',
+            bottom: '16px',
+            right: '128px',
+            zIndex: 9999,
+            backgroundColor: '#ef4444',
             color: 'white',
-            border: 'none',
-            outline: 'none',
-            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             fontSize: '14px',
             fontWeight: '600',
+            cursor: 'pointer',
+            border: 'none',
+            outline: 'none',
           }}
         >
-          🚨 Cleanup
-        </button>
-      </div>
+          <button
+            onClick={handleEmergencyCleanup}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'white',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+            }}
+          >
+            🚨 Cleanup
+          </button>
+        </div>
 
-      {/* Force Display Summary Button */}
-      <div
-        className="fixed bottom-4 right-48 z-[9999]"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          right: '192px',
-          zIndex: 9999,
-          backgroundColor: '#3b82f6',
-          color: 'white',
-          padding: '8px 16px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          border: 'none',
-          outline: 'none',
-        }}
-      >
-        <button
-          onClick={handleForceSummary}
+        {/* Force Display Summary Button */}
+        <div
+          className="fixed bottom-4 right-48 z-[9999]"
           style={{
-            backgroundColor: 'transparent',
+            position: 'fixed',
+            bottom: '16px',
+            right: '192px',
+            zIndex: 9999,
+            backgroundColor: '#3b82f6',
             color: 'white',
-            border: 'none',
-            outline: 'none',
-            cursor: 'pointer',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             fontSize: '14px',
             fontWeight: '600',
+            cursor: 'pointer',
+            border: 'none',
+            outline: 'none',
           }}
         >
-          🚀 Force Summary
-        </button>
-      </div>
-    </>
+          <button
+            onClick={handleForceSummary}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'white',
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+            }}
+          >
+            🚀 Force Summary
+          </button>
+        </div>
+      </>
+    </DebugWrapper>
   );
 };
