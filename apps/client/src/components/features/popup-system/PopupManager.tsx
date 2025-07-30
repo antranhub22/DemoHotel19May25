@@ -214,7 +214,7 @@ export const usePopup = () => {
 
       // ✅ FIXED: Prevent multiple rapid calls with better logic
       const now = Date.now();
-      if (showSummary.lastCall && now - showSummary.lastCall < 50) {
+      if (showSummary.lastCall && now - showSummary.lastCall < 20) {
         console.log('🚫 [DEBUG] showSummary called too rapidly, skipping...');
         console.log(
           '🚫 [DEBUG] Time since last call:',

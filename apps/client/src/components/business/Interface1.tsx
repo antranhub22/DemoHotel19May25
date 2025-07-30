@@ -46,10 +46,19 @@ import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButton
 
 // Mobile Summary Popup Component - Similar to RightPanelSection logic
 const MobileSummaryPopup = () => {
+  console.log('📱 [DEBUG] MobileSummaryPopup component rendered');
   const { popups, removePopup } = usePopupContext();
-  const [showSummary, setShowSummary] = useState(false);
 
-  // Listen for summary popups and show them in mobile center modal
+  // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
+  const summaryPopup = popups.find(popup => popup.type === 'summary');
+  const showSummary = !!summaryPopup;
+
+  console.log('📱 [DEBUG] MobileSummaryPopup - Direct calculation:');
+  console.log('📱 [DEBUG] - popups count:', popups.length);
+  console.log('📱 [DEBUG] - summaryPopup found:', !!summaryPopup);
+  console.log('📱 [DEBUG] - showSummary:', showSummary);
+
+  // ✅ NEW: useEffect only for cleanup, not for state management
   useEffect(() => {
     console.log('📱 [DEBUG] MobileSummaryPopup useEffect triggered');
     console.log(
@@ -57,22 +66,25 @@ const MobileSummaryPopup = () => {
       popups.map(p => ({ id: p.id, type: p.type, title: p.title }))
     );
 
-    const summaryPopup = popups.find(popup => popup.type === 'summary');
-    const hasSummary = !!summaryPopup;
-
-    // ✅ FIX: Force update state even if same value
-    setShowSummary(hasSummary);
+    if (summaryPopup) {
+      console.log(
+        '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
+        summaryPopup
+      );
+    } else {
+      console.log('📱 [DEBUG] MobileSummaryPopup - No summary popup found');
+    }
 
     console.log(
       '📱 [DEBUG] MobileSummaryPopup - showSummary:',
-      hasSummary,
+      showSummary,
       'popups count:',
       popups.length,
       'summaryPopup:',
       summaryPopup
     );
 
-    if (hasSummary) {
+    if (showSummary) {
       console.log(
         '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
         summaryPopup
@@ -120,7 +132,7 @@ const MobileSummaryPopup = () => {
   console.log('📱 [DEBUG] MobileSummaryPopup - Rendering modal');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">📋 Call Summary</h2>
