@@ -1,6 +1,5 @@
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
-import { useEffect } from 'react';
 import { DebugLog } from '../debug/DebugWrapper';
 import { SummaryPopupContent } from './SummaryPopupContent';
 
@@ -13,42 +12,7 @@ export const MobileSummaryPopup = () => {
   const summaryPopup = popups.find(popup => popup.type === 'summary');
   const showSummary = !!summaryPopup;
 
-  // ✅ NEW: useEffect only for cleanup, not for state management
-  useEffect(() => {
-    // ✅ NEW: Auto-cleanup old summary popups to prevent accumulation
-    if (popups.length > 10) {
-      const summaryPopups = popups.filter(popup => popup.type === 'summary');
-      if (summaryPopups.length > 1) {
-        // Keep only the newest summary popup
-        summaryPopups.slice(1).forEach(popup => {
-          removePopup(popup.id);
-        });
-      }
-    }
-
-    // ✅ NEW: Cleanup any existing summary popups on component mount
-    // This prevents showing summary popup when first loading the page
-    const existingSummaryPopups = popups.filter(
-      popup => popup.type === 'summary'
-    );
-    if (existingSummaryPopups.length > 0) {
-      console.log(
-        '🧹 [MobileSummaryPopup] Cleaning up existing summary popups on mount'
-      );
-      existingSummaryPopups.forEach(popup => {
-        removePopup(popup.id);
-      });
-    }
-
-    // ✅ NEW: Cleanup summary popups if call is active
-    // Summary should only show when call has ended
-    if (isCallActive && summaryPopup) {
-      console.log(
-        '📱 [MobileSummaryPopup] Call is active, cleaning up summary popup'
-      );
-      removePopup(summaryPopup.id);
-    }
-  }, [popups, removePopup, isCallActive, summaryPopup]);
+  // ✅ REMOVED: Cleanup logic moved to useConfirmHandler for centralized management
 
   const handleClose = () => {
     // Remove all summary popups

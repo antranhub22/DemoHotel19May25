@@ -41,6 +41,7 @@ import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
 import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add transcript routes
 import vapiConfigRoutes from '@server/routes/vapi-config'; // ✅ NEW: VAPI Configuration for language-specific settings
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
+import webhookRoutes from '@server/routes/webhook'; // ✅ NEW: VAPI Webhook endpoints
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
 import { logger } from '@shared/utils/logger';
@@ -95,7 +96,7 @@ router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migratio
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
 router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
 router.use('/api/openai', openaiRoutes); // ✅ NEW: OpenAI processing endpoints
-// ✅ REMOVED: VAPI Webhook endpoints - now using OpenAI only
+router.use('/api/webhook', webhookRoutes); // ✅ NEW: VAPI Webhook endpoints
 
 // ============================================
 // LEGACY ROUTES (v1.0-v2.0) - Backward Compatible

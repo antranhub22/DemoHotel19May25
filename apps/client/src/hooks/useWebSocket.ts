@@ -151,24 +151,29 @@ export function useWebSocket() {
           );
         }
 
-        // ✅ REMOVED: Call summary received from webhook - now using OpenAI only
-        // if (data.type === 'call-summary-received') {
-        //   logger.debug(
-        //     '[useWebSocket] Call summary received from webhook:',
-        //     'Component',
-        //     data
-        //   );
+        // ✅ NEW: Call summary received from webhook - OpenAI processed
+        if (data.type === 'call-summary-received') {
+          logger.debug(
+            '[useWebSocket] Call summary received from webhook:',
+            'Component',
+            data
+          );
 
-        //   // Update call summary in assistant context
-        //   if (data.summary) {
-        //     assistant.setCallSummary({
-        //       callId: data.callId || 'unknown',
-        //       tenantId: 'default',
-        //       content: data.summary,
-        //       timestamp: data.timestamp,
-        //     });
-        //   }
-        // }
+          // Update assistant context with OpenAI processed data
+          if (data.summary) {
+            assistant.setCallSummary({
+              callId: data.callId || 'unknown',
+              tenantId: 'default',
+              content: data.summary,
+              timestamp: data.timestamp,
+            });
+          }
+
+          // Update service requests from OpenAI
+          if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
+            assistant.setServiceRequests(data.serviceRequests);
+          }
+        }
 
         // Handle error messages
         if (data.type === 'error') {

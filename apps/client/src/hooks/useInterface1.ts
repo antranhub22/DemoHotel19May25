@@ -260,49 +260,15 @@ export const useInterface1 = ({
   }, [showNotification]);
 
   const handleShowSummaryDemo = useCallback(() => {
-    import('../components/features/popup-system/SummaryPopupContent')
-      .then(module => {
-        const { SummaryPopupContent } = module;
-        showSummary(createElement(SummaryPopupContent), {
-          title: 'Call Summary',
-          priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
-        });
-      })
-      .catch(() => {
-        // Optimized fallback with current time
-        const currentTime = new Date().toLocaleTimeString();
-        showSummary(
-          createElement(
-            'div',
-            { style: { padding: '16px', fontSize: '12px' } },
-            [
-              createElement(
-                'div',
-                {
-                  key: 'title',
-                  style: { fontWeight: 'bold', marginBottom: '8px' },
-                },
-                '📋 Call Summary'
-              ),
-              createElement('div', { key: 'room' }, 'Room: 101'),
-              createElement('div', { key: 'items' }, 'Items: 3 requests'),
-              createElement(
-                'div',
-                {
-                  key: 'time',
-                  style: { fontSize: '10px', color: '#666', marginTop: '8px' },
-                },
-                `Generated at ${currentTime}`
-              ),
-            ]
-          ),
-          {
-            title: 'Call Summary',
-            priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium'
-          }
-        );
-      });
-  }, [showSummary]);
+    // ✅ DISABLED: Demo summary popup - use webhook flow instead
+    console.log('🚫 [DEBUG] Demo summary popup disabled - use webhook flow');
+    console.log(
+      '📋 [INFO] Summary popup will be triggered automatically when call ends'
+    );
+    console.log(
+      '📋 [INFO] Full transcript will be processed by OpenAI via webhook'
+    );
+  }, []);
 
   return {
     // Loading & Error states
