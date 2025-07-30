@@ -33,38 +33,30 @@ interface Interface1Props {
 }
 
 export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
-  // ✅ HOOKS MUST BE FIRST - NO CONDITIONAL CALLS
+  // Hooks must be first - no conditional calls
   const { language } = useAssistant();
   const {
     isLoading,
     error,
     micLevel,
-    showScrollButton: _showScrollButton,
-    scrollToTop: _scrollToTop,
-    scrollToSection: _scrollToSection,
     heroSectionRef,
     serviceGridRef,
-    conversationRef: _conversationRef,
-    rightPanelRef: _rightPanelRef,
     isCallStarted,
     showConversation,
     handleCallStart,
     handleCallEnd,
     showingSummary,
     showRightPanel,
-    handleRightPanelToggle: _handleRightPanelToggle,
     handleRightPanelClose,
     handleShowConversationPopup: _handleShowConversationPopup,
-    handleShowNotificationDemo: _handleShowNotificationDemo,
-    handleShowSummaryDemo: _handleShowSummaryDemo,
   } = useInterface1({ isActive });
 
-  // ✅ ENHANCED: Add service selection state for user feedback
+  // Add service selection state for user feedback
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(
     null
   );
 
-  // ✅ ENHANCEMENT: Enhanced language change handler
+  // Enhanced language change handler
   const handleLanguageChange = (newLanguage: Language) => {
     logger.debug(
       `🗣️ [Interface1] Language changed to: ${newLanguage}`,
@@ -80,7 +72,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     );
   };
 
-  // ✅ ENHANCEMENT: Service interaction handlers with voice context
+  // Service interaction handlers with voice context
   const handleServiceSelect = (service: ServiceItem) => {
     logger.debug(
       `🎯 [Interface1] Service selected: ${service.name}`,
@@ -172,7 +164,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     [language, handleCallStart]
   );
 
-  // ✅ ENHANCEMENT: Add call end notification with multi-language support
+  // Add call end notification with multi-language support
   useEffect(() => {
     if (!isCallStarted && selectedService) {
       // Call ended while a service was selected
@@ -193,7 +185,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     }
   }, [isCallStarted, selectedService?.name, language]);
 
-  // ✅ OPTIMIZATION: Auto-clear selected service after timeout
+  // Auto-clear selected service after timeout
   useEffect(() => {
     if (selectedService) {
       const timeoutId = setTimeout(() => {
@@ -206,7 +198,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     }
   }, [selectedService]);
 
-  // ✅ EARLY RETURNS AFTER HOOKS
+  // Early returns after hooks
   if (isLoading) {
     return <LoadingState />;
   }
