@@ -9,9 +9,25 @@ export const SummaryPopupContent: React.FC = () => {
 
   // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
+    console.log('🔍 [DEBUG] SummaryPopupContent.getSummaryData called:', {
+      hasServiceRequests: !!serviceRequests,
+      serviceRequestsCount: serviceRequests?.length || 0,
+      hasCallDetails: !!callDetails,
+      language,
+    });
+
     // OpenAI serviceRequests (enhanced processing)
     if (serviceRequests && serviceRequests.length > 0) {
       const roomNumber = serviceRequests[0]?.details?.roomNumber || 'Unknown';
+
+      console.log('📋 [DEBUG] Found service requests:', {
+        count: serviceRequests.length,
+        roomNumber,
+        requests: serviceRequests.map(req => ({
+          serviceType: req.serviceType,
+          requestText: req.requestText?.substring(0, 50) + '...',
+        })),
+      });
 
       return {
         source: 'OpenAI Analysis',
@@ -29,6 +45,8 @@ export const SummaryPopupContent: React.FC = () => {
         hasData: true,
       };
     }
+
+    console.log('⚠️ [DEBUG] No service requests found, using fallback');
 
     // Fallback: No summary available
     return {

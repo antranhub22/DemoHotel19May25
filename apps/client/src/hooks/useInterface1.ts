@@ -91,7 +91,7 @@ export const useInterface1 = ({
   } = useHotelConfiguration();
 
   // Popup system hooks - optimized imports
-  const { showNotification, showSummary } = usePopup();
+  const { showNotification } = usePopup();
   const [conversationPopupId, setConversationPopupId] = useState<string | null>(
     null
   );
@@ -107,18 +107,8 @@ export const useInterface1 = ({
 
   // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
 
-  const confirmHandlerConfig = useMemo(
-    () => ({
-      endCall,
-      transcripts,
-      callSummary,
-      serviceRequests,
-    }),
-    [endCall, transcripts, callSummary, serviceRequests]
-  ); // Dependencies are correct
-
   // ✅ REMOVED: handleCancel is no longer needed
-  const { autoTriggerSummary } = useConfirmHandler(confirmHandlerConfig);
+  const { autoTriggerSummary } = useConfirmHandler();
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
@@ -138,6 +128,13 @@ export const useInterface1 = ({
   // ✅ REFACTORED: Use autoTriggerSummary from useConfirmHandler instead of autoShowSummary
   const autoShowSummary = useCallback(() => {
     console.log('📞 [DEBUG] autoShowSummary callback triggered');
+
+    // ✅ FIX: Only trigger if call was actually active
+    if (!conversationState.isCallStarted) {
+      console.log('🚫 [DEBUG] No call was active, skipping summary trigger');
+      return;
+    }
+
     if (import.meta.env.DEV) {
       logger.debug(
         'Auto-showing Summary Popup after call end',
@@ -167,7 +164,7 @@ export const useInterface1 = ({
         );
       }, 500);
     }
-  }, [autoTriggerSummary]);
+  }, [autoTriggerSummary, conversationState.isCallStarted]);
 
   // ✅ FIXED: Stable listener registration to prevent re-register
   useEffect(() => {

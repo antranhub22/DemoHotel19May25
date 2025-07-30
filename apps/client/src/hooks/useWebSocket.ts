@@ -159,8 +159,23 @@ export function useWebSocket() {
             data
           );
 
+          console.log('🎉 [DEBUG] WebSocket received call-summary-received:', {
+            callId: data.callId,
+            hasSummary: !!data.summary,
+            summaryLength: data.summary?.length || 0,
+            hasServiceRequests: !!data.serviceRequests,
+            serviceRequestsCount: data.serviceRequests?.length || 0,
+            timestamp: data.timestamp,
+          });
+
           // Update assistant context with OpenAI processed data
           if (data.summary) {
+            console.log('📋 [DEBUG] Setting call summary:', {
+              callId: data.callId || 'unknown',
+              contentLength: data.summary.length,
+              timestamp: data.timestamp,
+            });
+
             assistant.setCallSummary({
               callId: data.callId || 'unknown',
               tenantId: 'default',
@@ -171,8 +186,20 @@ export function useWebSocket() {
 
           // Update service requests from OpenAI
           if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
+            console.log('🛎️ [DEBUG] Setting service requests:', {
+              count: data.serviceRequests.length,
+              requests: data.serviceRequests.map(req => ({
+                serviceType: req.serviceType,
+                requestText: req.requestText?.substring(0, 50) + '...',
+              })),
+            });
+
             assistant.setServiceRequests(data.serviceRequests);
           }
+
+          console.log(
+            '✅ [DEBUG] WebSocket call-summary-received processing completed'
+          );
         }
 
         // Handle error messages

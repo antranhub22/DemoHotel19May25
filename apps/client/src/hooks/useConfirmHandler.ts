@@ -149,13 +149,13 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
       summaryPopupIdRef.current = popupId;
       console.log('🔍 [DEBUG] Waiting popup shown, ID:', popupId);
 
-      // Reset trigger flag after a delay to allow webhook processing
+      // ✅ FIX: Increase timeout for OpenAI processing
       setTimeout(() => {
         isTriggeringRef.current = false;
         console.log(
           '🔍 [DEBUG] Reset isTriggeringRef.current = false (waiting for webhook)'
         );
-      }, 15000); // 15 seconds for OpenAI processing
+      }, 30000); // 30 seconds for OpenAI processing
     } catch (error) {
       console.error('❌ [DEBUG] autoTriggerSummary error:', error);
       logger.error(
