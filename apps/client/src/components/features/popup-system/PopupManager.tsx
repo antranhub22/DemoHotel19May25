@@ -204,6 +204,12 @@ export const usePopup = () => {
       priority?: 'high' | 'medium' | 'low';
     }
   ) => {
+    console.log('📋 [DEBUG] showSummary called with options:', {
+      title: options?.title,
+      priority: options?.priority || 'medium',
+      hasContent: !!content,
+    });
+
     return addPopup({
       type: 'summary',
       title: options?.title || 'Call Summary',
