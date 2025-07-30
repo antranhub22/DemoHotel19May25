@@ -117,6 +117,7 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
         priority: popup.priority,
         isActive: popup.isActive,
       });
+      console.log('➕ [DEBUG] addPopup call stack:', new Error().stack);
 
       setPopups(prev => {
         // ✅ FIX: Don't auto-remove summary popups - they should persist

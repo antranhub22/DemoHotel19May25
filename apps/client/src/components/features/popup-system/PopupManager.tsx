@@ -209,6 +209,7 @@ export const usePopup = () => {
       priority: options?.priority || 'medium',
       hasContent: !!content,
     });
+    console.log('📋 [DEBUG] showSummary call stack:', new Error().stack);
 
     return addPopup({
       type: 'summary',
