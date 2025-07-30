@@ -281,6 +281,42 @@ export const usePopup = () => {
     console.log('✅ [DEBUG] Summary system reset completed');
   };
 
+  // ✅ NEW: Force display summary popup
+  const forceShowSummary = (content?: React.ReactNode) => {
+    console.log('🚀 [DEBUG] Force showing summary popup');
+
+    // First cleanup all existing popups
+    emergencyCleanup();
+
+    // Then create new summary popup
+    setTimeout(() => {
+      const summaryContent = content || (
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <h3
+            style={{
+              marginBottom: '16px',
+              fontSize: '18px',
+              fontWeight: '600',
+            }}
+          >
+            📋 Call Summary
+          </h3>
+          <p style={{ marginBottom: '16px', lineHeight: '1.5' }}>
+            Your call has been completed successfully!
+          </p>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+        </div>
+      );
+
+      const popupId = showSummary(summaryContent, {
+        title: 'Call Complete',
+        priority: 'medium',
+      });
+
+      console.log('✅ [DEBUG] Force summary popup created, ID:', popupId);
+    }, 100);
+  };
+
   // ✅ NEW: Quick notification method to replace NotificationSystem
   const showQuickNotification = (
     message: string,
@@ -364,6 +400,7 @@ export const usePopup = () => {
     showMultiLanguageNotification, // ✅ NEW: Multi-language support
     emergencyCleanup, // ✅ NEW: Export cleanup function
     resetSummarySystem, // ✅ NEW: Export reset function
+    forceShowSummary, // ✅ NEW: Export force display function
     removePopup,
     setActivePopup,
   };

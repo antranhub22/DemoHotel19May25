@@ -120,6 +120,14 @@ export const PopupProvider: React.FC<{ children: ReactNode }> = ({
       console.log('➕ [DEBUG] addPopup call stack:', new Error().stack);
 
       setPopups(prev => {
+        // ✅ EMERGENCY: If too many popups, clear all and start fresh
+        if (prev.length > 100) {
+          console.log(
+            '🚨 [DEBUG] EMERGENCY: Too many popups detected, clearing all'
+          );
+          return [newPopup]; // Start fresh with only the new popup
+        }
+
         // ✅ NEW: Limit total number of popups to prevent memory issues
         const maxPopups = 50; // Limit to 50 popups max
         if (prev.length >= maxPopups) {

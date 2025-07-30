@@ -245,32 +245,31 @@ export const useConfirmHandler = ({
 
       console.log('📋 [DEBUG] About to show summary popup');
 
-      // ✅ TEST: Add delay to prevent race condition
-      setTimeout(() => {
-        if (!isMountedRef.current) {
-          console.log('🚫 [DEBUG] Component unmounted, skipping summary popup');
-          return;
-        }
+      // ✅ FIX: Remove delay to prevent race condition
+      if (!isMountedRef.current) {
+        console.log('🚫 [DEBUG] Component unmounted, skipping summary popup');
+        isTriggeringRef.current = false; // ✅ FIX: Reset immediately
+        return;
+      }
 
-        const popupId = showSummary(summaryElement, {
-          title: 'Call Complete',
-          priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
-        });
+      const popupId = showSummary(summaryElement, {
+        title: 'Call Complete',
+        priority: 'medium' as const, // ✅ FIX: Change from 'high' to 'medium' to prevent auto-removal
+      });
 
-        // ✅ NEW: Track the popup ID for cleanup
-        summaryPopupIdRef.current = popupId;
+      // ✅ NEW: Track the popup ID for cleanup
+      summaryPopupIdRef.current = popupId;
 
-        console.log(
-          '✅ [DEBUG] Summary popup shown successfully (with delay), ID:',
-          popupId
-        );
-      }, 100); // 100ms delay
+      console.log('✅ [DEBUG] Summary popup shown successfully, ID:', popupId);
 
-      console.log('✅ [DEBUG] Summary popup trigger scheduled');
+      console.log('✅ [DEBUG] Summary popup trigger completed');
       logger.debug(
         '✅ [useConfirmHandler] Summary popup shown successfully',
         'Component'
       );
+
+      // ✅ FIX: Reset trigger flag immediately after success
+      isTriggeringRef.current = false;
     } catch (error) {
       logger.error(
         '❌ [useConfirmHandler] Error showing summary:',
@@ -284,11 +283,8 @@ export const useConfirmHandler = ({
           'Component'
         );
       }
-    } finally {
-      // ✅ FIX: Reset trigger flag after completion
-      setTimeout(() => {
-        isTriggeringRef.current = false;
-      }, 200); // Small delay to prevent rapid re-triggers
+      // ✅ FIX: Reset trigger flag on error
+      isTriggeringRef.current = false;
     }
   }, [showSummary, transcripts, serviceRequests, cleanupSummaryPopups]);
 

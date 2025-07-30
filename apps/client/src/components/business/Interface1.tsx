@@ -53,12 +53,17 @@ const MobileSummaryPopup = () => {
   useEffect(() => {
     const summaryPopup = popups.find(popup => popup.type === 'summary');
     const hasSummary = !!summaryPopup;
+
+    // ✅ FIX: Force update state even if same value
     setShowSummary(hasSummary);
+
     console.log(
       '📱 [DEBUG] MobileSummaryPopup - showSummary:',
       hasSummary,
       'popups count:',
-      popups.length
+      popups.length,
+      'summaryPopup:',
+      summaryPopup
     );
 
     if (hasSummary) {
@@ -66,6 +71,8 @@ const MobileSummaryPopup = () => {
         '📱 [DEBUG] MobileSummaryPopup - Summary popup found:',
         summaryPopup
       );
+    } else {
+      console.log('📱 [DEBUG] MobileSummaryPopup - No summary popup found');
     }
 
     // ✅ NEW: Auto-cleanup old summary popups to prevent accumulation
@@ -93,7 +100,18 @@ const MobileSummaryPopup = () => {
       });
   };
 
-  if (!showSummary) return null;
+  // ✅ DEBUG: Log render state
+  console.log(
+    '📱 [DEBUG] MobileSummaryPopup render - showSummary:',
+    showSummary
+  );
+
+  if (!showSummary) {
+    console.log('📱 [DEBUG] MobileSummaryPopup - Not showing, returning null');
+    return null;
+  }
+
+  console.log('📱 [DEBUG] MobileSummaryPopup - Rendering modal');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -530,6 +548,52 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
                 }}
               >
                 🚨 Cleanup
+              </button>
+            </div>
+
+            {/* ✅ NEW: Force Display Summary Button - Desktop */}
+            <div
+              className="fixed bottom-4 right-48 z-[9999] hidden md:block"
+              style={{
+                position: 'fixed',
+                bottom: '16px',
+                right: '192px',
+                zIndex: 9999,
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                outline: 'none',
+              }}
+            >
+              <button
+                onClick={() => {
+                  console.log('🚀 Force display summary button clicked!');
+                  const { forceShowSummary } = usePopup();
+
+                  // Force display summary popup
+                  forceShowSummary();
+
+                  alert(
+                    '🚀 Force summary popup triggered! Check console for details.'
+                  );
+                }}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: 'white',
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
+              >
+                🚀 Force Summary
               </button>
             </div>
 
