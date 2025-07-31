@@ -129,7 +129,9 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const configuration = useConfiguration();
   const vapi = useVapi();
 
-  // ✅ NEW: Setup VapiProvider callback to trigger CallContext.endCall()
+  // ✅ TEMPORARILY DISABLED: VapiProvider callback (was bypassing protection logic)
+  // This was causing immediate call.endCall() without proper checks
+  /*
   useEffect(() => {
     console.log('📞 [DEBUG] Setting up VapiProvider callback');
     vapi.setCallEndCallback(() => {
@@ -151,6 +153,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       vapi.setCallEndCallback(() => {}); // Clear callback
     };
   }, [vapi, call]);
+  */
 
   // ✅ NOTE: endCall registration moved after endCall definition
 
