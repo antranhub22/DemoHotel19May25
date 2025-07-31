@@ -152,6 +152,24 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     };
   }, [vapi, call]);
 
+  // ✅ NEW: Register RefactoredAssistant.endCall as call end listener
+  useEffect(() => {
+    console.log(
+      '📞 [DEBUG] Registering RefactoredAssistant.endCall as call end listener'
+    );
+    const unregister = call.addCallEndListener(endCall);
+    console.log(
+      '✅ [DEBUG] RefactoredAssistant.endCall registered successfully'
+    );
+
+    return () => {
+      console.log(
+        '📞 [DEBUG] Unregistering RefactoredAssistant.endCall listener'
+      );
+      unregister();
+    };
+  }, [call, endCall]);
+
   // ✅ NEW: Listen for language changes and reinitialize Vapi
   useEffect(() => {
     logger.debug(
