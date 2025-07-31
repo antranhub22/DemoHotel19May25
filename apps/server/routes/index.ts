@@ -212,6 +212,11 @@ router.get('/api/test-db-direct', async (req, res) => {
   }
 });
 
+// ✅ SPECIFIC API ROUTES (NO AUTH REQUIRED) - MUST come BEFORE dashboardRoutes
+router.use('/api/health', healthRoutes);
+router.use('/api/temp-public', tempPublicRoutes);
+router.use('/api/debug', debugRoutes);
+
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
 
