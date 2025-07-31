@@ -1,9 +1,9 @@
-import { getDatabase } from '@shared/db';
+import { getDatabase, initializeDatabase } from '@shared/db';
 import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
 
-// ✅ FIX: Enhanced error handling for database operations
+// ✅ FIX: Enhanced error handling for database operations with fallback
 async function safeDatabaseOperation<T>(
   operation: () => Promise<T>
 ): Promise<T> {
@@ -17,9 +17,26 @@ async function safeDatabaseOperation<T>(
       error instanceof Error &&
       (error.message.includes('connection') ||
         error.message.includes('timeout') ||
-        error.message.includes('ECONNREFUSED'))
+        error.message.includes('ECONNREFUSED') ||
+        error.message.includes('not properly initialized'))
     ) {
-      throw new Error('Database connection error. Please try again.');
+      // Try to reinitialize database connection
+      try {
+        logger.info(
+          '🔄 Attempting to reinitialize database connection...',
+          'RequestController'
+        );
+        await initializeDatabase();
+        // Retry operation once
+        return await operation();
+      } catch (retryError) {
+        logger.error(
+          '❌ Database reinitialization failed:',
+          'RequestController',
+          retryError
+        );
+        throw new Error('Database connection error. Please try again.');
+      }
     }
 
     throw error;
@@ -37,9 +54,12 @@ export class RequestController {
       const { serviceType, requestText, roomNumber, guestName, priority } =
         req.body;
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Use safe database operation with proper async handling
       const newRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
+        if (!db) {
+          throw new Error('Database not properly initialized');
+        }
         return await db
           .insert(request)
           .values({
@@ -121,9 +141,12 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Use safe database operation with proper async handling
       const requestsData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
+        if (!db || !db.query) {
+          throw new Error('Database not properly initialized');
+        }
         return await db.query.request.findMany({
           orderBy: { createdAt: 'desc' },
           limit: 100,
@@ -186,9 +209,12 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Use safe database operation with proper async handling
       const request = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
+        if (!db || !db.query) {
+          throw new Error('Database not properly initialized');
+        }
         return await db.query.request.findFirst({
           where: { id: parseInt(id) },
         });
