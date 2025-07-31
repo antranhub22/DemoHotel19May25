@@ -165,6 +165,79 @@ export class FeatureFlags {
       true
     );
 
+    // ✅ NEW: Request Controller Refactor Feature Flags
+    this.setFlag(
+      'request-controller-v2',
+      {
+        name: 'request-controller-v2',
+        enabled: this.getEnvFlag('ENABLE_REQUEST_CONTROLLER_V2', false),
+        description:
+          'Enhanced RequestController with validation and service layer',
+        module: 'request-module',
+        version: '2.1.0',
+        dependencies: ['request-module'],
+        rolloutPercentage: 0, // Start disabled, enable gradually
+        tags: ['refactor', 'validation', 'service-layer'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
+
+    this.setFlag(
+      'request-validation-v2',
+      {
+        name: 'request-validation-v2',
+        enabled: this.getEnvFlag('ENABLE_REQUEST_VALIDATION_V2', false),
+        description: 'Enhanced input validation for request endpoints',
+        module: 'request-module',
+        version: '2.1.0',
+        dependencies: ['request-module'],
+        rolloutPercentage: 0,
+        tags: ['validation', 'security'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
+
+    this.setFlag(
+      'request-service-layer',
+      {
+        name: 'request-service-layer',
+        enabled: this.getEnvFlag('ENABLE_REQUEST_SERVICE_LAYER', false),
+        description: 'Service layer separation for RequestController',
+        module: 'request-module',
+        version: '2.1.0',
+        dependencies: ['request-module', 'request-controller-v2'],
+        rolloutPercentage: 0,
+        tags: ['refactor', 'architecture'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
+
+    this.setFlag(
+      'request-response-standardization',
+      {
+        name: 'request-response-standardization',
+        enabled: this.getEnvFlag(
+          'ENABLE_REQUEST_RESPONSE_STANDARDIZATION',
+          false
+        ),
+        description: 'Standardized response format for request endpoints',
+        module: 'request-module',
+        version: '2.1.0',
+        dependencies: ['request-module'],
+        rolloutPercentage: 0,
+        tags: ['api', 'standardization'],
+      },
+      'system',
+      'System initialization',
+      true
+    );
+
     // ✅ NEW v2.0: Advanced feature flags
     this.setFlag(
       'advanced-analytics',

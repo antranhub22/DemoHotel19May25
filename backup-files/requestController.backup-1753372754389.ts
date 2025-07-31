@@ -1,13 +1,18 @@
+// ============================================================================
+// REQUEST CONTROLLER BACKUP - ORIGINAL VERSION
+// ============================================================================
+// Backup created on: 2025-01-25 17:53:27
+// File: apps/server/controllers/requestController.ts
+// Version: 2.0.0 (Modular Enhanced)
+//
+// This backup preserves the original implementation for rollback purposes
+// during the refactor process.
+
 import { getDatabase, initializeDatabase } from '@shared/db';
 import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { desc, eq } from 'drizzle-orm';
 import { Request, Response } from 'express';
-
-// ✅ NEW: Phase 1 imports for validation and response standardization
-import { getValidatedData } from '@server/middleware/requestValidation';
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
-import { ResponseWrapper } from '@shared/utils/responseWrapper';
 
 // ✅ FIX: Enhanced error handling for database operations with fallback
 async function safeDatabaseOperation<T>(
@@ -53,79 +58,12 @@ export class RequestController {
   static async createRequest(req: Request, res: Response): Promise<void> {
     try {
       logger.info(
-        '📝 [RequestController] Creating new request - Phase 1 Enhanced',
+        '📝 [RequestController] Creating new request - Modular v2.0',
         'RequestController'
       );
 
-      // ✅ NEW: Phase 1 - Input validation with feature flag
-      let validatedData: CreateRequestInput;
-
-      if (isFeatureEnabled('request-validation-v2')) {
-        // Use validated data from middleware if available
-        const middlewareData = getValidatedData<CreateRequestInput>(req);
-
-        if (middlewareData) {
-          validatedData = middlewareData;
-          logger.debug(
-            '✅ [RequestController] Using validated data from middleware',
-            'RequestController'
-          );
-        } else {
-          // Fallback validation if middleware not used
-          const validationResult = validateRequestData(
-            CreateRequestSchema,
-            req.body
-          );
-
-          if (!validationResult.success) {
-            const formattedErrors = formatValidationErrors(
-              (validationResult as any).errors
-            );
-            logger.warn(
-              '❌ [RequestController] Validation failed',
-              'RequestController',
-              { errors: formattedErrors.details }
-            );
-
-            ResponseWrapper.sendValidationError(res, formattedErrors.details);
-            return;
-          }
-
-          validatedData = validationResult.data;
-          logger.debug(
-            '✅ [RequestController] Fallback validation passed',
-            'RequestController'
-          );
-        }
-      } else {
-        // Legacy mode - use original validation
-        const { serviceType, requestText, roomNumber, guestName, priority } =
-          req.body;
-
-        if (!requestText || !roomNumber) {
-          ResponseWrapper.sendError(
-            res,
-            'Missing required fields: requestText and roomNumber',
-            400,
-            'VALIDATION_ERROR'
-          );
-          return;
-        }
-
-        validatedData = {
-          serviceType,
-          requestText,
-          roomNumber,
-          guestName,
-          priority: priority || 'medium',
-          tenantId: req.body.tenantId,
-        };
-
-        logger.debug(
-          '🔧 [RequestController] Using legacy validation mode',
-          'RequestController'
-        );
-      }
+      const { serviceType, requestText, roomNumber, guestName, priority } =
+        req.body;
 
       // ✅ FIX: Use safe database operation with proper async handling
       const newRequest = await safeDatabaseOperation(async () => {
@@ -136,107 +74,66 @@ export class RequestController {
         return await db
           .insert(request)
           .values({
-            tenant_id: validatedData.tenantId || 'default-tenant',
-            room_number: validatedData.roomNumber,
-            request_content: validatedData.requestText,
-            guest_name: validatedData.guestName,
-            priority: validatedData.priority,
+            tenant_id: req.body.tenantId || 'default-tenant',
+            room_number: roomNumber,
+            request_content: requestText,
+            guest_name: guestName,
+            priority: priority || 'medium',
             status: 'pending',
             created_at: new Date(),
-            description: validatedData.serviceType
-              ? `Service: ${validatedData.serviceType}`
-              : undefined,
-            phone_number: validatedData.phoneNumber,
-            total_amount: validatedData.totalAmount,
-            currency: validatedData.currency,
-            special_instructions: validatedData.specialInstructions,
-            urgency: validatedData.urgency,
-            order_type: validatedData.orderType,
-            delivery_time: validatedData.deliveryTime,
-            items: validatedData.items,
+            description: serviceType ? `Service: ${serviceType}` : undefined,
           })
           .returning();
       });
 
-      // ✅ NEW: Phase 1 - Standardized response format
-      if (isFeatureEnabled('request-response-standardization')) {
-        ResponseWrapper.sendResponse(res, newRequest[0], 201, {
-          version: '2.1.0',
+      const response = {
+        success: true,
+        data: newRequest[0],
+        _metadata: {
+          module: 'request-module',
+          version: '2.0.0',
+          architecture: 'modular-enhanced',
+        },
+      };
+
+      logger.success(
+        '✅ [RequestController] Request created successfully - Modular v2.0',
+        'RequestController',
+        response
+      );
+
+      (res as any).status(201).json(response);
+    } catch (error) {
+      logger.error(
+        '❌ [RequestController] Failed to create request - Modular v2.0',
+        'RequestController',
+        error
+      );
+
+      // ✅ FIX: Better error responses
+      if (
+        error instanceof Error &&
+        error.message.includes('Database connection error')
+      ) {
+        (res as any).status(503).json({
+          success: false,
+          error: 'Database temporarily unavailable. Please try again.',
+          code: 'DATABASE_UNAVAILABLE',
         });
       } else {
-        // Legacy response format
-        const response = {
-          success: true,
-          data: newRequest[0],
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to create request',
+          details:
+            error instanceof Error
+              ? (error as any)?.message || String(error)
+              : 'Unknown error',
           _metadata: {
             module: 'request-module',
             version: '2.0.0',
             architecture: 'modular-enhanced',
           },
-        };
-
-        (res as any).status(201).json(response);
-      }
-
-      logger.success(
-        '✅ [RequestController] Request created successfully - Phase 1 Enhanced',
-        'RequestController',
-        {
-          requestId: newRequest[0].id,
-          validationMode: isFeatureEnabled('request-validation-v2')
-            ? 'enhanced'
-            : 'legacy',
-          responseMode: isFeatureEnabled('request-response-standardization')
-            ? 'standardized'
-            : 'legacy',
-        }
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [RequestController] Failed to create request - Phase 1 Enhanced',
-        'RequestController',
-        error
-      );
-
-      // ✅ NEW: Phase 1 - Enhanced error handling
-      if (isFeatureEnabled('request-response-standardization')) {
-        if (
-          error instanceof Error &&
-          error.message.includes('Database connection error')
-        ) {
-          ResponseWrapper.sendServiceUnavailable(
-            res,
-            'Database temporarily unavailable. Please try again.'
-          );
-        } else {
-          ResponseWrapper.sendDatabaseError(res, 'Failed to create request');
-        }
-      } else {
-        // Legacy error response format
-        if (
-          error instanceof Error &&
-          error.message.includes('Database connection error')
-        ) {
-          (res as any).status(503).json({
-            success: false,
-            error: 'Database temporarily unavailable. Please try again.',
-            code: 'DATABASE_UNAVAILABLE',
-          });
-        } else {
-          (res as any).status(500).json({
-            success: false,
-            error: 'Failed to create request',
-            details:
-              error instanceof Error
-                ? (error as any)?.message || String(error)
-                : 'Unknown error',
-            _metadata: {
-              module: 'request-module',
-              version: '2.0.0',
-              architecture: 'modular-enhanced',
-            },
-          });
-        }
+        });
       }
     }
   }
