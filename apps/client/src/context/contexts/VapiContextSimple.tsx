@@ -1,6 +1,6 @@
 // 🎯 SIMPLIFIED VAPI CONTEXT - Using Official Pattern
 // Replaces complex VapiContext with simple, official implementation
-// ✅ UPDATED: Now uses vapiOfficial.ts instead of vapiSimple.ts
+// ✅ UPDATED: Now uses vapiOfficial.ts instead of deprecated vapiSimple.ts
 
 import { useTenantDetection } from '@/context/AuthContext';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
@@ -91,7 +91,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     return 'tenant-default';
   };
 
-  // ✅ UPDATED: Using VapiOfficial instead of VapiSimple
+  // ✅ UPDATED: Using VapiOfficial instead of deprecated VapiSimple
   const initializeVapi = (language: string): VapiOfficial => {
     // Get environment variables with proper validation
     const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;

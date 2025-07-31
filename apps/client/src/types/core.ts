@@ -199,19 +199,7 @@ export interface InterfaceLayer {
   isActive: boolean;
 }
 
-// ✅ DEPRECATED: Use RefactoredAssistantContextType instead
-export interface AssistantContextType {
-  transcripts: Transcript[];
-  callDetails: CallDetails | null;
-  callDuration: number;
-  language: Language;
-  activeOrders: ActiveOrder[];
-  setActiveOrders: (orders: ActiveOrder[]) => void;
-  addTranscript: (transcript: Transcript) => void;
-  setCallDetails: (details: CallDetails) => void;
-  setCallDuration: (duration: number) => void;
-  setLanguage: (lang: Language) => void;
-}
+// ✅ REMOVED: AssistantContextType - Use RefactoredAssistantContextType instead
 
 // ========================================
 // ANALYTICS TYPES
