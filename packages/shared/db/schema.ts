@@ -237,8 +237,8 @@ export const request = pgTable(
     description: varchar('description', { length: 500 }),
     priority: varchar('priority', { length: 20 }).default('medium'),
     assigned_to: varchar('assigned_to', { length: 100 }),
-    // ✅ NEW: Service integration fields
-    service_id: integer('service_id').references(() => services.id),
+    // ✅ NEW: Service integration fields (commented for backward compatibility)
+    // service_id: integer('service_id').references(() => services.id),
     guest_name: varchar('guest_name', { length: 100 }),
     phone_number: varchar('phone_number', { length: 20 }),
     total_amount: real('total_amount'),
@@ -262,8 +262,8 @@ export const request = pgTable(
     priorityIdx: index('request_priority_idx').on(table.priority),
     createdAtIdx: index('request_created_at_idx').on(table.created_at),
     updatedAtIdx: index('request_updated_at_idx').on(table.updated_at),
-    // ✅ NEW: Service-related indexes
-    serviceIdIdx: index('request_service_id_idx').on(table.service_id),
+    // ✅ NEW: Service-related indexes (commented for backward compatibility)
+    // serviceIdIdx: index('request_service_id_idx').on(table.service_id),
     guestNameIdx: index('request_guest_name_idx').on(table.guest_name),
     totalAmountIdx: index('request_total_amount_idx').on(table.total_amount),
     // Composite indexes for dashboard queries
@@ -294,9 +294,10 @@ export const orderItems = pgTable(
     request_id: integer('request_id')
       .references(() => request.id)
       .notNull(),
-    service_id: integer('service_id')
-      .references(() => services.id)
-      .notNull(),
+    // ✅ COMMENTED: service_id for backward compatibility
+    // service_id: integer('service_id')
+    //   .references(() => services.id)
+    //   .notNull(),
     quantity: integer('quantity').default(1),
     unit_price: real('unit_price').notNull(),
     total_price: real('total_price').notNull(),
@@ -306,14 +307,15 @@ export const orderItems = pgTable(
   table => ({
     // Performance indexes
     requestIdIdx: index('order_items_request_id_idx').on(table.request_id),
-    serviceIdIdx: index('order_items_service_id_idx').on(table.service_id),
+    // ✅ COMMENTED: service_id indexes for backward compatibility
+    // serviceIdIdx: index('order_items_service_id_idx').on(table.service_id),
     quantityIdx: index('order_items_quantity_idx').on(table.quantity),
     totalPriceIdx: index('order_items_total_price_idx').on(table.total_price),
-    // Composite indexes for order management
-    requestServiceIdx: index('order_items_request_service_idx').on(
-      table.request_id,
-      table.service_id
-    ),
+    // ✅ COMMENTED: service_id composite index for backward compatibility
+    // requestServiceIdx: index('order_items_request_service_idx').on(
+    //   table.request_id,
+    //   table.service_id
+    // ),
   })
 );
 

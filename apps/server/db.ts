@@ -1,7 +1,7 @@
+import * as schema from '@shared/db/schema';
+import { logger } from '@shared/utils/logger';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
-import * as schema from '@shared/schema';
-import { logger } from '@shared/utils/logger';
 const { Pool } = pg;
 
 // ✅ LEGACY POSTGRESQL CONNECTION - DEACTIVATED
