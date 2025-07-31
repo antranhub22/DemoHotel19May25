@@ -4,6 +4,7 @@
 declare global {
   interface Window {
     triggerSummaryPopup?: () => void;
+    storeCallId?: (callId: string) => void;
   }
 }
 
@@ -276,23 +277,26 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     [call, vapi, language, configuration, transcript, order]
   );
 
-  // Enhanced endCall that integrates all contexts
-  const enhancedEndCall = useCallback(async () => {
-    console.log('📞 [DEBUG] RefactoredAssistant.enhancedEndCall called');
-    logger.debug('[RefactoredAssistant] Ending enhanced call...', 'Component');
+  // ✅ MERGED: Single endCall function with full functionality
+  const endCall = useCallback(async () => {
+    console.log('📞 [DEBUG] RefactoredAssistant.endCall called');
+    logger.debug(
+      '[RefactoredAssistant] Ending call with summary processing...',
+      'Component'
+    );
 
     try {
-      // Stop Vapi first
+      // Step 1: Stop Vapi first
       console.log('📞 [DEBUG] Calling vapi.endCall()');
       await vapi.endCall();
       console.log('✅ [DEBUG] vapi.endCall() completed');
 
-      // End call timer
+      // Step 2: End call timer and trigger listeners
       console.log('📞 [DEBUG] Calling call.endCall()');
       call.endCall();
       console.log('✅ [DEBUG] call.endCall() completed');
 
-      // ✅ NEW: Process summary if we have transcripts
+      // Step 3: Process summary if we have transcripts
       if (transcript.transcripts.length >= 2) {
         console.log(
           '📞 [DEBUG] Processing call summary with transcripts:',
@@ -306,13 +310,19 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         );
 
         // ✅ NEW: Set call summary data for popup system
-        const callId = `call-${Date.now()}`;
+        // ✅ FIXED: Use Vapi callId if available, otherwise use temporary
+        const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
         order.setCallSummary({
-          callId,
+          callId: vapiCallId,
           tenantId: configuration.tenantId || 'default',
           content: '', // Will be filled by WebSocket
           timestamp: new Date(),
         });
+
+        // ✅ NEW: Store callId globally for WebSocket integration
+        if (window.storeCallId) {
+          window.storeCallId(vapiCallId);
+        }
 
         // ✅ NEW: Trigger summary popup via global function
         if (window.triggerSummaryPopup) {
@@ -327,10 +337,13 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         );
       }
 
-      console.log('✅ [DEBUG] RefactoredAssistant.enhancedEndCall completed');
-      logger.debug('[RefactoredAssistant] Enhanced call ended', 'Component');
+      console.log('✅ [DEBUG] RefactoredAssistant.endCall completed');
+      logger.debug(
+        '[RefactoredAssistant] Call ended with summary processing',
+        'Component'
+      );
     } catch (error) {
-      console.error('❌ [DEBUG] Error in enhancedEndCall:', error);
+      console.error('❌ [DEBUG] Error in endCall:', error);
       logger.error(
         '[RefactoredAssistant] Error ending call:',
         'Component',
@@ -349,7 +362,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     // Call functionality (enhanced)
     ...call,
     startCall: enhancedStartCall,
-    endCall: enhancedEndCall,
+    endCall: endCall,
     toggleMute: enhancedToggleMute,
 
     // All other contexts

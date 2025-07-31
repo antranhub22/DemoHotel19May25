@@ -18,7 +18,7 @@ interface UseConversationStateReturn {
   handleCallStart: (
     lang: Language
   ) => Promise<{ success: boolean; error?: string }>;
-  handleCallEnd: () => void;
+  handleCallEnd: () => Promise<void>;
   // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // 🔧 REMOVE: handleConfirm is now in useConfirmHandler
 }
@@ -35,6 +35,7 @@ export const useConversationState = ({
     transcripts,
     setLanguage,
     addTranscript, // ✅ ADD: Import addTranscript for mock generation
+    // ✅ NEW: Import enhancedEndCall for summary processing
   } = useAssistant();
 
   const [isCallStarted, setIsCallStarted] = useState(false);
@@ -442,7 +443,7 @@ export const useConversationState = ({
     ]
   );
 
-  const handleCallEnd = useCallback(() => {
+  const handleCallEnd = useCallback(async () => {
     logger.debug('🛑 [useConversationState] Ending call', 'Component');
     logger.debug(
       '🔍 [useConversationState] Current isCallStarted state:',
@@ -450,21 +451,22 @@ export const useConversationState = ({
       isCallStarted
     );
 
-    // ✅ FIX: ALWAYS call endCall() first to stop VAPI in all modes
+    // ✅ MERGED: Use single endCall() function with full functionality
     console.log(
-      '📞 [DEBUG] useConversationState.handleCallEnd - Step 1: Calling endCall()'
+      '📞 [DEBUG] useConversationState.handleCallEnd - Calling merged endCall()'
     );
     logger.debug(
-      '📞 [useConversationState] Step 1: Calling endCall() to stop VAPI...',
+      '📞 [useConversationState] Calling merged endCall() with summary processing...',
       'Component'
     );
+
     try {
-      endCall(); // ← This MUST run to stop VAPI instance
+      await endCall(); // ← Now includes summary processing
       console.log(
         '✅ [DEBUG] useConversationState.handleCallEnd - endCall() completed successfully'
       );
       logger.debug(
-        '✅ [useConversationState] endCall() completed - VAPI stopped',
+        '✅ [useConversationState] endCall() completed - VAPI stopped + summary processed',
         'Component'
       );
     } catch (endCallError) {

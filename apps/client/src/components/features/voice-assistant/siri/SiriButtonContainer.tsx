@@ -17,7 +17,7 @@ interface SiriButtonContainerProps {
   isCallStarted: boolean;
   micLevel: number;
   onCallStart: (lang: Language) => Promise<void>;
-  onCallEnd: () => void;
+  onCallEnd: () => Promise<void>;
   // ✅ REMOVED: onCancel and onConfirm are no longer needed
   // Summary popup will auto-show when call ends via Siri button tap
   showingSummary?: boolean; // ✅ NEW: Hide Cancel/Confirm when summary is showing

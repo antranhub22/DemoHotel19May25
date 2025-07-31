@@ -8,6 +8,13 @@ import { logger } from '@shared/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+// ✅ NEW: Type declarations for global window functions
+declare global {
+  interface Window {
+    updateSummaryProgression?: (data: any) => void;
+  }
+}
+
 export function useWebSocket() {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
@@ -202,8 +209,20 @@ export function useWebSocket() {
 
             // ✅ FALLBACK: Update assistant context directly
             if (data.summary) {
+              // ✅ FIXED: Prioritize Vapi callId from server, fallback to stored callId
+              const serverCallId = data.callId; // Vapi SDK callId
+              const storedCallId = (window as any).currentCallId; // Client callId
+              const finalCallId = serverCallId || storedCallId || 'unknown';
+
+              console.log('🔗 [DEBUG] Using callId for summary update:', {
+                serverCallId,
+                storedCallId,
+                finalCallId,
+                priority: serverCallId ? 'Vapi SDK' : 'Client',
+              });
+
               assistant.setCallSummary({
-                callId: data.callId || 'unknown',
+                callId: finalCallId,
                 tenantId: 'default',
                 content: data.summary,
                 timestamp: data.timestamp,

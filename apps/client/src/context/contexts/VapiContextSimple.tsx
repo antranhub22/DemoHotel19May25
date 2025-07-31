@@ -148,13 +148,13 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         setIsCallActive(true);
         hadActiveCallRef.current = true; // ✅ Track that we had an active call
         setMicLevel(0);
-        // Generate new call ID when call starts
-        const newCallId = `call-${Date.now()}`;
-        setCurrentCallId(newCallId);
+        // ✅ NEW: Use temporary call ID, will be updated when Vapi provides real callId
+        const tempCallId = `temp-call-${Date.now()}`;
+        setCurrentCallId(tempCallId);
         logger.debug(
-          '🆔 [VapiProvider] Call started with new call ID:',
+          '🆔 [VapiProvider] Call started with temporary call ID:',
           'VapiProvider',
-          newCallId
+          tempCallId
         );
       },
       onCallEnd: () => {
@@ -200,13 +200,15 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       onMessage: message => {
         if (message.type === 'transcript') {
           // ✅ FIX: Use consistent call ID throughout the call session
-          const callId = currentCallId || `call-${Date.now()}`;
-          if (!currentCallId) {
-            setCurrentCallId(callId);
+          const callId = currentCallId || `temp-call-${Date.now()}`;
+
+          // ✅ NEW: Update callId if Vapi provides real callId
+          if (message.call?.id && message.call.id !== currentCallId) {
+            setCurrentCallId(message.call.id);
             logger.debug(
-              '🆔 [VapiProvider] Setting new call ID:',
+              '🆔 [VapiProvider] Updated with real Vapi call ID:',
               'VapiProvider',
-              callId
+              message.call.id
             );
           }
 

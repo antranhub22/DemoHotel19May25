@@ -8,6 +8,7 @@ declare global {
     triggerSummaryPopup?: () => void;
     updateSummaryPopup?: (summary: string, serviceRequests: any[]) => void;
     resetSummarySystem?: () => void;
+    storeCallId?: (callId: string) => void;
   }
 }
 
@@ -18,6 +19,8 @@ interface UseConfirmHandlerReturn {
   updateSummaryPopup: (summary: string, serviceRequests: any[]) => void;
   // ✅ NEW: Reset summary system
   resetSummarySystem: () => void;
+  // ✅ NEW: Store callId for WebSocket integration
+  storeCallId: (callId: string) => void;
 }
 
 export const useConfirmHandler = (): UseConfirmHandlerReturn => {
@@ -249,24 +252,34 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
     [showSummary, removePopup, setCallSummary, setServiceRequests]
   );
 
+  // ✅ NEW: Store callId for WebSocket integration
+  const storeCallId = useCallback((callId: string) => {
+    console.log('🔗 [DEBUG] Storing callId for WebSocket integration:', callId);
+    // Store callId globally for WebSocket to use
+    (window as any).currentCallId = callId;
+  }, []);
+
   // ✅ NEW: Connect to global window for RefactoredAssistantContext access
   useEffect(() => {
     console.log('🔗 [DEBUG] Connecting useConfirmHandler to window');
     window.triggerSummaryPopup = autoTriggerSummary;
     window.updateSummaryPopup = updateSummaryPopup;
     window.resetSummarySystem = resetSummarySystem;
+    window.storeCallId = storeCallId;
 
     return () => {
       console.log('🔗 [DEBUG] Cleaning up useConfirmHandler from window');
       delete window.triggerSummaryPopup;
       delete window.updateSummaryPopup;
       delete window.resetSummarySystem;
+      delete window.storeCallId;
     };
-  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem]);
+  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
 
   return {
     autoTriggerSummary,
     updateSummaryPopup,
     resetSummarySystem,
+    storeCallId,
   };
 };

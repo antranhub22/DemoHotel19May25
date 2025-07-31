@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 interface UseSiriButtonStateProps {
   isListening: boolean;
   onCallStart?: () => Promise<void>;
-  onCallEnd?: () => void;
+  onCallEnd?: () => Promise<void>;
 }
 
 interface UseSiriButtonStateReturn {
@@ -57,7 +57,7 @@ export const useSiriButtonState = ({
         setStatus('processing');
         logger.debug('[useSiriButtonState] Ending call...', 'Component');
 
-        onCallEnd();
+        await onCallEnd();
         logger.debug(
           '[useSiriButtonState] Call ended successfully',
           'Component'

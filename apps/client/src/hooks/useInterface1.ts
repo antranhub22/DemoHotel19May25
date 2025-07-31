@@ -46,7 +46,7 @@ interface UseInterface1Return {
   isCallStarted: boolean;
   showConversation: boolean;
   handleCallStart: (lang: any) => Promise<{ success: boolean; error?: string }>;
-  handleCallEnd: () => void;
+  handleCallEnd: () => Promise<void>;
   // ✅ REMOVED: handleCancel is no longer needed - auto-trigger only
   // ✅ REMOVED: handleConfirm is no longer needed - auto-trigger only
 
@@ -77,7 +77,7 @@ export const useInterface1 = ({
   isActive,
 }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, addCallEndListener } = useAssistant();
+  const { micLevel } = useAssistant();
   const {
     config: hotelConfig,
     isLoading: configLoading,
@@ -102,7 +102,7 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
 
   // ✅ REMOVED: handleCancel is no longer needed
-  const { autoTriggerSummary, updateSummaryPopup } = useConfirmHandler();
+  const { updateSummaryPopup } = useConfirmHandler();
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
@@ -120,39 +120,31 @@ export const useInterface1 = ({
   }, [popups, showingSummary]);
 
   // ✅ SIMPLIFIED: Clean auto-show summary - no complex validation
-  const autoShowSummary = useCallback(() => {
-    console.log('📞 [DEBUG] Call ended - triggering summary popup');
 
-    // ✅ SIMPLE: Just trigger the popup, no validation needed
-    autoTriggerSummary();
+  // ✅ REMOVED: Duplicate summary trigger - now handled by RefactoredAssistantContext
+  // useEffect(() => {
+  //   console.log(
+  //     '📞 [DEBUG] Registering auto-summary listener - CALL ID:',
+  //     Date.now()
+  //   );
+  //   if (import.meta.env.DEV) {
+  //     logger.debug('Registering auto-summary listener', 'useInterface1');
+  //   }
 
-    console.log('✅ [DEBUG] Summary popup triggered successfully');
-  }, [autoTriggerSummary]);
+  //   const unregister = addCallEndListener(autoShowSummary);
+  //   console.log('✅ [DEBUG] Auto-summary listener registered successfully');
 
-  // ✅ FIXED: Stable listener registration to prevent re-register
-  useEffect(() => {
-    console.log(
-      '📞 [DEBUG] Registering auto-summary listener - CALL ID:',
-      Date.now()
-    );
-    if (import.meta.env.DEV) {
-      logger.debug('Registering auto-summary listener', 'useInterface1');
-    }
-
-    const unregister = addCallEndListener(autoShowSummary);
-    console.log('✅ [DEBUG] Auto-summary listener registered successfully');
-
-    return () => {
-      console.log(
-        '📞 [DEBUG] Unregistering auto-summary listener - CALL ID:',
-        Date.now()
-      );
-      if (import.meta.env.DEV) {
-        logger.debug('Unregistering auto-summary listener', 'useInterface1');
-      }
-      unregister();
-    };
-  }, [addCallEndListener]); // ✅ FIXED: Remove autoShowSummary dependency to prevent re-register
+  //   return () => {
+  //     console.log(
+  //       '📞 [DEBUG] Unregistering auto-summary listener - CALL ID:',
+  //       Date.now()
+  //     );
+  //     if (import.meta.env.DEV) {
+  //       logger.debug('Unregistering auto-summary listener', 'useInterface1');
+  //     }
+  //     unregister();
+  //   };
+  // }, [addCallEndListener]); // ✅ FIXED: Remove autoShowSummary dependency to prevent re-register
 
   // ✅ NEW: Connect updateSummaryPopup to global window for WebSocket access
   useEffect(() => {
