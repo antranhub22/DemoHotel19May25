@@ -127,7 +127,7 @@ router.use('/api/temp-public', tempPublicRoutes);
 router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
 // ✅ DIRECT TEST: Simple endpoint to test authentication bypass (BEFORE ANY MIDDLEWARE)
-router.get('/test-direct', (req, res) => {
+router.get('/api/test-direct', (req, res) => {
   res.json({
     success: true,
     message: 'Direct test endpoint working - NO AUTH REQUIRED',
@@ -137,7 +137,7 @@ router.get('/test-direct', (req, res) => {
 });
 
 // ✅ DIRECT DATABASE TEST: Test database connection (BEFORE ANY MIDDLEWARE)
-router.get('/test-db-direct', async (req, res) => {
+router.get('/api/test-db-direct', async (req, res) => {
   try {
     const { Client } = await import('pg');
     const databaseUrl = process.env.DATABASE_URL;
