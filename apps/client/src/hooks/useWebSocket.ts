@@ -85,6 +85,9 @@ export function useWebSocket() {
 
     newSocket.on('connect', () => {
       logger.debug('Socket.IO connection established', 'Component');
+      console.log(
+        '🔌 [DEBUG] WebSocket connected successfully for Summary updates'
+      );
       clearTimeout(connectionTimeout); // Clear timeout on successful connection
       setConnected(true);
       retryRef.current = 0; // reset retry count
@@ -188,6 +191,7 @@ export function useWebSocket() {
             data
           );
 
+          console.log('🎉 [DEBUG] ===== WEBSOCKET SUMMARY RECEIVED =====');
           console.log('🎉 [DEBUG] WebSocket received call-summary-received:', {
             callId: data.callId,
             hasSummary: !!data.summary,
@@ -195,15 +199,22 @@ export function useWebSocket() {
             hasServiceRequests: !!data.serviceRequests,
             serviceRequestsCount: data.serviceRequests?.length || 0,
             timestamp: data.timestamp,
+            fullData: data,
           });
 
           // ✅ TRIGGER: Update summary popup with real data
+          console.log('🔍 [DEBUG] Checking updateSummaryPopup availability:', {
+            available: !!window.updateSummaryPopup,
+            type: typeof window.updateSummaryPopup,
+          });
+
           if (window.updateSummaryPopup) {
             console.log('🔄 [DEBUG] Updating summary popup with webhook data');
             window.updateSummaryPopup(
               data.summary || '',
               data.serviceRequests || []
             );
+            console.log('✅ [DEBUG] updateSummaryPopup called successfully');
           } else {
             console.log('⚠️ [DEBUG] updateSummaryPopup function not available');
 
