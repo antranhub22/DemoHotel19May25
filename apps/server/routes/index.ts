@@ -122,6 +122,10 @@ router.use('/api/analytics', analyticsRoutes);
 // System Routes (NO AUTH REQUIRED - must come before dashboard routes)
 router.use('/api/health', healthRoutes);
 
+// Development & Testing (NO AUTH REQUIRED)
+router.use('/api/temp-public', tempPublicRoutes);
+router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
+
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
 
@@ -129,10 +133,6 @@ router.use('/api', dashboardRoutes);
 router.use('/api/feature-flags', featureFlagsRoutes);
 router.use('/api/module-lifecycle', moduleLifecycleRoutes);
 router.use('/api/monitoring', monitoringRoutes);
-
-// Development & Testing
-router.use('/api/temp-public', tempPublicRoutes);
-router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
 // ============================================
 // ROUTE REGISTRATION SUCCESS
