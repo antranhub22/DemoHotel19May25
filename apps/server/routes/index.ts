@@ -139,31 +139,80 @@ router.get('/test-direct', (req, res) => {
 // ✅ DIRECT DATABASE TEST: Test database connection (BEFORE ANY MIDDLEWARE)
 router.get('/test-db-direct', async (req, res) => {
   try {
-    const { getDatabase } = await import('@shared/db');
-    const db = await getDatabase();
+    const { Client } = await import('pg');
+    const databaseUrl = process.env.DATABASE_URL;
 
-    // Simple test query
-    const result = await db.select().from(db.raw('1 as test')).limit(1);
+    if (!databaseUrl) {
+      return res.status(500).json({
+        success: false,
+        error: 'DATABASE_URL is not set',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    console.log(
+      '🔍 Testing DATABASE_URL:',
+      databaseUrl.substring(0, 30) + '...'
+    );
+
+    const client = new Client({
+      connectionString: databaseUrl,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    // Test connection
+    await client.connect();
+    console.log('✅ Database connection successful');
+
+    // Test simple query
+    const result = await client.query('SELECT 1 as test, NOW() as timestamp');
+    console.log('✅ Query successful:', result.rows[0]);
+
+    // Check tables
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+
+    const tables = tablesResult.rows.map(row => row.table_name);
+    console.log('✅ Tables found:', tables);
+
+    await client.end();
 
     res.json({
       success: true,
-      message: 'Database connection successful',
+      message: 'Database connection and queries successful',
       data: {
         connected: true,
-        testResult: result,
+        databaseUrlSet: true,
+        databaseUrlLength: databaseUrl.length,
+        databaseUrlPrefix: databaseUrl.substring(0, 30) + '...',
+        testQuery: result.rows[0],
+        tables: tables,
         timestamp: new Date().toISOString(),
       },
     });
   } catch (error) {
-    console.error('Database test failed:', error);
+    console.error('❌ Database test failed:', error);
     res.status(500).json({
       success: false,
       error:
         error instanceof Error ? error.message : 'Database connection failed',
-      timestamp: new Date().toISOString(),
+      details: {
+        code: error.code,
+        message: error.message,
+        databaseUrlSet: !!process.env.DATABASE_URL,
+        databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 });
+
+// ✅ DIRECT TEST: Test if server is working (BEFORE ANY MIDDLEWARE)
 
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
