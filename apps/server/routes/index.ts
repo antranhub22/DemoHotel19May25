@@ -126,7 +126,7 @@ router.use('/api/health', healthRoutes);
 router.use('/api/temp-public', tempPublicRoutes);
 router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
-// ✅ DIRECT TEST: Simple endpoint to test authentication bypass (BEFORE ANY MIDDLEWARE)
+// ✅ DIRECT TEST ENDPOINTS (NO AUTH REQUIRED) - MUST come BEFORE dashboardRoutes
 router.get('/api/test-direct', (req, res) => {
   res.json({
     success: true,
@@ -136,7 +136,7 @@ router.get('/api/test-direct', (req, res) => {
   });
 });
 
-// ✅ DIRECT DATABASE TEST: Test database connection (BEFORE ANY MIDDLEWARE)
+// ✅ DIRECT DATABASE TEST: Test database connection (NO AUTH REQUIRED)
 router.get('/api/test-db-direct', async (req, res) => {
   try {
     const { Client } = await import('pg');
@@ -211,8 +211,6 @@ router.get('/api/test-db-direct', async (req, res) => {
     });
   }
 });
-
-// ✅ DIRECT TEST: Test if server is working (BEFORE ANY MIDDLEWARE)
 
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
