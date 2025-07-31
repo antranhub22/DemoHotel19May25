@@ -2,6 +2,8 @@ import { getDatabase } from '@shared/db';
 import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
+import { requestMapper } from '@shared/db/transformers';
+import { desc, eq } from 'drizzle-orm'; // ✅ Import drizzle-orm functions
 
 // ✅ FIX: Enhanced error handling for database operations
 async function safeDatabaseOperation<T>(
@@ -37,26 +39,44 @@ export class RequestController {
       const { serviceType, requestText, roomNumber, guestName, priority } =
         req.body;
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Validate required fields
+      if (!roomNumber) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Room number is required',
+          code: 'VALIDATION_ERROR',
+        });
+        return;
+      }
+
+      // ✅ FIX: Use requestMapper for proper field mapping and add default tenant_id
+      const requestData = requestMapper.toDatabase({
+        tenantId: req.body.tenantId || 'default-tenant', // ✅ Add required tenant_id
+        roomNumber: roomNumber,
+        requestContent: requestText, // ✅ Map requestText to requestContent
+        guestName: guestName,
+        priority: priority || 'medium',
+        status: 'pending',
+        createdAt: new Date(),
+        // ✅ Handle serviceType - map to description field as fallback
+        description: serviceType ? `Service: ${serviceType}` : undefined,
+      });
+
+      // ✅ FIX: Use safe database operation with mapped fields
       const newRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
         return await db
           .insert(request)
-          .values({
-            serviceType,
-            requestText,
-            roomNumber,
-            guestName,
-            priority: priority || 'medium',
-            status: 'pending',
-            createdAt: new Date(),
-          })
+          .values(requestData)
           .returning();
       });
 
+      // ✅ FIX: Map response back to camelCase for frontend
+      const responseData = requestMapper.toFrontend(newRequest[0]);
+
       const response = {
         success: true,
-        data: newRequest[0],
+        data: responseData,
         _metadata: {
           module: 'request-module',
           version: '2.0.0',
@@ -121,22 +141,26 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Use safe database operation with correct drizzle syntax
       const requestsData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        return await db.query.request.findMany({
-          orderBy: { createdAt: 'desc' },
-          limit: 100,
-        });
+        return await db
+          .select()
+          .from(request)
+          .orderBy(desc(request.created_at)) // ✅ Fix: Use desc() function
+          .limit(100);
       });
+
+      // ✅ FIX: Map all requests to camelCase for frontend
+      const mappedRequests = requestsData.map(req => requestMapper.toFrontend(req));
 
       logger.success(
         '✅ [RequestController] Requests fetched successfully',
         'RequestController',
-        { count: requestsData.length }
+        { count: mappedRequests.length }
       );
 
-      (res as any).json({ success: true, data: requestsData });
+      (res as any).json({ success: true, data: mappedRequests });
     } catch (error) {
       // ✅ ENHANCED: Better error detection and reporting
       const errorMessage =
@@ -186,15 +210,17 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
-      const request = await safeDatabaseOperation(async () => {
+      // ✅ FIX: Use safe database operation with correct drizzle syntax
+      const requestData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        return await db.query.request.findFirst({
-          where: { id: parseInt(id) },
-        });
+        return await db
+          .select()
+          .from(request)
+          .where(eq(request.id, parseInt(id))) // ✅ Fix: Use eq() function
+          .limit(1);
       });
 
-      if (!request) {
+      if (!requestData || requestData.length === 0) {
         (res as any).status(404).json({
           success: false,
           error: 'Request not found',
@@ -202,7 +228,10 @@ export class RequestController {
         return;
       }
 
-      (res as any).json({ success: true, data: request });
+      // ✅ FIX: Map to camelCase for frontend
+      const mappedRequest = requestMapper.toFrontend(requestData[0]);
+
+      (res as any).json({ success: true, data: mappedRequest });
     } catch (error) {
       logger.error(
         '❌ [RequestController] Failed to fetch request by ID',
@@ -231,16 +260,19 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
+      // ✅ FIX: Use requestMapper for field mapping
+      const updateData = requestMapper.toDatabase({
+        status: status,
+        updatedAt: new Date(),
+      });
+
+      // ✅ FIX: Use safe database operation with correct drizzle syntax
       const updatedRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
         return await db
           .update(request)
-          .set({
-            status,
-            updatedAt: new Date(),
-          })
-          .where({ id: parseInt(id) })
+          .set(updateData)
+          .where(eq(request.id, parseInt(id))) // ✅ Fix: Use eq() function
           .returning();
       });
 
@@ -252,7 +284,10 @@ export class RequestController {
         return;
       }
 
-      (res as any).json({ success: true, data: updatedRequest[0] });
+      // ✅ FIX: Map response to camelCase
+      const mappedResponse = requestMapper.toFrontend(updatedRequest[0]);
+
+      (res as any).json({ success: true, data: mappedResponse });
     } catch (error) {
       logger.error(
         '❌ [RequestController] Failed to update request status',

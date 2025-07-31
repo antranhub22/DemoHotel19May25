@@ -294,6 +294,18 @@ export interface RequestCamelCase {
   description?: string | null;
   priority?: string;
   assignedTo?: string | null;
+  // ✅ NEW: Add missing fields from database schema
+  guestName?: string | null;
+  phoneNumber?: string | null;
+  totalAmount?: number | null;
+  currency?: string;
+  estimatedCompletion?: Date | null;
+  actualCompletion?: Date | null;
+  specialInstructions?: string | null;
+  urgency?: string;
+  orderType?: string | null;
+  deliveryTime?: string | null;
+  items?: string | null; // JSON stored as text
 }
 
 export const requestMapper = {
@@ -310,22 +322,51 @@ export const requestMapper = {
     description: request.description,
     priority: request.priority,
     assignedTo: request.assigned_to,
+    // ✅ NEW: Map additional fields
+    guestName: request.guest_name,
+    phoneNumber: request.phone_number,
+    totalAmount: request.total_amount,
+    currency: request.currency,
+    estimatedCompletion: request.estimated_completion,
+    actualCompletion: request.actual_completion,
+    specialInstructions: request.special_instructions,
+    urgency: request.urgency,
+    orderType: request.order_type,
+    deliveryTime: request.delivery_time,
+    items: request.items,
   }),
 
-  toDatabase: (request: Partial<RequestCamelCase>): any => ({
-    id: request.id,
-    tenant_id: request.tenantId,
-    call_id: request.callId,
-    room_number: request.roomNumber,
-    order_id: request.orderId,
-    request_content: request.requestContent,
-    status: request.status,
-    created_at: request.createdAt,
-    updated_at: request.updatedAt,
-    description: request.description,
-    priority: request.priority,
-    assigned_to: request.assignedTo,
-  }),
+  toDatabase: (request: Partial<RequestCamelCase>): any => {
+    const mapped: any = {};
+    
+    // ✅ Only include defined fields to avoid overwriting with undefined
+    if (request.id !== undefined) mapped.id = request.id;
+    if (request.tenantId !== undefined) mapped.tenant_id = request.tenantId;
+    if (request.callId !== undefined) mapped.call_id = request.callId;
+    if (request.roomNumber !== undefined) mapped.room_number = request.roomNumber;
+    if (request.orderId !== undefined) mapped.order_id = request.orderId;
+    if (request.requestContent !== undefined) mapped.request_content = request.requestContent;
+    if (request.status !== undefined) mapped.status = request.status;
+    if (request.createdAt !== undefined) mapped.created_at = request.createdAt;
+    if (request.updatedAt !== undefined) mapped.updated_at = request.updatedAt;
+    if (request.description !== undefined) mapped.description = request.description;
+    if (request.priority !== undefined) mapped.priority = request.priority;
+    if (request.assignedTo !== undefined) mapped.assigned_to = request.assignedTo;
+    // ✅ NEW: Map additional fields
+    if (request.guestName !== undefined) mapped.guest_name = request.guestName;
+    if (request.phoneNumber !== undefined) mapped.phone_number = request.phoneNumber;
+    if (request.totalAmount !== undefined) mapped.total_amount = request.totalAmount;
+    if (request.currency !== undefined) mapped.currency = request.currency;
+    if (request.estimatedCompletion !== undefined) mapped.estimated_completion = request.estimatedCompletion;
+    if (request.actualCompletion !== undefined) mapped.actual_completion = request.actualCompletion;
+    if (request.specialInstructions !== undefined) mapped.special_instructions = request.specialInstructions;
+    if (request.urgency !== undefined) mapped.urgency = request.urgency;
+    if (request.orderType !== undefined) mapped.order_type = request.orderType;
+    if (request.deliveryTime !== undefined) mapped.delivery_time = request.deliveryTime;
+    if (request.items !== undefined) mapped.items = request.items;
+
+    return mapped;
+  },
 };
 
 // ============================================
