@@ -1,6 +1,6 @@
-import express from 'express';
 import { getDatabase } from '@shared/db';
 import { logger } from '@shared/utils/logger';
+import express from 'express';
 
 const router = express.Router();
 
@@ -226,6 +226,93 @@ router.post('/test-db', async (req, res) => {
       details: {
         databaseUrlSet: !!process.env.DATABASE_URL,
         databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+});
+
+// ✅ DEBUG: Production DATABASE_URL test (NO AUTH REQUIRED)
+router.get('/production-db-test', async (req, res) => {
+  try {
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      return res.status(500).json({
+        success: false,
+        error: 'DATABASE_URL is not set',
+        details: {
+          missing: true,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    }
+
+    // Mask password for security
+    const maskedUrl = databaseUrl.replace(/:([^:@]+)@/, ':****@');
+
+    const debugInfo = {
+      databaseUrlExists: true,
+      databaseUrlLength: databaseUrl.length,
+      databaseUrlMasked: maskedUrl,
+      isPostgreSQL:
+        databaseUrl.includes('postgresql://') ||
+        databaseUrl.includes('postgres://'),
+      environment: process.env.NODE_ENV,
+      timestamp: new Date().toISOString(),
+    };
+
+    // Test connection
+    try {
+      const { Client } = await import('pg');
+      const client = new Client({
+        connectionString: databaseUrl,
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeoutMillis: 10000,
+      });
+
+      await client.connect();
+      const result = await client.query(
+        'SELECT NOW() as current_time, version() as db_version'
+      );
+
+      await client.end();
+
+      res.json({
+        success: true,
+        message: 'Production DATABASE_URL test successful',
+        data: {
+          ...debugInfo,
+          connectionTest: {
+            connected: true,
+            currentTime: result.rows[0].current_time,
+            dbVersion: result.rows[0].db_version.substring(0, 100) + '...',
+          },
+        },
+      });
+    } catch (dbError) {
+      res.json({
+        success: false,
+        error: 'Database connection failed',
+        details: {
+          ...debugInfo,
+          connectionError: {
+            code: dbError.code,
+            message: dbError.message,
+            stack: dbError.stack,
+          },
+        },
+      });
+    }
+  } catch (error) {
+    logger.error('Production DATABASE_URL test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Production DATABASE_URL test failed',
+      details: {
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString(),
       },
