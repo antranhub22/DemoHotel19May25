@@ -280,6 +280,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   // ✅ MERGED: Single endCall function with full functionality
   const endCall = useCallback(async () => {
     console.log('📞 [DEBUG] RefactoredAssistant.endCall called');
+    console.log('🎯 [DEBUG] THIS IS THE ENDCALL FUNCTION - MANUALLY TESTING');
+    alert('🎯 endCall function was called!'); // Visual debug
     logger.debug(
       '[RefactoredAssistant] Ending call with summary processing...',
       'Component'
@@ -333,6 +335,9 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
         // ✅ NEW: Trigger summary popup via global function
         if (window.triggerSummaryPopup) {
+          alert(
+            '🎯 WITH TRANSCRIPT: About to call window.triggerSummaryPopup()!'
+          ); // Visual debug
           window.triggerSummaryPopup();
         }
 
@@ -367,9 +372,14 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           console.log(
             '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
           );
+          alert('🎯 About to call window.triggerSummaryPopup()!'); // Visual debug
           window.triggerSummaryPopup();
+          console.log(
+            '✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully'
+          );
         } else {
           console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
+          alert('❌ window.triggerSummaryPopup NOT AVAILABLE!'); // Visual debug
         }
 
         console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
