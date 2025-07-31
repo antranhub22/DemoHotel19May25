@@ -74,7 +74,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
   // Refs
   const vapiClientRef = useRef<VapiOfficial | null>(null);
-  const hadActiveCallRef = useRef(false);
+  const hadActiveCallRef = useRef<number>(0); // Store call start timestamp
 
   // Context dependencies
   const { addTranscript } = useTranscript();
@@ -146,7 +146,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       onCallStart: () => {
         logger.debug('📞 [VapiProvider] Call started', 'VapiProvider');
         setIsCallActive(true);
-        hadActiveCallRef.current = true; // ✅ Track that we had an active call
+        hadActiveCallRef.current = Date.now(); // ✅ Track WHEN call started (timestamp)
         setMicLevel(0);
         // ✅ NEW: Use temporary call ID, will be updated when Vapi provides real callId
         const tempCallId = `temp-call-${Date.now()}`;
@@ -163,10 +163,28 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         );
         logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
 
-        // ✅ FIX: Check if we ever had an active call (more reliable than current state)
-        if (!hadActiveCallRef.current) {
+        // ✅ FIX: Check if we ever had an active call AND minimum duration
+        const callStartTime = hadActiveCallRef.current;
+        const callDuration = callStartTime ? Date.now() - callStartTime : 0;
+        const minCallDuration = 2000; // 2 seconds minimum
+
+        console.log('📞 [DEBUG] VapiProvider call timing:', {
+          callStartTime,
+          callDuration,
+          minCallDuration,
+          hasCallHistory: !!callStartTime,
+        });
+
+        if (!callStartTime) {
           console.log(
             '📞 [DEBUG] VapiProvider: No call history found, skipping onCallEnd processing'
+          );
+          return;
+        }
+
+        if (callDuration < minCallDuration) {
+          console.log(
+            '📞 [DEBUG] VapiProvider: Call too short (race condition), skipping onCallEnd processing'
           );
           return;
         }
@@ -178,9 +196,15 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
         // Use Vapi SDK's own state instead of our context state to avoid race conditions
         const vapiSdkActive = vapi?.isCallActive?.() || false;
-        console.log('📞 [DEBUG] VapiProvider SDK state:', {
+
+        // ✅ ENHANCED DEBUG: More detailed state info
+        console.log('📞 [DEBUG] VapiProvider DETAILED state:', {
           vapiSdkActive,
           contextActive: isCallActive,
+          hadActiveCallRef: hadActiveCallRef.current,
+          vapiExists: !!vapi,
+          isCallActiveMethod: typeof vapi?.isCallActive,
+          timestamp: new Date().toISOString(),
         });
 
         if (!vapiSdkActive) {
@@ -201,7 +225,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           // Update state after callback
           setIsCallActive(false);
           setMicLevel(0);
-          hadActiveCallRef.current = false; // ✅ Reset call history after processing
+          hadActiveCallRef.current = 0; // ✅ Reset call history after processing
         } else {
           console.log(
             '📞 [DEBUG] VapiProvider: Vapi SDK still active, ignoring onCallEnd (race condition)'
