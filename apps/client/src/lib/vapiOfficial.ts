@@ -81,15 +81,17 @@ export class VapiOfficial {
 
   private setupEventListeners() {
     // Call start event
-    this.vapi.on('call-start', () => {
-      logger.debug('🎙️ Call started', 'VapiOfficial');
+    this.vapi.on('call-start', (callData?: any) => {
+      logger.debug('🎙️ Call started', 'VapiOfficial', callData);
+      console.log('🔍 [DEBUG] Vapi call-start event data:', callData);
       this._isCallActive = true;
       this.config.onCallStart?.();
     });
 
     // Call end event
-    this.vapi.on('call-end', () => {
-      logger.debug('📞 Call ended', 'VapiOfficial');
+    this.vapi.on('call-end', (callData?: any) => {
+      logger.debug('📞 Call ended', 'VapiOfficial', callData);
+      console.log('🔍 [DEBUG] Vapi call-end event data:', callData);
       this._isCallActive = false;
       this.clearCallTimeout();
       this.config.onCallEnd?.();
@@ -137,6 +139,13 @@ export class VapiOfficial {
       }
 
       logger.error('❌ Vapi error:', 'VapiOfficial', error);
+      console.error('🔍 [DEBUG] Vapi error details:', {
+        error,
+        message: error?.message,
+        type: error?.type,
+        code: error?.code,
+        timestamp: new Date().toISOString(),
+      });
       this._isCallActive = false;
       this.clearCallTimeout();
       this.config.onError?.(error);
