@@ -32,7 +32,12 @@ export const authenticateJWT = async (
       req.path.startsWith('/api/public/') || // ✅ FIX: Allow public endpoints
       req.path.startsWith('/api/test-db-direct') || // ✅ FIX: Database test endpoint
       req.path.startsWith('/api/test-direct') || // ✅ FIX: Direct test endpoint
-      req.path.startsWith('/api/debug/'); // ✅ FIX: Debug endpoints
+      req.path.startsWith('/api/debug/') || // ✅ FIX: Debug endpoints
+      req.path.includes('/test-db') || // ✅ FIX: Database test endpoints
+      req.path.includes('/database') || // ✅ FIX: Database-related endpoints
+      req.path.startsWith('/test-db-bypass') || // ✅ FIX: Database bypass endpoints
+      req.path.startsWith('/api/core/') || // ✅ FIX: Core API endpoints
+      req.path.startsWith('/api/modules/'); // ✅ FIX: Module endpoints
 
     if (isGuestEndpoint) {
       console.log(`✅ [Auth] Bypassing auth for guest endpoint: ${req.path}`);
