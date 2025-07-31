@@ -32,10 +32,10 @@ export const DesktopSummaryPopup = () => {
     isCallActive,
   });
 
-  // ✅ NEW: Only show if call is NOT active AND there's a summary popup
-  if (!showSummary || isCallActive) {
+  // ✅ SIMPLIFIED: Only show if there's a summary popup
+  if (!showSummary) {
     console.log(
-      '🖥️ [DesktopSummaryPopup] Not showing - no summary popup or call is active'
+      '🖥️ [DesktopSummaryPopup] Not showing - no summary popup found'
     );
     return null;
   }

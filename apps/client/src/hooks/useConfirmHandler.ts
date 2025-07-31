@@ -1,20 +1,17 @@
 import { usePopup } from '@/components/features/popup-system';
 import { useAssistant } from '@/context';
-import { logger } from '@shared/utils/logger';
-import { createElement, useCallback, useEffect, useRef } from 'react';
 
 interface UseConfirmHandlerReturn {
-  // ✅ UPDATED: Auto-trigger summary when call ends - now waits for webhook
+  // ✅ SIMPLIFIED: Clean auto-trigger summary function
   autoTriggerSummary: () => void;
-  // ✅ NEW: Test function to force reset auto-trigger state
-  forceResetAutoTrigger: () => void;
+  // ✅ UTILITY: Update popup content when WebSocket data arrives
+  updateSummaryPopup: (summary: string, serviceRequests: any[]) => void;
 }
 
 export const useConfirmHandler = (): UseConfirmHandlerReturn => {
   const isMountedRef = useRef(true);
   const { showSummary, removePopup } = usePopup();
   const { setServiceRequests, setCallSummary } = useAssistant();
-  const isTriggeringRef = useRef(false);
   const summaryPopupIdRef = useRef<string | null>(null);
 
   // ✅ CLEANUP: Remove summary popups on unmount
@@ -27,57 +24,101 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
     };
   }, [removePopup]);
 
-  // ✅ HELPER: Cleanup existing summary popups
-  const cleanupSummaryPopups = useCallback(() => {
-    // Remove any existing summary popups
-    const existingPopups = document.querySelectorAll(
-      '[data-popup-type="summary"]'
+  // ✅ SIMPLIFIED: Auto-trigger summary when call ends - clean logic
+  const autoTriggerSummary = useCallback(() => {
+    console.log('📞 [DEBUG] Call ended - showing processing popup');
+
+    // ✅ STEP 1: Show "Processing..." popup immediately
+    const processingElement = createElement(
+      'div',
+      {
+        style: {
+          padding: '20px',
+          textAlign: 'center',
+          maxWidth: '400px',
+        },
+      },
+      [
+        createElement(
+          'h3',
+          {
+            key: 'title',
+            style: {
+              marginBottom: '16px',
+              color: '#333',
+              fontSize: '18px',
+              fontWeight: '600',
+            },
+          },
+          '⏳ Processing Call Summary'
+        ),
+
+        createElement(
+          'div',
+          {
+            key: 'icon',
+            style: { fontSize: '48px', marginBottom: '16px' },
+          },
+          '🔄'
+        ),
+
+        createElement(
+          'p',
+          {
+            key: 'message',
+            style: {
+              marginBottom: '16px',
+              lineHeight: '1.5',
+              color: '#333',
+              fontSize: '16px',
+            },
+          },
+          'Please wait while we analyze your conversation...'
+        ),
+      ]
     );
-    existingPopups.forEach(popup => {
-      const popupId = popup.getAttribute('data-popup-id');
-      if (popupId) {
-        removePopup(popupId);
-      }
+
+    const popupId = showSummary(processingElement, {
+      title: 'Call Complete',
+      priority: 'medium',
     });
-  }, [removePopup]);
 
-  // ✅ UPDATED: Auto-trigger summary when call ends - now waits for webhook
-  const autoTriggerSummary = useCallback(async () => {
-    // ✅ DEBUG: Track trigger state
-    console.log(
-      '🔍 [DEBUG] autoTriggerSummary called - isTriggeringRef.current:',
-      isTriggeringRef.current
-    );
+    summaryPopupIdRef.current = popupId;
+    console.log('✅ [DEBUG] Processing popup shown, ID:', popupId);
 
-    // ✅ FIX: Prevent multiple calls
-    if (isTriggeringRef.current) {
-      console.log('🚫 [DEBUG] Auto-trigger already in progress, skipping...');
-      return;
-    }
+    // ✅ STEP 2: WebSocket will update popup content when data arrives
+    // No timeout needed - popup will be updated by WebSocket event
+  }, [showSummary]);
 
-    // ✅ NEW: Cleanup existing summary popups first
-    cleanupSummaryPopups();
+  // ✅ NEW: Update popup content when WebSocket data arrives
+  const updateSummaryPopup = useCallback(
+    (summary: string, serviceRequests: any[]) => {
+      console.log('🔄 [DEBUG] Updating summary popup with real data');
 
-    isTriggeringRef.current = true;
-    console.log('🔍 [DEBUG] Set isTriggeringRef.current = true');
+      if (!summaryPopupIdRef.current) {
+        console.log('⚠️ [DEBUG] No summary popup to update');
+        return;
+      }
 
-    console.log(
-      '🚀 [DEBUG] Auto-triggering summary after call end - CALL ID:',
-      Date.now()
-    );
-    logger.debug(
-      '🚀 [useConfirmHandler] Auto-triggering summary after call end',
-      'Component'
-    );
+      // ✅ STEP 1: Update assistant context first
+      setCallSummary({
+        callId: `call-${Date.now()}`,
+        tenantId: 'default',
+        content: summary,
+        timestamp: new Date(),
+      });
 
-    try {
-      // ✅ NEW: Wait for webhook instead of processing real-time transcripts
-      console.log(
-        '🔍 [DEBUG] Waiting for webhook to process full transcript...'
-      );
+      if (serviceRequests && serviceRequests.length > 0) {
+        setServiceRequests(serviceRequests);
+      }
 
-      // Show a temporary message while waiting for webhook
-      const waitingElement = createElement(
+      // ✅ STEP 2: Remove old popup and show new one with real data
+      if (summaryPopupIdRef.current) {
+        removePopup(summaryPopupIdRef.current);
+      }
+
+      // ✅ STEP 3: Create new popup with real summary data
+      const realSummaryElement = createElement(
         'div',
         {
           style: {
@@ -98,7 +139,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
                 fontWeight: '600',
               },
             },
-            '⏳ Processing...'
+            '📋 Call Summary'
           ),
 
           createElement(
@@ -107,148 +148,87 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
               key: 'icon',
               style: { fontSize: '48px', marginBottom: '16px' },
             },
-            '🔄'
-          ),
-
-          createElement(
-            'p',
-            {
-              key: 'message',
-              style: {
-                marginBottom: '16px',
-                lineHeight: '1.5',
-                color: '#333',
-                fontSize: '16px',
-              },
-            },
-            'Please wait while we analyze your conversation...'
+            '✅'
           ),
 
           createElement(
             'div',
             {
-              key: 'info',
+              key: 'summary',
               style: {
+                marginBottom: '16px',
                 padding: '12px',
                 backgroundColor: '#f8f9fa',
                 borderRadius: '8px',
-                fontSize: '12px',
-                color: '#666',
+                textAlign: 'left',
+                fontSize: '14px',
+                lineHeight: '1.4',
+                whiteSpace: 'pre-wrap',
               },
             },
-            'This may take a few seconds while we process your full conversation transcript.'
+            summary || 'Your call has been processed successfully!'
           ),
+
+          serviceRequests && serviceRequests.length > 0
+            ? createElement(
+                'div',
+                {
+                  key: 'requests',
+                  style: {
+                    marginTop: '16px',
+                    padding: '12px',
+                    backgroundColor: '#e3f2fd',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                  },
+                },
+                [
+                  createElement(
+                    'h4',
+                    {
+                      key: 'requests-title',
+                      style: {
+                        marginBottom: '8px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1976d2',
+                      },
+                    },
+                    `🛎️ Service Requests (${serviceRequests.length})`
+                  ),
+                  ...serviceRequests.map((req, index) =>
+                    createElement(
+                      'div',
+                      {
+                        key: `request-${index}`,
+                        style: {
+                          marginBottom: '4px',
+                          fontSize: '12px',
+                          color: '#333',
+                        },
+                      },
+                      `• ${req.serviceType}: ${req.requestText}`
+                    )
+                  ),
+                ]
+              )
+            : null,
         ]
       );
 
-      const popupId = showSummary(waitingElement, {
-        title: 'Call Complete',
+      const newPopupId = showSummary(realSummaryElement, {
+        title: 'Call Summary',
         priority: 'medium',
       });
 
-      summaryPopupIdRef.current = popupId;
-      console.log('🔍 [DEBUG] Waiting popup shown, ID:', popupId);
-
-      // ✅ FIX: Increase timeout for OpenAI processing
-      setTimeout(() => {
-        isTriggeringRef.current = false;
-        console.log(
-          '🔍 [DEBUG] Reset isTriggeringRef.current = false (waiting for webhook)'
-        );
-      }, 30000); // 30 seconds for OpenAI processing
-    } catch (error) {
-      console.error('❌ [DEBUG] autoTriggerSummary error:', error);
-      logger.error(
-        '[useConfirmHandler] autoTriggerSummary failed:',
-        'Component',
-        error
+      summaryPopupIdRef.current = newPopupId;
+      console.log(
+        '✅ [DEBUG] Summary popup updated with real data, ID:',
+        newPopupId
       );
+    },
+    [showSummary, removePopup, setCallSummary, setServiceRequests]
+  );
 
-      // ✅ NEW: Reset trigger flag on error
-      isTriggeringRef.current = false;
-      console.log('🔍 [DEBUG] Reset isTriggeringRef.current = false (error)');
-
-      // ✅ NEW: Show error popup to user
-      const errorElement = createElement(
-        'div',
-        {
-          style: {
-            padding: '20px',
-            textAlign: 'center',
-            maxWidth: '400px',
-          },
-        },
-        [
-          createElement(
-            'h3',
-            {
-              key: 'title',
-              style: {
-                marginBottom: '16px',
-                color: '#d32f2f',
-                fontSize: '18px',
-                fontWeight: '600',
-              },
-            },
-            '❌ Error'
-          ),
-
-          createElement(
-            'div',
-            {
-              key: 'icon',
-              style: { fontSize: '48px', marginBottom: '16px' },
-            },
-            '⚠️'
-          ),
-
-          createElement(
-            'p',
-            {
-              key: 'message',
-              style: {
-                marginBottom: '16px',
-                lineHeight: '1.5',
-                color: '#333',
-                fontSize: '16px',
-              },
-            },
-            'Failed to generate call summary. Please try again.'
-          ),
-
-          createElement(
-            'div',
-            {
-              key: 'info',
-              style: {
-                padding: '12px',
-                backgroundColor: '#fff3cd',
-                borderRadius: '8px',
-                fontSize: '12px',
-                color: '#856404',
-              },
-            },
-            'The system will retry automatically when you end your next call.'
-          ),
-        ]
-      );
-
-      showSummary(errorElement, {
-        title: 'Error',
-        priority: 'high',
-      });
-    }
-  }, [showSummary, cleanupSummaryPopups]);
-
-  // ✅ HELPER: Force reset auto-trigger state (for testing)
-  const forceResetAutoTrigger = useCallback(() => {
-    console.log('🔧 [DEBUG] Force reset auto-trigger state');
-    isTriggeringRef.current = false;
-    if (summaryPopupIdRef.current) {
-      removePopup(summaryPopupIdRef.current);
-      summaryPopupIdRef.current = null;
-    }
-  }, [removePopup]);
-
-  return { autoTriggerSummary, forceResetAutoTrigger };
+  return { autoTriggerSummary, updateSummaryPopup };
 };

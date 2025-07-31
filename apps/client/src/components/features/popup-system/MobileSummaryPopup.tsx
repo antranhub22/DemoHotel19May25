@@ -23,8 +23,8 @@ export const MobileSummaryPopup = () => {
       });
   };
 
-  // ✅ NEW: Only show if call is NOT active AND there's actually a summary popup AND it's not empty
-  if (!showSummary || !summaryPopup || isCallActive) {
+  // ✅ SIMPLIFIED: Only show if there's a summary popup
+  if (!showSummary || !summaryPopup) {
     return null;
   }
 

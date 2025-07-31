@@ -168,33 +168,29 @@ export function useWebSocket() {
             timestamp: data.timestamp,
           });
 
-          // Update assistant context with OpenAI processed data
-          if (data.summary) {
-            console.log('📋 [DEBUG] Setting call summary:', {
-              callId: data.callId || 'unknown',
-              contentLength: data.summary.length,
-              timestamp: data.timestamp,
-            });
+          // ✅ TRIGGER: Update summary popup with real data
+          if (window.updateSummaryPopup) {
+            console.log('🔄 [DEBUG] Updating summary popup with webhook data');
+            window.updateSummaryPopup(
+              data.summary || '',
+              data.serviceRequests || []
+            );
+          } else {
+            console.log('⚠️ [DEBUG] updateSummaryPopup function not available');
 
-            assistant.setCallSummary({
-              callId: data.callId || 'unknown',
-              tenantId: 'default',
-              content: data.summary,
-              timestamp: data.timestamp,
-            });
-          }
+            // ✅ FALLBACK: Update assistant context directly
+            if (data.summary) {
+              assistant.setCallSummary({
+                callId: data.callId || 'unknown',
+                tenantId: 'default',
+                content: data.summary,
+                timestamp: data.timestamp,
+              });
+            }
 
-          // Update service requests from OpenAI
-          if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
-            console.log('🛎️ [DEBUG] Setting service requests:', {
-              count: data.serviceRequests.length,
-              requests: data.serviceRequests.map(req => ({
-                serviceType: req.serviceType,
-                requestText: req.requestText?.substring(0, 50) + '...',
-              })),
-            });
-
-            assistant.setServiceRequests(data.serviceRequests);
+            if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
+              assistant.setServiceRequests(data.serviceRequests);
+            }
           }
 
           console.log(

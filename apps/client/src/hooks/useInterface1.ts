@@ -13,6 +13,13 @@ import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { logger } from '@shared/utils/logger';
 import { createElement, useCallback, useEffect, useState } from 'react';
 
+// ✅ TypeScript declaration for global updateSummaryPopup function
+declare global {
+  interface Window {
+    updateSummaryPopup?: (summary: string, serviceRequests: any[]) => void;
+  }
+}
+
 interface UseInterface1Props {
   isActive: boolean;
 }
@@ -70,8 +77,7 @@ export const useInterface1 = ({
   isActive,
 }: UseInterface1Props): UseInterface1Return => {
   // Core dependencies
-  const { micLevel, transcripts, addCallEndListener, callDuration } =
-    useAssistant();
+  const { micLevel, addCallEndListener } = useAssistant();
   const {
     config: hotelConfig,
     isLoading: configLoading,
@@ -96,7 +102,7 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
 
   // ✅ REMOVED: handleCancel is no longer needed
-  const { autoTriggerSummary } = useConfirmHandler();
+  const { autoTriggerSummary, updateSummaryPopup } = useConfirmHandler();
 
   // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
   const { popups } = usePopupContext();
@@ -113,57 +119,15 @@ export const useInterface1 = ({
     }
   }, [popups, showingSummary]);
 
-  // ✅ REFACTORED: Use autoTriggerSummary from useConfirmHandler instead of autoShowSummary
+  // ✅ SIMPLIFIED: Clean auto-show summary - no complex validation
   const autoShowSummary = useCallback(() => {
-    console.log('📞 [DEBUG] autoShowSummary callback triggered');
+    console.log('📞 [DEBUG] Call ended - triggering summary popup');
 
-    // ✅ IMPROVED: Better logic to check if call actually happened
-    console.log('📞 [DEBUG] Conversation state check:', {
-      isCallStarted: conversationState.isCallStarted,
-      callDuration: callDuration,
-      transcriptsCount: transcripts.length,
-      hasCallActivity: callDuration > 0 || transcripts.length > 0,
-    });
+    // ✅ SIMPLE: Just trigger the popup, no validation needed
+    autoTriggerSummary();
 
-    // ✅ FIX: Use more reliable indicators of call activity
-    const hadCallActivity = callDuration > 0 || transcripts.length > 0;
-    if (!hadCallActivity) {
-      console.log(
-        '🚫 [DEBUG] No call activity detected (no duration/transcripts), skipping summary trigger'
-      );
-      return;
-    }
-
-    if (import.meta.env.DEV) {
-      logger.debug(
-        'Auto-showing Summary Popup after call end',
-        'useInterface1'
-      );
-    }
-
-    try {
-      // ✅ NEW: Use autoTriggerSummary instead of showSummary directly
-      console.log('📞 [DEBUG] Calling autoTriggerSummary()');
-      autoTriggerSummary();
-
-      console.log('✅ [DEBUG] autoTriggerSummary() completed successfully');
-      if (import.meta.env.DEV) {
-        logger.success(
-          'Summary Popup auto-shown successfully',
-          'useInterface1'
-        );
-      }
-    } catch (error) {
-      console.error('❌ [DEBUG] Error in autoShowSummary:', error);
-      logger.error('Error auto-showing summary popup', 'useInterface1', error);
-      setTimeout(() => {
-        logger.info(
-          'Call completed! Please check your conversation summary.',
-          'useInterface1'
-        );
-      }, 500);
-    }
-  }, [autoTriggerSummary, conversationState.isCallStarted]);
+    console.log('✅ [DEBUG] Summary popup triggered successfully');
+  }, [autoTriggerSummary]);
 
   // ✅ FIXED: Stable listener registration to prevent re-register
   useEffect(() => {
@@ -189,6 +153,17 @@ export const useInterface1 = ({
       unregister();
     };
   }, [addCallEndListener]); // ✅ FIXED: Remove autoShowSummary dependency to prevent re-register
+
+  // ✅ NEW: Connect updateSummaryPopup to global window for WebSocket access
+  useEffect(() => {
+    console.log('🔗 [DEBUG] Connecting updateSummaryPopup to window');
+    window.updateSummaryPopup = updateSummaryPopup;
+
+    return () => {
+      console.log('🔗 [DEBUG] Cleaning up updateSummaryPopup from window');
+      delete window.updateSummaryPopup;
+    };
+  }, [updateSummaryPopup]);
 
   // ✅ REMOVED: Duplicate listener registration - now handled above
 
