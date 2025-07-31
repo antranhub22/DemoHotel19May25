@@ -23,8 +23,12 @@ export function useWebSocket() {
   const assistant = useAssistant();
   const retryRef = useRef(0);
 
+  // ✅ DIRECT TEST: Call initSocket immediately
+  console.log('🔌 [DEBUG] About to define initSocket function...');
+
   // Initialize Socket.IO connection
   const initSocket = useCallback(() => {
+    console.log('🔌 [DEBUG] ===== INITSOCKET FUNCTION CALLED =====');
     console.log('🔌 [DEBUG] ===== ATTEMPTING WEBSOCKET CONNECTION =====');
     logger.debug(
       'useWebSocket env VITE_API_HOST:',
@@ -389,7 +393,7 @@ export function useWebSocket() {
         }
       }
     };
-  }); // ✅ TEMP: No dependency array to force execution
+  }, []); // ✅ REVERTED: Back to original empty dependency array
 
   // ✅ IMPROVED: Re-send init with better error handling
   useEffect(() => {
