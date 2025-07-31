@@ -9,6 +9,7 @@ import {
   tenants,
   transcript,
 } from '@shared/db/schema';
+import { logger } from '@shared/utils/logger';
 import Database, { type Database as DatabaseType } from 'better-sqlite3';
 import { drizzle as drizzleSqlite } from 'drizzle-orm/better-sqlite3';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -137,9 +138,54 @@ export class DatabaseConnectionManager {
       } else if (DATABASE_URL && IS_SQLITE) {
         // 📁 SQLite Connection
         await this.initializeSQLite(DATABASE_URL);
-      } else if (IS_LOCAL) {
-        // 📁 Default SQLite for Local Development
-        await this.initializeSQLite('sqlite://../dev.db');
+      } else if (IS_LOCAL || !DATABASE_URL) {
+        // ✅ NEW: Enhanced fallback for local development
+        logger.info(
+          '🔄 [ConnectionManager] No DATABASE_URL found, using default SQLite for local development',
+          'ConnectionManager',
+          {
+            nodeEnv: process.env.NODE_ENV,
+            databaseUrl: DATABASE_URL || 'not set',
+            fallbackPath: './database-files/dev.db',
+          }
+        );
+
+        // Try multiple fallback paths
+        const fallbackPaths = [
+          './database-files/dev.db',
+          '../database-files/dev.db',
+          './dev.db',
+          '../dev.db',
+        ];
+
+        for (const path of fallbackPaths) {
+          try {
+            await this.initializeSQLite(`sqlite://${path}`);
+            logger.success(
+              `✅ [ConnectionManager] Successfully connected to SQLite at: ${path}`,
+              'ConnectionManager'
+            );
+            return this.db;
+          } catch (pathError) {
+            logger.debug(
+              `⚠️ [ConnectionManager] Failed to connect to: ${path}`,
+              'ConnectionManager',
+              {
+                error:
+                  pathError instanceof Error
+                    ? pathError.message
+                    : 'Unknown error',
+              }
+            );
+          }
+        }
+
+        // If all fallbacks fail, create a new database
+        logger.warn(
+          '⚠️ [ConnectionManager] All fallback paths failed, creating new SQLite database',
+          'ConnectionManager'
+        );
+        await this.initializeSQLite('sqlite://./database-files/dev.db');
       } else if (IS_PRODUCTION) {
         // 🐘 Production requires DATABASE_URL
         throw new Error(
@@ -152,12 +198,47 @@ export class DatabaseConnectionManager {
       }
 
       this.isConnected = true;
-      this.startHealthChecks();
-      console.log('✅ Database connection manager initialized successfully');
-
       return this.db;
     } catch (error) {
-      console.error('❌ Failed to initialize database connection:', error);
+      logger.error(
+        '❌ [ConnectionManager] Database initialization failed',
+        'ConnectionManager',
+        {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          nodeEnv: process.env.NODE_ENV,
+          databaseUrl: DATABASE_URL || 'not set',
+        }
+      );
+
+      // ✅ NEW: Enhanced error recovery
+      if (!IS_PRODUCTION) {
+        logger.info(
+          '🔄 [ConnectionManager] Attempting emergency SQLite fallback',
+          'ConnectionManager'
+        );
+
+        try {
+          await this.initializeSQLite('sqlite://./database-files/dev.db');
+          this.isConnected = true;
+          logger.success(
+            '✅ [ConnectionManager] Emergency SQLite fallback successful',
+            'ConnectionManager'
+          );
+          return this.db;
+        } catch (fallbackError) {
+          logger.error(
+            '❌ [ConnectionManager] Emergency fallback also failed',
+            'ConnectionManager',
+            {
+              error:
+                fallbackError instanceof Error
+                  ? fallbackError.message
+                  : 'Unknown error',
+            }
+          );
+        }
+      }
+
       throw error;
     }
   }
@@ -329,28 +410,6 @@ export class DatabaseConnectionManager {
       activeConnections: this.pool.totalCount - this.pool.idleCount,
       waitingCount: this.pool.waitingCount,
     };
-  }
-
-  /**
-   * Start periodic health checks
-   */
-  private startHealthChecks(): void {
-    // Health check every 5 minutes
-    setInterval(
-      async () => {
-        try {
-          await this.healthCheck();
-        } catch (error) {
-          console.error('❌ Health check failed:', error);
-        }
-      },
-      5 * 60 * 1000
-    );
-
-    // Metrics logging every 1 minute
-    setInterval(() => {
-      this.logMetrics();
-    }, 60 * 1000);
   }
 
   /**
