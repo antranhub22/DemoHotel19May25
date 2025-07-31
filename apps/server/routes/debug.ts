@@ -4,13 +4,16 @@ import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
-// ✅ DEBUG: Environment variables endpoint
+// ✅ DEBUG: Environment variables endpoint (NO AUTH REQUIRED)
 router.get('/env', (req, res) => {
   try {
     const envInfo = {
       NODE_ENV: process.env.NODE_ENV,
       DATABASE_URL: process.env.DATABASE_URL ? 'SET' : 'NOT SET',
       DATABASE_URL_LENGTH: process.env.DATABASE_URL?.length || 0,
+      DATABASE_URL_PREFIX: process.env.DATABASE_URL
+        ? process.env.DATABASE_URL.substring(0, 30) + '...'
+        : 'N/A',
       PORT: process.env.PORT,
       RENDER: process.env.RENDER,
       RENDER_EXTERNAL_URL: process.env.RENDER_EXTERNAL_URL,
@@ -31,7 +34,7 @@ router.get('/env', (req, res) => {
   }
 });
 
-// ✅ DEBUG: Database connection test
+// ✅ DEBUG: Database connection test (NO AUTH REQUIRED)
 router.get('/db', async (req, res) => {
   try {
     const db = getDatabase();
@@ -64,7 +67,7 @@ router.get('/db', async (req, res) => {
   }
 });
 
-// ✅ DEBUG: Test DATABASE_URL specifically
+// ✅ DEBUG: Test DATABASE_URL specifically (NO AUTH REQUIRED)
 router.post('/test-db', async (req, res) => {
   try {
     const dbUrl = process.env.DATABASE_URL;
