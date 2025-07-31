@@ -330,6 +330,11 @@ export interface RequestServiceConfig {
     notifyOnUrgentRequest: boolean;
     notifyOnBulkOperations: boolean;
   };
+  pagination: {
+    defaultPage: number;
+    defaultLimit: number;
+    maxLimit: number;
+  };
 }
 
 // ============================================================================

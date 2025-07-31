@@ -197,6 +197,11 @@ export class RequestService implements IRequestService {
         notifyOnUrgentRequest: true,
         notifyOnBulkOperations: true,
       },
+      pagination: {
+        defaultPage: 1,
+        defaultLimit: 20,
+        maxLimit: 100,
+      },
       ...config,
     };
 
@@ -1594,7 +1599,7 @@ export class RequestService implements IRequestService {
   }
 
   async deleteRequest(
-    id: number
+    _id: number
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for soft delete
     return { success: true };
@@ -2174,14 +2179,14 @@ export class RequestService implements IRequestService {
   }
 
   async canUpdateRequest(
-    id: number
+    _id: number
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for update permission check
     return { success: true };
   }
 
   async canDeleteRequest(
-    id: number
+    _id: number
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for delete permission check
     return { success: true };

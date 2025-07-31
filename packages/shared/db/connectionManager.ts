@@ -36,8 +36,21 @@ interface ConnectionConfig {
 function getConnectionConfig(): ConnectionConfig {
   const isProduction = process.env.NODE_ENV === 'production';
   const isDevelopment = process.env.NODE_ENV === 'development';
+  const isRender = process.env.RENDER === 'true'; // ✅ NEW: Detect Render environment
 
-  if (isProduction) {
+  if (isProduction && isRender) {
+    // 🚀 Render Production: Conservative configuration for free tier
+    return {
+      max: 5, // Reduced for Render free tier limits
+      min: 1, // Minimal connections to avoid exhaustion
+      idleTimeoutMillis: 30000, // 30 seconds - shorter for cloud
+      connectionTimeoutMillis: 15000, // 15 seconds - longer timeout for cloud
+      statementTimeout: 30000, // 30 seconds statement timeout
+      query_timeout: 30000, // 30 seconds query timeout
+      keepAlive: true, // Keep connections alive
+      keepAliveInitialDelayMillis: 10000, // 10 seconds initial delay
+    };
+  } else if (isProduction) {
     // 🚀 Production: High-performance configuration
     return {
       max: 20, // Higher max connections for production load
@@ -429,22 +442,6 @@ export class DatabaseConnectionManager {
     } catch (error) {
       console.error('❌ Database health check failed:', error);
       return false;
-    }
-  }
-
-  /**
-   * Log connection metrics
-   */
-  private logMetrics(): void {
-    if (this.pool) {
-      console.log('📊 Connection Pool Metrics:', {
-        total: this.connectionMetrics.totalConnections,
-        idle: this.connectionMetrics.idleConnections,
-        active: this.connectionMetrics.activeConnections,
-        waiting: this.connectionMetrics.waitingCount,
-        errors: this.connectionMetrics.errorCount,
-        lastError: this.connectionMetrics.lastError || 'None',
-      });
     }
   }
 

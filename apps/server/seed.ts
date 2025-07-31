@@ -1,7 +1,7 @@
-import bcrypt from 'bcrypt';
 import { DEV_CONFIG } from '@auth/config/auth.config';
-import { call, db, eq, request, staff, tenants } from '@shared/db';
+import { eq, getDatabase, request, staff, tenants } from '@shared/db';
 import { logger } from '@shared/utils/logger';
+import bcrypt from 'bcrypt';
 
 // Import dev users from auth config
 
@@ -9,14 +9,21 @@ export async function seedDevelopmentData() {
   try {
     logger.debug('Seeding development data...', 'Component');
 
+    // ✅ NEW: Get database connection asynchronously
+    const db = await getDatabase();
+    if (!db) {
+      logger.error('❌ Database connection failed during seeding', 'Component');
+      return;
+    }
+
     // First, ensure we have a tenant
-    await seedTenant();
+    await seedTenant(db);
 
     // Then seed staff users
-    await seedStaffUsers();
+    await seedStaffUsers(db);
 
     // Then seed other data
-    await seedCallsAndRequests();
+    await seedCallsAndRequests(db);
 
     logger.debug('Development data seeded successfully!', 'Component');
   } catch (error) {
@@ -24,7 +31,7 @@ export async function seedDevelopmentData() {
   }
 }
 
-async function seedTenant() {
+async function seedTenant(db: any) {
   try {
     // Check if tenant exists
     const existingTenant = await db
@@ -57,7 +64,7 @@ async function seedTenant() {
   }
 }
 
-async function seedStaffUsers() {
+async function seedStaffUsers(db: any) {
   try {
     // Check if staff users already exist
     const existingStaff = await db.select().from(staff).limit(1);
@@ -100,111 +107,81 @@ async function seedStaffUsers() {
   }
 }
 
-async function seedCallsAndRequests() {
+async function seedCallsAndRequests(db: any) {
   try {
     // Check if data already exists
-    const existingCalls = await db.select().from(call).limit(1);
+    const existingRequests = await db.select().from(request).limit(1);
 
-    if (existingCalls.length > 0) {
+    if (existingRequests.length > 0) {
       logger.debug(
-        'Call/request data already exists, skipping seed...',
+        'Request data already exists, skipping seed...',
         'Component'
       );
       return;
     }
 
-    logger.debug('Seeding call and request data...', 'Component');
-
-    // Seed call data
-    const callData = [
-      {
-        call_id_vapi: 'call-001-dev',
-        tenant_id: 'mi-nhon-hotel',
-      },
-      {
-        call_id_vapi: 'call-002-dev',
-        tenant_id: 'mi-nhon-hotel',
-      },
-    ];
-
-    // Insert call data
-    for (const callItem of callData as any[]) {
-      await db.insert(call).values(callItem).onConflictDoNothing();
-    }
+    logger.debug('Seeding request data...', 'Component');
 
     // Seed request data
     const requestData = [
       {
-        id: 'REQ-001',
-        type: 'housekeeping',
-        roomNumber: '101',
-        orderId: 'ORD-001',
-        requestContent: 'Yêu cầu dọn phòng lúc 2:00 PM',
-        status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), // 1 hour ago
+        tenant_id: 'mi-nhon-hotel',
+        room_number: '101',
+        request_content: 'Yêu cầu dọn phòng lúc 2:00 PM',
+        guest_name: 'John Doe',
+        priority: 'medium',
+        status: 'pending',
+        created_at: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        updated_at: new Date(),
       },
       {
-        id: 'REQ-002',
-        type: 'housekeeping',
-        roomNumber: '202',
-        orderId: 'ORD-002',
-        requestContent: 'Cần thêm khăn tắm',
-        status: 'Đang thực hiện',
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        tenant_id: 'mi-nhon-hotel',
+        room_number: '202',
+        request_content: 'Cần thêm khăn tắm',
+        guest_name: 'Jane Smith',
+        priority: 'low',
+        status: 'in-progress',
+        created_at: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        updated_at: new Date(),
       },
       {
-        id: 'REQ-003',
-        type: 'transportation',
-        roomNumber: '303',
-        orderId: 'ORD-003',
-        requestContent: 'Yêu cầu taxi đến sân bay lúc 6:00 AM',
-        status: 'Hoàn thiện',
-        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(), // 3 hours ago
+        tenant_id: 'mi-nhon-hotel',
+        room_number: '303',
+        request_content: 'Yêu cầu taxi đến sân bay lúc 6:00 AM',
+        guest_name: 'Mike Johnson',
+        priority: 'high',
+        status: 'completed',
+        created_at: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+        updated_at: new Date(),
       },
       {
-        id: 'REQ-004',
-        type: 'concierge',
-        roomNumber: '404',
-        orderId: 'ORD-004',
-        requestContent: 'Thông tin về tour địa phương',
-        status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
+        tenant_id: 'mi-nhon-hotel',
+        room_number: '404',
+        request_content: 'Thông tin về tour địa phương',
+        guest_name: 'Sarah Wilson',
+        priority: 'medium',
+        status: 'pending',
+        created_at: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
+        updated_at: new Date(),
       },
       {
-        id: 'REQ-005',
-        type: 'maintenance',
-        roomNumber: '505',
-        orderId: 'ORD-005',
-        requestContent: 'Sửa chữa điều hòa không hoạt động',
-        status: 'Đang thực hiện',
-        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-      },
-      {
-        id: 'REQ-006',
-        type: 'restaurant',
-        roomNumber: '606',
-        orderId: 'ORD-006',
-        requestContent: 'Đặt bàn nhà hàng cho 4 người lúc 7:00 PM',
-        status: 'Hoàn thiện',
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
-      },
-      {
-        id: 'REQ-007',
-        type: 'housekeeping',
-        roomNumber: '707',
-        orderId: 'ORD-007',
-        requestContent: 'Yêu cầu dịch vụ giặt ủi',
-        status: 'Đã ghi nhận',
-        createdAt: new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(), // 7 hours ago
+        tenant_id: 'mi-nhon-hotel',
+        room_number: '505',
+        request_content: 'Sửa chữa điều hòa không hoạt động',
+        guest_name: 'David Brown',
+        priority: 'high',
+        status: 'in-progress',
+        created_at: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+        updated_at: new Date(),
       },
     ];
 
-    // Insert requests
-    for (const requestItem of requestData as any[]) {
+    // Insert request data
+    for (const requestItem of requestData) {
       await db.insert(request).values(requestItem);
     }
 
-    logger.debug('Call and request data seeded successfully!', 'Component');
+    logger.debug('Request data seeded successfully!', 'Component');
   } catch (error) {
     logger.error('Error seeding call and request data:', 'Component', error);
   }
@@ -216,7 +193,7 @@ seedDevelopmentData()
     console.log('✅ Database seeding completed successfully!');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error('❌ Database seeding failed:', error);
     process.exit(1);
   });
