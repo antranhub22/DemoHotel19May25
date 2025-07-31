@@ -416,14 +416,5 @@ export const validationPerformanceMiddleware = (
 // EXPORTS
 // ============================================================================
 
-export {
-  conditionalValidation,
-  createValidationMiddleware,
-  validateCreateRequest,
-  validateCreateRequestEnhanced,
-  validateRequestFilters,
-  validateRequestId,
-  validateUpdateRequestStatus,
-  validationErrorHandler,
-  validationPerformanceMiddleware,
-};
+// All exports are already declared above with 'export' keyword
+// No need for duplicate exports here

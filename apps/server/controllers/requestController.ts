@@ -1,13 +1,17 @@
-import { getDatabase, initializeDatabase } from '@shared/db';
-import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
-import { desc, eq } from 'drizzle-orm';
 import { Request, Response } from 'express';
 
 // ✅ NEW: Phase 1 imports for validation and response standardization
 import { getValidatedData } from '@server/middleware/requestValidation';
+import { RequestService } from '@server/services/RequestService';
 import { isFeatureEnabled } from '@server/shared/FeatureFlags';
 import { ResponseWrapper } from '@shared/utils/responseWrapper';
+import {
+  CreateRequestInput,
+  CreateRequestSchema,
+  formatValidationErrors,
+  validateRequestData,
+} from '@shared/validation/requestSchemas';
 
 // ✅ FIX: Enhanced error handling for database operations with fallback
 async function safeDatabaseOperation<T>(
@@ -127,36 +131,35 @@ export class RequestController {
         );
       }
 
-      // ✅ FIX: Use safe database operation with proper async handling
-      const newRequest = await safeDatabaseOperation(async () => {
-        const db = await getDatabase();
-        if (!db) {
-          throw new Error('Database not properly initialized');
+      // ✅ NEW: Phase 2 - Use service layer for business logic
+      const requestService = new RequestService();
+      const serviceResult = await requestService.createRequest(validatedData);
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to create request',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendError(
+            res,
+            serviceResult.error || 'Failed to create request',
+            500,
+            serviceResult.code
+          );
+        } else {
+          (res as any).status(500).json({
+            success: false,
+            error: serviceResult.error || 'Failed to create request',
+            code: serviceResult.code,
+          });
         }
-        return await db
-          .insert(request)
-          .values({
-            tenant_id: validatedData.tenantId || 'default-tenant',
-            room_number: validatedData.roomNumber,
-            request_content: validatedData.requestText,
-            guest_name: validatedData.guestName,
-            priority: validatedData.priority,
-            status: 'pending',
-            created_at: new Date(),
-            description: validatedData.serviceType
-              ? `Service: ${validatedData.serviceType}`
-              : undefined,
-            phone_number: validatedData.phoneNumber,
-            total_amount: validatedData.totalAmount,
-            currency: validatedData.currency,
-            special_instructions: validatedData.specialInstructions,
-            urgency: validatedData.urgency,
-            order_type: validatedData.orderType,
-            delivery_time: validatedData.deliveryTime,
-            items: validatedData.items,
-          })
-          .returning();
-      });
+        return;
+      }
+
+      const newRequest = [serviceResult.data!]; // Convert to array for compatibility
 
       // ✅ NEW: Phase 1 - Standardized response format
       if (isFeatureEnabled('request-response-standardization')) {
@@ -249,54 +252,89 @@ export class RequestController {
    * Get all requests
    * GET /api/request
    */
-  static async getAllRequests(_req: Request, res: Response): Promise<void> {
+  static async getAllRequests(req: Request, res: Response): Promise<void> {
     try {
       logger.info(
-        '📋 [RequestController] Getting all requests...',
+        '📋 [RequestController] Getting all requests - Phase 2 Enhanced',
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation with correct Drizzle syntax
-      const requestsData = await safeDatabaseOperation(async () => {
-        const db = await getDatabase();
-        if (!db || !db.select) {
-          throw new Error('Database not properly initialized');
+      // ✅ NEW: Phase 2 - Use service layer for business logic
+      const requestService = new RequestService();
+
+      // Extract filters from query parameters
+      const filters = req.query as any;
+      const serviceResult = await requestService.getAllRequests(filters);
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to get requests',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendError(
+            res,
+            serviceResult.error || 'Failed to fetch requests',
+            500,
+            serviceResult.code
+          );
+        } else {
+          (res as any).status(500).json({
+            success: false,
+            error: serviceResult.error || 'Failed to fetch requests',
+            _metadata: {
+              module: 'request-module',
+              version: '2.0.0',
+              architecture: 'modular-enhanced',
+            },
+          });
         }
-        return await db
-          .select()
-          .from(request)
-          .orderBy(desc(request.created_at))
-          .limit(100);
-      });
+        return;
+      }
 
       logger.success(
-        '✅ [RequestController] Requests fetched successfully',
+        '✅ [RequestController] Requests fetched successfully - Phase 2 Enhanced',
         'RequestController',
-        { count: requestsData.length }
+        {
+          count: serviceResult.data?.length || 0,
+          pagination: serviceResult.pagination,
+        }
       );
 
-      (res as any).json({ success: true, data: requestsData });
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.2.0',
+        });
+      } else {
+        (res as any).json({
+          success: true,
+          data: serviceResult.data,
+          pagination: serviceResult.pagination,
+        });
+      }
     } catch (error) {
-      // ✅ ENHANCED: Better error detection and reporting
       logger.error(
-        '❌ [RequestController] Failed to fetch requests',
+        '❌ [RequestController] Failed to fetch requests - Phase 2 Enhanced',
         'RequestController',
         error
       );
 
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-
-      (res as any).status(500).json({
-        success: false,
-        error: 'Failed to fetch requests',
-        details: errorMessage,
-        _metadata: {
-          module: 'request-module',
-          version: '2.0.0',
-          architecture: 'modular-enhanced',
-        },
-      });
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(res, 'Failed to fetch requests');
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to fetch requests',
+          details: error instanceof Error ? error.message : 'Unknown error',
+          _metadata: {
+            module: 'request-module',
+            version: '2.0.0',
+            architecture: 'modular-enhanced',
+          },
+        });
+      }
     }
   }
 
@@ -308,45 +346,79 @@ export class RequestController {
     try {
       const { id } = req.params;
       logger.info(
-        `📋 [RequestController] Getting request by ID: ${id}`,
+        `📋 [RequestController] Getting request by ID: ${id} - Phase 2 Enhanced`,
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation with correct Drizzle syntax
-      const requestData = await safeDatabaseOperation(async () => {
-        const db = await getDatabase();
-        if (!db || !db.select) {
-          throw new Error('Database not properly initialized');
-        }
-        return await db
-          .select()
-          .from(request)
-          .where(eq(request.id, parseInt(id)))
-          .limit(1);
-      });
+      // ✅ NEW: Phase 2 - Use service layer for business logic
+      const requestService = new RequestService();
+      const serviceResult = await requestService.getRequestById(parseInt(id));
 
-      if (!requestData || requestData.length === 0) {
-        (res as any).status(404).json({
-          success: false,
-          error: 'Request not found',
-          code: 'REQUEST_NOT_FOUND',
-        });
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to get request by ID',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (serviceResult.code === 'NOT_FOUND') {
+          if (isFeatureEnabled('request-response-standardization')) {
+            ResponseWrapper.sendNotFound(res, 'Request');
+          } else {
+            (res as any).status(404).json({
+              success: false,
+              error: 'Request not found',
+              code: 'REQUEST_NOT_FOUND',
+            });
+          }
+        } else {
+          if (isFeatureEnabled('request-response-standardization')) {
+            ResponseWrapper.sendError(
+              res,
+              serviceResult.error || 'Failed to get request',
+              500,
+              serviceResult.code
+            );
+          } else {
+            (res as any).status(500).json({
+              success: false,
+              error: serviceResult.error || 'Failed to get request',
+              code: serviceResult.code,
+            });
+          }
+        }
         return;
       }
 
-      (res as any).json({ success: true, data: requestData[0] });
+      logger.success(
+        '✅ [RequestController] Request fetched successfully - Phase 2 Enhanced',
+        'RequestController',
+        { requestId: id }
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.2.0',
+        });
+      } else {
+        (res as any).json({ success: true, data: serviceResult.data });
+      }
     } catch (error) {
       logger.error(
-        '❌ [RequestController] Failed to get request by ID',
+        '❌ [RequestController] Failed to get request by ID - Phase 2 Enhanced',
         'RequestController',
         error
       );
 
-      (res as any).status(500).json({
-        success: false,
-        error: 'Failed to get request',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      });
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(res, 'Failed to get request');
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to get request',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
     }
   }
 
@@ -357,60 +429,125 @@ export class RequestController {
   static async updateRequestStatus(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, notes, assignedTo } = req.body;
 
       logger.info(
-        `📝 [RequestController] Updating request status: ${id} -> ${status}`,
+        `📝 [RequestController] Updating request status: ${id} -> ${status} - Phase 2 Enhanced`,
         'RequestController'
       );
 
       if (!status) {
-        (res as any).status(400).json({
-          success: false,
-          error: 'Status is required',
-          code: 'VALIDATION_ERROR',
-        });
-        return;
-      }
-
-      // ✅ FIX: Use safe database operation with correct Drizzle syntax
-      const updatedRequest = await safeDatabaseOperation(async () => {
-        const db = await getDatabase();
-        if (!db || !db.update) {
-          throw new Error('Database not properly initialized');
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendValidationError(res, [
+            { field: 'status', message: 'Status is required' },
+          ]);
+        } else {
+          (res as any).status(400).json({
+            success: false,
+            error: 'Status is required',
+            code: 'VALIDATION_ERROR',
+          });
         }
-        return await db
-          .update(request)
-          .set({
-            status,
-            updated_at: new Date(),
-          })
-          .where(eq(request.id, parseInt(id)))
-          .returning();
-      });
-
-      if (!updatedRequest || updatedRequest.length === 0) {
-        (res as any).status(404).json({
-          success: false,
-          error: 'Request not found',
-          code: 'REQUEST_NOT_FOUND',
-        });
         return;
       }
 
-      (res as any).json({ success: true, data: updatedRequest[0] });
+      // ✅ NEW: Phase 2 - Use service layer for business logic
+      const requestService = new RequestService();
+      const serviceResult = await requestService.updateRequestStatus(
+        parseInt(id),
+        {
+          status,
+          notes,
+          assignedTo,
+        }
+      );
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to update request status',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (serviceResult.code === 'NOT_FOUND') {
+          if (isFeatureEnabled('request-response-standardization')) {
+            ResponseWrapper.sendNotFound(res, 'Request');
+          } else {
+            (res as any).status(404).json({
+              success: false,
+              error: 'Request not found',
+              code: 'REQUEST_NOT_FOUND',
+            });
+          }
+        } else if (serviceResult.code === 'INVALID_STATUS_TRANSITION') {
+          if (isFeatureEnabled('request-response-standardization')) {
+            ResponseWrapper.sendError(
+              res,
+              serviceResult.error || 'Invalid status transition',
+              400,
+              serviceResult.code
+            );
+          } else {
+            (res as any).status(400).json({
+              success: false,
+              error: serviceResult.error || 'Invalid status transition',
+              code: serviceResult.code,
+            });
+          }
+        } else {
+          if (isFeatureEnabled('request-response-standardization')) {
+            ResponseWrapper.sendError(
+              res,
+              serviceResult.error || 'Failed to update request status',
+              500,
+              serviceResult.code
+            );
+          } else {
+            (res as any).status(500).json({
+              success: false,
+              error: serviceResult.error || 'Failed to update request status',
+              code: serviceResult.code,
+            });
+          }
+        }
+        return;
+      }
+
+      logger.success(
+        '✅ [RequestController] Request status updated successfully - Phase 2 Enhanced',
+        'RequestController',
+        {
+          requestId: id,
+          newStatus: status,
+        }
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.2.0',
+        });
+      } else {
+        (res as any).json({ success: true, data: serviceResult.data });
+      }
     } catch (error) {
       logger.error(
-        '❌ [RequestController] Failed to update request status',
+        '❌ [RequestController] Failed to update request status - Phase 2 Enhanced',
         'RequestController',
         error
       );
 
-      (res as any).status(500).json({
-        success: false,
-        error: 'Failed to update request status',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      });
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(
+          res,
+          'Failed to update request status'
+        );
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to update request status',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
     }
   }
 }
