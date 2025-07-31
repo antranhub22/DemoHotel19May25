@@ -367,7 +367,8 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
       // ✅ UPDATED: Use CallOptions interface from vapiOfficial
       const options: CallOptions = {
-        timeout: 5 * 60 * 1000, // 5 minutes timeout
+        // ✅ FIXED: Remove timeout to prevent premature call end
+        // timeout: 5 * 60 * 1000, // 5 minutes timeout
         metadata: {
           language,
           timestamp: new Date().toISOString(),

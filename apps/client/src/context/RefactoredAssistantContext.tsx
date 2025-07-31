@@ -1,6 +1,11 @@
 /// <reference types="vite/client" />
 
 // Type declaration for import.meta
+declare global {
+  interface Window {
+    triggerSummaryPopup?: () => void;
+  }
+}
 
 import React, {
   createContext,
@@ -287,18 +292,34 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       call.endCall();
       console.log('✅ [DEBUG] call.endCall() completed');
 
-      // Process summary if we have transcripts
+      // ✅ NEW: Process summary if we have transcripts
       if (transcript.transcripts.length >= 2) {
         console.log(
           '📞 [DEBUG] Processing call summary with transcripts:',
           transcript.transcripts.length
         );
-        // This would trigger summary generation
+
+        // ✅ INTEGRATED: Trigger summary processing
         logger.debug(
           '[RefactoredAssistant] Processing call summary...',
           'Component'
         );
-        // Summary processing logic would go here
+
+        // ✅ NEW: Set call summary data for popup system
+        const callId = `call-${Date.now()}`;
+        order.setCallSummary({
+          callId,
+          tenantId: configuration.tenantId || 'default',
+          content: '', // Will be filled by WebSocket
+          timestamp: new Date(),
+        });
+
+        // ✅ NEW: Trigger summary popup via global function
+        if (window.triggerSummaryPopup) {
+          window.triggerSummaryPopup();
+        }
+
+        console.log('✅ [DEBUG] Summary processing triggered');
       } else {
         console.log(
           '📞 [DEBUG] No transcripts to process:',
@@ -316,7 +337,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         error
       );
     }
-  }, [call, vapi, transcript]);
+  }, [call, vapi, transcript, order, configuration]);
 
   // Enhanced toggleMute that integrates both contexts
   const enhancedToggleMute = useCallback(() => {

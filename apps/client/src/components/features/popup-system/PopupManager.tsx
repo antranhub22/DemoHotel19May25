@@ -1,4 +1,5 @@
 import { usePopupContext } from '@/context/PopupContext';
+import { useRefactoredAssistant } from '@/context/RefactoredAssistantContext';
 import React, { Suspense, useEffect } from 'react';
 import { PopupStack } from './PopupStack';
 
@@ -225,6 +226,13 @@ export const usePopup = () => {
       }
       showSummary.lastCall = now;
 
+      // ✅ NEW: Check if we should show summary based on RefactoredAssistantContext
+      const { isCallActive } = useRefactoredAssistant();
+      if (!isCallActive) {
+        console.log('⚠️ [DEBUG] No active call, skipping summary popup');
+        return '';
+      }
+
       const popupId = addPopup({
         type: 'summary',
         title: options?.title || 'Call Summary',
@@ -257,16 +265,22 @@ export const usePopup = () => {
   // ✅ NEW: Add static property to track last call time
   showSummary.lastCall = 0;
 
-  // ✅ NEW: Emergency cleanup function
+  // ✅ NEW: Emergency cleanup function - integrated with RefactoredAssistantContext
   const emergencyCleanup = () => {
     console.log('🚨 [DEBUG] Emergency cleanup triggered');
     const { clearAllPopups } = usePopupContext();
     clearAllPopups();
     showSummary.lastCall = 0;
+
+    // ✅ NEW: Reset RefactoredAssistantContext summary state
+    if (window.resetSummarySystem) {
+      window.resetSummarySystem();
+    }
+
     console.log('✅ [DEBUG] Emergency cleanup completed');
   };
 
-  // ✅ NEW: Reset summary system
+  // ✅ NEW: Reset summary system - integrated with RefactoredAssistantContext
   const resetSummarySystem = () => {
     console.log('🔄 [DEBUG] Resetting summary system');
     const { popups, removePopup } = usePopupContext();
@@ -283,10 +297,16 @@ export const usePopup = () => {
       });
 
     showSummary.lastCall = 0;
+
+    // ✅ NEW: Reset RefactoredAssistantContext summary state
+    if (window.resetSummarySystem) {
+      window.resetSummarySystem();
+    }
+
     console.log('✅ [DEBUG] Summary system reset completed');
   };
 
-  // ✅ NEW: Force display summary popup
+  // ✅ NEW: Force display summary popup - integrated with RefactoredAssistantContext
   const forceShowSummary = (content?: React.ReactNode) => {
     console.log('🚀 [DEBUG] Force showing summary popup');
 

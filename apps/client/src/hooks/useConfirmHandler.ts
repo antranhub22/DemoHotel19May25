@@ -1,11 +1,23 @@
 import { usePopup } from '@/components/features/popup-system';
 import { useAssistant } from '@/context';
+import React, { useCallback, useEffect, useRef } from 'react';
+
+// ✅ NEW: Type declarations for global window functions
+declare global {
+  interface Window {
+    triggerSummaryPopup?: () => void;
+    updateSummaryPopup?: (summary: string, serviceRequests: any[]) => void;
+    resetSummarySystem?: () => void;
+  }
+}
 
 interface UseConfirmHandlerReturn {
   // ✅ SIMPLIFIED: Clean auto-trigger summary function
   autoTriggerSummary: () => void;
   // ✅ UTILITY: Update popup content when WebSocket data arrives
   updateSummaryPopup: (summary: string, serviceRequests: any[]) => void;
+  // ✅ NEW: Reset summary system
+  resetSummarySystem: () => void;
 }
 
 export const useConfirmHandler = (): UseConfirmHandlerReturn => {
@@ -24,12 +36,22 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
     };
   }, [removePopup]);
 
+  // ✅ NEW: Reset summary system
+  const resetSummarySystem = useCallback(() => {
+    console.log('🔄 [DEBUG] Resetting summary system');
+    if (summaryPopupIdRef.current) {
+      removePopup(summaryPopupIdRef.current);
+      summaryPopupIdRef.current = null;
+    }
+    console.log('✅ [DEBUG] Summary system reset completed');
+  }, [removePopup]);
+
   // ✅ SIMPLIFIED: Auto-trigger summary when call ends - clean logic
   const autoTriggerSummary = useCallback(() => {
     console.log('📞 [DEBUG] Call ended - showing processing popup');
 
     // ✅ STEP 1: Show "Processing..." popup immediately
-    const processingElement = createElement(
+    const processingElement = React.createElement(
       'div',
       {
         style: {
@@ -39,7 +61,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
         },
       },
       [
-        createElement(
+        React.createElement(
           'h3',
           {
             key: 'title',
@@ -53,7 +75,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
           '⏳ Processing Call Summary'
         ),
 
-        createElement(
+        React.createElement(
           'div',
           {
             key: 'icon',
@@ -62,7 +84,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
           '🔄'
         ),
 
-        createElement(
+        React.createElement(
           'p',
           {
             key: 'message',
@@ -118,7 +140,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
       }
 
       // ✅ STEP 3: Create new popup with real summary data
-      const realSummaryElement = createElement(
+      const realSummaryElement = React.createElement(
         'div',
         {
           style: {
@@ -128,7 +150,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
           },
         },
         [
-          createElement(
+          React.createElement(
             'h3',
             {
               key: 'title',
@@ -142,7 +164,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
             '📋 Call Summary'
           ),
 
-          createElement(
+          React.createElement(
             'div',
             {
               key: 'icon',
@@ -151,7 +173,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
             '✅'
           ),
 
-          createElement(
+          React.createElement(
             'div',
             {
               key: 'summary',
@@ -170,7 +192,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
           ),
 
           serviceRequests && serviceRequests.length > 0
-            ? createElement(
+            ? React.createElement(
                 'div',
                 {
                   key: 'requests',
@@ -183,7 +205,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
                   },
                 },
                 [
-                  createElement(
+                  React.createElement(
                     'h4',
                     {
                       key: 'requests-title',
@@ -197,17 +219,17 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
                     `🛎️ Service Requests (${serviceRequests.length})`
                   ),
                   ...serviceRequests.map((req, index) =>
-                    createElement(
+                    React.createElement(
                       'div',
                       {
                         key: `request-${index}`,
                         style: {
                           marginBottom: '4px',
                           fontSize: '12px',
-                          color: '#333',
+                          color: '#424242',
                         },
                       },
-                      `• ${req.serviceType}: ${req.requestText}`
+                      `• ${req.service}: ${req.details}`
                     )
                   ),
                 ]
@@ -217,18 +239,34 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
       );
 
       const newPopupId = showSummary(realSummaryElement, {
-        title: 'Call Summary',
+        title: 'Call Complete',
         priority: 'medium',
       });
 
       summaryPopupIdRef.current = newPopupId;
-      console.log(
-        '✅ [DEBUG] Summary popup updated with real data, ID:',
-        newPopupId
-      );
+      console.log('✅ [DEBUG] Real summary popup created, ID:', newPopupId);
     },
     [showSummary, removePopup, setCallSummary, setServiceRequests]
   );
 
-  return { autoTriggerSummary, updateSummaryPopup };
+  // ✅ NEW: Connect to global window for RefactoredAssistantContext access
+  useEffect(() => {
+    console.log('🔗 [DEBUG] Connecting useConfirmHandler to window');
+    window.triggerSummaryPopup = autoTriggerSummary;
+    window.updateSummaryPopup = updateSummaryPopup;
+    window.resetSummarySystem = resetSummarySystem;
+
+    return () => {
+      console.log('🔗 [DEBUG] Cleaning up useConfirmHandler from window');
+      delete window.triggerSummaryPopup;
+      delete window.updateSummaryPopup;
+      delete window.resetSummarySystem;
+    };
+  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem]);
+
+  return {
+    autoTriggerSummary,
+    updateSummaryPopup,
+    resetSummarySystem,
+  };
 };
