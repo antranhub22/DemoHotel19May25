@@ -388,10 +388,25 @@ export interface PaginatedResponse<T> {
 // ========================================
 
 export interface WebSocketMessage {
-  type: 'transcript' | 'order_status_update' | 'call_end' | 'init' | 'error';
+  type:
+    | 'transcript'
+    | 'order_status_update'
+    | 'call_end'
+    | 'init'
+    | 'error'
+    | 'call-summary-received';
   data: any;
   timestamp: Date;
   tenantId?: string;
+}
+
+// ✅ NEW: Specific interface for call summary WebSocket payload
+export interface CallSummaryReceivedMessage {
+  type: 'call-summary-received';
+  callId: string;
+  summary: string;
+  serviceRequests: any[];
+  timestamp: string;
 }
 
 export interface TranscriptMessage {
