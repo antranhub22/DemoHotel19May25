@@ -129,15 +129,15 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const configuration = useConfiguration();
   const vapi = useVapi();
 
-  // ✅ RE-ENABLED: VapiProvider callback with protection logic
+  // ✅ DISABLED AGAIN: VapiProvider callback (causes premature Summary)
+  // Need alternative approach to trigger Summary Popup
+  /*
   useEffect(() => {
     console.log('📞 [DEBUG] Setting up VapiProvider callback with protection');
     vapi.setCallEndCallback(() => {
       console.log(
         '📞 [DEBUG] VapiProvider callback triggered, checking call state...'
       );
-
-      // ✅ NEW: Add protection - only trigger if call was active for minimum duration
 
       // Check if call was actually active (simple check)
       if (call.isCallActive || vapi.isCallActive) {
@@ -158,6 +158,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       vapi.setCallEndCallback(() => {}); // Clear callback
     };
   }, [vapi, call]);
+  */
 
   // ✅ NOTE: endCall registration moved after endCall definition
 

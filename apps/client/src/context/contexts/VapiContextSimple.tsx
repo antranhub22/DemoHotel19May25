@@ -218,8 +218,20 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
             callEndCallback();
           } else {
             console.log(
-              '📞 [DEBUG] VapiProvider no external callback available'
+              '📞 [DEBUG] VapiProvider no external callback available - using direct trigger'
             );
+
+            // ✅ NEW: Direct trigger Summary Popup when no external callback
+            if (window.triggerSummaryPopup) {
+              console.log(
+                '📞 [DEBUG] VapiProvider directly triggering Summary Popup'
+              );
+              window.triggerSummaryPopup();
+            } else {
+              console.log(
+                '📞 [DEBUG] window.triggerSummaryPopup not available'
+              );
+            }
           }
 
           // Update state after callback
