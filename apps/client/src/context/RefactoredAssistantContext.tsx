@@ -297,6 +297,13 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       console.log('✅ [DEBUG] call.endCall() completed');
 
       // Step 3: Process summary if we have any transcripts (reduced from 2 to 1)
+      console.log('🔍 [DEBUG] Checking transcript state:', {
+        hasTranscript: !!transcript,
+        transcriptLength: transcript?.transcripts?.length || 0,
+        transcripts: transcript?.transcripts || 'undefined',
+        fullTranscriptObject: transcript,
+      });
+
       if (transcript.transcripts.length >= 1) {
         console.log(
           '📞 [DEBUG] Processing call summary with transcripts:',
@@ -335,6 +342,37 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           '📞 [DEBUG] No transcripts to process:',
           transcript.transcripts.length
         );
+
+        // ✅ FALLBACK: Always trigger Summary Popup even without transcripts
+        // Backend webhook will handle the summary processing
+        console.log(
+          '🔄 [DEBUG] FALLBACK: Triggering Summary Popup without transcripts'
+        );
+
+        const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
+        order.setCallSummary({
+          callId: vapiCallId,
+          tenantId: configuration.tenantId || 'default',
+          content: 'Processing call summary...', // Placeholder content
+          timestamp: new Date(),
+        });
+
+        // Store callId globally for WebSocket integration
+        if (window.storeCallId) {
+          window.storeCallId(vapiCallId);
+        }
+
+        // Trigger summary popup via global function
+        if (window.triggerSummaryPopup) {
+          console.log(
+            '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
+          );
+          window.triggerSummaryPopup();
+        } else {
+          console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
+        }
+
+        console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
       }
 
       console.log('✅ [DEBUG] RefactoredAssistant.endCall completed');
