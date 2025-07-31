@@ -16,6 +16,8 @@ declare global {
 }
 
 export function useWebSocket() {
+  console.log('🔌 [DEBUG] ===== INITIALIZING WEBSOCKET HOOK =====');
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const assistant = useAssistant();
@@ -23,11 +25,17 @@ export function useWebSocket() {
 
   // Initialize Socket.IO connection
   const initSocket = useCallback(() => {
+    console.log('🔌 [DEBUG] ===== ATTEMPTING WEBSOCKET CONNECTION =====');
     logger.debug(
       'useWebSocket env VITE_API_HOST:',
       'Component',
       import.meta.env.VITE_API_HOST
     );
+    console.log('🔌 [DEBUG] WebSocket connection details:', {
+      host: import.meta.env.VITE_API_HOST,
+      connected: connected,
+      socketExists: !!socket,
+    });
 
     // ✅ ENHANCED: Better cleanup of existing socket
     if (socket !== null) {
