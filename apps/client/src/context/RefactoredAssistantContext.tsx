@@ -357,14 +357,39 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           transcript.transcripts.length
         );
 
-        // ✅ DISABLED FALLBACK: Do NOT trigger Summary Popup without transcripts
-        // This was causing premature Summary Popup during active calls
+        // ✅ RE-ENABLED FALLBACK: Trigger Summary Popup even without transcripts
+        // Race condition issue was fixed, safe to re-enable
         console.log(
-          '⚠️ [DEBUG] FALLBACK DISABLED: No transcripts found, NOT triggering Summary Popup'
+          '🔄 [DEBUG] FALLBACK: Triggering Summary Popup without transcripts'
         );
-        console.log(
-          '💡 [DEBUG] Summary will be triggered by backend webhook when ready'
-        );
+
+        const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
+        order.setCallSummary({
+          callId: vapiCallId,
+          tenantId: configuration.tenantId || 'default',
+          content: 'Processing call summary...', // Placeholder content
+          timestamp: new Date(),
+        });
+
+        // Store callId globally for WebSocket integration
+        if (window.storeCallId) {
+          window.storeCallId(vapiCallId);
+        }
+
+        // Trigger summary popup via global function
+        if (window.triggerSummaryPopup) {
+          console.log(
+            '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
+          );
+          window.triggerSummaryPopup();
+          console.log(
+            '✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully'
+          );
+        } else {
+          console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
+        }
+
+        console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
       }
 
       console.log('✅ [DEBUG] RefactoredAssistant.endCall completed');
@@ -382,9 +407,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     }
   }, [call, vapi, transcript, order, configuration]);
 
-  // ✅ TEMPORARILY DISABLED: Register RefactoredAssistant.endCall as call end listener
-  // This might be causing call end loops - investigating
-  /*
+  // ✅ RE-ENABLED: Register RefactoredAssistant.endCall as call end listener
+  // Call loop issue was fixed by disabling the problematic VapiProvider callback
   useEffect(() => {
     console.log(
       '📞 [DEBUG] Registering RefactoredAssistant.endCall as call end listener'
@@ -401,7 +425,6 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       unregister();
     };
   }, [call, endCall]);
-  */
 
   // Enhanced toggleMute that integrates both contexts
   const enhancedToggleMute = useCallback(() => {
