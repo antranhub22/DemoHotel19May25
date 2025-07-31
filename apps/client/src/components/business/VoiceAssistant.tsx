@@ -23,6 +23,14 @@ const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const popupSystem = usePopup();
 
+  // ✅ FIX: Move useConfirmHandler inside PopupProvider to avoid context error
+  const {
+    autoTriggerSummary,
+    updateSummaryPopup,
+    resetSummarySystem,
+    storeCallId,
+  } = useConfirmHandler();
+
   // Expose PopupSystem globally for migration from NotificationSystem
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -39,6 +47,19 @@ const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
   }, [popupSystem]);
+
+  // ✅ NEW: Debug logging for useConfirmHandler
+  useEffect(() => {
+    console.log(
+      '🔗 [VoiceAssistant] useConfirmHandler mounted with functions:',
+      {
+        hasAutoTriggerSummary: typeof autoTriggerSummary === 'function',
+        hasUpdateSummaryPopup: typeof updateSummaryPopup === 'function',
+        hasResetSummarySystem: typeof resetSummarySystem === 'function',
+        hasStoreCallId: typeof storeCallId === 'function',
+      }
+    );
+  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
 
   return <>{children}</>;
 };
@@ -104,14 +125,6 @@ const VoiceAssistant: React.FC = () => {
   const { logout } = useAuth();
   const isMobile = useIsMobile();
 
-  // ✅ NEW: Ensure useConfirmHandler is always mounted for summary popup
-  const {
-    autoTriggerSummary,
-    updateSummaryPopup,
-    resetSummarySystem,
-    storeCallId,
-  } = useConfirmHandler();
-
   // ✅ NEW: Guest Journey State Management
   const [guestJourneyState, setGuestJourneyState] = useState<{
     showWelcome: boolean;
@@ -162,18 +175,7 @@ const VoiceAssistant: React.FC = () => {
     }
   }, [setLanguage]);
 
-  // ✅ NEW: Debug logging for useConfirmHandler
-  useEffect(() => {
-    console.log(
-      '🔗 [VoiceAssistant] useConfirmHandler mounted with functions:',
-      {
-        hasAutoTriggerSummary: typeof autoTriggerSummary === 'function',
-        hasUpdateSummaryPopup: typeof updateSummaryPopup === 'function',
-        hasResetSummarySystem: typeof resetSummarySystem === 'function',
-        hasStoreCallId: typeof storeCallId === 'function',
-      }
-    );
-  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
+  // ✅ REMOVED: Debug logging moved to GlobalPopupSystemProvider
 
   // ✅ NEW: Handle Welcome completion
   const handleWelcomeComplete = () => {
