@@ -80,18 +80,20 @@ export class VapiOfficial {
   }
 
   private setupEventListeners() {
+    console.log('🔧 [DEBUG] Setting up Vapi event listeners...');
+
     // Call start event
     this.vapi.on('call-start', (callData?: any) => {
+      console.log('🎙️ [DEBUG] === VAPI CALL-START EVENT ===', callData);
       logger.debug('🎙️ Call started', 'VapiOfficial', callData);
-      console.log('🔍 [DEBUG] Vapi call-start event data:', callData);
       this._isCallActive = true;
       this.config.onCallStart?.();
     });
 
     // Call end event
     this.vapi.on('call-end', (callData?: any) => {
+      console.log('📞 [DEBUG] === VAPI CALL-END EVENT ===', callData);
       logger.debug('📞 Call ended', 'VapiOfficial', callData);
-      console.log('🔍 [DEBUG] Vapi call-end event data:', callData);
       this._isCallActive = false;
       this.clearCallTimeout();
       this.config.onCallEnd?.();
@@ -225,6 +227,13 @@ export class VapiOfficial {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
+      console.log('🚀 [DEBUG] === STARTING VAPI CALL ===', {
+        assistantId: assistantId.substring(0, 15) + '...',
+        timeout: options.timeout,
+        metadata: options.metadata,
+        currentState: this._isCallActive,
+      });
+
       logger.debug('🚀 Starting Vapi call', 'VapiOfficial', {
         assistantId: assistantId.substring(0, 15) + '...',
         timeout: options.timeout,
@@ -236,9 +245,12 @@ export class VapiOfficial {
         metadata: options.metadata,
       });
 
+      console.log('✅ [DEBUG] === VAPI.START COMPLETED ===');
+
       // Set auto-timeout if specified
       if (options.timeout) {
         this.setCallTimeout(options.timeout);
+        console.log('⏰ [DEBUG] Auto-timeout set for', options.timeout, 'ms');
       }
 
       logger.debug('✅ Call started successfully', 'VapiOfficial');

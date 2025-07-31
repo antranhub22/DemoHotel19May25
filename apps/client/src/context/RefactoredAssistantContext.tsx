@@ -379,7 +379,9 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     }
   }, [call, vapi, transcript, order, configuration]);
 
-  // ✅ NEW: Register RefactoredAssistant.endCall as call end listener
+  // ✅ TEMPORARILY DISABLED: Register RefactoredAssistant.endCall as call end listener
+  // This might be causing call end loops - investigating
+  /*
   useEffect(() => {
     console.log(
       '📞 [DEBUG] Registering RefactoredAssistant.endCall as call end listener'
@@ -396,6 +398,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       unregister();
     };
   }, [call, endCall]);
+  */
 
   // Enhanced toggleMute that integrates both contexts
   const enhancedToggleMute = useCallback(() => {
