@@ -4,11 +4,14 @@
 
 import { useAssistant } from '@/context';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
-import { designSystem } from '@/styles/designSystem';
+import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MobileTouchDebugger } from './MobileTouchDebugger';
 import SiriCallButton from './SiriCallButton';
+import { SiriButtonStatus } from './components/SiriButtonStatus';
+import { useCallProtection } from './hooks/useCallProtection';
+import { useLanguageColors } from './hooks/useLanguageColors';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -21,46 +24,6 @@ interface SiriButtonContainerProps {
   _showingSummary?: boolean; // ✅ NEW: Internal state for summary display
 }
 
-// Màu sắc cho từng ngôn ngữ
-const LANGUAGE_COLORS = {
-  en: {
-    primary: '#5DB6B9', // Xanh dương nhạt (English - mặc định)
-    secondary: '#E8B554', // Vàng gold
-    glow: 'rgba(93, 182, 185, 0.4)',
-    name: 'English',
-  },
-  fr: {
-    primary: '#8B5CF6', // Tím (French - màu tím sang trọng)
-    secondary: '#A78BFA', // Tím nhạt
-    glow: 'rgba(139, 92, 246, 0.4)',
-    name: 'Français',
-  },
-  zh: {
-    primary: '#EF4444', // Đỏ (Chinese - màu đỏ may mắn)
-    secondary: '#FCA5A5', // Đỏ nhạt
-    glow: 'rgba(239, 68, 68, 0.4)',
-    name: '中文',
-  },
-  ru: {
-    primary: '#10B981', // Xanh lá (Russian - màu xanh lá)
-    secondary: '#6EE7B7', // Xanh lá nhạt
-    glow: 'rgba(16, 185, 129, 0.4)',
-    name: 'Русский',
-  },
-  ko: {
-    primary: '#F59E0B', // Cam (Korean - màu cam ấm áp)
-    secondary: '#FDE68A', // Cam nhạt
-    glow: 'rgba(245, 158, 11, 0.4)',
-    name: '한국어',
-  },
-  vi: {
-    primary: '#EC4899', // Hồng (Vietnamese - màu hồng)
-    secondary: '#F9A8D4', // Hồng nhạt
-    glow: 'rgba(236, 72, 153, 0.4)',
-    name: 'Tiếng Việt',
-  },
-} as const;
-
 export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   isCallStarted,
   micLevel,
@@ -70,201 +33,20 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
 
-  // ✅ NEW: Prevent accidental restart after Confirm
-  const [isConfirming, setIsConfirming] = useState(false);
+  // Custom hooks
+  const currentColors = useLanguageColors(language);
+  const { isConfirming, protectedOnCallStart } = useCallProtection({
+    isCallStarted,
+    onCallStart,
+  });
 
-  // Use LANGUAGE_COLORS mapping based on current language
-  const currentColors =
-    LANGUAGE_COLORS[language as keyof typeof LANGUAGE_COLORS] ||
-    LANGUAGE_COLORS['en'];
-
-  // Debug: Log language and color changes
-  logger.debug(
-    `🎨 [SiriButtonContainer] Language: ${language}, Colors: ${currentColors.name}, Primary: ${currentColors.primary}`,
-    'Component'
-  );
-  logger.debug(
-    '📏 [SiriButtonContainer] Responsive size:',
-    'Component',
-    responsiveSize
-  );
-
-  // 🚨 DEBUG: Tap to End Call Fix Verification
+  // Minimal debug logging
   if (import.meta.env.DEV) {
     logger.debug(
-      '🔧 [SiriButtonContainer] TAP TO END CALL FIXES APPLIED:',
-      'Component'
-    );
-    logger.debug(
-      '  ✅ Priority 1: Mobile handleDirectTouch has end call logic',
-      'Component'
-    );
-    logger.debug(
-      '  ✅ Priority 2: Mobile unified with desktop protections',
-      'Component'
-    );
-    logger.debug(
-      '  ✅ Priority 3: Protection states fixed (isConfirming, emergencyStop)',
-      'Component'
-    );
-    logger.debug(
-      '  ✅ Priority 4: MobileTouchDebugger enabled for testing',
-      'Component'
-    );
-    logger.debug(
-      '  🚫 DISABLED: Cancel and Confirm buttons hidden by user request',
-      'Component'
-    );
-    logger.debug(
-      `  🎯 isCallStarted: ${isCallStarted}, isConfirming: ${isConfirming}`,
-      'Component'
-    );
-    logger.debug(
-      `  🎯 onCallStart available: ${!!onCallStart}, onCallEnd available: ${!!onCallEnd}`,
+      `[SiriButtonContainer] Language: ${language}, isCallStarted: ${isCallStarted}`,
       'Component'
     );
   }
-
-  // ✅ NEW: Reset confirming state when call ends
-  useEffect(() => {
-    if (!isCallStarted) {
-      setIsConfirming(false);
-    }
-  }, [isCallStarted]);
-
-  // ✅ NEW: Protected onCallStart to prevent restart during/after Confirm
-  const protectedOnCallStart = async (lang: Language) => {
-    if (isConfirming) {
-      logger.debug(
-        '🛡️ [SiriButtonContainer] Call start blocked - confirming in progress',
-        'Component'
-      );
-      return;
-    }
-
-    logger.debug(
-      '🎤 [SiriButtonContainer] Starting call normally...',
-      'Component'
-    );
-    await onCallStart(lang);
-  };
-
-  const handleStartCall = async (lang: Language) => {
-    logger.debug(
-      '🎤 [SiriButtonContainer] Starting call with language:',
-      'Component',
-      lang
-    );
-
-    // ✅ NEW: Enhanced debug logging for call start
-    console.log('🎬 [DEBUG] SiriButtonContainer.handleStartCall called:', {
-      language: lang,
-      timestamp: new Date().toISOString(),
-      onCallStartFunction: !!onCallStart,
-      onCallStartType: typeof onCallStart,
-    });
-
-    // ✅ IMPROVED: Better error handling for call start
-    try {
-      // ✅ NEW: Pre-call debug
-      console.log('🚀 [DEBUG] About to call onCallStart:', {
-        language: lang,
-        timestamp: new Date().toISOString(),
-      });
-
-      await onCallStart(lang);
-
-      // ✅ NEW: Post-call success debug
-      console.log('✅ [DEBUG] onCallStart completed successfully:', {
-        language: lang,
-        timestamp: new Date().toISOString(),
-      });
-
-      logger.debug(
-        '✅ [SiriButtonContainer] Call started successfully',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [SiriButtonContainer] Error during call start:',
-        'Component',
-        error
-      );
-
-      // ✅ IMPROVED: Handle errors gracefully with user-friendly messages
-      const errorMessage =
-        error instanceof Error
-          ? (error as any)?.message || String(error)
-          : 'Lỗi không xác định';
-
-      logger.error(
-        '❌ [SiriButtonContainer] Call start error:',
-        'Component',
-        errorMessage
-      );
-
-      if (typeof window !== 'undefined') {
-        if (errorMessage.includes('webCallUrl')) {
-          logger.warn(
-            'Không thể khởi tạo cuộc gọi. Vui lòng kiểm tra kết nối internet và thử lại.',
-            'Component'
-          );
-        } else if (errorMessage.includes('assistant')) {
-          logger.warn(
-            'Cấu hình trợ lý gặp vấn đề. Vui lòng liên hệ hỗ trợ.',
-            'Component'
-          );
-        } else if (
-          errorMessage.includes('network') ||
-          errorMessage.includes('fetch')
-        ) {
-          logger.warn(
-            'Lỗi mạng. Vui lòng kiểm tra kết nối internet và thử lại.',
-            'Component'
-          );
-        } else if (
-          errorMessage.includes('microphone') ||
-          errorMessage.includes('permissions')
-        ) {
-          logger.warn(
-            'Cần quyền truy cập microphone. Vui lòng cho phép quyền truy cập và thử lại.',
-            'Component'
-          );
-        } else {
-          logger.warn(
-            `Không thể bắt đầu cuộc gọi: ${errorMessage}`,
-            'Component'
-          );
-        }
-      }
-    }
-  };
-
-  const handleEndCall = () => {
-    logger.debug('🛑 [SiriButtonContainer] Ending call', 'Component');
-
-    // ✅ IMPROVED: Better error handling for call end
-    try {
-      onCallEnd();
-      logger.debug(
-        '✅ [SiriButtonContainer] Call ended successfully',
-        'Component'
-      );
-    } catch (error) {
-      logger.error(
-        '❌ [SiriButtonContainer] Error ending call:',
-        'Component',
-        error
-      );
-
-      // ✅ IMPROVED: Even if end call fails, still show success to user
-      // The error is logged but we don't want to confuse the user
-      logger.debug(
-        '⚠️ [SiriButtonContainer] Call end had errors but proceeding normally',
-        'Component'
-      );
-    }
-  };
 
   // ✅ REMOVED: handleConfirm function is no longer needed
   // Summary popup will auto-show when call ends via Siri button tap
@@ -273,11 +55,10 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     <div
       className="relative flex flex-col items-center justify-center voice-button-container"
       style={{
-        marginBottom: designSystem.spacing.xl,
-        zIndex: 10000, // 🔧 FIX: Ensure highest priority above RealtimeConversationPopup (35)
+        marginBottom: '2rem',
+        zIndex: 10000,
         pointerEvents: 'auto',
-        // 🔧 HYBRID FIX: Fixed height to prevent layout shift
-        height: '400px', // Fixed height container
+        height: '400px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -291,8 +72,8 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         {isConfirming
           ? 'Processing call summary, please wait'
           : isCallStarted
-            ? `Voice call active in ${LANGUAGE_COLORS[language].name}. Press space or enter to end call.`
-            : `Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Press space or enter to start speaking.`}
+            ? `Voice call active in ${currentColors.name}. Press space or enter to end call.`
+            : `Voice assistant ready in ${currentColors.name}. Press space or enter to start speaking.`}
       </div>
 
       {/* Top Row: Cancel + Confirm - COMPLETELY REMOVED */}
@@ -312,17 +93,17 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           isConfirming
             ? 'Processing call summary, please wait'
             : isCallStarted
-              ? `End voice call in ${LANGUAGE_COLORS[language].name}`
-              : `Start voice call in ${LANGUAGE_COLORS[language].name}`
+              ? `End voice call in ${currentColors.name}`
+              : `Start voice call in ${currentColors.name}`
         }
         aria-describedby="voice-button-status"
         onKeyDown={e => {
           if ((e.key === 'Enter' || e.key === ' ') && !isConfirming) {
             e.preventDefault();
             if (isCallStarted) {
-              handleEndCall();
+              onCallEnd();
             } else {
-              handleStartCall(language);
+              protectedOnCallStart(language);
             }
           }
         }}
@@ -374,55 +155,13 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
         />
       </div>
 
-      {/* Enhanced Status text with better accessibility */}
-      <div
-        id="voice-button-status"
-        className="block mt-4 text-center transition-all duration-300"
-        role="status"
-        aria-live="polite"
-        style={{
-          fontSize: '1rem',
-          fontWeight: '600',
-        }}
-      >
-        {/* ✅ Enhanced messages with better accessibility */}
-        {isConfirming ? (
-          <div
-            style={{
-              color: '#808080',
-              textShadow: `0 2px 8px rgba(128, 128, 128, 0.3)`,
-            }}
-            aria-label="Processing call summary, please wait"
-          >
-            📋 Processing call summary...
-          </div>
-        ) : isCallStarted ? (
-          <div
-            style={{
-              color: currentColors.primary,
-              textShadow: `0 2px 8px ${currentColors.glow}`,
-            }}
-            aria-label={`Voice call active in ${LANGUAGE_COLORS[language].name}. Tap or press Enter to end call`}
-          >
-            🎤 Listening... Tap to end call
-          </div>
-        ) : (
-          <div
-            style={{
-              color: currentColors.primary,
-              textShadow: `0 2px 8px ${currentColors.glow}`,
-            }}
-            aria-label={`Voice assistant ready in ${LANGUAGE_COLORS[language].name}. Tap or press Enter to start speaking`}
-          >
-            Tap To Speak
-          </div>
-        )}
-      </div>
-
-      {/* Keyboard Navigation Hint */}
-      <div className="mt-2 text-xs text-gray-500 text-center opacity-70">
-        Press Space or Enter to {isCallStarted ? 'end' : 'start'} voice call
-      </div>
+      {/* Status Component */}
+      <SiriButtonStatus
+        isCallStarted={isCallStarted}
+        isConfirming={isConfirming}
+        language={language}
+        colors={currentColors}
+      />
 
       {/* 🧪 DEBUG: Mobile Touch Debugger - Development only */}
       {import.meta.env.DEV && (
