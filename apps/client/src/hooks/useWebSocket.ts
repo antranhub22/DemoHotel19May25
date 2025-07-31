@@ -389,7 +389,7 @@ export function useWebSocket() {
         }
       }
     };
-  }, []); // ✅ FIXED: Empty dependencies to run only once
+  }); // ✅ TEMP: No dependency array to force execution
 
   // ✅ IMPROVED: Re-send init with better error handling
   useEffect(() => {
