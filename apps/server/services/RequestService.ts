@@ -32,64 +32,6 @@ import {
 // REQUEST SERVICE CONFIGURATION
 // ============================================================================
 
-/**
- * Default Request Service Configuration
- */
-const DEFAULT_CONFIG: RequestServiceConfig = {
-  pagination: {
-    defaultPage: 1,
-    defaultLimit: 20,
-    maxLimit: 100,
-  },
-  statusTransitions: {
-    pending: [
-      'in-progress',
-      'completed',
-      'cancelled',
-      'Đang xử lý',
-      'Hoàn thành',
-      'Đã hủy',
-    ],
-    'in-progress': ['completed', 'cancelled', 'Hoàn thành', 'Đã hủy'],
-    completed: ['cancelled', 'Đã hủy'],
-    cancelled: [],
-    'Đã ghi nhận': ['Đang xử lý', 'Hoàn thành', 'Đã hủy'],
-    'Đang xử lý': ['Hoàn thành', 'Đã hủy'],
-    'Hoàn thành': ['Đã hủy'],
-    'Đã hủy': [],
-  },
-  priorityValidation: {
-    highPriorityKeywords: [
-      'urgent',
-      'emergency',
-      'immediate',
-      'critical',
-      'broken',
-      'leak',
-      'fire',
-    ],
-    autoUpgradeToHigh: true,
-  },
-  businessRules: {
-    allowStatusDowngrade: false,
-    requireNotesForCancellation: true,
-    autoAssignUrgentRequests: true,
-    maxRequestsPerRoom: 5,
-  },
-  audit: {
-    enabled: true,
-    logAllChanges: true,
-    logStatusChanges: true,
-    logPriorityChanges: true,
-  },
-  notifications: {
-    enableRealTime: true,
-    notifyOnStatusChange: true,
-    notifyOnUrgentRequest: true,
-    notifyOnBulkOperations: true,
-  },
-};
-
 // ============================================================================
 // REQUEST SERVICE IMPLEMENTATION
 // ============================================================================
