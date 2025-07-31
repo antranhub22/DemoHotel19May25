@@ -105,6 +105,9 @@ export {
   call_summaries,
 } from './schema';
 
+// ✅ ALIAS: Maintain compatibility with existing routes that use 'requests'
+export { request as requests } from './schema';
+
 // ✅ FIXED: Export common drizzle-orm functions to fix missing imports
 export {
   eq,

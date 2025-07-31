@@ -1,5 +1,5 @@
 import { getDatabase } from '@shared/db';
-import { requests } from '@shared/db/schema';
+import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
 
@@ -41,7 +41,7 @@ export class RequestController {
       const newRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
         return await db
-          .insert(requests)
+          .insert(request)
           .values({
             serviceType,
             requestText,
@@ -114,7 +114,7 @@ export class RequestController {
    * Get all requests
    * GET /api/request
    */
-  static async getAllRequests(req: Request, res: Response): Promise<void> {
+  static async getAllRequests(_req: Request, res: Response): Promise<void> {
     try {
       logger.info(
         '📋 [RequestController] Getting all requests...',
@@ -124,7 +124,7 @@ export class RequestController {
       // ✅ FIX: Use safe database operation
       const requestsData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        return await db.query.requests.findMany({
+        return await db.query.request.findMany({
           orderBy: { createdAt: 'desc' },
           limit: 100,
         });
@@ -189,7 +189,7 @@ export class RequestController {
       // ✅ FIX: Use safe database operation
       const request = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        return await db.query.requests.findFirst({
+        return await db.query.request.findFirst({
           where: { id: parseInt(id) },
         });
       });
@@ -235,7 +235,7 @@ export class RequestController {
       const updatedRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
         return await db
-          .update(requests)
+          .update(request)
           .set({
             status,
             updatedAt: new Date(),
