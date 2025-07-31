@@ -42,6 +42,7 @@ import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add trans
 import vapiConfigRoutes from '@server/routes/vapi-config'; // ✅ NEW: VAPI Configuration for language-specific settings
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 import webhookRoutes from '@server/routes/webhook'; // ✅ NEW: VAPI Webhook endpoints
+import debugRoutes from '@server/routes/debug'; // ✅ NEW: Debug endpoints for production testing
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
 import { logger } from '@shared/utils/logger';
@@ -131,6 +132,7 @@ router.use('/api/monitoring', monitoringRoutes);
 
 // Development & Testing
 router.use('/api/temp-public', tempPublicRoutes);
+router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
 // ============================================
 // ROUTE REGISTRATION SUCCESS
