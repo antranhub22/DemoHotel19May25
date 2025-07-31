@@ -1,5 +1,7 @@
 import { usePopup } from '@/components/features/popup-system';
 import { useAssistant } from '@/context';
+import { logger } from '@shared/utils/logger';
+import { createElement, useCallback, useEffect, useRef } from 'react';
 
 interface UseConfirmHandlerReturn {
   // ✅ SIMPLIFIED: Clean auto-trigger summary function
