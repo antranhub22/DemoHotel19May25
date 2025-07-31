@@ -32,6 +32,7 @@ import advancedCallsRoutes from './advanced-calls'; // ✅ NEW: Advanced filteri
 import versionedApiRoutes from './versioned-api'; // ✅ NEW: API versioning & migration
 
 // ✅ LEGACY: Keep existing imports for backward compatibility
+import debugRoutes from '@server/routes/debug'; // ✅ NEW: Debug endpoints for production testing
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
 import openaiRoutes from '@server/routes/openai'; // ✅ NEW: OpenAI processing endpoints
@@ -42,7 +43,6 @@ import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add trans
 import vapiConfigRoutes from '@server/routes/vapi-config'; // ✅ NEW: VAPI Configuration for language-specific settings
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
 import webhookRoutes from '@server/routes/webhook'; // ✅ NEW: VAPI Webhook endpoints
-import debugRoutes from '@server/routes/debug'; // ✅ NEW: Debug endpoints for production testing
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
 import { logger } from '@shared/utils/logger';
@@ -137,7 +137,7 @@ router.get('/api/test-direct', (req, res) => {
 });
 
 // ✅ DIRECT DATABASE TEST: Test database connection (NO AUTH REQUIRED)
-router.get('/api/test-db-direct', async (req, res) => {
+router.get('/api/test-db-direct', async (_req, res) => {
   try {
     const { Client } = await import('pg');
     const databaseUrl = process.env.DATABASE_URL;
@@ -185,6 +185,82 @@ router.get('/api/test-db-direct', async (req, res) => {
     res.json({
       success: true,
       message: 'Database connection and queries successful',
+      data: {
+        connected: true,
+        databaseUrlSet: true,
+        databaseUrlLength: databaseUrl.length,
+        databaseUrlPrefix: databaseUrl.substring(0, 30) + '...',
+        testQuery: result.rows[0],
+        tables: tables,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('❌ Database test failed:', error);
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Database connection failed',
+      details: {
+        code: error.code,
+        message: error.message,
+        databaseUrlSet: !!process.env.DATABASE_URL,
+        databaseUrlLength: process.env.DATABASE_URL?.length || 0,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
+});
+
+// ✅ COMPLETELY BYPASS AUTH: Test endpoints without /api prefix
+router.get('/test-db-bypass', async (_req, res) => {
+  try {
+    const { Client } = await import('pg');
+    const databaseUrl = process.env.DATABASE_URL;
+
+    if (!databaseUrl) {
+      return res.status(500).json({
+        success: false,
+        error: 'DATABASE_URL is not set',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    console.log(
+      '🔍 Testing DATABASE_URL:',
+      databaseUrl.substring(0, 30) + '...'
+    );
+
+    const client = new Client({
+      connectionString: databaseUrl,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    // Test connection
+    await client.connect();
+    console.log('✅ Database connection successful');
+
+    // Test simple query
+    const result = await client.query('SELECT 1 as test, NOW() as timestamp');
+    console.log('✅ Query successful:', result.rows[0]);
+
+    // Check tables
+    const tablesResult = await client.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+
+    const tables = tablesResult.rows.map(row => row.table_name);
+    console.log('✅ Tables found:', tables);
+
+    await client.end();
+
+    res.json({
+      success: true,
+      message: 'Database connection and queries successful (BYPASS AUTH)',
       data: {
         connected: true,
         databaseUrlSet: true,
