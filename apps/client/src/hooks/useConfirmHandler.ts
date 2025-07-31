@@ -1,16 +1,6 @@
-import { usePopup } from '@/components/features/popup-system';
+import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
 import React, { useCallback, useEffect, useRef } from 'react';
-
-// ✅ NEW: Type declarations for global window functions
-declare global {
-  interface Window {
-    triggerSummaryPopup?: () => void;
-    updateSummaryPopup?: (summary: string, serviceRequests: any[]) => void;
-    resetSummarySystem?: () => void;
-    storeCallId?: (callId: string) => void;
-  }
-}
 
 interface UseConfirmHandlerReturn {
   // ✅ SIMPLIFIED: Clean auto-trigger summary function
@@ -23,234 +13,168 @@ interface UseConfirmHandlerReturn {
   storeCallId: (callId: string) => void;
 }
 
+// ✅ FIX: Enhanced summary popup trigger with error handling
 export const useConfirmHandler = (): UseConfirmHandlerReturn => {
-  const isMountedRef = useRef(true);
+  const { serviceRequests, setCallSummary, setServiceRequests } =
+    useAssistant();
   const { showSummary, removePopup } = usePopup();
-  const { setServiceRequests, setCallSummary } = useAssistant();
-  const summaryPopupIdRef = useRef<string | null>(null);
+  const summaryPopupIdRef = useRef<string>('');
 
-  // ✅ CLEANUP: Remove summary popups on unmount
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      if (summaryPopupIdRef.current) {
-        removePopup(summaryPopupIdRef.current);
-      }
-    };
-  }, [removePopup]);
+  // ✅ FIX: Enhanced auto-trigger summary function with production checks
+  const autoTriggerSummary = useCallback(async () => {
+    try {
+      console.log('📋 [DEBUG] Auto-triggering summary popup...');
 
-  // ✅ NEW: Reset summary system
-  const resetSummarySystem = useCallback(() => {
-    console.log('🔄 [DEBUG] Resetting summary system');
-    if (summaryPopupIdRef.current) {
-      removePopup(summaryPopupIdRef.current);
-      summaryPopupIdRef.current = null;
-    }
-    console.log('✅ [DEBUG] Summary system reset completed');
-  }, [removePopup]);
-
-  // ✅ SIMPLIFIED: Auto-trigger summary when call ends - clean logic
-  const autoTriggerSummary = useCallback(() => {
-    console.log('📞 [DEBUG] Call ended - showing processing popup');
-
-    // ✅ STEP 1: Show "Processing..." popup immediately
-    const processingElement = React.createElement(
-      'div',
-      {
-        style: {
-          padding: '20px',
-          textAlign: 'center',
-          maxWidth: '400px',
-        },
-      },
-      [
-        React.createElement(
-          'h3',
-          {
-            key: 'title',
-            style: {
-              marginBottom: '16px',
-              color: '#333',
-              fontSize: '18px',
-              fontWeight: '600',
-            },
-          },
-          '⏳ Processing Call Summary'
-        ),
-
-        React.createElement(
-          'div',
-          {
-            key: 'icon',
-            style: { fontSize: '48px', marginBottom: '16px' },
-          },
-          '🔄'
-        ),
-
-        React.createElement(
-          'p',
-          {
-            key: 'message',
-            style: {
-              marginBottom: '16px',
-              lineHeight: '1.5',
-              color: '#333',
-              fontSize: '16px',
-            },
-          },
-          'Please wait while we analyze your conversation...'
-        ),
-      ]
-    );
-
-    const popupId = showSummary(processingElement, {
-      title: 'Call Complete',
-      priority: 'medium',
-    });
-
-    summaryPopupIdRef.current = popupId;
-    console.log('✅ [DEBUG] Processing popup shown, ID:', popupId);
-
-    // ✅ STEP 2: WebSocket will update popup content when data arrives
-    // No timeout needed - popup will be updated by WebSocket event
-  }, [showSummary]);
-
-  // ✅ NEW: Update popup content when WebSocket data arrives
-  const updateSummaryPopup = useCallback(
-    (summary: string, serviceRequests: any[]) => {
-      console.log('🔄 [DEBUG] Updating summary popup with real data');
-
-      if (!summaryPopupIdRef.current) {
-        console.log('⚠️ [DEBUG] No summary popup to update');
+      // ✅ FIX: Check if call data exists
+      if (!serviceRequests || serviceRequests.length === 0) {
+        console.log(
+          '⚠️ [DEBUG] No service requests found, showing fallback summary'
+        );
+        showSummary('Call completed successfully!', {
+          title: 'Call Complete',
+          priority: 'medium',
+        });
         return;
       }
 
-      // ✅ STEP 1: Update assistant context first
-      setCallSummary({
-        callId: `call-${Date.now()}`,
-        tenantId: 'default',
-        content: summary,
+      // ✅ FIX: Enhanced summary creation with error handling
+      const summaryData = {
+        roomNumber: serviceRequests[0]?.details?.roomNumber || 'Unknown',
+        requests: serviceRequests.map(req => ({
+          service: req.serviceType,
+          details: req.requestText,
+        })),
         timestamp: new Date(),
-      });
+      };
 
-      if (serviceRequests && serviceRequests.length > 0) {
-        setServiceRequests(serviceRequests);
-      }
+      console.log('📋 [DEBUG] Creating summary with data:', summaryData);
 
-      // ✅ STEP 2: Remove old popup and show new one with real data
-      if (summaryPopupIdRef.current) {
-        removePopup(summaryPopupIdRef.current);
-      }
-
-      // ✅ STEP 3: Create new popup with real summary data
-      const realSummaryElement = React.createElement(
+      const summaryElement = React.createElement(
         'div',
         {
           style: {
-            padding: '20px',
-            textAlign: 'center',
-            maxWidth: '400px',
+            padding: '16px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '8px',
+            marginBottom: '16px',
           },
         },
         [
+          React.createElement('h3', { key: 'title' }, '📋 Call Summary'),
           React.createElement(
-            'h3',
-            {
-              key: 'title',
-              style: {
-                marginBottom: '16px',
-                color: '#333',
-                fontSize: '18px',
-                fontWeight: '600',
-              },
-            },
-            '📋 Call Summary'
+            'p',
+            { key: 'room' },
+            `Room: ${summaryData.roomNumber}`
           ),
-
           React.createElement(
-            'div',
-            {
-              key: 'icon',
-              style: { fontSize: '48px', marginBottom: '16px' },
-            },
-            '✅'
+            'p',
+            { key: 'time' },
+            `Time: ${summaryData.timestamp.toLocaleTimeString()}`
           ),
-
-          React.createElement(
-            'div',
-            {
-              key: 'summary',
-              style: {
-                marginBottom: '16px',
-                padding: '12px',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '8px',
-                textAlign: 'left',
-                fontSize: '14px',
-                lineHeight: '1.4',
-                whiteSpace: 'pre-wrap',
-              },
-            },
-            summary || 'Your call has been processed successfully!'
+          ...summaryData.requests.map((req, index) =>
+            React.createElement('div', { key: `req-${index}` }, [
+              React.createElement('strong', { key: 'service' }, req.service),
+              React.createElement(
+                'span',
+                { key: 'details' },
+                `: ${req.details}`
+              ),
+            ])
           ),
-
-          serviceRequests && serviceRequests.length > 0
-            ? React.createElement(
-                'div',
-                {
-                  key: 'requests',
-                  style: {
-                    marginTop: '16px',
-                    padding: '12px',
-                    backgroundColor: '#e3f2fd',
-                    borderRadius: '8px',
-                    textAlign: 'left',
-                  },
-                },
-                [
-                  React.createElement(
-                    'h4',
-                    {
-                      key: 'requests-title',
-                      style: {
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1976d2',
-                      },
-                    },
-                    `🛎️ Service Requests (${serviceRequests.length})`
-                  ),
-                  ...serviceRequests.map((req, index) =>
-                    React.createElement(
-                      'div',
-                      {
-                        key: `request-${index}`,
-                        style: {
-                          marginBottom: '4px',
-                          fontSize: '12px',
-                          color: '#424242',
-                        },
-                      },
-                      `• ${req.service}: ${req.details}`
-                    )
-                  ),
-                ]
-              )
-            : null,
         ]
       );
 
-      const newPopupId = showSummary(realSummaryElement, {
+      const popupId = showSummary(summaryElement, {
+        title: 'Call Complete',
+        priority: 'high',
+      });
+
+      summaryPopupIdRef.current = popupId;
+      console.log(
+        '✅ [DEBUG] Summary popup created successfully, ID:',
+        popupId
+      );
+    } catch (error) {
+      console.error('❌ [DEBUG] Failed to trigger summary popup:', error);
+
+      // ✅ FIX: Fallback summary on error
+      showSummary('Call completed. Please check with staff for details.', {
         title: 'Call Complete',
         priority: 'medium',
       });
+    }
+  }, [showSummary, serviceRequests]);
 
-      summaryPopupIdRef.current = newPopupId;
-      console.log('✅ [DEBUG] Real summary popup created, ID:', newPopupId);
+  // ✅ FIX: Enhanced update summary popup function
+  const updateSummaryPopup = useCallback(
+    (summary: string, serviceRequests: any[]) => {
+      try {
+        console.log('📋 [DEBUG] Updating summary popup...');
+
+        // Remove existing summary popup
+        if (summaryPopupIdRef.current) {
+          removePopup(summaryPopupIdRef.current);
+        }
+
+        // Create new summary popup with enhanced content
+        const realSummaryElement = React.createElement(
+          'div',
+          {
+            style: {
+              padding: '16px',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '8px',
+              textAlign: 'left',
+              fontSize: '14px',
+              lineHeight: '1.4',
+              whiteSpace: 'pre-wrap',
+            },
+          },
+          summary || 'Your call has been processed successfully!'
+        );
+
+        const newPopupId = showSummary(realSummaryElement, {
+          title: 'Call Complete',
+          priority: 'medium',
+        });
+
+        summaryPopupIdRef.current = newPopupId;
+        console.log(
+          '✅ [DEBUG] Updated summary popup created, ID:',
+          newPopupId
+        );
+      } catch (error) {
+        console.error('❌ [DEBUG] Failed to update summary popup:', error);
+      }
     },
     [showSummary, removePopup, setCallSummary, setServiceRequests]
   );
+
+  // ✅ FIX: Enhanced reset summary system
+  const resetSummarySystem = useCallback(() => {
+    try {
+      console.log('🔄 [DEBUG] Resetting summary system...');
+
+      // Remove existing summary popup
+      if (summaryPopupIdRef.current) {
+        removePopup(summaryPopupIdRef.current);
+        summaryPopupIdRef.current = '';
+      }
+
+      // Clear call summary and service requests
+      setCallSummary({
+        callId: '',
+        tenantId: '',
+        content: '',
+        timestamp: new Date(),
+      });
+      setServiceRequests([]);
+
+      console.log('✅ [DEBUG] Summary system reset successfully');
+    } catch (error) {
+      console.error('❌ [DEBUG] Failed to reset summary system:', error);
+    }
+  }, [removePopup, setCallSummary, setServiceRequests]);
 
   // ✅ NEW: Store callId for WebSocket integration
   const storeCallId = useCallback((callId: string) => {
@@ -259,7 +183,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
     (window as any).currentCallId = callId;
   }, []);
 
-  // ✅ NEW: Connect to global window for RefactoredAssistantContext access
+  // ✅ FIX: Connect to global window for RefactoredAssistantContext access
   useEffect(() => {
     console.log('🔗 [DEBUG] Connecting useConfirmHandler to window');
     window.triggerSummaryPopup = autoTriggerSummary;
