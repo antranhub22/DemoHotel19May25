@@ -365,11 +365,16 @@ export function useWebSocket() {
 
   // Initialize Socket.IO on mount
   useEffect(() => {
+    console.log('🔌 [DEBUG] ===== WEBSOCKET USEEFFECT FIRED =====');
     let mounted = true;
 
     // Only initialize if component is still mounted
+    console.log('🔌 [DEBUG] Mounted status:', mounted);
     if (mounted) {
+      console.log('🔌 [DEBUG] About to call initSocket()...');
       initSocket();
+    } else {
+      console.log('🔌 [DEBUG] Component not mounted, skipping initSocket');
     }
 
     return () => {
