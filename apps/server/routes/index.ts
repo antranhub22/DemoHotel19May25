@@ -136,6 +136,35 @@ router.get('/test-direct', (req, res) => {
   });
 });
 
+// ✅ DIRECT DATABASE TEST: Test database connection (BEFORE ANY MIDDLEWARE)
+router.get('/test-db-direct', async (req, res) => {
+  try {
+    const { getDatabase } = await import('@shared/db');
+    const db = await getDatabase();
+
+    // Simple test query
+    const result = await db.select().from(db.raw('1 as test')).limit(1);
+
+    res.json({
+      success: true,
+      message: 'Database connection successful',
+      data: {
+        connected: true,
+        testResult: result,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('Database test failed:', error);
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Database connection failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
 
