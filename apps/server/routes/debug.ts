@@ -4,6 +4,16 @@ import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
+// ✅ DEBUG: Simple test endpoint (NO AUTH REQUIRED)
+router.get('/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Debug test endpoint working',
+    timestamp: new Date().toISOString(),
+    headers: req.headers,
+  });
+});
+
 // ✅ DEBUG: Environment variables endpoint (NO AUTH REQUIRED)
 router.get('/env', (req, res) => {
   try {
