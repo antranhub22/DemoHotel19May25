@@ -277,8 +277,17 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   // ✅ MERGED: Single endCall function with full functionality
   const endCall = useCallback(async () => {
     console.log('📞 [DEBUG] RefactoredAssistant.endCall called');
-    console.log('🎯 [DEBUG] THIS IS THE ENDCALL FUNCTION - MANUALLY TESTING');
-    alert('🎯 endCall function was called!'); // Visual debug
+
+    // ✅ GUARD: Only proceed if there was actually an active call
+    if (!call.isCallActive && !vapi.isCallActive) {
+      console.log(
+        '⚠️ [DEBUG] No active call found, skipping endCall processing'
+      );
+      return;
+    }
+
+    // Debug logging for endCall function
+    console.log('🎯 [DEBUG] EndCall function triggered with active call');
     logger.debug(
       '[RefactoredAssistant] Ending call with summary processing...',
       'Component'
@@ -369,14 +378,12 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           console.log(
             '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
           );
-          alert('🎯 About to call window.triggerSummaryPopup()!'); // Visual debug
           window.triggerSummaryPopup();
           console.log(
             '✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully'
           );
         } else {
           console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
-          alert('❌ window.triggerSummaryPopup NOT AVAILABLE!'); // Visual debug
         }
 
         console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
