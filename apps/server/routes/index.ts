@@ -293,13 +293,42 @@ router.use('/api/health', healthRoutes);
 router.use('/api/temp-public', tempPublicRoutes);
 router.use('/api/debug', debugRoutes);
 
-// Dashboard routes (apply auth globally) - MUST come after specific routes
-router.use('/api', dashboardRoutes);
-
-// System Management (v2.0)
+// System Management (v2.0) - MOVED BEFORE dashboard to avoid catch-all
 router.use('/api/feature-flags', featureFlagsRoutes);
 router.use('/api/module-lifecycle', moduleLifecycleRoutes);
 router.use('/api/monitoring', monitoringRoutes);
+
+// ✅ FIX: Dashboard routes with SPECIFIC path instead of catch-all
+router.use('/api/dashboard', dashboardRoutes);
+
+// ✅ FALLBACK: Handle remaining API requests without auth requirement
+router.use('/api/*', (req, res, next) => {
+  // Log unhandled API requests for debugging
+  logger.debug(
+    `🔍 [Fallback] Unhandled API request: ${req.method} ${req.path}`,
+    'Router'
+  );
+
+  // If it's a health check or database related, allow it
+  if (
+    req.path.includes('/health') ||
+    req.path.includes('/test-db') ||
+    req.path.includes('/database') ||
+    req.path.includes('/core/') ||
+    req.path.includes('/modules/')
+  ) {
+    return next();
+  }
+
+  // For other unhandled API requests, return 404
+  res.status(404).json({
+    success: false,
+    error: 'API endpoint not found',
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ============================================
 // ROUTE REGISTRATION SUCCESS

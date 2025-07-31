@@ -1,6 +1,3 @@
-import { eq } from 'drizzle-orm';
-import express, { Request, Response } from 'express';
-import { z } from 'zod';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import {
   getHourlyActivity,
@@ -16,6 +13,9 @@ import {
   VapiIntegrationService,
 } from '@server/services/vapiIntegration';
 import { db } from '@shared/db';
+import { eq } from 'drizzle-orm';
+import express, { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 // ✅ FIXED: Removed duplicate hotelProfiles import
 import { hotelProfileMapper } from '@shared/db/transformers';
 import { logger } from '@shared/utils/logger';
@@ -25,8 +25,24 @@ import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
 
-// Apply authentication and tenant middleware to all dashboard routes
-router.use(authenticateJWT);
+// ✅ CONDITIONAL AUTH: Only apply authentication to routes that need it
+const conditionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  // Skip auth for health checks and public endpoints
+  if (
+    req.path.includes('/health') ||
+    req.path.includes('/test') ||
+    req.path.includes('/debug') ||
+    req.path.includes('/public')
+  ) {
+    console.log(`✅ [Dashboard] Bypassing auth for: ${req.path}`);
+    return next();
+  }
+
+  // Apply authentication for protected routes
+  return authenticateJWT(req, res, next);
+};
+
+router.use(conditionalAuth);
 // router.use(identifyTenant);
 // router.use(enforceRowLevelSecurity);
 
