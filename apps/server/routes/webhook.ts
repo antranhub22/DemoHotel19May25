@@ -105,7 +105,55 @@ router.post('/vapi', express.json(), async (req, res) => {
           serviceRequestsCount: serviceRequests?.length || 0,
         });
 
-        // ✅ STEP 3: Gửi kết quả cho client qua WebSocket
+        // ✅ STEP 3: Lưu summary từ OpenAI vào database
+        try {
+          // Extract room number from summary
+          const roomNumberMatch = summary.match(
+            /(?:room(?:\s+number)?|room|phòng)(?:\s*[:#-]?\s*)([0-9]{1,4}[A-Za-z]?)|(?:staying in|in room|in phòng|phòng số)(?:\s+)([0-9]{1,4}[A-Za-z]?)/
+          );
+          const extractedRoomNumber = roomNumberMatch
+            ? roomNumberMatch[1] || roomNumberMatch[2]
+            : null;
+
+          // Calculate duration from call data if available
+          let calculatedDuration = null;
+          if (
+            endOfCallReport?.call?.endedAt &&
+            endOfCallReport?.call?.startedAt
+          ) {
+            calculatedDuration = Math.floor(
+              (new Date(endOfCallReport.call.endedAt).getTime() -
+                new Date(endOfCallReport.call.startedAt).getTime()) /
+                1000
+            ).toString();
+          }
+
+          await storage.addCallSummary({
+            call_id: callId,
+            content: summary,
+            room_number: extractedRoomNumber,
+            duration: calculatedDuration,
+          });
+
+          logger.success(
+            '[Webhook] OpenAI summary saved to database',
+            'Component',
+            {
+              callId: callId,
+              summaryLength: summary?.length || 0,
+              roomNumber: extractedRoomNumber,
+              duration: calculatedDuration,
+            }
+          );
+        } catch (dbError) {
+          logger.error(
+            '[Webhook] Failed to save OpenAI summary to database:',
+            'Component',
+            dbError
+          );
+        }
+
+        // ✅ STEP 4: Gửi kết quả cho client qua WebSocket
         try {
           // Lấy io instance từ Express app
           const io = (req as any).app.get('io');
