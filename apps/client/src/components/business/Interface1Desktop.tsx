@@ -11,7 +11,7 @@ interface Interface1DesktopProps {
   showRightPanel: boolean;
   showingSummary: boolean;
   handleCallStart: (lang: any) => Promise<{ success: boolean; error?: string }>;
-  handleCallEnd: () => void;
+  handleCallEnd: () => Promise<void>;
   handleRightPanelClose: () => void;
 }
 
@@ -19,11 +19,9 @@ export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({
   isCallStarted,
   micLevel,
   showConversation,
-  showRightPanel,
   showingSummary,
   handleCallStart,
   handleCallEnd,
-  handleRightPanelClose,
 }) => {
   return (
     <div className="hidden md:block">
@@ -56,10 +54,7 @@ export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({
 
         {/* Column 3: Summary Popup (Right) */}
         <div className="w-full max-w-sm">
-          <DesktopSummaryPopup
-            isOpen={showRightPanel}
-            onClose={handleRightPanelClose}
-          />
+          <DesktopSummaryPopup />
         </div>
       </div>
 

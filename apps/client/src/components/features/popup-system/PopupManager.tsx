@@ -1,6 +1,4 @@
 import { usePopupContext } from '@/context/PopupContext';
-import { useRefactoredAssistant } from '@/context/RefactoredAssistantContext';
-import React, { Suspense, useEffect } from 'react';
 import { PopupStack } from './PopupStack';
 
 // Lazy load SummaryPopupContent for code splitting
@@ -226,12 +224,9 @@ export const usePopup = () => {
       }
       showSummary.lastCall = now;
 
-      // ✅ NEW: Check if we should show summary based on RefactoredAssistantContext
-      const { isCallActive } = useRefactoredAssistant();
-      if (!isCallActive) {
-        console.log('⚠️ [DEBUG] No active call, skipping summary popup');
-        return '';
-      }
+      // ✅ FIXED: Remove isCallActive check - summary should show AFTER call ends
+      // The summary popup is triggered when the call ends, so isCallActive will be false
+      console.log('📋 [DEBUG] Creating summary popup (call may have ended)');
 
       const popupId = addPopup({
         type: 'summary',

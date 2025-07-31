@@ -296,8 +296,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       call.endCall();
       console.log('✅ [DEBUG] call.endCall() completed');
 
-      // Step 3: Process summary if we have transcripts
-      if (transcript.transcripts.length >= 2) {
+      // Step 3: Process summary if we have any transcripts (reduced from 2 to 1)
+      if (transcript.transcripts.length >= 1) {
         console.log(
           '📞 [DEBUG] Processing call summary with transcripts:',
           transcript.transcripts.length
