@@ -10,6 +10,8 @@ import ErrorBoundary from '@/components/layout/ErrorBoundary';
 import { useAssistant } from '@/context';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+// ✅ NEW: Import useConfirmHandler to ensure it's always mounted
+import { useConfirmHandler } from '@/hooks/useConfirmHandler';
 import { Language } from '@/types/interface1.types';
 import { logger } from '@shared/utils/logger';
 import React, { useEffect, useState } from 'react';
@@ -102,6 +104,14 @@ const VoiceAssistant: React.FC = () => {
   const { logout } = useAuth();
   const isMobile = useIsMobile();
 
+  // ✅ NEW: Ensure useConfirmHandler is always mounted for summary popup
+  const {
+    autoTriggerSummary,
+    updateSummaryPopup,
+    resetSummarySystem,
+    storeCallId,
+  } = useConfirmHandler();
+
   // ✅ NEW: Guest Journey State Management
   const [guestJourneyState, setGuestJourneyState] = useState<{
     showWelcome: boolean;
@@ -151,6 +161,19 @@ const VoiceAssistant: React.FC = () => {
       });
     }
   }, [setLanguage]);
+
+  // ✅ NEW: Debug logging for useConfirmHandler
+  useEffect(() => {
+    console.log(
+      '🔗 [VoiceAssistant] useConfirmHandler mounted with functions:',
+      {
+        hasAutoTriggerSummary: typeof autoTriggerSummary === 'function',
+        hasUpdateSummaryPopup: typeof updateSummaryPopup === 'function',
+        hasResetSummarySystem: typeof resetSummarySystem === 'function',
+        hasStoreCallId: typeof storeCallId === 'function',
+      }
+    );
+  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
 
   // ✅ NEW: Handle Welcome completion
   const handleWelcomeComplete = () => {

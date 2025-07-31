@@ -1,10 +1,10 @@
-import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import { setupServer } from 'msw/node';
 
 // Mock API handlers
 export const handlers = [
   // Mock authentication endpoints
-  rest.post('/api/auth/login', (req, res, ctx) => {
+  rest.post('/api/auth/login', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -19,7 +19,7 @@ export const handlers = [
   }),
 
   // Mock voice assistant endpoints
-  rest.post('/api/call-start', (req, res, ctx) => {
+  rest.post('/api/call-start', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -30,7 +30,7 @@ export const handlers = [
     );
   }),
 
-  rest.post('/api/call-end', (req, res, ctx) => {
+  rest.post('/api/call-end', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -42,7 +42,7 @@ export const handlers = [
   }),
 
   // Mock notification endpoints
-  rest.post('/api/notifications', (req, res, ctx) => {
+  rest.post('/api/notifications', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -53,7 +53,7 @@ export const handlers = [
   }),
 
   // Mock analytics endpoints
-  rest.get('/api/analytics/overview', (req, res, ctx) => {
+  rest.get('/api/analytics/overview', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -83,7 +83,7 @@ export const handlers = [
   }),
 
   // Mock service requests
-  rest.get('/api/requests', (req, res, ctx) => {
+  rest.get('/api/request', (_req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json([
@@ -98,7 +98,7 @@ export const handlers = [
     );
   }),
 
-  rest.post('/api/requests', (req, res, ctx) => {
+  rest.post('/api/request', (_req, res, ctx) => {
     return res(
       ctx.status(201),
       ctx.json({
@@ -111,12 +111,9 @@ export const handlers = [
   // Fallback handler for unhandled requests
   rest.all('*', (req, res, ctx) => {
     console.warn(`Unhandled ${req.method} request to ${req.url}`);
-    return res(
-      ctx.status(404),
-      ctx.json({ error: 'Not found' })
-    );
+    return res(ctx.status(404), ctx.json({ error: 'Not found' }));
   }),
 ];
 
 // Create MSW server
-export const server = setupServer(...handlers); 
+export const server = setupServer(...handlers);
