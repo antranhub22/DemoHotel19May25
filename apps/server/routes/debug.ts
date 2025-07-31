@@ -14,6 +14,34 @@ router.get('/test', (req, res) => {
   });
 });
 
+// ✅ DEBUG: Simple database test (NO AUTH REQUIRED)
+router.get('/db-test', async (req, res) => {
+  try {
+    const db = getDatabase();
+
+    // Simple test query
+    const result = await db.select().from(db.raw('1 as test')).limit(1);
+
+    res.json({
+      success: true,
+      message: 'Database connection successful',
+      data: {
+        connected: true,
+        testResult: result,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    logger.error('Database test failed:', error);
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error ? error.message : 'Database connection failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // ✅ DEBUG: Environment variables endpoint (NO AUTH REQUIRED)
 router.get('/env', (req, res) => {
   try {
