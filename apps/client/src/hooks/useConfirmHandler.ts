@@ -1,6 +1,6 @@
+import React, { useCallback, useEffect, useRef } from 'react';
 import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
-import React, { useCallback, useEffect, useRef } from 'react';
 
 interface UseConfirmHandlerReturn {
   // ✅ SIMPLIFIED: Clean auto-trigger summary function
