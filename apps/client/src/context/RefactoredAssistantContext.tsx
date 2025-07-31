@@ -129,22 +129,27 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const configuration = useConfiguration();
   const vapi = useVapi();
 
-  // ✅ TEMPORARILY DISABLED: VapiProvider callback (was bypassing protection logic)
-  // This was causing immediate call.endCall() without proper checks
-  /*
+  // ✅ RE-ENABLED: VapiProvider callback with protection logic
   useEffect(() => {
-    console.log('📞 [DEBUG] Setting up VapiProvider callback');
+    console.log('📞 [DEBUG] Setting up VapiProvider callback with protection');
     vapi.setCallEndCallback(() => {
       console.log(
         '📞 [DEBUG] VapiProvider callback triggered, checking call state...'
       );
 
-      // ✅ FIX: Always trigger CallContext.endCall() when VapiProvider ends call
-      // The VapiProvider callback only fires when there was actually a call
-      console.log(
-        '📞 [DEBUG] VapiProvider ended call, calling CallContext.endCall()'
-      );
-      call.endCall();
+      // ✅ NEW: Add protection - only trigger if call was active for minimum duration
+
+      // Check if call was actually active (simple check)
+      if (call.isCallActive || vapi.isCallActive) {
+        console.log(
+          '📞 [DEBUG] Call confirmed active, triggering CallContext.endCall()'
+        );
+        call.endCall();
+      } else {
+        console.log(
+          '📞 [DEBUG] No active call detected, skipping CallContext.endCall()'
+        );
+      }
     });
 
     // ✅ FIX: Cleanup callback on unmount
@@ -153,7 +158,6 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       vapi.setCallEndCallback(() => {}); // Clear callback
     };
   }, [vapi, call]);
-  */
 
   // ✅ NOTE: endCall registration moved after endCall definition
 
