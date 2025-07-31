@@ -171,22 +171,42 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           return;
         }
 
+        // ✅ NEW: Check Vapi SDK state directly instead of using delay
         console.log(
-          '📞 [DEBUG] VapiProvider: Call history detected, processing call end'
+          '📞 [DEBUG] VapiProvider: Checking Vapi SDK internal state...'
         );
 
-        // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
-        if (callEndCallback) {
-          console.log('📞 [DEBUG] VapiProvider calling external callback');
-          callEndCallback();
-        } else {
-          console.log('📞 [DEBUG] VapiProvider no external callback available');
-        }
+        // Use Vapi SDK's own state instead of our context state to avoid race conditions
+        const vapiSdkActive = vapi?.isCallActive?.() || false;
+        console.log('📞 [DEBUG] VapiProvider SDK state:', {
+          vapiSdkActive,
+          contextActive: isCallActive,
+        });
 
-        // Update state after callback
-        setIsCallActive(false);
-        setMicLevel(0);
-        hadActiveCallRef.current = false; // ✅ Reset call history after processing
+        if (!vapiSdkActive) {
+          console.log(
+            '📞 [DEBUG] VapiProvider: Vapi SDK confirms call ended, processing...'
+          );
+
+          // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
+          if (callEndCallback) {
+            console.log('📞 [DEBUG] VapiProvider calling external callback');
+            callEndCallback();
+          } else {
+            console.log(
+              '📞 [DEBUG] VapiProvider no external callback available'
+            );
+          }
+
+          // Update state after callback
+          setIsCallActive(false);
+          setMicLevel(0);
+          hadActiveCallRef.current = false; // ✅ Reset call history after processing
+        } else {
+          console.log(
+            '📞 [DEBUG] VapiProvider: Vapi SDK still active, ignoring onCallEnd (race condition)'
+          );
+        }
 
         // Keep call ID for a bit to allow final transcripts, then reset
         setTimeout(() => {
