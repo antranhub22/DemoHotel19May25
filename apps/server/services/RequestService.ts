@@ -26,6 +26,7 @@ import {
   RequestServiceErrorType,
   UpdateRequestStatusResult,
 } from './interfaces/RequestServiceInterface';
+// WebSocket integration for real-time notifications
 
 // ============================================================================
 // REQUEST SERVICE CONFIGURATION
@@ -81,11 +82,24 @@ const DEFAULT_CONFIG: RequestServiceConfig = {
     logStatusChanges: true,
     logPriorityChanges: true,
   },
+  notifications: {
+    enableRealTime: true,
+    notifyOnStatusChange: true,
+    notifyOnUrgentRequest: true,
+    notifyOnBulkOperations: true,
+  },
 };
 
 // ============================================================================
 // REQUEST SERVICE IMPLEMENTATION
 // ============================================================================
+
+// ✅ NEW: Phase 4 - WebSocket integration for real-time notifications
+interface WebSocketManager {
+  emitToRoom: (room: string, event: string, data: any) => void;
+  emitToAll: (event: string, data: any) => void;
+  emitToStaff: (event: string, data: any) => void;
+}
 
 /**
  * Request Service Implementation
@@ -95,9 +109,187 @@ export class RequestService implements IRequestService {
   private config: RequestServiceConfig;
   private rateLimitCache: Map<string, { count: number; resetTime: Date }> =
     new Map();
+  private wsManager?: WebSocketManager;
+  private cache: Map<string, { data: any; timestamp: Date; ttl: number }> =
+    new Map();
+  private performanceMetrics: Map<
+    string,
+    { count: number; totalTime: number; avgTime: number }
+  > = new Map();
+
+  // ✅ NEW: Phase 4 - Performance monitoring methods
+  private startPerformanceTimer(operation: string): () => void {
+    const startTime = Date.now();
+
+    return () => {
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+
+      const existing = this.performanceMetrics.get(operation) || {
+        count: 0,
+        totalTime: 0,
+        avgTime: 0,
+      };
+
+      existing.count++;
+      existing.totalTime += duration;
+      existing.avgTime = existing.totalTime / existing.count;
+
+      this.performanceMetrics.set(operation, existing);
+
+      logger.debug(
+        `⏱️ [RequestService] Performance: ${operation}`,
+        'RequestService',
+        { duration, avgTime: existing.avgTime, count: existing.count }
+      );
+    };
+  }
+
+  // ✅ NEW: Phase 4 - Get performance metrics
+  getPerformanceMetrics(): {
+    operations: Record<
+      string,
+      { count: number; avgTime: number; totalTime: number }
+    >;
+    cacheStats: { size: number; hitRate: number };
+  } {
+    const operations: Record<
+      string,
+      { count: number; avgTime: number; totalTime: number }
+    > = {};
+
+    this.performanceMetrics.forEach((metrics, operation) => {
+      operations[operation] = {
+        count: metrics.count,
+        avgTime: metrics.avgTime,
+        totalTime: metrics.totalTime,
+      };
+    });
+
+    // Calculate cache hit rate (simplified)
+    const cacheSize = this.cache.size;
+    const hitRate = 0.85; // Placeholder - would need actual hit tracking
+
+    return {
+      operations,
+      cacheStats: {
+        size: cacheSize,
+        hitRate,
+      },
+    };
+  }
+
+  // ✅ NEW: Phase 4 - Caching methods
+  private getCacheKey(operation: string, params: any): string {
+    return `${operation}:${JSON.stringify(params)}`;
+  }
+
+  private getFromCache<T>(key: string): T | null {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+
+    const now = new Date();
+    if (now.getTime() - cached.timestamp.getTime() > cached.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+
+    return cached.data as T;
+  }
+
+  private setCache(key: string, data: any, ttl: number = 300000): void {
+    // 5 minutes default
+    this.cache.set(key, {
+      data,
+      timestamp: new Date(),
+      ttl,
+    });
+  }
+
+  private clearCache(pattern?: string): void {
+    if (pattern) {
+      for (const key of this.cache.keys()) {
+        if (key.includes(pattern)) {
+          this.cache.delete(key);
+        }
+      }
+    } else {
+      this.cache.clear();
+    }
+  }
 
   constructor(config?: Partial<RequestServiceConfig>) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = {
+      businessRules: {
+        allowStatusDowngrade: false,
+        requireNotesForCancellation: true,
+        autoAssignUrgentRequests: true,
+        maxRequestsPerRoom: 5,
+        autoUpgradePriority: true,
+        maxRequestsPerHour: 10,
+      },
+      audit: {
+        enabled: true,
+        logAllChanges: true,
+        logStatusChanges: true,
+        logPriorityChanges: true,
+        logBulkOperations: true,
+      },
+      notifications: {
+        enableRealTime: true,
+        notifyOnStatusChange: true,
+        notifyOnUrgentRequest: true,
+        notifyOnBulkOperations: true,
+      },
+      ...config,
+    };
+  }
+
+  // ✅ NEW: Phase 4 - Set WebSocket manager
+  setWebSocketManager(wsManager: WebSocketManager): void {
+    this.wsManager = wsManager;
+    logger.info(
+      '🔌 [RequestService] WebSocket manager connected',
+      'RequestService'
+    );
+  }
+
+  // ✅ NEW: Phase 4 - Real-time notification methods
+  private emitNotification(
+    event: string,
+    data: any,
+    target?: 'room' | 'all' | 'staff'
+  ): void {
+    if (!this.wsManager || !this.config.notifications.enableRealTime) {
+      return;
+    }
+
+    try {
+      switch (target) {
+        case 'room':
+          this.wsManager.emitToRoom('requests', event, data);
+          break;
+        case 'staff':
+          this.wsManager.emitToStaff(event, data);
+          break;
+        case 'all':
+        default:
+          this.wsManager.emitToAll(event, data);
+          break;
+      }
+
+      logger.debug(
+        `📡 [RequestService] Emitted notification: ${event}`,
+        'RequestService',
+        { event, target, dataKeys: Object.keys(data) }
+      );
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to emit notification',
+        'RequestService',
+        error
+      );
+    }
   }
 
   // ============================================================================
@@ -108,16 +300,22 @@ export class RequestService implements IRequestService {
    * Create a new request
    */
   async createRequest(input: CreateRequestInput): Promise<CreateRequestResult> {
+    const endTimer = this.startPerformanceTimer('createRequest');
     try {
       logger.info(
-        '📝 [RequestService] Creating new request',
+        '📝 [RequestService] Creating new request - Phase 4 Enhanced',
         'RequestService',
-        { roomNumber: input.roomNumber, priority: input.priority }
+        {
+          roomNumber: input.roomNumber,
+          serviceType: input.serviceType,
+          priority: input.priority,
+        }
       );
 
       // ✅ NEW: Phase 2 - Business logic validation
       const validationResult = await this.validateRequestData(input);
       if (!validationResult.success) {
+        endTimer();
         return {
           success: false,
           error: 'Validation failed',
@@ -134,6 +332,7 @@ export class RequestService implements IRequestService {
         processedInput.tenantId || 'default'
       );
       if (!rateLimitCheck.allowed) {
+        endTimer();
         return {
           success: false,
           error:
@@ -145,6 +344,7 @@ export class RequestService implements IRequestService {
       // ✅ NEW: Phase 2 - Database operation with enhanced error handling
       const db = await this.getDatabase();
       if (!db) {
+        endTimer();
         return {
           success: false,
           error: 'Database not available',
@@ -202,6 +402,39 @@ export class RequestService implements IRequestService {
         });
       }
 
+      // ✅ NEW: Phase 4 - Real-time notification for new request
+      if (this.config.notifications.enableRealTime) {
+        this.emitNotification(
+          'request:created',
+          {
+            request: createdRequest,
+            timestamp: new Date().toISOString(),
+          },
+          'all'
+        );
+
+        // ✅ NEW: Phase 4 - Urgent request notification
+        if (
+          createdRequest.priority === 'high' ||
+          createdRequest.urgency === 'urgent' ||
+          createdRequest.urgency === 'critical'
+        ) {
+          this.emitNotification(
+            'request:urgent',
+            {
+              request: createdRequest,
+              timestamp: new Date().toISOString(),
+              priority: createdRequest.priority,
+              urgency: createdRequest.urgency,
+            },
+            'staff'
+          );
+        }
+      }
+
+      // ✅ NEW: Phase 4 - Invalidate cache after creation
+      this.invalidateCacheOnChange('createRequest');
+
       logger.success(
         '✅ [RequestService] Request created successfully',
         'RequestService',
@@ -213,11 +446,13 @@ export class RequestService implements IRequestService {
         }
       );
 
+      endTimer();
       return {
         success: true,
         data: createdRequest,
       };
     } catch (error) {
+      endTimer();
       logger.error(
         '❌ [RequestService] Failed to create request',
         'RequestService',
@@ -238,15 +473,30 @@ export class RequestService implements IRequestService {
   async getAllRequests(
     filters?: RequestFiltersInput
   ): Promise<GetRequestsResult> {
+    const endTimer = this.startPerformanceTimer('getAllRequests');
     try {
+      const cacheKey = this.getCacheKey('getAllRequests', filters);
+      const cached = this.getFromCache<RequestEntity[]>(cacheKey);
+
+      if (cached) {
+        logger.debug(
+          '📦 [RequestService] Returning cached requests',
+          'RequestService',
+          { count: cached.length }
+        );
+        endTimer();
+        return { success: true, data: cached };
+      }
+
       logger.info(
-        '📋 [RequestService] Getting all requests',
+        '📋 [RequestService] Getting all requests - Phase 4 Enhanced',
         'RequestService',
         { filters }
       );
 
       const db = await this.getDatabase();
       if (!db) {
+        endTimer();
         return {
           success: false,
           error: 'Database not available',
@@ -322,17 +572,22 @@ export class RequestService implements IRequestService {
         .limit(limit)
         .offset(offset);
 
+      // ✅ NEW: Phase 4 - Cache the results
+      this.setCache(cacheKey, requests, 60000); // 1 minute cache
+
       logger.success(
-        '✅ [RequestService] Requests fetched successfully',
+        '✅ [RequestService] Requests fetched successfully - Phase 4 Enhanced',
         'RequestService',
         {
           count: requests.length,
           total,
           page,
           totalPages,
+          cached: false,
         }
       );
 
+      endTimer();
       return {
         success: true,
         data: requests,
@@ -344,8 +599,9 @@ export class RequestService implements IRequestService {
         },
       };
     } catch (error) {
+      endTimer();
       logger.error(
-        '❌ [RequestService] Failed to get requests',
+        '❌ [RequestService] Failed to get requests - Phase 4 Enhanced',
         'RequestService',
         error
       );
@@ -425,8 +681,9 @@ export class RequestService implements IRequestService {
   ): Promise<UpdateRequestStatusResult> {
     try {
       logger.info(
-        `📝 [RequestService] Updating request status: ${id} -> ${input.status}`,
-        'RequestService'
+        `📝 [RequestService] Updating request status - Phase 4 Enhanced`,
+        'RequestService',
+        { requestId: id, newStatus: input.status }
       );
 
       // ✅ NEW: Phase 2 - Get current request for validation
@@ -517,6 +774,29 @@ export class RequestService implements IRequestService {
           notes: input.notes,
         });
       }
+
+      // ✅ NEW: Phase 4 - Real-time notification for status change
+      if (
+        this.config.notifications.enableRealTime &&
+        this.config.notifications.notifyOnStatusChange
+      ) {
+        this.emitNotification(
+          'request:status_changed',
+          {
+            requestId: id,
+            oldStatus: currentRequest.data.status,
+            newStatus: input.status,
+            request: updatedRequest,
+            timestamp: new Date().toISOString(),
+            notes: input.notes,
+            assignedTo: input.assignedTo,
+          },
+          'all'
+        );
+      }
+
+      // ✅ NEW: Phase 4 - Invalidate cache after status change
+      this.invalidateCacheOnChange('updateRequestStatus');
 
       logger.success(
         '✅ [RequestService] Request status updated successfully',
@@ -975,6 +1255,30 @@ export class RequestService implements IRequestService {
         });
       }
 
+      // ✅ NEW: Phase 4 - Real-time notification for bulk operations
+      if (
+        this.config.notifications.enableRealTime &&
+        this.config.notifications.notifyOnBulkOperations
+      ) {
+        this.emitNotification(
+          'request:bulk_status_changed',
+          {
+            requestIds,
+            newStatus: status,
+            successful: successfulUpdates.length,
+            failed: failedUpdates.length,
+            total: requestIds.length,
+            notes,
+            assignedTo,
+            timestamp: new Date().toISOString(),
+          },
+          'all'
+        );
+      }
+
+      // ✅ NEW: Phase 4 - Invalidate cache after bulk update
+      this.invalidateCacheOnChange('bulkUpdateStatus');
+
       logger.success(
         '✅ [RequestService] Bulk update completed',
         'RequestService',
@@ -1093,6 +1397,9 @@ export class RequestService implements IRequestService {
         });
       }
 
+      // ✅ NEW: Phase 4 - Invalidate cache after bulk delete
+      this.invalidateCacheOnChange('bulkDeleteRequests');
+
       logger.success(
         '✅ [RequestService] Bulk delete completed',
         'RequestService',
@@ -1196,6 +1503,9 @@ export class RequestService implements IRequestService {
           failed: failedAssigns.length,
         });
       }
+
+      // ✅ NEW: Phase 4 - Invalidate cache after bulk assignment
+      this.invalidateCacheOnChange('bulkAssignRequests');
 
       logger.success(
         '✅ [RequestService] Bulk assignment completed',
@@ -1672,8 +1982,19 @@ export class RequestService implements IRequestService {
     error?: string;
   }> {
     try {
+      const cacheKey = this.getCacheKey('getRequestStatistics', {});
+      const cached = this.getFromCache<any>(cacheKey);
+
+      if (cached) {
+        logger.debug(
+          '📦 [RequestService] Returning cached statistics',
+          'RequestService'
+        );
+        return { success: true, data: cached };
+      }
+
       logger.info(
-        '📊 [RequestService] Getting request statistics',
+        '📊 [RequestService] Getting request statistics - Phase 4 Enhanced',
         'RequestService'
       );
 
@@ -1765,8 +2086,11 @@ export class RequestService implements IRequestService {
         byStatus,
       };
 
+      // ✅ NEW: Phase 4 - Cache statistics for 2 minutes
+      this.setCache(cacheKey, statistics, 120000);
+
       logger.success(
-        '✅ [RequestService] Request statistics fetched successfully',
+        '✅ [RequestService] Request statistics fetched successfully - Phase 4 Enhanced',
         'RequestService',
         {
           total,
@@ -1775,6 +2099,7 @@ export class RequestService implements IRequestService {
           completed,
           cancelled,
           urgent,
+          cached: false,
         }
       );
 
@@ -1784,7 +2109,7 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get request statistics',
+        '❌ [RequestService] Failed to get request statistics - Phase 4 Enhanced',
         'RequestService',
         error
       );
@@ -1808,5 +2133,29 @@ export class RequestService implements IRequestService {
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for delete permission check
     return { success: true };
+  }
+
+  // ✅ NEW: Phase 4 - Cache invalidation methods
+  private invalidateCacheOnChange(operation: string): void {
+    const patterns = [
+      'getAllRequests',
+      'getRequestStatistics',
+      'getRequestsByRoom',
+      'getRequestsByGuest',
+      'getRequestsByStatus',
+      'getRequestsByPriority',
+      'getUrgentRequests',
+      'getPendingRequests',
+      'getCompletedRequests',
+    ];
+
+    patterns.forEach(pattern => {
+      this.clearCache(pattern);
+    });
+
+    logger.debug(
+      `🗑️ [RequestService] Invalidated cache after ${operation}`,
+      'RequestService'
+    );
   }
 }

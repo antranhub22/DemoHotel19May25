@@ -309,48 +309,26 @@ export interface RequestServiceEvents {
  * Request Service Configuration
  */
 export interface RequestServiceConfig {
-  /**
-   * Default pagination settings
-   */
-  pagination: {
-    defaultPage: number;
-    defaultLimit: number;
-    maxLimit: number;
-  };
-
-  /**
-   * Status transition rules
-   */
-  statusTransitions: {
-    [key: string]: string[];
-  };
-
-  /**
-   * Priority validation rules
-   */
-  priorityValidation: {
-    highPriorityKeywords: string[];
-    autoUpgradeToHigh: boolean;
-  };
-
-  /**
-   * Business rules
-   */
   businessRules: {
     allowStatusDowngrade: boolean;
     requireNotesForCancellation: boolean;
     autoAssignUrgentRequests: boolean;
     maxRequestsPerRoom: number;
+    autoUpgradePriority: boolean;
+    maxRequestsPerHour: number;
   };
-
-  /**
-   * Audit settings
-   */
   audit: {
     enabled: boolean;
     logAllChanges: boolean;
     logStatusChanges: boolean;
     logPriorityChanges: boolean;
+    logBulkOperations: boolean;
+  };
+  notifications: {
+    enableRealTime: boolean;
+    notifyOnStatusChange: boolean;
+    notifyOnUrgentRequest: boolean;
+    notifyOnBulkOperations: boolean;
   };
 }
 
