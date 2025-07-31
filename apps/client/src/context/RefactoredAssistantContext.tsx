@@ -354,39 +354,14 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           transcript.transcripts.length
         );
 
-        // ✅ FALLBACK: Always trigger Summary Popup even without transcripts
-        // Backend webhook will handle the summary processing
+        // ✅ DISABLED FALLBACK: Do NOT trigger Summary Popup without transcripts
+        // This was causing premature Summary Popup during active calls
         console.log(
-          '🔄 [DEBUG] FALLBACK: Triggering Summary Popup without transcripts'
+          '⚠️ [DEBUG] FALLBACK DISABLED: No transcripts found, NOT triggering Summary Popup'
         );
-
-        const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
-        order.setCallSummary({
-          callId: vapiCallId,
-          tenantId: configuration.tenantId || 'default',
-          content: 'Processing call summary...', // Placeholder content
-          timestamp: new Date(),
-        });
-
-        // Store callId globally for WebSocket integration
-        if (window.storeCallId) {
-          window.storeCallId(vapiCallId);
-        }
-
-        // Trigger summary popup via global function
-        if (window.triggerSummaryPopup) {
-          console.log(
-            '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
-          );
-          window.triggerSummaryPopup();
-          console.log(
-            '✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully'
-          );
-        } else {
-          console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
-        }
-
-        console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
+        console.log(
+          '💡 [DEBUG] Summary will be triggered by backend webhook when ready'
+        );
       }
 
       console.log('✅ [DEBUG] RefactoredAssistant.endCall completed');
