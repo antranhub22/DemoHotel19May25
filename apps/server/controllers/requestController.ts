@@ -2,6 +2,8 @@ import { getDatabase, initializeDatabase } from '@shared/db';
 import { request } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { Request, Response } from 'express';
+import { desc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 // ✅ FIX: Enhanced error handling for database operations with fallback
 async function safeDatabaseOperation<T>(
@@ -63,13 +65,14 @@ export class RequestController {
         return await db
           .insert(request)
           .values({
-            serviceType,
-            requestText,
-            roomNumber,
-            guestName,
+            tenant_id: req.body.tenantId || 'default-tenant',
+            room_number: roomNumber,
+            request_content: requestText,
+            guest_name: guestName,
             priority: priority || 'medium',
             status: 'pending',
-            createdAt: new Date(),
+            created_at: new Date(),
+            description: serviceType ? `Service: ${serviceType}` : undefined,
           })
           .returning();
       });
@@ -141,16 +144,17 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation with proper async handling
+      // ✅ FIX: Use safe database operation with correct Drizzle syntax
       const requestsData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        if (!db || !db.query) {
+        if (!db || !db.select) {
           throw new Error('Database not properly initialized');
         }
-        return await db.query.request.findMany({
-          orderBy: { createdAt: 'desc' },
-          limit: 100,
-        });
+        return await db
+          .select()
+          .from(request)
+          .orderBy(desc(request.created_at))
+          .limit(100);
       });
 
       logger.success(
@@ -162,37 +166,24 @@ export class RequestController {
       (res as any).json({ success: true, data: requestsData });
     } catch (error) {
       // ✅ ENHANCED: Better error detection and reporting
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-
-      if (
-        errorMessage.includes('Database connection error') ||
-        errorMessage.includes('connection') ||
-        errorMessage.includes('ECONNREFUSED')
-      ) {
-        logger.error(
-          '❌ [RequestController] Database connection error',
-          'RequestController',
-          error
-        );
-        (res as any).status(503).json({
-          success: false,
-          error: 'Database service temporarily unavailable. Please try again.',
-          code: 'DATABASE_CONNECTION_ERROR',
-        });
-        return;
-      }
-
       logger.error(
         '❌ [RequestController] Failed to fetch requests',
         'RequestController',
         error
       );
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
       (res as any).status(500).json({
         success: false,
         error: 'Failed to fetch requests',
-        details:
-          process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+        details: errorMessage,
+        _metadata: {
+          module: 'request-module',
+          version: '2.0.0',
+          architecture: 'modular-enhanced',
+        },
       });
     }
   }
@@ -209,37 +200,40 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation with proper async handling
-      const request = await safeDatabaseOperation(async () => {
+      // ✅ FIX: Use safe database operation with correct Drizzle syntax
+      const requestData = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
-        if (!db || !db.query) {
+        if (!db || !db.select) {
           throw new Error('Database not properly initialized');
         }
-        return await db.query.request.findFirst({
-          where: { id: parseInt(id) },
-        });
+        return await db
+          .select()
+          .from(request)
+          .where(eq(request.id, parseInt(id)))
+          .limit(1);
       });
 
-      if (!request) {
+      if (!requestData || requestData.length === 0) {
         (res as any).status(404).json({
           success: false,
           error: 'Request not found',
+          code: 'REQUEST_NOT_FOUND',
         });
         return;
       }
 
-      (res as any).json({ success: true, data: request });
+      (res as any).json({ success: true, data: requestData[0] });
     } catch (error) {
       logger.error(
-        '❌ [RequestController] Failed to fetch request by ID',
+        '❌ [RequestController] Failed to get request by ID',
         'RequestController',
         error
       );
+
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to fetch request',
-        details:
-          process.env.NODE_ENV === 'development' ? String(error) : undefined,
+        error: 'Failed to get request',
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
@@ -252,21 +246,34 @@ export class RequestController {
     try {
       const { id } = req.params;
       const { status } = req.body;
+
       logger.info(
-        `📋 [RequestController] Updating request status: ${id} -> ${status}`,
+        `📝 [RequestController] Updating request status: ${id} -> ${status}`,
         'RequestController'
       );
 
-      // ✅ FIX: Use safe database operation
+      if (!status) {
+        (res as any).status(400).json({
+          success: false,
+          error: 'Status is required',
+          code: 'VALIDATION_ERROR',
+        });
+        return;
+      }
+
+      // ✅ FIX: Use safe database operation with correct Drizzle syntax
       const updatedRequest = await safeDatabaseOperation(async () => {
         const db = await getDatabase();
+        if (!db || !db.update) {
+          throw new Error('Database not properly initialized');
+        }
         return await db
           .update(request)
           .set({
             status,
-            updatedAt: new Date(),
+            updated_at: new Date(),
           })
-          .where({ id: parseInt(id) })
+          .where(eq(request.id, parseInt(id)))
           .returning();
       });
 
@@ -274,6 +281,7 @@ export class RequestController {
         (res as any).status(404).json({
           success: false,
           error: 'Request not found',
+          code: 'REQUEST_NOT_FOUND',
         });
         return;
       }
@@ -285,11 +293,11 @@ export class RequestController {
         'RequestController',
         error
       );
+
       (res as any).status(500).json({
         success: false,
         error: 'Failed to update request status',
-        details:
-          process.env.NODE_ENV === 'development' ? String(error) : undefined,
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   }
