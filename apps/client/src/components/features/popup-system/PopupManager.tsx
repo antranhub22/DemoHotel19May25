@@ -1,3 +1,4 @@
+import React, { useEffect, Suspense } from 'react';
 import { usePopupContext } from '@/context/PopupContext';
 import { PopupStack } from './PopupStack';
 

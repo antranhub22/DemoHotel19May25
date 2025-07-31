@@ -1,3 +1,4 @@
+import React from 'react';
 import { DebugButtons } from '../features/debug/DebugButtons';
 import { DebugWrapper } from '../features/debug/DebugWrapper';
 import { DesktopSummaryPopup } from '../features/popup-system/DesktopSummaryPopup';

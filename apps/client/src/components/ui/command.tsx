@@ -1,3 +1,4 @@
+import React from 'react';
 import type { DialogProps } from '@radix-ui/react-dialog'; // ✅ FIXED: Add missing DialogProps import
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
