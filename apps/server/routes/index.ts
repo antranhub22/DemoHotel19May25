@@ -126,6 +126,16 @@ router.use('/api/health', healthRoutes);
 router.use('/api/temp-public', tempPublicRoutes);
 router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
+// ✅ DIRECT TEST: Simple endpoint to test authentication bypass
+router.get('/api/test-direct', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Direct test endpoint working',
+    timestamp: new Date().toISOString(),
+    headers: req.headers,
+  });
+});
+
 // Dashboard routes (apply auth globally) - MUST come after specific routes
 router.use('/api', dashboardRoutes);
 
