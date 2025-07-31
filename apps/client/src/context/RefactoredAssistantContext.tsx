@@ -137,17 +137,12 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         '📞 [DEBUG] VapiProvider callback triggered, checking call state...'
       );
 
-      // ✅ FIX: Only trigger if call was actually active
-      if (call.isCallActive || vapi.isCallActive) {
-        console.log(
-          '📞 [DEBUG] Call was active, calling CallContext.endCall()'
-        );
-        call.endCall();
-      } else {
-        console.log(
-          '📞 [DEBUG] No active call found, skipping CallContext.endCall()'
-        );
-      }
+      // ✅ FIX: Always trigger CallContext.endCall() when VapiProvider ends call
+      // The VapiProvider callback only fires when there was actually a call
+      console.log(
+        '📞 [DEBUG] VapiProvider ended call, calling CallContext.endCall()'
+      );
+      call.endCall();
     });
 
     // ✅ FIX: Cleanup callback on unmount
