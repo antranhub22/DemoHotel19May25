@@ -41,7 +41,7 @@
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:clean": "docker-compose down -v && docker system prune -f",
-    "deploy:production": "npm run build:production && npm run db:setup && npm run db:seed",
+    "deploy:production": "npm run build:production && npm run db:setup && npm run migrate:production && npm run db:seed",
     "health:check": "curl -f http://localhost:10000/api/health || echo 'Health check failed'",
     "backup:create": "mkdir -p backups && pg_dump $DATABASE_URL > backups/backup-$(date +%Y%m%d-%H%M%S).sql 2>/dev/null || echo 'Backup failed - check DATABASE_URL'",
     "backup:restore": "test -n \"$BACKUP_FILE\" && psql $DATABASE_URL < $BACKUP_FILE || echo 'Set BACKUP_FILE environment variable'",
