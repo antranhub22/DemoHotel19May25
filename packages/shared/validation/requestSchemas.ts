@@ -20,20 +20,20 @@ export const CreateRequestSchema = z.object({
     .string()
     .min(1, 'Room number is required')
     .max(10, 'Room number too long'),
-  guestName: z.string().optional().max(100, 'Guest name too long'),
+  guestName: z.string().max(100, 'Guest name too long').optional(),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   tenantId: z.string().uuid().optional(),
-  description: z.string().optional().max(500, 'Description too long'),
-  phoneNumber: z.string().optional().max(20, 'Phone number too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  phoneNumber: z.string().max(20, 'Phone number too long').optional(),
   totalAmount: z.number().positive().optional(),
   currency: z.string().max(10).default('VND'),
   specialInstructions: z
     .string()
-    .optional()
-    .max(500, 'Special instructions too long'),
+    .max(500, 'Special instructions too long')
+    .optional(),
   urgency: z.enum(['normal', 'urgent', 'critical']).default('normal'),
-  orderType: z.string().optional().max(50, 'Order type too long'),
-  deliveryTime: z.string().optional().max(100, 'Delivery time too long'),
+  orderType: z.string().max(50, 'Order type too long').optional(),
+  deliveryTime: z.string().max(100, 'Delivery time too long').optional(),
   items: z.string().optional(), // JSON stored as text
 });
 
@@ -57,9 +57,9 @@ export const UpdateRequestStatusSchema = z.object({
       errorMap: () => ({ message: 'Invalid request status' }),
     }
   ),
-  notes: z.string().optional().max(500, 'Notes too long'),
+  notes: z.string().max(500, 'Notes too long').optional(),
   completedAt: z.string().datetime().optional(),
-  assignedTo: z.string().optional().max(100, 'Assigned to too long'),
+  assignedTo: z.string().max(100, 'Assigned to too long').optional(),
 });
 
 /**
