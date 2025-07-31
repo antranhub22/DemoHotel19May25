@@ -1,11 +1,13 @@
 import { useAssistant } from '@/context';
+import { useSummaryProgression } from '@/hooks/useSummaryProgression';
 import { logger } from '@shared/utils/logger';
-import React from 'react';
-// Remove i18n for now - use static text
+import React, { useEffect } from 'react';
+import { SummaryProgression } from './SummaryProgression';
 
 // Main Summary Popup Component - Uses OpenAI-only summary system
 export const SummaryPopupContent: React.FC = () => {
   const { serviceRequests, language, callDetails } = useAssistant();
+  const { progression, startProcessing, complete } = useSummaryProgression();
 
   // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
@@ -58,6 +60,20 @@ export const SummaryPopupContent: React.FC = () => {
       hasData: false,
     };
   };
+
+  // Auto-start processing when popup opens
+  useEffect(() => {
+    if (progression.status === 'idle' && !serviceRequests?.length) {
+      startProcessing();
+    }
+  }, [progression.status, serviceRequests, startProcessing]);
+
+  // Auto-complete when data is available
+  useEffect(() => {
+    if (progression.status === 'processing' && serviceRequests?.length > 0) {
+      complete();
+    }
+  }, [progression.status, serviceRequests, complete]);
 
   const summary = getSummaryData();
 
@@ -126,6 +142,21 @@ export const SummaryPopupContent: React.FC = () => {
           {formatTimestamp(summary.timestamp)} • Room: {summary.roomNumber}
         </p>
       </div>
+
+      {/* Summary Progression */}
+      {progression.status !== 'completed' && (
+        <div style={{ marginBottom: '20px' }}>
+          <SummaryProgression
+            status={progression.status}
+            progress={progression.progress}
+            currentStep={progression.currentStep}
+            totalSteps={progression.totalSteps}
+            currentStepIndex={progression.currentStepIndex}
+            estimatedTime={progression.estimatedTime}
+            errorMessage={progression.errorMessage}
+          />
+        </div>
+      )}
 
       {/* Summary Content */}
       <div style={{ marginBottom: '20px' }}>

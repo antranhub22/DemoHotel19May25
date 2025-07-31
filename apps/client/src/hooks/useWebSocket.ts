@@ -151,6 +151,28 @@ export function useWebSocket() {
           );
         }
 
+        // ✅ NEW: Summary progression updates
+        if (data.type === 'summary-progression') {
+          logger.debug(
+            '[useWebSocket] Summary progression update:',
+            'Component',
+            data
+          );
+
+          console.log('📊 [DEBUG] WebSocket received summary-progression:', {
+            callId: data.callId,
+            status: data.status,
+            progress: data.progress,
+            currentStep: data.currentStep,
+            currentStepIndex: data.currentStepIndex,
+          });
+
+          // Update progression state if available
+          if (window.updateSummaryProgression) {
+            window.updateSummaryProgression(data);
+          }
+        }
+
         // ✅ NEW: Call summary received from webhook - OpenAI processed
         if (data.type === 'call-summary-received') {
           logger.debug(

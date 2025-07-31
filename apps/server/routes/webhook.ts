@@ -158,6 +158,18 @@ router.post('/vapi', express.json(), async (req, res) => {
           // Lấy io instance từ Express app
           const io = (req as any).app.get('io');
           if (io) {
+            // Send progression updates
+            io.emit('summary-progression', {
+              type: 'summary-progression',
+              callId: callId,
+              status: 'processing',
+              progress: 25,
+              currentStep: 'Receiving call data from Vapi.ai',
+              currentStepIndex: 0,
+              timestamp: new Date().toISOString(),
+            });
+
+            // Send final summary
             io.emit('call-summary-received', {
               type: 'call-summary-received',
               callId: callId,
