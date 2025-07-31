@@ -6,12 +6,12 @@ import { usePopup } from '@/components/features/popup-system/PopupManager';
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 // ✅ REMOVED: useCancelHandler import - no longer needed
-import { useConfirmHandler } from '@/hooks/useConfirmHandler';
+// ✅ REMOVED: useConfirmHandler import - duplicate window registration removed
 import { useConversationState } from '@/hooks/useConversationState';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
 import { logger } from '@shared/utils/logger';
-import { createElement, useCallback, useEffect, useState } from 'react';
+import { createElement, useCallback, useState } from 'react';
 
 // ✅ TypeScript declaration for global updateSummaryPopup function
 declare global {
@@ -102,22 +102,13 @@ export const useInterface1 = ({
   // ✅ OPTIMIZED: Memoized button handlers to prevent recreation
 
   // ✅ REMOVED: handleCancel is no longer needed
-  const { updateSummaryPopup } = useConfirmHandler();
+  // ✅ REMOVED: useConfirmHandler duplicate - now handled in VoiceAssistant level
 
-  // ✅ OPTIMIZED: Track summary popup state with reduced re-renders
+  // ✅ SIMPLIFIED: Only get popups for showingSummary calculation
   const { popups } = usePopupContext();
-  const [showingSummary, setShowingSummary] = useState(false);
 
-  // ✅ OPTIMIZED: Single effect for summary popup monitoring
-  useEffect(() => {
-    const summaryPopup = popups.find(
-      (popup: { type: string }) => popup.type === 'summary'
-    );
-    const hasSummary = !!summaryPopup;
-    if (showingSummary !== hasSummary) {
-      setShowingSummary(hasSummary);
-    }
-  }, [popups, showingSummary]);
+  // ✅ SIMPLIFIED: Direct calculation without state to avoid re-renders
+  const showingSummary = popups.some(popup => popup.type === 'summary');
 
   // ✅ SIMPLIFIED: Clean auto-show summary - no complex validation
 
@@ -146,16 +137,7 @@ export const useInterface1 = ({
   //   };
   // }, [addCallEndListener]); // ✅ FIXED: Remove autoShowSummary dependency to prevent re-register
 
-  // ✅ NEW: Connect updateSummaryPopup to global window for WebSocket access
-  useEffect(() => {
-    console.log('🔗 [DEBUG] Connecting updateSummaryPopup to window');
-    window.updateSummaryPopup = updateSummaryPopup;
-
-    return () => {
-      console.log('🔗 [DEBUG] Cleaning up updateSummaryPopup from window');
-      delete window.updateSummaryPopup;
-    };
-  }, [updateSummaryPopup]);
+  // ✅ REMOVED: Duplicate window registration - now handled in useConfirmHandler at VoiceAssistant level
 
   // ✅ REMOVED: Duplicate listener registration - now handled above
 
