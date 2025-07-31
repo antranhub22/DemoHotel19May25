@@ -126,11 +126,11 @@ router.use('/api/health', healthRoutes);
 router.use('/api/temp-public', tempPublicRoutes);
 router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
-// ✅ DIRECT TEST: Simple endpoint to test authentication bypass
-router.get('/api/test-direct', (req, res) => {
+// ✅ DIRECT TEST: Simple endpoint to test authentication bypass (BEFORE ANY MIDDLEWARE)
+router.get('/test-direct', (req, res) => {
   res.json({
     success: true,
-    message: 'Direct test endpoint working',
+    message: 'Direct test endpoint working - NO AUTH REQUIRED',
     timestamp: new Date().toISOString(),
     headers: req.headers,
   });
