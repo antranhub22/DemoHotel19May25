@@ -58,6 +58,12 @@ export class RequestService implements IRequestService {
     string,
     { count: number; totalTime: number; avgTime: number }
   > = new Map();
+  private instanceId: string;
+  private clusterInfo: {
+    nodeId: string;
+    totalNodes: number;
+    isLeader: boolean;
+  };
 
   // ✅ NEW: Phase 4 - Performance monitoring methods
   private startPerformanceTimer(operation: string): () => void {
@@ -161,6 +167,14 @@ export class RequestService implements IRequestService {
   }
 
   constructor(config?: Partial<RequestServiceConfig>) {
+    // ✅ NEW: Phase 5 - Load balancing and clustering support
+    this.instanceId = process.env.INSTANCE_ID || `node-${Date.now()}`;
+    this.clusterInfo = {
+      nodeId: this.instanceId,
+      totalNodes: parseInt(process.env.TOTAL_NODES || '1'),
+      isLeader: process.env.IS_LEADER === 'true',
+    };
+
     this.config = {
       businessRules: {
         allowStatusDowngrade: false,
@@ -185,6 +199,95 @@ export class RequestService implements IRequestService {
       },
       ...config,
     };
+
+    logger.info(
+      '🚀 [RequestService] Initialized with load balancing support - Phase 5',
+      'RequestService',
+      {
+        instanceId: this.instanceId,
+        clusterInfo: this.clusterInfo,
+        isLeader: this.clusterInfo.isLeader,
+      }
+    );
+  }
+
+  // ✅ NEW: Phase 5 - Load balancing methods
+  getInstanceInfo(): {
+    instanceId: string;
+    clusterInfo: any;
+    performanceMetrics: any;
+  } {
+    return {
+      instanceId: this.instanceId,
+      clusterInfo: this.clusterInfo,
+      performanceMetrics: this.getPerformanceMetrics(),
+    };
+  }
+
+  // ✅ NEW: Phase 5 - Distributed cache coordination
+  private async coordinateWithOtherNodes(
+    operation: string,
+    data: any
+  ): Promise<void> {
+    if (this.clusterInfo.totalNodes <= 1) {
+      return; // Single node, no coordination needed
+    }
+
+    try {
+      // ✅ NEW: Phase 5 - Broadcast cache invalidation to other nodes
+      if (this.wsManager) {
+        this.wsManager.emitToAll('cache:invalidate', {
+          operation,
+          data,
+          sourceNode: this.instanceId,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      logger.debug(
+        `🔄 [RequestService] Coordinated with other nodes`,
+        'RequestService',
+        {
+          operation,
+          sourceNode: this.instanceId,
+          totalNodes: this.clusterInfo.totalNodes,
+        }
+      );
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to coordinate with other nodes',
+        'RequestService',
+        error
+      );
+    }
+  }
+
+  // ✅ NEW: Phase 5 - Enhanced cache invalidation with coordination
+  private async invalidateCacheOnChange(operation: string): Promise<void> {
+    const patterns = [
+      'getAllRequests',
+      'getRequestStatistics',
+      'getRequestsByRoom',
+      'getRequestsByGuest',
+      'getRequestsByStatus',
+      'getRequestsByPriority',
+      'getUrgentRequests',
+      'getPendingRequests',
+      'getCompletedRequests',
+    ];
+
+    patterns.forEach(pattern => {
+      this.clearCache(pattern);
+    });
+
+    // ✅ NEW: Phase 5 - Coordinate with other nodes
+    await this.coordinateWithOtherNodes(operation, { patterns });
+
+    logger.debug(
+      `🗑️ [RequestService] Invalidated cache after ${operation} - Phase 5`,
+      'RequestService',
+      { operation, instanceId: this.instanceId }
+    );
   }
 
   // ✅ NEW: Phase 4 - Set WebSocket manager
@@ -243,14 +346,16 @@ export class RequestService implements IRequestService {
    */
   async createRequest(input: CreateRequestInput): Promise<CreateRequestResult> {
     const endTimer = this.startPerformanceTimer('createRequest');
+
     try {
       logger.info(
-        '📝 [RequestService] Creating new request - Phase 4 Enhanced',
+        '📝 [RequestService] Creating new request - Phase 5 Enhanced',
         'RequestService',
         {
           roomNumber: input.roomNumber,
           serviceType: input.serviceType,
           priority: input.priority,
+          instanceId: this.instanceId,
         }
       );
 
@@ -341,6 +446,8 @@ export class RequestService implements IRequestService {
           roomNumber: createdRequest.room_number,
           priority: createdRequest.priority,
           urgency: createdRequest.urgency,
+          instanceId: this.instanceId,
+          nodeId: this.clusterInfo.nodeId,
         });
       }
 
@@ -351,6 +458,7 @@ export class RequestService implements IRequestService {
           {
             request: createdRequest,
             timestamp: new Date().toISOString(),
+            instanceId: this.instanceId,
           },
           'all'
         );
@@ -368,6 +476,7 @@ export class RequestService implements IRequestService {
               timestamp: new Date().toISOString(),
               priority: createdRequest.priority,
               urgency: createdRequest.urgency,
+              instanceId: this.instanceId,
             },
             'staff'
           );
@@ -375,16 +484,17 @@ export class RequestService implements IRequestService {
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after creation
-      this.invalidateCacheOnChange('createRequest');
+      await this.invalidateCacheOnChange('createRequest');
 
       logger.success(
-        '✅ [RequestService] Request created successfully',
+        '✅ [RequestService] Request created successfully - Phase 5 Enhanced',
         'RequestService',
         {
           requestId: createdRequest.id,
           roomNumber: createdRequest.room_number,
           priority: createdRequest.priority,
           urgency: createdRequest.urgency,
+          instanceId: this.instanceId,
         }
       );
 
@@ -396,9 +506,9 @@ export class RequestService implements IRequestService {
     } catch (error) {
       endTimer();
       logger.error(
-        '❌ [RequestService] Failed to create request',
+        '❌ [RequestService] Failed to create request - Phase 5 Enhanced',
         'RequestService',
-        error
+        { error, instanceId: this.instanceId }
       );
 
       return {
