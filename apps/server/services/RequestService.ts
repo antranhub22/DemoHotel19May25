@@ -14,7 +14,7 @@ import {
   UpdateRequestStatusInput,
   validateRequestData,
 } from '@shared/validation/requestSchemas';
-import { and, count, desc, eq, gte, like, lte } from 'drizzle-orm';
+import { and, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import {
   BulkUpdateResult,
   CreateRequestResult,
@@ -265,7 +265,6 @@ export class RequestService implements IRequestService {
         assignedTo,
         startDate,
         endDate,
-        sortBy = 'created_at',
         sortOrder = 'desc',
       } = filters || {};
 
@@ -318,9 +317,7 @@ export class RequestService implements IRequestService {
         .from(request)
         .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
         .orderBy(
-          sortOrder === 'desc'
-            ? desc(request[sortBy as keyof typeof request])
-            : request[sortBy as keyof typeof request]
+          sortOrder === 'desc' ? desc(request.created_at) : request.created_at
         )
         .limit(limit)
         .offset(offset);
@@ -843,17 +840,395 @@ export class RequestService implements IRequestService {
   // ADDITIONAL METHODS (to be implemented)
   // ============================================================================
 
+  /**
+   * Bulk update request statuses
+   */
   async bulkUpdateStatus(
     requestIds: number[],
     status: string,
     notes?: string,
     assignedTo?: string
   ): Promise<BulkUpdateResult> {
-    // Implementation for bulk update
-    return {
-      success: true,
-      data: { updated: 0, failed: 0, total: requestIds.length },
-    };
+    try {
+      logger.info(
+        '📝 [RequestService] Bulk updating request statuses',
+        'RequestService',
+        {
+          requestIds: requestIds.length,
+          status,
+          notes: notes ? 'provided' : 'none',
+          assignedTo: assignedTo ? 'provided' : 'none',
+        }
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Validate status transition for all requests
+      const validationPromises = requestIds.map(async id => {
+        const currentRequest = await this.getRequestById(id);
+        if (!currentRequest.success || !currentRequest.data) {
+          return { id, valid: false, error: 'Request not found' };
+        }
+
+        const transitionValidation = await this.validateStatusTransition(
+          currentRequest.data.status,
+          status
+        );
+
+        return {
+          id,
+          valid: transitionValidation.success,
+          error: transitionValidation.error,
+        };
+      });
+
+      const validationResults = await Promise.all(validationPromises);
+      const invalidRequests = validationResults.filter(result => !result.valid);
+
+      if (invalidRequests.length > 0) {
+        logger.warn(
+          '❌ [RequestService] Some requests have invalid status transitions',
+          'RequestService',
+          { invalidRequests }
+        );
+
+        return {
+          success: false,
+          error: `Invalid status transitions for ${invalidRequests.length} requests`,
+          code: RequestServiceErrorType.INVALID_STATUS_TRANSITION,
+          data: {
+            updated: 0,
+            failed: invalidRequests.length,
+            total: requestIds.length,
+          },
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Business rule validation
+      if (status === 'cancelled' || status === 'Đã hủy') {
+        if (this.config.businessRules.requireNotesForCancellation && !notes) {
+          return {
+            success: false,
+            error: 'Notes are required for cancellation',
+            code: RequestServiceErrorType.BUSINESS_RULE_VIOLATION,
+          };
+        }
+      }
+
+      // ✅ NEW: Phase 3 - Bulk update with transaction
+      const updateData: any = {
+        status,
+        updated_at: new Date(),
+      };
+
+      if (notes) {
+        updateData.notes = notes;
+      }
+
+      if (assignedTo) {
+        updateData.assigned_to = assignedTo;
+      }
+
+      if (status === 'completed' || status === 'Hoàn thành') {
+        updateData.completed_at = new Date();
+      }
+
+      const updatePromises = requestIds.map(async id => {
+        try {
+          const result = await db
+            .update(request)
+            .set(updateData)
+            .where(eq(request.id, id))
+            .returning();
+
+          return { id, success: true, data: result[0] };
+        } catch (error) {
+          logger.error(
+            `❌ [RequestService] Failed to update request ${id}`,
+            'RequestService',
+            error
+          );
+          return { id, success: false, error: 'Database error' };
+        }
+      });
+
+      const updateResults = await Promise.all(updatePromises);
+      const successfulUpdates = updateResults.filter(result => result.success);
+      const failedUpdates = updateResults.filter(result => !result.success);
+
+      // ✅ NEW: Phase 3 - Audit logging for bulk operations
+      if (this.config.audit.logStatusChanges) {
+        this.logAuditEvent('bulk_status_changed', {
+          requestIds,
+          oldStatus: 'multiple',
+          newStatus: status,
+          successful: successfulUpdates.length,
+          failed: failedUpdates.length,
+          notes,
+        });
+      }
+
+      logger.success(
+        '✅ [RequestService] Bulk update completed',
+        'RequestService',
+        {
+          total: requestIds.length,
+          successful: successfulUpdates.length,
+          failed: failedUpdates.length,
+          status,
+        }
+      );
+
+      return {
+        success: true,
+        data: {
+          updated: successfulUpdates.length,
+          failed: failedUpdates.length,
+          total: requestIds.length,
+        },
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Bulk update failed',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to perform bulk update',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
+  }
+
+  /**
+   * Bulk delete requests (soft delete)
+   */
+  async bulkDeleteRequests(requestIds: number[]): Promise<BulkUpdateResult> {
+    try {
+      logger.info(
+        '🗑️ [RequestService] Bulk deleting requests',
+        'RequestService',
+        { requestIds: requestIds.length }
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Check if requests can be deleted
+      const canDeletePromises = requestIds.map(async id => {
+        const canDelete = await this.canDeleteRequest(id);
+        return { id, canDelete: canDelete.success, error: canDelete.error };
+      });
+
+      const canDeleteResults = await Promise.all(canDeletePromises);
+      const cannotDelete = canDeleteResults.filter(result => !result.canDelete);
+
+      if (cannotDelete.length > 0) {
+        logger.warn(
+          '❌ [RequestService] Some requests cannot be deleted',
+          'RequestService',
+          { cannotDelete }
+        );
+
+        return {
+          success: false,
+          error: `Cannot delete ${cannotDelete.length} requests`,
+          code: RequestServiceErrorType.BUSINESS_RULE_VIOLATION,
+          data: {
+            updated: 0,
+            failed: cannotDelete.length,
+            total: requestIds.length,
+          },
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Soft delete by setting status to 'deleted'
+      const deletePromises = requestIds.map(async id => {
+        try {
+          const result = await db
+            .update(request)
+            .set({
+              status: 'deleted',
+              updated_at: new Date(),
+            })
+            .where(eq(request.id, id))
+            .returning();
+
+          return { id, success: true, data: result[0] };
+        } catch (error) {
+          logger.error(
+            `❌ [RequestService] Failed to delete request ${id}`,
+            'RequestService',
+            error
+          );
+          return { id, success: false, error: 'Database error' };
+        }
+      });
+
+      const deleteResults = await Promise.all(deletePromises);
+      const successfulDeletes = deleteResults.filter(result => result.success);
+      const failedDeletes = deleteResults.filter(result => !result.success);
+
+      // ✅ NEW: Phase 3 - Audit logging for bulk deletes
+      if (this.config.audit.logAllChanges) {
+        this.logAuditEvent('bulk_requests_deleted', {
+          requestIds,
+          successful: successfulDeletes.length,
+          failed: failedDeletes.length,
+        });
+      }
+
+      logger.success(
+        '✅ [RequestService] Bulk delete completed',
+        'RequestService',
+        {
+          total: requestIds.length,
+          successful: successfulDeletes.length,
+          failed: failedDeletes.length,
+        }
+      );
+
+      return {
+        success: true,
+        data: {
+          updated: successfulDeletes.length,
+          failed: failedDeletes.length,
+          total: requestIds.length,
+        },
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Bulk delete failed',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to perform bulk delete',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
+  }
+
+  /**
+   * Bulk assign requests to staff
+   */
+  async bulkAssignRequests(
+    requestIds: number[],
+    assignedTo: string
+  ): Promise<BulkUpdateResult> {
+    try {
+      logger.info(
+        '👥 [RequestService] Bulk assigning requests',
+        'RequestService',
+        {
+          requestIds: requestIds.length,
+          assignedTo,
+        }
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Validate assignment
+      if (!assignedTo || assignedTo.trim() === '') {
+        return {
+          success: false,
+          error: 'AssignedTo is required',
+          code: RequestServiceErrorType.VALIDATION_ERROR,
+        };
+      }
+
+      const assignPromises = requestIds.map(async id => {
+        try {
+          const result = await db
+            .update(request)
+            .set({
+              assigned_to: assignedTo,
+              updated_at: new Date(),
+            })
+            .where(eq(request.id, id))
+            .returning();
+
+          return { id, success: true, data: result[0] };
+        } catch (error) {
+          logger.error(
+            `❌ [RequestService] Failed to assign request ${id}`,
+            'RequestService',
+            error
+          );
+          return { id, success: false, error: 'Database error' };
+        }
+      });
+
+      const assignResults = await Promise.all(assignPromises);
+      const successfulAssigns = assignResults.filter(result => result.success);
+      const failedAssigns = assignResults.filter(result => !result.success);
+
+      // ✅ NEW: Phase 3 - Audit logging for bulk assignments
+      if (this.config.audit.logAllChanges) {
+        this.logAuditEvent('bulk_requests_assigned', {
+          requestIds,
+          assignedTo,
+          successful: successfulAssigns.length,
+          failed: failedAssigns.length,
+        });
+      }
+
+      logger.success(
+        '✅ [RequestService] Bulk assignment completed',
+        'RequestService',
+        {
+          total: requestIds.length,
+          successful: successfulAssigns.length,
+          failed: failedAssigns.length,
+          assignedTo,
+        }
+      );
+
+      return {
+        success: true,
+        data: {
+          updated: successfulAssigns.length,
+          failed: failedAssigns.length,
+          total: requestIds.length,
+        },
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Bulk assignment failed',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to perform bulk assignment',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
   async deleteRequest(
@@ -863,48 +1238,421 @@ export class RequestService implements IRequestService {
     return { success: true };
   }
 
+  /**
+   * Get requests by room number
+   */
   async getRequestsByRoom(roomNumber: string): Promise<GetRequestsResult> {
-    // Implementation for room-based queries
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        `📋 [RequestService] Getting requests by room: ${roomNumber}`,
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(like(request.room_number, `%${roomNumber}%`))
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Requests by room fetched successfully',
+        'RequestService',
+        { roomNumber, count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get requests by room',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch requests by room',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get requests by guest name
+   */
   async getRequestsByGuest(guestName: string): Promise<GetRequestsResult> {
-    // Implementation for guest-based queries
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        `📋 [RequestService] Getting requests by guest: ${guestName}`,
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(like(request.guest_name, `%${guestName}%`))
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Requests by guest fetched successfully',
+        'RequestService',
+        { guestName, count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get requests by guest',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch requests by guest',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get requests by status
+   */
   async getRequestsByStatus(status: string): Promise<GetRequestsResult> {
-    // Implementation for status-based queries
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        `📋 [RequestService] Getting requests by status: ${status}`,
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(eq(request.status, status))
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Requests by status fetched successfully',
+        'RequestService',
+        { status, count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get requests by status',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch requests by status',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get requests by priority
+   */
   async getRequestsByPriority(priority: string): Promise<GetRequestsResult> {
-    // Implementation for priority-based queries
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        `📋 [RequestService] Getting requests by priority: ${priority}`,
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(eq(request.priority, priority))
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Requests by priority fetched successfully',
+        'RequestService',
+        { priority, count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get requests by priority',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch requests by priority',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get requests by assigned staff
+   */
   async getRequestsByAssignedTo(
     assignedTo: string
   ): Promise<GetRequestsResult> {
-    // Implementation for assigned staff queries
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        `📋 [RequestService] Getting requests by assigned staff: ${assignedTo}`,
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(eq(request.assigned_to, assignedTo))
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Requests by assigned staff fetched successfully',
+        'RequestService',
+        { assignedTo, count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get requests by assigned staff',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch requests by assigned staff',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get urgent requests (high priority or urgent/critical urgency)
+   */
   async getUrgentRequests(): Promise<GetRequestsResult> {
-    // Implementation for urgent requests
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        '🚨 [RequestService] Getting urgent requests',
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(
+          or(
+            eq(request.priority, 'high'),
+            eq(request.urgency, 'urgent'),
+            eq(request.urgency, 'critical')
+          )
+        )
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Urgent requests fetched successfully',
+        'RequestService',
+        { count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get urgent requests',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch urgent requests',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get pending requests
+   */
   async getPendingRequests(): Promise<GetRequestsResult> {
-    // Implementation for pending requests
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        '⏳ [RequestService] Getting pending requests',
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(
+          or(eq(request.status, 'pending'), eq(request.status, 'Đã ghi nhận'))
+        )
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Pending requests fetched successfully',
+        'RequestService',
+        { count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get pending requests',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch pending requests',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get completed requests
+   */
   async getCompletedRequests(): Promise<GetRequestsResult> {
-    // Implementation for completed requests
-    return { success: true, data: [] };
+    try {
+      logger.info(
+        '✅ [RequestService] Getting completed requests',
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+          code: RequestServiceErrorType.DATABASE_ERROR,
+        };
+      }
+
+      const requests = await db
+        .select()
+        .from(request)
+        .where(
+          or(eq(request.status, 'completed'), eq(request.status, 'Hoàn thành'))
+        )
+        .orderBy(desc(request.created_at));
+
+      logger.success(
+        '✅ [RequestService] Completed requests fetched successfully',
+        'RequestService',
+        { count: requests.length }
+      );
+
+      return {
+        success: true,
+        data: requests,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get completed requests',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch completed requests',
+        code: RequestServiceErrorType.DATABASE_ERROR,
+      };
+    }
   }
 
+  /**
+   * Get request statistics
+   */
   async getRequestStatistics(): Promise<{
     success: boolean;
     data?: {
@@ -923,20 +1671,129 @@ export class RequestService implements IRequestService {
     };
     error?: string;
   }> {
-    // Implementation for statistics
-    return {
-      success: true,
-      data: {
-        total: 0,
-        pending: 0,
-        inProgress: 0,
-        completed: 0,
-        cancelled: 0,
-        urgent: 0,
-        byPriority: { low: 0, medium: 0, high: 0 },
-        byStatus: {},
-      },
-    };
+    try {
+      logger.info(
+        '📊 [RequestService] Getting request statistics',
+        'RequestService'
+      );
+
+      const db = await this.getDatabase();
+      if (!db) {
+        return {
+          success: false,
+          error: 'Database not available',
+        };
+      }
+
+      // ✅ NEW: Phase 3 - Get total count
+      const totalCount = await db.select({ count: count() }).from(request);
+
+      const total = totalCount[0]?.count || 0;
+
+      // ✅ NEW: Phase 3 - Get status counts
+      const statusCounts = await db
+        .select({
+          status: request.status,
+          count: count(),
+        })
+        .from(request)
+        .groupBy(request.status);
+
+      const byStatus: Record<string, number> = {};
+      let pending = 0;
+      let inProgress = 0;
+      let completed = 0;
+      let cancelled = 0;
+
+      statusCounts.forEach(({ status, count }) => {
+        byStatus[status] = count;
+
+        if (status === 'pending' || status === 'Đã ghi nhận') {
+          pending += count;
+        } else if (status === 'in-progress' || status === 'Đang xử lý') {
+          inProgress += count;
+        } else if (status === 'completed' || status === 'Hoàn thành') {
+          completed += count;
+        } else if (status === 'cancelled' || status === 'Đã hủy') {
+          cancelled += count;
+        }
+      });
+
+      // ✅ NEW: Phase 3 - Get priority counts
+      const priorityCounts = await db
+        .select({
+          priority: request.priority,
+          count: count(),
+        })
+        .from(request)
+        .groupBy(request.priority);
+
+      const byPriority = {
+        low: 0,
+        medium: 0,
+        high: 0,
+      };
+
+      priorityCounts.forEach(({ priority, count }) => {
+        if (priority in byPriority) {
+          byPriority[priority as keyof typeof byPriority] = count;
+        }
+      });
+
+      // ✅ NEW: Phase 3 - Get urgent count (high priority or urgent/critical urgency)
+      const urgentCount = await db
+        .select({ count: count() })
+        .from(request)
+        .where(
+          or(
+            eq(request.priority, 'high'),
+            eq(request.urgency, 'urgent'),
+            eq(request.urgency, 'critical')
+          )
+        );
+
+      const urgent = urgentCount[0]?.count || 0;
+
+      const statistics = {
+        total,
+        pending,
+        inProgress,
+        completed,
+        cancelled,
+        urgent,
+        byPriority,
+        byStatus,
+      };
+
+      logger.success(
+        '✅ [RequestService] Request statistics fetched successfully',
+        'RequestService',
+        {
+          total,
+          pending,
+          inProgress,
+          completed,
+          cancelled,
+          urgent,
+        }
+      );
+
+      return {
+        success: true,
+        data: statistics,
+      };
+    } catch (error) {
+      logger.error(
+        '❌ [RequestService] Failed to get request statistics',
+        'RequestService',
+        error
+      );
+
+      return {
+        success: false,
+        error: 'Failed to fetch request statistics',
+      };
+    }
   }
 
   async canUpdateRequest(

@@ -14,44 +14,6 @@ import {
 } from '@shared/validation/requestSchemas';
 
 // ✅ FIX: Enhanced error handling for database operations with fallback
-async function safeDatabaseOperation<T>(
-  operation: () => Promise<T>
-): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    logger.error('Database operation failed:', error);
-
-    // Check for specific database errors
-    if (
-      error instanceof Error &&
-      (error.message.includes('connection') ||
-        error.message.includes('timeout') ||
-        error.message.includes('ECONNREFUSED') ||
-        error.message.includes('not properly initialized'))
-    ) {
-      // Try to reinitialize database connection
-      try {
-        logger.info(
-          '🔄 Attempting to reinitialize database connection...',
-          'RequestController'
-        );
-        await initializeDatabase();
-        // Retry operation once
-        return await operation();
-      } catch (retryError) {
-        logger.error(
-          '❌ Database reinitialization failed:',
-          'RequestController',
-          retryError
-        );
-        throw new Error('Database connection error. Please try again.');
-      }
-    }
-
-    throw error;
-  }
-}
 
 export class RequestController {
   static async createRequest(req: Request, res: Response): Promise<void> {
@@ -545,6 +507,285 @@ export class RequestController {
         (res as any).status(500).json({
           success: false,
           error: 'Failed to update request status',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+  }
+
+  /**
+   * Bulk update request statuses
+   */
+  static async bulkUpdateStatus(req: Request, res: Response): Promise<void> {
+    try {
+      const { requestIds, status, notes, assignedTo } = req.body;
+
+      logger.info(
+        `📝 [RequestController] Bulk updating request statuses - Phase 3 Enhanced`,
+        'RequestController',
+        {
+          requestIds: requestIds?.length || 0,
+          status,
+          notes: notes ? 'provided' : 'none',
+          assignedTo: assignedTo ? 'provided' : 'none',
+        }
+      );
+
+      if (
+        !requestIds ||
+        !Array.isArray(requestIds) ||
+        requestIds.length === 0
+      ) {
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendValidationError(res, [
+            {
+              field: 'requestIds',
+              message: 'Request IDs array is required and must not be empty',
+            },
+          ]);
+        } else {
+          (res as any).status(400).json({
+            success: false,
+            error: 'Request IDs array is required and must not be empty',
+            code: 'VALIDATION_ERROR',
+          });
+        }
+        return;
+      }
+
+      if (!status) {
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendValidationError(res, [
+            { field: 'status', message: 'Status is required' },
+          ]);
+        } else {
+          (res as any).status(400).json({
+            success: false,
+            error: 'Status is required',
+            code: 'VALIDATION_ERROR',
+          });
+        }
+        return;
+      }
+
+      // ✅ NEW: Phase 3 - Use service layer for bulk operations
+      const requestService = new RequestService();
+      const serviceResult = await requestService.bulkUpdateStatus(
+        requestIds,
+        status,
+        notes,
+        assignedTo
+      );
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to bulk update requests',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendError(
+            res,
+            serviceResult.error || 'Failed to bulk update requests',
+            500,
+            serviceResult.code
+          );
+        } else {
+          (res as any).status(500).json({
+            success: false,
+            error: serviceResult.error || 'Failed to bulk update requests',
+            code: serviceResult.code,
+          });
+        }
+        return;
+      }
+
+      logger.success(
+        '✅ [RequestController] Bulk update completed successfully - Phase 3 Enhanced',
+        'RequestController',
+        {
+          total: serviceResult.data?.total || 0,
+          successful: serviceResult.data?.updated || 0,
+          failed: serviceResult.data?.failed || 0,
+          status,
+        }
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.3.0',
+        });
+      } else {
+        (res as any).json({
+          success: true,
+          data: serviceResult.data,
+        });
+      }
+    } catch (error) {
+      logger.error(
+        '❌ [RequestController] Failed to bulk update requests - Phase 3 Enhanced',
+        'RequestController',
+        error
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(
+          res,
+          'Failed to bulk update requests'
+        );
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to bulk update requests',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+  }
+
+  /**
+   * Get request statistics
+   */
+  static async getRequestStatistics(res: Response): Promise<void> {
+    try {
+      logger.info(
+        '📊 [RequestController] Getting request statistics - Phase 3 Enhanced',
+        'RequestController'
+      );
+
+      // ✅ NEW: Phase 3 - Use service layer for statistics
+      const requestService = new RequestService();
+      const serviceResult = await requestService.getRequestStatistics();
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to get statistics',
+          'RequestController',
+          { error: serviceResult.error }
+        );
+
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendError(
+            res,
+            serviceResult.error || 'Failed to get statistics',
+            500
+          );
+        } else {
+          (res as any).status(500).json({
+            success: false,
+            error: serviceResult.error || 'Failed to get statistics',
+          });
+        }
+        return;
+      }
+
+      logger.success(
+        '✅ [RequestController] Statistics fetched successfully - Phase 3 Enhanced',
+        'RequestController',
+        {
+          total: serviceResult.data?.total || 0,
+          pending: serviceResult.data?.pending || 0,
+          urgent: serviceResult.data?.urgent || 0,
+        }
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.3.0',
+        });
+      } else {
+        (res as any).json({
+          success: true,
+          data: serviceResult.data,
+        });
+      }
+    } catch (error) {
+      logger.error(
+        '❌ [RequestController] Failed to get statistics - Phase 3 Enhanced',
+        'RequestController',
+        error
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(res, 'Failed to get statistics');
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to get statistics',
+          details: error instanceof Error ? error.message : 'Unknown error',
+        });
+      }
+    }
+  }
+
+  /**
+   * Get urgent requests
+   */
+  static async getUrgentRequests(res: Response): Promise<void> {
+    try {
+      logger.info(
+        '🚨 [RequestController] Getting urgent requests - Phase 3 Enhanced',
+        'RequestController'
+      );
+
+      // ✅ NEW: Phase 3 - Use service layer for urgent requests
+      const requestService = new RequestService();
+      const serviceResult = await requestService.getUrgentRequests();
+
+      if (!serviceResult.success) {
+        logger.error(
+          '❌ [RequestController] Service layer failed to get urgent requests',
+          'RequestController',
+          { error: serviceResult.error, code: serviceResult.code }
+        );
+
+        if (isFeatureEnabled('request-response-standardization')) {
+          ResponseWrapper.sendError(
+            res,
+            serviceResult.error || 'Failed to get urgent requests',
+            500,
+            serviceResult.code
+          );
+        } else {
+          (res as any).status(500).json({
+            success: false,
+            error: serviceResult.error || 'Failed to get urgent requests',
+            code: serviceResult.code,
+          });
+        }
+        return;
+      }
+
+      logger.success(
+        '✅ [RequestController] Urgent requests fetched successfully - Phase 3 Enhanced',
+        'RequestController',
+        { count: serviceResult.data?.length || 0 }
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendResponse(res, serviceResult.data, 200, {
+          version: '2.3.0',
+        });
+      } else {
+        (res as any).json({
+          success: true,
+          data: serviceResult.data,
+        });
+      }
+    } catch (error) {
+      logger.error(
+        '❌ [RequestController] Failed to get urgent requests - Phase 3 Enhanced',
+        'RequestController',
+        error
+      );
+
+      if (isFeatureEnabled('request-response-standardization')) {
+        ResponseWrapper.sendDatabaseError(res, 'Failed to get urgent requests');
+      } else {
+        (res as any).status(500).json({
+          success: false,
+          error: 'Failed to get urgent requests',
           details: error instanceof Error ? error.message : 'Unknown error',
         });
       }
