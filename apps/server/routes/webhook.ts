@@ -197,78 +197,84 @@ router.post('/vapi', express.json(), async (req, res) => {
 
     const callId = message?.call?.id || `call-${Date.now()}`;
 
-    // ✅ HANDLE TRANSCRIPT EVENT (for OpenAI processing)
+    // ✅ HANDLE REALTIME TRANSCRIPT EVENT (no OpenAI processing)
     if (isTranscriptEvent) {
-      logger.debug('[Webhook] Processing transcript event', 'Component', {
+      logger.debug(
+        '[Webhook] Received realtime transcript event',
+        'Component',
+        {
+          callId,
+          transcriptLength:
+            message?.transcript?.length || message?.messages?.length || 0,
+        }
+      );
+
+      // ✅ REALTIME TRANSCRIPT: Only log, do NOT process with OpenAI
+      // This is partial, incomplete data sent during the call
+      // We'll wait for the final transcript in end-of-call-report
+
+      return res.status(200).json({
+        success: true,
+        message: 'Realtime transcript received (not processed)',
         callId,
-        transcriptLength:
-          message?.transcript?.length || message?.messages?.length || 0,
       });
+    }
 
-      // Get transcript from the correct field
-      const transcript = message?.transcript || message?.messages || [];
+    // ✅ HANDLE END-OF-CALL-REPORT EVENT (with final transcript for OpenAI)
+    if (isEndOfCallEvent) {
+      logger.debug(
+        '[Webhook] Processing end-of-call-report with final transcript',
+        'Component',
+        {
+          callId,
+          hasMessages: !!message?.messages,
+          messagesLength: message?.messages?.length || 0,
+        }
+      );
 
-      if (transcript && Array.isArray(transcript) && transcript.length > 0) {
-        await processTranscriptWithOpenAI(transcript, callId);
+      // ✅ STEP 1: Save end-of-call-report metadata
+      await processEndOfCallReport(message, callId);
+
+      // ✅ STEP 2: Extract FINAL TRANSCRIPT for OpenAI processing
+      const finalTranscript = message?.messages || [];
+      if (
+        finalTranscript &&
+        Array.isArray(finalTranscript) &&
+        finalTranscript.length > 0
+      ) {
+        logger.debug(
+          '[Webhook] Processing FINAL TRANSCRIPT with OpenAI',
+          'Component',
+          {
+            callId,
+            transcriptLength: finalTranscript.length,
+          }
+        );
+
+        // Process final transcript with OpenAI to generate summary
+        await processTranscriptWithOpenAI(finalTranscript, callId);
+      } else {
+        logger.warn(
+          '[Webhook] No final transcript found in end-of-call-report',
+          'Component',
+          { callId }
+        );
       }
 
       return res.status(200).json({
         success: true,
-        message: 'Transcript processed successfully',
+        message:
+          'End-of-call-report and final transcript processed successfully',
         callId,
       });
     }
 
-    // ✅ HANDLE END-OF-CALL-REPORT EVENT (for metadata storage)
-    if (isEndOfCallEvent) {
-      logger.debug(
-        '[Webhook] Processing end-of-call-report event',
-        'Component',
-        {
-          callId,
-        }
-      );
-
-      await processEndOfCallReport(message, callId);
-
-      return res.status(200).json({
-        success: true,
-        message: 'End-of-call-report processed successfully',
-        callId,
-      });
-    }
-
-    // ✅ FALLBACK: Handle legacy format where transcript is in end-of-call-report
-    logger.debug('[Webhook] Checking for legacy format...', 'Component', {
+    // ✅ FALLBACK: Handle unknown event types
+    logger.debug('[Webhook] Checking for unknown event type...', 'Component', {
       messageType: message?.type,
       hasMessages: !!message?.messages,
       callId,
     });
-
-    // Legacy support: If we have messages in the payload (old format)
-    const transcript = message?.messages || [];
-
-    if (transcript && Array.isArray(transcript) && transcript.length > 0) {
-      logger.debug(
-        '[Webhook] Processing transcript in legacy format',
-        'Component',
-        {
-          transcriptLength: transcript.length,
-          callId,
-        }
-      );
-
-      await processTranscriptWithOpenAI(transcript, callId);
-
-      return res.status(200).json({
-        success: true,
-        message: 'Webhook processed successfully (legacy format)',
-        data: {
-          callId: callId,
-          timestamp: new Date().toISOString(),
-        },
-      });
-    }
 
     // ✅ UNKNOWN EVENT TYPE: Return success but log warning
     logger.warn(
