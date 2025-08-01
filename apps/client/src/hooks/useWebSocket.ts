@@ -24,7 +24,36 @@ export function useWebSocket() {
   const assistant = useAssistant();
   const retryRef = useRef(0);
 
+  // ✅ MEMORY LEAK FIX: Track timeouts for cleanup
+  const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
+  const isCleaningUpRef = useRef(false);
+  const mountedRef = useRef(true);
+
   console.log('🔌 [DEBUG] State initialized, about to define initSocket...');
+
+  // ✅ HELPER: Safe timeout with cleanup tracking
+  const createSafeTimeout = useCallback(
+    (callback: () => void, delay: number): NodeJS.Timeout => {
+      const timeoutId = setTimeout(() => {
+        if (mountedRef.current && !isCleaningUpRef.current) {
+          callback();
+        }
+        timeoutsRef.current.delete(timeoutId);
+      }, delay);
+
+      timeoutsRef.current.add(timeoutId);
+      return timeoutId;
+    },
+    []
+  );
+
+  // ✅ HELPER: Clear all tracked timeouts
+  const clearAllTimeouts = useCallback(() => {
+    timeoutsRef.current.forEach(timeoutId => {
+      clearTimeout(timeoutId);
+    });
+    timeoutsRef.current.clear();
+  }, []);
 
   // ✅ DIRECT TEST: Call initSocket immediately
   console.log('🔌 [DEBUG] About to define initSocket function...');
@@ -85,9 +114,28 @@ export function useWebSocket() {
     );
   }
 
+  // ✅ RACE CONDITION FIX: Track connection attempts
+  const isConnectingRef = useRef(false);
+
   // Initialize Socket.IO connection
   const initSocket = useCallback(() => {
     console.log('🔌 [DEBUG] ===== INITSOCKET FUNCTION CALLED =====');
+
+    // ✅ RACE CONDITION FIX: Prevent multiple concurrent connections
+    if (isConnectingRef.current) {
+      console.log('🔌 [DEBUG] Connection already in progress, skipping...');
+      return;
+    }
+
+    if (!mountedRef.current || isCleaningUpRef.current) {
+      console.log(
+        '🔌 [DEBUG] Component unmounted or cleaning up, skipping connection...'
+      );
+      return;
+    }
+
+    isConnectingRef.current = true;
+
     console.log('🔌 [DEBUG] ===== ATTEMPTING WEBSOCKET CONNECTION =====');
     logger.debug(
       'useWebSocket env VITE_API_HOST:',
@@ -101,14 +149,25 @@ export function useWebSocket() {
 
     // ✅ ENHANCED: Better cleanup of existing socket
     if (socket !== null) {
-      // Clear any pending reconnection timeout
-      if ((socket as any).reconnectTimeout) {
-        clearTimeout((socket as any).reconnectTimeout);
-      }
+      console.log('🔌 [DEBUG] Cleaning up existing socket...');
 
-      // Disconnect existing socket
-      if (socket.connected) {
-        socket.disconnect();
+      // ✅ MEMORY LEAK FIX: Proper cleanup
+      try {
+        // Remove all listeners to prevent memory leaks
+        socket.removeAllListeners();
+
+        // Clear any pending reconnection timeout
+        if ((socket as any).reconnectTimeout) {
+          clearTimeout((socket as any).reconnectTimeout);
+          delete (socket as any).reconnectTimeout;
+        }
+
+        // Disconnect existing socket
+        if (socket.connected) {
+          socket.disconnect();
+        }
+      } catch (error) {
+        logger.warn('Error during socket cleanup:', 'Component', error);
       }
     }
 
@@ -139,15 +198,16 @@ export function useWebSocket() {
       reconnectionDelay: 1000,
     });
 
-    // ✅ NEW: Add connection timeout for production stability
-    const connectionTimeout = setTimeout(
+    // ✅ MEMORY LEAK FIX: Use safe timeout with cleanup tracking
+    const connectionTimeout = createSafeTimeout(
       () => {
-        if (!newSocket.connected) {
+        if (!newSocket.connected && !isCleaningUpRef.current) {
           logger.warn(
             'Socket.IO connection timeout, disconnecting...',
             'Component'
           );
           newSocket.disconnect();
+          isConnectingRef.current = false;
         }
       },
       import.meta.env.PROD ? 15000 : 10000
@@ -158,7 +218,11 @@ export function useWebSocket() {
       console.log(
         '🔌 [DEBUG] WebSocket connected successfully for Summary updates'
       );
-      clearTimeout(connectionTimeout); // Clear timeout on successful connection
+
+      // ✅ CLEANUP: Clear timeout and reset flags
+      timeoutsRef.current.delete(connectionTimeout);
+      clearTimeout(connectionTimeout);
+      isConnectingRef.current = false;
       setConnected(true);
       retryRef.current = 0; // reset retry count
 
@@ -416,38 +480,54 @@ export function useWebSocket() {
     newSocket.on('disconnect', reason => {
       logger.debug('Socket.IO connection closed', 'Component', { reason });
       setConnected(false);
+      isConnectingRef.current = false;
 
-      // ✅ IMPROVED: Only reconnect if disconnect was not intentional
-      if (reason !== 'io client disconnect' && retryRef.current < 3) {
-        // Reduced from 5 to 3 attempts
-        const delay = Math.min(Math.pow(2, retryRef.current) * 1000, 10000); // Cap at 10s
+      // ✅ IMPROVED: Only reconnect if component mounted and disconnect was not intentional
+      if (
+        reason !== 'io client disconnect' &&
+        retryRef.current < 3 &&
+        mountedRef.current &&
+        !isCleaningUpRef.current
+      ) {
+        // Exponential backoff with jitter to prevent thundering herd
+        const baseDelay = Math.pow(2, retryRef.current) * 1000;
+        const jitter = Math.random() * 1000; // Add randomness
+        const delay = Math.min(baseDelay + jitter, 10000); // Cap at 10s
+
         logger.debug(
-          `Reconnecting Socket.IO in ${delay}ms (attempt ${retryRef.current + 1}/3)`,
+          `Reconnecting Socket.IO in ${Math.round(delay)}ms (attempt ${retryRef.current + 1}/3)`,
           'Component'
         );
 
-        const timeoutId = setTimeout(() => {
-          // ✅ NEW: Only reconnect if component is still mounted and we don't already have a connection
-          if (!socket || !socket.connected) {
+        // ✅ MEMORY LEAK FIX: Use safe timeout
+        const reconnectTimeout = createSafeTimeout(() => {
+          // ✅ RACE CONDITION FIX: Check conditions again before reconnecting
+          if (
+            mountedRef.current &&
+            !isCleaningUpRef.current &&
+            (!socket || !socket.connected)
+          ) {
+            retryRef.current++;
             initSocket();
           }
         }, delay);
 
-        retryRef.current++;
-
-        // ✅ NEW: Store timeout ID for cleanup
-        (newSocket as any).reconnectTimeout = timeoutId;
+        // ✅ CLEANUP: Track timeout for proper cleanup
+        (newSocket as any).reconnectTimeout = reconnectTimeout;
       } else if (retryRef.current >= 3) {
         logger.warn(
           'Max Socket.IO reconnection attempts reached (3/3)',
           'Component'
         );
 
-        // ✅ NEW: Stop retry attempts and provide user feedback
+        // ✅ ENHANCED: Better user feedback
         logger.error(
-          'Socket.IO connection failed permanently. Please refresh the page.',
+          'Socket.IO connection failed permanently. Summary updates may not work. Please refresh the page.',
           'Component'
         );
+
+        // ✅ CLEANUP: Reset for potential manual reconnect
+        isConnectingRef.current = false;
       }
     });
 
@@ -492,7 +572,7 @@ export function useWebSocket() {
     });
 
     setSocket(newSocket);
-  }, [assistant.callDetails]); // ✅ FIXED: Removed socket from deps to prevent circular dependency
+  }, [assistant.callDetails, createSafeTimeout, clearAllTimeouts]); // ✅ DEPENDENCIES: Include helpers to prevent stale closures
 
   // ✅ IMPROVED: Manual reconnect function with reset
   const reconnect = useCallback(() => {
@@ -527,15 +607,38 @@ export function useWebSocket() {
     return () => {
       console.log('🔌 [DEBUG] useEffect cleanup running...');
       mounted = false;
+
+      // ✅ MEMORY LEAK FIX: Comprehensive cleanup
+      isCleaningUpRef.current = true;
+      mountedRef.current = false;
+
+      // Clear all tracked timeouts
+      clearAllTimeouts();
+
       // Cleanup current socket if exists
       if (socket) {
-        if ((socket as any).reconnectTimeout) {
-          clearTimeout((socket as any).reconnectTimeout);
-        }
-        if (socket.connected) {
-          socket.disconnect();
+        try {
+          // Clear reconnection timeout if exists
+          if ((socket as any).reconnectTimeout) {
+            clearTimeout((socket as any).reconnectTimeout);
+            delete (socket as any).reconnectTimeout;
+          }
+
+          // Remove all listeners to prevent memory leaks
+          socket.removeAllListeners();
+
+          // Disconnect socket
+          if (socket.connected) {
+            socket.disconnect();
+          }
+        } catch (error) {
+          logger.warn('Error during useEffect cleanup:', 'Component', error);
         }
       }
+
+      // Reset connection flags
+      isConnectingRef.current = false;
+      retryRef.current = 0;
     };
   }, []); // ✅ REVERTED: Back to original empty dependency array
 
