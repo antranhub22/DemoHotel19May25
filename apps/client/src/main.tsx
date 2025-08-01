@@ -3,8 +3,6 @@
 // Type declaration for import.meta
 
 import App from '@/App.tsx';
-import React from 'react';
-import ReactDOM from 'react-dom/client';
 import './index.css';
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access
@@ -250,7 +248,8 @@ window.addEventListener('unhandledrejection', event => {
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  // ✅ TEMPORARY FIX: Disable StrictMode for WebSocket debugging
+  // <React.StrictMode>
+  <App />
+  // </React.StrictMode>
 );

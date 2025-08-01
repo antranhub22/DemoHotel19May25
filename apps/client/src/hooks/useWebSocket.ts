@@ -17,14 +17,73 @@ declare global {
 
 export function useWebSocket() {
   console.log('🔌 [DEBUG] ===== INITIALIZING WEBSOCKET HOOK =====');
+  console.log('🔌 [DEBUG] Hook function called, setting up state...');
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const assistant = useAssistant();
   const retryRef = useRef(0);
 
+  console.log('🔌 [DEBUG] State initialized, about to define initSocket...');
+
   // ✅ DIRECT TEST: Call initSocket immediately
   console.log('🔌 [DEBUG] About to define initSocket function...');
+
+  // ✅ DIRECT TEST FUNCTION: Manual test for initSocket
+  const testDirectConnection = useCallback(() => {
+    console.log('🧪 [TEST] ===== TESTING DIRECT WEBSOCKET CONNECTION =====');
+    console.log('🧪 [TEST] This is a manual test of WebSocket connection');
+    console.log('🧪 [TEST] Environment:', {
+      isDev: !import.meta.env.PROD,
+      VITE_API_HOST: import.meta.env.VITE_API_HOST,
+      currentHost: window.location.host,
+      currentOrigin: window.location.origin,
+    });
+
+    // Test different URLs
+    const testUrls = [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      `http://${import.meta.env.VITE_API_HOST || 'localhost:3000'}`,
+      window.location.origin,
+    ];
+
+    console.log('🧪 [TEST] Will test these URLs:', testUrls);
+
+    testUrls.forEach((url, index) => {
+      setTimeout(() => {
+        console.log(
+          `🧪 [TEST] Testing connection ${index + 1}/${testUrls.length}: ${url}`
+        );
+        try {
+          const testSocket = io(url, {
+            transports: ['websocket', 'polling'],
+            timeout: 5000,
+            reconnection: false,
+          });
+
+          testSocket.on('connect', () => {
+            console.log(`✅ [TEST] SUCCESS: Connected to ${url}`);
+            testSocket.disconnect();
+          });
+
+          testSocket.on('connect_error', error => {
+            console.log(`❌ [TEST] FAILED: ${url} - ${error.message}`);
+          });
+        } catch (error) {
+          console.log(`❌ [TEST] ERROR: ${url} - ${error}`);
+        }
+      }, index * 2000); // Test each URL with 2 second delay
+    });
+  }, []);
+
+  // ✅ EXPOSE TEST FUNCTION TO WINDOW
+  if (typeof window !== 'undefined') {
+    (window as any).testWebSocketConnection = testDirectConnection;
+    console.log(
+      '🧪 [TEST] Added testWebSocketConnection() to window for manual testing'
+    );
+  }
 
   // Initialize Socket.IO connection
   const initSocket = useCallback(() => {
@@ -37,7 +96,6 @@ export function useWebSocket() {
     );
     console.log('🔌 [DEBUG] WebSocket connection details:', {
       host: import.meta.env.VITE_API_HOST,
-      connected: connected,
       socketExists: !!socket,
     });
 
@@ -354,7 +412,7 @@ export function useWebSocket() {
     });
 
     setSocket(newSocket);
-  }, [assistant.callDetails, socket]);
+  }, [assistant.callDetails]); // ✅ FIXED: Removed socket from deps to prevent circular dependency
 
   // ✅ IMPROVED: Manual reconnect function with reset
   const reconnect = useCallback(() => {
@@ -368,8 +426,13 @@ export function useWebSocket() {
   }, [initSocket, socket]);
 
   // Initialize Socket.IO on mount
+  console.log(
+    '🔌 [DEBUG] Setting up useEffect for WebSocket initialization...'
+  );
+
   useEffect(() => {
     console.log('🔌 [DEBUG] ===== WEBSOCKET USEEFFECT FIRED =====');
+    console.log('🔌 [DEBUG] ===== THIS CONFIRMS USEEFFECT IS WORKING =====');
     let mounted = true;
 
     // Only initialize if component is still mounted
@@ -382,6 +445,7 @@ export function useWebSocket() {
     }
 
     return () => {
+      console.log('🔌 [DEBUG] useEffect cleanup running...');
       mounted = false;
       // Cleanup current socket if exists
       if (socket) {
@@ -394,6 +458,8 @@ export function useWebSocket() {
       }
     };
   }, []); // ✅ REVERTED: Back to original empty dependency array
+
+  console.log('🔌 [DEBUG] useEffect setup completed, continuing hook...');
 
   // ✅ IMPROVED: Re-send init with better error handling
   useEffect(() => {
@@ -441,6 +507,14 @@ export function useWebSocket() {
       }
     },
     [socket]
+  );
+
+  console.log('🔌 [DEBUG] useWebSocket hook completed, returning interface...');
+  console.log(
+    '🔌 [DEBUG] Final state - connected:',
+    connected,
+    'socket exists:',
+    !!socket
   );
 
   return { connected, sendMessage, reconnect };
