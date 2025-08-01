@@ -214,6 +214,11 @@ export const DEV_CONFIG = {
       password: 'itmanager123',
       role: 'it-manager' as UserRole,
     },
+    {
+      username: 'staff',
+      password: 'staff123',
+      role: 'front-desk' as UserRole,
+    },
   ],
 
   // Debug settings
