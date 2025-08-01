@@ -1044,7 +1044,7 @@ export async function generateCallSummaryOptimized(
     const conversationText = transcripts
       .map(
         t =>
-          `${t.role === 'assistant' ? 'Hotel Assistant' : 'Guest'}: ${t.content}`
+          `${t.role === 'assistant' ? 'Hotel Assistant' : 'Guest'}: ${t.content || t.message}`
       )
       .join('\n');
 

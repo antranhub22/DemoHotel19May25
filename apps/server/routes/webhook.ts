@@ -23,7 +23,7 @@ async function processTranscriptWithOpenAI(
     // Detect language from transcript
     const detectLanguage = (transcript: any[]): string => {
       const allText = transcript
-        .map(t => t.content)
+        .map(t => t.content || t.message)
         .join(' ')
         .toLowerCase();
       if (allText.includes('xin chào') || allText.includes('cảm ơn'))
