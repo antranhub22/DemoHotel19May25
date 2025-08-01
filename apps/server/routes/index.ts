@@ -35,7 +35,7 @@ import versionedApiRoutes from './versioned-api'; // ✅ NEW: API versioning & m
 import debugRoutes from '@server/routes/debug'; // ✅ NEW: Debug endpoints for production testing
 import guestPublicRoutes from '@server/routes/guest-public'; // ✅ NEW: GUEST VOICE ASSISTANT
 import monitoringRoutes from '@server/routes/monitoring';
-import openaiRoutes from '@server/routes/openai'; // ✅ NEW: OpenAI processing endpoints
+
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
@@ -98,7 +98,7 @@ router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migratio
 // ✅ VOICE ASSISTANT APIs
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
 router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
-router.use('/api/openai', openaiRoutes); // ✅ NEW: OpenAI processing endpoints
+
 router.use('/api/test-openai', testOpenaiRoutes); // ✅ DEBUG: Test OpenAI endpoints
 router.use('/api/test-webhook', testWebhookRoutes); // ✅ DEBUG: Test webhook endpoints
 router.use('/api/webhook', webhookRoutes); // ✅ NEW: VAPI Webhook endpoints
