@@ -51,9 +51,9 @@ const useDashboardData = () => {
       // Fetch requests data
       const requestsResponse = await fetch('/api/staff/requests', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
-        }
+        },
       });
 
       if (requestsResponse.ok) {
@@ -61,20 +61,20 @@ const useDashboardData = () => {
 
         // Calculate real statistics
         const today = new Date().toDateString();
-        const requestsToday = requests.filter((req: any) =>
-          new Date(req.createdAt).toDateString() === today
+        const requestsToday = requests.filter(
+          (req: any) => new Date(req.createdAt).toDateString() === today
         );
 
-        const pending = requests.filter((req: any) =>
-          req.status === 'Đã ghi nhận'
+        const pending = requests.filter(
+          (req: any) => req.status === 'Đã ghi nhận'
         ).length;
 
-        const inProgress = requests.filter((req: any) =>
-          req.status === 'Đang thực hiện'
+        const inProgress = requests.filter(
+          (req: any) => req.status === 'Đang thực hiện'
         ).length;
 
-        const completed = requests.filter((req: any) =>
-          req.status === 'Hoàn thiện'
+        const completed = requests.filter(
+          (req: any) => req.status === 'Hoàn thiện'
         ).length;
 
         setData({
@@ -82,15 +82,19 @@ const useDashboardData = () => {
             total: requests.length,
             today: requestsToday.length,
             answered: requests.length,
-            avgDuration: '2.3 min'
+            avgDuration: '2.3 min',
           },
           requests: {
             pending,
             inProgress,
             completed,
-            totalToday: requestsToday.length
+            totalToday: requestsToday.length,
           },
-          satisfaction: { rating: 4.7, responses: requests.length, trend: '+0.2' },
+          satisfaction: {
+            rating: 4.7,
+            responses: requests.length,
+            trend: '+0.2',
+          },
           system: { uptime: 99.9, responseTime: 150, errors: 0 },
         });
       }
@@ -127,7 +131,6 @@ const MetricCard = ({
   trend?: string;
   color?: 'blue' | 'green' | 'red' | 'orange' | 'purple';
 }) => {
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -163,7 +166,10 @@ const HotelManagerDashboard = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="h-24 bg-gray-200 animate-pulse rounded-lg"></div>
+            <div
+              key={i}
+              className="h-24 bg-gray-200 animate-pulse rounded-lg"
+            ></div>
           ))}
         </div>
       </div>
@@ -300,7 +306,10 @@ const HotelManagerDashboard = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-24 bg-gray-200 animate-pulse rounded-lg"></div>
+              <div
+                key={i}
+                className="h-24 bg-gray-200 animate-pulse rounded-lg"
+              ></div>
             ))}
           </div>
         </div>
@@ -312,7 +321,9 @@ const HotelManagerDashboard = () => {
         {/* Welcome section */}
         <div className="bg-gradient-to-r from-green-600 to-green-800 text-white p-6 rounded-lg">
           <h2 className="text-2xl font-bold mb-2">Front Desk Dashboard</h2>
-          <p className="text-green-100">Quản lý yêu cầu khách hàng và cuộc gọi</p>
+          <p className="text-green-100">
+            Quản lý yêu cầu khách hàng và cuộc gọi
+          </p>
         </div>
 
         {/* Staff metrics - REAL DATA */}
@@ -391,7 +402,9 @@ const HotelManagerDashboard = () => {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Đang chờ</span>
-                  <Badge variant="outline">{dashboardData.requests.pending}</Badge>
+                  <Badge variant="outline">
+                    {dashboardData.requests.pending}
+                  </Badge>
                 </div>
                 <Progress
                   value={
@@ -399,14 +412,16 @@ const HotelManagerDashboard = () => {
                       (dashboardData.requests.pending +
                         dashboardData.requests.inProgress +
                         dashboardData.requests.completed)) *
-                    100 || 0
+                      100 || 0
                   }
                   className="h-2"
                 />
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Đang xử lý</span>
-                  <Badge variant="outline">{dashboardData.requests.inProgress}</Badge>
+                  <Badge variant="outline">
+                    {dashboardData.requests.inProgress}
+                  </Badge>
                 </div>
                 <Progress
                   value={
@@ -414,14 +429,16 @@ const HotelManagerDashboard = () => {
                       (dashboardData.requests.pending +
                         dashboardData.requests.inProgress +
                         dashboardData.requests.completed)) *
-                    100 || 0
+                      100 || 0
                   }
                   className="h-2"
                 />
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Hoàn thành</span>
-                  <Badge variant="outline">{dashboardData.requests.completed}</Badge>
+                  <Badge variant="outline">
+                    {dashboardData.requests.completed}
+                  </Badge>
                 </div>
                 <Progress
                   value={
@@ -429,7 +446,7 @@ const HotelManagerDashboard = () => {
                       (dashboardData.requests.pending +
                         dashboardData.requests.inProgress +
                         dashboardData.requests.completed)) *
-                    100 || 0
+                      100 || 0
                   }
                   className="h-2"
                 />
@@ -439,147 +456,158 @@ const HotelManagerDashboard = () => {
         </div>
       </div>
     );
+  };
 
-    // IT Manager Dashboard
-    const ITManagerDashboard = () => {
-      const { data: dashboardData, loading } = useDashboardData();
+  // IT Manager Dashboard
+  const ITManagerDashboard = () => {
+    const { data: dashboardData, loading } = useDashboardData();
 
-      if (loading) {
-        return (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-lg">
-              <h2 className="text-2xl font-bold mb-2">IT System Dashboard</h2>
-              <p className="text-purple-100">Đang tải dữ liệu...</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="h-24 bg-gray-200 animate-pulse rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        );
-      }
-
+    if (loading) {
       return (
         <div className="space-y-6">
-          {/* Welcome section */}
           <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-lg">
             <h2 className="text-2xl font-bold mb-2">IT System Dashboard</h2>
-            <p className="text-purple-100">Giám sát hệ thống và quản lý kỹ thuật</p>
+            <p className="text-purple-100">Đang tải dữ liệu...</p>
           </div>
-
-          {/* IT metrics - REAL DATA */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <MetricCard
-              title="Uptime hệ thống"
-              value={`${dashboardData.system.uptime}%`}
-              description="30 ngày qua"
-              icon={Server}
-              trend="+0.1%"
-              color="purple"
-            />
-            <MetricCard
-              title="Response Time"
-              value={`${dashboardData.system.responseTime}ms`}
-              description="Trung bình 24h"
-              icon={Activity}
-              color="blue"
-            />
-            <MetricCard
-              title="Lỗi hệ thống"
-              value={dashboardData.system.errors}
-              description="Hôm nay"
-              icon={AlertCircle}
-              color="red"
-            />
-            <MetricCard
-              title="API Calls"
-              value={`${(dashboardData.calls.total * 100).toLocaleString()}`}
-              description="Hôm nay"
-              icon={Database}
-              trend="+8.2%"
-              color="green"
-            />
-          </div>
-
-          {/* IT Quick actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Công cụ IT</CardTitle>
-                <CardDescription>Quản lý hệ thống và bảo mật</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <PermissionGuard requiredPermission="system:monitor">
-                  <Link href="/hotel-dashboard/system-monitoring">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Monitor className="mr-2 h-4 w-4" />
-                      Giám sát hệ thống
-                    </Button>
-                  </Link>
-                </PermissionGuard>
-                <PermissionGuard requiredPermission="logs:view">
-                  <Link href="/hotel-dashboard/logs">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Database className="mr-2 h-4 w-4" />
-                      Xem system logs
-                    </Button>
-                  </Link>
-                </PermissionGuard>
-                <PermissionGuard requiredPermission="security:manage">
-                  <Link href="/hotel-dashboard/security">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Shield className="mr-2 h-4 w-4" />
-                      Cấu hình bảo mật
-                    </Button>
-                  </Link>
-                </PermissionGuard>
-                <PermissionGuard requiredPermission="integrations:manage">
-                  <Link href="/hotel-dashboard/integrations">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Wrench className="mr-2 h-4 w-4" />
-                      Quản lý tích hợp
-                    </Button>
-                  </Link>
-                </PermissionGuard>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Cảnh báo hệ thống</CardTitle>
-                <CardDescription>Thông báo kỹ thuật quan trọng</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <div className="flex-1">
-                      <p className="text-sm">Database backup completed</p>
-                      <p className="text-xs text-muted-foreground">5 phút trước</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <AlertCircle className="h-4 w-4 text-orange-500" />
-                    <div className="flex-1">
-                      <p className="text-sm">High memory usage: 85%</p>
-                      <p className="text-xs text-muted-foreground">10 phút trước</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Shield className="h-4 w-4 text-blue-500" />
-                    <div className="flex-1">
-                      <p className="text-sm">Security scan completed</p>
-                      <p className="text-xs text-muted-foreground">1 giờ trước</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {[1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className="h-24 bg-gray-200 animate-pulse rounded-lg"
+              ></div>
+            ))}
           </div>
         </div>
       );
-    };
+    }
+
+    return (
+      <div className="space-y-6">
+        {/* Welcome section */}
+        <div className="bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6 rounded-lg">
+          <h2 className="text-2xl font-bold mb-2">IT System Dashboard</h2>
+          <p className="text-purple-100">
+            Giám sát hệ thống và quản lý kỹ thuật
+          </p>
+        </div>
+
+        {/* IT metrics - REAL DATA */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            title="Uptime hệ thống"
+            value={`${dashboardData.system.uptime}%`}
+            description="30 ngày qua"
+            icon={Server}
+            trend="+0.1%"
+            color="purple"
+          />
+          <MetricCard
+            title="Response Time"
+            value={`${dashboardData.system.responseTime}ms`}
+            description="Trung bình 24h"
+            icon={Activity}
+            color="blue"
+          />
+          <MetricCard
+            title="Lỗi hệ thống"
+            value={dashboardData.system.errors}
+            description="Hôm nay"
+            icon={AlertCircle}
+            color="red"
+          />
+          <MetricCard
+            title="API Calls"
+            value={`${(dashboardData.calls.total * 100).toLocaleString()}`}
+            description="Hôm nay"
+            icon={Database}
+            trend="+8.2%"
+            color="green"
+          />
+        </div>
+
+        {/* IT Quick actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Công cụ IT</CardTitle>
+              <CardDescription>Quản lý hệ thống và bảo mật</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <PermissionGuard requiredPermission="system:monitor">
+                <Link href="/hotel-dashboard/system-monitoring">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Monitor className="mr-2 h-4 w-4" />
+                    Giám sát hệ thống
+                  </Button>
+                </Link>
+              </PermissionGuard>
+              <PermissionGuard requiredPermission="logs:view">
+                <Link href="/hotel-dashboard/logs">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Database className="mr-2 h-4 w-4" />
+                    Xem system logs
+                  </Button>
+                </Link>
+              </PermissionGuard>
+              <PermissionGuard requiredPermission="security:manage">
+                <Link href="/hotel-dashboard/security">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Cấu hình bảo mật
+                  </Button>
+                </Link>
+              </PermissionGuard>
+              <PermissionGuard requiredPermission="integrations:manage">
+                <Link href="/hotel-dashboard/integrations">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Wrench className="mr-2 h-4 w-4" />
+                    Quản lý tích hợp
+                  </Button>
+                </Link>
+              </PermissionGuard>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Cảnh báo hệ thống</CardTitle>
+              <CardDescription>Thông báo kỹ thuật quan trọng</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <div className="flex-1">
+                    <p className="text-sm">Database backup completed</p>
+                    <p className="text-xs text-muted-foreground">
+                      5 phút trước
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <AlertCircle className="h-4 w-4 text-orange-500" />
+                  <div className="flex-1">
+                    <p className="text-sm">High memory usage: 85%</p>
+                    <p className="text-xs text-muted-foreground">
+                      10 phút trước
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Shield className="h-4 w-4 text-blue-500" />
+                  <div className="flex-1">
+                    <p className="text-sm">Security scan completed</p>
+                    <p className="text-xs text-muted-foreground">1 giờ trước</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  };
+};
 
 // Main unified dashboard home component
 export const UnifiedDashboardHome: React.FC = () => {
@@ -601,7 +629,8 @@ export const UnifiedDashboardHome: React.FC = () => {
               Chào mừng đến với Hotel Dashboard
             </h2>
             <p className="text-gray-600">
-              Vai trò của bạn chưa được cấu hình. Vui lòng liên hệ quản trị viên.
+              Vai trò của bạn chưa được cấu hình. Vui lòng liên hệ quản trị
+              viên.
             </p>
           </div>
         );
