@@ -9,7 +9,11 @@ const storage = new DatabaseStorage();
 /**
  * ✅ HELPER: Process transcript with OpenAI for summary generation
  */
-async function processTranscriptWithOpenAI(transcript: any[], callId: string) {
+async function processTranscriptWithOpenAI(
+  transcript: any[],
+  callId: string,
+  req: any
+) {
   try {
     logger.debug('[Webhook] Processing transcript with OpenAI', 'Component', {
       transcriptLength: transcript.length,
@@ -84,7 +88,8 @@ async function processTranscriptWithOpenAI(transcript: any[], callId: string) {
 
     // Send WebSocket notification
     try {
-      const io = (require('../../app') as any).get('io'); // Get io from app
+      // ✅ FIX: Get io from req.app instead of require
+      const io = (req as any).app.get('io');
       if (io) {
         // Send progression updates
         io.emit('summary-progression', {
@@ -252,7 +257,7 @@ router.post('/vapi', express.json(), async (req, res) => {
         );
 
         // Process final transcript with OpenAI to generate summary
-        await processTranscriptWithOpenAI(finalTranscript, callId);
+        await processTranscriptWithOpenAI(finalTranscript, callId, req);
       } else {
         logger.warn(
           '[Webhook] No final transcript found in end-of-call-report',
