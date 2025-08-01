@@ -194,6 +194,8 @@ router.post('/vapi', express.json(), async (req, res) => {
       hasCall: !!message?.call,
       hasTranscript: !!message?.transcript,
       hasMessages: !!message?.messages,
+      transcriptLength: (message?.transcript || message?.messages || []).length,
+      payloadKeys: Object.keys(message || {}),
     });
 
     // ✅ FIX: Handle both transcript and end-of-call-report events separately
@@ -274,6 +276,42 @@ router.post('/vapi', express.json(), async (req, res) => {
       });
     }
 
+    // ✅ FALLBACK: Handle ANY event with transcript data for OpenAI processing
+    const transcriptData = message?.transcript || message?.messages || [];
+    if (
+      transcriptData &&
+      Array.isArray(transcriptData) &&
+      transcriptData.length > 0
+    ) {
+      logger.debug(
+        '[Webhook] FALLBACK: Processing transcript from unknown event type',
+        'Component',
+        {
+          callId,
+          eventType: message?.type || 'unknown',
+          transcriptLength: transcriptData.length,
+        }
+      );
+
+      try {
+        // Process with OpenAI even if event type is unknown
+        await processTranscriptWithOpenAI(transcriptData, callId, req);
+
+        return res.status(200).json({
+          success: true,
+          message: 'Fallback transcript processing completed',
+          callId,
+          eventType: message?.type || 'unknown',
+        });
+      } catch (error) {
+        logger.error(
+          '[Webhook] Fallback processing failed:',
+          'Component',
+          error
+        );
+      }
+    }
+
     // ✅ FALLBACK: Handle unknown event types
     logger.debug('[Webhook] Checking for unknown event type...', 'Component', {
       messageType: message?.type,
@@ -281,15 +319,19 @@ router.post('/vapi', express.json(), async (req, res) => {
       callId,
     });
 
-    // ✅ UNKNOWN EVENT TYPE: Return success but log warning
+    // ✅ FINAL FALLBACK: Log detailed info for debugging
     logger.warn(
-      '[Webhook] Unknown event type or no data to process',
+      '[Webhook] No transcript data found in any expected field',
       'Component',
       {
         messageType: message?.type,
         callId,
         hasTranscript: !!message?.transcript,
         hasMessages: !!message?.messages,
+        transcriptLength: (message?.transcript || message?.messages || [])
+          .length,
+        allFields: Object.keys(message || {}),
+        rawPayload: JSON.stringify(req.body).substring(0, 500),
       }
     );
 
