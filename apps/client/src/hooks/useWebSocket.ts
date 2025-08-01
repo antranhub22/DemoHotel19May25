@@ -180,14 +180,14 @@ export function useWebSocket() {
       window.location.hostname.includes('.onrender.com') ||
       window.location.hostname.includes('.talk2go.online')
     ) {
-      // ✅ PRODUCTION: Connect to same server as API (port 10000)
+      // ✅ PRODUCTION: Connect to same server as API
       if (window.location.hostname.includes('talk2go.online')) {
-        // Correct hostname typo and use proper port
+        // Correct hostname typo - use same origin (no explicit port)
         const correctedHostname = window.location.hostname.replace(
           'minhonmune',
           'minhonmuine'
         );
-        socketUrl = `https://${correctedHostname}:10000`;
+        socketUrl = `https://${correctedHostname}`;
       } else {
         socketUrl = window.location.origin;
       }
