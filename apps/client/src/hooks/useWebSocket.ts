@@ -174,14 +174,23 @@ export function useWebSocket() {
     // ✅ IMPROVED: Better Socket.IO URL construction for production
     let socketUrl: string;
 
-    // Production environment detection
+    // ✅ FIX: WebSocket connection URL matching API server
     if (
       import.meta.env.PROD ||
       window.location.hostname.includes('.onrender.com') ||
       window.location.hostname.includes('.talk2go.online')
     ) {
-      // Use current host for production
-      socketUrl = window.location.origin;
+      // ✅ PRODUCTION: Connect to same server as API (port 10000)
+      if (window.location.hostname.includes('talk2go.online')) {
+        // Correct hostname typo and use proper port
+        const correctedHostname = window.location.hostname.replace(
+          'minhonmune',
+          'minhonmuine'
+        );
+        socketUrl = `https://${correctedHostname}:10000`;
+      } else {
+        socketUrl = window.location.origin;
+      }
     } else {
       // Development environment
       const apiHost = import.meta.env.VITE_API_HOST || window.location.host;
