@@ -179,6 +179,86 @@ export function useWebSocket() {
       }
     });
 
+    // ✅ FIX: Listen for call-summary-received event directly from server
+    newSocket.on('call-summary-received', data => {
+      try {
+        logger.debug(
+          '[useWebSocket] Call summary received from webhook (direct event):',
+          'Component',
+          data
+        );
+
+        console.log(
+          '🎉 [DEBUG] ===== WEBSOCKET SUMMARY RECEIVED (DIRECT) ====='
+        );
+        console.log('🎉 [DEBUG] WebSocket received call-summary-received:', {
+          callId: data.callId,
+          hasSummary: !!data.summary,
+          summaryLength: data.summary?.length || 0,
+          hasServiceRequests: !!data.serviceRequests,
+          serviceRequestsCount: data.serviceRequests?.length || 0,
+          timestamp: data.timestamp,
+          fullData: data,
+        });
+
+        // ✅ Update assistant context directly
+        if (data.summary) {
+          const serverCallId = data.callId;
+          const storedCallId = (window as any).currentCallId;
+          const finalCallId = serverCallId || storedCallId || 'unknown';
+
+          console.log('🔗 [DEBUG] Using callId for summary update:', {
+            serverCallId,
+            storedCallId,
+            finalCallId,
+          });
+
+          assistant.setCallSummary({
+            callId: finalCallId,
+            tenantId: 'default',
+            content: data.summary,
+            timestamp: data.timestamp,
+          });
+        }
+
+        if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
+          console.log(
+            '🔄 [DEBUG] Setting service requests to assistant context:',
+            data.serviceRequests
+          );
+          assistant.setServiceRequests(data.serviceRequests);
+        }
+
+        console.log(
+          '✅ [DEBUG] Direct call-summary-received processing completed'
+        );
+      } catch (error) {
+        logger.error(
+          '[useWebSocket] Error processing call-summary-received (direct):',
+          'Component',
+          error
+        );
+      }
+    });
+
+    // ✅ Listen for summary-progression event directly
+    newSocket.on('summary-progression', data => {
+      try {
+        logger.debug(
+          '[useWebSocket] Summary progression update (direct):',
+          'Component',
+          data
+        );
+        console.log('📊 [DEBUG] Summary progression (direct):', data);
+      } catch (error) {
+        logger.error(
+          '[useWebSocket] Error processing summary-progression (direct):',
+          'Component',
+          error
+        );
+      }
+    });
+
     newSocket.on('message', data => {
       try {
         logger.debug('[useWebSocket] Message received:', 'Component', data);
