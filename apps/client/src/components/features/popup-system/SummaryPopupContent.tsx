@@ -63,15 +63,29 @@ export const SummaryPopupContent: React.FC = () => {
 
   // Auto-start processing when popup opens
   useEffect(() => {
-    if (progression.status === 'idle' && !serviceRequests?.length) {
+    if (progression.status === 'idle') {
+      console.log('🚀 [DEBUG] Starting summary processing...');
       startProcessing();
     }
-  }, [progression.status, serviceRequests, startProcessing]);
+  }, [progression.status, startProcessing]);
 
-  // Auto-complete when data is available
+  // Auto-complete when data is available OR after timeout
   useEffect(() => {
-    if (progression.status === 'processing' && serviceRequests?.length > 0) {
-      complete();
+    if (progression.status === 'processing') {
+      // Complete immediately if we have data
+      if (serviceRequests?.length > 0) {
+        console.log('✅ [DEBUG] Completing with service requests data');
+        complete();
+        return;
+      }
+
+      // ✅ FIX: Timeout fallback - complete after 10 seconds even without data
+      const timeout = setTimeout(() => {
+        console.log('⏰ [DEBUG] Completing with fallback data after timeout');
+        complete();
+      }, 10000); // 10 seconds timeout
+
+      return () => clearTimeout(timeout);
     }
   }, [progression.status, serviceRequests, complete]);
 
