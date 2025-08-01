@@ -184,20 +184,56 @@ router.patch(
       );
 
       // Update in database
+      // TODO: Add actual database update here
+
+      // Get request details for guest notification
+      let requestDetails = null;
+      try {
+        const requestQuery = await db
+          .select()
+          .from(requestTable)
+          .where(eq(requestTable.id, parseInt(id)))
+          .limit(1);
+        requestDetails = requestQuery[0];
+      } catch (dbError) {
+        logger.warn(
+          `⚠️ [STAFF] Could not fetch request details for guest notification`,
+          'Component',
+          dbError
+        );
+      }
 
       // WebSocket notification
       const io = (req as any).app?.get('io');
       if (io) {
         io.emit('requestStatusUpdate', {
+          type: 'status-change',
           requestId: id,
           status,
           assignedTo,
           timestamp: new Date().toISOString(),
         });
         logger.debug(
-          `📡 [STAFF] WebSocket notification sent for request ${id}`,
+          `📡 [STAFF] WebSocket notification sent for request ${id} status change`,
           'Component'
         );
+
+        // ✅ NEW: Guest notification
+        if (requestDetails) {
+          io.emit('guestNotification', {
+            type: 'status-update',
+            requestId: id,
+            roomNumber: requestDetails.room_number,
+            guestName: requestDetails.guest_name,
+            status,
+            message: `Yêu cầu của bạn đã được cập nhật: ${status}`,
+            timestamp: new Date().toISOString(),
+          });
+          logger.debug(
+            `📱 [STAFF] Guest notification sent for room ${requestDetails.room_number}`,
+            'Component'
+          );
+        }
       }
 
       logger.debug(
@@ -284,7 +320,7 @@ router.post(
 router.delete(
   '/staff/requests/all',
   authenticateJWT,
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       logger.debug(`🗑️ [STAFF] Attempting to delete all requests`, 'Component');
 

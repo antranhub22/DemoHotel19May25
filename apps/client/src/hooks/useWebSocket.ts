@@ -505,6 +505,78 @@ export function useWebSocket() {
       });
     });
 
+    // ✅ NEW: Listen for request status updates (dashboard real-time)
+    newSocket.on('requestStatusUpdate', data => {
+      try {
+        logger.debug(
+          '[useWebSocket] Request status update received:',
+          'Component',
+          data
+        );
+
+        // Call global function to update CustomerRequests dashboard
+        if ((window as any).updateRequestStatus) {
+          (window as any).updateRequestStatus(data);
+          logger.debug(
+            '✅ [useWebSocket] Called updateRequestStatus for dashboard',
+            'Component'
+          );
+        } else {
+          logger.warn(
+            '⚠️ [useWebSocket] updateRequestStatus function not available',
+            'Component'
+          );
+        }
+      } catch (error) {
+        logger.error(
+          '[useWebSocket] Error processing requestStatusUpdate:',
+          'Component',
+          error
+        );
+      }
+    });
+
+    // ✅ NEW: Listen for guest notifications (interface1 real-time)
+    newSocket.on('guestNotification', data => {
+      try {
+        logger.debug(
+          '[useWebSocket] Guest notification received:',
+          'Component',
+          data
+        );
+
+        // Show notification to guest (toast, modal, etc.)
+        if ((window as any).showGuestNotification) {
+          (window as any).showGuestNotification(data);
+          logger.debug(
+            '✅ [useWebSocket] Called showGuestNotification',
+            'Component'
+          );
+        } else {
+          // Fallback: Show browser notification
+          if (
+            'Notification' in window &&
+            Notification.permission === 'granted'
+          ) {
+            new Notification('Cập nhật yêu cầu', {
+              body: data.message,
+              icon: '/favicon.ico',
+            });
+          }
+          logger.debug(
+            '📱 [useWebSocket] Showed browser notification',
+            'Component'
+          );
+        }
+      } catch (error) {
+        logger.error(
+          '[useWebSocket] Error processing guestNotification:',
+          'Component',
+          error
+        );
+      }
+    });
+
     setSocket(newSocket);
   }, [assistant.callDetails, createSafeTimeout, clearAllTimeouts]); // ✅ DEPENDENCIES: Include helpers to prevent stale closures
 

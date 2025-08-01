@@ -86,6 +86,75 @@ async function processTranscriptWithOpenAI(
       );
     }
 
+    // ✅ NEW: Save service requests to database
+    if (serviceRequests && serviceRequests.length > 0) {
+      try {
+        // Extract tenant ID from request
+        const tenantId = 'mi-nhon-hotel'; // TODO: Extract from hostname if needed
+
+        logger.debug(
+          '[Webhook] Saving service requests to database',
+          'Component',
+          {
+            callId,
+            serviceRequestsCount: serviceRequests.length,
+            tenantId,
+          }
+        );
+
+        // Save each service request
+        const savedRequests = [];
+        for (const serviceRequest of serviceRequests) {
+          const savedRequest = await storage.addServiceRequest(
+            serviceRequest,
+            callId,
+            tenantId,
+            summary
+          );
+          savedRequests.push(savedRequest);
+        }
+
+        logger.success(
+          '[Webhook] Service requests saved to database successfully',
+          'Component',
+          {
+            callId,
+            savedCount: savedRequests.length,
+            requestIds: savedRequests.map(r => r.id),
+          }
+        );
+
+        // ✅ EMIT WEBSOCKET FOR NEW REQUESTS
+        const io = (req as any).app?.get('io');
+        if (io) {
+          // Emit for each new request
+          savedRequests.forEach(request => {
+            io.emit('requestStatusUpdate', {
+              type: 'new-request',
+              requestId: request.id,
+              status: request.status,
+              roomNumber: request.room_number,
+              guestName: request.guest_name,
+              requestContent: request.request_content,
+              orderType: request.order_type,
+              timestamp: new Date().toISOString(),
+            });
+
+            logger.debug(
+              `📡 [Webhook] WebSocket emitted for new request ${request.id}`,
+              'Component'
+            );
+          });
+        }
+      } catch (serviceError) {
+        logger.error(
+          '[Webhook] Failed to save service requests to database:',
+          'Component',
+          serviceError
+        );
+      }
+    }
+
     // Send WebSocket notification
     try {
       // ✅ FIX: Get io from req.app instead of require

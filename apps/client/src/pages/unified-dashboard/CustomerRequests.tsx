@@ -1,21 +1,4 @@
 import {
-  RefreshCw,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  Filter,
-  Trash2,
-  Send,
-  User,
-  Calendar,
-  MapPin,
-  Eye,
-  Edit,
-} from 'lucide-react';
-import React, { useState, useEffect } from 'react';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -53,8 +36,26 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { cn } from '@/lib/utils';
 import { logger } from '@shared/utils/logger';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Edit,
+  Eye,
+  Filter,
+  MapPin,
+  MessageSquare,
+  RefreshCw,
+  Search,
+  Send,
+  Trash2,
+  User,
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 // Types
 interface CustomerRequest {
@@ -337,7 +338,8 @@ const MessageModal = ({
 
 // Main Customer Requests component
 export const CustomerRequests: React.FC = () => {
-  const { user } = useAuth();
+  useAuth();
+  const {} = useWebSocket(); // Initialize WebSocket connection
   const [requests, setRequests] = useState<CustomerRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] =
@@ -525,12 +527,76 @@ export const CustomerRequests: React.FC = () => {
     return true;
   });
 
+  // ✅ NEW: WebSocket event listener for real-time updates
+  useEffect(() => {
+    // Set up global function for WebSocket to call
+    (window as any).updateRequestStatus = (data: any) => {
+      logger.debug(
+        '📡 [CustomerRequests] WebSocket request update received:',
+        'Component',
+        data
+      );
+
+      if (data.type === 'new-request') {
+        // Add new request to the list
+        const newRequest: CustomerRequest = {
+          id: data.requestId,
+          type: data.orderType || 'Service Request',
+          roomNumber: data.roomNumber || 'N/A',
+          orderId: `REQ-${data.requestId}`,
+          guestName: data.guestName || 'Guest',
+          requestContent: data.requestContent || 'New service request',
+          status: data.status || 'Đã ghi nhận',
+          createdAt: data.timestamp || new Date().toISOString(),
+          updatedAt: data.timestamp || new Date().toISOString(),
+        };
+
+        setRequests(prev => [newRequest, ...prev]);
+        logger.success(
+          '✅ [CustomerRequests] New request added to dashboard',
+          'Component',
+          {
+            requestId: data.requestId,
+            roomNumber: data.roomNumber,
+          }
+        );
+      } else if (data.type === 'status-change') {
+        // Update existing request status
+        setRequests(prev =>
+          prev.map(request =>
+            request.id === data.requestId
+              ? {
+                  ...request,
+                  status: data.status,
+                  updatedAt: data.timestamp,
+                  assignedTo: data.assignedTo,
+                }
+              : request
+          )
+        );
+        logger.success(
+          '✅ [CustomerRequests] Request status updated',
+          'Component',
+          {
+            requestId: data.requestId,
+            newStatus: data.status,
+          }
+        );
+      }
+    };
+
+    // Cleanup function
+    return () => {
+      (window as any).updateRequestStatus = undefined;
+    };
+  }, []);
+
   // Load requests on component mount
   useEffect(() => {
     fetchRequests();
 
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchRequests, 30000);
+    // Auto-refresh every 60 seconds (reduced frequency since we have real-time updates)
+    const interval = setInterval(fetchRequests, 60000);
     return () => clearInterval(interval);
   }, []);
 

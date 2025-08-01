@@ -1,4 +1,3 @@
-import { and, eq, gte, sql } from 'drizzle-orm';
 import type {
   CallSummary,
   InsertCallSummary,
@@ -9,6 +8,7 @@ import type {
 import { call_summaries, db, request, staff, transcript } from '@shared/db';
 import { AuthUserCamelCase, authUserMapper } from '@shared/db/transformers';
 import { logger } from '@shared/utils/logger';
+import { and, eq, gte, sql } from 'drizzle-orm';
 
 // ✅ Import missing types from shared/db
 
@@ -369,6 +369,87 @@ export class DatabaseStorage {
     } catch (error) {
       logger.error(
         '❌ [PostgreSQL Storage] Error getting recent call summaries:',
+        'Component',
+        error
+      );
+      throw error;
+    }
+  }
+
+  // ✅ NEW: Add service request to database
+  async addServiceRequest(
+    serviceRequest: any,
+    callId: string,
+    tenantId: string,
+    summary: string
+  ): Promise<any> {
+    try {
+      // Extract guest name from summary
+      const guestNameMatch = summary.match(
+        /Guest's Name.*?:\s*([^\n]+)|Tên khách.*?:\s*([^\n]+)/i
+      );
+      const guestName = guestNameMatch
+        ? (guestNameMatch[1] || guestNameMatch[2])?.trim()
+        : null;
+
+      // Generate order ID
+      const orderId = `REQ-${Date.now()}`;
+
+      // Map serviceRequest to request table fields
+      const requestData = {
+        tenant_id: tenantId,
+        call_id: callId,
+        room_number: serviceRequest.details?.roomNumber || 'N/A',
+        order_id: orderId,
+        request_content: serviceRequest.requestText || 'Service request',
+        status: 'Đã ghi nhận',
+        guest_name: guestName || 'Guest',
+        phone_number: null, // Will be extracted later if available
+        total_amount: serviceRequest.details?.amount
+          ? parseFloat(
+              serviceRequest.details.amount.toString().replace(/[^\d.]/g, '')
+            )
+          : null,
+        currency: 'VND',
+        special_instructions: serviceRequest.details?.otherDetails || null,
+        order_type: serviceRequest.serviceType || 'service-request',
+        delivery_time: serviceRequest.details?.time || null,
+        items: JSON.stringify(serviceRequest.details || {}),
+        priority: 'medium',
+        urgency: 'normal',
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      logger.debug(
+        '💾 [DatabaseStorage] Adding service request to database',
+        'Component',
+        {
+          callId,
+          tenantId,
+          serviceType: serviceRequest.serviceType,
+          roomNumber: requestData.room_number,
+          guestName: requestData.guest_name,
+          orderId,
+        }
+      );
+
+      const result = await db.insert(request).values(requestData).returning();
+
+      logger.success(
+        '✅ [DatabaseStorage] Service request saved successfully',
+        'Component',
+        {
+          requestId: result[0].id,
+          orderId,
+          roomNumber: requestData.room_number,
+        }
+      );
+
+      return result[0];
+    } catch (error) {
+      logger.error(
+        '❌ [DatabaseStorage] Failed to add service request:',
         'Component',
         error
       );
