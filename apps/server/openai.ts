@@ -1,5 +1,5 @@
-import OpenAI from 'openai';
 import { logger } from '@shared/utils/logger';
+import OpenAI from 'openai';
 
 // Initialize OpenAI client only if API key is available
 const apiKey = process.env.VITE_OPENAI_API_KEY;
@@ -619,6 +619,11 @@ export async function extractServiceRequests(
  * @param text Text to translate
  * @returns Vietnamese translation
  */
+// ✅ RATE LIMITING: Simple rate limiter for translations (max 5 per minute)
+const translationRateLimit = new Map<string, number[]>();
+const TRANSLATION_RATE_LIMIT = 5; // 5 translations per minute
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+
 export async function translateToVietnamese(text: string): Promise<string> {
   // If OpenAI client is not available, return original text
   if (!openai) {
@@ -628,6 +633,25 @@ export async function translateToVietnamese(text: string): Promise<string> {
     );
     return text;
   }
+
+  // ✅ RATE LIMITING: Check if we exceed the limit
+  const clientKey = 'global'; // In production, use IP or user ID
+  const now = Date.now();
+  const clientRequests = translationRateLimit.get(clientKey) || [];
+
+  // Remove old requests outside the window
+  const validRequests = clientRequests.filter(
+    time => now - time < RATE_LIMIT_WINDOW
+  );
+
+  if (validRequests.length >= TRANSLATION_RATE_LIMIT) {
+    logger.warn('🚫 [RATE-LIMIT] Translation rate limit exceeded', 'Component');
+    return 'Đã vượt quá giới hạn dịch thuật (5 lần/phút). Vui lòng thử lại sau.';
+  }
+
+  // Add current request
+  validRequests.push(now);
+  translationRateLimit.set(clientKey, validRequests);
 
   try {
     if (!text) {
@@ -647,7 +671,7 @@ export async function translateToVietnamese(text: string): Promise<string> {
 
     const chatCompletion = await openai.chat.completions.create(
       {
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini', // ✅ COST OPTIMIZATION: Use cheaper model for translation
         messages: [
           {
             role: 'system',
@@ -660,6 +684,15 @@ export async function translateToVietnamese(text: string): Promise<string> {
         temperature: 0.3,
       },
       { headers: { 'OpenAi-Project': projectId } }
+    );
+
+    logger.debug(
+      '💰 [TRANSLATION-OPTIMIZED] Translation completed',
+      'Component',
+      {
+        model: 'gpt-4o-mini',
+        costSaving: '~95% vs gpt-4o',
+      }
     );
 
     return (
@@ -957,22 +990,53 @@ ${conversationText}
 总结：`,
 };
 
-export async function generateCallSummary(
+// ✅ COST OPTIMIZATION: Simple cache for recent summaries (5 minutes TTL)
+const summaryCache = new Map<
+  string,
+  { summary: string; serviceRequests: ServiceRequest[]; timestamp: number }
+>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export async function generateCallSummaryOptimized(
   transcripts: Array<{ role: string; content: string }>,
   language: string = 'en'
-): Promise<string> {
+): Promise<{ summary: string; serviceRequests: ServiceRequest[] }> {
+  logger.debug('🔍 [DEBUG] generateCallSummaryOptimized called', 'Component', {
+    transcriptCount: transcripts?.length || 0,
+    language,
+    hasOpenAI: !!openai,
+    apiKey: process.env.VITE_OPENAI_API_KEY ? 'Present' : 'Missing',
+  });
+
   // If OpenAI client is not available, use the basic summary generator
   if (!openai) {
-    logger.debug(
-      'OpenAI client not available, using basic summary generator',
+    logger.warn(
+      '⚠️ [FALLBACK] OpenAI client not available, using basic summary generator',
       'Component'
     );
-    return generateBasicSummary(transcripts);
+    return {
+      summary: generateBasicSummary(transcripts),
+      serviceRequests: [],
+    };
   }
 
   // Ensure we have transcripts to summarize
   if (!transcripts || transcripts.length === 0) {
-    return 'There are no transcripts available to summarize.';
+    return {
+      summary: 'There are no transcripts available to summarize.',
+      serviceRequests: [],
+    };
+  }
+
+  // ✅ CACHE CHECK: Create cache key from transcript content
+  const cacheKey = JSON.stringify(transcripts) + language;
+  const cached = summaryCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    logger.debug('🚀 [COST-SAVE] Using cached summary', 'Component', {
+      cacheKey: cacheKey.substring(0, 50) + '...',
+      age: Math.floor((Date.now() - cached.timestamp) / 1000) + 's',
+    });
+    return { summary: cached.summary, serviceRequests: cached.serviceRequests };
   }
 
   try {
@@ -984,59 +1048,119 @@ export async function generateCallSummary(
       )
       .join('\n');
 
-    // Chọn template prompt đúng ngôn ngữ, fallback về tiếng Anh nếu không có
-    const promptTemplate = PROMPT_TEMPLATES[language] || PROMPT_TEMPLATES['en'];
-    const prompt = promptTemplate(conversationText);
+    // ✅ COMBINED PROMPT: Generate summary AND extract service requests in ONE call
+    const combinedPrompt = `You are a hotel service specialist for Mi Nhon Hotel. Process this conversation and provide BOTH summary and service data extraction.
 
-    // Call the OpenAI API with GPT-4o
+CONVERSATION:
+${conversationText}
+
+Please respond with VALID JSON in this exact format:
+{
+  "summary": "Room Number: [number or Not specified]\\nGuest's Name: [name or Not specified]\\n\\nREQUEST 1: [Service Type]\\n• Service Timing: [timing]\\n• Order Details:\\n    • [item] x [qty]\\n• Special Requirements: [requirements]\\n\\nNext Step: Please Press Send To Reception to complete your request",
+  "serviceRequests": [
+    {
+      "serviceType": "food-beverage|housekeeping|transportation|etc",
+      "requestText": "detailed description of request",
+      "details": {
+        "date": "YYYY-MM-DD or null",
+        "time": "HH:MM or time range",
+        "people": number_or_null,
+        "location": "specific location or null",
+        "amount": "price/cost or null", 
+        "roomNumber": "room number or null",
+        "otherDetails": "additional helpful details"
+      }
+    }
+  ]
+}
+
+IMPORTANT:
+- Extract room number and guest name if mentioned
+- Be specific about service types, quantities, timing
+- Use guest's original language (${language})
+- If no specific requests, use empty array for serviceRequests
+- Ensure valid JSON format`;
+
+    // ✅ COST OPTIMIZATION: Use GPT-4o-mini for this task (20x cheaper than GPT-4o)
     const options = {
-      timeout: 30000, // 30 second timeout to prevent hanging
+      timeout: 30000,
       headers: { 'OpenAi-Project': projectId },
     };
 
     const chatCompletion = await openai.chat.completions.create(
       {
-        model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        model: 'gpt-4o-mini', // ✅ MUCH CHEAPER: $0.15/1M tokens vs $5/1M for GPT-4o
         messages: [
           {
             role: 'system',
             content:
-              'You are a professional hotel service summarization specialist who creates concise and useful summaries.',
+              'You are a hotel service analyst that outputs valid JSON combining summary and service extraction.',
           },
-          { role: 'user', content: prompt },
+          { role: 'user', content: combinedPrompt },
         ],
-        max_tokens: 800, // Increased tokens limit for comprehensive summaries
-        temperature: 0.5, // More deterministic for consistent summaries
-        presence_penalty: 0.1, // Slight penalty to avoid repetition
-        frequency_penalty: 0.1, // Slight penalty to avoid repetition
+        response_format: { type: 'json_object' },
+        max_tokens: 1200,
+        temperature: 0.3, // Lower for more consistent JSON
       },
       options
     );
 
-    // Return the generated summary
-    return (
-      chatCompletion.choices[0].message.content?.trim() ||
-      'Failed to generate summary.'
-    );
-  } catch (error: any) {
-    logger.error('Error generating summary with OpenAI:', 'Component', error);
-
-    // Check for specific error types and provide more helpful messages
-    if (error?.code === 'invalid_api_key') {
-      return 'Could not generate AI summary: API key authentication failed. Please contact hotel staff to resolve this issue.';
-    } else if (error?.status === 429 || error?.code === 'insufficient_quota') {
-      // For rate limit errors, return just the detailed error
-      logger.debug(
-        'Rate limit or quota exceeded, falling back to basic summary generator',
-        'Component'
-      );
-      return generateBasicSummary(transcripts);
-    } else if (error?.status === 500) {
-      return 'Could not generate AI summary: OpenAI service is currently experiencing issues. Please try again later.';
+    const responseContent = chatCompletion.choices[0].message.content?.trim();
+    if (!responseContent) {
+      throw new Error('Empty response from OpenAI');
     }
 
-    // If OpenAI is unavailable for any other reason, use the basic summary as fallback
-    const basicSummary = generateBasicSummary(transcripts);
-    return basicSummary;
+    // Parse combined response
+    const parsed = JSON.parse(responseContent);
+    const summary = parsed.summary || 'Failed to generate summary.';
+    const serviceRequests = Array.isArray(parsed.serviceRequests)
+      ? parsed.serviceRequests
+      : [];
+
+    // ✅ CACHE RESULT: Store for future use
+    summaryCache.set(cacheKey, {
+      summary,
+      serviceRequests,
+      timestamp: Date.now(),
+    });
+
+    // ✅ CLEANUP: Remove old cache entries
+    for (const [key, value] of summaryCache.entries()) {
+      if (Date.now() - value.timestamp > CACHE_TTL) {
+        summaryCache.delete(key);
+      }
+    }
+
+    logger.debug(
+      '💰 [COST-OPTIMIZED] Combined summary+extraction completed',
+      'Component',
+      {
+        model: 'gpt-4o-mini',
+        tokensUsed: 'estimated 500-800',
+        costSaving: '~95% vs original',
+        summaryLength: summary.length,
+        serviceRequestsCount: serviceRequests.length,
+        summaryPreview: summary.substring(0, 100) + '...',
+      }
+    );
+
+    return { summary, serviceRequests };
+  } catch (error: any) {
+    logger.error('Error generating optimized summary:', 'Component', error);
+
+    // Fallback to basic summary
+    return {
+      summary: generateBasicSummary(transcripts),
+      serviceRequests: [],
+    };
   }
+}
+
+// ✅ BACKWARD COMPATIBILITY: Keep original function for legacy support
+export async function generateCallSummary(
+  transcripts: Array<{ role: string; content: string }>,
+  language: string = 'en'
+): Promise<string> {
+  const result = await generateCallSummaryOptimized(transcripts, language);
+  return result.summary;
 }

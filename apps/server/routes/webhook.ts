@@ -1,4 +1,4 @@
-import { extractServiceRequests, generateCallSummary } from '@server/openai';
+import { generateCallSummaryOptimized } from '@server/openai';
 import { DatabaseStorage } from '@server/storage';
 import { logger } from '@shared/utils/logger';
 import express from 'express';
@@ -40,11 +40,11 @@ async function processTranscriptWithOpenAI(
     const language = detectLanguage(transcript);
     logger.debug(`[Webhook] Detected language: ${language}`, 'Component');
 
-    // Generate summary from transcript
-    const summary = await generateCallSummary(transcript, language);
-
-    // Extract service requests from summary
-    const serviceRequests = await extractServiceRequests(summary);
+    // ✅ COST OPTIMIZATION: Generate summary AND extract service requests in ONE call
+    const { summary, serviceRequests } = await generateCallSummaryOptimized(
+      transcript,
+      language
+    );
 
     logger.success('[Webhook] OpenAI processing completed', 'Component', {
       summaryLength: summary?.length || 0,

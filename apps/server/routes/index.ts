@@ -39,6 +39,7 @@ import openaiRoutes from '@server/routes/openai'; // ✅ NEW: OpenAI processing 
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
+import testOpenaiRoutes from '@server/routes/test-openai'; // ✅ DEBUG: Test OpenAI endpoints
 import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add transcript routes
 import vapiConfigRoutes from '@server/routes/vapi-config'; // ✅ NEW: VAPI Configuration for language-specific settings
 import vapiProxyRoutes from '@server/routes/vapi-proxy'; // ✅ NEW: VAPI CORS BYPASS
@@ -97,6 +98,7 @@ router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migratio
 router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
 router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
 router.use('/api/openai', openaiRoutes); // ✅ NEW: OpenAI processing endpoints
+router.use('/api/test-openai', testOpenaiRoutes); // ✅ DEBUG: Test OpenAI endpoints
 router.use('/api/webhook', webhookRoutes); // ✅ NEW: VAPI Webhook endpoints
 
 // ============================================
