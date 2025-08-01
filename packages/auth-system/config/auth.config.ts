@@ -117,6 +117,7 @@ export const DEFAULT_PERMISSIONS = {
   ],
   'front-desk': [
     { module: 'dashboard', action: 'view', allowed: true },
+    { module: 'dashboard', action: 'view_client_interface', allowed: true }, // ✅ Added
     { module: 'calls', action: 'view', allowed: true },
     { module: 'requests', action: 'edit', allowed: true },
   ],

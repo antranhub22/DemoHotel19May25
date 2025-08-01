@@ -21,7 +21,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     logs: ['view', 'export'],
   },
   'front-desk': {
-    dashboard: ['view'],
+    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
     calls: ['view', 'join', 'transfer', 'end'],
     analytics: ['view_basic'], // Limited analytics
     profile: ['view', 'edit'],
@@ -86,7 +86,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     logs: ['view', 'export'],
   },
   frontdesk: {
-    dashboard: ['view'],
+    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
     calls: ['view', 'join', 'transfer', 'end'],
     analytics: ['view_basic'],
     profile: ['view', 'edit'],

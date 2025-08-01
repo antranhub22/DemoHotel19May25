@@ -31,7 +31,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     requests: ['view', 'manage'],
   },
   'front-desk': {
-    dashboard: ['view'],
+    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
     calls: ['view'],
     requests: ['view', 'manage'],
   },
@@ -57,7 +57,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     requests: ['view', 'manage'],
   },
   frontdesk: {
-    dashboard: ['view'],
+    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
     calls: ['view'],
     requests: ['view', 'manage'],
   },
