@@ -178,7 +178,7 @@ export const useSendToFrontDeskHandler = ({
       headers.Authorization = `Bearer ${guestToken}`;
     }
 
-    const response = await fetch('/api/guest/request', {
+    const response = await fetch('/api/guest/requests', {
       method: 'POST',
       headers,
       body: JSON.stringify(payload),
@@ -300,7 +300,7 @@ export const useSendToFrontDeskHandler = ({
       );
 
       // ✅ FIXED: Use guest endpoint for voice assistant requests (no auth required)
-      const response = await fetch('/api/guest/request', {
+      const response = await fetch('/api/guest/requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

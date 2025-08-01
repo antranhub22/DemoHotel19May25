@@ -1,4 +1,5 @@
 import { useAssistant } from '@/context';
+import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 import { useSummaryProgression } from '@/hooks/useSummaryProgression';
 import { logger } from '@shared/utils/logger';
 import React, { useEffect } from 'react';
@@ -8,6 +9,16 @@ import { SummaryProgression } from './SummaryProgression';
 export const SummaryPopupContent: React.FC = () => {
   const { serviceRequests, language, callDetails } = useAssistant();
   const { progression, startProcessing, complete } = useSummaryProgression();
+
+  // ✅ NEW: Add Send to FrontDesk functionality
+  const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
+    onSuccess: () => {
+      alert('✅ Request sent to Front Desk successfully!');
+    },
+    onError: error => {
+      alert(`❌ ${error}`);
+    },
+  });
 
   // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
@@ -275,25 +286,67 @@ export const SummaryPopupContent: React.FC = () => {
         </div>
       )}
 
-      {/* Status Footer */}
-      <div
-        style={{
-          borderTop: '1px solid #E5E7EB',
-          paddingTop: '16px',
-          fontSize: '12px',
-          color: '#6B7280',
-          textAlign: 'center',
-        }}
-      >
-        {summary.hasData ? (
-          <>
-            ✅ Summary generated successfully • Review and send to front desk if
-            needed
-          </>
-        ) : (
-          <>⏳ Processing call data • Summary will appear automatically</>
-        )}
-      </div>
+      {/* ✅ NEW: Action Buttons Section */}
+      {summary.hasData && (
+        <div
+          style={{
+            borderTop: '1px solid #E5E7EB',
+            paddingTop: '16px',
+          }}
+        >
+          {/* Status Message */}
+          <div
+            style={{
+              fontSize: '12px',
+              color: '#6B7280',
+              textAlign: 'center',
+              marginBottom: '12px',
+            }}
+          >
+            ✅ Summary generated successfully
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors"
+              onClick={() => window.location.reload()}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSendToFrontDesk}
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Sending...
+                </>
+              ) : (
+                'Send to FrontDesk'
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Processing State */}
+      {!summary.hasData && (
+        <div
+          style={{
+            borderTop: '1px solid #E5E7EB',
+            paddingTop: '16px',
+            fontSize: '12px',
+            color: '#6B7280',
+            textAlign: 'center',
+          }}
+        >
+          ⏳ Processing call data • Summary will appear automatically
+        </div>
+      )}
     </div>
   );
 };

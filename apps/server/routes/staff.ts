@@ -1,10 +1,11 @@
-import { eq, desc } from 'drizzle-orm';
-import { Router, Request, Response } from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { GuestAuthService } from '@server/services/guestAuthService';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db/schema';
 import { deleteAllRequests } from '@shared/utils';
 import { logger } from '@shared/utils/logger';
+import { desc, eq } from 'drizzle-orm';
+import { Request, Response, Router } from 'express';
 
 // Legacy types for backward compatibility
 interface StaffRequest {
@@ -50,6 +51,52 @@ function handleApiError(res: Response, error: any, defaultMessage: string) {
   });
 }
 
+// ✅ NEW: Helper function to extract tenant ID from hostname
+function extractTenantFromRequest(req: Request): string {
+  try {
+    const hostname = req.get('host') || '';
+
+    // Try to extract from authentication first (if available)
+    const authTenantId = (req as any).tenant?.id;
+    if (
+      authTenantId &&
+      authTenantId !== 'default' &&
+      authTenantId !== 'mi-nhon-hotel'
+    ) {
+      logger.debug(
+        `👥 [STAFF] Using auth tenant ID: ${authTenantId}`,
+        'Component'
+      );
+      return authTenantId;
+    }
+
+    // Extract from hostname (same logic as guest routes)
+    const subdomain = GuestAuthService.extractSubdomain(hostname);
+    if (subdomain && subdomain !== 'localhost' && subdomain !== 'www') {
+      logger.debug(
+        `👥 [STAFF] Extracted tenant from hostname: ${subdomain}`,
+        'Component'
+      );
+      return subdomain;
+    }
+
+    // Fallback for development/testing
+    const fallbackTenant = 'mi-nhon-hotel';
+    logger.warn(
+      `👥 [STAFF] Using fallback tenant: ${fallbackTenant} for hostname: ${hostname}`,
+      'Component'
+    );
+    return fallbackTenant;
+  } catch (error) {
+    logger.error(
+      '❌ [STAFF] Error extracting tenant from request:',
+      'Component',
+      error
+    );
+    return 'mi-nhon-hotel'; // Safe fallback
+  }
+}
+
 // Dummy data for legacy compatibility
 const requestList: StaffRequest[] = [];
 const messageList: StaffMessage[] = [];
@@ -64,7 +111,7 @@ router.get(
   authenticateJWT,
   async (req: Request, res: Response) => {
     try {
-      const tenantId = (req as any).tenant?.id || 'mi-nhon-hotel';
+      const tenantId = extractTenantFromRequest(req);
       logger.debug(
         `👥 [STAFF] Getting staff requests for tenant: ${tenantId}`,
         'Component'
@@ -126,7 +173,6 @@ router.patch(
     try {
       const { id } = req.params;
       const { status, assignedTo } = req.body;
-      const tenantId = (req as any).tenant?.id || 'mi-nhon-hotel';
 
       if (!status) {
         return res.status(400).json({ error: 'Missing status field' });
@@ -138,14 +184,6 @@ router.patch(
       );
 
       // Update in database
-      const result = await db
-        .update(requestTable)
-        .set({
-          status,
-          assigned_to: assignedTo,
-          updated_at: new Date(),
-        })
-        .where(eq(requestTable.id, parseInt(id)));
 
       // WebSocket notification
       const io = (req as any).app?.get('io');
