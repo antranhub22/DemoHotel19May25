@@ -349,9 +349,6 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
         // ✅ NEW: Trigger summary popup via global function
         if (window.triggerSummaryPopup) {
-          alert(
-            '🎯 WITH TRANSCRIPT: About to call window.triggerSummaryPopup()!'
-          ); // Visual debug
           window.triggerSummaryPopup();
         }
 

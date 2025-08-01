@@ -1,6 +1,5 @@
 import { desc, eq, count, and, gte } from 'drizzle-orm';
 import { call } from '@shared/db';
-// import { transcript, request } from '@shared/db'; // Available for future use
 import { logger } from '@shared/utils/logger';
 
 const isPostgres =

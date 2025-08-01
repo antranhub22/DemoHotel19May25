@@ -16,9 +16,6 @@ declare global {
 }
 
 export function useWebSocket() {
-  console.log('🔌 [DEBUG] ===== INITIALIZING WEBSOCKET HOOK =====');
-  console.log('🔌 [DEBUG] Hook function called, setting up state...');
-
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const assistant = useAssistant();
@@ -28,8 +25,6 @@ export function useWebSocket() {
   const timeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
   const isCleaningUpRef = useRef(false);
   const mountedRef = useRef(true);
-
-  console.log('🔌 [DEBUG] State initialized, about to define initSocket...');
 
   // ✅ HELPER: Safe timeout with cleanup tracking
   const createSafeTimeout = useCallback(
@@ -56,7 +51,6 @@ export function useWebSocket() {
   }, []);
 
   // ✅ DIRECT TEST: Call initSocket immediately
-  console.log('🔌 [DEBUG] About to define initSocket function...');
 
   // ✅ DIRECT TEST FUNCTION: Manual test for initSocket
   const testDirectConnection = useCallback(() => {
@@ -119,8 +113,6 @@ export function useWebSocket() {
 
   // Initialize Socket.IO connection
   const initSocket = useCallback(() => {
-    console.log('🔌 [DEBUG] ===== INITSOCKET FUNCTION CALLED =====');
-
     // ✅ RACE CONDITION FIX: Prevent multiple concurrent connections
     if (isConnectingRef.current) {
       console.log('🔌 [DEBUG] Connection already in progress, skipping...');
@@ -533,8 +525,6 @@ export function useWebSocket() {
   );
 
   useEffect(() => {
-    console.log('🔌 [DEBUG] ===== WEBSOCKET USEEFFECT FIRED =====');
-    console.log('🔌 [DEBUG] ===== THIS CONFIRMS USEEFFECT IS WORKING =====');
     let mounted = true;
 
     // Only initialize if component is still mounted
@@ -634,7 +624,6 @@ export function useWebSocket() {
     [socket]
   );
 
-  console.log('🔌 [DEBUG] useWebSocket hook completed, returning interface...');
   console.log(
     '🔌 [DEBUG] Final state - connected:',
     connected,
