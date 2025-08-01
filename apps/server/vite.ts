@@ -106,8 +106,8 @@ export function serveStatic(app: Express) {
     // Production: /opt/render/project/src/dist/public
     distPath = path.resolve(process.cwd(), 'dist/public');
   } else {
-    // Local development: ../../dist/public (from apps/server/)
-    distPath = path.resolve(process.cwd(), '../../dist/public');
+    // Local development: dist/public (from project root)
+    distPath = path.resolve(process.cwd(), 'dist/public');
   }
 
   if (!fs.existsSync(distPath)) {
