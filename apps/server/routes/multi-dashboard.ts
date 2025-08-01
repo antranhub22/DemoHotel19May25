@@ -1,7 +1,7 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import express, { type Request, Response } from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { tenants, staff, call, request as requestTable, db } from '@shared/db';
+import { call, db, request as requestTable, staff, tenants } from '@shared/db';
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();
