@@ -143,7 +143,12 @@ export const useHotelConfiguration = () => {
       }
       if (type === 'subdomain') {
         // ✅ FIXED: Use existing endpoint that doesn't require authentication
-        const endpoint = `/api/hotel/by-subdomain/${identifier}`;
+        // ✅ FIX: Correct hostname typo in identifier
+        const correctedIdentifier = identifier.replace(
+          'minhonmune',
+          'minhonmuine'
+        );
+        const endpoint = `/api/hotel/by-subdomain/${correctedIdentifier}`;
         logger.debug(
           '[DEBUG] Fetching hotel config from existing endpoint',
           'Component',

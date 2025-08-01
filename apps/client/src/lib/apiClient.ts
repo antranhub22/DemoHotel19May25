@@ -470,7 +470,14 @@ export const apiClient = new ApiClient({
     import.meta.env.VITE_API_URL ||
     (typeof window !== 'undefined' &&
     window.location.hostname.includes('talk2go.online')
-      ? `https://${window.location.hostname}`
+      ? (() => {
+          // ✅ FIX: Correct hostname typo minhonmune → minhonmuine
+          const correctedHostname = window.location.hostname.replace(
+            'minhonmune',
+            'minhonmuine'
+          );
+          return `https://${correctedHostname}`;
+        })()
       : 'http://localhost:3000'),
   timeout: 30000,
   withCredentials: true,

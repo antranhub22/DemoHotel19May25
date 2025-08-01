@@ -202,7 +202,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const API_BASE_URL =
         import.meta.env.VITE_API_URL ||
         (window.location.hostname.includes('talk2go.online')
-          ? `https://${window.location.hostname}`
+          ? (() => {
+              // ✅ FIX: Correct hostname typo minhonmune → minhonmuine
+              const correctedHostname = window.location.hostname.replace(
+                'minhonmune',
+                'minhonmuine'
+              );
+              return `https://${correctedHostname}`;
+            })()
           : 'http://localhost:3000');
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
