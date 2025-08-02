@@ -69,11 +69,11 @@ logger.debug(
 );
 
 // Business domain modules (v3.0)
-router.use('/api/admin', adminModuleRoutes);
-router.use('/api/analytics-module', analyticsModuleRoutes);
-router.use('/api/core', coreModuleRoutes);
-router.use('/api/hotel', hotelModuleRoutes);
-router.use('/api/voice', voiceModuleRoutes);
+router.use('/admin', adminModuleRoutes);
+router.use('/analytics-module', analyticsModuleRoutes);
+router.use('/core', coreModuleRoutes);
+router.use('/hotel', hotelModuleRoutes);
+router.use('/voice', voiceModuleRoutes);
 
 // ============================================
 // RESTful API ROUTES - GUEST JOURNEY PRIORITY
@@ -82,34 +82,34 @@ router.use('/api/voice', voiceModuleRoutes);
 logger.debug('📡 [Router] Setting up RESTful API routes...', 'MainRouter');
 
 // ✅ GUEST JOURNEY APIs (High Priority - Standardized)
-router.use('/api/guest', guestPublicRoutes); // Guest authentication & requests
-router.use('/api/transcripts', transcriptRoutes); // Voice transcripts
-router.use('/api/calls', callsRoutes); // Call management
-router.use('/api/summaries', summariesRoutes); // ✅ NEW: Call summaries (RESTful)
-router.use('/api/emails', emailsRoutes); // ✅ RENAMED: Email services (RESTful)
-router.use('/api/translations', translationsRoutes); // ✅ NEW: Translation services (RESTful)
+router.use('/guest', guestPublicRoutes); // Guest authentication & requests
+router.use('/transcripts', transcriptRoutes); // Voice transcripts
+router.use('/calls', callsRoutes); // Call management
+router.use('/summaries', summariesRoutes); // ✅ NEW: Call summaries (RESTful)
+router.use('/emails', emailsRoutes); // ✅ RENAMED: Email services (RESTful)
+router.use('/translations', translationsRoutes); // ✅ NEW: Translation services (RESTful)
 
 // ✅ NEW v2.2: ADVANCED API ROUTES WITH ENHANCED FILTERING
 logger.debug(
   '🚀 [Router] Setting up Advanced API v2.2 routes...',
   'MainRouter'
 );
-router.use('/api/v2/calls', advancedCallsRoutes); // ✅ NEW: Advanced calls with complex filtering & sorting
+router.use('/v2/calls', advancedCallsRoutes); // ✅ NEW: Advanced calls with complex filtering & sorting
 
 // ✅ NEW v2.3: API VERSIONING & MIGRATION SYSTEM
 logger.debug(
   '🔧 [Router] Setting up API Versioning v2.3 routes...',
   'MainRouter'
 );
-router.use('/api', versionedApiRoutes); // ✅ NEW: Version management, migration utilities, compatibility
+router.use('/', versionedApiRoutes); // ✅ NEW: Version management, migration utilities, compatibility
 
 // ✅ VOICE ASSISTANT APIs
-router.use('/api/vapi', vapiConfigRoutes); // Vapi configuration by language
-router.use('/api/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
+router.use('/vapi', vapiConfigRoutes); // Vapi configuration by language
+router.use('/vapi-proxy', vapiProxyRoutes); // Vapi CORS bypass
 
-router.use('/api/test-openai', testOpenaiRoutes); // ✅ DEBUG: Test OpenAI endpoints
-router.use('/api/test-webhook', testWebhookRoutes); // ✅ DEBUG: Test webhook endpoints
-router.use('/api/webhook', webhookRoutes); // ✅ NEW: VAPI Webhook endpoints
+router.use('/test-openai', testOpenaiRoutes); // ✅ DEBUG: Test OpenAI endpoints
+router.use('/test-webhook', testWebhookRoutes); // ✅ DEBUG: Test webhook endpoints
+router.use('/webhook', webhookRoutes); // ✅ NEW: VAPI Webhook endpoints
 
 // ============================================
 // LEGACY ROUTES (v1.0-v2.0) - Backward Compatible
@@ -119,28 +119,28 @@ logger.debug('📡 [Router] Setting up legacy API routes...', 'MainRouter');
 
 // ⚠️ DEPRECATED: General API routes - endpoints moved to specific routes
 // Keep for backward compatibility during transition
-router.use('/api', apiRoutes);
+router.use('/', apiRoutes);
 
 // Authentication (Unified System)
-router.use('/api/auth', unifiedAuthRoutes);
-router.use('/api/staff', staffRoutes);
+router.use('/auth', unifiedAuthRoutes);
+router.use('/staff', staffRoutes);
 
 // Business Logic
-router.use('/api/request', requestRoutes);
-router.use('/api/tenants', tenantRoutes); // ✅ NEW: Tenant management API
+router.use('/request', requestRoutes);
+router.use('/tenants', tenantRoutes); // ✅ NEW: Tenant management API
 
 // Analytics & Reporting
-router.use('/api/analytics', analyticsRoutes);
+router.use('/analytics', analyticsRoutes);
 
 // System Routes (NO AUTH REQUIRED - must come before dashboard routes)
-router.use('/api/health', healthRoutes);
+router.use('/health', healthRoutes);
 
 // Development & Testing (NO AUTH REQUIRED)
-router.use('/api/temp-public', tempPublicRoutes);
-router.use('/api/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
+router.use('/temp-public', tempPublicRoutes);
+router.use('/debug', debugRoutes); // ✅ NEW: Debug endpoints for production testing
 
 // ✅ DIRECT TEST ENDPOINTS (NO AUTH REQUIRED) - MUST come BEFORE dashboardRoutes
-router.get('/api/test-direct', (req, res) => {
+router.get('/test-direct', (req, res) => {
   res.json({
     success: true,
     message: 'Direct test endpoint working - NO AUTH REQUIRED',
@@ -150,7 +150,7 @@ router.get('/api/test-direct', (req, res) => {
 });
 
 // ✅ DIRECT DATABASE TEST: Test database connection (NO AUTH REQUIRED)
-router.get('/api/test-db-direct', async (_req, res) => {
+router.get('/test-db-direct', async (_req, res) => {
   try {
     const { Client } = await import('pg');
     const databaseUrl = process.env.DATABASE_URL;
@@ -302,24 +302,24 @@ router.get('/test-db-bypass', async (_req, res) => {
 });
 
 // ✅ SPECIFIC API ROUTES (NO AUTH REQUIRED) - MUST come BEFORE dashboardRoutes
-router.use('/api/health', healthRoutes);
-router.use('/api/temp-public', tempPublicRoutes);
-router.use('/api/debug', debugRoutes);
+router.use('/health', healthRoutes);
+router.use('/temp-public', tempPublicRoutes);
+router.use('/debug', debugRoutes);
 
 // System Management (v2.0) - MOVED BEFORE dashboard to avoid catch-all
-router.use('/api/feature-flags', featureFlagsRoutes);
-router.use('/api/module-lifecycle', moduleLifecycleRoutes);
-router.use('/api/monitoring', monitoringRoutes);
+router.use('/feature-flags', featureFlagsRoutes);
+router.use('/module-lifecycle', moduleLifecycleRoutes);
+router.use('/monitoring', monitoringRoutes);
 
 // ✅ FIX: Dashboard routes with SPECIFIC path instead of catch-all
-router.use('/api/dashboard', dashboardRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 // ✅ NEW: DASHBOARD PERFORMANCE ENHANCEMENTS - PHASE 1 & 2
-router.use('/api/dashboard', dashboardDataRoutes); // Additional optimized endpoints
-router.use('/api/performance', performanceMetricsRoutes); // Performance monitoring
-router.use('/api/cache', cacheMonitoringRoutes); // Cache management
-router.use('/api/websocket', websocketMonitoringRoutes); // WebSocket monitoring
-router.use('/api/errors', errorMonitoringRoutes); // Error tracking
+router.use('/dashboard', dashboardDataRoutes); // Additional optimized endpoints
+router.use('/performance', performanceMetricsRoutes); // Performance monitoring
+router.use('/cache', cacheMonitoringRoutes); // Cache management
+router.use('/websocket', websocketMonitoringRoutes); // WebSocket monitoring
+router.use('/errors', errorMonitoringRoutes); // Error tracking
 
 // ✅ FALLBACK: Handle remaining API requests without auth requirement
 router.use('/api/*', (req, res, next) => {
