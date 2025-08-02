@@ -25,6 +25,13 @@ import voiceModuleRoutes from '@server/routes/modules/voice-module';
 import summariesRoutes from '@server/routes/summaries'; // ✅ NEW: RESTful summaries
 import translationsRoutes from '@server/routes/translations'; // ✅ NEW: RESTful translations
 
+// ✅ NEW: DASHBOARD PERFORMANCE ENHANCEMENTS - PHASE 1 & 2
+import dashboardDataRoutes from '@server/routes/dashboard-data'; // ✅ NEW: Optimized dashboard APIs
+import performanceMetricsRoutes from '@server/routes/performance-metrics'; // ✅ NEW: Performance monitoring
+import cacheMonitoringRoutes from '@server/routes/cache-monitoring'; // ✅ NEW: Cache management
+import websocketMonitoringRoutes from '@server/routes/websocket-monitoring'; // ✅ NEW: WebSocket monitoring
+import errorMonitoringRoutes from '@server/routes/error-monitoring'; // ✅ NEW: Error tracking
+
 // ✅ NEW v2.2: ADVANCED FILTERING & SORTING API
 import advancedCallsRoutes from './advanced-calls'; // ✅ NEW: Advanced filtering API
 
@@ -307,6 +314,13 @@ router.use('/api/monitoring', monitoringRoutes);
 // ✅ FIX: Dashboard routes with SPECIFIC path instead of catch-all
 router.use('/api/dashboard', dashboardRoutes);
 
+// ✅ NEW: DASHBOARD PERFORMANCE ENHANCEMENTS - PHASE 1 & 2
+router.use('/api/dashboard', dashboardDataRoutes); // Additional optimized endpoints
+router.use('/api/performance', performanceMetricsRoutes); // Performance monitoring
+router.use('/api/cache', cacheMonitoringRoutes); // Cache management
+router.use('/api/websocket', websocketMonitoringRoutes); // WebSocket monitoring
+router.use('/api/errors', errorMonitoringRoutes); // Error tracking
+
 // ✅ FALLBACK: Handle remaining API requests without auth requirement
 router.use('/api/*', (req, res, next) => {
   // Log unhandled API requests for debugging
@@ -354,6 +368,13 @@ logger.debug('📊 [Router] Route structure:', 'MainRouter', {
     'emails',
     'translations',
   ], // ✅ NEW
+  dashboardEnhancements: [
+    'dashboard/optimized',
+    'performance',
+    'cache',
+    'websocket',
+    'errors',
+  ], // ✅ NEW PHASE 1&2
   advancedV2: ['v2/calls'], // ✅ NEW v2.2
   versioning: ['versions', 'version/*', 'migration/*', 'compatibility/*'], // ✅ NEW v2.3
   voiceAssistant: ['vapi', 'vapi-proxy'], // ✅ NEW

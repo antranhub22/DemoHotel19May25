@@ -1,4 +1,7 @@
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
+import { performanceMiddleware } from '@server/middleware/performanceMonitoring';
+import { CacheKeys, dashboardCache } from '@server/services/DashboardCache';
+import { dashboardWebSocket } from '@server/services/DashboardWebSocket';
 import { GuestAuthService } from '@server/services/guestAuthService';
 import { db } from '@shared/db';
 import { request as requestTable } from '@shared/db/schema';
@@ -109,6 +112,7 @@ const messageList: StaffMessage[] = [];
 router.get(
   '/staff/requests',
   authenticateJWT,
+  performanceMiddleware, // ✅ ENHANCEMENT: Performance monitoring (ZERO RISK)
   async (req: Request, res: Response) => {
     try {
       const tenantId = extractTenantFromRequest(req);
@@ -117,42 +121,51 @@ router.get(
         'Component'
       );
 
-      // Get from database first
-      const dbRequests = await db
-        .select()
-        .from(requestTable)
-        .where(eq(requestTable.tenant_id, tenantId))
-        .orderBy(desc(requestTable.created_at));
+      // ✅ ENHANCEMENT: Transparent caching layer (ZERO RISK)
+      // If cache fails, automatically falls back to original database logic
+      const finalRequests = await dashboardCache.get(
+        CacheKeys.staffRequests(tenantId),
+        async () => {
+          // EXISTING DATABASE LOGIC WRAPPED (UNCHANGED)
+          const dbRequests = await db
+            .select()
+            .from(requestTable)
+            .where(eq(requestTable.tenant_id, tenantId))
+            .orderBy(desc(requestTable.created_at));
 
-      logger.debug(
-        `📊 [STAFF] Found ${dbRequests.length} database requests for tenant: ${tenantId}`,
-        'Component'
+          logger.debug(
+            `📊 [STAFF] Found ${dbRequests.length} database requests for tenant: ${tenantId}`,
+            'Component'
+          );
+
+          // Transform database requests to match expected format (UNCHANGED)
+          const transformedRequests = dbRequests.map(req => ({
+            id: req.id,
+            roomNumber: req.room_number || 'N/A',
+            customerName: req.customer_name || 'Guest',
+            requestType: req.order_type || req.type || 'Service Request',
+            requestContent:
+              req.request_content || req.special_instructions || 'No details',
+            status: req.status || 'Đã ghi nhận',
+            createdAt: req.created_at,
+            updatedAt: req.updated_at,
+            priority: req.priority || 'normal',
+            totalAmount: req.total_amount || 0,
+            callId: req.call_id,
+            assignedTo: req.assigned_to,
+            // Legacy fields for backward compatibility
+            customer: req.customer_name || 'Guest',
+            request: req.request_content || 'Service request',
+            timestamp: req.created_at,
+          }));
+
+          // Fallback to legacy requests if database is empty (UNCHANGED)
+          return transformedRequests.length > 0
+            ? transformedRequests
+            : requestList;
+        },
+        60000 // 1 minute cache TTL
       );
-
-      // Transform database requests to match expected format
-      const transformedRequests = dbRequests.map(req => ({
-        id: req.id,
-        roomNumber: req.room_number || 'N/A',
-        customerName: req.customer_name || 'Guest',
-        requestType: req.order_type || req.type || 'Service Request',
-        requestContent:
-          req.request_content || req.special_instructions || 'No details',
-        status: req.status || 'Đã ghi nhận',
-        createdAt: req.created_at,
-        updatedAt: req.updated_at,
-        priority: req.priority || 'normal',
-        totalAmount: req.total_amount || 0,
-        callId: req.call_id,
-        assignedTo: req.assigned_to,
-        // Legacy fields for backward compatibility
-        customer: req.customer_name || 'Guest',
-        request: req.request_content || 'Service request',
-        timestamp: req.created_at,
-      }));
-
-      // Fallback to legacy requests if database is empty
-      const finalRequests =
-        transformedRequests.length > 0 ? transformedRequests : requestList;
 
       logger.debug(
         `✅ [STAFF] Returning ${finalRequests.length} requests to staff interface`,
@@ -169,6 +182,7 @@ router.get(
 router.patch(
   '/staff/requests/:id/status',
   authenticateJWT,
+  performanceMiddleware, // ✅ ENHANCEMENT: Performance monitoring (ZERO RISK)
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
@@ -234,6 +248,42 @@ router.patch(
             'Component'
           );
         }
+      }
+
+      // ✅ ENHANCEMENT: Invalidate cache after status update (ZERO RISK)
+      const tenantId = extractTenantFromRequest(req);
+      dashboardCache.delete(CacheKeys.staffRequests(tenantId));
+      logger.debug(
+        `🗑️ [STAFF] Cache invalidated for tenant: ${tenantId}`,
+        'Component'
+      );
+
+      // ✅ ENHANCEMENT: WebSocket real-time update (MEDIUM RISK with safe fallback)
+      try {
+        dashboardWebSocket.publishDashboardUpdate({
+          type: 'request_update',
+          tenantId,
+          data: {
+            requestId: id,
+            newStatus: status,
+            assignedTo,
+            timestamp: new Date().toISOString(),
+          },
+          timestamp: new Date().toISOString(),
+          source: 'staff_status_update',
+        });
+
+        logger.debug(
+          `📡 [STAFF] WebSocket update sent for request ${id}`,
+          'Component'
+        );
+      } catch (wsError) {
+        // Silent fail for WebSocket - doesn't affect main functionality
+        logger.warn(
+          `⚠️ [STAFF] WebSocket update failed for request ${id}`,
+          'Component',
+          wsError
+        );
       }
 
       logger.debug(

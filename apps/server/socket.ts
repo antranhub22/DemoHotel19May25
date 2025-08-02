@@ -1,6 +1,7 @@
-import { Server as HTTPServer } from 'http';
-import { Server as SocketIOServer, Socket } from 'socket.io';
+import { dashboardWebSocket } from '@server/services/DashboardWebSocket';
 import { logger } from '@shared/utils/logger';
+import { Server as HTTPServer } from 'http';
+import { Socket, Server as SocketIOServer } from 'socket.io';
 
 export function setupSocket(server: HTTPServer) {
   // ✅ SECURITY FIX: Proper CORS configuration
@@ -37,6 +38,22 @@ export function setupSocket(server: HTTPServer) {
     pingTimeout: 60000,
     pingInterval: 25000,
   });
+
+  // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (MEDIUM RISK with fallback)
+  try {
+    dashboardWebSocket.initialize(server);
+    logger.info(
+      '✅ [Socket] Dashboard WebSocket service initialized',
+      'WebSocket'
+    );
+  } catch (error) {
+    logger.error(
+      '❌ [Socket] Dashboard WebSocket initialization failed',
+      'WebSocket',
+      error
+    );
+    // Continue with order WebSocket setup - dashboard will use polling fallback
+  }
 
   // ✅ RATE LIMITING: Track connections per IP
   const connectionCounts = new Map<string, number>();
