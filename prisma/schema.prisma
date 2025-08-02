@@ -1,0 +1,467 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model call_summaries {
+  id          Int      @id @default(autoincrement())
+  call_id     String
+  content     String
+  timestamp   DateTime @default(now()) @db.Timestamp(6)
+  room_number String?
+  duration    String?
+
+  @@index([call_id], map: "idx_call_summaries_call_id")
+  @@index([timestamp], map: "idx_call_summaries_timestamp")
+}
+
+model hotel_profiles {
+  id                String    @id
+  tenant_id         String
+  research_data     String?
+  assistant_config  String?
+  vapi_assistant_id String?
+  services_config   String?
+  knowledge_base    String?
+  system_prompt     String?
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+  tenants           tenants   @relation(fields: [tenant_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_hotel_profiles_tenant")
+
+  @@index([tenant_id], map: "idx_hotel_profiles_tenant_id")
+}
+
+model orders {
+  id                   Int      @id @default(autoincrement())
+  call_id              String
+  room_number          String
+  order_type           String
+  delivery_time        String
+  special_instructions String?
+  items                Json
+  total_amount         Int
+  status               String   @default("pending")
+  created_at           DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([call_id], map: "idx_orders_call_id")
+  @@index([created_at], map: "idx_orders_created_at")
+  @@index([status], map: "idx_orders_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model platform_tokens {
+  id            Int       @id @default(autoincrement())
+  session_id    String    @db.VarChar(255)
+  platform      String    @db.VarChar(50)
+  access_token  String
+  refresh_token String?
+  token_type    String?   @default("Bearer") @db.VarChar(50)
+  expires_at    DateTime? @db.Timestamp(6)
+  scope         String?
+  channel_info  Json?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+
+  @@unique([session_id, platform])
+  @@index([expires_at], map: "idx_platform_tokens_expires")
+  @@index([platform], map: "idx_platform_tokens_platform")
+  @@index([session_id], map: "idx_platform_tokens_session")
+}
+
+model preferences {
+  id                 Int       @id @default(autoincrement())
+  user_id            String    @db.Uuid
+  platform           String    @db.VarChar(50)
+  config             Json
+  ai_prompt_template Json?
+  created_at         DateTime? @default(now()) @db.Timestamp(6)
+  updated_at         DateTime? @default(now()) @db.Timestamp(6)
+
+  @@unique([user_id, platform])
+}
+
+model request {
+  id                   Int       @id @default(autoincrement())
+  room_number          String?   @db.VarChar(20)
+  guest_name           String?   @db.VarChar(100)
+  request_content      String?
+  status               String?   @db.VarChar(100)
+  created_at           DateTime? @default(now()) @db.Timestamp(6)
+  order_id             String?   @db.VarChar(32)
+  updated_at           DateTime  @default(now()) @db.Timestamp(6)
+  tenant_id            String?
+  description          String?
+  priority             String?   @default("medium")
+  assigned_to          String?
+  completed_at         DateTime? @db.Timestamp(6)
+  metadata             Json?
+  type                 String?
+  total_amount         Decimal?  @db.Decimal(10, 2)
+  items                Json?
+  delivery_time        DateTime? @db.Timestamp(6)
+  special_instructions String?
+  order_type           String?
+  call_id              String?   @db.VarChar(255)
+  service_id           String?   @db.VarChar(255)
+  phone_number         String?   @db.VarChar(50)
+  currency             String?   @default("USD") @db.VarChar(10)
+  urgency              String?   @default("normal") @db.VarChar(20)
+
+  @@index([call_id], map: "idx_request_call_id")
+  @@index([status], map: "idx_request_status")
+  @@index([tenant_id], map: "idx_request_tenant_id")
+  @@index([type], map: "idx_request_type")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model schedules {
+  id             Int       @id @default(autoincrement())
+  title          String    @db.VarChar(255)
+  description    String?
+  platform       String    @db.VarChar(50)
+  scheduled_time DateTime  @db.Timestamptz(6)
+  status         String    @default("pending") @db.VarChar(50)
+  video_id       Int?
+  user_id        Int?
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([scheduled_time], map: "idx_schedules_scheduled_time")
+  @@index([status], map: "idx_schedules_status")
+  @@index([user_id], map: "idx_schedules_user_id")
+  @@index([video_id], map: "idx_schedules_video_id")
+}
+
+model staff {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique @db.VarChar(50)
+  password     String    @db.VarChar(255)
+  role         String?   @default("staff") @db.VarChar(20)
+  name         String?   @db.VarChar(100)
+  email        String?   @db.VarChar(100)
+  tenant_id    String?
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @default(now()) @db.Timestamp(6)
+  first_name   String?   @db.VarChar(255)
+  last_name    String?   @db.VarChar(255)
+  display_name String?   @db.VarChar(255)
+  avatar_url   String?
+  permissions  String?   @default("[]")
+  is_active    Boolean?  @default(true)
+  last_login   DateTime? @db.Timestamp(6)
+  phone        String?   @db.VarChar(255)
+
+  @@index([email], map: "idx_staff_email")
+  @@index([tenant_id], map: "idx_staff_tenant_id")
+  @@index([username], map: "idx_staff_username")
+}
+
+model template_standards {
+  id          Int     @id @default(autoincrement())
+  template_id Int?
+  key         String  @db.VarChar(50)
+  value       String
+  description String?
+}
+
+model templates {
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(100)
+  description String?
+}
+
+model tenants {
+  id                  String           @id
+  hotel_name          String
+  domain              String?
+  subdomain           String?
+  email               String?
+  phone               String?
+  address             String?
+  subscription_plan   String?          @default("trial")
+  subscription_status String?          @default("active")
+  created_at          DateTime?        @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?        @default(now()) @db.Timestamp(6)
+  custom_domain       String?
+  trial_ends_at       DateTime?        @db.Timestamp(6)
+  max_voices          Int?             @default(5)
+  max_languages       Int?             @default(4)
+  voice_cloning       Boolean?         @default(false)
+  multi_location      Boolean?         @default(false)
+  white_label         Boolean?         @default(false)
+  data_retention_days Int?             @default(90)
+  monthly_call_limit  Int?             @default(1000)
+  hotel_profiles      hotel_profiles[]
+}
+
+model transcript {
+  id        Int      @id @default(autoincrement())
+  call_id   String
+  role      String
+  content   String
+  timestamp DateTime @default(now()) @db.Timestamp(6)
+  tenant_id String?  @default("default")
+
+  @@index([call_id], map: "idx_transcript_call_id")
+}
+
+model transcripts {
+  id        Int      @id @default(autoincrement())
+  call_id   String
+  role      String
+  content   String
+  timestamp DateTime @default(now()) @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model upload_jobs {
+  id            Int       @id @default(autoincrement())
+  job_id        String    @unique @db.VarChar(255)
+  video_id      String    @db.VarChar(255)
+  channel       String    @db.VarChar(50)
+  session_id    String    @db.VarChar(255)
+  status        String?   @default("queued") @db.VarChar(50)
+  priority      Int?      @default(5)
+  retry_count   Int?      @default(0)
+  max_retries   Int?      @default(3)
+  error_message String?
+  progress      Int?      @default(0)
+  started_at    DateTime? @db.Timestamp(6)
+  completed_at  DateTime? @db.Timestamp(6)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([created_at], map: "idx_upload_jobs_created")
+  @@index([priority], map: "idx_upload_jobs_priority")
+  @@index([status], map: "idx_upload_jobs_status")
+}
+
+model user_custom_standards {
+  id         Int       @id @default(autoincrement())
+  user_id    String?   @db.VarChar(50)
+  channel_id Int?
+  key        String    @db.VarChar(50)
+  value      String
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model user_sessions {
+  id            Int       @id @default(autoincrement())
+  session_id    String    @unique @db.VarChar(255)
+  user_id       String?   @db.VarChar(255)
+  platform      String    @db.VarChar(50)
+  is_active     Boolean?  @default(true)
+  last_activity DateTime? @default(now()) @db.Timestamp(6)
+  ip_address    String?   @db.Inet
+  user_agent    String?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  expires_at    DateTime? @db.Timestamp(6)
+
+  @@index([is_active], map: "idx_user_sessions_active")
+  @@index([expires_at], map: "idx_user_sessions_expires")
+  @@index([platform], map: "idx_user_sessions_platform")
+  @@index([user_id], map: "idx_user_sessions_user_id")
+}
+
+model users {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
+
+model video_analysis_jobs {
+  id            Int       @id @default(autoincrement())
+  status        String    @default("pending") @db.VarChar(20)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  error_message String?
+  workflow_id   Int?
+}
+
+model video_analysis_results {
+  video_id        String    @id @db.VarChar(255)
+  analysis_result Json?
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model video_uploads {
+  id                Int       @id @default(autoincrement())
+  video_id          String    @db.VarChar(255)
+  filename          String    @db.VarChar(255)
+  original_filename String?   @db.VarChar(255)
+  platform          String    @db.VarChar(50)
+  session_id        String    @db.VarChar(255)
+  metadata          Json
+  file_size         BigInt?
+  file_path         String?   @db.VarChar(500)
+  upload_status     String?   @default("pending") @db.VarChar(50)
+  platform_video_id String?   @db.VarChar(255)
+  platform_url      String?   @db.VarChar(500)
+  thumbnail_url     String?   @db.VarChar(500)
+  error_message     String?
+  upload_progress   Int?      @default(0)
+  started_at        DateTime? @default(now()) @db.Timestamp(6)
+  completed_at      DateTime? @db.Timestamp(6)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+
+  @@index([created_at], map: "idx_video_uploads_created")
+  @@index([platform], map: "idx_video_uploads_platform")
+  @@index([session_id], map: "idx_video_uploads_session")
+  @@index([upload_status], map: "idx_video_uploads_status")
+  @@index([video_id], map: "idx_video_uploads_video_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model videos {
+  id            Int       @id @default(autoincrement())
+  title         String    @db.VarChar(255)
+  description   String?
+  file_url      String    @db.VarChar(255)
+  thumbnail_url String?   @db.VarChar(255)
+  platform      String    @db.VarChar(50)
+  status        String    @default("pending") @db.VarChar(50)
+  views         Int?      @default(0)
+  likes         Int?      @default(0)
+  comments      Int?      @default(0)
+  shares        Int?      @default(0)
+  user_id       Int?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([platform], map: "idx_videos_platform")
+  @@index([status], map: "idx_videos_status")
+  @@index([user_id], map: "idx_videos_user_id")
+}
+
+model workflow_status {
+  id            Int       @id @default(autoincrement())
+  user_id       String?   @db.VarChar(50)
+  channel_id    Int?
+  template_id   String?   @db.VarChar(50)
+  standards     Json?
+  current_step  String?   @db.VarChar(50)
+  status        String?   @default("draft") @db.VarChar(20)
+  metadata      Json?
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  error_message String?
+}
+
+enum BatchStatus {
+  active
+  expired
+  consumed
+  damaged
+  returned
+}
+
+enum ExportPurpose {
+  production
+  sale
+  damage
+  return
+  transfer
+}
+
+enum ExportStatus {
+  draft
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum ItemCondition {
+  good
+  fair
+  poor
+  damaged
+  expired
+}
+
+enum Language {
+  vi
+  en
+}
+
+enum ReconciliationStatus {
+  draft
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum ReturnReason {
+  excess
+  defective
+  menu_change
+  expired
+  other
+}
+
+enum ReturnStatus {
+  draft
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum Role {
+  owner
+  manager
+  supervisor
+  staff
+}
+
+enum ShiftType {
+  morning
+  afternoon
+  evening
+  full_day
+}
+
+enum TransactionStatus {
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum TransactionType {
+  IN
+  OUT
+  RETURN
+  ADJUSTMENT
+  TRANSFER
+  WASTE
+  STAFF_USE
+  SAMPLING
+}
+
+enum WasteStatus {
+  draft
+  pending
+  approved
+  rejected
+  cancelled
+}
+
+enum WasteType {
+  damage
+  expiry
+  breakage
+  natural
+  cooking
+  quality
+  other
+}

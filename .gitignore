@@ -62,3 +62,5 @@ test-*.tmp
 *.sqlite3
 dev.db
 apps/dev.db
+
+/generated/prisma

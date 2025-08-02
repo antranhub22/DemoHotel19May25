@@ -13,9 +13,64 @@ import {
   validateRequestData,
 } from '@shared/validation/requestSchemas';
 
+// 🔄 NEW: Prisma integration imports
+import { DatabaseServiceFactory } from '@shared/db/DatabaseServiceFactory';
+import * as FeatureFlags from '@shared/FeatureFlags';
+
 // ✅ FIX: Enhanced error handling for database operations with fallback
 
 export class RequestController {
+  /**
+   * 🔄 Get appropriate request service based on feature flags
+   * Supports switching between Drizzle (legacy) and Prisma (new) ORMs
+   */
+  private static async getRequestService(): Promise<
+    RequestService | IDatabaseService
+  > {
+    const usePrisma =
+      process.env.USE_PRISMA === 'true' ||
+      isFeatureEnabled(FeatureFlags.USE_PRISMA) ||
+      isFeatureEnabled(FeatureFlags.PRISMA_REQUEST_SERVICE);
+
+    if (usePrisma) {
+      try {
+        logger.info('🔄 [RequestController] Using Prisma Request Service');
+
+        // Initialize Prisma connections if not already done
+        await DatabaseServiceFactory.initializeConnections();
+
+        // Get Prisma-based service
+        const databaseService =
+          await DatabaseServiceFactory.createDatabaseService();
+
+        logger.info(
+          '✅ [RequestController] Prisma Request Service initialized'
+        );
+        return databaseService;
+      } catch (error) {
+        logger.error(
+          '❌ [RequestController] Failed to initialize Prisma service, falling back to Drizzle',
+          error
+        );
+
+        // Fallback to Drizzle if Prisma fails
+        return new RequestService();
+      }
+    }
+
+    // Default to Drizzle RequestService
+    logger.info(
+      '🔧 [RequestController] Using Drizzle Request Service (legacy)'
+    );
+    return new RequestService();
+  }
+
+  /**
+   * 🔄 Check if service is legacy Drizzle or new Prisma
+   */
+  private static isLegacyService(service: any): service is RequestService {
+    return service instanceof RequestService;
+  }
   static async createRequest(req: Request, res: Response): Promise<void> {
     try {
       logger.info(
@@ -93,9 +148,26 @@ export class RequestController {
         );
       }
 
-      // ✅ NEW: Phase 2 - Use service layer for business logic
-      const requestService = new RequestService();
-      const serviceResult = await requestService.createRequest(validatedData);
+      // ✅ NEW: Phase 2 - Use service layer for business logic (with Prisma support)
+      const service = await RequestController.getRequestService();
+
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        // Legacy Drizzle service - use existing interface
+        serviceResult = await service.createRequest(validatedData);
+      } else {
+        // New Prisma service - use legacy interface for compatibility
+        serviceResult = await (service as any).createRequest(validatedData);
+      }
+
+      logger.info(
+        '🎯 [RequestController] Service type detected',
+        'RequestController',
+        {
+          isLegacy: RequestController.isLegacyService(service),
+          usePrisma: process.env.USE_PRISMA === 'true',
+        }
+      );
 
       if (!serviceResult.success) {
         logger.error(
@@ -221,12 +293,30 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ NEW: Phase 2 - Use service layer for business logic
-      const requestService = new RequestService();
+      // ✅ NEW: Phase 2 - Use service layer for business logic (with Prisma support)
+      const service = await RequestController.getRequestService();
 
       // Extract filters from query parameters
       const filters = req.query as any;
-      const serviceResult = await requestService.getAllRequests(filters);
+
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        // Legacy Drizzle service - use existing interface
+        serviceResult = await service.getAllRequests(filters);
+      } else {
+        // New Prisma service - use legacy interface for compatibility
+        serviceResult = await (service as any).getAllRequests(filters);
+      }
+
+      logger.info(
+        '🎯 [RequestController] Service type for getAllRequests',
+        'RequestController',
+        {
+          isLegacy: RequestController.isLegacyService(service),
+          usePrisma: process.env.USE_PRISMA === 'true',
+          filterCount: Object.keys(filters || {}).length,
+        }
+      );
 
       if (!serviceResult.success) {
         logger.error(
@@ -312,9 +402,14 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ NEW: Phase 2 - Use service layer for business logic
-      const requestService = new RequestService();
-      const serviceResult = await requestService.getRequestById(parseInt(id));
+      // ✅ NEW: Phase 2 - Use service layer for business logic (with Prisma support)
+      const service = await RequestController.getRequestService();
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        serviceResult = await service.getRequestById(parseInt(id));
+      } else {
+        serviceResult = await (service as any).getRequestById(parseInt(id));
+      }
 
       if (!serviceResult.success) {
         logger.error(
@@ -413,16 +508,25 @@ export class RequestController {
         return;
       }
 
-      // ✅ NEW: Phase 2 - Use service layer for business logic
-      const requestService = new RequestService();
-      const serviceResult = await requestService.updateRequestStatus(
-        parseInt(id),
-        {
+      // ✅ NEW: Phase 2 - Use service layer for business logic (with Prisma support)
+      const service = await RequestController.getRequestService();
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        serviceResult = await service.updateRequestStatus(parseInt(id), {
           status,
           notes,
           assignedTo,
-        }
-      );
+        });
+      } else {
+        serviceResult = await (service as any).updateRequestStatus(
+          parseInt(id),
+          {
+            status,
+            notes,
+            assignedTo,
+          }
+        );
+      }
 
       if (!serviceResult.success) {
         logger.error(
@@ -568,14 +672,24 @@ export class RequestController {
         return;
       }
 
-      // ✅ NEW: Phase 3 - Use service layer for bulk operations
-      const requestService = new RequestService();
-      const serviceResult = await requestService.bulkUpdateStatus(
-        requestIds,
-        status,
-        notes,
-        assignedTo
-      );
+      // ✅ NEW: Phase 3 - Use service layer for bulk operations (with Prisma support)
+      const service = await RequestController.getRequestService();
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        serviceResult = await service.bulkUpdateStatus(
+          requestIds,
+          status,
+          notes,
+          assignedTo
+        );
+      } else {
+        serviceResult = await (service as any).bulkUpdateStatus(
+          requestIds,
+          status,
+          notes,
+          assignedTo
+        );
+      }
 
       if (!serviceResult.success) {
         logger.error(
@@ -654,9 +768,14 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ NEW: Phase 3 - Use service layer for statistics
-      const requestService = new RequestService();
-      const serviceResult = await requestService.getRequestStatistics();
+      // ✅ NEW: Phase 3 - Use service layer for statistics (with Prisma support)
+      const service = await RequestController.getRequestService();
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        serviceResult = await service.getRequestStatistics();
+      } else {
+        serviceResult = await (service as any).getRequestStatistics();
+      }
 
       if (!serviceResult.success) {
         logger.error(
@@ -729,9 +848,14 @@ export class RequestController {
         'RequestController'
       );
 
-      // ✅ NEW: Phase 3 - Use service layer for urgent requests
-      const requestService = new RequestService();
-      const serviceResult = await requestService.getUrgentRequests();
+      // ✅ NEW: Phase 3 - Use service layer for urgent requests (with Prisma support)
+      const service = await RequestController.getRequestService();
+      let serviceResult;
+      if (RequestController.isLegacyService(service)) {
+        serviceResult = await service.getUrgentRequests();
+      } else {
+        serviceResult = await (service as any).getUrgentRequests();
+      }
 
       if (!serviceResult.success) {
         logger.error(
