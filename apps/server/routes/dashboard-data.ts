@@ -158,6 +158,10 @@ router.get(
               }
             );
 
+            // Get trend data
+            const callTrend = await callAnalytics.getCallTrend(tenantId);
+            const systemTrend = await callAnalytics.getSystemTrend(tenantId);
+
             return {
               total: result.total,
               today: result.today,
@@ -166,6 +170,8 @@ router.get(
               avgDurationSeconds: result.avgDurationSeconds,
               successRate: result.successRate,
               peakHours: result.peakHours,
+              trend: callTrend,
+              systemTrend: systemTrend,
               lastUpdated: new Date().toISOString(),
             };
           } catch (dbError) {

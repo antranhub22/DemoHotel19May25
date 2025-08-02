@@ -4,6 +4,7 @@ export interface DashboardData {
     today: number;
     answered: number;
     avgDuration: string;
+    trend?: string;
   };
   requests: {
     pending: number;
@@ -20,6 +21,7 @@ export interface DashboardData {
     uptime: number;
     responseTime: number;
     errors: number;
+    trend?: string;
   };
 }
 

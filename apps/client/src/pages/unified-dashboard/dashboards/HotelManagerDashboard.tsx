@@ -42,7 +42,7 @@ export const HotelManagerDashboard: React.FC = () => {
           value={dashboardData.calls.total}
           description={`Hôm nay: +${dashboardData.calls.today}`}
           icon={Phone}
-          trend="+15.2%"
+          trend={dashboardData.calls.trend || '+0.0'}
           color="blue"
         />
         <MetricCard
@@ -65,7 +65,7 @@ export const HotelManagerDashboard: React.FC = () => {
           value={`${dashboardData.system.uptime}%`}
           description="30 ngày qua"
           icon={Activity}
-          trend="+0.1%"
+          trend={dashboardData.system.trend || '+0.1'}
           color="purple"
         />
       </div>

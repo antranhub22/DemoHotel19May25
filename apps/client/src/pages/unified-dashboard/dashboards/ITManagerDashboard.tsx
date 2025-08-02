@@ -41,7 +41,7 @@ export const ITManagerDashboard: React.FC = () => {
           value={`${dashboardData.system.uptime}%`}
           description="30 ngày qua"
           icon={Server}
-          trend="+0.1%"
+          trend={dashboardData.system.trend || '+0.1'}
           color="purple"
         />
         <MetricCard
@@ -63,7 +63,7 @@ export const ITManagerDashboard: React.FC = () => {
           value={`${(dashboardData.calls.total * 100).toLocaleString()}`}
           description="Hôm nay"
           icon={Database}
-          trend="+8.2%"
+          trend={dashboardData.calls.trend || '+0.0'}
           color="green"
         />
       </div>
