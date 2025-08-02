@@ -6,6 +6,7 @@ import {
   staff,
   tenants,
   transcript,
+  call_summaries,
 } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import Database, { type Database as DatabaseType } from 'better-sqlite3';
