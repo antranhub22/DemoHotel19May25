@@ -60,6 +60,26 @@ import { logger } from '@shared/utils/logger';
 const router = express.Router();
 
 // ============================================
+// ✅ FIX: ROOT ROUTE HANDLER - Prevent 404 errors
+// ============================================
+
+// Handle root path to prevent 404 errors
+router.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    message: 'DemoHotel API Server is running',
+    version: '3.0',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/api/health',
+      dashboard: '/api/dashboard',
+      docs: '/api/docs',
+    },
+    status: 'healthy',
+  });
+});
+
+// ============================================
 // v3.0 MODULAR ARCHITECTURE ROUTES
 // ============================================
 

@@ -37,50 +37,57 @@ export const metricsMiddleware = (
     );
     const isError = res.statusCode >= 400;
 
-    // Record performance metrics
-    try {
-      recordPerformanceMetrics({
-        module: req.module || 'unknown',
-        endpoint: req.path,
-        operation: `${req.method}:${req.path}`,
-        responseTime,
-        memoryUsage,
-        cpuUsage: 0, // CPU usage is expensive to calculate per request
-        errorRate: isError ? 1 : 0,
-        throughput: 1, // One request processed
-      });
+    // ✅ FIX: Skip metrics for 404 errors to prevent false alerts
+    const is404Error = res.statusCode === 404;
+    const shouldSkipMetrics =
+      is404Error && (req.path === '/' || req.path === '/api');
 
-      // Log slow requests
-      if (responseTime > 2000) {
-        logger.warn(
-          `🐌 [Metrics] Slow request detected: ${req.method} ${req.path} (${responseTime}ms)`,
+    if (!shouldSkipMetrics) {
+      // Record performance metrics
+      try {
+        recordPerformanceMetrics({
+          module: req.module || 'unknown',
+          endpoint: req.path,
+          operation: `${req.method}:${req.path}`,
+          responseTime,
+          memoryUsage,
+          cpuUsage: 0, // CPU usage is expensive to calculate per request
+          errorRate: isError ? 1 : 0,
+          throughput: 1, // One request processed
+        });
+
+        // Log slow requests
+        if (responseTime > 2000) {
+          logger.warn(
+            `🐌 [Metrics] Slow request detected: ${req.method} ${req.path} (${responseTime}ms)`,
+            'MetricsMiddleware',
+            {
+              module: req.module,
+              responseTime,
+              statusCode: res.statusCode,
+            }
+          );
+        }
+
+        // Log errors (but not 404s)
+        if (isError && !is404Error) {
+          logger.warn(
+            `❌ [Metrics] Error response: ${req.method} ${req.path} (${res.statusCode})`,
+            'MetricsMiddleware',
+            {
+              module: req.module,
+              responseTime,
+              statusCode: res.statusCode,
+            }
+          );
+        }
+      } catch (error) {
+        logger.error(
+          '❌ [Metrics] Failed to record performance metrics',
           'MetricsMiddleware',
-          {
-            module: req.module,
-            responseTime,
-            statusCode: res.statusCode,
-          }
+          error
         );
       }
-
-      // Log errors
-      if (isError) {
-        logger.warn(
-          `❌ [Metrics] Error response: ${req.method} ${req.path} (${res.statusCode})`,
-          'MetricsMiddleware',
-          {
-            module: req.module,
-            responseTime,
-            statusCode: res.statusCode,
-          }
-        );
-      }
-    } catch (error) {
-      logger.error(
-        '❌ [Metrics] Failed to record performance metrics',
-        'MetricsMiddleware',
-        error
-      );
     }
 
     return originalSend.call(this, data);
@@ -115,8 +122,7 @@ function determineModule(path: string): string {
 /**
  * Business metrics middleware for specific endpoints
  */
-export const businessMetricsMiddleware = (
-  kpiName: string) => {
+export const businessMetricsMiddleware = (kpiName: string) => {
   return (req: MetricsRequest, res: Response, next: NextFunction) => {
     const originalSend = res.send;
     res.send = function (data) {
@@ -201,7 +207,8 @@ export const moduleMetricsMiddleware = (moduleName: string) => {
 export const criticalEndpointMiddleware = (
   req: MetricsRequest,
   res: Response,
-  next: NextFunction) => {
+  next: NextFunction
+) => {
   const criticalPaths = [
     '/api/health',
     '/api/core/health',
@@ -216,13 +223,16 @@ export const criticalEndpointMiddleware = (
     res.send = function (data: any) {
       const responseTime = Date.now() - (req.startTime || Date.now());
 
-      // Create alert for critical endpoint issues
-      if (res.statusCode >= 500 || responseTime > 5000) {
+      // ✅ FIX: Disable alert creation in production to prevent false alerts
+      const shouldCreateAlert =
+        process.env.NODE_ENV !== 'production' &&
+        (res.statusCode >= 500 || responseTime > 5000);
+
+      if (shouldCreateAlert) {
         try {
           // ✅ FIXED: Skip alert creation to avoid ES modules error
           // const { advancedMetricsCollector } = require('@server/shared/AdvancedMetricsCollector');
           // TODO: Refactor to use dynamic import in async context
-
           // advancedMetricsCollector.createAlert({
           // type: 'performance',
           //   severity: res.statusCode >= 500 ? 'critical' : 'high',

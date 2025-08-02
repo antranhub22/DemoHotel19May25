@@ -11,6 +11,9 @@ export function setupSocket(server: HTTPServer) {
     'https://localhost:5173',
     'http://localhost:3000',
     'http://localhost:5173',
+    // ✅ FIX: Add production domains
+    'https://demohotel19may25.onrender.com',
+    'https://minhnhotelben.onrender.com',
   ];
 
   const io = new SocketIOServer(server, {
@@ -19,11 +22,19 @@ export function setupSocket(server: HTTPServer) {
         // Allow requests with no origin (e.g., mobile apps, Postman)
         if (!origin) return callback(null, true);
 
-        // Check if origin is allowed
-        if (
+        // ✅ FIX: Allow all origins in development
+        if (process.env.NODE_ENV === 'development') {
+          return callback(null, true);
+        }
+
+        // ✅ FIX: Allow production domains
+        const isAllowed =
           allowedOrigins.includes(origin) ||
-          process.env.NODE_ENV === 'development'
-        ) {
+          origin.includes('talk2go.online') ||
+          origin.includes('onrender.com') ||
+          origin.includes('localhost');
+
+        if (isAllowed) {
           return callback(null, true);
         }
 
@@ -32,11 +43,16 @@ export function setupSocket(server: HTTPServer) {
       },
       methods: ['GET', 'POST'],
       credentials: true,
+      // ✅ FIX: Add additional CORS headers
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     },
     // ✅ PERFORMANCE: Add connection limits
     maxHttpBufferSize: 1e6, // 1MB limit
     pingTimeout: 60000,
     pingInterval: 25000,
+    // ✅ FIX: Add additional options to prevent conflicts
+    allowEIO3: true,
+    transports: ['websocket', 'polling'],
   });
 
   // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (MEDIUM RISK with fallback)

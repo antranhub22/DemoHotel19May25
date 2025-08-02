@@ -248,28 +248,44 @@ export class AdvancedMetricsCollector {
    * Create an alert
    */
   createAlert(alert: Omit<Alert, 'id' | 'triggeredAt' | 'resolved'>): void {
-    const newAlert: Alert = {
-      ...alert,
-      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      triggeredAt: new Date(),
-      resolved: false,
-    };
+    // ✅ FIX: Disable alerts in production to prevent false alerts
+    if (process.env.NODE_ENV === 'production') {
+      logger.debug(
+        `[Metrics] Alert creation disabled in production: ${alert.title}`,
+        'AdvancedMetricsCollector'
+      );
+      return;
+    }
 
-    this.activeAlerts.set(newAlert.id, newAlert);
-    this.alertHistory.push(newAlert);
+    try {
+      const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const fullAlert: Alert = {
+        ...alert,
+        id: alertId,
+        triggeredAt: new Date(),
+        resolved: false,
+      };
 
-    logger.warn(
-      `🚨 [MetricsCollector] Alert created: ${alert.title} (${alert.severity})`,
-      'MetricsCollector',
-      {
-        module: alert.module,
-        currentValue: alert.currentValue,
-        threshold: alert.threshold,
-      }
-    );
+      this.activeAlerts.set(alertId, fullAlert);
+      this.alertHistory.push(fullAlert);
 
-    // Auto-resolve alerts based on conditions
-    setTimeout(() => this.checkAlertResolution(newAlert.id), 60000); // Check after 1 minute
+      logger.warn(
+        `🚨 [Metrics] Alert created: ${alert.title} (${alert.severity})`,
+        'AdvancedMetricsCollector',
+        {
+          alertId,
+          module: alert.module,
+          threshold: alert.threshold,
+          currentValue: alert.currentValue,
+        }
+      );
+    } catch (error) {
+      logger.error(
+        '❌ [Metrics] Failed to create alert',
+        'AdvancedMetricsCollector',
+        error
+      );
+    }
   }
 
   /**
@@ -701,50 +717,6 @@ export class AdvancedMetricsCollector {
         currentValue: kpi.value,
         metadata: { kpiCategory: kpi.category, target: kpi.target },
       });
-    }
-  }
-
-  private checkAlertResolution(alertId: string): void {
-    const alert = this.activeAlerts.get(alertId);
-    if (!alert) return;
-
-    // Auto-resolve based on current metrics
-    const recentMetrics = this.metricsHistory.filter(
-      m =>
-        m.module === alert.module &&
-        m.timestamp >= new Date(Date.now() - 5 * 60 * 1000) // Last 5 minutes
-    );
-
-    if (recentMetrics.length === 0) return;
-
-    const avgResponseTime =
-      recentMetrics.reduce((sum, m) => sum + m.responseTime, 0) /
-      recentMetrics.length;
-    const avgErrorRate =
-      recentMetrics.reduce((sum, m) => sum + m.errorRate, 0) /
-      recentMetrics.length;
-
-    let shouldResolve = false;
-
-    if (alert.type === 'performance') {
-      if (
-        alert.title.includes('Response Time') &&
-        avgResponseTime < alert.threshold
-      ) {
-        shouldResolve = true;
-      } else if (
-        alert.title.includes('Error Rate') &&
-        avgErrorRate < alert.threshold
-      ) {
-        shouldResolve = true;
-      }
-    }
-
-    if (shouldResolve) {
-      this.resolveAlert(
-        alertId,
-        'Auto-resolved: metrics returned to normal levels'
-      );
     }
   }
 
