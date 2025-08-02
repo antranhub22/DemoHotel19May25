@@ -7,6 +7,29 @@ const router = express.Router();
 const storage = new DatabaseStorage();
 
 /**
+ * ✅ HELPER: Extract tenant ID from request
+ */
+function extractTenantFromRequest(req: any): string {
+  try {
+    const hostname = req.get('host') || '';
+    const subdomain = hostname.split('.')[0];
+
+    if (subdomain && subdomain !== 'localhost' && subdomain !== 'www') {
+      return subdomain;
+    }
+
+    return 'mi-nhon-hotel'; // Safe fallback
+  } catch (error) {
+    logger.warn(
+      '⚠️ [Webhook] Failed to extract tenant from request, using fallback',
+      'Component',
+      error
+    );
+    return 'mi-nhon-hotel';
+  }
+}
+
+/**
  * ✅ HELPER: Process transcript with OpenAI for summary generation
  */
 async function processTranscriptWithOpenAI(
@@ -90,7 +113,7 @@ async function processTranscriptWithOpenAI(
     if (serviceRequests && serviceRequests.length > 0) {
       try {
         // Extract tenant ID from request
-        const tenantId = 'mi-nhon-hotel'; // TODO: Extract from hostname if needed
+        const tenantId = extractTenantFromRequest(req);
 
         logger.debug(
           '[Webhook] Saving service requests to database',
@@ -246,7 +269,11 @@ async function processTranscriptWithOpenAI(
 /**
  * ✅ HELPER: Process end-of-call-report for metadata storage
  */
-async function processEndOfCallReport(endOfCallReport: any, callId: string) {
+async function processEndOfCallReport(
+  endOfCallReport: any,
+  callId: string,
+  req: any
+) {
   try {
     logger.debug('[Webhook] Processing end-of-call-report', 'Component', {
       callId,
@@ -255,7 +282,7 @@ async function processEndOfCallReport(endOfCallReport: any, callId: string) {
     // ✅ ENHANCED: Save detailed call information to call table
     const callData = {
       call_id_vapi: callId,
-      tenant_id: 'mi-nhon-hotel', // TODO: Extract from hostname if needed
+      tenant_id: extractTenantFromRequest(req),
       room_number: endOfCallReport.call?.customer?.number || null,
       language: null, // Will be detected from transcript
       service_type: 'voice_assistant',
@@ -388,7 +415,7 @@ router.post('/vapi', express.json(), async (req, res) => {
       );
 
       // ✅ STEP 1: Save end-of-call-report metadata
-      await processEndOfCallReport(message, callId);
+      await processEndOfCallReport(message, callId, req);
 
       // ✅ STEP 2: Extract FINAL TRANSCRIPT for OpenAI processing
       const finalTranscript = message?.messages || [];

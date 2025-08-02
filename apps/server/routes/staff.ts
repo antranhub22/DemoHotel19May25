@@ -198,7 +198,30 @@ router.patch(
       );
 
       // Update in database
-      // TODO: Add actual database update here
+      try {
+        await db
+          .update(requestTable)
+          .set({
+            status,
+            assigned_to: assignedTo,
+            updated_at: new Date(),
+          })
+          .where(eq(requestTable.id, parseInt(id)));
+
+        logger.debug(
+          `✅ [STAFF] Database updated for request ${id}`,
+          'Component'
+        );
+      } catch (dbError) {
+        logger.error(
+          `❌ [STAFF] Failed to update database for request ${id}`,
+          'Component',
+          dbError
+        );
+        return res.status(500).json({
+          error: 'Failed to update request status in database',
+        });
+      }
 
       // Get request details for guest notification
       let requestDetails = null;
