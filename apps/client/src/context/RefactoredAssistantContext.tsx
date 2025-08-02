@@ -24,7 +24,11 @@ import {
   LanguageProvider,
   useLanguage,
 } from '@/context/contexts/LanguageContext';
-import { OrderProvider, useOrder } from '@/context/contexts/OrderContext';
+import {
+  OrderProvider,
+  RecentRequest,
+  useOrder,
+} from '@/context/contexts/OrderContext';
 import { useVapi, VapiProvider } from '@/context/contexts/VapiContextSimple';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
 import {
@@ -90,6 +94,9 @@ export interface RefactoredAssistantContextType {
   activeOrders: ActiveOrder[];
   setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
   addActiveOrder: (order: ActiveOrder) => void;
+  // ✅ NEW: Recent request for post-submit display
+  recentRequest: RecentRequest | null;
+  setRecentRequest: (request: RecentRequest | null) => void;
   emailSentForCurrentSession: boolean;
   setEmailSentForCurrentSession: (sent: boolean) => void;
   requestReceivedAt: Date | null;

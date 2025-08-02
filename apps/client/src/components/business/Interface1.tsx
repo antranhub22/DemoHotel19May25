@@ -20,6 +20,7 @@ import {
   addMultiLanguageNotification,
   LANGUAGE_DISPLAY_NAMES,
 } from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
+import { RecentRequestCard } from '../features/voice-assistant/interface1/RecentRequestCard';
 import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
 import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
@@ -34,7 +35,7 @@ interface Interface1Props {
 
 export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   // Hooks must be first - no conditional calls
-  const { language } = useAssistant();
+  const { language, recentRequest, setRecentRequest } = useAssistant();
   const {
     isLoading,
     error,
@@ -297,6 +298,34 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       {selectedService && (
         <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md z-50">
           🎤 {selectedService.name}...
+        </div>
+      )}
+
+      {/* ✅ NEW: Recent Request Card - Shows submitted request after UI reset */}
+      {recentRequest && (
+        <div
+          className="w-full max-w-md mx-auto mb-8 relative z-20"
+          data-testid="recent-request-card"
+        >
+          <RecentRequestCard
+            request={recentRequest}
+            onViewDetails={() => {
+              logger.debug(
+                '👁️ [Interface1] View request details clicked',
+                'Component',
+                { reference: recentRequest.reference }
+              );
+              // TODO: Implement view details modal or navigation
+            }}
+            onDismiss={() => {
+              logger.debug(
+                '🗑️ [Interface1] Recent request dismissed',
+                'Component',
+                { reference: recentRequest.reference }
+              );
+              setRecentRequest(null);
+            }}
+          />
         </div>
       )}
 

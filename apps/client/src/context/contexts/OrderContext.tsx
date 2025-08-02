@@ -1,18 +1,36 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react';
 import {
+  ActiveOrder,
+  CallSummary,
   Order,
   OrderSummary,
-  CallSummary,
   ServiceRequest,
-  ActiveOrder,
 } from '@/types';
 import { logger } from '@shared/utils/logger';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+// ✅ NEW: Recent request interface for tracking just-submitted requests
+export interface RecentRequest {
+  id: string | number;
+  reference: string;
+  roomNumber: string;
+  guestName: string;
+  requestContent: string;
+  orderType: string;
+  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  submittedAt: Date;
+  estimatedTime?: string;
+  items?: Array<{
+    name: string;
+    quantity: number;
+    description?: string;
+  }>;
+}
+
 export interface OrderContextType {
   // Order state
   order: Order | null;
@@ -32,6 +50,10 @@ export interface OrderContextType {
   activeOrders: ActiveOrder[];
   setActiveOrders: React.Dispatch<React.SetStateAction<ActiveOrder[]>>;
   addActiveOrder: (order: ActiveOrder) => void;
+
+  // ✅ NEW: Recent request state for post-submit display
+  recentRequest: RecentRequest | null;
+  setRecentRequest: (request: RecentRequest | null) => void;
 
   // Email state
   emailSentForCurrentSession: boolean;
@@ -79,6 +101,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [emailSentForCurrentSession, setEmailSentForCurrentSession] =
     useState<boolean>(false);
   const [requestReceivedAt, setRequestReceivedAt] = useState<Date | null>(null);
+
+  // ✅ NEW: Recent request state
+  const [recentRequest, setRecentRequest] = useState<RecentRequest | null>(
+    null
+  );
 
   // Active orders with localStorage persistence
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>(() => {
@@ -208,6 +235,9 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     activeOrders,
     setActiveOrders,
     addActiveOrder,
+    // ✅ NEW: Recent request state
+    recentRequest,
+    setRecentRequest,
     emailSentForCurrentSession,
     setEmailSentForCurrentSession,
     requestReceivedAt,

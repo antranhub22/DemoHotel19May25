@@ -46,8 +46,23 @@ export const useSendToFrontDeskHandler = ({
   onSuccess,
   onError,
 }: UseSendToFrontDeskHandlerProps = {}): UseSendToFrontDeskHandlerReturn => {
-  const { callSummary, serviceRequests, orderSummary, setOrder } =
-    useAssistant();
+  const {
+    callSummary,
+    serviceRequests,
+    orderSummary,
+    setOrder,
+    // ✅ ADD: Reset methods for UI refresh after SendToFrontDesk success
+    clearTranscripts,
+    clearModelOutput,
+    setOrderSummary,
+    setCallSummary,
+    setServiceRequests,
+    setEmailSentForCurrentSession,
+    setRequestReceivedAt,
+    setVietnameseSummary,
+    // ✅ NEW: Recent request state for displaying request card after reset
+    setRecentRequest,
+  } = useAssistant();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ✅ MEMOIZED: Default item template to prevent recreation
@@ -222,18 +237,118 @@ export const useSendToFrontDeskHandler = ({
         summary: orderData,
       });
 
+      // ✅ IMPROVED: Fetch actual data from database response for accuracy
+      if (requestData && requestData.data) {
+        const dbData = requestData.data; // Actual database record
+
+        const recentRequestData = {
+          id: dbData.id,
+          reference: `REQ-${dbData.id}`, // Use actual DB ID
+          roomNumber: dbData.room_number || 'TBD',
+          guestName: dbData.guest_name || 'Khách',
+          requestContent: dbData.request_content || 'Yêu cầu dịch vụ',
+          orderType: dbData.order_type || dbData.type || 'Room Service',
+          status: dbData.status as
+            | 'pending'
+            | 'in-progress'
+            | 'completed'
+            | 'cancelled',
+          submittedAt: new Date(dbData.created_at),
+          estimatedTime:
+            dbData.delivery_time || CONSTANTS.DELIVERY_TIME_DEFAULT,
+          items: dbData.items ? JSON.parse(dbData.items) : [], // Parse if JSON string
+        };
+
+        logger.debug(
+          '💾 [useSendToFrontDeskHandler] Saving REAL database data...',
+          'Component',
+          {
+            id: recentRequestData.id,
+            reference: recentRequestData.reference,
+            dbCreatedAt: dbData.created_at,
+          }
+        );
+
+        // Save actual database data
+        setRecentRequest(recentRequestData);
+      } else {
+        logger.warn(
+          '⚠️ [useSendToFrontDeskHandler] No database data in response, using fallback',
+          'Component'
+        );
+
+        // Fallback to frontend data (previous behavior)
+        const fallbackData = {
+          id: Date.now(),
+          reference: `REQ-${Date.now()}`,
+          roomNumber: orderData.roomNumber || 'TBD',
+          guestName: orderData.guestName || 'Khách',
+          requestContent: `${orderData.orderType}: Yêu cầu từ voice assistant`,
+          orderType: orderData.orderType || 'Room Service',
+          status: 'pending' as const,
+          submittedAt: new Date(),
+          estimatedTime:
+            orderData.deliveryTime || CONSTANTS.DELIVERY_TIME_DEFAULT,
+          items: [],
+        };
+
+        setRecentRequest(fallbackData);
+      }
+
+      // ✅ NEW: Reset UI to initial state after successful submission
+      // Add small delay to let user see success message
+      setTimeout(() => {
+        logger.debug(
+          '🔄 [useSendToFrontDeskHandler] Resetting UI to initial state...',
+          'Component'
+        );
+
+        // Clear all conversation and order data (but keep recentRequest)
+        clearTranscripts();
+        clearModelOutput();
+        setOrderSummary(null);
+        setCallSummary(null);
+        setServiceRequests([]);
+        setEmailSentForCurrentSession(false);
+        setRequestReceivedAt(null);
+        setVietnameseSummary(null);
+
+        logger.debug(
+          '✅ [useSendToFrontDeskHandler] UI reset completed - ready for new call',
+          'Component'
+        );
+
+        // Show notification that UI is ready for new call
+        logger.success(
+          '🎤 Ready for new voice call! Interface has been reset.',
+          'Component'
+        );
+      }, 2000); // 2 second delay to show success message first
+
       // Execute callback or show default feedback
       if (onSuccess) {
         onSuccess();
       } else {
         // Use logger instead of alert for better UX
         logger.success(
-          '✅ Request sent to front desk successfully',
+          '✅ Request sent to front desk successfully! UI reset for new call.',
           'Component'
         );
       }
     },
-    [setOrder, onSuccess]
+    [
+      setOrder,
+      onSuccess,
+      clearTranscripts,
+      clearModelOutput,
+      setOrderSummary,
+      setCallSummary,
+      setServiceRequests,
+      setEmailSentForCurrentSession,
+      setRequestReceivedAt,
+      setVietnameseSummary,
+      setRecentRequest,
+    ]
   );
 
   // ✅ EXTRACTED: Error handling
@@ -300,9 +415,10 @@ export const useSendToFrontDeskHandler = ({
         '📤 [useSendToFrontDeskHandler] Submitting request to guest endpoint:',
         'Component',
         {
-          requestText: backendPayload.requestText,
+          orderType: backendPayload.orderType,
           roomNumber: backendPayload.roomNumber,
-          serviceType: backendPayload.serviceType,
+          items: backendPayload.items?.length || 0,
+          tenantId: backendPayload.tenantId,
         }
       );
 
