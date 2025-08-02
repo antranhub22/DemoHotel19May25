@@ -276,7 +276,7 @@ app.use((req, res, next) => {
     'Component'
   );
 
-  // ✅ FIX: Register API routes BEFORE static files in production
+  // ✅ FIX: Register API routes FIRST in production
   // Use the new routes system - NOW SAFE with database ready
   // ✅ FIX: Only register API routes, not root route
   app.use('/api', router);
