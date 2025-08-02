@@ -87,7 +87,7 @@ export class CallAnalyticsService {
 
       // Calculate metrics
       const total = totalResult[0]?.count || 0;
-      const today = todayResult[0]?.count || 0;
+      const todayCount = todayResult[0]?.count || 0;
       const answered = answeredResult[0]?.count || 0;
       const avgDurationSeconds = durationResult[0]?.avgDuration || 0;
       const successRate = total > 0 ? (answered / total) * 100 : 0;
@@ -100,7 +100,7 @@ export class CallAnalyticsService {
 
       const analytics: CallAnalytics = {
         total,
-        today,
+        today: todayCount,
         answered,
         avgDuration,
         avgDurationSeconds: Math.round(avgDurationSeconds),
