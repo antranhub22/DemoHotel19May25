@@ -59,21 +59,29 @@ export function setupSocket(server: HTTPServer) {
     namespace: '/',
   });
 
-  // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (MEDIUM RISK with fallback)
-  try {
-    dashboardWebSocket.initialize(server);
-    logger.info(
-      '✅ [Socket] Dashboard WebSocket service initialized',
-      'WebSocket'
-    );
-  } catch (error) {
-    logger.error(
-      '❌ [Socket] Dashboard WebSocket initialization failed',
-      'WebSocket',
-      error
-    );
-    // Continue with order WebSocket setup - dashboard will use polling fallback
-  }
+  // ✅ FIX: Disable dashboard WebSocket to prevent handleUpgrade conflicts
+  // The dashboard WebSocket service creates a separate WebSocket server
+  // which conflicts with the main Socket.IO server
+  logger.info(
+    '🚫 [Socket] Dashboard WebSocket service disabled to prevent handleUpgrade conflicts',
+    'WebSocket'
+  );
+
+  // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (DISABLED to prevent conflicts)
+  // try {
+  //   dashboardWebSocket.initialize(server);
+  //   logger.info(
+  //     '✅ [Socket] Dashboard WebSocket service initialized',
+  //     'WebSocket'
+  //   );
+  // } catch (error) {
+  //   logger.error(
+  //     '❌ [Socket] Dashboard WebSocket initialization failed',
+  //     'WebSocket',
+  //     error
+  //   );
+  //   // Continue with order WebSocket setup - dashboard will use polling fallback
+  // }
 
   // ✅ RATE LIMITING: Track connections per IP
   const connectionCounts = new Map<string, number>();
