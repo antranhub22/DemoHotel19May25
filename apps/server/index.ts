@@ -120,8 +120,15 @@ app.use(
         return callback(null, true);
       }
 
-      // In production, allow subdomains of talk2go.online
-      const allowedDomains = ['talk2go.online', 'localhost', '127.0.0.1'];
+      // ✅ FIX: Allow production domains for WebSocket compatibility
+      const allowedDomains = [
+        'talk2go.online',
+        'localhost',
+        '127.0.0.1',
+        'onrender.com',
+        'demohotel19may25.onrender.com',
+        'minhnhotelben.onrender.com',
+      ];
 
       const isAllowed = allowedDomains.some(
         domain => origin.includes(domain) || origin.endsWith(`.${domain}`)
@@ -274,9 +281,20 @@ app.use((req, res, next) => {
 
   // Create HTTP server for WebSocket support
   const server = http.createServer(app);
-  // Setup WebSocket server for real-time notifications and save instance on Express app
-  const io = setupSocket(server);
-  app.set('io', io);
+
+  // ✅ FIX: Disable Socket.IO in production to prevent handleUpgrade errors
+  if (process.env.NODE_ENV === 'production') {
+    logger.debug(
+      '⚠️ Socket.IO disabled in production to prevent handleUpgrade errors',
+      'Component'
+    );
+    // Set empty io instance
+    app.set('io', null);
+  } else {
+    // Setup WebSocket server for real-time notifications and save instance on Express app
+    const io = setupSocket(server);
+    app.set('io', io);
+  }
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();

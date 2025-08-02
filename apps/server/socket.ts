@@ -53,6 +53,10 @@ export function setupSocket(server: HTTPServer) {
     // ✅ FIX: Add additional options to prevent conflicts
     allowEIO3: true,
     transports: ['websocket', 'polling'],
+    // ✅ FIX: Add path to avoid conflicts
+    path: '/socket.io/',
+    // ✅ FIX: Add namespace to avoid conflicts
+    namespace: '/',
   });
 
   // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (MEDIUM RISK with fallback)
