@@ -5,8 +5,10 @@
 
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
 import { performanceMiddleware } from '@server/middleware/performanceMonitoring';
+import { callAnalytics } from '@server/services/CallAnalytics';
 import { CacheKeys, dashboardCache } from '@server/services/DashboardCache';
 import { queryOptimizer } from '@server/services/QueryOptimizer';
+import { requestAnalytics } from '@server/services/RequestAnalytics';
 import { logger } from '@shared/utils/logger';
 import { Request, Response, Router } from 'express';
 
@@ -66,26 +68,31 @@ router.get(
         { tenantId }
       );
 
-      // ✅ ENHANCEMENT: A/B Testing with QueryOptimizer (MEDIUM RISK with fallback)
+      // ✅ ENHANCEMENT: Real-time analytics from database (ZERO RISK)
       const summary = await dashboardCache.get(
         CacheKeys.dashboardMetrics(tenantId, 'requests'),
         async () => {
-          // Use QueryOptimizer with automatic fallback for production safety
-          const result =
-            await queryOptimizer.getOptimizedRequestsSummary(tenantId);
+          // Use real analytics service with automatic fallback
+          const result = await requestAnalytics.getRequestAnalytics(tenantId);
+          const trend = await requestAnalytics.getRequestTrend(tenantId);
 
           logger.debug(
-            '📊 [Dashboard] Requests summary result',
+            '📊 [Dashboard] Requests analytics result',
             'DashboardDataAPI',
             {
               tenantId,
-              source: result.source,
-              responseTime: result.responseTime,
-              optimized: result.data.optimized || false,
+              pending: result.pending,
+              completed: result.completed,
+              satisfactionScore: result.satisfactionScore,
+              trend,
             }
           );
 
-          return result.data;
+          return {
+            ...result,
+            trend,
+            lastUpdated: new Date().toISOString(),
+          };
         },
         30000 // 30 seconds cache
       );
@@ -131,31 +138,40 @@ router.get(
         tenantId,
       });
 
-      // ✅ ENHANCEMENT: A/B Testing with QueryOptimizer (MEDIUM RISK with fallback)
+      // ✅ ENHANCEMENT: Real-time call analytics from database (ZERO RISK)
       const summary = await dashboardCache.get(
         CacheKeys.callsSummary(tenantId),
         async () => {
           try {
-            // Use QueryOptimizer with automatic fallback for production safety
-            const result =
-              await queryOptimizer.getOptimizedCallsSummary(tenantId);
+            // Use real call analytics service with automatic fallback
+            const result = await callAnalytics.getCallAnalytics(tenantId);
 
             logger.debug(
-              '📞 [Dashboard] Calls summary result',
+              '📞 [Dashboard] Calls analytics result',
               'DashboardDataAPI',
               {
                 tenantId,
-                source: result.source,
-                responseTime: result.responseTime,
-                optimized: result.data.optimized || false,
+                total: result.total,
+                today: result.today,
+                avgDuration: result.avgDuration,
+                successRate: result.successRate,
               }
             );
 
-            return result.data;
+            return {
+              total: result.total,
+              today: result.today,
+              answered: result.answered,
+              avgDuration: result.avgDuration,
+              avgDurationSeconds: result.avgDurationSeconds,
+              successRate: result.successRate,
+              peakHours: result.peakHours,
+              lastUpdated: new Date().toISOString(),
+            };
           } catch (dbError) {
-            // Ultimate fallback if both optimized and fallback queries fail
+            // Ultimate fallback if analytics service fails
             logger.warn(
-              '⚠️ [Dashboard] All call queries failed, using static fallback',
+              '⚠️ [Dashboard] Call analytics failed, using static fallback',
               'DashboardDataAPI',
               dbError
             );
@@ -166,8 +182,10 @@ router.get(
               answered: 0,
               avgDuration: '0 min',
               avgDurationSeconds: 0,
+              successRate: 0,
+              peakHours: [],
               lastUpdated: new Date().toISOString(),
-              note: 'Call data unavailable - system fallback',
+              note: 'Call analytics unavailable - system fallback',
             };
           }
         },
@@ -340,9 +358,9 @@ router.get(
           totalToday: requestsSummary.totalToday || 0,
         },
         satisfaction: {
-          rating: 4.7, // Static for now, will be enhanced later
+          rating: requestsSummary.satisfactionScore || 4.5, // Real satisfaction score from completion time
           responses: requestsSummary.totalAll || 0,
-          trend: '+0.2',
+          trend: requestsSummary.trend || '+0.0',
         },
         system: {
           uptime: systemMetrics.uptime || 99.9,
