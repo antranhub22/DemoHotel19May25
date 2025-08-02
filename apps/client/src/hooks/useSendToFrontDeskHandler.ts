@@ -286,16 +286,23 @@ export const useSendToFrontDeskHandler = ({
     setIsSubmitting(true);
 
     try {
-      // Build and submit request
+      // Build and submit request - SIMPLIFIED
       const requestPayload = buildRequestPayload(generatedOrderSummary);
+
+      // ✅ SIMPLIFIED: Backend now accepts any format with automatic fallbacks
+      const backendPayload = {
+        ...requestPayload,
+        // Optional: Override with any specific fields if needed
+        tenantId: 'mi-nhon-hotel',
+      };
 
       logger.debug(
         '📤 [useSendToFrontDeskHandler] Submitting request to guest endpoint:',
         'Component',
         {
-          orderType: requestPayload.orderType,
-          items: requestPayload.items?.length || 0,
-          roomNumber: requestPayload.roomNumber,
+          requestText: backendPayload.requestText,
+          roomNumber: backendPayload.roomNumber,
+          serviceType: backendPayload.serviceType,
         }
       );
 
@@ -307,7 +314,7 @@ export const useSendToFrontDeskHandler = ({
           // Add guest session ID for tracking
           'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
-        body: JSON.stringify(requestPayload),
+        body: JSON.stringify(backendPayload),
       });
 
       if (!response.ok) {

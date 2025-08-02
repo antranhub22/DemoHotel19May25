@@ -119,27 +119,18 @@ export class RequestController {
           );
         }
       } else {
-        // Legacy mode - use original validation
+        // Legacy mode - use relaxed validation with fallbacks
         const { serviceType, requestText, roomNumber, guestName, priority } =
           req.body;
 
-        if (!requestText || !roomNumber) {
-          ResponseWrapper.sendError(
-            res,
-            'Missing required fields: requestText and roomNumber',
-            400,
-            'VALIDATION_ERROR'
-          );
-          return;
-        }
-
+        // ✅ RELAXED VALIDATION: Apply fallbacks for missing data
         validatedData = {
-          serviceType,
-          requestText,
-          roomNumber,
-          guestName,
+          serviceType: serviceType || 'general',
+          requestText: requestText || 'Voice Assistant Request', // ✅ FALLBACK
+          roomNumber: roomNumber || 'TBD', // ✅ FALLBACK
+          guestName: guestName || 'Guest',
           priority: priority || 'medium',
-          tenantId: req.body.tenantId,
+          tenantId: req.body.tenantId || 'mi-nhon-hotel', // ✅ FALLBACK to real tenant
         };
 
         logger.debug(

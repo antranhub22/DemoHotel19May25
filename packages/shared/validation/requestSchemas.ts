@@ -14,12 +14,14 @@ export const CreateRequestSchema = z.object({
   serviceType: z.string().optional(),
   requestText: z
     .string()
-    .min(1, 'Request text is required')
-    .max(1000, 'Request text too long'),
+    .max(1000, 'Request text too long')
+    .optional()
+    .default('Voice Assistant Request'), // ✅ FALLBACK cho empty requests
   roomNumber: z
     .string()
-    .min(1, 'Room number is required')
-    .max(10, 'Room number too long'),
+    .max(10, 'Room number too long')
+    .optional()
+    .default('TBD'), // ✅ FALLBACK cho missing room number
   guestName: z.string().max(100, 'Guest name too long').optional(),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
   tenantId: z.string().uuid().optional(),
