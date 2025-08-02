@@ -81,9 +81,20 @@ export class GuestAuthService {
         return { success: false, error: 'Invalid hostname or subdomain' };
       }
 
-      // Find tenant by subdomain
-      const tenant =
-        await GuestAuthService.tenantService.getTenantBySubdomain(subdomain);
+      // Find tenant by subdomain - with proper error handling
+      let tenant = null;
+      try {
+        tenant =
+          await GuestAuthService.tenantService.getTenantBySubdomain(subdomain);
+      } catch (error) {
+        // Tenant not found in database - will use default creation below
+        logger.debug(
+          `🏨 [GuestAuth] Tenant lookup failed for subdomain: ${subdomain}`,
+          'GuestAuthService',
+          { error: error instanceof Error ? error.message : String(error) }
+        );
+        tenant = null;
+      }
 
       if (!tenant) {
         logger.warn(
@@ -243,4 +254,4 @@ export class GuestAuthService {
       expiresAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
     };
   }
-} 
+}
