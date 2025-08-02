@@ -88,32 +88,73 @@ export class GuestAuthService {
           await GuestAuthService.tenantService.getTenantBySubdomain(subdomain);
       } catch (error) {
         // Tenant not found in database - will use default creation below
-        logger.debug(
-          `🏨 [GuestAuth] Tenant lookup failed for subdomain: ${subdomain}`,
+        logger.error(
+          `🏨 [GuestAuth] CRITICAL DEBUG - Tenant lookup failed for subdomain: ${subdomain}`,
           'GuestAuthService',
-          { error: error instanceof Error ? error.message : String(error) }
+          {
+            error: error instanceof Error ? error.message : String(error),
+            subdomain,
+            timestamp: new Date().toISOString(),
+            debugMarker: 'FIX-DEPLOYED-V2',
+          }
         );
         tenant = null;
       }
 
       if (!tenant) {
-        logger.warn(
-          `🏨 [GuestAuth] Tenant not found for subdomain: ${subdomain}`,
-          'GuestAuthService'
+        logger.error(
+          `🏨 [GuestAuth] CRITICAL DEBUG - Creating default tenant for subdomain: ${subdomain}`,
+          'GuestAuthService',
+          {
+            subdomain,
+            timestamp: new Date().toISOString(),
+            debugMarker: 'DEFAULT-TENANT-CREATION-V2',
+          }
         );
         // Create default tenant for demo purposes
-        return {
-          success: true,
-          token: await GuestAuthService.createDefaultGuestToken(
+        try {
+          const defaultToken = await GuestAuthService.createDefaultGuestToken(
             subdomain,
             ipAddress
-          ),
-          session: await GuestAuthService.createDefaultGuestSession(
-            subdomain,
-            ipAddress,
-            userAgent
-          ),
-        };
+          );
+          const defaultSession =
+            await GuestAuthService.createDefaultGuestSession(
+              subdomain,
+              ipAddress,
+              userAgent
+            );
+          logger.error(
+            `🏨 [GuestAuth] CRITICAL DEBUG - Default tenant created successfully`,
+            'GuestAuthService',
+            {
+              subdomain,
+              sessionId: defaultSession.sessionId,
+              tenantId: defaultSession.tenantId,
+              debugMarker: 'DEFAULT-TENANT-SUCCESS-V2',
+            }
+          );
+          return {
+            success: true,
+            token: defaultToken,
+            session: defaultSession,
+          };
+        } catch (defaultError) {
+          logger.error(
+            `🏨 [GuestAuth] CRITICAL DEBUG - Default tenant creation failed!`,
+            'GuestAuthService',
+            {
+              error:
+                defaultError instanceof Error
+                  ? defaultError.message
+                  : String(defaultError),
+              debugMarker: 'DEFAULT-TENANT-FAILED-V2',
+            }
+          );
+          return {
+            success: false,
+            error: 'Failed to create default tenant session',
+          };
+        }
       }
 
       // Check if tenant is active
