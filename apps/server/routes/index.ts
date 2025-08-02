@@ -26,11 +26,11 @@ import summariesRoutes from '@server/routes/summaries'; // ✅ NEW: RESTful summ
 import translationsRoutes from '@server/routes/translations'; // ✅ NEW: RESTful translations
 
 // ✅ NEW: DASHBOARD PERFORMANCE ENHANCEMENTS - PHASE 1 & 2
-import dashboardDataRoutes from '@server/routes/dashboard-data'; // ✅ NEW: Optimized dashboard APIs
-import performanceMetricsRoutes from '@server/routes/performance-metrics'; // ✅ NEW: Performance monitoring
 import cacheMonitoringRoutes from '@server/routes/cache-monitoring'; // ✅ NEW: Cache management
-import websocketMonitoringRoutes from '@server/routes/websocket-monitoring'; // ✅ NEW: WebSocket monitoring
+import dashboardDataRoutes from '@server/routes/dashboard-data'; // ✅ NEW: Optimized dashboard APIs
 import errorMonitoringRoutes from '@server/routes/error-monitoring'; // ✅ NEW: Error tracking
+import performanceMetricsRoutes from '@server/routes/performance-metrics'; // ✅ NEW: Performance monitoring
+import websocketMonitoringRoutes from '@server/routes/websocket-monitoring'; // ✅ NEW: WebSocket monitoring
 
 // ✅ NEW v2.2: ADVANCED FILTERING & SORTING API
 import advancedCallsRoutes from './advanced-calls'; // ✅ NEW: Advanced filtering API
