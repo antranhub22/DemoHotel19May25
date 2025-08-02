@@ -146,6 +146,41 @@ async function processTranscriptWithOpenAI(
             );
           });
         }
+
+        // ✅ ENHANCEMENT: Also use Dashboard WebSocket service for dashboard updates
+        try {
+          const { dashboardWebSocket } = await import(
+            '@server/services/DashboardWebSocket'
+          );
+          savedRequests.forEach(request => {
+            dashboardWebSocket.publishDashboardUpdate({
+              type: 'request_update',
+              tenantId: 'mi-nhon-hotel',
+              data: {
+                requestId: request.id,
+                status: request.status,
+                roomNumber: request.room_number,
+                guestName: request.guest_name,
+                requestContent: request.request_content,
+                orderType: request.order_type,
+                timestamp: new Date().toISOString(),
+              },
+              timestamp: new Date().toISOString(),
+              source: 'webhook_new_request',
+            });
+
+            logger.debug(
+              `📊 [Webhook] Dashboard WebSocket update sent for request ${request.id}`,
+              'Component'
+            );
+          });
+        } catch (dashboardError) {
+          logger.warn(
+            '⚠️ [Webhook] Dashboard WebSocket update failed, using fallback',
+            'Component',
+            dashboardError
+          );
+        }
       } catch (serviceError) {
         logger.error(
           '[Webhook] Failed to save service requests to database:',

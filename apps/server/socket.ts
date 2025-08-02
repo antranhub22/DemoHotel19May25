@@ -59,29 +59,23 @@ export function setupSocket(server: HTTPServer) {
     namespace: '/',
   });
 
-  // ✅ FIX: Disable dashboard WebSocket to prevent handleUpgrade conflicts
-  // The dashboard WebSocket service creates a separate WebSocket server
-  // which conflicts with the main Socket.IO server
-  logger.info(
-    '🚫 [Socket] Dashboard WebSocket service disabled to prevent handleUpgrade conflicts',
-    'WebSocket'
-  );
-
-  // ✅ ENHANCEMENT: Initialize Dashboard WebSocket Service (DISABLED to prevent conflicts)
-  // try {
-  //   dashboardWebSocket.initialize(server);
-  //   logger.info(
-  //     '✅ [Socket] Dashboard WebSocket service initialized',
-  //     'WebSocket'
-  //   );
-  // } catch (error) {
-  //   logger.error(
-  //     '❌ [Socket] Dashboard WebSocket initialization failed',
-  //     'WebSocket',
-  //     error
-  //   );
-  //   // Continue with order WebSocket setup - dashboard will use polling fallback
-  // }
+  // ✅ FIX: Share Socket.IO instance with Dashboard WebSocket service
+  // Instead of creating separate WebSocket server, pass the io instance
+  try {
+    // Pass the io instance to dashboard service instead of creating new server
+    dashboardWebSocket.setSocketIO(io);
+    logger.info(
+      '✅ [Socket] Dashboard WebSocket service connected to main Socket.IO',
+      'WebSocket'
+    );
+  } catch (error) {
+    logger.error(
+      '❌ [Socket] Dashboard WebSocket connection failed',
+      'WebSocket',
+      error
+    );
+    // Continue with order WebSocket setup - dashboard will use polling fallback
+  }
 
   // ✅ RATE LIMITING: Track connections per IP
   const connectionCounts = new Map<string, number>();

@@ -1,6 +1,6 @@
 const { Pool } = require('pg');
 
-const DATABASE_URL = "postgresql://minhonhotelen1_user:Fjos7A0kcIGCOQZKtSaDoSHYOgvd8GWU@dpg-d036eph5pdvs73db24rg-a:5432/minhonhotelen1";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:password@dpg-cr5j2gaj1k6c73f12qj0-a.oregon-postgres.render.com/hotel_production_db";
 
 async function checkProductionDB() {
   const pool = new Pool({

@@ -118,6 +118,40 @@ class DashboardWebSocketService {
   }
 
   /**
+   * ✅ NEW: Set existing Socket.IO instance (for sharing with main server)
+   */
+  setSocketIO(io: SocketIOServer): void {
+    if (!this.config.enableWebSocket) {
+      logger.info(
+        '🚫 [WebSocket] WebSocket disabled, skipping Socket.IO setup',
+        'WebSocket'
+      );
+      return;
+    }
+
+    try {
+      this.io = io;
+      this.setupEventHandlers();
+      this.startHeartbeat();
+
+      logger.info(
+        '✅ [WebSocket] Dashboard WebSocket service connected to shared Socket.IO',
+        'WebSocket'
+      );
+    } catch (error) {
+      this.stats.errors++;
+      this.stats.lastError =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      logger.error(
+        '❌ [WebSocket] Failed to connect to shared Socket.IO',
+        'WebSocket',
+        error
+      );
+    }
+  }
+
+  /**
    * Setup WebSocket event handlers
    */
   private setupEventHandlers(): void {
@@ -338,10 +372,34 @@ class DashboardWebSocketService {
     try {
       const targetRoom = update.tenantId ? `tenant:${update.tenantId}` : 'all';
 
+      // Emit dashboard:update for dashboard clients
       this.io.to(targetRoom).emit('dashboard:update', {
         ...update,
         timestamp: new Date().toISOString(),
       });
+
+      // ✅ ENHANCEMENT: Also emit requestStatusUpdate for CustomerRequests component
+      if (update.type === 'request_update' && update.data) {
+        this.io.emit('requestStatusUpdate', {
+          type: 'new-request',
+          requestId: update.data.requestId,
+          status: update.data.status,
+          roomNumber: update.data.roomNumber,
+          guestName: update.data.guestName,
+          requestContent: update.data.requestContent,
+          orderType: update.data.orderType,
+          timestamp: new Date().toISOString(),
+        });
+
+        logger.debug(
+          '📡 [WebSocket] requestStatusUpdate emitted',
+          'WebSocket',
+          {
+            requestId: update.data.requestId,
+            roomNumber: update.data.roomNumber,
+          }
+        );
+      }
 
       this.stats.messagesPublished++;
 
