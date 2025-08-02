@@ -133,7 +133,7 @@ router.use('/tenants', tenantRoutes); // ✅ NEW: Tenant management API
 router.use('/analytics', analyticsRoutes);
 
 // System Routes (NO AUTH REQUIRED - must come before dashboard routes)
-router.use('/health', healthRoutes);
+router.use('/', healthRoutes);
 
 // Development & Testing (NO AUTH REQUIRED)
 router.use('/temp-public', tempPublicRoutes);
