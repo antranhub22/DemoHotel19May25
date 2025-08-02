@@ -1,7 +1,8 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import express, { type Request, Response } from 'express';
 import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { call, db, request as requestTable, staff, tenants } from '@shared/db';
+import { db, request as requestTable, staff, tenants } from '@shared/db';
+// import { call } from '@shared/db'; // Table not exists in database
 import { logger } from '@shared/utils/logger';
 
 const router = express.Router();

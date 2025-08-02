@@ -9,7 +9,8 @@ import {
   parseAdvancedQuery,
 } from '@server/utils/pagination';
 import { db } from '@shared/db';
-import { call, transcript } from '@shared/db/schema';
+import { transcript } from '@shared/db/schema';
+// import { call } from '@shared/db/schema'; // Table not exists in database
 import { logger } from '@shared/utils/logger';
 import { asc, eq } from 'drizzle-orm';
 import express from 'express';

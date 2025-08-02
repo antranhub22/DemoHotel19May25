@@ -1,4 +1,4 @@
-import { call } from '@shared/db';
+// import { call } from '@shared/db'; // Table not exists in database
 import { logger } from '@shared/utils/logger';
 import { and, count, desc, eq, gte } from 'drizzle-orm';
 

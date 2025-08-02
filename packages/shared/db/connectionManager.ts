@@ -1,7 +1,5 @@
 // ✅ Advanced Database Connection Manager with Pooling & Monitoring
 import {
-  call,
-  call_summaries,
   hotelProfiles,
   message,
   request,
@@ -308,7 +306,6 @@ export class DatabaseConnectionManager {
         tenants,
         hotelProfiles,
         staff,
-        call,
         transcript,
         request,
         message,
@@ -342,7 +339,6 @@ export class DatabaseConnectionManager {
         tenants,
         hotelProfiles,
         staff,
-        call,
         transcript,
         request,
         message,

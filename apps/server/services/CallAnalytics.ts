@@ -1,5 +1,5 @@
 import { db } from '@shared/db';
-import { call } from '@shared/db/schema';
+// import { call } from '@shared/db/schema'; // Table not exists in database
 import { logger } from '@shared/utils/logger';
 import { and, eq, gte, lte, sql } from 'drizzle-orm';
 

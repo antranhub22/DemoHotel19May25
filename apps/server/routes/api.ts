@@ -3,7 +3,8 @@ import {
   commonErrors,
   ErrorCodes,
 } from '@server/utils/apiHelpers';
-import { call, db } from '@shared/db';
+import { db } from '@shared/db';
+// import { call } from '@shared/db'; // Table not exists in database
 import { logger } from '@shared/utils/logger';
 import { eq } from 'drizzle-orm';
 import express from 'express';
