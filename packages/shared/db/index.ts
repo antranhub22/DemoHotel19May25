@@ -98,12 +98,12 @@ export {
   tenants,
   hotelProfiles,
   staff,
+  call,
   transcript,
   request,
   message,
   call_summaries,
 } from './schema';
-// export { call } from './schema'; // Table not exists in database
 
 // ✅ ALIAS: Maintain compatibility with existing routes that use 'requests'
 export { request as requests } from './schema';

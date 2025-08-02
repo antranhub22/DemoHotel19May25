@@ -10,8 +10,7 @@ import {
   getServiceSync,
 } from '@server/shared/ServiceContainer';
 import { storage } from '@server/storage';
-import { db } from '@shared/db';
-// import { call } from '@shared/db'; // Table not exists in database
+import { call, db } from '@shared/db';
 import { insertTranscriptSchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
 

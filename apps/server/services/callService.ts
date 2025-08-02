@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { storage } from '@server/storage';
-import { db, eq, transcript } from '@shared/db';
-// import { call } from '@shared/db'; // Table not exists in database
+import { call, db, eq, transcript } from '@shared/db';
 import { insertTranscriptSchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
 

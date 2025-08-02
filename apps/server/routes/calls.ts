@@ -12,8 +12,7 @@ import {
   parseCompleteQuery,
 } from '@server/utils/pagination';
 import { db } from '@shared/db';
-import { transcript } from '@shared/db/schema';
-// import { call } from '@shared/db/schema'; // Table not exists in database
+import { call, transcript } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
 import { and, asc, desc, eq, or } from 'drizzle-orm';
 import { Request, Response, Router } from 'express';

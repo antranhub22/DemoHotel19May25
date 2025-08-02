@@ -6,6 +6,7 @@ import {
   staff,
   tenants,
   transcript,
+  call,
   call_summaries,
 } from '@shared/db/schema';
 import { logger } from '@shared/utils/logger';
@@ -307,6 +308,7 @@ export class DatabaseConnectionManager {
         tenants,
         hotelProfiles,
         staff,
+        call,
         transcript,
         request,
         message,
@@ -340,6 +342,7 @@ export class DatabaseConnectionManager {
         tenants,
         hotelProfiles,
         staff,
+        call,
         transcript,
         request,
         message,

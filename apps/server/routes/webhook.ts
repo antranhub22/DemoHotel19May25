@@ -252,7 +252,51 @@ async function processEndOfCallReport(endOfCallReport: any, callId: string) {
       callId,
     });
 
-    // Save end-of-call-report for stakeholders
+    // ✅ ENHANCED: Save detailed call information to call table
+    const callData = {
+      call_id_vapi: callId,
+      tenant_id: 'mi-nhon-hotel', // TODO: Extract from hostname if needed
+      room_number: endOfCallReport.call?.customer?.number || null,
+      language: null, // Will be detected from transcript
+      service_type: 'voice_assistant',
+      start_time: endOfCallReport.call?.startedAt
+        ? new Date(endOfCallReport.call.startedAt)
+        : null,
+      end_time: endOfCallReport.call?.endedAt
+        ? new Date(endOfCallReport.call.endedAt)
+        : null,
+      duration:
+        endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
+          ? Math.floor(
+              (new Date(endOfCallReport.call.endedAt).getTime() -
+                new Date(endOfCallReport.call.startedAt).getTime()) /
+                1000
+            )
+          : null,
+    };
+
+    try {
+      // Import call table
+      const { call } = await import('@shared/db/schema');
+      const { db } = await import('@shared/db');
+
+      // Insert call record
+      await db.insert(call).values(callData);
+
+      logger.success(
+        '[Webhook] Call information saved to call table',
+        'Component',
+        { callId, duration: callData.duration }
+      );
+    } catch (callError) {
+      logger.warn(
+        '[Webhook] Failed to save call information, using fallback',
+        'Component',
+        callError
+      );
+    }
+
+    // Save end-of-call-report for stakeholders (existing functionality)
     await storage.addCallSummary({
       call_id: callId,
       content: JSON.stringify(endOfCallReport),
