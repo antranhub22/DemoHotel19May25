@@ -395,7 +395,7 @@ export class DatabaseStorage {
       // Generate order ID
       const orderId = `REQ-${Date.now()}`;
 
-      // Map serviceRequest to request table fields
+      // Map serviceRequest to request table fields - UPDATED to match DB schema
       const requestData = {
         tenant_id: tenantId,
         call_id: callId,
@@ -413,8 +413,10 @@ export class DatabaseStorage {
         currency: 'VND',
         special_instructions: serviceRequest.details?.otherDetails || null,
         order_type: serviceRequest.serviceType || 'service-request',
-        delivery_time: serviceRequest.details?.time || null,
-        items: JSON.stringify(serviceRequest.details || {}),
+        delivery_time: serviceRequest.details?.time
+          ? new Date(serviceRequest.details.time)
+          : null,
+        items: serviceRequest.details || {}, // JSON object for jsonb
         priority: 'medium',
         urgency: 'normal',
         created_at: new Date(),
