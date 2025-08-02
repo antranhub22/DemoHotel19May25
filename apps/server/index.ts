@@ -289,19 +289,10 @@ app.use((req, res, next) => {
   // Create HTTP server for WebSocket support
   const server = http.createServer(app);
 
-  // ✅ FIX: Disable Socket.IO in production to prevent handleUpgrade errors
-  if (process.env.NODE_ENV === 'production') {
-    logger.debug(
-      '⚠️ Socket.IO disabled in production to prevent handleUpgrade errors',
-      'Component'
-    );
-    // Set empty io instance
-    app.set('io', null);
-  } else {
-    // Setup WebSocket server for real-time notifications and save instance on Express app
-    const io = setupSocket(server);
-    app.set('io', io);
-  }
+  // ✅ FIX: Enable Socket.IO in production for summary events
+  // Setup WebSocket server for real-time notifications and save instance on Express app
+  const io = setupSocket(server);
+  app.set('io', io);
 
   // Run production migration first (for PostgreSQL schema fixes)
   await runProductionMigration();
