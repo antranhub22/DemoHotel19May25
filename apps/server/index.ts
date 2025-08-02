@@ -276,14 +276,15 @@ app.use((req, res, next) => {
     'Component'
   );
 
-  // ✅ FIX: Serve static files BEFORE ALL API routes in production
-  if (process.env.NODE_ENV === 'production') {
-    serveStatic(app);
-  }
-
+  // ✅ FIX: Register API routes BEFORE static files in production
   // Use the new routes system - NOW SAFE with database ready
   // ✅ FIX: Only register API routes, not root route
   app.use('/api', router);
+
+  // ✅ FIX: Serve static files AFTER API routes in production
+  if (process.env.NODE_ENV === 'production') {
+    serveStatic(app);
+  }
 
   // Create HTTP server for WebSocket support
   const server = http.createServer(app);

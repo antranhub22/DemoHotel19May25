@@ -159,21 +159,15 @@ export function serveStatic(app: Express) {
   app.use('*', (req, res) => {
     const url = req.originalUrl;
 
-    // Don't intercept API routes
+    // ✅ FIX: Don't intercept API routes - let them pass through
     if (url.startsWith('/api/') || url.startsWith('/ws/')) {
-      // Enhanced logging for debugging API endpoint issues
-      console.warn(`❌ [API] Endpoint not found: ${req.method} ${url}`, {
-        host: req.get('host'),
-        userAgent: req.get('user-agent'),
-        referer: req.get('referer'),
-        timestamp: new Date().toISOString(),
-      });
-
-      return (res as any).status(404).json({
+      // Let API routes pass through to the next middleware
+      return res.status(404).json({
         error: 'API endpoint not found',
         path: url,
         method: req.method,
-        suggestion: 'Ensure your API calls start with /api/ prefix',
+        suggestion:
+          'This endpoint is not implemented or the route is not registered',
       });
     }
 
