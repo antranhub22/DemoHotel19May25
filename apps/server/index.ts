@@ -281,10 +281,10 @@ app.use((req, res, next) => {
   // ✅ FIX: Only register API routes, not root route
   app.use('/api', router);
 
-  // ✅ FIX: Temporarily disable static files to test API routes
-  // if (process.env.NODE_ENV === 'production') {
-  //   serveStatic(app);
-  // }
+  // ✅ FIX: Serve static files AFTER API routes in production
+  if (process.env.NODE_ENV === 'production') {
+    serveStatic(app);
+  }
 
   // Create HTTP server for WebSocket support
   const server = http.createServer(app);
