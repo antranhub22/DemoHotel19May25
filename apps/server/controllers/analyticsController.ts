@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
 import {
   getDashboardAnalytics,
   getHourlyActivity,
   getOverview,
   getServiceDistribution,
 } from '@server/analytics';
+import { Request, Response } from 'express';
 
 // ✅ ENHANCED v2.0: Import modular architecture components
 import { TenantService } from '@server/services/tenantService';
@@ -14,6 +14,9 @@ import {
   getServiceSync,
 } from '@server/shared/ServiceContainer';
 import { logger } from '@shared/utils/logger';
+
+// 🔄 NEW: Prisma integration imports
+import { DatabaseServiceFactory } from '@shared/db/DatabaseServiceFactory';
 
 /**
  * Enhanced Analytics Controller v2.0 - Modular Architecture
@@ -41,6 +44,66 @@ export class AnalyticsController {
       '📊 [AnalyticsController] ServiceContainer integration initialized - v2.0',
       'AnalyticsController'
     );
+  }
+
+  /**
+   * 🔄 Get appropriate analytics service based on feature flags
+   * Supports switching between Drizzle (legacy) and Prisma (new) analytics
+   */
+  private static async getAnalyticsService(): Promise<any> {
+    const usePrisma =
+      process.env.USE_PRISMA === 'true' ||
+      isFeatureEnabled(FeatureFlags.USE_PRISMA) ||
+      isFeatureEnabled(FeatureFlags.PRISMA_ANALYTICS_SERVICE);
+
+    if (usePrisma) {
+      try {
+        logger.info('🔄 [AnalyticsController] Using Prisma Analytics Service');
+
+        // Initialize Prisma connections if not already done
+        await DatabaseServiceFactory.initializeConnections();
+
+        // Get unified Prisma database service
+        const databaseService =
+          await DatabaseServiceFactory.createDatabaseService();
+
+        logger.info(
+          '✅ [AnalyticsController] Prisma Analytics Service initialized'
+        );
+        return databaseService;
+      } catch (error) {
+        logger.error(
+          '❌ [AnalyticsController] Failed to initialize Prisma service, falling back to Drizzle',
+          error
+        );
+
+        // Fallback to Drizzle analytics functions
+        return {
+          getOverview,
+          getServiceDistribution,
+          getHourlyActivity,
+          getDashboardAnalytics,
+          type: 'drizzle',
+        };
+      }
+    }
+
+    // Default to Drizzle analytics functions
+    logger.info('🔧 [AnalyticsController] Using Drizzle Analytics (legacy)');
+    return {
+      getOverview,
+      getServiceDistribution,
+      getHourlyActivity,
+      getDashboardAnalytics,
+      type: 'drizzle',
+    };
+  }
+
+  /**
+   * 🔄 Check if service is legacy Drizzle or new Prisma
+   */
+  private static isLegacyService(service: any): boolean {
+    return service.type === 'drizzle';
   }
 
   /**
@@ -192,8 +255,33 @@ export class AnalyticsController {
       );
 
       const startTime = Date.now();
-      const overview = await getOverview({ tenantId, timeRange });
+
+      // 🔄 NEW: Use service switching for analytics
+      const analyticsService = await AnalyticsController.getAnalyticsService();
+      let overview;
+
+      if (AnalyticsController.isLegacyService(analyticsService)) {
+        // Legacy Drizzle analytics
+        overview = await analyticsService.getOverview({ tenantId, timeRange });
+      } else {
+        // New Prisma analytics
+        overview = await analyticsService.getOverviewAnalytics({
+          tenantId,
+          timeRange,
+        });
+      }
+
       const executionTime = Date.now() - startTime;
+
+      logger.info(
+        '🎯 [AnalyticsController] Service type for getOverview',
+        'AnalyticsController',
+        {
+          isLegacy: AnalyticsController.isLegacyService(analyticsService),
+          usePrisma: process.env.USE_PRISMA === 'true',
+          executionTime,
+        }
+      );
 
       // ✅ NEW v2.0: Enhanced analytics with additional metrics
       let enhancedOverview: any = { ...overview };

@@ -11,8 +11,8 @@ import { DatabaseProvider, IDatabaseService } from './IDatabaseService';
 import { PrismaConnectionManager } from './PrismaConnectionManager';
 
 // Import services
-import { PrismaRequestService } from '../services/PrismaRequestService';
-// import { DrizzleRequestService } from '../services/DrizzleRequestService'; // TODO: Create later
+import { PrismaDatabaseService } from '../services/PrismaDatabaseService';
+// import { DrizzleDatabaseService } from '../services/DrizzleDatabaseService'; // TODO: Create later
 
 /**
  * Environment Configuration Interface
@@ -186,14 +186,14 @@ export class DatabaseServiceFactory {
 
     switch (provider) {
       case DatabaseProvider.PRISMA:
-        logger.info('🔄 Creating Prisma database service');
+        logger.info('🔄 Creating unified Prisma database service');
         const prismaManager = DatabaseServiceFactory.getPrismaManager();
-        return new PrismaRequestService(prismaManager);
+        return new PrismaDatabaseService(prismaManager);
 
       case DatabaseProvider.DRIZZLE:
         logger.info('🔄 Creating Drizzle database service');
-        // TODO: Return new DrizzleRequestService(DatabaseServiceFactory.getDrizzleManager());
-        throw new Error('DrizzleRequestService not implemented yet');
+        // TODO: Return new DrizzleDatabaseService(DatabaseServiceFactory.getDrizzleManager());
+        throw new Error('DrizzleDatabaseService not implemented yet');
 
       default:
         throw new Error(`Unsupported database provider: ${provider}`);

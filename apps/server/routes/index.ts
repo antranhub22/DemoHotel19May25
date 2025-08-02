@@ -39,6 +39,7 @@ import monitoringRoutes from '@server/routes/monitoring';
 import requestRoutes from '@server/routes/request';
 import staffRoutes from '@server/routes/staff';
 import tempPublicRoutes from '@server/routes/temp-public'; // TEST DEPLOYMENT
+import tenantRoutes from '@server/routes/tenants'; // ✅ NEW: Tenant management
 import testOpenaiRoutes from '@server/routes/test-openai'; // ✅ DEBUG: Test OpenAI endpoints
 import testWebhookRoutes from '@server/routes/test-webhook'; // ✅ DEBUG: Test webhook endpoints
 import transcriptRoutes from '@server/routes/transcripts'; // ✅ FIX: Add transcript routes
@@ -119,6 +120,7 @@ router.use('/api/staff', staffRoutes);
 
 // Business Logic
 router.use('/api/request', requestRoutes);
+router.use('/api/tenants', tenantRoutes); // ✅ NEW: Tenant management API
 
 // Analytics & Reporting
 router.use('/api/analytics', analyticsRoutes);
