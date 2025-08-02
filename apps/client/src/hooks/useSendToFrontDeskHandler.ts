@@ -1,4 +1,5 @@
 import { useAssistant } from '@/context';
+import { usePopupContext } from '@/context/PopupContext';
 import { logger } from '@shared/utils/logger';
 import { useCallback, useMemo, useState } from 'react';
 // ✅ CONSTANTS - Moved to top level
@@ -63,6 +64,9 @@ export const useSendToFrontDeskHandler = ({
     // ✅ NEW: Recent request state for displaying request card after reset
     setRecentRequest,
   } = useAssistant();
+
+  // ✅ ADD: Popup management for clearing summary popups
+  const { clearAllPopups } = usePopupContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ✅ MEMOIZED: Default item template to prevent recreation
@@ -237,62 +241,162 @@ export const useSendToFrontDeskHandler = ({
         summary: orderData,
       });
 
-      // ✅ IMPROVED: Fetch actual data from database response for accuracy
+      // ✅ ENHANCED: Combine database accuracy + voice call details for best UX
       if (requestData && requestData.data) {
         const dbData = requestData.data; // Actual database record
 
-        const recentRequestData = {
+        // Helper function to build detailed request content
+        const buildDetailedRequestContent = (
+          orderData: any,
+          serviceReqs: any[]
+        ) => {
+          if (serviceReqs && serviceReqs.length > 0) {
+            // Use detailed service requests from voice call
+            const details = serviceReqs
+              .map(req => req.requestText || req.serviceType)
+              .join(', ');
+            return `${orderData.orderType || 'Room Service'}: ${details}`;
+          }
+
+          if (orderData.items && orderData.items.length > 0) {
+            // Use items from order data
+            const itemDetails = orderData.items
+              .map(
+                (item: any) =>
+                  `${item.quantity || 1}x ${item.name || item.description || 'item'}`
+              )
+              .join(', ');
+            return `${orderData.orderType || 'Room Service'}: ${itemDetails}`;
+          }
+
+          // Fallback to database content or generic
+          return dbData.request_content || 'Yêu cầu dịch vụ từ voice assistant';
+        };
+
+        // Helper function to extract room number with priority
+        const extractBestRoomNumber = (
+          orderData: any,
+          serviceReqs: any[],
+          dbRoomNumber: string
+        ) => {
+          // Priority 1: Room number from order data
+          if (
+            orderData.roomNumber &&
+            orderData.roomNumber !== 'TBD' &&
+            orderData.roomNumber !== 'unknown'
+          ) {
+            return orderData.roomNumber;
+          }
+
+          // Priority 2: Room number from service requests
+          for (const req of serviceReqs || []) {
+            if (
+              req.roomNumber &&
+              req.roomNumber !== 'TBD' &&
+              req.roomNumber !== 'unknown'
+            ) {
+              return req.roomNumber;
+            }
+          }
+
+          // Priority 3: Extract from content using regex
+          const contentToSearch = [
+            orderData.specialInstructions,
+            orderData.requestText,
+            ...(serviceReqs || []).map(req => req.requestText),
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          const roomMatch = contentToSearch.match(/(?:room|phòng)\s*#?(\d+)/i);
+          if (roomMatch && roomMatch[1]) {
+            return roomMatch[1];
+          }
+
+          // Priority 4: Database value (might be TBD)
+          return dbRoomNumber || 'TBD';
+        };
+
+        const enhancedRequestData = {
+          // ✅ Database accuracy (ID, timestamps, status)
           id: dbData.id,
-          reference: `REQ-${dbData.id}`, // Use actual DB ID
-          roomNumber: dbData.room_number || 'TBD',
-          guestName: dbData.guest_name || 'Khách',
-          requestContent: dbData.request_content || 'Yêu cầu dịch vụ',
-          orderType: dbData.order_type || dbData.type || 'Room Service',
+          reference: `REQ-${dbData.id}`,
           status: dbData.status as
             | 'pending'
             | 'in-progress'
             | 'completed'
             | 'cancelled',
           submittedAt: new Date(dbData.created_at),
+
+          // ✅ Enhanced with voice call details
+          roomNumber: extractBestRoomNumber(
+            orderData,
+            serviceRequests,
+            dbData.room_number
+          ),
+          guestName: orderData.guestName || dbData.guest_name || 'Khách',
+          requestContent: buildDetailedRequestContent(
+            orderData,
+            serviceRequests
+          ),
+          orderType:
+            orderData.orderType ||
+            dbData.order_type ||
+            dbData.type ||
+            'Room Service',
           estimatedTime:
-            dbData.delivery_time || CONSTANTS.DELIVERY_TIME_DEFAULT,
-          items: dbData.items ? JSON.parse(dbData.items) : [], // Parse if JSON string
+            orderData.deliveryTime ||
+            dbData.delivery_time ||
+            CONSTANTS.DELIVERY_TIME_DEFAULT,
+
+          // ✅ Voice call items with fallback to database
+          items:
+            orderData.items?.map((item: any) => ({
+              name: item.name || item.description || 'Dịch vụ',
+              quantity: item.quantity || 1,
+              description: item.description,
+            })) || (dbData.items ? JSON.parse(dbData.items) : []),
         };
 
         logger.debug(
-          '💾 [useSendToFrontDeskHandler] Saving REAL database data...',
+          '💎 [useSendToFrontDeskHandler] Saving ENHANCED data (DB + Voice)...',
           'Component',
           {
-            id: recentRequestData.id,
-            reference: recentRequestData.reference,
-            dbCreatedAt: dbData.created_at,
+            id: enhancedRequestData.id,
+            reference: enhancedRequestData.reference,
+            roomNumber: enhancedRequestData.roomNumber,
+            hasItems: enhancedRequestData.items.length,
+            contentPreview: enhancedRequestData.requestContent.substring(0, 50),
           }
         );
 
-        // Save actual database data
-        setRecentRequest(recentRequestData);
+        // Save enhanced request data
+        setRecentRequest(enhancedRequestData);
       } else {
         logger.warn(
-          '⚠️ [useSendToFrontDeskHandler] No database data in response, using fallback',
+          '⚠️ [useSendToFrontDeskHandler] No database data in response, using voice call data',
           'Component'
         );
 
-        // Fallback to frontend data (previous behavior)
-        const fallbackData = {
+        // Fallback to voice call data only
+        const voiceCallData = {
           id: Date.now(),
           reference: `REQ-${Date.now()}`,
           roomNumber: orderData.roomNumber || 'TBD',
           guestName: orderData.guestName || 'Khách',
-          requestContent: `${orderData.orderType}: Yêu cầu từ voice assistant`,
+          requestContent:
+            serviceRequests?.length > 0
+              ? `${orderData.orderType}: ${serviceRequests.map(req => req.requestText).join(', ')}`
+              : `${orderData.orderType}: Yêu cầu từ voice assistant`,
           orderType: orderData.orderType || 'Room Service',
           status: 'pending' as const,
           submittedAt: new Date(),
           estimatedTime:
             orderData.deliveryTime || CONSTANTS.DELIVERY_TIME_DEFAULT,
-          items: [],
+          items: orderData.items || [],
         };
 
-        setRecentRequest(fallbackData);
+        setRecentRequest(voiceCallData);
       }
 
       // ✅ NEW: Reset UI to initial state after successful submission
@@ -312,6 +416,14 @@ export const useSendToFrontDeskHandler = ({
         setEmailSentForCurrentSession(false);
         setRequestReceivedAt(null);
         setVietnameseSummary(null);
+
+        // ✅ NEW: Clear summary popups to prevent showing after UI reset
+        clearAllPopups();
+
+        logger.debug(
+          '🗑️ [useSendToFrontDeskHandler] Cleared summary popups and call state',
+          'Component'
+        );
 
         logger.debug(
           '✅ [useSendToFrontDeskHandler] UI reset completed - ready for new call',
@@ -348,6 +460,8 @@ export const useSendToFrontDeskHandler = ({
       setRequestReceivedAt,
       setVietnameseSummary,
       setRecentRequest,
+      clearAllPopups,
+      serviceRequests, // Include serviceRequests for enhanced data combination
     ]
   );
 
