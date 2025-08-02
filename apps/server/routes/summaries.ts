@@ -9,7 +9,7 @@ import {
 import { call_summaries, db } from '@shared/db';
 import { insertCallSummarySchema } from '@shared/schema';
 import { logger } from '@shared/utils/logger';
-import { and, asc, desc, eq, or } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import express from 'express';
 
 const router = express.Router();
@@ -94,6 +94,29 @@ router.get('/:callId', async (req, res) => {
       'Summaries'
     );
 
+    // ✅ FRONTEND COMPATIBILITY: Return single summary object if only requesting without pagination params
+    // This matches what CallDetails.tsx expects
+    if (
+      summaries.length === 1 &&
+      !search &&
+      Object.keys(filters).length === 0
+    ) {
+      const summary = summaries[0];
+      return apiResponse.success(
+        res,
+        {
+          id: summary.id,
+          callId: summary.call_id,
+          content: summary.content,
+          timestamp: summary.timestamp,
+          roomNumber: summary.room_number,
+          duration: summary.duration,
+        },
+        `Retrieved summary for call ${callId}`
+      );
+    }
+
+    // For multiple summaries or when using filters/search, return full array response
     return apiResponse.success(
       res,
       summaries,
@@ -178,6 +201,63 @@ router.post('/', async (req, res) => {
   } catch (error) {
     logger.error('❌ [SUMMARIES] Error creating summary:', 'Summaries', error);
     return commonErrors.database(res, 'Failed to create summary', error);
+  }
+});
+
+// GET /api/summaries/recent/:hours - Get summaries from the last X hours
+router.get('/recent/:hours', async (req, res) => {
+  try {
+    const { hours } = req.params;
+    const hoursNumber = parseInt(hours, 10);
+
+    if (isNaN(hoursNumber) || hoursNumber <= 0) {
+      return commonErrors.validation(res, 'Hours must be a positive number');
+    }
+
+    logger.debug(
+      `📋 [SUMMARIES] Getting recent summaries from last ${hoursNumber} hours`,
+      'Summaries'
+    );
+
+    // Use storage method to get recent summaries
+    const storage = new (await import('@server/storage')).DatabaseStorage();
+    const summaries = await storage.getRecentCallSummaries(hoursNumber);
+
+    // Transform summaries to match frontend expectations
+    const transformedSummaries = summaries.map(summary => ({
+      id: summary.id,
+      callId: summary.call_id,
+      content: summary.content,
+      timestamp: summary.timestamp,
+      roomNumber: summary.room_number,
+      duration: summary.duration,
+    }));
+
+    logger.debug(
+      `✅ [SUMMARIES] Found ${transformedSummaries.length} recent summaries`,
+      'Summaries'
+    );
+
+    return apiResponse.success(
+      res,
+      {
+        summaries: transformedSummaries,
+        count: transformedSummaries.length,
+        timeframe: hoursNumber,
+      },
+      `Retrieved ${transformedSummaries.length} summaries from last ${hoursNumber} hours`
+    );
+  } catch (error) {
+    logger.error(
+      '❌ [SUMMARIES] Error fetching recent summaries:',
+      'Summaries',
+      error
+    );
+    return commonErrors.database(
+      res,
+      'Failed to fetch recent summaries',
+      error
+    );
   }
 });
 
