@@ -49,7 +49,7 @@
     "docs:cleanup": "node scripts/cleanup-docs.cjs",
     "docs:update": "npm run docs:organize && npm run docs:cleanup",
     "docs:validate": "node scripts/validate-docs.cjs",
-    "migrate:production": "tsx tools/scripts/run-production-migration.ts",
+    "migrate:production": "tsx tools/scripts/standalone-production-migration.ts",
     "fix:tenants": "node scripts/fix-tenants-table.cjs",
     "migrate:auto": "tsx tools/scripts/maintenance/auto-migrate-on-deploy.ts"
   },
