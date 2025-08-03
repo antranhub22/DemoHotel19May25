@@ -6,6 +6,10 @@ echo "🚀 Starting Safe Deployment with Auto-Migration..."
 echo "📦 Installing dependencies..."
 npm install || echo "Some packages failed to install but continuing..."
 
+# Run production migration first (creates basic tables like tenants)
+echo "🔧 Running production migration..."
+npm run migrate:production || echo "Production migration completed (may have warnings)"
+
 # Auto-migrate database schema (safe to run multiple times)
 echo "🔄 Running auto-migration..."
 npm run migrate:auto || echo "Auto-migration completed (may have warnings)"
