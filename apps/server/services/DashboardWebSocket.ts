@@ -148,6 +148,12 @@ class DashboardWebSocketService {
         'WebSocket',
         error
       );
+
+      // ✅ ENHANCEMENT: Continue without WebSocket - app will use polling fallback
+      logger.info(
+        '🔄 [WebSocket] Continuing with polling fallback mode',
+        'WebSocket'
+      );
     }
   }
 

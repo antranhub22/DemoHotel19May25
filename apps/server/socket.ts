@@ -14,6 +14,9 @@ export function setupSocket(server: HTTPServer) {
     // ✅ FIX: Add production domains
     'https://demohotel19may25.onrender.com',
     'https://minhnhotelben.onrender.com',
+    // ✅ ENHANCEMENT: Add more production domains
+    'https://*.onrender.com',
+    'https://*.talk2go.online',
   ];
 
   const io = new SocketIOServer(server, {
@@ -27,12 +30,13 @@ export function setupSocket(server: HTTPServer) {
           return callback(null, true);
         }
 
-        // ✅ FIX: Allow production domains
+        // ✅ FIX: Allow production domains with wildcard support
         const isAllowed =
           allowedOrigins.includes(origin) ||
           origin.includes('talk2go.online') ||
           origin.includes('onrender.com') ||
-          origin.includes('localhost');
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1');
 
         if (isAllowed) {
           return callback(null, true);
@@ -75,6 +79,10 @@ export function setupSocket(server: HTTPServer) {
       error
     );
     // Continue with order WebSocket setup - dashboard will use polling fallback
+    logger.info(
+      '🔄 [Socket] Dashboard will use polling fallback mode',
+      'WebSocket'
+    );
   }
 
   // ✅ RATE LIMITING: Track connections per IP

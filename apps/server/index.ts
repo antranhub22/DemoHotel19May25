@@ -355,6 +355,7 @@ app.use((req, res, next) => {
     console.log(`🚀 Server started successfully on port ${port}`);
     console.log(`🔗 API available at: http://localhost:${port}/api`);
     console.log(`📊 Health check: http://localhost:${port}/api/health`);
+    console.log(`🔌 WebSocket available at: ws://localhost:${port}/socket.io/`);
 
     // ✅ Show monitoring status and reminders after startup
     setTimeout(() => {

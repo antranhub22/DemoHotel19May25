@@ -203,6 +203,11 @@ async function processTranscriptWithOpenAI(
             'Component',
             dashboardError
           );
+          // ✅ ENHANCEMENT: Continue without WebSocket - dashboard will use polling
+          logger.info(
+            '🔄 [Webhook] Dashboard will use polling fallback for updates',
+            'Component'
+          );
         }
       } catch (serviceError) {
         logger.error(

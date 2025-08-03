@@ -154,6 +154,7 @@ export const useDashboardData = () => {
   useEffect(() => {
     // Use WebSocket data when available
     if (wsData && wsStatus.transport !== 'fallback') {
+      console.log('📊 Using WebSocket data for dashboard');
       setData(wsData);
       setLoading(false);
 
@@ -171,6 +172,7 @@ export const useDashboardData = () => {
 
     // WebSocket not available or using fallback - use original logic
     if (wsStatus.transport === 'fallback' || !wsStatus.connected) {
+      console.log('🔄 WebSocket not available, using API fallback');
       fetchDashboardData();
     }
   }, [wsData, wsStatus.connected, wsStatus.transport]);

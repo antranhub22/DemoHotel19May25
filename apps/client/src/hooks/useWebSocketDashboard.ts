@@ -70,6 +70,7 @@ export const useWebSocketDashboard = (
    */
   const initializeWebSocket = () => {
     if (!defaultConfig.enableWebSocket || forcePollingRef.current) {
+      console.log('🔄 WebSocket disabled, using polling fallback');
       startFallbackPolling();
       return;
     }
@@ -85,6 +86,8 @@ export const useWebSocketDashboard = (
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}`;
 
+      console.log('🔌 Connecting to WebSocket:', wsUrl);
+
       socketRef.current = io(wsUrl, {
         transports: ['websocket', 'polling'],
         timeout: 10000,
@@ -92,6 +95,12 @@ export const useWebSocketDashboard = (
         auth: {
           token: localStorage.getItem('token'),
         },
+        // ✅ ENHANCEMENT: Add production-specific options
+        forceNew: true,
+        reconnection: true,
+        reconnectionAttempts: defaultConfig.reconnectAttempts,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
       });
 
       setupSocketEventHandlers();

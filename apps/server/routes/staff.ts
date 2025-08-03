@@ -307,6 +307,11 @@ router.patch(
           'Component',
           wsError
         );
+        // ✅ ENHANCEMENT: Continue without WebSocket - dashboard will use polling
+        logger.info(
+          '🔄 [STAFF] Dashboard will use polling fallback for updates',
+          'Component'
+        );
       }
 
       logger.debug(
