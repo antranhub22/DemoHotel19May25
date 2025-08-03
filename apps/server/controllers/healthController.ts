@@ -22,7 +22,7 @@ import {
 import { FeatureFlags } from '@server/shared/FeatureFlags';
 import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
 import { ServiceContainer } from '@server/shared/ServiceContainer';
-import { db } from '@shared/db';
+import { db, connectionManager } from '@shared/db';
 import { logger } from '@shared/utils/logger';
 
 export class HealthController {
@@ -724,7 +724,7 @@ export class HealthController {
       const startTime = Date.now();
 
       // Perform database health check
-      const isDatabaseHealthy = await db.$client.query('SELECT 1');
+      const isDatabaseHealthy = await connectionManager.healthCheck();
 
       // Get connection pool metrics
       // const poolMetrics = getDatabaseMetrics(); // This line was removed as per the new_code
@@ -895,7 +895,7 @@ export class HealthController {
       const startTime = Date.now();
 
       // Perform database health check
-      const isDatabaseHealthy = await db.$client.query('SELECT 1');
+      const isDatabaseHealthy = await connectionManager.healthCheck();
 
       // Get detailed pool metrics
       // const poolMetrics = getDatabaseMetrics(); // This line was removed as per the new_code
@@ -1135,7 +1135,7 @@ export class HealthController {
     try {
       this.initialize();
 
-      const isDatabaseHealthy = await db.$client.query('SELECT 1');
+      const isDatabaseHealthy = await connectionManager.healthCheck();
       const containerHealthy =
         ServiceContainer.getHealthStatus().status === 'healthy';
 
@@ -1194,7 +1194,10 @@ export class HealthController {
 
     try {
       // Test database connection
-      await db.$client.query('SELECT 1');
+      const isDatabaseHealthy = await connectionManager.healthCheck();
+      if (!isDatabaseHealthy) {
+        throw new Error('Database connection failed');
+      }
 
       return {
         success: true,
