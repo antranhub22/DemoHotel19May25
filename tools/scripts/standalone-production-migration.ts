@@ -83,6 +83,20 @@ try {
 
   // Create other essential tables
   const createTablesSQL = [
+    `CREATE TABLE IF NOT EXISTS hotel_profiles (
+      id TEXT PRIMARY KEY,
+      tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
+      hotel_name TEXT NOT NULL,
+      description TEXT,
+      address TEXT,
+      phone TEXT,
+      email TEXT,
+      website TEXT,
+      amenities TEXT,
+      policies TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
     `CREATE TABLE IF NOT EXISTS transcript (
       id SERIAL PRIMARY KEY,
       call_id TEXT NOT NULL,
