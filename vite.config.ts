@@ -5,8 +5,8 @@ import { defineConfig } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Since vite.config.ts is now in config/build/, we need to go up 2 levels to reach root
-const rootDir = path.resolve(__dirname, "..", "..");
+// vite.config.ts is now at root level
+const rootDir = __dirname;
 
 export default defineConfig({
   plugins: [
