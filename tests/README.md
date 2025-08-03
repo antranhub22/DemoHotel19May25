@@ -478,3 +478,65 @@ npm run test:hotel-research:production
 **💡 Remember**: This testing system validates the complete hotel research flow that powers the
 multi-tenant SaaS platform. Thorough testing ensures reliable hotel onboarding and assistant
 generation for all tenants.
+
+## 📁 Thư mục mới được tổ chức
+
+### 🧪 `root-tests/`
+Các file test chính được di chuyển từ root directory:
+- Test WebSocket dashboard
+- Test database connection
+- Test production fixes
+- Test API và UI fixes
+- Test real database và schema
+
+### 🐛 `debug-scripts/`
+Các script debug:
+- Debug summary issues
+- Debug production database
+- Debug window functions
+- Debug database schema
+
+### 🔍 `check-scripts/`
+Các script kiểm tra:
+- Check schema consistency
+- Check production database
+- Check system status
+
+### 🔧 `fix-scripts/`
+Các script fix:
+- Fix summary popup
+- Fix production database
+
+### 📊 `monitoring-scripts/`
+Các script monitoring:
+- Monitor deployment
+- Get database URL
+- Compare schema mismatch
+
+### 🗄️ `database-tests/`
+Các test database:
+- Point-in-time recovery tests
+- Database migration tests
+- Database recovery tests
+- Database backup tests
+
+## 🚀 Cách sử dụng nhanh
+```bash
+# Chạy test chính
+cd tests/root-tests && node test-complete-flow.cjs
+
+# Debug vấn đề
+cd tests/debug-scripts && node debug-summary-issue.js
+
+# Kiểm tra hệ thống
+cd tests/check-scripts && node check-schema-consistency.cjs
+
+# Fix vấn đề
+cd tests/fix-scripts && node fix-summary-popup.js
+
+# Monitor deployment
+cd tests/monitoring-scripts && node monitor-deployment.cjs
+
+# Database tests
+cd tests/database-tests && ls -la
+```

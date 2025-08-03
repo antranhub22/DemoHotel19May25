@@ -1,139 +1,62 @@
-# 📚 Documentation Hub - DemoHotel19May
-
-## 🎯 Tổng quan
-
-Đây là trung tâm tài liệu được tổ chức lại cho hệ thống DemoHotel19May. Tất cả các file markdown đã
-được phân loại và sắp xếp theo chủ đề để dễ tìm và đọc.
+# DemoHotel Documentation
 
 ## 📁 Cấu trúc thư mục
 
-```
-docs/
-├── 📋 project-info/           # Thông tin dự án
-│   ├── README.md             # Tổng quan dự án
-│   ├── CHANGELOG.md          # Lịch sử thay đổi
-│   └── LICENSE.md            # Giấy phép
-├── 🏗️ architecture/          # Kiến trúc hệ thống
-│   ├── overview.md           # Tổng quan kiến trúc
-│   ├── modules.md            # Cấu trúc module
-│   └── decisions/            # Architecture Decision Records
-├── 🚀 deployment/            # Hướng dẫn triển khai
-│   ├── quickstart.md         # Triển khai nhanh
-│   ├── production.md         # Triển khai production
-│   └── troubleshooting.md    # Xử lý sự cố triển khai
-├── 💻 development/           # Hướng dẫn phát triển
-│   ├── setup.md              # Cài đặt môi trường
-│   ├── contributing.md       # Hướng dẫn đóng góp
-│   └── coding-standards.md   # Tiêu chuẩn code
-├── 🧪 testing/              # Tài liệu testing
-│   ├── overview.md           # Tổng quan testing
-│   ├── unit-tests.md         # Unit testing
-│   ├── integration-tests.md  # Integration testing
-│   └── e2e-tests.md         # End-to-end testing
-├── 🔧 troubleshooting/       # Xử lý sự cố
-│   ├── common-issues.md      # Các vấn đề thường gặp
-│   ├── database-issues.md    # Vấn đề database
-│   └── voice-assistant.md    # Vấn đề voice assistant
-├── 📊 api/                   # Tài liệu API
-│   ├── overview.md           # Tổng quan API
-│   ├── authentication.md     # Xác thực API
-│   └── endpoints.md          # Danh sách endpoints
-├── 🎨 ui-components/         # Tài liệu UI components
-│   ├── overview.md           # Tổng quan components
-│   ├── voice-assistant.md    # Voice assistant UI
-│   └── dashboard.md          # Dashboard components
-├── 🗄️ database/             # Tài liệu database
-│   ├── schema.md             # Schema database
-│   ├── migrations.md         # Database migrations
-│   └── optimization.md       # Tối ưu database
-├── 🔐 security/             # Tài liệu bảo mật
-│   ├── overview.md           # Tổng quan bảo mật
-│   ├── authentication.md     # Hệ thống xác thực
-│   └── best-practices.md     # Best practices
-├── 📈 analytics/             # Tài liệu analytics
-│   ├── overview.md           # Tổng quan analytics
-│   ├── metrics.md            # Các metrics
-│   └── reporting.md          # Báo cáo
-├── 🎙️ voice-assistant/      # Tài liệu voice assistant
-│   ├── overview.md           # Tổng quan voice assistant
-│   ├── vapi-integration.md   # Tích hợp Vapi.ai
-│   └── configuration.md      # Cấu hình
-├── 🏢 multi-tenant/         # Tài liệu multi-tenant
-│   ├── overview.md           # Tổng quan multi-tenant
-│   ├── isolation.md          # Cô lập dữ liệu
-│   └── management.md         # Quản lý tenant
-├── 🔄 automation/            # Tài liệu automation
-│   ├── overview.md           # Tổng quan automation
-│   ├── scripts.md            # Scripts tự động
-│   └── ci-cd.md             # CI/CD pipeline
-├── 📚 knowledge-base/        # Knowledge base
-│   ├── overview.md           # Tổng quan knowledge base
-│   ├── faq.md               # Câu hỏi thường gặp
-│   └── best-practices.md     # Best practices
-├── 🎓 training/             # Tài liệu đào tạo
-│   ├── overview.md           # Tổng quan training
-│   ├── onboarding.md         # Onboarding
-│   └── advanced-topics.md    # Chủ đề nâng cao
-├── 📋 governance/           # Tài liệu governance
-│   ├── overview.md           # Tổng quan governance
-│   ├── policies.md           # Chính sách
-│   └── compliance.md         # Tuân thủ
-├── 🗂️ legacy/              # Tài liệu legacy (đã lỗi thời)
-│   ├── deprecated.md         # Danh sách deprecated
-│   └── migration-guides.md   # Hướng dẫn migration
-└── 📝 templates/            # Templates
-    ├── adr-template.md       # Template ADR
-    ├── api-doc-template.md   # Template API doc
-    └── component-template.md # Template component doc
-```
+### 📊 Reports
+Các báo cáo và phân tích dự án:
+- `SCHEMA_CONSISTENCY_FINAL_REPORT.md` - Báo cáo cuối cùng về tính nhất quán schema
+- `DASHBOARD_TRIGGER_ANALYSIS.md` - Phân tích trigger dashboard
+- `DASHBOARD_DATA_ISSUE_ANALYSIS.md` - Phân tích vấn đề dữ liệu dashboard
+- `DASHBOARD_UPDATE_ANALYSIS_REPORT.md` - Báo cáo phân tích cập nhật dashboard
+- `REAL_DATA_IMPLEMENTATION.md` - Triển khai dữ liệu thực
+- `BAO_CAO_TOAN_DIEN_DEMOHOTEL.md` - Báo cáo toàn diện DemoHotel
+- `ORGANIZATION_SUMMARY.md` - Tóm tắt tổ chức
+- `IMPACT_ANALYSIS.md` - Phân tích tác động
+- `FOLDER_ORGANIZATION.md` - Tổ chức thư mục
+- `ENHANCED_ORGANIZATION.md` - Tổ chức nâng cao
 
-## 🔍 Cách sử dụng
+### 🚀 Deployment
+Hướng dẫn và báo cáo deployment:
+- `PRODUCTION_DEPLOYMENT_RENDER.md` - Deployment production trên Render
+- `DEPLOYMENT_READY.md` - Sẵn sàng deployment
+- `DEPLOYMENT-STATUS.md` - Trạng thái deployment
+- `production-deployment-guide.md` - Hướng dẫn deployment production
 
-### 1. Tìm kiếm nhanh
+### 🔧 Troubleshooting
+Các file fix và troubleshooting:
+- `WEBSOCKET-CONFLICT-FIX.md` - Fix xung đột WebSocket
+- `FINAL-SUMMARY-FIX.md` - Fix summary cuối cùng
+- `OPENAI-SUMMARY-FIX-SUMMARY.md` - Tóm tắt fix OpenAI summary
+- `QUICK-FIX-OPENAI-ERROR.md` - Fix nhanh lỗi OpenAI
+- `FIX-OPENAI-SUMMARY-ERROR.md` - Fix lỗi OpenAI summary
+- `TEST_SUMMARY_POPUP_DEBUG.md` - Debug popup summary test
+- `SUMMARY_POPUP_FINAL_FIX.md` - Fix cuối cùng popup summary
+- `SUMMARY_POPUP_FIX_FINAL.md` - Fix cuối cùng popup summary
+- `SUMMARY_POPUP_FIX_REPORT.md` - Báo cáo fix popup summary
+- `SECURITY_MIDDLEWARE_FIX_COMPLETED.md` - Fix middleware bảo mật hoàn thành
+- `SECURITY_MIDDLEWARE_DATABASE_URL_ISSUE.md` - Vấn đề database URL middleware bảo mật
 
-- **Bắt đầu dự án**: `docs/project-info/README.md`
-- **Triển khai**: `docs/deployment/quickstart.md`
-- **Phát triển**: `docs/development/setup.md`
-- **API**: `docs/api/overview.md`
+### 💻 Development
+Hướng dẫn phát triển:
+- `LOCALHOST_DEVELOPMENT_GUIDE.md` - Hướng dẫn phát triển localhost
 
-### 2. Tìm kiếm theo chủ đề
+## 📚 Thư mục khác
+- `api/` - Tài liệu API
+- `architecture/` - Kiến trúc hệ thống
+- `database/` - Tài liệu database
+- `security/` - Tài liệu bảo mật
+- `testing/` - Tài liệu testing
+- `voice-assistant/` - Tài liệu voice assistant
+- `multi-tenant/` - Tài liệu multi-tenant
+- `analytics/` - Tài liệu analytics
+- `knowledge-base/` - Cơ sở kiến thức
+- `training/` - Tài liệu đào tạo
+- `templates/` - Templates
+- `project-info/` - Thông tin dự án
+- `automation/` - Tự động hóa
+- `governance/` - Quản trị
+- `legacy/` - Tài liệu legacy
+- `refactor/` - Tài liệu refactor
 
-- **Kiến trúc**: `docs/architecture/`
-- **Testing**: `docs/testing/`
-- **Troubleshooting**: `docs/troubleshooting/`
-- **Voice Assistant**: `docs/voice-assistant/`
-
-### 3. Tìm kiếm theo vai trò
-
-- **Developer**: `docs/development/`
-- **DevOps**: `docs/deployment/`
-- **QA**: `docs/testing/`
-- **Product Manager**: `docs/project-info/`
-
-## 📊 Thống kê
-
-- **Tổng số file**: 2027 files markdown
-- **Đã tổ chức**: 100% files đã được phân loại
-- **Cập nhật cuối**: $(date)
-
-## 🔄 Cập nhật
-
-Tài liệu này được cập nhật tự động khi có thay đổi trong dự án. Để cập nhật:
-
-```bash
-npm run docs:update
-npm run docs:validate
-```
-
-## 📞 Hỗ trợ
-
-Nếu bạn không tìm thấy tài liệu cần thiết hoặc cần hỗ trợ:
-
-1. Kiểm tra `docs/troubleshooting/common-issues.md`
-2. Tìm kiếm trong knowledge base: `docs/knowledge-base/`
-3. Liên hệ team development
-
----
-
-_📚 Tài liệu này được tổ chức lại để dễ tìm và đọc hơn. Mọi thay đổi đều được ghi lại trong
-CHANGELOG.md_
+## 🔍 Cách tìm kiếm
+Sử dụng Ctrl+F để tìm kiếm nhanh trong file này hoặc duyệt qua các thư mục con.
