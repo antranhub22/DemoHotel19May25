@@ -1,6 +1,8 @@
 // ✅ ADVANCED FILTERING USING PRISMA
 // This file provides advanced filtering capabilities using Prisma's native features
 
+import { logger } from "@shared/utils/logger";
+
 // ============================================
 // MIGRATED FILTER INTERFACES - NOW USING PRISMA
 // ============================================
@@ -178,6 +180,39 @@ export function getFilterPreset(
 
 export function getAllFilterPresets() {
   return Object.keys(HOTEL_FILTER_PRESETS);
+}
+
+// Export simplified preset function for backward compatibility
+export function applyFilterPreset(
+  presetName: string,
+  additionalFilter?: any,
+): any {
+  const preset = getFilterPreset(
+    presetName as keyof typeof HOTEL_FILTER_PRESETS,
+  );
+
+  let result: any = {};
+
+  if (preset.conditions) {
+    result.conditions = preset.conditions;
+  }
+
+  if (additionalFilter) {
+    if (additionalFilter.AND) {
+      result.AND = [...(result.conditions || []), ...additionalFilter.AND];
+    }
+    if (additionalFilter.OR) {
+      result.OR = additionalFilter.OR;
+    }
+    if (additionalFilter.conditions) {
+      result.conditions = [
+        ...(result.conditions || []),
+        ...additionalFilter.conditions,
+      ];
+    }
+  }
+
+  return result;
 }
 
 // ============================================
