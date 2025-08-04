@@ -1,7 +1,5 @@
 #!/usr/bin/env tsx
 
-import { dirname } from "path";
-import { Pool } from "pg";
 import { fileURLToPath } from "url";
 
 /**
@@ -248,6 +246,33 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     `);
 
     const tableNames = existingTables.rows.map((row) => row.table_name);
+
+    // Check for orphaned tables and cleanup
+    console.log("🔍 Checking for orphaned tables...");
+
+    // Check if orphaned 'users' table exists
+    if (tableNames.includes("users")) {
+      console.log("🚨 Found orphaned 'users' table - dropping...");
+
+      const orphanedTableSQL = `
+        -- Drop orphaned users table (data should be in staff table)
+        DROP TABLE IF EXISTS users;
+      `;
+
+      await client.query("BEGIN");
+      try {
+        await client.query(orphanedTableSQL);
+        await client.query("COMMIT");
+        migrationsRun.push("orphaned_tables_cleanup");
+        console.log("✅ Orphaned tables cleanup completed");
+      } catch (error) {
+        await client.query("ROLLBACK");
+        console.warn("⚠️ Failed to drop orphaned tables:", error);
+      }
+    } else {
+      console.log("✅ No orphaned tables found");
+    }
+
     const indexQueries = [];
 
     // Always create staff indexes (we know staff table exists)
