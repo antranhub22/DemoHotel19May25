@@ -1,7 +1,7 @@
 // ✅ DETAILED MIGRATION: Removed Drizzle imports - using Prisma
 import { PrismaClient } from "@prisma/client";
-import { insertServiceSchema } from "@shared/db/schema";
 import { logger } from "@shared/utils/logger";
+import { insertServiceSchema } from "@shared/validation/prismaSchemas";
 import { validateRequest } from "@shared/validation/validateRequest";
 import express from "express";
 

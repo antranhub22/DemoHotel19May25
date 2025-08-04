@@ -20,7 +20,7 @@ export type {
   ServiceCategory,
   Timestamp,
   UserRole,
-} from '../../types/core';
+} from "../../types/core";
 
 // API types (confirmed exports)
 export type {
@@ -30,25 +30,41 @@ export type {
   SaveTranscriptRequest,
   SaveTranscriptResponse,
   WebSocketMessage,
-} from '../../types/api';
+} from "../../types/api";
 
-// Database types
+// ✅ PRISMA MIGRATION: Database types from Prisma generated client
+import type {
+  call as Call,
+  call_summaries as CallSummary,
+  message as Message,
+  request as RequestRecord,
+  staff as Staff,
+  tenants as Tenant,
+  transcript as Transcript,
+} from "@prisma/client";
+
+// Database types (using Prisma generated types)
 export type {
   Call,
   CallSummary,
-  InsertCall,
-  InsertCallSummary,
-  InsertMessage,
-  InsertRequestRecord,
-  InsertStaff,
-  InsertTenant,
-  InsertTranscript,
   Message,
   RequestRecord,
   Staff,
   Tenant,
   Transcript,
-} from '@shared/db/schema';
+};
+
+// Insert types derived from Prisma types
+export type InsertCall = Omit<Call, "id" | "created_at" | "updated_at">;
+export type InsertCallSummary = Omit<CallSummary, "id" | "timestamp">;
+export type InsertMessage = Omit<Message, "id" | "created_at" | "updated_at">;
+export type InsertRequestRecord = Omit<
+  RequestRecord,
+  "id" | "created_at" | "updated_at"
+>;
+export type InsertStaff = Omit<Staff, "id" | "created_at" | "updated_at">;
+export type InsertTenant = Omit<Tenant, "created_at" | "updated_at">;
+export type InsertTranscript = Omit<Transcript, "id" | "timestamp">;
 
 // ========================================
 // 🔧 LAYER 3: UNIFIED SERVICE CATEGORY TYPES

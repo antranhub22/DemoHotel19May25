@@ -1,14 +1,16 @@
-import request from 'supertest';
-import { db } from '@shared/db';
-import {
-  staff,
-  tenants,
-  calls,
-  transcripts,
-  requests,
-  messages,
-} from '@shared/db/schema';
-import bcrypt from 'bcrypt';
+import request from "supertest";
+import { db } from "@shared/db";
+// ✅ MIGRATION: Using Prisma generated types instead of Drizzle
+// import {
+//   staff,
+//   tenants,
+//   calls,
+//   transcripts,
+//   requests,
+//   messages,
+// } from '@shared/db/schema'; // REMOVED
+
+import bcrypt from "bcrypt";
 
 // ============================================================================
 // TEST SETUP
@@ -16,30 +18,29 @@ import bcrypt from 'bcrypt';
 
 let authToken: string;
 let testTenantId: string;
-let testUserId: number;
 
 const testData = {
   tenant: {
-    id: 'test-tenant-id',
-    hotelName: 'Test Hotel',
-    subdomain: 'test-hotel',
-    subscriptionPlan: 'premium' as const,
-    subscriptionStatus: 'active' as const,
+    id: "test-tenant-id",
+    hotelName: "Test Hotel",
+    subdomain: "test-hotel",
+    subscriptionPlan: "premium" as const,
+    subscriptionStatus: "active" as const,
   },
   user: {
-    username: 'testadmin',
-    password: 'testpassword123',
-    role: 'admin' as const,
+    username: "testadmin",
+    password: "testpassword123",
+    role: "admin" as const,
   },
   call: {
-    roomNumber: '101',
-    language: 'en' as const,
-    serviceType: 'room-service',
+    roomNumber: "101",
+    language: "en" as const,
+    serviceType: "room-service",
   },
   order: {
-    roomNumber: '101',
-    orderId: 'TEST-ORDER-001',
-    requestContent: 'I need room service for breakfast',
+    roomNumber: "101",
+    orderId: "TEST-ORDER-001",
+    requestContent: "I need room service for breakfast",
   },
 };
 
@@ -64,7 +65,6 @@ const setupTestData = async () => {
     .returning();
 
   testTenantId = testData.tenant.id;
-  testUserId = user.id;
 };
 
 const cleanupTestData = async () => {
@@ -80,7 +80,7 @@ const cleanupTestData = async () => {
 // AUTHENTICATION TESTS
 // ============================================================================
 
-describe('Authentication API', () => {
+describe("Authentication API", () => {
   beforeAll(async () => {
     await setupTestData();
   });
@@ -89,9 +89,9 @@ describe('Authentication API', () => {
     await cleanupTestData();
   });
 
-  describe('POST /auth/login', () => {
-    it('should authenticate valid credentials', async () => {
-      const response = await request(app).post('/auth/login').send({
+  describe("POST /auth/login", () => {
+    it("should authenticate valid credentials", async () => {
+      const response = await request(app).post("/auth/login").send({
         username: testData.user.username,
         password: testData.user.password,
         tenantId: testTenantId,
@@ -107,44 +107,44 @@ describe('Authentication API', () => {
       authToken = response.body.data.token;
     });
 
-    it('should reject invalid credentials', async () => {
-      const response = await request(app).post('/auth/login').send({
+    it("should reject invalid credentials", async () => {
+      const response = await request(app).post("/auth/login").send({
         username: testData.user.username,
-        password: 'wrongpassword',
+        password: "wrongpassword",
         tenantId: testTenantId,
       });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Invalid credentials');
+      expect(response.body.error).toBe("Invalid credentials");
     });
 
-    it('should reject missing username', async () => {
-      const response = await request(app).post('/auth/login').send({
+    it("should reject missing username", async () => {
+      const response = await request(app).post("/auth/login").send({
         password: testData.user.password,
         tenantId: testTenantId,
       });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
 
-    it('should reject missing password', async () => {
-      const response = await request(app).post('/auth/login').send({
+    it("should reject missing password", async () => {
+      const response = await request(app).post("/auth/login").send({
         username: testData.user.username,
         tenantId: testTenantId,
       });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
   });
 
-  describe('POST /auth/refresh', () => {
-    it('should refresh valid token', async () => {
-      const response = await request(app).post('/auth/refresh').send({
+  describe("POST /auth/refresh", () => {
+    it("should refresh valid token", async () => {
+      const response = await request(app).post("/auth/refresh").send({
         token: authToken,
       });
 
@@ -154,9 +154,9 @@ describe('Authentication API', () => {
       expect(response.body.data.expiresIn).toBeDefined();
     });
 
-    it('should reject invalid token', async () => {
-      const response = await request(app).post('/auth/refresh').send({
-        token: 'invalid-token',
+    it("should reject invalid token", async () => {
+      const response = await request(app).post("/auth/refresh").send({
+        token: "invalid-token",
       });
 
       expect(response.status).toBe(401);
@@ -169,14 +169,14 @@ describe('Authentication API', () => {
 // CALL MANAGEMENT TESTS
 // ============================================================================
 
-describe('Call Management API', () => {
+describe("Call Management API", () => {
   let testCallId: string;
 
-  describe('POST /calls/start', () => {
-    it('should start a new call', async () => {
+  describe("POST /calls/start", () => {
+    it("should start a new call", async () => {
       const response = await request(app)
-        .post('/calls/start')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/start")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           ...testData.call,
           tenantId: testTenantId,
@@ -193,9 +193,9 @@ describe('Call Management API', () => {
       testCallId = response.body.data.callId;
     });
 
-    it('should reject call without authentication', async () => {
+    it("should reject call without authentication", async () => {
       const response = await request(app)
-        .post('/calls/start')
+        .post("/calls/start")
         .send({
           ...testData.call,
           tenantId: testTenantId,
@@ -205,42 +205,42 @@ describe('Call Management API', () => {
       expect(response.body.success).toBe(false);
     });
 
-    it('should reject invalid room number', async () => {
+    it("should reject invalid room number", async () => {
       const response = await request(app)
-        .post('/calls/start')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/start")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          roomNumber: '',
+          roomNumber: "",
           language: testData.call.language,
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
 
-    it('should reject invalid language', async () => {
+    it("should reject invalid language", async () => {
       const response = await request(app)
-        .post('/calls/start')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/start")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           roomNumber: testData.call.roomNumber,
-          language: 'invalid',
+          language: "invalid",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
   });
 
-  describe('POST /calls/end', () => {
-    it('should end an active call', async () => {
+  describe("POST /calls/end", () => {
+    it("should end an active call", async () => {
       const response = await request(app)
-        .post('/calls/end')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/end")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           callId: testCallId,
           duration: 300,
@@ -254,27 +254,27 @@ describe('Call Management API', () => {
       expect(response.body.data.duration).toBe(300);
     });
 
-    it('should reject invalid call ID', async () => {
+    it("should reject invalid call ID", async () => {
       const response = await request(app)
-        .post('/calls/end')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/end")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          callId: 'invalid-call-id',
+          callId: "invalid-call-id",
           duration: 300,
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
   });
 
-  describe('GET /calls/:id', () => {
-    it('should get call details', async () => {
+  describe("GET /calls/:id", () => {
+    it("should get call details", async () => {
       const response = await request(app)
         .get(`/calls/${testCallId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -283,21 +283,21 @@ describe('Call Management API', () => {
       expect(response.body.data.language).toBe(testData.call.language);
     });
 
-    it('should return 404 for non-existent call', async () => {
+    it("should return 404 for non-existent call", async () => {
       const response = await request(app)
-        .get('/calls/non-existent-id')
-        .set('Authorization', `Bearer ${authToken}`);
+        .get("/calls/non-existent-id")
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
     });
   });
 
-  describe('GET /calls', () => {
-    it('should get paginated list of calls', async () => {
+  describe("GET /calls", () => {
+    it("should get paginated list of calls", async () => {
       const response = await request(app)
-        .get('/calls')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/calls")
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
           page: 1,
           limit: 10,
@@ -311,10 +311,10 @@ describe('Call Management API', () => {
       expect(response.body.pagination.limit).toBe(10);
     });
 
-    it('should filter calls by room number', async () => {
+    it("should filter calls by room number", async () => {
       const response = await request(app)
-        .get('/calls')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/calls")
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
           roomNumber: testData.call.roomNumber,
         });
@@ -327,10 +327,10 @@ describe('Call Management API', () => {
       });
     });
 
-    it('should filter calls by language', async () => {
+    it("should filter calls by language", async () => {
       const response = await request(app)
-        .get('/calls')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/calls")
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
           language: testData.call.language,
         });
@@ -349,7 +349,7 @@ describe('Call Management API', () => {
 // TRANSCRIPT TESTS
 // ============================================================================
 
-describe('Transcript API', () => {
+describe("Transcript API", () => {
   let testCallId: string;
 
   beforeAll(async () => {
@@ -357,9 +357,9 @@ describe('Transcript API', () => {
     const [call] = await db
       .insert(calls)
       .values({
-        callIdVapi: 'test-vapi-call-id',
-        roomNumber: '102',
-        language: 'en',
+        callIdVapi: "test-vapi-call-id",
+        roomNumber: "102",
+        language: "en",
         startTime: new Date(),
         tenantId: testTenantId,
       })
@@ -367,47 +367,47 @@ describe('Transcript API', () => {
     testCallId = call.id;
   });
 
-  describe('POST /transcripts', () => {
-    it('should save transcript entry', async () => {
+  describe("POST /transcripts", () => {
+    it("should save transcript entry", async () => {
       const response = await request(app)
-        .post('/transcripts')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/transcripts")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           callId: testCallId,
-          role: 'user',
-          content: 'Hello, I need room service',
+          role: "user",
+          content: "Hello, I need room service",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.callId).toBe(testCallId);
-      expect(response.body.data.role).toBe('user');
-      expect(response.body.data.content).toBe('Hello, I need room service');
+      expect(response.body.data.role).toBe("user");
+      expect(response.body.data.content).toBe("Hello, I need room service");
     });
 
-    it('should reject invalid role', async () => {
+    it("should reject invalid role", async () => {
       const response = await request(app)
-        .post('/transcripts')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/transcripts")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           callId: testCallId,
-          role: 'invalid',
-          content: 'Test content',
+          role: "invalid",
+          content: "Test content",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
   });
 
-  describe('GET /transcripts/:callId', () => {
-    it('should get transcripts for a call', async () => {
+  describe("GET /transcripts/:callId", () => {
+    it("should get transcripts for a call", async () => {
       const response = await request(app)
         .get(`/transcripts/${testCallId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -420,14 +420,14 @@ describe('Transcript API', () => {
 // ORDER MANAGEMENT TESTS
 // ============================================================================
 
-describe('Order Management API', () => {
+describe("Order Management API", () => {
   let testOrderId: string;
 
-  describe('POST /orders', () => {
-    it('should create a new order', async () => {
+  describe("POST /orders", () => {
+    it("should create a new order", async () => {
       const response = await request(app)
-        .post('/orders')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/orders")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           ...testData.order,
           tenantId: testTenantId,
@@ -438,17 +438,17 @@ describe('Order Management API', () => {
       expect(response.body.data.roomNumber).toBe(testData.order.roomNumber);
       expect(response.body.data.orderId).toBe(testData.order.orderId);
       expect(response.body.data.requestContent).toBe(
-        testData.order.requestContent
+        testData.order.requestContent,
       );
-      expect(response.body.data.status).toBe('pending');
+      expect(response.body.data.status).toBe("pending");
 
       testOrderId = response.body.data.orderId;
     });
 
-    it('should reject duplicate order ID', async () => {
+    it("should reject duplicate order ID", async () => {
       const response = await request(app)
-        .post('/orders')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/orders")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           ...testData.order,
           tenantId: testTenantId,
@@ -459,41 +459,41 @@ describe('Order Management API', () => {
     });
   });
 
-  describe('PATCH /orders/:orderId/status', () => {
-    it('should update order status', async () => {
+  describe("PATCH /orders/:orderId/status", () => {
+    it("should update order status", async () => {
       const response = await request(app)
         .patch(`/orders/${testOrderId}/status`)
-        .set('Authorization', `Bearer ${authToken}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          status: 'in-progress',
+          status: "in-progress",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.status).toBe('in-progress');
+      expect(response.body.data.status).toBe("in-progress");
     });
 
-    it('should reject invalid status', async () => {
+    it("should reject invalid status", async () => {
       const response = await request(app)
         .patch(`/orders/${testOrderId}/status`)
-        .set('Authorization', `Bearer ${authToken}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          status: 'invalid-status',
+          status: "invalid-status",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
     });
   });
 
-  describe('GET /orders', () => {
-    it('should get paginated list of orders', async () => {
+  describe("GET /orders", () => {
+    it("should get paginated list of orders", async () => {
       const response = await request(app)
-        .get('/orders')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/orders")
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
           page: 1,
           limit: 10,
@@ -505,19 +505,19 @@ describe('Order Management API', () => {
       expect(response.body.pagination).toBeDefined();
     });
 
-    it('should filter orders by status', async () => {
+    it("should filter orders by status", async () => {
       const response = await request(app)
-        .get('/orders')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/orders")
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
-          status: 'pending',
+          status: "pending",
         });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toBeInstanceOf(Array);
       response.body.data.forEach((order: any) => {
-        expect(order.status).toBe('pending');
+        expect(order.status).toBe("pending");
       });
     });
   });
@@ -527,7 +527,7 @@ describe('Order Management API', () => {
 // MESSAGE TESTS
 // ============================================================================
 
-describe('Message API', () => {
+describe("Message API", () => {
   let testRequestId: number;
 
   beforeAll(async () => {
@@ -535,41 +535,41 @@ describe('Message API', () => {
     const [request] = await db
       .insert(requests)
       .values({
-        roomNumber: '103',
-        orderId: 'TEST-ORDER-002',
-        requestContent: 'Test request',
-        status: 'pending',
+        roomNumber: "103",
+        orderId: "TEST-ORDER-002",
+        requestContent: "Test request",
+        status: "pending",
         tenantId: testTenantId,
       })
       .returning();
     testRequestId = request.id;
   });
 
-  describe('POST /messages', () => {
-    it('should create a new message', async () => {
+  describe("POST /messages", () => {
+    it("should create a new message", async () => {
       const response = await request(app)
-        .post('/messages')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/messages")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           requestId: testRequestId,
-          sender: 'staff',
-          content: 'Your order is being prepared',
+          sender: "staff",
+          content: "Your order is being prepared",
           tenantId: testTenantId,
         });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.requestId).toBe(testRequestId);
-      expect(response.body.data.sender).toBe('staff');
-      expect(response.body.data.content).toBe('Your order is being prepared');
+      expect(response.body.data.sender).toBe("staff");
+      expect(response.body.data.content).toBe("Your order is being prepared");
     });
   });
 
-  describe('GET /messages/:requestId', () => {
-    it('should get messages for a request', async () => {
+  describe("GET /messages/:requestId", () => {
+    it("should get messages for a request", async () => {
       const response = await request(app)
         .get(`/messages/${testRequestId}`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -582,15 +582,15 @@ describe('Message API', () => {
 // HOTEL MANAGEMENT TESTS
 // ============================================================================
 
-describe('Hotel Management API', () => {
-  describe('POST /hotel/research', () => {
-    it('should research hotel information', async () => {
+describe("Hotel Management API", () => {
+  describe("POST /hotel/research", () => {
+    it("should research hotel information", async () => {
       const response = await request(app)
-        .post('/hotel/research')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/hotel/research")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          hotelName: 'Test Hotel',
-          location: 'Test City',
+          hotelName: "Test Hotel",
+          location: "Test City",
         });
 
       expect(response.status).toBe(200);
@@ -600,41 +600,41 @@ describe('Hotel Management API', () => {
     });
   });
 
-  describe('POST /hotel/generate-assistant', () => {
-    it('should generate assistant configuration', async () => {
+  describe("POST /hotel/generate-assistant", () => {
+    it("should generate assistant configuration", async () => {
       const response = await request(app)
-        .post('/hotel/generate-assistant')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/hotel/generate-assistant")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
           hotelData: {
-            name: 'Test Hotel',
-            address: '123 Test Street',
-            phone: '+1234567890',
-            email: 'test@hotel.com',
-            description: 'A test hotel',
-            amenities: ['wifi', 'pool'],
+            name: "Test Hotel",
+            address: "123 Test Street",
+            phone: "+1234567890",
+            email: "test@hotel.com",
+            description: "A test hotel",
+            amenities: ["wifi", "pool"],
             services: [
               {
-                name: 'Room Service',
-                description: '24/7 room service',
-                category: 'food',
+                name: "Room Service",
+                description: "24/7 room service",
+                category: "food",
                 price: 25,
-                availability: '24/7',
+                availability: "24/7",
               },
             ],
             policies: {
-              checkIn: '3:00 PM',
-              checkOut: '11:00 AM',
-              cancellation: '24 hours',
+              checkIn: "3:00 PM",
+              checkOut: "11:00 AM",
+              cancellation: "24 hours",
               pets: false,
               smoking: false,
             },
           },
           customization: {
             capabilities: {
-              languages: ['en'],
-              services: ['room-service'],
-              features: ['voice-commands'],
+              languages: ["en"],
+              services: ["room-service"],
+              features: ["voice-commands"],
             },
           },
         });
@@ -651,15 +651,15 @@ describe('Hotel Management API', () => {
 // ANALYTICS TESTS
 // ============================================================================
 
-describe('Analytics API', () => {
-  describe('GET /analytics/:tenantId', () => {
-    it('should get analytics overview', async () => {
+describe("Analytics API", () => {
+  describe("GET /analytics/:tenantId", () => {
+    it("should get analytics overview", async () => {
       const response = await request(app)
         .get(`/analytics/${testTenantId}`)
-        .set('Authorization', `Bearer ${authToken}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .query({
-          startDate: '2024-01-01T00:00:00.000Z',
-          endDate: '2024-12-31T23:59:59.999Z',
+          startDate: "2024-01-01T00:00:00.000Z",
+          endDate: "2024-12-31T23:59:59.999Z",
         });
 
       expect(response.status).toBe(200);
@@ -671,11 +671,11 @@ describe('Analytics API', () => {
     });
   });
 
-  describe('GET /analytics/:tenantId/service-distribution', () => {
-    it('should get service type distribution', async () => {
+  describe("GET /analytics/:tenantId/service-distribution", () => {
+    it("should get service type distribution", async () => {
       const response = await request(app)
         .get(`/analytics/${testTenantId}/service-distribution`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -683,11 +683,11 @@ describe('Analytics API', () => {
     });
   });
 
-  describe('GET /analytics/:tenantId/hourly-activity', () => {
-    it('should get hourly activity data', async () => {
+  describe("GET /analytics/:tenantId/hourly-activity", () => {
+    it("should get hourly activity data", async () => {
       const response = await request(app)
         .get(`/analytics/${testTenantId}/hourly-activity`)
-        .set('Authorization', `Bearer ${authToken}`);
+        .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -700,21 +700,21 @@ describe('Analytics API', () => {
 // HEALTH CHECK TESTS
 // ============================================================================
 
-describe('Health Check API', () => {
-  describe('GET /health', () => {
-    it('should return basic health status', async () => {
-      const response = await request(app).get('/health');
+describe("Health Check API", () => {
+  describe("GET /health", () => {
+    it("should return basic health status", async () => {
+      const response = await request(app).get("/health");
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.status).toBe('healthy');
+      expect(response.body.data.status).toBe("healthy");
       expect(response.body.data.timestamp).toBeDefined();
     });
   });
 
-  describe('GET /health/detailed', () => {
-    it('should return detailed health status', async () => {
-      const response = await request(app).get('/health/detailed');
+  describe("GET /health/detailed", () => {
+    it("should return detailed health status", async () => {
+      const response = await request(app).get("/health/detailed");
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -730,10 +730,10 @@ describe('Health Check API', () => {
 // ERROR HANDLING TESTS
 // ============================================================================
 
-describe('Error Handling', () => {
-  describe('Invalid routes', () => {
-    it('should return 404 for non-existent routes', async () => {
-      const response = await request(app).get('/non-existent-route');
+describe("Error Handling", () => {
+  describe("Invalid routes", () => {
+    it("should return 404 for non-existent routes", async () => {
+      const response = await request(app).get("/non-existent-route");
 
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
@@ -741,39 +741,39 @@ describe('Error Handling', () => {
     });
   });
 
-  describe('Invalid authentication', () => {
-    it('should return 401 for missing token', async () => {
+  describe("Invalid authentication", () => {
+    it("should return 401 for missing token", async () => {
       const response = await request(app)
-        .get('/calls')
-        .set('Authorization', '');
+        .get("/calls")
+        .set("Authorization", "");
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
     });
 
-    it('should return 401 for invalid token', async () => {
+    it("should return 401 for invalid token", async () => {
       const response = await request(app)
-        .get('/calls')
-        .set('Authorization', 'Bearer invalid-token');
+        .get("/calls")
+        .set("Authorization", "Bearer invalid-token");
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
     });
   });
 
-  describe('Validation errors', () => {
-    it('should return 400 for invalid request data', async () => {
+  describe("Validation errors", () => {
+    it("should return 400 for invalid request data", async () => {
       const response = await request(app)
-        .post('/calls/start')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/calls/start")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          roomNumber: '',
-          language: 'invalid',
+          roomNumber: "",
+          language: "invalid",
         });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.code).toBe('VALIDATION_ERROR');
+      expect(response.body.code).toBe("VALIDATION_ERROR");
       expect(response.body.details).toBeDefined();
     });
   });

@@ -9,9 +9,11 @@ import {
   AdvancedGuestJourneyQuery,
   parseAdvancedQuery,
 } from "@server/utils/pagination";
-import { db } from "@shared/db";
-import { call, transcript } from "@shared/db/schema";
-import { logger } from "@shared/utils/logger";
+// ✅ DETAILED MIGRATION: Using Prisma instead of Drizzle
+
+const prisma = new PrismaClient();
+// ✅ DETAILED MIGRATION: Using Prisma types instead of Drizzle
+// ✅ MIGRATION COMPLETE: Drizzle schema imports removed
 import express from "express";
 
 const router = express.Router();
