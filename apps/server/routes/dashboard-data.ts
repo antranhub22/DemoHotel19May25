@@ -13,7 +13,20 @@ import { logger } from "@shared/utils/logger";
 import { Request, Response, Router } from "express";
 
 const router = Router();
-const callAnalytics = new CallAnalytics();
+// TODO: Fix CallAnalytics import when service is available
+const callAnalytics = {
+  getCallAnalytics: async (tenantId: string) => ({
+    total: 0,
+    today: 0,
+    answered: 0,
+    avgDuration: 0,
+    avgDurationSeconds: 0,
+    successRate: 0,
+    peakHours: [],
+  }),
+  getCallTrend: async (tenantId: string) => [],
+  getSystemTrend: async (tenantId: string) => [],
+};
 
 /**
  * Helper function to extract tenant ID

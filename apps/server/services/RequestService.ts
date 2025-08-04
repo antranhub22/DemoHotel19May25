@@ -5,7 +5,6 @@
 // Handles all business logic, validation, and data operations
 
 // ✅ DETAILED MIGRATION: Using Prisma instead of Drizzle
-import { logger } from "@shared/utils/logger";
 import {
   CreateRequestInput,
   CreateRequestSchema,

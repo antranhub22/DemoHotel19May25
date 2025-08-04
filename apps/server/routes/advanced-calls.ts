@@ -9,6 +9,7 @@ import {
   AdvancedGuestJourneyQuery,
   parseAdvancedQuery,
 } from "@server/utils/pagination";
+import { logger } from "@shared/utils/logger";
 // ✅ DETAILED MIGRATION: Using Prisma instead of Drizzle
 
 const prisma = new PrismaClient();
@@ -65,14 +66,14 @@ router.get("/", async (req, res) => {
         ],
         defaultSearchFields: ["room_number", "service_type"],
         tableColumns: {
-          start_time: call.start_time,
-          end_time: call.end_time,
-          duration: call.duration,
-          room_number: call.room_number,
-          language: call.language,
-          service_type: call.service_type,
-          tenant_id: call.tenant_id,
-          call_id_vapi: call.call_id_vapi,
+          start_time: "start_time",
+          end_time: "end_time",
+          duration: "duration",
+          room_number: "room_number",
+          language: "language",
+          service_type: "service_type",
+          tenant_id: "tenant_id",
+          call_id_vapi: "call_id_vapi",
         },
       },
     );
@@ -94,52 +95,40 @@ router.get("/", async (req, res) => {
       "AdvancedCalls",
     );
 
-    // Execute query with advanced WHERE and ORDER BY
-    const callsQuery = db
-      .select({
-        id: call.id,
-        call_id_vapi: call.call_id_vapi,
-        room_number: call.room_number,
-        language: call.language,
-        service_type: call.service_type,
-        tenant_id: call.tenant_id,
-        start_time: call.start_time,
-        end_time: call.end_time,
-        duration: call.duration,
-      })
-      .from(call);
-
-    if (whereCondition) {
-      callsQuery.where(whereCondition);
-    }
-
-    if (orderByClause && orderByClause.length > 0) {
-      callsQuery.orderBy(...orderByClause);
-    }
-
-    const calls = await callsQuery.limit(limit).offset(offset);
+    // Execute query with advanced WHERE and ORDER BY using Prisma
+    const calls = await prisma.call.findMany({
+      where: whereCondition,
+      orderBy: orderByClause,
+      take: limit,
+      skip: offset,
+      select: {
+        id: true,
+        call_id_vapi: true,
+        room_number: true,
+        language: true,
+        service_type: true,
+        tenant_id: true,
+        start_time: true,
+        end_time: true,
+        duration: true,
+      },
+    });
 
     // Get total count with same WHERE condition
-    const totalCountQuery = db.select({ count: call.id }).from(call);
-
-    if (whereCondition) {
-      totalCountQuery.where(whereCondition);
-    }
-
-    const totalCountResult = await totalCountQuery;
-    const total = totalCountResult.length;
+    const total = await prisma.call.count({
+      where: whereCondition,
+    });
 
     // Add transcript count for each call
     const callsWithTranscripts = await Promise.all(
       calls.map(async (callData) => {
-        const transcriptCount = await db
-          .select({ count: transcript.id })
-          .from(transcript)
-          .where(eq(transcript.call_id, callData.call_id_vapi));
+        const transcriptCount = await prisma.transcript.count({
+          where: { call_id: callData.call_id_vapi },
+        });
 
         return {
           ...callData,
-          transcriptCount: transcriptCount.length,
+          transcriptCount,
         };
       }),
     );
