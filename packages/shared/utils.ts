@@ -1,35 +1,37 @@
-import { db, request } from './db';
-import { handlePostgreSQLResult } from './db/transformers';
+import { PrismaClient } from "@prisma/client";
+import { handlePostgreSQLResult } from "./db/transformers";
 
 // ============================================
 // Database Utility Functions
 // ============================================
 
+const prisma = new PrismaClient();
+
 // Delete all requests (used by server)
 export async function deleteAllRequests() {
   try {
-    const result = await db.delete(request);
-    return handlePostgreSQLResult(result);
+    const result = await prisma.request.deleteMany();
+    return {
+      success: true,
+      data: result,
+    };
   } catch (error) {
-    console.error('Error deleting all requests:', error);
+    console.error("Error deleting all requests:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? (error as any)?.message || String(error)
-          : 'Unknown error',
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
 
 // Helper to convert Date to string for SQLite
 export function dateToString(
-  date: Date | string | null | undefined
+  date: Date | string | null | undefined,
 ): string | null {
   if (!date) {
     return null;
   }
-  if (typeof date === 'string') {
+  if (typeof date === "string") {
     return date;
   }
   return date.toISOString();
