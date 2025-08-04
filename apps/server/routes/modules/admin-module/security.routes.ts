@@ -1,8 +1,9 @@
-import { Request, Response, Router } from 'express';
-import { securityMiddleware } from '@server/middleware/securityMiddleware';
-import { securityHardening } from '@server/shared/SecurityHardening';
+import { createSecurityMiddleware } from "@server/middleware/securityMiddleware";
+import { securityHardening } from "@server/shared/SecurityHardening";
+import { Request, Response, Router } from "express";
 
 const router = Router();
+const securityMiddleware = createSecurityMiddleware();
 
 // ============================================
 // Security Overview & Status
@@ -12,7 +13,7 @@ const router = Router();
  * GET /security/status
  * Get comprehensive security system status
  */
-router.get('/status', async (req: Request, res: Response) => {
+router.get("/status", async (_req: Request, res: Response) => {
   try {
     const metrics = securityMiddleware.getSecurityMetrics();
     const report = securityMiddleware.getSecurityReport();
@@ -20,21 +21,21 @@ router.get('/status', async (req: Request, res: Response) => {
     const status = {
       timestamp: new Date().toISOString(),
       system: {
-        status: 'operational',
+        status: "operational",
         uptime: process.uptime(),
-        version: '1.0.0',
+        version: "1.0.0",
       },
       security: {
         threatLevel: report.securityHealth.riskLevel,
-        protectionStatus: 'active',
+        protectionStatus: "active",
         threatsBlocked: metrics.threatsBlocked,
         requestsProcessed: metrics.totalRequests,
-        lastThreatDetected: metrics.threatsDetected > 0 ? 'recently' : 'none',
+        lastThreatDetected: metrics.threatsDetected > 0 ? "recently" : "none",
       },
       monitoring: {
-        auditLogging: 'enabled',
-        realTimeMonitoring: 'active',
-        alerting: 'enabled',
+        auditLogging: "enabled",
+        realTimeMonitoring: "active",
+        alerting: "enabled",
       },
     };
 
@@ -44,11 +45,11 @@ router.get('/status', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security status error:', error);
+    console.error("Security status error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get security status',
-      code: 'SECURITY_STATUS_ERROR',
+      error: "Failed to get security status",
+      code: "SECURITY_STATUS_ERROR",
     });
   }
 });
@@ -57,7 +58,7 @@ router.get('/status', async (req: Request, res: Response) => {
  * GET /security/metrics
  * Get detailed security metrics
  */
-router.get('/metrics', async (req: Request, res: Response) => {
+router.get("/metrics", async (_req: Request, res: Response) => {
   try {
     const metrics = securityMiddleware.getSecurityMetrics();
     const threats = securityMiddleware.getRecentThreats(24);
@@ -76,7 +77,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
         }, {}),
       },
       performance: {
-        averageResponseTime: '54ms',
+        averageResponseTime: "54ms",
         requestsPerSecond: Math.round(metrics.totalRequests / process.uptime()),
         memoryUsage: process.memoryUsage(),
       },
@@ -88,11 +89,11 @@ router.get('/metrics', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security metrics error:', error);
+    console.error("Security metrics error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get security metrics',
-      code: 'SECURITY_METRICS_ERROR',
+      error: "Failed to get security metrics",
+      code: "SECURITY_METRICS_ERROR",
     });
   }
 });
@@ -101,7 +102,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
  * GET /security/report
  * Generate comprehensive security report
  */
-router.get('/report', async (req: Request, res: Response) => {
+router.get("/report", async (_req: Request, res: Response) => {
   try {
     const report = securityMiddleware.getSecurityReport();
 
@@ -111,11 +112,11 @@ router.get('/report', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security report error:', error);
+    console.error("Security report error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to generate security report',
-      code: 'SECURITY_REPORT_ERROR',
+      error: "Failed to generate security report",
+      code: "SECURITY_REPORT_ERROR",
     });
   }
 });
@@ -128,7 +129,7 @@ router.get('/report', async (req: Request, res: Response) => {
  * GET /security/threats
  * Get recent security threats
  */
-router.get('/threats', async (req: Request, res: Response) => {
+router.get("/threats", async (req: Request, res: Response) => {
   try {
     const hours = parseInt(req.query.hours as string) || 24;
     const limit = parseInt(req.query.limit as string) || 100;
@@ -155,11 +156,11 @@ router.get('/threats', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Threats query error:', error);
+    console.error("Threats query error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get threats',
-      code: 'THREATS_QUERY_ERROR',
+      error: "Failed to get threats",
+      code: "THREATS_QUERY_ERROR",
     });
   }
 });
@@ -168,49 +169,49 @@ router.get('/threats', async (req: Request, res: Response) => {
  * GET /security/threats/live
  * Get real-time threat feed (Server-Sent Events)
  */
-router.get('/threats/live', (req: Request, res: Response) => {
+router.get("/threats/live", (req: Request, res: Response) => {
   res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-    'Access-Control-Allow-Origin': '*',
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Access-Control-Allow-Origin": "*",
   });
 
   // Send initial connection message
   res.write(
     `data: ${JSON.stringify({
-      type: 'connection',
-      message: 'Connected to security threat feed',
+      type: "connection",
+      message: "Connected to security threat feed",
       timestamp: new Date().toISOString(),
-    })}\n\n`
+    })}\n\n`,
   );
 
   // Listen for security events
   const threatHandler = (event: any) => {
     res.write(
       `data: ${JSON.stringify({
-        type: 'threat',
+        type: "threat",
         data: event,
         timestamp: new Date().toISOString(),
-      })}\n\n`
+      })}\n\n`,
     );
   };
 
-  securityHardening.on('securityThreat', threatHandler);
+  securityHardening.on("securityThreat", threatHandler);
 
   // Send periodic heartbeat
   const heartbeat = setInterval(() => {
     res.write(
       `data: ${JSON.stringify({
-        type: 'heartbeat',
+        type: "heartbeat",
         timestamp: new Date().toISOString(),
-      })}\n\n`
+      })}\n\n`,
     );
   }, 30000);
 
   // Clean up on connection close
-  req.on('close', () => {
-    securityHardening.removeListener('securityThreat', threatHandler);
+  req.on("close", () => {
+    securityHardening.removeListener("securityThreat", threatHandler);
     clearInterval(heartbeat);
   });
 });
@@ -223,7 +224,7 @@ router.get('/threats/live', (req: Request, res: Response) => {
  * GET /security/audit-logs
  * Get security audit logs
  */
-router.get('/audit-logs', async (req: Request, res: Response) => {
+router.get("/audit-logs", async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 100;
     const offset = parseInt(req.query.offset as string) || 0;
@@ -238,9 +239,9 @@ router.get('/audit-logs', async (req: Request, res: Response) => {
       limit,
       logs: paginatedLogs,
       stats: {
-        allowed: allLogs.filter(log => log.action === 'allowed').length,
-        blocked: allLogs.filter(log => log.action === 'blocked').length,
-        filtered: allLogs.filter(log => log.action === 'filtered').length,
+        allowed: allLogs.filter((log) => log.action === "allowed").length,
+        blocked: allLogs.filter((log) => log.action === "blocked").length,
+        filtered: allLogs.filter((log) => log.action === "filtered").length,
       },
     };
 
@@ -250,11 +251,11 @@ router.get('/audit-logs', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Audit logs error:', error);
+    console.error("Audit logs error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get audit logs',
-      code: 'AUDIT_LOGS_ERROR',
+      error: "Failed to get audit logs",
+      code: "AUDIT_LOGS_ERROR",
     });
   }
 });
@@ -263,18 +264,18 @@ router.get('/audit-logs', async (req: Request, res: Response) => {
  * GET /security/audit-logs/export
  * Export audit logs as CSV
  */
-router.get('/audit-logs/export', async (req: Request, res: Response) => {
+router.get("/audit-logs/export", async (_req: Request, res: Response) => {
   try {
     const logs = securityMiddleware.getAuditLogs();
 
     // Create CSV content
     const csvHeader =
-      'Timestamp,IP,Method,Path,UserAgent,Action,ResponseCode,ProcessingTime,Threats\n';
+      "Timestamp,IP,Method,Path,UserAgent,Action,ResponseCode,ProcessingTime,Threats\n";
     const csvRows = logs
-      .map(log => {
+      .map((log) => {
         const threats = log.threats
-          .map(t => `${t.type}:${t.severity}`)
-          .join(';');
+          .map((t) => `${t.type}:${t.severity}`)
+          .join(";");
         return [
           log.timestamp.toISOString(),
           log.ip,
@@ -285,24 +286,24 @@ router.get('/audit-logs/export', async (req: Request, res: Response) => {
           log.responseCode,
           log.processingTime,
           `"${threats}"`,
-        ].join(',');
+        ].join(",");
       })
-      .join('\n');
+      .join("\n");
 
     const csvContent = csvHeader + csvRows;
 
-    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader("Content-Type", "text/csv");
     res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="security-audit-${new Date().toISOString().split('T')[0]}.csv"`
+      "Content-Disposition",
+      `attachment; filename="security-audit-${new Date().toISOString().split("T")[0]}.csv"`,
     );
     res.send(csvContent);
   } catch (error) {
-    console.error('Audit logs export error:', error);
+    console.error("Audit logs export error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to export audit logs',
-      code: 'AUDIT_EXPORT_ERROR',
+      error: "Failed to export audit logs",
+      code: "AUDIT_EXPORT_ERROR",
     });
   }
 });
@@ -315,7 +316,7 @@ router.get('/audit-logs/export', async (req: Request, res: Response) => {
  * GET /security/config
  * Get current security configuration
  */
-router.get('/config', async (req: Request, res: Response) => {
+router.get("/config", async (_req: Request, res: Response) => {
   try {
     // Return sanitized config (without sensitive data)
     const config = {
@@ -327,7 +328,7 @@ router.get('/config', async (req: Request, res: Response) => {
       },
       xssProtection: {
         enabled: true,
-        mode: 'block',
+        mode: "block",
         contentSecurityPolicy: { enabled: true },
       },
       sqlInjectionProtection: {
@@ -353,11 +354,11 @@ router.get('/config', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security config error:', error);
+    console.error("Security config error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get security configuration',
-      code: 'SECURITY_CONFIG_ERROR',
+      error: "Failed to get security configuration",
+      code: "SECURITY_CONFIG_ERROR",
     });
   }
 });
@@ -366,15 +367,15 @@ router.get('/config', async (req: Request, res: Response) => {
  * PUT /security/config
  * Update security configuration
  */
-router.put('/config', async (req: Request, res: Response) => {
+router.put("/config", async (req: Request, res: Response) => {
   try {
     const { config } = req.body;
 
     if (!config) {
       return res.status(400).json({
         success: false,
-        error: 'Configuration object required',
-        code: 'CONFIG_REQUIRED',
+        error: "Configuration object required",
+        code: "CONFIG_REQUIRED",
       });
     }
 
@@ -383,15 +384,15 @@ router.put('/config', async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: 'Security configuration updated successfully',
+      message: "Security configuration updated successfully",
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security config update error:', error);
+    console.error("Security config update error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update security configuration',
-      code: 'CONFIG_UPDATE_ERROR',
+      error: "Failed to update security configuration",
+      code: "CONFIG_UPDATE_ERROR",
     });
   }
 });
@@ -404,62 +405,62 @@ router.put('/config', async (req: Request, res: Response) => {
  * POST /security/test
  * Test security systems
  */
-router.post('/test', async (req: Request, res: Response) => {
+router.post("/test", async (req: Request, res: Response) => {
   try {
     const { testType } = req.body;
 
     const testResults: any = {
       timestamp: new Date().toISOString(),
-      testType: testType || 'comprehensive',
+      testType: testType || "comprehensive",
       results: {},
     };
 
     // Run various security tests
     if (
       !testType ||
-      testType === 'comprehensive' ||
-      testType === 'input-sanitization'
+      testType === "comprehensive" ||
+      testType === "input-sanitization"
     ) {
       testResults.results.inputSanitization = {
-        status: 'passed',
+        status: "passed",
         checks: [
-          { name: 'XSS Script Tag Detection', passed: true },
-          { name: 'SQL Injection Pattern Detection', passed: true },
-          { name: 'Input Length Validation', passed: true },
+          { name: "XSS Script Tag Detection", passed: true },
+          { name: "SQL Injection Pattern Detection", passed: true },
+          { name: "Input Length Validation", passed: true },
         ],
       };
     }
 
     if (
       !testType ||
-      testType === 'comprehensive' ||
-      testType === 'rate-limiting'
+      testType === "comprehensive" ||
+      testType === "rate-limiting"
     ) {
       testResults.results.rateLimiting = {
-        status: 'passed',
+        status: "passed",
         checks: [
-          { name: 'Rate Limit Headers', passed: true },
-          { name: 'Request Counting', passed: true },
-          { name: 'Window Reset', passed: true },
+          { name: "Rate Limit Headers", passed: true },
+          { name: "Request Counting", passed: true },
+          { name: "Window Reset", passed: true },
         ],
       };
     }
 
-    if (!testType || testType === 'comprehensive' || testType === 'headers') {
+    if (!testType || testType === "comprehensive" || testType === "headers") {
       testResults.results.securityHeaders = {
-        status: 'passed',
+        status: "passed",
         checks: [
-          { name: 'X-Content-Type-Options', passed: true },
-          { name: 'X-Frame-Options', passed: true },
-          { name: 'X-XSS-Protection', passed: true },
+          { name: "X-Content-Type-Options", passed: true },
+          { name: "X-Frame-Options", passed: true },
+          { name: "X-XSS-Protection", passed: true },
         ],
       };
     }
 
     testResults.overall = {
-      status: 'passed',
-      score: '100%',
-      recommendation: 'Security systems are functioning correctly',
+      status: "passed",
+      score: "100%",
+      recommendation: "Security systems are functioning correctly",
     };
 
     res.json({
@@ -468,11 +469,11 @@ router.post('/test', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security test error:', error);
+    console.error("Security test error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to run security tests',
-      code: 'SECURITY_TEST_ERROR',
+      error: "Failed to run security tests",
+      code: "SECURITY_TEST_ERROR",
     });
   }
 });
@@ -481,38 +482,38 @@ router.post('/test', async (req: Request, res: Response) => {
  * GET /security/diagnostics
  * Get security system diagnostics
  */
-router.get('/diagnostics', async (req: Request, res: Response) => {
+router.get("/diagnostics", async (_req: Request, res: Response) => {
   try {
     const metrics = securityMiddleware.getSecurityMetrics();
     const threats = securityMiddleware.getRecentThreats(1);
 
     const diagnostics = {
       system: {
-        status: 'healthy',
+        status: "healthy",
         uptime: process.uptime(),
         memory: process.memoryUsage(),
         cpu: process.cpuUsage(),
       },
       security: {
-        middleware: 'active',
-        threatDetection: 'operational',
-        auditLogging: 'enabled',
-        rateLimiting: 'functional',
+        middleware: "active",
+        threatDetection: "operational",
+        auditLogging: "enabled",
+        rateLimiting: "functional",
       },
       performance: {
         requestsProcessed: metrics.totalRequests,
-        averageResponseTime: '54ms',
+        averageResponseTime: "54ms",
         throughput: Math.round(metrics.totalRequests / process.uptime()),
-        errorRate: '0.1%',
+        errorRate: "0.1%",
       },
       health: {
-        overall: 'excellent',
-        riskLevel: 'low',
-        lastThreat: threats.length > 0 ? threats[0].timestamp : 'none',
+        overall: "excellent",
+        riskLevel: "low",
+        lastThreat: threats.length > 0 ? threats[0].timestamp : "none",
         recommendations: [
-          'System is operating within normal parameters',
-          'All security layers are active and functional',
-          'Continue monitoring for new threats',
+          "System is operating within normal parameters",
+          "All security layers are active and functional",
+          "Continue monitoring for new threats",
         ],
       },
     };
@@ -523,11 +524,11 @@ router.get('/diagnostics', async (req: Request, res: Response) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Security diagnostics error:', error);
+    console.error("Security diagnostics error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get security diagnostics',
-      code: 'SECURITY_DIAGNOSTICS_ERROR',
+      error: "Failed to get security diagnostics",
+      code: "SECURITY_DIAGNOSTICS_ERROR",
     });
   }
 });

@@ -4,8 +4,8 @@
  */
 
 import { authenticateJWT } from "@auth/middleware/auth.middleware";
+import { PrismaClient } from "@prisma/client";
 import { performanceMiddleware } from "@server/middleware/performanceMonitoring";
-import { callAnalytics } from "@server/services/CallAnalytics";
 import { CacheKeys, dashboardCache } from "@server/services/DashboardCache";
 import { requestAnalytics } from "@server/services/RequestAnalytics";
 import { QueryOptimizer } from "@shared/optimization/QueryOptimizer";
@@ -13,6 +13,7 @@ import { logger } from "@shared/utils/logger";
 import { Request, Response, Router } from "express";
 
 const router = Router();
+const callAnalytics = new CallAnalytics();
 
 /**
  * Helper function to extract tenant ID
@@ -81,9 +82,10 @@ router.get(
             "DashboardDataAPI",
             {
               tenantId,
-              pending: result.pending,
-              completed: result.completed,
-              satisfactionScore: result.satisfactionScore,
+              totalRequests: result.totalRequests,
+              pendingRequests: result.pendingRequests,
+              completedRequests: result.completedRequests,
+              completionRate: result.completionRate,
               trend,
             },
           );
@@ -424,8 +426,8 @@ router.get(
         "DashboardDataAPI",
       );
 
-      const queryOptimizer = new QueryOptimizer();
-      const stats = queryOptimizer.getStats();
+      const queryOptimizer = new QueryOptimizer(new PrismaClient());
+      const stats = queryOptimizer.generateOptimizationReport();
 
       res.json({
         success: true,

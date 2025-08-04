@@ -13,6 +13,17 @@ import {
   UpdateRequestStatusInput,
   validateRequestData,
 } from "@shared/validation/requestSchemas";
+import {
+  BulkUpdateResult,
+  CreateRequestResult,
+  GetRequestByIdResult,
+  GetRequestsResult,
+  IRequestService,
+  RequestEntity,
+  RequestServiceConfig,
+  RequestServiceErrorType,
+  UpdateRequestStatusResult,
+} from "./interfaces/RequestServiceInterface";
 // ✅ DETAILED MIGRATION: FINAL FILE - REPLACED WITH PRISMA
 // This is the last file to complete 100% Prisma migration!
 

@@ -1,5 +1,3 @@
-import { getDatabase } from "@shared/db";
-import { logger } from "@shared/utils/logger";
 import express from "express";
 
 const router = express.Router();
@@ -136,7 +134,7 @@ router.get("/env", (_req, res) => {
       timestamp: new Date().toISOString(),
     };
 
-    logger.info("Environment variables check:", envInfo);
+    logger.info("Environment variables check: " + JSON.stringify(envInfo));
     res.json({
       success: true,
       data: envInfo,
@@ -202,11 +200,9 @@ router.post("/test-db", async (_req, res) => {
     }
 
     // Test connection with current DATABASE_URL
-    const db = getDatabase();
-    const result = await db
-      .select()
-      .from(db.raw("1 as connection_test"))
-      .limit(1);
+    const { PrismaClient } = await import("@prisma/client");
+    const prisma = new PrismaClient();
+    const result = await prisma.$queryRaw`SELECT 1 as connection_test`;
 
     const connectionInfo = {
       databaseUrlSet: true,

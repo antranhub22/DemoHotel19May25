@@ -3,10 +3,10 @@
  * Provides error tracking and health monitoring endpoints
  */
 
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { errorTracking } from '@server/services/ErrorTracking';
-import { logger } from '@shared/utils/logger';
-import { Request, Response, Router } from 'express';
+import { authenticateJWT } from "@auth/middleware/auth.middleware";
+import { errorTracking } from "@server/services/ErrorTracking";
+import { logger } from "@shared/utils/logger";
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
@@ -14,13 +14,13 @@ const router = Router();
  * GET /api/errors/stats - Get error statistics
  * ZERO RISK: Read-only monitoring endpoint
  */
-router.get('/stats', authenticateJWT, (req: Request, res: Response) => {
+router.get("/stats", authenticateJWT, (req: Request, res: Response) => {
   try {
     const timeRange = parseInt(req.query.timeRange as string) || 24; // Default 24 hours
 
     logger.debug(
       `📊 [Errors] Getting error stats for ${timeRange} hours`,
-      'ErrorAPI'
+      "ErrorAPI",
     );
 
     const stats = errorTracking.getErrorStats(timeRange);
@@ -28,19 +28,19 @@ router.get('/stats', authenticateJWT, (req: Request, res: Response) => {
     res.json({
       success: true,
       data: stats,
-      version: '1.0.0',
+      version: "1.0.0",
       _metadata: {
-        endpoint: 'error-stats',
+        endpoint: "error-stats",
         timeRange: `${timeRange}h`,
         timestamp: new Date().toISOString(),
       },
     });
   } catch (error) {
-    logger.error('❌ [Errors] Failed to get error stats', 'ErrorAPI', error);
+    logger.error("❌ [Errors] Failed to get error stats", "ErrorAPI", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get error statistics',
-      details: error instanceof Error ? error.message : 'Unknown error',
+      error: "Failed to get error statistics",
+      details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
@@ -49,9 +49,9 @@ router.get('/stats', authenticateJWT, (req: Request, res: Response) => {
  * GET /api/errors/health - System health based on error rates
  * ZERO RISK: Health check endpoint
  */
-router.get('/health', (req: Request, res: Response) => {
+router.get("/health", (req: Request, res: Response) => {
   try {
-    logger.debug('🏥 [Errors] Getting system health status', 'ErrorAPI');
+    logger.debug("🏥 [Errors] Getting system health status", "ErrorAPI");
 
     const health = errorTracking.getHealthStatus();
 
@@ -59,16 +59,16 @@ router.get('/health', (req: Request, res: Response) => {
       ...health,
       timestamp: new Date().toISOString(),
       _metadata: {
-        endpoint: 'error-health',
-        version: '1.0.0',
+        endpoint: "error-health",
+        version: "1.0.0",
       },
     });
   } catch (error) {
-    logger.error('❌ [Errors] Health check failed', 'ErrorAPI', error);
+    logger.error("❌ [Errors] Health check failed", "ErrorAPI", error);
     res.status(500).json({
-      status: 'error',
+      status: "error",
       details: {
-        error: error instanceof Error ? error.message : 'Health check failed',
+        error: error instanceof Error ? error.message : "Health check failed",
       },
       timestamp: new Date().toISOString(),
     });
@@ -79,13 +79,13 @@ router.get('/health', (req: Request, res: Response) => {
  * GET /api/errors/recent - Get recent errors with pagination
  * ZERO RISK: Read-only endpoint with filtering
  */
-router.get('/recent', authenticateJWT, (req: Request, res: Response) => {
+router.get("/recent", authenticateJWT, (req: Request, res: Response) => {
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100); // Max 100
     const component = req.query.component as string;
     const severity = req.query.severity as string;
 
-    logger.debug('📋 [Errors] Getting recent errors', 'ErrorAPI', {
+    logger.debug("📋 [Errors] Getting recent errors", "ErrorAPI", {
       limit,
       component,
       severity,
@@ -97,12 +97,12 @@ router.get('/recent', authenticateJWT, (req: Request, res: Response) => {
     // Apply filters
     if (component) {
       errors = errors.filter(
-        error => error.component.toLowerCase() === component.toLowerCase()
+        (error) => error.component.toLowerCase() === component.toLowerCase(),
       );
     }
 
     if (severity) {
-      errors = errors.filter(error => error.severity === severity);
+      errors = errors.filter((error) => error.severity === severity);
     }
 
     // Apply limit
@@ -115,17 +115,17 @@ router.get('/recent', authenticateJWT, (req: Request, res: Response) => {
         total: errors.length,
         filters: { component, severity, limit },
       },
-      version: '1.0.0',
+      version: "1.0.0",
       _metadata: {
-        endpoint: 'recent-errors',
+        endpoint: "recent-errors",
         timestamp: new Date().toISOString(),
       },
     });
   } catch (error) {
-    logger.error('❌ [Errors] Failed to get recent errors', 'ErrorAPI', error);
+    logger.error("❌ [Errors] Failed to get recent errors", "ErrorAPI", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get recent errors',
+      error: "Failed to get recent errors",
     });
   }
 });
@@ -134,7 +134,7 @@ router.get('/recent', authenticateJWT, (req: Request, res: Response) => {
  * POST /api/errors/report - Report a new error (for client-side reporting)
  * LOW RISK: Allows controlled error reporting from frontend
  */
-router.post('/report', authenticateJWT, (req: Request, res: Response) => {
+router.post("/report", authenticateJWT, (req: Request, res: Response) => {
   try {
     const { component, operation, error, context, severity } = req.body;
 
@@ -142,7 +142,7 @@ router.post('/report', authenticateJWT, (req: Request, res: Response) => {
     if (!component || !operation || !error) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: component, operation, error',
+        error: "Missing required fields: component, operation, error",
       });
     }
 
@@ -159,14 +159,14 @@ router.post('/report', authenticateJWT, (req: Request, res: Response) => {
         ...context,
         userId,
         tenantId,
-        source: 'client-report',
-        userAgent: req.headers['user-agent'],
+        source: "client-report",
+        userAgent: req.headers["user-agent"],
         ip: req.ip,
       },
-      severity
+      severity,
     );
 
-    logger.debug('📝 [Errors] Client error reported', 'ErrorAPI', {
+    logger.debug("📝 [Errors] Client error reported", "ErrorAPI", {
       errorId,
       component,
       operation,
@@ -178,15 +178,15 @@ router.post('/report', authenticateJWT, (req: Request, res: Response) => {
       success: true,
       data: {
         errorId,
-        message: 'Error reported successfully',
+        message: "Error reported successfully",
       },
-      version: '1.0.0',
+      version: "1.0.0",
     });
   } catch (error) {
-    logger.error('❌ [Errors] Failed to report error', 'ErrorAPI', error);
+    logger.error("❌ [Errors] Failed to report error", "ErrorAPI", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to report error',
+      error: "Failed to report error",
     });
   }
 });
@@ -196,7 +196,7 @@ router.post('/report', authenticateJWT, (req: Request, res: Response) => {
  * LOW RISK: Updates error status only
  */
 router.put(
-  '/:errorId/resolve',
+  "/:errorId/resolve",
   authenticateJWT,
   (req: Request, res: Response) => {
     try {
@@ -206,7 +206,7 @@ router.put(
       if (!errorId) {
         return res.status(400).json({
           success: false,
-          error: 'Error ID is required',
+          error: "Error ID is required",
         });
       }
 
@@ -214,7 +214,7 @@ router.put(
       const resolved = errorTracking.resolveError(errorId, userId);
 
       if (resolved) {
-        logger.debug('✅ [Errors] Error resolved', 'ErrorAPI', {
+        logger.debug("✅ [Errors] Error resolved", "ErrorAPI", {
           errorId,
           resolvedBy: userId,
           notes,
@@ -232,24 +232,24 @@ router.put(
       } else {
         res.status(404).json({
           success: false,
-          error: 'Error not found or already resolved',
+          error: "Error not found or already resolved",
         });
       }
     } catch (error) {
-      logger.error('❌ [Errors] Failed to resolve error', 'ErrorAPI', error);
+      logger.error("❌ [Errors] Failed to resolve error", "ErrorAPI", error);
       res.status(500).json({
         success: false,
-        error: 'Failed to resolve error',
+        error: "Failed to resolve error",
       });
     }
-  }
+  },
 );
 
 /**
  * DELETE /api/errors/cleanup - Clean up old errors (admin only)
  * LOW RISK: Maintenance endpoint
  */
-router.delete('/cleanup', authenticateJWT, (req: Request, res: Response) => {
+router.delete("/cleanup", authenticateJWT, (req: Request, res: Response) => {
   try {
     // TODO: Add admin role check
     // if (!(req as any).user?.role?.includes('admin')) {
@@ -261,13 +261,13 @@ router.delete('/cleanup', authenticateJWT, (req: Request, res: Response) => {
     if (daysOld < 1 || daysOld > 90) {
       return res.status(400).json({
         success: false,
-        error: 'Days must be between 1 and 90',
+        error: "Days must be between 1 and 90",
       });
     }
 
     const clearedCount = errorTracking.clearOldErrors(daysOld);
 
-    logger.info(`🧹 [Errors] Cleanup completed`, 'ErrorAPI', {
+    logger.info(`🧹 [Errors] Cleanup completed`, "ErrorAPI", {
       daysOld,
       clearedCount,
       requestedBy: (req as any).user?.id,
@@ -282,10 +282,10 @@ router.delete('/cleanup', authenticateJWT, (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    logger.error('❌ [Errors] Cleanup failed', 'ErrorAPI', error);
+    logger.error("❌ [Errors] Cleanup failed", "ErrorAPI", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to cleanup errors',
+      error: "Failed to cleanup errors",
     });
   }
 });
@@ -294,11 +294,11 @@ router.delete('/cleanup', authenticateJWT, (req: Request, res: Response) => {
  * GET /api/errors/dashboard - Dashboard-specific error overview
  * ZERO RISK: Specialized endpoint for dashboard error monitoring
  */
-router.get('/dashboard', authenticateJWT, (req: Request, res: Response) => {
+router.get("/dashboard", authenticateJWT, (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
 
-    logger.debug('📊 [Errors] Getting dashboard error overview', 'ErrorAPI', {
+    logger.debug("📊 [Errors] Getting dashboard error overview", "ErrorAPI", {
       tenantId,
     });
 
@@ -306,10 +306,10 @@ router.get('/dashboard', authenticateJWT, (req: Request, res: Response) => {
 
     // Filter for dashboard-related errors
     const dashboardErrors = stats.recentErrors.filter(
-      error =>
-        error.component === 'Dashboard' ||
-        error.component === 'WebSocket' ||
-        error.context?.category === 'dashboard'
+      (error) =>
+        error.component === "Dashboard" ||
+        error.component === "WebSocket" ||
+        error.context?.category === "dashboard",
     );
 
     // Get dashboard health
@@ -319,36 +319,36 @@ router.get('/dashboard', authenticateJWT, (req: Request, res: Response) => {
       health: health.status,
       totalDashboardErrors: dashboardErrors.length,
       errorsByType: {
-        dashboard: dashboardErrors.filter(e => e.component === 'Dashboard')
+        dashboard: dashboardErrors.filter((e) => e.component === "Dashboard")
           .length,
-        websocket: dashboardErrors.filter(e => e.component === 'WebSocket')
+        websocket: dashboardErrors.filter((e) => e.component === "WebSocket")
           .length,
-        database: dashboardErrors.filter(e => e.component === 'Database')
+        database: dashboardErrors.filter((e) => e.component === "Database")
           .length,
       },
       recentErrors: dashboardErrors.slice(-5), // Last 5 dashboard errors
-      recommendations: this.getDashboardRecommendations(dashboardErrors),
+      recommendations: getDashboardRecommendations(dashboardErrors),
     };
 
     res.json({
       success: true,
       data: dashboardOverview,
-      version: '1.0.0',
+      version: "1.0.0",
       _metadata: {
-        endpoint: 'dashboard-errors',
+        endpoint: "dashboard-errors",
         tenantId,
         timestamp: new Date().toISOString(),
       },
     });
   } catch (error) {
     logger.error(
-      '❌ [Errors] Failed to get dashboard error overview',
-      'ErrorAPI',
-      error
+      "❌ [Errors] Failed to get dashboard error overview",
+      "ErrorAPI",
+      error,
     );
     res.status(500).json({
       success: false,
-      error: 'Failed to get dashboard error overview',
+      error: "Failed to get dashboard error overview",
     });
   }
 });
@@ -360,32 +360,34 @@ function getDashboardRecommendations(errors: any[]): string[] {
   const recommendations: string[] = [];
 
   const websocketErrors = errors.filter(
-    e => e.component === 'WebSocket'
+    (e) => e.component === "WebSocket",
   ).length;
-  const databaseErrors = errors.filter(e => e.component === 'Database').length;
-  const cacheErrors = errors.filter(e => e.error.includes('cache')).length;
+  const databaseErrors = errors.filter(
+    (e) => e.component === "Database",
+  ).length;
+  const cacheErrors = errors.filter((e) => e.error.includes("cache")).length;
 
   if (websocketErrors > 5) {
     recommendations.push(
-      'Consider enabling WebSocket fallback mode for more stable connections'
+      "Consider enabling WebSocket fallback mode for more stable connections",
     );
   }
 
   if (databaseErrors > 3) {
     recommendations.push(
-      'Check database connection pooling and query optimization'
+      "Check database connection pooling and query optimization",
     );
   }
 
   if (cacheErrors > 2) {
     recommendations.push(
-      'Review cache configuration and consider increasing cache TTL'
+      "Review cache configuration and consider increasing cache TTL",
     );
   }
 
   if (errors.length === 0) {
     recommendations.push(
-      'Dashboard system running smoothly with no recent errors'
+      "Dashboard system running smoothly with no recent errors",
     );
   }
 
