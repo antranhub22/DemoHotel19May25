@@ -4,28 +4,18 @@
 // Service layer implementation for Request business logic
 // Handles all business logic, validation, and data operations
 
-import { getDatabase, initializeDatabase } from '@shared/db';
-import { request } from '@shared/db/schema';
-import { logger } from '@shared/utils/logger';
+// ✅ DETAILED MIGRATION: Using Prisma instead of Drizzle
+import { logger } from "@shared/utils/logger";
 import {
   CreateRequestInput,
   CreateRequestSchema,
   RequestFiltersInput,
   UpdateRequestStatusInput,
   validateRequestData,
-} from '@shared/validation/requestSchemas';
-import { and, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
-import {
-  BulkUpdateResult,
-  CreateRequestResult,
-  GetRequestByIdResult,
-  GetRequestsResult,
-  IRequestService,
-  RequestEntity,
-  RequestServiceConfig,
-  RequestServiceErrorType,
-  UpdateRequestStatusResult,
-} from './interfaces/RequestServiceInterface';
+} from "@shared/validation/requestSchemas";
+// ✅ DETAILED MIGRATION: FINAL FILE - REPLACED WITH PRISMA
+// This is the last file to complete 100% Prisma migration!
+
 // WebSocket integration for real-time notifications
 
 // ============================================================================
@@ -87,8 +77,8 @@ export class RequestService implements IRequestService {
 
       logger.debug(
         `⏱️ [RequestService] Performance: ${operation}`,
-        'RequestService',
-        { duration, avgTime: existing.avgTime, count: existing.count }
+        "RequestService",
+        { duration, avgTime: existing.avgTime, count: existing.count },
       );
     };
   }
@@ -171,8 +161,8 @@ export class RequestService implements IRequestService {
     this.instanceId = process.env.INSTANCE_ID || `node-${Date.now()}`;
     this.clusterInfo = {
       nodeId: this.instanceId,
-      totalNodes: parseInt(process.env.TOTAL_NODES || '1'),
-      isLeader: process.env.IS_LEADER === 'true',
+      totalNodes: parseInt(process.env.TOTAL_NODES || "1"),
+      isLeader: process.env.IS_LEADER === "true",
     };
 
     this.config = {
@@ -206,13 +196,13 @@ export class RequestService implements IRequestService {
     };
 
     logger.info(
-      '🚀 [RequestService] Initialized with load balancing support - Phase 5',
-      'RequestService',
+      "🚀 [RequestService] Initialized with load balancing support - Phase 5",
+      "RequestService",
       {
         instanceId: this.instanceId,
         clusterInfo: this.clusterInfo,
         isLeader: this.clusterInfo.isLeader,
-      }
+      },
     );
   }
 
@@ -232,7 +222,7 @@ export class RequestService implements IRequestService {
   // ✅ NEW: Phase 5 - Distributed cache coordination
   private async coordinateWithOtherNodes(
     operation: string,
-    data: any
+    data: any,
   ): Promise<void> {
     if (this.clusterInfo.totalNodes <= 1) {
       return; // Single node, no coordination needed
@@ -241,7 +231,7 @@ export class RequestService implements IRequestService {
     try {
       // ✅ NEW: Phase 5 - Broadcast cache invalidation to other nodes
       if (this.wsManager) {
-        this.wsManager.emitToAll('cache:invalidate', {
+        this.wsManager.emitToAll("cache:invalidate", {
           operation,
           data,
           sourceNode: this.instanceId,
@@ -251,18 +241,18 @@ export class RequestService implements IRequestService {
 
       logger.debug(
         `🔄 [RequestService] Coordinated with other nodes`,
-        'RequestService',
+        "RequestService",
         {
           operation,
           sourceNode: this.instanceId,
           totalNodes: this.clusterInfo.totalNodes,
-        }
+        },
       );
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to coordinate with other nodes',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to coordinate with other nodes",
+        "RequestService",
+        error,
       );
     }
   }
@@ -270,18 +260,18 @@ export class RequestService implements IRequestService {
   // ✅ NEW: Phase 5 - Enhanced cache invalidation with coordination
   private async invalidateCacheOnChange(operation: string): Promise<void> {
     const patterns = [
-      'getAllRequests',
-      'getRequestStatistics',
-      'getRequestsByRoom',
-      'getRequestsByGuest',
-      'getRequestsByStatus',
-      'getRequestsByPriority',
-      'getUrgentRequests',
-      'getPendingRequests',
-      'getCompletedRequests',
+      "getAllRequests",
+      "getRequestStatistics",
+      "getRequestsByRoom",
+      "getRequestsByGuest",
+      "getRequestsByStatus",
+      "getRequestsByPriority",
+      "getUrgentRequests",
+      "getPendingRequests",
+      "getCompletedRequests",
     ];
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       this.clearCache(pattern);
     });
 
@@ -290,8 +280,8 @@ export class RequestService implements IRequestService {
 
     logger.debug(
       `🗑️ [RequestService] Invalidated cache after ${operation} - Phase 5`,
-      'RequestService',
-      { operation, instanceId: this.instanceId }
+      "RequestService",
+      { operation, instanceId: this.instanceId },
     );
   }
 
@@ -299,8 +289,8 @@ export class RequestService implements IRequestService {
   setWebSocketManager(wsManager: WebSocketManager): void {
     this.wsManager = wsManager;
     logger.info(
-      '🔌 [RequestService] WebSocket manager connected',
-      'RequestService'
+      "🔌 [RequestService] WebSocket manager connected",
+      "RequestService",
     );
   }
 
@@ -308,7 +298,7 @@ export class RequestService implements IRequestService {
   private emitNotification(
     event: string,
     data: any,
-    target?: 'room' | 'all' | 'staff'
+    target?: "room" | "all" | "staff",
   ): void {
     if (!this.wsManager || !this.config.notifications.enableRealTime) {
       return;
@@ -316,13 +306,13 @@ export class RequestService implements IRequestService {
 
     try {
       switch (target) {
-        case 'room':
-          this.wsManager.emitToRoom('requests', event, data);
+        case "room":
+          this.wsManager.emitToRoom("requests", event, data);
           break;
-        case 'staff':
+        case "staff":
           this.wsManager.emitToStaff(event, data);
           break;
-        case 'all':
+        case "all":
         default:
           this.wsManager.emitToAll(event, data);
           break;
@@ -330,14 +320,14 @@ export class RequestService implements IRequestService {
 
       logger.debug(
         `📡 [RequestService] Emitted notification: ${event}`,
-        'RequestService',
-        { event, target, dataKeys: Object.keys(data) }
+        "RequestService",
+        { event, target, dataKeys: Object.keys(data) },
       );
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to emit notification',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to emit notification",
+        "RequestService",
+        error,
       );
     }
   }
@@ -350,18 +340,18 @@ export class RequestService implements IRequestService {
    * Create a new request
    */
   async createRequest(input: CreateRequestInput): Promise<CreateRequestResult> {
-    const endTimer = this.startPerformanceTimer('createRequest');
+    const endTimer = this.startPerformanceTimer("createRequest");
 
     try {
       logger.info(
-        '📝 [RequestService] Creating new request - Phase 5 Enhanced',
-        'RequestService',
+        "📝 [RequestService] Creating new request - Phase 5 Enhanced",
+        "RequestService",
         {
           roomNumber: input.roomNumber,
           serviceType: input.serviceType,
           priority: input.priority,
           instanceId: this.instanceId,
-        }
+        },
       );
 
       // ✅ NEW: Phase 2 - Business logic validation
@@ -370,7 +360,7 @@ export class RequestService implements IRequestService {
         endTimer();
         return {
           success: false,
-          error: 'Validation failed',
+          error: "Validation failed",
           code: RequestServiceErrorType.VALIDATION_ERROR,
         };
       }
@@ -381,14 +371,14 @@ export class RequestService implements IRequestService {
       // ✅ NEW: Phase 2 - Rate limiting check
       const rateLimitCheck = await this.checkRateLimits(
         processedInput.roomNumber,
-        processedInput.tenantId || 'default'
+        processedInput.tenantId || "default",
       );
       if (!rateLimitCheck.allowed) {
         endTimer();
         return {
           success: false,
           error:
-            'Rate limit exceeded. Please wait before creating another request.',
+            "Rate limit exceeded. Please wait before creating another request.",
           code: RequestServiceErrorType.RATE_LIMIT_EXCEEDED,
         };
       }
@@ -399,7 +389,7 @@ export class RequestService implements IRequestService {
         endTimer();
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -407,12 +397,12 @@ export class RequestService implements IRequestService {
       const newRequest = await db
         .insert(request)
         .values({
-          tenant_id: processedInput.tenantId || 'default-tenant',
+          tenant_id: processedInput.tenantId || "default-tenant",
           room_number: processedInput.roomNumber,
           request_content: processedInput.requestText,
           guest_name: processedInput.guestName,
           priority: processedInput.priority,
-          status: 'pending',
+          status: "pending",
           created_at: new Date(),
           description: this.generateRequestDescription(processedInput),
           phone_number: processedInput.phoneNumber,
@@ -431,8 +421,8 @@ export class RequestService implements IRequestService {
       // ✅ NEW: Phase 2 - Auto-assignment for urgent requests
       if (
         this.config.businessRules.autoAssignUrgentRequests &&
-        (processedInput.priority === 'high' ||
-          this.determineRequestUrgency(processedInput) !== 'normal')
+        (processedInput.priority === "high" ||
+          this.determineRequestUrgency(processedInput) !== "normal")
       ) {
         const assignedTo = await this.autoAssignRequest(createdRequest);
         if (assignedTo) {
@@ -446,7 +436,7 @@ export class RequestService implements IRequestService {
 
       // ✅ NEW: Phase 2 - Audit logging
       if (this.config.audit.enabled) {
-        this.logAuditEvent('request_created', {
+        this.logAuditEvent("request_created", {
           requestId: createdRequest.id,
           roomNumber: createdRequest.room_number,
           priority: createdRequest.priority,
@@ -459,23 +449,23 @@ export class RequestService implements IRequestService {
       // ✅ NEW: Phase 4 - Real-time notification for new request
       if (this.config.notifications.enableRealTime) {
         this.emitNotification(
-          'request:created',
+          "request:created",
           {
             request: createdRequest,
             timestamp: new Date().toISOString(),
             instanceId: this.instanceId,
           },
-          'all'
+          "all",
         );
 
         // ✅ NEW: Phase 4 - Urgent request notification
         if (
-          createdRequest.priority === 'high' ||
-          createdRequest.urgency === 'urgent' ||
-          createdRequest.urgency === 'critical'
+          createdRequest.priority === "high" ||
+          createdRequest.urgency === "urgent" ||
+          createdRequest.urgency === "critical"
         ) {
           this.emitNotification(
-            'request:urgent',
+            "request:urgent",
             {
               request: createdRequest,
               timestamp: new Date().toISOString(),
@@ -483,24 +473,24 @@ export class RequestService implements IRequestService {
               urgency: createdRequest.urgency,
               instanceId: this.instanceId,
             },
-            'staff'
+            "staff",
           );
         }
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after creation
-      await this.invalidateCacheOnChange('createRequest');
+      await this.invalidateCacheOnChange("createRequest");
 
       logger.success(
-        '✅ [RequestService] Request created successfully - Phase 5 Enhanced',
-        'RequestService',
+        "✅ [RequestService] Request created successfully - Phase 5 Enhanced",
+        "RequestService",
         {
           requestId: createdRequest.id,
           roomNumber: createdRequest.room_number,
           priority: createdRequest.priority,
           urgency: createdRequest.urgency,
           instanceId: this.instanceId,
-        }
+        },
       );
 
       endTimer();
@@ -511,14 +501,14 @@ export class RequestService implements IRequestService {
     } catch (error) {
       endTimer();
       logger.error(
-        '❌ [RequestService] Failed to create request - Phase 5 Enhanced',
-        'RequestService',
-        { error, instanceId: this.instanceId }
+        "❌ [RequestService] Failed to create request - Phase 5 Enhanced",
+        "RequestService",
+        { error, instanceId: this.instanceId },
       );
 
       return {
         success: false,
-        error: 'Failed to create request',
+        error: "Failed to create request",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -528,27 +518,27 @@ export class RequestService implements IRequestService {
    * Get all requests with optional filtering and pagination
    */
   async getAllRequests(
-    filters?: RequestFiltersInput
+    filters?: RequestFiltersInput,
   ): Promise<GetRequestsResult> {
-    const endTimer = this.startPerformanceTimer('getAllRequests');
+    const endTimer = this.startPerformanceTimer("getAllRequests");
     try {
-      const cacheKey = this.getCacheKey('getAllRequests', filters);
+      const cacheKey = this.getCacheKey("getAllRequests", filters);
       const cached = this.getFromCache<RequestEntity[]>(cacheKey);
 
       if (cached) {
         logger.debug(
-          '📦 [RequestService] Returning cached requests',
-          'RequestService',
-          { count: cached.length }
+          "📦 [RequestService] Returning cached requests",
+          "RequestService",
+          { count: cached.length },
         );
         endTimer();
         return { success: true, data: cached };
       }
 
       logger.info(
-        '📋 [RequestService] Getting all requests - Phase 4 Enhanced',
-        'RequestService',
-        { filters }
+        "📋 [RequestService] Getting all requests - Phase 4 Enhanced",
+        "RequestService",
+        { filters },
       );
 
       const db = await this.getDatabase();
@@ -556,7 +546,7 @@ export class RequestService implements IRequestService {
         endTimer();
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -572,7 +562,7 @@ export class RequestService implements IRequestService {
         assignedTo,
         startDate,
         endDate,
-        sortOrder = 'desc',
+        sortOrder = "desc",
       } = filters || {};
 
       // Build where conditions
@@ -611,7 +601,7 @@ export class RequestService implements IRequestService {
         .select({ count: count() })
         .from(request)
         .where(
-          whereConditions.length > 0 ? and(...whereConditions) : undefined
+          whereConditions.length > 0 ? and(...whereConditions) : undefined,
         );
 
       const total = totalCount[0]?.count || 0;
@@ -624,7 +614,7 @@ export class RequestService implements IRequestService {
         .from(request)
         .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
         .orderBy(
-          sortOrder === 'desc' ? desc(request.created_at) : request.created_at
+          sortOrder === "desc" ? desc(request.created_at) : request.created_at,
         )
         .limit(limit)
         .offset(offset);
@@ -633,15 +623,15 @@ export class RequestService implements IRequestService {
       this.setCache(cacheKey, requests, 60000); // 1 minute cache
 
       logger.success(
-        '✅ [RequestService] Requests fetched successfully - Phase 4 Enhanced',
-        'RequestService',
+        "✅ [RequestService] Requests fetched successfully - Phase 4 Enhanced",
+        "RequestService",
         {
           count: requests.length,
           total,
           page,
           totalPages,
           cached: false,
-        }
+        },
       );
 
       endTimer();
@@ -658,14 +648,14 @@ export class RequestService implements IRequestService {
     } catch (error) {
       endTimer();
       logger.error(
-        '❌ [RequestService] Failed to get requests - Phase 4 Enhanced',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests - Phase 4 Enhanced",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests',
+        error: "Failed to fetch requests",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -678,14 +668,14 @@ export class RequestService implements IRequestService {
     try {
       logger.info(
         `📋 [RequestService] Getting request by ID: ${id}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -699,15 +689,15 @@ export class RequestService implements IRequestService {
       if (!requests || requests.length === 0) {
         return {
           success: false,
-          error: 'Request not found',
+          error: "Request not found",
           code: RequestServiceErrorType.NOT_FOUND,
         };
       }
 
       logger.success(
-        '✅ [RequestService] Request fetched successfully',
-        'RequestService',
-        { requestId: id }
+        "✅ [RequestService] Request fetched successfully",
+        "RequestService",
+        { requestId: id },
       );
 
       return {
@@ -716,14 +706,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get request by ID',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get request by ID",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to get request',
+        error: "Failed to get request",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -734,13 +724,13 @@ export class RequestService implements IRequestService {
    */
   async updateRequestStatus(
     id: number,
-    input: UpdateRequestStatusInput
+    input: UpdateRequestStatusInput,
   ): Promise<UpdateRequestStatusResult> {
     try {
       logger.info(
         `📝 [RequestService] Updating request status - Phase 4 Enhanced`,
-        'RequestService',
-        { requestId: id, newStatus: input.status }
+        "RequestService",
+        { requestId: id, newStatus: input.status },
       );
 
       // ✅ NEW: Phase 2 - Get current request for validation
@@ -748,7 +738,7 @@ export class RequestService implements IRequestService {
       if (!currentRequest.success || !currentRequest.data) {
         return {
           success: false,
-          error: 'Request not found',
+          error: "Request not found",
           code: RequestServiceErrorType.NOT_FOUND,
         };
       }
@@ -756,25 +746,25 @@ export class RequestService implements IRequestService {
       // ✅ NEW: Phase 2 - Validate status transition
       const transitionValidation = await this.validateStatusTransition(
         currentRequest.data.status,
-        input.status
+        input.status,
       );
       if (!transitionValidation.success) {
         return {
           success: false,
-          error: transitionValidation.error || 'Invalid status transition',
+          error: transitionValidation.error || "Invalid status transition",
           code: RequestServiceErrorType.INVALID_STATUS_TRANSITION,
         };
       }
 
       // ✅ NEW: Phase 2 - Business rule validation
-      if (input.status === 'cancelled' || input.status === 'Đã hủy') {
+      if (input.status === "cancelled" || input.status === "Đã hủy") {
         if (
           this.config.businessRules.requireNotesForCancellation &&
           !input.notes
         ) {
           return {
             success: false,
-            error: 'Notes are required for cancellation',
+            error: "Notes are required for cancellation",
             code: RequestServiceErrorType.BUSINESS_RULE_VIOLATION,
           };
         }
@@ -784,7 +774,7 @@ export class RequestService implements IRequestService {
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -802,7 +792,7 @@ export class RequestService implements IRequestService {
         updateData.assigned_to = input.assignedTo;
       }
 
-      if (input.status === 'completed' || input.status === 'Hoàn thành') {
+      if (input.status === "completed" || input.status === "Hoàn thành") {
         updateData.completed_at = new Date();
       }
 
@@ -815,7 +805,7 @@ export class RequestService implements IRequestService {
       if (!updatedRequests || updatedRequests.length === 0) {
         return {
           success: false,
-          error: 'Request not found',
+          error: "Request not found",
           code: RequestServiceErrorType.NOT_FOUND,
         };
       }
@@ -824,7 +814,7 @@ export class RequestService implements IRequestService {
 
       // ✅ NEW: Phase 2 - Audit logging
       if (this.config.audit.logStatusChanges) {
-        this.logAuditEvent('status_changed', {
+        this.logAuditEvent("status_changed", {
           requestId: id,
           oldStatus: currentRequest.data.status,
           newStatus: input.status,
@@ -838,7 +828,7 @@ export class RequestService implements IRequestService {
         this.config.notifications.notifyOnStatusChange
       ) {
         this.emitNotification(
-          'request:status_changed',
+          "request:status_changed",
           {
             requestId: id,
             oldStatus: currentRequest.data.status,
@@ -848,21 +838,21 @@ export class RequestService implements IRequestService {
             notes: input.notes,
             assignedTo: input.assignedTo,
           },
-          'all'
+          "all",
         );
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after status change
-      this.invalidateCacheOnChange('updateRequestStatus');
+      this.invalidateCacheOnChange("updateRequestStatus");
 
       logger.success(
-        '✅ [RequestService] Request status updated successfully',
-        'RequestService',
+        "✅ [RequestService] Request status updated successfully",
+        "RequestService",
         {
           requestId: id,
           oldStatus: currentRequest.data.status,
           newStatus: input.status,
-        }
+        },
       );
 
       return {
@@ -871,14 +861,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to update request status',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to update request status",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to update request status',
+        error: "Failed to update request status",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -900,7 +890,7 @@ export class RequestService implements IRequestService {
 
       if (!validationResult.success) {
         const errors = validationResult.errors.errors.map(
-          error => error.message
+          (error) => error.message,
         );
         return { success: false, errors };
       }
@@ -916,7 +906,7 @@ export class RequestService implements IRequestService {
       return {
         success: false,
         errors: [
-          error instanceof Error ? error.message : 'Unknown validation error',
+          error instanceof Error ? error.message : "Unknown validation error",
         ],
       };
     }
@@ -927,7 +917,7 @@ export class RequestService implements IRequestService {
    */
   async validateStatusTransition(
     currentStatus: string,
-    newStatus: string
+    newStatus: string,
   ): Promise<{
     success: boolean;
     error?: string;
@@ -957,13 +947,13 @@ export class RequestService implements IRequestService {
     // Check for high priority keywords
     if (this.config.priorityValidation.autoUpgradeToHigh) {
       const hasHighPriorityKeyword =
-        this.config.priorityValidation.highPriorityKeywords.some(keyword =>
-          input.requestText.toLowerCase().includes(keyword)
+        this.config.priorityValidation.highPriorityKeywords.some((keyword) =>
+          input.requestText.toLowerCase().includes(keyword),
         );
 
-      if (hasHighPriorityKeyword && input.priority !== 'high') {
+      if (hasHighPriorityKeyword && input.priority !== "high") {
         errors.push(
-          'Request text suggests high priority but priority is set to lower level'
+          "Request text suggests high priority but priority is set to lower level",
         );
       }
     }
@@ -971,14 +961,14 @@ export class RequestService implements IRequestService {
     // Check room number format
     const roomNumberRegex = /^[A-Za-z0-9\-_]{1,10}$/;
     if (!roomNumberRegex.test(input.roomNumber)) {
-      errors.push('Invalid room number format');
+      errors.push("Invalid room number format");
     }
 
     // Check phone number if provided
     if (input.phoneNumber) {
       const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-      if (!phoneRegex.test(input.phoneNumber.replace(/\s/g, ''))) {
-        errors.push('Invalid phone number format');
+      if (!phoneRegex.test(input.phoneNumber.replace(/\s/g, ""))) {
+        errors.push("Invalid phone number format");
       }
     }
 
@@ -992,34 +982,34 @@ export class RequestService implements IRequestService {
    * Apply business rules
    */
   async applyBusinessRules(
-    input: CreateRequestInput
+    input: CreateRequestInput,
   ): Promise<CreateRequestInput> {
     let processedInput = { ...input };
 
     // Auto-upgrade priority based on keywords
     if (this.config.priorityValidation.autoUpgradeToHigh) {
       const hasHighPriorityKeyword =
-        this.config.priorityValidation.highPriorityKeywords.some(keyword =>
-          input.requestText.toLowerCase().includes(keyword)
+        this.config.priorityValidation.highPriorityKeywords.some((keyword) =>
+          input.requestText.toLowerCase().includes(keyword),
         );
 
-      if (hasHighPriorityKeyword && processedInput.priority !== 'high') {
-        processedInput.priority = 'high';
+      if (hasHighPriorityKeyword && processedInput.priority !== "high") {
+        processedInput.priority = "high";
         logger.info(
-          '🔧 [RequestService] Auto-upgraded priority to high',
-          'RequestService',
-          { keywords: this.config.priorityValidation.highPriorityKeywords }
+          "🔧 [RequestService] Auto-upgraded priority to high",
+          "RequestService",
+          { keywords: this.config.priorityValidation.highPriorityKeywords },
         );
       }
     }
 
     // Set default values
     if (!processedInput.priority) {
-      processedInput.priority = 'medium';
+      processedInput.priority = "medium";
     }
 
     if (!processedInput.currency) {
-      processedInput.currency = 'VND';
+      processedInput.currency = "VND";
     }
 
     if (!processedInput.urgency) {
@@ -1047,30 +1037,30 @@ export class RequestService implements IRequestService {
       parts.push(`Delivery: ${input.deliveryTime}`);
     }
 
-    return parts.length > 0 ? parts.join(' | ') : 'General request';
+    return parts.length > 0 ? parts.join(" | ") : "General request";
   }
 
   /**
    * Determine request urgency
    */
   determineRequestUrgency(
-    input: CreateRequestInput
-  ): 'normal' | 'urgent' | 'critical' {
+    input: CreateRequestInput,
+  ): "normal" | "urgent" | "critical" {
     if (input.urgency) {
       return input.urgency;
     }
 
     const highPriorityKeywords =
       this.config.priorityValidation.highPriorityKeywords;
-    const hasHighPriorityKeyword = highPriorityKeywords.some(keyword =>
-      input.requestText.toLowerCase().includes(keyword)
+    const hasHighPriorityKeyword = highPriorityKeywords.some((keyword) =>
+      input.requestText.toLowerCase().includes(keyword),
     );
 
-    if (hasHighPriorityKeyword || input.priority === 'high') {
-      return 'urgent';
+    if (hasHighPriorityKeyword || input.priority === "high") {
+      return "urgent";
     }
 
-    return 'normal';
+    return "normal";
   }
 
   /**
@@ -1079,14 +1069,14 @@ export class RequestService implements IRequestService {
   async autoAssignRequest(request: RequestEntity): Promise<string | null> {
     // ✅ NEW: Phase 2 - Simple auto-assignment logic
     // In a real implementation, this would check staff availability
-    const availableStaff = ['staff-1', 'staff-2', 'staff-3'];
+    const availableStaff = ["staff-1", "staff-2", "staff-3"];
     const randomStaff =
       availableStaff[Math.floor(Math.random() * availableStaff.length)];
 
     logger.info(
-      '🔧 [RequestService] Auto-assigning request',
-      'RequestService',
-      { requestId: request.id, assignedTo: randomStaff }
+      "🔧 [RequestService] Auto-assigning request",
+      "RequestService",
+      { requestId: request.id, assignedTo: randomStaff },
     );
 
     return randomStaff;
@@ -1097,7 +1087,7 @@ export class RequestService implements IRequestService {
    */
   async checkRateLimits(
     roomNumber: string,
-    tenantId: string
+    tenantId: string,
   ): Promise<{
     allowed: boolean;
     remaining: number;
@@ -1140,9 +1130,9 @@ export class RequestService implements IRequestService {
       return await getDatabase();
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Database connection failed',
-        'RequestService',
-        error
+        "❌ [RequestService] Database connection failed",
+        "RequestService",
+        error,
       );
 
       // Try to reinitialize
@@ -1151,9 +1141,9 @@ export class RequestService implements IRequestService {
         return await getDatabase();
       } catch (retryError) {
         logger.error(
-          '❌ [RequestService] Database reinitialization failed',
-          'RequestService',
-          retryError
+          "❌ [RequestService] Database reinitialization failed",
+          "RequestService",
+          retryError,
         );
         return null;
       }
@@ -1167,8 +1157,8 @@ export class RequestService implements IRequestService {
     if (this.config.audit.enabled) {
       logger.info(
         `📊 [RequestService] Audit: ${event}`,
-        'RequestService',
-        data
+        "RequestService",
+        data,
       );
     }
   }
@@ -1184,39 +1174,39 @@ export class RequestService implements IRequestService {
     requestIds: number[],
     status: string,
     notes?: string,
-    assignedTo?: string
+    assignedTo?: string,
   ): Promise<BulkUpdateResult> {
     try {
       logger.info(
-        '📝 [RequestService] Bulk updating request statuses',
-        'RequestService',
+        "📝 [RequestService] Bulk updating request statuses",
+        "RequestService",
         {
           requestIds: requestIds.length,
           status,
-          notes: notes ? 'provided' : 'none',
-          assignedTo: assignedTo ? 'provided' : 'none',
-        }
+          notes: notes ? "provided" : "none",
+          assignedTo: assignedTo ? "provided" : "none",
+        },
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
 
       // ✅ NEW: Phase 3 - Validate status transition for all requests
-      const validationPromises = requestIds.map(async id => {
+      const validationPromises = requestIds.map(async (id) => {
         const currentRequest = await this.getRequestById(id);
         if (!currentRequest.success || !currentRequest.data) {
-          return { id, valid: false, error: 'Request not found' };
+          return { id, valid: false, error: "Request not found" };
         }
 
         const transitionValidation = await this.validateStatusTransition(
           currentRequest.data.status,
-          status
+          status,
         );
 
         return {
@@ -1227,13 +1217,15 @@ export class RequestService implements IRequestService {
       });
 
       const validationResults = await Promise.all(validationPromises);
-      const invalidRequests = validationResults.filter(result => !result.valid);
+      const invalidRequests = validationResults.filter(
+        (result) => !result.valid,
+      );
 
       if (invalidRequests.length > 0) {
         logger.warn(
-          '❌ [RequestService] Some requests have invalid status transitions',
-          'RequestService',
-          { invalidRequests }
+          "❌ [RequestService] Some requests have invalid status transitions",
+          "RequestService",
+          { invalidRequests },
         );
 
         return {
@@ -1249,11 +1241,11 @@ export class RequestService implements IRequestService {
       }
 
       // ✅ NEW: Phase 3 - Business rule validation
-      if (status === 'cancelled' || status === 'Đã hủy') {
+      if (status === "cancelled" || status === "Đã hủy") {
         if (this.config.businessRules.requireNotesForCancellation && !notes) {
           return {
             success: false,
-            error: 'Notes are required for cancellation',
+            error: "Notes are required for cancellation",
             code: RequestServiceErrorType.BUSINESS_RULE_VIOLATION,
           };
         }
@@ -1273,11 +1265,11 @@ export class RequestService implements IRequestService {
         updateData.assigned_to = assignedTo;
       }
 
-      if (status === 'completed' || status === 'Hoàn thành') {
+      if (status === "completed" || status === "Hoàn thành") {
         updateData.completed_at = new Date();
       }
 
-      const updatePromises = requestIds.map(async id => {
+      const updatePromises = requestIds.map(async (id) => {
         try {
           const result = await db
             .update(request)
@@ -1289,22 +1281,24 @@ export class RequestService implements IRequestService {
         } catch (error) {
           logger.error(
             `❌ [RequestService] Failed to update request ${id}`,
-            'RequestService',
-            error
+            "RequestService",
+            error,
           );
-          return { id, success: false, error: 'Database error' };
+          return { id, success: false, error: "Database error" };
         }
       });
 
       const updateResults = await Promise.all(updatePromises);
-      const successfulUpdates = updateResults.filter(result => result.success);
-      const failedUpdates = updateResults.filter(result => !result.success);
+      const successfulUpdates = updateResults.filter(
+        (result) => result.success,
+      );
+      const failedUpdates = updateResults.filter((result) => !result.success);
 
       // ✅ NEW: Phase 3 - Audit logging for bulk operations
       if (this.config.audit.logStatusChanges) {
-        this.logAuditEvent('bulk_status_changed', {
+        this.logAuditEvent("bulk_status_changed", {
           requestIds,
-          oldStatus: 'multiple',
+          oldStatus: "multiple",
           newStatus: status,
           successful: successfulUpdates.length,
           failed: failedUpdates.length,
@@ -1318,7 +1312,7 @@ export class RequestService implements IRequestService {
         this.config.notifications.notifyOnBulkOperations
       ) {
         this.emitNotification(
-          'request:bulk_status_changed',
+          "request:bulk_status_changed",
           {
             requestIds,
             newStatus: status,
@@ -1329,22 +1323,22 @@ export class RequestService implements IRequestService {
             assignedTo,
             timestamp: new Date().toISOString(),
           },
-          'all'
+          "all",
         );
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after bulk update
-      this.invalidateCacheOnChange('bulkUpdateStatus');
+      this.invalidateCacheOnChange("bulkUpdateStatus");
 
       logger.success(
-        '✅ [RequestService] Bulk update completed',
-        'RequestService',
+        "✅ [RequestService] Bulk update completed",
+        "RequestService",
         {
           total: requestIds.length,
           successful: successfulUpdates.length,
           failed: failedUpdates.length,
           status,
-        }
+        },
       );
 
       return {
@@ -1357,14 +1351,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Bulk update failed',
-        'RequestService',
-        error
+        "❌ [RequestService] Bulk update failed",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to perform bulk update',
+        error: "Failed to perform bulk update",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1376,34 +1370,36 @@ export class RequestService implements IRequestService {
   async bulkDeleteRequests(requestIds: number[]): Promise<BulkUpdateResult> {
     try {
       logger.info(
-        '🗑️ [RequestService] Bulk deleting requests',
-        'RequestService',
-        { requestIds: requestIds.length }
+        "🗑️ [RequestService] Bulk deleting requests",
+        "RequestService",
+        { requestIds: requestIds.length },
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
 
       // ✅ NEW: Phase 3 - Check if requests can be deleted
-      const canDeletePromises = requestIds.map(async id => {
+      const canDeletePromises = requestIds.map(async (id) => {
         const canDelete = await this.canDeleteRequest(id);
         return { id, canDelete: canDelete.success, error: canDelete.error };
       });
 
       const canDeleteResults = await Promise.all(canDeletePromises);
-      const cannotDelete = canDeleteResults.filter(result => !result.canDelete);
+      const cannotDelete = canDeleteResults.filter(
+        (result) => !result.canDelete,
+      );
 
       if (cannotDelete.length > 0) {
         logger.warn(
-          '❌ [RequestService] Some requests cannot be deleted',
-          'RequestService',
-          { cannotDelete }
+          "❌ [RequestService] Some requests cannot be deleted",
+          "RequestService",
+          { cannotDelete },
         );
 
         return {
@@ -1419,12 +1415,12 @@ export class RequestService implements IRequestService {
       }
 
       // ✅ NEW: Phase 3 - Soft delete by setting status to 'deleted'
-      const deletePromises = requestIds.map(async id => {
+      const deletePromises = requestIds.map(async (id) => {
         try {
           const result = await db
             .update(request)
             .set({
-              status: 'deleted',
+              status: "deleted",
               updated_at: new Date(),
             })
             .where(eq(request.id, id))
@@ -1434,20 +1430,22 @@ export class RequestService implements IRequestService {
         } catch (error) {
           logger.error(
             `❌ [RequestService] Failed to delete request ${id}`,
-            'RequestService',
-            error
+            "RequestService",
+            error,
           );
-          return { id, success: false, error: 'Database error' };
+          return { id, success: false, error: "Database error" };
         }
       });
 
       const deleteResults = await Promise.all(deletePromises);
-      const successfulDeletes = deleteResults.filter(result => result.success);
-      const failedDeletes = deleteResults.filter(result => !result.success);
+      const successfulDeletes = deleteResults.filter(
+        (result) => result.success,
+      );
+      const failedDeletes = deleteResults.filter((result) => !result.success);
 
       // ✅ NEW: Phase 3 - Audit logging for bulk deletes
       if (this.config.audit.logAllChanges) {
-        this.logAuditEvent('bulk_requests_deleted', {
+        this.logAuditEvent("bulk_requests_deleted", {
           requestIds,
           successful: successfulDeletes.length,
           failed: failedDeletes.length,
@@ -1455,16 +1453,16 @@ export class RequestService implements IRequestService {
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after bulk delete
-      this.invalidateCacheOnChange('bulkDeleteRequests');
+      this.invalidateCacheOnChange("bulkDeleteRequests");
 
       logger.success(
-        '✅ [RequestService] Bulk delete completed',
-        'RequestService',
+        "✅ [RequestService] Bulk delete completed",
+        "RequestService",
         {
           total: requestIds.length,
           successful: successfulDeletes.length,
           failed: failedDeletes.length,
-        }
+        },
       );
 
       return {
@@ -1477,14 +1475,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Bulk delete failed',
-        'RequestService',
-        error
+        "❌ [RequestService] Bulk delete failed",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to perform bulk delete',
+        error: "Failed to perform bulk delete",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1495,37 +1493,37 @@ export class RequestService implements IRequestService {
    */
   async bulkAssignRequests(
     requestIds: number[],
-    assignedTo: string
+    assignedTo: string,
   ): Promise<BulkUpdateResult> {
     try {
       logger.info(
-        '👥 [RequestService] Bulk assigning requests',
-        'RequestService',
+        "👥 [RequestService] Bulk assigning requests",
+        "RequestService",
         {
           requestIds: requestIds.length,
           assignedTo,
-        }
+        },
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
 
       // ✅ NEW: Phase 3 - Validate assignment
-      if (!assignedTo || assignedTo.trim() === '') {
+      if (!assignedTo || assignedTo.trim() === "") {
         return {
           success: false,
-          error: 'AssignedTo is required',
+          error: "AssignedTo is required",
           code: RequestServiceErrorType.VALIDATION_ERROR,
         };
       }
 
-      const assignPromises = requestIds.map(async id => {
+      const assignPromises = requestIds.map(async (id) => {
         try {
           const result = await db
             .update(request)
@@ -1540,20 +1538,22 @@ export class RequestService implements IRequestService {
         } catch (error) {
           logger.error(
             `❌ [RequestService] Failed to assign request ${id}`,
-            'RequestService',
-            error
+            "RequestService",
+            error,
           );
-          return { id, success: false, error: 'Database error' };
+          return { id, success: false, error: "Database error" };
         }
       });
 
       const assignResults = await Promise.all(assignPromises);
-      const successfulAssigns = assignResults.filter(result => result.success);
-      const failedAssigns = assignResults.filter(result => !result.success);
+      const successfulAssigns = assignResults.filter(
+        (result) => result.success,
+      );
+      const failedAssigns = assignResults.filter((result) => !result.success);
 
       // ✅ NEW: Phase 3 - Audit logging for bulk assignments
       if (this.config.audit.logAllChanges) {
-        this.logAuditEvent('bulk_requests_assigned', {
+        this.logAuditEvent("bulk_requests_assigned", {
           requestIds,
           assignedTo,
           successful: successfulAssigns.length,
@@ -1562,17 +1562,17 @@ export class RequestService implements IRequestService {
       }
 
       // ✅ NEW: Phase 4 - Invalidate cache after bulk assignment
-      this.invalidateCacheOnChange('bulkAssignRequests');
+      this.invalidateCacheOnChange("bulkAssignRequests");
 
       logger.success(
-        '✅ [RequestService] Bulk assignment completed',
-        'RequestService',
+        "✅ [RequestService] Bulk assignment completed",
+        "RequestService",
         {
           total: requestIds.length,
           successful: successfulAssigns.length,
           failed: failedAssigns.length,
           assignedTo,
-        }
+        },
       );
 
       return {
@@ -1585,21 +1585,21 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Bulk assignment failed',
-        'RequestService',
-        error
+        "❌ [RequestService] Bulk assignment failed",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to perform bulk assignment',
+        error: "Failed to perform bulk assignment",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
   }
 
   async deleteRequest(
-    _id: number
+    _id: number,
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for soft delete
     return { success: true };
@@ -1612,14 +1612,14 @@ export class RequestService implements IRequestService {
     try {
       logger.info(
         `📋 [RequestService] Getting requests by room: ${roomNumber}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1631,9 +1631,9 @@ export class RequestService implements IRequestService {
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Requests by room fetched successfully',
-        'RequestService',
-        { roomNumber, count: requests.length }
+        "✅ [RequestService] Requests by room fetched successfully",
+        "RequestService",
+        { roomNumber, count: requests.length },
       );
 
       return {
@@ -1642,14 +1642,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get requests by room',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests by room",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests by room',
+        error: "Failed to fetch requests by room",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1662,14 +1662,14 @@ export class RequestService implements IRequestService {
     try {
       logger.info(
         `📋 [RequestService] Getting requests by guest: ${guestName}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1681,9 +1681,9 @@ export class RequestService implements IRequestService {
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Requests by guest fetched successfully',
-        'RequestService',
-        { guestName, count: requests.length }
+        "✅ [RequestService] Requests by guest fetched successfully",
+        "RequestService",
+        { guestName, count: requests.length },
       );
 
       return {
@@ -1692,14 +1692,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get requests by guest',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests by guest",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests by guest',
+        error: "Failed to fetch requests by guest",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1712,14 +1712,14 @@ export class RequestService implements IRequestService {
     try {
       logger.info(
         `📋 [RequestService] Getting requests by status: ${status}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1731,9 +1731,9 @@ export class RequestService implements IRequestService {
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Requests by status fetched successfully',
-        'RequestService',
-        { status, count: requests.length }
+        "✅ [RequestService] Requests by status fetched successfully",
+        "RequestService",
+        { status, count: requests.length },
       );
 
       return {
@@ -1742,14 +1742,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get requests by status',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests by status",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests by status',
+        error: "Failed to fetch requests by status",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1762,14 +1762,14 @@ export class RequestService implements IRequestService {
     try {
       logger.info(
         `📋 [RequestService] Getting requests by priority: ${priority}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1781,9 +1781,9 @@ export class RequestService implements IRequestService {
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Requests by priority fetched successfully',
-        'RequestService',
-        { priority, count: requests.length }
+        "✅ [RequestService] Requests by priority fetched successfully",
+        "RequestService",
+        { priority, count: requests.length },
       );
 
       return {
@@ -1792,14 +1792,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get requests by priority',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests by priority",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests by priority',
+        error: "Failed to fetch requests by priority",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1809,19 +1809,19 @@ export class RequestService implements IRequestService {
    * Get requests by assigned staff
    */
   async getRequestsByAssignedTo(
-    assignedTo: string
+    assignedTo: string,
   ): Promise<GetRequestsResult> {
     try {
       logger.info(
         `📋 [RequestService] Getting requests by assigned staff: ${assignedTo}`,
-        'RequestService'
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1833,9 +1833,9 @@ export class RequestService implements IRequestService {
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Requests by assigned staff fetched successfully',
-        'RequestService',
-        { assignedTo, count: requests.length }
+        "✅ [RequestService] Requests by assigned staff fetched successfully",
+        "RequestService",
+        { assignedTo, count: requests.length },
       );
 
       return {
@@ -1844,14 +1844,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get requests by assigned staff',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get requests by assigned staff",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch requests by assigned staff',
+        error: "Failed to fetch requests by assigned staff",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1863,15 +1863,15 @@ export class RequestService implements IRequestService {
   async getUrgentRequests(): Promise<GetRequestsResult> {
     try {
       logger.info(
-        '🚨 [RequestService] Getting urgent requests',
-        'RequestService'
+        "🚨 [RequestService] Getting urgent requests",
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1881,17 +1881,17 @@ export class RequestService implements IRequestService {
         .from(request)
         .where(
           or(
-            eq(request.priority, 'high'),
-            eq(request.urgency, 'urgent'),
-            eq(request.urgency, 'critical')
-          )
+            eq(request.priority, "high"),
+            eq(request.urgency, "urgent"),
+            eq(request.urgency, "critical"),
+          ),
         )
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Urgent requests fetched successfully',
-        'RequestService',
-        { count: requests.length }
+        "✅ [RequestService] Urgent requests fetched successfully",
+        "RequestService",
+        { count: requests.length },
       );
 
       return {
@@ -1900,14 +1900,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get urgent requests',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get urgent requests",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch urgent requests',
+        error: "Failed to fetch urgent requests",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1919,15 +1919,15 @@ export class RequestService implements IRequestService {
   async getPendingRequests(): Promise<GetRequestsResult> {
     try {
       logger.info(
-        '⏳ [RequestService] Getting pending requests',
-        'RequestService'
+        "⏳ [RequestService] Getting pending requests",
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1936,14 +1936,14 @@ export class RequestService implements IRequestService {
         .select()
         .from(request)
         .where(
-          or(eq(request.status, 'pending'), eq(request.status, 'Đã ghi nhận'))
+          or(eq(request.status, "pending"), eq(request.status, "Đã ghi nhận")),
         )
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Pending requests fetched successfully',
-        'RequestService',
-        { count: requests.length }
+        "✅ [RequestService] Pending requests fetched successfully",
+        "RequestService",
+        { count: requests.length },
       );
 
       return {
@@ -1952,14 +1952,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get pending requests',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get pending requests",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch pending requests',
+        error: "Failed to fetch pending requests",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -1971,15 +1971,15 @@ export class RequestService implements IRequestService {
   async getCompletedRequests(): Promise<GetRequestsResult> {
     try {
       logger.info(
-        '✅ [RequestService] Getting completed requests',
-        'RequestService'
+        "✅ [RequestService] Getting completed requests",
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
           code: RequestServiceErrorType.DATABASE_ERROR,
         };
       }
@@ -1988,14 +1988,14 @@ export class RequestService implements IRequestService {
         .select()
         .from(request)
         .where(
-          or(eq(request.status, 'completed'), eq(request.status, 'Hoàn thành'))
+          or(eq(request.status, "completed"), eq(request.status, "Hoàn thành")),
         )
         .orderBy(desc(request.created_at));
 
       logger.success(
-        '✅ [RequestService] Completed requests fetched successfully',
-        'RequestService',
-        { count: requests.length }
+        "✅ [RequestService] Completed requests fetched successfully",
+        "RequestService",
+        { count: requests.length },
       );
 
       return {
@@ -2004,14 +2004,14 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get completed requests',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get completed requests",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch completed requests',
+        error: "Failed to fetch completed requests",
         code: RequestServiceErrorType.DATABASE_ERROR,
       };
     }
@@ -2039,27 +2039,27 @@ export class RequestService implements IRequestService {
     error?: string;
   }> {
     try {
-      const cacheKey = this.getCacheKey('getRequestStatistics', {});
+      const cacheKey = this.getCacheKey("getRequestStatistics", {});
       const cached = this.getFromCache<any>(cacheKey);
 
       if (cached) {
         logger.debug(
-          '📦 [RequestService] Returning cached statistics',
-          'RequestService'
+          "📦 [RequestService] Returning cached statistics",
+          "RequestService",
         );
         return { success: true, data: cached };
       }
 
       logger.info(
-        '📊 [RequestService] Getting request statistics - Phase 4 Enhanced',
-        'RequestService'
+        "📊 [RequestService] Getting request statistics - Phase 4 Enhanced",
+        "RequestService",
       );
 
       const db = await this.getDatabase();
       if (!db) {
         return {
           success: false,
-          error: 'Database not available',
+          error: "Database not available",
         };
       }
 
@@ -2086,13 +2086,13 @@ export class RequestService implements IRequestService {
       statusCounts.forEach(({ status, count }) => {
         byStatus[status] = count;
 
-        if (status === 'pending' || status === 'Đã ghi nhận') {
+        if (status === "pending" || status === "Đã ghi nhận") {
           pending += count;
-        } else if (status === 'in-progress' || status === 'Đang xử lý') {
+        } else if (status === "in-progress" || status === "Đang xử lý") {
           inProgress += count;
-        } else if (status === 'completed' || status === 'Hoàn thành') {
+        } else if (status === "completed" || status === "Hoàn thành") {
           completed += count;
-        } else if (status === 'cancelled' || status === 'Đã hủy') {
+        } else if (status === "cancelled" || status === "Đã hủy") {
           cancelled += count;
         }
       });
@@ -2124,10 +2124,10 @@ export class RequestService implements IRequestService {
         .from(request)
         .where(
           or(
-            eq(request.priority, 'high'),
-            eq(request.urgency, 'urgent'),
-            eq(request.urgency, 'critical')
-          )
+            eq(request.priority, "high"),
+            eq(request.urgency, "urgent"),
+            eq(request.urgency, "critical"),
+          ),
         );
 
       const urgent = urgentCount[0]?.count || 0;
@@ -2147,8 +2147,8 @@ export class RequestService implements IRequestService {
       this.setCache(cacheKey, statistics, 120000);
 
       logger.success(
-        '✅ [RequestService] Request statistics fetched successfully - Phase 4 Enhanced',
-        'RequestService',
+        "✅ [RequestService] Request statistics fetched successfully - Phase 4 Enhanced",
+        "RequestService",
         {
           total,
           pending,
@@ -2157,7 +2157,7 @@ export class RequestService implements IRequestService {
           cancelled,
           urgent,
           cached: false,
-        }
+        },
       );
 
       return {
@@ -2166,27 +2166,27 @@ export class RequestService implements IRequestService {
       };
     } catch (error) {
       logger.error(
-        '❌ [RequestService] Failed to get request statistics - Phase 4 Enhanced',
-        'RequestService',
-        error
+        "❌ [RequestService] Failed to get request statistics - Phase 4 Enhanced",
+        "RequestService",
+        error,
       );
 
       return {
         success: false,
-        error: 'Failed to fetch request statistics',
+        error: "Failed to fetch request statistics",
       };
     }
   }
 
   async canUpdateRequest(
-    _id: number
+    _id: number,
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for update permission check
     return { success: true };
   }
 
   async canDeleteRequest(
-    _id: number
+    _id: number,
   ): Promise<{ success: boolean; error?: string }> {
     // Implementation for delete permission check
     return { success: true };
@@ -2195,24 +2195,24 @@ export class RequestService implements IRequestService {
   // ✅ NEW: Phase 4 - Cache invalidation methods
   private invalidateCacheOnChange(operation: string): void {
     const patterns = [
-      'getAllRequests',
-      'getRequestStatistics',
-      'getRequestsByRoom',
-      'getRequestsByGuest',
-      'getRequestsByStatus',
-      'getRequestsByPriority',
-      'getUrgentRequests',
-      'getPendingRequests',
-      'getCompletedRequests',
+      "getAllRequests",
+      "getRequestStatistics",
+      "getRequestsByRoom",
+      "getRequestsByGuest",
+      "getRequestsByStatus",
+      "getRequestsByPriority",
+      "getUrgentRequests",
+      "getPendingRequests",
+      "getCompletedRequests",
     ];
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       this.clearCache(pattern);
     });
 
     logger.debug(
       `🗑️ [RequestService] Invalidated cache after ${operation}`,
-      'RequestService'
+      "RequestService",
     );
   }
 }

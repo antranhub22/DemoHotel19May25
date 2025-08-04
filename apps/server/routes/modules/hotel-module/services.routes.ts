@@ -1,33 +1,39 @@
-import { db } from '@shared/db';
-import { insertServiceSchema, services } from '@shared/db/schema';
-import { logger } from '@shared/utils/logger';
-import { validateRequest } from '@shared/validation/validateRequest';
-import { and, eq } from 'drizzle-orm';
-import express from 'express';
+// ✅ DETAILED MIGRATION: Removed Drizzle imports - using Prisma
+import { PrismaClient } from "@prisma/client";
+import { insertServiceSchema } from "@shared/db/schema";
+import { logger } from "@shared/utils/logger";
+import { validateRequest } from "@shared/validation/validateRequest";
+import express from "express";
+
+// ✅ DETAILED MIGRATION: Use Prisma for hotel module services
+const prisma = new PrismaClient();
 
 const router = express.Router();
 
 // ============================================
 // GET /api/hotel/services - List services
 // ============================================
-router.get('/', async (req: any, res: any) => {
+router.get("/", async (req: any, res: any) => {
   try {
     logger.debug(
       `🏨 [Services] Listing services for tenant: ${req.tenant.id}`,
-      'HotelModule'
+      "HotelModule",
     );
 
     const tenantServices = await db
       .select()
       .from(services)
       .where(
-        and(eq(services.tenant_id, req.tenant.id), eq(services.is_active, true))
+        and(
+          eq(services.tenant_id, req.tenant.id),
+          eq(services.is_active, true),
+        ),
       )
       .orderBy(services.category, services.name);
 
     logger.debug(
       `✅ [Services] Found ${tenantServices.length} services`,
-      'HotelModule'
+      "HotelModule",
     );
 
     (res as any).json({
@@ -36,10 +42,10 @@ router.get('/', async (req: any, res: any) => {
       count: tenantServices.length,
     });
   } catch (error) {
-    logger.error('❌ [Services] Error listing services:', 'HotelModule', error);
+    logger.error("❌ [Services] Error listing services:", "HotelModule", error);
     (res as any).status(500).json({
       success: false,
-      error: 'Failed to list services',
+      error: "Failed to list services",
     });
   }
 });
@@ -47,44 +53,42 @@ router.get('/', async (req: any, res: any) => {
 // ============================================
 // GET /api/hotel/services/:id - Get service details
 // ============================================
-router.get('/:id', async (req: any, res: any) => {
+router.get("/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
 
     logger.debug(
       `🏨 [Services] Getting service ${id} for tenant: ${req.tenant.id}`,
-      'HotelModule'
+      "HotelModule",
     );
 
-    const service = await db
-      .select()
-      .from(services)
-      .where(
-        and(
-          eq(services.id, parseInt(id)),
-          eq(services.tenant_id, req.tenant.id)
-        )
-      )
-      .limit(1);
+    // ✅ DETAILED MIGRATION: Use Prisma for service lookup
+    const service = await prisma.services.findFirst({
+      where: {
+        id: parseInt(id),
+        tenant_id: req.tenant.id,
+      },
+    });
 
-    if (!service.length) {
+    // ✅ DETAILED MIGRATION: Fix Prisma logic (findFirst returns object or null)
+    if (!service) {
       return (res as any).status(404).json({
         success: false,
-        error: 'Service not found',
+        error: "Service not found",
       });
     }
 
-    logger.debug('✅ [Services] Service found', 'HotelModule');
+    logger.debug("✅ [Services] Service found", "HotelModule");
 
     (res as any).json({
       success: true,
       data: service[0],
     });
   } catch (error) {
-    logger.error('❌ [Services] Error getting service:', 'HotelModule', error);
+    logger.error("❌ [Services] Error getting service:", "HotelModule", error);
     (res as any).status(500).json({
       success: false,
-      error: 'Failed to get service',
+      error: "Failed to get service",
     });
   }
 });
@@ -93,7 +97,7 @@ router.get('/:id', async (req: any, res: any) => {
 // POST /api/hotel/services - Create new service
 // ============================================
 router.post(
-  '/',
+  "/",
   validateRequest(insertServiceSchema),
   async (req: any, res: any) => {
     try {
@@ -104,17 +108,17 @@ router.post(
 
       logger.debug(
         `🏨 [Services] Creating service for tenant: ${req.tenant.id}`,
-        'HotelModule'
+        "HotelModule",
       );
 
-      const [newService] = await db
-        .insert(services)
-        .values(serviceData)
-        .returning();
+      // ✅ DETAILED MIGRATION: Create service using Prisma
+      const newService = await prisma.services.create({
+        data: serviceData,
+      });
 
       logger.debug(
         `✅ [Services] Service created with ID: ${newService.id}`,
-        'HotelModule'
+        "HotelModule",
       );
 
       (res as any).status(201).json({
@@ -123,29 +127,29 @@ router.post(
       });
     } catch (error) {
       logger.error(
-        '❌ [Services] Error creating service:',
-        'HotelModule',
-        error
+        "❌ [Services] Error creating service:",
+        "HotelModule",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to create service',
+        error: "Failed to create service",
       });
     }
-  }
+  },
 );
 
 // ============================================
 // PATCH /api/hotel/services/:id - Update service
 // ============================================
-router.patch('/:id', async (req: any, res: any) => {
+router.patch("/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
 
     logger.debug(
       `🏨 [Services] Updating service ${id} for tenant: ${req.tenant.id}`,
-      'HotelModule'
+      "HotelModule",
     );
 
     const [updatedService] = await db
@@ -157,29 +161,29 @@ router.patch('/:id', async (req: any, res: any) => {
       .where(
         and(
           eq(services.id, parseInt(id)),
-          eq(services.tenant_id, req.tenant.id)
-        )
+          eq(services.tenant_id, req.tenant.id),
+        ),
       )
       .returning();
 
     if (!updatedService) {
       return (res as any).status(404).json({
         success: false,
-        error: 'Service not found',
+        error: "Service not found",
       });
     }
 
-    logger.debug('✅ [Services] Service updated', 'HotelModule');
+    logger.debug("✅ [Services] Service updated", "HotelModule");
 
     (res as any).json({
       success: true,
       data: updatedService,
     });
   } catch (error) {
-    logger.error('❌ [Services] Error updating service:', 'HotelModule', error);
+    logger.error("❌ [Services] Error updating service:", "HotelModule", error);
     (res as any).status(500).json({
       success: false,
-      error: 'Failed to update service',
+      error: "Failed to update service",
     });
   }
 });
@@ -187,13 +191,13 @@ router.patch('/:id', async (req: any, res: any) => {
 // ============================================
 // DELETE /api/hotel/services/:id - Delete service
 // ============================================
-router.delete('/:id', async (req: any, res: any) => {
+router.delete("/:id", async (req: any, res: any) => {
   try {
     const { id } = req.params;
 
     logger.debug(
       `🏨 [Services] Deleting service ${id} for tenant: ${req.tenant.id}`,
-      'HotelModule'
+      "HotelModule",
     );
 
     const [deletedService] = await db
@@ -205,29 +209,29 @@ router.delete('/:id', async (req: any, res: any) => {
       .where(
         and(
           eq(services.id, parseInt(id)),
-          eq(services.tenant_id, req.tenant.id)
-        )
+          eq(services.tenant_id, req.tenant.id),
+        ),
       )
       .returning();
 
     if (!deletedService) {
       return (res as any).status(404).json({
         success: false,
-        error: 'Service not found',
+        error: "Service not found",
       });
     }
 
-    logger.debug('✅ [Services] Service deleted', 'HotelModule');
+    logger.debug("✅ [Services] Service deleted", "HotelModule");
 
     (res as any).json({
       success: true,
       data: deletedService,
     });
   } catch (error) {
-    logger.error('❌ [Services] Error deleting service:', 'HotelModule', error);
+    logger.error("❌ [Services] Error deleting service:", "HotelModule", error);
     (res as any).status(500).json({
       success: false,
-      error: 'Failed to delete service',
+      error: "Failed to delete service",
     });
   }
 });
@@ -235,38 +239,41 @@ router.delete('/:id', async (req: any, res: any) => {
 // ============================================
 // GET /api/hotel/services/categories - Get service categories
 // ============================================
-router.get('/categories', async (req: any, res: any) => {
+router.get("/categories", async (req: any, res: any) => {
   try {
     logger.debug(
       `🏨 [Services] Getting categories for tenant: ${req.tenant.id}`,
-      'HotelModule'
+      "HotelModule",
     );
 
     const categories = await db
       .selectDistinct({ category: services.category })
       .from(services)
       .where(
-        and(eq(services.tenant_id, req.tenant.id), eq(services.is_active, true))
+        and(
+          eq(services.tenant_id, req.tenant.id),
+          eq(services.is_active, true),
+        ),
       );
 
     logger.debug(
       `✅ [Services] Found ${categories.length} categories`,
-      'HotelModule'
+      "HotelModule",
     );
 
     (res as any).json({
       success: true,
-      data: categories.map(c => c.category),
+      data: categories.map((c) => c.category),
     });
   } catch (error) {
     logger.error(
-      '❌ [Services] Error getting categories:',
-      'HotelModule',
-      error
+      "❌ [Services] Error getting categories:",
+      "HotelModule",
+      error,
     );
     (res as any).status(500).json({
       success: false,
-      error: 'Failed to get categories',
+      error: "Failed to get categories",
     });
   }
 });
