@@ -1,18 +1,18 @@
+import { PrismaClient } from "@prisma/client";
 import {
   getAllFilterPresets,
   getFilterPreset,
   HOTEL_FILTER_PRESETS,
-} from '@server/utils/advancedFiltering';
-import { apiResponse, commonErrors } from '@server/utils/apiHelpers';
+} from "@server/utils/advancedFiltering";
+import { apiResponse, commonErrors } from "@server/utils/apiHelpers";
 import {
   AdvancedGuestJourneyQuery,
   parseAdvancedQuery,
-} from '@server/utils/pagination';
-import { db } from '@shared/db';
-import { call, transcript } from '@shared/db/schema';
-import { logger } from '@shared/utils/logger';
-import { asc, eq } from 'drizzle-orm';
-import express from 'express';
+} from "@server/utils/pagination";
+import { db } from "@shared/db";
+import { call, transcript } from "@shared/db/schema";
+import { logger } from "@shared/utils/logger";
+import express from "express";
 
 const router = express.Router();
 
@@ -33,11 +33,11 @@ const router = express.Router();
  * /api/v2/calls?advancedFilter[AND][0][field]=language&advancedFilter[AND][0][operator]=eq&advancedFilter[AND][0][value]=vi
  * /api/v2/calls?sort=duration,start_time&order=desc,asc
  */
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     logger.debug(
       `🔍 [ADVANCED-CALLS] Processing advanced query with ${Object.keys(req.query).length} parameters`,
-      'AdvancedCalls'
+      "AdvancedCalls",
     );
 
     // Parse advanced query with enhanced capabilities
@@ -46,22 +46,22 @@ router.get('/', async (req, res) => {
       {
         defaultLimit: 20,
         maxLimit: 100,
-        defaultSort: { field: 'start_time', order: 'desc' },
+        defaultSort: { field: "start_time", order: "desc" },
         allowedSortFields: [
-          'start_time',
-          'end_time',
-          'duration',
-          'room_number',
-          'language',
-          'service_type',
+          "start_time",
+          "end_time",
+          "duration",
+          "room_number",
+          "language",
+          "service_type",
         ],
         allowedFilters: [
-          'room_number',
-          'language',
-          'service_type',
-          'tenant_id',
+          "room_number",
+          "language",
+          "service_type",
+          "tenant_id",
         ],
-        defaultSearchFields: ['room_number', 'service_type'],
+        defaultSearchFields: ["room_number", "service_type"],
         tableColumns: {
           start_time: call.start_time,
           end_time: call.end_time,
@@ -72,7 +72,7 @@ router.get('/', async (req, res) => {
           tenant_id: call.tenant_id,
           call_id_vapi: call.call_id_vapi,
         },
-      }
+      },
     );
 
     const {
@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
 
     logger.debug(
       `📊 [ADVANCED-CALLS] Query parsed - Page: ${page}, Limit: ${limit}, Preset: ${preset}, Advanced: ${hasAdvancedFeatures}`,
-      'AdvancedCalls'
+      "AdvancedCalls",
     );
 
     // Execute query with advanced WHERE and ORDER BY
@@ -129,7 +129,7 @@ router.get('/', async (req, res) => {
 
     // Add transcript count for each call
     const callsWithTranscripts = await Promise.all(
-      calls.map(async callData => {
+      calls.map(async (callData) => {
         const transcriptCount = await db
           .select({ count: transcript.id })
           .from(transcript)
@@ -139,12 +139,12 @@ router.get('/', async (req, res) => {
           ...callData,
           transcriptCount: transcriptCount.length,
         };
-      })
+      }),
     );
 
     logger.debug(
       `✅ [ADVANCED-CALLS] Retrieved ${calls.length} calls (total: ${total}) with advanced filtering`,
-      'AdvancedCalls'
+      "AdvancedCalls",
     );
 
     return apiResponse.success(
@@ -163,7 +163,7 @@ router.get('/', async (req, res) => {
         advancedQuery: {
           preset: preset || null,
           hasAdvancedFeatures,
-          sortRules: sortRules.map(rule => ({
+          sortRules: sortRules.map((rule) => ({
             field: rule.field,
             order: rule.order,
             priority: rule.priority,
@@ -179,18 +179,18 @@ router.get('/', async (req, res) => {
           optimized: true,
           indexesUsed: sortRules.length > 0,
         },
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error in advanced calls query:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error in advanced calls query:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.database(
       res,
-      'Failed to retrieve calls with advanced filtering',
-      error
+      "Failed to retrieve calls with advanced filtering",
+      error,
     );
   }
 });
@@ -198,7 +198,7 @@ router.get('/', async (req, res) => {
 /**
  * GET /api/v2/calls/presets - Get available filter presets
  */
-router.get('/presets', async (req, res) => {
+router.get("/presets", async (req, res) => {
   try {
     const { tags } = req.query;
     const tagsArray = tags
@@ -206,8 +206,8 @@ router.get('/presets', async (req, res) => {
       : undefined;
 
     logger.debug(
-      `📋 [ADVANCED-CALLS] Getting filter presets (tags: ${tagsArray?.join(', ') || 'all'})`,
-      'AdvancedCalls'
+      `📋 [ADVANCED-CALLS] Getting filter presets (tags: ${tagsArray?.join(", ") || "all"})`,
+      "AdvancedCalls",
     );
 
     const presets = getAllFilterPresets(tagsArray);
@@ -218,34 +218,34 @@ router.get('/presets', async (req, res) => {
       `Retrieved ${presets.length} filter presets`,
       {
         availableTags: [
-          'time',
-          'recent',
-          'duration',
-          'analysis',
-          'language',
-          'vietnamese',
-          'service',
-          'food',
-          'room',
-          'issues',
-          'complaints',
-          'quality',
-          'premium',
-          'high-value',
+          "time",
+          "recent",
+          "duration",
+          "analysis",
+          "language",
+          "vietnamese",
+          "service",
+          "food",
+          "room",
+          "issues",
+          "complaints",
+          "quality",
+          "premium",
+          "high-value",
         ],
         totalPresets: Object.keys(HOTEL_FILTER_PRESETS).length,
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error getting presets:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error getting presets:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to retrieve filter presets',
-      error
+      "Failed to retrieve filter presets",
+      error,
     );
   }
 });
@@ -253,19 +253,19 @@ router.get('/presets', async (req, res) => {
 /**
  * GET /api/v2/calls/presets/:presetId - Get specific filter preset
  */
-router.get('/presets/:presetId', async (req, res) => {
+router.get("/presets/:presetId", async (req, res) => {
   try {
     const { presetId } = req.params;
 
     logger.debug(
       `📋 [ADVANCED-CALLS] Getting preset: ${presetId}`,
-      'AdvancedCalls'
+      "AdvancedCalls",
     );
 
     const preset = getFilterPreset(presetId);
 
     if (!preset) {
-      return commonErrors.notFound(res, 'Filter preset', presetId);
+      return commonErrors.notFound(res, "Filter preset", presetId);
     }
 
     return apiResponse.success(
@@ -274,18 +274,18 @@ router.get('/presets/:presetId', async (req, res) => {
       `Retrieved filter preset: ${preset.name}`,
       {
         availablePresets: Object.keys(HOTEL_FILTER_PRESETS),
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error getting preset:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error getting preset:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to retrieve filter preset',
-      error
+      "Failed to retrieve filter preset",
+      error,
     );
   }
 });
@@ -293,7 +293,7 @@ router.get('/presets/:presetId', async (req, res) => {
 /**
  * POST /api/v2/calls/query-builder - Build complex query interactively
  */
-router.post('/query-builder', async (req, res) => {
+router.post("/query-builder", async (req, res) => {
   try {
     const {
       filters = {},
@@ -302,7 +302,7 @@ router.post('/query-builder', async (req, res) => {
       preview = false,
     } = req.body;
 
-    logger.debug('🔨 [ADVANCED-CALLS] Building complex query', 'AdvancedCalls');
+    logger.debug("🔨 [ADVANCED-CALLS] Building complex query", "AdvancedCalls");
 
     // Build query object
     const queryObject: AdvancedGuestJourneyQuery = {
@@ -315,17 +315,17 @@ router.post('/query-builder', async (req, res) => {
     const parsedQuery = parseAdvancedQuery(queryObject, {
       defaultLimit: 20,
       maxLimit: 100,
-      defaultSort: { field: 'start_time', order: 'desc' },
+      defaultSort: { field: "start_time", order: "desc" },
       allowedSortFields: [
-        'start_time',
-        'end_time',
-        'duration',
-        'room_number',
-        'language',
-        'service_type',
+        "start_time",
+        "end_time",
+        "duration",
+        "room_number",
+        "language",
+        "service_type",
       ],
-      allowedFilters: ['room_number', 'language', 'service_type', 'tenant_id'],
-      defaultSearchFields: ['room_number', 'service_type'],
+      allowedFilters: ["room_number", "language", "service_type", "tenant_id"],
+      defaultSearchFields: ["room_number", "service_type"],
       tableColumns: {
         start_time: call.start_time,
         end_time: call.end_time,
@@ -345,20 +345,20 @@ router.post('/query-builder', async (req, res) => {
         {
           queryStructure: parsedQuery,
           sqlPreview: {
-            whereClause: 'Generated WHERE clause would be applied',
-            orderByClause: `ORDER BY ${parsedQuery.sortRules.map(r => `${r.field} ${r.order.toUpperCase()}`).join(', ')}`,
+            whereClause: "Generated WHERE clause would be applied",
+            orderByClause: `ORDER BY ${parsedQuery.sortRules.map((r) => `${r.field} ${r.order.toUpperCase()}`).join(", ")}`,
             pagination: `LIMIT ${parsedQuery.limit} OFFSET ${parsedQuery.offset}`,
           },
-          estimatedResults: 'Query is valid and ready for execution',
+          estimatedResults: "Query is valid and ready for execution",
         },
-        'Query built successfully (preview mode)',
+        "Query built successfully (preview mode)",
         {
           validationPassed: true,
           complexityScore:
             (parsedQuery.advancedFilter.AND?.length || 0) +
             (parsedQuery.advancedFilter.OR?.length || 0) +
             parsedQuery.sortRules.length,
-        }
+        },
       );
     }
 
@@ -385,18 +385,18 @@ router.post('/query-builder', async (req, res) => {
         queryBuilt: true,
         resultsFound: calls.length,
         queryStructure: parsedQuery,
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error in query builder:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error in query builder:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.validation(
       res,
-      'Failed to build or execute query',
-      error
+      "Failed to build or execute query",
+      error,
     );
   }
 });
@@ -404,11 +404,11 @@ router.post('/query-builder', async (req, res) => {
 /**
  * GET /api/v2/calls/analytics - Advanced analytics with filtering
  */
-router.get('/analytics', async (req, res) => {
+router.get("/analytics", async (req, res) => {
   try {
     logger.debug(
-      '📊 [ADVANCED-CALLS] Getting advanced analytics',
-      'AdvancedCalls'
+      "📊 [ADVANCED-CALLS] Getting advanced analytics",
+      "AdvancedCalls",
     );
 
     // Parse filter from query
@@ -424,7 +424,7 @@ router.get('/analytics', async (req, res) => {
           service_type: call.service_type,
           tenant_id: call.tenant_id,
         },
-      }
+      },
     );
 
     const { whereCondition } = queryParams;
@@ -445,40 +445,40 @@ router.get('/analytics', async (req, res) => {
           filteredCalls.length || 0,
       languageDistribution: filteredCalls.reduce(
         (acc, call) => {
-          acc[call.language || 'unknown'] =
-            (acc[call.language || 'unknown'] || 0) + 1;
+          acc[call.language || "unknown"] =
+            (acc[call.language || "unknown"] || 0) + 1;
           return acc;
         },
-        {} as Record<string, number>
+        {} as Record<string, number>,
       ),
       serviceTypeDistribution: filteredCalls.reduce(
         (acc, call) => {
-          acc[call.service_type || 'unknown'] =
-            (acc[call.service_type || 'unknown'] || 0) + 1;
+          acc[call.service_type || "unknown"] =
+            (acc[call.service_type || "unknown"] || 0) + 1;
           return acc;
         },
-        {} as Record<string, number>
+        {} as Record<string, number>,
       ),
       roomNumberDistribution: filteredCalls.reduce(
         (acc, call) => {
           const roomRange = call.room_number
             ? parseInt(call.room_number) < 100
-              ? 'Standard (1-99)'
+              ? "Standard (1-99)"
               : parseInt(call.room_number) < 200
-                ? 'Premium (100-199)'
-                : 'Luxury (200+)'
-            : 'Unknown';
+                ? "Premium (100-199)"
+                : "Luxury (200+)"
+            : "Unknown";
           acc[roomRange] = (acc[roomRange] || 0) + 1;
           return acc;
         },
-        {} as Record<string, number>
+        {} as Record<string, number>,
       ),
       durationRanges: {
-        short: filteredCalls.filter(c => (c.duration || 0) < 120).length,
+        short: filteredCalls.filter((c) => (c.duration || 0) < 120).length,
         medium: filteredCalls.filter(
-          c => (c.duration || 0) >= 120 && (c.duration || 0) < 300
+          (c) => (c.duration || 0) >= 120 && (c.duration || 0) < 300,
         ).length,
-        long: filteredCalls.filter(c => (c.duration || 0) >= 300).length,
+        long: filteredCalls.filter((c) => (c.duration || 0) >= 300).length,
       },
     };
 
@@ -490,18 +490,18 @@ router.get('/analytics', async (req, res) => {
         filtersApplied: !!whereCondition,
         totalCallsInSystem: filteredCalls.length,
         analyticsGeneratedAt: new Date().toISOString(),
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error in advanced analytics:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error in advanced analytics:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.database(
       res,
-      'Failed to generate advanced analytics',
-      error
+      "Failed to generate advanced analytics",
+      error,
     );
   }
 });
@@ -509,13 +509,13 @@ router.get('/analytics', async (req, res) => {
 /**
  * GET /api/v2/calls/:callId - Enhanced call details
  */
-router.get('/:callId', async (req, res) => {
+router.get("/:callId", async (req, res) => {
   try {
     const { callId } = req.params;
 
     logger.debug(
       `📞 [ADVANCED-CALLS] Getting enhanced call details: ${callId}`,
-      'AdvancedCalls'
+      "AdvancedCalls",
     );
 
     // Get call details
@@ -526,7 +526,7 @@ router.get('/:callId', async (req, res) => {
       .limit(1);
 
     if (calls.length === 0) {
-      return commonErrors.notFound(res, 'Call', callId);
+      return commonErrors.notFound(res, "Call", callId);
     }
 
     const callData = calls[0];
@@ -542,28 +542,28 @@ router.get('/:callId', async (req, res) => {
     const enhancedMetrics = {
       transcriptStats: {
         total: transcripts.length,
-        userMessages: transcripts.filter(t => t.role === 'user').length,
-        assistantMessages: transcripts.filter(t => t.role === 'assistant')
+        userMessages: transcripts.filter((t) => t.role === "user").length,
+        assistantMessages: transcripts.filter((t) => t.role === "assistant")
           .length,
         averageMessageLength:
           transcripts.reduce((sum, t) => sum + t.content.length, 0) /
             transcripts.length || 0,
         totalCharacters: transcripts.reduce(
           (sum, t) => sum + t.content.length,
-          0
+          0,
         ),
       },
       callQuality: {
         duration: callData.duration || 0,
-        completeness: transcripts.length > 0 ? 'complete' : 'incomplete',
-        language: callData.language || 'unknown',
-        serviceCategory: callData.service_type || 'general',
+        completeness: transcripts.length > 0 ? "complete" : "incomplete",
+        language: callData.language || "unknown",
+        serviceCategory: callData.service_type || "general",
       },
-      timeline: transcripts.map(t => ({
+      timeline: transcripts.map((t) => ({
         timestamp: t.timestamp,
         role: t.role,
         contentPreview:
-          t.content.substring(0, 100) + (t.content.length > 100 ? '...' : ''),
+          t.content.substring(0, 100) + (t.content.length > 100 ? "..." : ""),
         characterCount: t.content.length,
       })),
     };
@@ -575,23 +575,23 @@ router.get('/:callId', async (req, res) => {
         transcripts,
         enhancedMetrics,
       },
-      'Retrieved enhanced call details with transcripts',
+      "Retrieved enhanced call details with transcripts",
       {
         callId,
         transcriptCount: transcripts.length,
         enhancedFeaturesEnabled: true,
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [ADVANCED-CALLS] Error getting enhanced call details:',
-      'AdvancedCalls',
-      error
+      "❌ [ADVANCED-CALLS] Error getting enhanced call details:",
+      "AdvancedCalls",
+      error,
     );
     return commonErrors.database(
       res,
-      'Failed to retrieve enhanced call details',
-      error
+      "Failed to retrieve enhanced call details",
+      error,
     );
   }
 });

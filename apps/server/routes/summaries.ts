@@ -1,16 +1,18 @@
-import { apiResponse, commonErrors } from '@server/utils/apiHelpers';
+import { PrismaClient } from "@prisma/client";
+import { apiResponse, commonErrors } from "@server/utils/apiHelpers";
 import {
   buildDateRangeConditions,
   buildSearchConditions,
   buildWhereConditions,
   GUEST_JOURNEY_DEFAULTS,
   parseCompleteQuery,
-} from '@server/utils/pagination';
-import { call_summaries, db } from '@shared/db';
-import { insertCallSummarySchema } from '@shared/schema';
-import { logger } from '@shared/utils/logger';
-import { and, asc, desc, eq } from 'drizzle-orm';
-import express from 'express';
+} from "@server/utils/pagination";
+import { insertCallSummarySchema } from "@shared/schema";
+import { logger } from "@shared/utils/logger";
+import express from "express";
+
+// ✅ DETAILED MIGRATION: Initialize Prisma client for call_summaries operations
+const prisma = new PrismaClient();
 
 const router = express.Router();
 
@@ -19,79 +21,73 @@ const router = express.Router();
 // ============================================
 
 // GET /api/summaries/:callId - Get summaries for a specific call
-router.get('/:callId', async (req, res) => {
+router.get("/:callId", async (req, res) => {
   try {
     const { callId } = req.params;
 
     if (!callId) {
-      return commonErrors.validation(res, 'Call ID is required');
+      return commonErrors.validation(res, "Call ID is required");
     }
 
     // ✅ NEW: Add pagination for call-specific summaries
     const queryParams = parseCompleteQuery(req.query, {
       defaultLimit: 10, // Smaller limit for single call
       maxLimit: 50,
-      defaultSort: 'timestamp',
-      allowedSortFields: ['timestamp', 'room_number', 'duration'],
-      allowedFilters: ['room_number'],
-      defaultSearchFields: ['content'],
+      defaultSort: "timestamp",
+      allowedSortFields: ["timestamp", "room_number", "duration"],
+      allowedFilters: ["room_number"],
+      defaultSearchFields: ["content"],
     });
 
     const { page, limit, offset, sort, order, filters, search } = queryParams;
 
     logger.debug(
       `🔍 [SUMMARIES] Getting summaries for call: ${callId} (page: ${page})`,
-      'Summaries'
+      "Summaries",
     );
 
-    // Build WHERE conditions
-    const whereConditions = [eq(call_summaries.call_id, callId)];
+    // ✅ DETAILED MIGRATION: Build Prisma where conditions properly
+    const whereConditions: any = { call_id: callId };
 
-    // Add filter conditions
+    // Add filter conditions using Prisma syntax
     if (filters.room_number) {
-      whereConditions.push(eq(call_summaries.room_number, filters.room_number));
+      whereConditions.room_number = filters.room_number;
     }
 
-    // Add search conditions
+    // Add search conditions using Prisma full-text search
     if (search) {
-      const searchConditions = buildSearchConditions(search, ['content'], {
-        content: call_summaries.content,
-      });
-      if (searchConditions.length > 0) {
-        whereConditions.push(or(...searchConditions));
-      }
+      whereConditions.content = {
+        contains: search,
+        mode: "insensitive",
+      };
     }
 
-    const whereClause = and(...whereConditions);
+    // ✅ DETAILED MIGRATION: Prisma ordering and pagination
+    const orderBy: any = {};
+    const sortField =
+      sort === "room_number"
+        ? "room_number"
+        : sort === "duration"
+          ? "duration"
+          : "timestamp";
+    orderBy[sortField] = order || "desc";
 
-    // Order by - fix column reference
-    const sortColumn =
-      sort === 'room_number'
-        ? call_summaries.room_number
-        : sort === 'duration'
-          ? call_summaries.duration
-          : call_summaries.timestamp;
-
-    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
-
-    const summaries = await db
-      .select()
-      .from(call_summaries)
-      .where(whereClause)
-      .orderBy(orderClause)
-      .limit(limit)
-      .offset(offset);
-
-    // Get total count
-    const totalCountResult = await db
-      .select({ count: call_summaries.id })
-      .from(call_summaries)
-      .where(whereClause);
-    const total = totalCountResult.length;
+    // Execute Prisma queries with proper error handling
+    const [summaries, total] = await Promise.all([
+      prisma.call_summaries.findMany({
+        where: whereConditions,
+        orderBy,
+        take: limit,
+        skip: offset,
+      }),
+      prisma.call_summaries.count({
+        where: whereConditions,
+      }),
+    ]);
 
     logger.debug(
       `📋 [SUMMARIES] Found ${summaries.length} summaries for call: ${callId}`,
-      'Summaries'
+      "Summaries",
     );
 
     // ✅ FRONTEND COMPATIBILITY: Return single summary object if only requesting without pagination params
@@ -112,7 +108,7 @@ router.get('/:callId', async (req, res) => {
           roomNumber: summary.room_number,
           duration: summary.duration,
         },
-        `Retrieved summary for call ${callId}`
+        `Retrieved summary for call ${callId}`,
       );
     }
 
@@ -134,30 +130,30 @@ router.get('/:callId', async (req, res) => {
         },
         search: search || null,
         filters: Object.keys(filters).length > 0 ? filters : null,
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [SUMMARIES] Error fetching summaries:',
-      'Summaries',
-      error
+      "❌ [SUMMARIES] Error fetching summaries:",
+      "Summaries",
+      error,
     );
-    return commonErrors.database(res, 'Failed to fetch summaries', error);
+    return commonErrors.database(res, "Failed to fetch summaries", error);
   }
 });
 
 // POST /api/summaries/ - Create a new call summary
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { callId, content, roomNumber, duration } = req.body;
 
     if (!callId || !content) {
-      return commonErrors.missingFields(res, ['callId', 'content']);
+      return commonErrors.missingFields(res, ["callId", "content"]);
     }
 
     logger.debug(
       `📋 [SUMMARIES] Creating summary for call: ${callId}`,
-      'Summaries'
+      "Summaries",
     );
 
     try {
@@ -170,14 +166,14 @@ router.post('/', async (req, res) => {
         timestamp: new Date(),
       });
 
-      const [newSummary] = await db
-        .insert(call_summaries)
-        .values(validatedData)
-        .returning();
+      // ✅ DETAILED MIGRATION: Create summary using Prisma
+      const newSummary = await prisma.call_summaries.create({
+        data: validatedData,
+      });
 
       logger.debug(
         `✅ [SUMMARIES] Summary created successfully for call: ${callId}`,
-        'Summaries'
+        "Summaries",
       );
 
       return apiResponse.created(
@@ -189,42 +185,42 @@ router.post('/', async (req, res) => {
           duration,
           createdAt: newSummary.timestamp,
         },
-        'Call summary created successfully'
+        "Call summary created successfully",
       );
     } catch (validationError) {
       return commonErrors.validation(
         res,
-        'Invalid summary data',
-        validationError
+        "Invalid summary data",
+        validationError,
       );
     }
   } catch (error) {
-    logger.error('❌ [SUMMARIES] Error creating summary:', 'Summaries', error);
-    return commonErrors.database(res, 'Failed to create summary', error);
+    logger.error("❌ [SUMMARIES] Error creating summary:", "Summaries", error);
+    return commonErrors.database(res, "Failed to create summary", error);
   }
 });
 
 // GET /api/summaries/recent/:hours - Get summaries from the last X hours
-router.get('/recent/:hours', async (req, res) => {
+router.get("/recent/:hours", async (req, res) => {
   try {
     const { hours } = req.params;
     const hoursNumber = parseInt(hours, 10);
 
     if (isNaN(hoursNumber) || hoursNumber <= 0) {
-      return commonErrors.validation(res, 'Hours must be a positive number');
+      return commonErrors.validation(res, "Hours must be a positive number");
     }
 
     logger.debug(
       `📋 [SUMMARIES] Getting recent summaries from last ${hoursNumber} hours`,
-      'Summaries'
+      "Summaries",
     );
 
     // Use storage method to get recent summaries
-    const storage = new (await import('@server/storage')).DatabaseStorage();
+    const storage = new (await import("@server/storage")).DatabaseStorage();
     const summaries = await storage.getRecentCallSummaries(hoursNumber);
 
     // Transform summaries to match frontend expectations
-    const transformedSummaries = summaries.map(summary => ({
+    const transformedSummaries = summaries.map((summary) => ({
       id: summary.id,
       callId: summary.call_id,
       content: summary.content,
@@ -235,7 +231,7 @@ router.get('/recent/:hours', async (req, res) => {
 
     logger.debug(
       `✅ [SUMMARIES] Found ${transformedSummaries.length} recent summaries`,
-      'Summaries'
+      "Summaries",
     );
 
     return apiResponse.success(
@@ -245,31 +241,31 @@ router.get('/recent/:hours', async (req, res) => {
         count: transformedSummaries.length,
         timeframe: hoursNumber,
       },
-      `Retrieved ${transformedSummaries.length} summaries from last ${hoursNumber} hours`
+      `Retrieved ${transformedSummaries.length} summaries from last ${hoursNumber} hours`,
     );
   } catch (error) {
     logger.error(
-      '❌ [SUMMARIES] Error fetching recent summaries:',
-      'Summaries',
-      error
+      "❌ [SUMMARIES] Error fetching recent summaries:",
+      "Summaries",
+      error,
     );
     return commonErrors.database(
       res,
-      'Failed to fetch recent summaries',
-      error
+      "Failed to fetch recent summaries",
+      error,
     );
   }
 });
 
 // GET /api/summaries/ - Get all summaries with advanced pagination, filtering, and search
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // Parse query with advanced features
     const queryParams = parseCompleteQuery(req.query, {
       defaultLimit: GUEST_JOURNEY_DEFAULTS.SUMMARIES.limit,
       maxLimit: 100,
       defaultSort: GUEST_JOURNEY_DEFAULTS.SUMMARIES.sort,
-      allowedSortFields: ['timestamp', 'call_id', 'room_number', 'duration'],
+      allowedSortFields: ["timestamp", "call_id", "room_number", "duration"],
       allowedFilters: [...GUEST_JOURNEY_DEFAULTS.SUMMARIES.allowedFilters],
       defaultSearchFields: [...GUEST_JOURNEY_DEFAULTS.SUMMARIES.searchFields],
     });
@@ -288,7 +284,7 @@ router.get('/', async (req, res) => {
 
     logger.debug(
       `📋 [SUMMARIES] Getting summaries with pagination (page: ${page}, limit: ${limit}, search: "${search}")`,
-      'Summaries'
+      "Summaries",
     );
 
     // Build WHERE conditions
@@ -299,7 +295,7 @@ router.get('/', async (req, res) => {
       // Note: Assuming tenant filtering via call relationship
       logger.debug(
         `🏨 [SUMMARIES] Filtering by tenant: ${tenantId}`,
-        'Summaries'
+        "Summaries",
       );
       // TODO: Add JOIN with calls table for tenant filtering when schema supports it
     }
@@ -313,7 +309,7 @@ router.get('/', async (req, res) => {
 
     // Add search conditions
     if (search) {
-      const searchConditions = buildSearchConditions(search, ['content'], {
+      const searchConditions = buildSearchConditions(search, ["content"], {
         content: call_summaries.content,
       });
       if (searchConditions.length > 0) {
@@ -325,7 +321,7 @@ router.get('/', async (req, res) => {
     if (dateRange.from || dateRange.to) {
       const dateConditions = buildDateRangeConditions(
         dateRange,
-        call_summaries.timestamp
+        call_summaries.timestamp,
       );
       whereConditions.push(...dateConditions);
     }
@@ -340,29 +336,29 @@ router.get('/', async (req, res) => {
 
     // Order by - fix column reference
     const sortColumn =
-      sort === 'call_id'
+      sort === "call_id"
         ? call_summaries.call_id
-        : sort === 'room_number'
+        : sort === "room_number"
           ? call_summaries.room_number
-          : sort === 'duration'
+          : sort === "duration"
             ? call_summaries.duration
             : call_summaries.timestamp;
 
-    const orderClause = order === 'asc' ? asc(sortColumn) : desc(sortColumn);
+    const orderClause = order === "asc" ? asc(sortColumn) : desc(sortColumn);
 
-    // Get paginated data
-    const summaries = await db
-      .select()
-      .from(call_summaries)
-      .where(whereClause)
-      .orderBy(orderClause)
-      .limit(limit)
-      .offset(offset);
+    // ✅ DETAILED MIGRATION: Get paginated data using Prisma
+    const summaries = await prisma.call_summaries.findMany({
+      where: whereClause,
+      orderBy: orderClause,
+      take: limit,
+      skip: offset,
+    });
 
     // Get total count for pagination
-    const totalCountQuery = db
-      .select({ count: call_summaries.id })
-      .from(call_summaries);
+    // ✅ DETAILED MIGRATION: Get count using Prisma
+    const totalCount = await prisma.call_summaries.count({
+      where: whereClause,
+    });
 
     if (whereClause) {
       totalCountQuery.where(whereClause);
@@ -373,7 +369,7 @@ router.get('/', async (req, res) => {
 
     logger.debug(
       `✅ [SUMMARIES] Retrieved ${summaries.length} summaries (total: ${total})`,
-      'Summaries'
+      "Summaries",
     );
 
     return apiResponse.success(
@@ -393,28 +389,28 @@ router.get('/', async (req, res) => {
         filters: Object.keys(filters).length > 0 ? filters : null,
         sorting: { sort, order },
         tenantId: tenantId || null,
-      }
+      },
     );
   } catch (error) {
     logger.error(
-      '❌ [SUMMARIES] Error fetching summaries:',
-      'Summaries',
-      error
+      "❌ [SUMMARIES] Error fetching summaries:",
+      "Summaries",
+      error,
     );
-    return commonErrors.database(res, 'Failed to fetch summaries', error);
+    return commonErrors.database(res, "Failed to fetch summaries", error);
   }
 });
 
 // DELETE /api/summaries/:id - Delete a specific summary (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!id) {
-      return commonErrors.validation(res, 'Summary ID is required');
+      return commonErrors.validation(res, "Summary ID is required");
     }
 
-    logger.debug(`🗑️ [SUMMARIES] Deleting summary: ${id}`, 'Summaries');
+    logger.debug(`🗑️ [SUMMARIES] Deleting summary: ${id}`, "Summaries");
 
     const deletedSummaries = await db
       .delete(call_summaries)
@@ -422,22 +418,22 @@ router.delete('/:id', async (req, res) => {
       .returning();
 
     if (deletedSummaries.length === 0) {
-      return commonErrors.notFound(res, 'Summary', id);
+      return commonErrors.notFound(res, "Summary", id);
     }
 
     logger.debug(
       `✅ [SUMMARIES] Summary deleted successfully: ${id}`,
-      'Summaries'
+      "Summaries",
     );
 
     return apiResponse.success(
       res,
       { deletedId: id, deletedAt: new Date().toISOString() },
-      'Summary deleted successfully'
+      "Summary deleted successfully",
     );
   } catch (error) {
-    logger.error('❌ [SUMMARIES] Error deleting summary:', 'Summaries', error);
-    return commonErrors.database(res, 'Failed to delete summary', error);
+    logger.error("❌ [SUMMARIES] Error deleting summary:", "Summaries", error);
+    return commonErrors.database(res, "Failed to delete summary", error);
   }
 });
 
