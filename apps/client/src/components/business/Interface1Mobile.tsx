@@ -1,9 +1,9 @@
-import React from 'react';
-import { DebugButtons } from '../features/debug/DebugButtons';
-import { DebugWrapper } from '../features/debug/DebugWrapper';
-import { MobileSummaryPopup } from '../features/popup-system/MobileSummaryPopup';
-import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
-import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
+import React from "react";
+import { DebugButtons } from "../features/debug/DebugButtons";
+import { DebugWrapper } from "../features/debug/DebugWrapper";
+import { MobileSummaryPopup } from "../features/popup-system/MobileSummaryPopup";
+import RealtimeConversationPopup from "../features/popup-system/RealtimeConversationPopup";
+import { SiriButtonContainer } from "../features/voice-assistant/siri/SiriButtonContainer";
 
 interface Interface1MobileProps {
   isCallStarted: boolean;
@@ -30,10 +30,12 @@ export const Interface1Mobile: React.FC<Interface1MobileProps> = ({
           <SiriButtonContainer
             isCallStarted={isCallStarted}
             micLevel={micLevel}
-            onCallStart={async lang => {
+            onCallStart={async (lang) => {
               await handleCallStart(lang);
             }}
-            onCallEnd={handleCallEnd}
+            onCallEnd={async () => {
+              handleCallEnd();
+            }}
             showingSummary={showingSummary}
           />
         </div>

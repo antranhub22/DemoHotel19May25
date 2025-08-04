@@ -1,20 +1,20 @@
 /// <reference types="vite/client" />
 
-import { Language } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
-import React, { useEffect } from 'react';
-import '../../../../styles/voice-interface.css';
-import { SiriButtonVisual } from './components/SiriButtonVisual';
-import { useSiriButtonEvents } from './hooks/useSiriButtonEvents';
-import { useSiriButtonState } from './hooks/useSiriButtonState';
-import { useSiriButtonVisual } from './hooks/useSiriButtonVisual';
+import { Language } from "@/types/interface1.types";
+import { logger } from "@shared/utils/logger";
+import React, { useEffect } from "react";
+import "../../../../styles/voice-interface.css";
+import { SiriButtonVisual } from "./components/SiriButtonVisual";
+import { useSiriButtonEvents } from "./hooks/useSiriButtonEvents";
+import { useSiriButtonState } from "./hooks/useSiriButtonState";
+import { useSiriButtonVisual } from "./hooks/useSiriButtonVisual";
 
 interface SiriCallButtonProps {
   isListening: boolean;
   volumeLevel: number;
   containerId: string;
   onCallStart?: () => Promise<void>;
-  onCallEnd?: () => void;
+  onCallEnd?: () => Promise<void>;
   language?: Language;
   colors?: {
     primary: string;
@@ -36,7 +36,7 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
   if (import.meta.env.DEV) {
     logger.debug(
       `[SiriCallButton] Component render - Container: ${containerId}, isListening: ${isListening}, Mobile: ${/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)}`,
-      'Component'
+      "Component",
     );
   }
 
@@ -78,20 +78,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       onTouchEnd={handleDirectTouch}
       onClick={handleDirectTouch}
       style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        cursor: 'pointer',
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        cursor: "pointer",
         zIndex: 10,
-        borderRadius: '50%',
-        pointerEvents: 'auto',
-        overflow: 'visible',
+        borderRadius: "50%",
+        pointerEvents: "auto",
+        overflow: "visible",
         // Mobile touch optimizations
-        touchAction: 'manipulation', // Improve touch responsiveness
-        WebkitTapHighlightColor: 'transparent', // Remove mobile tap highlight
-        WebkitUserSelect: 'none', // Prevent text selection
-        userSelect: 'none', // Prevent text selection
-        WebkitTouchCallout: 'none', // Disable context menu on long press
+        touchAction: "manipulation", // Improve touch responsiveness
+        WebkitTapHighlightColor: "transparent", // Remove mobile tap highlight
+        WebkitUserSelect: "none", // Prevent text selection
+        userSelect: "none", // Prevent text selection
+        WebkitTouchCallout: "none", // Disable context menu on long press
       }}
     >
       {/* Visual component */}
@@ -104,20 +104,20 @@ const SiriCallButton: React.FC<SiriCallButtonProps> = ({
       />
 
       {/* Status indicator */}
-      {status !== 'idle' && status !== 'listening' && (
+      {status !== "idle" && status !== "listening" && (
         <div
           className={`status-indicator ${status}`}
           style={{
-            position: 'absolute',
-            top: '-48px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            color: colors?.primary || '#5DB6B9',
-            textShadow: `0 0 10px ${colors?.glow || 'rgba(93, 182, 185, 0.4)'}`,
-            pointerEvents: 'none', // Don't block container events
+            position: "absolute",
+            top: "-48px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            color: colors?.primary || "#5DB6B9",
+            textShadow: `0 0 10px ${colors?.glow || "rgba(93, 182, 185, 0.4)"}`,
+            pointerEvents: "none", // Don't block container events
           }}
         >
-          {status === 'processing' ? 'Processing...' : 'Speaking...'}
+          {status === "processing" ? "Processing..." : "Speaking..."}
         </div>
       )}
     </div>

@@ -19,18 +19,17 @@ import {
   Wrench,
   Database,
   Shield,
-} from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
-// ✅ FIXED: Use global UserRole type instead of importing from constants
-// import type { UserRole } from '@shared/constants/permissions';
+} from "lucide-react";
+import React, { useState } from "react";
+import { Link, useLocation } from "wouter";
+import type { UserRole } from "@/types/auth";
 import {
   PermissionGuard,
   usePermissionCheck,
-} from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/features/dashboard/unified-dashboard/guards/PermissionGuard";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,9 +37,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 
 // Types
 interface UnifiedDashboardLayoutProps {
@@ -60,150 +59,150 @@ interface NavigationItem {
 const navigationItems: NavigationItem[] = [
   // Dashboard Overview - All roles can view
   {
-    href: '/hotel-dashboard',
+    href: "/hotel-dashboard",
     icon: Home,
-    label: 'Tổng quan',
-    description: 'Thống kê và metrics tổng quan',
-    permission: 'dashboard:view',
+    label: "Tổng quan",
+    description: "Thống kê và metrics tổng quan",
+    permission: "dashboard:view",
   },
 
   // Hotel Manager Features
   {
-    href: '/saas-dashboard/setup',
+    href: "/saas-dashboard/setup",
     icon: Bot,
-    label: 'Thiết lập Assistant',
-    description: 'Cấu hình và tùy chỉnh AI Assistant',
-    permission: 'assistant:configure',
-    roleSpecific: ['hotel-manager'],
+    label: "Thiết lập Assistant",
+    description: "Cấu hình và tùy chỉnh AI Assistant",
+    permission: "assistant:configure",
+    roleSpecific: ["hotel-manager"],
   },
   {
-    href: '/hotel-dashboard/analytics',
+    href: "/hotel-dashboard/analytics",
     icon: BarChart,
-    label: 'Phân tích nâng cao',
-    description: 'Báo cáo và thống kê chi tiết',
-    permission: 'analytics:view_advanced',
-    roleSpecific: ['hotel-manager'],
+    label: "Phân tích nâng cao",
+    description: "Báo cáo và thống kê chi tiết",
+    permission: "analytics:view_advanced",
+    roleSpecific: ["hotel-manager"],
   },
   {
-    href: '/saas-dashboard/billing',
+    href: "/saas-dashboard/billing",
     icon: CreditCard,
-    label: 'Thanh toán',
-    description: 'Quản lý subscription và billing',
-    permission: 'billing:view',
-    roleSpecific: ['hotel-manager'],
+    label: "Thanh toán",
+    description: "Quản lý subscription và billing",
+    permission: "billing:view",
+    roleSpecific: ["hotel-manager"],
   },
   {
-    href: '/hotel-dashboard/staff-management',
+    href: "/hotel-dashboard/staff-management",
     icon: Users,
-    label: 'Quản lý nhân viên',
-    description: 'Thêm, sửa, xóa tài khoản nhân viên',
-    permission: 'staff:manage',
-    roleSpecific: ['hotel-manager'],
+    label: "Quản lý nhân viên",
+    description: "Thêm, sửa, xóa tài khoản nhân viên",
+    permission: "staff:manage",
+    roleSpecific: ["hotel-manager"],
   },
   {
-    href: '/hotel-dashboard/settings',
+    href: "/hotel-dashboard/settings",
     icon: Settings,
-    label: 'Cài đặt hệ thống',
-    description: 'Cấu hình khách sạn và hệ thống',
-    permission: 'settings:manage',
-    roleSpecific: ['hotel-manager'],
+    label: "Cài đặt hệ thống",
+    description: "Cấu hình khách sạn và hệ thống",
+    permission: "settings:manage",
+    roleSpecific: ["hotel-manager"],
   },
 
   // Front Desk Staff Features
   {
-    href: '/hotel-dashboard/requests',
+    href: "/hotel-dashboard/requests",
     icon: ClipboardList,
-    label: 'Yêu cầu khách hàng',
-    description: 'Xem và xử lý yêu cầu từ khách',
-    permission: 'requests:view',
-    roleSpecific: ['front-desk'],
+    label: "Yêu cầu khách hàng",
+    description: "Xem và xử lý yêu cầu từ khách",
+    permission: "requests:view",
+    roleSpecific: ["front-desk"],
   },
   {
-    href: '/hotel-dashboard/guest-management',
+    href: "/hotel-dashboard/guest-management",
     icon: UserCog,
-    label: 'Quản lý khách hàng',
-    description: 'Thông tin và lịch sử khách hàng',
-    permission: 'guests:manage',
-    roleSpecific: ['front-desk'],
+    label: "Quản lý khách hàng",
+    description: "Thông tin và lịch sử khách hàng",
+    permission: "guests:manage",
+    roleSpecific: ["front-desk"],
   },
   {
-    href: '/hotel-dashboard/basic-analytics',
+    href: "/hotel-dashboard/basic-analytics",
     icon: BarChart3,
-    label: 'Thống kê cơ bản',
-    description: 'Báo cáo hoạt động hàng ngày',
-    permission: 'analytics:view_basic',
-    roleSpecific: ['front-desk'],
+    label: "Thống kê cơ bản",
+    description: "Báo cáo hoạt động hàng ngày",
+    permission: "analytics:view_basic",
+    roleSpecific: ["front-desk"],
   },
   {
-    href: '/hotel-dashboard/calls',
+    href: "/hotel-dashboard/calls",
     icon: MessageSquare,
-    label: 'Lịch sử cuộc gọi',
-    description: 'Xem lịch sử cuộc gọi và transcript',
-    permission: 'calls:view',
-    roleSpecific: ['front-desk'],
+    label: "Lịch sử cuộc gọi",
+    description: "Xem lịch sử cuộc gọi và transcript",
+    permission: "calls:view",
+    roleSpecific: ["front-desk"],
   },
 
   // IT Manager Features
   {
-    href: '/hotel-dashboard/system-monitoring',
+    href: "/hotel-dashboard/system-monitoring",
     icon: Monitor,
-    label: 'Giám sát hệ thống',
-    description: 'Theo dõi hiệu suất và sức khỏe hệ thống',
-    permission: 'system:monitor',
-    roleSpecific: ['it-manager'],
+    label: "Giám sát hệ thống",
+    description: "Theo dõi hiệu suất và sức khỏe hệ thống",
+    permission: "system:monitor",
+    roleSpecific: ["it-manager"],
   },
   {
-    href: '/hotel-dashboard/integrations',
+    href: "/hotel-dashboard/integrations",
     icon: Wrench,
-    label: 'Tích hợp',
-    description: 'Quản lý API và tích hợp bên thứ 3',
-    permission: 'integrations:manage',
-    roleSpecific: ['it-manager'],
+    label: "Tích hợp",
+    description: "Quản lý API và tích hợp bên thứ 3",
+    permission: "integrations:manage",
+    roleSpecific: ["it-manager"],
   },
   {
-    href: '/hotel-dashboard/logs',
+    href: "/hotel-dashboard/logs",
     icon: Database,
-    label: 'Nhật ký hệ thống',
-    description: 'Xem logs và debug issues',
-    permission: 'logs:view',
-    roleSpecific: ['it-manager'],
+    label: "Nhật ký hệ thống",
+    description: "Xem logs và debug issues",
+    permission: "logs:view",
+    roleSpecific: ["it-manager"],
   },
   {
-    href: '/hotel-dashboard/security',
+    href: "/hotel-dashboard/security",
     icon: Shield,
-    label: 'Bảo mật',
-    description: 'Cấu hình và giám sát bảo mật',
-    permission: 'security:manage',
-    roleSpecific: ['it-manager'],
+    label: "Bảo mật",
+    description: "Cấu hình và giám sát bảo mật",
+    permission: "security:manage",
+    roleSpecific: ["it-manager"],
   },
 ];
 
 // Role-specific styling
 const getRoleTheme = (role: UserRole) => {
   switch (role) {
-    case 'hotel-manager':
+    case "hotel-manager":
       return {
-        primary: 'bg-blue-600 hover:bg-blue-700',
-        accent: 'border-blue-200',
-        badge: 'bg-blue-100 text-blue-800',
+        primary: "bg-blue-600 hover:bg-blue-700",
+        accent: "border-blue-200",
+        badge: "bg-blue-100 text-blue-800",
       };
-    case 'front-desk':
+    case "front-desk":
       return {
-        primary: 'bg-green-600 hover:bg-green-700',
-        accent: 'border-green-200',
-        badge: 'bg-green-100 text-green-800',
+        primary: "bg-green-600 hover:bg-green-700",
+        accent: "border-green-200",
+        badge: "bg-green-100 text-green-800",
       };
-    case 'it-manager':
+    case "it-manager":
       return {
-        primary: 'bg-purple-600 hover:bg-purple-700',
-        accent: 'border-purple-200',
-        badge: 'bg-purple-100 text-purple-800',
+        primary: "bg-purple-600 hover:bg-purple-700",
+        accent: "border-purple-200",
+        badge: "bg-purple-100 text-purple-800",
       };
     default:
       return {
-        primary: 'bg-gray-600 hover:bg-gray-700',
-        accent: 'border-gray-200',
-        badge: 'bg-gray-100 text-gray-800',
+        primary: "bg-gray-600 hover:bg-gray-700",
+        accent: "border-gray-200",
+        badge: "bg-gray-100 text-gray-800",
       };
   }
 };
@@ -211,14 +210,14 @@ const getRoleTheme = (role: UserRole) => {
 // Role display names
 const getRoleDisplayName = (role: UserRole) => {
   switch (role) {
-    case 'hotel-manager':
-      return 'Quản lý khách sạn';
-    case 'front-desk':
-      return 'Lễ tân';
-    case 'it-manager':
-      return 'Quản lý IT';
+    case "hotel-manager":
+      return "Quản lý khách sạn";
+    case "front-desk":
+      return "Lễ tân";
+    case "it-manager":
+      return "Quản lý IT";
     default:
-      return 'Người dùng';
+      return "Người dùng";
   }
 };
 
@@ -240,12 +239,12 @@ const NavItem = ({
 }) => (
   <Link href={href}>
     <Button
-      variant={isActive ? 'default' : 'ghost'}
+      variant={isActive ? "default" : "ghost"}
       className={cn(
-        'w-full justify-start gap-3 px-3 py-6 h-auto',
-        'hover:bg-gray-100 dark:hover:bg-gray-800',
+        "w-full justify-start gap-3 px-3 py-6 h-auto",
+        "hover:bg-gray-100 dark:hover:bg-gray-800",
         isActive &&
-          `${theme.primary} text-white hover:${theme.primary.replace('bg-', 'bg-').replace('600', '700')}`
+          `${theme.primary} text-white hover:${theme.primary.replace("bg-", "bg-").replace("600", "700")}`,
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
@@ -253,8 +252,8 @@ const NavItem = ({
         <div className="font-medium">{label}</div>
         <div
           className={cn(
-            'text-xs text-muted-foreground',
-            isActive && 'text-white/80'
+            "text-xs text-muted-foreground",
+            isActive && "text-white/80",
           )}
         >
           {description}
@@ -282,11 +281,11 @@ const UserMenu = ({
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={user.avatar_url || ''}
+              src={user.avatar_url || ""}
               alt={user.display_name || user.email}
             />
             <AvatarFallback className={theme.primary}>
-              {(user.display_name || user.email || '').charAt(0).toUpperCase()}
+              {(user.display_name || user.email || "").charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -339,7 +338,7 @@ const DynamicSidebar = ({
   const hasPermission = permissionChecker.canAccess;
 
   // Filter navigation items based on role and permissions
-  const availableNavItems = navigationItems.filter(item => {
+  const availableNavItems = navigationItems.filter((item) => {
     // Check if user has permission
     if (!hasPermission(item.permission)) {
       return false;
@@ -356,23 +355,23 @@ const DynamicSidebar = ({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0',
-        isOpen ? 'translate-x-0' : '-translate-x-full'
+        "fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="flex h-full flex-col">
         {/* Header */}
         <div
           className={cn(
-            'flex items-center justify-between p-6 border-b',
-            theme.accent
+            "flex items-center justify-between p-6 border-b",
+            theme.accent,
           )}
         >
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-lg text-white',
-                theme.primary
+                "flex h-10 w-10 items-center justify-center rounded-lg text-white",
+                theme.primary,
               )}
             >
               <Building2 className="h-6 w-6" />
@@ -393,7 +392,7 @@ const DynamicSidebar = ({
         </div>
 
         {/* User info */}
-        <div className={cn('px-6 py-4 border-b', theme.accent)}>
+        <div className={cn("px-6 py-4 border-b", theme.accent)}>
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold text-lg">
@@ -414,8 +413,8 @@ const DynamicSidebar = ({
               <Link
                 href="/interface1"
                 className={cn(
-                  'flex-1 px-3 py-2 text-white text-sm rounded hover:opacity-90 transition text-center',
-                  theme.primary
+                  "flex-1 px-3 py-2 text-white text-sm rounded hover:opacity-90 transition text-center",
+                  theme.primary,
                 )}
               >
                 Giao diện khách
@@ -430,7 +429,7 @@ const DynamicSidebar = ({
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {availableNavItems.map(item => {
+          {availableNavItems.map((item) => {
             const isActive = location === item.href;
 
             return (
@@ -464,7 +463,7 @@ export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
-  const role = user?.role || 'front-desk';
+  const role = user?.role || "front-desk";
 
   // Get theme based on user role
   const theme = getRoleTheme(role);
@@ -472,14 +471,14 @@ export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({
   // Role-specific page title
   const getPageTitle = () => {
     switch (role) {
-      case 'hotel-manager':
-        return 'Hotel Manager Dashboard';
-      case 'front-desk':
-        return 'Front Desk Dashboard';
-      case 'it-manager':
-        return 'IT System Dashboard';
+      case "hotel-manager":
+        return "Hotel Manager Dashboard";
+      case "front-desk":
+        return "Front Desk Dashboard";
+      case "it-manager":
+        return "IT System Dashboard";
       default:
-        return 'Hotel Dashboard';
+        return "Hotel Dashboard";
     }
   };
 

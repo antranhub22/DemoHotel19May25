@@ -20,16 +20,13 @@ router.get("/", async (req: any, res: any) => {
       "HotelModule",
     );
 
-    const tenantServices = await db
-      .select()
-      .from(services)
-      .where(
-        and(
-          eq(services.tenant_id, req.tenant.id),
-          eq(services.is_active, true),
-        ),
-      )
-      .orderBy(services.category, services.name);
+    const tenantServices = await prisma.services.findMany({
+      where: {
+        tenant_id: req.tenant.id,
+        is_active: true,
+      },
+      orderBy: [{ category: "asc" }, { name: "asc" }],
+    });
 
     logger.debug(
       `✅ [Services] Found ${tenantServices.length} services`,
@@ -152,32 +149,36 @@ router.patch("/:id", async (req: any, res: any) => {
       "HotelModule",
     );
 
-    const [updatedService] = await db
-      .update(services)
-      .set({
+    const updatedService = await prisma.services.updateMany({
+      where: {
+        id: parseInt(id),
+        tenant_id: req.tenant.id,
+      },
+      data: {
         ...updateData,
         updated_at: new Date(),
-      })
-      .where(
-        and(
-          eq(services.id, parseInt(id)),
-          eq(services.tenant_id, req.tenant.id),
-        ),
-      )
-      .returning();
+      },
+    });
 
-    if (!updatedService) {
+    if (updatedService.count === 0) {
       return (res as any).status(404).json({
         success: false,
         error: "Service not found",
       });
     }
 
+    const service = await prisma.services.findFirst({
+      where: {
+        id: parseInt(id),
+        tenant_id: req.tenant.id,
+      },
+    });
+
     logger.debug("✅ [Services] Service updated", "HotelModule");
 
     (res as any).json({
       success: true,
-      data: updatedService,
+      data: service,
     });
   } catch (error) {
     logger.error("❌ [Services] Error updating service:", "HotelModule", error);
@@ -200,32 +201,36 @@ router.delete("/:id", async (req: any, res: any) => {
       "HotelModule",
     );
 
-    const [deletedService] = await db
-      .update(services)
-      .set({
+    const deletedService = await prisma.services.updateMany({
+      where: {
+        id: parseInt(id),
+        tenant_id: req.tenant.id,
+      },
+      data: {
         is_active: false,
         updated_at: new Date(),
-      })
-      .where(
-        and(
-          eq(services.id, parseInt(id)),
-          eq(services.tenant_id, req.tenant.id),
-        ),
-      )
-      .returning();
+      },
+    });
 
-    if (!deletedService) {
+    if (deletedService.count === 0) {
       return (res as any).status(404).json({
         success: false,
         error: "Service not found",
       });
     }
 
+    const service = await prisma.services.findFirst({
+      where: {
+        id: parseInt(id),
+        tenant_id: req.tenant.id,
+      },
+    });
+
     logger.debug("✅ [Services] Service deleted", "HotelModule");
 
     (res as any).json({
       success: true,
-      data: deletedService,
+      data: service,
     });
   } catch (error) {
     logger.error("❌ [Services] Error deleting service:", "HotelModule", error);
@@ -246,15 +251,16 @@ router.get("/categories", async (req: any, res: any) => {
       "HotelModule",
     );
 
-    const categories = await db
-      .selectDistinct({ category: services.category })
-      .from(services)
-      .where(
-        and(
-          eq(services.tenant_id, req.tenant.id),
-          eq(services.is_active, true),
-        ),
-      );
+    const categories = await prisma.services.findMany({
+      where: {
+        tenant_id: req.tenant.id,
+        is_active: true,
+      },
+      select: {
+        category: true,
+      },
+      distinct: ["category"],
+    });
 
     logger.debug(
       `✅ [Services] Found ${categories.length} categories`,

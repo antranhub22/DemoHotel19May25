@@ -1,5 +1,7 @@
-import { INTERFACE_CONSTANTS } from '@/constants/interface1Constants';
-import { designSystem } from '@/styles/designSystem';
+import * as React from "react";
+import { ReactNode } from "react";
+import { INTERFACE_CONSTANTS } from "@/constants/interface1Constants";
+import { designSystem } from "@/styles/designSystem";
 
 interface InterfaceContainerProps {
   children: ReactNode;
@@ -8,7 +10,7 @@ interface InterfaceContainerProps {
 
 export const InterfaceContainer = ({
   children,
-  className = '',
+  className = "",
 }: InterfaceContainerProps): JSX.Element => {
   return (
     <div

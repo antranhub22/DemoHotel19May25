@@ -1,6 +1,6 @@
-import { usePopup } from '@/components/features/popup-system';
-import { logger } from '@shared/utils/logger';
-import React, { createElement, useEffect, useState } from 'react';
+import { usePopup } from "@/components/features/popup-system";
+import { logger } from "@shared/utils/logger";
+import React, { createElement, useEffect, useState } from "react";
 
 interface SummaryPopupProps {
   isOpen: boolean;
@@ -11,111 +11,104 @@ export const SummaryPopup: React.FC<SummaryPopupProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { showPopup, hidePopup } = usePopup();
+  const { showSummary, removePopup } = usePopup();
   const [isVisible, setIsVisible] = useState(false);
 
   // ✅ NEW: Test function to trigger summary popup
   const testSummaryPopup = () => {
     logger.debug(
-      '🧪 [SummaryPopup] Testing summary popup trigger',
-      'Component'
+      "🧪 [SummaryPopup] Testing summary popup trigger",
+      "Component",
     );
 
     const summaryContent = createElement(
-      'div',
+      "div",
       {
         style: {
-          padding: '20px',
-          textAlign: 'center',
-          maxWidth: '400px',
+          padding: "20px",
+          textAlign: "center",
+          maxWidth: "400px",
         },
       },
       [
         createElement(
-          'h3',
+          "h3",
           {
-            key: 'title',
+            key: "title",
             style: {
-              marginBottom: '16px',
-              color: '#333',
-              fontSize: '18px',
-              fontWeight: '600',
+              marginBottom: "16px",
+              color: "#333",
+              fontSize: "18px",
+              fontWeight: "600",
             },
           },
-          '📋 Test Call Summary'
+          "📋 Test Call Summary",
         ),
 
         createElement(
-          'div',
+          "div",
           {
-            key: 'icon',
-            style: { fontSize: '48px', marginBottom: '16px' },
+            key: "icon",
+            style: { fontSize: "48px", marginBottom: "16px" },
           },
-          '✅'
+          "✅",
         ),
 
         createElement(
-          'p',
+          "p",
           {
-            key: 'message',
+            key: "message",
             style: {
-              marginBottom: '16px',
-              lineHeight: '1.5',
-              color: '#333',
-              fontSize: '16px',
+              marginBottom: "16px",
+              lineHeight: "1.5",
+              color: "#333",
+              fontSize: "16px",
             },
           },
-          'This is a test summary popup!'
+          "This is a test summary popup!",
         ),
 
         createElement(
-          'div',
+          "div",
           {
-            key: 'test-info',
+            key: "test-info",
             style: {
-              marginBottom: '16px',
-              padding: '12px',
-              backgroundColor: '#f0f9ff',
-              borderRadius: '6px',
-              fontSize: '14px',
+              marginBottom: "16px",
+              padding: "12px",
+              backgroundColor: "#f0f9ff",
+              borderRadius: "6px",
+              fontSize: "14px",
             },
           },
           [
             createElement(
-              'div',
+              "div",
               {
-                key: 'test-title',
+                key: "test-title",
                 style: {
-                  fontWeight: '600',
-                  marginBottom: '4px',
-                  color: '#1e40af',
+                  fontWeight: "600",
+                  marginBottom: "4px",
+                  color: "#1e40af",
                 },
               },
-              'Test Summary:'
+              "Test Summary:",
             ),
             createElement(
-              'div',
+              "div",
               {
-                key: 'test-details',
-                style: { color: '#374151' },
+                key: "test-details",
+                style: { color: "#374151" },
               },
-              'Summary popup is working correctly!'
+              "Summary popup is working correctly!",
             ),
-          ]
+          ],
         ),
-      ]
+      ],
     );
 
-    showPopup({
-      type: 'summary',
-      title: 'Test Summary',
-      content: summaryContent,
-      onClose: () => {
-        logger.debug(
-          '🧪 [SummaryPopup] Test summary popup closed',
-          'Component'
-        );
-      },
+    showSummary(summaryContent, {
+      title: "Test Summary",
+      priority: "medium",
     });
   };
 
