@@ -108,23 +108,20 @@ ON CONFLICT (id) DO UPDATE SET
     subscription_status = EXCLUDED.subscription_status,
     updated_at = CURRENT_TIMESTAMP;
 
--- Step 6: Insert hotel profile
-INSERT INTO hotel_profiles (id, tenant_id, hotel_name, description, address, phone, email, website, amenities, policies)
-VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 'Mi Nhon Hotel', 
-        'A beautiful beachfront hotel in Mui Ne, Vietnam',
-        '97 Nguyen Dinh Chieu, Ham Tien, Mui Ne, Phan Thiet, Vietnam',
-        '+84 252 3847 007', 'info@minhonhotel.com', 'https://minhonhotel.com',
-        ARRAY['Pool', 'Restaurant', 'Free WiFi', 'Beach Access', 'Spa'],
-        ARRAY['Check-in: 2:00 PM', 'Check-out: 12:00 PM', 'No smoking'])
+-- Step 6: Insert hotel profile (using current schema without deprecated columns)
+INSERT INTO hotel_profiles (id, tenant_id, research_data, assistant_config, services_config, knowledge_base, system_prompt)
+VALUES ('mi-nhon-hotel-profile', 'mi-nhon-hotel', 
+        '{"location": "Mui Ne, Vietnam", "type": "Beach Resort", "amenities": ["Pool", "Restaurant", "Free WiFi", "Beach Access", "Spa"]}',
+        '{"language_preferences": ["vi", "en"], "voice_type": "friendly", "response_style": "professional"}',
+        '{"categories": ["room_service", "housekeeping", "concierge", "spa"], "default_currency": "VND"}',
+        'Mi Nhon Hotel is a beautiful beachfront resort located in Mui Ne, Vietnam. We offer premium accommodations with ocean views, spa services, restaurant dining, and various recreational activities.',
+        'You are a helpful hotel assistant for Mi Nhon Hotel in Mui Ne, Vietnam. Respond professionally and warmly to guest requests.')
 ON CONFLICT (id) DO UPDATE SET
-    hotel_name = EXCLUDED.hotel_name,
-    description = EXCLUDED.description,
-    address = EXCLUDED.address,
-    phone = EXCLUDED.phone,
-    email = EXCLUDED.email,
-    website = EXCLUDED.website,
-    amenities = EXCLUDED.amenities,
-    policies = EXCLUDED.policies,
+    research_data = EXCLUDED.research_data,
+    assistant_config = EXCLUDED.assistant_config,
+    services_config = EXCLUDED.services_config,
+    knowledge_base = EXCLUDED.knowledge_base,
+    system_prompt = EXCLUDED.system_prompt,
     updated_at = CURRENT_TIMESTAMP;
 
 -- Step 7: Insert default staff accounts

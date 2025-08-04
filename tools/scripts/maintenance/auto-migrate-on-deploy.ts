@@ -1,8 +1,8 @@
 #!/usr/bin/env tsx
 
-import { Pool } from 'pg';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname } from "path";
+import { Pool } from "pg";
+import { fileURLToPath } from "url";
 
 /**
  * Auto-Migration Script for Production Deployment
@@ -18,44 +18,44 @@ interface MigrationResult {
 }
 
 async function autoMigrateOnDeploy(): Promise<MigrationResult> {
-  console.log('🔄 Auto-Migration: Checking database schema...');
+  console.log("🔄 Auto-Migration: Checking database schema...");
 
   const DATABASE_URL = process.env.DATABASE_URL;
 
   if (!DATABASE_URL) {
     console.log(
-      '⚠️ DATABASE_URL not found - skipping migration (probably local dev)'
+      "⚠️ DATABASE_URL not found - skipping migration (probably local dev)",
     );
     return { success: true, migrationsRun: [] };
   }
 
   // ✅ FIXED: Skip PostgreSQL auto-migration for SQLite databases
-  if (DATABASE_URL.startsWith('sqlite://')) {
+  if (DATABASE_URL.startsWith("sqlite://")) {
     console.log(
-      '📁 SQLite database detected - skipping PostgreSQL auto-migration'
+      "📁 SQLite database detected - skipping PostgreSQL auto-migration",
     );
     console.log(
-      'ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)'
+      "ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)",
     );
-    return { success: true, migrationsRun: ['sqlite-auto-handled'] };
+    return { success: true, migrationsRun: ["sqlite-auto-handled"] };
   }
 
   // ✅ IMPROVED: Only proceed with PostgreSQL auto-migration for actual PostgreSQL databases
   if (
-    !DATABASE_URL.includes('postgres') &&
-    !DATABASE_URL.includes('postgresql')
+    !DATABASE_URL.includes("postgres") &&
+    !DATABASE_URL.includes("postgresql")
   ) {
     console.log(
-      '⚠️ Database URL does not appear to be PostgreSQL - skipping auto-migration'
+      "⚠️ Database URL does not appear to be PostgreSQL - skipping auto-migration",
     );
     console.log(
-      '🔍 DATABASE_URL pattern:',
-      DATABASE_URL.substring(0, 20) + '...'
+      "🔍 DATABASE_URL pattern:",
+      DATABASE_URL.substring(0, 20) + "...",
     );
     return { success: true, migrationsRun: [] };
   }
 
-  console.log('🐘 PostgreSQL database detected - running auto-migration...');
+  console.log("🐘 PostgreSQL database detected - running auto-migration...");
 
   const pool = new Pool({
     connectionString: DATABASE_URL,
@@ -68,30 +68,30 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     const client = await pool.connect();
 
     // 1. Check if staff table has required columns
-    console.log('🔍 Checking staff table schema...');
+    console.log("🔍 Checking staff table schema...");
     const staffColumns = await client.query(`
       SELECT column_name
       FROM information_schema.columns 
       WHERE table_name = 'staff'
     `);
 
-    const existingColumns = staffColumns.rows.map(row => row.column_name);
+    const existingColumns = staffColumns.rows.map((row) => row.column_name);
     const requiredColumns = [
-      'first_name',
-      'last_name',
-      'display_name',
-      'phone',
-      'email',
-      'permissions',
-      'is_active',
+      "first_name",
+      "last_name",
+      "display_name",
+      "phone",
+      "email",
+      "permissions",
+      "is_active",
     ];
     const missingColumns = requiredColumns.filter(
-      col => !existingColumns.includes(col)
+      (col) => !existingColumns.includes(col),
     );
 
     if (missingColumns.length > 0) {
-      console.log(`🚨 Missing columns detected: ${missingColumns.join(', ')}`);
-      console.log('🔧 Running staff table migration...');
+      console.log(`🚨 Missing columns detected: ${missingColumns.join(", ")}`);
+      console.log("🔧 Running staff table migration...");
 
       const migrationSQL = `
         -- Add missing staff columns
@@ -117,22 +117,22 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         WHERE first_name IS NULL OR last_name IS NULL OR display_name IS NULL;
       `;
 
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       try {
         await client.query(migrationSQL);
-        await client.query('COMMIT');
-        migrationsRun.push('staff_table_columns');
-        console.log('✅ Staff table migration completed');
+        await client.query("COMMIT");
+        migrationsRun.push("staff_table_columns");
+        console.log("✅ Staff table migration completed");
       } catch (error) {
-        await client.query('ROLLBACK');
+        await client.query("ROLLBACK");
         throw error;
       }
     } else {
-      console.log('✅ Staff table schema is up to date');
+      console.log("✅ Staff table schema is up to date");
     }
 
     // 2. Check tenants table
-    console.log('🔍 Checking tenants table schema...');
+    console.log("🔍 Checking tenants table schema...");
     const tenantsColumns = await client.query(`
       SELECT column_name
       FROM information_schema.columns 
@@ -140,22 +140,22 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     `);
 
     const existingTenantColumns = tenantsColumns.rows.map(
-      row => row.column_name
+      (row) => row.column_name,
     );
     const requiredTenantColumns = [
-      'hotel_name',
-      'subscription_plan',
-      'subscription_status',
+      "hotel_name",
+      "subscription_plan",
+      "subscription_status",
     ];
     const missingTenantColumns = requiredTenantColumns.filter(
-      col => !existingTenantColumns.includes(col)
+      (col) => !existingTenantColumns.includes(col),
     );
 
     if (missingTenantColumns.length > 0) {
       console.log(
-        `🚨 Missing tenant columns: ${missingTenantColumns.join(', ')}`
+        `🚨 Missing tenant columns: ${missingTenantColumns.join(", ")}`,
       );
-      console.log('🔧 Running tenants table migration...');
+      console.log("🔧 Running tenants table migration...");
 
       const tenantMigrationSQL = `
         ALTER TABLE tenants 
@@ -177,22 +177,68 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         WHERE hotel_name IS NULL;
       `;
 
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       try {
         await client.query(tenantMigrationSQL);
-        await client.query('COMMIT');
-        migrationsRun.push('tenants_table_columns');
-        console.log('✅ Tenants table migration completed');
+        await client.query("COMMIT");
+        migrationsRun.push("tenants_table_columns");
+        console.log("✅ Tenants table migration completed");
       } catch (error) {
-        await client.query('ROLLBACK');
+        await client.query("ROLLBACK");
         throw error;
       }
     } else {
-      console.log('✅ Tenants table schema is up to date');
+      console.log("✅ Tenants table schema is up to date");
     }
 
-    // 3. Ensure indexes exist (only for existing tables)
-    console.log('🔍 Checking database indexes...');
+    // 3. Check hotel_profiles table
+    console.log("🔍 Checking hotel_profiles table schema...");
+    const hotelProfilesColumns = await client.query(`
+      SELECT column_name
+      FROM information_schema.columns 
+      WHERE table_name = 'hotel_profiles'
+    `);
+
+    const existingProfileColumns = hotelProfilesColumns.rows.map(
+      (row) => row.column_name,
+    );
+
+    // Remove hotel_name column if it exists (it was moved to tenants table)
+    if (existingProfileColumns.includes("hotel_name")) {
+      console.log(
+        "🚨 Found deprecated hotel_name column in hotel_profiles - removing...",
+      );
+
+      const profileMigrationSQL = `
+        -- Remove deprecated hotel_name column from hotel_profiles
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS hotel_name;
+        
+        -- Also remove other deprecated columns that might exist
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS description;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS address;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS phone;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS email;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS website;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS amenities;
+        ALTER TABLE hotel_profiles DROP COLUMN IF EXISTS policies;
+      `;
+
+      await client.query("BEGIN");
+      try {
+        await client.query(profileMigrationSQL);
+        await client.query("COMMIT");
+        migrationsRun.push("hotel_profiles_cleanup");
+        console.log("✅ Hotel profiles table cleanup completed");
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      }
+    } else {
+      console.log("✅ Hotel profiles table schema is up to date");
+    }
+
+    // 4. Ensure indexes exist (only for existing tables)
+    console.log("🔍 Checking database indexes...");
 
     // Get list of existing tables
     const existingTables = await client.query(`
@@ -201,29 +247,29 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
       WHERE table_schema = 'public'
     `);
 
-    const tableNames = existingTables.rows.map(row => row.table_name);
+    const tableNames = existingTables.rows.map((row) => row.table_name);
     const indexQueries = [];
 
     // Always create staff indexes (we know staff table exists)
     indexQueries.push(
-      'CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id)'
+      "CREATE INDEX IF NOT EXISTS idx_staff_tenant_id ON staff(tenant_id)",
     );
     indexQueries.push(
-      'CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username)'
+      "CREATE INDEX IF NOT EXISTS idx_staff_username ON staff(username)",
     );
     indexQueries.push(
-      'CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email)'
+      "CREATE INDEX IF NOT EXISTS idx_staff_email ON staff(email)",
     );
 
     // Only create indexes for tables that exist
-    if (tableNames.includes('call')) {
+    if (tableNames.includes("call")) {
       indexQueries.push(
-        'CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id)'
+        "CREATE INDEX IF NOT EXISTS idx_call_tenant_id ON call(tenant_id)",
       );
     }
-    if (tableNames.includes('request')) {
+    if (tableNames.includes("request")) {
       indexQueries.push(
-        'CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)'
+        "CREATE INDEX IF NOT EXISTS idx_request_tenant_id ON request(tenant_id)",
       );
     }
 
@@ -233,32 +279,32 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
         await client.query(query);
       } catch (error) {
         console.warn(
-          `⚠️ Failed to create index: ${(error as any)?.message || String(error)}`
+          `⚠️ Failed to create index: ${(error as any)?.message || String(error)}`,
         );
       }
     }
 
-    console.log('✅ Database indexes ensured');
+    console.log("✅ Database indexes ensured");
 
     client.release();
 
     if (migrationsRun.length > 0) {
-      console.log('🎉 Auto-migration completed successfully!');
-      console.log(`📝 Migrations run: ${migrationsRun.join(', ')}`);
+      console.log("🎉 Auto-migration completed successfully!");
+      console.log(`📝 Migrations run: ${migrationsRun.join(", ")}`);
     } else {
-      console.log('✅ Database schema is up to date - no migrations needed');
+      console.log("✅ Database schema is up to date - no migrations needed");
     }
 
     return { success: true, migrationsRun };
   } catch (error) {
-    console.error('❌ Auto-migration failed:', error);
+    console.error("❌ Auto-migration failed:", error);
     return {
       success: false,
       migrationsRun,
       error:
         error instanceof Error
           ? (error as any)?.message || String(error)
-          : 'Unknown error',
+          : "Unknown error",
     };
   } finally {
     await pool.end();
@@ -270,23 +316,22 @@ export { autoMigrateOnDeploy };
 
 // Run if called directly (ES module compatible)
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Check if this file is being run directly
 const isMainModule =
   process.argv[1] === __filename ||
-  process.argv[1]?.endsWith('auto-migrate-on-deploy.ts');
+  process.argv[1]?.endsWith("auto-migrate-on-deploy.ts");
 
 if (isMainModule) {
   autoMigrateOnDeploy()
-    .then(result => {
+    .then((result) => {
       if (!result.success) {
-        console.error('Migration failed, but continuing deployment...');
+        console.error("Migration failed, but continuing deployment...");
         // Don't exit with error code to allow deployment to continue
       }
     })
-    .catch(error => {
-      console.error('Migration script error:', error);
+    .catch((error) => {
+      console.error("Migration script error:", error);
       // Don't exit with error code to allow deployment to continue
     });
 }
