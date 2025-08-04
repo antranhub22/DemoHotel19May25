@@ -1,8 +1,11 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
-import express, { type Request, Response } from 'express';
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { call, db, request as requestTable, staff, tenants } from '@shared/db';
-import { logger } from '@shared/utils/logger';
+import { PrismaClient } from "@prisma/client";
+
+// ✅ DETAILED MIGRATION: Use Prisma client for multi-dashboard operations
+const prisma = new PrismaClient();
+import express, { type Request, Response } from "express";
+import { authenticateJWT } from "@auth/middleware/auth.middleware";
+import { call, db, request as requestTable, staff, tenants } from "@shared/db";
+import { logger } from "@shared/utils/logger";
 
 const router = express.Router();
 

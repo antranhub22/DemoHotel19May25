@@ -333,23 +333,22 @@ router.get("/", async (req, res) => {
             : "timestamp";
     orderClause[sortField] = order || "desc";
 
-    // ✅ SMART MIGRATION: Get paginated data using Prisma
-    const summaries = await prisma.call_summaries.findMany({
-      where: whereClause,
-      orderBy: orderClause,
-      take: limit,
-      skip: offset,
-    });
+    // ✅ DETAILED MIGRATION: Get paginated data with proper Prisma queries
+    const [summaries, totalCount] = await Promise.all([
+      prisma.call_summaries.findMany({
+        where: whereClause,
+        orderBy: orderClause,
+        take: limit,
+        skip: offset,
+      }),
+      prisma.call_summaries.count({
+        where: whereClause,
+      }),
+    ]);
 
-    // Get total count for pagination
-    // ✅ DETAILED MIGRATION: Get count using Prisma
-    const totalCount = await prisma.call_summaries.count({
-      where: whereClause,
-    });
+    // Total count already calculated in Promise.all above
 
-    // Count query already executed above
-
-    // Total count already calculated above
+    // Total count calculated in Promise.all above
 
     logger.debug(
       `✅ [SUMMARIES] Retrieved ${summaries.length} summaries (total: ${totalCount})`,
