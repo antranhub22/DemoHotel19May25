@@ -1,9 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { apiResponse, commonErrors } from "@server/utils/apiHelpers";
 import {
-  buildDateRangeConditions,
-  buildSearchConditions,
-  buildWhereConditions,
   GUEST_JOURNEY_DEFAULTS,
   parseCompleteQuery,
 } from "@server/utils/pagination";
@@ -123,9 +120,9 @@ router.get("/:callId", async (req, res) => {
         pagination: {
           page,
           limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasNext: offset + limit < total,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasNext: offset + limit < totalCount,
           hasPrev: page > 1,
         },
         search: search || null,
@@ -300,53 +297,43 @@ router.get("/", async (req, res) => {
       // TODO: Add JOIN with calls table for tenant filtering when schema supports it
     }
 
-    // Add filter conditions
-    const filterConditions = buildWhereConditions(filters, {
-      call_id: call_summaries.call_id,
-      room_number: call_summaries.room_number,
-    });
-    whereConditions.push(...filterConditions);
+    // ✅ SMART MIGRATION: Use direct Prisma where object instead of complex helpers
+    const whereClause: any = {};
 
-    // Add search conditions
+    // Add filters directly
+    if (filters.call_id) whereClause.call_id = filters.call_id;
+    if (filters.room_number) whereClause.room_number = filters.room_number;
+    if (filters.duration) whereClause.duration = parseInt(filters.duration);
+
+    // Add search using Prisma
     if (search) {
-      const searchConditions = buildSearchConditions(search, ["content"], {
-        content: call_summaries.content,
-      });
-      if (searchConditions.length > 0) {
-        whereConditions.push(or(...searchConditions));
-      }
+      whereClause.content = {
+        contains: search,
+        mode: "insensitive",
+      };
     }
 
-    // Add date range conditions
+    // Add date range
     if (dateRange.from || dateRange.to) {
-      const dateConditions = buildDateRangeConditions(
-        dateRange,
-        call_summaries.timestamp,
-      );
-      whereConditions.push(...dateConditions);
+      const dateFilter: any = {};
+      if (dateRange.from) dateFilter.gte = new Date(dateRange.from);
+      if (dateRange.to) dateFilter.lte = new Date(dateRange.to);
+      whereClause.timestamp = dateFilter;
     }
 
-    // Build query
-    const whereClause =
-      whereConditions.length > 0
-        ? whereConditions.length > 1
-          ? and(...whereConditions)
-          : whereConditions[0]
-        : undefined;
-
-    // Order by - fix column reference
-    const sortColumn =
+    // ✅ SMART MIGRATION: Direct Prisma orderBy
+    const orderClause: any = {};
+    const sortField =
       sort === "call_id"
-        ? call_summaries.call_id
+        ? "call_id"
         : sort === "room_number"
-          ? call_summaries.room_number
+          ? "room_number"
           : sort === "duration"
-            ? call_summaries.duration
-            : call_summaries.timestamp;
+            ? "duration"
+            : "timestamp";
+    orderClause[sortField] = order || "desc";
 
-    const orderClause = order === "asc" ? asc(sortColumn) : desc(sortColumn);
-
-    // ✅ DETAILED MIGRATION: Get paginated data using Prisma
+    // ✅ SMART MIGRATION: Get paginated data using Prisma
     const summaries = await prisma.call_summaries.findMany({
       where: whereClause,
       orderBy: orderClause,
@@ -360,15 +347,12 @@ router.get("/", async (req, res) => {
       where: whereClause,
     });
 
-    if (whereClause) {
-      totalCountQuery.where(whereClause);
-    }
+    // Count query already executed above
 
-    const totalCountResult = await totalCountQuery;
-    const total = totalCountResult.length;
+    // Total count already calculated above
 
     logger.debug(
-      `✅ [SUMMARIES] Retrieved ${summaries.length} summaries (total: ${total})`,
+      `✅ [SUMMARIES] Retrieved ${summaries.length} summaries (total: ${totalCount})`,
       "Summaries",
     );
 
@@ -380,9 +364,9 @@ router.get("/", async (req, res) => {
         pagination: {
           page,
           limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-          hasNext: offset + limit < total,
+          totalCount,
+          totalPages: Math.ceil(totalCount / limit),
+          hasNext: offset + limit < totalCount,
           hasPrev: page > 1,
         },
         search: search || null,
@@ -412,13 +396,18 @@ router.delete("/:id", async (req, res) => {
 
     logger.debug(`🗑️ [SUMMARIES] Deleting summary: ${id}`, "Summaries");
 
-    const deletedSummaries = await db
-      .delete(call_summaries)
-      .where(eq(call_summaries.id, parseInt(id)))
-      .returning();
-
-    if (deletedSummaries.length === 0) {
-      return commonErrors.notFound(res, "Summary", id);
+    // ✅ DETAILED MIGRATION: Delete using Prisma with error handling
+    try {
+      const deletedSummary = await prisma.call_summaries.delete({
+        where: {
+          id: parseInt(id),
+        },
+      });
+    } catch (error: any) {
+      if (error.code === "P2025") {
+        return commonErrors.notFound(res, "Summary", id);
+      }
+      throw error;
     }
 
     logger.debug(
