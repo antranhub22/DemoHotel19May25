@@ -7,12 +7,11 @@ services:
     env: node
     region: oregon
     plan: free
-    # ✅ FIXED: Updated build command to match package.json scripts
+    # ✅ FIXED: Simplified build command for stable deployment
     buildCommand: |
       npm ci && 
       npx prisma generate && 
       npx prisma migrate deploy && 
-      tsx tools/scripts/maintenance/auto-migrate-on-deploy.ts && 
       npm run build:production
     startCommand: npm run start
     healthCheckPath: /api/health
@@ -21,10 +20,16 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: AUTO_MIGRATE
+        value: "false"
+      - key: SEED_USERS
+        value: "false"
+      - key: AUTO_DB_FIX
+        value: "false"
       # ✅ DATABASE_URL will be automatically provided by Render PostgreSQL
       # ✅ Add other environment variables as needed
       - fromGroup: demohotel-env-group
-    nodeVersion: 18.20.8
+    nodeVersion: 20.18.1
     buildFilter:
       paths:
       - apps/**

@@ -1,0 +1,19 @@
+# 🚀 SIMPLE RENDER DEPLOYMENT - PRODUCTION READY
+# Minimal config for stable deployment
+
+services:
+  - type: web
+    name: demohotel19may25
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy && npm run build:production
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - fromGroup: demohotel-env-group
+    nodeVersion: 20.18.1
