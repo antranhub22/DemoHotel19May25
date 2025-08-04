@@ -1,11 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import express from "express";
 
-// ✅ DETAILED MIGRATION: Use Prisma client for multi-dashboard operations
-const prisma = new PrismaClient();
-import express, { type Request, Response } from "express";
-import { authenticateJWT } from "@auth/middleware/auth.middleware";
-import { call, db, request as requestTable, staff, tenants } from "@shared/db";
-import { logger } from "@shared/utils/logger";
+// ✅ DETAILED MIGRATION: Removed Drizzle imports - using Prisma instead
 
 const router = express.Router();
 
