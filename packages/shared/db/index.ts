@@ -1,27 +1,19 @@
-// ✅ Enhanced Database Connection with Advanced Pooling & Monitoring
-import { connectionManager } from "@shared/db/connectionManager";
-
-// Initialize connection manager
-let _dbInstance: any;
+// ✅ Enhanced Database Connection with Prisma
+import { PrismaConnectionManager } from "./PrismaConnectionManager";
 
 /**
- * Get database instance with advanced connection pooling
- * Automatically initializes connection manager if not already done
+ * Get Prisma database instance
  */
 export async function getDatabase() {
-  if (!_dbInstance) {
-    _dbInstance = await connectionManager.initialize();
-  }
-  return _dbInstance;
+  return PrismaConnectionManager.getInstance().getClient();
 }
 
 /**
  * Synchronous database access (for backwards compatibility)
- * Note: This will throw an error if connection is not initialized
  */
 function getDatabaseSync() {
   try {
-    return connectionManager.getDatabase();
+    return PrismaConnectionManager.getInstance().getClient();
   } catch (error) {
     console.warn(
       "⚠️ Database not initialized synchronously. Consider using getDatabase() instead.",
@@ -31,9 +23,9 @@ function getDatabaseSync() {
 }
 
 // For backward compatibility - maintain existing sync access pattern
-// But log warning about migration to async pattern
+// But now returns Prisma client instead of Drizzle
 export const db = new Proxy({} as any, {
-  get(target, prop) {
+  get(_target, prop) {
     try {
       const database = getDatabaseSync();
       return database[prop];
@@ -53,8 +45,9 @@ export const db = new Proxy({} as any, {
  * Recommended for application startup
  */
 export async function initializeDatabase() {
-  console.log("🚀 Initializing database with advanced connection pooling...");
-  const database = await connectionManager.initialize();
+  console.log("🚀 Initializing Prisma database connection...");
+  const prismaManager = PrismaConnectionManager.getInstance();
+  const database = prismaManager.getClient();
   console.log("✅ Database initialization complete");
   return database;
 }
@@ -63,14 +56,14 @@ export async function initializeDatabase() {
  * Get connection pool health metrics
  */
 export function getDatabaseMetrics() {
-  return connectionManager.getMetrics();
+  return PrismaConnectionManager.getInstance().getMetrics();
 }
 
 /**
  * Perform database health check
  */
 export async function checkDatabaseHealth() {
-  return await connectionManager.healthCheck();
+  return await PrismaConnectionManager.getInstance().healthCheck();
 }
 
 /**
@@ -79,7 +72,7 @@ export async function checkDatabaseHealth() {
  */
 export async function shutdownDatabase() {
   console.log("🔄 Shutting down database connections...");
-  await connectionManager.shutdown();
+  await PrismaConnectionManager.getInstance().disconnect();
   console.log("✅ Database shutdown complete");
 }
 
@@ -88,7 +81,9 @@ export async function shutdownDatabase() {
  */
 export async function reconnectDatabase() {
   console.log("🔄 Reconnecting to database...");
-  const database = await connectionManager.reconnect();
+  const prismaManager = PrismaConnectionManager.getInstance();
+  await prismaManager.disconnect();
+  const database = prismaManager.getClient();
   console.log("✅ Database reconnection complete");
   return database;
 }
@@ -135,9 +130,7 @@ export const safeNumber = (value: any): number => {
   return isNaN(num) ? 0 : num;
 };
 
-export * from "./schema";
 export * from "./transformers";
-export * from "./connectionManager";
 
 // ✅ Setup graceful shutdown handling
 const setupGracefulShutdown = () => {

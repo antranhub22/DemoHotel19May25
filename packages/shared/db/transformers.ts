@@ -6,22 +6,23 @@
 // ✅ POSTGRESQL FIELD MAPPING UTILITIES
 // Handles conversion between PostgreSQL snake_case and JavaScript camelCase
 
-import type {
-  Tenant,
-  InsertTenant,
-  Staff,
-  InsertStaff,
-  Call,
-  InsertCall,
-  Transcript,
-  InsertTranscript,
-  RequestRecord,
-  InsertRequestRecord,
-  Message,
-  InsertMessage,
-  CallSummary,
-  InsertCallSummary,
-} from './schema';
+import type { Prisma } from "@prisma/client";
+
+// Define types using Prisma
+export type Tenant = Prisma.TenantGetPayload<{}>;
+export type InsertTenant = Prisma.TenantCreateInput;
+export type Staff = Prisma.StaffGetPayload<{}>;
+export type InsertStaff = Prisma.StaffCreateInput;
+export type Call = Prisma.CallGetPayload<{}>;
+export type InsertCall = Prisma.CallCreateInput;
+export type Transcript = Prisma.TranscriptGetPayload<{}>;
+export type InsertTranscript = Prisma.TranscriptCreateInput;
+export type RequestRecord = Prisma.RequestGetPayload<{}>;
+export type InsertRequestRecord = Prisma.RequestCreateInput;
+export type Message = Prisma.MessageGetPayload<{}>;
+export type InsertMessage = Prisma.MessageCreateInput;
+export type CallSummary = Prisma.CallSummaryGetPayload<{}>;
+export type InsertCallSummary = Prisma.CallSummaryCreateInput;
 
 // ============================================
 // CORE TRANSFORMATION FUNCTIONS
@@ -32,7 +33,7 @@ export const toCamelCase = (str: string): string => {
 };
 
 export const toSnakeCase = (str: string): string => {
-  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 };
 
 // ============================================
@@ -333,19 +334,19 @@ export const requestMapper = {
 // ============================================
 
 export const convertToISOString = (
-  date: Date | string | null | undefined
+  date: Date | string | null | undefined,
 ): string | null => {
   if (!date) {
     return null;
   }
-  if (typeof date === 'string') {
+  if (typeof date === "string") {
     return date;
   }
   return date.toISOString();
 };
 
 export const convertToDate = (
-  dateString: string | Date | null | undefined
+  dateString: string | Date | null | undefined,
 ): Date | null => {
   if (!dateString) {
     return null;
