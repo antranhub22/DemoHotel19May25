@@ -1,6 +1,6 @@
 // 🔄 PRISMA CONNECTION MANAGER WITH POOLING & MONITORING
-import { logger } from '@shared/utils/logger';
-import { PrismaClient } from '../../../generated/prisma';
+import { PrismaClient } from "@prisma/client";
+import { logger } from "../utils/logger";
 
 /**
  * Prisma Connection Pool Configuration
@@ -12,16 +12,16 @@ interface PrismaConnectionConfig {
   transactionMaxWait: number;
   poolTimeout: number;
   binaryTargets: string[];
-  logLevel: 'info' | 'query' | 'warn' | 'error';
+  logLevel: "info" | "query" | "warn" | "error";
 }
 
 /**
  * Get optimized Prisma configuration based on environment
  */
 function getPrismaConnectionConfig(): PrismaConnectionConfig {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  const isRender = process.env.RENDER === 'true';
+  const isProduction = process.env.NODE_ENV === "production";
+  const isDevelopment = process.env.NODE_ENV === "development";
+  const isRender = process.env.RENDER === "true";
 
   if (isProduction && isRender) {
     // 🚀 Render Production: Conservative configuration for free tier
@@ -30,8 +30,8 @@ function getPrismaConnectionConfig(): PrismaConnectionConfig {
       queryTimeout: 30000, // 30 seconds query timeout
       transactionMaxWait: 15000, // 15 seconds transaction timeout
       poolTimeout: 20000, // 20 seconds pool timeout
-      binaryTargets: ['native', 'linux-musl'],
-      logLevel: 'warn', // Less verbose in production
+      binaryTargets: ["native", "linux-musl"],
+      logLevel: "warn", // Less verbose in production
     };
   } else if (isProduction) {
     // 🏢 Production: High-performance configuration
@@ -40,8 +40,8 @@ function getPrismaConnectionConfig(): PrismaConnectionConfig {
       queryTimeout: 60000,
       transactionMaxWait: 30000,
       poolTimeout: 30000,
-      binaryTargets: ['native'],
-      logLevel: 'error',
+      binaryTargets: ["native"],
+      logLevel: "error",
     };
   } else if (isDevelopment) {
     // 🛠️ Development: Balanced performance with debugging
@@ -50,8 +50,8 @@ function getPrismaConnectionConfig(): PrismaConnectionConfig {
       queryTimeout: 45000,
       transactionMaxWait: 20000,
       poolTimeout: 25000,
-      binaryTargets: ['native'],
-      logLevel: 'info',
+      binaryTargets: ["native"],
+      logLevel: "info",
     };
   } else {
     // 🧪 Testing/Local: Minimal configuration
@@ -60,8 +60,8 @@ function getPrismaConnectionConfig(): PrismaConnectionConfig {
       queryTimeout: 15000,
       transactionMaxWait: 10000,
       poolTimeout: 15000,
-      binaryTargets: ['native'],
-      logLevel: 'query',
+      binaryTargets: ["native"],
+      logLevel: "query",
     };
   }
 }
@@ -124,12 +124,12 @@ export class PrismaConnectionManager {
 
     if (!DATABASE_URL) {
       throw new Error(
-        '❌ DATABASE_URL environment variable is required for Prisma'
+        "❌ DATABASE_URL environment variable is required for Prisma",
       );
     }
 
     try {
-      logger.info('🔄 Initializing Prisma connection manager...');
+      logger.info("🔄 Initializing Prisma connection manager...");
 
       // Create Prisma client with optimized configuration
       this.prisma = new PrismaClient({
@@ -139,12 +139,12 @@ export class PrismaConnectionManager {
           },
         },
         log: [
-          { level: 'query', emit: 'event' },
-          { level: 'error', emit: 'event' },
-          { level: 'info', emit: 'event' },
-          { level: 'warn', emit: 'event' },
+          { level: "query", emit: "event" },
+          { level: "error", emit: "event" },
+          { level: "info", emit: "event" },
+          { level: "warn", emit: "event" },
         ],
-        errorFormat: 'pretty',
+        errorFormat: "pretty",
         transactionOptions: {
           maxWait: config.transactionMaxWait,
           timeout: config.queryTimeout,
@@ -161,17 +161,17 @@ export class PrismaConnectionManager {
       this.metrics.isConnected = true;
       this.metrics.connectionCount++;
 
-      logger.info('✅ Prisma connection manager initialized successfully');
+      logger.info("✅ Prisma connection manager initialized successfully");
       logger.info(`🔧 Configuration: ${JSON.stringify(config, null, 2)}`);
 
       return this.prisma;
     } catch (error) {
       this.metrics.errorCount++;
       this.metrics.lastError =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
       this.metrics.lastErrorTime = new Date();
 
-      logger.error('❌ Failed to initialize Prisma connection:', error);
+      logger.error("❌ Failed to initialize Prisma connection:", error);
       throw new Error(`Prisma initialization failed: ${error}`);
     }
   }
@@ -183,7 +183,7 @@ export class PrismaConnectionManager {
     if (!this.prisma) return;
 
     // Query logging and metrics
-    this.prisma.$on('query', e => {
+    this.prisma.$on("query", (e) => {
       this.metrics.queryCount++;
       this.metrics.lastQuery = e.query;
       this.metrics.lastQueryTime = new Date();
@@ -197,27 +197,27 @@ export class PrismaConnectionManager {
 
       if (queryTime > 1000) {
         logger.warn(
-          `🐌 Slow Prisma query (${queryTime}ms): ${e.query.substring(0, 100)}...`
+          `🐌 Slow Prisma query (${queryTime}ms): ${e.query.substring(0, 100)}...`,
         );
       }
     });
 
     // Error logging
-    this.prisma.$on('error', e => {
+    this.prisma.$on("error", (e) => {
       this.metrics.errorCount++;
       this.metrics.lastError = e.message;
       this.metrics.lastErrorTime = new Date();
-      logger.error('❌ Prisma error:', e);
+      logger.error("❌ Prisma error:", e);
     });
 
     // Info logging
-    this.prisma.$on('info', e => {
-      logger.info('ℹ️ Prisma info:', e.message);
+    this.prisma.$on("info", (e) => {
+      logger.info("ℹ️ Prisma info:", e.message);
     });
 
     // Warning logging
-    this.prisma.$on('warn', e => {
-      logger.warn('⚠️ Prisma warning:', e.message);
+    this.prisma.$on("warn", (e) => {
+      logger.warn("⚠️ Prisma warning:", e.message);
     });
   }
 
@@ -226,15 +226,15 @@ export class PrismaConnectionManager {
    */
   private async testConnection(): Promise<void> {
     if (!this.prisma) {
-      throw new Error('Prisma client not initialized');
+      throw new Error("Prisma client not initialized");
     }
 
     try {
       // Simple connection test
       await this.prisma.$queryRaw`SELECT 1 as connection_test`;
-      logger.info('✅ Prisma database connection test successful');
+      logger.info("✅ Prisma database connection test successful");
     } catch (error) {
-      logger.error('❌ Prisma database connection test failed:', error);
+      logger.error("❌ Prisma database connection test failed:", error);
       throw error;
     }
   }
@@ -245,7 +245,7 @@ export class PrismaConnectionManager {
   getClient(): PrismaClient {
     if (!this.prisma || !this.isConnected) {
       throw new Error(
-        '❌ Prisma connection not initialized. Call initialize() first.'
+        "❌ Prisma connection not initialized. Call initialize() first.",
       );
     }
     return this.prisma;
@@ -263,10 +263,10 @@ export class PrismaConnectionManager {
       await this.prisma.$queryRaw`SELECT 1`;
       return true;
     } catch (error) {
-      logger.error('❌ Prisma health check failed:', error);
+      logger.error("❌ Prisma health check failed:", error);
       this.metrics.errorCount++;
       this.metrics.lastError =
-        error instanceof Error ? error.message : 'Health check failed';
+        error instanceof Error ? error.message : "Health check failed";
       this.metrics.lastErrorTime = new Date();
       return false;
     }
@@ -289,9 +289,9 @@ export class PrismaConnectionManager {
         await this.prisma.$disconnect();
         this.isConnected = false;
         this.metrics.isConnected = false;
-        logger.info('✅ Prisma connection closed gracefully');
+        logger.info("✅ Prisma connection closed gracefully");
       } catch (error) {
-        logger.error('❌ Error during Prisma disconnect:', error);
+        logger.error("❌ Error during Prisma disconnect:", error);
         throw error;
       } finally {
         this.prisma = null;
@@ -314,7 +314,7 @@ export class PrismaConnectionManager {
       const duration = Date.now() - startTime;
       if (duration > 1000) {
         logger.warn(
-          `🐌 Slow raw query (${duration}ms): ${query.substring(0, 100)}...`
+          `🐌 Slow raw query (${duration}ms): ${query.substring(0, 100)}...`,
         );
       }
 
@@ -322,10 +322,14 @@ export class PrismaConnectionManager {
     } catch (error) {
       this.metrics.errorCount++;
       this.metrics.lastError =
-        error instanceof Error ? error.message : 'Raw query failed';
+        error instanceof Error ? error.message : "Raw query failed";
       this.metrics.lastErrorTime = new Date();
 
-      logger.error('❌ Raw query failed:', { query, error });
+      logger.error(
+        `❌ Raw query failed: ${query}`,
+        "PrismaConnectionManager",
+        error,
+      );
       throw error;
     }
   }
@@ -334,7 +338,7 @@ export class PrismaConnectionManager {
    * Begin transaction with error handling
    */
   async beginTransaction<T>(
-    callback: (prisma: PrismaClient) => Promise<T>
+    callback: (prisma: PrismaClient) => Promise<T>,
   ): Promise<T> {
     const client = this.getClient();
 
@@ -343,10 +347,10 @@ export class PrismaConnectionManager {
     } catch (error) {
       this.metrics.errorCount++;
       this.metrics.lastError =
-        error instanceof Error ? error.message : 'Transaction failed';
+        error instanceof Error ? error.message : "Transaction failed";
       this.metrics.lastErrorTime = new Date();
 
-      logger.error('❌ Transaction failed:', error);
+      logger.error("❌ Transaction failed:", error);
       throw error;
     }
   }

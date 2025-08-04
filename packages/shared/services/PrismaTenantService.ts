@@ -10,14 +10,10 @@
  * - Metrics and monitoring
  */
 
-import { PrismaClient } from '../../generated/prisma';
-import {
-  CreateTenantInput,
-  TenantEntity,
-  UpdateTenantInput,
-} from '../db/IDatabaseService';
-import { PrismaConnectionManager } from '../db/PrismaConnectionManager';
-import { logger } from '../utils/logger';
+import { PrismaClient } from "@prisma/client";
+import { CreateTenantInput, UpdateTenantInput } from "../db/IDatabaseService";
+import { PrismaConnectionManager } from "../db/PrismaConnectionManager";
+import { logger } from "../utils/logger";
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -27,8 +23,8 @@ export interface TenantConfig {
   hotelName: string;
   subdomain: string;
   customDomain?: string;
-  subscriptionPlan: 'trial' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'inactive' | 'expired' | 'cancelled';
+  subscriptionPlan: "trial" | "basic" | "premium" | "enterprise";
+  subscriptionStatus: "active" | "inactive" | "expired" | "cancelled";
   trialEndsAt?: Date;
   maxVoices?: number;
   maxLanguages?: number;
@@ -151,11 +147,9 @@ export class PrismaTenantService {
       cacheHits: 0,
     };
 
-    logger.info('🏨 PrismaTenantService initialized', {
-      instanceId: this.instanceId,
-      enableCaching: this.enableCaching,
-      enableMetrics: this.enableMetrics,
-    });
+    logger.info(
+      `🏨 PrismaTenantService initialized - Instance: ${this.instanceId}, Caching: ${this.enableCaching}, Metrics: ${this.enableMetrics}`,
+    );
   }
 
   // ============================================
@@ -177,11 +171,11 @@ export class PrismaTenantService {
       if (this.enableMetrics) {
         if (duration > 2000) {
           logger.warn(
-            `🐌 Slow tenant operation: ${operation} took ${duration}ms`
+            `🐌 Slow tenant operation: ${operation} took ${duration}ms`,
           );
         } else {
           logger.debug(
-            `⚡ Tenant operation: ${operation} completed in ${duration}ms`
+            `⚡ Tenant operation: ${operation} completed in ${duration}ms`,
           );
         }
       }
@@ -257,10 +251,10 @@ export class PrismaTenantService {
   private clearTenantCaches(tenantId?: string): void {
     if (tenantId) {
       // Clear specific tenant caches
-      const keysToDelete = Array.from(this.cache.keys()).filter(key =>
-        key.includes(tenantId)
+      const keysToDelete = Array.from(this.cache.keys()).filter((key) =>
+        key.includes(tenantId),
       );
-      keysToDelete.forEach(key => this.cache.delete(key));
+      keysToDelete.forEach((key) => this.cache.delete(key));
     } else {
       // Clear all tenant caches
       this.cache.clear();
@@ -275,21 +269,20 @@ export class PrismaTenantService {
    * Create a new tenant using IDatabaseService interface
    */
   async createTenant(tenantData: CreateTenantInput): Promise<TenantEntity> {
-    const endTimer = this.startPerformanceTimer('createTenant_interface');
+    const endTimer = this.startPerformanceTimer("createTenant_interface");
 
     try {
-      logger.info('🏨 [PrismaTenantService] Creating tenant via interface', {
-        hotelName: tenantData.hotel_name,
-        subdomain: tenantData.subdomain,
-      });
+      logger.info(
+        `🏨 [PrismaTenantService] Creating tenant via interface - Hotel: ${tenantData.hotel_name}, Subdomain: ${tenantData.subdomain}`,
+      );
 
       // Convert interface input to internal config
       const config: TenantConfig = {
         hotelName: tenantData.hotel_name,
-        subdomain: tenantData.subdomain || '',
+        subdomain: tenantData.subdomain || "",
         customDomain: tenantData.domain,
-        subscriptionPlan: (tenantData.subscription_plan as any) || 'trial',
-        subscriptionStatus: 'active',
+        subscriptionPlan: (tenantData.subscription_plan as any) || "trial",
+        subscriptionStatus: "active",
         email: tenantData.email,
         phone: tenantData.phone,
         address: tenantData.address,
@@ -300,9 +293,9 @@ export class PrismaTenantService {
 
       if (!createdTenant) {
         throw new TenantError(
-          'Failed to retrieve created tenant',
-          'TENANT_CREATION_FAILED',
-          500
+          "Failed to retrieve created tenant",
+          "TENANT_CREATION_FAILED",
+          500,
         );
       }
 
@@ -311,8 +304,8 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to create tenant via interface',
-        error
+        "❌ [PrismaTenantService] Failed to create tenant via interface",
+        error,
       );
       endTimer();
       throw error;
@@ -323,10 +316,10 @@ export class PrismaTenantService {
    * Create a new tenant with detailed configuration (legacy method)
    */
   async createTenantWithConfig(config: TenantConfig): Promise<string> {
-    const endTimer = this.startPerformanceTimer('createTenant');
+    const endTimer = this.startPerformanceTimer("createTenant");
 
     try {
-      logger.info('🏨 [PrismaTenantService] Creating new tenant', {
+      logger.info("🏨 [PrismaTenantService] Creating new tenant", {
         hotelName: config.hotelName,
         subdomain: config.subdomain,
       });
@@ -337,14 +330,14 @@ export class PrismaTenantService {
       // Set default feature flags and limits based on subscription plan
       const featureFlags = this.getDefaultFeatureFlags(config.subscriptionPlan);
       const subscriptionLimits = this.getSubscriptionLimits(
-        config.subscriptionPlan
+        config.subscriptionPlan,
       );
 
       // Generate tenant ID
       const tenantId = `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       // Create tenant using Prisma transaction
-      const result = await this.prisma.$transaction(async tx => {
+      const result = await this.prisma.$transaction(async (tx) => {
         // Create tenant
         const tenant = await tx.tenants.create({
           data: {
@@ -392,7 +385,7 @@ export class PrismaTenantService {
       // Clear caches
       this.clearTenantCaches();
 
-      logger.success('✅ [PrismaTenantService] Tenant created successfully', {
+      logger.success("✅ [PrismaTenantService] Tenant created successfully", {
         tenantId: result.id,
         hotelName: result.hotel_name,
       });
@@ -402,15 +395,15 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       this.metrics.lastError =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
       this.metrics.lastErrorTime = new Date();
 
-      logger.error('❌ [PrismaTenantService] Failed to create tenant', error);
+      logger.error("❌ [PrismaTenantService] Failed to create tenant", error);
       endTimer();
       throw new TenantError(
-        `Failed to create tenant: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'TENANT_CREATION_FAILED',
-        500
+        `Failed to create tenant: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "TENANT_CREATION_FAILED",
+        500,
       );
     }
   }
@@ -420,14 +413,14 @@ export class PrismaTenantService {
    */
   async getTenantById(
     tenantId: string,
-    includeRelations = false
+    includeRelations = false,
   ): Promise<TenantEntity | TenantWithRelations | null> {
-    const endTimer = this.startPerformanceTimer('getTenantById');
+    const endTimer = this.startPerformanceTimer("getTenantById");
 
     try {
       const cacheKey = `tenant_${tenantId}_${includeRelations}`;
       const cached = this.getFromCache<TenantEntity | TenantWithRelations>(
-        cacheKey
+        cacheKey,
       );
 
       if (cached) {
@@ -490,14 +483,14 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to get tenant by ID',
-        error
+        "❌ [PrismaTenantService] Failed to get tenant by ID",
+        error,
       );
       endTimer();
       throw new TenantError(
-        `Failed to get tenant: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'TENANT_FETCH_FAILED',
-        500
+        `Failed to get tenant: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "TENANT_FETCH_FAILED",
+        500,
       );
     }
   }
@@ -506,7 +499,7 @@ export class PrismaTenantService {
    * Get tenant by subdomain
    */
   async getTenantBySubdomain(subdomain: string): Promise<TenantEntity | null> {
-    const endTimer = this.startPerformanceTimer('getTenantBySubdomain');
+    const endTimer = this.startPerformanceTimer("getTenantBySubdomain");
 
     try {
       const cacheKey = `tenant_subdomain_${subdomain}`;
@@ -556,14 +549,14 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to get tenant by subdomain',
-        error
+        "❌ [PrismaTenantService] Failed to get tenant by subdomain",
+        error,
       );
       endTimer();
       throw new TenantError(
-        `Failed to get tenant: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'TENANT_FETCH_FAILED',
-        500
+        `Failed to get tenant: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "TENANT_FETCH_FAILED",
+        500,
       );
     }
   }
@@ -572,7 +565,7 @@ export class PrismaTenantService {
    * Get all tenants (IDatabaseService interface)
    */
   async getAllTenants(): Promise<TenantEntity[]> {
-    const endTimer = this.startPerformanceTimer('getAllTenants_interface');
+    const endTimer = this.startPerformanceTimer("getAllTenants_interface");
 
     try {
       const result = await this.getAllTenantsWithPagination();
@@ -581,8 +574,8 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to get all tenants via interface',
-        error
+        "❌ [PrismaTenantService] Failed to get all tenants via interface",
+        error,
       );
       endTimer();
       throw error;
@@ -599,9 +592,9 @@ export class PrismaTenantService {
       subscriptionPlan?: string;
       subscriptionStatus?: string;
       search?: string;
-    }
+    },
   ): Promise<{ tenants: TenantEntity[]; total: number }> {
-    const endTimer = this.startPerformanceTimer('getAllTenants');
+    const endTimer = this.startPerformanceTimer("getAllTenants");
 
     try {
       const cacheKey = `all_tenants_${limit}_${offset}_${JSON.stringify(filters)}`;
@@ -626,23 +619,23 @@ export class PrismaTenantService {
       }
       if (filters?.search) {
         where.OR = [
-          { hotel_name: { contains: filters.search, mode: 'insensitive' } },
-          { subdomain: { contains: filters.search, mode: 'insensitive' } },
-          { email: { contains: filters.search, mode: 'insensitive' } },
+          { hotel_name: { contains: filters.search, mode: "insensitive" } },
+          { subdomain: { contains: filters.search, mode: "insensitive" } },
+          { email: { contains: filters.search, mode: "insensitive" } },
         ];
       }
 
       const [tenants, total] = await Promise.all([
         this.prisma.tenants.findMany({
           where,
-          orderBy: { created_at: 'desc' },
+          orderBy: { created_at: "desc" },
           take: limit,
           skip: offset,
         }),
         this.prisma.tenants.count({ where }),
       ]);
 
-      const mappedTenants: TenantEntity[] = tenants.map(tenant => ({
+      const mappedTenants: TenantEntity[] = tenants.map((tenant) => ({
         id: tenant.id,
         hotel_name: tenant.hotel_name,
         subdomain: tenant.subdomain,
@@ -668,7 +661,7 @@ export class PrismaTenantService {
       const result = { tenants: mappedTenants, total };
       this.setCache(cacheKey, result);
 
-      logger.info('✅ [PrismaTenantService] Retrieved tenants successfully', {
+      logger.info("✅ [PrismaTenantService] Retrieved tenants successfully", {
         count: tenants.length,
         total,
         filters,
@@ -678,12 +671,12 @@ export class PrismaTenantService {
       return result;
     } catch (error) {
       this.metrics.errorCount++;
-      logger.error('❌ [PrismaTenantService] Failed to get all tenants', error);
+      logger.error("❌ [PrismaTenantService] Failed to get all tenants", error);
       endTimer();
       throw new TenantError(
-        `Failed to get tenants: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'TENANT_FETCH_FAILED',
-        500
+        `Failed to get tenants: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "TENANT_FETCH_FAILED",
+        500,
       );
     }
   }
@@ -693,9 +686,9 @@ export class PrismaTenantService {
    */
   async updateTenant(
     id: string,
-    data: UpdateTenantInput
+    data: UpdateTenantInput,
   ): Promise<TenantEntity> {
-    const endTimer = this.startPerformanceTimer('updateTenant_interface');
+    const endTimer = this.startPerformanceTimer("updateTenant_interface");
 
     try {
       // Convert interface input to internal config
@@ -724,8 +717,8 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to update tenant via interface',
-        error
+        "❌ [PrismaTenantService] Failed to update tenant via interface",
+        error,
       );
       endTimer();
       throw error;
@@ -737,12 +730,12 @@ export class PrismaTenantService {
    */
   async updateTenantWithConfig(
     tenantId: string,
-    updates: Partial<TenantConfig>
+    updates: Partial<TenantConfig>,
   ): Promise<TenantEntity> {
-    const endTimer = this.startPerformanceTimer('updateTenant');
+    const endTimer = this.startPerformanceTimer("updateTenant");
 
     try {
-      logger.info('🔄 [PrismaTenantService] Updating tenant', {
+      logger.info("🔄 [PrismaTenantService] Updating tenant", {
         tenantId,
         updates: Object.keys(updates),
       });
@@ -769,7 +762,7 @@ export class PrismaTenantService {
 
         // Update feature flags and limits based on new plan
         const featureFlags = this.getDefaultFeatureFlags(
-          updates.subscriptionPlan
+          updates.subscriptionPlan,
         );
         const limits = this.getSubscriptionLimits(updates.subscriptionPlan);
 
@@ -813,7 +806,7 @@ export class PrismaTenantService {
         domain: updatedTenant.domain,
       };
 
-      logger.success('✅ [PrismaTenantService] Tenant updated successfully', {
+      logger.success("✅ [PrismaTenantService] Tenant updated successfully", {
         tenantId,
       });
 
@@ -821,12 +814,12 @@ export class PrismaTenantService {
       return mappedTenant;
     } catch (error) {
       this.metrics.errorCount++;
-      logger.error('❌ [PrismaTenantService] Failed to update tenant', error);
+      logger.error("❌ [PrismaTenantService] Failed to update tenant", error);
       endTimer();
       throw new TenantError(
-        `Failed to update tenant: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'TENANT_UPDATE_FAILED',
-        500
+        `Failed to update tenant: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "TENANT_UPDATE_FAILED",
+        500,
       );
     }
   }
@@ -835,13 +828,13 @@ export class PrismaTenantService {
    * Delete tenant and all associated data
    */
   async deleteTenant(tenantId: string): Promise<boolean> {
-    const endTimer = this.startPerformanceTimer('deleteTenant');
+    const endTimer = this.startPerformanceTimer("deleteTenant");
 
     try {
-      logger.info('🗑️ [PrismaTenantService] Deleting tenant', { tenantId });
+      logger.info("🗑️ [PrismaTenantService] Deleting tenant", { tenantId });
 
       // Use transaction to ensure data consistency
-      await this.prisma.$transaction(async tx => {
+      await this.prisma.$transaction(async (tx) => {
         // Delete related data first (due to foreign key constraints)
 
         // Delete transcripts
@@ -866,7 +859,7 @@ export class PrismaTenantService {
       // Clear caches
       this.clearTenantCaches(tenantId);
 
-      logger.success('✅ [PrismaTenantService] Tenant deleted successfully', {
+      logger.success("✅ [PrismaTenantService] Tenant deleted successfully", {
         tenantId,
       });
 
@@ -874,7 +867,7 @@ export class PrismaTenantService {
       return true;
     } catch (error) {
       this.metrics.errorCount++;
-      logger.error('❌ [PrismaTenantService] Failed to delete tenant', error);
+      logger.error("❌ [PrismaTenantService] Failed to delete tenant", error);
       endTimer();
       return false;
     }
@@ -889,9 +882,9 @@ export class PrismaTenantService {
    */
   async hasFeatureAccess(
     tenantId: string,
-    feature: keyof FeatureFlags
+    feature: keyof FeatureFlags,
   ): Promise<boolean> {
-    const endTimer = this.startPerformanceTimer('hasFeatureAccess');
+    const endTimer = this.startPerformanceTimer("hasFeatureAccess");
 
     try {
       const tenant = await this.getTenantById(tenantId);
@@ -906,8 +899,8 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to check feature access',
-        error
+        "❌ [PrismaTenantService] Failed to check feature access",
+        error,
       );
       endTimer();
       return false;
@@ -918,7 +911,7 @@ export class PrismaTenantService {
    * Get current feature flags for tenant
    */
   getCurrentFeatureFlags(tenant: TenantEntity): FeatureFlags {
-    const plan = tenant.subscription_plan || 'trial';
+    const plan = tenant.subscription_plan || "trial";
     const baseFlags = this.getDefaultFeatureFlags(plan as any);
 
     // Override with tenant-specific settings
@@ -935,7 +928,7 @@ export class PrismaTenantService {
    */
   private getDefaultFeatureFlags(plan: string): FeatureFlags {
     switch (plan) {
-      case 'trial':
+      case "trial":
         return {
           voiceCloning: false,
           multiLocation: false,
@@ -946,7 +939,7 @@ export class PrismaTenantService {
           apiAccess: false,
           bulkOperations: false,
         };
-      case 'basic':
+      case "basic":
         return {
           voiceCloning: false,
           multiLocation: false,
@@ -957,7 +950,7 @@ export class PrismaTenantService {
           apiAccess: true,
           bulkOperations: false,
         };
-      case 'premium':
+      case "premium":
         return {
           voiceCloning: true,
           multiLocation: true,
@@ -968,7 +961,7 @@ export class PrismaTenantService {
           apiAccess: true,
           bulkOperations: true,
         };
-      case 'enterprise':
+      case "enterprise":
         return {
           voiceCloning: true,
           multiLocation: true,
@@ -980,7 +973,7 @@ export class PrismaTenantService {
           bulkOperations: true,
         };
       default:
-        return this.getDefaultFeatureFlags('trial');
+        return this.getDefaultFeatureFlags("trial");
     }
   }
 
@@ -993,7 +986,7 @@ export class PrismaTenantService {
    */
   getSubscriptionLimits(plan: string): SubscriptionLimits {
     switch (plan) {
-      case 'trial':
+      case "trial":
         return {
           maxVoices: 2,
           maxLanguages: 2,
@@ -1002,7 +995,7 @@ export class PrismaTenantService {
           maxStaffUsers: 2,
           maxHotelLocations: 1,
         };
-      case 'basic':
+      case "basic":
         return {
           maxVoices: 5,
           maxLanguages: 4,
@@ -1011,7 +1004,7 @@ export class PrismaTenantService {
           maxStaffUsers: 5,
           maxHotelLocations: 1,
         };
-      case 'premium':
+      case "premium":
         return {
           maxVoices: 15,
           maxLanguages: 8,
@@ -1020,7 +1013,7 @@ export class PrismaTenantService {
           maxStaffUsers: 15,
           maxHotelLocations: 5,
         };
-      case 'enterprise':
+      case "enterprise":
         return {
           maxVoices: -1, // Unlimited
           maxLanguages: -1, // Unlimited
@@ -1030,7 +1023,7 @@ export class PrismaTenantService {
           maxHotelLocations: -1, // Unlimited
         };
       default:
-        return this.getSubscriptionLimits('trial');
+        return this.getSubscriptionLimits("trial");
     }
   }
 
@@ -1041,17 +1034,17 @@ export class PrismaTenantService {
     withinLimits: boolean;
     violations: string[];
   }> {
-    const endTimer = this.startPerformanceTimer('checkSubscriptionLimits');
+    const endTimer = this.startPerformanceTimer("checkSubscriptionLimits");
 
     try {
       const tenant = await this.getTenantById(tenantId);
       if (!tenant) {
         endTimer();
-        return { withinLimits: false, violations: ['Tenant not found'] };
+        return { withinLimits: false, violations: ["Tenant not found"] };
       }
 
       const limits = this.getSubscriptionLimits(
-        tenant.subscription_plan || 'trial'
+        tenant.subscription_plan || "trial",
       );
       const usage = await this.getTenantUsage(tenantId);
 
@@ -1062,12 +1055,12 @@ export class PrismaTenantService {
         limits.monthlyCallLimit > 0 &&
         usage.callsThisMonth >= limits.monthlyCallLimit
       ) {
-        violations.push('Monthly call limit exceeded');
+        violations.push("Monthly call limit exceeded");
       }
 
       // Check voice limit
       if (limits.maxVoices > 0 && usage.voicesUsed >= limits.maxVoices) {
-        violations.push('Voice limit exceeded');
+        violations.push("Voice limit exceeded");
       }
 
       // Check language limit
@@ -1075,7 +1068,7 @@ export class PrismaTenantService {
         limits.maxLanguages > 0 &&
         usage.languagesUsed >= limits.maxLanguages
       ) {
-        violations.push('Language limit exceeded');
+        violations.push("Language limit exceeded");
       }
 
       endTimer();
@@ -1086,11 +1079,11 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to check subscription limits',
-        error
+        "❌ [PrismaTenantService] Failed to check subscription limits",
+        error,
       );
       endTimer();
-      return { withinLimits: false, violations: ['Unable to check limits'] };
+      return { withinLimits: false, violations: ["Unable to check limits"] };
     }
   }
 
@@ -1098,7 +1091,7 @@ export class PrismaTenantService {
    * Get tenant usage statistics
    */
   async getTenantUsage(tenantId: string): Promise<TenantUsage> {
-    const endTimer = this.startPerformanceTimer('getTenantUsage');
+    const endTimer = this.startPerformanceTimer("getTenantUsage");
 
     try {
       const cacheKey = `tenant_usage_${tenantId}`;
@@ -1143,7 +1136,7 @@ export class PrismaTenantService {
         voicesUsed: 1, // TODO: Implement proper voice tracking
         languagesUsed: 1, // TODO: Implement language tracking from transcripts
         storageUsed: Math.round(
-          ((storageAggregate._count.id || 0) * 500) / 1024
+          ((storageAggregate._count.id || 0) * 500) / 1024,
         ), // Approximate KB
         dataRetentionDays: 90, // TODO: Get from tenant settings
         requestsThisMonth: 0, // TODO: Implement when request model has tenant relations
@@ -1158,8 +1151,8 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to get tenant usage',
-        error
+        "❌ [PrismaTenantService] Failed to get tenant usage",
+        error,
       );
       endTimer();
       return {
@@ -1183,14 +1176,14 @@ export class PrismaTenantService {
    */
   private async validateSubdomain(
     subdomain: string,
-    excludeTenantId?: string
+    excludeTenantId?: string,
   ): Promise<void> {
     // Check format
     if (!/^[a-z0-9-]+$/.test(subdomain)) {
       throw new TenantError(
-        'Subdomain must contain only lowercase letters, numbers, and hyphens',
-        'INVALID_SUBDOMAIN_FORMAT',
-        400
+        "Subdomain must contain only lowercase letters, numbers, and hyphens",
+        "INVALID_SUBDOMAIN_FORMAT",
+        400,
       );
     }
 
@@ -1203,7 +1196,7 @@ export class PrismaTenantService {
     const existing = await this.prisma.tenants.findFirst({ where });
 
     if (existing) {
-      throw new TenantError('Subdomain already exists', 'SUBDOMAIN_TAKEN', 409);
+      throw new TenantError("Subdomain already exists", "SUBDOMAIN_TAKEN", 409);
     }
   }
 
@@ -1220,12 +1213,12 @@ export class PrismaTenantService {
    * Check if tenant subscription is active
    */
   isSubscriptionActive(tenant: TenantEntity): boolean {
-    if (tenant.subscription_status !== 'active') {
+    if (tenant.subscription_status !== "active") {
       return false;
     }
 
     // Check trial expiration
-    if (tenant.subscription_plan === 'trial' && tenant.trial_ends_at) {
+    if (tenant.subscription_plan === "trial" && tenant.trial_ends_at) {
       return new Date() < new Date(tenant.trial_ends_at);
     }
 
@@ -1241,19 +1234,19 @@ export class PrismaTenantService {
     activeSubscriptions: number;
     metrics: TenantServiceMetrics;
   }> {
-    const endTimer = this.startPerformanceTimer('getServiceHealth');
+    const endTimer = this.startPerformanceTimer("getServiceHealth");
 
     try {
       const [tenantsCount, activeSubscriptions] = await Promise.all([
         this.prisma.tenants.count(),
         this.prisma.tenants.count({
-          where: { subscription_status: 'active' },
+          where: { subscription_status: "active" },
         }),
       ]);
 
       endTimer();
       return {
-        status: 'healthy',
+        status: "healthy",
         tenantsCount,
         activeSubscriptions,
         metrics: { ...this.metrics },
@@ -1261,12 +1254,12 @@ export class PrismaTenantService {
     } catch (error) {
       this.metrics.errorCount++;
       logger.error(
-        '❌ [PrismaTenantService] Failed to get service health',
-        error
+        "❌ [PrismaTenantService] Failed to get service health",
+        error,
       );
       endTimer();
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         tenantsCount: 0,
         activeSubscriptions: 0,
         metrics: { ...this.metrics },
@@ -1303,12 +1296,12 @@ export class PrismaTenantService {
    * Data cleanup based on retention policy
    */
   async cleanupOldData(tenantId: string): Promise<void> {
-    const endTimer = this.startPerformanceTimer('cleanupOldData');
+    const endTimer = this.startPerformanceTimer("cleanupOldData");
 
     try {
       const tenant = await this.getTenantById(tenantId);
       if (!tenant) {
-        throw new TenantError('Tenant not found', 'TENANT_NOT_FOUND', 404);
+        throw new TenantError("Tenant not found", "TENANT_NOT_FOUND", 404);
       }
 
       const retentionDays = tenant.data_retention_days || 90;
@@ -1326,7 +1319,7 @@ export class PrismaTenantService {
         {
           tenantId,
           cutoffDate,
-        }
+        },
       );
 
       // Delete old transcripts
@@ -1341,7 +1334,7 @@ export class PrismaTenantService {
 
       // TODO: Add cleanup for other tenant-related data when models are enhanced
 
-      logger.success('✅ [PrismaTenantService] Data cleanup completed', {
+      logger.success("✅ [PrismaTenantService] Data cleanup completed", {
         tenantId,
         deletedTranscripts: deletedTranscripts.count,
       });
@@ -1349,12 +1342,12 @@ export class PrismaTenantService {
       endTimer();
     } catch (error) {
       this.metrics.errorCount++;
-      logger.error('❌ [PrismaTenantService] Failed to cleanup data', error);
+      logger.error("❌ [PrismaTenantService] Failed to cleanup data", error);
       endTimer();
       throw new TenantError(
-        `Failed to cleanup data: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'DATA_CLEANUP_FAILED',
-        500
+        `Failed to cleanup data: ${error instanceof Error ? error.message : "Unknown error"}`,
+        "DATA_CLEANUP_FAILED",
+        500,
       );
     }
   }
@@ -1368,10 +1361,10 @@ export class TenantError extends Error {
   constructor(
     message: string,
     public code: string,
-    public statusCode: number
+    public statusCode: number,
   ) {
     super(message);
-    this.name = 'TenantError';
+    this.name = "TenantError";
   }
 }
 

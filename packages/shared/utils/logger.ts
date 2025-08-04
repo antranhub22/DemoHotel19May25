@@ -21,45 +21,43 @@ class Logger {
   constructor() {
     this.logLevel = this.getLogLevel();
     // ✅ FIX: Handle browser environment where process is not defined
-    this.isDevelopment = this.getEnvironment() !== 'production';
+    this.isDevelopment = this.getEnvironment() !== "production";
   }
 
   // ✅ NEW: Helper to get environment safely
   private getEnvironment(): string {
     // Browser environment (client-side)
-    if (typeof window !== 'undefined' && typeof import.meta !== 'undefined') {
-      return (
-        import.meta.env?.MODE || import.meta.env?.NODE_ENV || 'development'
-      );
+    if (typeof window !== "undefined") {
+      return "development"; // Default for client-side
     }
     // Node.js environment (server-side)
-    if (typeof process !== 'undefined' && process.env) {
-      return process.env.NODE_ENV || 'development';
+    if (typeof process !== "undefined" && process.env) {
+      return process.env.NODE_ENV || "development";
     }
     // Fallback
-    return 'development';
+    return "development";
   }
 
   private getLogLevel(): LogLevel {
     let level: string | undefined;
 
     // ✅ FIX: Handle browser environment where process is not defined
-    if (typeof window !== 'undefined' && typeof import.meta !== 'undefined') {
-      // Browser environment (client-side)
-      level = import.meta.env?.VITE_LOG_LEVEL?.toUpperCase();
-    } else if (typeof process !== 'undefined' && process.env) {
+    if (typeof window !== "undefined") {
+      // Browser environment (client-side) - use localStorage or default
+      level = localStorage?.getItem("LOG_LEVEL")?.toUpperCase() || "INFO";
+    } else if (typeof process !== "undefined" && process.env) {
       // Node.js environment (server-side)
       level = process.env.LOG_LEVEL?.toUpperCase();
     }
 
     switch (level) {
-      case 'DEBUG':
+      case "DEBUG":
         return LogLevel.DEBUG;
-      case 'INFO':
+      case "INFO":
         return LogLevel.INFO;
-      case 'WARN':
+      case "WARN":
         return LogLevel.WARN;
-      case 'ERROR':
+      case "ERROR":
         return LogLevel.ERROR;
       default:
         return this.isDevelopment ? LogLevel.DEBUG : LogLevel.INFO;
@@ -70,7 +68,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: string,
-    data?: any
+    data?: any,
   ): string {
     const timestamp = new Date().toISOString();
     const levelStr = LogLevel[level];
@@ -104,7 +102,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: string,
-    data?: any
+    data?: any,
   ): void {
     if (level < this.logLevel) {
       return;

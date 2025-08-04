@@ -1,18 +1,19 @@
-import { eq } from 'drizzle-orm';
-import { Request, Response } from 'express';
+import { PrismaClient } from "@prisma/client";
+import { Request, Response } from "express";
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { CallService } from '@server/services/callService';
-import { TenantService } from '@server/services/tenantService';
-import { evaluateABTest, isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { CallService } from "@server/services/callService";
+import { TenantService } from "@server/services/tenantService";
+import { evaluateABTest, isFeatureEnabled } from "@server/shared/FeatureFlags";
 import {
   ServiceContainer,
   getServiceSync,
-} from '@server/shared/ServiceContainer';
-import { storage } from '@server/storage';
-import { call, db } from '@shared/db';
-import { insertTranscriptSchema } from '@shared/schema';
-import { logger } from '@shared/utils/logger';
+} from "@server/shared/ServiceContainer";
+import { storage } from "@server/storage";
+import { insertTranscriptSchema } from "@shared/schema";
+import { logger } from "@shared/utils/logger";
+// ✅ MIGRATED: Use Prisma client instead of Drizzle
+const prisma = new PrismaClient();
 
 /**
  * Enhanced Calls Controller v2.0 - Modular Architecture
@@ -37,8 +38,8 @@ export class CallsController {
 
     this.initialized = true;
     logger.debug(
-      '📞 [CallsController] ServiceContainer integration initialized - v2.0',
-      'CallsController'
+      "📞 [CallsController] ServiceContainer integration initialized - v2.0",
+      "CallsController",
     );
   }
 
@@ -48,20 +49,20 @@ export class CallsController {
   private static registerCallServices(): void {
     try {
       // Register TenantService for call filtering
-      if (!ServiceContainer.has('TenantService')) {
-        ServiceContainer.register('TenantService', TenantService, {
-          module: 'call-module',
+      if (!ServiceContainer.has("TenantService")) {
+        ServiceContainer.register("TenantService", TenantService, {
+          module: "call-module",
           singleton: true,
           lifecycle: {
             onInit: () =>
               logger.debug(
-                'TenantService registered for calls',
-                'CallsController'
+                "TenantService registered for calls",
+                "CallsController",
               ),
             onDestroy: () =>
               logger.debug(
-                'TenantService destroyed for calls',
-                'CallsController'
+                "TenantService destroyed for calls",
+                "CallsController",
               ),
             onHealthCheck: () => true,
           },
@@ -69,29 +70,29 @@ export class CallsController {
       }
 
       // Register CallService for call management
-      if (!ServiceContainer.has('CallService')) {
-        ServiceContainer.register('CallService', CallService, {
-          module: 'call-module',
+      if (!ServiceContainer.has("CallService")) {
+        ServiceContainer.register("CallService", CallService, {
+          module: "call-module",
           singleton: true,
           lifecycle: {
             onInit: () =>
-              logger.debug('CallService registered', 'CallsController'),
+              logger.debug("CallService registered", "CallsController"),
             onDestroy: () =>
-              logger.debug('CallService destroyed', 'CallsController'),
+              logger.debug("CallService destroyed", "CallsController"),
             onHealthCheck: () => true,
           },
         });
       }
 
       logger.debug(
-        '📞 [CallsController] Call services registered with ServiceContainer',
-        'CallsController'
+        "📞 [CallsController] Call services registered with ServiceContainer",
+        "CallsController",
       );
     } catch (error) {
       logger.warn(
-        '⚠️ [CallsController] Failed to register some call services',
-        'CallsController',
-        error
+        "⚠️ [CallsController] Failed to register some call services",
+        "CallsController",
+        error,
       );
     }
   }
@@ -101,7 +102,7 @@ export class CallsController {
    */
   private static async validateCallAccess(
     req: Request,
-    callId: string
+    callId: string,
   ): Promise<{
     isValid: boolean;
     tenantId?: string;
@@ -111,38 +112,38 @@ export class CallsController {
       const tenantId = (req as any).tenant?.id;
 
       if (!tenantId) {
-        return { isValid: false, error: 'Tenant not identified' };
+        return { isValid: false, error: "Tenant not identified" };
       }
 
       // ✅ Use ServiceContainer to get TenantService
-      const tenantService = getServiceSync('TenantService') as any;
+      const tenantService = getServiceSync("TenantService") as any;
 
       if (
         tenantService &&
-        typeof tenantService.validateCallAccess === 'function'
+        typeof tenantService.validateCallAccess === "function"
       ) {
         const isValid = await tenantService.validateCallAccess(
           tenantId,
-          callId
+          callId,
         );
         if (!isValid) {
-          return { isValid: false, error: 'Call access denied' };
+          return { isValid: false, error: "Call access denied" };
         }
       }
 
       return { isValid: true, tenantId };
     } catch (error) {
       logger.warn(
-        '⚠️ [CallsController] Call validation error',
-        'CallsController',
-        error
+        "⚠️ [CallsController] Call validation error",
+        "CallsController",
+        error,
       );
       // Fall back to basic validation
       const tenantId = (req as any).tenant?.id;
       return {
         isValid: !!tenantId,
         tenantId: tenantId || undefined,
-        error: tenantId ? undefined : 'Call validation failed',
+        error: tenantId ? undefined : "Call validation failed",
       };
     }
   }
@@ -152,7 +153,7 @@ export class CallsController {
    */
   static async getTranscriptsByCallId(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       // Initialize on first use
@@ -165,9 +166,9 @@ export class CallsController {
       if (!callValidation.isValid) {
         (res as any).status(403).json({
           success: false,
-          error: callValidation.error || 'Call access denied',
-          code: 'CALL_ACCESS_DENIED',
-          version: '2.0.0',
+          error: callValidation.error || "Call access denied",
+          code: "CALL_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -176,32 +177,32 @@ export class CallsController {
 
       // ✅ NEW v2.0: Context-aware feature flag evaluation
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
         callId,
       };
 
       const enableAdvancedTranscription = isFeatureEnabled(
-        'advanced-transcription',
-        context
+        "advanced-transcription",
+        context,
       );
       const enableSentimentAnalysis = isFeatureEnabled(
-        'sentiment-analysis',
-        context
+        "sentiment-analysis",
+        context,
       );
       const enableTranscriptSummary = isFeatureEnabled(
-        'transcript-summary',
-        context
+        "transcript-summary",
+        context,
       );
 
       // ✅ NEW v2.0: A/B test for transcript display format
       const transcriptFormatVariant = context.userId
-        ? evaluateABTest('transcript-format-test', context.userId)
+        ? evaluateABTest("transcript-format-test", context.userId)
         : null;
 
       logger.api(
         `📞 [CallsController] Getting transcripts for call: ${callId} - v2.0`,
-        'CallsController',
+        "CallsController",
         {
           tenantId,
           features: {
@@ -210,18 +211,18 @@ export class CallsController {
             transcriptSummary: enableTranscriptSummary,
           },
           abTest: transcriptFormatVariant,
-        }
+        },
       );
 
       const startTime = Date.now();
 
       // ✅ Use ServiceContainer to get CallService
-      const callService = getServiceSync('CallService') as any;
+      const callService = getServiceSync("CallService") as any;
       let transcripts;
 
       if (
         callService &&
-        typeof callService.getTranscriptsByCallId === 'function'
+        typeof callService.getTranscriptsByCallId === "function"
       ) {
         transcripts = await callService.getTranscriptsByCallId(callId);
       } else {
@@ -239,9 +240,9 @@ export class CallsController {
           ...transcript,
           advanced: {
             confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
-            wordCount: transcript.content?.split(' ').length || 0,
+            wordCount: transcript.content?.split(" ").length || 0,
             speakingTime: Math.random() * 30 + 5, // 5-35 seconds
-            clarity: Math.random() > 0.8 ? 'high' : 'medium',
+            clarity: Math.random() > 0.8 ? "high" : "medium",
           },
         }));
       }
@@ -254,10 +255,10 @@ export class CallsController {
             magnitude: Math.random(),
             label:
               Math.random() > 0.6
-                ? 'positive'
+                ? "positive"
                 : Math.random() > 0.3
-                  ? 'neutral'
-                  : 'negative',
+                  ? "neutral"
+                  : "negative",
             emotions: {
               joy: Math.random() * 0.5,
               anger: Math.random() * 0.2,
@@ -274,17 +275,17 @@ export class CallsController {
           totalTranscripts: transcripts.length,
           totalDuration: enhancedTranscripts.reduce(
             (sum: number, t: any) => sum + (t.advanced?.speakingTime || 10),
-            0
+            0,
           ),
-          keyTopics: ['room service', 'booking inquiry', 'general assistance'], // TODO: Extract from content
-          overallSentiment: enableSentimentAnalysis ? 'positive' : 'neutral',
+          keyTopics: ["room service", "booking inquiry", "general assistance"], // TODO: Extract from content
+          overallSentiment: enableSentimentAnalysis ? "positive" : "neutral",
           averageConfidence: enableAdvancedTranscription ? 0.85 : undefined,
         };
       }
 
       logger.success(
-        '📞 [CallsController] Transcripts retrieved successfully - v2.0',
-        'CallsController',
+        "📞 [CallsController] Transcripts retrieved successfully - v2.0",
+        "CallsController",
         {
           callId,
           tenantId,
@@ -295,7 +296,7 @@ export class CallsController {
             sentimentAnalysis: enableSentimentAnalysis,
             transcriptSummary: enableTranscriptSummary,
           },
-        }
+        },
       );
 
       (res as any).json({
@@ -303,7 +304,7 @@ export class CallsController {
         data: enhancedTranscripts,
         ...(summary && { summary }),
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           callId,
           tenantId,
@@ -314,33 +315,33 @@ export class CallsController {
           },
           abTest: transcriptFormatVariant
             ? {
-                testName: 'transcript-format-test',
+                testName: "transcript-format-test",
                 variant: transcriptFormatVariant,
                 userId: context.userId,
               }
             : undefined,
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['CallService', 'TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["CallService", "TenantService"],
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [CallsController] Failed to get transcripts - v2.0',
-        'CallsController',
-        error
+        "❌ [CallsController] Failed to get transcripts - v2.0",
+        "CallsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve transcripts',
+        error: "Failed to retrieve transcripts",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? (error as any)?.message || String(error)
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -357,9 +358,9 @@ export class CallsController {
       if (!callId || duration === undefined) {
         (res as any).status(400).json({
           success: false,
-          error: 'callId and duration are required',
-          code: 'MISSING_PARAMETERS',
-          version: '2.0.0',
+          error: "callId and duration are required",
+          code: "MISSING_PARAMETERS",
+          version: "2.0.0",
         });
         return;
       }
@@ -369,9 +370,9 @@ export class CallsController {
       if (!callValidation.isValid) {
         (res as any).status(403).json({
           success: false,
-          error: callValidation.error || 'Call access denied',
-          code: 'CALL_ACCESS_DENIED',
-          version: '2.0.0',
+          error: callValidation.error || "Call access denied",
+          code: "CALL_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -380,24 +381,24 @@ export class CallsController {
 
       // ✅ NEW v2.0: Feature flag context
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
         callId,
       };
 
-      const enableCallAnalytics = isFeatureEnabled('call-analytics', context);
+      const enableCallAnalytics = isFeatureEnabled("call-analytics", context);
       const enableRealTimeNotifications = isFeatureEnabled(
-        'real-time-call-notifications',
-        context
+        "real-time-call-notifications",
+        context,
       );
       const enablePerformanceTracking = isFeatureEnabled(
-        'call-performance-tracking',
-        context
+        "call-performance-tracking",
+        context,
       );
 
       logger.api(
         `📞 [CallsController] Ending call: ${callId} with duration: ${duration}s - v2.0`,
-        'CallsController',
+        "CallsController",
         {
           tenantId,
           features: {
@@ -405,19 +406,22 @@ export class CallsController {
             realTimeNotifications: enableRealTimeNotifications,
             performanceTracking: enablePerformanceTracking,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
 
       // Update call duration and end time using existing schema fields
-      await db
-        .update(call)
-        .set({
+      // ✅ MIGRATED: Use Prisma for call update
+      await prisma.call.updateMany({
+        where: {
+          call_id_vapi: callId,
+        },
+        data: {
           duration: Math.floor(duration),
           end_time: new Date(),
-        })
-        .where(eq(call.call_id_vapi, callId));
+        },
+      });
 
       const executionTime = Date.now() - startTime;
 
@@ -427,9 +431,9 @@ export class CallsController {
         analytics = {
           duration: Math.floor(duration),
           category:
-            duration > 300 ? 'long' : duration > 120 ? 'medium' : 'short',
+            duration > 300 ? "long" : duration > 120 ? "medium" : "short",
           efficiency:
-            duration < 180 ? 'high' : duration < 300 ? 'medium' : 'low',
+            duration < 180 ? "high" : duration < 300 ? "medium" : "low",
           timeOfDay: new Date().getHours(),
           completionRate: 100, // Completed call
         };
@@ -437,9 +441,9 @@ export class CallsController {
 
       // ✅ NEW v2.0: Real-time notifications
       if (enableRealTimeNotifications) {
-        const io = (req as any).app?.get('io');
+        const io = (req as any).app?.get("io");
         if (io) {
-          io.emit('callEnded', {
+          io.emit("callEnded", {
             callId,
             duration: Math.floor(duration),
             tenantId,
@@ -448,7 +452,7 @@ export class CallsController {
           });
           logger.debug(
             `📡 [CallsController] Real-time notification sent for call end: ${callId}`,
-            'CallsController'
+            "CallsController",
           );
         }
       }
@@ -460,13 +464,13 @@ export class CallsController {
           updateTime: executionTime,
           dbResponseTime: executionTime,
           systemLoad: Math.random() * 100,
-          serverRegion: 'default',
+          serverRegion: "default",
         };
       }
 
       logger.success(
         `📞 [CallsController] Call ended successfully - v2.0`,
-        'CallsController',
+        "CallsController",
         {
           callId,
           duration: Math.floor(duration),
@@ -477,7 +481,7 @@ export class CallsController {
             realTime: enableRealTimeNotifications,
             performance: enablePerformanceTracking,
           },
-        }
+        },
       );
 
       (res as any).json({
@@ -486,7 +490,7 @@ export class CallsController {
         ...(analytics && { analytics }),
         ...(performance && { performance }),
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           callId,
           tenantId,
@@ -496,27 +500,27 @@ export class CallsController {
             performanceTracking: enablePerformanceTracking,
           },
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["TenantService"],
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [CallsController] Error ending call - v2.0',
-        'CallsController',
-        error
+        "❌ [CallsController] Error ending call - v2.0",
+        "CallsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? (error as any)?.message || String(error)
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -534,9 +538,9 @@ export class CallsController {
       if (!call_id_vapi) {
         (res as any).status(400).json({
           success: false,
-          error: 'call_id_vapi is required',
-          code: 'MISSING_CALL_ID',
-          version: '2.0.0',
+          error: "call_id_vapi is required",
+          code: "MISSING_CALL_ID",
+          version: "2.0.0",
         });
         return;
       }
@@ -546,9 +550,9 @@ export class CallsController {
       if (!tenantValidation.isValid && tenant_id) {
         // Use provided tenant_id if validation failed but tenant_id is provided
         logger.warn(
-          'Using provided tenant_id after validation failure',
-          'CallsController',
-          { tenant_id }
+          "Using provided tenant_id after validation failure",
+          "CallsController",
+          { tenant_id },
         );
       }
 
@@ -556,27 +560,27 @@ export class CallsController {
 
       // ✅ NEW v2.0: Feature flag context
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId: finalTenantId,
         callId: call_id_vapi,
       };
 
       const enableCallTracking = isFeatureEnabled(
-        'advanced-call-tracking',
-        context
+        "advanced-call-tracking",
+        context,
       );
       const enableCallClassification = isFeatureEnabled(
-        'call-classification',
-        context
+        "call-classification",
+        context,
       );
       const enableCallPrioritization = isFeatureEnabled(
-        'call-prioritization',
-        context
+        "call-prioritization",
+        context,
       );
 
       logger.api(
         `📞 [CallsController] Creating call: ${call_id_vapi} - v2.0`,
-        'CallsController',
+        "CallsController",
         {
           room_number,
           language,
@@ -587,7 +591,7 @@ export class CallsController {
             callClassification: enableCallClassification,
             callPrioritization: enableCallPrioritization,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
@@ -596,7 +600,7 @@ export class CallsController {
       let callData: any = {
         call_id_vapi,
         room_number: room_number || null,
-        language: language || 'en',
+        language: language || "en",
         service_type: service_type || null,
         tenant_id: finalTenantId || null,
         start_time: new Date(),
@@ -606,19 +610,21 @@ export class CallsController {
         callData = {
           ...callData,
           // Additional tracking fields (would need schema update)
-          source: 'voice_assistant',
+          source: "voice_assistant",
           priority: enableCallPrioritization
-            ? service_type?.includes('emergency')
-              ? 'high'
-              : 'medium'
-            : 'normal',
-          initial_language: language || 'en',
-          device_info: req.headers['user-agent'] || 'unknown',
+            ? service_type?.includes("emergency")
+              ? "high"
+              : "medium"
+            : "normal",
+          initial_language: language || "en",
+          device_info: req.headers["user-agent"] || "unknown",
         };
       }
 
-      // Create call record with all supported fields
-      const [newCall] = await db.insert(call).values(callData).returning();
+      // ✅ MIGRATED: Create call record using Prisma
+      const newCall = await prisma.call.create({
+        data: callData,
+      });
 
       const executionTime = Date.now() - startTime;
 
@@ -626,16 +632,16 @@ export class CallsController {
       let classification;
       if (enableCallClassification) {
         classification = {
-          category: service_type || 'general',
-          urgency: service_type?.includes('emergency') ? 'high' : 'normal',
-          complexity: 'medium', // TODO: Implement complexity analysis
-          expectedDuration: service_type === 'room_service' ? 180 : 120, // seconds
+          category: service_type || "general",
+          urgency: service_type?.includes("emergency") ? "high" : "normal",
+          complexity: "medium", // TODO: Implement complexity analysis
+          expectedDuration: service_type === "room_service" ? 180 : 120, // seconds
         };
       }
 
       logger.success(
-        '📞 [CallsController] Call created successfully - v2.0',
-        'CallsController',
+        "📞 [CallsController] Call created successfully - v2.0",
+        "CallsController",
         {
           callId: newCall.call_id_vapi,
           room_number: newCall.room_number,
@@ -646,7 +652,7 @@ export class CallsController {
             classification: enableCallClassification,
             prioritization: enableCallPrioritization,
           },
-        }
+        },
       );
 
       (res as any).json({
@@ -654,7 +660,7 @@ export class CallsController {
         data: newCall,
         ...(classification && { classification }),
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           callId: newCall.call_id_vapi,
           tenantId: finalTenantId,
@@ -664,27 +670,27 @@ export class CallsController {
             callPrioritization: enableCallPrioritization,
           },
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["TenantService"],
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [CallsController] Error creating call - v2.0',
-        'CallsController',
-        error
+        "❌ [CallsController] Error creating call - v2.0",
+        "CallsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? (error as any)?.message || String(error)
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -694,7 +700,7 @@ export class CallsController {
    */
   static async createTestTranscript(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       this.initialize();
@@ -704,9 +710,9 @@ export class CallsController {
       if (!callId || !role || !content) {
         (res as any).status(400).json({
           success: false,
-          error: 'Call ID, role, and content are required',
-          code: 'MISSING_PARAMETERS',
-          version: '2.0.0',
+          error: "Call ID, role, and content are required",
+          code: "MISSING_PARAMETERS",
+          version: "2.0.0",
         });
         return;
       }
@@ -715,32 +721,32 @@ export class CallsController {
       const callValidation = await this.validateCallAccess(req, callId);
       if (!callValidation.isValid) {
         logger.warn(
-          'Call validation failed for test transcript, proceeding with default tenant',
-          'CallsController'
+          "Call validation failed for test transcript, proceeding with default tenant",
+          "CallsController",
         );
       }
 
-      const tenantId = callValidation.tenantId || 'default';
+      const tenantId = callValidation.tenantId || "default";
 
       // ✅ NEW v2.0: Feature flag context
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
         callId,
       };
 
       const enableAdvancedProcessing = isFeatureEnabled(
-        'advanced-transcript-processing',
-        context
+        "advanced-transcript-processing",
+        context,
       );
       const enableAutoSummarization = isFeatureEnabled(
-        'auto-summarization',
-        context
+        "auto-summarization",
+        context,
       );
 
       logger.api(
         `📞 [CallsController] Creating test transcript for call: ${callId} - v2.0`,
-        'CallsController',
+        "CallsController",
         {
           role,
           contentLength: content.length,
@@ -749,7 +755,7 @@ export class CallsController {
             advancedProcessing: enableAdvancedProcessing,
             autoSummarization: enableAutoSummarization,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
@@ -765,7 +771,7 @@ export class CallsController {
 
       // Validate with database schema (expects snake_case)
       const validatedData = insertTranscriptSchema.parse(
-        transcriptDataForValidation
+        transcriptDataForValidation,
       );
 
       // ✅ NEW v2.0: Enhanced transcript processing
@@ -774,62 +780,66 @@ export class CallsController {
       if (enableAdvancedProcessing) {
         processedTranscript = {
           ...processedTranscript,
-          word_count: content.split(' ').length,
+          word_count: content.split(" ").length,
           confidence_score: Math.random() * 0.3 + 0.7, // 70-100%
-          language_detected: 'en', // TODO: Implement language detection
+          language_detected: "en", // TODO: Implement language detection
           sentiment_score: Math.random() * 2 - 1, // -1 to 1
-          key_phrases: ['service', 'room', 'assistance'], // TODO: Extract actual phrases
+          key_phrases: ["service", "room", "assistance"], // TODO: Extract actual phrases
         };
       }
 
       let summary;
       if (enableAutoSummarization && content.length > 100) {
         summary = {
-          summary: content.substring(0, 100) + '...', // TODO: Implement actual summarization
-          keyPoints: ['Customer inquiry', 'Service request'], // TODO: Extract actual points
-          actionItems: ['Follow up required'], // TODO: Extract actual actions
+          summary: content.substring(0, 100) + "...", // TODO: Implement actual summarization
+          keyPoints: ["Customer inquiry", "Service request"], // TODO: Extract actual points
+          actionItems: ["Follow up required"], // TODO: Extract actual actions
         };
       }
 
       // Auto-create call record if it doesn't exist
       try {
-        const existingCall = await db
-          .select()
-          .from(call)
-          .where(eq(call.call_id_vapi, callId))
-          .limit(1);
+        // ✅ MIGRATED: Check if call exists using Prisma
+        const existingCall = await prisma.call.findFirst({
+          where: {
+            call_id_vapi: callId,
+          },
+        });
 
-        if (existingCall.length === 0) {
+        if (!existingCall) {
           logger.debug(
             `🔍 [CallsController] No call found for ${callId}, auto-creating call record - v2.0`,
-            'CallsController'
+            "CallsController",
           );
 
-          await db.insert(call).values({
-            call_id_vapi: callId,
-            tenant_id: tenantId,
-            start_time: new Date(),
-            language: 'en',
+          // ✅ MIGRATED: Create call using Prisma
+          await prisma.call.create({
+            data: {
+              call_id_vapi: callId,
+              tenant_id: tenantId,
+              start_time: new Date(),
+              language: "en",
+            },
           });
 
           logger.success(
             `📞 [CallsController] Auto-created call record for ${callId}`,
-            'CallsController'
+            "CallsController",
           );
         }
       } catch (error) {
         logger.error(
-          '❌ [CallsController] Error checking/creating call record - v2.0',
-          'CallsController',
-          error
+          "❌ [CallsController] Error checking/creating call record - v2.0",
+          "CallsController",
+          error,
         );
       }
 
       const executionTime = Date.now() - startTime;
 
       logger.success(
-        '📞 [CallsController] Test transcript created successfully - v2.0',
-        'CallsController',
+        "📞 [CallsController] Test transcript created successfully - v2.0",
+        "CallsController",
         {
           callId,
           role,
@@ -840,7 +850,7 @@ export class CallsController {
             advancedProcessing: enableAdvancedProcessing,
             autoSummarization: enableAutoSummarization,
           },
-        }
+        },
       );
 
       (res as any).json({
@@ -848,7 +858,7 @@ export class CallsController {
         data: processedTranscript,
         ...(summary && { summary }),
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           callId,
           tenantId,
@@ -857,28 +867,28 @@ export class CallsController {
             autoSummarization: enableAutoSummarization,
           },
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["TenantService"],
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [CallsController] Error creating test transcript - v2.0',
-        'CallsController',
-        error
+        "❌ [CallsController] Error creating test transcript - v2.0",
+        "CallsController",
+        error,
       );
 
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to create test transcript',
+        error: "Failed to create test transcript",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? (error as any)?.message || String(error)
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
