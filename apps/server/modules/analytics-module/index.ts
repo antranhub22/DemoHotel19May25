@@ -10,19 +10,19 @@ export {
   getHourlyActivity,
   getOverview,
   getServiceDistribution,
-} from '@server/analytics';
-export { AnalyticsController } from '@server/controllers/analyticsController';
+} from "@server/analytics";
+export { AnalyticsController } from "@server/controllers/analyticsController";
 
 // ✅ NEW v2.0: Import lifecycle management
-import { FeatureFlags } from '@server/shared/FeatureFlags';
+import { FeatureFlags } from "@server/shared/FeatureFlags";
 import {
   ModuleLifecycleManager,
   type ModuleDefinition,
   type ModuleLifecycleHooks,
-} from '@server/shared/ModuleLifecycleManager';
-import { ServiceContainer } from '@server/shared/ServiceContainer';
-import { db } from '@shared/db';
-import { logger } from '@shared/utils/logger';
+} from "@server/shared/ModuleLifecycleManager";
+import { ServiceContainer } from "@server/shared/ServiceContainer";
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+import { logger } from "@shared/utils/logger";
 
 // ============================================
 // MODULE LIFECYCLE HOOKS
@@ -30,117 +30,119 @@ import { logger } from '@shared/utils/logger';
 
 const analyticsModuleHooks: ModuleLifecycleHooks = {
   async onStartup() {
-    logger.info('🚀 [AnalyticsModule] Starting up...', 'AnalyticsModule');
+    logger.info("🚀 [AnalyticsModule] Starting up...", "AnalyticsModule");
 
     // Register services with ServiceContainer
     try {
       const { AnalyticsController } = await import(
-        '@server/controllers/analyticsController'
+        "@server/controllers/analyticsController"
       );
 
       ServiceContainer.registerInstance(
-        'AnalyticsController',
+        "AnalyticsController",
         AnalyticsController,
         {
-          module: 'analytics-module',
-        }
+          module: "analytics-module",
+        },
       );
 
       logger.debug(
-        '✅ [AnalyticsModule] Services registered',
-        'AnalyticsModule'
+        "✅ [AnalyticsModule] Services registered",
+        "AnalyticsModule",
       );
     } catch (error) {
       logger.warn(
-        '⚠️ [AnalyticsModule] Failed to register some services',
-        'AnalyticsModule',
-        error
+        "⚠️ [AnalyticsModule] Failed to register some services",
+        "AnalyticsModule",
+        error,
       );
     }
 
     // Validate database connection for analytics tables
     try {
-      // Check if we can access calls table for analytics
-      await db.execute('SELECT COUNT(*) FROM calls LIMIT 1');
+      // Check if we can access calls table for analytics using Prisma
+      const prisma = PrismaConnectionManager.getInstance().getClient();
+      await prisma.call.count({ take: 1 });
       logger.debug(
-        '✅ [AnalyticsModule] Database access validated',
-        'AnalyticsModule'
+        "✅ [AnalyticsModule] Database access validated",
+        "AnalyticsModule",
       );
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsModule] Database access failed',
-        'AnalyticsModule',
-        error
+        "❌ [AnalyticsModule] Database access failed",
+        "AnalyticsModule",
+        error,
       );
-      throw new Error('Database access required for analytics module');
+      throw new Error("Database access required for analytics module");
     }
 
     // Check if advanced analytics features are enabled
     const advancedAnalyticsEnabled =
-      FeatureFlags.isEnabled('advanced-analytics');
+      FeatureFlags.isEnabled("advanced-analytics");
     if (advancedAnalyticsEnabled) {
       logger.info(
-        '📊 [AnalyticsModule] Advanced analytics features enabled',
-        'AnalyticsModule'
+        "📊 [AnalyticsModule] Advanced analytics features enabled",
+        "AnalyticsModule",
       );
       // Initialize advanced analytics features here
     }
 
     logger.success(
-      '✅ [AnalyticsModule] Startup completed successfully',
-      'AnalyticsModule'
+      "✅ [AnalyticsModule] Startup completed successfully",
+      "AnalyticsModule",
     );
   },
 
   async onShutdown() {
-    logger.info('🛑 [AnalyticsModule] Shutting down...', 'AnalyticsModule');
+    logger.info("🛑 [AnalyticsModule] Shutting down...", "AnalyticsModule");
 
     // Clean up any analytics resources
     // Could include flushing cached analytics data, closing connections, etc.
 
     logger.success(
-      '✅ [AnalyticsModule] Shutdown completed',
-      'AnalyticsModule'
+      "✅ [AnalyticsModule] Shutdown completed",
+      "AnalyticsModule",
     );
   },
 
   async onHealthCheck(): Promise<boolean> {
     try {
       // Check if feature flag is enabled
-      if (!FeatureFlags.isEnabled('analytics-module')) {
+      if (!FeatureFlags.isEnabled("analytics-module")) {
         return false;
       }
 
       // Check database connectivity for analytics queries
-      await db.execute('SELECT COUNT(*) FROM calls LIMIT 1');
+      const prisma = PrismaConnectionManager.getInstance().getClient();
+      await prisma.call.count({ take: 1 });
 
       // Check if tenant module dependency is healthy
-      const hasTenantModule = ServiceContainer.has('TenantService');
+      const hasTenantModule = ServiceContainer.has("TenantService");
       if (!hasTenantModule) {
         logger.warn(
-          '⚠️ [AnalyticsModule] TenantService dependency not available',
-          'AnalyticsModule'
+          "⚠️ [AnalyticsModule] TenantService dependency not available",
+          "AnalyticsModule",
         );
         // Analytics can work without tenant service, but with limited functionality
       }
 
       // If advanced analytics is enabled, check its health
       const advancedAnalyticsEnabled =
-        FeatureFlags.isEnabled('advanced-analytics');
+        FeatureFlags.isEnabled("advanced-analytics");
       if (advancedAnalyticsEnabled) {
         // Perform advanced analytics health checks here
         logger.debug(
-          '📊 [AnalyticsModule] Advanced analytics health check passed',
-          'AnalyticsModule'
+          "📊 [AnalyticsModule] Advanced analytics health check passed",
+          "AnalyticsModule",
         );
       }
 
       return true;
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsModule] Health check failed',
-        'AnalyticsModule',
-        error
+        "❌ [AnalyticsModule] Health check failed",
+        "AnalyticsModule",
+        error,
       );
       return false;
     }
@@ -148,8 +150,8 @@ const analyticsModuleHooks: ModuleLifecycleHooks = {
 
   async onDegraded() {
     logger.warn(
-      '⚠️ [AnalyticsModule] Entering degraded state',
-      'AnalyticsModule'
+      "⚠️ [AnalyticsModule] Entering degraded state",
+      "AnalyticsModule",
     );
 
     // In degraded state, analytics might:
@@ -158,44 +160,44 @@ const analyticsModuleHooks: ModuleLifecycleHooks = {
     // - Cache more aggressively
 
     logger.info(
-      '🔄 [AnalyticsModule] Switching to basic analytics mode',
-      'AnalyticsModule'
+      "🔄 [AnalyticsModule] Switching to basic analytics mode",
+      "AnalyticsModule",
     );
   },
 
   async onRecovered() {
     logger.info(
-      '💚 [AnalyticsModule] Recovered from degraded state',
-      'AnalyticsModule'
+      "💚 [AnalyticsModule] Recovered from degraded state",
+      "AnalyticsModule",
     );
 
     // Re-enable advanced analytics if available
     const advancedAnalyticsEnabled =
-      FeatureFlags.isEnabled('advanced-analytics');
+      FeatureFlags.isEnabled("advanced-analytics");
     if (advancedAnalyticsEnabled) {
       logger.info(
-        '📊 [AnalyticsModule] Advanced analytics restored',
-        'AnalyticsModule'
+        "📊 [AnalyticsModule] Advanced analytics restored",
+        "AnalyticsModule",
       );
     }
 
     logger.success(
-      '✅ [AnalyticsModule] Full functionality restored',
-      'AnalyticsModule'
+      "✅ [AnalyticsModule] Full functionality restored",
+      "AnalyticsModule",
     );
   },
 
   async onDependencyFailed(failedDependency: string) {
     logger.warn(
       `⚠️ [AnalyticsModule] Dependency failed: ${failedDependency}`,
-      'AnalyticsModule',
-      { failedDependency }
+      "AnalyticsModule",
+      { failedDependency },
     );
 
-    if (failedDependency === 'tenant-module') {
+    if (failedDependency === "tenant-module") {
       logger.warn(
-        '📊 [AnalyticsModule] Tenant module failed - switching to global analytics mode',
-        'AnalyticsModule'
+        "📊 [AnalyticsModule] Tenant module failed - switching to global analytics mode",
+        "AnalyticsModule",
       );
       // Analytics can continue to work without tenant isolation
       // but will provide global analytics instead of tenant-specific
@@ -208,17 +210,17 @@ const analyticsModuleHooks: ModuleLifecycleHooks = {
 // ============================================
 
 export const AnalyticsModuleDefinition: ModuleDefinition = {
-  name: 'analytics-module',
-  version: '2.0.0',
-  description: 'Analytics and reporting module with lifecycle management',
-  dependencies: ['tenant-module'], // Analytics depends on tenant for data isolation
+  name: "analytics-module",
+  version: "2.0.0",
+  description: "Analytics and reporting module with lifecycle management",
+  dependencies: ["tenant-module"], // Analytics depends on tenant for data isolation
   optionalDependencies: [], // No optional dependencies
   priority: 30, // Lower priority (analytics is not critical for core functionality)
   healthCheckInterval: 60000, // 60 seconds (analytics can have longer intervals)
   maxFailures: 5, // Higher tolerance for failures (analytics is not critical)
   gracefulShutdownTimeout: 8000, // 8 seconds
   lifecycle: analyticsModuleHooks,
-  featureFlag: 'analytics-module', // Controlled by feature flag
+  featureFlag: "analytics-module", // Controlled by feature flag
 };
 
 // ============================================
@@ -226,27 +228,27 @@ export const AnalyticsModuleDefinition: ModuleDefinition = {
 // ============================================
 
 export const AnalyticsModuleInfo = {
-  name: 'analytics-module',
-  version: '2.0.0',
+  name: "analytics-module",
+  version: "2.0.0",
   description:
-    'Analytics and reporting module with enhanced lifecycle management',
-  dependencies: ['tenant-module'],
+    "Analytics and reporting module with enhanced lifecycle management",
+  dependencies: ["tenant-module"],
   endpoints: [
-    'GET /api/analytics/overview',
-    'GET /api/analytics/service-distribution',
-    'GET /api/analytics/hourly-activity',
-    'GET /api/analytics/dashboard',
+    "GET /api/analytics/overview",
+    "GET /api/analytics/service-distribution",
+    "GET /api/analytics/hourly-activity",
+    "GET /api/analytics/dashboard",
   ],
   features: [
-    'call-analytics',
-    'service-distribution',
-    'hourly-activity',
-    'tenant-filtering',
-    'dashboard-analytics',
-    'lifecycle-management',
-    'health-monitoring',
-    'graceful-degradation',
-    'advanced-analytics',
+    "call-analytics",
+    "service-distribution",
+    "hourly-activity",
+    "tenant-filtering",
+    "dashboard-analytics",
+    "lifecycle-management",
+    "health-monitoring",
+    "graceful-degradation",
+    "advanced-analytics",
   ],
 };
 
@@ -256,10 +258,10 @@ export const AnalyticsModuleInfo = {
 
 export const checkAnalyticsModuleHealth = () => {
   const lifecycleManager =
-    ModuleLifecycleManager.getModuleStatus('analytics-module');
+    ModuleLifecycleManager.getModuleStatus("analytics-module");
 
   return {
-    status: lifecycleManager?.state || 'unknown',
+    status: lifecycleManager?.state || "unknown",
     timestamp: new Date().toISOString(),
     module: AnalyticsModuleInfo.name,
     version: AnalyticsModuleInfo.version,
@@ -282,14 +284,14 @@ export const checkAnalyticsModuleHealth = () => {
 try {
   ModuleLifecycleManager.registerModule(AnalyticsModuleDefinition);
   logger.debug(
-    '🔄 [AnalyticsModule] Registered with ModuleLifecycleManager',
-    'AnalyticsModule',
-    { version: AnalyticsModuleDefinition.version }
+    "🔄 [AnalyticsModule] Registered with ModuleLifecycleManager",
+    "AnalyticsModule",
+    { version: AnalyticsModuleDefinition.version },
   );
 } catch (error) {
   logger.error(
-    '❌ [AnalyticsModule] Failed to register with ModuleLifecycleManager',
-    'AnalyticsModule',
-    error
+    "❌ [AnalyticsModule] Failed to register with ModuleLifecycleManager",
+    "AnalyticsModule",
+    error,
   );
 }

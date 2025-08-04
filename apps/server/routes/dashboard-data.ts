@@ -3,14 +3,14 @@
  * New endpoints providing optimized data for dashboard without affecting existing APIs
  */
 
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { performanceMiddleware } from '@server/middleware/performanceMonitoring';
-import { callAnalytics } from '@server/services/CallAnalytics';
-import { CacheKeys, dashboardCache } from '@server/services/DashboardCache';
-import { queryOptimizer } from '@server/services/QueryOptimizer';
-import { requestAnalytics } from '@server/services/RequestAnalytics';
-import { logger } from '@shared/utils/logger';
-import { Request, Response, Router } from 'express';
+import { authenticateJWT } from "@auth/middleware/auth.middleware";
+import { performanceMiddleware } from "@server/middleware/performanceMonitoring";
+import { callAnalytics } from "@server/services/CallAnalytics";
+import { CacheKeys, dashboardCache } from "@server/services/DashboardCache";
+import { requestAnalytics } from "@server/services/RequestAnalytics";
+import { QueryOptimizer } from "@shared/optimization/QueryOptimizer";
+import { logger } from "@shared/utils/logger";
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
@@ -23,30 +23,30 @@ function extractTenantFromRequest(req: Request): string {
       return (req as any).user.tenantId;
     }
 
-    const host = req.get('host') || '';
-    const subdomain = host.split('.')[0];
+    const host = req.get("host") || "";
+    const subdomain = host.split(".")[0];
 
     if (
       subdomain &&
-      subdomain !== 'localhost' &&
-      subdomain !== '127' &&
-      subdomain !== 'www'
+      subdomain !== "localhost" &&
+      subdomain !== "127" &&
+      subdomain !== "www"
     ) {
       return subdomain;
     }
 
     logger.warn(
-      'Could not extract tenant from request, using fallback',
-      'DashboardDataAPI'
+      "Could not extract tenant from request, using fallback",
+      "DashboardDataAPI",
     );
-    return 'mi-nhon-hotel'; // Safe fallback
+    return "mi-nhon-hotel"; // Safe fallback
   } catch (error) {
     logger.error(
-      'Failed to extract tenant from request',
-      'DashboardDataAPI',
-      error
+      "Failed to extract tenant from request",
+      "DashboardDataAPI",
+      error,
     );
-    return 'mi-nhon-hotel';
+    return "mi-nhon-hotel";
   }
 }
 
@@ -55,7 +55,7 @@ function extractTenantFromRequest(req: Request): string {
  * ZERO RISK: New endpoint, doesn't affect existing /api/staff/requests
  */
 router.get(
-  '/requests-summary',
+  "/requests-summary",
   authenticateJWT,
   performanceMiddleware,
   async (req: Request, res: Response) => {
@@ -63,29 +63,29 @@ router.get(
       const tenantId = extractTenantFromRequest(req);
 
       logger.debug(
-        '📊 [Dashboard] Getting requests summary',
-        'DashboardDataAPI',
-        { tenantId }
+        "📊 [Dashboard] Getting requests summary",
+        "DashboardDataAPI",
+        { tenantId },
       );
 
       // ✅ ENHANCEMENT: Real-time analytics from database (ZERO RISK)
       const summary = await dashboardCache.get(
-        CacheKeys.dashboardMetrics(tenantId, 'requests'),
+        CacheKeys.dashboardMetrics(tenantId, "requests"),
         async () => {
           // Use real analytics service with automatic fallback
           const result = await requestAnalytics.getRequestAnalytics(tenantId);
           const trend = await requestAnalytics.getRequestTrend(tenantId);
 
           logger.debug(
-            '📊 [Dashboard] Requests analytics result',
-            'DashboardDataAPI',
+            "📊 [Dashboard] Requests analytics result",
+            "DashboardDataAPI",
             {
               tenantId,
               pending: result.pending,
               completed: result.completed,
               satisfactionScore: result.satisfactionScore,
               trend,
-            }
+            },
           );
 
           return {
@@ -94,32 +94,32 @@ router.get(
             lastUpdated: new Date().toISOString(),
           };
         },
-        30000 // 30 seconds cache
+        30000, // 30 seconds cache
       );
 
       res.json({
         success: true,
         data: summary,
-        version: '1.0.0',
+        version: "1.0.0",
         _metadata: {
-          endpoint: 'requests-summary',
+          endpoint: "requests-summary",
           tenantId,
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [Dashboard] Failed to get requests summary',
-        'DashboardDataAPI',
-        error
+        "❌ [Dashboard] Failed to get requests summary",
+        "DashboardDataAPI",
+        error,
       );
       res.status(500).json({
         success: false,
-        error: 'Failed to get requests summary',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get requests summary",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 /**
@@ -127,14 +127,14 @@ router.get(
  * ZERO RISK: New endpoint for call analytics
  */
 router.get(
-  '/calls-summary',
+  "/calls-summary",
   authenticateJWT,
   performanceMiddleware,
   async (req: Request, res: Response) => {
     try {
       const tenantId = extractTenantFromRequest(req);
 
-      logger.debug('📞 [Dashboard] Getting calls summary', 'DashboardDataAPI', {
+      logger.debug("📞 [Dashboard] Getting calls summary", "DashboardDataAPI", {
         tenantId,
       });
 
@@ -147,15 +147,15 @@ router.get(
             const result = await callAnalytics.getCallAnalytics(tenantId);
 
             logger.debug(
-              '📞 [Dashboard] Calls analytics result',
-              'DashboardDataAPI',
+              "📞 [Dashboard] Calls analytics result",
+              "DashboardDataAPI",
               {
                 tenantId,
                 total: result.total,
                 today: result.today,
                 avgDuration: result.avgDuration,
                 successRate: result.successRate,
-              }
+              },
             );
 
             // Get trend data
@@ -177,50 +177,50 @@ router.get(
           } catch (dbError) {
             // Ultimate fallback if analytics service fails
             logger.warn(
-              '⚠️ [Dashboard] Call analytics failed, using static fallback',
-              'DashboardDataAPI',
-              dbError
+              "⚠️ [Dashboard] Call analytics failed, using static fallback",
+              "DashboardDataAPI",
+              dbError,
             );
 
             return {
               total: 0,
               today: 0,
               answered: 0,
-              avgDuration: '0 min',
+              avgDuration: "0 min",
               avgDurationSeconds: 0,
               successRate: 0,
               peakHours: [],
               lastUpdated: new Date().toISOString(),
-              note: 'Call analytics unavailable - system fallback',
+              note: "Call analytics unavailable - system fallback",
             };
           }
         },
-        60000 // 1 minute cache
+        60000, // 1 minute cache
       );
 
       res.json({
         success: true,
         data: summary,
-        version: '1.0.0',
+        version: "1.0.0",
         _metadata: {
-          endpoint: 'calls-summary',
+          endpoint: "calls-summary",
           tenantId,
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [Dashboard] Failed to get calls summary',
-        'DashboardDataAPI',
-        error
+        "❌ [Dashboard] Failed to get calls summary",
+        "DashboardDataAPI",
+        error,
       );
       res.status(500).json({
         success: false,
-        error: 'Failed to get calls summary',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get calls summary",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 /**
@@ -228,12 +228,12 @@ router.get(
  * ZERO RISK: New endpoint for system monitoring
  */
 router.get(
-  '/system-metrics',
+  "/system-metrics",
   authenticateJWT,
   performanceMiddleware,
   async (req: Request, res: Response) => {
     try {
-      logger.debug('🖥️ [Dashboard] Getting system metrics', 'DashboardDataAPI');
+      logger.debug("🖥️ [Dashboard] Getting system metrics", "DashboardDataAPI");
 
       const metrics = await dashboardCache.get(
         CacheKeys.systemMetrics(),
@@ -242,7 +242,7 @@ router.get(
           const uptimeHours = process.uptime() / 3600; // Convert seconds to hours
           const uptimePercentage = Math.min(
             99.9,
-            95 + (uptimeHours / 720) * 4.9
+            95 + (uptimeHours / 720) * 4.9,
           ); // Scale to 99.9% max
 
           // Get memory usage
@@ -260,7 +260,7 @@ router.get(
             memoryUsed: memoryUsedMB,
             memoryTotal: memoryTotalMB,
             memoryUsagePercent: Math.round(
-              (memoryUsedMB / memoryTotalMB) * 100
+              (memoryUsedMB / memoryTotalMB) * 100,
             ),
             processUptime: Math.round(process.uptime()),
             nodeVersion: process.version,
@@ -268,31 +268,31 @@ router.get(
             lastUpdated: new Date().toISOString(),
           };
         },
-        30000 // 30 seconds cache
+        30000, // 30 seconds cache
       );
 
       res.json({
         success: true,
         data: metrics,
-        version: '1.0.0',
+        version: "1.0.0",
         _metadata: {
-          endpoint: 'system-metrics',
+          endpoint: "system-metrics",
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [Dashboard] Failed to get system metrics',
-        'DashboardDataAPI',
-        error
+        "❌ [Dashboard] Failed to get system metrics",
+        "DashboardDataAPI",
+        error,
       );
       res.status(500).json({
         success: false,
-        error: 'Failed to get system metrics',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get system metrics",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 /**
@@ -300,7 +300,7 @@ router.get(
  * ZERO RISK: Combines all dashboard data efficiently
  */
 router.get(
-  '/unified',
+  "/unified",
   authenticateJWT,
   performanceMiddleware,
   async (req: Request, res: Response) => {
@@ -308,43 +308,43 @@ router.get(
       const tenantId = extractTenantFromRequest(req);
 
       logger.debug(
-        '🎯 [Dashboard] Getting unified dashboard data',
-        'DashboardDataAPI',
-        { tenantId }
+        "🎯 [Dashboard] Getting unified dashboard data",
+        "DashboardDataAPI",
+        { tenantId },
       );
 
       // Get all dashboard data in parallel
       const [requestsSummary, callsSummary, systemMetrics] = await Promise.all([
         // Reuse cached endpoints data
         dashboardCache.get(
-          CacheKeys.dashboardMetrics(tenantId, 'requests'),
+          CacheKeys.dashboardMetrics(tenantId, "requests"),
           async () => {
             const response = await fetch(
-              `${req.protocol}://${req.get('host')}/api/dashboard/requests-summary`,
+              `${req.protocol}://${req.get("host")}/api/dashboard/requests-summary`,
               {
-                headers: { Authorization: req.headers.authorization || '' },
-              }
+                headers: { Authorization: req.headers.authorization || "" },
+              },
             );
             return response.ok ? (await response.json()).data : {};
-          }
+          },
         ),
 
         dashboardCache.get(CacheKeys.callsSummary(tenantId), async () => {
           const response = await fetch(
-            `${req.protocol}://${req.get('host')}/api/dashboard/calls-summary`,
+            `${req.protocol}://${req.get("host")}/api/dashboard/calls-summary`,
             {
-              headers: { Authorization: req.headers.authorization || '' },
-            }
+              headers: { Authorization: req.headers.authorization || "" },
+            },
           );
           return response.ok ? (await response.json()).data : {};
         }),
 
         dashboardCache.get(CacheKeys.systemMetrics(), async () => {
           const response = await fetch(
-            `${req.protocol}://${req.get('host')}/api/dashboard/system-metrics`,
+            `${req.protocol}://${req.get("host")}/api/dashboard/system-metrics`,
             {
-              headers: { Authorization: req.headers.authorization || '' },
-            }
+              headers: { Authorization: req.headers.authorization || "" },
+            },
           );
           return response.ok ? (await response.json()).data : {};
         }),
@@ -355,7 +355,7 @@ router.get(
           total: callsSummary.total || 0,
           today: callsSummary.today || 0,
           answered: callsSummary.answered || 0,
-          avgDuration: callsSummary.avgDuration || '0 min',
+          avgDuration: callsSummary.avgDuration || "0 min",
         },
         requests: {
           pending: requestsSummary.pending || 0,
@@ -366,7 +366,7 @@ router.get(
         satisfaction: {
           rating: requestsSummary.satisfactionScore || 4.5, // Real satisfaction score from completion time
           responses: requestsSummary.totalAll || 0,
-          trend: requestsSummary.trend || '+0.0',
+          trend: requestsSummary.trend || "+0.0",
         },
         system: {
           uptime: systemMetrics.uptime || 99.9,
@@ -387,26 +387,26 @@ router.get(
       res.json({
         success: true,
         data: unifiedData,
-        version: '1.0.0',
+        version: "1.0.0",
         _metadata: {
-          endpoint: 'unified-dashboard',
+          endpoint: "unified-dashboard",
           tenantId,
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [Dashboard] Failed to get unified dashboard data',
-        'DashboardDataAPI',
-        error
+        "❌ [Dashboard] Failed to get unified dashboard data",
+        "DashboardDataAPI",
+        error,
       );
       res.status(500).json({
         success: false,
-        error: 'Failed to get unified dashboard data',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get unified dashboard data",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 /**
@@ -414,40 +414,41 @@ router.get(
  * ZERO RISK: Read-only monitoring endpoint
  */
 router.get(
-  '/query-optimization-stats',
+  "/query-optimization-stats",
   authenticateJWT,
   performanceMiddleware,
   async (req: Request, res: Response) => {
     try {
       logger.debug(
-        '📊 [Dashboard] Getting query optimization stats',
-        'DashboardDataAPI'
+        "📊 [Dashboard] Getting query optimization stats",
+        "DashboardDataAPI",
       );
 
+      const queryOptimizer = new QueryOptimizer();
       const stats = queryOptimizer.getStats();
 
       res.json({
         success: true,
         data: stats,
-        version: '1.0.0',
+        version: "1.0.0",
         _metadata: {
-          endpoint: 'query-optimization-stats',
+          endpoint: "query-optimization-stats",
           timestamp: new Date().toISOString(),
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [Dashboard] Failed to get optimization stats',
-        'DashboardDataAPI',
-        error
+        "❌ [Dashboard] Failed to get optimization stats",
+        "DashboardDataAPI",
+        error,
       );
       res.status(500).json({
         success: false,
-        error: 'Failed to get optimization stats',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Failed to get optimization stats",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 export default router;
