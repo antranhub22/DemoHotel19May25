@@ -17,18 +17,16 @@ CREATE TABLE IF NOT EXISTS tenants (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Step 2: Create hotel_profiles table
+-- Step 2: Create hotel_profiles table (FIXED: Updated to current schema)
 CREATE TABLE IF NOT EXISTS hotel_profiles (
     id TEXT PRIMARY KEY,
     tenant_id TEXT REFERENCES tenants(id) ON DELETE CASCADE,
-    hotel_name TEXT NOT NULL,
-    description TEXT,
-    address TEXT,
-    phone TEXT,
-    email TEXT,
-    website TEXT,
-    amenities TEXT[],
-    policies TEXT[],
+    research_data TEXT,
+    assistant_config TEXT,
+    vapi_assistant_id TEXT,
+    services_config TEXT,
+    knowledge_base TEXT,
+    system_prompt TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
