@@ -1,17 +1,10 @@
-import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@server/db';
-import { hotelProfileMapper, tenantMapper } from '@shared/db/transformers';
-import {
-  call,
-  hotelProfiles,
-  message,
-  request,
-  staff,
-  tenants,
-  transcript,
-} from '@shared/schema';
-import { generateId } from '@shared/utils/idGenerator';
-import { logger } from '@shared/utils/logger';
+import { PrismaClient } from "@prisma/client";
+import { hotelProfileMapper, tenantMapper } from "@shared/db/transformers";
+import { generateId } from "@shared/utils/idGenerator";
+import { logger } from "@shared/utils/logger";
+
+// ✅ DETAILED MIGRATION: Use Prisma for all tenant operations
+const prisma = new PrismaClient();
 
 // ============================================
 // Types & Interfaces for Tenant Management
@@ -21,8 +14,8 @@ export interface TenantConfig {
   hotelName: string;
   subdomain: string;
   customDomain?: string;
-  subscriptionPlan: 'trial' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'inactive' | 'expired' | 'cancelled';
+  subscriptionPlan: "trial" | "basic" | "premium" | "enterprise";
+  subscriptionStatus: "active" | "inactive" | "expired" | "cancelled";
   trialEndsAt?: Date;
   maxVoices?: number;
   maxLanguages?: number;
@@ -75,7 +68,7 @@ export class TenantService {
    */
   async createTenant(config: TenantConfig): Promise<string> {
     try {
-      logger.debug(`🏨 Creating new tenant: ${config.hotelName}`, 'Component');
+      logger.debug(`🏨 Creating new tenant: ${config.hotelName}`, "Component");
 
       // Validate subdomain availability
       await this.validateSubdomain(config.subdomain);
@@ -83,11 +76,11 @@ export class TenantService {
       // Set default feature flags based on subscription plan
       const featureFlags = this.getDefaultFeatureFlags(config.subscriptionPlan);
       const subscriptionLimits = this.getSubscriptionLimits(
-        config.subscriptionPlan
+        config.subscriptionPlan,
       );
 
       // Create tenant using field mapper
-      const tenantId = generateId('tenant');
+      const tenantId = generateId("tenant");
       const tenantData = tenantMapper.toDatabase({
         id: tenantId,
         hotelName: config.hotelName,
@@ -106,11 +99,14 @@ export class TenantService {
         createdAt: new Date(),
       });
 
-      const [tenant] = await db.insert(tenants).values(tenantData).returning();
+      // ✅ DETAILED MIGRATION: Create tenant using Prisma
+      const tenant = await prisma.tenants.create({
+        data: tenantData,
+      });
 
       // Create default hotel profile using field mapper
       const profileData = hotelProfileMapper.toDatabase({
-        id: generateId('hotel-profile'),
+        id: generateId("hotel-profile"),
         tenantId: tenant.id,
         researchData: null,
         assistantConfig: null,
@@ -120,20 +116,23 @@ export class TenantService {
         systemPrompt: null,
       });
 
-      await db.insert(hotelProfiles).values(profileData);
+      // ✅ DETAILED MIGRATION: Create hotel profile using Prisma
+      await prisma.hotel_profiles.create({
+        data: profileData,
+      });
 
-      logger.debug(`✅ Tenant created successfully: ${tenant.id}`, 'Component');
+      logger.debug(`✅ Tenant created successfully: ${tenant.id}`, "Component");
       return tenant.id;
     } catch (error) {
       logger.error(
-        'Failed to create tenant ${config.hotelName}:',
-        'Component',
-        error
+        "Failed to create tenant ${config.hotelName}:",
+        "Component",
+        error,
       );
       throw new TenantError(
-        `Failed to create tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'TENANT_CREATION_FAILED',
-        500
+        `Failed to create tenant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "TENANT_CREATION_FAILED",
+        500,
       );
     }
   }
@@ -167,7 +166,7 @@ export class TenantService {
         .limit(1);
 
       if (!tenant) {
-        throw new TenantError('Tenant not found', 'TENANT_NOT_FOUND', 404);
+        throw new TenantError("Tenant not found", "TENANT_NOT_FOUND", 404);
       }
 
       return tenant;
@@ -176,9 +175,9 @@ export class TenantService {
         throw error;
       }
       throw new TenantError(
-        `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'TENANT_FETCH_FAILED',
-        500
+        `Failed to get tenant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "TENANT_FETCH_FAILED",
+        500,
       );
     }
   }
@@ -212,7 +211,7 @@ export class TenantService {
         .limit(1);
 
       if (!tenant) {
-        throw new TenantError('Tenant not found', 'TENANT_NOT_FOUND', 404);
+        throw new TenantError("Tenant not found", "TENANT_NOT_FOUND", 404);
       }
 
       return tenant;
@@ -221,9 +220,9 @@ export class TenantService {
         throw error;
       }
       throw new TenantError(
-        `Failed to get tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'TENANT_FETCH_FAILED',
-        500
+        `Failed to get tenant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "TENANT_FETCH_FAILED",
+        500,
       );
     }
   }
@@ -233,10 +232,10 @@ export class TenantService {
    */
   async updateTenant(
     tenantId: string,
-    updates: Partial<TenantConfig>
+    updates: Partial<TenantConfig>,
   ): Promise<void> {
     try {
-      logger.debug(`🔄 Updating tenant: ${tenantId}`, 'Component');
+      logger.debug(`🔄 Updating tenant: ${tenantId}`, "Component");
 
       const updateData: any = {};
 
@@ -251,7 +250,7 @@ export class TenantService {
         updateData.subscriptionPlan = updates.subscriptionPlan;
         // Update feature flags and limits based on new plan
         const featureFlags = this.getDefaultFeatureFlags(
-          updates.subscriptionPlan
+          updates.subscriptionPlan,
         );
         const limits = this.getSubscriptionLimits(updates.subscriptionPlan);
         Object.assign(updateData, featureFlags, limits);
@@ -263,15 +262,19 @@ export class TenantService {
         updateData.trialEndsAt = updates.trialEndsAt;
       }
 
-      await db.update(tenants).set(updateData).where(eq(tenants.id, tenantId));
+      // ✅ DETAILED MIGRATION: Update tenant using Prisma
+      await prisma.tenants.update({
+        where: { id: tenantId },
+        data: updateData,
+      });
 
-      logger.debug(`✅ Tenant updated successfully: ${tenantId}`, 'Component');
+      logger.debug(`✅ Tenant updated successfully: ${tenantId}`, "Component");
     } catch (error) {
-      logger.error('Failed to update tenant ${tenantId}:', 'Component', error);
+      logger.error("Failed to update tenant ${tenantId}:", "Component", error);
       throw new TenantError(
-        `Failed to update tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'TENANT_UPDATE_FAILED',
-        500
+        `Failed to update tenant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "TENANT_UPDATE_FAILED",
+        500,
       );
     }
   }
@@ -281,26 +284,30 @@ export class TenantService {
    */
   async deleteTenant(tenantId: string): Promise<void> {
     try {
-      logger.debug(`🗑️ Deleting tenant: ${tenantId}`, 'Component');
+      logger.debug(`🗑️ Deleting tenant: ${tenantId}`, "Component");
 
       // Delete in order due to foreign key constraints
-      await db.delete(message).where(eq(message.tenant_id, tenantId));
-      await db.delete(transcript).where(eq(transcript.tenant_id, tenantId));
-      await db.delete(request).where(eq(request.tenant_id, tenantId));
-      await db.delete(call).where(eq(call.tenant_id, tenantId));
-      await db.delete(staff).where(eq(staff.tenant_id, tenantId));
-      await db
-        .delete(hotelProfiles)
-        .where(eq(hotelProfiles.tenant_id, tenantId));
-      await db.delete(tenants).where(eq(tenants.id, tenantId));
+      // ✅ DETAILED MIGRATION: Cascade delete using Prisma
+      await Promise.all([
+        prisma.message.deleteMany({ where: { tenant_id: tenantId } }),
+        prisma.transcript.deleteMany({ where: { tenant_id: tenantId } }),
+        prisma.request.deleteMany({ where: { tenant_id: tenantId } }),
+        prisma.call.deleteMany({ where: { tenant_id: tenantId } }),
+        prisma.staff.deleteMany({ where: { tenant_id: tenantId } }),
+      ]);
+      // ✅ DETAILED MIGRATION: Final cleanup using Prisma
+      await prisma.hotel_profiles.deleteMany({
+        where: { tenant_id: tenantId },
+      });
+      await prisma.tenants.delete({ where: { id: tenantId } });
 
-      logger.debug(`✅ Tenant deleted successfully: ${tenantId}`, 'Component');
+      logger.debug(`✅ Tenant deleted successfully: ${tenantId}`, "Component");
     } catch (error) {
-      logger.error('Failed to delete tenant ${tenantId}:', 'Component', error);
+      logger.error("Failed to delete tenant ${tenantId}:", "Component", error);
       throw new TenantError(
-        `Failed to delete tenant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'TENANT_DELETE_FAILED',
-        500
+        `Failed to delete tenant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "TENANT_DELETE_FAILED",
+        500,
       );
     }
   }
@@ -314,7 +321,7 @@ export class TenantService {
    */
   async hasFeatureAccess(
     tenantId: string,
-    feature: keyof FeatureFlags
+    feature: keyof FeatureFlags,
   ): Promise<boolean> {
     try {
       const tenant = await this.getTenantById(tenantId);
@@ -322,9 +329,9 @@ export class TenantService {
       return featureFlags[feature] || false;
     } catch (error) {
       logger.error(
-        'Failed to check feature access for ${tenantId}:',
-        'Component',
-        error
+        "Failed to check feature access for ${tenantId}:",
+        "Component",
+        error,
       );
       return false;
     }
@@ -351,7 +358,7 @@ export class TenantService {
    */
   private getDefaultFeatureFlags(plan: string): FeatureFlags {
     switch (plan) {
-      case 'trial':
+      case "trial":
         return {
           voiceCloning: false,
           multiLocation: false,
@@ -362,7 +369,7 @@ export class TenantService {
           apiAccess: false,
           bulkOperations: false,
         };
-      case 'basic':
+      case "basic":
         return {
           voiceCloning: false,
           multiLocation: false,
@@ -373,7 +380,7 @@ export class TenantService {
           apiAccess: true,
           bulkOperations: false,
         };
-      case 'premium':
+      case "premium":
         return {
           voiceCloning: true,
           multiLocation: true,
@@ -384,7 +391,7 @@ export class TenantService {
           apiAccess: true,
           bulkOperations: true,
         };
-      case 'enterprise':
+      case "enterprise":
         return {
           voiceCloning: true,
           multiLocation: true,
@@ -396,7 +403,7 @@ export class TenantService {
           bulkOperations: true,
         };
       default:
-        return this.getDefaultFeatureFlags('trial');
+        return this.getDefaultFeatureFlags("trial");
     }
   }
 
@@ -409,7 +416,7 @@ export class TenantService {
    */
   getSubscriptionLimits(plan: string): SubscriptionLimits {
     switch (plan) {
-      case 'trial':
+      case "trial":
         return {
           maxVoices: 2,
           maxLanguages: 2,
@@ -418,7 +425,7 @@ export class TenantService {
           maxStaffUsers: 2,
           maxHotelLocations: 1,
         };
-      case 'basic':
+      case "basic":
         return {
           maxVoices: 5,
           maxLanguages: 4,
@@ -427,7 +434,7 @@ export class TenantService {
           maxStaffUsers: 5,
           maxHotelLocations: 1,
         };
-      case 'premium':
+      case "premium":
         return {
           maxVoices: 15,
           maxLanguages: 8,
@@ -436,7 +443,7 @@ export class TenantService {
           maxStaffUsers: 15,
           maxHotelLocations: 5,
         };
-      case 'enterprise':
+      case "enterprise":
         return {
           maxVoices: -1, // Unlimited
           maxLanguages: -1, // Unlimited
@@ -446,7 +453,7 @@ export class TenantService {
           maxHotelLocations: -1, // Unlimited
         };
       default:
-        return this.getSubscriptionLimits('trial');
+        return this.getSubscriptionLimits("trial");
     }
   }
 
@@ -454,7 +461,7 @@ export class TenantService {
    * Check if tenant is within subscription limits
    */
   async checkSubscriptionLimits(
-    tenantId: string
+    tenantId: string,
   ): Promise<{ withinLimits: boolean; violations: string[] }> {
     try {
       const tenant = await this.getTenantById(tenantId);
@@ -468,12 +475,12 @@ export class TenantService {
         limits.monthlyCallLimit > 0 &&
         usage.callsThisMonth >= limits.monthlyCallLimit
       ) {
-        violations.push('Monthly call limit exceeded');
+        violations.push("Monthly call limit exceeded");
       }
 
       // Check voice limit
       if (limits.maxVoices > 0 && usage.voicesUsed >= limits.maxVoices) {
-        violations.push('Voice limit exceeded');
+        violations.push("Voice limit exceeded");
       }
 
       // Check language limit
@@ -481,7 +488,7 @@ export class TenantService {
         limits.maxLanguages > 0 &&
         usage.languagesUsed >= limits.maxLanguages
       ) {
-        violations.push('Language limit exceeded');
+        violations.push("Language limit exceeded");
       }
 
       return {
@@ -490,11 +497,11 @@ export class TenantService {
       };
     } catch (error) {
       logger.error(
-        'Failed to check subscription limits for ${tenantId}:',
-        'Component',
-        error
+        "Failed to check subscription limits for ${tenantId}:",
+        "Component",
+        error,
       );
-      return { withinLimits: false, violations: ['Unable to check limits'] };
+      return { withinLimits: false, violations: ["Unable to check limits"] };
     }
   }
 
@@ -513,8 +520,8 @@ export class TenantService {
         .where(
           and(
             eq(call.tenant_id, tenantId),
-            sql`${call.created_at} >= ${startOfMonth}`
-          )
+            sql`${call.created_at} >= ${startOfMonth}`,
+          ),
         );
 
       // Get unique languages used
@@ -539,15 +546,15 @@ export class TenantService {
         storageUsed: Math.round(
           ((storageResult?.transcripts || 0) *
             (storageResult?.avgLength || 0)) /
-            1024
+            1024,
         ), // KB
         dataRetentionDays: 90, // Note: Dynamic tenant settings to be implemented
       };
     } catch (error) {
       logger.error(
-        'Failed to get tenant usage for ${tenantId}:',
-        'Component',
-        error
+        "Failed to get tenant usage for ${tenantId}:",
+        "Component",
+        error,
       );
       return {
         callsThisMonth: 0,
@@ -587,7 +594,7 @@ export class TenantService {
 
       logger.debug(
         `🧹 Cleaning up data older than ${retentionDays} days for tenant ${tenantId}`,
-        'Component'
+        "Component",
       );
 
       // Delete old transcripts
@@ -596,8 +603,8 @@ export class TenantService {
         .where(
           and(
             eq(transcript.tenant_id, tenantId),
-            sql`${transcript.timestamp} < ${cutoffDate}`
-          )
+            sql`${transcript.timestamp} < ${cutoffDate}`,
+          ),
         );
 
       // Delete old calls
@@ -606,24 +613,24 @@ export class TenantService {
         .where(
           and(
             eq(call.tenant_id, tenantId),
-            sql`${call.created_at} < ${cutoffDate}`
-          )
+            sql`${call.created_at} < ${cutoffDate}`,
+          ),
         );
 
       logger.debug(
         `✅ Data cleanup completed for tenant ${tenantId}`,
-        'Component'
+        "Component",
       );
     } catch (error) {
       logger.error(
-        'Failed to cleanup data for tenant ${tenantId}:',
-        'Component',
-        error
+        "Failed to cleanup data for tenant ${tenantId}:",
+        "Component",
+        error,
       );
       throw new TenantError(
-        `Failed to cleanup data: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'DATA_CLEANUP_FAILED',
-        500
+        `Failed to cleanup data: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "DATA_CLEANUP_FAILED",
+        500,
       );
     }
   }
@@ -639,9 +646,9 @@ export class TenantService {
     // Check format
     if (!/^[a-z0-9-]+$/.test(subdomain)) {
       throw new TenantError(
-        'Subdomain must contain only lowercase letters, numbers, and hyphens',
-        'INVALID_SUBDOMAIN_FORMAT',
-        400
+        "Subdomain must contain only lowercase letters, numbers, and hyphens",
+        "INVALID_SUBDOMAIN_FORMAT",
+        400,
       );
     }
 
@@ -653,7 +660,7 @@ export class TenantService {
       .limit(1);
 
     if (existing) {
-      throw new TenantError('Subdomain already exists', 'SUBDOMAIN_TAKEN', 409);
+      throw new TenantError("Subdomain already exists", "SUBDOMAIN_TAKEN", 409);
     }
   }
 
@@ -670,12 +677,12 @@ export class TenantService {
    * Check if tenant subscription is active
    */
   isSubscriptionActive(tenant: any): boolean {
-    if (tenant.subscriptionStatus !== 'active') {
+    if (tenant.subscriptionStatus !== "active") {
       return false;
     }
 
     // Check trial expiration
-    if (tenant.subscriptionPlan === 'trial' && tenant.trialEndsAt) {
+    if (tenant.subscriptionPlan === "trial" && tenant.trialEndsAt) {
       return new Date() < new Date(tenant.trialEndsAt);
     }
 
@@ -698,17 +705,17 @@ export class TenantService {
       const [activeResult] = await db
         .select({ count: sql<number>`count(*)` })
         .from(tenants)
-        .where(eq(tenants.subscription_status, 'active'));
+        .where(eq(tenants.subscription_status, "active"));
 
       return {
-        status: 'healthy',
+        status: "healthy",
         tenantsCount: tenantsResult?.count || 0,
         activeSubscriptions: activeResult?.count || 0,
       };
     } catch (error) {
-      logger.error('Failed to get service health:', 'Component', error);
+      logger.error("Failed to get service health:", "Component", error);
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         tenantsCount: 0,
         activeSubscriptions: 0,
       };
@@ -724,10 +731,10 @@ export class TenantError extends Error {
   constructor(
     message: string,
     public code: string,
-    public statusCode: number
+    public statusCode: number,
   ) {
     super(message);
-    this.name = 'TenantError';
+    this.name = "TenantError";
   }
 }
 
