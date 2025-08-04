@@ -1,12 +1,13 @@
 #!/usr/bin/env tsx
 
+import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 
 /**
- * Auto-Migration Script for Production Deployment
+ * Auto-Migration Script for Production Deployment with Prisma
  *
- * This script automatically detects and fixes schema mismatches
- * during deployment process. It's safe to run multiple times.
+ * This script uses Prisma commands for safe database migrations
+ * and automatically detects schema mismatches. Safe to run multiple times.
  */
 
 interface MigrationResult {
@@ -16,9 +17,10 @@ interface MigrationResult {
 }
 
 async function autoMigrateOnDeploy(): Promise<MigrationResult> {
-  console.log("🔄 Auto-Migration: Checking database schema...");
+  console.log("🔄 Auto-Migration: Starting Prisma-based migration...");
 
   const DATABASE_URL = process.env.DATABASE_URL;
+  const migrationsRun: string[] = [];
 
   if (!DATABASE_URL) {
     console.log(
@@ -26,6 +28,41 @@ async function autoMigrateOnDeploy(): Promise<MigrationResult> {
     );
     return { success: true, migrationsRun: [] };
   }
+
+  try {
+    // 1. Generate Prisma client
+    console.log("📦 Generating Prisma client...");
+    execSync("npx prisma generate", { stdio: "inherit" });
+    migrationsRun.push("prisma-generate");
+
+    // 2. Deploy pending migrations
+    console.log("🚀 Deploying Prisma migrations...");
+    execSync("npx prisma migrate deploy", { stdio: "inherit" });
+    migrationsRun.push("prisma-migrate-deploy");
+
+    // 3. Verify database schema
+    console.log("✅ Verifying database schema...");
+    execSync("npx prisma validate", { stdio: "inherit" });
+    migrationsRun.push("prisma-validate");
+
+    console.log("🎉 Prisma-based auto-migration completed successfully!");
+    console.log(`📝 Operations completed: ${migrationsRun.join(", ")}`);
+
+    return { success: true, migrationsRun };
+  } catch (error) {
+    console.error("❌ Prisma auto-migration failed:", error);
+
+    // Fallback to legacy migration if Prisma fails
+    console.log("🔄 Attempting legacy migration fallback...");
+    return await legacyAutoMigration();
+  }
+}
+
+// Legacy migration function (keeping for backward compatibility)
+async function legacyAutoMigration(): Promise<MigrationResult> {
+  console.log("🔄 Running legacy auto-migration...");
+
+  const DATABASE_URL = process.env.DATABASE_URL;
 
   // ✅ FIXED: Skip PostgreSQL auto-migration for SQLite databases
   if (DATABASE_URL.startsWith("sqlite://")) {

@@ -1,0 +1,55 @@
+# 🚀 RENDER DEPLOYMENT CONFIGURATION - PRODUCTION READY
+# Complete database migration and deployment setup for Prisma + Auto-migration
+
+services:
+  - type: web
+    name: demohotel19may25
+    env: node
+    region: oregon
+    plan: free
+    # ✅ FIXED: Updated build command to match package.json scripts
+    buildCommand: |
+      npm ci && 
+      npx prisma generate && 
+      npx prisma migrate deploy && 
+      tsx tools/scripts/maintenance/auto-migrate-on-deploy.ts && 
+      npm run build:production
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      # ✅ DATABASE_URL will be automatically provided by Render PostgreSQL
+      # ✅ Add other environment variables as needed
+      - fromGroup: demohotel-env-group
+    nodeVersion: 18.20.8
+    buildFilter:
+      paths:
+      - apps/**
+      - packages/**
+      - prisma/**
+      - tools/**
+      - package.json
+      - package-lock.json
+      - tsconfig.json
+      ignoredPaths:
+      - "**/*.test.ts"
+      - "**/*.spec.ts"
+      - tests/**
+      - docs/**
+
+# ✅ ENVIRONMENT GROUP REFERENCE
+# Create an environment group named 'demohotel-env-group' in Render dashboard with:
+# - DATABASE_URL (automatically provided by PostgreSQL service)
+# - VITE_VAPI_ASSISTANT_ID
+# - JWT_SECRET
+# - Other production environment variables
+
+# ✅ DEPLOYMENT FEATURES:
+# - Automatic Prisma migration on each deploy
+# - Auto-migration script for schema fixes
+# - Health check endpoint monitoring
+# - Optimized build process
+# - Production-ready configuration
