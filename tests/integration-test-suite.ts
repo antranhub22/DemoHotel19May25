@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 
-import { and, count, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
+// TODO: Migrate to Prisma
+// import { and, count, eq } from "drizzle-orm";
+// import { drizzle } from "drizzle-orm/postgres-js";
 import * as fs from "fs";
 import { performance } from "perf_hooks";
 

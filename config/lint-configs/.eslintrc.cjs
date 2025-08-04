@@ -55,22 +55,9 @@ module.exports = {
     Response: 'readonly',
     NextFunction: 'readonly',
 
-    // Drizzle ORM types
-    db: 'readonly',
-    eq: 'readonly',
-    sql: 'readonly',
-    and: 'readonly',
-    or: 'readonly',
-    desc: 'readonly',
-    asc: 'readonly',
-    like: 'readonly',
-    ilike: 'readonly',
-    inArray: 'readonly',
-    notInArray: 'readonly',
-    isNull: 'readonly',
-    isNotNull: 'readonly',
-    exists: 'readonly',
-    notExists: 'readonly',
+    // Prisma ORM types
+    PrismaClient: 'readonly',
+    Prisma: 'readonly',
 
     // Vapi types
     VapiClient: 'readonly',
@@ -151,7 +138,7 @@ module.exports = {
     'import/order': ['warn', {
       groups: [
         'builtin',
-        'external', 
+        'external',
         'internal',
         'parent',
         'sibling',

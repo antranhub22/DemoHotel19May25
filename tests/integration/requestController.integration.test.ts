@@ -2,7 +2,8 @@ import { app } from "@server/app";
 import { getDatabase } from "@shared/db";
 // ✅ MIGRATION: Using Prisma generated types instead of Drizzle
 // import { request as requestTable } from '@shared/db/schema'; // REMOVED
-import { eq } from "drizzle-orm";
+// TODO: Migrate to Prisma
+// import { eq } from "drizzle-orm";
 import request from "supertest";
 
 describe("RequestController Integration Tests", () => {

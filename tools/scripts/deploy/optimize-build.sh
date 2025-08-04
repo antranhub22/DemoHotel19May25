@@ -200,12 +200,12 @@ optimize_database_queries() {
     log "🗄️ Optimizing database preparation..."
     
     # Prepare optimized schema
-    if [[ -f "$PROJECT_ROOT/packages/shared/db/schema.ts" ]]; then
+    if [[ -f "$PROJECT_ROOT/prisma/schema.prisma" ]]; then
         log "Validating database schema..."
         
         # Run schema validation
         cd "$PROJECT_ROOT"
-        npx drizzle-kit check || log_warning "Schema check warnings found"
+        npx prisma validate || log_warning "Schema validation warnings found"
     fi
     
     log_success "Database optimization complete"

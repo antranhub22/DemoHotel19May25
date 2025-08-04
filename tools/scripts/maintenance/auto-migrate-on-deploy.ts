@@ -64,13 +64,13 @@ async function legacyAutoMigration(): Promise<MigrationResult> {
 
   const DATABASE_URL = process.env.DATABASE_URL;
 
-  // ✅ FIXED: Skip PostgreSQL auto-migration for SQLite databases
+  // Skip auto-migration for SQLite databases
   if (DATABASE_URL.startsWith("sqlite://")) {
     console.log(
       "📁 SQLite database detected - skipping PostgreSQL auto-migration",
     );
     console.log(
-      "ℹ️ SQLite databases use different migration approach (Drizzle ORM handles this automatically)",
+      "ℹ️ SQLite databases use a different migration approach with Prisma",
     );
     return { success: true, migrationsRun: ["sqlite-auto-handled"] };
   }

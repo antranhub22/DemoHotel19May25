@@ -7,5 +7,5 @@ export interface Staff {
   createdAt: Date;
 }
 
-// Nếu dùng ORM (ví dụ: drizzle, sequelize, typeorm), có thể export schema ở đây
+// Prisma schema được định nghĩa trong prisma/schema.prisma
 // Nếu dùng raw SQL, chỉ cần interface này để type-check

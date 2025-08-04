@@ -1,22 +1,13 @@
 #!/usr/bin/env tsx
 
-import Database from "better-sqlite3";
-import { eq } from "drizzle-orm";
-import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
-import { drizzle } from "drizzle-orm/postgres-js";
-import * as fs from "fs";
+import { PrismaClient } from "@prisma/client";
 
 // Import services
-import { HotelResearchService } from "@server/services/hotelResearch";
 import { KnowledgeBaseGenerator } from "@server/services/knowledgeBaseGenerator";
 import {
   AssistantGeneratorService,
   VapiIntegrationService,
 } from "@server/services/vapiIntegration";
-
-// Import schema
-// ✅ MIGRATION: Using Prisma generated types instead of Drizzle
-// import { hotelProfiles } from '@shared/db/schema'; // REMOVED
 // ============================================
 // Test Configuration & Types
 // ============================================
@@ -220,7 +211,7 @@ LOCAL ATTRACTIONS:
 export class HotelResearchFlowTest {
   private config: TestConfig;
   private results: TestResults;
-  private db: any;
+  private prisma: PrismaClient;
   private testTenantId: string | null = null;
 
   // Service instances
@@ -395,42 +386,36 @@ export class HotelResearchFlowTest {
   private async initializeTestEnvironment(): Promise<void> {
     this.log("🔧 Setting up test environment...", "info");
 
-    // Initialize database connection
-    const isPostgres = this.config.databaseUrl?.includes("postgres");
-
-    if (isPostgres && this.config.databaseUrl) {
-      this.log("Connecting to PostgreSQL database...", "info");
-      const { postgres } = await import("postgres");
-      const client = postgres(this.config.databaseUrl);
-      this.db = drizzle(client);
-    } else {
-      this.log("Using SQLite database for testing...", "info");
-      if (fs.existsSync(this.config.testDbPath)) {
-        fs.unlinkSync(this.config.testDbPath);
-      }
-      const sqlite = new Database(this.config.testDbPath);
-      this.db = drizzleSqlite(sqlite);
-    }
+    // Initialize Prisma client
+    this.prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: this.config.databaseUrl,
+        },
+      },
+    });
 
     // Test database connection
-    await this.db.select().from(tenants).limit(1);
+    await this.prisma.$queryRaw`SELECT 1`;
     this.log("✅ Database connection established", "success");
 
     // Create test tenant
     this.testTenantId = `test-tenant-${Date.now()}`;
-    await this.db.insert(tenants).values({
-      id: this.testTenantId,
-      hotelName: "Test Hotel for Research Flow",
-      subdomain: "test-hotel-research",
-      subscriptionPlan: "premium",
-      subscriptionStatus: "active",
-      maxVoices: 10,
-      maxLanguages: 5,
-      voiceCloning: true,
-      multiLocation: true,
-      whiteLabel: true,
-      dataRetentionDays: 365,
-      monthlyCallLimit: 10000,
+    await this.prisma.tenant.create({
+      data: {
+        id: this.testTenantId,
+        hotel_name: "Test Hotel for Research Flow",
+        subdomain: "test-hotel-research",
+        subscription_plan: "premium",
+        subscription_status: "active",
+        max_voices: 10,
+        max_languages: 5,
+        voice_cloning: true,
+        multi_location: true,
+        white_label: true,
+        data_retention_days: 365,
+        monthly_call_limit: 10000,
+      },
     });
 
     this.log(`✅ Test tenant created: ${this.testTenantId}`, "success");
@@ -529,17 +514,19 @@ export class HotelResearchFlowTest {
 
       // Step 5: Database storage
       this.log("💾 Storing research data in database...", "info");
-      await this.db.insert(hotelProfiles).values({
-        id: `profile-${Date.now()}`,
-        tenantId: this.testTenantId,
-        researchData: hotelData,
-        knowledgeBase,
-        systemPrompt,
-        vapiAssistantId: assistantId,
-        assistantConfig: {
-          personality: "professional",
-          tone: "friendly",
-          languages: ["English"],
+      await this.prisma.hotelProfile.create({
+        data: {
+          id: `profile-${Date.now()}`,
+          tenant_id: this.testTenantId,
+          research_data: hotelData,
+          knowledge_base: knowledgeBase,
+          system_prompt: systemPrompt,
+          vapi_assistant_id: assistantId,
+          assistant_config: {
+            personality: "professional",
+            tone: "friendly",
+            languages: ["English"],
+          },
         },
       });
 
@@ -548,17 +535,17 @@ export class HotelResearchFlowTest {
 
       // Step 6: Verify storage and retrieval
       this.log("🔍 Verifying data retrieval...", "info");
-      const storedProfile = await this.db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.tenantId, this.testTenantId))
-        .limit(1);
+      const storedProfile = await this.prisma.hotelProfile.findFirst({
+        where: {
+          tenant_id: this.testTenantId,
+        },
+      });
 
-      if (!storedProfile || storedProfile.length === 0) {
+      if (!storedProfile) {
         throw new Error("Failed to retrieve stored hotel profile");
       }
 
-      if (storedProfile[0].vapiAssistantId !== assistantId) {
+      if (storedProfile.vapi_assistant_id !== assistantId) {
         throw new Error(
           "Stored assistant ID does not match created assistant ID",
         );
@@ -768,54 +755,61 @@ export class HotelResearchFlowTest {
       const profileId = `test-profile-${Date.now()}`;
       const profileData = {
         id: profileId,
-        tenantId: this.testTenantId,
-        researchData: MOCK_HOTEL_DATA,
-        knowledgeBase: MOCK_KNOWLEDGE_BASE,
-        systemPrompt: "Test system prompt",
-        vapiAssistantId: "test-assistant-123",
-        assistantConfig: {
+        tenant_id: this.testTenantId,
+        research_data: MOCK_HOTEL_DATA,
+        knowledge_base: MOCK_KNOWLEDGE_BASE,
+        system_prompt: "Test system prompt",
+        vapi_assistant_id: "test-assistant-123",
+        assistant_config: {
           personality: "professional",
           tone: "friendly",
         },
       };
 
-      await this.db.insert(hotelProfiles).values(profileData);
+      await this.prisma.hotelProfile.create({
+        data: profileData,
+      });
       this.log("✅ Hotel profile stored successfully", "success");
 
       // Test data retrieval
-      const retrievedProfile = await this.db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.id, profileId))
-        .limit(1);
+      const retrievedProfile = await this.prisma.hotelProfile.findUnique({
+        where: {
+          id: profileId,
+        },
+      });
 
-      if (!retrievedProfile || retrievedProfile.length === 0) {
+      if (!retrievedProfile) {
         throw new Error("Failed to retrieve stored hotel profile");
       }
 
       // Verify data integrity
-      if (retrievedProfile[0].vapiAssistantId !== "test-assistant-123") {
+      if (retrievedProfile.vapi_assistant_id !== "test-assistant-123") {
         throw new Error("Data integrity check failed");
       }
 
       this.log("✅ Data retrieval and integrity check passed", "success");
 
       // Test data update
-      await this.db
-        .update(hotelProfiles)
-        .set({
-          systemPrompt: "Updated system prompt",
-          updatedAt: new Date(),
-        })
-        .where(eq(hotelProfiles.id, profileId));
+      await this.prisma.hotelProfile.update({
+        where: {
+          id: profileId,
+        },
+        data: {
+          system_prompt: "Updated system prompt",
+          updated_at: new Date(),
+        },
+      });
 
-      const updatedProfile = await this.db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.id, profileId))
-        .limit(1);
+      const updatedProfile = await this.prisma.hotelProfile.findUnique({
+        where: {
+          id: profileId,
+        },
+      });
 
-      if (updatedProfile[0].systemPrompt !== "Updated system prompt") {
+      if (
+        !updatedProfile ||
+        updatedProfile.system_prompt !== "Updated system prompt"
+      ) {
         throw new Error("Data update failed");
       }
 
@@ -936,13 +930,20 @@ export class HotelResearchFlowTest {
 
       // Test 4: Database connection failure
       try {
-        const invalidDb = drizzleSqlite(new Database(":memory:"));
-        await invalidDb.select().from(hotelProfiles).limit(1);
-        throw new Error("Should have failed with invalid database schema");
+        const invalidPrisma = new PrismaClient({
+          datasources: {
+            db: {
+              url: "invalid_url",
+            },
+          },
+        });
+        await invalidPrisma.$queryRaw`SELECT 1`;
+        throw new Error("Should have failed with invalid database connection");
       } catch (error) {
         if (
           (error as any)?.message ||
-          String(error) === "Should have failed with invalid database schema"
+          String(error) ===
+            "Should have failed with invalid database connection"
         ) {
           throw error;
         }
@@ -1015,54 +1016,62 @@ export class HotelResearchFlowTest {
     try {
       // Create a second test tenant
       const secondTenantId = `test-tenant-2-${Date.now()}`;
-      await this.db.insert(tenants).values({
-        id: secondTenantId,
-        hotelName: "Second Test Hotel",
-        subdomain: "second-test-hotel",
-        subscriptionPlan: "basic",
-        subscriptionStatus: "active",
+      await this.prisma.tenant.create({
+        data: {
+          id: secondTenantId,
+          hotel_name: "Second Test Hotel",
+          subdomain: "second-test-hotel",
+          subscription_plan: "basic",
+          subscription_status: "active",
+        },
       });
 
       // Create hotel profiles for both tenants
       const profile1Id = `profile-1-${Date.now()}`;
       const profile2Id = `profile-2-${Date.now()}`;
 
-      await this.db.insert(hotelProfiles).values({
-        id: profile1Id,
-        tenantId: this.testTenantId,
-        researchData: MOCK_HOTEL_DATA,
-        vapiAssistantId: "assistant-1",
+      await this.prisma.hotelProfile.create({
+        data: {
+          id: profile1Id,
+          tenant_id: this.testTenantId,
+          research_data: MOCK_HOTEL_DATA,
+          vapi_assistant_id: "assistant-1",
+        },
       });
 
-      await this.db.insert(hotelProfiles).values({
-        id: profile2Id,
-        tenantId: secondTenantId,
-        researchData: { ...MOCK_HOTEL_DATA, name: "Second Test Hotel" },
-        vapiAssistantId: "assistant-2",
+      await this.prisma.hotelProfile.create({
+        data: {
+          id: profile2Id,
+          tenant_id: secondTenantId,
+          research_data: { ...MOCK_HOTEL_DATA, name: "Second Test Hotel" },
+          vapi_assistant_id: "assistant-2",
+        },
       });
 
       // Test tenant isolation - tenant 1 should only see their data
-      const tenant1Data = await this.db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.tenantId, this.testTenantId));
+      const tenant1Data = await this.prisma.hotelProfile.findMany({
+        where: {
+          tenant_id: this.testTenantId,
+        },
+      });
 
       if (
         tenant1Data.length !== 1 ||
-        tenant1Data[0].vapiAssistantId !== "assistant-1"
+        tenant1Data[0].vapi_assistant_id !== "assistant-1"
       ) {
         throw new Error("Tenant 1 isolation failed");
       }
 
       // Test tenant isolation - tenant 2 should only see their data
-      const tenant2Data = await this.db
-        .select()
-        .from(hotelProfiles)
-        .where(eq(hotelProfiles.tenantId, secondTenantId));
+      const tenant2Data = await this.prisma.hotelProfile.findMany({
+        where: {
+          tenant_id: secondTenantId,
+        },
+      });
 
       if (
         tenant2Data.length !== 1 ||
-        tenant2Data[0].vapiAssistantId !== "assistant-2"
+        tenant2Data[0].vapi_assistant_id !== "assistant-2"
       ) {
         throw new Error("Tenant 2 isolation failed");
       }

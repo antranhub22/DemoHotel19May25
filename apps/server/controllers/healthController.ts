@@ -4,26 +4,25 @@
 // Comprehensive health monitoring with advanced health check system,
 // module-specific health validation, cascade failure detection, and intelligent recommendations
 
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 // ✅ v3.0: Import Advanced Health Check System
 
 // ✅ v2.0: Enhanced architecture imports
-import { HotelResearchService } from '@server/services/hotelResearch';
-import { TenantService } from '@server/services/tenantService';
-import { VapiIntegrationService } from '@server/services/vapiIntegration';
-import { getArchitectureHealth } from '@server/shared';
+import { HotelResearchService } from "@server/services/hotelResearch";
+import { TenantService } from "@server/services/tenantService";
+import { VapiIntegrationService } from "@server/services/vapiIntegration";
+import { getArchitectureHealth } from "@server/shared";
 import {
   advancedHealthCheck,
   getModuleHealth,
   getSystemHealth,
   registerModuleHealthChecker,
-} from '@server/shared/AdvancedHealthCheck';
-import { FeatureFlags } from '@server/shared/FeatureFlags';
-import { ModuleLifecycleManager } from '@server/shared/ModuleLifecycleManager';
-import { ServiceContainer } from '@server/shared/ServiceContainer';
-import { db, connectionManager } from '@shared/db';
-import { logger } from '@shared/utils/logger';
+} from "@server/shared/AdvancedHealthCheck";
+import { FeatureFlags } from "@server/shared/FeatureFlags";
+import { ModuleLifecycleManager } from "@server/shared/ModuleLifecycleManager";
+import { ServiceContainer } from "@server/shared/ServiceContainer";
+import { logger } from "@shared/utils/logger";
 
 export class HealthController {
   private static isInitialized = false;
@@ -36,8 +35,8 @@ export class HealthController {
 
     try {
       logger.info(
-        '🏥 [HealthController] Initializing v3.0 with advanced health system',
-        'HealthController'
+        "🏥 [HealthController] Initializing v3.0 with advanced health system",
+        "HealthController",
       );
 
       // Initialize advanced health check system
@@ -51,14 +50,14 @@ export class HealthController {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [HealthController] v3.0 initialized with advanced health monitoring',
-        'HealthController'
+        "✅ [HealthController] v3.0 initialized with advanced health monitoring",
+        "HealthController",
       );
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Failed to initialize v3.0',
-        'HealthController',
-        error
+        "❌ [HealthController] Failed to initialize v3.0",
+        "HealthController",
+        error,
       );
       throw error;
     }
@@ -71,94 +70,94 @@ export class HealthController {
     try {
       // Register TenantService
       ServiceContainer.registerFactory(
-        'TenantService',
+        "TenantService",
         () => new TenantService(),
         {
           singleton: true,
-          module: 'core',
+          module: "core",
           lifecycle: {
             onInit: async () => {
               logger.debug(
-                '🔧 [HealthController] TenantService initialized',
-                'HealthController'
+                "🔧 [HealthController] TenantService initialized",
+                "HealthController",
               );
             },
             onDestroy: async () => {
               logger.debug(
-                '🔧 [HealthController] TenantService destroyed',
-                'HealthController'
+                "🔧 [HealthController] TenantService destroyed",
+                "HealthController",
               );
             },
             onHealthCheck: async () => {
               try {
                 const service = (await ServiceContainer.get(
-                  'TenantService'
+                  "TenantService",
                 )) as TenantService;
                 const health = await service.getServiceHealth();
-                return health.status === 'healthy';
+                return health.status === "healthy";
               } catch {
                 return false;
               }
             },
           },
-        }
+        },
       );
 
       // Register HotelResearchService
       ServiceContainer.registerFactory(
-        'HotelResearchService',
+        "HotelResearchService",
         () => new HotelResearchService(),
         {
           singleton: true,
-          module: 'hotel',
+          module: "hotel",
           lifecycle: {
             onHealthCheck: async () => {
               try {
                 const service = (await ServiceContainer.get(
-                  'HotelResearchService'
+                  "HotelResearchService",
                 )) as HotelResearchService;
                 const health = await service.getServiceHealth();
-                return health.status === 'healthy';
+                return health.status === "healthy";
               } catch {
                 return false;
               }
             },
           },
-        }
+        },
       );
 
       // Register VapiIntegrationService
       ServiceContainer.registerFactory(
-        'VapiIntegrationService',
+        "VapiIntegrationService",
         () => new VapiIntegrationService(),
         {
           singleton: true,
-          module: 'voice',
+          module: "voice",
           lifecycle: {
             onHealthCheck: async () => {
               try {
                 const service = (await ServiceContainer.get(
-                  'VapiIntegrationService'
+                  "VapiIntegrationService",
                 )) as VapiIntegrationService;
                 const health = await service.getServiceHealth();
-                return health.status === 'healthy';
+                return health.status === "healthy";
               } catch {
                 return false;
               }
             },
           },
-        }
+        },
       );
 
       logger.debug(
-        '✅ [HealthController] Core services registered',
-        'HealthController'
+        "✅ [HealthController] Core services registered",
+        "HealthController",
       );
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Failed to register core services',
-        'HealthController',
-        error
+        "❌ [HealthController] Failed to register core services",
+        "HealthController",
+        error,
       );
       throw error;
     }
@@ -170,7 +169,7 @@ export class HealthController {
   private static async registerModuleHealthCheckers(): Promise<void> {
     // Core Module Health Checker
     registerModuleHealthChecker({
-      name: 'core-module',
+      name: "core-module",
       checkFunction: async () => {
         const startTime = Date.now();
 
@@ -180,27 +179,27 @@ export class HealthController {
 
         const status =
           serviceContainer.healthy && featureFlags.isInitialized
-            ? 'healthy'
-            : 'degraded';
+            ? "healthy"
+            : "degraded";
 
         return {
-          name: 'core-module',
+          name: "core-module",
           status,
           uptime: process.uptime(),
           lastCheck: new Date(),
           dependencies: [
             {
-              name: 'ServiceContainer',
-              type: 'service' as const,
-              status: serviceContainer.healthy ? 'healthy' : 'failed',
+              name: "ServiceContainer",
+              type: "service" as const,
+              status: serviceContainer.healthy ? "healthy" : "failed",
               responseTime: 0,
               lastCheck: new Date(),
               errorCount: serviceContainer.errors.length,
             },
             {
-              name: 'FeatureFlags',
-              type: 'service' as const,
-              status: featureFlags.isInitialized ? 'healthy' : 'failed',
+              name: "FeatureFlags",
+              type: "service" as const,
+              status: featureFlags.isInitialized ? "healthy" : "failed",
               responseTime: 0,
               lastCheck: new Date(),
               errorCount: 0,
@@ -217,44 +216,44 @@ export class HealthController {
           responseTime: Date.now() - startTime,
         };
       },
-      dependencies: ['database', 'memory'],
-      criticalDependencies: ['database'],
+      dependencies: ["database", "memory"],
+      criticalDependencies: ["database"],
       interval: 60000,
       timeout: 5000,
     });
 
     // Hotel Module Health Checker
     registerModuleHealthChecker({
-      name: 'hotel-module',
+      name: "hotel-module",
       checkFunction: async () => {
         const startTime = Date.now();
 
         try {
           // Check tenant service health
           const tenantService = (await ServiceContainer.get(
-            'TenantService'
+            "TenantService",
           )) as TenantService;
           const tenantHealth = await tenantService.getServiceHealth();
 
           return {
-            name: 'hotel-module',
-            status: tenantHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
+            name: "hotel-module",
+            status: tenantHealth.status === "healthy" ? "healthy" : "unhealthy",
             uptime: process.uptime(),
             lastCheck: new Date(),
             dependencies: [
               {
-                name: 'TenantService',
-                type: 'service' as const,
+                name: "TenantService",
+                type: "service" as const,
                 status:
-                  tenantHealth.status === 'healthy' ? 'healthy' : 'failed',
+                  tenantHealth.status === "healthy" ? "healthy" : "failed",
                 responseTime: Date.now() - startTime,
                 lastCheck: new Date(),
-                errorCount: tenantHealth.status === 'healthy' ? 0 : 1,
+                errorCount: tenantHealth.status === "healthy" ? 0 : 1,
               },
             ],
             metrics: {
               requestCount: 1,
-              errorRate: tenantHealth.status === 'healthy' ? 0 : 1,
+              errorRate: tenantHealth.status === "healthy" ? 0 : 1,
               averageResponseTime: Date.now() - startTime,
               memoryUsage: 0,
               cpuUsage: 0,
@@ -264,8 +263,8 @@ export class HealthController {
           };
         } catch (error) {
           return {
-            name: 'hotel-module',
-            status: 'critical' as const,
+            name: "hotel-module",
+            status: "critical" as const,
             uptime: process.uptime(),
             lastCheck: new Date(),
             dependencies: [],
@@ -279,55 +278,55 @@ export class HealthController {
             issues: [
               {
                 id: `hotel-error-${Date.now()}`,
-                severity: 'critical' as const,
+                severity: "critical" as const,
                 description: `Hotel module health check failed: ${(error as Error).message}`,
-                module: 'hotel-module',
+                module: "hotel-module",
                 timestamp: new Date(),
                 resolved: false,
-                affectedDependencies: ['TenantService'],
+                affectedDependencies: ["TenantService"],
               },
             ],
             responseTime: Date.now() - startTime,
           };
         }
       },
-      dependencies: ['core-module', 'database'],
-      criticalDependencies: ['database'],
+      dependencies: ["core-module", "database"],
+      criticalDependencies: ["database"],
       interval: 45000,
       timeout: 5000,
     });
 
     // Voice Module Health Checker
     registerModuleHealthChecker({
-      name: 'voice-module',
+      name: "voice-module",
       checkFunction: async () => {
         const startTime = Date.now();
 
         try {
           const vapiService = (await ServiceContainer.get(
-            'VapiIntegrationService'
+            "VapiIntegrationService",
           )) as VapiIntegrationService;
           const vapiHealth = await vapiService.getServiceHealth();
 
           return {
-            name: 'voice-module',
-            status: vapiHealth.status === 'healthy' ? 'healthy' : 'degraded',
+            name: "voice-module",
+            status: vapiHealth.status === "healthy" ? "healthy" : "degraded",
             uptime: process.uptime(),
             lastCheck: new Date(),
             dependencies: [
               {
-                name: 'VapiIntegrationService',
-                type: 'external_api' as const,
+                name: "VapiIntegrationService",
+                type: "external_api" as const,
                 status:
-                  vapiHealth.status === 'healthy' ? 'healthy' : 'degraded',
+                  vapiHealth.status === "healthy" ? "healthy" : "degraded",
                 responseTime: Date.now() - startTime,
                 lastCheck: new Date(),
-                errorCount: vapiHealth.status === 'healthy' ? 0 : 1,
+                errorCount: vapiHealth.status === "healthy" ? 0 : 1,
               },
             ],
             metrics: {
               requestCount: 1,
-              errorRate: vapiHealth.status === 'healthy' ? 0 : 1,
+              errorRate: vapiHealth.status === "healthy" ? 0 : 1,
               averageResponseTime: Date.now() - startTime,
               memoryUsage: 0,
               cpuUsage: 0,
@@ -337,8 +336,8 @@ export class HealthController {
           };
         } catch (error) {
           return {
-            name: 'voice-module',
-            status: 'unhealthy' as const,
+            name: "voice-module",
+            status: "unhealthy" as const,
             uptime: process.uptime(),
             lastCheck: new Date(),
             dependencies: [],
@@ -352,27 +351,27 @@ export class HealthController {
             issues: [
               {
                 id: `voice-error-${Date.now()}`,
-                severity: 'high' as const,
+                severity: "high" as const,
                 description: `Voice module health check failed: ${(error as Error).message}`,
-                module: 'voice-module',
+                module: "voice-module",
                 timestamp: new Date(),
                 resolved: false,
-                affectedDependencies: ['VapiIntegrationService'],
+                affectedDependencies: ["VapiIntegrationService"],
               },
             ],
             responseTime: Date.now() - startTime,
           };
         }
       },
-      dependencies: ['core-module'],
+      dependencies: ["core-module"],
       criticalDependencies: [],
       interval: 60000,
       timeout: 10000,
     });
 
     logger.debug(
-      '✅ [HealthController] Module health checkers registered',
-      'HealthController'
+      "✅ [HealthController] Module health checkers registered",
+      "HealthController",
     );
   }
 
@@ -385,45 +384,45 @@ export class HealthController {
    */
   public static async getAdvancedSystemHealth(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       await HealthController.initialize();
 
       logger.api(
-        '🏥 [HealthController] Advanced system health requested',
-        'HealthController'
+        "🏥 [HealthController] Advanced system health requested",
+        "HealthController",
       );
 
       const systemHealth = await getSystemHealth();
 
       (res as any).status(200).json({
         success: true,
-        version: '3.0.0',
+        version: "3.0.0",
         timestamp: new Date().toISOString(),
         data: systemHealth,
         _metadata: {
-          controller: 'HealthController',
-          version: '3.0.0',
+          controller: "HealthController",
+          version: "3.0.0",
           features: [
-            'advanced-monitoring',
-            'cascade-detection',
-            'health-recommendations',
+            "advanced-monitoring",
+            "cascade-detection",
+            "health-recommendations",
           ],
-          requestId: req.headers['x-request-id'] || 'unknown',
+          requestId: req.headers["x-request-id"] || "unknown",
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Advanced system health failed',
-        'HealthController',
-        error
+        "❌ [HealthController] Advanced system health failed",
+        "HealthController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve advanced system health',
+        error: "Failed to retrieve advanced system health",
         details: (error as Error).message,
-        version: '3.0.0',
+        version: "3.0.0",
       });
     }
   }
@@ -433,7 +432,7 @@ export class HealthController {
    */
   public static async getModuleHealthStatus(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       await HealthController.initialize();
@@ -441,7 +440,7 @@ export class HealthController {
       const { moduleName } = req.params;
       logger.api(
         `🔍 [HealthController] Module health requested: ${moduleName}`,
-        'HealthController'
+        "HealthController",
       );
 
       const moduleHealth = await getModuleHealth(moduleName);
@@ -452,32 +451,32 @@ export class HealthController {
           error: `Module '${moduleName}' not found`,
           availableModules:
             advancedHealthCheck.getDiagnostics().registeredCheckers,
-          version: '3.0.0',
+          version: "3.0.0",
         });
       }
 
       (res as any).status(200).json({
         success: true,
-        version: '3.0.0',
+        version: "3.0.0",
         timestamp: new Date().toISOString(),
         data: moduleHealth,
         _metadata: {
-          controller: 'HealthController',
-          version: '3.0.0',
+          controller: "HealthController",
+          version: "3.0.0",
           module: moduleName,
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Module health check failed',
-        'HealthController',
-        error
+        "❌ [HealthController] Module health check failed",
+        "HealthController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve module health',
+        error: "Failed to retrieve module health",
         details: (error as Error).message,
-        version: '3.0.0',
+        version: "3.0.0",
       });
     }
   }
@@ -490,15 +489,15 @@ export class HealthController {
       await HealthController.initialize();
 
       logger.api(
-        '🔧 [HealthController] Health diagnostics requested',
-        'HealthController'
+        "🔧 [HealthController] Health diagnostics requested",
+        "HealthController",
       );
 
       const diagnostics = advancedHealthCheck.getDiagnostics();
 
       (res as any).status(200).json({
         success: true,
-        version: '3.0.0',
+        version: "3.0.0",
         timestamp: new Date().toISOString(),
         data: {
           healthSystem: diagnostics,
@@ -507,22 +506,22 @@ export class HealthController {
           moduleLifecycle: ModuleLifecycleManager.getDiagnostics(),
         },
         _metadata: {
-          controller: 'HealthController',
-          version: '3.0.0',
-          features: ['health-diagnostics', 'system-monitoring'],
+          controller: "HealthController",
+          version: "3.0.0",
+          features: ["health-diagnostics", "system-monitoring"],
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Health diagnostics failed',
-        'HealthController',
-        error
+        "❌ [HealthController] Health diagnostics failed",
+        "HealthController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve health diagnostics',
+        error: "Failed to retrieve health diagnostics",
         details: (error as Error).message,
-        version: '3.0.0',
+        version: "3.0.0",
       });
     }
   }
@@ -540,14 +539,14 @@ export class HealthController {
       (res as any).status(200).json(health);
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Basic health check failed',
-        'HealthController',
-        error
+        "❌ [HealthController] Basic health check failed",
+        "HealthController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        status: 'unhealthy',
-        error: 'Health check failed',
+        status: "unhealthy",
+        error: "Health check failed",
         timestamp: new Date().toISOString(),
       });
     }
@@ -558,15 +557,15 @@ export class HealthController {
    */
   static async getArchitectureHealth(
     _req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       // Initialize on first use
       this.initialize();
 
       logger.api(
-        '🏗️ [HealthController] Architecture health check requested - v2.0',
-        'HealthController'
+        "🏗️ [HealthController] Architecture health check requested - v2.0",
+        "HealthController",
       );
 
       const startTime = Date.now();
@@ -583,16 +582,16 @@ export class HealthController {
 
       // Determine overall health status
       const isSystemHealthy =
-        architectureHealth.overall.status === 'healthy' &&
-        architectureHealth.services.container.status === 'healthy' &&
-        architectureHealth.services.featureFlags.status === 'healthy' &&
-        architectureHealth.services.lifecycle.status === 'healthy';
+        architectureHealth.overall.status === "healthy" &&
+        architectureHealth.services.container.status === "healthy" &&
+        architectureHealth.services.featureFlags.status === "healthy" &&
+        architectureHealth.services.lifecycle.status === "healthy";
 
       logger.success(
-        '🏗️ [HealthController] Architecture health completed - v2.0',
-        'HealthController',
+        "🏗️ [HealthController] Architecture health completed - v2.0",
+        "HealthController",
         {
-          status: isSystemHealthy ? 'healthy' : 'degraded',
+          status: isSystemHealthy ? "healthy" : "degraded",
           responseTime,
           components: {
             container: architectureHealth.services.container.status,
@@ -600,45 +599,45 @@ export class HealthController {
             lifecycle: architectureHealth.services.lifecycle.status,
             monitoring: architectureHealth.services.monitoring.status,
           },
-        }
+        },
       );
 
       (res as any).status(isSystemHealthy ? 200 : 503).json({
         success: true,
-        status: isSystemHealthy ? 'healthy' : 'degraded',
+        status: isSystemHealthy ? "healthy" : "degraded",
         timestamp: new Date().toISOString(),
-        version: '3.0.0',
+        version: "3.0.0",
         responseTime,
         data: enhancedArchitectureHealth,
         summary: {
           overall: architectureHealth.overall.status,
           servicesHealthy: Object.values(architectureHealth.services).filter(
-            (s: any) => s.status === 'healthy'
+            (s: any) => s.status === "healthy",
           ).length,
           totalServices: Object.keys(architectureHealth.services).length,
         },
         architecture: {
-          version: '3.0.0',
+          version: "3.0.0",
           modular: true,
           enhancedHealthCheck: true,
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Architecture health failed - v2.0',
-        'HealthController',
-        error
+        "❌ [HealthController] Architecture health failed - v2.0",
+        "HealthController",
+        error,
       );
 
       (res as any).status(503).json({
         success: false,
-        status: 'unhealthy',
-        error: 'Architecture health check failed',
+        status: "unhealthy",
+        error: "Architecture health check failed",
         details: (error as Error).message,
         timestamp: new Date().toISOString(),
-        version: '3.0.0',
+        version: "3.0.0",
         architecture: {
-          version: '3.0.0',
+          version: "3.0.0",
           modular: true,
         },
       });
@@ -654,13 +653,13 @@ export class HealthController {
     unhealthy: number;
     services: Record<
       string,
-      { status: 'healthy' | 'unhealthy'; error?: string }
+      { status: "healthy" | "unhealthy"; error?: string }
     >;
   }> {
     const services = ServiceContainer.getRegisteredServices();
     const results: Record<
       string,
-      { status: 'healthy' | 'unhealthy'; error?: string }
+      { status: "healthy" | "unhealthy"; error?: string }
     > = {};
 
     let healthy = 0;
@@ -673,28 +672,28 @@ export class HealthController {
 
         if (
           service &&
-          typeof (service as any).getServiceHealth === 'function'
+          typeof (service as any).getServiceHealth === "function"
         ) {
           const health = await (service as any).getServiceHealth();
-          if (health && health.status === 'healthy') {
-            results[serviceName] = { status: 'healthy' };
+          if (health && health.status === "healthy") {
+            results[serviceName] = { status: "healthy" };
             healthy++;
           } else {
             results[serviceName] = {
-              status: 'unhealthy',
-              error: 'Service reported unhealthy',
+              status: "unhealthy",
+              error: "Service reported unhealthy",
             };
             unhealthy++;
           }
         } else {
           // Service exists but no health check method - assume healthy
-          results[serviceName] = { status: 'healthy' };
+          results[serviceName] = { status: "healthy" };
           healthy++;
         }
       } catch (error) {
         results[serviceName] = {
-          status: 'unhealthy',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          status: "unhealthy",
+          error: error instanceof Error ? error.message : "Unknown error",
         };
         unhealthy++;
       }
@@ -717,8 +716,8 @@ export class HealthController {
       this.initialize();
 
       logger.api(
-        '🏥 [HealthController] Detailed health check requested - v2.0',
-        'HealthController'
+        "🏥 [HealthController] Detailed health check requested - v2.0",
+        "HealthController",
       );
 
       const startTime = Date.now();
@@ -747,9 +746,9 @@ export class HealthController {
 
       const detailedHealth = {
         status:
-          isDatabaseHealthy && containerHealth.status === 'healthy'
-            ? 'healthy'
-            : 'unhealthy',
+          isDatabaseHealthy && containerHealth.status === "healthy"
+            ? "healthy"
+            : "unhealthy",
         timestamp: new Date().toISOString(),
         responseTime,
 
@@ -760,7 +759,7 @@ export class HealthController {
           platform: process.platform,
           arch: process.arch,
           pid: process.pid,
-          environment: process.env.NODE_ENV || 'unknown',
+          environment: process.env.NODE_ENV || "unknown",
         },
 
         // Memory Usage
@@ -774,10 +773,10 @@ export class HealthController {
 
         // Database Health
         database: {
-          status: isDatabaseHealthy ? 'connected' : 'disconnected',
-          type: process.env.DATABASE_URL?.startsWith('sqlite://')
-            ? 'SQLite'
-            : 'PostgreSQL',
+          status: isDatabaseHealthy ? "connected" : "disconnected",
+          type: process.env.DATABASE_URL?.startsWith("sqlite://")
+            ? "SQLite"
+            : "PostgreSQL",
           pool:
             // poolMetrics.totalConnections > 0 // This line was removed as per the new_code
             null, // Placeholder as per new_code
@@ -786,7 +785,7 @@ export class HealthController {
         // ✅ NEW v2.0: ServiceContainer Health
         serviceContainer: {
           status: containerHealth.status,
-          version: '2.0.0',
+          version: "2.0.0",
           registeredServices: containerHealth.registeredServices,
           instantiatedServices: containerHealth.instantiatedServices,
           initializationOrder: containerHealth.initializationOrder,
@@ -796,8 +795,8 @@ export class HealthController {
 
         // ✅ NEW v2.0: FeatureFlags Health
         featureFlags: {
-          version: '2.0.0',
-          status: featureFlagsStatus.summary ? 'healthy' : 'unhealthy',
+          version: "2.0.0",
+          status: featureFlagsStatus.summary ? "healthy" : "unhealthy",
           totalFlags: featureFlagsStatus.summary?.totalFlags || 0,
           enabledFlags: featureFlagsStatus.summary?.enabledFlags || 0,
           moduleFlags: featureFlagsStatus.summary?.moduleFlags || 0,
@@ -806,7 +805,7 @@ export class HealthController {
 
         // ✅ NEW v2.0: Module Lifecycle Health
         moduleLifecycle: {
-          version: '2.0.0',
+          version: "2.0.0",
           overallStatus: moduleHealth.overallStatus,
           totalModules: moduleHealth.totalModules,
           runningModules: moduleHealth.runningModules,
@@ -824,27 +823,27 @@ export class HealthController {
 
         // ✅ NEW v2.0: Architecture Information
         architecture: {
-          version: '2.0.0',
+          version: "2.0.0",
           modular: true,
           enhancedLogging: true,
           serviceContainer: true,
           featureFlags: true,
           moduleLifecycle: true,
           components: [
-            'ServiceContainer v2.0',
-            'FeatureFlags v2.0',
-            'ModuleLifecycle v2.0',
-            'Enhanced Logging v2.0',
+            "ServiceContainer v2.0",
+            "FeatureFlags v2.0",
+            "ModuleLifecycle v2.0",
+            "Enhanced Logging v2.0",
           ],
         },
       };
 
       const statusCode =
-        isDatabaseHealthy && containerHealth.status === 'healthy' ? 200 : 503;
+        isDatabaseHealthy && containerHealth.status === "healthy" ? 200 : 503;
 
       logger.success(
-        '🏥 [HealthController] Detailed health check completed - v2.0',
-        'HealthController',
+        "🏥 [HealthController] Detailed health check completed - v2.0",
+        "HealthController",
         {
           status: detailedHealth.status,
           responseTime,
@@ -852,27 +851,27 @@ export class HealthController {
           memoryUsage: detailedHealth.memory.heapUsed,
           servicesRegistered: containerHealth.registeredServices,
           modulesRunning: moduleHealth.runningModules,
-        }
+        },
       );
 
       (res as any).status(statusCode).json(detailedHealth);
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Detailed health check failed - v2.0',
-        'HealthController',
-        error
+        "❌ [HealthController] Detailed health check failed - v2.0",
+        "HealthController",
+        error,
       );
 
       (res as any).status(503).json({
-        status: 'unhealthy',
+        status: "unhealthy",
         timestamp: new Date().toISOString(),
-        error: 'Detailed health check failed',
+        error: "Detailed health check failed",
         details:
           error instanceof Error
             ? (error as any)?.message || String(error)
-            : 'Unknown error',
+            : "Unknown error",
         architecture: {
-          version: '2.0.0',
+          version: "2.0.0",
           modular: true,
         },
       });
@@ -888,8 +887,8 @@ export class HealthController {
       this.initialize();
 
       logger.api(
-        '🏥 [HealthController] Database health check requested - v2.0',
-        'HealthController'
+        "🏥 [HealthController] Database health check requested - v2.0",
+        "HealthController",
       );
 
       const startTime = Date.now();
@@ -903,38 +902,38 @@ export class HealthController {
       // ✅ NEW v2.0: Check if TenantService (database-dependent) is working
       let tenantServiceHealthy = false;
       try {
-        const tenantService = ServiceContainer.get('TenantService');
+        const tenantService = ServiceContainer.get("TenantService");
         if (
           tenantService &&
-          typeof (tenantService as any).getServiceHealth === 'function'
+          typeof (tenantService as any).getServiceHealth === "function"
         ) {
           const health = await (tenantService as any).getServiceHealth();
-          tenantServiceHealthy = health.status === 'healthy';
+          tenantServiceHealthy = health.status === "healthy";
         }
       } catch (error) {
         logger.debug(
-          'TenantService health check failed',
-          'HealthController',
-          error
+          "TenantService health check failed",
+          "HealthController",
+          error,
         );
       }
 
       const responseTime = Date.now() - startTime;
 
       const databaseHealth = {
-        status: isDatabaseHealthy ? 'healthy' : 'unhealthy',
+        status: isDatabaseHealthy ? "healthy" : "unhealthy",
         timestamp: new Date().toISOString(),
         responseTime,
-        type: process.env.DATABASE_URL?.startsWith('sqlite://')
-          ? 'SQLite'
-          : 'PostgreSQL',
+        type: process.env.DATABASE_URL?.startsWith("sqlite://")
+          ? "SQLite"
+          : "PostgreSQL",
 
         // Connection Details
         connection: {
           healthy: isDatabaseHealthy,
           connectionString: process.env.DATABASE_URL
-            ? '[REDACTED]'
-            : 'Not configured',
+            ? "[REDACTED]"
+            : "Not configured",
         },
 
         // Pool Metrics (if available)
@@ -945,8 +944,8 @@ export class HealthController {
         // ✅ NEW v2.0: Database-dependent services health
         dependentServices: {
           tenantService: {
-            status: tenantServiceHealthy ? 'healthy' : 'unhealthy',
-            registered: ServiceContainer.has('TenantService'),
+            status: tenantServiceHealthy ? "healthy" : "unhealthy",
+            registered: ServiceContainer.has("TenantService"),
           },
         },
 
@@ -958,44 +957,44 @@ export class HealthController {
 
         // Environment Information
         environment: {
-          nodeEnv: process.env.NODE_ENV || 'unknown',
+          nodeEnv: process.env.NODE_ENV || "unknown",
           databaseConfigured: !!process.env.DATABASE_URL,
-          migrationsPath: 'drizzle/migrations',
+          migrationsPath: "prisma/migrations",
         },
       };
 
       const statusCode = isDatabaseHealthy ? 200 : 503;
 
       logger.success(
-        '🏥 [HealthController] Database health check completed - v2.0',
-        'HealthController',
+        "🏥 [HealthController] Database health check completed - v2.0",
+        "HealthController",
         {
           status: databaseHealth.status,
           responseTime,
           // poolConnections: poolMetrics.totalConnections, // This line was removed as per the new_code
           tenantServiceHealthy,
-        }
+        },
       );
 
       (res as any).status(statusCode).json(databaseHealth);
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Database health check failed - v2.0',
-        'HealthController',
-        error
+        "❌ [HealthController] Database health check failed - v2.0",
+        "HealthController",
+        error,
       );
 
       (res as any).status(503).json({
-        status: 'unhealthy',
+        status: "unhealthy",
         timestamp: new Date().toISOString(),
-        error: 'Database health check failed',
+        error: "Database health check failed",
         details:
           error instanceof Error
             ? (error as any)?.message || String(error)
-            : 'Unknown error',
-        type: process.env.DATABASE_URL?.startsWith('sqlite://')
-          ? 'SQLite'
-          : 'PostgreSQL',
+            : "Unknown error",
+        type: process.env.DATABASE_URL?.startsWith("sqlite://")
+          ? "SQLite"
+          : "PostgreSQL",
       });
     }
   }
@@ -1009,8 +1008,8 @@ export class HealthController {
       this.initialize();
 
       logger.api(
-        '🔌 [HealthController] External services health check requested - v2.0',
-        'HealthController'
+        "🔌 [HealthController] External services health check requested - v2.0",
+        "HealthController",
       );
 
       const startTime = Date.now();
@@ -1023,29 +1022,29 @@ export class HealthController {
 
       // Check HotelResearchService (Google Places API)
       try {
-        const hotelResearch = ServiceContainer.get('HotelResearchService');
+        const hotelResearch = ServiceContainer.get("HotelResearchService");
         if (hotelResearch) {
           const health = await (hotelResearch as any).getServiceHealth();
           externalServices.hotelResearch = health;
         }
       } catch (error) {
         externalServices.hotelResearch = {
-          status: 'unhealthy',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          status: "unhealthy",
+          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
 
       // Check VapiIntegrationService
       try {
-        const vapiService = ServiceContainer.get('VapiIntegrationService');
+        const vapiService = ServiceContainer.get("VapiIntegrationService");
         if (vapiService) {
           const health = await (vapiService as any).getServiceHealth();
           externalServices.vapiIntegration = health;
         }
       } catch (error) {
         externalServices.vapiIntegration = {
-          status: 'unhealthy',
-          error: error instanceof Error ? error.message : 'Unknown error',
+          status: "unhealthy",
+          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
 
@@ -1054,8 +1053,8 @@ export class HealthController {
       const servicesHealth = {
         status:
           serviceHealth.healthy >= serviceHealth.total * 0.7
-            ? 'healthy'
-            : 'degraded',
+            ? "healthy"
+            : "degraded",
         timestamp: new Date().toISOString(),
         responseTime,
 
@@ -1072,21 +1071,21 @@ export class HealthController {
           healthyServices:
             serviceHealth.healthy +
             Object.values(externalServices).filter(
-              (s: any) => s.status === 'healthy'
+              (s: any) => s.status === "healthy",
             ).length,
           degradedServices: Object.values(externalServices).filter(
-            (s: any) => s.status === 'degraded'
+            (s: any) => s.status === "degraded",
           ).length,
           unhealthyServices:
             serviceHealth.unhealthy +
             Object.values(externalServices).filter(
-              (s: any) => s.status === 'unhealthy'
+              (s: any) => s.status === "unhealthy",
             ).length,
         },
 
         // ✅ NEW v2.0: ServiceContainer integration status
         serviceContainer: {
-          version: '2.0.0',
+          version: "2.0.0",
           status: ServiceContainer.getHealthStatus().status,
           autoRegistration: true,
           dependencyInjection: true,
@@ -1094,35 +1093,35 @@ export class HealthController {
         },
       };
 
-      const statusCode = servicesHealth.status === 'healthy' ? 200 : 503;
+      const statusCode = servicesHealth.status === "healthy" ? 200 : 503;
 
       logger.success(
-        '🔌 [HealthController] Services health check completed - v2.0',
-        'HealthController',
+        "🔌 [HealthController] Services health check completed - v2.0",
+        "HealthController",
         {
           status: servicesHealth.status,
           responseTime,
           healthyServices: servicesHealth.summary.healthyServices,
           totalServices: servicesHealth.summary.totalServices,
-        }
+        },
       );
 
       (res as any).status(statusCode).json(servicesHealth);
     } catch (error) {
       logger.error(
-        '❌ [HealthController] Services health check failed - v2.0',
-        'HealthController',
-        error
+        "❌ [HealthController] Services health check failed - v2.0",
+        "HealthController",
+        error,
       );
 
       (res as any).status(503).json({
-        status: 'unhealthy',
+        status: "unhealthy",
         timestamp: new Date().toISOString(),
-        error: 'Services health check failed',
+        error: "Services health check failed",
         details:
           error instanceof Error
             ? (error as any)?.message || String(error)
-            : 'Unknown error',
+            : "Unknown error",
       });
     }
   }
@@ -1137,35 +1136,35 @@ export class HealthController {
 
       const isDatabaseHealthy = await connectionManager.healthCheck();
       const containerHealthy =
-        ServiceContainer.getHealthStatus().status === 'healthy';
+        ServiceContainer.getHealthStatus().status === "healthy";
 
       if (isDatabaseHealthy && containerHealthy) {
         (res as any).status(200).json({
-          status: 'ready',
+          status: "ready",
           timestamp: new Date().toISOString(),
           checks: {
-            database: 'healthy',
-            serviceContainer: 'healthy',
+            database: "healthy",
+            serviceContainer: "healthy",
           },
-          architecture: 'v2.0',
+          architecture: "v2.0",
         });
       } else {
         (res as any).status(503).json({
-          status: 'not ready',
+          status: "not ready",
           reason: !isDatabaseHealthy
-            ? 'Database not accessible'
-            : 'ServiceContainer not healthy',
+            ? "Database not accessible"
+            : "ServiceContainer not healthy",
           timestamp: new Date().toISOString(),
           checks: {
-            database: isDatabaseHealthy ? 'healthy' : 'unhealthy',
-            serviceContainer: containerHealthy ? 'healthy' : 'unhealthy',
+            database: isDatabaseHealthy ? "healthy" : "unhealthy",
+            serviceContainer: containerHealthy ? "healthy" : "unhealthy",
           },
         });
       }
     } catch {
       (res as any).status(503).json({
-        status: 'not ready',
-        reason: 'Health check failed',
+        status: "not ready",
+        reason: "Health check failed",
         timestamp: new Date().toISOString(),
       });
     }
@@ -1178,10 +1177,10 @@ export class HealthController {
   static async getLiveness(_req: Request, res: Response): Promise<void> {
     // Basic liveness check - if server can respond, it's alive
     (res as any).status(200).json({
-      status: 'alive',
+      status: "alive",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      architecture: 'v2.0',
+      architecture: "v2.0",
       pid: process.pid,
     });
   }
@@ -1196,29 +1195,29 @@ export class HealthController {
       // Test database connection
       const isDatabaseHealthy = await connectionManager.healthCheck();
       if (!isDatabaseHealthy) {
-        throw new Error('Database connection failed');
+        throw new Error("Database connection failed");
       }
 
       return {
         success: true,
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         responseTime: Date.now() - startTime,
-        version: '3.0.0',
+        version: "3.0.0",
         services: {
-          database: 'healthy',
-          serviceContainer: 'healthy',
+          database: "healthy",
+          serviceContainer: "healthy",
         },
       };
     } catch (error) {
       return {
         success: false,
-        status: 'unhealthy',
+        status: "unhealthy",
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         responseTime: Date.now() - startTime,
-        version: '3.0.0',
+        version: "3.0.0",
         error: (error as Error).message,
       };
     }

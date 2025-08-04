@@ -1,8 +1,8 @@
 /**
  * 🔄 DATABASE ABSTRACTION LAYER INTERFACE
  *
- * Interface này cho phép switching giữa Drizzle và Prisma
- * mà không phải thay đổi business logic trong controllers
+ * Interface này định nghĩa các phương thức cần thiết cho database service
+ * giúp tách biệt business logic khỏi database implementation
  */
 
 export interface IDatabaseService {
@@ -34,7 +34,7 @@ export interface IDatabaseService {
   // 📊 ANALYTICS OPERATIONS
   getRequestStats(
     tenantId: string,
-    dateRange?: DateRange
+    dateRange?: DateRange,
   ): Promise<RequestStats>;
   getCallStats(tenantId: string, dateRange?: DateRange): Promise<CallStats>;
   getTenantMetrics(tenantId: string): Promise<TenantMetrics>;
@@ -262,6 +262,5 @@ export interface DatabaseTransaction {
 
 // 🎯 DATABASE PROVIDER ENUM
 export enum DatabaseProvider {
-  DRIZZLE = 'drizzle',
-  PRISMA = 'prisma',
+  PRISMA = "prisma",
 }

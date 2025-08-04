@@ -61,22 +61,12 @@ declare global {
 }
 
 // ==============================================================
-// DRIZZLE ORM TYPES - Fix all db/eq/sql errors
+// PRISMA ORM TYPES - Fix all Prisma type errors
 // ==============================================================
 
 declare global {
-  const db: any;
-  const eq: any;
-  const sql: any;
-  const and: any;
-  const or: any;
-  const desc: any;
-  const asc: any;
-  const count: any;
-  const avg: any;
-  const sum: any;
-  const max: any;
-  const min: any;
+  const PrismaClient: any;
+  const Prisma: any;
 }
 
 // ==============================================================
@@ -107,7 +97,7 @@ declare global {
     lastLogin: number;
   };
 
-  type InsertStaff = Omit<Staff, 'id' | 'createdAt' | 'lastLogin'>;
+  type InsertStaff = Omit<Staff, "id" | "createdAt" | "lastLogin">;
 
   type Call = {
     id: string;
@@ -122,7 +112,7 @@ declare global {
     createdAt: number;
   };
 
-  type InsertCall = Omit<Call, 'id' | 'createdAt'>;
+  type InsertCall = Omit<Call, "id" | "createdAt">;
 
   type Transcript = {
     id: string;
@@ -135,7 +125,7 @@ declare global {
     createdAt: number;
   };
 
-  type InsertTranscript = Omit<Transcript, 'id' | 'createdAt'>;
+  type InsertTranscript = Omit<Transcript, "id" | "createdAt">;
 
   type RequestRecord = {
     id: string;
@@ -153,7 +143,7 @@ declare global {
 
   type InsertRequestRecord = Omit<
     RequestRecord,
-    'id' | 'createdAt' | 'updatedAt'
+    "id" | "createdAt" | "updatedAt"
   >;
 
   type Message = {
@@ -166,7 +156,7 @@ declare global {
     createdAt: number;
   };
 
-  type InsertMessage = Omit<Message, 'id' | 'createdAt'>;
+  type InsertMessage = Omit<Message, "id" | "createdAt">;
 
   type CallSummary = {
     id: string;
@@ -180,7 +170,7 @@ declare global {
     createdAt: number;
   };
 
-  type InsertCallSummary = Omit<CallSummary, 'id' | 'createdAt'>;
+  type InsertCallSummary = Omit<CallSummary, "id" | "createdAt">;
 
   type Tenant = {
     id: string;
@@ -195,7 +185,7 @@ declare global {
     settings?: string;
   };
 
-  type InsertTenant = Omit<Tenant, 'id' | 'created_at'>;
+  type InsertTenant = Omit<Tenant, "id" | "created_at">;
 
   type HotelProfile = {
     id: string;
@@ -215,7 +205,7 @@ declare global {
 
   type InsertHotelProfile = Omit<
     HotelProfile,
-    'id' | 'createdAt' | 'updatedAt'
+    "id" | "createdAt" | "updatedAt"
   >;
 }
 
@@ -224,69 +214,69 @@ declare global {
 // ==============================================================
 
 declare global {
-  type Language = 'en' | 'vi' | 'fr' | 'zh' | 'ru' | 'ko';
+  type Language = "en" | "vi" | "fr" | "zh" | "ru" | "ko";
 
   type ServiceCategory =
-    | 'room_service'
-    | 'housekeeping'
-    | 'maintenance'
-    | 'concierge'
-    | 'spa_wellness'
-    | 'dining'
-    | 'transportation'
-    | 'business_center'
-    | 'laundry'
-    | 'wake_up_call'
-    | 'other';
+    | "room_service"
+    | "housekeeping"
+    | "maintenance"
+    | "concierge"
+    | "spa_wellness"
+    | "dining"
+    | "transportation"
+    | "business_center"
+    | "laundry"
+    | "wake_up_call"
+    | "other";
 
   type UserRole =
-    | 'super-admin'
-    | 'hotel-manager'
-    | 'front-desk'
-    | 'it-manager'
-    | 'admin'
-    | 'staff'
-    | 'manager'
-    | 'frontdesk'
-    | 'itmanager'
-    | 'guest';
+    | "super-admin"
+    | "hotel-manager"
+    | "front-desk"
+    | "it-manager"
+    | "admin"
+    | "staff"
+    | "manager"
+    | "frontdesk"
+    | "itmanager"
+    | "guest";
 
   type Permission =
-    | 'read'
-    | 'write'
-    | 'delete'
-    | 'admin'
-    | 'manage_users'
-    | 'manage_settings'
-    | 'view_analytics'
-    | 'manage_calls'
-    | 'manage_requests';
+    | "read"
+    | "write"
+    | "delete"
+    | "admin"
+    | "manage_users"
+    | "manage_settings"
+    | "view_analytics"
+    | "manage_calls"
+    | "manage_requests";
 
   type AuthErrorCode =
-    | 'INVALID_CREDENTIALS'
-    | 'TOKEN_EXPIRED'
-    | 'TOKEN_INVALID'
-    | 'UNAUTHORIZED'
-    | 'FORBIDDEN'
-    | 'USER_NOT_FOUND'
-    | 'USER_INACTIVE'
-    | 'ACCOUNT_LOCKED';
+    | "INVALID_CREDENTIALS"
+    | "TOKEN_EXPIRED"
+    | "TOKEN_INVALID"
+    | "UNAUTHORIZED"
+    | "FORBIDDEN"
+    | "USER_NOT_FOUND"
+    | "USER_INACTIVE"
+    | "ACCOUNT_LOCKED";
 
   // React types
-  type RefObject<T> = import('react').RefObject<T>;
-  type MutableRefObject<T> = import('react').MutableRefObject<T>;
-  type ReactNode = import('react').ReactNode;
+  type RefObject<T> = import("react").RefObject<T>;
+  type MutableRefObject<T> = import("react").MutableRefObject<T>;
+  type ReactNode = import("react").ReactNode;
   type JSX = any;
 
   // Common UI types
-  type IconType = import('react-icons').IconType;
+  type IconType = import("react-icons").IconType;
   type ButtonVariant =
-    | 'primary'
-    | 'secondary'
-    | 'danger'
-    | 'success'
-    | 'warning';
-  type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    | "primary"
+    | "secondary"
+    | "danger"
+    | "success"
+    | "warning";
+  type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
   // API types
   interface ApiResponse<T = any> {
@@ -409,11 +399,11 @@ declare global {
   class HotelResearchService {
     basicResearch(
       hotelName: string,
-      location?: string
+      location?: string,
     ): Promise<BasicHotelData>;
     advancedResearch(
       hotelName: string,
-      location?: string
+      location?: string,
     ): Promise<AdvancedHotelData>;
   }
 
@@ -436,7 +426,7 @@ declare global {
 
   interface VapiCall {
     id: string;
-    status: 'active' | 'ended' | 'failed';
+    status: "active" | "ended" | "failed";
     duration?: number;
     transcript?: string;
   }
@@ -587,31 +577,31 @@ declare global {
     | { [key: string]: JSONValue };
 
   // Environment types
-  type NodeEnv = 'development' | 'production' | 'test';
+  type NodeEnv = "development" | "production" | "test";
 
   // HTTP types
-  type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   type HttpStatus = 200 | 201 | 400 | 401 | 403 | 404 | 500;
 
   // Database types
-  type SortOrder = 'asc' | 'desc';
+  type SortOrder = "asc" | "desc";
   type FilterOperator =
-    | 'eq'
-    | 'ne'
-    | 'gt'
-    | 'gte'
-    | 'lt'
-    | 'lte'
-    | 'like'
-    | 'in';
+    | "eq"
+    | "ne"
+    | "gt"
+    | "gte"
+    | "lt"
+    | "lte"
+    | "like"
+    | "in";
 
   // UI state types
-  type LoadingState = 'idle' | 'loading' | 'success' | 'error';
-  type Theme = 'light' | 'dark' | 'auto';
+  type LoadingState = "idle" | "loading" | "success" | "error";
+  type Theme = "light" | "dark" | "auto";
 
   // Animation types
-  type AnimationDuration = 'fast' | 'normal' | 'slow';
-  type AnimationType = 'fade' | 'slide' | 'bounce' | 'zoom';
+  type AnimationDuration = "fast" | "normal" | "slow";
+  type AnimationType = "fade" | "slide" | "bounce" | "zoom";
 }
 
 // Export empty object to make this a module

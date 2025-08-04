@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 var __awaiter =
   (this && this.__awaiter) ||
   function (thisArg, _arguments, P, generator) {
@@ -19,7 +19,7 @@ var __awaiter =
       }
       function rejected(value) {
         try {
-          step(generator['throw'](value));
+          step(generator["throw"](value));
         } catch (e) {
           reject(e);
         }
@@ -48,13 +48,13 @@ var __generator =
       y,
       t,
       g = Object.create(
-        (typeof Iterator === 'function' ? Iterator : Object).prototype
+        (typeof Iterator === "function" ? Iterator : Object).prototype,
       );
     return (
       (g.next = verb(0)),
-      (g['throw'] = verb(1)),
-      (g['return'] = verb(2)),
-      typeof Symbol === 'function' &&
+      (g["throw"] = verb(1)),
+      (g["return"] = verb(2)),
+      typeof Symbol === "function" &&
         (g[Symbol.iterator] = function () {
           return this;
         }),
@@ -66,7 +66,7 @@ var __generator =
       };
     }
     function step(op) {
-      if (f) throw new TypeError('Generator is already executing.');
+      if (f) throw new TypeError("Generator is already executing.");
       while ((g && ((g = 0), op[0] && (_ = 0)), _))
         try {
           if (
@@ -74,9 +74,9 @@ var __generator =
             y &&
               (t =
                 op[0] & 2
-                  ? y['return']
+                  ? y["return"]
                   : op[0]
-                    ? y['throw'] || ((t = y['return']) && t.call(y), 0)
+                    ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
                     : y.next) &&
               !(t = t.call(y, op[1])).done)
           )
@@ -136,29 +136,32 @@ var __generator =
       return { value: op[0] ? op[1] : void 0, done: true };
     }
   };
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.pool = exports.db = void 0;
-var node_postgres_1 = require('drizzle-orm/node-postgres');
-var better_sqlite3_1 = require('drizzle-orm/better-sqlite3');
-var pg_1 = require('pg');
-var better_sqlite3_2 = require('better-sqlite3');
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.pool = exports.prisma = void 0;
+var pg_1 = require("pg");
+var client_1 = require("@prisma/client");
+
 var DATABASE_URL = process.env.DATABASE_URL;
-var isProduction = process.env.NODE_ENV === 'production';
+var isProduction = process.env.NODE_ENV === "production";
+
+// Initialize Prisma client
+var prisma = new client_1.PrismaClient();
+exports.prisma = prisma;
+
 // Initialize database connection based on environment
-var db;
 var pool;
-// Use SQLite for development if no DATABASE_URL is provided
+
 if (!DATABASE_URL && !isProduction) {
-  console.log('⏳ Using SQLite database for development');
-  var sqlite = new better_sqlite3_2.default('./dev.db');
-  exports.db = db = (0, better_sqlite3_1.drizzle)(sqlite);
+  console.log("⏳ Using SQLite database for development");
+  // Use Prisma with SQLite
+  prisma.$connect();
 } else if (!DATABASE_URL) {
   // Default connection string if DATABASE_URL is not provided
-  var DEFAULT_DB_URL = 'postgres://postgres:postgres@localhost:5432/minhon';
+  var DEFAULT_DB_URL = "postgres://postgres:postgres@localhost:5432/minhon";
   var dbUrl = DEFAULT_DB_URL;
   console.log(
-    'Database connection using URL:',
-    dbUrl.replace(/:\/\/[^:]+:[^@]+@/, '://****:****@')
+    "Database connection using URL:",
+    dbUrl.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"),
   );
   exports.pool = pool = new pg_1.Pool({
     connectionString: dbUrl,
@@ -174,12 +177,12 @@ if (!DATABASE_URL && !isProduction) {
             return [4 /*yield*/, pool.connect()];
           case 1:
             client = _a.sent();
-            console.log('Database connection successful');
+            console.log("Database connection successful");
             client.release();
             return [3 /*break*/, 3];
           case 2:
             error_1 = _a.sent();
-            console.error('Database connection failed:', error_1);
+            console.error("Database connection failed:", error_1);
             return [3 /*break*/, 3];
           case 3:
             return [2 /*return*/];
@@ -187,12 +190,11 @@ if (!DATABASE_URL && !isProduction) {
       });
     });
   })();
-  exports.db = db = (0, node_postgres_1.drizzle)(pool);
 } else {
   // Log connection information
   console.log(
-    'Database connection using URL:',
-    DATABASE_URL.replace(/:\/\/[^:]+:[^@]+@/, '://****:****@')
+    "Database connection using URL:",
+    DATABASE_URL.replace(/:\/\/[^:]+:[^@]+@/, "://****:****@"),
   );
   exports.pool = pool = new pg_1.Pool({
     connectionString: DATABASE_URL,
@@ -208,12 +210,12 @@ if (!DATABASE_URL && !isProduction) {
             return [4 /*yield*/, pool.connect()];
           case 1:
             client = _a.sent();
-            console.log('Database connection successful');
+            console.log("Database connection successful");
             client.release();
             return [3 /*break*/, 3];
           case 2:
             error_2 = _a.sent();
-            console.error('Database connection failed:', error_2);
+            console.error("Database connection failed:", error_2);
             return [3 /*break*/, 3];
           case 3:
             return [2 /*return*/];
@@ -221,5 +223,4 @@ if (!DATABASE_URL && !isProduction) {
       });
     });
   })();
-  exports.db = db = (0, node_postgres_1.drizzle)(pool);
 }

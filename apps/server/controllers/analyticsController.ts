@@ -1,22 +1,17 @@
-import {
-  getDashboardAnalytics,
-  getHourlyActivity,
-  getOverview,
-  getServiceDistribution,
-} from '@server/analytics';
-import { Request, Response } from 'express';
+import { getDashboardAnalytics, getHourlyActivity } from "@server/analytics";
+import { Request, Response } from "express";
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { TenantService } from '@server/services/tenantService';
-import { evaluateABTest, isFeatureEnabled } from '@server/shared/FeatureFlags';
+import { TenantService } from "@server/services/tenantService";
+import { evaluateABTest, isFeatureEnabled } from "@server/shared/FeatureFlags";
 import {
   ServiceContainer,
   getServiceSync,
-} from '@server/shared/ServiceContainer';
-import { logger } from '@shared/utils/logger';
+} from "@server/shared/ServiceContainer";
+import { logger } from "@shared/utils/logger";
 
 // 🔄 NEW: Prisma integration imports
-import { DatabaseServiceFactory } from '@shared/db/DatabaseServiceFactory';
+import { DatabaseServiceFactory } from "@shared/db/DatabaseServiceFactory";
 
 /**
  * Enhanced Analytics Controller v2.0 - Modular Architecture
@@ -41,69 +36,45 @@ export class AnalyticsController {
 
     this.initialized = true;
     logger.debug(
-      '📊 [AnalyticsController] ServiceContainer integration initialized - v2.0',
-      'AnalyticsController'
+      "📊 [AnalyticsController] ServiceContainer integration initialized - v2.0",
+      "AnalyticsController",
     );
   }
 
   /**
-   * 🔄 Get appropriate analytics service based on feature flags
-   * Supports switching between Drizzle (legacy) and Prisma (new) analytics
+   * 🔄 Get analytics service instance
    */
   private static async getAnalyticsService(): Promise<any> {
-    const usePrisma =
-      process.env.USE_PRISMA === 'true' ||
-      isFeatureEnabled(FeatureFlags.USE_PRISMA) ||
-      isFeatureEnabled(FeatureFlags.PRISMA_ANALYTICS_SERVICE);
+    try {
+      logger.info(
+        "🔄 [AnalyticsController] Initializing Prisma Analytics Service",
+      );
 
-    if (usePrisma) {
-      try {
-        logger.info('🔄 [AnalyticsController] Using Prisma Analytics Service');
+      // Initialize Prisma connections if not already done
+      await DatabaseServiceFactory.initializeConnections();
 
-        // Initialize Prisma connections if not already done
-        await DatabaseServiceFactory.initializeConnections();
+      // Get unified Prisma database service
+      const databaseService =
+        await DatabaseServiceFactory.createDatabaseService();
 
-        // Get unified Prisma database service
-        const databaseService =
-          await DatabaseServiceFactory.createDatabaseService();
-
-        logger.info(
-          '✅ [AnalyticsController] Prisma Analytics Service initialized'
-        );
-        return databaseService;
-      } catch (error) {
-        logger.error(
-          '❌ [AnalyticsController] Failed to initialize Prisma service, falling back to Drizzle',
-          error
-        );
-
-        // Fallback to Drizzle analytics functions
-        return {
-          getOverview,
-          getServiceDistribution,
-          getHourlyActivity,
-          getDashboardAnalytics,
-          type: 'drizzle',
-        };
-      }
+      logger.info(
+        "✅ [AnalyticsController] Prisma Analytics Service initialized",
+      );
+      return databaseService;
+    } catch (error) {
+      logger.error(
+        "❌ [AnalyticsController] Failed to initialize Prisma service",
+        error,
+      );
+      throw error;
     }
-
-    // Default to Drizzle analytics functions
-    logger.info('🔧 [AnalyticsController] Using Drizzle Analytics (legacy)');
-    return {
-      getOverview,
-      getServiceDistribution,
-      getHourlyActivity,
-      getDashboardAnalytics,
-      type: 'drizzle',
-    };
   }
 
   /**
-   * 🔄 Check if service is legacy Drizzle or new Prisma
+   * 🔄 Check if service is valid
    */
-  private static isLegacyService(service: any): boolean {
-    return service.type === 'drizzle';
+  private static isValidService(service: any): boolean {
+    return service && typeof service === "object";
   }
 
   /**
@@ -112,20 +83,20 @@ export class AnalyticsController {
   private static registerAnalyticsServices(): void {
     try {
       // Register TenantService for analytics filtering
-      if (!ServiceContainer.has('TenantService')) {
-        ServiceContainer.register('TenantService', TenantService, {
-          module: 'analytics-module',
+      if (!ServiceContainer.has("TenantService")) {
+        ServiceContainer.register("TenantService", TenantService, {
+          module: "analytics-module",
           singleton: true,
           lifecycle: {
             onInit: () =>
               logger.debug(
-                'TenantService registered for analytics',
-                'AnalyticsController'
+                "TenantService registered for analytics",
+                "AnalyticsController",
               ),
             onDestroy: () =>
               logger.debug(
-                'TenantService destroyed for analytics',
-                'AnalyticsController'
+                "TenantService destroyed for analytics",
+                "AnalyticsController",
               ),
             onHealthCheck: () => true,
           },
@@ -133,14 +104,14 @@ export class AnalyticsController {
       }
 
       logger.debug(
-        '📊 [AnalyticsController] Analytics services registered with ServiceContainer',
-        'AnalyticsController'
+        "📊 [AnalyticsController] Analytics services registered with ServiceContainer",
+        "AnalyticsController",
       );
     } catch (error) {
       logger.warn(
-        '⚠️ [AnalyticsController] Failed to register some analytics services',
-        'AnalyticsController',
-        error
+        "⚠️ [AnalyticsController] Failed to register some analytics services",
+        "AnalyticsController",
+        error,
       );
     }
   }
@@ -157,35 +128,35 @@ export class AnalyticsController {
       const tenantId = (req as any).tenant?.id;
 
       if (!tenantId) {
-        return { isValid: false, error: 'Tenant not identified' };
+        return { isValid: false, error: "Tenant not identified" };
       }
 
       // ✅ Use ServiceContainer to get TenantService
-      const tenantService = getServiceSync('TenantService') as any;
+      const tenantService = getServiceSync("TenantService") as any;
 
       if (
         tenantService &&
-        typeof tenantService.validateTenantAccess === 'function'
+        typeof tenantService.validateTenantAccess === "function"
       ) {
         const isValid = await tenantService.validateTenantAccess(tenantId);
         if (!isValid) {
-          return { isValid: false, error: 'Tenant access denied' };
+          return { isValid: false, error: "Tenant access denied" };
         }
       }
 
       return { isValid: true, tenantId };
     } catch (error) {
       logger.warn(
-        '⚠️ [AnalyticsController] Tenant validation error',
-        'AnalyticsController',
-        error
+        "⚠️ [AnalyticsController] Tenant validation error",
+        "AnalyticsController",
+        error,
       );
       // Fall back to basic validation
       const tenantId = (req as any).tenant?.id;
       return {
         isValid: !!tenantId,
         tenantId: tenantId || undefined,
-        error: tenantId ? undefined : 'Tenant validation failed',
+        error: tenantId ? undefined : "Tenant validation failed",
       };
     }
   }
@@ -203,9 +174,9 @@ export class AnalyticsController {
       if (!tenantValidation.isValid) {
         (res as any).status(400).json({
           success: false,
-          error: tenantValidation.error || 'Tenant validation failed',
-          code: 'TENANT_ACCESS_DENIED',
-          version: '2.0.0',
+          error: tenantValidation.error || "Tenant validation failed",
+          code: "TENANT_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -215,33 +186,33 @@ export class AnalyticsController {
 
       // ✅ NEW v2.0: Context-aware feature flag evaluation
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
-        userAgent: req.headers['user-agent'],
+        userAgent: req.headers["user-agent"],
       };
 
       // ✅ NEW v2.0: Check if advanced analytics features are enabled
       const enableAdvancedAnalytics = isFeatureEnabled(
-        'advanced-analytics',
-        context
+        "advanced-analytics",
+        context,
       );
       const enableRealTimeMetrics = isFeatureEnabled(
-        'real-time-metrics',
-        context
+        "real-time-metrics",
+        context,
       );
       const enablePredictiveAnalytics = isFeatureEnabled(
-        'predictive-analytics',
-        context
+        "predictive-analytics",
+        context,
       );
 
       // ✅ NEW v2.0: A/B test for analytics presentation
       const analyticsUiVariant = context.userId
-        ? evaluateABTest('analytics-ui-test', context.userId)
+        ? evaluateABTest("analytics-ui-test", context.userId)
         : null;
 
       logger.api(
-        '📊 [AnalyticsController] Getting overview - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Getting overview - v2.0",
+        "AnalyticsController",
         {
           userId: req.user?.id,
           tenantId,
@@ -251,36 +222,27 @@ export class AnalyticsController {
             predictiveAnalytics: enablePredictiveAnalytics,
           },
           abTest: analyticsUiVariant,
-        }
+        },
       );
 
       const startTime = Date.now();
 
       // 🔄 NEW: Use service switching for analytics
       const analyticsService = await AnalyticsController.getAnalyticsService();
-      let overview;
-
-      if (AnalyticsController.isLegacyService(analyticsService)) {
-        // Legacy Drizzle analytics
-        overview = await analyticsService.getOverview({ tenantId, timeRange });
-      } else {
-        // New Prisma analytics
-        overview = await analyticsService.getOverviewAnalytics({
-          tenantId,
-          timeRange,
-        });
-      }
+      // Get analytics using Prisma service
+      const overview = await analyticsService.getOverviewAnalytics({
+        tenantId,
+        timeRange,
+      });
 
       const executionTime = Date.now() - startTime;
 
       logger.info(
-        '🎯 [AnalyticsController] Service type for getOverview',
-        'AnalyticsController',
+        "🎯 [AnalyticsController] Using Prisma service for getOverview",
+        "AnalyticsController",
         {
-          isLegacy: AnalyticsController.isLegacyService(analyticsService),
-          usePrisma: process.env.USE_PRISMA === 'true',
           executionTime,
-        }
+        },
       );
 
       // ✅ NEW v2.0: Enhanced analytics with additional metrics
@@ -293,15 +255,15 @@ export class AnalyticsController {
           performance: {
             queryExecutionTime: executionTime,
             cacheHitRate: Math.random() * 100, // TODO: Implement actual cache metrics
-            dataFreshness: 'real-time',
+            dataFreshness: "real-time",
           },
           trends: {
             callGrowthRate:
               overview.callsThisMonth > overview.totalCalls * 0.1
-                ? 'growing'
-                : 'stable',
+                ? "growing"
+                : "stable",
             peakHours: [9, 10, 11, 14, 15, 16], // TODO: Calculate from actual data
-            seasonalPatterns: 'summer_peak', // TODO: Implement seasonal analysis
+            seasonalPatterns: "summer_peak", // TODO: Implement seasonal analysis
           },
         };
       }
@@ -311,15 +273,15 @@ export class AnalyticsController {
           ...enhancedOverview,
           predictions: {
             nextMonthCalls: Math.round(overview.callsThisMonth * 1.1),
-            expectedGrowth: '10%',
-            recommendedCapacity: 'increase',
+            expectedGrowth: "10%",
+            recommendedCapacity: "increase",
           },
         };
       }
 
       logger.success(
-        '📊 [AnalyticsController] Overview retrieved successfully - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Overview retrieved successfully - v2.0",
+        "AnalyticsController",
         {
           tenantId,
           totalCalls: overview.totalCalls,
@@ -329,7 +291,7 @@ export class AnalyticsController {
             advancedAnalytics: enableAdvancedAnalytics,
             predictiveAnalytics: enablePredictiveAnalytics,
           },
-        }
+        },
       );
 
       (res as any).json({
@@ -337,7 +299,7 @@ export class AnalyticsController {
         data: enhancedOverview,
         // ✅ NEW v2.0: Enhanced metadata
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           tenantId,
           features: {
@@ -347,33 +309,33 @@ export class AnalyticsController {
           },
           abTest: analyticsUiVariant
             ? {
-                testName: 'analytics-ui-test',
+                testName: "analytics-ui-test",
                 variant: analyticsUiVariant,
                 userId: context.userId,
               }
             : undefined,
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["TenantService"],
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsController] Failed to get overview - v2.0',
-        'AnalyticsController',
-        error
+        "❌ [AnalyticsController] Failed to get overview - v2.0",
+        "AnalyticsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve analytics overview',
+        error: "Failed to retrieve analytics overview",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? error.message
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -383,7 +345,7 @@ export class AnalyticsController {
    */
   static async getServiceDistribution(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       this.initialize();
@@ -393,9 +355,9 @@ export class AnalyticsController {
       if (!tenantValidation.isValid) {
         (res as any).status(400).json({
           success: false,
-          error: tenantValidation.error || 'Tenant validation failed',
-          code: 'TENANT_ACCESS_DENIED',
-          version: '2.0.0',
+          error: tenantValidation.error || "Tenant validation failed",
+          code: "TENANT_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -405,22 +367,22 @@ export class AnalyticsController {
 
       // ✅ NEW v2.0: Feature flag context
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
       };
 
       const enableDetailedBreakdown = isFeatureEnabled(
-        'detailed-service-breakdown',
-        context
+        "detailed-service-breakdown",
+        context,
       );
       const enableServiceInsights = isFeatureEnabled(
-        'service-insights',
-        context
+        "service-insights",
+        context,
       );
 
       logger.api(
-        '📊 [AnalyticsController] Getting service distribution - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Getting service distribution - v2.0",
+        "AnalyticsController",
         {
           userId: req.user?.id,
           tenantId,
@@ -428,7 +390,7 @@ export class AnalyticsController {
             detailedBreakdown: enableDetailedBreakdown,
             serviceInsights: enableServiceInsights,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
@@ -442,11 +404,11 @@ export class AnalyticsController {
       let enhancedDistribution = [...distribution];
 
       if (enableDetailedBreakdown) {
-        enhancedDistribution = enhancedDistribution.map(service => ({
+        enhancedDistribution = enhancedDistribution.map((service) => ({
           ...service,
           breakdown: {
             hourlyAverage: service.count / 24, // TODO: Calculate actual hourly average
-            peakTimes: ['9:00-11:00', '14:00-16:00'], // TODO: Calculate from actual data
+            peakTimes: ["9:00-11:00", "14:00-16:00"], // TODO: Calculate from actual data
             satisfaction: Math.random() * 5, // TODO: Implement satisfaction metrics
           },
         }));
@@ -454,25 +416,25 @@ export class AnalyticsController {
 
       if (enableServiceInsights) {
         const insights = {
-          mostPopular: enhancedDistribution[0]?.name || 'N/A',
+          mostPopular: enhancedDistribution[0]?.name || "N/A",
           growingServices: enhancedDistribution
-            .filter(s => s.count > 10)
-            .map(s => s.name),
+            .filter((s) => s.count > 10)
+            .map((s) => s.name),
           recommendations: [
-            'Consider promoting underutilized services',
-            'Peak hour staffing optimization needed',
+            "Consider promoting underutilized services",
+            "Peak hour staffing optimization needed",
           ],
         };
 
         logger.success(
-          '📊 [AnalyticsController] Service distribution with insights retrieved - v2.0',
-          'AnalyticsController',
+          "📊 [AnalyticsController] Service distribution with insights retrieved - v2.0",
+          "AnalyticsController",
           {
             tenantId,
             servicesCount: distribution.length,
             executionTime,
             insights,
-          }
+          },
         );
 
         (res as any).json({
@@ -480,7 +442,7 @@ export class AnalyticsController {
           data: enhancedDistribution,
           insights,
           metadata: {
-            version: '2.0.0',
+            version: "2.0.0",
             executionTime,
             tenantId,
             features: {
@@ -493,40 +455,40 @@ export class AnalyticsController {
       }
 
       logger.success(
-        '📊 [AnalyticsController] Service distribution retrieved - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Service distribution retrieved - v2.0",
+        "AnalyticsController",
         {
           tenantId,
           servicesCount: distribution.length,
           executionTime,
-        }
+        },
       );
 
       (res as any).json({
         success: true,
         data: enhancedDistribution,
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           tenantId,
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsController] Failed to get service distribution - v2.0',
-        'AnalyticsController',
-        error
+        "❌ [AnalyticsController] Failed to get service distribution - v2.0",
+        "AnalyticsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve service distribution',
+        error: "Failed to retrieve service distribution",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? error.message
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -543,9 +505,9 @@ export class AnalyticsController {
       if (!tenantValidation.isValid) {
         (res as any).status(400).json({
           success: false,
-          error: tenantValidation.error || 'Tenant validation failed',
-          code: 'TENANT_ACCESS_DENIED',
-          version: '2.0.0',
+          error: tenantValidation.error || "Tenant validation failed",
+          code: "TENANT_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -555,22 +517,22 @@ export class AnalyticsController {
 
       // ✅ NEW v2.0: Feature flag context
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
       };
 
       const enableHourlyPredictions = isFeatureEnabled(
-        'hourly-predictions',
-        context
+        "hourly-predictions",
+        context,
       );
       const enableCapacityPlanning = isFeatureEnabled(
-        'capacity-planning',
-        context
+        "capacity-planning",
+        context,
       );
 
       logger.api(
-        '📊 [AnalyticsController] Getting hourly activity - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Getting hourly activity - v2.0",
+        "AnalyticsController",
         {
           userId: req.user?.id,
           tenantId,
@@ -578,7 +540,7 @@ export class AnalyticsController {
             hourlyPredictions: enableHourlyPredictions,
             capacityPlanning: enableCapacityPlanning,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
@@ -589,43 +551,43 @@ export class AnalyticsController {
       let enhancedActivity = [...activity];
 
       if (enableHourlyPredictions) {
-        enhancedActivity = enhancedActivity.map(hour => ({
+        enhancedActivity = enhancedActivity.map((hour) => ({
           ...hour,
           predictions: {
             nextWeek: Math.round(hour.count * (1 + Math.random() * 0.2 - 0.1)), // ±10% variation
             confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
-            trend: hour.count > 5 ? 'increasing' : 'stable',
+            trend: hour.count > 5 ? "increasing" : "stable",
           },
         }));
       }
 
       let capacityRecommendations;
       if (enableCapacityPlanning) {
-        const peakHours = enhancedActivity.filter(h => h.count > 10);
+        const peakHours = enhancedActivity.filter((h) => h.count > 10);
         capacityRecommendations = {
-          peakHours: peakHours.map(h => h.hour),
+          peakHours: peakHours.map((h) => h.hour),
           recommendedStaffing: Math.max(
             2,
-            Math.ceil(Math.max(...activity.map(h => h.count)) / 5)
+            Math.ceil(Math.max(...activity.map((h) => h.count)) / 5),
           ),
           optimalShifts: [
-            { start: '08:00', end: '12:00', staff: 3 },
-            { start: '12:00', end: '18:00', staff: 4 },
-            { start: '18:00', end: '22:00', staff: 2 },
+            { start: "08:00", end: "12:00", staff: 3 },
+            { start: "12:00", end: "18:00", staff: 4 },
+            { start: "18:00", end: "22:00", staff: 2 },
           ],
         };
       }
 
       logger.success(
-        '📊 [AnalyticsController] Hourly activity retrieved - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Hourly activity retrieved - v2.0",
+        "AnalyticsController",
         {
           tenantId,
           dataPoints: activity.length,
           executionTime,
           predictions: enableHourlyPredictions,
           capacityPlanning: enableCapacityPlanning,
-        }
+        },
       );
 
       (res as any).json({
@@ -633,7 +595,7 @@ export class AnalyticsController {
         data: enhancedActivity,
         ...(capacityRecommendations && { capacity: capacityRecommendations }),
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
           tenantId,
           features: {
@@ -644,20 +606,20 @@ export class AnalyticsController {
       });
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsController] Failed to get hourly activity - v2.0',
-        'AnalyticsController',
-        error
+        "❌ [AnalyticsController] Failed to get hourly activity - v2.0",
+        "AnalyticsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve hourly activity',
+        error: "Failed to retrieve hourly activity",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? error.message
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -668,7 +630,7 @@ export class AnalyticsController {
    */
   static async getDashboardAnalytics(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       this.initialize();
@@ -678,9 +640,9 @@ export class AnalyticsController {
       if (!tenantValidation.isValid) {
         (res as any).status(400).json({
           success: false,
-          error: tenantValidation.error || 'Tenant validation failed',
-          code: 'TENANT_ACCESS_DENIED',
-          version: '2.0.0',
+          error: tenantValidation.error || "Tenant validation failed",
+          code: "TENANT_ACCESS_DENIED",
+          version: "2.0.0",
         });
         return;
       }
@@ -690,32 +652,32 @@ export class AnalyticsController {
 
       // ✅ NEW v2.0: Context-aware feature flag evaluation
       const context = {
-        userId: req.headers['x-user-id'] as string,
+        userId: req.headers["x-user-id"] as string,
         tenantId,
-        endpoint: 'dashboard-analytics',
+        endpoint: "dashboard-analytics",
       };
 
       // ✅ NEW v2.0: A/B test for dashboard layout
       const dashboardLayoutVariant = context.userId
-        ? evaluateABTest('dashboard-layout-test', context.userId)
+        ? evaluateABTest("dashboard-layout-test", context.userId)
         : null;
 
       const enableComprehensiveAnalytics = isFeatureEnabled(
-        'comprehensive-analytics',
-        context
+        "comprehensive-analytics",
+        context,
       );
       const enableRealTimeDashboard = isFeatureEnabled(
-        'real-time-dashboard',
-        context
+        "real-time-dashboard",
+        context,
       );
       const enableAdvancedInsights = isFeatureEnabled(
-        'advanced-insights',
-        context
+        "advanced-insights",
+        context,
       );
 
       logger.api(
-        '📊 [AnalyticsController] Getting comprehensive dashboard analytics - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Getting comprehensive dashboard analytics - v2.0",
+        "AnalyticsController",
         {
           userId: req.user?.id,
           tenantId,
@@ -725,7 +687,7 @@ export class AnalyticsController {
             realTime: enableRealTimeDashboard,
             insights: enableAdvancedInsights,
           },
-        }
+        },
       );
 
       const startTime = Date.now();
@@ -746,8 +708,8 @@ export class AnalyticsController {
           },
           optimization: {
             cacheHitRate: Math.random() * 100,
-            indexEfficiency: 'optimal',
-            queryComplexity: 'medium',
+            indexEfficiency: "optimal",
+            queryComplexity: "medium",
           },
         };
       }
@@ -757,24 +719,24 @@ export class AnalyticsController {
           keyMetrics: {
             busiest_hour: analytics.hourlyActivity.reduce(
               (max, current) => (current.count > max.count ? current : max),
-              { count: 0, hour: 'N/A' }
+              { count: 0, hour: "N/A" },
             ),
-            popular_service: analytics.serviceDistribution[0]?.name || 'N/A',
+            popular_service: analytics.serviceDistribution[0]?.name || "N/A",
             primary_language:
-              analytics.languageDistribution[0]?.language || 'en',
+              analytics.languageDistribution[0]?.language || "en",
           },
           recommendations: [
-            'Consider increasing staff during peak hours',
-            'Promote underutilized services during low-activity periods',
-            'Optimize response times for popular services',
+            "Consider increasing staff during peak hours",
+            "Promote underutilized services during low-activity periods",
+            "Optimize response times for popular services",
           ],
           trends: {
             growth_rate:
               analytics.overview.callsThisMonth >
               analytics.overview.totalCalls * 0.1
-                ? 'positive'
-                : 'stable',
-            seasonal_pattern: 'summer_peak',
+                ? "positive"
+                : "stable",
+            seasonal_pattern: "summer_peak",
             user_satisfaction: 4.2, // TODO: Implement actual satisfaction tracking
           },
         };
@@ -790,8 +752,8 @@ export class AnalyticsController {
       }
 
       logger.success(
-        '📊 [AnalyticsController] Dashboard analytics retrieved successfully - v2.0',
-        'AnalyticsController',
+        "📊 [AnalyticsController] Dashboard analytics retrieved successfully - v2.0",
+        "AnalyticsController",
         {
           tenantId,
           executionTime,
@@ -802,16 +764,16 @@ export class AnalyticsController {
             hourlyActivity: analytics.hourlyActivity.length,
             languageDistribution: analytics.languageDistribution.length,
           },
-        }
+        },
       );
 
       (res as any).json({
         success: true,
         data: enhancedAnalytics,
         metadata: {
-          version: '2.0.0',
+          version: "2.0.0",
           executionTime,
-          tenantId: tenantId || 'all',
+          tenantId: tenantId || "all",
           timestamp: new Date().toISOString(),
           features: {
             comprehensive: enableComprehensiveAnalytics,
@@ -820,34 +782,34 @@ export class AnalyticsController {
           },
           abTest: dashboardLayoutVariant
             ? {
-                testName: 'dashboard-layout-test',
+                testName: "dashboard-layout-test",
                 variant: dashboardLayoutVariant,
                 userId: context.userId,
               }
             : undefined,
           serviceContainer: {
-            version: '2.0.0',
-            servicesUsed: ['TenantService'],
+            version: "2.0.0",
+            servicesUsed: ["TenantService"],
             dependencyInjection: true,
           },
         },
       });
     } catch (error) {
       logger.error(
-        '❌ [AnalyticsController] Failed to get dashboard analytics - v2.0',
-        'AnalyticsController',
-        error
+        "❌ [AnalyticsController] Failed to get dashboard analytics - v2.0",
+        "AnalyticsController",
+        error,
       );
       (res as any).status(500).json({
         success: false,
-        error: 'Failed to retrieve dashboard analytics',
+        error: "Failed to retrieve dashboard analytics",
         details:
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? error instanceof Error
               ? error.message
-              : 'Unknown error'
+              : "Unknown error"
             : undefined,
-        version: '2.0.0',
+        version: "2.0.0",
       });
     }
   }
@@ -860,7 +822,7 @@ export class AnalyticsController {
     return {
       start: query.start ? new Date(query.start) : undefined,
       end: query.end ? new Date(query.end) : undefined,
-      period: query.period || '30d',
+      period: query.period || "30d",
     };
   }
 }

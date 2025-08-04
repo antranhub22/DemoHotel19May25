@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { db } from "@shared/db";
 // ✅ MIGRATION: Using Prisma generated types instead of Drizzle
 // import { tenants, staff, call, transcript, request } from '@shared/db/schema'; // REMOVED
-import { and, eq } from "drizzle-orm";
+// TODO: Migrate to Prisma
+// import { and, eq } from "drizzle-orm";
 
 // Test data for multiple tenants
 const testTenants = [

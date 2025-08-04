@@ -2,19 +2,17 @@
  * 🏨 TENANT CONTROLLER
  *
  * RESTful API controller for tenant management operations
- * Uses Prisma-based services with automatic fallback to Drizzle
+ * Uses Prisma ORM for database operations
  * Supports multi-tenant architecture with proper isolation
  */
 
-import { isFeatureEnabled } from '@server/shared/FeatureFlags';
-import { DatabaseServiceFactory } from '@shared/db/DatabaseServiceFactory';
-import * as FeatureFlags from '@shared/FeatureFlags';
-import { logger } from '@shared/utils/logger';
-import { ResponseWrapper } from '@shared/utils/responseWrapper';
-import { Request, Response } from 'express';
+import { DatabaseServiceFactory } from "@shared/db/DatabaseServiceFactory";
+import { logger } from "@shared/utils/logger";
+import { ResponseWrapper } from "@shared/utils/responseWrapper";
+import { Request, Response } from "express";
 
-// Import legacy service for fallback
-import TenantService from '@server/services/tenantService';
+// Import database service factory
+import { IDatabaseService } from "@shared/db/IDatabaseService";
 
 // ============================================
 // TENANT CONTROLLER CLASS
@@ -22,49 +20,35 @@ import TenantService from '@server/services/tenantService';
 
 export class TenantController {
   /**
-   * 🔄 Get appropriate tenant service based on feature flags
-   * Supports switching between Drizzle (legacy) and Prisma (new) tenant services
+   * 🔄 Get tenant service instance
    */
-  private static async getTenantService(): Promise<any> {
-    const usePrisma =
-      process.env.USE_PRISMA === 'true' ||
-      isFeatureEnabled(FeatureFlags.USE_PRISMA) ||
-      isFeatureEnabled(FeatureFlags.PRISMA_TENANT_SERVICE);
+  private static async getTenantService(): Promise<IDatabaseService> {
+    try {
+      logger.info("🔄 [TenantController] Initializing Prisma Tenant Service");
 
-    if (usePrisma) {
-      try {
-        logger.info('🔄 [TenantController] Using Prisma Tenant Service');
+      // Initialize Prisma connections if not already done
+      await DatabaseServiceFactory.initializeConnections();
 
-        // Initialize Prisma connections if not already done
-        await DatabaseServiceFactory.initializeConnections();
+      // Get unified Prisma database service
+      const databaseService =
+        await DatabaseServiceFactory.createDatabaseService();
 
-        // Get unified Prisma database service
-        const databaseService =
-          await DatabaseServiceFactory.createDatabaseService();
-
-        logger.info('✅ [TenantController] Prisma Tenant Service initialized');
-        return databaseService;
-      } catch (error) {
-        logger.error(
-          '❌ [TenantController] Failed to initialize Prisma service, falling back to Drizzle',
-          error
-        );
-
-        // Fallback to Drizzle if Prisma fails
-        return new TenantService();
-      }
+      logger.info("✅ [TenantController] Prisma Tenant Service initialized");
+      return databaseService;
+    } catch (error) {
+      logger.error(
+        "❌ [TenantController] Failed to initialize Prisma service",
+        error,
+      );
+      throw error;
     }
-
-    // Default to Drizzle TenantService
-    logger.info('🔧 [TenantController] Using Drizzle Tenant Service (legacy)');
-    return new TenantService();
   }
 
   /**
-   * 🔄 Check if service is legacy Drizzle or new Prisma
+   * 🔄 Check if service is valid
    */
-  private static isLegacyService(service: any): service is TenantService {
-    return service instanceof TenantService;
+  private static isValidService(service: any): boolean {
+    return service && typeof service === "object";
   }
 
   // ============================================
@@ -78,15 +62,15 @@ export class TenantController {
   static async createTenant(req: Request, res: Response): Promise<void> {
     try {
       logger.info(
-        '🏨 [TenantController] Creating new tenant',
-        'TenantController'
+        "🏨 [TenantController] Creating new tenant",
+        "TenantController",
       );
 
       const {
         hotelName,
         subdomain,
         customDomain,
-        subscriptionPlan = 'trial',
+        subscriptionPlan = "trial",
         email,
         phone,
         address,
@@ -96,8 +80,8 @@ export class TenantController {
       if (!hotelName || !subdomain) {
         ResponseWrapper.sendValidationError(res, [
           {
-            field: !hotelName ? 'hotelName' : 'subdomain',
-            message: `${!hotelName ? 'Hotel name' : 'Subdomain'} is required`,
+            field: !hotelName ? "hotelName" : "subdomain",
+            message: `${!hotelName ? "Hotel name" : "Subdomain"} is required`,
           },
         ]);
         return;
@@ -105,84 +89,62 @@ export class TenantController {
 
       const service = await TenantController.getTenantService();
 
-      let result;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        const tenantId = await service.createTenant({
-          hotelName,
-          subdomain,
-          customDomain,
-          subscriptionPlan,
-          subscriptionStatus: 'active',
-          email,
-          phone,
-          address,
-        });
+      // Create tenant using Prisma service
+      const tenantData = {
+        id: `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        hotel_name: hotelName,
+        subdomain,
+        domain: customDomain,
+        subscription_plan: subscriptionPlan,
+        email,
+        phone,
+        address,
+      };
 
-        const createdTenant = await service.getTenantById(tenantId);
-        result = { success: true, data: createdTenant };
-      } else {
-        // New Prisma service
-        const tenantData = {
-          id: `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          hotel_name: hotelName,
-          subdomain,
-          domain: customDomain,
-          subscription_plan: subscriptionPlan,
-          email,
-          phone,
-          address,
-        };
-
-        const createdTenant = await service.createTenant(tenantData);
-        result = { success: true, data: createdTenant };
-      }
+      const createdTenant = await service.createTenant(tenantData);
+      const result = { success: true, data: createdTenant };
 
       logger.info(
-        '🎯 [TenantController] Service type for createTenant',
-        'TenantController',
-        {
-          isLegacy: TenantController.isLegacyService(service),
-          usePrisma: process.env.USE_PRISMA === 'true',
-        }
+        "🎯 [TenantController] Using Prisma service for createTenant",
+        "TenantController",
       );
 
       if (result.success) {
         logger.success(
-          '✅ [TenantController] Tenant created successfully',
-          'TenantController',
+          "✅ [TenantController] Tenant created successfully",
+          "TenantController",
           {
             tenantId: result.data.id,
-          }
+          },
         );
 
         ResponseWrapper.sendCreated(
           res,
           result.data,
-          'Tenant created successfully'
+          "Tenant created successfully",
         );
       } else {
         logger.error(
-          '❌ [TenantController] Failed to create tenant',
-          'TenantController',
+          "❌ [TenantController] Failed to create tenant",
+          "TenantController",
           {
             error: result.error,
-          }
+          },
         );
 
         ResponseWrapper.sendError(
           res,
-          result.error || 'Failed to create tenant',
-          500
+          result.error || "Failed to create tenant",
+          500,
         );
       }
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to create tenant',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to create tenant",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to create tenant');
+      ResponseWrapper.sendDatabaseError(res, "Failed to create tenant");
     }
   }
 
@@ -193,45 +155,39 @@ export class TenantController {
   static async getTenantById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const includeRelations = req.query.include === 'relations';
+      const includeRelations = req.query.include === "relations";
 
       logger.info(
         `🔍 [TenantController] Getting tenant by ID: ${id}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let tenant;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        tenant = await service.getTenantById(id);
-      } else {
-        // New Prisma service
-        tenant = await service.getTenantById(id, includeRelations);
-      }
+      // Get tenant using Prisma service
+      const tenant = await service.getTenantById(id, includeRelations);
 
       if (!tenant) {
-        ResponseWrapper.sendNotFound(res, 'Tenant not found');
+        ResponseWrapper.sendNotFound(res, "Tenant not found");
         return;
       }
 
       logger.success(
-        '✅ [TenantController] Tenant retrieved successfully',
-        'TenantController',
+        "✅ [TenantController] Tenant retrieved successfully",
+        "TenantController",
         {
           tenantId: id,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(res, tenant, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get tenant by ID',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get tenant by ID",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to retrieve tenant');
+      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenant");
     }
   }
 
@@ -241,49 +197,43 @@ export class TenantController {
    */
   static async getTenantBySubdomain(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       const { subdomain } = req.params;
 
       logger.info(
         `🔍 [TenantController] Getting tenant by subdomain: ${subdomain}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let tenant;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        tenant = await service.getTenantBySubdomain(subdomain);
-      } else {
-        // New Prisma service
-        tenant = await service.getTenantBySubdomain(subdomain);
-      }
+      // Get tenant using Prisma service
+      const tenant = await service.getTenantBySubdomain(subdomain);
 
       if (!tenant) {
-        ResponseWrapper.sendNotFound(res, 'Tenant not found');
+        ResponseWrapper.sendNotFound(res, "Tenant not found");
         return;
       }
 
       logger.success(
-        '✅ [TenantController] Tenant retrieved by subdomain',
-        'TenantController',
+        "✅ [TenantController] Tenant retrieved by subdomain",
+        "TenantController",
         {
           subdomain,
           tenantId: tenant.id,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(res, tenant, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get tenant by subdomain',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get tenant by subdomain",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to retrieve tenant');
+      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenant");
     }
   }
 
@@ -302,34 +252,27 @@ export class TenantController {
       } = req.query;
 
       logger.info(
-        '📋 [TenantController] Getting all tenants',
-        'TenantController',
+        "📋 [TenantController] Getting all tenants",
+        "TenantController",
         {
           limit: Number(limit),
           offset: Number(offset),
-        }
+        },
       );
 
       const service = await TenantController.getTenantService();
 
-      let result;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service - this method doesn't exist in legacy service
-        // We'll need to implement a simple version
-        throw new Error('getAllTenants not implemented in legacy service');
-      } else {
-        // New Prisma service
-        const tenants = await service.getAllTenants();
-        result = { tenants, total: tenants.length };
-      }
+      // Get all tenants using Prisma service
+      const tenants = await service.getAllTenants();
+      const result = { tenants, total: tenants.length };
 
       logger.success(
-        '✅ [TenantController] Tenants retrieved successfully',
-        'TenantController',
+        "✅ [TenantController] Tenants retrieved successfully",
+        "TenantController",
         {
           count: result.tenants.length,
           total: result.total,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(
@@ -342,15 +285,15 @@ export class TenantController {
             offset: Number(offset),
           },
         },
-        200
+        200,
       );
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get all tenants',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get all tenants",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to retrieve tenants');
+      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenants");
     }
   }
 
@@ -365,74 +308,52 @@ export class TenantController {
 
       logger.info(
         `🔄 [TenantController] Updating tenant: ${id}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let result;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        const legacyUpdates = {
-          hotelName: updates.hotel_name || updates.hotelName,
-          subdomain: updates.subdomain,
-          customDomain: updates.custom_domain || updates.customDomain,
-          subscriptionPlan:
-            updates.subscription_plan || updates.subscriptionPlan,
-          subscriptionStatus:
-            updates.subscription_status || updates.subscriptionStatus,
-          trialEndsAt: updates.trial_ends_at || updates.trialEndsAt,
-          email: updates.email,
-          phone: updates.phone,
-          address: updates.address,
-        };
-
-        await service.updateTenant(id, legacyUpdates);
-        const updatedTenant = await service.getTenantById(id);
-        result = { success: true, data: updatedTenant };
-      } else {
-        // New Prisma service
-        const updatedTenant = await service.updateTenant(id, updates);
-        result = { success: true, data: updatedTenant };
-      }
+      // Update tenant using Prisma service
+      const updatedTenant = await service.updateTenant(id, updates);
+      const result = { success: true, data: updatedTenant };
 
       if (result.success) {
         logger.success(
-          '✅ [TenantController] Tenant updated successfully',
-          'TenantController',
+          "✅ [TenantController] Tenant updated successfully",
+          "TenantController",
           {
             tenantId: id,
-          }
+          },
         );
 
         ResponseWrapper.sendResponse(
           res,
           result.data,
           200,
-          'Tenant updated successfully'
+          "Tenant updated successfully",
         );
       } else {
         logger.error(
-          '❌ [TenantController] Failed to update tenant',
-          'TenantController',
+          "❌ [TenantController] Failed to update tenant",
+          "TenantController",
           {
             error: result.error,
-          }
+          },
         );
 
         ResponseWrapper.sendError(
           res,
-          result.error || 'Failed to update tenant',
-          500
+          result.error || "Failed to update tenant",
+          500,
         );
       }
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to update tenant',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to update tenant",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to update tenant');
+      ResponseWrapper.sendDatabaseError(res, "Failed to update tenant");
     }
   }
 
@@ -446,47 +367,40 @@ export class TenantController {
 
       logger.info(
         `🗑️ [TenantController] Deleting tenant: ${id}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let success;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        await service.deleteTenant(id);
-        success = true;
-      } else {
-        // New Prisma service - this method doesn't exist in unified service
-        // We'd need to implement it in PrismaDatabaseService
-        throw new Error('deleteTenant not implemented in unified service yet');
-      }
+      // Delete tenant using Prisma service
+      await service.deleteTenant(id);
+      const success = true;
 
       if (success) {
         logger.success(
-          '✅ [TenantController] Tenant deleted successfully',
-          'TenantController',
+          "✅ [TenantController] Tenant deleted successfully",
+          "TenantController",
           {
             tenantId: id,
-          }
+          },
         );
 
         ResponseWrapper.sendResponse(
           res,
           null,
           200,
-          'Tenant deleted successfully'
+          "Tenant deleted successfully",
         );
       } else {
-        ResponseWrapper.sendError(res, 'Failed to delete tenant', 500);
+        ResponseWrapper.sendError(res, "Failed to delete tenant", 500);
       }
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to delete tenant',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to delete tenant",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to delete tenant');
+      ResponseWrapper.sendDatabaseError(res, "Failed to delete tenant");
     }
   }
 
@@ -504,43 +418,35 @@ export class TenantController {
 
       logger.info(
         `🏴 [TenantController] Checking feature access for tenant: ${id}`,
-        'TenantController',
+        "TenantController",
         {
           feature,
-        }
+        },
       );
 
       const service = await TenantController.getTenantService();
 
-      let hasAccess;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        hasAccess = await service.hasFeatureAccess(id, feature as any);
-      } else {
-        // New Prisma service - need to implement in unified service
-        throw new Error(
-          'hasFeatureAccess not implemented in unified service yet'
-        );
-      }
+      // Check feature access using Prisma service
+      const hasAccess = await service.hasFeatureAccess(id, feature as any);
 
       logger.info(
-        '✅ [TenantController] Feature access checked',
-        'TenantController',
+        "✅ [TenantController] Feature access checked",
+        "TenantController",
         {
           tenantId: id,
           feature,
           hasAccess,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(res, { hasAccess }, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to check feature access',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to check feature access",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to check feature access');
+      ResponseWrapper.sendDatabaseError(res, "Failed to check feature access");
     }
   }
 
@@ -550,54 +456,46 @@ export class TenantController {
    */
   static async getSubscriptionLimits(
     req: Request,
-    res: Response
+    res: Response,
   ): Promise<void> {
     try {
       const { id } = req.params;
 
       logger.info(
         `📊 [TenantController] Getting subscription limits for tenant: ${id}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let limits;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        const tenant = await service.getTenantById(id);
-        if (!tenant) {
-          ResponseWrapper.sendNotFound(res, 'Tenant not found');
-          return;
-        }
-        limits = service.getSubscriptionLimits(
-          tenant.subscription_plan || 'trial'
-        );
-      } else {
-        // New Prisma service - need to implement in unified service
-        throw new Error(
-          'getSubscriptionLimits not implemented in unified service yet'
-        );
+      // Get subscription limits using Prisma service
+      const tenant = await service.getTenantById(id);
+      if (!tenant) {
+        ResponseWrapper.sendNotFound(res, "Tenant not found");
+        return;
       }
+      const limits = service.getSubscriptionLimits(
+        tenant.subscription_plan || "trial",
+      );
 
       logger.success(
-        '✅ [TenantController] Subscription limits retrieved',
-        'TenantController',
+        "✅ [TenantController] Subscription limits retrieved",
+        "TenantController",
         {
           tenantId: id,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(res, limits, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get subscription limits',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get subscription limits",
+        "TenantController",
+        error,
       );
       ResponseWrapper.sendDatabaseError(
         res,
-        'Failed to get subscription limits'
+        "Failed to get subscription limits",
       );
     }
   }
@@ -612,38 +510,30 @@ export class TenantController {
 
       logger.info(
         `📈 [TenantController] Getting usage statistics for tenant: ${id}`,
-        'TenantController'
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let usage;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        usage = await service.getTenantUsage(id);
-      } else {
-        // New Prisma service - need to implement in unified service
-        throw new Error(
-          'getTenantUsage not implemented in unified service yet'
-        );
-      }
+      // Get tenant usage using Prisma service
+      const usage = await service.getTenantUsage(id);
 
       logger.success(
-        '✅ [TenantController] Usage statistics retrieved',
-        'TenantController',
+        "✅ [TenantController] Usage statistics retrieved",
+        "TenantController",
         {
           tenantId: id,
-        }
+        },
       );
 
       ResponseWrapper.sendResponse(res, usage, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get tenant usage',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get tenant usage",
+        "TenantController",
+        error,
       );
-      ResponseWrapper.sendDatabaseError(res, 'Failed to get tenant usage');
+      ResponseWrapper.sendDatabaseError(res, "Failed to get tenant usage");
     }
   }
 
@@ -658,38 +548,30 @@ export class TenantController {
   static async getServiceHealth(req: Request, res: Response): Promise<void> {
     try {
       logger.info(
-        '🏥 [TenantController] Getting service health',
-        'TenantController'
+        "🏥 [TenantController] Getting service health",
+        "TenantController",
       );
 
       const service = await TenantController.getTenantService();
 
-      let health;
-      if (TenantController.isLegacyService(service)) {
-        // Legacy Drizzle service
-        health = await service.getServiceHealth();
-      } else {
-        // New Prisma service - need to implement in unified service
-        throw new Error(
-          'getServiceHealth not implemented in unified service yet'
-        );
-      }
+      // Get service health using Prisma service
+      const health = await service.getServiceHealth();
 
       logger.success(
-        '✅ [TenantController] Service health retrieved',
-        'TenantController'
+        "✅ [TenantController] Service health retrieved",
+        "TenantController",
       );
 
       ResponseWrapper.sendResponse(res, health, 200);
     } catch (error) {
       logger.error(
-        '❌ [TenantController] Failed to get service health',
-        'TenantController',
-        error
+        "❌ [TenantController] Failed to get service health",
+        "TenantController",
+        error,
       );
       ResponseWrapper.sendServiceUnavailable(
         res,
-        'Service health check failed'
+        "Service health check failed",
       );
     }
   }

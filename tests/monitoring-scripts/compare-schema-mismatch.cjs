@@ -1,149 +1,141 @@
 #!/usr/bin/env node
 
 /**
- * Compare Drizzle Schema vs Database Schema
- * Find mismatches that cause 42703 errors
+ * Compare Prisma Schema vs Database Schema
+ * Helps identify schema mismatches between Prisma and actual database
  */
 
+const { PrismaClient } = require('@prisma/client');
 const { Pool } = require('pg');
 
-const DATABASE_URL = process.env.DATABASE_URL;
+// Initialize Prisma client
+const prisma = new PrismaClient();
 
-if (!DATABASE_URL) {
-    console.error('❌ DATABASE_URL environment variable is required!');
-    process.exit(1);
-}
-
-// Drizzle schema definition (from packages/shared/db/schema.ts)
-const drizzleSchema = {
-    id: 'serial',
-    tenant_id: 'text',
-    call_id: 'text',
-    room_number: 'varchar(10)',
-    order_id: 'varchar(50)',
-    request_content: 'varchar(1000)',
-    status: 'varchar(50)',
+// Get database schema from Prisma
+const prismaSchema = {
+    // Define expected schema based on Prisma models
+    id: 'uuid',
+    hotel_name: 'varchar(255)',
+    subdomain: 'varchar(50)',
+    custom_domain: 'varchar(100)',
+    subscription_plan: 'varchar(20)',
+    subscription_status: 'varchar(20)',
+    trial_ends_at: 'timestamp',
     created_at: 'timestamp',
+    max_voices: 'integer',
+    max_languages: 'integer',
+    voice_cloning: 'boolean',
+    multi_location: 'boolean',
+    white_label: 'boolean',
+    data_retention_days: 'integer',
+    monthly_call_limit: 'integer',
+    name: 'varchar(255)',
     updated_at: 'timestamp',
-    description: 'varchar(500)',
-    priority: 'varchar(20)',
-    assigned_to: 'varchar(100)',
-    guest_name: 'varchar(100)',
-    phone_number: 'varchar(20)',
-    total_amount: 'real',
-    currency: 'varchar(10)',
-    estimated_completion: 'timestamp',
-    actual_completion: 'timestamp',
-    special_instructions: 'varchar(500)',
-    urgency: 'varchar(20)',
-    order_type: 'varchar(50)',
-    delivery_time: 'varchar(100)', // ⚠️ Drizzle: varchar, DB: timestamp
-    items: 'text'
+    is_active: 'boolean',
+    settings: 'jsonb',
+    tier: 'varchar(20)',
+    max_calls: 'integer',
+    max_users: 'integer',
+    features: 'jsonb'
 };
 
 async function compareSchemas() {
-    const pool = new Pool({
-        connectionString: DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-    });
-
     try {
-        console.log('🔍 Comparing Drizzle Schema vs Database Schema');
-        console.log('==============================================');
-
-        // Get actual database schema
-        const dbSchemaResult = await pool.query(`
+        // Get database schema from PostgreSQL
+        const pool = new Pool();
+        const { rows } = await pool.query(`
       SELECT column_name, data_type, character_maximum_length
-      FROM information_schema.columns 
-      WHERE table_name = 'request' 
-      ORDER BY ordinal_position;
+      FROM information_schema.columns
+      WHERE table_name = 'tenants'
     `);
 
+        // Convert database schema to comparable format
         const dbSchema = {};
-        dbSchemaResult.rows.forEach(row => {
+        rows.forEach(row => {
             let type = row.data_type;
             if (row.character_maximum_length) {
-                type += `(${row.character_maximum_length})`;
+                type = `${type}(${row.character_maximum_length})`;
             }
             dbSchema[row.column_name] = type;
         });
 
+        console.log('🔍 Comparing Prisma Schema vs Database Schema');
+        console.log('===========================================');
+
+        // Compare schemas
+        let mismatches = 0;
+        let missing = 0;
+
+        console.log('\n📋 Prisma Schema (Expected):');
+        Object.entries(prismaSchema).forEach(([col, type]) => {
+            console.log(`  ${col}: ${type}`);
+        });
+
         console.log('\n📋 Database Schema (Actual):');
         Object.entries(dbSchema).forEach(([col, type]) => {
-            console.log(`  - ${col}: ${type}`);
+            console.log(`  ${col}: ${type}`);
         });
 
-        console.log('\n📋 Drizzle Schema (Expected):');
-        Object.entries(drizzleSchema).forEach(([col, type]) => {
-            console.log(`  - ${col}: ${type}`);
-        });
-
-        console.log('\n🔍 Mismatches Found:');
-        let hasMismatches = false;
-
-        // Check for missing columns in database
-        Object.keys(drizzleSchema).forEach(col => {
+        console.log('\n🔍 Missing Columns:');
+        Object.keys(prismaSchema).forEach(col => {
             if (!dbSchema[col]) {
-                console.log(`  ❌ Missing in DB: ${col} (${drizzleSchema[col]})`);
-                hasMismatches = true;
+                console.log(`  ❌ Missing in DB: ${col} (${prismaSchema[col]})`);
+                missing++;
             }
         });
 
-        // Check for missing columns in Drizzle
+        // Check for missing columns in Prisma
         Object.keys(dbSchema).forEach(col => {
-            if (!drizzleSchema[col]) {
-                console.log(`  ❌ Missing in Drizzle: ${col} (${dbSchema[col]})`);
-                hasMismatches = true;
+            if (!prismaSchema[col]) {
+                console.log(`  ❌ Missing in Prisma: ${col} (${dbSchema[col]})`);
+                missing++;
             }
         });
 
-        // Check for type mismatches
-        Object.keys(drizzleSchema).forEach(col => {
-            if (dbSchema[col] && drizzleSchema[col] !== dbSchema[col]) {
-                console.log(`  ⚠️ Type mismatch for ${col}:`);
-                console.log(`    Drizzle: ${drizzleSchema[col]}`);
-                console.log(`    Database: ${dbSchema[col]}`);
-                hasMismatches = true;
+        console.log('\n🔍 Type Mismatches:');
+        Object.keys(prismaSchema).forEach(col => {
+            if (dbSchema[col] && prismaSchema[col] !== dbSchema[col]) {
+                console.log(`  ❌ Type mismatch for ${col}:`);
+                console.log(`    Prisma: ${prismaSchema[col]}`);
+                console.log(`    DB: ${dbSchema[col]}`);
+                mismatches++;
             }
         });
 
-        if (!hasMismatches) {
-            console.log('  ✅ No mismatches found!');
-        }
-
-        // Test specific problematic fields
-        console.log('\n🧪 Testing specific fields:');
-        const testFields = ['delivery_time', 'items', 'total_amount'];
-
-        for (const field of testFields) {
-            const drizzleType = drizzleSchema[field];
+        // Check specific fields that often cause issues
+        console.log('\n🔍 Common Issues Check:');
+        const criticalFields = ['delivery_time', 'created_at', 'updated_at'];
+        criticalFields.forEach(field => {
+            const prismaType = prismaSchema[field];
             const dbType = dbSchema[field];
 
-            console.log(`  ${field}:`);
-            console.log(`    Drizzle: ${drizzleType}`);
-            console.log(`    Database: ${dbType}`);
+            console.log(`\n  Checking ${field}:`);
+            console.log(`    Prisma: ${prismaType}`);
+            console.log(`    DB: ${dbType}`);
 
-            if (drizzleType !== dbType) {
-                console.log(`    ⚠️ MISMATCH - This could cause 42703 errors!`);
-            } else {
-                console.log(`    ✅ Match`);
+            if (prismaType !== dbType) {
+                console.log('    ⚠️ Type mismatch!');
             }
-        }
+        });
 
-        console.log('\n💡 Recommendations:');
-        if (hasMismatches) {
-            console.log('  1. Update Drizzle schema to match database');
-            console.log('  2. Or run migration to update database schema');
-            console.log('  3. Check for data type conversions in code');
+        console.log('\n📊 Summary:');
+        console.log(`  Missing Columns: ${missing}`);
+        console.log(`  Type Mismatches: ${mismatches}`);
+
+        if (missing > 0 || mismatches > 0) {
+            console.log('\n⚠️ Action Required:');
+            console.log('  1. Update Prisma schema to match database');
+            console.log('  2. Run prisma generate');
+            console.log('  3. Run prisma migrate dev');
+            process.exit(1);
         } else {
-            console.log('  ✅ Schemas match - 42703 error might be from other causes');
+            console.log('\n✅ Schemas match!');
+            process.exit(0);
         }
-
     } catch (error) {
-        console.error('❌ Comparison failed:', error.message);
-    } finally {
-        await pool.end();
+        console.error('❌ Error:', error);
+        process.exit(1);
     }
 }
 
-compareSchemas(); 
+compareSchemas();

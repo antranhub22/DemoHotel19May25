@@ -104,7 +104,7 @@ export interface DashboardAnalytics {
     tenantId: string;
     executionTime: number;
     timestamp: string;
-    dataSource: "prisma" | "drizzle";
+    dataSource: "prisma";
     cacheHitRate?: number;
   };
 }

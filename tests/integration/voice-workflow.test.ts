@@ -2,7 +2,8 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { db } from "@shared/db";
 // ✅ MIGRATION: Using Prisma generated types instead of Drizzle
 // import { tenants, call, transcript, request } from '@shared/db/schema'; // REMOVED
-import { and, eq } from "drizzle-orm";
+// TODO: Migrate to Prisma
+// import { and, eq } from "drizzle-orm";
 
 const testTenant = {
   id: "voice-workflow-tenant",

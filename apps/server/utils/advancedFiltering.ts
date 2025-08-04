@@ -1,9 +1,5 @@
-// ✅ DETAILED MIGRATION: ADVANCED FILTERING MIGRATED TO PRISMA
-// This file has been completely migrated to use Prisma's native filtering capabilities
-// All Drizzle-based filtering logic has been replaced with Prisma equivalents
-
-import { PrismaClient } from "@prisma/client";
-import { logger } from "@shared/utils/logger";
+// ✅ ADVANCED FILTERING USING PRISMA
+// This file provides advanced filtering capabilities using Prisma's native features
 
 // ============================================
 // MIGRATED FILTER INTERFACES - NOW USING PRISMA
@@ -189,18 +185,13 @@ export function getAllFilterPresets() {
 // ============================================
 
 /*
-✅ DETAILED MIGRATION COMPLETED:
+✅ ADVANCED FILTERING FEATURES:
 
-BEFORE (Drizzle):
-- Used SQL-based filtering with and(), or(), eq(), etc.
-- Required knowledge of SQL operators
-- Complex query building logic
-
-AFTER (Prisma):
+FEATURES:
 - Uses Prisma's native where/orderBy objects
 - Type-safe filtering conditions
 - Simplified query building
-- Better performance with built-in optimizations
+- Optimized performance
 
 BENEFITS:
 - 🎯 Type Safety: Full TypeScript support
@@ -209,8 +200,8 @@ BENEFITS:
 - 🔧 Maintainability: Cleaner, more readable code
 - 📈 Features: Built-in pagination, sorting, filtering
 
-ALL LEGACY FUNCTIONALITY PRESERVED:
-- Filter presets still available
-- Same interface for existing code
-- Enhanced with Prisma's capabilities
+FUNCTIONALITY:
+- Filter presets available
+- Consistent interface
+- Enhanced capabilities
 */

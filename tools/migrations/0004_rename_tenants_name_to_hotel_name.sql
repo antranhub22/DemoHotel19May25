@@ -11,5 +11,5 @@ BEGIN
     END IF;
 END$$;
 
--- For SQLite (if needed, syntax is different, but Drizzle handles this in dev)
--- ALTER TABLE tenants RENAME COLUMN name TO hotel_name; 
+-- For SQLite (if needed, use Prisma migrate)
+-- Use prisma migrate dev to handle SQLite migrations 

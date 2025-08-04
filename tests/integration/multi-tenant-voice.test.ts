@@ -16,7 +16,8 @@ import { db } from "@shared/db";
 //   transcript,
 // } from '@shared/db/schema'; // REMOVED
 
-import { and, eq } from "drizzle-orm";
+// TODO: Migrate to Prisma
+// import { and, eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import request from "supertest";
 
