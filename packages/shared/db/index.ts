@@ -1,5 +1,5 @@
 // ✅ Enhanced Database Connection with Advanced Pooling & Monitoring
-import { connectionManager } from '@shared/db/connectionManager';
+import { connectionManager } from "@shared/db/connectionManager";
 
 // Initialize connection manager
 let _dbInstance: any;
@@ -24,7 +24,7 @@ function getDatabaseSync() {
     return connectionManager.getDatabase();
   } catch (error) {
     console.warn(
-      '⚠️ Database not initialized synchronously. Consider using getDatabase() instead.'
+      "⚠️ Database not initialized synchronously. Consider using getDatabase() instead.",
     );
     throw error;
   }
@@ -39,7 +39,7 @@ export const db = new Proxy({} as any, {
       return database[prop];
     } catch (error) {
       console.error(
-        '❌ Database access failed. Ensure connection is initialized first.'
+        "❌ Database access failed. Ensure connection is initialized first.",
       );
       throw error;
     }
@@ -53,9 +53,9 @@ export const db = new Proxy({} as any, {
  * Recommended for application startup
  */
 export async function initializeDatabase() {
-  console.log('🚀 Initializing database with advanced connection pooling...');
+  console.log("🚀 Initializing database with advanced connection pooling...");
   const database = await connectionManager.initialize();
-  console.log('✅ Database initialization complete');
+  console.log("✅ Database initialization complete");
   return database;
 }
 
@@ -78,58 +78,24 @@ export async function checkDatabaseHealth() {
  * Important for clean application shutdown
  */
 export async function shutdownDatabase() {
-  console.log('🔄 Shutting down database connections...');
+  console.log("🔄 Shutting down database connections...");
   await connectionManager.shutdown();
-  console.log('✅ Database shutdown complete');
+  console.log("✅ Database shutdown complete");
 }
 
 /**
  * Force database reconnection (for recovery scenarios)
  */
 export async function reconnectDatabase() {
-  console.log('🔄 Reconnecting to database...');
+  console.log("🔄 Reconnecting to database...");
   const database = await connectionManager.reconnect();
-  console.log('✅ Database reconnection complete');
+  console.log("✅ Database reconnection complete");
   return database;
 }
 
-// Export all schema tables
-export {
-  tenants,
-  hotelProfiles,
-  staff,
-  call,
-  transcript,
-  request,
-  message,
-  call_summaries,
-} from './schema';
-
-// ✅ ALIAS: Maintain compatibility with existing routes that use 'requests'
-export { request as requests } from './schema';
-
-// ✅ FIXED: Export common drizzle-orm functions to fix missing imports
-export {
-  eq,
-  and,
-  or,
-  desc,
-  asc,
-  count,
-  avg,
-  sum,
-  max,
-  min,
-  sql,
-  like,
-  between,
-  isNull,
-  isNotNull,
-  inArray,
-  notInArray,
-  exists,
-  notExists,
-} from 'drizzle-orm';
+// Export Prisma client and connection manager
+export { PrismaClient } from "@prisma/client";
+export { PrismaConnectionManager } from "./PrismaConnectionManager";
 
 // ✅ POSTGRESQL-OPTIMIZED UTILITIES
 export const getCurrentTimestamp = (): Date => {
@@ -138,7 +104,7 @@ export const getCurrentTimestamp = (): Date => {
 
 // PostgreSQL-compatible date conversion
 export const convertToDate = (
-  value: string | number | Date | null
+  value: string | number | Date | null,
 ): Date | null => {
   if (value === null || value === undefined) {
     return null;
@@ -148,12 +114,12 @@ export const convertToDate = (
     return value;
   }
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const date = new Date(value);
     return isNaN(date.getTime()) ? null : date;
   }
 
-  if (typeof value === 'number') {
+  if (typeof value === "number") {
     // Handle both seconds and milliseconds
     const timestamp = value < 10000000000 ? value * 1000 : value;
     const date = new Date(timestamp);
@@ -169,9 +135,9 @@ export const safeNumber = (value: any): number => {
   return isNaN(num) ? 0 : num;
 };
 
-export * from './schema';
-export * from './transformers';
-export * from './connectionManager';
+export * from "./schema";
+export * from "./transformers";
+export * from "./connectionManager";
 
 // ✅ Setup graceful shutdown handling
 const setupGracefulShutdown = () => {
@@ -181,17 +147,17 @@ const setupGracefulShutdown = () => {
       await shutdownDatabase();
       process.exit(0);
     } catch (error) {
-      console.error('❌ Error during graceful shutdown:', error);
+      console.error("❌ Error during graceful shutdown:", error);
       process.exit(1);
     }
   };
 
-  process.on('SIGINT', () => shutdownHandler('SIGINT'));
-  process.on('SIGTERM', () => shutdownHandler('SIGTERM'));
-  process.on('SIGUSR2', () => shutdownHandler('SIGUSR2')); // For nodemon
+  process.on("SIGINT", () => shutdownHandler("SIGINT"));
+  process.on("SIGTERM", () => shutdownHandler("SIGTERM"));
+  process.on("SIGUSR2", () => shutdownHandler("SIGUSR2")); // For nodemon
 };
 
 // Setup graceful shutdown in non-test environments
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   setupGracefulShutdown();
 }

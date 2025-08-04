@@ -4,9 +4,9 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import bcrypt from 'bcrypt';
-import { and, eq } from 'drizzle-orm';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 // Import new unified types and config
 import {
   AUTH_ERROR_MESSAGES,
@@ -15,7 +15,7 @@ import {
   SECURITY_CONFIG,
   TENANT_CONFIG,
   authValidationSchemas,
-} from '@auth/config';
+} from "@auth/config";
 import type {
   AuthErrorCode,
   AuthResult,
@@ -25,8 +25,8 @@ import type {
   Permission,
   TokenPair,
   TokenValidationResult,
-} from '@auth/types';
-import { db, staff } from '@shared/db';
+} from "@auth/types";
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================
@@ -75,8 +75,8 @@ export class UnifiedAuthService {
         authValidationSchemas.loginCredentials.safeParse(credentials);
       if (!validation.success) {
         return this.createErrorResult(
-          'INVALID_CREDENTIALS',
-          'Invalid login credentials'
+          "INVALID_CREDENTIALS",
+          "Invalid login credentials",
         );
       }
 
@@ -90,22 +90,22 @@ export class UnifiedAuthService {
       const user = await this.findUserByCredentials(loginIdentifier!, tenantId);
       if (!user) {
         console.log(`❌ [UnifiedAuth] User not found: ${loginIdentifier}`);
-        return this.createErrorResult('INVALID_CREDENTIALS');
+        return this.createErrorResult("INVALID_CREDENTIALS");
       }
 
       // Check if user is active
       if (!user.is_active) {
         console.log(`❌ [UnifiedAuth] User inactive: ${loginIdentifier}`);
-        return this.createErrorResult('USER_INACTIVE');
+        return this.createErrorResult("USER_INACTIVE");
       }
 
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         console.log(
-          `❌ [UnifiedAuth] Invalid password for: ${loginIdentifier}`
+          `❌ [UnifiedAuth] Invalid password for: ${loginIdentifier}`,
         );
-        return this.createErrorResult('INVALID_CREDENTIALS');
+        return this.createErrorResult("INVALID_CREDENTIALS");
       }
 
       // Create AuthUser object
@@ -118,7 +118,7 @@ export class UnifiedAuthService {
       await this.updateLastLogin(user.id);
 
       console.log(
-        `✅ [UnifiedAuth] Login successful: ${loginIdentifier} (${authUser.role})`
+        `✅ [UnifiedAuth] Login successful: ${loginIdentifier} (${authUser.role})`,
       );
 
       return {
@@ -130,8 +130,8 @@ export class UnifiedAuthService {
         tokenType: tokenPair.tokenType,
       };
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Login error:', error);
-      return this.createErrorResult('SERVER_ERROR');
+      console.error("❌ [UnifiedAuth] Login error:", error);
+      return this.createErrorResult("SERVER_ERROR");
     }
   }
 
@@ -157,14 +157,14 @@ export class UnifiedAuthService {
       const user = await this.findUserById(payload.userId);
       if (!user || !user.is_active) {
         console.log(
-          `❌ [UnifiedAuth] User not found or inactive: ${payload.userId}`
+          `❌ [UnifiedAuth] User not found or inactive: ${payload.userId}`,
         );
         return null;
       }
 
       return this.createAuthUserFromDbUser(user);
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Token verification error:', error);
+      console.error("❌ [UnifiedAuth] Token verification error:", error);
       return null;
     }
   }
@@ -176,20 +176,20 @@ export class UnifiedAuthService {
     try {
       const validation = this.validateToken(refreshToken);
       if (!validation.valid || !validation.payload) {
-        return this.createErrorResult('TOKEN_INVALID');
+        return this.createErrorResult("TOKEN_INVALID");
       }
 
       const payload = validation.payload;
 
       // Check if refresh token is blacklisted
       if (payload.jti && TokenBlacklist.isBlacklisted(payload.jti)) {
-        return this.createErrorResult('TOKEN_INVALID');
+        return this.createErrorResult("TOKEN_INVALID");
       }
 
       // Get fresh user data
       const user = await this.findUserById(payload.userId);
       if (!user || !user.is_active) {
-        return this.createErrorResult('USER_INACTIVE');
+        return this.createErrorResult("USER_INACTIVE");
       }
 
       // Create AuthUser object with fresh data
@@ -212,8 +212,8 @@ export class UnifiedAuthService {
         tokenType: tokenPair.tokenType,
       };
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Refresh token error:', error);
-      return this.createErrorResult('SERVER_ERROR');
+      console.error("❌ [UnifiedAuth] Refresh token error:", error);
+      return this.createErrorResult("SERVER_ERROR");
     }
   }
 
@@ -226,11 +226,11 @@ export class UnifiedAuthService {
       if (validation.valid && validation.payload?.jti) {
         TokenBlacklist.addToken(validation.payload.jti);
         console.log(
-          `✅ [UnifiedAuth] Token blacklisted: ${validation.payload.jti}`
+          `✅ [UnifiedAuth] Token blacklisted: ${validation.payload.jti}`,
         );
       }
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Logout error:', error);
+      console.error("❌ [UnifiedAuth] Logout error:", error);
     }
   }
 
@@ -244,13 +244,13 @@ export class UnifiedAuthService {
   static hasPermission(
     user: AuthUser,
     module: string,
-    action: string
+    action: string,
   ): boolean {
     return user.permissions.some(
-      permission =>
+      (permission) =>
         permission.module === module &&
         permission.action === action &&
-        permission.allowed
+        permission.allowed,
     );
   }
 
@@ -260,7 +260,7 @@ export class UnifiedAuthService {
   static hasRole(user: AuthUser, role: UserRole): boolean {
     const {
       hasRolePrivilege,
-    } = require('../../../packages/config/auth.config');
+    } = require("../../../packages/config/auth.config");
     return hasRolePrivilege(user.role, role);
   }
 
@@ -269,7 +269,7 @@ export class UnifiedAuthService {
    */
   static canAccessTenant(user: AuthUser, tenantId: string): boolean {
     // Super admin can access all tenants
-    if (user.role === 'super-admin') {
+    if (user.role === "super-admin") {
       return true;
     }
 
@@ -281,37 +281,47 @@ export class UnifiedAuthService {
   // PRIVATE HELPER METHODS
   // ============================================
 
+  private static prisma: PrismaClient;
+
+  private static getPrisma(): PrismaClient {
+    if (!this.prisma) {
+      this.prisma = PrismaConnectionManager.getInstance().getClient();
+    }
+    return this.prisma;
+  }
+
   private static async findUserByCredentials(
     loginIdentifier: string,
-    tenantId?: string
+    tenantId?: string,
   ): Promise<any> {
     try {
-      const whereConditions = [eq(staff.is_active, true)];
+      // Build where conditions for Prisma
+      const whereConditions: any = {
+        is_active: true,
+      };
 
       // Search by username or email
-      const isEmail = loginIdentifier.includes('@');
+      const isEmail = loginIdentifier.includes("@");
       if (isEmail) {
-        whereConditions.push(eq(staff.email, loginIdentifier));
+        whereConditions.email = loginIdentifier;
       } else {
-        whereConditions.push(eq(staff.username, loginIdentifier));
+        whereConditions.username = loginIdentifier;
       }
 
       // Filter by tenant if provided
       if (tenantId) {
-        whereConditions.push(eq(staff.tenant_id, tenantId));
+        whereConditions.tenant_id = tenantId;
       }
 
-      const users = await db
-        .select()
-        .from(staff)
-        .where(and(...whereConditions))
-        .limit(1);
+      const user = await this.getPrisma().staff.findFirst({
+        where: whereConditions,
+      });
 
-      return users[0] || null;
+      return user;
     } catch (error) {
       console.error(
-        '❌ [UnifiedAuth] Error finding user by credentials:',
-        error
+        "❌ [UnifiedAuth] Error finding user by credentials:",
+        error,
       );
       return null;
     }
@@ -319,28 +329,28 @@ export class UnifiedAuthService {
 
   private static async findUserById(userId: string): Promise<any> {
     try {
-      const users = await db
-        .select()
-        .from(staff)
-        .where(eq(staff.id, userId))
-        .limit(1);
+      const user = await this.getPrisma().staff.findUnique({
+        where: {
+          id: userId,
+        },
+      });
 
-      return users[0] || null;
+      return user;
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Error finding user by ID:', error);
+      console.error("❌ [UnifiedAuth] Error finding user by ID:", error);
       return null;
     }
   }
 
   private static async createAuthUserFromDbUser(
-    dbUser: any
+    dbUser: any,
   ): Promise<AuthUser> {
     // Get user permissions
     let permissions: Permission[] = [];
 
     try {
       // Parse permissions from database
-      if (dbUser.permissions && typeof dbUser.permissions === 'string') {
+      if (dbUser.permissions && typeof dbUser.permissions === "string") {
         permissions = JSON.parse(dbUser.permissions);
       } else if (Array.isArray(dbUser.permissions)) {
         permissions = dbUser.permissions;
@@ -357,7 +367,7 @@ export class UnifiedAuthService {
       }
     } catch (error) {
       console.warn(
-        `⚠️ [UnifiedAuth] Failed to parse permissions for user ${dbUser.id}, using role defaults`
+        `⚠️ [UnifiedAuth] Failed to parse permissions for user ${dbUser.id}, using role defaults`,
       );
       const rolePermissions = (DEFAULT_PERMISSIONS as any)?.[
         dbUser.role as any
@@ -398,7 +408,7 @@ export class UnifiedAuthService {
 
   private static generateTokenPair(
     user: AuthUser,
-    rememberMe = false
+    rememberMe = false,
   ): TokenPair {
     const now = Math.floor(Date.now() / 1000);
     const jti = `${user.id}-${now}-${Math.random().toString(36).substr(2, 9)}`;
@@ -443,13 +453,13 @@ export class UnifiedAuthService {
       accessToken,
       refreshToken,
       expiresIn: this.getExpirationTime(JWT_CONFIG.ACCESS_TOKEN_EXPIRES_IN),
-      tokenType: 'Bearer',
+      tokenType: "Bearer",
     };
   }
 
   private static validateToken(
     token: string,
-    checkExpiration = true
+    checkExpiration = true,
   ): TokenValidationResult {
     try {
       const options: jwt.VerifyOptions = {
@@ -465,7 +475,7 @@ export class UnifiedAuthService {
       const decoded = jwt.verify(
         token,
         JWT_CONFIG.SECRET,
-        options
+        options,
       ) as JWTPayload;
 
       return {
@@ -473,32 +483,34 @@ export class UnifiedAuthService {
         payload: decoded,
       };
     } catch (error: any) {
-      if (error.name === 'TokenExpiredError') {
+      if (error.name === "TokenExpiredError") {
         return {
           valid: false,
           expired: true,
-          error: 'Token expired',
+          error: "Token expired",
         };
       }
 
       return {
         valid: false,
-        error: (error as any)?.message || String(error) || 'Invalid token',
+        error: (error as any)?.message || String(error) || "Invalid token",
       };
     }
   }
 
   private static async updateLastLogin(userId: string): Promise<void> {
     try {
-      await db
-        .update(staff)
-        .set({
+      await this.getPrisma().staff.update({
+        where: {
+          id: userId,
+        },
+        data: {
           last_login: new Date(),
           updated_at: new Date(),
-        } as any) // Type cast to avoid strict typing issues
-        .where(eq(staff.id, userId));
+        },
+      });
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Failed to update last login:', error);
+      console.error("❌ [UnifiedAuth] Failed to update last login:", error);
       // Don't throw error, just log it
     }
   }
@@ -522,7 +534,7 @@ export class UnifiedAuthService {
 
   private static createErrorResult(
     code: AuthErrorCode,
-    customMessage?: string
+    customMessage?: string,
   ): AuthResult {
     return {
       success: false,
@@ -555,7 +567,7 @@ export class UnifiedAuthService {
 
       return this.createAuthUserFromDbUser(user);
     } catch (error) {
-      console.error('❌ [UnifiedAuth] Get user error:', error);
+      console.error("❌ [UnifiedAuth] Get user error:", error);
       return null;
     }
   }
