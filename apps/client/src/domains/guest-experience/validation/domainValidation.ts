@@ -3,7 +3,7 @@
  * Validates Guest Experience domain integration and dependencies
  */
 
-import { store } from "../../../store";
+import { store } from "@/store";
 import { GuestExperienceService } from "../services/guestExperienceService";
 import {
   initializeGuestJourney,

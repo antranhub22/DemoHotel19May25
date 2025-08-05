@@ -5,7 +5,7 @@
  */
 
 import { useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { GuestExperienceService } from "../services/guestExperienceService";
 import {
   addModelOutput,

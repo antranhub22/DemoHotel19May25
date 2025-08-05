@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { requestManagementService } from "../services/requestManagementService";
 import {
   addMessage,

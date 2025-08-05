@@ -6,7 +6,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { useCallback, useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 // ✅ NEW: SaaS Provider integration
 import {
