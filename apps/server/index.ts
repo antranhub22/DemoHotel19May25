@@ -10,7 +10,6 @@ import { autoMigrateOnDeploy } from "@tools/scripts/maintenance/auto-migrate-on-
 import { seedProductionUsers } from "@tools/scripts/maintenance/seed-production-users";
 import cors from "cors";
 import "dotenv/config";
-import "web-file-polyfill";
 import express, { NextFunction, type Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
