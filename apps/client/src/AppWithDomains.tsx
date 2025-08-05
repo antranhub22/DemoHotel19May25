@@ -28,6 +28,9 @@ import { Link, Route, Switch, useLocation } from "wouter";
 // Platform Admin Dashboard
 import { PlatformAdminDashboard } from "@/domains/saas-provider";
 
+// ✅ NEW: SaaS-Integrated Voice Assistant
+import VoiceAssistantWithSaaS from "@/components/business/VoiceAssistantWithSaaS";
+
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
   () => import("./pages/AnalyticsDashboard"),
@@ -259,6 +262,10 @@ function Router() {
         {/* ✅ NEW: Use refactored VoiceAssistant with domain architecture */}
         <Route path="/" component={VoiceAssistantRefactored} />
         <Route path="/interface1" component={VoiceAssistantRefactored} />
+
+        {/* ✅ NEW: SaaS-Integrated Voice Assistant (test route) */}
+        <Route path="/voice-saas" component={VoiceAssistantWithSaaS} />
+
         <Route path="/vapi-test" component={VapiTest} />
 
         {/* Keep existing routes for backward compatibility */}
