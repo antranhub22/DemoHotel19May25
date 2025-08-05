@@ -5,9 +5,9 @@
  * Supports CRUD operations and tenant-specific features
  */
 
-import TenantController from '@server/controllers/tenantController';
-import { logger } from '@shared/utils/logger';
-import { Router } from 'express';
+import { TenantController } from "@server/controllers/tenantController";
+import { logger } from "@shared/utils/logger";
+import { Router } from "express";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ const router = Router();
 
 // Log all tenant API requests
 router.use((req, res, next) => {
-  logger.info(`🏨 [TenantRoutes] ${req.method} ${req.path}`, 'TenantRoutes', {
+  logger.info(`🏨 [TenantRoutes] ${req.method} ${req.path}`, "TenantRoutes", {
     method: req.method,
     path: req.path,
     params: req.params,
@@ -45,7 +45,7 @@ router.use((req, res, next) => {
  *   "address": "Hotel Address"
  * }
  */
-router.post('/', TenantController.createTenant);
+router.post("/", TenantController.createTenant);
 
 /**
  * Get all tenants with pagination
@@ -58,7 +58,7 @@ router.post('/', TenantController.createTenant);
  * - subscriptionStatus: string
  * - search: string
  */
-router.get('/', TenantController.getAllTenants);
+router.get("/", TenantController.getAllTenants);
 
 /**
  * Get tenant by ID
@@ -67,13 +67,13 @@ router.get('/', TenantController.getAllTenants);
  * Query Parameters:
  * - include: "relations" (optional, includes hotel profiles)
  */
-router.get('/:id', TenantController.getTenantById);
+router.get("/:id", TenantController.getTenantById);
 
 /**
  * Get tenant by subdomain
  * GET /api/tenants/subdomain/:subdomain
  */
-router.get('/subdomain/:subdomain', TenantController.getTenantBySubdomain);
+router.get("/subdomain/:subdomain", TenantController.getTenantBySubdomain);
 
 /**
  * Update tenant
@@ -81,13 +81,13 @@ router.get('/subdomain/:subdomain', TenantController.getTenantBySubdomain);
  *
  * Body: Partial tenant data to update
  */
-router.put('/:id', TenantController.updateTenant);
+router.put("/:id", TenantController.updateTenant);
 
 /**
  * Delete tenant
  * DELETE /api/tenants/:id
  */
-router.delete('/:id', TenantController.deleteTenant);
+router.delete("/:id", TenantController.deleteTenant);
 
 // ============================================
 // TENANT FEATURE ROUTES
@@ -99,19 +99,19 @@ router.delete('/:id', TenantController.deleteTenant);
  *
  * Features: voiceCloning, multiLocation, whiteLabel, etc.
  */
-router.get('/:id/features/:feature', TenantController.checkFeatureAccess);
+router.get("/:id/features/:feature", TenantController.checkFeatureAccess);
 
 /**
  * Get tenant subscription limits
  * GET /api/tenants/:id/limits
  */
-router.get('/:id/limits', TenantController.getSubscriptionLimits);
+router.get("/:id/limits", TenantController.getSubscriptionLimits);
 
 /**
  * Get tenant usage statistics
  * GET /api/tenants/:id/usage
  */
-router.get('/:id/usage', TenantController.getTenantUsage);
+router.get("/:id/usage", TenantController.getTenantUsage);
 
 // ============================================
 // UTILITY ROUTES
@@ -121,7 +121,7 @@ router.get('/:id/usage', TenantController.getTenantUsage);
  * Get tenant service health
  * GET /api/tenants/health
  */
-router.get('/health', TenantController.getServiceHealth);
+router.get("/health", TenantController.getServiceHealth);
 
 // ============================================
 // ERROR HANDLING
@@ -130,21 +130,21 @@ router.get('/health', TenantController.getServiceHealth);
 // Global error handler for tenant routes
 router.use((error: any, req: any, res: any, next: any) => {
   logger.error(
-    '❌ [TenantRoutes] Unhandled error in tenant routes',
-    'TenantRoutes',
+    "❌ [TenantRoutes] Unhandled error in tenant routes",
+    "TenantRoutes",
     {
       error: error.message,
       stack: error.stack,
       method: req.method,
       path: req.path,
-    }
+    },
   );
 
   if (!res.headersSent) {
     res.status(500).json({
       success: false,
-      error: 'Internal server error in tenant management',
-      code: 'TENANT_ROUTE_ERROR',
+      error: "Internal server error in tenant management",
+      code: "TENANT_ROUTE_ERROR",
       timestamp: new Date().toISOString(),
     });
   }
