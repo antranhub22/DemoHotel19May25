@@ -1,0 +1,90 @@
+{
+  "success": false,
+  "startTime": 1259.854682000354,
+  "endTime": 1326.0544430017471,
+  "duration": 66.1997610013932,
+  "testsRun": 2,
+  "testsPassed": 1,
+  "testsFailed": 1,
+  "testSuites": [
+    {
+      "name": "Mi Nhon Hotel Compatibility",
+      "status": "failed",
+      "startTime": 1304.9669240005314,
+      "endTime": 1325.771862000227,
+      "duration": 20.80493799969554,
+      "tests": [
+        {
+          "id": "verify-mi-nhon-tenant",
+          "name": "Verify Mi Nhon Hotel exists as tenant",
+          "status": "passed",
+          "startTime": 1305.4470300003886,
+          "endTime": 1313.70919300057,
+          "duration": 8.262163000181317
+        },
+        {
+          "id": "verify-existing-data",
+          "name": "Verify existing Mi Nhon data is preserved",
+          "status": "failed",
+          "startTime": 1314.1719330009073,
+          "endTime": 1316.3244470003992,
+          "duration": 2.15251399949193,
+          "error": "no such column: \"updated_at\" - should this be a string literal in single-quotes?"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "suite": "Mi Nhon Hotel Compatibility",
+      "test": "verify-existing-data",
+      "message": "no such column: \"updated_at\" - should this be a string literal in single-quotes?",
+      "stack": "SqliteError: no such column: \"updated_at\" - should this be a string literal in single-quotes?\n    at Database.prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)\n    at BetterSQLiteSession.prepareQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:50:28)\n    at BetterSQLiteSession.prepareOneTimeQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/session.ts:135:15)\n    at SQLiteSelectBase._prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:865:85)\n    at SQLiteSelectBase.all (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:884:15)\n    at SQLiteSelectBase.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:896:15)\n    at SQLiteSelectBase.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "Mi Nhon Hotel Compatibility",
+      "test": "suite",
+      "message": "no such column: \"updated_at\" - should this be a string literal in single-quotes?",
+      "stack": "SqliteError: no such column: \"updated_at\" - should this be a string literal in single-quotes?\n    at Database.prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)\n    at BetterSQLiteSession.prepareQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:50:28)\n    at BetterSQLiteSession.prepareOneTimeQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/session.ts:135:15)\n    at SQLiteSelectBase._prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:865:85)\n    at SQLiteSelectBase.all (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:884:15)\n    at SQLiteSelectBase.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:896:15)\n    at SQLiteSelectBase.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "Integration Test Suite",
+      "test": "main",
+      "message": "no such column: \"updated_at\" - should this be a string literal in single-quotes?",
+      "stack": "SqliteError: no such column: \"updated_at\" - should this be a string literal in single-quotes?\n    at Database.prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/better-sqlite3/lib/methods/wrappers.js:5:21)\n    at BetterSQLiteSession.prepareQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:50:28)\n    at BetterSQLiteSession.prepareOneTimeQuery (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/session.ts:135:15)\n    at SQLiteSelectBase._prepare (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:865:85)\n    at SQLiteSelectBase.all (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:884:15)\n    at SQLiteSelectBase.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/select.ts:896:15)\n    at SQLiteSelectBase.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    }
+  ],
+  "miNhonCompatibility": {
+    "voiceAssistantWorking": false,
+    "existingDataPreserved": false,
+    "allFeaturesWorking": false,
+    "noPerformanceDegradation": false,
+    "apiEndpointsUnchanged": false
+  },
+  "newTenantFunctionality": {
+    "canCreateNewTenant": false,
+    "tenantHasIsolatedData": false,
+    "tenantCanUseAllFeatures": false,
+    "setupWizardWorks": false,
+    "assistantCreationWorks": false
+  },
+  "dataIsolation": {
+    "dataIsolationVerified": false,
+    "crossTenantAccessBlocked": false,
+    "tenantsCannotSeeOthersData": false,
+    "queryFiltersWorking": false
+  },
+  "dashboardApis": {
+    "hotelResearchWorks": false,
+    "assistantGenerationWorks": false,
+    "analyticsWork": false,
+    "settingsWork": false,
+    "multiTenantDataCorrect": false
+  },
+  "voiceInterface": {
+    "miNhonVoiceWorks": false,
+    "newTenantVoiceWorks": false,
+    "tenantSpecificKnowledge": false,
+    "assistantIsolation": false
+  }
+}

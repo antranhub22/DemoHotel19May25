@@ -1,0 +1,131 @@
+{
+  "success": false,
+  "startTime": 1061.2704239990562,
+  "endTime": 1111.1491189990193,
+  "duration": 49.878694999963045,
+  "testsRun": 6,
+  "testsPassed": 5,
+  "testsFailed": 1,
+  "testSuites": [
+    {
+      "name": "Mi Nhon Hotel Compatibility",
+      "status": "passed",
+      "startTime": 1091.0981670003384,
+      "endTime": 1103.478790000081,
+      "duration": 12.380622999742627,
+      "tests": [
+        {
+          "id": "verify-mi-nhon-tenant",
+          "name": "Verify Mi Nhon Hotel exists as tenant",
+          "status": "passed",
+          "startTime": 1091.4528940003365,
+          "endTime": 1096.8434699997306,
+          "duration": 5.390575999394059
+        },
+        {
+          "id": "verify-existing-data",
+          "name": "Verify existing Mi Nhon data is preserved",
+          "status": "passed",
+          "startTime": 1096.9101729989052,
+          "endTime": 1098.5513799991459,
+          "duration": 1.6412070002406836
+        },
+        {
+          "id": "test-voice-assistant",
+          "name": "Test Mi Nhon voice assistant functionality",
+          "status": "passed",
+          "startTime": 1098.5659449994564,
+          "endTime": 1098.6719589997083,
+          "duration": 0.10601400025188923
+        },
+        {
+          "id": "test-mi-nhon-features",
+          "name": "Test all Mi Nhon features work",
+          "status": "passed",
+          "startTime": 1098.6813409999013,
+          "endTime": 1102.4768599998206,
+          "duration": 3.7955189999192953
+        },
+        {
+          "id": "performance-test",
+          "name": "Test no performance degradation",
+          "status": "passed",
+          "startTime": 1102.5003929995,
+          "endTime": 1103.4684779997915,
+          "duration": 0.9680850002914667
+        }
+      ]
+    },
+    {
+      "name": "New Tenant Creation",
+      "status": "failed",
+      "startTime": 1103.5175320003182,
+      "endTime": 1111.131571000442,
+      "duration": 7.614039000123739,
+      "tests": [
+        {
+          "id": "create-new-tenant",
+          "name": "Create new tenant end-to-end",
+          "status": "failed",
+          "startTime": 1103.784179000184,
+          "endTime": 1107.3416789993644,
+          "duration": 3.557499999180436,
+          "error": "SQLite3 can only bind numbers, strings, bigints, buffers, and null"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "suite": "New Tenant Creation",
+      "test": "create-new-tenant",
+      "message": "SQLite3 can only bind numbers, strings, bigints, buffers, and null",
+      "stack": "TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "New Tenant Creation",
+      "test": "suite",
+      "message": "SQLite3 can only bind numbers, strings, bigints, buffers, and null",
+      "stack": "TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    },
+    {
+      "suite": "Integration Test Suite",
+      "test": "main",
+      "message": "SQLite3 can only bind numbers, strings, bigints, buffers, and null",
+      "stack": "TypeError: SQLite3 can only bind numbers, strings, bigints, buffers, and null\n    at PreparedQuery.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/better-sqlite3/session.ts:113:20)\n    at QueryPromise.run (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:392:26)\n    at QueryPromise.execute (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/sqlite-core/query-builders/insert.ts:408:53)\n    at QueryPromise.then (/Users/tuannguyen/Desktop/GITHUB REPOS/DemoHotel19May/node_modules/src/query-promise.ts:31:15)"
+    }
+  ],
+  "miNhonCompatibility": {
+    "voiceAssistantWorking": true,
+    "existingDataPreserved": true,
+    "allFeaturesWorking": true,
+    "noPerformanceDegradation": true,
+    "apiEndpointsUnchanged": true
+  },
+  "newTenantFunctionality": {
+    "canCreateNewTenant": false,
+    "tenantHasIsolatedData": false,
+    "tenantCanUseAllFeatures": false,
+    "setupWizardWorks": false,
+    "assistantCreationWorks": false
+  },
+  "dataIsolation": {
+    "dataIsolationVerified": false,
+    "crossTenantAccessBlocked": false,
+    "tenantsCannotSeeOthersData": false,
+    "queryFiltersWorking": false
+  },
+  "dashboardApis": {
+    "hotelResearchWorks": false,
+    "assistantGenerationWorks": false,
+    "analyticsWork": false,
+    "settingsWork": false,
+    "multiTenantDataCorrect": false
+  },
+  "voiceInterface": {
+    "miNhonVoiceWorks": false,
+    "newTenantVoiceWorks": false,
+    "tenantSpecificKnowledge": false,
+    "assistantIsolation": false
+  }
+}
