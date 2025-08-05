@@ -7,7 +7,9 @@ import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
 import { logger } from "@shared/utils/logger";
 
 export class RequestAnalytics {
-  private static prisma = PrismaConnectionManager.getInstance().getClient();
+  private static get prisma() {
+    return PrismaConnectionManager.getInstance().getClient();
+  }
 
   static async getRequestAnalytics(tenantId: string) {
     try {

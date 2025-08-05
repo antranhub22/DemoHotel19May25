@@ -47,6 +47,7 @@ export const db = new Proxy({} as any, {
 export async function initializeDatabase() {
   console.log("🚀 Initializing Prisma database connection...");
   const prismaManager = PrismaConnectionManager.getInstance();
+  await prismaManager.initialize();
   const database = prismaManager.getClient();
   console.log("✅ Database initialization complete");
   return database;
@@ -83,6 +84,7 @@ export async function reconnectDatabase() {
   console.log("🔄 Reconnecting to database...");
   const prismaManager = PrismaConnectionManager.getInstance();
   await prismaManager.disconnect();
+  await prismaManager.initialize();
   const database = prismaManager.getClient();
   console.log("✅ Database reconnection complete");
   return database;
