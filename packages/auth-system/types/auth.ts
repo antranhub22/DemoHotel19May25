@@ -5,23 +5,11 @@
 // Maintains backward compatibility while introducing standardized interfaces
 
 // ============================================
-// CORE USER ROLES (Extended)
+// CORE USER ROLES (Imported from config to avoid circular imports)
 // ============================================
 
-// Legacy RBAC roles (maintain backward compatibility)
-// ✅ FIXED: Use global UserRole type to avoid conflicts
-// Re-export the global UserRole type for backward compatibility
-export type UserRole =
-  | 'super-admin'
-  | 'hotel-manager'
-  | 'front-desk'
-  | 'it-manager'
-  | 'admin'
-  | 'staff'
-  | 'manager'
-  | 'frontdesk'
-  | 'itmanager'
-  | 'guest';
+// Re-export UserRole from config
+export type { AuthErrorCode, UserRole } from "@auth/config";
 
 // ============================================
 // PERMISSION SYSTEM
@@ -118,6 +106,138 @@ export interface LoginCredentials {
   rememberMe?: boolean; // ✅ Extended session option
 }
 
+// ============================================
+// REGISTRATION CREDENTIALS
+// ============================================
+
+export interface RegisterCredentials {
+  username: string; // ✅ Required username
+  email: string; // ✅ Required email for verification
+  password: string; // ✅ Required password
+  confirmPassword: string; // ✅ Password confirmation
+  displayName: string; // ✅ Display name
+  firstName?: string; // ✅ Optional first name
+  lastName?: string; // ✅ Optional last name
+  phone?: string; // ✅ Optional phone
+  tenantId?: string; // ✅ Optional tenant specification
+  role?: UserRole; // ✅ Optional role (default: front-desk)
+  acceptTerms: boolean; // ✅ Terms acceptance
+}
+
+export interface EmailVerificationData {
+  token: string;
+  email: string;
+  expiresAt: string;
+  verified: boolean;
+}
+
+// ============================================
+// SESSION MANAGEMENT TYPES
+// ============================================
+
+export interface SessionData {
+  id: string;
+  userId: string;
+  tokenId: string; // JWT jti claim
+  deviceInfo: DeviceInfo;
+  ipAddress: string;
+  userAgent: string;
+  location?: LocationInfo;
+  createdAt: string;
+  lastActiveAt: string;
+  expiresAt: string;
+  isActive: boolean;
+}
+
+export interface DeviceInfo {
+  type: "desktop" | "mobile" | "tablet" | "unknown";
+  os: string;
+  browser: string;
+  fingerprint: string; // Device fingerprint hash
+}
+
+export interface LocationInfo {
+  country?: string;
+  region?: string;
+  city?: string;
+  timezone?: string;
+  isp?: string;
+}
+
+export interface SessionSummary {
+  total: number;
+  active: number;
+  expired: number;
+  current?: SessionData;
+  devices: SessionData[];
+}
+
+// ============================================
+// AUDIT LOGGING TYPES
+// ============================================
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  eventType: AuditEventType;
+  userId?: string;
+  username?: string;
+  email?: string;
+  ipAddress: string;
+  userAgent: string;
+  sessionId?: string;
+  action: string;
+  resource?: string;
+  result: "success" | "failure" | "warning";
+  details: Record<string, any>;
+  risk_level: "low" | "medium" | "high" | "critical";
+  location?: LocationInfo;
+}
+
+export type AuditEventType =
+  | "auth.login.attempt"
+  | "auth.login.success"
+  | "auth.login.failure"
+  | "auth.logout"
+  | "auth.register.attempt"
+  | "auth.register.success"
+  | "auth.password.change"
+  | "auth.password.reset.request"
+  | "auth.password.reset.success"
+  | "auth.email.verification"
+  | "auth.session.created"
+  | "auth.session.terminated"
+  | "auth.token.refresh"
+  | "auth.account.locked"
+  | "auth.suspicious.activity"
+  | "auth.rate.limit.exceeded"
+  | "auth.security.violation";
+
+export interface SecurityAlert {
+  id: string;
+  timestamp: string;
+  alertType: SecurityAlertType;
+  severity: "low" | "medium" | "high" | "critical";
+  title: string;
+  description: string;
+  userId?: string;
+  ipAddress: string;
+  userAgent?: string;
+  triggerEvent: AuditLogEntry;
+  relatedEvents: AuditLogEntry[];
+  actionTaken?: string;
+  resolved: boolean;
+}
+
+export type SecurityAlertType =
+  | "multiple.failed.logins"
+  | "suspicious.location"
+  | "unusual.activity.pattern"
+  | "brute.force.attempt"
+  | "account.compromise.suspected"
+  | "rate.limit.violation"
+  | "session.hijack.suspected";
+
 // Alternative login credentials for backward compatibility
 export interface LegacyLoginCredentials {
   email: string;
@@ -140,7 +260,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (
-    credentials: LoginCredentials | LegacyLoginCredentials
+    credentials: LoginCredentials | LegacyLoginCredentials,
   ) => Promise<void>;
   logout: () => void;
   hasPermission: (module: string, action: string) => boolean;
@@ -186,8 +306,8 @@ export interface TenantData {
   id: string;
   hotelName: string;
   subdomain: string;
-  subscriptionPlan: 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'inactive' | 'suspended' | 'cancelled';
+  subscriptionPlan: "basic" | "premium" | "enterprise";
+  subscriptionStatus: "active" | "inactive" | "suspended" | "cancelled";
   customDomain?: string;
   logoUrl?: string;
   settings?: Record<string, any>;
@@ -240,7 +360,7 @@ export interface TokenValidationResult {
 
 // Type guard for checking if user has legacy interface
 export const isLegacyUser = (user: AuthUser | User): user is User => {
-  return 'name' in user && 'hotelId' in user;
+  return "name" in user && "hotelId" in user;
 };
 
 // Convert AuthUser to legacy User interface
@@ -267,12 +387,4 @@ export interface AuthError {
   details?: any;
 }
 
-export type AuthErrorCode =
-  | 'INVALID_CREDENTIALS'
-  | 'TOKEN_EXPIRED'
-  | 'TOKEN_INVALID'
-  | 'USER_INACTIVE'
-  | 'PERMISSION_DENIED'
-  | 'TENANT_ACCESS_DENIED'
-  | 'NETWORK_ERROR'
-  | 'SERVER_ERROR';
+// AuthErrorCode is now exported from config (see re-export above)

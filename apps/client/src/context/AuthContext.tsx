@@ -1,13 +1,6 @@
-import { jwtDecode } from 'jwt-decode';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
-import { getPermissionsForRole } from '@shared/constants/permissions';
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { jwtDecode } from "jwt-decode";
+import React from "react";
 // ============================================
 // Types & Interfaces
 // ============================================
@@ -26,8 +19,8 @@ export interface TenantData {
   id: string;
   hotelName: string;
   subdomain: string;
-  subscriptionPlan: 'trial' | 'basic' | 'premium' | 'enterprise';
-  subscriptionStatus: 'active' | 'expired' | 'cancelled';
+  subscriptionPlan: "trial" | "basic" | "premium" | "enterprise";
+  subscriptionStatus: "active" | "expired" | "cancelled";
   trialEndsAt?: Date;
   remainingDays?: number;
   customDomain?: string;
@@ -79,8 +72,8 @@ export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     logger.warn(
-      'useAuth used outside AuthProvider - returning safe defaults',
-      'Component'
+      "useAuth used outside AuthProvider - returning safe defaults",
+      "Component",
     );
     // Return safe defaults instead of throwing
     return {
@@ -115,26 +108,26 @@ type MyJwtPayload = {
 // Map legacy roles to new RBAC roles
 const mapLegacyRole = (legacyRole: string): UserRole => {
   switch (legacyRole) {
-    case 'admin':
-    case 'manager':
-    case 'hotel-manager':
-      return 'hotel-manager';
-    case 'staff':
-    case 'front-desk':
-      return 'front-desk';
-    case 'it':
-    case 'tech':
-    case 'it-manager':
-      return 'it-manager';
+    case "admin":
+    case "manager":
+    case "hotel-manager":
+      return "hotel-manager";
+    case "staff":
+    case "front-desk":
+      return "front-desk";
+    case "it":
+    case "tech":
+    case "it-manager":
+      return "it-manager";
     default:
-      return 'front-desk'; // Default fallback
+      return "front-desk"; // Default fallback
   }
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  logger.debug('[DEBUG] AuthProvider render', 'Component');
+  logger.debug("[DEBUG] AuthProvider render", "Component");
 
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tenant, setTenant] = useState<TenantData | null>(null);
@@ -142,26 +135,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     logger.debug(
-      '[DEBUG] AuthProvider useEffect - checking token',
-      'Component'
+      "[DEBUG] AuthProvider useEffect - checking token",
+      "Component",
     );
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
       logger.debug(
-        '[DEBUG] AuthProvider - no token found, setting loading false',
-        'Component'
+        "[DEBUG] AuthProvider - no token found, setting loading false",
+        "Component",
       );
       setIsLoading(false);
       return;
     }
 
     try {
-      logger.debug('[DEBUG] AuthProvider - decoding token', 'Component');
+      logger.debug("[DEBUG] AuthProvider - decoding token", "Component");
       const decoded = jwtDecode<MyJwtPayload>(token);
       logger.debug(
-        '[DEBUG] AuthProvider - token decoded:',
-        'Component',
-        decoded
+        "[DEBUG] AuthProvider - token decoded:",
+        "Component",
+        decoded,
       );
 
       // Tạo user object từ token payload
@@ -178,17 +171,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Tạo tenant object từ token payload
       const tenantFromToken: TenantData = {
         id: decoded.tenantId,
-        hotelName: 'Mi Nhon Hotel', // Default name
-        subdomain: 'minhonmuine',
-        subscriptionPlan: 'premium',
-        subscriptionStatus: 'active',
+        hotelName: "Mi Nhon Hotel", // Default name
+        subdomain: "minhonmuine",
+        subscriptionPlan: "premium",
+        subscriptionStatus: "active",
       };
 
       setUser(userFromToken);
       setTenant(tenantFromToken);
     } catch (error) {
       // [SECURITY] Console.log removed for security compliance
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
     } finally {
       // [SECURITY] Console.log removed for security compliance
       setIsLoading(false);
@@ -201,29 +194,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // ✅ FIXED: Use proper API base URL - detect production
       const API_BASE_URL =
         import.meta.env.VITE_API_URL ||
-        (window.location.hostname.includes('talk2go.online')
+        (window.location.hostname.includes("talk2go.online")
           ? (() => {
               // ✅ FIX: Correct hostname typo minhonmune → minhonmuine
               const correctedHostname = window.location.hostname.replace(
-                'minhonmune',
-                'minhonmuine'
+                "minhonmune",
+                "minhonmuine",
               );
               return `https://${correctedHostname}`;
             })()
-          : 'http://localhost:3000');
+          : "http://localhost:3000");
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email, password }),
       });
       if (!res.ok) {
-        throw new Error('Sai tài khoản hoặc mật khẩu');
+        throw new Error("Sai tài khoản hoặc mật khẩu");
       }
       const data = await (res as any).json();
       if (!data.success || !data.token) {
-        throw new Error('Không nhận được token từ server');
+        throw new Error("Không nhận được token từ server");
       }
-      localStorage.setItem('token', data.token);
+      localStorage.setItem("token", data.token);
 
       // Sử dụng user data từ unified auth response
       const userFromResponse: any = {
@@ -241,16 +234,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Tạo tenant object từ user data
       const tenantFromResponse: TenantData = {
         id: data.user.tenantId,
-        hotelName: 'Mi Nhon Hotel', // Default name
-        subdomain: 'minhonmuine',
-        subscriptionPlan: 'premium',
-        subscriptionStatus: 'active',
+        hotelName: "Mi Nhon Hotel", // Default name
+        subdomain: "minhonmuine",
+        subscriptionPlan: "premium",
+        subscriptionStatus: "active",
       };
 
       setUser(userFromResponse);
       setTenant(tenantFromResponse);
     } catch (err: any) {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       setUser(null);
       setTenant(null);
       throw err;
@@ -263,8 +256,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // [SECURITY] Console.log removed for security compliance
     setUser(null);
     setTenant(null);
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   }, []);
 
   // Permission checking function - ✅ FIXED: Handle both permission structures
@@ -276,7 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       return user.permissions.some((permission: any) => {
         // Handle object-style permissions
-        if (typeof permission === 'object' && permission !== null) {
+        if (typeof permission === "object" && permission !== null) {
           return (
             permission.module === module &&
             permission.action === action &&
@@ -287,7 +280,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return permission === module || permission === action;
       });
     },
-    [user]
+    [user],
   );
 
   // Role checking function
@@ -295,10 +288,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     (role: UserRole): boolean => {
       return user?.role === role;
     },
-    [user]
+    [user],
   );
 
-  logger.debug('[DEBUG] AuthProvider state:', 'Component', {
+  logger.debug("[DEBUG] AuthProvider state:", "Component", {
     user,
     tenant,
     isLoading,
@@ -338,7 +331,7 @@ export const useTenantDetection = () => {
   } | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
@@ -346,10 +339,10 @@ export const useTenantDetection = () => {
     const hostname = window.location.hostname;
 
     // Check if it's a subdomain (not localhost, IP, or main domain)
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
     const isIP = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
     const isMainDomain =
-      hostname === 'talk2go.online' || hostname === 'www.talk2go.online';
+      hostname === "talk2go.online" || hostname === "www.talk2go.online";
 
     let subdomain: string | null = null;
     let isSubdomain = false;
@@ -357,9 +350,9 @@ export const useTenantDetection = () => {
 
     if (!isLocalhost && !isIP && !isMainDomain) {
       // Check if it's a custom domain or subdomain
-      if (hostname.includes('.talk2go.online')) {
+      if (hostname.includes(".talk2go.online")) {
         // It's a subdomain
-        const parts = hostname.split('.');
+        const parts = hostname.split(".");
         if (parts.length > 2) {
           subdomain = parts[0];
           isSubdomain = true;
@@ -374,10 +367,10 @@ export const useTenantDetection = () => {
     // Check if it's Mi Nhon Hotel (for backward compatibility)
     const isMiNhon =
       isLocalhost ||
-      hostname === 'minhotel.talk2go.online' ||
-      hostname === 'talk2go.online' ||
-      hostname === 'www.talk2go.online' ||
-      subdomain === 'minhon';
+      hostname === "minhotel.talk2go.online" ||
+      hostname === "talk2go.online" ||
+      hostname === "www.talk2go.online" ||
+      subdomain === "minhon";
 
     setTenantInfo({
       subdomain,
@@ -396,7 +389,7 @@ export const useTenantDetection = () => {
 
 export const useRequireAuth = (
   requireAuth: boolean = true,
-  requiredRole?: UserRole
+  requiredRole?: UserRole,
 ) => {
   const { user, isAuthenticated, isLoading, hasRole, hasPermission } =
     useAuth();

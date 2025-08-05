@@ -4,12 +4,14 @@
 // This service replaces all existing auth services and provides
 // a single source of truth for authentication and authorization
 
-import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 // Import new unified types and config
+import type { AuthErrorCode, UserRole } from "@auth/config";
 import {
   AUTH_ERROR_MESSAGES,
+  DEFAULT_PERMISSIONS,
   DEV_CONFIG,
   JWT_CONFIG,
   SECURITY_CONFIG,
@@ -17,16 +19,23 @@ import {
   authValidationSchemas,
 } from "@auth/config";
 import type {
-  AuthErrorCode,
   AuthResult,
   AuthUser,
+  DeviceInfo,
+  EmailVerificationData,
   JWTPayload,
+  LocationInfo,
   LoginCredentials,
   Permission,
+  RegisterCredentials,
+  SessionData,
+  SessionSummary,
   TokenPair,
   TokenValidationResult,
 } from "@auth/types";
 import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+import crypto from "crypto";
+import { AuditLogger } from "./AuditLogger";
 // ============================================
 // TOKEN BLACKLIST MANAGEMENT
 // ============================================
@@ -68,12 +77,28 @@ export class UnifiedAuthService {
    * Unified login method for all user types
    * Supports both username and email login
    */
-  static async login(credentials: LoginCredentials): Promise<AuthResult> {
+  static async login(
+    credentials: LoginCredentials,
+    requestInfo?: {
+      ipAddress?: string;
+      userAgent?: string;
+    },
+  ): Promise<AuthResult> {
+    const ipAddress = requestInfo?.ipAddress || "127.0.0.1";
+    const userAgent = requestInfo?.userAgent || "Unknown";
+
     try {
       // Validate input
       const validation =
         authValidationSchemas.loginCredentials.safeParse(credentials);
       if (!validation.success) {
+        await AuditLogger.logLoginAttempt(
+          credentials.username || credentials.email || "unknown",
+          "failure",
+          ipAddress,
+          userAgent,
+          { failureReason: "Invalid credentials format" },
+        );
         return this.createErrorResult(
           "INVALID_CREDENTIALS",
           "Invalid login credentials",
@@ -90,12 +115,30 @@ export class UnifiedAuthService {
       const user = await this.findUserByCredentials(loginIdentifier!, tenantId);
       if (!user) {
         console.log(`❌ [UnifiedAuth] User not found: ${loginIdentifier}`);
+        await AuditLogger.logLoginAttempt(
+          loginIdentifier!,
+          "failure",
+          ipAddress,
+          userAgent,
+          { failureReason: "User not found" },
+        );
         return this.createErrorResult("INVALID_CREDENTIALS");
       }
 
       // Check if user is active
       if (!user.is_active) {
         console.log(`❌ [UnifiedAuth] User inactive: ${loginIdentifier}`);
+        await AuditLogger.logLoginAttempt(
+          user.username,
+          "failure",
+          ipAddress,
+          userAgent,
+          {
+            userId: user.id,
+            email: user.email,
+            failureReason: "Account inactive",
+          },
+        );
         return this.createErrorResult("USER_INACTIVE");
       }
 
@@ -105,17 +148,55 @@ export class UnifiedAuthService {
         console.log(
           `❌ [UnifiedAuth] Invalid password for: ${loginIdentifier}`,
         );
+        await AuditLogger.logLoginAttempt(
+          user.username,
+          "failure",
+          ipAddress,
+          userAgent,
+          {
+            userId: user.id,
+            email: user.email,
+            failureReason: "Invalid password",
+          },
+        );
         return this.createErrorResult("INVALID_CREDENTIALS");
       }
 
       // Create AuthUser object
       const authUser = await this.createAuthUserFromDbUser(user);
 
-      // Generate tokens
-      const tokenPair = this.generateTokenPair(authUser, rememberMe);
+      // Create session with device tracking
+      const deviceInfo = this.parseDeviceInfo(userAgent, ipAddress);
+      const session = await this.createSession(
+        authUser,
+        deviceInfo,
+        ipAddress,
+        userAgent,
+      );
+
+      // Generate tokens with session ID
+      const tokenPair = this.generateTokenPair(
+        authUser,
+        rememberMe,
+        session.tokenId,
+      );
 
       // Update last login
       await this.updateLastLogin(user.id);
+
+      // Log successful login
+      await AuditLogger.logLoginAttempt(
+        user.username,
+        "success",
+        ipAddress,
+        userAgent,
+        {
+          userId: user.id,
+          email: user.email,
+          sessionId: session.id,
+          deviceFingerprint: deviceInfo.fingerprint,
+        },
+      );
 
       console.log(
         `✅ [UnifiedAuth] Login successful: ${loginIdentifier} (${authUser.role})`,
@@ -409,6 +490,7 @@ export class UnifiedAuthService {
   private static generateTokenPair(
     user: AuthUser,
     rememberMe = false,
+    _sessionTokenId?: string,
   ): TokenPair {
     const now = Math.floor(Date.now() / 1000);
     const jti = `${user.id}-${now}-${Math.random().toString(36).substr(2, 9)}`;
@@ -547,11 +629,253 @@ export class UnifiedAuthService {
   // UTILITY METHODS
   // ============================================
 
+  // ============================================
+  // REGISTRATION METHODS
+  // ============================================
+
+  /**
+   * Register a new user account
+   */
+  static async register(credentials: RegisterCredentials): Promise<AuthResult> {
+    try {
+      // Validate input
+      const validation =
+        authValidationSchemas.registerCredentials.safeParse(credentials);
+      if (!validation.success) {
+        return this.createErrorResult(
+          "INVALID_CREDENTIALS",
+          validation.error.errors[0]?.message || "Invalid registration data",
+        );
+      }
+
+      const {
+        username,
+        email,
+        password,
+        displayName,
+        firstName,
+        lastName,
+        phone,
+        tenantId,
+        role = "front-desk",
+      } = validation.data;
+
+      console.log(
+        `📝 [UnifiedAuth] Registration attempt for: ${username} (${email})`,
+      );
+
+      // Check if email already exists
+      const existingEmailUser = await this.findUserByCredentials(
+        email,
+        tenantId,
+      );
+      if (existingEmailUser) {
+        console.log(`❌ [UnifiedAuth] Email already exists: ${email}`);
+        return this.createErrorResult("EMAIL_ALREADY_EXISTS");
+      }
+
+      // Check if username already exists
+      const existingUsernameUser = await this.findUserByCredentials(
+        username,
+        tenantId,
+      );
+      if (existingUsernameUser) {
+        console.log(`❌ [UnifiedAuth] Username already exists: ${username}`);
+        return this.createErrorResult("USERNAME_ALREADY_EXISTS");
+      }
+
+      // Validate password strength
+      const passwordValidation = this.validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        return this.createErrorResult(
+          "WEAK_PASSWORD",
+          passwordValidation.message,
+        );
+      }
+
+      // Hash password
+      const hashedPassword = await this.hashPassword(password);
+
+      // Create user in database
+      const newUser = await this.createUser({
+        username,
+        email,
+        password: hashedPassword,
+        displayName,
+        firstName,
+        lastName,
+        phone,
+        tenantId: tenantId || TENANT_CONFIG.DEFAULT_TENANT_ID,
+        role,
+        isActive: false, // Start inactive until email verified
+      });
+
+      // Generate email verification token
+      const verificationToken =
+        await this.generateEmailVerificationToken(email);
+
+      // Send verification email (implementation will be added)
+      await this.sendVerificationEmail(email, verificationToken, displayName);
+
+      console.log(`✅ [UnifiedAuth] User registered successfully: ${username}`);
+
+      return {
+        success: true,
+        user: undefined, // Don't return user until verified
+        token: undefined,
+        refreshToken: undefined,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Registration error:", error);
+      return this.createErrorResult("SERVER_ERROR", "Registration failed");
+    }
+  }
+
+  /**
+   * Verify email address with token
+   */
+  static async verifyEmail(token: string): Promise<AuthResult> {
+    try {
+      console.log(`📧 [UnifiedAuth] Email verification attempt`);
+
+      // Validate token format
+      const validation = authValidationSchemas.emailVerification.safeParse({
+        token,
+      });
+      if (!validation.success) {
+        return this.createErrorResult("VERIFICATION_TOKEN_INVALID");
+      }
+
+      // Find verification record
+      const verification = await this.findEmailVerificationToken(token);
+      if (!verification) {
+        console.log(`❌ [UnifiedAuth] Verification token not found`);
+        return this.createErrorResult("VERIFICATION_TOKEN_INVALID");
+      }
+
+      // Check if token expired
+      if (new Date() > new Date(verification.expiresAt)) {
+        console.log(`❌ [UnifiedAuth] Verification token expired`);
+        await this.deleteEmailVerificationToken(token);
+        return this.createErrorResult("VERIFICATION_TOKEN_EXPIRED");
+      }
+
+      // Find user by email
+      const user = await this.findUserByCredentials(verification.email);
+      if (!user) {
+        console.log(
+          `❌ [UnifiedAuth] User not found for verification: ${verification.email}`,
+        );
+        return this.createErrorResult("USER_NOT_FOUND");
+      }
+
+      // Activate user account
+      await this.activateUserAccount(user.id);
+
+      // Clean up verification token
+      await this.deleteEmailVerificationToken(token);
+
+      // Create AuthUser object
+      const authUser = await this.createAuthUserFromDbUser({
+        ...user,
+        is_active: true,
+      });
+
+      // Generate login tokens
+      const tokenPair = this.generateTokenPair(authUser);
+
+      console.log(
+        `✅ [UnifiedAuth] Email verified successfully: ${verification.email}`,
+      );
+
+      return {
+        success: true,
+        user: authUser,
+        token: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        expiresIn: tokenPair.expiresIn,
+        tokenType: tokenPair.tokenType,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Email verification error:", error);
+      return this.createErrorResult(
+        "SERVER_ERROR",
+        "Email verification failed",
+      );
+    }
+  }
+
+  /**
+   * Resend email verification
+   */
+  static async resendVerificationEmail(email: string): Promise<AuthResult> {
+    try {
+      console.log(`📧 [UnifiedAuth] Resend verification for: ${email}`);
+
+      // Find user by email
+      const user = await this.findUserByCredentials(email);
+      if (!user) {
+        // Don't reveal if email exists for security
+        return {
+          success: true,
+          user: undefined,
+          token: undefined,
+          refreshToken: undefined,
+          error: undefined,
+          errorCode: undefined,
+        };
+      }
+
+      // Check if already verified
+      if (user.is_active) {
+        return this.createErrorResult(
+          "EMAIL_ALREADY_EXISTS",
+          "Email already verified",
+        );
+      }
+
+      // Delete existing verification tokens for this email
+      await this.deleteEmailVerificationTokensByEmail(email);
+
+      // Generate new verification token
+      const verificationToken =
+        await this.generateEmailVerificationToken(email);
+
+      // Send verification email
+      await this.sendVerificationEmail(
+        email,
+        verificationToken,
+        user.display_name || user.username,
+      );
+
+      console.log(`✅ [UnifiedAuth] Verification email resent: ${email}`);
+
+      return {
+        success: true,
+        user: undefined,
+        token: undefined,
+        refreshToken: undefined,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Resend verification error:", error);
+      return this.createErrorResult(
+        "SERVER_ERROR",
+        "Failed to resend verification email",
+      );
+    }
+  }
+
   /**
    * Hash password for storage
    */
   static async hashPassword(password: string): Promise<string> {
-    const saltRounds = 10;
+    const saltRounds = 12; // Increased for better security
     return bcrypt.hash(password, saltRounds);
   }
 
@@ -584,6 +908,877 @@ export class UnifiedAuthService {
    */
   static isDevMode(): boolean {
     return DEV_CONFIG.ENABLE_AUTO_LOGIN;
+  }
+
+  // ============================================
+  // SESSION MANAGEMENT METHODS
+  // ============================================
+
+  /**
+   * Get all active sessions for a user
+   */
+  static async getUserSessions(userId: string): Promise<SessionSummary> {
+    try {
+      const sessions = await this.getSessionsFromStorage(userId);
+      const activeSessions = sessions.filter(
+        (s) => s.isActive && new Date(s.expiresAt) > new Date(),
+      );
+
+      return {
+        total: sessions.length,
+        active: activeSessions.length,
+        expired: sessions.length - activeSessions.length,
+        devices: activeSessions,
+      };
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Get user sessions error:", error);
+      return { total: 0, active: 0, expired: 0, devices: [] };
+    }
+  }
+
+  /**
+   * Terminate specific session
+   */
+  static async terminateSession(
+    userId: string,
+    sessionId: string,
+  ): Promise<boolean> {
+    try {
+      console.log(
+        `🔄 [UnifiedAuth] Terminating session: ${sessionId} for user: ${userId}`,
+      );
+
+      // Get session data
+      const session = await this.getSessionById(sessionId);
+      if (!session || session.userId !== userId) {
+        return false;
+      }
+
+      // Add token to blacklist
+      if (session.tokenId) {
+        TokenBlacklist.addToken(session.tokenId);
+      }
+
+      // Mark session as inactive
+      await this.markSessionInactive(sessionId);
+
+      console.log(`✅ [UnifiedAuth] Session terminated: ${sessionId}`);
+      return true;
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Terminate session error:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Terminate all sessions except current
+   */
+  static async terminateOtherSessions(
+    userId: string,
+    currentSessionId: string,
+  ): Promise<number> {
+    try {
+      console.log(
+        `🔄 [UnifiedAuth] Terminating other sessions for user: ${userId}`,
+      );
+
+      const sessions = await this.getSessionsFromStorage(userId);
+      let terminatedCount = 0;
+
+      for (const session of sessions) {
+        if (session.id !== currentSessionId && session.isActive) {
+          const success = await this.terminateSession(userId, session.id);
+          if (success) terminatedCount++;
+        }
+      }
+
+      console.log(
+        `✅ [UnifiedAuth] Terminated ${terminatedCount} other sessions`,
+      );
+      return terminatedCount;
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Terminate other sessions error:", error);
+      return 0;
+    }
+  }
+
+  /**
+   * Create new session with device tracking
+   */
+  static async createSession(
+    user: AuthUser,
+    deviceInfo: DeviceInfo,
+    ipAddress: string,
+    userAgent: string,
+  ): Promise<SessionData> {
+    try {
+      // Check for existing sessions and enforce limits
+      await this.enforceSessionLimits(user.id);
+
+      // Create session data
+      const sessionData: SessionData = {
+        id: crypto.randomUUID(),
+        userId: user.id,
+        tokenId: crypto.randomUUID(), // Will be used as JWT jti
+        deviceInfo,
+        ipAddress,
+        userAgent,
+        location: await this.getLocationFromIP(ipAddress),
+        createdAt: new Date().toISOString(),
+        lastActiveAt: new Date().toISOString(),
+        expiresAt: new Date(
+          Date.now() + SECURITY_CONFIG.ABSOLUTE_TIMEOUT,
+        ).toISOString(),
+        isActive: true,
+      };
+
+      // Store session
+      await this.storeSession(sessionData);
+
+      console.log(
+        `✅ [UnifiedAuth] Session created: ${sessionData.id} for user: ${user.id}`,
+      );
+      return sessionData;
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Create session error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update session activity
+   */
+  static async updateSessionActivity(sessionId: string): Promise<void> {
+    try {
+      await this.updateSessionLastActive(sessionId, new Date().toISOString());
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Update session activity error:", error);
+    }
+  }
+
+  // ============================================
+  // PASSWORD MANAGEMENT METHODS
+  // ============================================
+
+  /**
+   * Change user password (requires current password)
+   */
+  static async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+    requestInfo?: {
+      ipAddress?: string;
+      userAgent?: string;
+    },
+  ): Promise<AuthResult> {
+    const ipAddress = requestInfo?.ipAddress || "127.0.0.1";
+    const userAgent = requestInfo?.userAgent || "Unknown";
+    try {
+      console.log(
+        `🔑 [UnifiedAuth] Password change attempt for user: ${userId}`,
+      );
+
+      // Validate input
+      const validation = authValidationSchemas.changePassword.safeParse({
+        currentPassword,
+        newPassword,
+        confirmPassword: newPassword,
+      });
+      if (!validation.success) {
+        return this.createErrorResult(
+          "INVALID_CREDENTIALS",
+          validation.error.errors[0]?.message || "Invalid password data",
+        );
+      }
+
+      // Find user
+      const user = await this.findUserById(userId);
+      if (!user) {
+        console.log(`❌ [UnifiedAuth] User not found: ${userId}`);
+        return this.createErrorResult("USER_NOT_FOUND");
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+      if (!isCurrentPasswordValid) {
+        console.log(`❌ [UnifiedAuth] Invalid current password for: ${userId}`);
+        return this.createErrorResult(
+          "INVALID_CREDENTIALS",
+          "Current password is incorrect",
+        );
+      }
+
+      // Validate new password strength
+      const passwordValidation = this.validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return this.createErrorResult(
+          "WEAK_PASSWORD",
+          passwordValidation.message,
+        );
+      }
+
+      // Check if new password is different from current
+      const isSamePassword = await bcrypt.compare(newPassword, user.password);
+      if (isSamePassword) {
+        return this.createErrorResult(
+          "WEAK_PASSWORD",
+          "New password must be different from current password",
+        );
+      }
+
+      // Hash new password
+      const hashedNewPassword = await this.hashPassword(newPassword);
+
+      // Update password in database
+      await this.updateUserPassword(userId, hashedNewPassword);
+
+      // Log password change
+      await AuditLogger.logPasswordChange(
+        userId,
+        user.username,
+        ipAddress,
+        userAgent,
+        "success",
+      );
+
+      console.log(
+        `✅ [UnifiedAuth] Password changed successfully for: ${userId}`,
+      );
+
+      return {
+        success: true,
+        user: undefined,
+        token: undefined,
+        refreshToken: undefined,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Password change error:", error);
+      return this.createErrorResult("SERVER_ERROR", "Password change failed");
+    }
+  }
+
+  /**
+   * Initiate forgot password process
+   */
+  static async forgotPassword(email: string): Promise<AuthResult> {
+    try {
+      console.log(`🔑 [UnifiedAuth] Forgot password request for: ${email}`);
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return this.createErrorResult(
+          "INVALID_CREDENTIALS",
+          "Invalid email format",
+        );
+      }
+
+      // Find user by email (don't reveal if user exists for security)
+      const user = await this.findUserByCredentials(email);
+
+      if (user && user.is_active) {
+        // Generate password reset token
+        const resetToken = await this.generatePasswordResetToken(email);
+
+        // Send password reset email
+        await this.sendPasswordResetEmail(
+          email,
+          resetToken,
+          user.display_name || user.username,
+        );
+      }
+
+      // Always return success for security (don't reveal if email exists)
+      console.log(
+        `✅ [UnifiedAuth] Forgot password email sent (if user exists): ${email}`,
+      );
+
+      return {
+        success: true,
+        user: undefined,
+        token: undefined,
+        refreshToken: undefined,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Forgot password error:", error);
+      return this.createErrorResult(
+        "SERVER_ERROR",
+        "Forgot password request failed",
+      );
+    }
+  }
+
+  /**
+   * Reset password with token
+   */
+  static async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<AuthResult> {
+    try {
+      console.log(`🔑 [UnifiedAuth] Password reset attempt`);
+
+      if (!token || !newPassword) {
+        return this.createErrorResult(
+          "INVALID_CREDENTIALS",
+          "Reset token and new password are required",
+        );
+      }
+
+      // Validate new password strength
+      const passwordValidation = this.validatePasswordStrength(newPassword);
+      if (!passwordValidation.valid) {
+        return this.createErrorResult(
+          "WEAK_PASSWORD",
+          passwordValidation.message,
+        );
+      }
+
+      // Find password reset record
+      const resetData = await this.findPasswordResetToken(token);
+      if (!resetData) {
+        console.log(`❌ [UnifiedAuth] Password reset token not found`);
+        return this.createErrorResult(
+          "VERIFICATION_TOKEN_INVALID",
+          "Invalid or expired reset token",
+        );
+      }
+
+      // Check if token expired (24 hours)
+      if (new Date() > new Date(resetData.expiresAt)) {
+        console.log(`❌ [UnifiedAuth] Password reset token expired`);
+        await this.deletePasswordResetToken(token);
+        return this.createErrorResult(
+          "VERIFICATION_TOKEN_EXPIRED",
+          "Reset token has expired",
+        );
+      }
+
+      // Find user by email
+      const user = await this.findUserByCredentials(resetData.email);
+      if (!user) {
+        console.log(
+          `❌ [UnifiedAuth] User not found for reset: ${resetData.email}`,
+        );
+        return this.createErrorResult("USER_NOT_FOUND");
+      }
+
+      // Hash new password
+      const hashedNewPassword = await this.hashPassword(newPassword);
+
+      // Update password in database
+      await this.updateUserPassword(user.id, hashedNewPassword);
+
+      // Clean up reset token
+      await this.deletePasswordResetToken(token);
+
+      // Create AuthUser object
+      const authUser = await this.createAuthUserFromDbUser(user);
+
+      // Generate login tokens (auto-login after reset)
+      const tokenPair = this.generateTokenPair(authUser);
+
+      console.log(
+        `✅ [UnifiedAuth] Password reset successfully for: ${resetData.email}`,
+      );
+
+      return {
+        success: true,
+        user: authUser,
+        token: tokenPair.accessToken,
+        refreshToken: tokenPair.refreshToken,
+        expiresIn: tokenPair.expiresIn,
+        tokenType: tokenPair.tokenType,
+        error: undefined,
+        errorCode: undefined,
+      };
+    } catch (error: any) {
+      console.error("❌ [UnifiedAuth] Password reset error:", error);
+      return this.createErrorResult("SERVER_ERROR", "Password reset failed");
+    }
+  }
+
+  // ============================================
+  // REGISTRATION HELPER METHODS
+  // ============================================
+
+  /**
+   * Validate password strength
+   */
+  private static validatePasswordStrength(password: string): {
+    valid: boolean;
+    message?: string;
+  } {
+    const config = SECURITY_CONFIG;
+
+    if (password.length < config.PASSWORD_MIN_LENGTH) {
+      return {
+        valid: false,
+        message: `Password must be at least ${config.PASSWORD_MIN_LENGTH} characters`,
+      };
+    }
+
+    if (config.PASSWORD_REQUIRE_UPPERCASE && !/[A-Z]/.test(password)) {
+      return {
+        valid: false,
+        message: "Password must contain at least one uppercase letter",
+      };
+    }
+
+    if (config.PASSWORD_REQUIRE_LOWERCASE && !/[a-z]/.test(password)) {
+      return {
+        valid: false,
+        message: "Password must contain at least one lowercase letter",
+      };
+    }
+
+    if (config.PASSWORD_REQUIRE_NUMBERS && !/\d/.test(password)) {
+      return {
+        valid: false,
+        message: "Password must contain at least one number",
+      };
+    }
+
+    if (
+      config.PASSWORD_REQUIRE_SYMBOLS &&
+      !/[!@#$%^&*(),.?":{}|<>]/.test(password)
+    ) {
+      return {
+        valid: false,
+        message: "Password must contain at least one special character",
+      };
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Create new user in database
+   */
+  private static async createUser(userData: {
+    username: string;
+    email: string;
+    password: string;
+    displayName: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    tenantId: string;
+    role: UserRole;
+    isActive: boolean;
+  }): Promise<any> {
+    const prisma = await PrismaConnectionManager.getInstance();
+
+    // Create new user record (using raw query for now)
+    const newUser = await (prisma as any).staff.create({
+      data: {
+        id: crypto.randomUUID(),
+        tenant_id: userData.tenantId,
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        display_name: userData.displayName,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        phone: userData.phone,
+        role: userData.role,
+        is_active: userData.isActive,
+        permissions: "[]", // Start with empty permissions, will be populated by role
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+
+    return newUser;
+  }
+
+  /**
+   * Generate email verification token
+   */
+  private static async generateEmailVerificationToken(
+    email: string,
+  ): Promise<string> {
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Store verification token (in a real app, this would be in database)
+    // For now, we'll use a simple in-memory storage
+    await this.storeEmailVerificationToken({
+      token,
+      email,
+      expiresAt: expiresAt.toISOString(),
+      verified: false,
+    });
+
+    return token;
+  }
+
+  /**
+   * Store email verification token (temporary implementation)
+   */
+  private static emailVerificationTokens = new Map<
+    string,
+    EmailVerificationData
+  >();
+
+  private static async storeEmailVerificationToken(
+    data: EmailVerificationData,
+  ): Promise<void> {
+    this.emailVerificationTokens.set(data.token, data);
+  }
+
+  private static async findEmailVerificationToken(
+    token: string,
+  ): Promise<EmailVerificationData | null> {
+    return this.emailVerificationTokens.get(token) || null;
+  }
+
+  private static async deleteEmailVerificationToken(
+    token: string,
+  ): Promise<void> {
+    this.emailVerificationTokens.delete(token);
+  }
+
+  private static async deleteEmailVerificationTokensByEmail(
+    email: string,
+  ): Promise<void> {
+    for (const [token, data] of this.emailVerificationTokens.entries()) {
+      if (data.email === email) {
+        this.emailVerificationTokens.delete(token);
+      }
+    }
+  }
+
+  /**
+   * Send verification email (placeholder implementation)
+   */
+  private static async sendVerificationEmail(
+    email: string,
+    token: string,
+    displayName: string,
+  ): Promise<void> {
+    // In a real implementation, this would send an actual email
+    // For now, just log the verification token for development
+    console.log(`📧 [EmailService] Verification email for ${email}:`);
+    console.log(`   Display Name: ${displayName}`);
+    console.log(`   Verification Token: ${token}`);
+    console.log(`   Verification URL: /verify-email?token=${token}`);
+
+    // TODO: Implement actual email sending with email service
+    // await emailService.send({
+    //   to: email,
+    //   subject: 'Verify your email address',
+    //   template: 'email-verification',
+    //   data: { displayName, verificationUrl: `/verify-email?token=${token}` }
+    // });
+  }
+
+  /**
+   * Activate user account after email verification
+   */
+  private static async activateUserAccount(userId: string): Promise<void> {
+    const prisma = await PrismaConnectionManager.getInstance();
+
+    await (prisma as any).staff.update({
+      where: { id: userId },
+      data: {
+        is_active: true,
+        updated_at: new Date(),
+      },
+    });
+  }
+
+  // ============================================
+  // PASSWORD MANAGEMENT HELPER METHODS
+  // ============================================
+
+  /**
+   * Update user password in database
+   */
+  private static async updateUserPassword(
+    userId: string,
+    hashedPassword: string,
+  ): Promise<void> {
+    const prisma = await PrismaConnectionManager.getInstance();
+
+    await (prisma as any).staff.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+        updated_at: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Generate password reset token
+   */
+  private static async generatePasswordResetToken(
+    email: string,
+  ): Promise<string> {
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Store password reset token
+    await this.storePasswordResetToken({
+      token,
+      email,
+      expiresAt: expiresAt.toISOString(),
+      used: false,
+    });
+
+    return token;
+  }
+
+  /**
+   * Password reset token storage (temporary implementation)
+   */
+  private static passwordResetTokens = new Map<
+    string,
+    {
+      token: string;
+      email: string;
+      expiresAt: string;
+      used: boolean;
+    }
+  >();
+
+  private static async storePasswordResetToken(data: {
+    token: string;
+    email: string;
+    expiresAt: string;
+    used: boolean;
+  }): Promise<void> {
+    this.passwordResetTokens.set(data.token, data);
+  }
+
+  private static async findPasswordResetToken(token: string): Promise<{
+    token: string;
+    email: string;
+    expiresAt: string;
+    used: boolean;
+  } | null> {
+    return this.passwordResetTokens.get(token) || null;
+  }
+
+  private static async deletePasswordResetToken(token: string): Promise<void> {
+    this.passwordResetTokens.delete(token);
+  }
+
+  /**
+   * Send password reset email (placeholder implementation)
+   */
+  private static async sendPasswordResetEmail(
+    email: string,
+    token: string,
+    displayName: string,
+  ): Promise<void> {
+    // In a real implementation, this would send an actual email
+    // For now, just log the reset token for development
+    console.log(`📧 [EmailService] Password reset email for ${email}:`);
+    console.log(`   Display Name: ${displayName}`);
+    console.log(`   Reset Token: ${token}`);
+    console.log(`   Reset URL: /reset-password?token=${token}`);
+    console.log(
+      `   Expires: ${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()}`,
+    );
+
+    // TODO: Implement actual email sending with email service
+    // await emailService.send({
+    //   to: email,
+    //   subject: 'Reset your password',
+    //   template: 'password-reset',
+    //   data: { displayName, resetUrl: `/reset-password?token=${token}` }
+    // });
+  }
+
+  // ============================================
+  // SESSION MANAGEMENT HELPER METHODS
+  // ============================================
+
+  /**
+   * Session storage (in-memory for now, should be Redis/Database in production)
+   */
+  private static sessions = new Map<string, SessionData>();
+
+  private static async storeSession(session: SessionData): Promise<void> {
+    this.sessions.set(session.id, session);
+  }
+
+  private static async getSessionById(
+    sessionId: string,
+  ): Promise<SessionData | null> {
+    return this.sessions.get(sessionId) || null;
+  }
+
+  private static async getSessionsFromStorage(
+    userId: string,
+  ): Promise<SessionData[]> {
+    return Array.from(this.sessions.values()).filter(
+      (s) => s.userId === userId,
+    );
+  }
+
+  private static async markSessionInactive(sessionId: string): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.isActive = false;
+      this.sessions.set(sessionId, session);
+    }
+  }
+
+  private static async updateSessionLastActive(
+    sessionId: string,
+    timestamp: string,
+  ): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.lastActiveAt = timestamp;
+      this.sessions.set(sessionId, session);
+    }
+  }
+
+  /**
+   * Enforce session limits for user
+   */
+  private static async enforceSessionLimits(userId: string): Promise<void> {
+    const sessions = await this.getSessionsFromStorage(userId);
+    const activeSessions = sessions.filter(
+      (s) => s.isActive && new Date(s.expiresAt) > new Date(),
+    );
+
+    // If at limit, terminate oldest session
+    if (activeSessions.length >= SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS) {
+      const oldestSession = activeSessions.sort(
+        (a, b) =>
+          new Date(a.lastActiveAt).getTime() -
+          new Date(b.lastActiveAt).getTime(),
+      )[0];
+
+      if (oldestSession) {
+        await this.terminateSession(userId, oldestSession.id);
+        console.log(
+          `🔄 [UnifiedAuth] Terminated oldest session due to limit: ${oldestSession.id}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Parse device info from User-Agent
+   */
+  static parseDeviceInfo(userAgent: string, ipAddress: string): DeviceInfo {
+    const ua = userAgent.toLowerCase();
+
+    // Detect device type
+    let type: DeviceInfo["type"] = "unknown";
+    if (
+      ua.includes("mobile") ||
+      ua.includes("android") ||
+      ua.includes("iphone")
+    ) {
+      type = "mobile";
+    } else if (ua.includes("tablet") || ua.includes("ipad")) {
+      type = "tablet";
+    } else if (
+      ua.includes("mozilla") ||
+      ua.includes("chrome") ||
+      ua.includes("safari")
+    ) {
+      type = "desktop";
+    }
+
+    // Detect OS
+    let os = "Unknown";
+    if (ua.includes("windows")) os = "Windows";
+    else if (ua.includes("mac")) os = "macOS";
+    else if (ua.includes("linux")) os = "Linux";
+    else if (ua.includes("android")) os = "Android";
+    else if (ua.includes("ios") || ua.includes("iphone") || ua.includes("ipad"))
+      os = "iOS";
+
+    // Detect browser
+    let browser = "Unknown";
+    if (ua.includes("chrome") && !ua.includes("edg")) browser = "Chrome";
+    else if (ua.includes("firefox")) browser = "Firefox";
+    else if (ua.includes("safari") && !ua.includes("chrome"))
+      browser = "Safari";
+    else if (ua.includes("edg")) browser = "Edge";
+    else if (ua.includes("opera")) browser = "Opera";
+
+    // Generate device fingerprint
+    const fingerprint = crypto
+      .createHash("sha256")
+      .update(userAgent + ipAddress + os + browser)
+      .digest("hex")
+      .substring(0, 16);
+
+    return { type, os, browser, fingerprint };
+  }
+
+  /**
+   * Get location from IP (placeholder implementation)
+   */
+  private static async getLocationFromIP(
+    ipAddress: string,
+  ): Promise<LocationInfo | undefined> {
+    // In production, this would call a geolocation service
+    // For now, return undefined (local/development)
+    if (
+      ipAddress === "127.0.0.1" ||
+      ipAddress === "::1" ||
+      ipAddress.startsWith("192.168.")
+    ) {
+      return {
+        country: "Local",
+        region: "Development",
+        city: "localhost",
+        timezone: "UTC",
+        isp: "Local Network",
+      };
+    }
+
+    // TODO: Implement actual geolocation lookup
+    // const response = await fetch(`https://api.geoip.com/v1/${ipAddress}`);
+    // return response.json();
+
+    return undefined;
+  }
+
+  /**
+   * Clean up expired sessions
+   */
+  static async cleanupExpiredSessions(): Promise<number> {
+    try {
+      const now = new Date();
+      let cleanedCount = 0;
+
+      for (const [sessionId, session] of this.sessions.entries()) {
+        if (new Date(session.expiresAt) <= now) {
+          this.sessions.delete(sessionId);
+          cleanedCount++;
+        }
+      }
+
+      if (cleanedCount > 0) {
+        console.log(
+          `🧹 [UnifiedAuth] Cleaned up ${cleanedCount} expired sessions`,
+        );
+      }
+
+      return cleanedCount;
+    } catch (error) {
+      console.error("❌ [UnifiedAuth] Session cleanup error:", error);
+      return 0;
+    }
   }
 }
 
