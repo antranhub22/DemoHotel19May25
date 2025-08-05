@@ -1,584 +1,944 @@
 /**
- * 🏨 TENANT CONTROLLER
- *
- * RESTful API controller for tenant management operations
- * Uses Prisma ORM for database operations
- * Supports multi-tenant architecture with proper isolation
+ * SaaS Provider Domain - Tenant Controller
+ * Handles HTTP requests for tenant management, subscription, and usage operations
  */
 
-import { DatabaseServiceFactory } from "@shared/db/DatabaseServiceFactory";
-import { logger } from "@shared/utils/logger";
-import { ResponseWrapper } from "@shared/utils/responseWrapper";
 import { Request, Response } from "express";
+import { TenantService } from "../services/tenantService";
+import { PrismaTenantService } from "../../packages/shared/services/PrismaTenantService";
+import { PrismaConnectionManager } from "../../packages/shared/db/PrismaConnectionManager";
+import { StripeService } from "../services/StripeService";
+import { UsageTrackingService } from "../services/UsageTrackingService";
+import { FeatureGatingService } from "../services/FeatureGatingService";
+import { logger } from "@shared/utils/logger";
+import { z } from "zod";
 
-// Import database service factory
-import { IDatabaseService } from "@shared/db/IDatabaseService";
+// ============================================
+// REQUEST VALIDATION SCHEMAS
+// ============================================
+
+const UpdateSubscriptionSchema = z.object({
+  subscriptionPlan: z.enum(["trial", "basic", "premium", "enterprise"]),
+  billingCycle: z.enum(["monthly", "yearly"]).optional().default("monthly"),
+});
+
+const CancelSubscriptionSchema = z.object({
+  reason: z.string().optional(),
+  feedback: z.string().optional(),
+});
+
+const TrackUsageSchema = z.object({
+  eventType: z.enum([
+    "call_started",
+    "call_ended",
+    "api_request",
+    "feature_used",
+  ]),
+  metadata: z.record(z.any()).optional(),
+  timestamp: z.string().datetime().optional(),
+});
+
+const CheckFeatureSchema = z.object({
+  feature: z.string(),
+  context: z.record(z.any()).optional(),
+});
+
+const ProcessPaymentSchema = z.object({
+  amount: z.number().positive(),
+  currency: z.string().default("USD"),
+  paymentMethodId: z.string(),
+  description: z.string().optional(),
+});
 
 // ============================================
 // TENANT CONTROLLER CLASS
 // ============================================
 
 export class TenantController {
-  /**
-   * 🔄 Get tenant service instance
-   */
-  private static async getTenantService(): Promise<IDatabaseService> {
-    try {
-      logger.info("🔄 [TenantController] Initializing Prisma Tenant Service");
+  private tenantService: TenantService;
+  private prismaTenantService: PrismaTenantService;
+  private stripeService: StripeService;
+  private usageTrackingService: UsageTrackingService;
+  private featureGatingService: FeatureGatingService;
 
-      // Initialize Prisma connections if not already done
-      await DatabaseServiceFactory.initializeConnections();
+  constructor() {
+    this.tenantService = new TenantService();
 
-      // Get unified Prisma database service
-      const databaseService =
-        await DatabaseServiceFactory.createDatabaseService();
+    // Initialize Prisma services
+    const prismaManager = new PrismaConnectionManager();
+    this.prismaTenantService = new PrismaTenantService(prismaManager);
 
-      logger.info("✅ [TenantController] Prisma Tenant Service initialized");
-      return databaseService;
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to initialize Prisma service",
-        error,
-      );
-      throw error;
-    }
-  }
+    // Initialize SaaS services
+    this.stripeService = new StripeService();
+    this.usageTrackingService = new UsageTrackingService();
+    this.featureGatingService = new FeatureGatingService();
 
-  /**
-   * 🔄 Check if service is valid
-   */
-  private static isValidService(service: any): boolean {
-    return service && typeof service === "object";
+    logger.info("[TenantController] Initialized with all required services");
   }
 
   // ============================================
-  // TENANT CRUD OPERATIONS
+  // TENANT INFORMATION & CONTEXT
   // ============================================
 
   /**
-   * Create a new tenant
-   * POST /api/tenants
+   * Get current tenant information
    */
-  static async createTenant(req: Request, res: Response): Promise<void> {
+  async getCurrentTenant(req: Request, res: Response): Promise<void> {
     try {
-      logger.info(
-        "🏨 [TenantController] Creating new tenant",
-        "TenantController",
-      );
+      const userId = req.user?.id;
+      const tenantId = req.user?.tenantId;
 
-      const {
-        hotelName,
-        subdomain,
-        customDomain,
-        subscriptionPlan = "trial",
-        email,
-        phone,
-        address,
-      } = req.body;
-
-      // Validate required fields
-      if (!hotelName || !subdomain) {
-        ResponseWrapper.sendValidationError(res, [
-          {
-            field: !hotelName ? "hotelName" : "subdomain",
-            message: `${!hotelName ? "Hotel name" : "Subdomain"} is required`,
-          },
-        ]);
+      if (!tenantId) {
+        res.status(400).json({
+          success: false,
+          error: "No tenant context found",
+          message: "User is not associated with any tenant",
+        });
         return;
       }
 
-      const service = await TenantController.getTenantService();
+      logger.debug("[TenantController] Getting current tenant", {
+        userId,
+        tenantId,
+      });
 
-      // Create tenant using Prisma service
-      const tenantData = {
-        id: `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        hotel_name: hotelName,
-        subdomain,
-        domain: customDomain,
-        subscription_plan: subscriptionPlan,
-        email,
-        phone,
-        address,
-      };
-
-      const createdTenant = await service.createTenant(tenantData);
-      const result = { success: true, data: createdTenant };
-
-      logger.info(
-        "🎯 [TenantController] Using Prisma service for createTenant",
-        "TenantController",
-      );
-
-      if (result.success) {
-        logger.success(
-          "✅ [TenantController] Tenant created successfully",
-          "TenantController",
-          {
-            tenantId: result.data.id,
-          },
-        );
-
-        ResponseWrapper.sendCreated(
-          res,
-          result.data,
-          "Tenant created successfully",
-        );
-      } else {
-        logger.error(
-          "❌ [TenantController] Failed to create tenant",
-          "TenantController",
-          {
-            error: result.error,
-          },
-        );
-
-        ResponseWrapper.sendError(
-          res,
-          result.error || "Failed to create tenant",
-          500,
-        );
-      }
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to create tenant",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to create tenant");
-    }
-  }
-
-  /**
-   * Get tenant by ID
-   * GET /api/tenants/:id
-   */
-  static async getTenantById(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const includeRelations = req.query.include === "relations";
-
-      logger.info(
-        `🔍 [TenantController] Getting tenant by ID: ${id}`,
-        "TenantController",
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Get tenant using Prisma service
-      const tenant = await service.getTenantById(id, includeRelations);
+      // Get tenant data with relationships
+      const tenant =
+        await this.prismaTenantService.getTenantWithRelations(tenantId);
 
       if (!tenant) {
-        ResponseWrapper.sendNotFound(res, "Tenant not found");
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+          message: "The specified tenant does not exist",
+        });
         return;
       }
 
-      logger.success(
-        "✅ [TenantController] Tenant retrieved successfully",
-        "TenantController",
-        {
-          tenantId: id,
-        },
-      );
+      // Get current usage statistics
+      const usage = await this.usageTrackingService.getCurrentUsage(tenantId);
 
-      ResponseWrapper.sendResponse(res, tenant, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get tenant by ID",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenant");
-    }
-  }
-
-  /**
-   * Get tenant by subdomain
-   * GET /api/tenants/subdomain/:subdomain
-   */
-  static async getTenantBySubdomain(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
-    try {
-      const { subdomain } = req.params;
-
-      logger.info(
-        `🔍 [TenantController] Getting tenant by subdomain: ${subdomain}`,
-        "TenantController",
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Get tenant using Prisma service
-      const tenant = await service.getTenantBySubdomain(subdomain);
-
-      if (!tenant) {
-        ResponseWrapper.sendNotFound(res, "Tenant not found");
-        return;
-      }
-
-      logger.success(
-        "✅ [TenantController] Tenant retrieved by subdomain",
-        "TenantController",
-        {
-          subdomain,
-          tenantId: tenant.id,
-        },
-      );
-
-      ResponseWrapper.sendResponse(res, tenant, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get tenant by subdomain",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenant");
-    }
-  }
-
-  /**
-   * Get all tenants with pagination
-   * GET /api/tenants
-   */
-  static async getAllTenants(req: Request, res: Response): Promise<void> {
-    try {
-      const {
-        limit = 50,
-        offset = 0,
-        subscriptionPlan,
-        subscriptionStatus,
-        search,
-      } = req.query;
-
-      logger.info(
-        "📋 [TenantController] Getting all tenants",
-        "TenantController",
-        {
-          limit: Number(limit),
-          offset: Number(offset),
-        },
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Get all tenants using Prisma service
-      const tenants = await service.getAllTenants();
-      const result = { tenants, total: tenants.length };
-
-      logger.success(
-        "✅ [TenantController] Tenants retrieved successfully",
-        "TenantController",
-        {
-          count: result.tenants.length,
-          total: result.total,
-        },
-      );
-
-      ResponseWrapper.sendResponse(
-        res,
-        {
-          data: result.tenants,
-          meta: {
-            total: result.total,
-            limit: Number(limit),
-            offset: Number(offset),
-          },
-        },
-        200,
-      );
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get all tenants",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to retrieve tenants");
-    }
-  }
-
-  /**
-   * Update tenant
-   * PUT /api/tenants/:id
-   */
-  static async updateTenant(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const updates = req.body;
-
-      logger.info(
-        `🔄 [TenantController] Updating tenant: ${id}`,
-        "TenantController",
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Update tenant using Prisma service
-      const updatedTenant = await service.updateTenant(id, updates);
-      const result = { success: true, data: updatedTenant };
-
-      if (result.success) {
-        logger.success(
-          "✅ [TenantController] Tenant updated successfully",
-          "TenantController",
-          {
-            tenantId: id,
-          },
-        );
-
-        ResponseWrapper.sendResponse(
-          res,
-          result.data,
-          200,
-          "Tenant updated successfully",
-        );
-      } else {
-        logger.error(
-          "❌ [TenantController] Failed to update tenant",
-          "TenantController",
-          {
-            error: result.error,
-          },
-        );
-
-        ResponseWrapper.sendError(
-          res,
-          result.error || "Failed to update tenant",
-          500,
-        );
-      }
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to update tenant",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to update tenant");
-    }
-  }
-
-  /**
-   * Delete tenant
-   * DELETE /api/tenants/:id
-   */
-  static async deleteTenant(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-
-      logger.info(
-        `🗑️ [TenantController] Deleting tenant: ${id}`,
-        "TenantController",
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Delete tenant using Prisma service
-      await service.deleteTenant(id);
-      const success = true;
-
-      if (success) {
-        logger.success(
-          "✅ [TenantController] Tenant deleted successfully",
-          "TenantController",
-          {
-            tenantId: id,
-          },
-        );
-
-        ResponseWrapper.sendResponse(
-          res,
-          null,
-          200,
-          "Tenant deleted successfully",
-        );
-      } else {
-        ResponseWrapper.sendError(res, "Failed to delete tenant", 500);
-      }
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to delete tenant",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to delete tenant");
-    }
-  }
-
-  // ============================================
-  // TENANT FEATURE MANAGEMENT
-  // ============================================
-
-  /**
-   * Check tenant feature access
-   * GET /api/tenants/:id/features/:feature
-   */
-  static async checkFeatureAccess(req: Request, res: Response): Promise<void> {
-    try {
-      const { id, feature } = req.params;
-
-      logger.info(
-        `🏴 [TenantController] Checking feature access for tenant: ${id}`,
-        "TenantController",
-        {
-          feature,
-        },
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Check feature access using Prisma service
-      const hasAccess = await service.hasFeatureAccess(id, feature as any);
-
-      logger.info(
-        "✅ [TenantController] Feature access checked",
-        "TenantController",
-        {
-          tenantId: id,
-          feature,
-          hasAccess,
-        },
-      );
-
-      ResponseWrapper.sendResponse(res, { hasAccess }, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to check feature access",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to check feature access");
-    }
-  }
-
-  /**
-   * Get tenant subscription limits
-   * GET /api/tenants/:id/limits
-   */
-  static async getSubscriptionLimits(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
-    try {
-      const { id } = req.params;
-
-      logger.info(
-        `📊 [TenantController] Getting subscription limits for tenant: ${id}`,
-        "TenantController",
-      );
-
-      const service = await TenantController.getTenantService();
-
-      // Get subscription limits using Prisma service
-      const tenant = await service.getTenantById(id);
-      if (!tenant) {
-        ResponseWrapper.sendNotFound(res, "Tenant not found");
-        return;
-      }
-      const limits = service.getSubscriptionLimits(
+      // Get feature access information
+      const features = await this.featureGatingService.getTenantFeatures(
+        tenantId,
         tenant.subscription_plan || "trial",
       );
 
-      logger.success(
-        "✅ [TenantController] Subscription limits retrieved",
-        "TenantController",
-        {
-          tenantId: id,
-        },
-      );
+      // Calculate subscription health metrics
+      const healthMetrics = await this.calculateTenantHealth(tenant, usage);
 
-      ResponseWrapper.sendResponse(res, limits, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get subscription limits",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(
-        res,
-        "Failed to get subscription limits",
-      );
+      const response = {
+        success: true,
+        tenant: {
+          id: tenant.id,
+          hotelName: tenant.hotel_name,
+          subdomain: tenant.subdomain,
+          customDomain: tenant.custom_domain,
+          subscriptionPlan: tenant.subscription_plan,
+          subscriptionStatus: tenant.subscription_status,
+          trialEndsAt: tenant.trial_ends_at,
+          createdAt: tenant.created_at,
+          features: features,
+          limits: this.getSubscriptionLimits(
+            tenant.subscription_plan || "trial",
+          ),
+          usage: usage,
+          health: healthMetrics,
+        },
+      };
+
+      res.json(response);
+      logger.debug("[TenantController] Current tenant retrieved successfully", {
+        tenantId,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting current tenant", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenant information",
+        message: error.message,
+      });
     }
   }
 
   /**
-   * Get tenant usage statistics
-   * GET /api/tenants/:id/usage
+   * Get detailed tenant profile (admin only)
    */
-  static async getTenantUsage(req: Request, res: Response): Promise<void> {
+  async getTenantProfile(req: Request, res: Response): Promise<void> {
     try {
-      const { id } = req.params;
+      const tenantId = req.params.tenantId;
 
-      logger.info(
-        `📈 [TenantController] Getting usage statistics for tenant: ${id}`,
-        "TenantController",
-      );
+      // Verify admin access
+      if (!this.hasAdminAccess(req.user)) {
+        res.status(403).json({
+          success: false,
+          error: "Insufficient permissions",
+          message: "Admin access required",
+        });
+        return;
+      }
 
-      const service = await TenantController.getTenantService();
+      const tenant =
+        await this.prismaTenantService.getTenantWithFullMetrics(tenantId);
 
-      // Get tenant usage using Prisma service
-      const usage = await service.getTenantUsage(id);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
 
-      logger.success(
-        "✅ [TenantController] Usage statistics retrieved",
-        "TenantController",
-        {
-          tenantId: id,
-        },
-      );
-
-      ResponseWrapper.sendResponse(res, usage, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get tenant usage",
-        "TenantController",
-        error,
-      );
-      ResponseWrapper.sendDatabaseError(res, "Failed to get tenant usage");
+      res.json({
+        success: true,
+        tenant: tenant,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting tenant profile", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenant profile",
+        message: error.message,
+      });
     }
   }
 
   // ============================================
-  // UTILITY ENDPOINTS
+  // SUBSCRIPTION MANAGEMENT
   // ============================================
 
   /**
-   * Get tenant service health
-   * GET /api/tenants/health
+   * Update tenant subscription plan
    */
-  static async getServiceHealth(req: Request, res: Response): Promise<void> {
+  async updateSubscription(req: Request, res: Response): Promise<void> {
     try {
-      logger.info(
-        "🏥 [TenantController] Getting service health",
-        "TenantController",
+      const tenantId = req.params.tenantId;
+      const validation = UpdateSubscriptionSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid request data",
+          details: validation.error.issues,
+        });
+        return;
+      }
+
+      const { subscriptionPlan, billingCycle } = validation.data;
+
+      logger.debug("[TenantController] Updating subscription", {
+        tenantId,
+        newPlan: subscriptionPlan,
+        billingCycle,
+        userId: req.user?.id,
+      });
+
+      // Get current tenant
+      const currentTenant =
+        await this.prismaTenantService.getTenantById(tenantId);
+      if (!currentTenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      // Check if this is an upgrade or downgrade
+      const isUpgrade = this.isPlanUpgrade(
+        currentTenant.subscription_plan || "trial",
+        subscriptionPlan,
       );
 
-      const service = await TenantController.getTenantService();
+      // Handle Stripe subscription update
+      let stripeSubscription = null;
+      if (subscriptionPlan !== "trial") {
+        stripeSubscription = await this.stripeService.updateSubscription(
+          tenantId,
+          subscriptionPlan,
+          billingCycle,
+          isUpgrade,
+        );
+      }
 
-      // Get service health using Prisma service
-      const health = await service.getServiceHealth();
-
-      logger.success(
-        "✅ [TenantController] Service health retrieved",
-        "TenantController",
+      // Update tenant subscription in database
+      const updatedTenant = await this.prismaTenantService.updateTenant(
+        tenantId,
+        {
+          subscription_plan: subscriptionPlan,
+          subscription_status:
+            subscriptionPlan === "trial" ? "active" : "active",
+          updated_at: new Date(),
+        },
       );
 
-      ResponseWrapper.sendResponse(res, health, 200);
-    } catch (error) {
-      logger.error(
-        "❌ [TenantController] Failed to get service health",
-        "TenantController",
-        error,
+      // Update feature access
+      await this.featureGatingService.updateTenantFeatures(
+        tenantId,
+        subscriptionPlan,
       );
-      ResponseWrapper.sendServiceUnavailable(
-        res,
-        "Service health check failed",
+
+      // Log subscription change for analytics
+      await this.usageTrackingService.trackEvent(
+        tenantId,
+        "subscription_changed",
+        {
+          oldPlan: currentTenant.subscription_plan,
+          newPlan: subscriptionPlan,
+          billingCycle,
+          isUpgrade,
+          stripeSubscriptionId: stripeSubscription?.id,
+        },
       );
+
+      res.json({
+        success: true,
+        message: `Subscription updated to ${subscriptionPlan}`,
+        tenant: updatedTenant,
+        stripeSubscription: stripeSubscription,
+      });
+
+      logger.info("[TenantController] Subscription updated successfully", {
+        tenantId,
+        oldPlan: currentTenant.subscription_plan,
+        newPlan: subscriptionPlan,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error updating subscription", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to update subscription",
+        message: error.message,
+      });
     }
+  }
+
+  /**
+   * Cancel tenant subscription
+   */
+  async cancelSubscription(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const validation = CancelSubscriptionSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid request data",
+          details: validation.error.issues,
+        });
+        return;
+      }
+
+      const { reason, feedback } = validation.data;
+
+      logger.debug("[TenantController] Cancelling subscription", {
+        tenantId,
+        reason,
+        userId: req.user?.id,
+      });
+
+      // Get current tenant
+      const tenant = await this.prismaTenantService.getTenantById(tenantId);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      // Cancel Stripe subscription if exists
+      if (tenant.subscription_plan !== "trial") {
+        await this.stripeService.cancelSubscription(tenantId, reason);
+      }
+
+      // Update tenant status
+      const updatedTenant = await this.prismaTenantService.updateTenant(
+        tenantId,
+        {
+          subscription_status: "cancelled",
+          updated_at: new Date(),
+        },
+      );
+
+      // Log cancellation for analytics
+      await this.usageTrackingService.trackEvent(
+        tenantId,
+        "subscription_cancelled",
+        {
+          plan: tenant.subscription_plan,
+          reason,
+          feedback,
+          cancelledAt: new Date(),
+        },
+      );
+
+      res.json({
+        success: true,
+        message: "Subscription cancelled successfully",
+        tenant: updatedTenant,
+      });
+
+      logger.info("[TenantController] Subscription cancelled", {
+        tenantId,
+        reason,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error cancelling subscription", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to cancel subscription",
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Reactivate cancelled subscription
+   */
+  async reactivateSubscription(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const { subscriptionPlan } = req.body;
+
+      logger.debug("[TenantController] Reactivating subscription", {
+        tenantId,
+        plan: subscriptionPlan,
+        userId: req.user?.id,
+      });
+
+      // Get current tenant
+      const tenant = await this.prismaTenantService.getTenantById(tenantId);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      // Create new Stripe subscription
+      let stripeSubscription = null;
+      if (subscriptionPlan !== "trial") {
+        stripeSubscription = await this.stripeService.createSubscription(
+          tenantId,
+          subscriptionPlan,
+          "monthly", // Default to monthly
+        );
+      }
+
+      // Update tenant status
+      const updatedTenant = await this.prismaTenantService.updateTenant(
+        tenantId,
+        {
+          subscription_plan: subscriptionPlan,
+          subscription_status: "active",
+          updated_at: new Date(),
+        },
+      );
+
+      // Update feature access
+      await this.featureGatingService.updateTenantFeatures(
+        tenantId,
+        subscriptionPlan,
+      );
+
+      // Log reactivation for analytics
+      await this.usageTrackingService.trackEvent(
+        tenantId,
+        "subscription_reactivated",
+        {
+          plan: subscriptionPlan,
+          reactivatedAt: new Date(),
+          stripeSubscriptionId: stripeSubscription?.id,
+        },
+      );
+
+      res.json({
+        success: true,
+        message: "Subscription reactivated successfully",
+        tenant: updatedTenant,
+        stripeSubscription: stripeSubscription,
+      });
+
+      logger.info("[TenantController] Subscription reactivated", {
+        tenantId,
+        subscriptionPlan,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error reactivating subscription", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to reactivate subscription",
+        message: error.message,
+      });
+    }
+  }
+
+  // ============================================
+  // USAGE TRACKING & ANALYTICS
+  // ============================================
+
+  /**
+   * Get real-time usage statistics
+   */
+  async getCurrentUsage(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+
+      logger.debug("[TenantController] Getting current usage", { tenantId });
+
+      const usage = await this.usageTrackingService.getCurrentUsage(tenantId);
+      const limits = await this.getSubscriptionLimits(
+        req.user?.subscription_plan || "trial",
+      );
+
+      // Calculate usage percentages and alerts
+      const usageWithPercentages = {
+        ...usage,
+        percentages: {
+          calls: Math.round((usage.currentMonthCalls / limits.maxCalls) * 100),
+          minutes: Math.round(
+            (usage.currentMonthMinutes / limits.maxMonthlyMinutes) * 100,
+          ),
+          apiCalls: Math.round(
+            (usage.currentMonthApiCalls / limits.maxApiCalls) * 100,
+          ),
+          storage: Math.round(
+            (usage.storageUsed / (limits.dataRetentionDays * 100)) * 100,
+          ),
+        },
+        remaining: {
+          calls: Math.max(0, limits.maxCalls - usage.currentMonthCalls),
+          minutes: Math.max(
+            0,
+            limits.maxMonthlyMinutes - usage.currentMonthMinutes,
+          ),
+          apiCalls: Math.max(
+            0,
+            limits.maxApiCalls - usage.currentMonthApiCalls,
+          ),
+        },
+        alerts: await this.generateUsageAlerts(tenantId, usage, limits),
+      };
+
+      res.json({
+        success: true,
+        usage: usageWithPercentages,
+        limits: limits,
+        lastUpdated: new Date(),
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting current usage", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get usage statistics",
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Track usage event
+   */
+  async trackUsageEvent(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const validation = TrackUsageSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid request data",
+          details: validation.error.issues,
+        });
+        return;
+      }
+
+      const { eventType, metadata, timestamp } = validation.data;
+
+      // Track the usage event
+      await this.usageTrackingService.trackEvent(
+        tenantId,
+        eventType,
+        metadata,
+        timestamp ? new Date(timestamp) : new Date(),
+      );
+
+      res.json({
+        success: true,
+        message: "Usage event tracked successfully",
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error tracking usage event", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to track usage event",
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Get usage history with pagination
+   */
+  async getUsageHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const period = (req.query.period as string) || "current_month";
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+
+      const history = await this.usageTrackingService.getUsageHistory(
+        tenantId,
+        period,
+        page,
+        limit,
+      );
+
+      res.json({
+        success: true,
+        history: history,
+        pagination: {
+          page,
+          limit,
+          total: history.length,
+        },
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting usage history", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get usage history",
+        message: error.message,
+      });
+    }
+  }
+
+  // ============================================
+  // FEATURE ACCESS & LIMITS
+  // ============================================
+
+  /**
+   * Get feature access information
+   */
+  async getFeatureAccess(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+
+      const tenant = await this.prismaTenantService.getTenantById(tenantId);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      const features = await this.featureGatingService.getTenantFeatures(
+        tenantId,
+        tenant.subscription_plan || "trial",
+      );
+
+      res.json({
+        success: true,
+        features: features,
+        subscriptionPlan: tenant.subscription_plan,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting feature access", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get feature access",
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Check access to specific feature
+   */
+  async checkFeatureAccess(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const validation = CheckFeatureSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid request data",
+          details: validation.error.issues,
+        });
+        return;
+      }
+
+      const { feature, context } = validation.data;
+
+      const tenant = await this.prismaTenantService.getTenantById(tenantId);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      const hasAccess = await this.featureGatingService.checkFeatureAccess(
+        tenantId,
+        feature,
+        tenant.subscription_plan || "trial",
+        context,
+      );
+
+      // Track feature access attempt
+      await this.usageTrackingService.trackEvent(tenantId, "feature_checked", {
+        feature,
+        hasAccess,
+        subscriptionPlan: tenant.subscription_plan,
+        context,
+      });
+
+      res.json({
+        success: true,
+        feature: feature,
+        hasAccess: hasAccess,
+        subscriptionPlan: tenant.subscription_plan,
+        requiredPlan: this.getRequiredPlanForFeature(feature),
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error checking feature access", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to check feature access",
+        message: error.message,
+      });
+    }
+  }
+
+  // ============================================
+  // BILLING & PAYMENTS
+  // ============================================
+
+  /**
+   * Get billing invoices
+   */
+  async getBillingInvoices(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+
+      const invoices = await this.stripeService.getInvoices(
+        tenantId,
+        page,
+        limit,
+      );
+
+      res.json({
+        success: true,
+        invoices: invoices,
+        pagination: {
+          page,
+          limit,
+        },
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error getting billing invoices", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get billing invoices",
+        message: error.message,
+      });
+    }
+  }
+
+  /**
+   * Process payment
+   */
+  async processPayment(req: Request, res: Response): Promise<void> {
+    try {
+      const tenantId = req.params.tenantId;
+      const validation = ProcessPaymentSchema.safeParse(req.body);
+
+      if (!validation.success) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid request data",
+          details: validation.error.issues,
+        });
+        return;
+      }
+
+      const { amount, currency, paymentMethodId, description } =
+        validation.data;
+
+      const paymentResult = await this.stripeService.processPayment(
+        tenantId,
+        amount,
+        currency,
+        paymentMethodId,
+        description,
+      );
+
+      // Log payment for analytics
+      await this.usageTrackingService.trackEvent(
+        tenantId,
+        "payment_processed",
+        {
+          amount,
+          currency,
+          paymentIntentId: paymentResult.id,
+          status: paymentResult.status,
+        },
+      );
+
+      res.json({
+        success: true,
+        payment: paymentResult,
+      });
+    } catch (error: any) {
+      logger.error("[TenantController] Error processing payment", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process payment",
+        message: error.message,
+      });
+    }
+  }
+
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+
+  private hasAdminAccess(user: any): boolean {
+    return user?.role === "admin" || user?.role === "hotel-manager";
+  }
+
+  private isPlanUpgrade(currentPlan: string, newPlan: string): boolean {
+    const planHierarchy = ["trial", "basic", "premium", "enterprise"];
+    return planHierarchy.indexOf(newPlan) > planHierarchy.indexOf(currentPlan);
+  }
+
+  private getSubscriptionLimits(plan: string) {
+    const limits = {
+      trial: {
+        maxCalls: 100,
+        maxMonthlyMinutes: 500,
+        maxApiCalls: 1000,
+        maxStaffMembers: 2,
+        dataRetentionDays: 30,
+      },
+      basic: {
+        maxCalls: 1000,
+        maxMonthlyMinutes: 5000,
+        maxApiCalls: 10000,
+        maxStaffMembers: 5,
+        dataRetentionDays: 90,
+      },
+      premium: {
+        maxCalls: 10000,
+        maxMonthlyMinutes: 50000,
+        maxApiCalls: 100000,
+        maxStaffMembers: 20,
+        dataRetentionDays: 180,
+      },
+      enterprise: {
+        maxCalls: 100000,
+        maxMonthlyMinutes: 500000,
+        maxApiCalls: 1000000,
+        maxStaffMembers: 100,
+        dataRetentionDays: 365,
+      },
+    };
+
+    return limits[plan as keyof typeof limits] || limits.trial;
+  }
+
+  private getRequiredPlanForFeature(feature: string): string {
+    const featureRequirements: Record<string, string> = {
+      voice_cloning: "premium",
+      white_label: "enterprise",
+      multi_location: "premium",
+      advanced_analytics: "premium",
+      api_access: "basic",
+      custom_integrations: "enterprise",
+      priority_support: "premium",
+      data_export: "basic",
+    };
+
+    return featureRequirements[feature] || "basic";
+  }
+
+  private async calculateTenantHealth(tenant: any, usage: any) {
+    let score = 100;
+
+    // Deduct for high usage
+    const limits = this.getSubscriptionLimits(
+      tenant.subscription_plan || "trial",
+    );
+    const callUsageRatio = usage.currentMonthCalls / limits.maxCalls;
+    if (callUsageRatio > 0.8) score -= 20;
+    if (callUsageRatio > 0.95) score -= 10;
+
+    // Deduct for trial status
+    if (tenant.subscription_plan === "trial") score -= 10;
+
+    // Deduct for overdue payments
+    if (tenant.subscription_status === "expired") score -= 30;
+
+    // Deduct for approaching trial end
+    if (tenant.subscription_plan === "trial" && tenant.trial_ends_at) {
+      const daysRemaining = Math.ceil(
+        (new Date(tenant.trial_ends_at).getTime() - Date.now()) /
+          (1000 * 60 * 60 * 24),
+      );
+      if (daysRemaining <= 7) score -= 15;
+    }
+
+    return {
+      score: Math.max(0, score),
+      status:
+        score >= 80
+          ? "excellent"
+          : score >= 60
+            ? "good"
+            : score >= 40
+              ? "fair"
+              : "needs_attention",
+    };
+  }
+
+  private async generateUsageAlerts(tenantId: string, usage: any, limits: any) {
+    const alerts = [];
+
+    // Call limit alerts
+    const callUsageRatio = usage.currentMonthCalls / limits.maxCalls;
+    if (callUsageRatio >= 0.8) {
+      alerts.push({
+        type: "approaching_limit",
+        metric: "calls",
+        severity: callUsageRatio >= 0.95 ? "critical" : "warning",
+        message: `You've used ${Math.round(callUsageRatio * 100)}% of your monthly call limit`,
+        currentValue: usage.currentMonthCalls,
+        limitValue: limits.maxCalls,
+      });
+    }
+
+    // Minutes limit alerts
+    const minutesUsageRatio =
+      usage.currentMonthMinutes / limits.maxMonthlyMinutes;
+    if (minutesUsageRatio >= 0.8) {
+      alerts.push({
+        type: "approaching_limit",
+        metric: "minutes",
+        severity: minutesUsageRatio >= 0.95 ? "critical" : "warning",
+        message: `You've used ${Math.round(minutesUsageRatio * 100)}% of your monthly minutes`,
+        currentValue: usage.currentMonthMinutes,
+        limitValue: limits.maxMonthlyMinutes,
+      });
+    }
+
+    return alerts;
   }
 }
-
-// ============================================
-// EXPORT CONTROLLER
-// ============================================
-
-export default TenantController;
