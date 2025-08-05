@@ -14,23 +14,23 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-} from 'react';
+} from "react";
 
 // Import types
-import { CallProvider, useCall } from '@/context/contexts/CallContext';
+import { CallProvider, useCall } from "@/context/contexts/CallContext";
 
 // Import all new focused contexts
 import {
   LanguageProvider,
   useLanguage,
-} from '@/context/contexts/LanguageContext';
+} from "@/context/contexts/LanguageContext";
 import {
   OrderProvider,
   RecentRequest,
   useOrder,
-} from '@/context/contexts/OrderContext';
-import { useVapi, VapiProvider } from '@/context/contexts/VapiContextSimple';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+} from "@/context/contexts/OrderContext";
+import { useVapi, VapiProvider } from "@/context/contexts/VapiContextSimple";
+import { HotelConfiguration } from "@/hooks/useHotelConfiguration";
 import {
   ActiveOrder,
   CallDetails,
@@ -39,18 +39,15 @@ import {
   OrderSummary,
   ServiceRequest,
   Transcript,
-} from '@/types';
-import { logger } from '@shared/utils/logger';
-import {
-  ConfigurationProvider,
-  useConfiguration,
-} from './contexts/ConfigurationContext';
+} from "@/types";
+import { logger } from "@shared/utils/logger";
+import { useAuth } from "./AuthContext";
 import {
   TranscriptProvider,
   useTranscript,
-} from './contexts/TranscriptContext';
+} from "./contexts/TranscriptContext";
 // Define Language type
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
+export type Language = "en" | "fr" | "zh" | "ru" | "ko" | "vi";
 
 // Combined interface that exposes all context functionality
 export interface RefactoredAssistantContextType {
@@ -68,7 +65,7 @@ export interface RefactoredAssistantContextType {
   // From TranscriptContext
   transcripts: Transcript[];
   setTranscripts: (transcripts: Transcript[]) => void;
-  addTranscript: (transcript: Omit<Transcript, 'id' | 'timestamp'>) => void;
+  addTranscript: (transcript: Omit<Transcript, "id" | "timestamp">) => void;
   modelOutput: string[];
   setModelOutput: (output: string[]) => void;
   addModelOutput: (output: string) => void;
@@ -102,13 +99,8 @@ export interface RefactoredAssistantContextType {
   requestReceivedAt: Date | null;
   setRequestReceivedAt: (date: Date | null) => void;
 
-  // From ConfigurationContext
-  hotelConfig: HotelConfiguration | null;
-  setHotelConfig: (config: HotelConfiguration | null) => void;
+  // From AuthContext (simplified)
   tenantId: string | null;
-  setTenantId: (tenantId: string | null) => void;
-  tenantConfig: any | null;
-  setTenantConfig: (config: any | null) => void;
 
   // From VapiContext
   micLevel: number;
@@ -116,7 +108,7 @@ export interface RefactoredAssistantContextType {
   setCallDetails: (details: CallDetails | null) => void;
   initializeVapi: (
     language: string,
-    hotelConfig?: HotelConfiguration | null
+    hotelConfig?: HotelConfiguration | null,
   ) => Promise<void>;
   startVapiCall: (assistantId: string) => Promise<any>;
   endVapiCall: () => void;
@@ -133,7 +125,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   const transcript = useTranscript();
   const language = useLanguage();
   const order = useOrder();
-  const configuration = useConfiguration();
+  const { user } = useAuth();
   const vapi = useVapi();
 
   // ✅ DISABLED AGAIN: VapiProvider callback (causes premature Summary)
@@ -172,12 +164,12 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
   // ✅ NEW: Listen for language changes and reinitialize Vapi
   useEffect(() => {
     logger.debug(
-      '[RefactoredAssistant] Language changed, reinitializing Vapi...',
-      'Component',
+      "[RefactoredAssistant] Language changed, reinitializing Vapi...",
+      "Component",
       {
         newLanguage: language.language,
         currentVapiLanguage: vapi.currentLanguage,
-      }
+      },
     );
 
     // Reinitialize Vapi for the new language (only if language actually changed)
@@ -185,9 +177,9 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       vapi.reinitializeForLanguage(language.language);
 
       logger.debug(
-        '[RefactoredAssistant] Vapi reinitialized for language:',
-        'Component',
-        language.language
+        "[RefactoredAssistant] Vapi reinitialized for language:",
+        "Component",
+        language.language,
       );
     }
   }, [language.language, vapi]); // Depend on language changes
@@ -201,7 +193,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
         // ✅ NEW: Enhanced debug logging
         console.log(
-          '🎪 [DEBUG] RefactoredAssistant.enhancedStartCall called:',
+          "🎪 [DEBUG] RefactoredAssistant.enhancedStartCall called:",
           {
             targetLanguage,
             contextLanguage: language.language,
@@ -209,17 +201,17 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
             timestamp: new Date().toISOString(),
             vapiAvailable: !!vapi,
             vapiStartCallAvailable: !!(vapi && vapi.startCall),
-          }
+          },
         );
 
         logger.debug(
-          '[RefactoredAssistant] Starting enhanced call...',
-          'Component',
+          "[RefactoredAssistant] Starting enhanced call...",
+          "Component",
           {
             targetLanguage,
             contextLanguage: language.language,
             languageToUse,
-          }
+          },
         );
 
         // ✅ FIXED: Clear previous data BEFORE starting new call to prevent race condition
@@ -230,7 +222,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         // Note: VapiContextSimple handles initialization automatically
 
         // ✅ NEW: Debug before vapi.startCall
-        console.log('🎯 [DEBUG] About to call vapi.startCall:', {
+        console.log("🎯 [DEBUG] About to call vapi.startCall:", {
           languageToUse,
           timestamp: new Date().toISOString(),
         });
@@ -239,7 +231,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         await vapi.startCall(languageToUse);
 
         // ✅ NEW: Debug after vapi.startCall success
-        console.log('🎉 [DEBUG] vapi.startCall completed successfully:', {
+        console.log("🎉 [DEBUG] vapi.startCall completed successfully:", {
           languageToUse,
           timestamp: new Date().toISOString(),
         });
@@ -250,93 +242,93 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         // ✅ FIXED: Update language context if different language was used
         if (targetLanguage && targetLanguage !== language.language) {
           logger.debug(
-            '[RefactoredAssistant] Updating language context to match call',
-            'Component',
-            { from: language.language, to: targetLanguage }
+            "[RefactoredAssistant] Updating language context to match call",
+            "Component",
+            { from: language.language, to: targetLanguage },
           );
           language.setLanguage(targetLanguage as any);
         }
 
         logger.debug(
-          '[RefactoredAssistant] Enhanced call started successfully',
-          'Component'
+          "[RefactoredAssistant] Enhanced call started successfully",
+          "Component",
         );
       } catch (error) {
         // ✅ NEW: Enhanced error debugging for RefactoredAssistant
         console.error(
-          '💥 [DEBUG] Error in RefactoredAssistant.enhancedStartCall:',
+          "💥 [DEBUG] Error in RefactoredAssistant.enhancedStartCall:",
           {
             error,
             errorMessage:
               error instanceof Error ? error.message : String(error),
-            errorStack: error instanceof Error ? error.stack : 'No stack',
+            errorStack: error instanceof Error ? error.stack : "No stack",
             timestamp: new Date().toISOString(),
             targetLanguage,
             languageToUse: targetLanguage || language.language,
             vapiAvailable: !!vapi,
             vapiStartCallAvailable: !!(vapi && vapi.startCall),
-          }
+          },
         );
 
         logger.error(
-          '[RefactoredAssistant] Error starting enhanced call:',
-          'Component',
-          error
+          "[RefactoredAssistant] Error starting enhanced call:",
+          "Component",
+          error,
         );
         throw error;
       }
     },
-    [call, vapi, language, configuration, transcript, order]
+    [call, vapi, language, transcript, order],
   );
 
   // ✅ MERGED: Single endCall function with full functionality
   const endCall = useCallback(async () => {
-    console.log('📞 [DEBUG] RefactoredAssistant.endCall called');
+    console.log("📞 [DEBUG] RefactoredAssistant.endCall called");
 
     // ✅ GUARD: Only proceed if there was actually an active call
     if (!call.isCallActive && !vapi.isCallActive) {
       console.log(
-        '⚠️ [DEBUG] No active call found, skipping endCall processing'
+        "⚠️ [DEBUG] No active call found, skipping endCall processing",
       );
       return;
     }
 
     // Debug logging for endCall function
-    console.log('🎯 [DEBUG] EndCall function triggered with active call');
+    console.log("🎯 [DEBUG] EndCall function triggered with active call");
     logger.debug(
-      '[RefactoredAssistant] Ending call with summary processing...',
-      'Component'
+      "[RefactoredAssistant] Ending call with summary processing...",
+      "Component",
     );
 
     try {
       // Step 1: Stop Vapi first
-      console.log('📞 [DEBUG] Calling vapi.endCall()');
+      console.log("📞 [DEBUG] Calling vapi.endCall()");
       await vapi.endCall();
-      console.log('✅ [DEBUG] vapi.endCall() completed');
+      console.log("✅ [DEBUG] vapi.endCall() completed");
 
       // Step 2: End call timer and trigger listeners
-      console.log('📞 [DEBUG] Calling call.endCall()');
+      console.log("📞 [DEBUG] Calling call.endCall()");
       call.endCall();
-      console.log('✅ [DEBUG] call.endCall() completed');
+      console.log("✅ [DEBUG] call.endCall() completed");
 
       // Step 3: Process summary if we have any transcripts (reduced from 2 to 1)
-      console.log('🔍 [DEBUG] Checking transcript state:', {
+      console.log("🔍 [DEBUG] Checking transcript state:", {
         hasTranscript: !!transcript,
         transcriptLength: transcript?.transcripts?.length || 0,
-        transcripts: transcript?.transcripts || 'undefined',
+        transcripts: transcript?.transcripts || "undefined",
         fullTranscriptObject: transcript,
       });
 
       if (transcript.transcripts.length >= 1) {
         console.log(
-          '📞 [DEBUG] Processing call summary with transcripts:',
-          transcript.transcripts.length
+          "📞 [DEBUG] Processing call summary with transcripts:",
+          transcript.transcripts.length,
         );
 
         // ✅ INTEGRATED: Trigger summary processing
         logger.debug(
-          '[RefactoredAssistant] Processing call summary...',
-          'Component'
+          "[RefactoredAssistant] Processing call summary...",
+          "Component",
         );
 
         // ✅ NEW: Set call summary data for popup system
@@ -344,8 +336,8 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
         order.setCallSummary({
           callId: vapiCallId,
-          tenantId: configuration.tenantId || 'default',
-          content: '', // Will be filled by WebSocket
+          tenantId: user?.tenantId || "default",
+          content: "", // Will be filled by WebSocket
           timestamp: new Date(),
         });
 
@@ -359,24 +351,24 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
           window.triggerSummaryPopup();
         }
 
-        console.log('✅ [DEBUG] Summary processing triggered');
+        console.log("✅ [DEBUG] Summary processing triggered");
       } else {
         console.log(
-          '📞 [DEBUG] No transcripts to process:',
-          transcript.transcripts.length
+          "📞 [DEBUG] No transcripts to process:",
+          transcript.transcripts.length,
         );
 
         // ✅ RE-ENABLED FALLBACK: Trigger Summary Popup even without transcripts
         // Race condition issue was fixed, safe to re-enable
         console.log(
-          '🔄 [DEBUG] FALLBACK: Triggering Summary Popup without transcripts'
+          "🔄 [DEBUG] FALLBACK: Triggering Summary Popup without transcripts",
         );
 
         const vapiCallId = vapi.callDetails?.id || `temp-call-${Date.now()}`;
         order.setCallSummary({
           callId: vapiCallId,
-          tenantId: configuration.tenantId || 'default',
-          content: 'Processing call summary...', // Placeholder content
+          tenantId: user?.tenantId || "default",
+          content: "Processing call summary...", // Placeholder content
           timestamp: new Date(),
         });
 
@@ -388,48 +380,48 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         // Trigger summary popup via global function
         if (window.triggerSummaryPopup) {
           console.log(
-            '🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()'
+            "🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()",
           );
           window.triggerSummaryPopup();
           console.log(
-            '✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully'
+            "✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully",
           );
         } else {
-          console.error('❌ [DEBUG] window.triggerSummaryPopup not available!');
+          console.error("❌ [DEBUG] window.triggerSummaryPopup not available!");
         }
 
-        console.log('✅ [DEBUG] FALLBACK Summary processing triggered');
+        console.log("✅ [DEBUG] FALLBACK Summary processing triggered");
       }
 
-      console.log('✅ [DEBUG] RefactoredAssistant.endCall completed');
+      console.log("✅ [DEBUG] RefactoredAssistant.endCall completed");
       logger.debug(
-        '[RefactoredAssistant] Call ended with summary processing',
-        'Component'
+        "[RefactoredAssistant] Call ended with summary processing",
+        "Component",
       );
     } catch (error) {
-      console.error('❌ [DEBUG] Error in endCall:', error);
+      console.error("❌ [DEBUG] Error in endCall:", error);
       logger.error(
-        '[RefactoredAssistant] Error ending call:',
-        'Component',
-        error
+        "[RefactoredAssistant] Error ending call:",
+        "Component",
+        error,
       );
     }
-  }, [call, vapi, transcript, order, configuration]);
+  }, [call, vapi, transcript, order]);
 
   // ✅ RE-ENABLED: Register RefactoredAssistant.endCall as call end listener
   // Call loop issue was fixed by disabling the problematic VapiProvider callback
   useEffect(() => {
     console.log(
-      '📞 [DEBUG] Registering RefactoredAssistant.endCall as call end listener'
+      "📞 [DEBUG] Registering RefactoredAssistant.endCall as call end listener",
     );
     const unregister = call.addCallEndListener(endCall);
     console.log(
-      '✅ [DEBUG] RefactoredAssistant.endCall registered successfully'
+      "✅ [DEBUG] RefactoredAssistant.endCall registered successfully",
     );
 
     return () => {
       console.log(
-        '📞 [DEBUG] Unregistering RefactoredAssistant.endCall listener'
+        "📞 [DEBUG] Unregistering RefactoredAssistant.endCall listener",
       );
       unregister();
     };
@@ -452,13 +444,15 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
     ...transcript,
     ...language,
     ...order,
-    ...configuration,
     ...vapi,
+
+    // From AuthContext
+    tenantId: user?.tenantId || null,
 
     // Additional Vapi methods for compatibility
     initializeVapi: async (
       _language: string,
-      _hotelConfig?: HotelConfiguration | null
+      _hotelConfig?: HotelConfiguration | null,
     ) => {
       // VapiContextSimple handles initialization automatically
       return Promise.resolve();
@@ -498,26 +492,24 @@ export function RefactoredAssistantProvider({
   children: ReactNode;
 }) {
   logger.debug(
-    '[RefactoredAssistantProvider] Initializing with nested providers...',
-    'Component'
+    "[RefactoredAssistantProvider] Initializing with nested providers...",
+    "Component",
   );
 
   return (
-    <ConfigurationProvider>
-      <LanguageProvider>
-        <TranscriptProvider>
-          <VapiProvider>
-            <CallProvider>
-              <OrderProvider>
-                <RefactoredAssistantProviderInternal>
-                  {children}
-                </RefactoredAssistantProviderInternal>
-              </OrderProvider>
-            </CallProvider>
-          </VapiProvider>
-        </TranscriptProvider>
-      </LanguageProvider>
-    </ConfigurationProvider>
+    <LanguageProvider>
+      <TranscriptProvider>
+        <VapiProvider>
+          <CallProvider>
+            <OrderProvider>
+              <RefactoredAssistantProviderInternal>
+                {children}
+              </RefactoredAssistantProviderInternal>
+            </OrderProvider>
+          </CallProvider>
+        </VapiProvider>
+      </TranscriptProvider>
+    </LanguageProvider>
   );
 }
 
@@ -526,7 +518,7 @@ export function useRefactoredAssistant() {
   const context = useContext(RefactoredAssistantContext);
   if (context === undefined) {
     throw new Error(
-      'useRefactoredAssistant must be used within a RefactoredAssistantProvider'
+      "useRefactoredAssistant must be used within a RefactoredAssistantProvider",
     );
   }
   return context;
