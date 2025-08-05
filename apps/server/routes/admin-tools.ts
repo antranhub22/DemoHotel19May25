@@ -10,84 +10,117 @@ import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
 const router = express.Router();
 
 // ============================================
-// CREATE PRODUCTION MANAGER
+// CREATE PRODUCTION USERS
 // ============================================
 
-router.post("/create-manager", async (req, res) => {
+router.post("/create-users", async (req, res) => {
   try {
-    console.log("🔧 [AdminTools] Creating production manager...");
+    console.log("🔧 [AdminTools] Creating production users...");
 
     const prisma = await PrismaConnectionManager.getInstance();
 
-    // Check if manager exists
-    const existingManager = await (prisma as any).staff.findFirst({
-      where: { username: "manager" },
-    });
+    // Define users with passwords that meet 12-character requirement
+    const users = [
+      {
+        username: "manager",
+        password: "manager123456", // 13 characters (original pattern + 456)
+        role: "hotel-manager",
+        firstName: "Hotel",
+        lastName: "Manager",
+        email: "manager@minhonhotel.com",
+        displayName: "Hotel Manager",
+        permissions: ["manage_staff", "view_analytics", "manage_requests"],
+      },
+      {
+        username: "frontdesk",
+        password: "frontdesk123", // 12 characters (already correct)
+        role: "front-desk",
+        firstName: "Front",
+        lastName: "Desk",
+        email: "frontdesk@minhonhotel.com",
+        displayName: "Front Desk Staff",
+        permissions: ["handle_requests", "view_guests"],
+      },
+      {
+        username: "itmanager",
+        password: "itmanager123", // 13 characters (already correct)
+        role: "it-manager",
+        firstName: "IT",
+        lastName: "Manager",
+        email: "it@minhonhotel.com",
+        displayName: "IT Manager",
+        permissions: ["manage_system", "view_logs", "manage_integrations"],
+      },
+    ];
 
-    const newPassword = "hotelmanager123"; // 15 characters
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const results = [];
 
-    if (existingManager) {
-      // Update existing manager
-      await (prisma as any).staff.update({
-        where: { id: existingManager.id },
-        data: {
-          password: hashedPassword,
-          is_active: true,
-        },
+    for (const userData of users) {
+      // Check if user exists
+      const existingUser = await (prisma as any).staff.findFirst({
+        where: { username: userData.username },
       });
 
-      console.log("✅ [AdminTools] Manager password updated");
+      const hashedPassword = await bcrypt.hash(userData.password, 12);
 
-      res.json({
-        success: true,
-        action: "updated",
-        credentials: {
-          username: "manager",
-          password: "hotelmanager123",
-          role: "hotel-manager",
-        },
-      });
-    } else {
-      // Create new manager
-      const newManager = await (prisma as any).staff.create({
-        data: {
-          tenant_id: "mi-nhon-hotel",
-          username: "manager",
-          password: hashedPassword,
-          first_name: "Hotel",
-          last_name: "Manager",
-          email: "manager@minhonhotel.com",
-          role: "hotel-manager",
-          display_name: "Hotel Manager",
-          permissions: JSON.stringify([
-            "manage_staff",
-            "view_analytics",
-            "manage_requests",
-          ]),
-          is_active: true,
-          created_at: new Date(),
-          updated_at: new Date(),
-        },
-      });
+      if (existingUser) {
+        // Update existing user
+        await (prisma as any).staff.update({
+          where: { id: existingUser.id },
+          data: {
+            password: hashedPassword,
+            is_active: true,
+          },
+        });
 
-      console.log("✅ [AdminTools] Manager created");
+        console.log(`✅ [AdminTools] ${userData.username} password updated`);
 
-      res.json({
-        success: true,
-        action: "created",
-        credentials: {
-          username: "manager",
-          password: "hotelmanager123",
-          role: "hotel-manager",
-        },
-      });
+        results.push({
+          action: "updated",
+          username: userData.username,
+          password: userData.password,
+          role: userData.role,
+        });
+      } else {
+        // Create new user
+        await (prisma as any).staff.create({
+          data: {
+            tenant_id: "mi-nhon-hotel",
+            username: userData.username,
+            password: hashedPassword,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+            role: userData.role,
+            display_name: userData.displayName,
+            permissions: JSON.stringify(userData.permissions),
+            is_active: true,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+        });
+
+        console.log(`✅ [AdminTools] ${userData.username} created`);
+
+        results.push({
+          action: "created",
+          username: userData.username,
+          password: userData.password,
+          role: userData.role,
+        });
+      }
     }
+
+    res.json({
+      success: true,
+      message: "All users processed successfully",
+      users: results,
+    });
   } catch (error) {
-    console.error("❌ [AdminTools] Error creating manager:", error);
+    console.error("❌ [AdminTools] Error creating users:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to create manager",
+      error: "Failed to create users",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -120,7 +153,7 @@ router.get("/users", async (req, res) => {
         ...user,
         passwordLength:
           user.username === "manager"
-            ? "15 chars (hotelmanager123)"
+            ? "13 chars (manager123456)"
             : user.username === "itmanager"
               ? "13 chars (itmanager123)"
               : user.username === "frontdesk"
