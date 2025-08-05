@@ -5,7 +5,7 @@
 
 import { Request, Response } from "express";
 import { TenantService } from "../services/tenantService";
-import { PrismaTenantService } from "../../packages/shared/services/PrismaTenantService";
+import PrismaTenantService from "../../packages/shared/services/PrismaTenantService";
 import { PrismaConnectionManager } from "../../packages/shared/db/PrismaConnectionManager";
 import { StripeService } from "../services/StripeService";
 import { UsageTrackingService } from "../services/UsageTrackingService";
