@@ -14,7 +14,7 @@ services:
       npx prisma generate --no-engine &&
       npx prisma migrate deploy &&
       npm run build:production
-    startCommand: NODE_OPTIONS="--max-old-space-size=400" npm run start
+    startCommand: npm run start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
