@@ -9,6 +9,7 @@ import {
 } from "@/context/AuthContext";
 import { HotelProvider } from "@/context/HotelContext";
 import { RefactoredAssistantProvider } from "@/context/RefactoredAssistantContext";
+
 import { useWebSocket } from "@/hooks/useWebSocket";
 import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
