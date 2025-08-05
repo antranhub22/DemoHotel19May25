@@ -18,6 +18,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import SimpleTest from "@/debug/SimpleTest";
 import ModuleTest from "@/debug/ModuleTest";
+import DummyTest from "@/debug/DummyTest";
 import { Link, Route, Switch, useLocation } from "wouter";
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
@@ -343,6 +344,7 @@ function Router() {
         <Route path="/vapi-test" component={VapiTest} />
         <Route path="/simple-test" component={SimpleTest} />
         <Route path="/module-test" component={ModuleTest} />
+        <Route path="/dummy-test" component={DummyTest} />
         {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />

@@ -363,6 +363,24 @@ export const CustomerRequestsRefactored: React.FC = () => {
   useAuth();
 
   // ========================================
+  // DEBUG: Kiểm tra useRequestManagement
+  // ========================================
+  console.log("🔍 [DEBUG] About to import useRequestManagement...");
+
+  // Test import trước khi sử dụng
+  try {
+    const {
+      useRequestManagement,
+    } = require("../../domains/request-management/index");
+    console.log(
+      "🔍 [DEBUG] useRequestManagement imported:",
+      typeof useRequestManagement,
+    );
+  } catch (error) {
+    console.error("❌ [DEBUG] Import failed:", error);
+  }
+
+  // ========================================
   // Redux Domain Hooks - NEW Architecture
   // ========================================
   const {
