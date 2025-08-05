@@ -62,7 +62,7 @@ import {
   useRequestMessages,
   useRequestRealtime,
   useRequestStatus,
-} from "@/domains/request-management";
+} from "../../domains/request-management/index";
 
 // ========================================
 // Utility Functions
