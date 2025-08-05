@@ -42,6 +42,9 @@ const AnalyticsDashboard = React.lazy(
 import StaffDashboard from "@/pages/StaffDashboard";
 import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
 import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
+import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored";
+import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperationsRefactored";
+import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 
 // Lazy load charts-heavy dashboard components
 const AdvancedAnalytics = React.lazy(() =>
@@ -288,6 +291,32 @@ function Router() {
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <CustomerRequests />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Refactored Customer Requests with Redux Domain */}
+        <Route path="/hotel-dashboard/requests-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <CustomerRequestsRefactored />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/hotel-dashboard/staff-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <StaffManagementRefactored />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Hotel Operations with Redux Domain */}
+        <Route path="/hotel-dashboard/operations-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <HotelOperationsRefactored />
             </UnifiedDashboardLayout>
           </ProtectedRoute>
         </Route>

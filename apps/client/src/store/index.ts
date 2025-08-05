@@ -8,17 +8,21 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 // Domain reducers
 import guestExperienceReducer from "../domains/guest-experience/store/guestJourneySlice";
+import hotelOperationsReducer from "../domains/hotel-operations/store/hotelOperationsSlice";
+import requestManagementReducer from "../domains/request-management/store/requestManagementSlice";
 import tenantReducer from "../domains/saas-provider/store/tenantSlice";
+import staffManagementReducer from "../domains/staff-management/store/staffManagementSlice";
 
 // Configure store with domains
 export const store = configureStore({
   reducer: {
     guestExperience: guestExperienceReducer,
     tenant: tenantReducer, // ✅ SaaS Provider Domain
-    // Future domains will be added here:
-    // requestManagement: requestManagementReducer,
-    // staffManagement: staffManagementReducer,
-    // hotelOperations: hotelOperationsReducer,
+    requestManagement: requestManagementReducer, // ✅ Request Management Domain
+    staffManagement: staffManagementReducer, // ✅ Staff Management Domain
+    hotelOperations: hotelOperationsReducer, // ✅ Hotel Operations Domain
+    // Future domains:
+    // billing: billingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -33,6 +37,23 @@ export const store = configureStore({
           "tenant/updateTenantUsage",
           "tenant/addUsageAlert",
           "tenant/updateRealTimeUsage",
+          "requestManagement/fetchRequests/fulfilled",
+          "requestManagement/createRequest/fulfilled",
+          "requestManagement/updateRequest/fulfilled",
+          "requestManagement/addRequestUpdate",
+          "requestManagement/addMessage",
+          "staffManagement/fetchStaff/fulfilled",
+          "staffManagement/createStaff/fulfilled",
+          "staffManagement/updateStaff/fulfilled",
+          "staffManagement/addStaffUpdate",
+          "staffManagement/checkInStaff/fulfilled",
+          "staffManagement/checkOutStaff/fulfilled",
+          "hotelOperations/fetchRooms/fulfilled",
+          "hotelOperations/createRoom/fulfilled",
+          "hotelOperations/updateRoom/fulfilled",
+          "hotelOperations/fetchHousekeepingTasks/fulfilled",
+          "hotelOperations/fetchMaintenanceRequests/fulfilled",
+          "hotelOperations/addHotelOperationsUpdate",
         ],
         ignoredPaths: [
           "guestExperience.voiceInteraction.callStartTime",
@@ -46,6 +67,30 @@ export const store = configureStore({
           "tenant.usageAlerts",
           "tenant.realTimeUsage",
           "tenant.platformMetrics.lastUpdated",
+          "requestManagement.requests",
+          "requestManagement.selectedRequest.createdAt",
+          "requestManagement.selectedRequest.updatedAt",
+          "requestManagement.lastUpdate",
+          "requestManagement.pendingUpdates",
+          "requestManagement.messages",
+          "requestManagement.metricsLastUpdated",
+          "staffManagement.staff",
+          "staffManagement.selectedStaff.hireDate",
+          "staffManagement.selectedStaff.lastCheckIn",
+          "staffManagement.selectedStaff.lastCheckOut",
+          "staffManagement.tasks",
+          "staffManagement.schedules",
+          "staffManagement.lastUpdate",
+          "hotelOperations.rooms",
+          "hotelOperations.selectedRoom.createdAt",
+          "hotelOperations.selectedRoom.updatedAt",
+          "hotelOperations.selectedRoom.lastCleaning",
+          "hotelOperations.selectedRoom.lastMaintenance",
+          "hotelOperations.housekeepingTasks",
+          "hotelOperations.maintenanceRequests",
+          "hotelOperations.facilities",
+          "hotelOperations.inventoryItems",
+          "hotelOperations.lastUpdate",
         ],
       },
     }),
