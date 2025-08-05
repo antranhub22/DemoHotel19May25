@@ -239,13 +239,13 @@ export const generateRequestSummary = (request: CustomerRequest): string => {
 
 const RequestManagementDomain = {
   // Hooks
-  useRequestManagement,
-  useRequestMessages,
-  useRequestStatus,
-  useRequestRealtime,
+  useRequestManagement: useRequestManagement,
+  useRequestMessages: useRequestMessages,
+  useRequestStatus: useRequestStatus,
+  useRequestRealtime: useRequestRealtime,
 
   // Services
-  requestManagementService,
+  requestManagementService: requestManagementService,
 
   // Constants
   REQUEST_STATUS_OPTIONS,
