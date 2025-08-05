@@ -3,8 +3,8 @@
  * Main hook for request management functionality
  */
 
-import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useCallback, useEffect } from "react";
 import { requestManagementService } from "../services/requestManagementService";
 import {
   addMessage,
@@ -440,7 +440,14 @@ export const useRequestStatus = () => {
  * Hook for real-time request updates
  */
 export const useRequestRealtime = () => {
-  const { handleRealtimeUpdate } = useRequestManagement();
+  const dispatch = useAppDispatch();
+
+  const handleRealtimeUpdate = useCallback(
+    (event: RequestUpdateEvent) => {
+      dispatch(addRequestUpdate(event));
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     // Set up WebSocket subscription for real-time updates
@@ -467,4 +474,8 @@ export const useRequestRealtime = () => {
       (window as any).updateRequestStatus = undefined;
     };
   }, [handleRealtimeUpdate]);
+
+  return {
+    handleRealtimeUpdate,
+  };
 };
