@@ -34,6 +34,7 @@ import {
 // Unified Dashboard (Phase 3)
 import StaffDashboard from "@/pages/StaffDashboard";
 import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
+import BillingSubscriptionManagement from "@/pages/unified-dashboard/BillingSubscriptionManagement";
 import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
 import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored";
 import { GuestManagement } from "@/pages/unified-dashboard/GuestManagement";
@@ -389,6 +390,15 @@ function Router() {
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <HotelOperationsRefactored />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Billing & Subscription Management with Redux Domain */}
+        <Route path="/hotel-dashboard/billing">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <BillingSubscriptionManagement />
             </UnifiedDashboardLayout>
           </ProtectedRoute>
         </Route>

@@ -7,6 +7,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 // Domain reducers
+import billingReducer from "../domains/billing-subscription/store/billingSlice";
 import guestExperienceReducer from "../domains/guest-experience/store/guestJourneySlice";
 import hotelOperationsReducer from "../domains/hotel-operations/store/hotelOperationsSlice";
 import requestManagementReducer from "../domains/request-management/store/requestManagementSlice";
@@ -21,8 +22,8 @@ export const store = configureStore({
     requestManagement: requestManagementReducer, // ✅ Request Management Domain
     staffManagement: staffManagementReducer, // ✅ Staff Management Domain
     hotelOperations: hotelOperationsReducer, // ✅ Hotel Operations Domain
+    billing: billingReducer, // ✅ Billing & Subscription Domain
     // Future domains:
-    // billing: billingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -54,6 +55,12 @@ export const store = configureStore({
           "hotelOperations/fetchHousekeepingTasks/fulfilled",
           "hotelOperations/fetchMaintenanceRequests/fulfilled",
           "hotelOperations/addHotelOperationsUpdate",
+          "billing/fetchSubscriptions/fulfilled",
+          "billing/fetchInvoices/fulfilled",
+          "billing/fetchCurrentUsage/fulfilled",
+          "billing/fetchBillingAnalytics/fulfilled",
+          "billing/fetchNotifications/fulfilled",
+          "billing/addBillingUpdate",
         ],
         ignoredPaths: [
           "guestExperience.voiceInteraction.callStartTime",
@@ -91,6 +98,27 @@ export const store = configureStore({
           "hotelOperations.facilities",
           "hotelOperations.inventoryItems",
           "hotelOperations.lastUpdate",
+          "billing.subscriptions",
+          "billing.currentSubscription.currentPeriodStart",
+          "billing.currentSubscription.currentPeriodEnd",
+          "billing.currentSubscription.trialEnd",
+          "billing.currentSubscription.created",
+          "billing.currentSubscription.updated",
+          "billing.invoices",
+          "billing.selectedInvoice.created",
+          "billing.selectedInvoice.dueDate",
+          "billing.selectedInvoice.paidAt",
+          "billing.upcomingInvoice.periodStart",
+          "billing.upcomingInvoice.periodEnd",
+          "billing.paymentIntents",
+          "billing.paymentMethods",
+          "billing.currentUsage.currentPeriod",
+          "billing.usageHistory",
+          "billing.billingAnalytics.period",
+          "billing.billingAnalytics.usageTrends",
+          "billing.notifications",
+          "billing.lastUpdate",
+          "billing.filters.dateRange",
         ],
       },
     }),
