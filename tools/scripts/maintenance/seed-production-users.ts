@@ -217,16 +217,18 @@ async function seedProductionUsers(): Promise<{
         await client.query(
           `
           INSERT INTO request (
-            tenant_id, room_number, request_content, status,
+            tenant_id, room, order_id, guest_name, content, status,
             priority, assigned_to, created_at
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP
+            $1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP
           )
         `,
           [
             tenantId,
-            req.room_number,
-            req.request_content,
+            req.room_number, // room
+            `ORDER-${Date.now()}-${req.room_number}`, // order_id
+            "Guest", // guest_name (default)
+            req.request_content, // content
             req.status,
             req.priority,
             req.assigned_to,
@@ -341,16 +343,18 @@ async function seedProductionUsers(): Promise<{
           await client.query(
             `
             INSERT INTO request (
-              tenant_id, room_number, request_content, status,
+              tenant_id, room, order_id, guest_name, content, status,
               priority, assigned_to, created_at
             ) VALUES (
-              $1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP
+              $1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP
             )
           `,
             [
               tenantId,
-              req.room_number,
-              req.request_content,
+              req.room_number, // room
+              `ORDER-${Date.now()}-${req.room_number}`, // order_id
+              "Guest", // guest_name (default)
+              req.request_content, // content
               req.status,
               req.priority,
               req.assigned_to,
