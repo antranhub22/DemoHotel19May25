@@ -10,7 +10,7 @@ services:
     # ✅ FIXED: Simplified build command for stable deployment
     buildCommand: |
       npm ci && 
-      npx prisma generate && 
+      npm run postinstall && 
       npx prisma migrate deploy && 
       npm run build:production
     startCommand: npm run start
@@ -29,7 +29,7 @@ services:
       # ✅ DATABASE_URL will be automatically provided by Render PostgreSQL
       # ✅ Add other environment variables as needed
       - fromGroup: demohotel-env-group
-    nodeVersion: 20.18.1
+    nodeVersion: 18.20.8
     buildFilter:
       paths:
       - apps/**

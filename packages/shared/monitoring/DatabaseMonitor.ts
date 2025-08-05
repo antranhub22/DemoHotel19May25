@@ -10,7 +10,7 @@
  * - Predictive alerts
  */
 
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import {
   ConnectionPoolManager,
   ConnectionPoolMetrics,

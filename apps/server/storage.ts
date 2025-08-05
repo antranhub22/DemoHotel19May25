@@ -1,7 +1,7 @@
 // ✅ COMPLETED MIGRATION: Now using Prisma only
 import { AuthUserCamelCase, authUserMapper } from "@shared/db/transformers";
 import { logger } from "@shared/utils/logger";
-import { PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // ✅ PRISMA ONLY: Migration completed successfully
 const prisma = new PrismaClient();

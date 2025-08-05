@@ -10,7 +10,7 @@
  * - Optimized pagination
  */
 
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { logger } from "../utils/logger";
 
 export interface QueryOptions<T> {

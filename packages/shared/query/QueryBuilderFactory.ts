@@ -5,7 +5,7 @@
  * for all entities in the system
  */
 
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { QueryBuilder } from "./QueryBuilder";
 
 export class QueryBuilderFactory {

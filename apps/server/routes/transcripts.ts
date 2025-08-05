@@ -9,7 +9,7 @@ import { parseCompleteQuery } from "@server/utils/pagination";
 import { logger } from "@shared/utils/logger";
 import express from "express";
 import { z } from "zod";
-import { PrismaClient } from "../../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 const router = express.Router();
 

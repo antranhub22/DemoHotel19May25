@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=18.20.0 <19.0.0",
+    "node": ">=18.20.0 <=20.18.1",
     "npm": ">=10.0.0"
   },
   "scripts": {
@@ -29,7 +29,7 @@
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "postinstall": "echo 'Post-install completed'",
+    "postinstall": "npx prisma generate",
     "validate:env": "node scripts/validate-env.cjs",
     "switch:env": "bash scripts/switch-env.sh",
     "env:local": "bash scripts/switch-env.sh local",
