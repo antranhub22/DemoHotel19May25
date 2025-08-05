@@ -1,41 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 interface StaffLoginProps {
   onLogin: () => void;
 }
 
 const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('Please enter both username and password.');
+      setError("Please enter both username and password.");
       return;
     }
-    setError('');
+    setError("");
     try {
-      const res = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
         const data = await (res as any).json();
-        setError(data.error || 'Login failed.');
+        setError(data.error || "Login failed.");
         return;
       }
       const data = await (res as any).json();
       if (data.success && data.token) {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem("token", data.token);
         onLogin();
       } else {
-        setError('Login failed: No token received.');
+        setError("Login failed: No token received.");
       }
     } catch (err) {
-      setError('Login failed: Network or server error.');
+      setError("Login failed: Network or server error.");
     }
   };
 
@@ -57,7 +57,7 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
             type="text"
             className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
             autoFocus
           />
         </div>
@@ -67,10 +67,10 @@ const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
           </label>
           <div className="relative">
             <input
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <button
               type="button"
