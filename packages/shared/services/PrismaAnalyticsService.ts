@@ -442,36 +442,36 @@ export class PrismaAnalyticsService {
         `📊 [PrismaAnalyticsService] Getting service distribution for tenant: ${options.tenantId}`,
       );
 
-      // Use requests table for service type distribution
+      // Use requests table for service type distribution (use description instead of type)
       const requestsByType = await this.prisma.request.groupBy({
-        by: ["type"],
+        by: ["description"],
         where: {
           ...this.buildTenantFilter(options),
-          type: {
+          description: {
             not: null,
           },
         },
         _count: {
-          type: true,
+          description: true,
         },
         orderBy: {
           _count: {
-            type: "desc",
+            description: "desc",
           },
         },
       });
 
       const total = requestsByType.reduce(
-        (sum, item) => sum + item._count.type,
+        (sum, item) => sum + item._count.description,
         0,
       );
 
       const result: ServiceDistribution[] = requestsByType.map((item) => ({
-        serviceType: item.type || "unknown",
-        count: item._count.type,
+        serviceType: item.description || "unknown",
+        count: item._count.description,
         percentage:
           total > 0
-            ? Math.round((item._count.type / total) * 100 * 100) / 100
+            ? Math.round((item._count.description / total) * 100 * 100) / 100
             : 0,
       }));
 

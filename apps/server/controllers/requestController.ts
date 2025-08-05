@@ -1,6 +1,6 @@
+import { PrismaClient } from "@prisma/client";
 import { logger } from "@shared/utils/logger";
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -13,18 +13,25 @@ export class RequestController {
         "RequestController",
       );
 
-      const { serviceType, requestText, roomNumber, guestName, priority } =
-        req.body;
+      const {
+        serviceType,
+        requestText,
+        roomNumber,
+        guestName,
+        priority,
+        description,
+      } = req.body;
 
       const newRequest = await prisma.request.create({
         data: {
-          tenant_id: req.body.tenantId || "default-tenant",
-          room_number: roomNumber,
-          request_content: requestText,
-          guest_name: guestName,
+          tenant_id: req.body.tenantId || "mi-nhon-hotel",
+          room: roomNumber || "Unknown", // ✅ FIX: Changed from room_number to room
+          content: requestText || description || "Guest request", // ✅ FIX: Required field
+          guest_name: guestName || "Anonymous Guest",
           priority: priority || "medium",
           status: "pending",
-          description: serviceType ? `Service: ${serviceType}` : undefined,
+          order_id: `REQ-${Date.now()}`, // ✅ FIX: Added required order_id field
+          description: serviceType ? `Service: ${serviceType}` : description,
         },
       });
 
