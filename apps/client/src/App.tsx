@@ -1,4 +1,4 @@
-import VoiceAssistant from "@/components/business/VoiceAssistant";
+import VoiceAssistantRefactored from "@/components/business/VoiceAssistantRefactored";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
@@ -335,8 +335,8 @@ function Router() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
-        <Route path="/" component={VoiceAssistant} />
-        <Route path="/interface1" component={VoiceAssistant} />
+        <Route path="/" component={VoiceAssistantRefactored} />
+        <Route path="/interface1" component={VoiceAssistantRefactored} />
         <Route path="/vapi-test" component={VapiTest} />
         {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
