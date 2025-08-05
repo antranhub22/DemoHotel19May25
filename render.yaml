@@ -9,15 +9,18 @@ services:
     plan: free
     # ✅ FIXED: Simplified build command for stable deployment
     buildCommand: |
-      npm ci && 
-      npx prisma generate && 
-      npx prisma migrate deploy && 
+      export NODE_OPTIONS="--max-old-space-size=400" &&
+      npm ci --only=production --no-optional &&
+      npx prisma generate --no-engine &&
+      npx prisma migrate deploy &&
       npm run build:production
-    startCommand: npm run start
+    startCommand: NODE_OPTIONS="--max-old-space-size=400" npm run start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=400"
       - key: PORT
         value: 10000
       - key: AUTO_MIGRATE
