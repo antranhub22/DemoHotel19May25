@@ -10,7 +10,7 @@ services:
     # ✅ FIXED: Simplified build command for stable deployment
     buildCommand: |
       npm ci && 
-      npm run postinstall && 
+      npx prisma generate && 
       npx prisma migrate deploy && 
       npm run build:production
     startCommand: npm run start
