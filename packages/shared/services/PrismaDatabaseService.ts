@@ -26,14 +26,14 @@ import {
   UpdateTenantInput,
   UpdateUserInput,
   UserEntity,
-} from '../db/IDatabaseService';
-import { PrismaConnectionManager } from '../db/PrismaConnectionManager';
-import { logger } from '../utils/logger';
+} from "../db/IDatabaseService";
+import { PrismaConnectionManager } from "../db/PrismaConnectionManager";
+import { logger } from "../utils/logger";
 
 // Import specialized services
-import { PrismaAnalyticsService } from './PrismaAnalyticsService';
-import { PrismaRequestService } from './PrismaRequestService';
-import { PrismaTenantService } from './PrismaTenantService';
+import { PrismaAnalyticsService } from "./PrismaAnalyticsService";
+import { PrismaRequestService } from "./PrismaRequestService";
+import { PrismaTenantService } from "./PrismaTenantService";
 
 /**
  * Unified Database Service using Prisma ORM
@@ -55,9 +55,9 @@ export class PrismaDatabaseService implements IDatabaseService {
     this.tenantService = new PrismaTenantService(prismaManager);
     this.analyticsService = new PrismaAnalyticsService(prismaManager);
 
-    logger.info('🔄 PrismaDatabaseService initialized', {
+    logger.info("🔄 PrismaDatabaseService initialized", {
       instanceId: this.instanceId,
-      services: ['RequestService', 'TenantService', 'AnalyticsService'],
+      services: ["RequestService", "TenantService", "AnalyticsService"],
     });
   }
 
@@ -79,7 +79,7 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async updateRequest(
     id: number,
-    data: UpdateRequestInput
+    data: UpdateRequestInput,
   ): Promise<RequestEntity> {
     return this.requestService.updateRequest(id, data);
   }
@@ -90,10 +90,13 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async getRequestStats(
     tenantId: string,
-    dateRange?: DateRange
+    dateRange?: DateRange,
   ): Promise<RequestStats> {
-    // TODO: Implement request statistics
-    throw new Error('getRequestStats not implemented yet');
+    // Delegate to PrismaAnalyticsService for statistics
+    const analyticsService = new (
+      await import("./PrismaAnalyticsService")
+    ).PrismaAnalyticsService();
+    return await analyticsService.getRequestStatistics(tenantId, dateRange);
   }
 
   // ============================================
@@ -114,14 +117,14 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async updateTenant(
     id: string,
-    data: UpdateTenantInput
+    data: UpdateTenantInput,
   ): Promise<TenantEntity> {
     return this.tenantService.updateTenant(id, data);
   }
 
   async getTenantMetrics(tenantId: string): Promise<TenantMetrics> {
-    // TODO: Implement tenant metrics
-    throw new Error('getTenantMetrics not implemented yet');
+    // Delegate to PrismaTenantService for metrics
+    return await this.tenantService.getTenantMetrics(tenantId);
   }
 
   // ============================================
@@ -130,22 +133,22 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async getUserById(id: string): Promise<UserEntity | null> {
     // TODO: Implement user operations
-    throw new Error('getUserById not implemented yet');
+    throw new Error("getUserById not implemented yet");
   }
 
   async getUserByEmail(email: string): Promise<UserEntity | null> {
     // TODO: Implement user operations
-    throw new Error('getUserByEmail not implemented yet');
+    throw new Error("getUserByEmail not implemented yet");
   }
 
   async createUser(userData: CreateUserInput): Promise<UserEntity> {
     // TODO: Implement user operations
-    throw new Error('createUser not implemented yet');
+    throw new Error("createUser not implemented yet");
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<UserEntity> {
     // TODO: Implement user operations
-    throw new Error('updateUser not implemented yet');
+    throw new Error("updateUser not implemented yet");
   }
 
   // ============================================
@@ -154,30 +157,30 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async createCall(callData: CreateCallInput): Promise<CallEntity> {
     // TODO: Implement call operations
-    throw new Error('createCall not implemented yet');
+    throw new Error("createCall not implemented yet");
   }
 
   async getCallById(id: string): Promise<CallEntity | null> {
     // TODO: Implement call operations
-    throw new Error('getCallById not implemented yet');
+    throw new Error("getCallById not implemented yet");
   }
 
   async getCallsByTenant(tenantId: string): Promise<CallEntity[]> {
     // TODO: Implement call operations
-    throw new Error('getCallsByTenant not implemented yet');
+    throw new Error("getCallsByTenant not implemented yet");
   }
 
   async updateCall(id: string, data: UpdateCallInput): Promise<CallEntity> {
     // TODO: Implement call operations
-    throw new Error('updateCall not implemented yet');
+    throw new Error("updateCall not implemented yet");
   }
 
   async getCallStats(
     tenantId: string,
-    dateRange?: DateRange
+    dateRange?: DateRange,
   ): Promise<CallStats> {
     // TODO: Implement call statistics
-    throw new Error('getCallStats not implemented yet');
+    throw new Error("getCallStats not implemented yet");
   }
 
   // ============================================
@@ -186,28 +189,28 @@ export class PrismaDatabaseService implements IDatabaseService {
 
   async connect(): Promise<void> {
     await this.prismaManager.initialize();
-    logger.info('✅ PrismaDatabaseService connected');
+    logger.info("✅ PrismaDatabaseService connected");
   }
 
   async disconnect(): Promise<void> {
     await this.prismaManager.disconnect();
-    logger.info('✅ PrismaDatabaseService disconnected');
+    logger.info("✅ PrismaDatabaseService disconnected");
   }
 
   async healthCheck(): Promise<boolean> {
     try {
       const isHealthy = await this.prismaManager.healthCheck();
-      logger.info('🏥 PrismaDatabaseService health check', { isHealthy });
+      logger.info("🏥 PrismaDatabaseService health check", { isHealthy });
       return isHealthy;
     } catch (error) {
-      logger.error('❌ PrismaDatabaseService health check failed', error);
+      logger.error("❌ PrismaDatabaseService health check failed", error);
       return false;
     }
   }
 
   async beginTransaction(): Promise<DatabaseTransaction> {
     // TODO: Implement transaction support
-    throw new Error('beginTransaction not implemented yet');
+    throw new Error("beginTransaction not implemented yet");
   }
 
   // ============================================
@@ -312,7 +315,7 @@ export class PrismaDatabaseService implements IDatabaseService {
     this.requestService.resetMetrics();
     this.tenantService.resetMetrics();
     this.analyticsService.resetMetrics();
-    logger.info('🔄 All service metrics reset');
+    logger.info("🔄 All service metrics reset");
   }
 
   /**
@@ -322,11 +325,11 @@ export class PrismaDatabaseService implements IDatabaseService {
     return {
       instanceId: this.instanceId,
       services: {
-        requestService: 'PrismaRequestService',
-        tenantService: 'PrismaTenantService',
-        analyticsService: 'PrismaAnalyticsService',
-        userService: 'Not implemented',
-        callService: 'Not implemented',
+        requestService: "PrismaRequestService",
+        tenantService: "PrismaTenantService",
+        analyticsService: "PrismaAnalyticsService",
+        userService: "Not implemented",
+        callService: "Not implemented",
       },
       features: {
         requestOperations: true,
