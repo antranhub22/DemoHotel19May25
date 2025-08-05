@@ -84,6 +84,9 @@ router.use("/voice", voiceModuleRoutes);
 
 logger.debug("📡 [Router] Setting up RESTful API routes...", "MainRouter");
 
+// ✅ ADMIN TOOLS (temporary for production setup)
+router.use("/api/admin", adminToolsRoutes); // ✅ NEW: Admin tools for user creation
+
 // ✅ GUEST JOURNEY APIs (High Priority - Standardized)
 router.use("/guest", guestPublicRoutes); // Guest authentication & requests
 router.use("/transcripts", transcriptRoutes); // Voice transcripts
