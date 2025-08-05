@@ -77,6 +77,281 @@ export class TenantController {
   }
 
   // ============================================
+  // STATIC CRUD METHODS FOR ROUTES
+  // ============================================
+
+  /**
+   * Create a new tenant
+   */
+  static async createTenant(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const {
+        hotelName,
+        subdomain,
+        customDomain,
+        subscriptionPlan = "trial",
+      } = req.body;
+
+      const tenantId = await controller.tenantService.createTenant({
+        hotelName,
+        subdomain,
+        customDomain,
+        subscriptionPlan,
+        subscriptionStatus: "active",
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Tenant created successfully",
+        tenantId,
+      });
+    } catch (error) {
+      logger.error("[TenantController] Failed to create tenant", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create tenant",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  /**
+   * Get all tenants
+   */
+  static async getAllTenants(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const tenants = await controller.prismaTenantService.getAllTenants();
+
+      res.json({
+        success: true,
+        data: tenants,
+      });
+    } catch (error) {
+      logger.error("[TenantController] Failed to get all tenants", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenants",
+      });
+    }
+  }
+
+  /**
+   * Get tenant by ID
+   */
+  static async getTenantById(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const { id } = req.params;
+
+      const tenant = await controller.prismaTenantService.getTenantById(id);
+
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: tenant,
+      });
+    } catch (error) {
+      logger.error("[TenantController] Failed to get tenant by ID", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenant",
+      });
+    }
+  }
+
+  /**
+   * Get tenant by subdomain
+   */
+  static async getTenantBySubdomain(
+    req: Request,
+    res: Response,
+  ): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const { subdomain } = req.params;
+
+      const tenant =
+        await controller.prismaTenantService.getTenantBySubdomain(subdomain);
+
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: tenant,
+      });
+    } catch (error) {
+      logger.error(
+        "[TenantController] Failed to get tenant by subdomain",
+        error,
+      );
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenant",
+      });
+    }
+  }
+
+  /**
+   * Update tenant
+   */
+  static async updateTenant(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const { id } = req.params;
+      const updates = req.body;
+
+      await controller.tenantService.updateTenant(id, updates);
+
+      res.json({
+        success: true,
+        message: "Tenant updated successfully",
+      });
+    } catch (error) {
+      logger.error("[TenantController] Failed to update tenant", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to update tenant",
+      });
+    }
+  }
+
+  /**
+   * Delete tenant
+   */
+  static async deleteTenant(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const { id } = req.params;
+
+      await controller.tenantService.deleteTenant(id);
+
+      res.json({
+        success: true,
+        message: "Tenant deleted successfully",
+      });
+    } catch (error) {
+      logger.error("[TenantController] Failed to delete tenant", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to delete tenant",
+      });
+    }
+  }
+
+  /**
+   * Check feature access
+   */
+  static async checkFeatureAccess(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      await controller.getFeatureAccess(req, res);
+    } catch (error) {
+      logger.error("[TenantController] Failed to check feature access", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to check feature access",
+      });
+    }
+  }
+
+  /**
+   * Get subscription limits
+   */
+  static async getSubscriptionLimits(
+    req: Request,
+    res: Response,
+  ): Promise<void> {
+    try {
+      const controller = new TenantController();
+      const { id } = req.params;
+
+      const tenant = await controller.prismaTenantService.getTenantById(id);
+      if (!tenant) {
+        res.status(404).json({
+          success: false,
+          error: "Tenant not found",
+        });
+        return;
+      }
+
+      // Get subscription limits based on plan
+      const limits = controller.tenantService.getSubscriptionLimits(
+        tenant.subscription_plan || "trial",
+      );
+
+      res.json({
+        success: true,
+        data: limits,
+      });
+    } catch (error) {
+      logger.error(
+        "[TenantController] Failed to get subscription limits",
+        error,
+      );
+      res.status(500).json({
+        success: false,
+        error: "Failed to get subscription limits",
+      });
+    }
+  }
+
+  /**
+   * Get tenant usage
+   */
+  static async getTenantUsage(req: Request, res: Response): Promise<void> {
+    try {
+      const controller = new TenantController();
+      await controller.getCurrentUsage(req, res);
+    } catch (error) {
+      logger.error("[TenantController] Failed to get tenant usage", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to get tenant usage",
+      });
+    }
+  }
+
+  /**
+   * Get service health
+   */
+  static async getServiceHealth(req: Request, res: Response): Promise<void> {
+    try {
+      res.json({
+        success: true,
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+        services: {
+          tenantService: "operational",
+          stripeService: "operational",
+          prismaService: "operational",
+        },
+      });
+    } catch (error) {
+      logger.error("[TenantController] Health check failed", error);
+      res.status(500).json({
+        success: false,
+        status: "unhealthy",
+        error: "Service health check failed",
+      });
+    }
+  }
+
+  // ============================================
   // TENANT INFORMATION & CONTEXT
   // ============================================
 
