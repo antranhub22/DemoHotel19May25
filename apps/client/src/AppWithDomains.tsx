@@ -4,7 +4,7 @@
  * This is a safe testing ground before fully migrating main App.tsx
  */
 
-import VoiceAssistantRefactored from "@/components/business/VoiceAssistantRefactored";
+import VoiceAssistant from "@/components/business/VoiceAssistant";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
@@ -264,8 +264,8 @@ function Router() {
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
         {/* ✅ NEW: Use refactored VoiceAssistant with domain architecture */}
-        <Route path="/" component={VoiceAssistantRefactored} />
-        <Route path="/interface1" component={VoiceAssistantRefactored} />
+        <Route path="/" component={VoiceAssistant} />
+        <Route path="/interface1" component={VoiceAssistant} />
 
         {/* ✅ NEW: SaaS-Integrated Voice Assistant (test route) */}
         <Route path="/voice-saas" component={VoiceAssistantWithSaaS} />

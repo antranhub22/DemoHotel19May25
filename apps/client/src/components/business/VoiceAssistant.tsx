@@ -1,21 +1,37 @@
-import { Interface1 } from '@/components/business/Interface1';
+/**
+ * VoiceAssistant - Guest Experience with Domain-Driven Architecture
+ * Mobile-First Guest Experience using Domain-Driven Architecture
+ *
+ * GUEST JOURNEY FLOW (Domain-based):
+ * 1. Welcome Modal (first-time users) - managed by guestExperience domain
+ * 2. Language Selection (manual only) - managed by guestExperience domain
+ * 3. Voice Call (mobile-optimized) - managed by guestExperience domain
+ * 4. Real-time Conversation Display - managed by guestExperience domain
+ * 5. Summary Popup (call end) - managed by guestExperience domain
+ * 6. Database Integration (Hotel + SaaS Provider) - existing API endpoints unchanged
+ */
+
+import { Interface1 } from "@/components/business/Interface1";
 import {
   PopupManager,
   PopupProvider,
   usePopup,
-} from '@/components/features/popup-system';
-import WelcomePopup from '@/components/features/popup-system/WelcomePopup';
-import { VoiceLanguageSwitcher } from '@/components/features/voice-assistant/interface1/VoiceLanguageSwitcher';
-import ErrorBoundary from '@/components/layout/ErrorBoundary';
-import { useAssistant } from '@/context';
-import { useAuth } from '@/context/AuthContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-// ✅ NEW: Import useConfirmHandler to ensure it's always mounted
-import { useConfirmHandler } from '@/hooks/useConfirmHandler';
-import { Language } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+} from "@/components/features/popup-system";
+import WelcomePopup from "@/components/features/popup-system/WelcomePopup";
+import { VoiceLanguageSwitcher } from "@/components/features/voice-assistant/interface1/VoiceLanguageSwitcher";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
+import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+// ✅ NEW: Import Guest Experience domain hooks
+import {
+  useGuestExperience,
+  useLanguageSelection,
+} from "@/domains/guest-experience/hooks/useGuestExperience";
+import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
+import { useConfirmHandler } from "@/hooks/useConfirmHandler";
+import { logger } from "@shared/utils/logger";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
 const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -33,16 +49,16 @@ const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Expose PopupSystem globally for migration from NotificationSystem
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       (window as any).unifiedPopupSystem = popupSystem;
       logger.debug(
-        '🔄 [Migration] PopupSystem exposed globally',
-        'VoiceAssistant'
+        "🔄 [Migration] PopupSystem exposed globally",
+        "VoiceAssistant",
       );
     }
 
     return () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         delete (window as any).unifiedPopupSystem;
       }
     };
@@ -51,13 +67,13 @@ const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
   // ✅ NEW: Debug logging for useConfirmHandler
   useEffect(() => {
     console.log(
-      '🔗 [VoiceAssistant] useConfirmHandler mounted with functions:',
+      "🔗 [VoiceAssistant] useConfirmHandler mounted with functions:",
       {
-        hasAutoTriggerSummary: typeof autoTriggerSummary === 'function',
-        hasUpdateSummaryPopup: typeof updateSummaryPopup === 'function',
-        hasResetSummarySystem: typeof resetSummarySystem === 'function',
-        hasStoreCallId: typeof storeCallId === 'function',
-      }
+        hasAutoTriggerSummary: typeof autoTriggerSummary === "function",
+        hasUpdateSummaryPopup: typeof updateSummaryPopup === "function",
+        hasResetSummarySystem: typeof resetSummarySystem === "function",
+        hasStoreCallId: typeof storeCallId === "function",
+      },
     );
   }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
 
@@ -87,17 +103,15 @@ const Interface1ErrorFallback: React.FC<{
   </div>
 );
 
-// Language Selection Modal Component
+// Language Selection Modal Component (unchanged for compatibility)
 const LanguageSelectionModal: React.FC<{
   onLanguageSelect: (lang: Language) => void;
   isMobile: boolean;
 }> = ({ onLanguageSelect, isMobile }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div
-      className={`bg-white rounded-xl p-6 mx-4 ${isMobile ? 'w-full max-w-sm' : 'w-full max-w-md'}`}
-    >
-      <h2 className="text-xl font-bold text-center mb-4">
-        {isMobile ? 'Select Language' : 'Choose Your Language'}
+  <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+        Select Language
       </h2>
       <VoiceLanguageSwitcher
         position="inline"
@@ -109,138 +123,84 @@ const LanguageSelectionModal: React.FC<{
 );
 
 /**
- * VoiceAssistant - Mobile-First Guest Experience
- *
- * NEW GUEST JOURNEY FLOW:
- * 1. Welcome Modal (first-time users)
- * 2. Language Selection (manual only, no voice preview)
- * 3. Voice Call (mobile-optimized)
- * 4. Real-time Conversation Display
- * 5. Summary Popup (call end)
- * 6. Database Integration (Hotel + SaaS Provider)
+ * VoiceAssistant - Domain Architecture Implementation
+ * Uses Guest Experience domain for state management
  */
 const VoiceAssistant: React.FC = () => {
   const navigate = useNavigate();
-  const { setLanguage } = useAssistant();
   const { logout } = useAuth();
   const isMobile = useIsMobile();
 
-  // ✅ NEW: Guest Journey State Management
-  const [guestJourneyState, setGuestJourneyState] = useState<{
-    showWelcome: boolean;
-    hasSelectedLanguage: boolean;
-    isInVoiceCall: boolean;
-    hasCompletedCall: boolean;
-  }>({
-    showWelcome: false,
-    hasSelectedLanguage: false,
-    isInVoiceCall: false,
-    hasCompletedCall: false,
-  });
+  // ✅ NEW: Use Guest Experience domain hooks instead of local state
+  const {
+    journey,
+    selectedLanguage,
+    initializeJourney,
+    completeWelcome,
+    selectLanguage,
+  } = useGuestExperience();
 
-  // ✅ NEW: Initialize Guest Journey on first visit
+  // ✅ NEW: Simplified language selection hook
+  const { hasSelectedLanguage, getLanguageDisplayName } =
+    useLanguageSelection();
+
+  // ✅ NEW: Initialize Guest Journey on component mount
   useEffect(() => {
-    const hasVisited = localStorage.getItem('hasVisited');
-    const savedLanguage = localStorage.getItem('selectedLanguage') as Language;
+    initializeJourney();
+    logger.debug("🎯 [VoiceAssistant] Guest journey initialized", "Component");
+  }, [initializeJourney]);
 
-    if (!hasVisited) {
-      // First-time user - show welcome popup
-      setGuestJourneyState(prev => ({
-        ...prev,
-        showWelcome: true,
-        hasSelectedLanguage: false,
-      }));
-      localStorage.setItem('hasVisited', 'true');
-      logger.debug(
-        '🎯 [VoiceAssistant] First-time user detected - showing welcome',
-        'Component'
-      );
-    } else {
-      // Returning user - check if language was previously selected
-      const hasLanguage =
-        savedLanguage &&
-        ['en', 'vi', 'fr', 'zh', 'ru', 'ko'].includes(savedLanguage);
-      if (hasLanguage) {
-        setLanguage(savedLanguage);
-      }
-      setGuestJourneyState(prev => ({
-        ...prev,
-        showWelcome: false,
-        hasSelectedLanguage: hasLanguage,
-      }));
-      logger.debug('🎯 [VoiceAssistant] Returning user detected', 'Component', {
-        hasLanguage,
-        savedLanguage,
-      });
-    }
-  }, [setLanguage]);
-
-  // ✅ REMOVED: Debug logging moved to GlobalPopupSystemProvider
-
-  // ✅ NEW: Handle Welcome completion
+  // ✅ NEW: Handle Welcome completion using domain action
   const handleWelcomeComplete = () => {
-    setGuestJourneyState(prev => ({
-      ...prev,
-      showWelcome: false,
-    }));
+    completeWelcome();
     logger.debug(
-      '🎯 [VoiceAssistant] Welcome completed - proceeding to language selection',
-      'Component'
+      "🎯 [VoiceAssistant] Welcome completed - proceeding to language selection",
+      "Component",
     );
   };
 
-  // ✅ NEW: Enhanced language selection handler (mobile-first, manual only)
+  // ✅ NEW: Enhanced language selection handler using domain action
   const handleLanguageSelection = (newLanguage: Language) => {
-    setLanguage(newLanguage);
-    setGuestJourneyState(prev => ({
-      ...prev,
-      hasSelectedLanguage: true,
-    }));
-
-    // Persist language selection
-    localStorage.setItem('selectedLanguage', newLanguage);
-
-    logger.debug('🌍 [VoiceAssistant] Language selected:', 'Component', {
-      language: newLanguage,
-      isMobile,
-      journeyState: 'language-selected',
-    });
+    selectLanguage(newLanguage);
+    logger.debug(
+      `🗣️ [VoiceAssistant] Language selected: ${newLanguage}`,
+      "Component",
+    );
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
-  // ✅ NEW: Mobile-First UI Rendering
+  // ✅ NEW: Mobile-First UI Rendering with Domain State
   return (
     <PopupProvider>
       <GlobalPopupSystemProvider>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-          {/* ✅ STEP 1: Welcome Modal (First-time users only) */}
-          {guestJourneyState.showWelcome && (
+          {/* ✅ STEP 1: Welcome Modal (First-time users only) - Domain Controlled */}
+          {journey.showWelcome && (
             <WelcomePopup onClose={handleWelcomeComplete} />
           )}
 
-          {/* ✅ STEP 2: Language Selection (Mobile-First, Manual Only) */}
-          {!guestJourneyState.showWelcome &&
-            !guestJourneyState.hasSelectedLanguage && (
-              <LanguageSelectionModal
-                onLanguageSelect={handleLanguageSelection}
-                isMobile={isMobile}
-              />
-            )}
+          {/* ✅ STEP 2: Language Selection (Mobile-First, Manual Only) - Domain Controlled */}
+          {!journey.showWelcome && !hasSelectedLanguage && (
+            <LanguageSelectionModal
+              onLanguageSelect={handleLanguageSelection}
+              isMobile={isMobile}
+            />
+          )}
 
           {/* Mobile-First Header */}
           <div className="fixed top-0 left-0 right-0 z-[9997] bg-white/90 backdrop-blur-sm border-b">
             <div className="flex items-center justify-between px-4 py-2">
               {/* Logo/Title */}
               <div className="text-lg font-bold text-blue-900">
-                {isMobile ? 'Hotel Assistant' : 'Hotel Voice Assistant'}
+                {isMobile ? "Hotel Assistant" : "Hotel Voice Assistant"}
               </div>
 
-              {/* Language Switcher (Mobile-Optimized) */}
-              {guestJourneyState.hasSelectedLanguage && (
+              {/* Language Switcher (Mobile-Optimized) - Domain Controlled */}
+              {hasSelectedLanguage && (
                 <div className="flex items-center space-x-2">
                   <VoiceLanguageSwitcher
                     position="header"
@@ -260,33 +220,33 @@ const VoiceAssistant: React.FC = () => {
             </div>
           </div>
 
-          {/* ✅ STEP 3-5: Main Interface (Voice Call + Real-time Conversation + Summary) */}
-          {guestJourneyState.hasSelectedLanguage && (
+          {/* ✅ STEP 3-5: Main Interface (Voice Call + Real-time Conversation + Summary) - Domain Controlled */}
+          {hasSelectedLanguage && (
             <div
               className="relative w-full h-full"
               style={{
-                marginTop: isMobile ? '50px' : '60px',
+                marginTop: isMobile ? "50px" : "60px",
                 minHeight: isMobile
-                  ? 'calc(100vh - 50px)'
-                  : 'calc(100vh - 60px)',
+                  ? "calc(100vh - 50px)"
+                  : "calc(100vh - 60px)",
               }}
             >
               <ErrorBoundary
                 fallbackComponent={Interface1ErrorFallback}
                 onError={(error, errorInfo) => {
                   logger.error(
-                    '🚨 [VoiceAssistant] Interface1 Error:',
-                    'Component',
-                    error
+                    "🚨 [VoiceAssistant] Interface1 Error:",
+                    "Component",
+                    error,
                   );
                   logger.error(
-                    '🚨 [VoiceAssistant] Error Info:',
-                    'Component',
-                    errorInfo
+                    "🚨 [VoiceAssistant] Error Info:",
+                    "Component",
+                    errorInfo,
                   );
                 }}
               >
-                <Interface1 key="mobile-first-interface1" isActive={true} />
+                <Interface1 key="domain-based-interface1" isActive={true} />
               </ErrorBoundary>
             </div>
           )}

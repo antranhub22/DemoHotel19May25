@@ -1,4 +1,4 @@
-import VoiceAssistantRefactored from "@/components/business/VoiceAssistantRefactored";
+import VoiceAssistant from "@/components/business/VoiceAssistant";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
@@ -10,15 +10,15 @@ import {
 import { HotelProvider } from "@/context/HotelContext";
 import { RefactoredAssistantProvider } from "@/context/RefactoredAssistantContext";
 
+import DummyTest from "@/debug/DummyTest";
+import ModuleTest from "@/debug/ModuleTest";
+import SimpleTest from "@/debug/SimpleTest";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
 import VapiTest from "@/pages/VapiTest";
 import React, { Suspense, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
-import SimpleTest from "@/debug/SimpleTest";
-import ModuleTest from "@/debug/ModuleTest";
-import DummyTest from "@/debug/DummyTest";
 import { Link, Route, Switch, useLocation } from "wouter";
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
@@ -339,8 +339,8 @@ function Router() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Switch>
-        <Route path="/" component={VoiceAssistantRefactored} />
-        <Route path="/interface1" component={VoiceAssistantRefactored} />
+        <Route path="/" component={VoiceAssistant} />
+        <Route path="/interface1" component={VoiceAssistant} />
         <Route path="/vapi-test" component={VapiTest} />
         <Route path="/simple-test" component={SimpleTest} />
         <Route path="/module-test" component={ModuleTest} />
