@@ -138,6 +138,12 @@ const VoiceAssistant: React.FC = () => {
   // ✅ NEW: Simplified language selection hook
   const { hasSelectedLanguage } = useLanguageSelection();
 
+  // ✅ DEBUG: Add error boundary for hooks
+  if (!journey) {
+    console.error("🚨 [VoiceAssistant] Journey is null/undefined");
+    return <div>Loading guest experience...</div>;
+  }
+
   // ✅ NEW: Initialize Guest Journey on component mount
   useEffect(() => {
     initializeJourney();
