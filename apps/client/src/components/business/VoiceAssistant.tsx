@@ -106,7 +106,6 @@ const Interface1ErrorFallback: React.FC<{
 // Language Selection Modal Component (unchanged for compatibility)
 const LanguageSelectionModal: React.FC<{
   onLanguageSelect: (lang: Language) => void;
-  isMobile: boolean;
 }> = ({ onLanguageSelect }) => (
   <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -132,16 +131,33 @@ const VoiceAssistant: React.FC = () => {
   const isMobile = useIsMobile();
 
   // ✅ NEW: Use Guest Experience domain hooks instead of local state
-  const { journey, initializeJourney, completeWelcome, selectLanguage } =
-    useGuestExperience();
+  const guestExperienceHook = useGuestExperience();
+  const languageSelectionHook = useLanguageSelection();
 
-  // ✅ NEW: Simplified language selection hook
-  const { hasSelectedLanguage } = useLanguageSelection();
+  // ✅ SAFETY: Extract values with fallbacks
+  const {
+    journey = null,
+    initializeJourney = () => {},
+    completeWelcome = () => {},
+    selectLanguage = () => {},
+  } = guestExperienceHook || {};
+
+  const { hasSelectedLanguage = false } = languageSelectionHook || {};
 
   // ✅ DEBUG: Add error boundary for hooks
   if (!journey) {
-    console.error("🚨 [VoiceAssistant] Journey is null/undefined");
-    return <div>Loading guest experience...</div>;
+    console.error("🚨 [VoiceAssistant] Journey is null/undefined", {
+      journey,
+      hasSelectedLanguage,
+    });
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading guest experience...</p>
+        </div>
+      </div>
+    );
   }
 
   // ✅ NEW: Initialize Guest Journey on component mount
@@ -187,7 +203,6 @@ const VoiceAssistant: React.FC = () => {
           {!journey.showWelcome && !hasSelectedLanguage && (
             <LanguageSelectionModal
               onLanguageSelect={handleLanguageSelection}
-              isMobile={isMobile}
             />
           )}
 
