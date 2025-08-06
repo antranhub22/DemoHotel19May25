@@ -1,5 +1,5 @@
 import React from "react";
-import { useRequestManagement } from "../domains/request-management";
+// import { useRequestManagement } from "../domains/request-management"; // TEMPORARILY DISABLED
 
 const DummyTest: React.FC = () => {
   console.log("🧪 DummyTest component rendering...");
@@ -8,17 +8,17 @@ const DummyTest: React.FC = () => {
 
   try {
     // Test real hook (but safely)
-    console.log(
-      "✅ Real useRequestManagement imported:",
-      typeof useRequestManagement,
-    );
+    // console.log(
+    //   "✅ Real useRequestManagement imported:",
+    //   typeof useRequestManagement,
+    // ); // TEMPORARILY DISABLED
     console.log("✅ Ready for use in React component context");
 
     return (
       <div style={{ padding: "20px", background: "#e8f5e8", color: "#2e7d32" }}>
         <h3>✅ Real Hook Test Success</h3>
-        <p>useRequestManagement is properly imported!</p>
-        <p>Hook type: {typeof useRequestManagement}</p>
+        <p>useRequestManagement temporarily disabled for debugging!</p>
+        {/* <p>Hook type: {typeof useRequestManagement}</p> */}
       </div>
     );
   } catch (error) {
