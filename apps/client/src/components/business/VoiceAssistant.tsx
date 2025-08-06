@@ -107,7 +107,7 @@ const Interface1ErrorFallback: React.FC<{
 const LanguageSelectionModal: React.FC<{
   onLanguageSelect: (lang: Language) => void;
   isMobile: boolean;
-}> = ({ onLanguageSelect, isMobile }) => (
+}> = ({ onLanguageSelect }) => (
   <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
       <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
@@ -132,17 +132,11 @@ const VoiceAssistant: React.FC = () => {
   const isMobile = useIsMobile();
 
   // ✅ NEW: Use Guest Experience domain hooks instead of local state
-  const {
-    journey,
-    selectedLanguage,
-    initializeJourney,
-    completeWelcome,
-    selectLanguage,
-  } = useGuestExperience();
+  const { journey, initializeJourney, completeWelcome, selectLanguage } =
+    useGuestExperience();
 
   // ✅ NEW: Simplified language selection hook
-  const { hasSelectedLanguage, getLanguageDisplayName } =
-    useLanguageSelection();
+  const { hasSelectedLanguage } = useLanguageSelection();
 
   // ✅ NEW: Initialize Guest Journey on component mount
   useEffect(() => {
