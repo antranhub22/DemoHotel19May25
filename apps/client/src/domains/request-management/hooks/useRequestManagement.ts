@@ -333,6 +333,28 @@ export const useRequestManagement = () => {
 
     // Utilities
     setupAutoRefresh,
+
+    // Messaging (basic support - use useRequestMessages for full functionality)
+    sendMessage: useCallback(
+      (payload: SendMessagePayload) => {
+        return dispatch(sendMessage(payload));
+      },
+      [dispatch],
+    ),
+
+    addMessage: useCallback(
+      (requestId: number, message: any) => {
+        dispatch(addMessage({ requestId, message }));
+      },
+      [dispatch],
+    ),
+
+    markMessageAsRead: useCallback(
+      (requestId: number, messageId: string) => {
+        dispatch(markMessageAsRead({ requestId, messageId }));
+      },
+      [dispatch],
+    ),
   };
 };
 
@@ -479,8 +501,4 @@ export const useRequestRealtime = () => {
       (window as any).updateRequestStatus = undefined;
     };
   }, [handleRealtimeUpdate]);
-
-  return {
-    handleRealtimeUpdate,
-  };
 };
