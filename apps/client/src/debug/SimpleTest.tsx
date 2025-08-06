@@ -1,6 +1,6 @@
 import React from "react";
 import { useRequestManagement } from "../domains/request-management";
-import { useAppDispatch, useAppSelector } from "../store";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 
 const SimpleTest: React.FC = () => {
   console.log("🧪 SimpleTest component rendering...");

@@ -1,8 +1,10 @@
 /**
- * Redux Hooks
- * Typed hooks for use throughout the application
+ * Redux Store Hooks
+ * Isolated hooks to avoid circular imports between store and domains
  */
 
-// Re-export typed hooks from store/index.ts
-export { useAppDispatch, useAppSelector } from "./index";
-export type { RootState, AppDispatch } from "./index";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+
+// Simple typed hooks without importing store types to break circular dependency
+export const useAppDispatch = () => useDispatch();
+export const useAppSelector: TypedUseSelectorHook<any> = useSelector;

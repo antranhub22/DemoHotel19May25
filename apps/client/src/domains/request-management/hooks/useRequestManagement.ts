@@ -3,7 +3,7 @@
  * Main hook for request management functionality
  */
 
-import { useAppDispatch, useAppSelector } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useCallback, useEffect } from "react";
 import { requestManagementService } from "../services/requestManagementService";
 import {
