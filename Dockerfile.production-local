@@ -1,0 +1,59 @@
+# Production-Local Dockerfile for Mi Nhon Hotel
+FROM node:18-alpine AS base
+
+# Install dependencies for production
+FROM base AS deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Build the application
+FROM base AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build production bundle
+RUN npm run build:production
+
+# Production runtime
+FROM base AS runner
+WORKDIR /app
+
+# Create app user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 appuser
+
+# Copy production dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package*.json ./
+
+# Copy additional required files
+COPY --from=builder /app/apps/server ./apps/server
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/config ./config
+
+# Create necessary directories
+RUN mkdir -p logs uploads temp
+RUN chown -R appuser:nodejs /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 10000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:10000/api/health || exit 1
+
+# Start the application
+CMD ["npm", "run", "start"]
