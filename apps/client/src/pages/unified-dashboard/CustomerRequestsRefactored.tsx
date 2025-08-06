@@ -58,15 +58,11 @@ import {
   formatRequestDate,
   getRequestStatusColor,
   getTimeElapsed,
-} from "../../domains/request-management";
-
-// Direct imports to avoid tree-shaking issues in production
-import {
   useRequestManagement,
   useRequestMessages,
   useRequestRealtime,
   useRequestStatus,
-} from "../../domains/request-management/hooks/useRequestManagement";
+} from "../../domains/request-management";
 
 // ========================================
 // Utility Functions
