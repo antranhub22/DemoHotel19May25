@@ -211,6 +211,14 @@ app.use(
   businessMetricsMiddleware("assistant-creation", "operations"),
 );
 
+// ✅ MEMORY OPTIMIZATION: Add memory management middleware
+import {
+  memoryOptimizationMiddleware,
+  responseCompressionMiddleware,
+} from "./middleware/memoryOptimization.js";
+app.use(memoryOptimizationMiddleware);
+app.use(responseCompressionMiddleware);
+
 // ✅ NEW v3.0: Advanced Caching Middleware
 // Automatic cache invalidation on data mutations
 app.use(cacheInvalidationMiddleware());

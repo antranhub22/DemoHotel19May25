@@ -3,8 +3,8 @@
  * Tracks API performance metrics without affecting business logic
  */
 
-import { logger } from '@shared/utils/logger';
-import { NextFunction, Request, Response } from 'express';
+import { logger } from "@shared/utils/logger";
+import { NextFunction, Request, Response } from "express";
 
 export interface ApiPerformanceMetrics {
   endpoint: string;
@@ -22,7 +22,7 @@ export interface ApiPerformanceMetrics {
 
 class PerformanceMonitor {
   private metrics: ApiPerformanceMetrics[] = [];
-  private readonly maxHistorySize = 1000;
+  private readonly maxHistorySize = 200; // Reduced from 1000 to 200 for memory optimization
 
   /**
    * Record API performance metrics
@@ -39,24 +39,24 @@ class PerformanceMonitor {
       // Log slow requests (>1000ms)
       if (metrics.responseTime > 1000) {
         logger.warn(
-          '🐌 [Performance] Slow API request detected',
-          'PerformanceMonitor',
+          "🐌 [Performance] Slow API request detected",
+          "PerformanceMonitor",
           {
             endpoint: metrics.endpoint,
             method: metrics.method,
             responseTime: `${metrics.responseTime}ms`,
             statusCode: metrics.statusCode,
             tenantId: metrics.tenantId,
-          }
+          },
         );
       }
 
       // Log in development
-      if (process.env.NODE_ENV === 'development') {
-        const emoji = metrics.success ? '⚡' : '❌';
+      if (process.env.NODE_ENV === "development") {
+        const emoji = metrics.success ? "⚡" : "❌";
         logger.debug(
           `${emoji} [API Performance] ${metrics.method} ${metrics.endpoint}`,
-          'PerformanceMonitor',
+          "PerformanceMonitor",
           {
             responseTime: `${metrics.responseTime}ms`,
             statusCode: metrics.statusCode,
@@ -64,12 +64,12 @@ class PerformanceMonitor {
             memoryUsage: metrics.memoryUsage
               ? `${Math.round(metrics.memoryUsage / 1024 / 1024)}MB`
               : undefined,
-          }
+          },
         );
       }
     } catch (error) {
       // Silent fail - monitoring should never break the app
-      logger.warn('Performance monitoring failed', 'PerformanceMonitor', error);
+      logger.warn("Performance monitoring failed", "PerformanceMonitor", error);
     }
   }
 
@@ -80,15 +80,15 @@ class PerformanceMonitor {
     try {
       const cutoff = Date.now() - timeRange; // Default: last hour
       const recentMetrics = this.metrics.filter(
-        m => new Date(m.timestamp).getTime() > cutoff
+        (m) => new Date(m.timestamp).getTime() > cutoff,
       );
 
       if (recentMetrics.length === 0) {
         return null;
       }
 
-      const successfulRequests = recentMetrics.filter(m => m.success);
-      const failedRequests = recentMetrics.filter(m => !m.success);
+      const successfulRequests = recentMetrics.filter((m) => m.success);
+      const failedRequests = recentMetrics.filter((m) => !m.success);
 
       return {
         totalRequests: recentMetrics.length,
@@ -96,7 +96,7 @@ class PerformanceMonitor {
         averageResponseTime:
           successfulRequests.reduce((sum, m) => sum + m.responseTime, 0) /
             successfulRequests.length || 0,
-        slowRequests: recentMetrics.filter(m => m.responseTime > 1000).length,
+        slowRequests: recentMetrics.filter((m) => m.responseTime > 1000).length,
         errorRate: (failedRequests.length / recentMetrics.length) * 100,
         topEndpoints: this.getTopEndpoints(recentMetrics),
         timeRange: timeRange / 1000 / 60, // in minutes
@@ -104,9 +104,9 @@ class PerformanceMonitor {
       };
     } catch (error) {
       logger.warn(
-        'Failed to get performance analytics',
-        'PerformanceMonitor',
-        error
+        "Failed to get performance analytics",
+        "PerformanceMonitor",
+        error,
       );
       return null;
     }
@@ -118,7 +118,7 @@ class PerformanceMonitor {
       { count: number; avgTime: number; totalTime: number }
     >();
 
-    metrics.forEach(m => {
+    metrics.forEach((m) => {
       const key = `${m.method} ${m.endpoint}`;
       const existing = endpointStats.get(key) || {
         count: 0,
@@ -156,7 +156,7 @@ export const performanceMonitor = new PerformanceMonitor();
 export const performanceMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void => {
   const startTime = process.hrtime.bigint();
   const startMemory = process.memoryUsage().heapUsed;
@@ -175,7 +175,7 @@ export const performanceMiddleware = (
   };
 
   // Monitor response completion
-  res.on('finish', () => {
+  res.on("finish", () => {
     try {
       const endTime = process.hrtime.bigint();
       const responseTime = Number(endTime - startTime) / 1000000; // Convert to milliseconds
@@ -203,7 +203,7 @@ export const performanceMiddleware = (
       performanceMonitor.recordMetrics(metrics);
     } catch (error) {
       // Silent fail - monitoring should never break the app
-      logger.warn('Performance middleware failed', 'PerformanceMonitor', error);
+      logger.warn("Performance middleware failed", "PerformanceMonitor", error);
     }
   });
 
@@ -221,14 +221,14 @@ function extractTenantFromRequest(req: Request): string | undefined {
     }
 
     // Try to get from subdomain
-    const host = req.get('host') || '';
-    const subdomain = host.split('.')[0];
+    const host = req.get("host") || "";
+    const subdomain = host.split(".")[0];
 
     if (
       subdomain &&
-      subdomain !== 'localhost' &&
-      subdomain !== '127' &&
-      subdomain !== 'www'
+      subdomain !== "localhost" &&
+      subdomain !== "127" &&
+      subdomain !== "www"
     ) {
       return subdomain;
     }
@@ -236,15 +236,15 @@ function extractTenantFromRequest(req: Request): string | undefined {
     return undefined;
   } catch (error) {
     logger.warn(
-      'Failed to extract tenant from request',
-      'PerformanceMonitor',
-      error
+      "Failed to extract tenant from request",
+      "PerformanceMonitor",
+      error,
     );
     return undefined;
   }
 }
 
 // Export for debugging in development
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   (global as any).performanceMonitor = performanceMonitor;
 }
