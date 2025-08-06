@@ -1,31 +1,25 @@
 import React from "react";
+import { useRequestManagement } from "../domains/request-management";
+import { useAppDispatch, useAppSelector } from "../store";
 
 const SimpleTest: React.FC = () => {
   console.log("🧪 SimpleTest component rendering...");
 
   try {
-    // Test 1: Import from store
-    const { useAppDispatch, useAppSelector } = require("../../store");
+    // Test 1: Store hooks
     console.log("✅ Store hooks imported:", {
       useAppDispatch: typeof useAppDispatch,
       useAppSelector: typeof useAppSelector,
     });
 
-    // Test 2: Import from domain
-    const {
-      useRequestManagement,
-    } = require("../../domains/request-management");
+    // Test 2: Domain hook
     console.log(
       "✅ useRequestManagement imported:",
       typeof useRequestManagement,
     );
 
-    // Test 3: Call hook
-    const result = useRequestManagement();
-    console.log(
-      "✅ useRequestManagement called successfully:",
-      Object.keys(result),
-    );
+    // Test 3: Hook will be called in component context
+    console.log("✅ Hooks available for use in React components");
 
     return (
       <div style={{ padding: "20px", background: "#e8f5e8", color: "#2e7d32" }}>

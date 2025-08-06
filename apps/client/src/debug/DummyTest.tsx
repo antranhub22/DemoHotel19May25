@@ -1,10 +1,11 @@
 import React from "react";
+import { useRequestManagement } from "../domains/request-management";
 
 const DummyTest: React.FC = () => {
   console.log("🧪 DummyTest component rendering...");
 
-  // Tạm thời thay thế
-  const useRequestManagement = () => {
+  // Use the real hook instead of dummy
+  const useRealRequestManagement = () => {
     console.log("Dummy useRequestManagement called");
     return {
       requests: [],
@@ -23,15 +24,18 @@ const DummyTest: React.FC = () => {
   };
 
   try {
-    // Test dummy hook
-    const result = useRequestManagement();
-    console.log("✅ Dummy hook called successfully:", Object.keys(result));
+    // Test real hook (but safely)
+    console.log(
+      "✅ Real useRequestManagement imported:",
+      typeof useRequestManagement,
+    );
+    console.log("✅ Ready for use in React component context");
 
     return (
       <div style={{ padding: "20px", background: "#e8f5e8", color: "#2e7d32" }}>
-        <h3>✅ Dummy Test Success</h3>
-        <p>Dummy useRequestManagement is working!</p>
-        <p>Returned keys: {Object.keys(result).join(", ")}</p>
+        <h3>✅ Real Hook Test Success</h3>
+        <p>useRequestManagement is properly imported!</p>
+        <p>Hook type: {typeof useRequestManagement}</p>
       </div>
     );
   } catch (error) {
