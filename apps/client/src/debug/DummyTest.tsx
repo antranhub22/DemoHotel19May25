@@ -5,23 +5,6 @@ const DummyTest: React.FC = () => {
   console.log("🧪 DummyTest component rendering...");
 
   // Use the real hook instead of dummy
-  const useRealRequestManagement = () => {
-    console.log("Dummy useRequestManagement called");
-    return {
-      requests: [],
-      requestCounts: { total: 0, pending: 0, completed: 0 },
-      selectedRequest: null,
-      filters: {},
-      isLoading: false,
-      error: null,
-      loadRequests: () => console.log("Dummy loadRequests called"),
-      selectRequest: () => console.log("Dummy selectRequest called"),
-      updateFilters: () => console.log("Dummy updateFilters called"),
-      clearFilters: () => console.log("Dummy clearFilters called"),
-      clearCurrentError: () => console.log("Dummy clearCurrentError called"),
-      setupAutoRefresh: () => console.log("Dummy setupAutoRefresh called"),
-    };
-  };
 
   try {
     // Test real hook (but safely)
