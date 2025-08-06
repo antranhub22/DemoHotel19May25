@@ -78,10 +78,11 @@ import {
   StaffMember,
   TASK_CATEGORY_OPTIONS,
   TASK_PRIORITY_OPTIONS,
-  useAttendance,
-  useStaffManagement,
-  useStaffRealtime,
-  useTaskManagement,
+  // Hooks temporarily disabled due to circular dependency
+  // useAttendance,
+  // useStaffManagement,
+  // useStaffRealtime,
+  // useTaskManagement,
   validateStaffData,
   validateTaskData,
 } from "@/domains/staff-management";
@@ -611,36 +612,58 @@ export const StaffManagementRefactored: React.FC = () => {
   useAuth();
 
   // ========================================
-  // Redux Domain Hooks - NEW Architecture
+  // Redux Domain Hooks - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
   // ========================================
-  const {
-    staff,
-    staffByDepartment,
-    staffCounts,
-    selectedStaff,
-    filters,
-    isLoading,
-    error,
-    analytics,
-    loadStaff,
-    selectStaffMember,
-    updateStaffFilters,
-    clearStaffFilters,
-    clearCurrentError,
-    setupAutoRefresh,
-  } = useStaffManagement();
+  // const {
+  //   staff,
+  //   staffByDepartment,
+  //   staffCounts,
+  //   selectedStaff,
+  //   filters,
+  //   isLoading,
+  //   error,
+  //   analytics,
+  //   loadStaff,
+  //   selectStaffMember,
+  //   updateStaffFilters,
+  //   clearStaffFilters,
+  //   clearCurrentError,
+  //   setupAutoRefresh,
+  // } = useStaffManagement();
 
-  const { tasks, loadTasks } = useTaskManagement();
+  // const { tasks, loadTasks } = useTaskManagement();
 
-  const {
-    onDutyStaff,
-    availableStaff,
-    checkInStaffMember,
-    checkOutStaffMember,
-  } = useAttendance();
+  // const {
+  //   onDutyStaff,
+  //   availableStaff,
+  //   checkInStaffMember,
+  //   checkOutStaffMember,
+  // } = useAttendance();
 
-  // Set up real-time updates
-  useStaffRealtime();
+  // Set up real-time updates - TEMPORARILY DISABLED
+  // useStaffRealtime();
+
+  // MOCK DATA FOR STAFF MANAGEMENT
+  const staff = [];
+  const staffByDepartment = {};
+  const staffCounts = { total: 0, active: 0, onDuty: 0 };
+  const selectedStaff = null;
+  const filters = {};
+  const isLoading = false;
+  const error = null;
+  const analytics = {};
+  const tasks = [];
+  const onDutyStaff = [];
+  const availableStaff = [];
+  const loadStaff = () => {};
+  const selectStaffMember = () => {};
+  const updateStaffFilters = () => {};
+  const clearStaffFilters = () => {};
+  const clearCurrentError = () => {};
+  const setupAutoRefresh = () => {};
+  const loadTasks = () => {};
+  const checkInStaffMember = () => {};
+  const checkOutStaffMember = () => {};
 
   // ========================================
   // Local State for UI

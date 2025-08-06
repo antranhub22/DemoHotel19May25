@@ -110,15 +110,8 @@ export {
 // ========================================
 // Hooks
 // ========================================
-export {
-  useAttendance,
-  useDepartmentManagement,
-  useScheduleManagement,
-  useStaffManagement,
-  useStaffRealtime,
-  useTaskManagement,
-  useWorkloadManagement,
-} from "./hooks/useStaffManagement";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ========================================
 // Constants & Utilities
@@ -513,15 +506,6 @@ export const getSuggestedStaff = (
 // ========================================
 
 const StaffManagementDomain = {
-  // Hooks
-  useStaffManagement,
-  useTaskManagement,
-  useScheduleManagement,
-  useAttendance,
-  useDepartmentManagement,
-  useWorkloadManagement,
-  useStaffRealtime,
-
   // Services
   staffManagementService,
 

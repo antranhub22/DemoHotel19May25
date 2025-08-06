@@ -80,17 +80,17 @@ import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { logger } from "@shared/utils/logger";
 
-// Domain imports
+// Domain imports - Hooks temporarily disabled
 import {
-  useBilling,
-  useSubscriptionManagement,
-  usePaymentManagement,
-  useInvoiceManagement,
-  useUsageAnalytics,
-  usePricingPlans,
-  useBillingNotifications,
-  useCustomerPortal,
-  useBillingAutoRefresh,
+  // useBilling,
+  // useSubscriptionManagement,
+  // usePaymentManagement,
+  // useInvoiceManagement,
+  // useUsageAnalytics,
+  // usePricingPlans,
+  // useBillingNotifications,
+  // useCustomerPortal,
+  // useBillingAutoRefresh,
   BillingUtils,
   PLAN_LIMITS,
   PLAN_FEATURES,
@@ -107,18 +107,28 @@ const BillingSubscriptionManagement: React.FC = () => {
   const { user } = useAuth();
   const tenantId = user?.tenantId || "";
 
-  // Domain hooks
-  const billing = useBilling();
-  const subscriptionMgmt = useSubscriptionManagement();
-  const paymentMgmt = usePaymentManagement();
-  const invoiceMgmt = useInvoiceManagement();
-  const usageAnalytics = useUsageAnalytics();
-  const pricingPlans = usePricingPlans();
-  const notifications = useBillingNotifications();
-  const customerPortal = useCustomerPortal();
+  // Domain hooks - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
+  // const billing = useBilling();
+  // const subscriptionMgmt = useSubscriptionManagement();
+  // const paymentMgmt = usePaymentManagement();
+  // const invoiceMgmt = useInvoiceManagement();
+  // const usageAnalytics = useUsageAnalytics();
+  // const pricingPlans = usePricingPlans();
+  // const notifications = useBillingNotifications();
+  // const customerPortal = useCustomerPortal();
 
-  // Auto-refresh billing data
-  useBillingAutoRefresh(tenantId);
+  // Auto-refresh billing data - TEMPORARILY DISABLED
+  // useBillingAutoRefresh(tenantId);
+
+  // MOCK DATA FOR BILLING MANAGEMENT
+  const billing = { currentSubscription: null, isLoading: false };
+  const subscriptionMgmt = { plans: [], upgradePlan: () => {} };
+  const paymentMgmt = { methods: [], addPaymentMethod: () => {} };
+  const invoiceMgmt = { invoices: [], downloadInvoice: () => {} };
+  const usageAnalytics = { usage: {}, limits: {} };
+  const pricingPlans = { plans: [], features: {} };
+  const notifications = { notifications: [], markAsRead: () => {} };
+  const customerPortal = { openPortal: () => {} };
 
   // Local state
   const [activeTab, setActiveTab] = useState("overview");

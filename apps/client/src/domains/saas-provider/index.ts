@@ -63,21 +63,12 @@ export { platformAdminService } from "./services/platformAdminService";
 export { TenantManagementService } from "./services/tenantManagementService";
 
 // Hooks
-export {
-  useFeatureGating,
-  usePlatformAnalytics,
-  useSubscriptionManagement,
-  useTenantManagement,
-  useUsageMonitoring,
-} from "./hooks/useTenantManagement";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // Platform Admin Hooks
-export {
-  usePlatformAdmin,
-  usePlatformMetrics,
-  useTenantManagement as usePlatformTenantManagement,
-  useSystemHealth,
-} from "./hooks/usePlatformAdmin";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // Components
 export {

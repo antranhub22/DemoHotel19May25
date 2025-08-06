@@ -129,17 +129,8 @@ export { default as billingReducer } from "./store/billingSlice";
 // HOOKS EXPORTS
 // ============================================
 
-export {
-  useBilling,
-  useSubscriptionManagement,
-  usePaymentManagement,
-  useInvoiceManagement,
-  useUsageAnalytics,
-  usePricingPlans,
-  useBillingNotifications,
-  useCustomerPortal,
-  useBillingAutoRefresh,
-} from "./hooks/useBilling";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ============================================
 // UTILITIES & HELPERS

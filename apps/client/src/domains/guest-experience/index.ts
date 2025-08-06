@@ -57,12 +57,8 @@ export type { GuestExperienceState } from "./store/guestJourneySlice";
 export { GuestExperienceService } from "./services/guestExperienceService";
 
 // Hooks
-export {
-  useConversation,
-  useGuestExperience,
-  useLanguageSelection,
-  useVoiceInteraction,
-} from "./hooks/useGuestExperience";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // Adapters
 export {
