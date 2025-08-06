@@ -82,12 +82,13 @@ export {
 // ========================================
 // Hooks
 // ========================================
-export {
-  useRequestManagement,
-  useRequestMessages,
-  useRequestRealtime,
-  useRequestStatus,
-} from "./hooks/useRequestManagement";
+// TEMPORARILY DISABLED - Fixing circular dependency build issues
+// export {
+//   useRequestManagement,
+//   useRequestMessages,
+//   useRequestRealtime,
+//   useRequestStatus,
+// } from "./hooks/useRequestManagement";
 
 // ========================================
 // Constants & Utilities
@@ -238,11 +239,11 @@ export const generateRequestSummary = (request: CustomerRequest): string => {
 // ========================================
 
 const RequestManagementDomain = {
-  // Hooks
-  useRequestManagement: useRequestManagement,
-  useRequestMessages: useRequestMessages,
-  useRequestStatus: useRequestStatus,
-  useRequestRealtime: useRequestRealtime,
+  // Hooks - TEMPORARILY DISABLED
+  // useRequestManagement: useRequestManagement,
+  // useRequestMessages: useRequestMessages,
+  // useRequestStatus: useRequestStatus,
+  // useRequestRealtime: useRequestRealtime,
 
   // Services
   requestManagementService: requestManagementService,
