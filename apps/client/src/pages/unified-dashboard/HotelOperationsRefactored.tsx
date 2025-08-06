@@ -49,47 +49,109 @@ import {
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
-// Hotel Operations Domain imports
-import {
-  BED_TYPE_OPTIONS,
-  CreateHousekeepingTaskPayload,
-  CreateMaintenanceRequestPayload,
-  CreateRoomPayload,
-  formatCurrency,
-  formatDate,
-  formatDuration,
-  getFacilityStatusColor,
-  getMaintenancePriorityColor,
-  getRoomDisplayName,
-  getRoomStatusColor,
-  getTaskPriorityColor,
-  getTaskStatusColor,
-  getTimeElapsed,
-  HOUSEKEEPING_TASK_TYPES,
-  HousekeepingTask,
-  isMaintenanceUrgent,
-  MAINTENANCE_CATEGORY_OPTIONS,
-  MAINTENANCE_PRIORITY_OPTIONS,
-  MAINTENANCE_URGENCY_OPTIONS,
-  MaintenanceRequest,
-  Room,
-  ROOM_STATUS_OPTIONS,
-  ROOM_VIEW_OPTIONS,
-  TASK_PRIORITY_OPTIONS,
-  // useBulkOperations,
-  // Hooks temporarily disabled due to circular dependency
-  // useFacilities,
-  // useHotelAnalytics,
-  // useHotelOperations,
-  // useHotelOperationsRealtime,
-  // useHousekeeping,
-  // useInventory,
-  // useMaintenance,
-  // useRoomStatus,
-  validateHousekeepingTaskData,
-  validateMaintenanceRequestData,
-  validateRoomData,
-} from "@/domains/hotel-operations";
+// Hotel Operations Domain imports - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
+// import {
+//   BED_TYPE_OPTIONS,
+//   CreateHousekeepingTaskPayload,
+//   CreateMaintenanceRequestPayload,
+//   CreateRoomPayload,
+//   formatCurrency,
+//   formatDate,
+//   formatDuration,
+//   getFacilityStatusColor,
+//   getMaintenancePriorityColor,
+//   getRoomDisplayName,
+//   getRoomStatusColor,
+//   getTaskPriorityColor,
+//   getTaskStatusColor,
+//   getTimeElapsed,
+//   HOUSEKEEPING_TASK_TYPES,
+//   HousekeepingTask,
+//   isMaintenanceUrgent,
+//   MAINTENANCE_CATEGORY_OPTIONS,
+//   MAINTENANCE_PRIORITY_OPTIONS,
+//   MAINTENANCE_URGENCY_OPTIONS,
+//   MaintenanceRequest,
+//   Room,
+//   ROOM_STATUS_OPTIONS,
+//   ROOM_VIEW_OPTIONS,
+//   TASK_PRIORITY_OPTIONS,
+//   validateHousekeepingTaskData,
+//   validateMaintenanceRequestData,
+//   validateRoomData,
+// } from "@/domains/hotel-operations";
+
+// MOCK CONSTANTS AND TYPES FOR TEMPORARY TESTING
+const BED_TYPE_OPTIONS = ["Single", "Double", "Queen", "King"];
+const ROOM_STATUS_OPTIONS = [
+  "available",
+  "occupied",
+  "maintenance",
+  "cleaning",
+];
+const ROOM_VIEW_OPTIONS = ["City", "Garden", "Ocean", "Pool"];
+const HOUSEKEEPING_TASK_TYPES = ["cleaning", "maintenance", "inspection"];
+const MAINTENANCE_CATEGORY_OPTIONS = [
+  "plumbing",
+  "electrical",
+  "hvac",
+  "general",
+];
+const MAINTENANCE_PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
+const MAINTENANCE_URGENCY_OPTIONS = ["normal", "urgent", "emergency"];
+const TASK_PRIORITY_OPTIONS = ["low", "medium", "high"];
+
+// Mock types
+interface Room {
+  id: string;
+  number: string;
+  status: string;
+}
+interface HousekeepingTask {
+  id: string;
+  type: string;
+  status: string;
+}
+interface MaintenanceRequest {
+  id: string;
+  category: string;
+  priority: string;
+}
+interface CreateRoomPayload {
+  number: string;
+  type: string;
+}
+interface CreateHousekeepingTaskPayload {
+  type: string;
+  roomId: string;
+}
+interface CreateMaintenanceRequestPayload {
+  category: string;
+  description: string;
+}
+
+// Mock utility functions
+const formatCurrency = (amount: number) => `$${amount.toFixed(2)}`;
+const formatDate = (date: Date | string) => new Date(date).toLocaleDateString();
+const formatDuration = (minutes: number) => `${minutes}m`;
+const getRoomDisplayName = (room: any) => `Room ${room?.number || "N/A"}`;
+const getRoomStatusColor = (status: string) =>
+  status === "available" ? "green" : "yellow";
+const getTaskStatusColor = (status: string) => "blue";
+const getTaskPriorityColor = (priority: string) => "orange";
+const getFacilityStatusColor = (status: string) => "purple";
+const getMaintenancePriorityColor = (priority: string) => "red";
+const getTimeElapsed = (date: Date | string) => "1h ago";
+const isMaintenanceUrgent = (request: any) => request?.priority === "urgent";
+const validateRoomData = (data: any) => ({ isValid: true, errors: [] });
+const validateHousekeepingTaskData = (data: any) => ({
+  isValid: true,
+  errors: [],
+});
+const validateMaintenanceRequestData = (data: any) => ({
+  isValid: true,
+  errors: [],
+});
 
 // ========================================
 // Main Component

@@ -149,10 +149,8 @@ export { default as hotelOperationsReducer } from "./store/hotelOperationsSlice"
 // ========================================
 // Services
 // ========================================
-export {
-  HotelOperationsService,
-  hotelOperationsService,
-} from "./services/hotelOperationsService";
+// NOTE: Service exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ========================================
 // Hooks
@@ -693,9 +691,6 @@ export const calculateInventoryValue = (items: InventoryItem[]): number => {
 // ========================================
 
 const HotelOperationsDomain = {
-  // Services
-  hotelOperationsService,
-
   // Constants
   ROOM_STATUS_OPTIONS,
   ROOM_AVAILABILITY_OPTIONS,
