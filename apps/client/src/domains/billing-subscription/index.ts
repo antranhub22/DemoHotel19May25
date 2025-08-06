@@ -63,8 +63,8 @@ export {
 // ============================================
 // SERVICE EXPORTS
 // ============================================
-
-export { billingService, BillingService } from "./services/billingService";
+// NOTE: Service exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ============================================
 // REDUX EXPORTS

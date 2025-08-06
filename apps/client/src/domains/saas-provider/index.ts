@@ -59,8 +59,8 @@ export {
 } from "./store/tenantSlice";
 
 // Services
-export { platformAdminService } from "./services/platformAdminService";
-export { TenantManagementService } from "./services/tenantManagementService";
+// NOTE: Service exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // Hooks
 // NOTE: Hooks exports temporarily disabled to resolve circular dependency

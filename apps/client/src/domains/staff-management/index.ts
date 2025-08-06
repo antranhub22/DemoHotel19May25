@@ -102,10 +102,8 @@ export { default as staffManagementReducer } from "./store/staffManagementSlice"
 // ========================================
 // Services
 // ========================================
-export {
-  StaffManagementService,
-  staffManagementService,
-} from "./services/staffManagementService";
+// NOTE: Service exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ========================================
 // Hooks
@@ -506,9 +504,6 @@ export const getSuggestedStaff = (
 // ========================================
 
 const StaffManagementDomain = {
-  // Services
-  staffManagementService,
-
   // Constants
   STAFF_ROLE_OPTIONS,
   STAFF_DEPARTMENT_OPTIONS,

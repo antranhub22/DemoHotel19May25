@@ -54,7 +54,8 @@ export {
 export type { GuestExperienceState } from "./store/guestJourneySlice";
 
 // Services
-export { GuestExperienceService } from "./services/guestExperienceService";
+// NOTE: Service exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // Hooks
 // NOTE: Hooks exports temporarily disabled to resolve circular dependency
