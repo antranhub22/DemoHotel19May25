@@ -20,7 +20,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=350 --optimize-for-size"
+        value: "--max-old-space-size=350"
       - key: PORT
         value: 10000
       - key: AUTO_MIGRATE
