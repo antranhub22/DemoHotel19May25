@@ -51,7 +51,6 @@ import {
 // ========================================
 
 export const useRequestManagement = () => {
-  console.log("🔍 [DEBUG] useRequestManagement hook called");
   console.log(
     "🔍 [DEBUG] useRequestManagement defined:",
     typeof useRequestManagement,

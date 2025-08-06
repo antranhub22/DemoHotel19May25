@@ -1,0 +1,53 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+
+    // 🚀 Performance optimizations
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+
+    // 💾 Memory optimizations
+    "preserveWatchOutput": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+
+    // 🔍 Better error reporting without breaking builds
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+
+    // 📦 Bundle optimization
+    "importsNotUsedAsValues": "remove",
+    "preserveValueImports": false,
+
+    // 🛡️ Strict but safe
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": true,
+
+    // 🎯 Modern ES features for better performance
+    "useDefineForClassFields": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // 📊 Skip lib checks to speed up compilation
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
+  },
+
+  "include": ["apps/**/*", "packages/**/*", "tools/**/*"],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/test/**/*"
+  ]
+}

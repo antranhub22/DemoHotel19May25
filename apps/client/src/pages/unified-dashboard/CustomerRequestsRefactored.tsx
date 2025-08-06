@@ -367,9 +367,8 @@ export const CustomerRequestsRefactored: React.FC = () => {
   useAuth();
 
   // ========================================
-  // DEBUG: Kiểm tra useRequestManagement
+
   // ========================================
-  console.log("🔍 [DEBUG] About to import useRequestManagement...");
 
   // Test import trước khi sử dụng
   try {

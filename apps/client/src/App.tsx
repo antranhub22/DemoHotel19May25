@@ -555,10 +555,9 @@ function Router() {
 
 function AppContent() {
   logger.debug("[DEBUG] AppContent render", "Component");
-  console.log("🔍 [DEBUG] ===== APPCONTENT RENDERING =====");
-  console.log("🔍 [DEBUG] About to call useWebSocket hook...");
+
   useWebSocket();
-  console.log("🔍 [DEBUG] useWebSocket hook called successfully");
+
   return (
     <ErrorBoundary>
       <Router />

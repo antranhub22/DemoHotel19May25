@@ -50,7 +50,13 @@
     "docs:validate": "node scripts/validate-docs.cjs",
     "migrate:production": "npx prisma migrate deploy",
     "fix:tenants": "node scripts/fix-tenants-table.cjs",
-    "migrate:auto": "tsx tools/scripts/maintenance/auto-migrate-on-deploy.ts"
+    "migrate:auto": "tsx tools/scripts/maintenance/auto-migrate-on-deploy.ts",
+    "perf:analyze": "npm run build && npx vite-bundle-analyzer dist",
+    "deps:check": "npx npm-check-updates --interactive",
+    "size:check": "npx bundlesize",
+    "security:audit": "npm audit --audit-level moderate",
+    "clean:cache": "npm cache clean --force && rm -rf node_modules/.cache",
+    "quick:health": "npm run health:check && npm run security:audit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -175,6 +181,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "glob": "^10.4.5",
     "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",

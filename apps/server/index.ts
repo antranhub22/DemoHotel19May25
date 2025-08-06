@@ -216,8 +216,12 @@ import {
   memoryOptimizationMiddleware,
   responseCompressionMiddleware,
 } from "./middleware/memoryOptimization.js";
+// ✅ RESPONSE OPTIMIZATION: Add performance middleware
+import responseOptimization from "./middleware/responseOptimization.js";
+
 app.use(memoryOptimizationMiddleware);
 app.use(responseCompressionMiddleware);
+app.use(responseOptimization.fullStack);
 
 // ✅ NEW v3.0: Advanced Caching Middleware
 // Automatic cache invalidation on data mutations
