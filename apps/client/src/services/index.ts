@@ -1,14 +1,16 @@
 /**
- * Barrel exports for services directory
- *
- * NOTE: OpenAI services completely removed during Layer 4 cleanup
- * These were disabled due to voice model enum bundling errors
+ * Services - Public API
+ * Application services and API clients for DemoHotel
  */
 
-// ✅ ENABLED: Non-OpenAI services only
-export * from './ReferenceService';
+// ========================================
+// Core Services
+// ========================================
+export * from "./ReferenceService";
 
-// Dashboard API (safe - no OpenAI dependencies)
+// ========================================
+// Dashboard API Services
+// ========================================
 export {
   dashboardApi,
   type HotelData,
@@ -20,4 +22,9 @@ export {
   BACKGROUND_SOUND_OPTIONS,
   validateHotelData,
   validateAssistantCustomization,
-} from './dashboardApi';
+} from "./dashboardApi";
+
+// ========================================
+// Note: OpenAI services removed in Layer 4 cleanup
+// Safe from voice model enum bundling errors
+// ========================================
