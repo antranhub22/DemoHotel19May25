@@ -19,7 +19,8 @@ const SimpleTest: React.FC = () => {
     );
 
     // Test 3: Hook will be called in component context
-    console.log("✅ Hooks available for use in React components");
+    const result = useRequestManagement();
+    console.log("✅ useRequestManagement hook called:", result);
 
     return (
       <div style={{ padding: "20px", background: "#e8f5e8", color: "#2e7d32" }}>
