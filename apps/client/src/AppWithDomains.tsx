@@ -43,7 +43,7 @@ import StaffDashboard from "@/pages/StaffDashboard";
 import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
 import BillingSubscriptionManagement from "@/pages/unified-dashboard/BillingSubscriptionManagement";
 import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
-import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored";
+// import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored"; // TEMPORARILY DISABLED
 import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperationsRefactored";
 import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 
@@ -300,7 +300,8 @@ function Router() {
         <Route path="/hotel-dashboard/requests-refactored">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
-              <CustomerRequestsRefactored />
+              {/* <CustomerRequestsRefactored /> TEMPORARILY DISABLED */}
+              <div>Component temporarily disabled for debugging</div>
             </UnifiedDashboardLayout>
           </ProtectedRoute>
         </Route>
