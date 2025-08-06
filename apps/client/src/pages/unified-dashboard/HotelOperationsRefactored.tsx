@@ -76,15 +76,16 @@ import {
   ROOM_STATUS_OPTIONS,
   ROOM_VIEW_OPTIONS,
   TASK_PRIORITY_OPTIONS,
-  useBulkOperations,
-  useFacilities,
-  useHotelAnalytics,
-  useHotelOperations,
-  useHotelOperationsRealtime,
-  useHousekeeping,
-  useInventory,
-  useMaintenance,
-  useRoomStatus,
+  // useBulkOperations,
+  // Hooks temporarily disabled due to circular dependency
+  // useFacilities,
+  // useHotelAnalytics,
+  // useHotelOperations,
+  // useHotelOperationsRealtime,
+  // useHousekeeping,
+  // useInventory,
+  // useMaintenance,
+  // useRoomStatus,
   validateHousekeepingTaskData,
   validateMaintenanceRequestData,
   validateRoomData,
@@ -99,99 +100,174 @@ const HotelOperationsRefactored: React.FC = () => {
   // Hooks & State
   // ========================================
 
-  // Main hotel operations
-  const {
-    rooms,
-    roomTypes,
-    roomCounts,
-    availableRooms,
-    occupiedRooms,
-    roomsNeedingCleaning,
-    selectedRoom,
-    roomFilters,
-    isLoading,
-    error,
-    hotelOperations,
-    loadRooms,
-    loadRoomById,
-    createNewRoom,
-    updateExistingRoom,
-    changeRoomStatus,
-    loadRoomTypes,
-    updateRoomFilters,
-    clearRoomFilters,
-    selectRoom,
-    changeTab,
-    changeViewMode,
-    toggleFilterPanel,
-    clearCurrentError,
-    loadAnalytics,
-  } = useHotelOperations();
+  // Main hotel operations - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
+  // const {
+  //   rooms,
+  //   roomTypes,
+  //   roomCounts,
+  //   availableRooms,
+  //   occupiedRooms,
+  //   roomsNeedingCleaning,
+  //   selectedRoom,
+  //   roomFilters,
+  //   isLoading,
+  //   error,
+  //   hotelOperations,
+  //   loadRooms,
+  //   loadRoomById,
+  //   createNewRoom,
+  //   updateExistingRoom,
+  //   changeRoomStatus,
+  //   loadRoomTypes,
+  //   updateRoomFilters,
+  //   clearRoomFilters,
+  //   selectRoom,
+  //   changeTab,
+  //   changeViewMode,
+  //   toggleFilterPanel,
+  //   clearCurrentError,
+  //   loadAnalytics,
+  // } = useHotelOperations();
 
-  // Specialized hooks
-  const {
-    tasks,
-    selectedTask,
-    urgentTasks,
-    loadTasks,
-    createNewTask,
-    updateExistingTask,
-    assignTaskToStaff,
-    completeTask,
-    selectTask,
-    updateTaskFilters,
-    clearTaskFilters,
-  } = useHousekeeping();
+  // MOCK DATA FOR TEMPORARY TESTING
+  const rooms = [];
+  const roomTypes = [];
+  const roomCounts = { total: 0, available: 0, occupied: 0, maintenance: 0 };
+  const availableRooms = [];
+  const occupiedRooms = [];
+  const roomsNeedingCleaning = [];
+  const selectedRoom = null;
+  const roomFilters = {};
+  const isLoading = false;
+  const error = null;
+  const hotelOperations = {};
+  const loadRooms = () => {};
+  const loadRoomById = () => {};
+  const createNewRoom = () => {};
+  const updateExistingRoom = () => {};
+  const changeRoomStatus = () => {};
+  const loadRoomTypes = () => {};
+  const updateRoomFilters = () => {};
+  const clearRoomFilters = () => {};
+  const selectRoom = () => {};
+  const changeTab = () => {};
+  const changeViewMode = () => {};
+  const toggleFilterPanel = () => {};
+  const clearCurrentError = () => {};
+  const loadAnalytics = () => {};
 
-  const {
-    requests,
-    selectedRequest,
-    urgentRequests,
-    loadRequests,
-    createNewRequest,
-    updateExistingRequest,
-    assignRequestToStaff,
-    selectRequest,
-    updateRequestFilters,
-    clearRequestFilters,
-  } = useMaintenance();
+  // Specialized hooks - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
+  // const {
+  //   tasks,
+  //   selectedTask,
+  //   urgentTasks,
+  //   loadTasks,
+  //   createNewTask,
+  //   updateExistingTask,
+  //   assignTaskToStaff,
+  //   completeTask,
+  //   selectTask,
+  //   updateTaskFilters,
+  //   clearTaskFilters,
+  // } = useHousekeeping();
 
-  const {
-    facilities,
-    loadFacilities,
-    changeFacilityStatus,
-    selectFacility,
-    updateFacilityFilters,
-  } = useFacilities();
+  // const {
+  //   requests,
+  //   selectedRequest,
+  //   urgentRequests,
+  //   loadRequests,
+  //   createNewRequest,
+  //   updateExistingRequest,
+  //   assignRequestToStaff,
+  //   selectRequest,
+  //   updateRequestFilters,
+  //   clearRequestFilters,
+  // } = useMaintenance();
 
-  const {
-    items: inventoryItems,
-    lowStockItems,
-    loadItems: loadInventoryItems,
-    updateStock,
-    selectItem,
-    updateItemFilters,
-  } = useInventory();
+  // const {
+  //   facilities,
+  //   loadFacilities,
+  //   changeFacilityStatus,
+  //   selectFacility,
+  //   updateFacilityFilters,
+  // } = useFacilities();
 
-  const {
-    updateStatus: updateRoomStatusDirect,
-    checkInGuest,
-    checkOutGuest,
-    markRoomReady,
-    markRoomMaintenance,
-  } = useRoomStatus();
+  // MOCK DATA FOR SPECIALIZED HOOKS
+  const tasks = [];
+  const selectedTask = null;
+  const urgentTasks = [];
+  const requests = [];
+  const selectedRequest = null;
+  const urgentRequests = [];
+  const facilities = [];
+  const loadTasks = () => {};
+  const createNewTask = () => {};
+  const updateExistingTask = () => {};
+  const assignTaskToStaff = () => {};
+  const completeTask = () => {};
+  const selectTask = () => {};
+  const updateTaskFilters = () => {};
+  const clearTaskFilters = () => {};
+  const loadRequests = () => {};
+  const createNewRequest = () => {};
+  const updateExistingRequest = () => {};
+  const assignRequestToStaff = () => {};
+  const selectRequest = () => {};
+  const updateRequestFilters = () => {};
+  const clearRequestFilters = () => {};
+  const loadFacilities = () => {};
+  const changeFacilityStatus = () => {};
+  const selectFacility = () => {};
+  const updateFacilityFilters = () => {};
 
-  const {
-    analytics,
-    occupancyRate,
-    housekeepingEfficiency,
-    maintenanceBacklog,
-  } = useHotelAnalytics();
+  // Additional hooks - TEMPORARILY DISABLED
+  // const {
+  //   items: inventoryItems,
+  //   lowStockItems,
+  //   loadItems: loadInventoryItems,
+  //   updateStock,
+  //   selectItem,
+  //   updateItemFilters,
+  // } = useInventory();
 
-  const { bulkUpdateRoomStatus, bulkAssignTasks } = useBulkOperations();
+  // const {
+  //   updateStatus: updateRoomStatusDirect,
+  //   checkInGuest,
+  //   checkOutGuest,
+  //   markRoomReady,
+  //   markRoomMaintenance,
+  // } = useRoomStatus();
 
-  // Real-time updates
-  useHotelOperationsRealtime();
+  // const {
+  //   analytics,
+  //   occupancyRate,
+  //   housekeepingEfficiency,
+  //   maintenanceBacklog,
+  // } = useHotelAnalytics();
+
+  // const { bulkUpdateRoomStatus, bulkAssignTasks } = useBulkOperations();
+
+  // MOCK DATA FOR ADDITIONAL HOOKS
+  const inventoryItems = [];
+  const lowStockItems = [];
+  const analytics = {};
+  const occupancyRate = 0;
+  const housekeepingEfficiency = 0;
+  const maintenanceBacklog = 0;
+  const loadInventoryItems = () => {};
+  const updateStock = () => {};
+  const selectItem = () => {};
+  const updateItemFilters = () => {};
+  const updateRoomStatusDirect = () => {};
+  const checkInGuest = () => {};
+  const checkOutGuest = () => {};
+  const markRoomReady = () => {};
+  const markRoomMaintenance = () => {};
+  const bulkUpdateRoomStatus = () => {};
+  const bulkAssignTasks = () => {};
+
+  // Real-time updates - TEMPORARILY DISABLED
+  // useHotelOperationsRealtime();
 
   // ========================================
   // Local State

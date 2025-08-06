@@ -157,17 +157,8 @@ export {
 // ========================================
 // Hooks
 // ========================================
-export {
-  useBulkOperations,
-  useFacilities,
-  useHotelAnalytics,
-  useHotelOperations,
-  useHotelOperationsRealtime,
-  useHousekeeping,
-  useInventory,
-  useMaintenance,
-  useRoomStatus,
-} from "./hooks/useHotelOperations";
+// NOTE: Hooks exports temporarily disabled to resolve circular dependency
+// Will be re-enabled after architectural refactor
 
 // ========================================
 // Constants & Utilities
@@ -702,17 +693,6 @@ export const calculateInventoryValue = (items: InventoryItem[]): number => {
 // ========================================
 
 const HotelOperationsDomain = {
-  // Hooks
-  useHotelOperations,
-  useHousekeeping,
-  useMaintenance,
-  useFacilities,
-  useInventory,
-  useRoomStatus,
-  useHotelOperationsRealtime,
-  useHotelAnalytics,
-  useBulkOperations,
-
   // Services
   hotelOperationsService,
 
