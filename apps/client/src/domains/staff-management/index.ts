@@ -484,7 +484,7 @@ export const isStaffAvailable = (staff: StaffMember): boolean => {
  * Get suggested staff for task assignment
  */
 export const getSuggestedStaff = (
-  task: CreateTaskPayload,
+  _task: CreateTaskPayload,
   availableStaff: StaffMember[],
 ): StaffMember[] => {
   return availableStaff
