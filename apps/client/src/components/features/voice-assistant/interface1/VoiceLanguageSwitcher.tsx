@@ -232,9 +232,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
                   : newLanguage === "ru"
                     ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
-                    : newLanguage === "zh"
-                      ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
-                      : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+                    : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
           (window as any).addNotification({
             type: "success",
@@ -593,9 +591,3 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
     </div>
   );
 };
-
-interface VoiceLanguageSwitcherProps {
-  onLanguageChange?: (language: string) => void;
-  currentLanguage?: string;
-  className?: string;
-}

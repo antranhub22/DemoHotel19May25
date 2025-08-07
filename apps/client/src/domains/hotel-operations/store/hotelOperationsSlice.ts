@@ -114,7 +114,7 @@ const initialState: HotelOperationsState = {
 
 export const fetchRooms = createAsyncThunk(
   "hotelOperations/fetchRooms",
-  async (filters?: RoomFilters, { rejectWithValue }) => {
+  async (filters: RoomFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await hotelOperationsService.getRooms(filters);
       return response;

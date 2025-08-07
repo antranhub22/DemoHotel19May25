@@ -3,6 +3,7 @@ import * as React from "react";
 
 // Type declaration for import.meta
 
+import { useAssistant } from "@/context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Language, ServiceItem } from "@/types/interface1.types";
 import logger from "@shared/utils/logger";
@@ -105,18 +106,6 @@ const VOICE_PROMPTS: Record<
       fallback:
         "Я могу помочь с заказом обслуживания номеров. Скажите, что вам нужно.",
     },
-    zh: {
-      greeting: "안녕하세요! 룸서비스 도우미입니다. 무엇을 주문하시겠습니까?",
-      instructions:
-        "음식, 음료를 주문하시거나 객실 내 식사 준비를 요청하실 수 있습니다.",
-      examples: [
-        "두 명을 위한 아침식사를 주문하고 싶습니다",
-        "와인 한 병을 배달받을 수 있나요?",
-        "깨끗한 수건과 세면도구를 가져다 주세요",
-      ],
-      fallback:
-        "룸서비스 주문을 도와드릴 수 있습니다. 필요한 것을 말씀해 주세요.",
-    },
   },
   Restaurant: {
     en: {
@@ -175,18 +164,6 @@ const VOICE_PROMPTS: Record<
       ],
       fallback:
         "Могу помочь с бронированием ресторана и информацией о питании.",
-    },
-    zh: {
-      greeting:
-        "레스토랑 서비스에 오신 것을 환영합니다! 식사와 관련해 어떻게 도와드릴까요?",
-      instructions:
-        "예약, 메뉴 정보, 특별 식단 요구사항을 도와드릴 수 있습니다.",
-      examples: [
-        "오늘 저녁 예약을 하고 싶습니다",
-        "오늘의 특별 메뉴는 무엇인가요?",
-        "채식 옵션이 있나요?",
-      ],
-      fallback: "레스토랑 예약과 식사 정보를 도와드릴 수 있습니다.",
     },
   },
   Concierge: {
@@ -252,19 +229,6 @@ const VOICE_PROMPTS: Record<
       fallback:
         "Я здесь, чтобы помочь с любыми запросами для комфортного пребывания.",
     },
-    zh: {
-      greeting:
-        "안녕하세요! 컨시어지 도우미입니다. 어떻게 숙박을 더 즐겁게 도와드릴까요?",
-      instructions:
-        "지역 추천, 예약, 교통편, 일반 문의를 도와드릴 수 있습니다.",
-      examples: [
-        "근처 좋은 레스토랑을 추천해 주실 수 있나요?",
-        "공항까지 택시가 필요합니다",
-        "방문할 만한 관광 명소가 있나요?",
-      ],
-      fallback:
-        "숙박을 더 편안하게 만들어 드리기 위한 모든 요청을 도와드립니다.",
-    },
   },
   // Add more services like Housekeeping, Maintenance, etc.
   Housekeeping: {
@@ -307,12 +271,6 @@ const VOICE_PROMPTS: Record<
     },
     ru: {
       greeting: "Здравствуйте! Я здесь для услуг уборки.",
-      instructions: "",
-      examples: [],
-      fallback: "",
-    },
-    zh: {
-      greeting: "안녕하세요! 하우스키핑 서비스를 도와드립니다.",
       instructions: "",
       examples: [],
       fallback: "",
@@ -376,7 +334,7 @@ export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
       "Component",
     );
 
-    const prompt = generateVoicePrompt(selectedService, language);
+    const prompt = generateVoicePrompt(selectedService, language as any);
     if (prompt) {
       setCurrentPrompt(prompt);
       setIsReady(true);

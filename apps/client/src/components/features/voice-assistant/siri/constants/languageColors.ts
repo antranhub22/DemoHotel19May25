@@ -30,8 +30,8 @@ export const LANGUAGE_COLORS: Record<Language, LanguageColorScheme> = {
   zh: {
     primary: "#ff6b6b",
     secondary: "#4ecdc4",
-    accent: "#45b7d1",
-    background: "linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)",
+    glow: "#45b7d1",
+    name: "中文",
   },
 
   ru: {

@@ -33,7 +33,7 @@ import type {
 // Subscription Management
 export const fetchSubscriptions = createAsyncThunk(
   "billing/fetchSubscriptions",
-  async (tenantId?: string, { rejectWithValue }: any) => {
+  async (tenantId: string | undefined, { rejectWithValue }: any) => {
     try {
       return await billingService.getSubscriptions(tenantId);
     } catch (error: any) {
@@ -147,7 +147,7 @@ export const fetchPricingConfig = createAsyncThunk(
 // Payment Methods
 export const fetchPaymentMethods = createAsyncThunk(
   "billing/fetchPaymentMethods",
-  async (tenantId?: string, { rejectWithValue }: any) => {
+  async (tenantId: string | undefined, { rejectWithValue }: any) => {
     try {
       return await billingService.getPaymentMethods(tenantId);
     } catch (error: any) {

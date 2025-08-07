@@ -159,7 +159,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       <SiriButtonStatus
         isCallStarted={isCallStarted}
         isConfirming={isConfirming}
-        language={language}
+        language={language as any}
         colors={currentColors}
       />
 
