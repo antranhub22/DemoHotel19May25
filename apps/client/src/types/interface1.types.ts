@@ -1,5 +1,16 @@
-import type { Room } from '../types/common.types';
-import type { LucideIcon } from 'lucide-react';
+import type { Room } from "../types/common.types";
+import type { LucideIcon } from "lucide-react";
+import {
+  Bed,
+  Bell,
+  Car,
+  MapPin,
+  Phone,
+  Sparkles,
+  Utensils,
+  Waves,
+  Wine,
+} from "lucide-react";
 
 // Core types for Interface1
 
@@ -25,53 +36,53 @@ export interface ServiceItem {
 // Constants
 export const SERVICE_CATEGORIES: ServiceItem[] = [
   {
-    name: 'Room Service',
+    name: "Room Service",
     icon: Bed,
-    description: 'In-room dining and housekeeping services',
+    description: "In-room dining and housekeeping services",
   },
   {
-    name: 'Restaurant',
+    name: "Restaurant",
     icon: Utensils,
-    description: 'Hotel restaurants and dining options',
+    description: "Hotel restaurants and dining options",
   },
   {
-    name: 'Concierge',
+    name: "Concierge",
     icon: Bell,
-    description: 'Concierge and guest services',
+    description: "Concierge and guest services",
   },
   {
-    name: 'Pool & Gym',
+    name: "Pool & Gym",
     icon: Waves,
-    description: 'Swimming pool and fitness facilities',
+    description: "Swimming pool and fitness facilities",
   },
   {
-    name: 'Spa & Wellness',
+    name: "Spa & Wellness",
     icon: Sparkles,
-    description: 'Spa treatments and wellness services',
+    description: "Spa treatments and wellness services",
   },
   {
-    name: 'Bar & Lounge',
+    name: "Bar & Lounge",
     icon: Wine,
-    description: 'Hotel bars and lounges',
+    description: "Hotel bars and lounges",
   },
   {
-    name: 'Transportation',
+    name: "Transportation",
     icon: Car,
-    description: 'Transportation and taxi services',
+    description: "Transportation and taxi services",
   },
   {
-    name: 'Local Guide',
+    name: "Local Guide",
     icon: MapPin,
-    description: 'Local area guide and information',
+    description: "Local area guide and information",
   },
   {
-    name: 'Reception',
+    name: "Reception",
     icon: Phone,
-    description: 'Front desk and reception services',
+    description: "Front desk and reception services",
   },
   {
-    name: 'Guest Services',
+    name: "Guest Services",
     icon: Bell,
-    description: 'Additional guest services',
+    description: "Additional guest services",
   },
 ];
