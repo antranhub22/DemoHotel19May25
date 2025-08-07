@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { SummaryProgression } from './SummaryProgression.tsx';
+import { SummaryProgression } from './SummaryProgression';
 
 export 
 interface SummaryProgressionDemoProps {

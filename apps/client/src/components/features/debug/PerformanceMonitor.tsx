@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef } from 'react';
-import { useDebugMode } from './DebugWrapper.tsx';
+import { useDebugMode } from './DebugWrapper';
 
 interface PerformanceMonitorProps {
   componentName: string;

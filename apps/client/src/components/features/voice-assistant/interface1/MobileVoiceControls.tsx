@@ -14,7 +14,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher.tsx';
+import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;

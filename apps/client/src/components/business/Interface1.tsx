@@ -26,8 +26,8 @@ import { VoiceCommandContext } from '../features/voice-assistant/interface1/Voic
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 
 // Import extracted components
-import { Interface1Desktop } from './Interface1Desktop.tsx';
-import { Interface1Mobile } from './Interface1Mobile.tsx';
+import { Interface1Desktop } from './Interface1Desktop';
+import { Interface1Mobile } from './Interface1Mobile';
 
 interface Interface1Props {
   isActive: boolean;

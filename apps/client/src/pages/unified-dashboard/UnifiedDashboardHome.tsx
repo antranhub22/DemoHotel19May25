@@ -1,8 +1,8 @@
 import { useAuth } from '@/context/AuthContext';
 import React from 'react';
-import { FrontDeskDashboard } from './dashboards/FrontDeskDashboard.tsx';
-import { HotelManagerDashboard } from './dashboards/HotelManagerDashboard.tsx';
-import { ITManagerDashboard } from './dashboards/ITManagerDashboard.tsx';
+import { FrontDeskDashboard } from './dashboards/FrontDeskDashboard';
+import { HotelManagerDashboard } from './dashboards/HotelManagerDashboard';
+import { ITManagerDashboard } from './dashboards/ITManagerDashboard';
 
 // Main unified dashboard home component
 export const UnifiedDashboardHome: React.FC = () => {

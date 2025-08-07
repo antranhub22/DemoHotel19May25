@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { DebugPanel } from './components/DebugPanel.tsx';
-import { useTouchDebugger } from './hooks/useTouchDebugger.ts';
+import { DebugPanel } from './components/DebugPanel';
+import { useTouchDebugger } from './hooks/useTouchDebugger';
 
 interface MobileTouchDebuggerProps {
   containerId: string;

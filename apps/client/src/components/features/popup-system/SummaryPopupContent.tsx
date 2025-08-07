@@ -5,7 +5,7 @@ import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 import { useSummaryProgression } from '@/hooks/useSummaryProgression';
 import logger from '@shared/utils/logger';
 import { useEffect } from 'react';
-import { SummaryProgression } from './SummaryProgression.tsx';
+import { SummaryProgression } from './SummaryProgression';
 
 // Main Summary Popup Component - Uses OpenAI-only summary system
 export 

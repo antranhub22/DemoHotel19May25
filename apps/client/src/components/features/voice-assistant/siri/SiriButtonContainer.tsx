@@ -7,11 +7,11 @@ import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { Language } from '@/types/interface1.types';
 import logger from '@shared/utils/logger';
 import React from 'react';
-import { MobileTouchDebugger } from './MobileTouchDebugger.tsx';
-import SiriCallButton from './SiriCallButton.tsx';
-import { SiriButtonStatus } from './components/SiriButtonStatus.tsx';
-import { useCallProtection } from './hooks/useCallProtection.ts';
-import { useLanguageColors } from './hooks/useLanguageColors.ts';
+import { MobileTouchDebugger } from './MobileTouchDebugger';
+import SiriCallButton from './SiriCallButton';
+import { SiriButtonStatus } from './components/SiriButtonStatus';
+import { useCallProtection } from './hooks/useCallProtection';
+import { useLanguageColors } from './hooks/useLanguageColors';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;

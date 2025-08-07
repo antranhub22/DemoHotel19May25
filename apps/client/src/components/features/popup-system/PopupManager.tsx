@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, Suspense } from 'react';
 import { usePopupContext } from "@/context/PopupContext";
-import { PopupStack } from './PopupStack.tsx';
+import { PopupStack } from './PopupStack';
 import { logger } from '@shared/utils/logger';
 
 // Lazy load SummaryPopupContent for code splitting

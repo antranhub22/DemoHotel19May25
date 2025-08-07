@@ -18,7 +18,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useTranscript } from './TranscriptContext.tsx';
+import { useTranscript } from './TranscriptContext';
 
 export interface VapiContextType {
   // Call state

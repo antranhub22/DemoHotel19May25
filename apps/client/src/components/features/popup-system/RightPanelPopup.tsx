@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import React from 'react';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
-import { SummaryPopupContent } from './SummaryPopupContent.tsx';
+import { SummaryPopupContent } from './SummaryPopupContent';
 
 interface RightPanelPopupProps {
   isOpen: boolean;

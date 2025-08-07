@@ -43,11 +43,11 @@ import {
   Transcript,
 } from "@/types";
 import logger from '@shared/utils/logger';
-import { useAuth } from './AuthContext.tsx';
+import { useAuth } from './AuthContext';
 import {
   TranscriptProvider,
   useTranscript,
-} from './contexts/TranscriptContext.tsx';
+} from './contexts/TranscriptContext';
 // Define Language type
 export type Language = "en" | "fr" | "zh" | "ru" | "ko" | "vi";
 

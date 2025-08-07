@@ -19,7 +19,7 @@ import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
 import logger from '@shared/utils/logger';
-import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper.ts';
+import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
 
 interface VoicePrompt {
   service: string;

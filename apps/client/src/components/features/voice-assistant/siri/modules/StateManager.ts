@@ -33,7 +33,7 @@ export interface ExternalVisualState {
 }
 
 // ✅ FIXED: Import missing types
-import type { DebugManager } from './DebugManager.ts';
+import type { DebugManager } from './DebugManager';
 
 export class StateManager {
   private state: VisualState;

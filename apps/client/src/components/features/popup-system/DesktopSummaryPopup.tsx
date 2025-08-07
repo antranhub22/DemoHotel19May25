@@ -1,7 +1,7 @@
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 import { DebugLog } from '../debug/DebugWrapper';
-import { SummaryPopupContent } from './SummaryPopupContent.tsx';
+import { SummaryPopupContent } from './SummaryPopupContent';
 
 // Desktop Summary Popup Component - Similar to MobileSummaryPopup but for desktop layout
 export const DesktopSummaryPopup = () => {

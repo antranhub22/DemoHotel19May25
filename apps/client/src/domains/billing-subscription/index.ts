@@ -391,7 +391,7 @@ import type {
   BillingError,
   BillingNotification,
   BillingWebhookEvent,
-} from './types/billing.types.ts';
+} from './types/billing.types';
 
 // ============================================
 // FEATURE FLAGS & CONSTANTS

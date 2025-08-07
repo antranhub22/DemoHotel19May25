@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useMemo } from 'react';
-import { useSiriAnimation } from './hooks/useSiriAnimation.ts';
+import { useSiriAnimation } from './hooks/useSiriAnimation';
 
 interface SimpleMobileSiriVisualProps {
   isListening: boolean;

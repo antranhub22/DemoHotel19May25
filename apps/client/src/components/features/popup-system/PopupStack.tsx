@@ -1,6 +1,6 @@
 import React from 'react';
 import { PopupState } from '@/context/PopupContext';
-import { PopupCard } from './PopupCard.tsx';
+import { PopupCard } from './PopupCard';
 import styles from './PopupStack.module.css';
 
 interface PopupStackProps {

@@ -5,10 +5,10 @@ import { Language } from "@/types/interface1.types";
 import logger from '@shared/utils/logger';
 import { useEffect } from 'react';
 import "../../../../styles/voice-interface.css";
-import { SiriButtonVisual } from './components/SiriButtonVisual.tsx';
-import { useSiriButtonEvents } from './hooks/useSiriButtonEvents.ts';
-import { useSiriButtonState } from './hooks/useSiriButtonState.ts';
-import { useSiriButtonVisual } from './hooks/useSiriButtonVisual.ts';
+import { SiriButtonVisual } from './components/SiriButtonVisual';
+import { useSiriButtonEvents } from './hooks/useSiriButtonEvents';
+import { useSiriButtonState } from './hooks/useSiriButtonState';
+import { useSiriButtonVisual } from './hooks/useSiriButtonVisual';
 
 interface SiriCallButtonProps {
   isListening: boolean;
