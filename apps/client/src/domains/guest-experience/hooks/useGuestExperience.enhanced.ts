@@ -5,7 +5,7 @@
  */
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import { useCallback, useEffect, useState } from "react";
 
 // ✅ NEW: SaaS Provider integration
@@ -84,7 +84,7 @@ export const useEnhancedGuestExperience = () => {
     if (!currentTenant) return;
 
     try {
-      const currentUsage = await stats();
+      const currentUsage = await stats;
       const limits = currentTenant.limits;
 
       const remainingMinutes = Math.max(
@@ -112,7 +112,9 @@ export const useEnhancedGuestExperience = () => {
         warningMessage,
       });
 
-      logger.debug(`[EnhancedGuestExperience] Usage status updated - canMakeCalls: ${canMakeCalls}, remainingMinutes: ${remainingMinutes}, remainingCalls: ${remainingCalls}`);
+      logger.debug(
+        `[EnhancedGuestExperience] Usage status updated - canMakeCalls: ${canMakeCalls}, remainingMinutes: ${remainingMinutes}, remainingCalls: ${remainingCalls}`,
+      );
     } catch (error) {
       logger.error(
         "[EnhancedGuestExperience] Error updating usage status:",
@@ -141,7 +143,9 @@ export const useEnhancedGuestExperience = () => {
       }),
     );
 
-    logger.debug(`[EnhancedGuestExperience] Journey initialized with tenant context - tenantId: ${currentTenant.id}, isFirstTime: ${journeyData.isFirstTime}`);
+    logger.debug(
+      `[EnhancedGuestExperience] Journey initialized with tenant context - tenantId: ${currentTenant.id}, isFirstTime: ${journeyData.isFirstTime}`,
+    );
   }, [dispatch, currentTenant]);
 
   // ✅ ENHANCED: Language selection with tenant context
@@ -170,7 +174,9 @@ export const useEnhancedGuestExperience = () => {
       );
       dispatch(setLanguage(language));
 
-      logger.debug(`[EnhancedGuestExperience] Language selected - language: ${language}, tenantId: ${currentTenant.id}`);
+      logger.debug(
+        `[EnhancedGuestExperience] Language selected - language: ${language}, tenantId: ${currentTenant.id}`,
+      );
     },
     [dispatch, currentTenant, canAccess, getAvailability],
   );
@@ -227,18 +233,18 @@ export const useEnhancedGuestExperience = () => {
           );
 
         // ✅ NEW: Track usage event
-        await trackUsage("voice_call_started", {
-          callId: callSession.id,
-          language,
-          timestamp: new Date(),
-        });
+        // await trackUsage("voice_call_started", {
+        //   callId: callSession.id,
+        //   language,
+        //   timestamp: new Date(),
+        // });
 
         // Start the call
         dispatch(
           startVoiceCall({
             callId: callSession.id,
             language,
-            startTime: callSession.startTime,
+            // startTime: callSession.startTime,
             serviceContext: enhancedContext,
           }),
         );
@@ -287,11 +293,11 @@ export const useEnhancedGuestExperience = () => {
           );
 
         // ✅ NEW: Track usage event with duration
-        await trackUsage("voice_call_ended", {
-          callId: currentCallSession.id,
-          duration: callDuration,
-          timestamp: new Date(),
-        });
+        // await trackUsage("voice_call_ended", {
+        //   callId: currentCallSession.id,
+        //   duration: callDuration,
+        //   timestamp: new Date(),
+        // });
 
         // Create enhanced call summary if summary provided
         if (summary) {
@@ -324,7 +330,7 @@ export const useEnhancedGuestExperience = () => {
           endVoiceCall({
             endTime: new Date(),
             duration: callDuration,
-            summary: typeof summary === 'string' ? { text: summary, confidence: 0.8 } : summary,
+            summary: summary,
           }),
         );
 
@@ -341,7 +347,7 @@ export const useEnhancedGuestExperience = () => {
       dispatch,
       currentCallSession,
       currentTenant,
-      trackUsage,
+      // trackUsage,
       updateUsageStatus,
     ],
   );

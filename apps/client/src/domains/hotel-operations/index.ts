@@ -1,25 +1,4 @@
-
-// Basic type definitions - TODO: Move to dedicated type files
-interface Room {
-  id: string;
-  number: string;
-  type: string;
-  status: string;
-}
-
-interface HousekeepingTask {
-  id: string;
-  roomId: string;
-  type: string;
-  status: string;
-}
-
-interface ServiceRequest {
-  id: string;
-  type: string;
-  description: string;
-  status: string;
-}
+// Using consolidated types from common.types.ts
 
 /**
  * Hotel Operations Domain - Main Entry Point
@@ -82,10 +61,10 @@ export type {
   RoomCondition,
   RoomFeature,
   RoomFilters,
+  RoomsResponse,
   RoomStatus,
   RoomType,
   RoomView,
-  RoomsResponse,
   SecurityLevel,
   Supplier,
   TaskPriority,
@@ -93,8 +72,8 @@ export type {
   UpdateHousekeepingTaskPayload,
   UpdateMaintenanceRequestPayload,
   UpdateRoomPayload,
-  UsageFrequency
-} from './types/hotelOperations.types.ts';
+  UsageFrequency,
+} from "./types/hotelOperations.types.ts";
 
 // ========================================
 // Redux Store
@@ -115,8 +94,8 @@ export {
   fetchInventoryItems,
   fetchMaintenanceRequests,
   fetchRoomById,
-  fetchRoomTypes,
   fetchRooms,
+  fetchRoomTypes,
   optimisticUpdateRoom,
   optimisticUpdateTask,
   resetHotelOperations,
@@ -136,9 +115,9 @@ export {
   selectMaintenanceRequests,
   selectOccupiedRooms,
   selectRoomFilters,
-  selectRoomTypes,
   selectRooms,
   selectRoomsNeedingCleaning,
+  selectRoomTypes,
   selectSelectedRequest,
   selectSelectedRoom,
   selectSelectedTask,
@@ -163,11 +142,11 @@ export {
   updateInventoryStock,
   updateMaintenanceRequest,
   updateRoom,
-  updateRoomStatus
-} from './store/hotelOperationsSlice.ts';
+  updateRoomStatus,
+} from "./store/hotelOperationsSlice.ts";
 
 // Default export for reducer
-export { default as hotelOperationsReducer } from './store/hotelOperationsSlice.ts';
+export { default as hotelOperationsReducer } from "./store/hotelOperationsSlice.ts";
 
 // ========================================
 // Services
@@ -447,7 +426,7 @@ export const getTaskStatusColor = (status: string): string => {
 export const getMaintenancePriorityColor = (priority: string): string => {
   return (
     MAINTENANCE_PRIORITY_COLORS[
-    priority as keyof typeof MAINTENANCE_PRIORITY_COLORS
+      priority as keyof typeof MAINTENANCE_PRIORITY_COLORS
     ] || MAINTENANCE_PRIORITY_COLORS["medium"]
   );
 };
@@ -500,9 +479,7 @@ export const calculateOccupancyRate = (rooms: any[]): number => {
 /**
  * Calculate housekeeping efficiency
  */
-export const calculateHousekeepingEfficiency = (
-  tasks: any[],
-): number => {
+export const calculateHousekeepingEfficiency = (tasks: any[]): number => {
   if (tasks.length === 0) return 0;
   const completedTasks = tasks.filter(
     (task) => task.status === "completed",
@@ -658,9 +635,7 @@ export const generateTaskSummary = (task: any): string => {
 /**
  * Generate maintenance request summary
  */
-export const generateMaintenanceRequestSummary = (
-  request: any,
-): string => {
+export const generateMaintenanceRequestSummary = (request: any): string => {
   return `${request.title} - ${request.location}: ${request.description.substring(0, 100)}${request.description.length > 100 ? "..." : ""}`;
 };
 

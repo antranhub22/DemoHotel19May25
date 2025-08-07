@@ -1,35 +1,12 @@
-
-// Basic type definitions - TODO: Move to dedicated type files
-interface Room {
-  id: string;
-  number: string;
-  type: string;
-  status: string;
-}
-
-interface HousekeepingTask {
-  id: string;
-  roomId: string;
-  type: string;
-  status: string;
-}
-
-interface ServiceRequest {
-  id: string;
-  type: string;
-  description: string;
-  status: string;
-}
+// Using consolidated types from common.types.ts
 
 /**
  * Hotel Operations Custom Hooks
  * Main hooks for hotel operations functionality
  */
 
-import type { HousekeepingTask } from '../types/common.types';
-import type { Room } from '../types/common.types';
-import { useCallback, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useCallback, useEffect } from "react";
 import { hotelOperationsService } from "../services/hotelOperationsService";
 import {
   addHotelOperationsUpdate,
@@ -93,6 +70,7 @@ import {
   updateRoom,
   updateRoomStatus,
 } from "../store/hotelOperationsSlice";
+import type { HousekeepingTask, Room } from "../types/common.types";
 import {
   CreateHousekeepingTaskPayload,
   CreateMaintenanceRequestPayload,
@@ -101,12 +79,10 @@ import {
   FacilityFilters,
   HotelOperationsUpdateEvent,
   HousekeepingFilters,
-  HousekeepingTask,
   InventoryFilters,
   InventoryItem,
   MaintenanceFilters,
   MaintenanceRequest,
-  Room,
   RoomFilters,
 } from "../types/hotelOperations.types";
 
@@ -147,13 +123,14 @@ export const useHotelOperations = () => {
 
   const createNewRoom = useCallback(
     (payload: CreateRoomPayload) => {
-      return dispatch(createRoom(payload));
+      return dispatch(createRoom(payload)) as any;
     },
     [dispatch],
   );
 
   const updateExistingRoom = useCallback(
-    (roomId: number, updates: Partial<any>) => { // TODO: Fix Room type definition
+    (roomId: number, updates: Partial<any>) => {
+      // TODO: Fix Room type definition
       // Optimistic update first
       dispatch(optimisticUpdateRoom({ id: roomId, updates }));
 
@@ -402,7 +379,8 @@ export const useHousekeeping = () => {
   );
 
   const updateExistingTask = useCallback(
-    (taskId: string, updates: Partial<any> ) // TODO: Fix HousekeepingTask type definition => {
+    (taskId: string, updates: Partial<any>) => {
+      // TODO: Fix HousekeepingTask type definition
       // Optimistic update first
       dispatch(optimisticUpdateTask({ id: taskId, updates }));
 

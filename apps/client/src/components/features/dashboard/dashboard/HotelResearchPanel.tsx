@@ -1,43 +1,42 @@
-import * as React from 'react';
-import type { Room } from '../types/common.types';
-import {
-  Search,
-  MapPin,
-  Phone,
-  Globe,
-  Mail,
-  Clock,
-  Star,
-  Car,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  Edit3,
-  Save,
-  X,
-  ExternalLink,
-  Hotel,
-  DollarSign,
-  Wifi,
-  Coffee,
-  Dumbbell,
-} from 'lucide-react';
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import {
+  AlertCircle,
+  Car,
+  CheckCircle2,
+  Clock,
+  Coffee,
+  DollarSign,
+  Dumbbell,
+  Edit3,
+  ExternalLink,
+  Globe,
+  Hotel,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  Save,
+  Search,
+  Star,
+  Wifi,
+  X,
+} from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
 
 // Types
 interface HotelData {
@@ -97,16 +96,16 @@ interface HotelResearchPanelProps {
 const getAmenityIcon = (amenity: string) => {
   const lowerAmenity = amenity.toLowerCase();
 
-  if (lowerAmenity.includes('wifi') || lowerAmenity.includes('internet')) {
+  if (lowerAmenity.includes("wifi") || lowerAmenity.includes("internet")) {
     return Wifi;
-  } else if (lowerAmenity.includes('parking') || lowerAmenity.includes('car')) {
+  } else if (lowerAmenity.includes("parking") || lowerAmenity.includes("car")) {
     return Car;
   } else if (
-    lowerAmenity.includes('restaurant') ||
-    lowerAmenity.includes('breakfast')
+    lowerAmenity.includes("restaurant") ||
+    lowerAmenity.includes("breakfast")
   ) {
     return Coffee;
-  } else if (lowerAmenity.includes('gym') || lowerAmenity.includes('fitness')) {
+  } else if (lowerAmenity.includes("gym") || lowerAmenity.includes("fitness")) {
     return Dumbbell;
   }
 
@@ -121,8 +120,8 @@ const ResearchForm = ({
   onSearch: (hotelName: string, location?: string) => void;
   isLoading: boolean;
 }) => {
-  const [hotelName, setHotelName] = useState('');
-  const [location, setLocation] = useState('');
+  const [hotelName, setHotelName] = useState("");
+  const [location, setLocation] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +150,7 @@ const ResearchForm = ({
                 id="hotel-name"
                 placeholder="Ví dụ: Grand Hotel Saigon"
                 value={hotelName}
-                onChange={e => setHotelName(e.target.value)}
+                onChange={(e) => setHotelName(e.target.value)}
                 required
               />
             </div>
@@ -161,7 +160,7 @@ const ResearchForm = ({
                 id="location"
                 placeholder="Ví dụ: Ho Chi Minh City"
                 value={location}
-                onChange={e => setLocation(e.target.value)}
+                onChange={(e) => setLocation(e.target.value)}
               />
             </div>
           </div>
@@ -309,8 +308,8 @@ const HotelInfoDisplay = ({
                 <Label>Tên khách sạn</Label>
                 <Input
                   value={editData.name}
-                  onChange={e =>
-                    setEditData(prev => ({ ...prev, name: e.target.value }))
+                  onChange={(e) =>
+                    setEditData((prev) => ({ ...prev, name: e.target.value }))
                   }
                 />
               </div>
@@ -318,8 +317,11 @@ const HotelInfoDisplay = ({
                 <Label>Địa chỉ</Label>
                 <Input
                   value={editData.address}
-                  onChange={e =>
-                    setEditData(prev => ({ ...prev, address: e.target.value }))
+                  onChange={(e) =>
+                    setEditData((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -327,18 +329,21 @@ const HotelInfoDisplay = ({
                 <div>
                   <Label>Điện thoại</Label>
                   <Input
-                    value={editData.phone || ''}
-                    onChange={e =>
-                      setEditData(prev => ({ ...prev, phone: e.target.value }))
+                    value={editData.phone || ""}
+                    onChange={(e) =>
+                      setEditData((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
                     }
                   />
                 </div>
                 <div>
                   <Label>Website</Label>
                   <Input
-                    value={editData.website || ''}
-                    onChange={e =>
-                      setEditData(prev => ({
+                    value={editData.website || ""}
+                    onChange={(e) =>
+                      setEditData((prev) => ({
                         ...prev,
                         website: e.target.value,
                       }))
@@ -349,9 +354,9 @@ const HotelInfoDisplay = ({
               <div>
                 <Label>Mô tả</Label>
                 <Textarea
-                  value={editData.description || ''}
-                  onChange={e =>
-                    setEditData(prev => ({
+                  value={editData.description || ""}
+                  onChange={(e) =>
+                    setEditData((prev) => ({
                       ...prev,
                       description: e.target.value,
                     }))
@@ -526,7 +531,7 @@ const HotelInfoDisplay = ({
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{room.name}</h4>
                     <Badge variant="outline">
-                      {room.price.toLocaleString('vi-VN')} VND/đêm
+                      {room.price.toLocaleString("vi-VN")} VND/đêm
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">
@@ -535,7 +540,7 @@ const HotelInfoDisplay = ({
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span>Sức chứa: {room.capacity} người</span>
                     {room.amenities.length > 0 && (
-                      <span>Tiện nghi: {room.amenities.join(', ')}</span>
+                      <span>Tiện nghi: {room.amenities.join(", ")}</span>
                     )}
                   </div>
                 </div>
@@ -579,8 +584,8 @@ const HotelInfoDisplay = ({
       {/* Last Updated */}
       {data.lastUpdated && (
         <div className="text-center text-xs text-muted-foreground">
-          Cập nhật lần cuối:{' '}
-          {new Date(data.lastUpdated).toLocaleString('vi-VN')}
+          Cập nhật lần cuối:{" "}
+          {new Date(data.lastUpdated).toLocaleString("vi-VN")}
         </div>
       )}
     </div>
@@ -588,9 +593,18 @@ const HotelInfoDisplay = ({
 };
 
 // Main Hotel Research Panel component
-export const HotelResearchPanel: React.FC<HotelResearchPanel> = ({ data, isLoading, error, onSearch, onEdit, onSave, editable = false, className = "" }) => {
+export const HotelResearchPanel: React.FC<HotelResearchPanel> = ({
+  data,
+  isLoading,
+  error,
+  onSearch,
+  onEdit,
+  onSave,
+  editable = false,
+  className = "",
+}) => {
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* Research Form */}
       {!data && <ResearchForm onSearch={onSearch} isLoading={isLoading} />}
 

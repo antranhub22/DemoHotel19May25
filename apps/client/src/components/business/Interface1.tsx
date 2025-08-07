@@ -1,33 +1,33 @@
 // React hooks
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 // Custom Hook
-import { useAssistant } from '@/context';
+import { useAssistant } from "@/context";
 
 // Types & Constants
-import { useInterface1 } from '@/hooks/useInterface1';
-import type { Language } from '@/types/interface1.types';
-import { ServiceItem } from '@/types/interface1.types';
-import logger from '@shared/utils/logger';
+import { useInterface1 } from "@/hooks/useInterface1";
+import type { Language } from "@/types/common.types";
+import { ServiceItem } from "@/types/interface1.types";
+import logger from "@shared/utils/logger";
 
 // UI Components
-import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
-import { InterfaceContainer } from '../features/voice-assistant/interface1/InterfaceContainer';
-import { InterfaceHeader } from '../features/voice-assistant/interface1/InterfaceHeader';
-import { LoadingState } from '../features/voice-assistant/interface1/LoadingState';
-import { MobileVoiceControls } from '../features/voice-assistant/interface1/MobileVoiceControls';
+import { ErrorState } from "../features/voice-assistant/interface1/ErrorState";
+import { InterfaceContainer } from "../features/voice-assistant/interface1/InterfaceContainer";
+import { InterfaceHeader } from "../features/voice-assistant/interface1/InterfaceHeader";
+import { LoadingState } from "../features/voice-assistant/interface1/LoadingState";
+import { MobileVoiceControls } from "../features/voice-assistant/interface1/MobileVoiceControls";
 import {
   addMultiLanguageNotification,
   LANGUAGE_DISPLAY_NAMES,
-} from '../features/voice-assistant/interface1/MultiLanguageNotificationHelper';
-import { RecentRequestCard } from '../features/voice-assistant/interface1/RecentRequestCard';
-import { ServiceGrid } from '../features/voice-assistant/interface1/ServiceGrid';
-import { VoiceCommandContext } from '../features/voice-assistant/interface1/VoiceCommandContext';
-import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
+} from "../features/voice-assistant/interface1/MultiLanguageNotificationHelper";
+import { RecentRequestCard } from "../features/voice-assistant/interface1/RecentRequestCard";
+import { ServiceGrid } from "../features/voice-assistant/interface1/ServiceGrid";
+import { VoiceCommandContext } from "../features/voice-assistant/interface1/VoiceCommandContext";
+import { VoiceLanguageSwitcher } from "../features/voice-assistant/interface1/VoiceLanguageSwitcher";
 
 // Import extracted components
-import { Interface1Desktop } from './Interface1Desktop';
-import { Interface1Mobile } from './Interface1Mobile';
+import { Interface1Desktop } from "./Interface1Desktop";
+import { Interface1Mobile } from "./Interface1Mobile";
 
 interface Interface1Props {
   isActive: boolean;
@@ -54,22 +54,22 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   // Add service selection state for user feedback
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(
-    null
+    null,
   );
 
   // Enhanced language change handler
   const handleLanguageChange = (newLanguage: Language) => {
     logger.debug(
       `🗣️ [Interface1] Language changed to: ${newLanguage}`,
-      'Component'
+      "Component",
     );
 
     // Add multi-language notification using helper
     addMultiLanguageNotification(
-      'languageChanged',
+      "languageChanged",
       newLanguage,
       { language: LANGUAGE_DISPLAY_NAMES[newLanguage][newLanguage] },
-      { type: 'success', duration: 4000 }
+      { type: "success", duration: 4000 },
     );
   };
 
@@ -77,7 +77,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   const handleServiceSelect = (service: ServiceItem) => {
     logger.debug(
       `🎯 [Interface1] Service selected: ${service.name}`,
-      'Component'
+      "Component",
     );
 
     // Show selected service feedback
@@ -85,17 +85,17 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
     // Add multi-language notification using helper
     addMultiLanguageNotification(
-      'serviceSelected',
+      "serviceSelected",
       language,
       { service: service.name },
       {
-        type: 'info',
+        type: "info",
         duration: 4000,
         metadata: {
           serviceName: service.name,
           serviceDescription: service.description,
         },
-      }
+      },
     );
   };
 
@@ -103,7 +103,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     async (service: ServiceItem) => {
       logger.debug(
         `🎤 [Interface1] Voice service request: ${service.name}`,
-        'Component'
+        "Component",
       );
 
       try {
@@ -112,17 +112,17 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
         // Add multi-language notification using helper
         addMultiLanguageNotification(
-          'voiceRequestStarted',
+          "voiceRequestStarted",
           language,
           { service: service.name },
           {
-            type: 'call',
+            type: "call",
             duration: 3000,
             metadata: {
               serviceName: service.name,
               language,
             },
-          }
+          },
         );
 
         // Start call with service context
@@ -130,23 +130,23 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
         logger.debug(
           `✅ [Interface1] Voice request started for: ${service.name}`,
-          'Component'
+          "Component",
         );
       } catch (error) {
         logger.error(
           `❌ [Interface1] Error starting voice request for: ${service.name}`,
-          'Component',
-          error
+          "Component",
+          error,
         );
         setSelectedService(null); // Clear on error
 
         // Add multi-language error notification using helper
         addMultiLanguageNotification(
-          'voiceRequestFailed',
+          "voiceRequestFailed",
           language,
           { service: service.name },
           {
-            type: 'error',
+            type: "error",
             duration: 5000,
             metadata: {
               serviceName: service.name,
@@ -154,15 +154,15 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
               error:
                 error instanceof Error
                   ? (error as any)?.message || String(error)
-                  : 'Unknown error',
+                  : "Unknown error",
             },
-          }
+          },
         );
 
         throw error; // Let ServiceGrid handle the error display
       }
     },
-    [language, handleCallStart]
+    [language, handleCallStart],
   );
 
   // Add call end notification with multi-language support
@@ -170,18 +170,18 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     if (!isCallStarted && selectedService) {
       // Call ended while a service was selected
       addMultiLanguageNotification(
-        'voiceCallCompleted',
+        "voiceCallCompleted",
         language,
         {},
         {
-          type: 'success',
+          type: "success",
           duration: 4000,
           metadata: {
             language,
             serviceName: selectedService.name,
-            callDuration: '2 minutes', // Would come from call context
+            callDuration: "2 minutes", // Would come from call context
           },
-        }
+        },
       );
     }
   }, [isCallStarted, selectedService?.name, language]);
@@ -236,11 +236,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       <VoiceCommandContext
         selectedService={selectedService}
         isCallActive={isCallStarted}
-        onVoicePromptReady={prompt => {
+        onVoicePromptReady={(prompt) => {
           logger.debug(
-            '🎤 [Interface1] Voice prompt ready:',
-            'Component',
-            prompt
+            "🎤 [Interface1] Voice prompt ready:",
+            "Component",
+            prompt,
           );
         }}
       />
@@ -311,17 +311,17 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
             request={recentRequest}
             onViewDetails={() => {
               logger.debug(
-                '👁️ [Interface1] View request details clicked',
-                'Component',
-                { reference: recentRequest.reference }
+                "👁️ [Interface1] View request details clicked",
+                "Component",
+                { reference: recentRequest.reference },
               );
               // TODO: Implement view details modal or navigation
             }}
             onDismiss={() => {
               logger.debug(
-                '🗑️ [Interface1] Recent request dismissed',
-                'Component',
-                { reference: recentRequest.reference }
+                "🗑️ [Interface1] Recent request dismissed",
+                "Component",
+                { reference: recentRequest.reference },
               );
               setRecentRequest(null);
             }}

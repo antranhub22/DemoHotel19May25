@@ -4,11 +4,11 @@
  * ✅ ENHANCED: Now includes tenant context, feature gating, and usage tracking
  */
 
-import type { Language } from '@shared/types';
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import type {
   CallSession,
   CallSummary,
+  Language,
   ServiceContext,
   Transcript,
 } from "../types/guestExperience.types";
@@ -87,10 +87,14 @@ export class EnhancedGuestExperienceService {
     tenantId: string,
   ): void {
     localStorage.setItem(`selectedLanguage_${tenantId}`, language);
-    logger.debug("[EnhancedGuestExperience] Language saved for tenant:", {
-      language,
-      tenantId,
-    });
+    logger.debug(
+      "[EnhancedGuestExperience] Language saved for tenant",
+      "EnhancedGuestExperience",
+      {
+        language,
+        tenantId,
+      },
+    );
   }
 
   // ===============================================
@@ -123,11 +127,15 @@ export class EnhancedGuestExperienceService {
     const allowedFeatures = featureMatrix[subscriptionPlan] || [];
     const hasAccess = allowedFeatures.includes(feature);
 
-    logger.debug("[EnhancedGuestExperience] Feature access check:", {
-      feature,
-      subscriptionPlan,
-      hasAccess,
-    });
+    logger.debug(
+      "[EnhancedGuestExperience] Feature access check",
+      "EnhancedGuestExperience",
+      {
+        feature,
+        subscriptionPlan,
+        hasAccess,
+      },
+    );
 
     return hasAccess;
   }
@@ -171,12 +179,16 @@ export class EnhancedGuestExperienceService {
   ): CallSession & { tenantId: string; trackUsage: boolean } {
     const callId = this.generateCallId();
 
-    logger.debug("[EnhancedGuestExperience] Creating enhanced call session:", {
-      callId,
-      tenantId: context.tenantId,
-      language,
-      plan: context.subscriptionPlan,
-    });
+    logger.debug(
+      "[EnhancedGuestExperience] Creating enhanced call session",
+      "EnhancedGuestExperience",
+      {
+        callId,
+        tenantId: context.tenantId,
+        language,
+        plan: context.subscriptionPlan,
+      },
+    );
 
     return {
       id: callId,
@@ -210,10 +222,14 @@ export class EnhancedGuestExperienceService {
     },
   ): Promise<void> {
     try {
-      logger.debug("[EnhancedGuestExperience] Tracking usage event:", {
-        event,
-        data,
-      });
+      logger.debug(
+        "[EnhancedGuestExperience] Tracking usage event",
+        "EnhancedGuestExperience",
+        {
+          event,
+          data,
+        },
+      );
 
       // This would integrate with backend usage tracking
       const response = await fetch("/api/usage/track", {
@@ -267,12 +283,16 @@ export class EnhancedGuestExperienceService {
     const durationMinutes = Math.ceil(callDuration / 60);
     const cost = durationMinutes * costPerMinute;
 
-    logger.debug("[EnhancedGuestExperience] Enhanced call summary created:", {
-      callId,
-      duration: callDuration,
-      cost,
-      plan: context.subscriptionPlan,
-    });
+    logger.debug(
+      "[EnhancedGuestExperience] Enhanced call summary created",
+      "EnhancedGuestExperience",
+      {
+        callId,
+        duration: callDuration,
+        cost,
+        plan: context.subscriptionPlan,
+      },
+    );
 
     return {
       ...summary,

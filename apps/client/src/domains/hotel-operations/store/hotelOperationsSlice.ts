@@ -1,35 +1,13 @@
-
-// Basic type definitions - TODO: Move to dedicated type files
-interface Room {
-  id: string;
-  number: string;
-  type: string;
-  status: string;
-}
-
-interface HousekeepingTask {
-  id: string;
-  roomId: string;
-  type: string;
-  status: string;
-}
-
-interface ServiceRequest {
-  id: string;
-  type: string;
-  description: string;
-  status: string;
-}
+// Using consolidated types from common.types.ts
 
 /**
  * Hotel Operations Redux Slice
  * Domain-driven state management for hotel operations
  */
 
-import type { HousekeepingTask } from '../types/common.types';
-import type { Room } from '../types/common.types';
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { hotelOperationsService } from "../services/hotelOperationsService";
+import type { HousekeepingTask, Room } from "../types/common.types";
 import {
   CreateHousekeepingTaskPayload,
   CreateMaintenanceRequestPayload,
@@ -42,14 +20,12 @@ import {
   HotelOperationsUpdateEvent,
   HousekeepingFilters,
   HousekeepingResponse,
-  HousekeepingTask,
   InventoryFilters,
   InventoryItem,
   InventoryResponse,
   MaintenanceFilters,
   MaintenanceRequest,
   MaintenanceResponse,
-  Room,
   RoomFilters,
   RoomsResponse,
   RoomType,

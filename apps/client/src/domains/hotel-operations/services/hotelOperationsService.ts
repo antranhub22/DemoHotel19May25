@@ -1,33 +1,11 @@
-
-// Basic type definitions - TODO: Move to dedicated type files
-interface Room {
-  id: string;
-  number: string;
-  type: string;
-  status: string;
-}
-
-interface HousekeepingTask {
-  id: string;
-  roomId: string;
-  type: string;
-  status: string;
-}
-
-interface ServiceRequest {
-  id: string;
-  type: string;
-  description: string;
-  status: string;
-}
+// Using consolidated types from common.types.ts
 
 /**
  * Hotel Operations Service
  * Service layer for hotel operations API interactions
  */
 
-import type { HousekeepingTask } from '../types/common.types';
-import type { Room } from '../types/common.types';
+import type { HousekeepingTask, Room } from "../types/common.types";
 import {
   CreateHousekeepingTaskPayload,
   CreateMaintenanceRequestPayload,
@@ -38,14 +16,12 @@ import {
   HotelOperationsAnalytics,
   HousekeepingFilters,
   HousekeepingResponse,
-  HousekeepingTask,
   InventoryFilters,
   InventoryItem,
   InventoryResponse,
   MaintenanceFilters,
   MaintenanceRequest,
   MaintenanceResponse,
-  Room,
   RoomFilters,
   RoomsResponse,
   RoomType,
@@ -194,7 +170,8 @@ export class HotelOperationsService {
   /**
    * Update an existing room
    */
-  async updateRoom(roomId: number, updates: Partial<any>): Promise<Room> { // TODO: Fix Room type definition
+  async updateRoom(roomId: number, updates: Partial<any>): Promise<Room> {
+    // TODO: Fix Room type definition
     updates.updatedAt = new Date().toISOString();
 
     const response = await fetch(`${API_BASE}/hotel/rooms/${roomId}`, {
@@ -332,8 +309,8 @@ export class HotelOperationsService {
    */
   async updateHousekeepingTask(
     taskId: string,
-    updates: Partial<any> ) // TODO: Fix HousekeepingTask type definition,
-  : Promise<HousekeepingTask> {
+    updates: Partial<any>, // TODO: Fix HousekeepingTask type definition,
+  ): Promise<HousekeepingTask> {
     updates.updatedAt = new Date().toISOString();
 
     // Auto-update status based on progress

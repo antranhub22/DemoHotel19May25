@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import { Crown, Lock, Sparkles, Zap } from "lucide-react";
 import React from "react";
 import { useFeatureGating } from "../hooks/useTenantManagement";
@@ -55,7 +55,11 @@ const FEATURE_NAMES: Record<string, string> = {
 };
 
 // Upgrade prompt component
-const UpgradePrompt: React.FC<UpgradePrompt> = ({ feature, requiredPlan, onUpgradeClick }) => {
+const UpgradePrompt: React.FC<UpgradePrompt> = ({
+  feature,
+  requiredPlan,
+  onUpgradeClick,
+}) => {
   const planConfig = PLAN_CONFIG[requiredPlan];
   const Icon = planConfig.icon;
   const featureName = FEATURE_NAMES[feature] || feature;
@@ -75,7 +79,9 @@ const UpgradePrompt: React.FC<UpgradePrompt> = ({ feature, requiredPlan, onUpgra
       </CardHeader>
       <CardContent className="text-center pt-0">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Badge variant="default" className="flex items-center gap-1"> {/* TODO: Fix variant type */}
+          <Badge variant="default" className="flex items-center gap-1">
+            {" "}
+            {/* TODO: Fix variant type */}
             <Icon className="w-3 h-3" />
             {planConfig.name}
           </Badge>
@@ -87,7 +93,7 @@ const UpgradePrompt: React.FC<UpgradePrompt> = ({ feature, requiredPlan, onUpgra
             <Crown className="w-4 h-4 mr-2" />
             Upgrade to {planConfig.name}
           </Button>
-        }
+        )}
 
         <p className="text-xs text-gray-400 mt-3">
           Unlock this feature and many more with an upgrade
@@ -293,10 +299,12 @@ export const FeatureList: React.FC<FeatureListProps> = ({
                 className="mr-2"
               />
               {!hasAccess && planConfig && (
-                <Badge variant={"default" as const} ) // TODO: Fix variant type className="text-xs">
+                <Badge variant={"default" as const} className="text-xs">
+                  {" "}
+                  {/* TODO: Fix variant type */}
                   {planConfig.name}
                 </Badge>
-              }
+              )}
               {!hasAccess && onUpgradeClick && (
                 <Button
                   size="sm"

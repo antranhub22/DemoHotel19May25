@@ -1,6 +1,5 @@
-import * as React from 'react';
-import type { Room } from '../types/common.types';
-import { useState } from 'react';
+import * as React from "react";
+import { useState } from "react";
 interface StaffRequestDetailModalProps {
   request: any;
   onClose: () => void;
@@ -9,14 +8,19 @@ interface StaffRequestDetailModalProps {
 }
 
 const statusOptions = [
-  'Đã ghi nhận',
-  'Đang thực hiện',
-  'Đã thực hiện và đang bàn giao cho khách',
-  'Hoàn thiện',
-  'Lưu ý khác',
+  "Đã ghi nhận",
+  "Đang thực hiện",
+  "Đã thực hiện và đang bàn giao cho khách",
+  "Hoàn thiện",
+  "Lưu ý khác",
 ];
 
-const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({ request, onClose, onStatusChange, onOpenMessage }) => {
+const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({
+  request,
+  onClose,
+  onStatusChange,
+  onOpenMessage,
+}) => {
   const [pendingStatus, setPendingStatus] = useState<string>(request.status);
   if (!request) {
     return null;
@@ -54,9 +58,9 @@ const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({ request, o
             <select
               className="border rounded px-2 py-1 text-xs"
               value={pendingStatus}
-              onChange={e => setPendingStatus(e.target.value)}
+              onChange={(e) => setPendingStatus(e.target.value)}
             >
-              {statusOptions.map(opt => (
+              {statusOptions.map((opt) => (
                 <option key={opt} value={opt}>
                   {opt}
                 </option>
@@ -64,7 +68,7 @@ const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({ request, o
             </select>
           </div>
           <div>
-            <b>Notes:</b> {request.notes || '-'}
+            <b>Notes:</b> {request.notes || "-"}
           </div>
         </div>
         <div className="flex gap-2 justify-end">

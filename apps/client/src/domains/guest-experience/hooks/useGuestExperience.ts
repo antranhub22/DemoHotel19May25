@@ -4,10 +4,9 @@
  * Provides easy-to-use interface for components
  */
 
-import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useCallback } from "react";
 import { GuestExperienceService } from "../services/guestExperienceService";
-import type { Language } from '@shared/types';
 import {
   addModelOutput,
   addTranscript,
@@ -38,7 +37,7 @@ import {
   setVoiceInteractionLoading,
   startVoiceCall,
   updateMicLevel,
-} from '../store/guestJourneySlice';
+} from "../store/guestJourneySlice";
 import type {
   CallSummary,
   Language,
