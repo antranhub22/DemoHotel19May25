@@ -664,8 +664,8 @@ const hotelOperationsSlice = createSlice({
     // Optimistic Updates
     optimisticUpdateRoom: (
       state,
-      action: PayloadAction<{ id: number; updates: Partial<any> ) // TODO: Fix Room type definition }>,
-     => {
+      action: PayloadAction<{ id: number; updates: Partial<any> }>, // TODO: Fix Room type definition
+    ) => {
       const { id, updates } = action.payload;
       const roomIndex = state.rooms.findIndex((r) => r.id === id);
       if (roomIndex !== -1) {

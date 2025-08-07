@@ -194,7 +194,7 @@ export class HotelOperationsService {
   /**
    * Update an existing room
    */
-  async updateRoom(roomId: number, updates: Partial<any> ) // TODO: Fix Room type definition: Promise<Room> {
+  async updateRoom(roomId: number, updates: Partial<any>): Promise<Room> { // TODO: Fix Room type definition
     updates.updatedAt = new Date().toISOString();
 
     const response = await fetch(`${API_BASE}/hotel/rooms/${roomId}`, {

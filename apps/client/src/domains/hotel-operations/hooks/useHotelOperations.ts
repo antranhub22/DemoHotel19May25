@@ -153,7 +153,7 @@ export const useHotelOperations = () => {
   );
 
   const updateExistingRoom = useCallback(
-    (roomId: number, updates: Partial<any> ) // TODO: Fix Room type definition => {
+    (roomId: number, updates: Partial<any>) => { // TODO: Fix Room type definition
       // Optimistic update first
       dispatch(optimisticUpdateRoom({ id: roomId, updates }));
 

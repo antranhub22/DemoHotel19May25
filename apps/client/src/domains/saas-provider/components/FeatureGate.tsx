@@ -75,7 +75,7 @@ const UpgradePrompt: React.FC<UpgradePrompt> = ({ feature, requiredPlan, onUpgra
       </CardHeader>
       <CardContent className="text-center pt-0">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Badge variant={"default" as const} ) // TODO: Fix variant type className="flex items-center gap-1">
+          <Badge variant="default" className="flex items-center gap-1"> {/* TODO: Fix variant type */}
             <Icon className="w-3 h-3" />
             {planConfig.name}
           </Badge>

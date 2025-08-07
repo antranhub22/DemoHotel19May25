@@ -182,13 +182,15 @@ interface NotificationItemProps {
   // TODO: Add specific props for NotificationItem
 }
 
-const NotificationItem: React.FC<NotificationItemPropsProps> = ({
+interface NotificationItemProps {
   notification: Notification;
   onClose: (id: string) => void;
   isExiting?: boolean;
   index?: number;
   isMobile?: boolean;
-}> = ({
+}
+
+const NotificationItem: React.FC<NotificationItemProps> = ({
   notification,
   onClose,
   isExiting = false,

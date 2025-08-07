@@ -40,7 +40,7 @@ interface UsageAlertBannerProps {
   // TODO: Add specific props for UsageAlertBanner
 }
 
-const UsageAlertBanner: React.FC<UsageAlertBannerPropsProps> = ({ usageStatus: any }> = ({ usageStatus }) => {
+const UsageAlertBanner: React.FC<UsageAlertBannerProps> = ({ usageStatus }) => {
   if (!usageStatus?.warningMessage) return null;
 
   return (

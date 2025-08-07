@@ -42,9 +42,7 @@ interface GlobalPopupSystemProviderProps {
   // TODO: Add specific props for GlobalPopupSystemProvider
 }
 
-const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderPropsProps> = ({ children: React.ReactNode }> = ({
-  children,
-}) => {
+const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({ children }) => {
   const popupSystem = usePopup();
 
   // ✅ FIX: Move useConfirmHandler inside PopupProvider to avoid context error

@@ -38,14 +38,16 @@ interface MenuItemComponentProps {
   // TODO: Add specific props for MenuItemComponent
 }
 
-const MenuItemComponent: React.FC<MenuItemComponentPropsProps> = ({
+interface MenuItemComponentProps {
   item: MenuItem;
   isActive: boolean;
   hasChildren: boolean;
   isExpanded: boolean;
   onToggle: () => void;
   depth: number;
-}> = ({ item, isActive, hasChildren, isExpanded, onToggle, depth }) => {
+}
+
+const MenuItemComponent: React.FC<MenuItemComponentProps> = ({ item, isActive, hasChildren, isExpanded, onToggle, depth }) => {
   const { canAccess } = usePermissionCheck();
 
   // Check if user has permission for this menu item
