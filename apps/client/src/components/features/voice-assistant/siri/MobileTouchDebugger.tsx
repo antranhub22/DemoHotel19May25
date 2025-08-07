@@ -11,7 +11,7 @@ interface MobileTouchDebuggerProps {
   enabled?: boolean;
 }
 
-export const MobileTouchDebugger: React.FC<MobileTouchDebugger> = ({ containerId, onCallStart, onCallEnd, isListening, enabled = true }) => {
+export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({ containerId, onCallStart, onCallEnd, isListening, enabled = true }) => {
   const [isVisible, setIsVisible] = useState(false);
   const { debugInfo, testCallStart, testCallEnd, isEnabled } = useTouchDebugger(
     {
@@ -62,3 +62,8 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebugger> = ({ containerId
     </>
   );
 };
+
+interface MobileTouchDebuggerProps {
+  enabled?: boolean;
+  className?: string;
+}

@@ -13,7 +13,7 @@ interface DebugWrapperProps {
  *   <DebugButtons />
  * </DebugWrapper>
  */
-export const DebugWrapper: React.FC<DebugWrapper> = ({ children, fallback = null }) => {
+export const DebugWrapper: React.FC<DebugWrapperProps> = ({ children, fallback = null }) => {
   const isDevelopment = import.meta.env.DEV;
 
   if (!isDevelopment) {

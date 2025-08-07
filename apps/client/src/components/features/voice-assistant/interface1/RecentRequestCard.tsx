@@ -1,4 +1,4 @@
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import {
   Calendar,
   CheckCircle,
@@ -63,7 +63,7 @@ const statusConfig = {
   },
 };
 
-export const RecentRequestCard: React.FC<RecentRequestCard> = ({ request, onViewDetails, onDismiss }) => {
+export const RecentRequestCard: React.FC<RecentRequestCardProps> = ({ request, onViewDetails, onDismiss }) => {
   const config = statusConfig[request.status];
   const StatusIcon = config.icon;
 

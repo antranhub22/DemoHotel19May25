@@ -116,7 +116,7 @@ interface HotelProviderProps {
 
 // Xóa hoàn toàn HotelConfigLoader và mọi logic liên quan đến loading/error ở cấp context
 // Trong HotelProvider, chỉ cần:
-export const HotelProvider: React.FC<HotelProvider> = ({ children }) => {
+export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   logger.debug('[DEBUG] HotelProvider rendered', 'Component');
   const hotelConfigHook = useHotelConfiguration();
   const { config, isLoading, error, reload } = hotelConfigHook;
@@ -249,3 +249,8 @@ export const useHotelVapi = () => {
 export type { HotelContextValue };
 
 export default HotelProvider;
+
+interface HotelProviderProps {
+  children: React.ReactNode;
+  tenantId?: string;
+}

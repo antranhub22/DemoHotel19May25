@@ -5,7 +5,7 @@ interface ErrorStateProps {
   error: string;
 }
 
-export const ErrorState: React.FC<ErrorState> = ({ error }) => {
+export const ErrorState: React.FC<ErrorStateProps> = ({ error }) => {
   return (
     <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"

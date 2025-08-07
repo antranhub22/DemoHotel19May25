@@ -407,7 +407,7 @@ const TIME_RANGE_OPTIONS = [
 ];
 
 // Main Usage Chart component
-export const UsageChart: React.FC<UsageChart> = ({ title, description, data, type, loading = false, error = null, timeRange = '30d', onTimeRangeChange, onRefresh, onExport, className = "", height = 300, showLegend: _showLegend = true, showGrid = true, animated = true, interactive: _interactive = true, format = 'number', threshold }) => {
+export const UsageChart: React.FC<UsageChartProps> = ({ title, description, data, type, loading = false, error = null, timeRange = '30d', onTimeRangeChange, onRefresh, onExport, className = "", height = 300, showLegend: _showLegend = true, showGrid = true, animated = true, interactive: _interactive = true, format = 'number', threshold }) => {
   if (loading) {
     return <ChartSkeleton height={height} />;
   }

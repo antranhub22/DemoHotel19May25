@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-import type { ServiceRequest } from '../types/common.types';
+import type { ServiceRequest } from '@/types/common.types';
 import type { Language } from '@shared/types';
 import React, {
   createContext,

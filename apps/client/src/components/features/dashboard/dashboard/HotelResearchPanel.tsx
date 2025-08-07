@@ -593,7 +593,7 @@ const HotelInfoDisplay = ({
 };
 
 // Main Hotel Research Panel component
-export const HotelResearchPanel: React.FC<HotelResearchPanel> = ({
+export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
   data,
   isLoading,
   error,

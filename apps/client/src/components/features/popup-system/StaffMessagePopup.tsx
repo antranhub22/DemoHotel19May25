@@ -14,7 +14,7 @@ interface StaffMessagePopupProps {
   loading?: boolean;
 }
 
-const StaffMessagePopup: React.FC<StaffMessagePopup> = ({ messages, onSend, onClose, loading = false }) => {
+const StaffMessagePopup: React.FC<StaffMessagePopupProps> = ({ messages, onSend, onClose, loading = false }) => {
   const [input, setInput] = useState('');
 
   const handleSend = () => {

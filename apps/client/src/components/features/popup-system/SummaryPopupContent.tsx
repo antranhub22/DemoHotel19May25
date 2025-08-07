@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Room } from "../types/common.types";
+import type { Room } from "@/types/common.types";
 import { useAssistant } from "@/context";
 import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
 import { useSummaryProgression } from "@/hooks/useSummaryProgression";

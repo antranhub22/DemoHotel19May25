@@ -459,7 +459,7 @@ const DynamicSidebar = ({
 };
 
 // Main unified dashboard layout component
-export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayout> = ({ children }) => {
+export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const role = user?.role || "front-desk";

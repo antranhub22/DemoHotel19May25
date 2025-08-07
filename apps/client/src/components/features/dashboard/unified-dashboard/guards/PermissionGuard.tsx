@@ -18,7 +18,7 @@ interface NoPermissionMessageProps {
 }
 
 // Default no permission message component
-const NoPermissionMessage: React.FC<NoPermissionMessage> = ({ requiredPermission, requiredRole, variant = "default" }) => {
+const NoPermissionMessage: React.FC<NoPermissionMessageProps> = ({ requiredPermission, requiredRole, variant = "default" }) => {
   if (variant === 'minimal') {
     return (
       <div className="text-gray-400 text-sm flex items-center gap-2">

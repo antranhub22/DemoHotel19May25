@@ -8,7 +8,7 @@ interface SummaryPopupProps {
   onClose: () => void;
 }
 
-export const SummaryPopup: React.FC<SummaryPopup> = ({ isOpen, onClose }) => {
+export const SummaryPopup: React.FC<SummaryPopupProps> = ({ isOpen, onClose }) => {
   const { showSummary, removePopup } = usePopup();
   const [isVisible, setIsVisible] = useState(false);
 

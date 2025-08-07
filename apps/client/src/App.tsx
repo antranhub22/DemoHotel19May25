@@ -1,4 +1,3 @@
-import * as React from 'react';
 import VoiceAssistant from "@/components/business/VoiceAssistant";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
@@ -10,6 +9,7 @@ import {
 } from "@/context/AuthContext";
 import { HotelProvider } from "@/context/HotelContext";
 import { RefactoredAssistantProvider } from "@/context/RefactoredAssistantContext";
+import * as React from 'react';
 
 import DummyTest from "@/debug/DummyTest";
 import ModuleTest from "@/debug/ModuleTest";
@@ -75,7 +75,7 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRoute> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 

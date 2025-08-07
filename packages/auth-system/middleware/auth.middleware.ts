@@ -185,7 +185,7 @@ export const verifyJWT = authenticateJWT;
 export const authMiddleware = {
   basic: authenticateJWT,
   adminOnly: [authenticateJWT, requireRole('admin')],
-  superAdminOnly: [authenticateJWT, requireRole('super-admin')],
+  superAdminOnly: [authenticateJWT, requireRole('super_admin')],
   managerOrHigher: [authenticateJWT, requireRole('manager')],
 
   withPermission: (module: string, action: string) => [

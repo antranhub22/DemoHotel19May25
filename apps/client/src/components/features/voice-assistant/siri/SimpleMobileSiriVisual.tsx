@@ -14,7 +14,7 @@ interface SimpleMobileSiriVisualProps {
   size?: number;
 }
 
-export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisual> = ({ isListening, volumeLevel, colors, size = "md" }) => {
+export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({ isListening, volumeLevel, colors, size = "md" }) => {
   const { ripples, finalScale } = useSiriAnimation({
     isListening,
     volumeLevel,
@@ -33,8 +33,8 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisual> = ({ isLis
       },
       outerGlow: {
         position: 'absolute' as const,
-        width: size + 40,
-        height: size + 40,
+        width: Number(size) + 40,
+        height: Number(size) + 40,
         borderRadius: '50%',
         background: `radial-gradient(circle, ${colors.glow} 0%, transparent 70%)`,
         transform: `scale(${finalScale})`,

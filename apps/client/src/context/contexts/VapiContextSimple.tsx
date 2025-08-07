@@ -55,7 +55,7 @@ interface VapiProviderProps {
   hotelConfig?: HotelConfiguration | null;
 }
 
-export const VapiProvider: React.FC<VapiProvider> = ({ children }) => {
+export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // State management
   const [isCallActive, setIsCallActive] = useState(false);
   const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(
@@ -538,3 +538,9 @@ export const VapiProvider: React.FC<VapiProvider> = ({ children }) => {
 
   return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;
 };
+
+interface VapiProviderProps {
+  children: React.ReactNode;
+  publicKey?: string;
+  assistantId?: string;
+}

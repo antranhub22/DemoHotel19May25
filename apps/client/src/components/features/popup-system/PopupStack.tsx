@@ -12,7 +12,7 @@ interface PopupStackProps {
   position?: 'top' | 'bottom' | 'center';
 }
 
-export const PopupStack: React.FC<PopupStack> = ({ popups, activePopup, maxVisible = 4, onPopupSelect, onPopupDismiss, position = 'bottom' }) => {
+export const PopupStack: React.FC<PopupStackProps> = ({ popups, activePopup, maxVisible = 4, onPopupSelect, onPopupDismiss, position = 'bottom' }) => {
   if (popups.length === 0) {
     return null;
   }

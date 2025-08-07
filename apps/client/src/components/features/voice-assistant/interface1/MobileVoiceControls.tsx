@@ -29,7 +29,7 @@ interface TouchFeedback {
   haptic: boolean;
 }
 
-export const MobileVoiceControls: React.FC<MobileVoiceControls> = ({ selectedService, isCallActive = false, onLanguageChange, className = "" }) => {
+export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({ selectedService, isCallActive = false, onLanguageChange, className = "" }) => {
   const { language } = useAssistant();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

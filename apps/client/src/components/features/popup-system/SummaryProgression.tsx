@@ -12,7 +12,7 @@ export interface SummaryProgressionProps {
   errorMessage?: string;
 }
 
-export const SummaryProgression: React.FC<SummaryProgression> = ({ status = 'idle', progress = 0, currentStep = '', totalSteps = 4, currentStepIndex = 0, estimatedTime = 30, errorMessage = '' }) => {
+export const SummaryProgression: React.FC<SummaryProgressionProps> = ({ status = 'idle', progress = 0, currentStep = '', totalSteps = 4, currentStepIndex = 0, estimatedTime = 30, errorMessage = '' }) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
 
   // Timer effect

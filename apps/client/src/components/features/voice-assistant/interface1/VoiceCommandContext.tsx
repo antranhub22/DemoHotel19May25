@@ -3,7 +3,7 @@ import * as React from 'react';
 
 // Type declaration for import.meta
 
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import {
   Eye,
   EyeOff,
@@ -322,7 +322,7 @@ const VOICE_PROMPTS: Record<
   },
 };
 
-export const VoiceCommandContext: React.FC<VoiceCommandContext> = ({ selectedService, isCallActive = false, onVoicePromptReady, className = "" }) => {
+export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({ selectedService, isCallActive = false, onVoicePromptReady, className = "" }) => {
   const { language } = useAssistant();
   const [currentPrompt, setCurrentPrompt] = useState<VoicePrompt | null>(null);
   const [isReady, setIsReady] = useState(false);

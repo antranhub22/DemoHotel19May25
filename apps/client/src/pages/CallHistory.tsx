@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link } from 'wouter';

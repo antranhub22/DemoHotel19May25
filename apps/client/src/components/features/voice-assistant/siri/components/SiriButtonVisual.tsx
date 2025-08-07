@@ -15,7 +15,7 @@ interface SiriButtonVisualProps {
   };
 }
 
-export const SiriButtonVisual: React.FC<SiriButtonVisual> = ({ containerId, isListening, volumeLevel, canvasReady, colors }) => {
+export const SiriButtonVisual: React.FC<SiriButtonVisualProps> = ({ containerId, isListening, volumeLevel, canvasReady, colors }) => {
   const isMobile = isMobileDevice();
   const defaultColors = {
     primary: '#5DB6B9',
@@ -85,3 +85,10 @@ export const SiriButtonVisual: React.FC<SiriButtonVisual> = ({ containerId, isLi
   // Desktop canvas is handled by SiriButton class
   return null;
 };
+
+interface SiriButtonVisualProps {
+  isListening?: boolean;
+  isLoading?: boolean;
+  isConnected?: boolean;
+  className?: string;
+}

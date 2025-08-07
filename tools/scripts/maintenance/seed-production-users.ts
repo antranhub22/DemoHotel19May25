@@ -373,7 +373,7 @@ async function seedProductionUsers(): Promise<{
         username: "admin",
         password: "admin123",
         email: "admin@minhonhotel.com",
-        role: "super-admin",
+        role: "super_admin",
         firstName: "System",
         lastName: "Administrator",
         displayName: "System Administrator",

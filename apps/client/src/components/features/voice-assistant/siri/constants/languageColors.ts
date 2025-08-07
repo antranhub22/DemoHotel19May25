@@ -28,6 +28,12 @@ export const LANGUAGE_COLORS: Record<Language, LanguageColorScheme> = {
     name: 'Français',
   },
   zh: {
+    primary: "#ff6b6b",
+    secondary: "#4ecdc4",
+    accent: "#45b7d1",
+    background: "linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)"
+  },
+  zh: {
     primary: '#FF9FF3',
     secondary: '#F8B500',
     glow: 'rgba(255, 159, 243, 0.4)',

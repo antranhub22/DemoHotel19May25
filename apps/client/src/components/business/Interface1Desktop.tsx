@@ -16,7 +16,7 @@ interface Interface1DesktopProps {
   handleRightPanelClose: () => void;
 }
 
-export const Interface1Desktop: React.FC<Interface1Desktop> = ({ isCallStarted, micLevel, showConversation, showingSummary, handleCallStart, handleCallEnd }) => {
+export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({ isCallStarted, micLevel, showConversation, showingSummary, handleCallStart, handleCallEnd }) => {
   return (
     <div className="hidden md:block">
       {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}

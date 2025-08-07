@@ -134,7 +134,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
  * - Supports nested menu items with expandable/collapsible sections
  * - Responsive design with mobile support
  */
-export const DynamicSidebar: React.FC<DynamicSidebar> = ({ isOpen, onClose, className = "" }) => {
+export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({ isOpen, onClose, className = "" }) => {
   const [location] = useLocation();
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());

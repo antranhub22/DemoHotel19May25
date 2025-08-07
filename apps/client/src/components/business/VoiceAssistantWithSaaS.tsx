@@ -37,7 +37,12 @@ interface VoiceAssistantWithSaaSProps {
 interface UsageAlertBannerProps {
   className?: string;
   children?: React.ReactNode;
-  // TODO: Add specific props for UsageAlertBanner
+  usageStatus?: {
+    canMakeCalls: boolean;
+    remainingMinutes: number;
+    remainingCalls: number;
+    warningMessage?: string;
+  };
 }
 
 const UsageAlertBanner: React.FC<UsageAlertBannerProps> = ({ usageStatus }) => {
@@ -149,15 +154,13 @@ const EnhancedLanguageSelector: React.FC = () => {
                 disabled={isDisabled}
                 className={`
                   p-3 rounded-lg border-2 transition-all relative
-                  ${
-                    isSelected
-                      ? "border-blue-500 bg-blue-50 text-blue-700"
-                      : "border-gray-200 hover:border-gray-300"
+                  ${isSelected
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-gray-200 hover:border-gray-300"
                   }
-                  ${
-                    isDisabled
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
+                  ${isDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
                   }
                 `}
               >
@@ -315,7 +318,7 @@ const EnhancedVoiceInterface: React.FC = () => {
 };
 
 // ✅ MAIN: Enhanced Voice Assistant Component
-const VoiceAssistantWithSaaS: React.FC<VoiceAssistantWithSaaS> = ({ className = "" }) => {
+const VoiceAssistantWithSaaS: React.FC<VoiceAssistantWithSaaSProps> = ({ className = "" }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();

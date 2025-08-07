@@ -24,7 +24,7 @@ interface SiriButtonContainerProps {
   _showingSummary?: boolean; // ✅ NEW: Internal state for summary display
 }
 
-export const SiriButtonContainer: React.FC<SiriButtonContainer> = ({ isCallStarted, micLevel, onCallStart, onCallEnd }) => {
+export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({ isCallStarted, micLevel, onCallStart, onCallEnd }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
 

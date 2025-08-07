@@ -407,7 +407,7 @@ const CurrentPlanCard = ({
 };
 
 // Main Feature Toggle component
-export const FeatureToggle: React.FC<FeatureToggle> = ({ features, currentPlan, onFeatureToggle, onUpgrade, className = "", showUpgradePrompts = true }) => {
+export const FeatureToggle: React.FC<FeatureToggleProps> = ({ features, currentPlan, onFeatureToggle, onUpgrade, className = "", showUpgradePrompts = true }) => {
   const [upgradeDialogPlan, setUpgradeDialogPlan] = useState<string | null>(
     null
   );

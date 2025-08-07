@@ -25,7 +25,7 @@ interface SiriCallButtonProps {
   };
 }
 
-const SiriCallButton: React.FC<SiriCallButton> = ({ isListening, volumeLevel, containerId, onCallStart, onCallEnd, colors }) => {
+const SiriCallButton: React.FC<SiriCallButtonProps> = ({ isListening, volumeLevel, containerId, onCallStart, onCallEnd, colors }) => {
   // Component render debug - Development only
   if (import.meta.env.DEV) {
     logger.debug(

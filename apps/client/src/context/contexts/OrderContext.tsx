@@ -1,5 +1,5 @@
-import type { ServiceRequest } from '../types/common.types';
-import type { Room } from '../types/common.types';
+import type { ServiceRequest } from '@/types/common.types';
+import type { Room } from '@/types/common.types';
 import {
   ActiveOrder,
   CallSummary,

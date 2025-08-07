@@ -1,4 +1,3 @@
-import type { Room } from '../types/common.types';
 import React from 'react';
 
 // ===============================================
@@ -7,8 +6,8 @@ import React from 'react';
 // This file contains DEMO UI components for testing and demonstration.
 // Production components are in separate files (e.g., SummaryPopupContent.tsx)
 
-export 
-interface ConversationDemoContentProps {
+export
+  interface ConversationDemoContentProps {
   className?: string;
   children?: React.ReactNode;
   // TODO: Add specific props for ConversationDemoContent

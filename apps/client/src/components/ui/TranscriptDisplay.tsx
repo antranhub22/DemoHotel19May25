@@ -6,7 +6,7 @@ interface TranscriptDisplayProps {
   socketUrl: string;
 }
 
-const TranscriptDisplay: React.FC<TranscriptDisplay> = ({ socketUrl }) => {
+const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ socketUrl }) => {
   const { transcript, isAssistantSpeaking } = useTranscriptSocket({
     socketUrl,
   });
@@ -24,3 +24,9 @@ const TranscriptDisplay: React.FC<TranscriptDisplay> = ({ socketUrl }) => {
 };
 
 export default TranscriptDisplay;
+
+interface TranscriptDisplayProps {
+  transcript?: string;
+  isListening?: boolean;
+  className?: string;
+}

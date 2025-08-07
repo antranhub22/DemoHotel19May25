@@ -9,7 +9,7 @@ interface RightPanelPopupProps {
   showSummary?: boolean; // New prop to control summary display
 }
 
-const RightPanelPopup: React.FC<RightPanelPopup> = ({ isOpen, onClose, showSummary = false }) => {
+const RightPanelPopup: React.FC<RightPanelPopupProps> = ({ isOpen, onClose, showSummary = false }) => {
   // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
   const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
     onSuccess: () => {

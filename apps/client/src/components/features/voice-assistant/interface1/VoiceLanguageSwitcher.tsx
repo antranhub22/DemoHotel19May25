@@ -129,7 +129,7 @@ interface VoiceLanguageSwitcherProps {
   className?: string;
 }
 
-export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcher> = ({ position = 'floating', showVoicePreview = true, onLanguageChange, className = "" }) => {
+export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({ position = 'floating', showVoicePreview = true, onLanguageChange, className = "" }) => {
   const { language, setLanguage } = useAssistant();
   const [isOpen, setIsOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);
@@ -587,3 +587,9 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcher> = ({ positio
     </div>
   );
 };
+
+interface VoiceLanguageSwitcherProps {
+  onLanguageChange?: (language: string) => void;
+  currentLanguage?: string;
+  className?: string;
+}

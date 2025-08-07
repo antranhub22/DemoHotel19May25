@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import StaffRequestDetailModal from "@/components/features/dashboard/StaffRequestDetailModal";

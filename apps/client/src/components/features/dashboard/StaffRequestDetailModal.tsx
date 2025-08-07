@@ -15,7 +15,7 @@ const statusOptions = [
   "Lưu ý khác",
 ];
 
-const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({
+const StaffRequestDetailModal: React.FC<StaffRequestDetailModalProps> = ({
   request,
   onClose,
   onStatusChange,

@@ -350,7 +350,7 @@ export class UnifiedAuthService {
    */
   static canAccessTenant(user: AuthUser, tenantId: string): boolean {
     // Super admin can access all tenants
-    if (user.role === "super-admin") {
+    if (user.role === "super_admin") {
       return true;
     }
 

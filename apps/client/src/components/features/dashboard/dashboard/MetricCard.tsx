@@ -162,7 +162,7 @@ const MetricCardSkeleton = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
 };
 
 // Main MetricCard component
-export const MetricCard: React.FC<MetricCard> = ({ title, value, description, change, icon: Icon, status, loading = false, className = "", suffix, prefix, format = 'number', size = "md", variant = "default", onClick, actionButton }) => {
+export const MetricCard: React.FC<MetricCardProps> = ({ title, value, description, change, icon: Icon, status, loading = false, className = "", suffix, prefix, format = 'number', size = "md", variant = "default", onClick, actionButton }) => {
   if (loading) {
     return <MetricCardSkeleton size={size} />;
   }

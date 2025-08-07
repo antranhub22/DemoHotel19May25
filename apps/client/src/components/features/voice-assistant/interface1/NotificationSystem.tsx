@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logger from '@shared/utils/logger';
 import {
@@ -383,7 +383,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   };
 
 // Main notification system component
-export const NotificationSystem: React.FC<NotificationSystem> = ({ position = 'top-right', maxNotifications = 5, className = "" }) => {
+export const NotificationSystem: React.FC<NotificationSystemProps> = ({ position = 'top-right', maxNotifications = 5, className = "" }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [exitingNotifications, setExitingNotifications] = useState<Set<string>>(
     new Set()

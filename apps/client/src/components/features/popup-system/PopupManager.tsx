@@ -18,7 +18,7 @@ interface PopupManagerProps {
   isMobile?: boolean; // Filter popups based on mobile/desktop
 }
 
-export const PopupManager: React.FC<PopupManager> = ({ position = "bottom", maxVisible = 4, autoCloseDelay }) => {
+export const PopupManager: React.FC<PopupManagerProps> = ({ position = "bottom", maxVisible = 4, autoCloseDelay }) => {
   const { popups, activePopup, setActivePopup, removePopup } =
     usePopupContext();
 

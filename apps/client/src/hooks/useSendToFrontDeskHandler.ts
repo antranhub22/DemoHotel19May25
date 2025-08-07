@@ -1,4 +1,4 @@
-import type { Room } from '../types/common.types';
+import type { Room } from '@/types/common.types';
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 import logger from '@shared/utils/logger';

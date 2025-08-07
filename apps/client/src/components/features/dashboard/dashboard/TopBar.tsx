@@ -331,7 +331,7 @@ const Breadcrumb = ({
 };
 
 // Main TopBar component
-export const TopBar: React.FC<TopBar> = ({ onSidebarToggle, tenantData, notifications, user, onLogout }) => {
+export const TopBar: React.FC<TopBarProps> = ({ onSidebarToggle, tenantData, notifications, user, onLogout }) => {
   // Get current page title from URL or context
   const getCurrentPageInfo = () => {
     const path = window.location.pathname;

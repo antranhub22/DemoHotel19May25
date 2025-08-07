@@ -314,7 +314,7 @@ const LanguageSelector = ({
 };
 
 // Main Assistant Config Panel component
-export const AssistantConfigPanel: React.FC<AssistantConfigPanel> = ({ config, isLoading, isSaving, error, onSave, onTest, onReset, className = "", disabled = false }) => {
+export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({ config, isLoading, isSaving, error, onSave, onTest, onReset, className = "", disabled = false }) => {
   const [editConfig, setEditConfig] = useState<AssistantConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
 

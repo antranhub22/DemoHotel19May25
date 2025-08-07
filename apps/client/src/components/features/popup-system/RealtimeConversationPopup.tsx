@@ -52,7 +52,7 @@ interface RealtimeConversationPopupProps {
   layout?: 'grid' | 'overlay'; // grid = desktop column, overlay = mobile bottom
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopup> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
   const { transcripts, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
