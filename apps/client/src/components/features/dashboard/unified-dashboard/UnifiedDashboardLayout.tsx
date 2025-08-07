@@ -28,9 +28,11 @@ import {
   PermissionGuard,
   usePermissionCheck,
 } from "@/components/features/dashboard/unified-dashboard/guards/PermissionGuard";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Avatar } from '@/components/simple-ui'
+// TODO: Migrate these manually: AvatarImage, AvatarFallback;
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+// TODO: Migrate these manually: DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 import {
   DropdownMenu,
   DropdownMenuContent,

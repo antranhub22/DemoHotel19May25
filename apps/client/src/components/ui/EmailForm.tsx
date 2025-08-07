@@ -1,19 +1,14 @@
 import React from 'react';
+// TODO: Migrate these manually: Alert, AlertDescription
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Input } from '@/components/simple-ui';
+;
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 import { useState } from 'react';
 
 interface EmailFormProps {

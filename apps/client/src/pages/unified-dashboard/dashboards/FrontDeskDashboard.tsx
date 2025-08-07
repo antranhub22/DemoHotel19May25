@@ -1,14 +1,9 @@
 import { PermissionGuard } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+;
 import {
   CheckCircle,
   ClipboardList,

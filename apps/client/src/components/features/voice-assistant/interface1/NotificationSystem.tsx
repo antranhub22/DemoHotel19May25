@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { Room } from '@/types/common.types';
 import { useIsMobile } from '@/hooks/use-mobile';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import {
   AlertCircle,
   AlertTriangle,

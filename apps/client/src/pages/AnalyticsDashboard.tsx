@@ -16,7 +16,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 
 const COLORS = [
   '#0088FE',

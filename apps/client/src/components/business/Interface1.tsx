@@ -8,7 +8,7 @@ import { useAssistant } from "@/context";
 import { useInterface1 } from "@/hooks/useInterface1";
 import type { Language } from "@/types/common.types";
 import { ServiceItem } from "@/types/interface1.types";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // UI Components
 import { ErrorState } from "../features/voice-assistant/interface1/ErrorState";

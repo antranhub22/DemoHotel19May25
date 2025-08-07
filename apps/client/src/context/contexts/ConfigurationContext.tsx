@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createContext, useContext, useState } from 'react';
 import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 
 export interface ConfigurationContextType {
   // Hotel configuration

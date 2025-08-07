@@ -1,6 +1,7 @@
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
 import type { VariantProps } from "class-variance-authority"; // ✅ FIXED: Add missing VariantProps import
 import * as React from "react";
+// TODO: Migrate these manually: toggleVariants
 import { toggleVariants } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 

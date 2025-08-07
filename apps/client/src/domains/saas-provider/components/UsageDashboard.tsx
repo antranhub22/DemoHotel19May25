@@ -4,11 +4,13 @@ import * as React from 'react';
  * Real-time usage monitoring and billing information
  */
 
+// TODO: Migrate these manually: Alert, AlertDescription
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle } from "@/components/simple-ui";;
+;
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import {

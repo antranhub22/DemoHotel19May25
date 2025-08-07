@@ -4,7 +4,7 @@ import * as React from 'react';
  * Manage feature flags and rollout strategies
  */
 
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import { useEffect, useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
 import { FeatureFlag, SubscriptionPlan } from "../../types/saasProvider.types";

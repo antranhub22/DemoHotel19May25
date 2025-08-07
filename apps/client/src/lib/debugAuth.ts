@@ -4,7 +4,7 @@
  */
 
 import { getAuthHeaders, getAuthToken } from "@/lib/authHelper";
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 
 export const debugAuth = {
   async testLogin(userType = "manager") {

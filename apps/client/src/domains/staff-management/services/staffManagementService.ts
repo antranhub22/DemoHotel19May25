@@ -3,7 +3,7 @@
  * Service layer for staff management API interactions
  */
 
-import type { Permission } from '@shared/types';
+import type { Permission } from '../../../../../../packages/shared/types';
 import {
   CreateStaffPayload,
   CreateTaskPayload,

@@ -3,7 +3,7 @@ import type { Room } from "@/types/common.types";
 import { useAssistant } from "@/context";
 import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
 import { useSummaryProgression } from "@/hooks/useSummaryProgression";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../../packages/shared/utils/logger";
 import { useEffect } from "react";
 import { SummaryProgression } from "./SummaryProgression";
 

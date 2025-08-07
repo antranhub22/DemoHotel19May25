@@ -1,7 +1,7 @@
 import { useAssistant } from "@/context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Language } from "@/types/interface1.types";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../../../packages/shared/utils/logger";
 import {
   CheckCircle,
   ChevronDown,

@@ -5,7 +5,7 @@
 
 import { store } from "@/store";
 import { GuestExperienceService } from "../services/guestExperienceService";
-import type { Language } from '@shared/types';
+import type { Language } from '../../../../../../packages/shared/types';
 import {
   initializeGuestJourney,
   selectGuestJourney,

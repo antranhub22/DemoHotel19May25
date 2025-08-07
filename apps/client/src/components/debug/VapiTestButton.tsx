@@ -4,7 +4,7 @@ import {
   VapiOfficial,
   VapiOfficialConfig,
 } from '@/lib/vapiOfficial';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 import { useState } from 'react';
 
 

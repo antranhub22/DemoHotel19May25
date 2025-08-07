@@ -1,4 +1,4 @@
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 import dictionaryData from './dictionary/dictionary.json';
 
 export interface DictionaryEntry {

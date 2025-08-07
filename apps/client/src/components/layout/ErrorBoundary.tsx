@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Component, ReactNode, ErrorInfo } from 'react';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 
 interface ErrorBoundaryState {
   hasError: boolean;

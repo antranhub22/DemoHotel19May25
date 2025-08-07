@@ -5,7 +5,7 @@ import * as React from 'react';
  * Mobile-First Guest Experience with complete SaaS integration
  */
 
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 

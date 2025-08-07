@@ -9,15 +9,11 @@ import {
   LineChart,
 } from 'lucide-react';
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -25,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
+import { LoadingSpinner } from '@/components/simple-ui';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -122,17 +118,17 @@ const ChartSkeleton = ({ height = 300 }: { height?: number }) => (
     <CardHeader>
       <div className="flex items-center justify-between">
         <div>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-96 mt-2" />
+          <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-96 mt-2 bg-gray-200 rounded animate-pulse" />
         </div>
-        <Skeleton className="h-8 w-24" />
+        <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
       </div>
     </CardHeader>
     <CardContent>
       <div className="space-y-4">
         <div className="flex justify-between">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-4 w-16" />
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
         </div>
         <Skeleton className={`w-full`} style={{ height }} />
       </div>

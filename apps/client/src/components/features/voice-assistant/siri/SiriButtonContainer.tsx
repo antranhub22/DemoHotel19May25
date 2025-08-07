@@ -5,7 +5,7 @@
 import { useAssistant } from "@/context";
 import { useSiriResponsiveSize } from "@/hooks/useSiriResponsiveSize";
 import type { Language } from "@/types/common.types";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../../../packages/shared/utils/logger";
 import React from "react";
 import { MobileTouchDebugger } from "./MobileTouchDebugger";
 import SiriCallButton from "./SiriCallButton";

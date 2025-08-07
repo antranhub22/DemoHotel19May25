@@ -1,5 +1,6 @@
 import { Shield, Lock } from 'lucide-react';
 import React from 'react';
+// TODO: Migrate these manually: Alert, AlertDescription
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
 

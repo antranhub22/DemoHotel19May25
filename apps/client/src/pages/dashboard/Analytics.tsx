@@ -13,15 +13,11 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -29,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+// TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Mock analytics data

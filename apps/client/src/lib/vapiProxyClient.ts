@@ -1,4 +1,4 @@
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 
 // ============================================
 // VAPI PROXY CLIENT - CORS BYPASS

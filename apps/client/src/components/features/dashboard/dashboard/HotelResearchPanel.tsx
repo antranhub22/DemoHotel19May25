@@ -1,16 +1,11 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Input } from '@/components/simple-ui';
+;
+import { LoadingSpinner } from '@/components/simple-ui';
+import { Input } from '@/components/simple-ui';
 import { cn } from "@/lib/utils";
 import {
   AlertCircle,
@@ -193,14 +188,14 @@ const ResearchSkeleton = () => (
   <div className="space-y-6">
     <Card>
       <CardHeader>
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-4 w-96" />
+        <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+        <div className="h-4 w-96 bg-gray-200 rounded animate-pulse" />
       </CardHeader>
       <CardContent className="space-y-4">
-        <Skeleton className="h-20 w-full" />
+        <div className="h-20 w-full bg-gray-200 rounded animate-pulse" />
         <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
+          <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
         </div>
       </CardContent>
     </Card>
@@ -208,7 +203,7 @@ const ResearchSkeleton = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
-          <Skeleton className="h-5 w-32" />
+          <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -221,7 +216,7 @@ const ResearchSkeleton = () => (
 
       <Card>
         <CardHeader>
-          <Skeleton className="h-5 w-32" />
+          <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import StaffRequestDetailModal from "@/components/features/dashboard/StaffRequestDetailModal";
 import StaffMessagePopup from "@/components/features/popup-system/StaffMessagePopup";
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 
 const statusOptions = [
   "Tất cả",

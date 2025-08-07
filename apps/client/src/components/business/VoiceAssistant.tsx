@@ -30,7 +30,7 @@ import {
 } from "@/domains/guest-experience/hooks/useGuestExperience";
 import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
 import { useConfirmHandler } from "@/hooks/useConfirmHandler";
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 import { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 

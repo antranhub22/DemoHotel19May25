@@ -2,7 +2,7 @@ import * as React from 'react';
 /// <reference types="vite/client" />
 
 import { Language } from "@/types/interface1.types";
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import { useEffect } from 'react';
 import "../../../../styles/voice-interface.css";
 import { SiriButtonVisual } from './components/SiriButtonVisual';

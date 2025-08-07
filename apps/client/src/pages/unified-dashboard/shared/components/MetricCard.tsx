@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle } from "@/components/simple-ui";;
 import { TrendingUp } from 'lucide-react';
 import React from 'react';
 import type { MetricCardProps } from '../types/dashboard';

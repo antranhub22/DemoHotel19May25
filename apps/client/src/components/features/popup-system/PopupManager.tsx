@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, Suspense } from 'react';
 import { usePopupContext } from "@/context/PopupContext";
 import { PopupStack } from './PopupStack';
-import { logger } from '@shared/utils/logger';
+import { logger } from '../../../../../../packages/shared/utils/logger';
 
 // Lazy load SummaryPopupContent for code splitting
 const LazySummaryPopupContent = React.lazy(() =>

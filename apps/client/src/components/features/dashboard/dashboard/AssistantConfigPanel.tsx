@@ -1,16 +1,12 @@
 import * as React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+;
+import { Input } from '@/components/simple-ui';
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -18,12 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { LoadingSpinner } from '@/components/simple-ui';
+;
+import { Switch } from '@/components/simple-ui';
+import { Input } from '@/components/simple-ui';
 import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import {
   AlertCircle,
   Bot,
@@ -184,15 +180,15 @@ const ConfigSkeleton = () => (
     {Array.from({ length: 4 }).map((_, i) => (
       <Card key={i}>
         <CardHeader>
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-96" />
+          <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-96 bg-gray-200 rounded animate-pulse" />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+            <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
           </div>
-          <Skeleton className="h-20 w-full" />
+          <div className="h-20 w-full bg-gray-200 rounded animate-pulse" />
         </CardContent>
       </Card>
     ))}

@@ -3,11 +3,11 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { usePermissionCheck } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { getMenuForRole } from '@shared/constants/permissions';
+import { getMenuForRole } from '../../../../../../../../packages/shared/constants/permissions';
 
 interface DynamicSidebarProps {
   isOpen: boolean;

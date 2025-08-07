@@ -14,9 +14,11 @@ import {
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Avatar } from '@/components/simple-ui'
+// TODO: Migrate these manually: AvatarFallback, AvatarImage;
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+// TODO: Migrate these manually: DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger
 import {
   DropdownMenu,
   DropdownMenuContent,

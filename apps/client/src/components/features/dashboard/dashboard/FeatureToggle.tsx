@@ -13,24 +13,13 @@ import {
   Shield,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
+// TODO: Migrate these manually: DialogDescription, DialogFooter;
+import { Switch } from '@/components/simple-ui';
 import { cn } from '@/lib/utils';
 
 // Types
@@ -533,8 +522,7 @@ export const FeatureToggle: React.FC<FeatureToggleProps> = ({ features, currentP
       )}
 
       {/* Upgrade Dialog */}
-      <Dialog
-        open={upgradeDialogPlan !== null}
+      <Modal open={upgradeDialogPlan !== null}
         onOpenChange={open => !open && setUpgradeDialogPlan(null)}
       >
         {upgradeDialogPlan && (

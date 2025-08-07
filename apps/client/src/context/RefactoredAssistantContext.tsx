@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-// import type { Language } from "@shared/types"; // Commented out due to conflict
+// import type { Language } from "../../../../packages/shared/types"; // Commented out due to conflict
 import React, {
   createContext,
   ReactNode,
@@ -41,7 +41,7 @@ import {
   ServiceRequest,
   Transcript,
 } from "@/types";
-import logger from "@shared/utils/logger";
+import logger from "../../../../packages/shared/utils/logger";
 import { useAuth } from "./AuthContext";
 import {
   TranscriptProvider,

@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/simple-ui';
 
 export default function NotFound() {
   return (

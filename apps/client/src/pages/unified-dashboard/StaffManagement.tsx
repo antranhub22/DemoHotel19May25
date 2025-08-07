@@ -17,6 +17,7 @@ import {
 import * as React from "react";
 import { useEffect, useState } from "react";
 // ✅ FIXED: Use global UserRole type from common types
+// TODO: Migrate these manually: AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,24 +29,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
+// TODO: Migrate these manually: DialogDescription;
+import { Input } from '@/components/simple-ui';
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -53,6 +45,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+// TODO: Migrate these manually: TableBody, TableCell, TableHead, TableHeader, TableRow
 import {
   Table,
   TableBody,
@@ -64,7 +57,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/common.types";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // Types
 interface StaffMember {
@@ -199,7 +192,7 @@ const StaffFormDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Modal open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -395,7 +388,7 @@ const StaffPermissionsModal = ({
   const roleConfig = roleConfigs[staff.role];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Modal open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

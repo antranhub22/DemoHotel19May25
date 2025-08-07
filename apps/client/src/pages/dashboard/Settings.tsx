@@ -15,21 +15,17 @@ import {
   Globe,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Input } from '@/components/simple-ui';
+;
+import { Switch } from '@/components/simple-ui';
+// TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import logger from '@shared/utils/logger';
+import { Input } from '@/components/simple-ui';
+import logger from '../../../../../packages/shared/utils/logger';
 
 // Mock hotel settings data
 const mockHotelSettings = {

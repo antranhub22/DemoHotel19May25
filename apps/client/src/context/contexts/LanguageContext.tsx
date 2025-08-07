@@ -1,4 +1,4 @@
-import logger from "@shared/utils/logger";
+import logger from "../../../../../packages/shared/utils/logger";
 import * as React from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 export type Language = "en" | "fr" | "zh" | "ru" | "ko" | "vi";

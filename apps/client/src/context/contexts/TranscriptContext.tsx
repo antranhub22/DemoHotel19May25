@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Transcript } from '@/types';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 import { createContext, useCallback, useContext, useState } from 'react';
 
 export interface TranscriptContextType {

@@ -10,7 +10,7 @@ import {
   useHotelConfiguration,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {

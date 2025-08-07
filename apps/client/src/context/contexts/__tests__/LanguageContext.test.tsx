@@ -1,4 +1,4 @@
-import type { Language } from '@shared/types';
+import type { Language } from '../../../../../../packages/shared/types';
 import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import React from 'react';

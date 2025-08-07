@@ -1,11 +1,5 @@
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from '@/components/ui/toast';
+import { Toast } from '@/components/simple-ui'
+// TODO: Migrate these manually: ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport;
 import { useToast } from '@/hooks/use-toast';
 
 export function Toaster() {

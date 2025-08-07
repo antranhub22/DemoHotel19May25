@@ -10,20 +10,16 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Input } from '@/components/simple-ui';
+;
+import { Divider } from '@/components/simple-ui';
+import { Switch } from '@/components/simple-ui';
+// TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/simple-ui';
 
 export const Settings: React.FC = () => {
   const [loading, setLoading] = useState(false);

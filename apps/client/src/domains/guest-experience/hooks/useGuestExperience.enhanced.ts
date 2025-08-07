@@ -5,8 +5,8 @@
  */
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import logger from "@shared/utils/logger";
 import { useCallback, useEffect, useState } from "react";
+import logger from "../../../../../../packages/shared/utils/logger";
 
 // ✅ NEW: SaaS Provider integration
 import {
@@ -315,19 +315,13 @@ export const useEnhancedGuestExperience = () => {
           dispatch(setCallSummary(enhancedSummary));
 
           logger.debug(
-            "[EnhancedGuestExperience] Enhanced call summary created:",
-            {
-              callId: currentCallSession.id,
-              duration: callDuration,
-              cost: enhancedSummary.billingData.cost,
-            },
+            `[EnhancedGuestExperience] Enhanced call summary created: callId=${currentCallSession.id}, duration=${callDuration}, cost=${enhancedSummary.billingData.cost}`
           );
         }
 
         dispatch(
           endVoiceCall({
-            endTime: new Date(),
-            duration: callDuration,
+            callId: currentCallSession.id,
             summary: summary as any,
           }),
         );

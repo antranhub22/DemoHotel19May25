@@ -4,7 +4,7 @@ import * as React from 'react';
  * Main dashboard for SaaS platform administration
  */
 
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import { useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
 import { FeatureRolloutManager } from './FeatureRolloutManager';

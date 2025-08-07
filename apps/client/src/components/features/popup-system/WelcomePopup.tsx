@@ -1,6 +1,5 @@
-import type { Room } from '@/types/common.types';
+import { Button } from '@/components/simple-ui';
 import React from 'react';
-import { Button } from '@/components/ui/button';
 
 interface WelcomePopupProps {
   onClose: () => void;

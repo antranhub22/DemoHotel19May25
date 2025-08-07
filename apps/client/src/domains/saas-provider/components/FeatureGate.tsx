@@ -3,16 +3,11 @@
  * Conditional rendering based on subscription plan and feature access
  */
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import logger from "@shared/utils/logger";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import logger from "../../../../../../packages/shared/utils/logger";
 import { Crown, Lock, Sparkles, Zap } from "lucide-react";
 import React from "react";
 import { useFeatureGating } from "../hooks/useTenantManagement";

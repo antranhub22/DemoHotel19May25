@@ -4,24 +4,15 @@ import * as React from "react";
  * Redux-based implementation replacing context and local state
  */
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
+// TODO: Migrate these manually: DialogDescription;
+import { Input } from '@/components/simple-ui';
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -29,10 +20,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from '@/components/simple-ui';
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import logger from "@shared/utils/logger";
+import logger from "../../../../../packages/shared/utils/logger";
 import {
   AlertCircle,
   Calendar,
@@ -107,7 +98,7 @@ const RequestDetailModal: React.FC<RequestDetailModal> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Modal open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Chi tiết yêu cầu #{request.id}</DialogTitle>
@@ -262,7 +253,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Modal open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>

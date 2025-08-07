@@ -11,7 +11,7 @@ import { usePopupContext } from '@/context/PopupContext';
 import { useConversationState } from '@/hooks/useConversationState';
 import { useHotelConfiguration } from '@/hooks/useHotelConfiguration';
 import { useScrollBehavior } from '@/hooks/useScrollBehavior';
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 import { createElement, useCallback, useState } from 'react';
 
 // ✅ TypeScript declaration for global updateSummaryPopup function

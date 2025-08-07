@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { usePopup } from "@/components/features/popup-system";
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../packages/shared/utils/logger';
 import { createElement, useEffect, useState } from 'react';
 
 interface SummaryPopupProps {

@@ -3,9 +3,9 @@
 // Type declaration for import.meta
 
 import type { Room } from '@/types/common.types';
-import logger from '@shared/utils/logger';
+import logger from '../../../../packages/shared/utils/logger';
 import { useCallback, useEffect, useState } from 'react';
-import type { Language } from '@shared/types';
+import type { Language } from '../../../../packages/shared/types';
 // ============================================
 // Hotel Configuration Interface
 // ============================================

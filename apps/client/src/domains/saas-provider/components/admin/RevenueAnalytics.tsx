@@ -4,7 +4,7 @@ import * as React from 'react';
  * Financial metrics, trends, and reports
  */
 
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import { useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
 

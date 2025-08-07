@@ -9,7 +9,7 @@ import * as React from 'react';
 import VoiceAssistant from "@/components/business/VoiceAssistant";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
-import { Toaster } from "@/components/ui/toaster";
+import { ToastContainer } from '@/components/simple-ui';
 import {
   AuthProvider,
   useAuth,
@@ -22,7 +22,7 @@ import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
 import VapiTest from "@/pages/VapiTest";
 import { ReduxProvider } from "@/providers/ReduxProvider";
-import logger from '@shared/utils/logger';
+import logger from '../../../packages/shared/utils/logger';
 import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter } from "react-router-dom";
 import { Link, Route, Switch, useLocation } from "wouter";

@@ -5,25 +5,15 @@ import * as React from "react";
  * invoice tracking, usage analytics, and customer portal integration
  */
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
+// TODO: Migrate these manually: DialogDescription, DialogFooter;
+;
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -31,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+// TODO: Migrate these manually: TableBody, TableCell, TableHead, TableHeader, TableRow
 import {
   Table,
   TableBody,
@@ -39,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+// TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
@@ -810,7 +802,7 @@ const BillingSubscriptionManagement: React.FC = () => {
       </Tabs>
 
       {/* Upgrade Plan Modal */}
-      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+      <Modal open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Upgrade Plan</DialogTitle>

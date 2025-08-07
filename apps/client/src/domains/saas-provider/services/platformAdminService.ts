@@ -3,8 +3,8 @@
  * Business logic for SaaS platform administration
  */
 
-import { apiClient } from "@shared/utils/apiClient";
-import logger from '@shared/utils/logger';
+import { apiClient } from "../../../../../../packages/shared/utils/apiClient";
+import logger from '../../../../../../packages/shared/utils/logger';
 import {
   FeatureFlag,
   PlatformMetrics,

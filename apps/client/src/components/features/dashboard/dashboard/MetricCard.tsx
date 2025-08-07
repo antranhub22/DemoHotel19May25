@@ -1,18 +1,16 @@
+import { Button, Card, CardContent, CardHeader } from '@/components/simple-ui';
+import { cn } from '@/lib/utils';
 import {
-  Info,
-  ExternalLink,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  CheckCircle2,
   AlertTriangle,
+  CheckCircle2,
   Clock,
+  ExternalLink,
+  Info,
+  Minus,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 
 // Types
 interface MetricCardProps {
@@ -150,16 +148,27 @@ const MetricCardSkeleton = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   return (
     <Card className={cn('animate-pulse', heights[size])}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-4 rounded" />
+        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+        <div className="h-4 w-4 bg-gray-200 rounded animate-pulse" />
       </CardHeader>
       <CardContent>
-        <Skeleton className="h-8 w-16 mb-2" />
-        <Skeleton className="h-3 w-32" />
+        <div className="h-8 w-16 mb-2 bg-gray-200 rounded animate-pulse" />
+        <div className="h-3 w-32 bg-gray-200 rounded animate-pulse" />
       </CardContent>
     </Card>
   );
 };
+
+// CardTitle wrapper for compatibility
+const CardTitle: React.FC<React.HTMLAttributes<HTMLHeadingElement>> = ({
+  className = '',
+  children,
+  ...props
+}) => (
+  <h3 className={`font-semibold leading-none tracking-tight ${className}`} {...props}>
+    {children}
+  </h3>
+);
 
 // Main MetricCard component
 export const MetricCard: React.FC<MetricCardProps> = ({ title, value, description, change, icon: Icon, status, loading = false, className = "", suffix, prefix, format = 'number', size = "md", variant = "default", onClick, actionButton }) => {
@@ -186,12 +195,12 @@ export const MetricCard: React.FC<MetricCardProps> = ({ title, value, descriptio
   const CardComponent = onClick ? 'button' : 'div';
   const cardProps = onClick
     ? {
-        onClick,
-        className: cn(
-          'w-full text-left transition-all hover:shadow-md hover:scale-105 cursor-pointer',
-          'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
-        ),
-      }
+      onClick,
+      className: cn(
+        'w-full text-left transition-all hover:shadow-md hover:scale-105 cursor-pointer',
+        'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+      ),
+    }
     : {};
 
   return (

@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'wouter';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
 import { cn } from '@/lib/utils';
 
 // Types

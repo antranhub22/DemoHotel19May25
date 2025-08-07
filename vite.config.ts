@@ -81,7 +81,7 @@ export default defineConfig({
   },
   // Development optimizations
   server: {
-    port: 10000,
+    port: 5173,
     open: false,
     hmr: {
       overlay: false,

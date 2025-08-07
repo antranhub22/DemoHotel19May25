@@ -18,18 +18,14 @@ import {
   Edit,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+import { Input } from '@/components/simple-ui';
+;
+;
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
   SelectContent,
@@ -37,7 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/simple-ui';
+// TODO: Migrate these manually: TableBody, TableCell, TableHead, TableHeader, TableRow
 import {
   Table,
   TableBody,
@@ -46,11 +43,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+// TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/simple-ui';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+import logger from '../../../../../packages/shared/utils/logger';
 
 // Types
 interface SecurityConfig {

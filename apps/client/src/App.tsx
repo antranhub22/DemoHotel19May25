@@ -1,26 +1,29 @@
-import VoiceAssistant from "@/components/business/VoiceAssistant";
-import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
-import ErrorBoundary from "@/components/layout/ErrorBoundary";
-import { Toaster } from "@/components/ui/toaster";
+import * as React from 'react';
+import VoiceAssistant from "./components/business/VoiceAssistant";
+import { UnifiedDashboardLayout } from "./components/features/dashboard/unified-dashboard";
+import ErrorBoundary from "./components/layout/ErrorBoundary";
+import { ToastContainer } from './components/simple-ui';
 import {
   AuthProvider,
   useAuth,
   useTenantDetection,
-} from "@/context/AuthContext";
-import { HotelProvider } from "@/context/HotelContext";
-import { RefactoredAssistantProvider } from "@/context/RefactoredAssistantContext";
-import * as React from 'react';
+} from "./context/AuthContext";
+import { HotelProvider } from "./context/HotelContext";
+import { RefactoredAssistantProvider } from "./context/RefactoredAssistantContext";
 
-import DummyTest from "@/debug/DummyTest";
-import ModuleTest from "@/debug/ModuleTest";
-import SimpleTest from "@/debug/SimpleTest";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import NotFound from "@/pages/not-found";
-import StaffPage from "@/pages/staff";
-import VapiTest from "@/pages/VapiTest";
+// Fix: Import Toaster (should be same as ToastContainer or create alias)
+const Toaster = ToastContainer;
+
 import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter } from "react-router-dom";
 import { Link, Route, Switch, useLocation } from "wouter";
+import DummyTest from "./debug/DummyTest";
+import ModuleTest from "./debug/ModuleTest";
+import SimpleTest from "./debug/SimpleTest";
+import { useWebSocket } from "./hooks/useWebSocket";
+import NotFound from "./pages/not-found";
+import StaffPage from "./pages/staff";
+import VapiTest from "./pages/VapiTest";
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
   () => import("./pages/AnalyticsDashboard"),
@@ -34,32 +37,32 @@ import {
   DashboardLayout,
   Settings,
   SetupWizard,
-} from "@/pages/dashboard";
+} from "./pages/dashboard";
 
 // Unified Dashboard (Phase 3)
-import StaffDashboard from "@/pages/StaffDashboard";
-import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
-import BillingSubscriptionManagement from "@/pages/unified-dashboard/BillingSubscriptionManagement";
-import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
+import StaffDashboard from "./pages/StaffDashboard";
+import { UnifiedDashboardHome } from "./pages/unified-dashboard";
+import BillingSubscriptionManagement from "./pages/unified-dashboard/BillingSubscriptionManagement";
+import { CustomerRequests } from "./pages/unified-dashboard/CustomerRequests";
 // import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored"; // TEMPORARILY DISABLED
-import { GuestManagement } from "@/pages/unified-dashboard/GuestManagement";
-import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperationsRefactored";
-import { Integrations } from "@/pages/unified-dashboard/Integrations";
-import { SecuritySettings } from "@/pages/unified-dashboard/SecuritySettings";
-import { Settings as UnifiedSettings } from "@/pages/unified-dashboard/Settings";
-import { StaffManagement } from "@/pages/unified-dashboard/StaffManagement";
-import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
-import { SystemLogs } from "@/pages/unified-dashboard/SystemLogs";
-import { ReduxProvider } from "@/providers/ReduxProvider";
-import logger from '@shared/utils/logger';
+import logger from '../../../packages/shared/utils/logger';
+import { GuestManagement } from "./pages/unified-dashboard/GuestManagement";
+import HotelOperationsRefactored from "./pages/unified-dashboard/HotelOperationsRefactored";
+import { Integrations } from "./pages/unified-dashboard/Integrations";
+import { SecuritySettings } from "./pages/unified-dashboard/SecuritySettings";
+import { Settings as UnifiedSettings } from "./pages/unified-dashboard/Settings";
+import { StaffManagement } from "./pages/unified-dashboard/StaffManagement";
+import { StaffManagementRefactored } from "./pages/unified-dashboard/StaffManagementRefactored";
+import { SystemLogs } from "./pages/unified-dashboard/SystemLogs";
+import { ReduxProvider } from "./providers/ReduxProvider";
 // Lazy load charts-heavy dashboard components
 const AdvancedAnalytics = React.lazy(() =>
-  import("@/pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
+  import("./pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
     default: module.AdvancedAnalytics,
   })),
 );
 const SystemMonitoring = React.lazy(() =>
-  import("@/pages/unified-dashboard/SystemMonitoring").then((module) => ({
+  import("./pages/unified-dashboard/SystemMonitoring").then((module) => ({
     default: module.SystemMonitoring,
   })),
 );
@@ -124,8 +127,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAuth =
 // Lazy-loaded Components
 // ============================================
 
-const CallHistory = React.lazy(() => import("@/pages/CallHistory"));
-const CallDetails = React.lazy(() => import("@/pages/CallDetails"));
+const CallHistory = React.lazy(() => import("./pages/CallHistory"));
+const CallDetails = React.lazy(() => import("./pages/CallDetails"));
 
 // ============================================
 // Loading Fallback
@@ -341,6 +344,7 @@ function Router() {
         <Route path="/simple-test" component={SimpleTest} />
         <Route path="/module-test" component={ModuleTest} />
         <Route path="/dummy-test" component={DummyTest} />
+        <Route path="/ui-demo" component={React.lazy(() => import("./pages/ui-demo"))} />
         {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />

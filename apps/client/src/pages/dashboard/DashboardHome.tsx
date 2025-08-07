@@ -1,4 +1,4 @@
-import type { Language } from '@shared/types';
+import type { Language } from '../../../../../packages/shared/types';
 import {
   TrendingUp,
   Phone,
@@ -15,16 +15,11 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { Link } from 'wouter';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/simple-ui';
+import { Button } from '@/components/simple-ui';
+import { Card, CardContent, CardHeader } from '@/components/simple-ui'
+import { CardTitle, CardDescription } from "@/components/simple-ui";;
+;
 
 // Mock data - will be replaced with actual API calls
 const mockMetrics = {

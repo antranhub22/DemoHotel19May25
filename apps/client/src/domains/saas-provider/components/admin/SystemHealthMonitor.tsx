@@ -4,7 +4,7 @@ import * as React from "react";
  * Monitor platform health, services, and alerts
  */
 
-import logger from "@shared/utils/logger";
+import logger from "../../../../../../../packages/shared/utils/logger";
 import { useState } from "react";
 import { useSystemHealth } from "../../hooks/usePlatformAdmin";
 

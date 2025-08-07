@@ -4,7 +4,7 @@ import * as React from 'react';
  * Platform KPIs and metrics overview
  */
 
-import logger from '@shared/utils/logger';
+import logger from '../../../../../../../packages/shared/utils/logger';
 import { useState } from 'react';
 import { usePlatformMetrics } from "../../hooks/usePlatformAdmin";
 import { PlatformMetrics } from "../../types/saasProvider.types";
