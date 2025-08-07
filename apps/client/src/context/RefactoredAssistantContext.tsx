@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-import type { Language } from "@shared/types";
+// import type { Language } from "@shared/types"; // Commented out due to conflict
 import React, {
   createContext,
   ReactNode,

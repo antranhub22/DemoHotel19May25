@@ -70,7 +70,7 @@ import {
   updateRoom,
   updateRoomStatus,
 } from "../store/hotelOperationsSlice";
-import type { HousekeepingTask, Room } from "../types/common.types";
+import type { HousekeepingTask, Room } from "../types/hotelOperations.types";
 import {
   CreateHousekeepingTaskPayload,
   CreateMaintenanceRequestPayload,

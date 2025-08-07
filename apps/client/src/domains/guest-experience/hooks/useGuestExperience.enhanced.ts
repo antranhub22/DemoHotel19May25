@@ -328,7 +328,7 @@ export const useEnhancedGuestExperience = () => {
           endVoiceCall({
             endTime: new Date(),
             duration: callDuration,
-            summary: summary,
+            summary: summary as any,
           }),
         );
 

@@ -9,7 +9,7 @@ import { useCallback } from "react";
 import { GuestExperienceService } from "../services/guestExperienceService";
 import {
   addModelOutput,
-  addTranscript,
+  addTranscript as addTranscriptAction,
   clearCallSummary,
   clearModelOutput,
   clearTranscripts,
@@ -171,7 +171,7 @@ export const useGuestExperience = () => {
           type,
           selectedLanguage,
         );
-        dispatch(addTranscript(transcript));
+        dispatch(addTranscriptAction(transcript));
       },
       [dispatch, selectedLanguage],
     ),
@@ -379,7 +379,7 @@ export const useConversation = () => {
         type,
         selectedLanguage,
       );
-      dispatch(addTranscript(transcript));
+      dispatch(addTranscriptAction(transcript));
     },
     [dispatch, selectedLanguage],
   );
