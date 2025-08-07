@@ -1,11 +1,9 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * Hotel Operations Refactored Component
  * Comprehensive hotel operations management using Redux domain
  */
 
-import type { HousekeepingTask } from '../types/common.types';
-import type { Room } from '../types/common.types';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,10 +26,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import {
   AlertTriangle,
-  Bed,
+  Building,
   CheckCircle,
   Clock,
   Cog,
@@ -50,7 +48,8 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
+import type { HousekeepingTask, Room } from "../types/common.types";
 
 // Hotel Operations Domain imports - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
 // import {
@@ -581,7 +580,7 @@ const HotelOperationsRefactored: React.FC = () => {
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-gray-500" />
               <span className="text-sm">{room.capacity} người</span>
-              <Bed className="h-4 w-4 text-gray-500 ml-2" />
+              <Building className="h-4 w-4 text-gray-500 ml-2" />
               <span className="text-sm">
                 {room.bedCount} {room.bedType}
               </span>
