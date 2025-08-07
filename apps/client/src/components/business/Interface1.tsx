@@ -210,14 +210,14 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
   return (
     <InterfaceContainer>
-      {/* Enhanced Voice Language Switcher */}
-      <div className="fixed top-4 left-4 z-[9998]">
+      {/* ✅ REMOVED: Voice Language Switcher - Already in VoiceAssistant header to prevent duplicate rendering */}
+      {/* <div className="fixed top-4 left-4 z-[9998]">
         <VoiceLanguageSwitcher
           position="floating"
           showVoicePreview={false}
           onLanguageChange={handleLanguageChange}
         />
-      </div>
+      </div> */}
 
       {/* 🎭 DEBUG: Mock Conversation Button (Development Only) */}
       {import.meta.env.DEV && (
