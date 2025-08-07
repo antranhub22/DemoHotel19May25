@@ -1,5 +1,6 @@
+import * as React from 'react';
 import { isMobileDevice } from '@/utils/deviceDetection';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SiriButton } from '../SiriButton';
 

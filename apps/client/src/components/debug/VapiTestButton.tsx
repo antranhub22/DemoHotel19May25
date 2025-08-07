@@ -1,12 +1,20 @@
+import * as React from 'react';
 import {
   createVapiClient,
   VapiOfficial,
   VapiOfficialConfig,
 } from '@/lib/vapiOfficial';
-import { logger } from '@shared/utils/logger';
-import React, { useState } from 'react';
+import logger from '@shared/utils/logger';
+import { useState } from 'react';
 
-const VapiTestButton: React.FC = () => {
+
+interface VapiTestButtonProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for VapiTestButton
+}
+
+const VapiTestButton: React.FC<VapiTestButtonProps> = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

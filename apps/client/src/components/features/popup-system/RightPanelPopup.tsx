@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import React from 'react';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
-import { SummaryPopupContent } from './SummaryPopupContent';
+import { SummaryPopupContent } from './SummaryPopupContent.tsx';
 
 interface RightPanelPopupProps {
   isOpen: boolean;
@@ -9,11 +9,7 @@ interface RightPanelPopupProps {
   showSummary?: boolean; // New prop to control summary display
 }
 
-const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
-  isOpen,
-  onClose,
-  showSummary = false,
-}) => {
+const RightPanelPopup: React.FC<RightPanelPopup> = ({ isOpen, onClose, showSummary = false }) => {
   // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
   const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
     onSuccess: () => {

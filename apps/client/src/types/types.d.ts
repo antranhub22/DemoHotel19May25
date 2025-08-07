@@ -1,3 +1,4 @@
+import * as React from 'react';
 declare module '@/services/ReferenceService' {
   export interface ReferenceItem {
     url: string;

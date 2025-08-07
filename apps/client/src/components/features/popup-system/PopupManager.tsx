@@ -1,6 +1,8 @@
-import React, { useEffect, Suspense } from "react";
+import * as React from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePopupContext } from "@/context/PopupContext";
-import { PopupStack } from "./PopupStack";
+import { PopupStack } from './PopupStack.tsx';
+import { logger } from '@shared/utils/logger';
 
 // Lazy load SummaryPopupContent for code splitting
 const LazySummaryPopupContent = React.lazy(() =>
@@ -16,11 +18,7 @@ interface PopupManagerProps {
   isMobile?: boolean; // Filter popups based on mobile/desktop
 }
 
-export const PopupManager: React.FC<PopupManagerProps> = ({
-  position = "bottom",
-  maxVisible = 4,
-  autoCloseDelay,
-}) => {
+export const PopupManager: React.FC<PopupManager> = ({ position = "bottom", maxVisible = 4, autoCloseDelay }) => {
   const { popups, activePopup, setActivePopup, removePopup } =
     usePopupContext();
 

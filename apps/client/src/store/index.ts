@@ -129,4 +129,4 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 // Export hooks from separate file to avoid circular imports
-export { useAppDispatch, useAppSelector } from "./hooks";
+export { useAppDispatch, useAppSelector } from './hooks.ts';

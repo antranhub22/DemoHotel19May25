@@ -1,4 +1,5 @@
-import { logger } from "@shared/utils/logger";
+import type { Room } from '../types/common.types';
+import logger from '@shared/utils/logger';
 import React, {
   createContext,
   ReactNode,

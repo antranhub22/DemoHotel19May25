@@ -27,7 +27,7 @@ export type {
   SendMessagePayload,
   StaffMember,
   UpdateRequestPayload,
-} from "./types/requestManagement.types";
+} from './types/requestManagement.types.ts';
 
 // ========================================
 // Redux Store
@@ -66,10 +66,10 @@ export {
   setViewMode,
   toggleFilters,
   updateRequest,
-} from "./store/requestManagementSlice";
+} from './store/requestManagementSlice.ts';
 
 // Default export for reducer
-export { default as requestManagementReducer } from "./store/requestManagementSlice";
+export { default as requestManagementReducer } from './store/requestManagementSlice.ts';
 
 // ========================================
 // Services
@@ -77,7 +77,7 @@ export { default as requestManagementReducer } from "./store/requestManagementSl
 export {
   RequestManagementService,
   requestManagementService,
-} from "./services/requestManagementService";
+} from './services/requestManagementService.ts';
 
 // ========================================
 // Hooks

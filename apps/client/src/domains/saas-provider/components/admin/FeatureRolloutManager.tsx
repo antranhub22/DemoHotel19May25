@@ -1,10 +1,11 @@
+import * as React from 'react';
 /**
  * Feature Rollout Manager
  * Manage feature flags and rollout strategies
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useEffect, useState } from "react";
+import logger from '@shared/utils/logger';
+import { useEffect, useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
 import { FeatureFlag, SubscriptionPlan } from "../../types/saasProvider.types";
 
@@ -16,11 +17,7 @@ interface CreateFeatureFlagModalProps {
   ) => Promise<void>;
 }
 
-const CreateFeatureFlagModal: React.FC<CreateFeatureFlagModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
+const CreateFeatureFlagModal: React.FC<CreateFeatureFlagModal> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",

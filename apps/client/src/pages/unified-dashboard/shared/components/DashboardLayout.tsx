@@ -1,14 +1,7 @@
 import React from 'react';
 import type { DashboardLayoutProps } from '../types/dashboard';
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  title,
-  subtitle,
-  gradientFrom,
-  gradientTo,
-  loading = false,
-  children,
-}) => {
+export const DashboardLayout: React.FC<DashboardLayout> = ({ title, subtitle, gradientFrom, gradientTo, loading = false, children }) => {
   if (loading) {
     return (
       <div className="space-y-6">

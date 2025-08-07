@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Crown,
   Lock,
@@ -11,7 +12,7 @@ import {
   Database,
   Shield,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -406,14 +407,7 @@ const CurrentPlanCard = ({
 };
 
 // Main Feature Toggle component
-export const FeatureToggle: React.FC<FeatureToggleProps> = ({
-  features,
-  currentPlan,
-  onFeatureToggle,
-  onUpgrade,
-  className,
-  showUpgradePrompts = true,
-}) => {
+export const FeatureToggle: React.FC<FeatureToggle> = ({ features, currentPlan, onFeatureToggle, onUpgrade, className = "", showUpgradePrompts = true }) => {
   const [upgradeDialogPlan, setUpgradeDialogPlan] = useState<string | null>(
     null
   );

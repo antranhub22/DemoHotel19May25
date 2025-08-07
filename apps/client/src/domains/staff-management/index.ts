@@ -39,7 +39,7 @@ export type {
   UpdateStaffPayload,
   UpdateTaskPayload,
   WorkShift,
-} from "./types/staffManagement.types";
+} from './types/staffManagement.types.ts';
 
 // ========================================
 // Redux Store
@@ -94,10 +94,10 @@ export {
   updateStaffWorkload,
   updateTask,
   updateTaskProgress,
-} from "./store/staffManagementSlice";
+} from './store/staffManagementSlice.ts';
 
 // Default export for reducer
-export { default as staffManagementReducer } from "./store/staffManagementSlice";
+export { default as staffManagementReducer } from './store/staffManagementSlice.ts';
 
 // ========================================
 // Services

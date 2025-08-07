@@ -10,7 +10,7 @@ import {
   VapiOfficialConfig,
 } from "@/lib/vapiOfficial";
 import { CallDetails, Language } from "@/types";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import React, {
   createContext,
   useContext,
@@ -18,7 +18,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useTranscript } from "./TranscriptContext";
+import { useTranscript } from './TranscriptContext.tsx';
 
 export interface VapiContextType {
   // Call state
@@ -55,7 +55,7 @@ interface VapiProviderProps {
   hotelConfig?: HotelConfiguration | null;
 }
 
-export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
+export const VapiProvider: React.FC<VapiProvider> = ({ children }) => {
   // State management
   const [isCallActive, setIsCallActive] = useState(false);
   const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(

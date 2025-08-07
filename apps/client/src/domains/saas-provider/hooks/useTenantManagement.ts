@@ -4,7 +4,7 @@
  */
 
 import { AppDispatch } from "@/store";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TenantManagementService } from "../services/tenantManagementService";

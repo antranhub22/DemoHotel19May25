@@ -1,11 +1,12 @@
+import * as React from 'react';
 /**
  * VoiceAssistant with SaaS Provider Integration
  * ✅ ENHANCED: Includes feature gating, usage tracking, and multi-tenant support
  * Mobile-First Guest Experience with complete SaaS integration
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useEffect, useState } from "react";
+import logger from '@shared/utils/logger';
+import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
@@ -32,7 +33,14 @@ interface VoiceAssistantWithSaaSProps {
 }
 
 // ✅ NEW: Usage Alert Component
-const UsageAlertBanner: React.FC<{ usageStatus: any }> = ({ usageStatus }) => {
+
+interface UsageAlertBannerProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for UsageAlertBanner
+}
+
+const UsageAlertBanner: React.FC<UsageAlertBannerPropsProps> = ({ usageStatus: any }> = ({ usageStatus }) => {
   if (!usageStatus?.warningMessage) return null;
 
   return (
@@ -307,9 +315,7 @@ const EnhancedVoiceInterface: React.FC = () => {
 };
 
 // ✅ MAIN: Enhanced Voice Assistant Component
-const VoiceAssistantWithSaaS: React.FC<VoiceAssistantWithSaaSProps> = ({
-  className,
-}) => {
+const VoiceAssistantWithSaaS: React.FC<VoiceAssistantWithSaaS> = ({ className = "" }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();

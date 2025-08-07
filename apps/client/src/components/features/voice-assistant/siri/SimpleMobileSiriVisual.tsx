@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
-import { useSiriAnimation } from './hooks/useSiriAnimation';
+import * as React from 'react';
+import { useMemo } from 'react';
+import { useSiriAnimation } from './hooks/useSiriAnimation.ts';
 
 interface SimpleMobileSiriVisualProps {
   isListening: boolean;
@@ -13,12 +14,7 @@ interface SimpleMobileSiriVisualProps {
   size?: number;
 }
 
-export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
-  isListening,
-  volumeLevel,
-  colors,
-  size = 280,
-}) => {
+export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisual> = ({ isListening, volumeLevel, colors, size = "md" }) => {
   const { ripples, finalScale } = useSiriAnimation({
     isListening,
     volumeLevel,

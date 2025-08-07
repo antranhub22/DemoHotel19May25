@@ -1,3 +1,26 @@
+
+// Basic type definitions - TODO: Move to dedicated type files
+interface Room {
+  id: string;
+  number: string;
+  type: string;
+  status: string;
+}
+
+interface HousekeepingTask {
+  id: string;
+  roomId: string;
+  type: string;
+  status: string;
+}
+
+interface ServiceRequest {
+  id: string;
+  type: string;
+  description: string;
+  status: string;
+}
+
 /**
  * Hotel Operations Domain - Main Entry Point
  * Exports all domain functionality for comprehensive hotel operations management
@@ -70,8 +93,8 @@ export type {
   UpdateHousekeepingTaskPayload,
   UpdateMaintenanceRequestPayload,
   UpdateRoomPayload,
-  UsageFrequency,
-} from "./types/hotelOperations.types";
+  UsageFrequency
+} from './types/hotelOperations.types.ts';
 
 // ========================================
 // Redux Store
@@ -140,11 +163,11 @@ export {
   updateInventoryStock,
   updateMaintenanceRequest,
   updateRoom,
-  updateRoomStatus,
-} from "./store/hotelOperationsSlice";
+  updateRoomStatus
+} from './store/hotelOperationsSlice.ts';
 
 // Default export for reducer
-export { default as hotelOperationsReducer } from "./store/hotelOperationsSlice";
+export { default as hotelOperationsReducer } from './store/hotelOperationsSlice.ts';
 
 // ========================================
 // Services
@@ -424,7 +447,7 @@ export const getTaskStatusColor = (status: string): string => {
 export const getMaintenancePriorityColor = (priority: string): string => {
   return (
     MAINTENANCE_PRIORITY_COLORS[
-      priority as keyof typeof MAINTENANCE_PRIORITY_COLORS
+    priority as keyof typeof MAINTENANCE_PRIORITY_COLORS
     ] || MAINTENANCE_PRIORITY_COLORS["medium"]
   );
 };
@@ -466,7 +489,7 @@ export const formatCurrency = (amount: number): string => {
 /**
  * Calculate room occupancy rate
  */
-export const calculateOccupancyRate = (rooms: Room[]): number => {
+export const calculateOccupancyRate = (rooms: any[]): number => {
   if (rooms.length === 0) return 0;
   const occupiedRooms = rooms.filter(
     (room) => room.status === "occupied",
@@ -478,7 +501,7 @@ export const calculateOccupancyRate = (rooms: Room[]): number => {
  * Calculate housekeeping efficiency
  */
 export const calculateHousekeepingEfficiency = (
-  tasks: HousekeepingTask[],
+  tasks: any[],
 ): number => {
   if (tasks.length === 0) return 0;
   const completedTasks = tasks.filter(
@@ -490,7 +513,7 @@ export const calculateHousekeepingEfficiency = (
 /**
  * Get room display name
  */
-export const getRoomDisplayName = (room: Room): string => {
+export const getRoomDisplayName = (room: any): string => {
   return `${room.roomNumber} - ${room.roomType.name}`;
 };
 
@@ -628,7 +651,7 @@ export const validateMaintenanceRequestData = (
 /**
  * Generate task summary for notifications
  */
-export const generateTaskSummary = (task: HousekeepingTask): string => {
+export const generateTaskSummary = (task: any): string => {
   return `${task.taskType} - Phòng ${task.roomNumber}: ${task.description.substring(0, 100)}${task.description.length > 100 ? "..." : ""}`;
 };
 
@@ -636,7 +659,7 @@ export const generateTaskSummary = (task: HousekeepingTask): string => {
  * Generate maintenance request summary
  */
 export const generateMaintenanceRequestSummary = (
-  request: MaintenanceRequest,
+  request: any,
 ): string => {
   return `${request.title} - ${request.location}: ${request.description.substring(0, 100)}${request.description.length > 100 ? "..." : ""}`;
 };
@@ -644,7 +667,7 @@ export const generateMaintenanceRequestSummary = (
 /**
  * Check if room is available for booking
  */
-export const isRoomAvailable = (room: Room): boolean => {
+export const isRoomAvailable = (room: any): boolean => {
   return (
     room.status === "available" &&
     room.availability === "ready" &&
@@ -655,7 +678,7 @@ export const isRoomAvailable = (room: Room): boolean => {
 /**
  * Check if maintenance request is urgent
  */
-export const isMaintenanceUrgent = (request: MaintenanceRequest): boolean => {
+export const isMaintenanceUrgent = (request: any): boolean => {
   return (
     request.urgency === "emergency" ||
     request.urgency === "urgent" ||
@@ -667,7 +690,7 @@ export const isMaintenanceUrgent = (request: MaintenanceRequest): boolean => {
  * Get room type display info
  */
 export const getRoomTypeInfo = (
-  roomType: RoomType,
+  roomType: anyType,
 ): { name: string; description: string; maxOccupancy: number } => {
   return {
     name: roomType.name,

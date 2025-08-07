@@ -1,3 +1,4 @@
+import * as React from 'react';
 /**
  * Interface1 Refactored - Type Definitions
  *
@@ -274,4 +275,4 @@ export const isCallActive = (handlers: Interface1Handlers): boolean => {
 // ============================================
 
 // Re-export existing types for convenience
-export type { Language } from './interface1.types';
+export type { Language } from './interface1.types.ts';

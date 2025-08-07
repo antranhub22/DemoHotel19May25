@@ -1,10 +1,11 @@
+import * as React from 'react';
 /**
  * Billing & Subscription Management - Complete UI Component
  * Comprehensive billing interface with subscription management, payment processing,
  * invoice tracking, usage analytics, and customer portal integration
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 import {
   CreditCard,
   FileText,
@@ -78,7 +79,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 
 // Domain imports - Hooks temporarily disabled
 import {

@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { CallProvider, useCall } from '../CallContext';
 import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CallProvider, useCall } from '../CallContext';
 
 // Test component that uses CallContext
 const TestComponent = () => {
@@ -31,7 +31,7 @@ const TestComponent = () => {
       <button onClick={toggleMute} data-testid="toggle-mute">
         Toggle Mute
       </button>
-      <button onClick={startCall} data-testid="start-call">
+      <button onClick={() => startCall()} data-testid="start-call">
         Start Call
       </button>
       <button onClick={endCall} data-testid="end-call">
@@ -129,7 +129,7 @@ describe('CallContext', () => {
   });
 
   it('should handle call end listeners', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
 
     render(
       <TestWrapper>
@@ -148,7 +148,7 @@ describe('CallContext', () => {
 
   it('should throw error when used outside provider', () => {
     // Mock console.error to prevent error output in test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
     expect(() => {
       render(<TestComponent />);

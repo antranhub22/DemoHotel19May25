@@ -1,10 +1,11 @@
+import * as React from 'react';
 /**
  * Revenue Analytics Component
  * Financial metrics, trends, and reports
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useState } from "react";
+import logger from '@shared/utils/logger';
+import { useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
 
 type ReportPeriod = "7d" | "30d" | "90d" | "1y" | "custom";

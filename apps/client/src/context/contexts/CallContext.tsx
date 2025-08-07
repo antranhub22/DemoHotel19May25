@@ -1,5 +1,6 @@
-import { logger } from '@shared/utils/logger';
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import * as React from 'react';
+import logger from '@shared/utils/logger';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 export interface CallContextType {
   // Call state

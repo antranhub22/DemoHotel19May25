@@ -4,7 +4,7 @@ interface ReferencePopupProps {
   onClose: () => void;
 }
 
-const ReferencePopup: React.FC<ReferencePopupProps> = ({ isOpen, onClose }) => {
+const ReferencePopup: React.FC<ReferencePopup> = ({ isOpen, onClose }) => {
   if (!isOpen) {
     return null;
   }

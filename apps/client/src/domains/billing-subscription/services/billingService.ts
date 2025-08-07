@@ -3,7 +3,7 @@
  * API integration for billing, subscriptions, payments, and invoices
  */
 
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import type {
   BillingAnalytics,
   BillingUsage,

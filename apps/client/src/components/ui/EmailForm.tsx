@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useState } from 'react';
 
 interface EmailFormProps {

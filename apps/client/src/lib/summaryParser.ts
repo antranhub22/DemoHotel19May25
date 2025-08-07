@@ -2,6 +2,7 @@
  * Utility to extract service details from AI-generated summary
  */
 
+import type { Room } from '../types/common.types';
 import {
   extractRoomNumber as extractRoomNumberShared,
   removeSimilarItems,

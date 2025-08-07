@@ -1,3 +1,5 @@
+import * as React from 'react';
+import type { Room } from '../types/common.types';
 import {
   Bot,
   Settings,
@@ -10,7 +12,7 @@ import {
   Clock,
   Activity,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +34,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // Mock assistant configuration
 const mockAssistantConfig = {

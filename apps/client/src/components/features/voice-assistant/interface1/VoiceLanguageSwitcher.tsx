@@ -1,7 +1,8 @@
+import * as React from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import {
   CheckCircle,
   ChevronDown,
@@ -9,7 +10,7 @@ import {
   Smartphone,
   Volume2,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface LanguageOption {
   code: Language;
@@ -128,12 +129,7 @@ interface VoiceLanguageSwitcherProps {
   className?: string;
 }
 
-export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
-  position = 'floating',
-  showVoicePreview = true,
-  onLanguageChange,
-  className = '',
-}) => {
+export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcher> = ({ position = 'floating', showVoicePreview = true, onLanguageChange, className = "" }) => {
   const { language, setLanguage } = useAssistant();
   const [isOpen, setIsOpen] = useState(false);
   const [isChanging, setIsChanging] = useState(false);

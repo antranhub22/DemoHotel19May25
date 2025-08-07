@@ -1,3 +1,4 @@
+import type { Language } from '@shared/types';
 import { act, render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import React from 'react';
@@ -219,7 +220,7 @@ describe('LanguageContext', () => {
 
   it('should throw error when used outside provider', () => {
     // Mock console.error to prevent error output in test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
     expect(() => {
       render(<TestComponent />);
@@ -234,7 +235,7 @@ describe('LanguageContext', () => {
       new Error('Translation failed')
     );
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
 
     render(
       <TestWrapper>

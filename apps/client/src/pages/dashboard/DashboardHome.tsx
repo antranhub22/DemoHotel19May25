@@ -1,3 +1,4 @@
+import type { Language } from '@shared/types';
 import {
   TrendingUp,
   Phone,

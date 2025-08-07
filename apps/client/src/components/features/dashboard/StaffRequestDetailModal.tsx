@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import type { Room } from '../types/common.types';
+import { useState } from 'react';
 interface StaffRequestDetailModalProps {
   request: any;
   onClose: () => void;
@@ -14,12 +16,7 @@ const statusOptions = [
   'Lưu ý khác',
 ];
 
-const StaffRequestDetailModal: React.FC<StaffRequestDetailModalProps> = ({
-  request,
-  onClose,
-  onStatusChange,
-  onOpenMessage,
-}) => {
+const StaffRequestDetailModal: React.FC<StaffRequestDetailModal> = ({ request, onClose, onStatusChange, onOpenMessage }) => {
   const [pendingStatus, setPendingStatus] = useState<string>(request.status);
   if (!request) {
     return null;

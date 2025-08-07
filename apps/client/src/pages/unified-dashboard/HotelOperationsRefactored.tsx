@@ -1,8 +1,11 @@
+import * as React from 'react';
 /**
  * Hotel Operations Refactored Component
  * Comprehensive hotel operations management using Redux domain
  */
 
+import type { HousekeepingTask } from '../types/common.types';
+import type { Room } from '../types/common.types';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +28,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import {
   AlertTriangle,
   Bed,
@@ -47,7 +50,7 @@ import {
   Wrench,
   X,
 } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 // Hotel Operations Domain imports - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
 // import {

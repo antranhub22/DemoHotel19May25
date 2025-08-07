@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Users,
   UserPlus,
@@ -14,7 +15,7 @@ import {
   Unlock,
   Key,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 // ✅ FIXED: Use global UserRole type instead of shared constants export
 // import type { UserRole } from '@shared/constants/permissions';
 import {
@@ -63,7 +64,7 @@ import {
 } from '@/components/ui/table';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // Types
 interface StaffMember {

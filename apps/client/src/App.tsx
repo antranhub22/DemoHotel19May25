@@ -1,3 +1,4 @@
+import * as React from 'react';
 import VoiceAssistant from "@/components/business/VoiceAssistant";
 import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
@@ -17,7 +18,7 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
 import VapiTest from "@/pages/VapiTest";
-import React, { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter } from "react-router-dom";
 import { Link, Route, Switch, useLocation } from "wouter";
 // Lazy load Analytics Dashboard to split charts bundle
@@ -50,7 +51,7 @@ import { StaffManagement } from "@/pages/unified-dashboard/StaffManagement";
 import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 import { SystemLogs } from "@/pages/unified-dashboard/SystemLogs";
 import { ReduxProvider } from "@/providers/ReduxProvider";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 // Lazy load charts-heavy dashboard components
 const AdvancedAnalytics = React.lazy(() =>
   import("@/pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
@@ -74,12 +75,7 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requireAuth = true,
-  requiredRole,
-  redirectTo = "/login",
-}) => {
+const ProtectedRoute: React.FC<ProtectedRoute> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 

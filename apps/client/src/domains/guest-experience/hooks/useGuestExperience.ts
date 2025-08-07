@@ -7,6 +7,7 @@
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { GuestExperienceService } from "../services/guestExperienceService";
+import type { Language } from '@shared/types';
 import {
   addModelOutput,
   addTranscript,
@@ -37,7 +38,7 @@ import {
   setVoiceInteractionLoading,
   startVoiceCall,
   updateMicLevel,
-} from "../store/guestJourneySlice";
+} from '../store/guestJourneySlice';
 import type {
   CallSummary,
   Language,

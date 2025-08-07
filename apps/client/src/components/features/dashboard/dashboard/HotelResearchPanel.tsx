@@ -1,3 +1,5 @@
+import * as React from 'react';
+import type { Room } from '../types/common.types';
 import {
   Search,
   MapPin,
@@ -21,7 +23,7 @@ import {
   Coffee,
   Dumbbell,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -586,16 +588,7 @@ const HotelInfoDisplay = ({
 };
 
 // Main Hotel Research Panel component
-export const HotelResearchPanel: React.FC<HotelResearchPanelProps> = ({
-  data,
-  isLoading,
-  error,
-  onSearch,
-  onEdit,
-  onSave,
-  editable = false,
-  className,
-}) => {
+export const HotelResearchPanel: React.FC<HotelResearchPanel> = ({ data, isLoading, error, onSearch, onEdit, onSave, editable = false, className = "" }) => {
   return (
     <div className={cn('space-y-6', className)}>
       {/* Research Form */}

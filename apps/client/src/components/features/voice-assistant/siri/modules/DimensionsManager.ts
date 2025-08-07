@@ -1,6 +1,6 @@
 // ✅ FIXED: Import missing types
-import type { DebugManager } from './DebugManager';
-import type { EmergencyStopManager } from './EmergencyStopManager';
+import type { DebugManager } from './DebugManager.ts';
+import type { EmergencyStopManager } from './EmergencyStopManager.ts';
 
 export interface DimensionsState {
   width: number;

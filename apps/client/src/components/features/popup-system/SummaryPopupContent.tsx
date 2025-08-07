@@ -1,12 +1,21 @@
+import * as React from 'react';
+import type { Room } from '../types/common.types';
 import { useAssistant } from '@/context';
 import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
 import { useSummaryProgression } from '@/hooks/useSummaryProgression';
-import { logger } from '@shared/utils/logger';
-import React, { useEffect } from 'react';
-import { SummaryProgression } from './SummaryProgression';
+import logger from '@shared/utils/logger';
+import { useEffect } from 'react';
+import { SummaryProgression } from './SummaryProgression.tsx';
 
 // Main Summary Popup Component - Uses OpenAI-only summary system
-export const SummaryPopupContent: React.FC = () => {
+export 
+interface SummaryPopupContentProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for SummaryPopupContent
+}
+
+const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
   const { serviceRequests, language, callDetails } = useAssistant();
   const { progression, startProcessing, complete } = useSummaryProgression();
 

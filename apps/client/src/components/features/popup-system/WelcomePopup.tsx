@@ -1,3 +1,4 @@
+import type { Room } from '../types/common.types';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -5,7 +6,7 @@ interface WelcomePopupProps {
   onClose: () => void;
 }
 
-const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
+const WelcomePopup: React.FC<WelcomePopup> = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm font-sans">
       <div

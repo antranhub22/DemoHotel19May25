@@ -1,3 +1,5 @@
+import * as React from 'react';
+// TODO: Fix proper typing
 /**
  * App with Domain Architecture
  * Testing version of App.tsx with Guest Experience domain integration
@@ -20,8 +22,8 @@ import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
 import VapiTest from "@/pages/VapiTest";
 import { ReduxProvider } from "@/providers/ReduxProvider";
-import { logger } from "@shared/utils/logger";
-import React, { Suspense, useEffect, useState } from "react";
+import logger from '@shared/utils/logger';
+import { Suspense, useEffect, useState } from 'react';
 import { BrowserRouter } from "react-router-dom";
 import { Link, Route, Switch, useLocation } from "wouter";
 
@@ -32,7 +34,7 @@ import { PlatformAdminDashboard } from "@/domains/saas-provider";
 import VoiceAssistantWithSaaS from "@/components/business/VoiceAssistantWithSaaS";
 
 // Lazy load Analytics Dashboard to split charts bundle
-const AnalyticsDashboard = React.lazy(
+const AnalyticsDashboard = (React as any).lazy(
   () => import("./pages/AnalyticsDashboard"),
 );
 
@@ -48,14 +50,14 @@ import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperations
 import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 
 // Lazy load charts-heavy dashboard components
-const AdvancedAnalytics = React.lazy(() =>
+const AdvancedAnalytics = (React as any).lazy(() =>
   import("@/pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
-    default: module.AdvancedAnalytics,
+    default: (module as any).AdvancedAnalytics,
   })),
 );
-const SystemMonitoring = React.lazy(() =>
+const SystemMonitoring = (React as any).lazy(() =>
   import("@/pages/unified-dashboard/SystemMonitoring").then((module) => ({
-    default: module.SystemMonitoring,
+    default: (module as any).SystemMonitoring,
   })),
 );
 
@@ -70,12 +72,7 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requireAuth = true,
-  requiredRole,
-  redirectTo = "/login",
-}) => {
+const ProtectedRoute: React.FC<ProtectedRoute> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -268,7 +265,9 @@ function Router() {
         <Route path="/interface1" component={VoiceAssistant} />
 
         {/* ✅ NEW: SaaS-Integrated Voice Assistant (test route) */}
-        <Route path="/voice-saas" component={VoiceAssistantWithSaaS} />
+        <Route path="/voice-saas">
+          <VoiceAssistantWithSaaS />
+        </Route>
 
         <Route path="/vapi-test" component={VapiTest} />
 
@@ -334,7 +333,7 @@ function Router() {
 
         {/* Platform Admin Dashboard - SaaS Provider management */}
         <Route path="/platform-admin">
-          <ProtectedRoute requireAuth={true} requiredRole="saas_admin">
+          <ProtectedRoute requireAuth={true} requiredRole="admin">
             <PlatformAdminDashboard />
           </ProtectedRoute>
         </Route>
@@ -352,7 +351,7 @@ function Router() {
 // ============================================
 
 function AppContent() {
-  const {} = useWebSocket();
+  const { } = useWebSocket();
 
   return (
     <ErrorBoundary>

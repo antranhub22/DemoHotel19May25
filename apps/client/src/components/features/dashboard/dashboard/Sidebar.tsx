@@ -199,11 +199,7 @@ const canAccessFeature = (userPlan: string, requiredPlan?: string): boolean => {
 };
 
 // Main sidebar component
-export const Sidebar: React.FC<SidebarProps> = ({
-  isOpen,
-  onClose,
-  tenantData,
-}) => {
+export const Sidebar: React.FC<Sidebar> = ({ isOpen, onClose, tenantData }) => {
   const [location] = useLocation();
 
   // Filter navigation items based on subscription

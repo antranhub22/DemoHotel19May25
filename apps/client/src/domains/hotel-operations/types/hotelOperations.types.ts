@@ -729,7 +729,7 @@ export interface InventoryFilters {
 // ========================================
 
 export interface RoomsResponse {
-  rooms: Room[];
+  rooms: Room[] // TODO: Fix Room type definition consistency;
   totalCount: number;
   availableCount: number;
   occupiedCount: number;
@@ -868,7 +868,7 @@ export interface UpdateMaintenanceRequestPayload {
 
 export interface HotelOperationsState {
   // Room management
-  rooms: Room[];
+  rooms: Room[] // TODO: Fix Room type definition consistency;
   roomTypes: RoomType[];
   selectedRoom: Room | null;
 

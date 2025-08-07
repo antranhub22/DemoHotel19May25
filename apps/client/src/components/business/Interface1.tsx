@@ -8,7 +8,7 @@ import { useAssistant } from '@/context';
 import { useInterface1 } from '@/hooks/useInterface1';
 import type { Language } from '@/types/interface1.types';
 import { ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // UI Components
 import { ErrorState } from '../features/voice-assistant/interface1/ErrorState';
@@ -26,8 +26,8 @@ import { VoiceCommandContext } from '../features/voice-assistant/interface1/Voic
 import { VoiceLanguageSwitcher } from '../features/voice-assistant/interface1/VoiceLanguageSwitcher';
 
 // Import extracted components
-import { Interface1Desktop } from './Interface1Desktop';
-import { Interface1Mobile } from './Interface1Mobile';
+import { Interface1Desktop } from './Interface1Desktop.tsx';
+import { Interface1Mobile } from './Interface1Mobile.tsx';
 
 interface Interface1Props {
   isActive: boolean;

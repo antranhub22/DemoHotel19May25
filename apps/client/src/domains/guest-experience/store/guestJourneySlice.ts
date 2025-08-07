@@ -4,6 +4,7 @@
  */
 
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { Language } from '@shared/types';
 import type {
   CallSession,
   CallSummary,

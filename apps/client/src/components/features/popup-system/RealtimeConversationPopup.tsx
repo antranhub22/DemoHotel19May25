@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useAssistant } from '@/context';
 import {
   STANDARD_POPUP_HEIGHT,
@@ -6,7 +7,7 @@ import {
 } from '@/context/PopupContext';
 import { t } from '@/i18n';
 import { X } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;
@@ -51,12 +52,7 @@ interface RealtimeConversationPopupProps {
   layout?: 'grid' | 'overlay'; // grid = desktop column, overlay = mobile bottom
 }
 
-const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
-  isOpen,
-  onClose,
-  isRight,
-  layout = 'overlay',
-}) => {
+const RealtimeConversationPopup: React.FC<RealtimeConversationPopup> = ({ isOpen, onClose, isRight, layout = 'overlay' }) => {
   const { transcripts, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});

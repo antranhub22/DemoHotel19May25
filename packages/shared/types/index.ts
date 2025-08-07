@@ -106,3 +106,5 @@ export interface ServiceCategoryConfig {
 // 🎯 LAYER 1 COMPLETE - SINGLE TYPE SOURCE
 // ========================================
 // Usage: import { ServiceCategory, Language, ApiResponse } from '@shared/types';
+
+

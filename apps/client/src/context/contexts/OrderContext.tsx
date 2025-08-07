@@ -1,3 +1,5 @@
+import type { ServiceRequest } from '../types/common.types';
+import type { Room } from '../types/common.types';
 import {
   ActiveOrder,
   CallSummary,
@@ -5,7 +7,7 @@ import {
   OrderSummary,
   ServiceRequest,
 } from '@/types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import React, {
   createContext,
   useCallback,

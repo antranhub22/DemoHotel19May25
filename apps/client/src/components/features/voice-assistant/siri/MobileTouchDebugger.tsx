@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { DebugPanel } from './components/DebugPanel';
-import { useTouchDebugger } from './hooks/useTouchDebugger';
+import * as React from 'react';
+import { useState } from 'react';
+import { DebugPanel } from './components/DebugPanel.tsx';
+import { useTouchDebugger } from './hooks/useTouchDebugger.ts';
 
 interface MobileTouchDebuggerProps {
   containerId: string;
@@ -10,13 +11,7 @@ interface MobileTouchDebuggerProps {
   enabled?: boolean;
 }
 
-export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
-  containerId,
-  onCallStart,
-  onCallEnd,
-  isListening,
-  enabled = true,
-}) => {
+export const MobileTouchDebugger: React.FC<MobileTouchDebugger> = ({ containerId, onCallStart, onCallEnd, isListening, enabled = true }) => {
   const [isVisible, setIsVisible] = useState(false);
   const { debugInfo, testCallStart, testCallEnd, isEnabled } = useTouchDebugger(
     {

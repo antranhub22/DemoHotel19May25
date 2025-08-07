@@ -3,14 +3,7 @@ import { TrendingUp } from 'lucide-react';
 import React from 'react';
 import type { MetricCardProps } from '../types/dashboard';
 
-export const MetricCard: React.FC<MetricCardProps> = ({
-  title,
-  value,
-  description,
-  icon: Icon,
-  trend,
-  color = 'blue',
-}) => {
+export const MetricCard: React.FC<MetricCard> = ({ title, value, description, icon: Icon, trend, color = 'blue' }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

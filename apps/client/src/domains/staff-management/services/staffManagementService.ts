@@ -3,6 +3,7 @@
  * Service layer for staff management API interactions
  */
 
+import type { Permission } from '@shared/types';
 import {
   CreateStaffPayload,
   CreateTaskPayload,
@@ -14,7 +15,7 @@ import {
   StaffSearchParams,
   StaffTask,
   WorkShift,
-} from "../types/staffManagement.types";
+} from '../types/staffManagement.types';
 
 // ========================================
 // API Configuration

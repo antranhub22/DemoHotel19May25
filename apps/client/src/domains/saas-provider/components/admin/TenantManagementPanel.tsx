@@ -1,10 +1,11 @@
+import * as React from 'react';
 /**
  * Tenant Management Panel
  * Manage hotel tenants - view, create, suspend, activate
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useState } from "react";
+import logger from '@shared/utils/logger';
+import { useState } from 'react';
 import { useTenantManagement } from "../../hooks/usePlatformAdmin";
 import {
   SubscriptionPlan,
@@ -23,11 +24,7 @@ interface CreateTenantModalProps {
   }) => Promise<void>;
 }
 
-const CreateTenantModal: React.FC<CreateTenantModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-}) => {
+const CreateTenantModal: React.FC<CreateTenantModal> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     hotelName: "",
     subdomain: "",

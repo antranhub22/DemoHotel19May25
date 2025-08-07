@@ -4,7 +4,7 @@
  */
 
 import { AppDispatch, RootState } from "@/store";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import {
   addUsageAlert,
   checkFeatureAccess,

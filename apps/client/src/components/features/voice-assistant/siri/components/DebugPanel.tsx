@@ -40,11 +40,7 @@ interface DebugPanelProps {
   testCallEnd: () => void;
 }
 
-export const DebugPanel: React.FC<DebugPanelProps> = ({
-  debugInfo,
-  testCallStart,
-  testCallEnd,
-}) => {
+export const DebugPanel: React.FC<DebugPanel> = ({ debugInfo, testCallStart, testCallEnd }) => {
   return (
     <div
       style={{

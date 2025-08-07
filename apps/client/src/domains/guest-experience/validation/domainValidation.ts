@@ -5,13 +5,14 @@
 
 import { store } from "@/store";
 import { GuestExperienceService } from "../services/guestExperienceService";
+import type { Language } from '@shared/types';
 import {
   initializeGuestJourney,
   selectGuestJourney,
   selectSelectedLanguage,
   setLanguage,
   startVoiceCall,
-} from "../store/guestJourneySlice";
+} from '../store/guestJourneySlice';
 
 /**
  * Validates that Guest Experience domain is properly integrated

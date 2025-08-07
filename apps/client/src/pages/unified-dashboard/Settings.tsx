@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Hotel,
   Bot,
@@ -8,7 +9,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,

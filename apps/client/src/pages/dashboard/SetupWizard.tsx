@@ -1,3 +1,5 @@
+import * as React from 'react';
+import type { Room } from '../types/common.types';
 import {
   AlertCircle,
   ArrowLeft,
@@ -23,7 +25,7 @@ import {
   Volume2,
   Wifi,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -97,12 +99,7 @@ interface StepProps {
 // Step 1: Hotel Search Component
 // ============================================
 
-const HotelSearchStep: React.FC<StepProps> = ({
-  state,
-  onNext,
-  onError,
-  onUpdateState,
-}) => {
+const HotelSearchStep: React.FC<Step> = ({ state, onNext, onError, onUpdateState }) => {
   const handleInputChange = (field: string, value: string) => {
     onUpdateState({
       formData: { ...state.formData, [field]: value },

@@ -4,7 +4,7 @@
  */
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import { billingService } from "../services/billingService";
 import type {
   BillingAnalytics,

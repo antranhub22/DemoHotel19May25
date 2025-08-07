@@ -1,7 +1,8 @@
+import * as React from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import {
   ChevronDown,
   ChevronUp,
@@ -12,8 +13,8 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
+import { useCallback, useEffect, useState } from 'react';
+import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher.tsx';
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;
@@ -28,12 +29,7 @@ interface TouchFeedback {
   haptic: boolean;
 }
 
-export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
-  selectedService,
-  isCallActive = false,
-  onLanguageChange,
-  className = '',
-}) => {
+export const MobileVoiceControls: React.FC<MobileVoiceControls> = ({ selectedService, isCallActive = false, onLanguageChange, className = "" }) => {
   const { language } = useAssistant();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

@@ -3,7 +3,7 @@
  * React hooks for SaaS platform administration
  */
 
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useState } from "react";
 import { platformAdminService } from "../services/platformAdminService";
 import {

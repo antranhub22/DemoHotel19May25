@@ -24,7 +24,7 @@ export type {
   TenantListItem,
   UsageAlert,
   WhiteLabelConfig,
-} from "./types/saasProvider.types";
+} from './types/saasProvider.types.ts';
 
 // Redux Store
 export {
@@ -56,7 +56,7 @@ export {
   updateRealTimeUsage,
   updateSubscriptionPlan,
   updateTenantUsage,
-} from "./store/tenantSlice";
+} from './store/tenantSlice.ts';
 
 // Services
 // NOTE: Service exports temporarily disabled to resolve circular dependency
@@ -79,9 +79,9 @@ export {
   FeatureList,
   VoiceCloningGate,
   WhiteLabelGate,
-} from "./components/FeatureGate";
+} from './components/FeatureGate.tsx';
 
-export { UsageDashboard } from "./components/UsageDashboard";
+export { UsageDashboard } from './components/UsageDashboard.tsx';
 
 // Platform Admin Components
 export {
@@ -95,5 +95,5 @@ export {
 
 // Re-export for convenience
 export { default as PlatformAdminDashboardComponent } from "./components/admin";
-export { default as FeatureGateComponent } from "./components/FeatureGate";
-export { default as UsageDashboardComponent } from "./components/UsageDashboard";
+export { default as FeatureGateComponent } from './components/FeatureGate.tsx';
+export { default as UsageDashboardComponent } from './components/UsageDashboard.tsx';

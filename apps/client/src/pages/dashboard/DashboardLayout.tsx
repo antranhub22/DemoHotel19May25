@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   BarChart,
   Bell,
@@ -10,7 +11,7 @@ import {
   Settings,
   Users,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import Sidebar from '@/components/features/dashboard/dashboard/Sidebar';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -223,9 +224,7 @@ const UserMenu = ({ tenant }: { tenant: TenantData }) => (
 );
 
 // Main dashboard layout component
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  children,
-}) => {
+export const DashboardLayout: React.FC<DashboardLayout> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [location] = useLocation();
   const { tenant, logout } = useAuth();

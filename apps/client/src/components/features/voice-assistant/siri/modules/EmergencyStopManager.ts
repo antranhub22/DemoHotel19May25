@@ -1,5 +1,5 @@
 // ✅ FIXED: Import missing types
-import type { DebugManager } from './DebugManager';
+import type { DebugManager } from './DebugManager.ts';
 
 export interface EmergencyState {
   emergencyStopRequested: boolean;

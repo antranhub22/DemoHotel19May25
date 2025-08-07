@@ -1,3 +1,4 @@
+import * as React from 'react';
 /**
  * Customer Requests - Refactored with Request Management Domain
  * Redux-based implementation replacing context and local state
@@ -31,7 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import {
   AlertCircle,
   Calendar,
@@ -46,7 +47,7 @@ import {
   Send,
   User,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // ========================================
 // Domain Imports - NEW Redux Architecture
@@ -92,12 +93,7 @@ interface RequestDetailModalProps {
   onOpenMessage: () => void;
 }
 
-const RequestDetailModal: React.FC<RequestDetailModalProps> = ({
-  request,
-  isOpen,
-  onClose,
-  onOpenMessage,
-}) => {
+const RequestDetailModal: React.FC<RequestDetailModal> = ({ request, isOpen, onClose, onOpenMessage }) => {
   const { updateStatus, isUpdating } = useRequestStatus();
   const [selectedStatus, setSelectedStatus] = useState(request.status);
 

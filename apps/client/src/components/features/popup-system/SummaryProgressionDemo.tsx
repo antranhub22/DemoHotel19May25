@@ -1,7 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { SummaryProgression } from './SummaryProgression';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { SummaryProgression } from './SummaryProgression.tsx';
 
-export const SummaryProgressionDemo: React.FC = () => {
+export 
+interface SummaryProgressionDemoProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for SummaryProgressionDemo
+}
+
+const SummaryProgressionDemo: React.FC<SummaryProgressionDemoProps> = () => {
   const [status, setStatus] = useState<
     'idle' | 'processing' | 'completed' | 'error'
   >('idle');

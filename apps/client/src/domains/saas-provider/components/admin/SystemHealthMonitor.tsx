@@ -1,10 +1,11 @@
+import * as React from 'react';
 /**
  * System Health Monitor
  * Monitor platform health, services, and alerts
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useState } from "react";
+import logger from '@shared/utils/logger';
+import { useState } from 'react';
 import { useSystemHealth } from "../../hooks/usePlatformAdmin";
 
 export const SystemHealthMonitor: React.FC = () => {

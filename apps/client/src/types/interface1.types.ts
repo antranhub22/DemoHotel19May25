@@ -1,18 +1,7 @@
+import type { Room } from '../types/common.types';
 import type { LucideIcon } from 'lucide-react';
-import {
-  Bed,
-  Bell,
-  Car,
-  MapPin,
-  Phone,
-  Sparkles,
-  Utensils,
-  Waves,
-  Wine,
-} from 'lucide-react';
 
 // Core types for Interface1
-export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 
 export interface CallDetails {
   id: string;

@@ -1,6 +1,7 @@
+import type { Room } from '../types/common.types';
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useCallback, useMemo, useState } from 'react';
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {

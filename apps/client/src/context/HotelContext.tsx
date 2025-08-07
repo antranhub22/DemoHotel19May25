@@ -10,7 +10,7 @@ import {
   useHotelConfiguration,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {
@@ -116,7 +116,7 @@ interface HotelProviderProps {
 
 // Xóa hoàn toàn HotelConfigLoader và mọi logic liên quan đến loading/error ở cấp context
 // Trong HotelProvider, chỉ cần:
-export const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
+export const HotelProvider: React.FC<HotelProvider> = ({ children }) => {
   logger.debug('[DEBUG] HotelProvider rendered', 'Component');
   const hotelConfigHook = useHotelConfiguration();
   const { config, isLoading, error, reload } = hotelConfigHook;

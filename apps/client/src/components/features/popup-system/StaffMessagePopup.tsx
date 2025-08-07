@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 interface Message {
   id: string;
   sender: string;
@@ -13,12 +14,7 @@ interface StaffMessagePopupProps {
   loading?: boolean;
 }
 
-const StaffMessagePopup: React.FC<StaffMessagePopupProps> = ({
-  messages,
-  onSend,
-  onClose,
-  loading,
-}) => {
+const StaffMessagePopup: React.FC<StaffMessagePopup> = ({ messages, onSend, onClose, loading = false }) => {
   const [input, setInput] = useState('');
 
   const handleSend = () => {

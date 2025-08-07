@@ -1,16 +1,17 @@
+import * as React from 'react';
 /**
  * Platform Admin Dashboard
  * Main dashboard for SaaS platform administration
  */
 
-import { logger } from "@shared/utils/logger";
-import React, { useState } from "react";
+import logger from '@shared/utils/logger';
+import { useState } from 'react';
 import { usePlatformAdmin } from "../../hooks/usePlatformAdmin";
-import { FeatureRolloutManager } from "./FeatureRolloutManager";
-import { MetricsOverview } from "./MetricsOverview";
-import { RevenueAnalytics } from "./RevenueAnalytics";
-import { SystemHealthMonitor } from "./SystemHealthMonitor";
-import { TenantManagementPanel } from "./TenantManagementPanel";
+import { FeatureRolloutManager } from './FeatureRolloutManager.tsx';
+import { MetricsOverview } from './MetricsOverview.tsx';
+import { RevenueAnalytics } from './RevenueAnalytics.tsx';
+import { SystemHealthMonitor } from './SystemHealthMonitor.tsx';
+import { TenantManagementPanel } from './TenantManagementPanel.tsx';
 
 type TabType = "overview" | "tenants" | "health" | "features" | "analytics";
 

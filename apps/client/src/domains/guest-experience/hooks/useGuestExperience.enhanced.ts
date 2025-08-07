@@ -4,9 +4,9 @@
  * Combines Guest Experience with feature gating, usage tracking, and billing
  */
 
-import { logger } from "@shared/utils/logger";
-import { useCallback, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import logger from '@shared/utils/logger';
+import { useCallback, useEffect, useState } from "react";
 
 // ✅ NEW: SaaS Provider integration
 import {
@@ -52,7 +52,8 @@ export const useEnhancedGuestExperience = () => {
   // ✅ NEW: SaaS Provider hooks
   const { currentTenant } = useTenantManagement();
   const { canAccess, getAvailability } = useFeatureGating();
-  const { trackUsage, stats, alerts, healthScore } = useUsageMonitoring();
+  const usageMonitoring = useUsageMonitoring();
+  const { stats, healthScore } = usageMonitoring;
 
   // Guest Experience selectors
   const journey = useAppSelector(selectGuestJourney);
@@ -111,12 +112,7 @@ export const useEnhancedGuestExperience = () => {
         warningMessage,
       });
 
-      logger.debug("[EnhancedGuestExperience] Usage status updated:", {
-        canMakeCalls,
-        remainingMinutes,
-        remainingCalls,
-        warningMessage,
-      });
+      logger.debug(`[EnhancedGuestExperience] Usage status updated - canMakeCalls: ${canMakeCalls}, remainingMinutes: ${remainingMinutes}, remainingCalls: ${remainingCalls}`);
     } catch (error) {
       logger.error(
         "[EnhancedGuestExperience] Error updating usage status:",
@@ -145,13 +141,7 @@ export const useEnhancedGuestExperience = () => {
       }),
     );
 
-    logger.debug(
-      "[EnhancedGuestExperience] Journey initialized with tenant context:",
-      {
-        tenantId: currentTenant.id,
-        isFirstTime: journeyData.isFirstTime,
-      },
-    );
+    logger.debug(`[EnhancedGuestExperience] Journey initialized with tenant context - tenantId: ${currentTenant.id}, isFirstTime: ${journeyData.isFirstTime}`);
   }, [dispatch, currentTenant]);
 
   // ✅ ENHANCED: Language selection with tenant context
@@ -180,10 +170,7 @@ export const useEnhancedGuestExperience = () => {
       );
       dispatch(setLanguage(language));
 
-      logger.debug("[EnhancedGuestExperience] Language selected:", {
-        language,
-        tenantId: currentTenant.id,
-      });
+      logger.debug(`[EnhancedGuestExperience] Language selected - language: ${language}, tenantId: ${currentTenant.id}`);
     },
     [dispatch, currentTenant, canAccess, getAvailability],
   );
@@ -214,7 +201,7 @@ export const useEnhancedGuestExperience = () => {
         }
 
         // ✅ NEW: Check specific voice cloning feature
-        if (serviceContext?.voiceCloning && !canAccess("voiceCloning")) {
+        if (serviceContext && !canAccess("voiceCloning")) {
           throw new Error(
             `Voice cloning requires ${getAvailability("voiceCloning").requiredPlan} plan or higher`,
           );
@@ -259,11 +246,7 @@ export const useEnhancedGuestExperience = () => {
         // Update usage status
         await updateUsageStatus();
 
-        logger.debug("[EnhancedGuestExperience] Enhanced call started:", {
-          callId: callSession.id,
-          tenantId: currentTenant.id,
-          language,
-        });
+        logger.debug("[EnhancedGuestExperience] Enhanced call started:");
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Failed to start call";
@@ -341,18 +324,14 @@ export const useEnhancedGuestExperience = () => {
           endVoiceCall({
             endTime: new Date(),
             duration: callDuration,
-            summary,
+            summary: typeof summary === 'string' ? { text: summary, confidence: 0.8 } : summary,
           }),
         );
 
         // Update usage status after call
         await updateUsageStatus();
 
-        logger.debug("[EnhancedGuestExperience] Enhanced call ended:", {
-          callId: currentCallSession.id,
-          duration: callDuration,
-          tenantId: currentTenant.id,
-        });
+        logger.debug("[EnhancedGuestExperience] Enhanced call ended:");
       } catch (error) {
         logger.error("[EnhancedGuestExperience] Error ending call:", error);
         throw error;
@@ -384,11 +363,7 @@ export const useEnhancedGuestExperience = () => {
       );
       dispatch(addTranscript(transcript));
 
-      logger.debug("[EnhancedGuestExperience] Transcript added:", {
-        transcriptId: transcript.id,
-        type,
-        tenantId: currentTenant.id,
-      });
+      logger.debug("[EnhancedGuestExperience] Transcript added:");
     },
     [dispatch, selectedLanguage, currentTenant],
   );

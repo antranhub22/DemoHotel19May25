@@ -6,7 +6,7 @@
 // ========================================
 // Core Services
 // ========================================
-export * from "./ReferenceService";
+export * from './ReferenceService.ts';
 
 // ========================================
 // Dashboard API Services
@@ -22,7 +22,7 @@ export {
   BACKGROUND_SOUND_OPTIONS,
   validateHotelData,
   validateAssistantCustomization,
-} from "./dashboardApi";
+} from './dashboardApi.ts';
 
 // ========================================
 // Note: OpenAI services removed in Layer 4 cleanup

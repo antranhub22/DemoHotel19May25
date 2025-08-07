@@ -1,7 +1,14 @@
 import React from 'react';
 import { designSystem } from '@/styles/designSystem';
 
-export const LoadingState: React.FC = () => {
+export 
+interface LoadingStateProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for LoadingState
+}
+
+const LoadingState: React.FC<LoadingStateProps> = () => {
   return (
     <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"

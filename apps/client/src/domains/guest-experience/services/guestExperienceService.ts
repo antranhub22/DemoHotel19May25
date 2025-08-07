@@ -4,6 +4,7 @@
  * ⚠️ NOTE: This service DOES NOT modify existing API endpoints or database
  */
 
+import type { Language } from '@shared/types';
 import type {
   CallSession,
   CallSummary,

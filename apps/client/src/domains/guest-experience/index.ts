@@ -15,7 +15,7 @@ export type {
   ServiceContext,
   Transcript,
   VoiceInteractionState,
-} from "./types/guestExperience.types";
+} from './types/guestExperience.types.ts';
 
 // Redux Store
 export {
@@ -49,9 +49,9 @@ export {
   setVoiceInteractionLoading,
   startVoiceCall,
   updateMicLevel,
-} from "./store/guestJourneySlice";
+} from './store/guestJourneySlice.ts';
 
-export type { GuestExperienceState } from "./store/guestJourneySlice";
+export type { GuestExperienceState } from './store/guestJourneySlice.ts';
 
 // Services
 // NOTE: Service exports temporarily disabled to resolve circular dependency
@@ -66,6 +66,6 @@ export {
   useAssistantAdapter,
   useAssistantMigrationHelper,
   useEnhancedAssistantAdapter,
-} from "./adapters/useAssistantAdapter";
+} from './adapters/useAssistantAdapter.ts';
 
-export type { LegacyAssistantInterface } from "./adapters/useAssistantAdapter";
+export type { LegacyAssistantInterface } from './adapters/useAssistantAdapter.ts';

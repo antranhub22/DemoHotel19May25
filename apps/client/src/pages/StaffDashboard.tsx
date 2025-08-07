@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import * as React from 'react';
+import type { Room } from '../types/common.types';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import StaffRequestDetailModal from "@/components/features/dashboard/StaffRequestDetailModal";
 import StaffMessagePopup from "@/components/features/popup-system/StaffMessagePopup";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 
 const statusOptions = [
   "Tất cả",

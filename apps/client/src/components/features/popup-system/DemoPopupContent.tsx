@@ -1,3 +1,4 @@
+import type { Room } from '../types/common.types';
 import React from 'react';
 
 // ===============================================
@@ -6,7 +7,14 @@ import React from 'react';
 // This file contains DEMO UI components for testing and demonstration.
 // Production components are in separate files (e.g., SummaryPopupContent.tsx)
 
-export const ConversationDemoContent: React.FC = () => {
+export 
+interface ConversationDemoContentProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for ConversationDemoContent
+}
+
+const ConversationDemoContent: React.FC<ConversationDemoContentProps> = () => {
   return (
     <div style={{ padding: '16px', minHeight: '200px' }}>
       <div style={{ marginBottom: '16px' }}>

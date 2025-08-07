@@ -4,7 +4,7 @@
 
 import { useAssistant } from '@/context';
 import { ActiveOrder } from '@/types/core';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 

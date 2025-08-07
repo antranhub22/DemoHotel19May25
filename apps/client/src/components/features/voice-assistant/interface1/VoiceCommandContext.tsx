@@ -1,7 +1,9 @@
+import * as React from 'react';
 /// <reference types="vite/client" />
 
 // Type declaration for import.meta
 
+import type { Room } from '../types/common.types';
 import {
   Eye,
   EyeOff,
@@ -12,12 +14,12 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAssistant } from '@/context';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Language, ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
-import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper';
+import logger from '@shared/utils/logger';
+import { addMultiLanguageNotification } from './MultiLanguageNotificationHelper.ts';
 
 interface VoicePrompt {
   service: string;
@@ -320,12 +322,7 @@ const VOICE_PROMPTS: Record<
   },
 };
 
-export const VoiceCommandContext: React.FC<VoiceCommandContextProps> = ({
-  selectedService,
-  isCallActive = false,
-  onVoicePromptReady,
-  className = '',
-}) => {
+export const VoiceCommandContext: React.FC<VoiceCommandContext> = ({ selectedService, isCallActive = false, onVoicePromptReady, className = "" }) => {
   const { language } = useAssistant();
   const [currentPrompt, setCurrentPrompt] = useState<VoicePrompt | null>(null);
   const [isReady, setIsReady] = useState(false);

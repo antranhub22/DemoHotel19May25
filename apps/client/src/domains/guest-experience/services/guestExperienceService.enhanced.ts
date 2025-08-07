@@ -4,11 +4,11 @@
  * ✅ ENHANCED: Now includes tenant context, feature gating, and usage tracking
  */
 
-import { logger } from "@shared/utils/logger";
+import type { Language } from '@shared/types';
+import logger from '@shared/utils/logger';
 import type {
   CallSession,
   CallSummary,
-  Language,
   ServiceContext,
   Transcript,
 } from "../types/guestExperience.types";

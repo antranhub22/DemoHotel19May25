@@ -3,6 +3,7 @@
  * Unit tests for business logic functions
  */
 
+import type { Room } from '../types/common.types';
 import { GuestExperienceService } from "../services/guestExperienceService";
 import type { Language } from "../types/guestExperience.types";
 

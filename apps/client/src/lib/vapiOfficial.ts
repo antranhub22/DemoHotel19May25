@@ -2,7 +2,7 @@
 // Based on: https://docs.vapi.ai/quickstart/web
 // Enhanced for compatibility with existing codebase
 
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import Vapi from "@vapi-ai/web";
 
 export interface VapiOfficialConfig {

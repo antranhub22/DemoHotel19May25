@@ -3,11 +3,11 @@
  */
 
 // Text processing
-export { processText, applySmartSpacing } from './textProcessing';
+export { processText, applySmartSpacing } from './textProcessing.ts';
 
 // Dictionary
-export { findInDictionary } from './dictionary';
+export { findInDictionary } from './dictionary.ts';
 
 // Dictionary data
-export { englishDictionary } from './dictionary/englishDictionary';
+export { englishDictionary } from './dictionary/englishDictionary.ts';
 export { default as dictionaryData } from './dictionary/dictionary.json';

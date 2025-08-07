@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 import { useEffect, useRef } from 'react';
-import { useDebugMode } from './DebugWrapper';
+import { useDebugMode } from './DebugWrapper.tsx';
 
 interface PerformanceMonitorProps {
   componentName: string;
@@ -10,10 +10,7 @@ interface PerformanceMonitorProps {
 /**
  * PerformanceMonitor - Monitors component performance in development
  */
-export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
-  componentName,
-  children,
-}) => {
+export const PerformanceMonitor: React.FC<PerformanceMonitor> = ({ componentName, children }) => {
   const isDevelopment = useDebugMode();
   const renderCount = useRef(0);
   const lastRenderTime = useRef(performance.now());

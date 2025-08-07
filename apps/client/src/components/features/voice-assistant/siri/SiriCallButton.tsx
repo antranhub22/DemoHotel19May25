@@ -1,13 +1,14 @@
+import * as React from 'react';
 /// <reference types="vite/client" />
 
 import { Language } from "@/types/interface1.types";
-import { logger } from "@shared/utils/logger";
-import React, { useEffect } from "react";
+import logger from '@shared/utils/logger';
+import { useEffect } from 'react';
 import "../../../../styles/voice-interface.css";
-import { SiriButtonVisual } from "./components/SiriButtonVisual";
-import { useSiriButtonEvents } from "./hooks/useSiriButtonEvents";
-import { useSiriButtonState } from "./hooks/useSiriButtonState";
-import { useSiriButtonVisual } from "./hooks/useSiriButtonVisual";
+import { SiriButtonVisual } from './components/SiriButtonVisual.tsx';
+import { useSiriButtonEvents } from './hooks/useSiriButtonEvents.ts';
+import { useSiriButtonState } from './hooks/useSiriButtonState.ts';
+import { useSiriButtonVisual } from './hooks/useSiriButtonVisual.ts';
 
 interface SiriCallButtonProps {
   isListening: boolean;
@@ -24,14 +25,7 @@ interface SiriCallButtonProps {
   };
 }
 
-const SiriCallButton: React.FC<SiriCallButtonProps> = ({
-  isListening,
-  volumeLevel,
-  containerId,
-  onCallStart,
-  onCallEnd,
-  colors,
-}) => {
+const SiriCallButton: React.FC<SiriCallButton> = ({ isListening, volumeLevel, containerId, onCallStart, onCallEnd, colors }) => {
   // Component render debug - Development only
   if (import.meta.env.DEV) {
     logger.debug(

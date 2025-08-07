@@ -14,14 +14,7 @@ interface Interface1MobileProps {
   handleCallEnd: () => void;
 }
 
-export const Interface1Mobile: React.FC<Interface1MobileProps> = ({
-  isCallStarted,
-  micLevel,
-  showConversation,
-  showingSummary,
-  handleCallStart,
-  handleCallEnd,
-}) => {
+export const Interface1Mobile: React.FC<Interface1Mobile> = ({ isCallStarted, micLevel, showConversation, showingSummary, handleCallStart, handleCallEnd }) => {
   return (
     <div className="block md:hidden">
       <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">

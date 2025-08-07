@@ -9,12 +9,7 @@ interface SiriButtonStatusProps {
   colors: LanguageColorScheme;
 }
 
-export const SiriButtonStatus: React.FC<SiriButtonStatusProps> = ({
-  isCallStarted,
-  isConfirming,
-  language,
-  colors,
-}) => {
+export const SiriButtonStatus: React.FC<SiriButtonStatus> = ({ isCallStarted, isConfirming, language, colors }) => {
   return (
     <>
       {/* Enhanced Status text with better accessibility */}

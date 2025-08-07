@@ -1,5 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { logger } from '@shared/utils/logger';
+import * as React from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
+import logger from '@shared/utils/logger';
+import type { Language } from '@shared/types';
 
 export type Language = 'en' | 'fr' | 'zh' | 'ru' | 'ko' | 'vi';
 

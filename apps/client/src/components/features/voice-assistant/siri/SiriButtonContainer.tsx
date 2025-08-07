@@ -5,13 +5,13 @@
 import { useAssistant } from '@/context';
 import { useSiriResponsiveSize } from '@/hooks/useSiriResponsiveSize';
 import { Language } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import React from 'react';
-import { MobileTouchDebugger } from './MobileTouchDebugger';
-import SiriCallButton from './SiriCallButton';
-import { SiriButtonStatus } from './components/SiriButtonStatus';
-import { useCallProtection } from './hooks/useCallProtection';
-import { useLanguageColors } from './hooks/useLanguageColors';
+import { MobileTouchDebugger } from './MobileTouchDebugger.tsx';
+import SiriCallButton from './SiriCallButton.tsx';
+import { SiriButtonStatus } from './components/SiriButtonStatus.tsx';
+import { useCallProtection } from './hooks/useCallProtection.ts';
+import { useLanguageColors } from './hooks/useLanguageColors.ts';
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -24,12 +24,7 @@ interface SiriButtonContainerProps {
   _showingSummary?: boolean; // ✅ NEW: Internal state for summary display
 }
 
-export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
-  isCallStarted,
-  micLevel,
-  onCallStart,
-  onCallEnd,
-}) => {
+export const SiriButtonContainer: React.FC<SiriButtonContainer> = ({ isCallStarted, micLevel, onCallStart, onCallEnd }) => {
   const { language } = useAssistant();
   const responsiveSize = useSiriResponsiveSize();
 

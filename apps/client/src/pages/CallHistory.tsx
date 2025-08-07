@@ -1,5 +1,7 @@
+import * as React from 'react';
+import type { Room } from '../types/common.types';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import type { CallSummary } from '@/types'; // ✅ FIXED: Add missing CallSummary import
 

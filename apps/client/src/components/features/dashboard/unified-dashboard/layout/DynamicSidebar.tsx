@@ -1,5 +1,6 @@
+import * as React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { usePermissionCheck } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,14 @@ const getIconComponent = (iconStr: string) => {
 };
 
 // Menu item component with permission checking
-const MenuItemComponent: React.FC<{
+
+interface MenuItemComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for MenuItemComponent
+}
+
+const MenuItemComponent: React.FC<MenuItemComponentPropsProps> = ({
   item: MenuItem;
   isActive: boolean;
   hasChildren: boolean;
@@ -124,11 +132,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
  * - Supports nested menu items with expandable/collapsible sections
  * - Responsive design with mobile support
  */
-export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
-  isOpen,
-  onClose,
-  className,
-}) => {
+export const DynamicSidebar: React.FC<DynamicSidebar> = ({ isOpen, onClose, className = "" }) => {
   const [location] = useLocation();
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());

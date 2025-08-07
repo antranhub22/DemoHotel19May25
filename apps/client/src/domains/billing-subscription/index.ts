@@ -47,7 +47,7 @@ export type {
 
   // Webhook Types
   BillingWebhookEvent,
-} from "./types/billing.types";
+} from './types/billing.types.ts';
 
 // ============================================
 // CONSTANTS EXPORTS
@@ -58,7 +58,7 @@ export {
   BILLING_CYCLES,
   PLAN_LIMITS,
   PLAN_FEATURES,
-} from "./types/billing.types";
+} from './types/billing.types.ts';
 
 // ============================================
 // SERVICE EXPORTS
@@ -120,10 +120,10 @@ export {
   setProcessingPayment,
   addBillingUpdate,
   clearBillingData,
-} from "./store/billingSlice";
+} from './store/billingSlice.ts';
 
 // Default export for the reducer
-export { default as billingReducer } from "./store/billingSlice";
+export { default as billingReducer } from './store/billingSlice.ts';
 
 // ============================================
 // HOOKS EXPORTS
@@ -391,7 +391,7 @@ import type {
   BillingError,
   BillingNotification,
   BillingWebhookEvent,
-} from "./types/billing.types";
+} from './types/billing.types.ts';
 
 // ============================================
 // FEATURE FLAGS & CONSTANTS

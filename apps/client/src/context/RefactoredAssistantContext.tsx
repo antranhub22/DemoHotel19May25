@@ -8,6 +8,8 @@ declare global {
   }
 }
 
+import type { ServiceRequest } from '../types/common.types';
+import type { Language } from '@shared/types';
 import React, {
   createContext,
   ReactNode,
@@ -40,12 +42,12 @@ import {
   ServiceRequest,
   Transcript,
 } from "@/types";
-import { logger } from "@shared/utils/logger";
-import { useAuth } from "./AuthContext";
+import logger from '@shared/utils/logger';
+import { useAuth } from './AuthContext.tsx';
 import {
   TranscriptProvider,
   useTranscript,
-} from "./contexts/TranscriptContext";
+} from './contexts/TranscriptContext.tsx';
 // Define Language type
 export type Language = "en" | "fr" | "zh" | "ru" | "ko" | "vi";
 

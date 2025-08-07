@@ -1,3 +1,4 @@
+import * as React from 'react';
 /**
  * VoiceAssistant - Guest Experience with Domain-Driven Architecture
  * Mobile-First Guest Experience using Domain-Driven Architecture
@@ -29,12 +30,19 @@ import {
 } from "@/domains/guest-experience/hooks/useGuestExperience";
 import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
 import { useConfirmHandler } from "@/hooks/useConfirmHandler";
-import { logger } from "@shared/utils/logger";
-import React, { useEffect } from "react";
+import logger from '@shared/utils/logger';
+import { useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
-const GlobalPopupSystemProvider: React.FC<{ children: React.ReactNode }> = ({
+
+interface GlobalPopupSystemProviderProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for GlobalPopupSystemProvider
+}
+
+const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderPropsProps> = ({ children: React.ReactNode }> = ({
   children,
 }) => {
   const popupSystem = usePopup();

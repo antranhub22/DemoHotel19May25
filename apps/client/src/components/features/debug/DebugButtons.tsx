@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import { usePopup } from '../popup-system/PopupManager';
-import { DebugWrapper } from './DebugWrapper';
+import { DebugWrapper } from './DebugWrapper.tsx';
 
 // Debug Buttons Component - Extracted from Interface1.tsx
 export const DebugButtons = () => {

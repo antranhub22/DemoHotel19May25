@@ -4,5 +4,5 @@ export {
   StaffOnly,
   ITOnly,
   usePermissionCheck,
-} from './guards/PermissionGuard';
-export { UnifiedDashboardLayout } from './UnifiedDashboardLayout';
+} from './guards/PermissionGuard.tsx';
+export { UnifiedDashboardLayout } from './UnifiedDashboardLayout.tsx';

@@ -1,7 +1,7 @@
 import { useAssistant } from '@/context';
 import { usePopupContext } from '@/context/PopupContext';
 import { DebugLog } from '../debug/DebugWrapper';
-import { SummaryPopupContent } from './SummaryPopupContent';
+import { SummaryPopupContent } from './SummaryPopupContent.tsx';
 
 // Mobile Summary Popup Component - Extracted from Interface1.tsx
 export const MobileSummaryPopup = () => {

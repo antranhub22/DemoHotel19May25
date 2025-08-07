@@ -1,3 +1,4 @@
+import * as React from 'react';
 /**
  * Lazy Loading Utilities for Memory Optimization
  * Giảm initial bundle size và memory footprint

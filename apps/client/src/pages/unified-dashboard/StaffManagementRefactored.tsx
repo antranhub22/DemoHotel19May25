@@ -1,3 +1,4 @@
+import * as React from 'react';
 /**
  * Staff Management Refactored Component
  * Redux-based staff management with domain-driven architecture
@@ -40,7 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import {
   Calendar,
   CheckCircle,
@@ -58,7 +59,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // ========================================
 // Staff Management Domain Imports
@@ -127,11 +128,7 @@ interface StaffFormDialogProps {
   staff?: StaffMember | null;
 }
 
-const StaffFormDialog: React.FC<StaffFormDialogProps> = ({
-  isOpen,
-  onClose,
-  staff,
-}) => {
+const StaffFormDialog: React.FC<StaffFormDialog> = ({ isOpen, onClose, staff }) => {
   const { createNewStaff, updateExistingStaff, isSaving } =
     useStaffManagement();
   const isEdit = !!staff;

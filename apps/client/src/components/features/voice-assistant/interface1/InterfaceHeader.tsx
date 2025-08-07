@@ -1,5 +1,12 @@
 import React from 'react';
-export const InterfaceHeader: React.FC = () => {
+export 
+interface InterfaceHeaderProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for InterfaceHeader
+}
+
+const InterfaceHeader: React.FC<InterfaceHeaderProps> = () => {
   return (
     <div
       className="w-full flex justify-center items-center py-8"

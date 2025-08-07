@@ -1,7 +1,7 @@
 import { useAssistant } from '@/context';
 import { designSystem } from '@/styles/designSystem';
 import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { forwardRef, useCallback, useState } from 'react';
 
 interface ServiceGridProps {

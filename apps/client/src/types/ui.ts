@@ -1,3 +1,4 @@
+import * as React from 'react';
 /* ========================================
    UI TYPES - USER INTERFACE TYPE DEFINITIONS
    ======================================== */

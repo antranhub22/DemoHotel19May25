@@ -4,7 +4,7 @@
  */
 
 import { apiClient } from "@shared/utils/apiClient";
-import { logger } from "@shared/utils/logger";
+import logger from '@shared/utils/logger';
 import {
   FeatureFlag,
   PlatformMetrics,

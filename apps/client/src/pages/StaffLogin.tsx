@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import * as React from 'react';
+import { useState } from 'react';
 interface StaffLoginProps {
   onLogin: () => void;
 }
 
-const StaffLogin: React.FC<StaffLoginProps> = ({ onLogin }) => {
+const StaffLogin: React.FC<StaffLogin> = ({ onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
