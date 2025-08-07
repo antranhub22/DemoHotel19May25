@@ -4,7 +4,7 @@
  */
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import { billingService } from "../services/billingService";
 import type {
   BillingAnalytics,
@@ -33,7 +33,7 @@ import type {
 // Subscription Management
 export const fetchSubscriptions = createAsyncThunk(
   "billing/fetchSubscriptions",
-  async (tenantId?: string, { rejectWithValue }) => {
+  async (tenantId?: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getSubscriptions(tenantId);
     } catch (error: any) {
@@ -49,7 +49,7 @@ export const fetchSubscriptions = createAsyncThunk(
 
 export const fetchSubscription = createAsyncThunk(
   "billing/fetchSubscription",
-  async (subscriptionId: string, { rejectWithValue }) => {
+  async (subscriptionId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getSubscription(subscriptionId);
     } catch (error: any) {
@@ -65,7 +65,7 @@ export const fetchSubscription = createAsyncThunk(
 
 export const createSubscription = createAsyncThunk(
   "billing/createSubscription",
-  async (payload: CreateSubscriptionPayload, { rejectWithValue }) => {
+  async (payload: CreateSubscriptionPayload, { rejectWithValue }: any) => {
     try {
       return await billingService.createSubscription(payload);
     } catch (error: any) {
@@ -81,7 +81,7 @@ export const createSubscription = createAsyncThunk(
 
 export const updateSubscription = createAsyncThunk(
   "billing/updateSubscription",
-  async (payload: UpdateSubscriptionPayload, { rejectWithValue }) => {
+  async (payload: UpdateSubscriptionPayload, { rejectWithValue }: any) => {
     try {
       return await billingService.updateSubscription(payload);
     } catch (error: any) {
@@ -97,7 +97,7 @@ export const updateSubscription = createAsyncThunk(
 
 export const cancelSubscription = createAsyncThunk(
   "billing/cancelSubscription",
-  async (payload: CancelSubscriptionPayload, { rejectWithValue }) => {
+  async (payload: CancelSubscriptionPayload, { rejectWithValue }: any) => {
     try {
       return await billingService.cancelSubscription(payload);
     } catch (error: any) {
@@ -113,7 +113,7 @@ export const cancelSubscription = createAsyncThunk(
 
 export const reactivateSubscription = createAsyncThunk(
   "billing/reactivateSubscription",
-  async (subscriptionId: string, { rejectWithValue }) => {
+  async (subscriptionId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.reactivateSubscription(subscriptionId);
     } catch (error: any) {
@@ -130,7 +130,7 @@ export const reactivateSubscription = createAsyncThunk(
 // Pricing & Plans
 export const fetchPricingConfig = createAsyncThunk(
   "billing/fetchPricingConfig",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue }: any) => {
     try {
       return await billingService.getPricingConfig();
     } catch (error: any) {
@@ -147,7 +147,7 @@ export const fetchPricingConfig = createAsyncThunk(
 // Payment Methods
 export const fetchPaymentMethods = createAsyncThunk(
   "billing/fetchPaymentMethods",
-  async (tenantId?: string, { rejectWithValue }) => {
+  async (tenantId?: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getPaymentMethods(tenantId);
     } catch (error: any) {
@@ -163,7 +163,7 @@ export const fetchPaymentMethods = createAsyncThunk(
 
 export const addPaymentMethod = createAsyncThunk(
   "billing/addPaymentMethod",
-  async (paymentMethodData: any, { rejectWithValue }) => {
+  async (paymentMethodData: any, { rejectWithValue }: any) => {
     try {
       return await billingService.addPaymentMethod(paymentMethodData);
     } catch (error: any) {
@@ -179,7 +179,7 @@ export const addPaymentMethod = createAsyncThunk(
 
 export const removePaymentMethod = createAsyncThunk(
   "billing/removePaymentMethod",
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, { rejectWithValue }: any) => {
     try {
       await billingService.removePaymentMethod(paymentMethodId);
       return paymentMethodId;
@@ -196,7 +196,7 @@ export const removePaymentMethod = createAsyncThunk(
 
 export const setDefaultPaymentMethod = createAsyncThunk(
   "billing/setDefaultPaymentMethod",
-  async (paymentMethodId: string, { rejectWithValue }) => {
+  async (paymentMethodId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.setDefaultPaymentMethod(paymentMethodId);
     } catch (error: any) {
@@ -213,7 +213,7 @@ export const setDefaultPaymentMethod = createAsyncThunk(
 // Payment Processing
 export const createPaymentIntent = createAsyncThunk(
   "billing/createPaymentIntent",
-  async (payload: CreatePaymentIntentPayload, { rejectWithValue }) => {
+  async (payload: CreatePaymentIntentPayload, { rejectWithValue }: any) => {
     try {
       return await billingService.createPaymentIntent(payload);
     } catch (error: any) {
@@ -229,7 +229,7 @@ export const createPaymentIntent = createAsyncThunk(
 
 export const confirmPayment = createAsyncThunk(
   "billing/confirmPayment",
-  async (payload: ProcessPaymentPayload, { rejectWithValue }) => {
+  async (payload: ProcessPaymentPayload, { rejectWithValue }: any) => {
     try {
       return await billingService.confirmPayment(payload);
     } catch (error: any) {
@@ -256,7 +256,7 @@ export const fetchInvoices = createAsyncThunk(
       limit?: number;
       offset?: number;
     },
-    { rejectWithValue },
+    { rejectWithValue }: any,
   ) => {
     try {
       return await billingService.getInvoices(tenantId, limit, offset);
@@ -273,7 +273,7 @@ export const fetchInvoices = createAsyncThunk(
 
 export const fetchInvoice = createAsyncThunk(
   "billing/fetchInvoice",
-  async (invoiceId: string, { rejectWithValue }) => {
+  async (invoiceId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getInvoice(invoiceId);
     } catch (error: any) {
@@ -289,7 +289,7 @@ export const fetchInvoice = createAsyncThunk(
 
 export const fetchUpcomingInvoice = createAsyncThunk(
   "billing/fetchUpcomingInvoice",
-  async (tenantId: string, { rejectWithValue }) => {
+  async (tenantId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getUpcomingInvoice(tenantId);
     } catch (error: any) {
@@ -305,7 +305,7 @@ export const fetchUpcomingInvoice = createAsyncThunk(
 
 export const downloadInvoice = createAsyncThunk(
   "billing/downloadInvoice",
-  async (invoiceId: string, { rejectWithValue }) => {
+  async (invoiceId: string, { rejectWithValue }: any) => {
     try {
       const blob = await billingService.downloadInvoice(invoiceId);
       const url = URL.createObjectURL(blob);
@@ -329,7 +329,7 @@ export const downloadInvoice = createAsyncThunk(
 // Usage & Analytics
 export const fetchCurrentUsage = createAsyncThunk(
   "billing/fetchCurrentUsage",
-  async (tenantId: string, { rejectWithValue }) => {
+  async (tenantId: string, { rejectWithValue }: any) => {
     try {
       return await billingService.getCurrentUsage(tenantId);
     } catch (error: any) {
@@ -355,7 +355,7 @@ export const fetchUsageHistory = createAsyncThunk(
       startDate: Date;
       endDate: Date;
     },
-    { rejectWithValue },
+    { rejectWithValue }: any,
   ) => {
     try {
       return await billingService.getUsageHistory(tenantId, startDate, endDate);
@@ -382,7 +382,7 @@ export const fetchBillingAnalytics = createAsyncThunk(
       startDate: Date;
       endDate: Date;
     },
-    { rejectWithValue },
+    { rejectWithValue }: any,
   ) => {
     try {
       return await billingService.getBillingAnalytics(
@@ -406,7 +406,7 @@ export const fetchNotifications = createAsyncThunk(
   "billing/fetchNotifications",
   async (
     { tenantId, limit = 50 }: { tenantId: string; limit?: number },
-    { rejectWithValue },
+    { rejectWithValue }: any,
   ) => {
     try {
       return await billingService.getNotifications(tenantId, limit);
@@ -423,7 +423,7 @@ export const fetchNotifications = createAsyncThunk(
 
 export const markNotificationAsRead = createAsyncThunk(
   "billing/markNotificationAsRead",
-  async (notificationId: string, { rejectWithValue }) => {
+  async (notificationId: string, { rejectWithValue }: any) => {
     try {
       await billingService.markNotificationAsRead(notificationId);
       return notificationId;

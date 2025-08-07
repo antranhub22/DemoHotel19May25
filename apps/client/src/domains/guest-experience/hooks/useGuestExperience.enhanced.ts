@@ -84,25 +84,25 @@ export const useEnhancedGuestExperience = () => {
     if (!currentTenant) return;
 
     try {
-      const currentUsage = await stats;
+      const currentUsage = stats;
       const limits = currentTenant.limits;
 
       const remainingMinutes = Math.max(
         0,
-        limits.maxMonthlyMinutes - currentUsage.monthlyMinutes,
+        limits.maxMonthlyMinutes - currentUsage.minutes.current,
       );
       const remainingCalls = Math.max(
         0,
-        limits.maxCalls - currentUsage.monthlyCalls,
+        limits.maxCalls - currentUsage.calls.current,
       );
 
       const canMakeCalls = remainingMinutes > 0 && remainingCalls > 0;
 
       let warningMessage;
-      if (healthScore("voice_minutes")) {
-        warningMessage = `⚠️ Approaching monthly minute limit (${currentUsage.monthlyMinutes}/${limits.maxMonthlyMinutes})`;
-      } else if (healthScore("voice_calls")) {
-        warningMessage = `⚠️ Approaching monthly call limit (${currentUsage.monthlyCalls}/${limits.maxCalls})`;
+      if (currentUsage.minutes.percentage > 80) {
+        warningMessage = `⚠️ Approaching monthly minute limit (${currentUsage.minutes.current}/${limits.maxMonthlyMinutes})`;
+      } else if (currentUsage.calls.percentage > 80) {
+        warningMessage = `⚠️ Approaching monthly call limit (${currentUsage.calls.current}/${limits.maxCalls})`;
       }
 
       setUsageStatus({
@@ -218,9 +218,9 @@ export const useEnhancedGuestExperience = () => {
           tenantId: currentTenant.id,
           subscriptionPlan: currentTenant.subscriptionPlan,
           usageTracking: {
-            currentMonthMinutes: stats().then((u) => u.monthlyMinutes),
+            currentMonthMinutes: stats.minutes.current,
             maxMonthlyMinutes: currentTenant.limits.maxMonthlyMinutes,
-            currentMonthCalls: stats().then((u) => u.monthlyCalls),
+            currentMonthCalls: stats.calls.current,
             maxMonthlyCalls: currentTenant.limits.maxCalls,
           },
         } as any;
@@ -245,7 +245,6 @@ export const useEnhancedGuestExperience = () => {
             callId: callSession.id,
             language,
             // startTime: callSession.startTime,
-            serviceContext: enhancedContext,
           }),
         );
 
@@ -269,7 +268,6 @@ export const useEnhancedGuestExperience = () => {
       usageStatus,
       canAccess,
       getAvailability,
-      trackUsage,
       stats,
       updateUsageStatus,
     ],
@@ -434,8 +432,8 @@ export const useEnhancedGuestExperience = () => {
  * Enhanced Language Selection Hook with Feature Gating
  */
 export const useEnhancedLanguageSelection = () => {
-  const { selectLanguage, selectedLanguage, featureInfo } =
-    useEnhancedGuestExperience();
+  const { selectedLanguage, featureInfo } = useEnhancedGuestExperience();
+  const { selectLanguage } = useEnhancedGuestExperience().actions;
 
   const availableLanguages = [
     { code: "en" as Language, name: "English", premium: false },
