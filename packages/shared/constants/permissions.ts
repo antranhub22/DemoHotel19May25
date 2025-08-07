@@ -66,13 +66,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     system: ["view", "debug"],
     calls: ["view"],
   },
-  super_admin: {
-    dashboard: ["view", "edit"],
-    analytics: ["view", "export"],
-    calls: ["view", "manage"],
-    requests: ["view", "manage"],
-    system: ["view", "debug", "manage"],
-  },
+
   guest: {
     dashboard: ["view"], // Add missing guest permissions
   },

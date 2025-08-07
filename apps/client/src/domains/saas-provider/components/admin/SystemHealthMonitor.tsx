@@ -1,11 +1,11 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * System Health Monitor
  * Monitor platform health, services, and alerts
  */
 
-import logger from '@shared/utils/logger';
-import { useState } from 'react';
+import logger from "@shared/utils/logger";
+import { useState } from "react";
 import { useSystemHealth } from "../../hooks/usePlatformAdmin";
 
 export const SystemHealthMonitor: React.FC = () => {
@@ -158,7 +158,7 @@ export const SystemHealthMonitor: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div
             className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-              health.status === "healthy"
+              health.status === "operational"
                 ? "bg-green-100 text-green-800"
                 : health.status === "degraded"
                   ? "bg-yellow-100 text-yellow-800"
