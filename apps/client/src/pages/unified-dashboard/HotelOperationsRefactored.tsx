@@ -4,14 +4,22 @@ import * as React from "react";
  * Comprehensive hotel operations management using Redux domain
  */
 
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 // TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
@@ -22,9 +30,7 @@ import {
 } from "@/components/ui/select";
 // TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from '@/components/simple-ui';
 import { cn } from "@/lib/utils";
-import logger from "../../../../../packages/shared/utils/logger";
 import {
   AlertTriangle,
   Building,
@@ -47,6 +53,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import logger from "../../../../../packages/shared/utils/logger";
 import type { HousekeepingTask, Room } from "../types/common.types";
 
 // Hotel Operations Domain imports - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
@@ -1260,7 +1267,7 @@ const HotelOperationsRefactored: React.FC = () => {
       </Tabs>
 
       {/* Room Modal */}
-      <Modal open={showRoomModal} onOpenChange={setShowRoomModal}>
+      <Dialog open={showRoomModal} onOpenChange={setShowRoomModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
@@ -1407,7 +1414,7 @@ const HotelOperationsRefactored: React.FC = () => {
       </Dialog>
 
       {/* Task Modal */}
-      <Modal open={showTaskModal} onOpenChange={setShowTaskModal}>
+      <Dialog open={showTaskModal} onOpenChange={setShowTaskModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Tạo nhiệm vụ dọn dẹp</DialogTitle>
@@ -1515,7 +1522,8 @@ const HotelOperationsRefactored: React.FC = () => {
       </Dialog>
 
       {/* Maintenance Modal */}
-      <Modal open={showMaintenanceModal}
+      <Dialog
+        open={showMaintenanceModal}
         onOpenChange={setShowMaintenanceModal}
       >
         <DialogContent className="max-w-2xl">

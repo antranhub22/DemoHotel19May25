@@ -4,14 +4,23 @@ import * as React from "react";
  * Redux-based implementation replacing context and local state
  */
 
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 // TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
@@ -20,10 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from '@/components/simple-ui';
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import logger from "../../../../../packages/shared/utils/logger";
 import {
   AlertCircle,
   Calendar,
@@ -39,6 +46,7 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // ========================================
 // Domain Imports - NEW Redux Architecture
@@ -98,7 +106,7 @@ const RequestDetailModal: React.FC<RequestDetailModal> = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Chi tiết yêu cầu #{request.id}</DialogTitle>
@@ -253,7 +261,7 @@ const MessageModal: React.FC<MessageModalProps> = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>

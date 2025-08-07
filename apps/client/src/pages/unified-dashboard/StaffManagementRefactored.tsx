@@ -1,17 +1,26 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * Staff Management Refactored Component
  * Redux-based staff management with domain-driven architecture
  */
 
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 // TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
   Select,
@@ -31,10 +40,8 @@ import {
 } from "@/components/ui/table";
 // TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from '@/components/simple-ui';
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import logger from '../../../../../packages/shared/utils/logger';
 import {
   Calendar,
   CheckCircle,
@@ -52,7 +59,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // ========================================
 // Staff Management Domain Imports
@@ -121,7 +129,11 @@ interface StaffFormDialogProps {
   staff?: StaffMember | null;
 }
 
-const StaffFormDialog: React.FC<StaffFormDialog> = ({ isOpen, onClose, staff }) => {
+const StaffFormDialog: React.FC<StaffFormDialog> = ({
+  isOpen,
+  onClose,
+  staff,
+}) => {
   const { createNewStaff, updateExistingStaff, isSaving } =
     useStaffManagement();
   const isEdit = !!staff;
@@ -193,7 +205,7 @@ const StaffFormDialog: React.FC<StaffFormDialog> = ({ isOpen, onClose, staff }) 
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -428,7 +440,7 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Tạo nhiệm vụ mới</DialogTitle>

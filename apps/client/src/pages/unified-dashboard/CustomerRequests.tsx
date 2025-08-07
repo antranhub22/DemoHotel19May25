@@ -1,5 +1,15 @@
-import * as React from 'react';
+import * as React from "react";
 // TODO: Migrate these manually: AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,28 +20,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
-// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/alert-dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/simple-ui';
-import { useAuth } from '@/context/AuthContext';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { cn } from '@/lib/utils';
-import logger from '../../../../../packages/shared/utils/logger';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
+import { useAuth } from "@/context/AuthContext";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { cn } from "@/lib/utils";
 import {
   AlertCircle,
   Calendar,
@@ -47,8 +47,9 @@ import {
   Send,
   Trash2,
   User,
-} from 'lucide-react';
-import { useEffect, useState } from 'react';
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // Types
 interface CustomerRequest {
@@ -65,49 +66,49 @@ interface CustomerRequest {
 
 interface Message {
   id: string;
-  sender: 'staff' | 'guest';
+  sender: "staff" | "guest";
   content: string;
   time: string;
 }
 
 // Status options và colors
 const statusOptions = [
-  'Tất cả',
-  'Đã ghi nhận',
-  'Đang thực hiện',
-  'Đã thực hiện và đang bàn giao cho khách',
-  'Hoàn thiện',
-  'Lưu ý khác',
+  "Tất cả",
+  "Đã ghi nhận",
+  "Đang thực hiện",
+  "Đã thực hiện và đang bàn giao cho khách",
+  "Hoàn thiện",
+  "Lưu ý khác",
 ];
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'Đã ghi nhận':
-      return 'bg-gray-100 text-gray-800 border-gray-300';
-    case 'Đang thực hiện':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-    case 'Đã thực hiện và đang bàn giao cho khách':
-      return 'bg-blue-100 text-blue-800 border-blue-300';
-    case 'Hoàn thiện':
-      return 'bg-green-100 text-green-800 border-green-300';
-    case 'Lưu ý khác':
-      return 'bg-red-100 text-red-800 border-red-300';
+    case "Đã ghi nhận":
+      return "bg-gray-100 text-gray-800 border-gray-300";
+    case "Đang thực hiện":
+      return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    case "Đã thực hiện và đang bàn giao cho khách":
+      return "bg-blue-100 text-blue-800 border-blue-300";
+    case "Hoàn thiện":
+      return "bg-green-100 text-green-800 border-green-300";
+    case "Lưu ý khác":
+      return "bg-red-100 text-red-800 border-red-300";
     default:
-      return 'bg-gray-100 text-gray-700 border-gray-300';
+      return "bg-gray-100 text-gray-700 border-gray-300";
   }
 };
 
 const getStatusIcon = (status: string) => {
   switch (status) {
-    case 'Đã ghi nhận':
+    case "Đã ghi nhận":
       return <Clock className="h-3 w-3" />;
-    case 'Đang thực hiện':
+    case "Đang thực hiện":
       return <AlertCircle className="h-3 w-3" />;
-    case 'Đã thực hiện và đang bàn giao cho khách':
+    case "Đã thực hiện và đang bàn giao cho khách":
       return <RefreshCw className="h-3 w-3" />;
-    case 'Hoàn thiện':
+    case "Hoàn thiện":
       return <CheckCircle className="h-3 w-3" />;
-    case 'Lưu ý khác':
+    case "Lưu ý khác":
       return <AlertCircle className="h-3 w-3" />;
     default:
       return <Clock className="h-3 w-3" />;
@@ -137,7 +138,7 @@ const RequestDetailModal = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -180,7 +181,7 @@ const RequestDetailModal = ({
               <Label>Trạng thái hiện tại</Label>
               <Badge
                 variant="outline"
-                className={cn('mt-2', getStatusColor(request.status))}
+                className={cn("mt-2", getStatusColor(request.status))}
               >
                 {getStatusIcon(request.status)}
                 <span className="ml-1">{request.status}</span>
@@ -194,8 +195,8 @@ const RequestDetailModal = ({
                 </SelectTrigger>
                 <SelectContent>
                   {statusOptions
-                    .filter(opt => opt !== 'Tất cả')
-                    .map(status => (
+                    .filter((opt) => opt !== "Tất cả")
+                    .map((status) => (
                       <SelectItem key={status} value={status}>
                         {status}
                       </SelectItem>
@@ -241,17 +242,17 @@ const MessageModal = ({
   onSendMessage: (message: string) => void;
   loading: boolean;
 }) => {
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
 
   const handleSend = () => {
     if (newMessage.trim()) {
       onSendMessage(newMessage.trim());
-      setNewMessage('');
+      setNewMessage("");
     }
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -267,29 +268,29 @@ const MessageModal = ({
                 Chưa có tin nhắn nào
               </div>
             ) : (
-              messages.map(msg => (
+              messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={cn(
-                    'flex',
-                    msg.sender === 'staff' ? 'justify-end' : 'justify-start'
+                    "flex",
+                    msg.sender === "staff" ? "justify-end" : "justify-start",
                   )}
                 >
                   <div
                     className={cn(
-                      'max-w-[70%] p-2 rounded-lg text-sm',
-                      msg.sender === 'staff'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                      "max-w-[70%] p-2 rounded-lg text-sm",
+                      msg.sender === "staff"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-900",
                     )}
                   >
                     <p>{msg.content}</p>
                     <p
                       className={cn(
-                        'text-xs mt-1',
-                        msg.sender === 'staff'
-                          ? 'text-blue-100'
-                          : 'text-gray-500'
+                        "text-xs mt-1",
+                        msg.sender === "staff"
+                          ? "text-blue-100"
+                          : "text-gray-500",
                       )}
                     >
                       {msg.time}
@@ -305,7 +306,7 @@ const MessageModal = ({
             <Textarea
               placeholder="Nhập tin nhắn..."
               value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
+              onChange={(e) => setNewMessage(e.target.value)}
               className="min-h-[60px]"
             />
             <div className="flex justify-end">
@@ -343,44 +344,44 @@ export const CustomerRequests: React.FC = () => {
   const [messageLoading, setMessageLoading] = useState(false);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState('Tất cả');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Delete modal
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteError, setDeleteError] = useState('');
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Get auth headers
   const getAuthHeaders = () => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
-    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem("token")}`,
+    "Content-Type": "application/json",
   });
 
   // Fetch requests
   const fetchRequests = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/staff/requests', {
+      const response = await fetch("/api/staff/requests", {
         headers: getAuthHeaders(),
       });
 
       if (response.status === 401) {
         // Handle unauthorized
-        logger.error('Unauthorized access', 'Component');
+        logger.error("Unauthorized access", "Component");
         return;
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch requests');
+        throw new Error("Failed to fetch requests");
       }
 
       const data = await response.json();
       setRequests(data);
     } catch (error) {
-      logger.error('Failed to fetch requests:', 'Component', error);
+      logger.error("Failed to fetch requests:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -390,21 +391,21 @@ export const CustomerRequests: React.FC = () => {
   const updateRequestStatus = async (requestId: number, status: string) => {
     try {
       await fetch(`/api/staff/requests/${requestId}/status`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
 
       // Update local state
-      setRequests(prev =>
-        prev.map(r => (r.id === requestId ? { ...r, status } : r))
+      setRequests((prev) =>
+        prev.map((r) => (r.id === requestId ? { ...r, status } : r)),
       );
 
       if (selectedRequest && selectedRequest.id === requestId) {
         setSelectedRequest({ ...selectedRequest, status });
       }
     } catch (error) {
-      logger.error('Failed to update status:', 'Component', error);
+      logger.error("Failed to update status:", "Component", error);
     }
   };
 
@@ -415,7 +416,7 @@ export const CustomerRequests: React.FC = () => {
         `/api/staff/requests/${requestId}/messages`,
         {
           headers: getAuthHeaders(),
-        }
+        },
       );
 
       if (response.ok) {
@@ -423,7 +424,7 @@ export const CustomerRequests: React.FC = () => {
         setMessages(data);
       }
     } catch (error) {
-      logger.error('Failed to fetch messages:', 'Component', error);
+      logger.error("Failed to fetch messages:", "Component", error);
       setMessages([]);
     }
   };
@@ -437,7 +438,7 @@ export const CustomerRequests: React.FC = () => {
     setMessageLoading(true);
     try {
       await fetch(`/api/staff/requests/${selectedRequest.id}/message`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({ content }),
       });
@@ -445,13 +446,13 @@ export const CustomerRequests: React.FC = () => {
       // Add message to local state
       const newMessage: Message = {
         id: Date.now().toString(),
-        sender: 'staff',
+        sender: "staff",
         content,
         time: new Date().toLocaleTimeString().slice(0, 5),
       };
-      setMessages(prev => [...prev, newMessage]);
+      setMessages((prev) => [...prev, newMessage]);
     } catch (error) {
-      logger.error('Failed to send message:', 'Component', error);
+      logger.error("Failed to send message:", "Component", error);
     } finally {
       setMessageLoading(false);
     }
@@ -459,15 +460,15 @@ export const CustomerRequests: React.FC = () => {
 
   // Delete all requests
   const deleteAllRequests = async () => {
-    if (deletePassword !== '2208') {
-      setDeleteError('Mật khẩu không đúng');
+    if (deletePassword !== "2208") {
+      setDeleteError("Mật khẩu không đúng");
       return;
     }
 
     setDeleteLoading(true);
     try {
-      const response = await fetch('/api/staff/requests/all', {
-        method: 'DELETE',
+      const response = await fetch("/api/staff/requests/all", {
+        method: "DELETE",
         headers: getAuthHeaders(),
       });
 
@@ -475,23 +476,23 @@ export const CustomerRequests: React.FC = () => {
 
       if (result.success) {
         setRequests([]);
-        setDeletePassword('');
-        setDeleteError('');
+        setDeletePassword("");
+        setDeleteError("");
       } else {
-        setDeleteError(result.error || 'Không thể xóa requests');
+        setDeleteError(result.error || "Không thể xóa requests");
       }
     } catch (error) {
-      logger.error('Error deleting requests:', 'Component', error);
-      setDeleteError('Đã xảy ra lỗi khi xóa requests');
+      logger.error("Error deleting requests:", "Component", error);
+      setDeleteError("Đã xảy ra lỗi khi xóa requests");
     } finally {
       setDeleteLoading(false);
     }
   };
 
   // Filter requests
-  const filteredRequests = requests.filter(request => {
+  const filteredRequests = requests.filter((request) => {
     // Status filter
-    if (statusFilter !== 'Tất cả' && request.status !== statusFilter) {
+    if (statusFilter !== "Tất cả" && request.status !== statusFilter) {
       return false;
     }
 
@@ -525,38 +526,38 @@ export const CustomerRequests: React.FC = () => {
     // Set up global function for WebSocket to call
     (window as any).updateRequestStatus = (data: any) => {
       logger.debug(
-        '📡 [CustomerRequests] WebSocket request update received:',
-        'Component',
-        data
+        "📡 [CustomerRequests] WebSocket request update received:",
+        "Component",
+        data,
       );
 
-      if (data.type === 'new-request') {
+      if (data.type === "new-request") {
         // Add new request to the list
         const newRequest: CustomerRequest = {
           id: data.requestId,
-          type: data.orderType || 'Service Request',
-          roomNumber: data.roomNumber || 'N/A',
+          type: data.orderType || "Service Request",
+          roomNumber: data.roomNumber || "N/A",
           orderId: `REQ-${data.requestId}`,
-          guestName: data.guestName || 'Guest',
-          requestContent: data.requestContent || 'New service request',
-          status: data.status || 'Đã ghi nhận',
+          guestName: data.guestName || "Guest",
+          requestContent: data.requestContent || "New service request",
+          status: data.status || "Đã ghi nhận",
           createdAt: data.timestamp || new Date().toISOString(),
           updatedAt: data.timestamp || new Date().toISOString(),
         };
 
-        setRequests(prev => [newRequest, ...prev]);
+        setRequests((prev) => [newRequest, ...prev]);
         logger.success(
-          '✅ [CustomerRequests] New request added to dashboard',
-          'Component',
+          "✅ [CustomerRequests] New request added to dashboard",
+          "Component",
           {
             requestId: data.requestId,
             roomNumber: data.roomNumber,
-          }
+          },
         );
-      } else if (data.type === 'status-change') {
+      } else if (data.type === "status-change") {
         // Update existing request status
-        setRequests(prev =>
-          prev.map(request =>
+        setRequests((prev) =>
+          prev.map((request) =>
             request.id === data.requestId
               ? {
                   ...request,
@@ -564,16 +565,16 @@ export const CustomerRequests: React.FC = () => {
                   updatedAt: data.timestamp,
                   assignedTo: data.assignedTo,
                 }
-              : request
-          )
+              : request,
+          ),
         );
         logger.success(
-          '✅ [CustomerRequests] Request status updated',
-          'Component',
+          "✅ [CustomerRequests] Request status updated",
+          "Component",
           {
             requestId: data.requestId,
             newStatus: data.status,
-          }
+          },
         );
       }
     };
@@ -632,7 +633,7 @@ export const CustomerRequests: React.FC = () => {
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchRequests} disabled={loading}>
             <RefreshCw
-              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+              className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
             />
             Làm mới
           </Button>
@@ -659,8 +660,8 @@ export const CustomerRequests: React.FC = () => {
                   type="password"
                   placeholder="Nhập mật khẩu xác nhận"
                   value={deletePassword}
-                  onChange={e => setDeletePassword(e.target.value)}
-                  className={deleteError ? 'border-red-500' : ''}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  className={deleteError ? "border-red-500" : ""}
                 />
                 {deleteError && (
                   <p className="text-red-500 text-sm mt-1">{deleteError}</p>
@@ -669,8 +670,8 @@ export const CustomerRequests: React.FC = () => {
               <AlertDialogFooter>
                 <AlertDialogCancel
                   onClick={() => {
-                    setDeletePassword('');
-                    setDeleteError('');
+                    setDeletePassword("");
+                    setDeleteError("");
                   }}
                 >
                   Hủy
@@ -680,7 +681,7 @@ export const CustomerRequests: React.FC = () => {
                   disabled={deleteLoading}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  {deleteLoading ? 'Đang xóa...' : 'Xóa tất cả'}
+                  {deleteLoading ? "Đang xóa..." : "Xóa tất cả"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -706,7 +707,7 @@ export const CustomerRequests: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {statusOptions.map(status => (
+                  {statusOptions.map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>
@@ -721,7 +722,7 @@ export const CustomerRequests: React.FC = () => {
               <Input
                 type="date"
                 value={startDate}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={(e) => setStartDate(e.target.value)}
               />
             </div>
 
@@ -730,7 +731,7 @@ export const CustomerRequests: React.FC = () => {
               <Input
                 type="date"
                 value={endDate}
-                onChange={e => setEndDate(e.target.value)}
+                onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
 
@@ -742,7 +743,7 @@ export const CustomerRequests: React.FC = () => {
                 <Input
                   placeholder="Tìm theo phòng, khách..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -750,7 +751,7 @@ export const CustomerRequests: React.FC = () => {
           </div>
 
           {/* Clear filters */}
-          {(statusFilter !== 'Tất cả' ||
+          {(statusFilter !== "Tất cả" ||
             startDate ||
             endDate ||
             searchQuery) && (
@@ -759,10 +760,10 @@ export const CustomerRequests: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setStatusFilter('Tất cả');
-                  setStartDate('');
-                  setEndDate('');
-                  setSearchQuery('');
+                  setStatusFilter("Tất cả");
+                  setStartDate("");
+                  setEndDate("");
+                  setSearchQuery("");
                 }}
               >
                 Xóa bộ lọc
@@ -781,7 +782,7 @@ export const CustomerRequests: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Đang chờ</p>
                 <p className="text-2xl font-bold">
-                  {requests.filter(r => r.status === 'Đã ghi nhận').length}
+                  {requests.filter((r) => r.status === "Đã ghi nhận").length}
                 </p>
               </div>
             </div>
@@ -795,7 +796,7 @@ export const CustomerRequests: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Đang xử lý</p>
                 <p className="text-2xl font-bold">
-                  {requests.filter(r => r.status === 'Đang thực hiện').length}
+                  {requests.filter((r) => r.status === "Đang thực hiện").length}
                 </p>
               </div>
             </div>
@@ -809,7 +810,7 @@ export const CustomerRequests: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Hoàn thành</p>
                 <p className="text-2xl font-bold">
-                  {requests.filter(r => r.status === 'Hoàn thiện').length}
+                  {requests.filter((r) => r.status === "Hoàn thiện").length}
                 </p>
               </div>
             </div>
@@ -854,9 +855,9 @@ export const CustomerRequests: React.FC = () => {
                 .sort(
                   (a, b) =>
                     new Date(b.createdAt).getTime() -
-                    new Date(a.createdAt).getTime()
+                    new Date(a.createdAt).getTime(),
                 )
-                .map(request => (
+                .map((request) => (
                   <Card
                     key={request.id}
                     className="hover:shadow-md transition-shadow"
@@ -893,8 +894,8 @@ export const CustomerRequests: React.FC = () => {
                             <Badge
                               variant="outline"
                               className={cn(
-                                'text-xs',
-                                getStatusColor(request.status)
+                                "text-xs",
+                                getStatusColor(request.status),
                               )}
                             >
                               {getStatusIcon(request.status)}
@@ -940,7 +941,7 @@ export const CustomerRequests: React.FC = () => {
             request={selectedRequest}
             isOpen={showDetailModal}
             onClose={handleCloseDetail}
-            onStatusChange={status =>
+            onStatusChange={(status) =>
               updateRequestStatus(selectedRequest.id, status)
             }
             onOpenMessage={handleOpenMessage}

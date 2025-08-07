@@ -19,6 +19,16 @@ import { useEffect, useState } from "react";
 // ✅ FIXED: Use global UserRole type from common types
 // TODO: Migrate these manually: AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
 import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,22 +39,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
-// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
 // TODO: Migrate these manually: TableBody, TableCell, TableHead, TableHeader, TableRow
 import {
   Table,
@@ -192,7 +194,7 @@ const StaffFormDialog = ({
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -388,7 +390,7 @@ const StaffPermissionsModal = ({
   const roleConfig = roleConfigs[staff.role];
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

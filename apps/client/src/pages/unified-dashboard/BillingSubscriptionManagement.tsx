@@ -5,15 +5,24 @@ import * as React from "react";
  * invoice tracking, usage analytics, and customer portal integration
  */
 
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription, DialogFooter;
-;
-;
-// TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/simple-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -801,8 +810,8 @@ const BillingSubscriptionManagement: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Upgrade Plan Modal */}
-      <Modal open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+      {/* Upgrade Plan Dialog */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Upgrade Plan</DialogTitle>

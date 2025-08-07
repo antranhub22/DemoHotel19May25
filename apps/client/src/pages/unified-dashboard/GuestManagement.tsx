@@ -1,35 +1,37 @@
-import * as React from 'react';
 import {
-  Users,
-  UserPlus,
-  Search,
-  Eye,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@/components/simple-ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Edit,
-  Phone,
+  Eye,
   Mail,
-  Star,
+  Phone,
   Plus,
   RefreshCw,
   Save,
+  Search,
+  Star,
   User,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/simple-ui';
-import { Button } from '@/components/simple-ui';
-import { Card, CardContent, CardHeader } from '@/components/simple-ui'
-import { CardTitle, CardDescription } from "@/components/simple-ui";;
-import { Modal, Modal, Modal, Modal } from '@/components/simple-ui'
-// TODO: Migrate these manually: DialogDescription;
-import { Input } from '@/components/simple-ui';
-;
+  UserPlus,
+  Users,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 // TODO: Migrate these manually: SelectContent, SelectItem, SelectTrigger, SelectValue
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 // TODO: Migrate these manually: TableBody, TableCell, TableHead, TableHeader, TableRow
 import {
   Table,
@@ -38,13 +40,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 // TODO: Migrate these manually: TabsContent, TabsList, TabsTrigger
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/simple-ui';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import logger from '../../../../../packages/shared/utils/logger';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "../../../../../packages/shared/utils/logger";
 
 // Types
 interface Guest {
@@ -61,7 +62,7 @@ interface Guest {
   country: string;
   zipCode: string;
   preferredLanguage: string;
-  membershipTier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  membershipTier: "bronze" | "silver" | "gold" | "platinum";
   totalStays: number;
   totalSpent: number;
   averageRating: number;
@@ -69,7 +70,7 @@ interface Guest {
   createdAt: string;
   updatedAt: string;
   lastStay: string;
-  status: 'active' | 'inactive' | 'vip';
+  status: "active" | "inactive" | "vip";
   preferences: {
     roomType: string;
     floorPreference: string;
@@ -88,8 +89,8 @@ interface Booking {
   checkOut: string;
   guests: number;
   totalAmount: number;
-  status: 'confirmed' | 'checked-in' | 'checked-out' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'refunded';
+  status: "confirmed" | "checked-in" | "checked-out" | "cancelled";
+  paymentStatus: "pending" | "paid" | "refunded";
   specialRequests: string[];
   rating: number;
   review: string;
@@ -100,7 +101,7 @@ interface GuestNote {
   id: string;
   guestId: string;
   note: string;
-  type: 'general' | 'preference' | 'complaint' | 'compliment';
+  type: "general" | "preference" | "complaint" | "compliment";
   staffMember: string;
   createdAt: string;
 }
@@ -108,99 +109,99 @@ interface GuestNote {
 // Mock data
 const mockGuests: Guest[] = [
   {
-    id: '1',
-    firstName: 'Nguyen',
-    lastName: 'Van A',
-    email: 'nguyenvana@email.com',
-    phone: '+84 90 123 4567',
-    nationality: 'Vietnam',
-    dateOfBirth: '1985-03-15',
-    idNumber: '123456789',
-    address: '123 Le Loi Street',
-    city: 'Ho Chi Minh City',
-    country: 'Vietnam',
-    zipCode: '700000',
-    preferredLanguage: 'vi',
-    membershipTier: 'gold',
+    id: "1",
+    firstName: "Nguyen",
+    lastName: "Van A",
+    email: "nguyenvana@email.com",
+    phone: "+84 90 123 4567",
+    nationality: "Vietnam",
+    dateOfBirth: "1985-03-15",
+    idNumber: "123456789",
+    address: "123 Le Loi Street",
+    city: "Ho Chi Minh City",
+    country: "Vietnam",
+    zipCode: "700000",
+    preferredLanguage: "vi",
+    membershipTier: "gold",
     totalStays: 12,
     totalSpent: 45000000,
     averageRating: 4.8,
-    notes: 'VIP customer, prefers quiet rooms',
-    createdAt: '2023-01-15T10:00:00Z',
-    updatedAt: '2024-01-10T14:30:00Z',
-    lastStay: '2024-01-10T14:30:00Z',
-    status: 'vip',
+    notes: "VIP customer, prefers quiet rooms",
+    createdAt: "2023-01-15T10:00:00Z",
+    updatedAt: "2024-01-10T14:30:00Z",
+    lastStay: "2024-01-10T14:30:00Z",
+    status: "vip",
     preferences: {
-      roomType: 'Suite',
-      floorPreference: 'High floor',
-      smokingPreference: 'Non-smoking',
-      bedPreference: 'King bed',
-      specialRequests: ['Late check-out', 'Extra towels'],
+      roomType: "Suite",
+      floorPreference: "High floor",
+      smokingPreference: "Non-smoking",
+      bedPreference: "King bed",
+      specialRequests: ["Late check-out", "Extra towels"],
     },
   },
   {
-    id: '2',
-    firstName: 'Kim',
-    lastName: 'Min Jun',
-    email: 'kim.minjun@email.com',
-    phone: '+82 10 9876 5432',
-    nationality: 'South Korea',
-    dateOfBirth: '1990-07-22',
-    idNumber: 'KOR987654321',
-    address: '456 Gangnam-gu',
-    city: 'Seoul',
-    country: 'South Korea',
-    zipCode: '06543',
-    preferredLanguage: 'ko',
-    membershipTier: 'silver',
+    id: "2",
+    firstName: "Kim",
+    lastName: "Min Jun",
+    email: "kim.minjun@email.com",
+    phone: "+82 10 9876 5432",
+    nationality: "South Korea",
+    dateOfBirth: "1990-07-22",
+    idNumber: "KOR987654321",
+    address: "456 Gangnam-gu",
+    city: "Seoul",
+    country: "South Korea",
+    zipCode: "06543",
+    preferredLanguage: "ko",
+    membershipTier: "silver",
     totalStays: 5,
     totalSpent: 18000000,
     averageRating: 4.5,
-    notes: 'Business traveler, needs early breakfast',
-    createdAt: '2023-08-20T09:00:00Z',
-    updatedAt: '2024-01-05T11:15:00Z',
-    lastStay: '2024-01-05T11:15:00Z',
-    status: 'active',
+    notes: "Business traveler, needs early breakfast",
+    createdAt: "2023-08-20T09:00:00Z",
+    updatedAt: "2024-01-05T11:15:00Z",
+    lastStay: "2024-01-05T11:15:00Z",
+    status: "active",
     preferences: {
-      roomType: 'Deluxe',
-      floorPreference: 'Mid floor',
-      smokingPreference: 'Non-smoking',
-      bedPreference: 'Twin beds',
-      specialRequests: ['Early breakfast', 'Business center access'],
+      roomType: "Deluxe",
+      floorPreference: "Mid floor",
+      smokingPreference: "Non-smoking",
+      bedPreference: "Twin beds",
+      specialRequests: ["Early breakfast", "Business center access"],
     },
   },
   {
-    id: '3',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.johnson@email.com',
-    phone: '+1 555 123 4567',
-    nationality: 'United States',
-    dateOfBirth: '1988-12-03',
-    idNumber: 'USA123456789',
-    address: '789 Broadway',
-    city: 'New York',
-    country: 'United States',
-    zipCode: '10001',
-    preferredLanguage: 'en',
-    membershipTier: 'platinum',
+    id: "3",
+    firstName: "Sarah",
+    lastName: "Johnson",
+    email: "sarah.johnson@email.com",
+    phone: "+1 555 123 4567",
+    nationality: "United States",
+    dateOfBirth: "1988-12-03",
+    idNumber: "USA123456789",
+    address: "789 Broadway",
+    city: "New York",
+    country: "United States",
+    zipCode: "10001",
+    preferredLanguage: "en",
+    membershipTier: "platinum",
     totalStays: 25,
     totalSpent: 95000000,
     averageRating: 4.9,
-    notes: 'Frequent traveler, allergic to shellfish',
-    createdAt: '2022-05-10T16:00:00Z',
-    updatedAt: '2024-01-12T09:45:00Z',
-    lastStay: '2024-01-12T09:45:00Z',
-    status: 'vip',
+    notes: "Frequent traveler, allergic to shellfish",
+    createdAt: "2022-05-10T16:00:00Z",
+    updatedAt: "2024-01-12T09:45:00Z",
+    lastStay: "2024-01-12T09:45:00Z",
+    status: "vip",
     preferences: {
-      roomType: 'Presidential Suite',
-      floorPreference: 'Top floor',
-      smokingPreference: 'Non-smoking',
-      bedPreference: 'King bed',
+      roomType: "Presidential Suite",
+      floorPreference: "Top floor",
+      smokingPreference: "Non-smoking",
+      bedPreference: "King bed",
       specialRequests: [
-        'Shellfish allergy',
-        'Concierge service',
-        'Airport transfer',
+        "Shellfish allergy",
+        "Concierge service",
+        "Airport transfer",
       ],
     },
   },
@@ -208,115 +209,115 @@ const mockGuests: Guest[] = [
 
 const mockBookings: Booking[] = [
   {
-    id: '1',
-    guestId: '1',
-    roomNumber: '2101',
-    roomType: 'Suite',
-    checkIn: '2024-01-10T15:00:00Z',
-    checkOut: '2024-01-13T11:00:00Z',
+    id: "1",
+    guestId: "1",
+    roomNumber: "2101",
+    roomType: "Suite",
+    checkIn: "2024-01-10T15:00:00Z",
+    checkOut: "2024-01-13T11:00:00Z",
     guests: 2,
     totalAmount: 12000000,
-    status: 'checked-out',
-    paymentStatus: 'paid',
-    specialRequests: ['Late check-out', 'Extra towels'],
+    status: "checked-out",
+    paymentStatus: "paid",
+    specialRequests: ["Late check-out", "Extra towels"],
     rating: 5,
-    review: 'Excellent service and room quality',
-    createdAt: '2024-01-05T10:00:00Z',
+    review: "Excellent service and room quality",
+    createdAt: "2024-01-05T10:00:00Z",
   },
   {
-    id: '2',
-    guestId: '2',
-    roomNumber: '1505',
-    roomType: 'Deluxe',
-    checkIn: '2024-01-05T14:00:00Z',
-    checkOut: '2024-01-07T12:00:00Z',
+    id: "2",
+    guestId: "2",
+    roomNumber: "1505",
+    roomType: "Deluxe",
+    checkIn: "2024-01-05T14:00:00Z",
+    checkOut: "2024-01-07T12:00:00Z",
     guests: 1,
     totalAmount: 6000000,
-    status: 'checked-out',
-    paymentStatus: 'paid',
-    specialRequests: ['Early breakfast'],
+    status: "checked-out",
+    paymentStatus: "paid",
+    specialRequests: ["Early breakfast"],
     rating: 4,
-    review: 'Good stay, helpful staff',
-    createdAt: '2024-01-01T09:00:00Z',
+    review: "Good stay, helpful staff",
+    createdAt: "2024-01-01T09:00:00Z",
   },
 ];
 
 const mockNotes: GuestNote[] = [
   {
-    id: '1',
-    guestId: '1',
-    note: 'Guest requested room upgrade, complimentary provided',
-    type: 'general',
-    staffMember: 'Front Desk Staff',
-    createdAt: '2024-01-10T16:00:00Z',
+    id: "1",
+    guestId: "1",
+    note: "Guest requested room upgrade, complimentary provided",
+    type: "general",
+    staffMember: "Front Desk Staff",
+    createdAt: "2024-01-10T16:00:00Z",
   },
   {
-    id: '2',
-    guestId: '1',
-    note: 'Prefers high floor rooms with city view',
-    type: 'preference',
-    staffMember: 'Front Desk Staff',
-    createdAt: '2024-01-10T15:30:00Z',
+    id: "2",
+    guestId: "1",
+    note: "Prefers high floor rooms with city view",
+    type: "preference",
+    staffMember: "Front Desk Staff",
+    createdAt: "2024-01-10T15:30:00Z",
   },
 ];
 
 // Helper functions
 const getMembershipColor = (tier: string) => {
   switch (tier) {
-    case 'platinum':
-      return 'bg-purple-100 text-purple-800';
-    case 'gold':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'silver':
-      return 'bg-gray-100 text-gray-800';
-    case 'bronze':
-      return 'bg-orange-100 text-orange-800';
+    case "platinum":
+      return "bg-purple-100 text-purple-800";
+    case "gold":
+      return "bg-yellow-100 text-yellow-800";
+    case "silver":
+      return "bg-gray-100 text-gray-800";
+    case "bronze":
+      return "bg-orange-100 text-orange-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'vip':
-      return 'bg-purple-100 text-purple-800';
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'inactive':
-      return 'bg-gray-100 text-gray-800';
+    case "vip":
+      return "bg-purple-100 text-purple-800";
+    case "active":
+      return "bg-green-100 text-green-800";
+    case "inactive":
+      return "bg-gray-100 text-gray-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getBookingStatusColor = (status: string) => {
   switch (status) {
-    case 'confirmed':
-      return 'bg-blue-100 text-blue-800';
-    case 'checked-in':
-      return 'bg-green-100 text-green-800';
-    case 'checked-out':
-      return 'bg-gray-100 text-gray-800';
-    case 'cancelled':
-      return 'bg-red-100 text-red-800';
+    case "confirmed":
+      return "bg-blue-100 text-blue-800";
+    case "checked-in":
+      return "bg-green-100 text-green-800";
+    case "checked-out":
+      return "bg-gray-100 text-gray-800";
+    case "cancelled":
+      return "bg-red-100 text-red-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
     maximumFractionDigits: 0,
   }).format(amount);
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('vi-VN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return new Date(dateString).toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 
@@ -350,11 +351,11 @@ const GuestDetailsModal = ({
     setLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       onUpdate(formData);
       setEditMode(false);
     } catch (error) {
-      logger.error('Failed to update guest:', 'Component', error);
+      logger.error("Failed to update guest:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -365,18 +366,18 @@ const GuestDetailsModal = ({
   }
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
             {guest.firstName} {guest.lastName}
             <Badge
-              className={cn('ml-2', getMembershipColor(guest.membershipTier))}
+              className={cn("ml-2", getMembershipColor(guest.membershipTier))}
             >
               {guest.membershipTier.toUpperCase()}
             </Badge>
-            <Badge className={cn('ml-1', getStatusColor(guest.status))}>
+            <Badge className={cn("ml-1", getStatusColor(guest.status))}>
               {guest.status.toUpperCase()}
             </Badge>
           </DialogTitle>
@@ -401,7 +402,7 @@ const GuestDetailsModal = ({
                 onClick={() => setEditMode(!editMode)}
               >
                 <Edit className="h-4 w-4 mr-2" />
-                {editMode ? 'Hủy' : 'Chỉnh sửa'}
+                {editMode ? "Hủy" : "Chỉnh sửa"}
               </Button>
             </div>
 
@@ -412,7 +413,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="firstName"
                     value={formData.firstName}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, firstName: e.target.value })
                     }
                     disabled={!editMode}
@@ -424,7 +425,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="lastName"
                     value={formData.lastName}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, lastName: e.target.value })
                     }
                     disabled={!editMode}
@@ -437,7 +438,7 @@ const GuestDetailsModal = ({
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
                     disabled={!editMode}
@@ -449,7 +450,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="phone"
                     value={formData.phone}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     disabled={!editMode}
@@ -461,7 +462,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="nationality"
                     value={formData.nationality}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, nationality: e.target.value })
                     }
                     disabled={!editMode}
@@ -476,7 +477,7 @@ const GuestDetailsModal = ({
                     id="dateOfBirth"
                     type="date"
                     value={formData.dateOfBirth}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, dateOfBirth: e.target.value })
                     }
                     disabled={!editMode}
@@ -488,7 +489,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="idNumber"
                     value={formData.idNumber}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, idNumber: e.target.value })
                     }
                     disabled={!editMode}
@@ -500,7 +501,7 @@ const GuestDetailsModal = ({
                   <Textarea
                     id="address"
                     value={formData.address}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, address: e.target.value })
                     }
                     disabled={!editMode}
@@ -513,7 +514,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="city"
                     value={formData.city}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, city: e.target.value })
                     }
                     disabled={!editMode}
@@ -525,7 +526,7 @@ const GuestDetailsModal = ({
                   <Input
                     id="country"
                     value={formData.country}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFormData({ ...formData, country: e.target.value })
                     }
                     disabled={!editMode}
@@ -539,7 +540,7 @@ const GuestDetailsModal = ({
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, notes: e.target.value })
                 }
                 disabled={!editMode}
@@ -582,8 +583,8 @@ const GuestDetailsModal = ({
 
             <div className="space-y-4">
               {mockBookings
-                .filter(b => b.guestId === guest.id)
-                .map(booking => (
+                .filter((b) => b.guestId === guest.id)
+                .map((booking) => (
                   <Card key={booking.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -594,14 +595,14 @@ const GuestDetailsModal = ({
                           <Badge variant="outline">{booking.roomType}</Badge>
                           <Badge
                             className={cn(
-                              getBookingStatusColor(booking.status)
+                              getBookingStatusColor(booking.status),
                             )}
                           >
                             {booking.status}
                           </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {formatDate(booking.checkIn)} -{' '}
+                          {formatDate(booking.checkIn)} -{" "}
                           {formatDate(booking.checkOut)}
                         </div>
                       </div>
@@ -610,13 +611,13 @@ const GuestDetailsModal = ({
                         <div>
                           <span className="text-muted-foreground">
                             Số khách:
-                          </span>{' '}
+                          </span>{" "}
                           {booking.guests}
                         </div>
                         <div>
                           <span className="text-muted-foreground">
                             Tổng tiền:
-                          </span>{' '}
+                          </span>{" "}
                           {formatCurrency(booking.totalAmount)}
                         </div>
                         <div>
@@ -628,10 +629,10 @@ const GuestDetailsModal = ({
                               <Star
                                 key={i}
                                 className={cn(
-                                  'h-3 w-3',
+                                  "h-3 w-3",
                                   i < booking.rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300'
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300",
                                 )}
                               />
                             ))}
@@ -644,7 +645,7 @@ const GuestDetailsModal = ({
                         <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
                           <span className="text-muted-foreground">
                             Đánh giá:
-                          </span>{' '}
+                          </span>{" "}
                           {booking.review}
                         </div>
                       )}
@@ -665,8 +666,8 @@ const GuestDetailsModal = ({
 
             <div className="space-y-3">
               {mockNotes
-                .filter(n => n.guestId === guest.id)
-                .map(note => (
+                .filter((n) => n.guestId === guest.id)
+                .map((note) => (
                   <Card key={note.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
@@ -698,20 +699,20 @@ const AddGuestModal = ({
   onAdd: (guest: Guest) => void;
 }) => {
   const [formData, setFormData] = useState<Partial<Guest>>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    nationality: '',
-    dateOfBirth: '',
-    idNumber: '',
-    address: '',
-    city: '',
-    country: '',
-    zipCode: '',
-    preferredLanguage: 'vi',
-    membershipTier: 'bronze',
-    notes: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    nationality: "",
+    dateOfBirth: "",
+    idNumber: "",
+    address: "",
+    city: "",
+    country: "",
+    zipCode: "",
+    preferredLanguage: "vi",
+    membershipTier: "bronze",
+    notes: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -721,7 +722,7 @@ const AddGuestModal = ({
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const newGuest: Guest = {
         id: Date.now().toString(),
@@ -731,13 +732,13 @@ const AddGuestModal = ({
         averageRating: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        lastStay: '',
-        status: 'active',
+        lastStay: "",
+        status: "active",
         preferences: {
-          roomType: '',
-          floorPreference: '',
-          smokingPreference: 'Non-smoking',
-          bedPreference: '',
+          roomType: "",
+          floorPreference: "",
+          smokingPreference: "Non-smoking",
+          bedPreference: "",
           specialRequests: [],
         },
       } as Guest;
@@ -747,30 +748,30 @@ const AddGuestModal = ({
 
       // Reset form
       setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        nationality: '',
-        dateOfBirth: '',
-        idNumber: '',
-        address: '',
-        city: '',
-        country: '',
-        zipCode: '',
-        preferredLanguage: 'vi',
-        membershipTier: 'bronze',
-        notes: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        nationality: "",
+        dateOfBirth: "",
+        idNumber: "",
+        address: "",
+        city: "",
+        country: "",
+        zipCode: "",
+        preferredLanguage: "vi",
+        membershipTier: "bronze",
+        notes: "",
       });
     } catch (error) {
-      logger.error('Failed to add guest:', 'Component', error);
+      logger.error("Failed to add guest:", "Component", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -789,7 +790,7 @@ const AddGuestModal = ({
               <Input
                 id="firstName"
                 value={formData.firstName}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, firstName: e.target.value })
                 }
                 required
@@ -801,7 +802,7 @@ const AddGuestModal = ({
               <Input
                 id="lastName"
                 value={formData.lastName}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, lastName: e.target.value })
                 }
                 required
@@ -814,7 +815,7 @@ const AddGuestModal = ({
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
                 required
@@ -826,7 +827,7 @@ const AddGuestModal = ({
               <Input
                 id="phone"
                 value={formData.phone}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, phone: e.target.value })
                 }
                 required
@@ -838,7 +839,7 @@ const AddGuestModal = ({
               <Input
                 id="nationality"
                 value={formData.nationality}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, nationality: e.target.value })
                 }
               />
@@ -850,7 +851,7 @@ const AddGuestModal = ({
                 id="dateOfBirth"
                 type="date"
                 value={formData.dateOfBirth}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, dateOfBirth: e.target.value })
                 }
               />
@@ -861,7 +862,7 @@ const AddGuestModal = ({
               <Input
                 id="idNumber"
                 value={formData.idNumber}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, idNumber: e.target.value })
                 }
               />
@@ -871,7 +872,7 @@ const AddGuestModal = ({
               <Label htmlFor="preferredLanguage">Ngôn ngữ ưa thích</Label>
               <Select
                 value={formData.preferredLanguage}
-                onValueChange={value =>
+                onValueChange={(value) =>
                   setFormData({ ...formData, preferredLanguage: value })
                 }
               >
@@ -893,7 +894,7 @@ const AddGuestModal = ({
             <Textarea
               id="address"
               value={formData.address}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, address: e.target.value })
               }
               rows={2}
@@ -906,7 +907,7 @@ const AddGuestModal = ({
               <Input
                 id="city"
                 value={formData.city}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, city: e.target.value })
                 }
               />
@@ -917,7 +918,7 @@ const AddGuestModal = ({
               <Input
                 id="country"
                 value={formData.country}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, country: e.target.value })
                 }
               />
@@ -929,7 +930,7 @@ const AddGuestModal = ({
             <Textarea
               id="notes"
               value={formData.notes}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, notes: e.target.value })
               }
               placeholder="Thông tin bổ sung về khách hàng..."
@@ -966,15 +967,15 @@ export const GuestManagement: React.FC = () => {
   const { user } = useAuth();
   const [guests, setGuests] = useState<Guest[]>(mockGuests);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [membershipFilter, setMembershipFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [membershipFilter, setMembershipFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
   const [showGuestDetails, setShowGuestDetails] = useState(false);
   const [showAddGuest, setShowAddGuest] = useState(false);
 
   // Filter guests based on search and filters
-  const filteredGuests = guests.filter(guest => {
+  const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
       !searchQuery ||
       guest.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -983,9 +984,9 @@ export const GuestManagement: React.FC = () => {
       guest.phone.includes(searchQuery);
 
     const matchesMembership =
-      membershipFilter === 'all' || guest.membershipTier === membershipFilter;
+      membershipFilter === "all" || guest.membershipTier === membershipFilter;
     const matchesStatus =
-      statusFilter === 'all' || guest.status === statusFilter;
+      statusFilter === "all" || guest.status === statusFilter;
 
     return matchesSearch && matchesMembership && matchesStatus;
   });
@@ -996,24 +997,24 @@ export const GuestManagement: React.FC = () => {
   };
 
   const handleUpdateGuest = (updatedGuest: Guest) => {
-    setGuests(prev =>
-      prev.map(g => (g.id === updatedGuest.id ? updatedGuest : g))
+    setGuests((prev) =>
+      prev.map((g) => (g.id === updatedGuest.id ? updatedGuest : g)),
     );
     setSelectedGuest(updatedGuest);
   };
 
   const handleAddGuest = (newGuest: Guest) => {
-    setGuests(prev => [...prev, newGuest]);
+    setGuests((prev) => [...prev, newGuest]);
   };
 
   const fetchGuests = async () => {
     setLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setGuests(mockGuests);
     } catch (error) {
-      logger.error('Failed to fetch guests:', 'Component', error);
+      logger.error("Failed to fetch guests:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -1064,7 +1065,7 @@ export const GuestManagement: React.FC = () => {
                 <Input
                   placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -1122,7 +1123,7 @@ export const GuestManagement: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Khách VIP</p>
                 <p className="text-2xl font-bold">
-                  {guests.filter(g => g.status === 'vip').length}
+                  {guests.filter((g) => g.status === "vip").length}
                 </p>
               </div>
               <Star className="h-8 w-8 text-purple-500" />
@@ -1138,9 +1139,9 @@ export const GuestManagement: React.FC = () => {
                 <p className="text-2xl font-bold">
                   {
                     guests.filter(
-                      g =>
+                      (g) =>
                         new Date(g.createdAt) >
-                        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
                     ).length
                   }
                 </p>
@@ -1194,7 +1195,7 @@ export const GuestManagement: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredGuests.map(guest => (
+                {filteredGuests.map((guest) => (
                   <TableRow key={guest.id}>
                     <TableCell>
                       <div>
@@ -1241,7 +1242,7 @@ export const GuestManagement: React.FC = () => {
                     <TableCell>
                       {guest.lastStay
                         ? formatDate(guest.lastStay)
-                        : 'Chưa lưu trú'}
+                        : "Chưa lưu trú"}
                     </TableCell>
                     <TableCell>
                       <Button
