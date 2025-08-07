@@ -1,7 +1,7 @@
 import type { Room } from "../types/common.types";
 import type { LucideIcon } from "lucide-react";
 import {
-  Bed,
+  Building,
   Bell,
   Car,
   MapPin,
@@ -37,7 +37,7 @@ export interface ServiceItem {
 export const SERVICE_CATEGORIES: ServiceItem[] = [
   {
     name: "Room Service",
-    icon: Bed,
+    icon: Building,
     description: "In-room dining and housekeeping services",
   },
   {
