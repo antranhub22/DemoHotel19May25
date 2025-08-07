@@ -678,8 +678,8 @@ const hotelOperationsSlice = createSlice({
 
     optimisticUpdateTask: (
       state,
-      action: PayloadAction<{ id: string; updates: Partial<any> ) // TODO: Fix HousekeepingTask type definition }>,
-     => {
+      action: PayloadAction<{ id: string; updates: Partial<any> }>, // TODO: Fix HousekeepingTask type definition
+    ) => {
       const { id, updates } = action.payload;
       const taskIndex = state.housekeepingTasks.findIndex((t) => t.id === id);
       if (taskIndex !== -1) {
