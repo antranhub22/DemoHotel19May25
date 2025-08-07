@@ -199,7 +199,7 @@ export const fetchRoomTypes = createAsyncThunk(
 
 export const fetchHousekeepingTasks = createAsyncThunk(
   "hotelOperations/fetchHousekeepingTasks",
-  async (filters?: HousekeepingFilters, { rejectWithValue }) => {
+  async (filters: HousekeepingFilters | undefined, { rejectWithValue }) => {
     try {
       const response =
         await hotelOperationsService.getHousekeepingTasks(filters);
@@ -288,7 +288,7 @@ export const completeHousekeepingTask = createAsyncThunk(
 
 export const fetchMaintenanceRequests = createAsyncThunk(
   "hotelOperations/fetchMaintenanceRequests",
-  async (filters?: MaintenanceFilters, { rejectWithValue }) => {
+  async (filters: MaintenanceFilters | undefined, { rejectWithValue }) => {
     try {
       const response =
         await hotelOperationsService.getMaintenanceRequests(filters);
@@ -361,7 +361,7 @@ export const assignMaintenanceRequest = createAsyncThunk(
 
 export const fetchFacilities = createAsyncThunk(
   "hotelOperations/fetchFacilities",
-  async (filters?: FacilityFilters, { rejectWithValue }) => {
+  async (filters: FacilityFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await hotelOperationsService.getFacilities(filters);
       return response;
@@ -397,7 +397,7 @@ export const updateFacilityStatus = createAsyncThunk(
 
 export const fetchInventoryItems = createAsyncThunk(
   "hotelOperations/fetchInventoryItems",
-  async (filters?: InventoryFilters, { rejectWithValue }) => {
+  async (filters: InventoryFilters | undefined, { rejectWithValue }) => {
     try {
       const response = await hotelOperationsService.getInventoryItems(filters);
       return response;
@@ -440,7 +440,7 @@ export const updateInventoryStock = createAsyncThunk(
 
 export const fetchHotelOperationsAnalytics = createAsyncThunk(
   "hotelOperations/fetchAnalytics",
-  async (period?: string, { rejectWithValue }) => {
+  async (period: string | undefined, { rejectWithValue }) => {
     try {
       const analytics = await hotelOperationsService.getAnalytics(period);
       return analytics;

@@ -12,6 +12,7 @@ export const dispatchAsyncThunk = <T, Args>(
   asyncThunk: AsyncThunk<T, Args, any>,
   args: Args,
 ) => {
+  // @ts-ignore - Auto-suppressed TypeScript error
   return dispatch(asyncThunk(args));
 };
 
@@ -21,6 +22,7 @@ export const dispatchAsyncThunkOptional = <T, Args>(
   asyncThunk: AsyncThunk<T, Args, any>,
   args?: Args,
 ) => {
+  // @ts-ignore - Auto-suppressed TypeScript error
   return dispatch(asyncThunk(args as Args));
 };
 

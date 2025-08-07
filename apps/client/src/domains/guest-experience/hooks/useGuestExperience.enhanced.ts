@@ -316,6 +316,7 @@ export const useEnhancedGuestExperience = () => {
 
           logger.debug(
             "[EnhancedGuestExperience] Enhanced call summary created:",
+            "GuestExperience",
             {
               callId: currentCallSession.id,
               duration: callDuration,

@@ -3,6 +3,12 @@
  * Exports all domain functionality for request management
  */
 
+import type {
+  CreateRequestPayload,
+  CustomerRequest,
+} from "./types/requestManagement.types";
+import { requestManagementService } from "./services/requestManagementService";
+
 // ========================================
 // Types
 // ========================================
@@ -27,7 +33,7 @@ export type {
   SendMessagePayload,
   StaffMember,
   UpdateRequestPayload,
-} from './types/requestManagement.types.ts';
+} from "./types/requestManagement.types.ts";
 
 // ========================================
 // Redux Store
@@ -66,10 +72,10 @@ export {
   setViewMode,
   toggleFilters,
   updateRequest,
-} from './store/requestManagementSlice.ts';
+} from "./store/requestManagementSlice.ts";
 
 // Default export for reducer
-export { default as requestManagementReducer } from './store/requestManagementSlice.ts';
+export { default as requestManagementReducer } from "./store/requestManagementSlice.ts";
 
 // ========================================
 // Services
@@ -77,7 +83,7 @@ export { default as requestManagementReducer } from './store/requestManagementSl
 export {
   RequestManagementService,
   requestManagementService,
-} from './services/requestManagementService.ts';
+} from "./services/requestManagementService.ts";
 
 // ========================================
 // Hooks

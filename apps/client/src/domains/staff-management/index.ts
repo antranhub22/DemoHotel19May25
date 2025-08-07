@@ -3,6 +3,13 @@
  * Exports all domain functionality for staff management
  */
 
+import type {
+  StaffMember,
+  StaffTask,
+  CreateStaffPayload,
+  CreateTaskPayload,
+} from "./types/staffManagement.types";
+
 // ========================================
 // Types
 // ========================================
@@ -39,7 +46,7 @@ export type {
   UpdateStaffPayload,
   UpdateTaskPayload,
   WorkShift,
-} from './types/staffManagement.types.ts';
+} from "./types/staffManagement.types.ts";
 
 // ========================================
 // Redux Store
@@ -94,10 +101,10 @@ export {
   updateStaffWorkload,
   updateTask,
   updateTaskProgress,
-} from './store/staffManagementSlice.ts';
+} from "./store/staffManagementSlice.ts";
 
 // Default export for reducer
-export { default as staffManagementReducer } from './store/staffManagementSlice.ts';
+export { default as staffManagementReducer } from "./store/staffManagementSlice.ts";
 
 // ========================================
 // Services

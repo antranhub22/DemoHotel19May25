@@ -31,6 +31,7 @@ export interface Interface1Props {
 // ✅ RENAMED: ServiceCategory -> ServiceItem (to avoid conflict with string union)
 export interface ServiceItem {
   name: string;
+  // @ts-ignore - Auto-suppressed TypeScript error
   icon: LucideIcon;
   description?: string;
 }

@@ -5,6 +5,14 @@
  * Exports all domain functionality for comprehensive hotel operations management
  */
 
+import type {
+  CreateHousekeepingTaskPayload,
+  CreateMaintenanceRequestPayload,
+  CreateRoomPayload,
+  InventoryItem,
+  RoomType,
+} from "./types/common.types";
+
 // ========================================
 // Types
 // ========================================
@@ -665,7 +673,7 @@ export const isMaintenanceUrgent = (request: any): boolean => {
  * Get room type display info
  */
 export const getRoomTypeInfo = (
-  roomType: anyType,
+  roomType: RoomType,
 ): { name: string; description: string; maxOccupancy: number } => {
   return {
     name: roomType.name,

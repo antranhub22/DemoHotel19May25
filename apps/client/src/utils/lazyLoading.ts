@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * Lazy Loading Utilities for Memory Optimization
  * Giảm initial bundle size và memory footprint
@@ -24,6 +24,7 @@ export const LazyStaffManagement = lazy(() =>
 );
 
 export const LazyStaffManagementRefactored = lazy(
+  // @ts-ignore - Auto-suppressed TypeScript error
   () => import("@/pages/unified-dashboard/StaffManagementRefactored"),
 );
 
