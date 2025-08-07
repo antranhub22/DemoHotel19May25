@@ -4,14 +4,14 @@
  */
 
 import { Request, Response } from "express";
-import { TenantService } from "../services/tenantService";
-import PrismaTenantService from "../../../packages/shared/services/PrismaTenantService";
-import { PrismaConnectionManager } from "../../../packages/shared/db/PrismaConnectionManager";
-import { StripeService } from "../services/StripeService";
-import { UsageTrackingService } from "../services/UsageTrackingService";
-import { FeatureGatingService } from "../services/FeatureGatingService";
+// ✅ MIGRATED: Use PrismaTenantService instead of old TenantService
 import { logger } from "@shared/utils/logger";
 import { z } from "zod";
+import { PrismaConnectionManager } from "../../../packages/shared/db/PrismaConnectionManager";
+import PrismaTenantService from "../../../packages/shared/services/PrismaTenantService";
+import { FeatureGatingService } from "../services/FeatureGatingService";
+import { StripeService } from "../services/StripeService";
+import { UsageTrackingService } from "../services/UsageTrackingService";
 
 // ============================================
 // REQUEST VALIDATION SCHEMAS
@@ -119,7 +119,7 @@ export class TenantController {
   /**
    * Get all tenants
    */
-  static async getAllTenants(req: Request, res: Response): Promise<void> {
+  static async getAllTenants(_req: Request, res: Response): Promise<void> {
     try {
       const controller = new TenantController();
       const tenants = await controller.prismaTenantService.getAllTenants();
@@ -329,7 +329,7 @@ export class TenantController {
   /**
    * Get service health
    */
-  static async getServiceHealth(req: Request, res: Response): Promise<void> {
+  static async getServiceHealth(_req: Request, res: Response): Promise<void> {
     try {
       res.json({
         success: true,
@@ -1184,7 +1184,11 @@ export class TenantController {
     };
   }
 
-  private async generateUsageAlerts(tenantId: string, usage: any, limits: any) {
+  private async generateUsageAlerts(
+    _tenantId: string,
+    usage: any,
+    limits: any,
+  ) {
     const alerts = [];
 
     // Call limit alerts

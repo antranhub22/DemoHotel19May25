@@ -117,11 +117,7 @@ export interface RequestFilters {
 export interface TenantEntity {
   id: string;
   hotel_name: string;
-  domain?: string;
   subdomain?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
   subscription_plan?: string;
   subscription_status?: string;
   created_at?: Date;
@@ -135,6 +131,7 @@ export interface TenantEntity {
   white_label?: boolean;
   data_retention_days?: number;
   monthly_call_limit?: number;
+  // Note: domain, email, phone, address fields removed from current schema
 }
 
 export interface CreateTenantInput {

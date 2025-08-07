@@ -80,6 +80,20 @@ export interface ServicePanel {
   description?: string;
 }
 
+// Service category types
+export type ServiceCategory =
+  | "room_service"
+  | "housekeeping"
+  | "maintenance"
+  | "concierge"
+  | "spa_wellness"
+  | "dining"
+  | "transportation"
+  | "business_center"
+  | "laundry"
+  | "wake_up_call"
+  | "other";
+
 // Service Category UI Configuration with ID mapping (for backend integration)
 export interface ServiceCategoryConfig {
   id: ServiceCategory;

@@ -334,7 +334,7 @@ function Router() {
 
         {/* Platform Admin Dashboard - SaaS Provider management */}
         <Route path="/platform-admin">
-          <ProtectedRoute requireAuth={true} requireRole="saas_admin">
+          <ProtectedRoute requireAuth={true} requiredRole="saas_admin">
             <PlatformAdminDashboard />
           </ProtectedRoute>
         </Route>

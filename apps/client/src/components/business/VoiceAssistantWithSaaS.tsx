@@ -189,7 +189,7 @@ const EnhancedVoiceInterface: React.FC = () => {
 
   const handleStartCall = async () => {
     try {
-      await actions.startCall(journey.selectedLanguage!);
+      await actions.startCall(journey.hasSelectedLanguage ? "en" : "en"); // TODO: Get selected language from journey state
     } catch (error) {
       if (error instanceof Error && error.message.includes("requires")) {
         const match = error.message.match(/requires (\w+) plan/);
