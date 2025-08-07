@@ -1,8 +1,7 @@
-import React from 'react';
-import { designSystem } from '@/styles/designSystem';
+import React from "react";
+import { designSystem } from "@/styles/designSystem";
 
-export 
-interface LoadingStateProps {
+export interface LoadingStateProps {
   className?: string;
   children?: React.ReactNode;
   // TODO: Add specific props for LoadingState
@@ -24,7 +23,7 @@ const LoadingState: React.FC<LoadingStateProps> = () => {
       >
         <div
           className="animate-spin rounded-full border-4 border-white/20 border-t-white mx-auto mb-6"
-          style={{ width: '64px', height: '64px' }}
+          style={{ width: "64px", height: "64px" }}
         ></div>
         <p className="text-white text-lg font-medium">
           Loading hotel configuration...
@@ -33,3 +32,5 @@ const LoadingState: React.FC<LoadingStateProps> = () => {
     </div>
   );
 };
+
+export { LoadingState };

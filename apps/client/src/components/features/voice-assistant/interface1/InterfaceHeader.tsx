@@ -1,6 +1,5 @@
-import React from 'react';
-export 
-interface InterfaceHeaderProps {
+import React from "react";
+export interface InterfaceHeaderProps {
   className?: string;
   children?: React.ReactNode;
   // TODO: Add specific props for InterfaceHeader
@@ -15,9 +14,9 @@ const InterfaceHeader: React.FC<InterfaceHeaderProps> = () => {
       <h1
         className="hidden sm:block text-3xl md:text-4xl font-bold text-white text-center"
         style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          position: "absolute",
+          left: "50%",
+          transform: "translateX(-50%)",
           zIndex: 10,
         }}
       >
@@ -26,3 +25,5 @@ const InterfaceHeader: React.FC<InterfaceHeaderProps> = () => {
     </div>
   );
 };
+
+export { InterfaceHeader };
