@@ -1,8 +1,6 @@
-import type { Room } from "../types/common.types";
-import type { LucideIcon } from "lucide-react";
 import {
-  Building,
   Bell,
+  Building,
   Car,
   MapPin,
   Phone,
@@ -11,6 +9,10 @@ import {
   Waves,
   Wine,
 } from "lucide-react";
+import type { Language } from "./common.types";
+
+// Export Language for compatibility
+export type { Language };
 
 // Core types for Interface1
 
@@ -19,7 +21,7 @@ export interface CallDetails {
   roomNumber: string;
   duration: string;
   category: string;
-  language: string;
+  language: Language;
 }
 
 export interface Interface1Props {

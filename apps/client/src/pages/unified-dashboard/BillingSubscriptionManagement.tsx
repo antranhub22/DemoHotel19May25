@@ -1,44 +1,10 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * Billing & Subscription Management - Complete UI Component
  * Comprehensive billing interface with subscription management, payment processing,
  * invoice tracking, usage analytics, and customer portal integration
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import {
-  CreditCard,
-  FileText,
-  TrendingUp,
-  Settings,
-  Bell,
-  Download,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  RefreshCw,
-  ExternalLink,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  DollarSign,
-  Users,
-  Database,
-  Zap,
-  Shield,
-  Crown,
-  Calendar,
-  Filter,
-  Search,
-  BarChart3,
-  PieChart,
-  ArrowUp,
-  ArrowDown,
-  Mail,
-  Phone,
-  Globe,
-} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -56,7 +22,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -66,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -76,10 +40,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import logger from '@shared/utils/logger';
+import {
+  ArrowUp,
+  Bell,
+  Crown,
+  Database,
+  ExternalLink,
+  Eye,
+  FileText,
+  Phone,
+  RefreshCw,
+  Users,
+  Zap,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Domain imports - Hooks temporarily disabled
 import {
@@ -93,11 +69,10 @@ import {
   // useCustomerPortal,
   // useBillingAutoRefresh,
   BillingUtils,
-  PLAN_LIMITS,
   PLAN_FEATURES,
-  type SubscriptionPlan,
+  PLAN_LIMITS,
   type BillingCycle,
-  type PricingConfig,
+  type SubscriptionPlan,
 } from "@/domains/billing-subscription";
 
 // ============================================
@@ -122,14 +97,56 @@ const BillingSubscriptionManagement: React.FC = () => {
   // useBillingAutoRefresh(tenantId);
 
   // MOCK DATA FOR BILLING MANAGEMENT
-  const billing = { currentSubscription: null, isLoading: false };
-  const subscriptionMgmt = { plans: [], upgradePlan: () => {} };
+  const billing = {
+    currentSubscription: null,
+    isLoading: false,
+    actions: {
+      fetchSubscriptions: () => {},
+      fetchPaymentMethods: () => {},
+      fetchInvoices: () => {},
+      fetchCurrentUsage: () => {},
+      fetchNotifications: () => {},
+    },
+    isTrialing: false,
+    hasActiveSubscription: false,
+  };
+  const subscriptionMgmt = {
+    plans: [],
+    upgradePlan: () => {},
+    currentPlan: null,
+    currentSubscription: null,
+    subscriptions: [],
+  };
   const paymentMgmt = { methods: [], addPaymentMethod: () => {} };
   const invoiceMgmt = { invoices: [], downloadInvoice: () => {} };
-  const usageAnalytics = { usage: {}, limits: {} };
-  const pricingPlans = { plans: [], features: {} };
-  const notifications = { notifications: [], markAsRead: () => {} };
-  const customerPortal = { openPortal: () => {} };
+  const usageAnalytics = {
+    usage: {},
+    limits: {},
+    usageMetrics: {
+      voiceCalls: { current: 0, limit: 100, percentage: 0 },
+      apiRequests: { current: 0, limit: 1000, percentage: 0 },
+      storage: { current: 0, limit: 100, percentage: 0 },
+      staffUsers: { current: 0, limit: 10, percentage: 0 },
+    },
+  };
+  const pricingPlans = {
+    plans: [],
+    features: {},
+    actions: {
+      fetchPricingConfig: () => {},
+    },
+    pricingConfig: {},
+    formatPrice: () => "$0",
+  };
+  const notifications = {
+    notifications: [],
+    markAsRead: () => {},
+    unreadCount: 0,
+  };
+  const customerPortal = {
+    openPortal: () => {},
+    loading: false,
+  };
 
   // Local state
   const [activeTab, setActiveTab] = useState("overview");

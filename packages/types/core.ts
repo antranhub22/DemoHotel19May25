@@ -20,6 +20,8 @@ export type UserRole =
   | "hotel-manager"
   | "front-desk"
   | "it-manager"
+  | "manager"
+  | "staff"
   | "guest";
 
 export type Permission =

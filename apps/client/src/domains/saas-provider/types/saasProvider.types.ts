@@ -84,6 +84,7 @@ export interface TenantData {
     soc2Compliant: boolean;
     lastSecurityAudit?: Date;
   };
+  plan?: string | SubscriptionPlan;
 }
 
 export interface Invoice {

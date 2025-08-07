@@ -40,7 +40,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     system: ["view", "debug"],
     calls: ["view"],
   },
-  admin: {
+  super_admin: {
     dashboard: ["view", "edit"],
     analytics: ["view", "export"],
     calls: ["view", "manage"],
@@ -66,7 +66,7 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     system: ["view", "debug"],
     calls: ["view"],
   },
-  "super-admin": {
+  super_admin: {
     dashboard: ["view", "edit"],
     analytics: ["view", "export"],
     calls: ["view", "manage"],
@@ -171,7 +171,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       requiredPermission: "system.view",
     },
   ],
-  admin: [
+  super_admin: [
     {
       key: "dashboard",
       label: "Tổng quan",
@@ -258,7 +258,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       requiredPermission: "system.view",
     },
   ],
-  "super-admin": [
+  super_admin: [
     {
       key: "dashboard",
       label: "Tổng quan",

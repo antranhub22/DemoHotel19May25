@@ -4,7 +4,7 @@
  */
 
 import { AppDispatch } from "@/store";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import { useCallback, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { TenantManagementService } from "../services/tenantManagementService";
@@ -37,7 +37,7 @@ export const useTenantManagement = () => {
 
   // Service instance
   const tenantService = useMemo(() => {
-    return new TenantManagementService(dispatch, () => store.getState());
+    return new TenantManagementService(dispatch, () => ({}));
   }, [dispatch]);
 
   // ============================================
@@ -268,7 +268,7 @@ export const useTenantManagement = () => {
   const planUpgradeRecommendation = useMemo(() => {
     if (!currentTenant || !usageStats) return null;
 
-    const { plan } = currentTenant;
+    const { plan } = currentTenant as any;
     const { calls, minutes } = usageStats;
 
     // Recommend upgrade if approaching limits

@@ -2,8 +2,8 @@
    API TYPES - API-RELATED TYPE DEFINITIONS
    ======================================== */
 
-import type { ApiResponse } from '../types/common.types';
-import { Language } from '@/types/core';
+import type { ApiResponse } from "@/types/common.types";
+import { Language } from "@/types/core";
 
 // ========================================
 // HOTEL DATA TYPES
@@ -29,7 +29,7 @@ export interface HotelData {
     description: string;
     category: string;
     price?: number;
-    availability: '24/7' | 'business-hours' | 'on-demand';
+    availability: "24/7" | "business-hours" | "on-demand";
   }>;
   policies: {
     checkIn: string;
@@ -55,12 +55,12 @@ export interface HotelProfile {
 
 export interface AssistantCustomization {
   voice: {
-    gender: 'male' | 'female';
+    gender: "male" | "female";
     accent: string;
     speed: number;
   };
   personality: {
-    tone: 'professional' | 'friendly' | 'formal' | 'casual';
+    tone: "professional" | "friendly" | "formal" | "casual";
     style: string;
     language: Language;
   };
@@ -158,22 +158,22 @@ export interface ServiceHealthResponse {
   success: boolean;
   data: {
     database: {
-      status: 'healthy' | 'degraded' | 'down';
+      status: "healthy" | "degraded" | "down";
       responseTime: number;
       lastCheck: Date;
     };
     vapi: {
-      status: 'healthy' | 'degraded' | 'down';
+      status: "healthy" | "degraded" | "down";
       responseTime: number;
       lastCheck: Date;
     };
     openai: {
-      status: 'healthy' | 'degraded' | 'down';
+      status: "healthy" | "degraded" | "down";
       responseTime: number;
       lastCheck: Date;
     };
     email: {
-      status: 'healthy' | 'degraded' | 'down';
+      status: "healthy" | "degraded" | "down";
       responseTime: number;
       lastCheck: Date;
     };
@@ -198,7 +198,7 @@ export interface LoginResponse {
     user: {
       id: number;
       username: string;
-      role: 'admin' | 'staff' | 'manager';
+      role: "admin" | "staff" | "manager";
       tenantId: string;
     };
     tenant: {
@@ -265,7 +265,7 @@ export interface EndCallResponse {
 
 export interface SaveTranscriptRequest {
   callId: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   tenantId: string;
 }
@@ -275,7 +275,7 @@ export interface SaveTranscriptResponse {
   data: {
     id: number;
     callId: string;
-    role: 'user' | 'assistant';
+    role: "user" | "assistant";
     content: string;
     timestamp: Date;
   };
@@ -308,7 +308,7 @@ export interface CreateOrderResponse {
 
 export interface UpdateOrderStatusRequest {
   orderId: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  status: "pending" | "in-progress" | "completed" | "cancelled";
   tenantId: string;
 }
 
@@ -369,7 +369,7 @@ export interface PaginationParams {
   page: number;
   limit: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 export interface PaginatedResponse<T> {
@@ -389,22 +389,22 @@ export interface PaginatedResponse<T> {
 // ========================================
 
 export interface WebSocketMessage {
-  type: 'transcript' | 'order_status_update' | 'call_end' | 'init' | 'error';
+  type: "transcript" | "order_status_update" | "call_end" | "init" | "error";
   data: any;
   timestamp: Date;
   tenantId?: string;
 }
 
 export interface TranscriptMessage {
-  type: 'transcript';
+  type: "transcript";
   content: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   timestamp: Date;
   callId: string;
 }
 
 export interface OrderStatusMessage {
-  type: 'order_status_update';
+  type: "order_status_update";
   orderId?: string;
   reference?: string;
   status: string;
@@ -413,21 +413,21 @@ export interface OrderStatusMessage {
 }
 
 export interface CallEndMessage {
-  type: 'call_end';
+  type: "call_end";
   callId: string;
   duration: number;
   timestamp: Date;
 }
 
 export interface InitMessage {
-  type: 'init';
+  type: "init";
   tenantId: string;
   roomNumber?: string;
   language?: Language;
 }
 
 export interface ErrorMessage {
-  type: 'error';
+  type: "error";
   message: string;
   code?: string;
   timestamp: Date;

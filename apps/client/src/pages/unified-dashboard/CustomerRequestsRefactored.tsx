@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * Customer Requests - Refactored with Request Management Domain
  * Redux-based implementation replacing context and local state
@@ -32,7 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import {
   AlertCircle,
   Calendar,
@@ -47,7 +47,7 @@ import {
   Send,
   User,
 } from "lucide-react";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 // ========================================
 // Domain Imports - NEW Redux Architecture
@@ -82,18 +82,12 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-// ========================================
-// Sub-Components
-// ========================================
-
-interface RequestDetailModalProps {
-  request: CustomerRequest;
-  isOpen: boolean;
-  onClose: () => void;
-  onOpenMessage: () => void;
-}
-
-const RequestDetailModal: React.FC<RequestDetailModal> = ({ request, isOpen, onClose, onOpenMessage }) => {
+const RequestDetailModal: React.FC<RequestDetailModal> = ({
+  request,
+  isOpen,
+  onClose,
+  onOpenMessage,
+}) => {
   const { updateStatus, isUpdating } = useRequestStatus();
   const [selectedStatus, setSelectedStatus] = useState(request.status);
 
@@ -398,7 +392,12 @@ export const CustomerRequestsRefactored: React.FC = () => {
   const requests = [];
   const requestCounts = { total: 0, pending: 0, inProgress: 0, completed: 0 };
   const selectedRequest = null;
-  const filters = {};
+  const filters = {
+    status: "",
+    startDate: "",
+    endDate: "",
+    searchQuery: "",
+  };
   const isLoading = false;
   const error = null;
   const loadRequests = () => {};
@@ -407,6 +406,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
   const clearFilters = () => {};
   const clearCurrentError = () => {};
   const setupAutoRefresh = () => {};
+  const handleFilterChange = () => {};
 
   // Set up real-time updates
   // useRequestRealtime(); // TEMPORARILY DISABLED
