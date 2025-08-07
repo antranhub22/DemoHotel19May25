@@ -1,8 +1,9 @@
-import { useAssistant } from '@/context';
-import { designSystem } from '@/styles/designSystem';
-import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
-import logger from '@shared/utils/logger';
-import { forwardRef, useCallback, useState } from 'react';
+import { useAssistant } from "@/context";
+import { designSystem } from "@/styles/designSystem";
+import { SERVICE_CATEGORIES, ServiceItem } from "@/types/interface1.types";
+import logger from "@shared/utils/logger";
+import { forwardRef, useCallback, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ServiceGridProps {
   className?: string;
@@ -11,17 +12,18 @@ interface ServiceGridProps {
 }
 
 export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
-  ({ className = '', onServiceSelect, onVoiceServiceRequest }, ref) => {
+  ({ className = "", onServiceSelect, onVoiceServiceRequest }, ref) => {
     const { startCall, language } = useAssistant();
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState<string | null>(null);
+    const isMobile = useIsMobile();
 
     // Handle service item click
     const handleServiceClick = useCallback(
       async (service: ServiceItem) => {
         logger.debug(
           `🎯 [ServiceGrid] Service clicked: ${service.name}`,
-          'Component'
+          "Component",
         );
 
         try {
@@ -37,30 +39,30 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           } else if (startCall) {
             // Fallback to direct voice assistant start
             logger.debug(
-              '🎤 [ServiceGrid] Starting voice call for service',
-              'Component',
-              service.name
+              "🎤 [ServiceGrid] Starting voice call for service",
+              "Component",
+              service.name,
             );
             await startCall();
           }
 
           logger.debug(
             `✅ [ServiceGrid] Service request processed: ${service.name}`,
-            'Component'
+            "Component",
           );
         } catch (error) {
           logger.error(
             `❌ [ServiceGrid] Error processing service: ${service.name}`,
-            'Component',
-            error
+            "Component",
+            error,
           );
 
           // Show user-friendly error
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             const errorMessage =
               error instanceof Error
                 ? (error as any)?.message || String(error)
-                : 'Unknown error';
+                : "Unknown error";
             alert(`Unable to process ${service.name} request: ${errorMessage}`);
           }
         } finally {
@@ -68,7 +70,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           setTimeout(() => setSelectedService(null), 2000); // Clear selection after 2s
         }
       },
-      [onServiceSelect, onVoiceServiceRequest, startCall, language]
+      [onServiceSelect, onVoiceServiceRequest, startCall, language],
     );
 
     // Generate service item component
@@ -80,18 +82,18 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
         const baseStyles = {
           background: isSelected
-            ? 'rgba(93, 182, 185, 0.3)'
-            : 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
+            ? "rgba(93, 182, 185, 0.3)"
+            : "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
           border: isSelected
-            ? '2px solid rgba(93, 182, 185, 0.6)'
-            : '1px solid rgba(255, 255, 255, 0.2)',
+            ? "2px solid rgba(93, 182, 185, 0.6)"
+            : "1px solid rgba(255, 255, 255, 0.2)",
           transition: designSystem.transitions.normal,
-          cursor: isLoading ? 'wait' : 'pointer',
+          cursor: isLoading ? "wait" : "pointer",
           boxShadow: isSelected
-            ? '0 8px 25px rgba(93, 182, 185, 0.4)'
+            ? "0 8px 25px rgba(93, 182, 185, 0.4)"
             : designSystem.shadows.card,
-          transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+          transform: isSelected ? "scale(1.05)" : "scale(1)",
         };
 
         if (isMobile) {
@@ -111,7 +113,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
                 )}
                 <Icon
                   size={32}
-                  className={isLoading ? 'opacity-30' : 'opacity-100'}
+                  className={isLoading ? "opacity-30" : "opacity-100"}
                 />
               </div>
               <div className="text-white">
@@ -149,14 +151,14 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
             {/* Icon */}
             <div
-              className={`text-white mb-2 ${isLoading ? 'opacity-30' : 'opacity-100'}`}
+              className={`text-white mb-2 ${isLoading ? "opacity-30" : "opacity-100"}`}
             >
               <Icon size={28} />
             </div>
 
             {/* Text */}
             <div
-              className={`text-white text-center text-sm font-medium ${isLoading ? 'opacity-30' : 'opacity-100'}`}
+              className={`text-white text-center text-sm font-medium ${isLoading ? "opacity-30" : "opacity-100"}`}
             >
               {service.name}
             </div>
@@ -180,36 +182,38 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           </div>
         );
       },
-      [selectedService, isProcessing, handleServiceClick]
+      [selectedService, isProcessing, handleServiceClick],
     );
 
     return (
       <div ref={ref} className={`w-full max-w-full ${className}`}>
-        {/* Mobile View - Vertical scroll list */}
-        <div className="block md:hidden space-y-4 px-4 py-6">
-          {SERVICE_CATEGORIES.map((service, index) =>
-            renderServiceItem(service, index, true)
-          )}
-        </div>
-
-        {/* Desktop View - Fixed grid layout */}
-        <div className="hidden md:block w-full max-w-6xl mx-auto px-6 py-8">
-          {/* First row - 5 items */}
-          <div className="grid grid-cols-5 gap-4 mb-4">
-            {SERVICE_CATEGORIES.slice(0, 5).map((service, index) =>
-              renderServiceItem(service, index, false)
+        {/* Mobile View - Force render only on mobile */}
+        {isMobile ? (
+          <div className="block md:hidden space-y-4 px-4 py-6">
+            {SERVICE_CATEGORIES.map((service, index) =>
+              renderServiceItem(service, index, true),
             )}
           </div>
-
-          {/* Second row - remaining items */}
-          {SERVICE_CATEGORIES.length > 5 && (
-            <div className="grid grid-cols-5 gap-4">
-              {SERVICE_CATEGORIES.slice(5).map((service, index) =>
-                renderServiceItem(service, index + 5, false)
+        ) : (
+          /* Desktop View - Force render only on desktop */
+          <div className="hidden md:block w-full max-w-6xl mx-auto px-6 py-8">
+            {/* First row - 5 items */}
+            <div className="grid grid-cols-5 gap-4 mb-4">
+              {SERVICE_CATEGORIES.slice(0, 5).map((service, index) =>
+                renderServiceItem(service, index, false),
               )}
             </div>
-          )}
-        </div>
+
+            {/* Second row - remaining items */}
+            {SERVICE_CATEGORIES.length > 5 && (
+              <div className="grid grid-cols-5 gap-4">
+                {SERVICE_CATEGORIES.slice(5).map((service, index) =>
+                  renderServiceItem(service, index + 5, false),
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Status message */}
         {selectedService && (
@@ -219,7 +223,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-ServiceGrid.displayName = 'ServiceGrid';
+ServiceGrid.displayName = "ServiceGrid";
