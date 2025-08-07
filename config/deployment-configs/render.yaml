@@ -1,14 +1,192 @@
+# 🚀 RENDER DEPLOYMENT CONFIGURATION - FIXED & PRODUCTION READY
+# ✅ Được cập nhật với cấu trúc repo mới nhất và tất cả dependencies cần thiết
+# ✅ Sửa lỗi build commands, migration sequence, và environment variables
+
 services:
   - type: web
     name: demohotel19may25
     env: node
     region: oregon
     plan: free
-    buildCommand: npm ci && npm run migrate:production && npm run migrate:auto && npm run build:production
+    
+    # ✅ FIXED: Build command sequence chính xác theo project structure
+    buildCommand: |
+      export NODE_OPTIONS="--max-old-space-size=1024" &&
+      echo "🚀 Starting Render deployment build..." &&
+      npm ci --prefer-offline --no-audit &&
+      echo "🏗️  Generating Prisma client..." &&
+      npx prisma generate &&
+      echo "🗄️  Running database migrations..." &&
+      npx prisma migrate deploy &&
+      echo "🔧 Running auto-migration scripts..." &&
+      npm run migrate:auto &&
+      echo "🔨 Building production application..." &&
+      npm run build:production &&
+      echo "✅ Build completed successfully!"
+    
+    # ✅ VERIFIED: Start command matches package.json
     startCommand: npm run start
+    
+    # ✅ ADDED: Health check endpoint từ healthController.ts  
+    healthCheckPath: /api/health
+    
     envVars:
+      # ========== CORE APPLICATION SETTINGS ==========
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=1024"
       - key: PORT
         value: 10000
-    nodeVersion: 18.20.8 
+      - key: CLIENT_URL
+        sync: false
+        # Set this to your frontend domain: https://your-frontend.onrender.com
+        
+      # ========== DATABASE (BẮT BUỘC) ==========
+      # DATABASE_URL sẽ được Render PostgreSQL service tự động cung cấp
+      # Hoặc thêm manual nếu dùng external database
+      
+      # ========== AUTHENTICATION & SECURITY (BẮT BUỘC) ==========
+      - key: JWT_SECRET
+        sync: false
+        # MUST SET: Minimum 32 characters secure string
+      - key: STAFF_ACCOUNTS  
+        sync: false
+        # Format: admin@hotel.com:password,manager@hotel.com:password
+        
+      # ========== AI & VOICE INTEGRATION (CORE FEATURES) ==========
+      - key: VITE_VAPI_PUBLIC_KEY
+        sync: false
+        # Format: pk_your-vapi-public-key
+      - key: VITE_VAPI_ASSISTANT_ID  
+        sync: false
+        # Format: asst_your-assistant-id
+      - key: VAPI_API_KEY
+        sync: false
+        # For dynamic assistant creation
+      - key: VITE_OPENAI_API_KEY
+        sync: false
+        # Format: sk-your-openai-api-key
+      - key: VITE_OPENAI_PROJECT_ID
+        sync: false
+        # Format: proj_your-project-id
+        
+      # ========== MULTI-LANGUAGE SUPPORT ==========
+      - key: VITE_VAPI_PUBLIC_KEY_VI
+        sync: false
+        # Vietnamese assistant
+      - key: VITE_VAPI_ASSISTANT_ID_VI
+        sync: false
+      - key: VITE_VAPI_PUBLIC_KEY_FR
+        sync: false
+        # French assistant  
+      - key: VITE_VAPI_ASSISTANT_ID_FR
+        sync: false
+        
+      # ========== HOTEL RESEARCH & APIS ==========
+      - key: GOOGLE_PLACES_API_KEY
+        sync: false
+        # For hotel research functionality
+        
+      # ========== SAAS PLATFORM SETTINGS ==========
+      - key: TALK2GO_DOMAIN
+        value: talk2go.online
+      - key: SUBDOMAIN_SUFFIX
+        value: .talk2go.online
+      - key: MINHON_TENANT_ID
+        sync: false
+        # Default tenant ID for Mi Nhon Hotel
+        
+      # ========== EMAIL SERVICES ==========
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+        # For sending call summaries
+      - key: SUMMARY_EMAILS
+        sync: false
+        # Comma-separated email list: admin@hotel.com,manager@hotel.com
+      - key: MAILJET_API_KEY
+        sync: false
+        # Optional: Alternative email service
+      - key: MAILJET_SECRET_KEY
+        sync: false
+        
+      # ========== FEATURE FLAGS ==========
+      - key: ENABLE_HOTEL_RESEARCH
+        value: "true"
+      - key: ENABLE_DYNAMIC_ASSISTANT_CREATION
+        value: "true"
+      - key: ENABLE_MULTI_LANGUAGE_SUPPORT
+        value: "true"
+      - key: ENABLE_ANALYTICS_DASHBOARD
+        value: "true"
+      - key: ENABLE_BILLING_SYSTEM
+        value: "false"
+        
+      # ========== PRODUCTION OPTIMIZATIONS ==========
+      - key: AUTO_MIGRATE
+        value: "true"
+      - key: SEED_USERS
+        value: "true"
+      - key: AUTO_DB_FIX
+        value: "false"
+      - key: LOG_LEVEL
+        value: "info"
+      - key: ENABLE_METRICS
+        value: "true"
+      - key: ENABLE_HEALTH_CHECKS
+        value: "true"
+        
+      # ========== SECURITY SETTINGS ==========
+      - key: CORS_ORIGIN
+        sync: false
+        # Set to your frontend domain
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: TRUST_PROXY
+        value: "true"
+        
+    # ✅ UPDATED: Node version compatible với project requirements  
+    nodeVersion: 18.20.8
+    
+    # ✅ OPTIMIZED: Build filters để tránh rebuild không cần thiết
+    buildFilter:
+      paths:
+        - apps/**
+        - packages/**
+        - prisma/**
+        - tools/scripts/maintenance/**
+        - package.json
+        - package-lock.json
+        - tsconfig.json
+        - vite.config.ts
+      ignoredPaths:
+        - "**/*.test.ts"
+        - "**/*.spec.ts"  
+        - "tests/**"
+        - "docs/**"
+        - "archive/**"
+        - "reports/**"
+        - "*.md"
+
+# =========================================================================
+# 🚨 CRITICAL SETUP STEPS AFTER DEPLOYMENT:
+# =========================================================================
+# 1. Create PostgreSQL database service on Render
+# 2. Set all environment variables marked with 'sync: false'
+# 3. Connect database service to web service
+# 4. Set CLIENT_URL to your frontend domain
+# 5. Set CORS_ORIGIN to match CLIENT_URL
+# 6. Test health endpoint: https://your-app.onrender.com/api/health
+# 7. Monitor logs for any missing environment variables
+#
+# 🔧 REQUIRED EXTERNAL SERVICES:
+# - Render PostgreSQL Database
+# - OpenAI API Account  
+# - Vapi.ai Account
+# - Google Places API
+# - Gmail/Mailjet for emails
+#
+# 📝 BACKUP CONFIG: Save this file as render-production.yaml
+# =========================================================================
