@@ -1,7 +1,7 @@
 import type { Permission, UserRole } from "@shared/types";
 import logger from '@shared/utils/logger';
 import { getPermissionsForRole } from '@shared/utils/permissions';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import React, {
   createContext,
   useCallback,
