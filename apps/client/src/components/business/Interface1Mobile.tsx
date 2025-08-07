@@ -4,6 +4,7 @@ import { DebugWrapper } from "../features/debug/DebugWrapper";
 import { MobileSummaryPopup } from "../features/popup-system/MobileSummaryPopup";
 import RealtimeConversationPopup from "../features/popup-system/RealtimeConversationPopup";
 import { SiriButtonContainer } from "../features/voice-assistant/siri/SiriButtonContainer";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Interface1MobileProps {
   isCallStarted: boolean;
@@ -14,7 +15,21 @@ interface Interface1MobileProps {
   handleCallEnd: () => void;
 }
 
-export const Interface1Mobile: React.FC<Interface1MobileProps> = ({ isCallStarted, micLevel, showConversation, showingSummary, handleCallStart, handleCallEnd }) => {
+export const Interface1Mobile: React.FC<Interface1MobileProps> = ({
+  isCallStarted,
+  micLevel,
+  showConversation,
+  showingSummary,
+  handleCallStart,
+  handleCallEnd,
+}) => {
+  const isMobile = useIsMobile();
+
+  // Force hide on desktop to prevent dual SiriButton rendering
+  if (!isMobile) {
+    return null;
+  }
+
   return (
     <div className="block md:hidden">
       <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">

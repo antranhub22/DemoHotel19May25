@@ -20,10 +20,14 @@ export const SimpleMobileSiriVisual: React.FC<SimpleMobileSiriVisualProps> = ({
   colors,
   size = 80,
 }) => {
-  const { ripples, finalScale } = useSiriAnimation({
-    isListening,
-    volumeLevel,
-  });
+  // ✅ TEMP FIX: Disable complex animations to fix UI break
+  const ripples: any[] = []; // Disable ripples temporarily
+  const finalScale = isListening ? 1.1 : 1; // Simple scale only
+
+  // Debug: Log when this component renders
+  if (import.meta.env.DEV) {
+    console.log("🎯 SimpleMobileSiriVisual render:", { isListening, size });
+  }
 
   // Memoize style calculations
   const styles = useMemo(

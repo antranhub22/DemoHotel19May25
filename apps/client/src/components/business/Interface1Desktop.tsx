@@ -1,9 +1,10 @@
-import React from 'react';
-import { DebugButtons } from '../features/debug/DebugButtons';
-import { DebugWrapper } from '../features/debug/DebugWrapper';
-import { DesktopSummaryPopup } from '../features/popup-system/DesktopSummaryPopup';
-import RealtimeConversationPopup from '../features/popup-system/RealtimeConversationPopup';
-import { SiriButtonContainer } from '../features/voice-assistant/siri/SiriButtonContainer';
+import React from "react";
+import { DebugButtons } from "../features/debug/DebugButtons";
+import { DebugWrapper } from "../features/debug/DebugWrapper";
+import { DesktopSummaryPopup } from "../features/popup-system/DesktopSummaryPopup";
+import RealtimeConversationPopup from "../features/popup-system/RealtimeConversationPopup";
+import { SiriButtonContainer } from "../features/voice-assistant/siri/SiriButtonContainer";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface Interface1DesktopProps {
   isCallStarted: boolean;
@@ -16,7 +17,21 @@ interface Interface1DesktopProps {
   handleRightPanelClose: () => void;
 }
 
-export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({ isCallStarted, micLevel, showConversation, showingSummary, handleCallStart, handleCallEnd }) => {
+export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({
+  isCallStarted,
+  micLevel,
+  showConversation,
+  showingSummary,
+  handleCallStart,
+  handleCallEnd,
+}) => {
+  const isMobile = useIsMobile();
+
+  // Force hide on mobile to prevent dual SiriButton rendering
+  if (isMobile) {
+    return null;
+  }
+
   return (
     <div className="hidden md:block">
       {/* Row 1: 3-Column Layout - Chat Popup | Siri | Summary Popup */}
@@ -37,7 +52,7 @@ export const Interface1Desktop: React.FC<Interface1DesktopProps> = ({ isCallStar
             <SiriButtonContainer
               isCallStarted={isCallStarted}
               micLevel={micLevel}
-              onCallStart={async lang => {
+              onCallStart={async (lang) => {
                 await handleCallStart(lang);
               }}
               onCallEnd={handleCallEnd}
