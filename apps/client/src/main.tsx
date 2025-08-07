@@ -2,7 +2,9 @@
 
 // Type declaration for import.meta
 
-import App from './App';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 import "./index.css";
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access
