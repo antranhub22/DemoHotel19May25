@@ -273,7 +273,7 @@ const EnhancedVoiceInterface: React.FC = () => {
       </div>
 
       {/* Active Call Interface */}
-      {voiceInteraction.isInCall && (
+      {voiceInteraction.isCallActive && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md mx-4 w-full">
             <h3 className="text-lg font-semibold mb-4">📞 Voice Call Active</h3>
@@ -383,7 +383,7 @@ const VoiceAssistantWithSaaS: React.FC<VoiceAssistantWithSaaSProps> = ({
                 I'm your AI assistant. How can I help you today?
               </p>
               <button
-                onClick={actions.completeWelcome}
+                onClick={() => actions.selectLanguage("en")}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Get Started

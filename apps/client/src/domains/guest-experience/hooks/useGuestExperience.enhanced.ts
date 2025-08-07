@@ -51,9 +51,8 @@ export const useEnhancedGuestExperience = () => {
 
   // ✅ NEW: SaaS Provider hooks
   const { currentTenant } = useTenantManagement();
-  const { canAccessFeature, getFeatureAvailability } = useFeatureGating();
-  const { trackUsage, getCurrentUsage, checkUsageLimits, isApproachingLimit } =
-    useUsageMonitoring();
+  const { canAccess, getAvailability } = useFeatureGating();
+  const { trackUsage, stats, alerts, healthScore } = useUsageMonitoring();
 
   // Guest Experience selectors
   const journey = useAppSelector(selectGuestJourney);
@@ -84,7 +83,7 @@ export const useEnhancedGuestExperience = () => {
     if (!currentTenant) return;
 
     try {
-      const currentUsage = await getCurrentUsage();
+      const currentUsage = await stats();
       const limits = currentTenant.limits;
 
       const remainingMinutes = Math.max(
@@ -99,9 +98,9 @@ export const useEnhancedGuestExperience = () => {
       const canMakeCalls = remainingMinutes > 0 && remainingCalls > 0;
 
       let warningMessage;
-      if (isApproachingLimit("voice_minutes")) {
+      if (healthScore("voice_minutes")) {
         warningMessage = `⚠️ Approaching monthly minute limit (${currentUsage.monthlyMinutes}/${limits.maxMonthlyMinutes})`;
-      } else if (isApproachingLimit("voice_calls")) {
+      } else if (healthScore("voice_calls")) {
         warningMessage = `⚠️ Approaching monthly call limit (${currentUsage.monthlyCalls}/${limits.maxCalls})`;
       }
 
@@ -124,7 +123,7 @@ export const useEnhancedGuestExperience = () => {
         error,
       );
     }
-  }, [currentTenant, getCurrentUsage, isApproachingLimit]);
+  }, [currentTenant, stats, healthScore]);
 
   // ✅ ENHANCED: Initialize journey with tenant context
   const initializeJourney = useCallback(() => {
@@ -166,12 +165,12 @@ export const useEnhancedGuestExperience = () => {
       }
 
       // Check if multi-language is available for this plan
-      if (!canAccessFeature("multiLanguage") && language !== "en") {
+      if (!canAccess("multiLanguage") && language !== "en") {
         logger.warn(
           "[EnhancedGuestExperience] Multi-language not available for current plan",
         );
         throw new Error(
-          `Multi-language support requires ${getFeatureAvailability("multiLanguage").requiredPlan} plan or higher`,
+          `Multi-language support requires ${getAvailability("multiLanguage").requiredPlan} plan or higher`,
         );
       }
 
@@ -186,7 +185,7 @@ export const useEnhancedGuestExperience = () => {
         tenantId: currentTenant.id,
       });
     },
-    [dispatch, currentTenant, canAccessFeature, getFeatureAvailability],
+    [dispatch, currentTenant, canAccess, getAvailability],
   );
 
   // ✅ ENHANCED: Start call with feature gating and usage tracking
@@ -201,9 +200,9 @@ export const useEnhancedGuestExperience = () => {
         dispatch(setVoiceInteractionError(null));
 
         // ✅ NEW: Check feature access
-        if (!canAccessFeature("basicVoice")) {
+        if (!canAccess("basicVoice")) {
           throw new Error(
-            `Voice features require ${getFeatureAvailability("basicVoice").requiredPlan} plan or higher`,
+            `Voice features require ${getAvailability("basicVoice").requiredPlan} plan or higher`,
           );
         }
 
@@ -215,12 +214,9 @@ export const useEnhancedGuestExperience = () => {
         }
 
         // ✅ NEW: Check specific voice cloning feature
-        if (
-          serviceContext?.useVoiceCloning &&
-          !canAccessFeature("voiceCloning")
-        ) {
+        if (serviceContext?.voiceCloning && !canAccess("voiceCloning")) {
           throw new Error(
-            `Voice cloning requires ${getFeatureAvailability("voiceCloning").requiredPlan} plan or higher`,
+            `Voice cloning requires ${getAvailability("voiceCloning").requiredPlan} plan or higher`,
           );
         }
 
@@ -229,11 +225,9 @@ export const useEnhancedGuestExperience = () => {
           tenantId: currentTenant.id,
           subscriptionPlan: currentTenant.subscriptionPlan,
           usageTracking: {
-            currentMonthMinutes: getCurrentUsage().then(
-              (u) => u.monthlyMinutes,
-            ),
+            currentMonthMinutes: stats().then((u) => u.monthlyMinutes),
             maxMonthlyMinutes: currentTenant.limits.maxMonthlyMinutes,
-            currentMonthCalls: getCurrentUsage().then((u) => u.monthlyCalls),
+            currentMonthCalls: stats().then((u) => u.monthlyCalls),
             maxMonthlyCalls: currentTenant.limits.maxCalls,
           },
         } as any;
@@ -284,10 +278,10 @@ export const useEnhancedGuestExperience = () => {
       dispatch,
       currentTenant,
       usageStatus,
-      canAccessFeature,
-      getFeatureAvailability,
+      canAccess,
+      getAvailability,
       trackUsage,
-      getCurrentUsage,
+      stats,
       updateUsageStatus,
     ],
   );
@@ -405,23 +399,23 @@ export const useEnhancedGuestExperience = () => {
 
     return {
       basicVoice: {
-        available: canAccessFeature("basicVoice"),
-        info: getFeatureAvailability("basicVoice"),
+        available: canAccess("basicVoice"),
+        info: getAvailability("basicVoice"),
       },
       voiceCloning: {
-        available: canAccessFeature("voiceCloning"),
-        info: getFeatureAvailability("voiceCloning"),
+        available: canAccess("voiceCloning"),
+        info: getAvailability("voiceCloning"),
       },
       multiLanguage: {
-        available: canAccessFeature("multiLanguage"),
-        info: getFeatureAvailability("multiLanguage"),
+        available: canAccess("multiLanguage"),
+        info: getAvailability("multiLanguage"),
       },
       advancedAnalytics: {
-        available: canAccessFeature("advancedAnalytics"),
-        info: getFeatureAvailability("advancedAnalytics"),
+        available: canAccess("advancedAnalytics"),
+        info: getAvailability("advancedAnalytics"),
       },
     };
-  }, [currentTenant, canAccessFeature, getFeatureAvailability]);
+  }, [currentTenant, canAccess, getAvailability]);
 
   return {
     // ✅ ENHANCED: State with SaaS integration

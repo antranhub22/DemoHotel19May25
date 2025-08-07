@@ -114,7 +114,7 @@ const LanguageSelectionModal: React.FC<{
         Select Language
       </h2>
       <VoiceLanguageSwitcher
-        position="modal"
+        position="floating"
         showVoicePreview={false}
         onLanguageChange={onLanguageSelect}
       />
