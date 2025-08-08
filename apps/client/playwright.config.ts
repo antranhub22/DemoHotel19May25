@@ -14,4 +14,10 @@ export default defineConfig({
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
     { name: "iphone-12", use: { ...devices["iPhone 12"] } },
   ],
+  webServer: {
+    command: "npm run dev -- --port=5173 --strictPort",
+    port: 5173,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
 });

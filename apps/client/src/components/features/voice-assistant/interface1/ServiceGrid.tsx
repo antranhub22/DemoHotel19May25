@@ -1,10 +1,10 @@
 import { useAssistant } from "@/context";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { designSystem } from "@/styles/designSystem";
 import { SERVICE_CATEGORIES, ServiceItem } from "@/types/interface1.types";
 import logger from "@shared/utils/logger";
 import { forwardRef, useCallback, useState } from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ServiceGridProps {
   className?: string;

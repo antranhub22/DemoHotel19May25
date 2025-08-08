@@ -2,11 +2,8 @@
 
 // Type declaration for import.meta
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from '@/App';
+import App from "./App";
 import "./index.css";
-import type { Language } from '@shared/types';
 /* eslint-disable no-console */
 // Production debug and troubleshooting require console access
 

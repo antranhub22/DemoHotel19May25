@@ -1,6 +1,7 @@
-import * as React from "react";
 import { useAssistant } from "@/context";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
 import { Language, ServiceItem } from "@/types/interface1.types";
 import logger from "@shared/utils/logger";
 import {
@@ -13,10 +14,9 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { VoiceLanguageSwitcher } from "./VoiceLanguageSwitcher";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { UI_CONSTANTS } from "@/lib/constants";
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;
