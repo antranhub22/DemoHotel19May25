@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface LanguageOption {
   code: Language;
@@ -147,6 +148,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const speechRef = useRef<any>(null);
   const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
 
   const currentOption =
     LANGUAGE_OPTIONS.find((opt) => opt.code === language) ||
@@ -171,6 +173,11 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   // Enhanced dropdown close with animation
   const handleCloseDropdown = useCallback(() => {
     if (isOpen) {
+      if (prefersReducedMotion) {
+        setIsOpen(false);
+        setAnimationState("idle");
+        return;
+      }
       setAnimationState("closing");
       setTimeout(() => {
         setIsOpen(false);
@@ -183,6 +190,10 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
   const handleOpenDropdown = useCallback(() => {
     if (!isOpen) {
       setIsOpen(true);
+      if (prefersReducedMotion) {
+        setAnimationState("idle");
+        return;
+      }
       setAnimationState("opening");
       setTimeout(() => {
         setAnimationState("idle");
@@ -419,10 +430,10 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
         onClick={isOpen ? handleCloseDropdown : handleOpenDropdown}
         disabled={isChanging}
         className={`
-          voice-control flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
+          voice-control flex items-center gap-3 px-4 py-3 rounded-xl ${prefersReducedMotion ? "" : "transition-all duration-300"}
           ${getPositionStyles()}
           ${currentColors.bg} ${currentColors.border}
-          hover:shadow-lg hover:scale-105 active:scale-95 focus:scale-105
+          ${prefersReducedMotion ? "" : "hover:shadow-lg hover:scale-105 active:scale-95 focus:scale-105"}
           ${isChanging ? "opacity-50 cursor-wait voice-loading" : "cursor-pointer"}
           ${isOpen ? "ring-2 ring-blue-400 ring-opacity-50" : ""}
           ${isMobile ? "px-3 py-2 text-sm" : ""}
