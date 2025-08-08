@@ -179,6 +179,11 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
         ${prefersReducedMotion ? "" : touchFeedback.isPressed ? "scale-95" : "scale-100"}
         voice-particles
       `}
+        style={{
+          willChange: prefersReducedMotion ? undefined : "transform",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+        }}
       >
         {/* Main Control Bar */}
         <div className="flex items-center justify-between p-4">
@@ -266,7 +271,9 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="px-4 space-y-4 animate-in slide-in-from-bottom duration-300">
+          <div
+            className={`px-4 space-y-4 ${prefersReducedMotion ? "" : "animate-in slide-in-from-bottom duration-300"}`}
+          >
             {/* Language Switcher */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -461,7 +468,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {/* Backdrop for settings */}
       {showSettings && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9989]"
+          className={`fixed inset-0 ${prefersReducedMotion ? "bg-black/30" : "bg-black/20 backdrop-blur-sm"}`}
           onClick={toggleSettings}
         />
       )}
