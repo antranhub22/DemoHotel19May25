@@ -56,7 +56,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
       className="relative flex flex-col items-center justify-center voice-button-container"
       style={{
         marginBottom: "2rem",
-        zIndex: 10000,
+        zIndex: 90,
         pointerEvents: "auto",
         height: "400px",
         display: "flex",
