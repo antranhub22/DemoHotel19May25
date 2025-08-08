@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 /**
  * VoiceAssistant - Guest Experience with Domain-Driven Architecture
  * Mobile-First Guest Experience using Domain-Driven Architecture
@@ -30,8 +30,8 @@ import {
 } from "@/domains/guest-experience/hooks/useGuestExperience";
 import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
 import { useConfirmHandler } from "@/hooks/useConfirmHandler";
-import logger from '@shared/utils/logger';
-import { useEffect } from 'react';
+import logger from "@shared/utils/logger";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
@@ -42,7 +42,9 @@ interface GlobalPopupSystemProviderProps {
   // TODO: Add specific props for GlobalPopupSystemProvider
 }
 
-const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({ children }) => {
+const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({
+  children,
+}) => {
   const popupSystem = usePopup();
 
   // ✅ FIX: Move useConfirmHandler inside PopupProvider to avoid context error
@@ -214,7 +216,7 @@ const VoiceAssistant: React.FC = () => {
 
           {/* Mobile-First Header */}
           <div className="fixed top-0 left-0 right-0 z-[9997] bg-white/90 backdrop-blur-sm border-b">
-            <div className="flex items-center justify-between px-4 py-2">
+            <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-2">
               {/* Logo/Title */}
               <div className="text-lg font-bold text-blue-900">
                 {isMobile ? "Hotel Assistant" : "Hotel Voice Assistant"}
