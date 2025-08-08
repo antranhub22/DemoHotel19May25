@@ -1,31 +1,31 @@
-import type { Room } from '@/types/common.types';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
+import type { Room } from "@/types/common.types";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import {
   ConfigurationProvider,
   useConfiguration,
-} from '../ConfigurationContext';
-import React from 'react';
+} from "../ConfigurationContext";
+import React from "react";
 
 // Mock hotel configuration data
 const mockHotelConfig = {
-  hotelName: 'Test Hotel',
-  logoUrl: 'test-logo.png',
-  primaryColor: '#1F2937',
-  headerText: 'Test Hotel',
-  vapiPublicKey: 'test-key',
-  vapiAssistantId: 'test-assistant',
+  hotelName: "Test Hotel",
+  logoUrl: "test-logo.png",
+  primaryColor: "#1F2937",
+  headerText: "Test Hotel",
+  vapiPublicKey: "test-key",
+  vapiAssistantId: "test-assistant",
   branding: {
-    logo: 'test-logo.png',
+    logo: "test-logo.png",
     colors: {
-      primary: '#1F2937',
-      secondary: '#374151',
-      accent: '#E74C3C',
+      primary: "#1F2937",
+      secondary: "#374151",
+      accent: "#E74C3C",
     },
     fonts: {
-      primary: 'Poppins',
-      secondary: 'Inter',
+      primary: "Poppins",
+      secondary: "Inter",
     },
   },
   features: {
@@ -35,16 +35,16 @@ const mockHotelConfig = {
     customization: true,
   },
   services: [
-    { type: 'room_service', name: 'Room Service', enabled: true },
-    { type: 'concierge', name: 'Concierge', enabled: true },
+    { type: "room_service", name: "Room Service", enabled: true },
+    { type: "concierge", name: "Concierge", enabled: true },
   ],
-  supportedLanguages: ['en', 'vi'],
+  supportedLanguages: ["en", "vi"],
 };
 
 const mockTenantConfig = {
-  tenantId: 'tenant-123',
-  subscriptionPlan: 'premium',
-  features: ['analytics', 'multi-language'],
+  tenantId: "tenant-123",
+  subscriptionPlan: "premium",
+  features: ["analytics", "multi-language"],
   limits: {
     maxAssistants: 5,
     maxCalls: 1000,
@@ -65,11 +65,11 @@ const TestComponent = () => {
   return (
     <div>
       <div data-testid="hotel-config">
-        {hotelConfig ? JSON.stringify(hotelConfig) : 'No hotel config'}
+        {hotelConfig ? JSON.stringify(hotelConfig) : "No hotel config"}
       </div>
-      <div data-testid="tenant-id">{tenantId || 'No tenant ID'}</div>
+      <div data-testid="tenant-id">{tenantId || "No tenant ID"}</div>
       <div data-testid="tenant-config">
-        {tenantConfig ? JSON.stringify(tenantConfig) : 'No tenant config'}
+        {tenantConfig ? JSON.stringify(tenantConfig) : "No tenant config"}
       </div>
 
       <button
@@ -79,7 +79,7 @@ const TestComponent = () => {
         Set Hotel Config
       </button>
       <button
-        onClick={() => setTenantId('tenant-456')}
+        onClick={() => setTenantId("tenant-456")}
         data-testid="set-tenant-id"
       >
         Set Tenant ID
@@ -114,155 +114,155 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <ConfigurationProvider>{children}</ConfigurationProvider>
 );
 
-describe('ConfigurationContext', () => {
+describe("ConfigurationContext", () => {
   const user = userEvent.setup();
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should provide default configuration state', () => {
+  it("should provide default configuration state", () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent(
-      'No hotel config'
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent(
+      "No hotel config",
     );
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('No tenant ID');
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent(
-      'No tenant config'
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("No tenant ID");
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent(
+      "No tenant config",
     );
   });
 
-  it('should set hotel configuration', async () => {
+  it("should set hotel configuration", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    await user.click(screen.getByTestId('set-hotel-config'));
+    await user.click(screen.getByTestId("set-hotel-config"));
 
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent('Test Hotel');
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent('hotel-123');
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent(
-      'room-service'
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent("Test Hotel");
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent("hotel-123");
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent(
+      "room-service",
     );
   });
 
-  it('should set tenant ID', async () => {
+  it("should set tenant ID", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    await user.click(screen.getByTestId('set-tenant-id'));
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('tenant-456');
+    await user.click(screen.getByTestId("set-tenant-id"));
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("tenant-456");
   });
 
-  it('should set tenant configuration', async () => {
+  it("should set tenant configuration", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    await user.click(screen.getByTestId('set-tenant-config'));
+    await user.click(screen.getByTestId("set-tenant-config"));
 
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('tenant-123');
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('premium');
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('analytics');
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("tenant-123");
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("premium");
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("analytics");
   });
 
-  it('should clear hotel configuration', async () => {
+  it("should clear hotel configuration", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // First set config
-    await user.click(screen.getByTestId('set-hotel-config'));
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent('Test Hotel');
+    await user.click(screen.getByTestId("set-hotel-config"));
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent("Test Hotel");
 
     // Then clear it
-    await user.click(screen.getByTestId('clear-hotel-config'));
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent(
-      'No hotel config'
+    await user.click(screen.getByTestId("clear-hotel-config"));
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent(
+      "No hotel config",
     );
   });
 
-  it('should clear tenant ID', async () => {
+  it("should clear tenant ID", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // First set tenant ID
-    await user.click(screen.getByTestId('set-tenant-id'));
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('tenant-456');
+    await user.click(screen.getByTestId("set-tenant-id"));
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("tenant-456");
 
     // Then clear it
-    await user.click(screen.getByTestId('clear-tenant-id'));
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('No tenant ID');
+    await user.click(screen.getByTestId("clear-tenant-id"));
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("No tenant ID");
   });
 
-  it('should clear tenant configuration', async () => {
+  it("should clear tenant configuration", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // First set config
-    await user.click(screen.getByTestId('set-tenant-config'));
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('premium');
+    await user.click(screen.getByTestId("set-tenant-config"));
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("premium");
 
     // Then clear it
-    await user.click(screen.getByTestId('clear-tenant-config'));
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent(
-      'No tenant config'
+    await user.click(screen.getByTestId("clear-tenant-config"));
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent(
+      "No tenant config",
     );
   });
 
-  it('should throw error when used outside provider', () => {
+  it("should throw error when used outside provider", () => {
     // Mock console.error to prevent error output in test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() => {
       render(<TestComponent />);
-    }).toThrow('useConfiguration must be used within a ConfigurationProvider');
+    }).toThrow("useConfiguration must be used within a ConfigurationProvider");
 
     consoleSpy.mockRestore();
   });
 
-  it('should handle multiple configuration updates', async () => {
+  it("should handle multiple configuration updates", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Set hotel config
-    await user.click(screen.getByTestId('set-hotel-config'));
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent('Test Hotel');
+    await user.click(screen.getByTestId("set-hotel-config"));
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent("Test Hotel");
 
     // Set tenant ID
-    await user.click(screen.getByTestId('set-tenant-id'));
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('tenant-456');
+    await user.click(screen.getByTestId("set-tenant-id"));
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("tenant-456");
 
     // Set tenant config
-    await user.click(screen.getByTestId('set-tenant-config'));
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('premium');
+    await user.click(screen.getByTestId("set-tenant-config"));
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("premium");
 
     // All should be set simultaneously
-    expect(screen.getByTestId('hotel-config')).toHaveTextContent('Test Hotel');
-    expect(screen.getByTestId('tenant-id')).toHaveTextContent('tenant-456');
-    expect(screen.getByTestId('tenant-config')).toHaveTextContent('premium');
+    expect(screen.getByTestId("hotel-config")).toHaveTextContent("Test Hotel");
+    expect(screen.getByTestId("tenant-id")).toHaveTextContent("tenant-456");
+    expect(screen.getByTestId("tenant-config")).toHaveTextContent("premium");
   });
 });

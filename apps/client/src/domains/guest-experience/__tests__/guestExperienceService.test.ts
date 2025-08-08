@@ -3,22 +3,23 @@
  * Unit tests for business logic functions
  */
 
-import type { Room } from '@/types/common.types';
+import type { Room } from "@/types/common.types";
 import { GuestExperienceService } from "../services/guestExperienceService";
 import type { Language } from "../types/guestExperience.types";
+import { vi, describe, test, expect, beforeEach } from "vitest";
 
 // Mock localStorage for testing
 const mockLocalStorage = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 (global as any).localStorage = mockLocalStorage;
 
 describe("GuestExperienceService", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Guest Journey Management", () => {
