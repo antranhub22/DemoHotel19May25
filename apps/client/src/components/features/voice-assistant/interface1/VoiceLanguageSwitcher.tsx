@@ -397,7 +397,8 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
 
   // Get enhanced position-specific styles
   const getPositionStyles = () => {
-    const baseStyles = "backdrop-blur-lg shadow-xl transition-all duration-300";
+    const blurPart = prefersReducedMotion ? "" : "backdrop-blur-lg";
+    const baseStyles = `${blurPart} shadow-xl transition-all duration-300`;
 
     switch (position) {
       case "header":
@@ -498,10 +499,11 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
           className={`
           ${getAnimationClasses()}
           absolute ${position === "header" ? "top-full right-0" : "top-full left-0 right-0"} 
-          mt-2 py-2 bg-white/95 backdrop-blur-lg border border-white/20 rounded-xl shadow-2xl z-50 
+          mt-2 py-2 bg-white/95 ${prefersReducedMotion ? "" : "backdrop-blur-lg"} border border-white/20 rounded-xl shadow-2xl z-50 
           ${isMobile ? "min-w-[280px]" : "min-w-[320px]"}
           voice-particles
         `}
+          style={{ contain: "layout paint style" as any }}
         >
           {/* Enhanced Language Options */}
           {LANGUAGE_OPTIONS.map((option) => {

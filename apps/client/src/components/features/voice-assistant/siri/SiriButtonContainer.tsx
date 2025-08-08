@@ -127,7 +127,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           background: isConfirming
             ? `linear-gradient(135deg, #80808020, #80808010)` // ✅ NEW: Muted background when confirming
             : `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
-          backdropFilter: "blur(10px)",
+          backdropFilter: prefersReducedMotion ? undefined : "blur(10px)",
           border: isConfirming
             ? `2px solid #80808040` // ✅ NEW: Muted border when confirming
             : `2px solid ${currentColors.primary}40`,

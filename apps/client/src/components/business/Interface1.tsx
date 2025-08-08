@@ -24,6 +24,7 @@ import { RecentRequestCard } from "../features/voice-assistant/interface1/Recent
 import { ServiceGrid } from "../features/voice-assistant/interface1/ServiceGrid";
 import { VoiceCommandContext } from "../features/voice-assistant/interface1/VoiceCommandContext";
 import { VoiceLanguageSwitcher } from "../features/voice-assistant/interface1/VoiceLanguageSwitcher";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // Import extracted components
 import { Interface1Desktop } from "./Interface1Desktop";
@@ -56,6 +57,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(
     null,
   );
+  const prefersReducedMotion = useReducedMotion();
 
   // Enhanced language change handler
   const handleLanguageChange = (newLanguage: Language) => {
@@ -301,8 +303,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
 
       {/* ✅ ENHANCEMENT: Service selection notification */}
       {selectedService && (
-        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-md z-50">
-          🎤 {selectedService.name}...
+        <div
+          className={`fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-medium ${prefersReducedMotion ? "" : "backdrop-blur-md"} z-50`}
+        >
+          {/* emoji avoided in source for prettier parsing issues */}
+          {selectedService.name}...
         </div>
       )}
 

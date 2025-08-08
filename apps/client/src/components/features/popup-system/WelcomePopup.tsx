@@ -1,5 +1,6 @@
 import type { Room } from "@/types/common.types";
 import React from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Button } from "@/components/ui/button";
 import { UI_CONSTANTS } from "@/lib/constants";
 
@@ -8,14 +9,18 @@ interface WelcomePopupProps {
 }
 
 const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm font-sans"
+      className={`fixed inset-0 flex items-center justify-center font-sans ${prefersReducedMotion ? "bg-black/40" : "bg-black/40 backdrop-blur-sm"}`}
       style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
     >
       <div
         className="bg-gradient-to-br from-[rgba(255,255,255,0.7)] to-[rgba(255,255,255,0.5)] dark:from-[rgba(30,30,30,0.7)] dark:to-[rgba(30,30,30,0.5)] text-gray-800 dark:text-gray-200 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto border border-white/30"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{
+          transformStyle: "preserve-3d",
+          contain: "layout paint style" as any,
+        }}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* Vietnamese Content */}

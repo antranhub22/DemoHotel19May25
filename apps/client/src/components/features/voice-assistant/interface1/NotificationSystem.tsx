@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { UI_CONSTANTS } from "@/lib/constants";
 import type { Room } from "@/types/common.types";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -121,9 +122,12 @@ const getNotificationIcon = (type: NotificationType) => {
 };
 
 // Enhanced notification colors with gradients
-const getNotificationStyles = (type: NotificationType) => {
-  const baseClasses =
-    "border-l-4 backdrop-blur-md shadow-lg transition-all duration-300";
+const getNotificationStyles = (
+  type: NotificationType,
+  prefersReducedMotion: boolean,
+) => {
+  const blurPart = prefersReducedMotion ? "" : "backdrop-blur-md";
+  const baseClasses = `border-l-4 ${blurPart} shadow-lg transition-all duration-300`;
 
   switch (type) {
     case "success":
@@ -503,6 +507,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     return null;
   }
 
+  const prefersReducedMotion = useReducedMotion();
   return (
     <div
       className={`${getPositionClasses(position, isMobile)} ${className}`}

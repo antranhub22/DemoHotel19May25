@@ -1,4 +1,5 @@
 import React from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { designSystem } from "@/styles/designSystem";
 
 export interface LoadingStateProps {
@@ -8,6 +9,7 @@ export interface LoadingStateProps {
 }
 
 const LoadingState: React.FC<LoadingStateProps> = () => {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <div
       className="absolute w-full min-h-screen h-full flex items-center justify-center z-10"
@@ -15,10 +17,11 @@ const LoadingState: React.FC<LoadingStateProps> = () => {
       style={{
         background: `linear-gradient(135deg, ${designSystem.colors.primary}, ${designSystem.colors.secondary})`,
         fontFamily: designSystem.fonts.primary,
+        contain: "layout paint style" as any,
       }}
     >
       <div
-        className="text-center p-8 bg-white/10 backdrop-blur-md rounded-2xl"
+        className={`text-center p-8 bg-white/10 ${prefersReducedMotion ? "" : "backdrop-blur-md"} rounded-2xl`}
         style={{ boxShadow: designSystem.shadows.card }}
       >
         <div

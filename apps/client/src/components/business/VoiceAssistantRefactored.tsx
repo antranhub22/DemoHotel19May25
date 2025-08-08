@@ -34,6 +34,7 @@ import logger from "@shared/utils/logger";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UI_CONSTANTS } from "@/lib/constants";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
 
@@ -117,22 +118,31 @@ const LanguageSelectionModal: React.FC<{
   onLanguageSelect: (lang: Language) => void;
   isMobile: boolean;
 }> = ({ onLanguageSelect, isMobile }) => (
-  <div
-    className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
-  >
-    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        Select Language
-      </h2>
-      <VoiceLanguageSwitcher
-        position="floating"
-        showVoicePreview={false}
-        onLanguageChange={onLanguageSelect}
-      />
-    </div>
-  </div>
+  <LanguageSelectionModalInner onLanguageSelect={onLanguageSelect} />
 );
+
+const LanguageSelectionModalInner: React.FC<{
+  onLanguageSelect: (lang: Language) => void;
+}> = ({ onLanguageSelect }) => {
+  const prefersReducedMotion = useReducedMotion();
+  return (
+    <div
+      className={`fixed inset-0 flex items-center justify-center ${prefersReducedMotion ? "bg-black/50" : "bg-black/50 backdrop-blur-sm"}`}
+      style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
+    >
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+          Select Language
+        </h2>
+        <VoiceLanguageSwitcher
+          position="floating"
+          showVoicePreview={false}
+          onLanguageChange={onLanguageSelect}
+        />
+      </div>
+    </div>
+  );
+};
 
 /**
  * VoiceAssistant - Domain Architecture Implementation
@@ -208,8 +218,11 @@ const VoiceAssistant: React.FC = () => {
 
           {/* Mobile-First Header */}
           <div
-            className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-b"
-            style={{ zIndex: UI_CONSTANTS.Z_INDEX.STICKY }}
+            className={`fixed top-0 left-0 right-0 border-b ${useReducedMotion() ? "bg-white/90" : "bg-white/90 backdrop-blur-sm"}`}
+            style={{
+              zIndex: UI_CONSTANTS.Z_INDEX.STICKY,
+              contain: "layout paint style" as any,
+            }}
           >
             <div className="flex items-center justify-between px-4 py-2">
               {/* Logo/Title */}
