@@ -8,6 +8,7 @@ import {
 import { t } from "@/i18n";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;
@@ -61,6 +62,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
   const { transcripts, language } = useAssistant();
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrames = useRef<{ [key: string]: number }>({});
+
+  const prefersReducedMotion = useReducedMotion();
 
   // ✅ DEBUG: Add logging to track transcripts
   useEffect(() => {
@@ -363,7 +366,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
         {/* ✅ SIMPLIFIED Header - No tabs needed */}
         <div
           className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10"
-          style={{ backdropFilter: "blur(4px)" }}
+          style={{
+            backdropFilter: prefersReducedMotion ? undefined : "blur(4px)",
+          }}
         >
           {/* Simple title instead of tabs */}
           <div className="flex items-center space-x-2">

@@ -12,6 +12,7 @@ import SiriCallButton from "./SiriCallButton";
 import { SiriButtonStatus } from "./components/SiriButtonStatus";
 import { useCallProtection } from "./hooks/useCallProtection";
 import { useLanguageColors } from "./hooks/useLanguageColors";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface SiriButtonContainerProps {
   isCallStarted: boolean;
@@ -39,6 +40,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
     isCallStarted,
     onCallStart,
   });
+  const prefersReducedMotion = useReducedMotion();
 
   // Minimal debug logging
   if (import.meta.env.DEV) {
@@ -82,7 +84,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
       {/* Enhanced Siri Button Container with Full Accessibility */}
       <div
-        className={`relative transition-all duration-500 ease-in-out voice-control hardware-accelerated ${isCallStarted ? "listening active" : ""} ${isConfirming ? "confirming" : ""} focus-ring ${isConfirming ? "gentle-glow" : ""}`}
+        className={`relative ${prefersReducedMotion ? "transition-none" : "transition-all duration-500 ease-in-out"} voice-control hardware-accelerated ${isCallStarted ? "listening active" : ""} ${isConfirming ? "confirming" : ""} focus-ring ${isConfirming ? "gentle-glow" : ""}`}
         data-testid="siri-button"
         data-language={language}
         role="button"
@@ -141,7 +143,9 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           contain: "layout style", // Enhanced containment for stability
           // Enhanced focus styles
           outline: "none",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: prefersReducedMotion
+            ? "none"
+            : "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         <SiriCallButton

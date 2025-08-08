@@ -3,6 +3,7 @@ import { designSystem } from "@/styles/designSystem";
 import { SERVICE_CATEGORIES, ServiceItem } from "@/types/interface1.types";
 import logger from "@shared/utils/logger";
 import { forwardRef, useCallback, useState } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ServiceGridProps {
@@ -17,6 +18,8 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState<string | null>(null);
     const isMobile = useIsMobile();
+
+    const prefersReducedMotion = useReducedMotion();
 
     // Handle service item click
     const handleServiceClick = useCallback(
@@ -88,7 +91,9 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           border: isSelected
             ? "2px solid rgba(93, 182, 185, 0.6)"
             : "1px solid rgba(255, 255, 255, 0.2)",
-          transition: designSystem.transitions.normal,
+          transition: prefersReducedMotion
+            ? "none"
+            : designSystem.transitions.normal,
           cursor: isLoading ? "wait" : "pointer",
           boxShadow: isSelected
             ? "0 8px 25px rgba(93, 182, 185, 0.4)"
@@ -137,7 +142,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         return (
           <div
             key={index}
-            className="relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95"
+            className={`relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer ${prefersReducedMotion ? "" : "transition-all duration-300 hover:scale-105 active:scale-95"}`}
             data-testid="service-item"
             style={baseStyles}
             onClick={() => handleServiceClick(service)}
@@ -171,7 +176,9 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
             )}
 
             {/* Enhanced hover overlay with call-to-action */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-3 text-white text-center rounded-xl">
+            <div
+              className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 ${prefersReducedMotion ? "" : "group-hover:opacity-100 transition-opacity"} flex flex-col items-center justify-center p-3 text-white text-center rounded-xl`}
+            >
               <div className="text-xs font-medium mb-2">
                 {service.description}
               </div>
