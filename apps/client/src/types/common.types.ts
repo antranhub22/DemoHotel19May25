@@ -8,7 +8,7 @@ import type { ComponentType, ReactNode, RefObject } from "react";
 // CORE TYPES
 // ========================================
 
-export type Language = "en" | "vi" | "fr" | "zh" | "ru";
+export type Language = "en" | "vi" | "fr" | "zh" | "ru" | "ko";
 
 export type UserRole =
   | "super_admin"

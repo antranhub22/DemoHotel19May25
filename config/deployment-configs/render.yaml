@@ -82,6 +82,21 @@ services:
         # French assistant  
       - key: VITE_VAPI_ASSISTANT_ID_FR
         sync: false
+      - key: VITE_VAPI_PUBLIC_KEY_ZH
+        sync: false
+        # Chinese assistant
+      - key: VITE_VAPI_ASSISTANT_ID_ZH
+        sync: false
+      - key: VITE_VAPI_PUBLIC_KEY_RU
+        sync: false
+        # Russian assistant
+      - key: VITE_VAPI_ASSISTANT_ID_RU
+        sync: false
+      - key: VITE_VAPI_PUBLIC_KEY_KO
+        sync: false
+        # Korean assistant
+      - key: VITE_VAPI_ASSISTANT_ID_KO
+        sync: false
         
       # ========== HOTEL RESEARCH & APIS ==========
       - key: GOOGLE_PLACES_API_KEY

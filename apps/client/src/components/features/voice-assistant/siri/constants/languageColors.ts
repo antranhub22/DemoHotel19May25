@@ -40,4 +40,10 @@ export const LANGUAGE_COLORS: Record<Language, LanguageColorScheme> = {
     glow: "rgba(255, 56, 56, 0.4)",
     name: "Русский",
   },
+  ko: {
+    primary: "#F59E0B",
+    secondary: "#FDE68A",
+    glow: "rgba(245, 158, 11, 0.4)",
+    name: "한국어",
+  },
 } as const;

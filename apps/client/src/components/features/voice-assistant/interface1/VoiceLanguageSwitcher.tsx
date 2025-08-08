@@ -67,7 +67,7 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
     sampleText: "Здравствуйте, добро пожаловать в наш отель. Чем могу помочь?",
   },
   {
-    code: "zh",
+    code: "ko",
     name: "Korean",
     nativeName: "한국어",
     flag: "🇰🇷",
@@ -243,7 +243,9 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
                   ? import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH
                   : newLanguage === "ru"
                     ? import.meta.env.VITE_VAPI_ASSISTANT_ID_RU
-                    : import.meta.env.VITE_VAPI_ASSISTANT_ID;
+                    : newLanguage === "ko"
+                      ? import.meta.env.VITE_VAPI_ASSISTANT_ID_KO
+                      : import.meta.env.VITE_VAPI_ASSISTANT_ID;
 
           (window as any).addNotification({
             type: "success",
