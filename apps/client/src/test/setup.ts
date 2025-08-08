@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeAll, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
 // JSDOM polyfills and globals
@@ -7,6 +7,14 @@ import { cleanup } from "@testing-library/react";
 Object.defineProperty(globalThis, "navigator", {
   value: { userAgent: "node.js" },
   writable: true,
+});
+
+beforeAll(() => {
+  // ensure document has a default body for user-event
+  if (!document.body) {
+    (document as any).body = document.createElement("body");
+    document.documentElement.appendChild(document.body);
+  }
 });
 
 // Provide basic localStorage mock when not present
