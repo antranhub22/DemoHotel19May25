@@ -261,7 +261,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         <InterfaceHeader />
 
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
-        <div className="relative min-h-[400px] px-4">
+        <div className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px] px-2 sm:px-4 md:px-6">
           {/* Desktop Layout */}
           <Interface1Desktop
             isCallStarted={isCallStarted}
@@ -304,7 +304,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       {/* ✅ NEW: Recent Request Card - Shows submitted request after UI reset */}
       {recentRequest && (
         <div
-          className="w-full max-w-md mx-auto mb-8 relative z-20"
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg mx-auto mb-4 sm:mb-6 md:mb-8 relative z-20"
           data-testid="recent-request-card"
         >
           <RecentRequestCard
@@ -330,7 +330,10 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       )}
 
       {/* Service Categories Section - Add margin to prevent overlap */}
-      <div className="mt-16 relative z-10" data-testid="service-grid">
+      <div
+        className="mt-8 sm:mt-12 md:mt-16 relative z-10"
+        data-testid="service-grid"
+      >
         <ServiceGrid
           ref={serviceGridRef}
           onServiceSelect={handleServiceSelect}

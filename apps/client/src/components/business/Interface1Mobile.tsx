@@ -31,8 +31,8 @@ export const Interface1Mobile: React.FC<Interface1MobileProps> = ({
   }
 
   return (
-    <div className="block md:hidden">
-      <div className="w-full flex flex-col items-center justify-center min-h-[400px] relative z-50">
+    <div className="block sm:hidden">
+      <div className="w-full flex flex-col items-center justify-center min-h-[300px] sm:min-h-[350px] relative z-50">
         <div className="flex flex-col items-center justify-center">
           {/* Siri Button Container */}
           <SiriButtonContainer
@@ -60,7 +60,7 @@ export const Interface1Mobile: React.FC<Interface1MobileProps> = ({
       <MobileSummaryPopup />
 
       {/* Debug Buttons - Mobile */}
-      <div className="block md:hidden">
+      <div className="block sm:hidden">
         <DebugWrapper>
           <DebugButtons />
         </DebugWrapper>
