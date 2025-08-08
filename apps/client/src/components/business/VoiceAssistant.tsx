@@ -231,15 +231,15 @@ const VoiceAssistant: React.FC = () => {
 
           {/* Mobile-First Header */}
           <div
-            className={`fixed top-0 left-0 right-0 border-b ${prefersReducedMotion ? "bg-white/90" : "bg-white/90 backdrop-blur-sm"}`}
+            className={`fixed top-0 left-0 right-0 h-14 md:h-16 border-b ${prefersReducedMotion ? "bg-white/90" : "bg-white/90 backdrop-blur-sm"}`}
             style={{
               zIndex: UI_CONSTANTS.Z_INDEX.STICKY,
               contain: "layout paint style" as any,
             }}
           >
-            <div className="container mx-auto flex items-center justify-between px-4 sm:px-6 py-2">
+            <div className="container mx-auto max-w-7xl h-full flex items-center justify-between px-4 md:px-6">
               {/* Logo/Title */}
-              <div className="text-lg font-bold text-blue-900">
+              <div className="text-base md:text-lg font-semibold text-blue-900">
                 {isMobile ? "Hotel Assistant" : "Hotel Voice Assistant"}
               </div>
 
@@ -266,33 +266,27 @@ const VoiceAssistant: React.FC = () => {
 
           {/* ✅ STEP 3-5: Main Interface (Voice Call + Real-time Conversation + Summary) - Domain Controlled */}
           {hasSelectedLanguage && (
-            <div
-              className="relative w-full h-full"
-              style={{
-                marginTop: isMobile ? "50px" : "60px",
-                minHeight: isMobile
-                  ? "calc(100vh - 50px)"
-                  : "calc(100vh - 60px)",
-              }}
-            >
-              <ErrorBoundary
-                fallbackComponent={Interface1ErrorFallback}
-                onError={(error, errorInfo) => {
-                  logger.error(
-                    "🚨 [VoiceAssistant] Interface1 Error:",
-                    "Component",
-                    error,
-                  );
-                  logger.error(
-                    "🚨 [VoiceAssistant] Error Info:",
-                    "Component",
-                    errorInfo,
-                  );
-                }}
-              >
-                <Interface1 key="domain-based-interface1" isActive={true} />
-              </ErrorBoundary>
-            </div>
+            <main className="pt-14 md:pt-16">
+              <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <ErrorBoundary
+                  fallbackComponent={Interface1ErrorFallback}
+                  onError={(error, errorInfo) => {
+                    logger.error(
+                      "🚨 [VoiceAssistant] Interface1 Error:",
+                      "Component",
+                      error,
+                    );
+                    logger.error(
+                      "🚨 [VoiceAssistant] Error Info:",
+                      "Component",
+                      errorInfo,
+                    );
+                  }}
+                >
+                  <Interface1 key="domain-based-interface1" isActive={true} />
+                </ErrorBoundary>
+              </div>
+            </main>
           )}
 
           {/* Mobile-First Popup System */}

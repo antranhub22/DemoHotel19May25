@@ -431,7 +431,7 @@ export const VoiceLanguageSwitcher: React.FC<VoiceLanguageSwitcherProps> = ({
         onClick={isOpen ? handleCloseDropdown : handleOpenDropdown}
         disabled={isChanging}
         className={`
-          voice-control flex items-center gap-3 px-4 py-3 rounded-xl ${prefersReducedMotion ? "" : "transition-all duration-300"}
+          voice-control flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-xl ${prefersReducedMotion ? "" : "transition-all duration-300"}
           ${getPositionStyles()}
           ${currentColors.bg} ${currentColors.border}
           ${prefersReducedMotion ? "" : "hover:shadow-lg hover:scale-105 active:scale-95 focus:scale-105"}

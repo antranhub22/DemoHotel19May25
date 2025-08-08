@@ -216,9 +216,9 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           </div>
         ) : (
           /* Desktop View - Force render only on desktop */
-          <div className="hidden md:block w-full max-w-xl sm:max-w-2xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
+          <div className="hidden md:block container mx-auto max-w-7xl w-full px-4 md:px-6 py-6 md:py-8">
             {/* First row - responsive columns */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-6">
               {SERVICE_CATEGORIES.slice(0, 5).map((service, index) =>
                 renderServiceItem(service, index, false),
               )}
@@ -226,7 +226,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
             {/* Second row - remaining items */}
             {SERVICE_CATEGORIES.length > 5 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                 {SERVICE_CATEGORIES.slice(5).map((service, index) =>
                   renderServiceItem(service, index + 5, false),
                 )}

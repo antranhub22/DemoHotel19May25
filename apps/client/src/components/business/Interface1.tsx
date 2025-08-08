@@ -257,7 +257,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       {/* Hero Section with 4-Position Layout */}
       <div
         ref={heroSectionRef}
-        className="relative"
+        className="relative space-y-8 md:space-y-10"
         data-testid="interface1-container"
         style={{
           contentVisibility: "auto" as any,
@@ -268,7 +268,7 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         <InterfaceHeader />
 
         {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
-        <div className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px] px-2 sm:px-4 md:px-6">
+        <div className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
           {/* Desktop Layout */}
           <Interface1Desktop
             isCallStarted={isCallStarted}

@@ -1,8 +1,6 @@
-import * as React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { UI_CONSTANTS } from "@/lib/constants";
-import type { Room } from "@/types/common.types";
-import { useIsMobile } from "@/hooks/use-mobile";
 import logger from "@shared/utils/logger";
 import {
   AlertCircle,
@@ -15,6 +13,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // Enhanced notification types with better categorization
@@ -202,6 +201,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   index = 0,
   isMobile = false,
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState(100);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
@@ -267,7 +267,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         ${isVisible ? `notification-${notification.type}` : "opacity-0 transform translate-x-full"}
         ${isExiting ? "notification-exit" : ""}
         ${isMobile ? "mobile" : ""}
-        ${getNotificationStyles(notification.type)}
+        ${getNotificationStyles(notification.type, prefersReducedMotion)}
         ${getPriorityStyles()}
         ${isMobile ? "w-full" : "w-80"}
         rounded-lg p-4 max-w-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02]
