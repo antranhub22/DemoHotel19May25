@@ -9,6 +9,7 @@ import { t } from "@/i18n";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
 // Interface cho trạng thái hiển thị của mỗi message
 interface VisibleCharState {
   [messageId: string]: number;
@@ -243,8 +244,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
         height: "320px",
         maxHeight: "320px",
         background: "rgba(255,255,255,0.15)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
+        backdropFilter: prefersReducedMotion ? undefined : "blur(20px)",
+        WebkitBackdropFilter: prefersReducedMotion ? undefined : "blur(20px)",
         border: "1.5px solid rgba(255,255,255,0.3)",
         boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
         borderRadius: 16, // Normal border radius
@@ -257,8 +258,8 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
         height: `${STANDARD_POPUP_HEIGHT}px`,
         maxHeight: `${STANDARD_POPUP_MAX_HEIGHT_VH}vh`,
         background: "rgba(255,255,255,0.12)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
+        backdropFilter: prefersReducedMotion ? undefined : "blur(18px)",
+        WebkitBackdropFilter: prefersReducedMotion ? undefined : "blur(18px)",
         border: "1.5px solid rgba(255,255,255,0.25)",
         boxShadow: "0 -8px 32px rgba(0,0,0,0.18)",
         borderTopLeftRadius: 20,
@@ -273,6 +274,11 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
     <div
       ref={containerRef}
       className="px-3 py-2 h-[calc(100%-3rem)] overflow-y-auto"
+      style={{
+        contentVisibility: "auto" as any,
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
+      }}
     >
       {conversationTurns.length === 0 && (
         <div
@@ -360,8 +366,12 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
     <>
       {/* Popup */}
       <div
-        className={`relative z-50 overflow-hidden shadow-2xl realtime-popup ${isGrid ? "grid-layout" : "overlay-layout"} ${isRight ? "popup-right" : ""} ${isGrid ? "" : "mx-auto animate-slide-up"}`}
-        style={popupStyles}
+        className={`relative overflow-hidden shadow-2xl realtime-popup ${isGrid ? "grid-layout" : "overlay-layout"} ${isRight ? "popup-right" : ""} ${isGrid ? "" : "mx-auto animate-slide-up"}`}
+        style={{
+          ...popupStyles,
+          zIndex: UI_CONSTANTS.Z_INDEX.POPOVER,
+          willChange: prefersReducedMotion ? undefined : "transform",
+        }}
       >
         {/* ✅ SIMPLIFIED Header - No tabs needed */}
         <div
