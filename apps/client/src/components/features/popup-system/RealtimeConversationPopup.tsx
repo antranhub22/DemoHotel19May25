@@ -368,6 +368,9 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
           className="flex items-center justify-between px-4 py-2 border-b border-gray-200/40 bg-white/10"
           style={{
             backdropFilter: prefersReducedMotion ? undefined : "blur(4px)",
+            WebkitBackdropFilter: prefersReducedMotion
+              ? undefined
+              : "blur(4px)",
           }}
         >
           {/* Simple title instead of tabs */}

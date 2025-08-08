@@ -138,11 +138,11 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           );
         }
 
-        // Desktop version
+        // Desktop version (use square aspect to avoid CLS)
         return (
           <div
             key={index}
-            className={`relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer ${prefersReducedMotion ? "" : "transition-all duration-300 hover:scale-105 active:scale-95"}`}
+            className={`relative group w-full aspect-square flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer ${prefersReducedMotion ? "" : "transition-all duration-300 hover:scale-105 active:scale-95"}`}
             data-testid="service-item"
             style={baseStyles}
             onClick={() => handleServiceClick(service)}
