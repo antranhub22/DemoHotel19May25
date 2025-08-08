@@ -87,9 +87,10 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe("LanguageContext", () => {
-  const user = userEvent.setup();
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
+    user = userEvent.setup();
     vi.clearAllMocks();
     // Reset fetch mock for each test
     vi.mocked(global.fetch).mockResolvedValue({

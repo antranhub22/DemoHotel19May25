@@ -152,8 +152,9 @@ export class GuestExperienceService {
     }
 
     // Extract guest name (patterns after "Mr.", "Ms.", "guest name")
+    // Capture lazily until we reach a likely boundary like "in room", "room", number, comma or period
     const nameMatch = summaryText.match(
-      /(?:Mr\.|Ms\.|guest name|tên khách)\s+([A-Za-z\s]+)/i,
+      /(?:Mr\.|Ms\.|guest name|tên khách)\s+([A-Za-z]+(?:\s+[A-Za-z]+)*?)(?=\s+(?:in\s+room|room|phòng|\d|,|\.|$))/i,
     );
     if (nameMatch) {
       extractedData.guestName = nameMatch[1].trim();

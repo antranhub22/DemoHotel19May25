@@ -58,9 +58,10 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe("CallContext", () => {
-  const user = userEvent.setup();
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
+    user = userEvent.setup();
     vi.clearAllMocks();
   });
 
