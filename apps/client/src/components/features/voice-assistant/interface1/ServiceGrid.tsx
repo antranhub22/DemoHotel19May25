@@ -83,11 +83,13 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         const isSelected = selectedService === service.name;
         const isLoading = isProcessing === service.name;
 
-        const baseStyles = {
+        const enableBlur = !prefersReducedMotion && !isMobile;
+        const baseStyles: React.CSSProperties = {
           background: isSelected
             ? "rgba(93, 182, 185, 0.3)"
             : "rgba(255, 255, 255, 0.1)",
-          backdropFilter: "blur(10px)",
+          backdropFilter: enableBlur ? "blur(6px)" : undefined,
+          WebkitBackdropFilter: enableBlur ? ("blur(6px)" as any) : undefined,
           border: isSelected
             ? "2px solid rgba(93, 182, 185, 0.6)"
             : "1px solid rgba(255, 255, 255, 0.2)",
@@ -99,13 +101,15 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
             ? "0 8px 25px rgba(93, 182, 185, 0.4)"
             : designSystem.shadows.card,
           transform: isSelected ? "scale(1.05)" : "scale(1)",
+          willChange: enableBlur ? ("transform" as any) : undefined,
+          backfaceVisibility: "hidden",
         };
 
         if (isMobile) {
           return (
             <div
               key={index}
-              className="flex items-center space-x-4 p-4 rounded-xl active:scale-95"
+              className="flex items-center space-x-4 p-4 rounded-xl active:scale-95 min-h-[72px]"
               data-testid="service-item"
               style={baseStyles}
               onClick={() => handleServiceClick(service)}
@@ -200,6 +204,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           contentVisibility: "auto" as any,
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
+          contain: "layout paint style" as any,
         }}
       >
         {/* Mobile View - Force render only on mobile */}

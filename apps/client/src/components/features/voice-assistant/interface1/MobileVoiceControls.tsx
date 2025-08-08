@@ -185,6 +185,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
           willChange: prefersReducedMotion ? undefined : "transform",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
+          contain: "layout paint style" as any,
         }}
       >
         {/* Main Control Bar */}
