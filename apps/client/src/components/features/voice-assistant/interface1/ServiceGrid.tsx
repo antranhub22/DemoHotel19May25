@@ -193,7 +193,15 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
     );
 
     return (
-      <div ref={ref} className={`w-full max-w-full ${className}`}>
+      <div
+        ref={ref}
+        className={`w-full max-w-full ${className}`}
+        style={{
+          contentVisibility: "auto" as any,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+        }}
+      >
         {/* Mobile View - Force render only on mobile */}
         {isMobile ? (
           <div className="block md:hidden space-y-2 sm:space-y-3 md:space-y-4 px-2 sm:px-4 py-3 sm:py-4 md:py-6">

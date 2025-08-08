@@ -371,6 +371,7 @@ const RealtimeConversationPopup: React.FC<RealtimeConversationPopupProps> = ({
           ...popupStyles,
           zIndex: UI_CONSTANTS.Z_INDEX.POPOVER,
           willChange: prefersReducedMotion ? undefined : "transform",
+          WebkitOverflowScrolling: "touch" as any,
         }}
       >
         {/* ✅ SIMPLIFIED Header - No tabs needed */}
