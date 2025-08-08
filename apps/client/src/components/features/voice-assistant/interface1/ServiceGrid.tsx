@@ -85,22 +85,18 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
         const enableBlur = !prefersReducedMotion && !isMobile;
         const baseStyles: React.CSSProperties = {
-          background: isSelected
-            ? "rgba(93, 182, 185, 0.3)"
-            : "rgba(255, 255, 255, 0.1)",
-          backdropFilter: enableBlur ? "blur(6px)" : undefined,
-          WebkitBackdropFilter: enableBlur ? ("blur(6px)" as any) : undefined,
+          background: "rgba(255,255,255,0.95)",
           border: isSelected
-            ? "2px solid rgba(93, 182, 185, 0.6)"
-            : "1px solid rgba(255, 255, 255, 0.2)",
+            ? "2px solid rgba(59,130,246,0.5)"
+            : "1px solid rgba(229,231,235,1)",
           transition: prefersReducedMotion
             ? "none"
             : designSystem.transitions.normal,
           cursor: isLoading ? "wait" : "pointer",
           boxShadow: isSelected
-            ? "0 8px 25px rgba(93, 182, 185, 0.4)"
-            : designSystem.shadows.card,
-          transform: isSelected ? "scale(1.05)" : "scale(1)",
+            ? "0 10px 24px rgba(0,0,0,0.18)"
+            : "0 4px 14px rgba(0,0,0,0.08)",
+          transform: isSelected ? "scale(1.03)" : "scale(1)",
           willChange: enableBlur ? ("transform" as any) : undefined,
           backfaceVisibility: "hidden",
         };
@@ -125,15 +121,17 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
                   className={isLoading ? "opacity-30" : "opacity-100"}
                 />
               </div>
-              <div className="text-white">
-                <div className="font-medium text-lg">{service.name}</div>
+              <div className="text-gray-800">
+                <div className="font-medium text-base md:text-lg">
+                  {service.name}
+                </div>
                 {service.description && (
-                  <div className="text-sm text-gray-300 mt-1">
+                  <div className="text-xs text-gray-500 mt-1">
                     {service.description}
                   </div>
                 )}
                 {isSelected && (
-                  <div className="text-xs text-blue-200 mt-1 font-semibold">
+                  <div className="text-xs text-blue-600 mt-1 font-semibold">
                     🎤 Starting voice request...
                   </div>
                 )}
@@ -146,7 +144,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         return (
           <div
             key={index}
-            className={`relative group w-full aspect-square flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer ${prefersReducedMotion ? "" : "transition-all duration-300 hover:scale-105 active:scale-95"}`}
+            className={`relative group w-full aspect-square flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer bg-white/95 ${prefersReducedMotion ? "" : "transition-transform duration-300 hover:scale-[1.02] active:scale-95"}`}
             data-testid="service-item"
             style={baseStyles}
             onClick={() => handleServiceClick(service)}
@@ -167,7 +165,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
             {/* Text */}
             <div
-              className={`text-white text-center text-sm font-medium ${isLoading ? "opacity-30" : "opacity-100"}`}
+              className={`text-gray-800 text-center text-sm font-medium ${isLoading ? "opacity-50" : "opacity-100"}`}
             >
               {service.name}
             </div>
@@ -181,13 +179,13 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
             {/* Enhanced hover overlay with call-to-action */}
             <div
-              className={`absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 ${prefersReducedMotion ? "" : "group-hover:opacity-100 transition-opacity"} flex flex-col items-center justify-center p-3 text-white text-center rounded-xl`}
+              className={`absolute inset-0 bg-gradient-to-t from-white/0 via-white/40 to-white/70 opacity-0 ${prefersReducedMotion ? "" : "group-hover:opacity-100 transition-opacity"} flex flex-col items-center justify-center p-3 text-gray-800 text-center rounded-xl`}
             >
               <div className="text-xs font-medium mb-2">
                 {service.description}
               </div>
-              <div className="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">
-                🎤 Click to Request
+              <div className="text-xs bg-white px-2 py-1 rounded-full font-semibold border border-gray-200">
+                Click to Request
               </div>
             </div>
           </div>

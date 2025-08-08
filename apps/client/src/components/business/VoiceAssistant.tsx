@@ -231,7 +231,7 @@ const VoiceAssistant: React.FC = () => {
 
           {/* Mobile-First Header */}
           <div
-            className={`fixed top-0 left-0 right-0 h-14 md:h-16 border-b ${prefersReducedMotion ? "bg-white/90" : "bg-white/90 backdrop-blur-sm"}`}
+            className={`fixed top-0 left-0 right-0 h-14 md:h-16 border-b shadow-sm ${prefersReducedMotion ? "bg-white/95" : "bg-white/95 backdrop-blur-sm"}`}
             style={{
               zIndex: UI_CONSTANTS.Z_INDEX.STICKY,
               contain: "layout paint style" as any,

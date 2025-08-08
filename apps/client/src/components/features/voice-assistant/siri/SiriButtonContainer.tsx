@@ -55,7 +55,7 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
 
   return (
     <div
-      className="relative flex flex-col items-center justify-center voice-button-container max-w-lg mx-auto my-8 md:my-10"
+      className="relative flex flex-col items-center justify-center voice-button-container max-w-lg mx-auto my-8 md:my-12"
       style={{
         marginBottom: "2rem",
         zIndex: 90,
@@ -122,11 +122,11 @@ export const SiriButtonContainer: React.FC<SiriButtonContainerProps> = ({
           maxHeight: responsiveSize.maxHeight,
           borderRadius: "50%",
           boxShadow: isConfirming
-            ? `0 10px 20px rgba(128, 128, 128, 0.3), 0 0 30px rgba(128, 128, 128, 0.2)` // ✅ NEW: Muted glow when confirming
-            : `0 20px 40px ${currentColors.glow}, 0 0 60px ${currentColors.glow}`,
+            ? `0 8px 18px rgba(0, 0, 0, 0.18)`
+            : `0 10px 30px rgba(0,0,0,0.16)`,
           background: isConfirming
-            ? `linear-gradient(135deg, #80808020, #80808010)` // ✅ NEW: Muted background when confirming
-            : `linear-gradient(135deg, ${currentColors.primary}15, ${currentColors.secondary}10)`,
+            ? `linear-gradient(135deg, #ffffff, #f8fafc)`
+            : `linear-gradient(135deg, #ffffff, #f8fafc)`,
           backdropFilter: prefersReducedMotion ? undefined : "blur(10px)",
           border: isConfirming
             ? `2px solid #80808040` // ✅ NEW: Muted border when confirming
