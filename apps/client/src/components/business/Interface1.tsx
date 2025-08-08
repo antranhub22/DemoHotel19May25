@@ -201,6 +201,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     }
   }, [selectedService]);
 
+  // Temporary feature flag to hide Service Grid for visual review
+  const SHOW_SERVICE_GRID = false;
+
   // Early returns after hooks
   if (isLoading) {
     return <LoadingState />;
@@ -339,17 +342,19 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         </div>
       )}
 
-      {/* Service Categories Section - Add margin to prevent overlap */}
-      <div
-        className="mt-8 sm:mt-12 md:mt-16 relative z-10"
-        data-testid="service-grid"
-      >
-        <ServiceGrid
-          ref={serviceGridRef}
-          onServiceSelect={handleServiceSelect}
-          onVoiceServiceRequest={handleVoiceServiceRequest}
-        />
-      </div>
+      {/* Service Categories Section - temporarily hidden via SHOW_SERVICE_GRID */}
+      {SHOW_SERVICE_GRID && (
+        <div
+          className="mt-8 sm:mt-12 md:mt-16 relative z-10"
+          data-testid="service-grid"
+        >
+          <ServiceGrid
+            ref={serviceGridRef}
+            onServiceSelect={handleServiceSelect}
+            onVoiceServiceRequest={handleVoiceServiceRequest}
+          />
+        </div>
+      )}
 
       {/* Scroll Controls */}
       {/* ScrollToTopButton - temporarily disabled
