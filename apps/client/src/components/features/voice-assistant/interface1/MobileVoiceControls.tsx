@@ -16,6 +16,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { VoiceLanguageSwitcher } from "./VoiceLanguageSwitcher";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;
@@ -172,7 +173,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {/* Floating Control Panel */}
       <div
         className={`
-        fixed bottom-4 left-4 right-4 z-[9990] 
+        fixed bottom-4 left-4 right-4 
         bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-2xl
         ${prefersReducedMotion ? "" : "transition-all duration-300 ease-out"}
         ${isExpanded ? "pb-4" : "pb-2"}
@@ -180,6 +181,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
         voice-particles
       `}
         style={{
+          zIndex: UI_CONSTANTS.Z_INDEX.FIXED,
           willChange: prefersReducedMotion ? undefined : "transform",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
@@ -469,6 +471,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {showSettings && (
         <div
           className={`fixed inset-0 ${prefersReducedMotion ? "bg-black/30" : "bg-black/20 backdrop-blur-sm"}`}
+          style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
           onClick={toggleSettings}
         />
       )}

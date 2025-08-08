@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { usePopup } from "../popup-system/PopupManager";
 import { DebugWrapper } from "./DebugWrapper";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { UI_CONSTANTS } from "@/lib/constants";
 
 // Debug Buttons Component - Extracted from Interface1.tsx
 export const DebugButtons = () => {
@@ -91,12 +92,12 @@ export const DebugButtons = () => {
       <>
         {/* Test Summary Popup Button */}
         <div
-          className={`fixed z-[9999] ${isMobile ? "bottom-20 right-4" : "bottom-4 right-4"}`}
+          className={`fixed ${isMobile ? "bottom-20 right-4" : "bottom-4 right-4"}`}
           style={{
             position: "fixed",
             bottom: isMobile ? "80px" : "16px",
             right: "16px",
-            zIndex: 9999,
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
             backgroundColor: "#10b981",
             color: "white",
             padding: "8px 16px",
@@ -127,12 +128,12 @@ export const DebugButtons = () => {
 
         {/* Emergency Cleanup Button */}
         <div
-          className={`fixed z-[9999] ${isMobile ? "bottom-20 right-20" : "bottom-4 right-32"}`}
+          className={`fixed ${isMobile ? "bottom-20 right-20" : "bottom-4 right-32"}`}
           style={{
             position: "fixed",
             bottom: isMobile ? "80px" : "16px",
             right: isMobile ? "80px" : "128px",
-            zIndex: 9999,
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
             backgroundColor: "#ef4444",
             color: "white",
             padding: "8px 16px",
@@ -163,12 +164,12 @@ export const DebugButtons = () => {
 
         {/* Force Display Summary Button */}
         <div
-          className={`fixed z-[9999] ${isMobile ? "bottom-20 right-36" : "bottom-4 right-48"}`}
+          className={`fixed ${isMobile ? "bottom-20 right-36" : "bottom-4 right-48"}`}
           style={{
             position: "fixed",
             bottom: isMobile ? "80px" : "16px",
             right: isMobile ? "144px" : "192px",
-            zIndex: 9999,
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
             backgroundColor: "#3b82f6",
             color: "white",
             padding: "8px 16px",
