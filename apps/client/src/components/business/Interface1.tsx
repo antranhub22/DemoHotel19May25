@@ -257,6 +257,11 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
         ref={heroSectionRef}
         className="relative"
         data-testid="interface1-container"
+        style={{
+          contentVisibility: "auto" as any,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+        }}
       >
         <InterfaceHeader />
 
