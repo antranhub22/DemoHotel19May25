@@ -4,7 +4,7 @@
 
 import { useCallback } from 'react';
 import { isMobileDevice } from '@/utils/deviceDetection';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 interface UseSimplifiedMobileTouchProps {
   containerId: string;

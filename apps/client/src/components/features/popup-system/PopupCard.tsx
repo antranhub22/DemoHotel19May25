@@ -12,14 +12,7 @@ interface PopupCardProps {
   maxVisible?: number;
 }
 
-export const PopupCard: React.FC<PopupCardProps> = ({
-  popup,
-  index,
-  isActive,
-  onClick,
-  onDismiss,
-  maxVisible = 3,
-}) => {
+export const PopupCard: React.FC<PopupCardProps> = ({ popup, index, isActive, onClick, onDismiss, maxVisible = 3 }) => {
   const config = POPUP_TYPES[popup.type];
   const isVisible = index < maxVisible;
 

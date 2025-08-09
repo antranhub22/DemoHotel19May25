@@ -1,21 +1,32 @@
-// Shared Package Barrel Exports
+/**
+ * Shared Package - Public API
+ * Core utilities and services for DemoHotel application
+ */
 
-// Database exports
-export * from './db/schema';
-export * from './db/connectionManager';
-export * from './db/transformers';
+// ========================================
+// Database Exports
+// ========================================
+export * from "./db/schema";
+export * from "./db/connectionManager";
+export * from "./db/transformers";
 
-// Utility exports
-export * from './utils';
-export * from './utils/logger';
+// ========================================
+// Utility Exports
+// ========================================
+export * from "./utils";
+export * from "./utils/logger";
 
-// Performance exports
-export * from './performance/optimization';
+// ========================================
+// Performance Exports
+// ========================================
+export * from "./performance/optimization";
 
-// Error exports
-export * from './errors/AppError';
+// ========================================
+// Error Handling Exports
+// ========================================
+export * from "./errors/AppError";
 
-// Validation exports
-export * from './validation/schemas';
-
-// Note: types/auth.ts does not exist, remove this line
+// ========================================
+// Validation Exports
+// ========================================
+export * from "./validation/schemas";

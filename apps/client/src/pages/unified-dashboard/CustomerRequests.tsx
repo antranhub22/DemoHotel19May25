@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +39,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import {
   AlertCircle,
   Calendar,
@@ -55,7 +56,7 @@ import {
   Trash2,
   User,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 // Types
 interface CustomerRequest {

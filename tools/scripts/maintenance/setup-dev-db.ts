@@ -97,7 +97,7 @@ const users = [
   {
     username: 'admin',
     password: 'admin123',
-    role: 'super-admin',
+    role: 'super_admin',
     displayName: 'System Administrator',
     email: 'admin@minhonhotel.com',
   },

@@ -2,7 +2,7 @@
 
 // Type declaration for import.meta
 
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { jwtDecode } from 'jwt-decode';
 
 export interface LoginCredentials {

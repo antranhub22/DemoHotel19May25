@@ -7,6 +7,7 @@
    ======================================== */
 
 // ✅ FIXED: Import all missing API types
+import type { ApiResponse } from '@/types/common.types';
 import type {
   AnalyticsResponse,
   ApiError,

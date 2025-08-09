@@ -1,5 +1,5 @@
 import React from 'react';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { InterfaceContainer } from './InterfaceContainer';
 import { InterfaceHeader } from './InterfaceHeader';
 

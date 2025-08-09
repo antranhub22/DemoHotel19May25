@@ -10,7 +10,7 @@ import {
   useHotelConfiguration,
   HotelConfiguration,
 } from '@/hooks/useHotelConfiguration';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // Hotel context interfaces
 interface HotelContextValue {
@@ -249,3 +249,8 @@ export const useHotelVapi = () => {
 export type { HotelContextValue };
 
 export default HotelProvider;
+
+interface HotelProviderProps {
+  children: React.ReactNode;
+  tenantId?: string;
+}

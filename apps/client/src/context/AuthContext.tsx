@@ -1,11 +1,13 @@
-import { logger } from "@shared/utils/logger";
-import { jwtDecode } from "jwt-decode";
+import type { Permission, UserRole } from "@shared/types";
+import logger from '@shared/utils/logger';
+import { getPermissionsForRole } from '@shared/utils/permissions';
+import { jwtDecode } from 'jwt-decode';
 import React, {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 // ============================================
 // Types & Interfaces

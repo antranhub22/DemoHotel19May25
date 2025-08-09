@@ -19,7 +19,7 @@ export async function setupTestDatabase(dbPath: string) {
   const now = new Date();
 
   // Create test tenant using Prisma
-  await prisma.tenant.create({
+  await prisma.tenants.create({
     data: {
       id: testTenantId,
       hotel_name: "Mi Nhon Hotel",
@@ -53,8 +53,8 @@ export async function setupTestDatabase(dbPath: string) {
  */
 export async function cleanupTestDatabase() {
   // Clean up test data using Prisma
-  await prisma.tenant.deleteMany();
-  await prisma.hotelProfile.deleteMany();
+  await prisma.tenants.deleteMany();
+  await prisma.hotel_profiles.deleteMany();
   await prisma.call.deleteMany();
   await prisma.transcript.deleteMany();
   await prisma.request.deleteMany();

@@ -2,8 +2,7 @@ import { getDashboardAnalytics, getHourlyActivity } from "@server/analytics";
 import { Request, Response } from "express";
 
 // ✅ ENHANCED v2.0: Import modular architecture components
-import { TenantService } from "@server/services/tenantService";
-import { evaluateABTest, isFeatureEnabled } from "@server/shared/FeatureFlags";
+// ✅ MIGRATED: Use PrismaTenantService instead of old TenantService
 import {
   ServiceContainer,
   getServiceSync,

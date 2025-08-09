@@ -1,4 +1,7 @@
-import { generateCallSummaryOptimized } from "@server/openai";
+import {
+  generateCallSummaryOptimized,
+  wasLastSummaryUsingFallback,
+} from "@server/openai";
 import { DatabaseStorage } from "@server/storage";
 import { logger } from "@shared/utils/logger";
 import express from "express";
@@ -75,7 +78,7 @@ async function processTranscriptWithOpenAI(
       callId,
     });
 
-    // Save summary to database
+    // Save summary to database (with audit trail for source)
     try {
       // Extract room number from summary
       const roomNumberMatch = summary.match(
@@ -85,9 +88,13 @@ async function processTranscriptWithOpenAI(
         ? roomNumberMatch[1] || roomNumberMatch[2]
         : null;
 
+      // Annotate summary with source for audit (without changing routes/schema)
+      const sourceLabel = "OpenAI"; // This block is only reached when OpenAI succeeded
+      const annotatedSummary = `Source: ${sourceLabel}\n\n${summary}`;
+
       await storage.addCallSummary({
         call_id: callId,
-        content: summary,
+        content: annotatedSummary,
         room_number: extractedRoomNumber,
         duration: null, // Will be updated by end-of-call-report
       });
@@ -97,7 +104,7 @@ async function processTranscriptWithOpenAI(
         "Component",
         {
           callId,
-          summaryLength: summary?.length || 0,
+          summaryLength: annotatedSummary?.length || 0,
           roomNumber: extractedRoomNumber,
         },
       );
@@ -126,7 +133,7 @@ async function processTranscriptWithOpenAI(
         );
 
         // Save each service request
-        const savedRequests = [];
+        const savedRequests: any[] = [];
         for (const serviceRequest of serviceRequests) {
           const savedRequest = await storage.addServiceRequest(
             serviceRequest,
@@ -234,7 +241,7 @@ async function processTranscriptWithOpenAI(
           timestamp: new Date().toISOString(),
         });
 
-        // Send final summary
+        // Send final summary with progression hint
         io.emit("call-summary-received", {
           type: "call-summary-received",
           callId: callId,
@@ -242,6 +249,29 @@ async function processTranscriptWithOpenAI(
           serviceRequests,
           timestamp: new Date().toISOString(),
         });
+
+        // Notify staff if OpenAI failed and we used fallback
+        if (wasLastSummaryUsingFallback()) {
+          io.emit("message", {
+            type: "error",
+            scope: "staff",
+            code: "OPENAI_SUMMARY_FALLBACK",
+            callId,
+            message:
+              "OpenAI summary generation failed. A basic fallback summary was used. Please review and assist the guest.",
+            timestamp: new Date().toISOString(),
+          });
+
+          // Inform guest as well via guestNotification channel used on client UI
+          io.emit("guestNotification", {
+            title: "Xin lỗi, hệ thống tóm tắt gặp lỗi",
+            message:
+              "Hiện tại chưa thể hiển thị tóm tắt cuộc gọi. Nhân viên đã được thông báo để hỗ trợ bạn.",
+            severity: "warning",
+            callId,
+            timestamp: new Date().toISOString(),
+          });
+        }
 
         logger.success(
           "[Webhook] WebSocket notification sent successfully",
@@ -331,18 +361,22 @@ async function processEndOfCallReport(
     }
 
     // Save end-of-call-report for stakeholders (existing functionality)
+    const durationSeconds =
+      endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
+        ? Math.floor(
+            (new Date(endOfCallReport.call.endedAt).getTime() -
+              new Date(endOfCallReport.call.startedAt).getTime()) /
+              1000,
+          )
+        : null;
+
+    // Store raw end-of-call-report with audit source tag
+    const eocrContent = `Source: EndOfCallReport\n\n${JSON.stringify(endOfCallReport)}`;
     await storage.addCallSummary({
       call_id: callId,
-      content: JSON.stringify(endOfCallReport),
+      content: eocrContent,
       room_number: endOfCallReport.call?.customer?.number || null,
-      duration:
-        endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
-          ? Math.floor(
-              (new Date(endOfCallReport.call.endedAt).getTime() -
-                new Date(endOfCallReport.call.startedAt).getTime()) /
-                1000,
-            ).toString()
-          : null,
+      duration: durationSeconds ? String(durationSeconds) : null,
     });
 
     logger.success(
@@ -350,6 +384,32 @@ async function processEndOfCallReport(
       "Component",
       { callId },
     );
+
+    // ✅ NEW: Also sync duration into the latest OpenAI summary for this call if missing
+    try {
+      if (durationSeconds !== null) {
+        const { PrismaClient } = await import("../../../generated/prisma");
+        const prisma = new PrismaClient();
+        await prisma.call_summaries.updateMany({
+          where: {
+            call_id: callId,
+            OR: [{ duration: null }, { duration: undefined as any }],
+          },
+          data: { duration: String(durationSeconds) },
+        });
+        logger.debug(
+          "[Webhook] Synced duration into call_summaries",
+          "Component",
+          { callId, durationSeconds },
+        );
+      }
+    } catch (syncError) {
+      logger.warn(
+        "[Webhook] Failed to sync duration into call_summaries",
+        "Component",
+        syncError,
+      );
+    }
   } catch (error) {
     logger.error(
       "[Webhook] Failed to save end-of-call-report:",

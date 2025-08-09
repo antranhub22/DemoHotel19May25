@@ -1,5 +1,5 @@
 import { apiRequest } from '@/lib/queryClient';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // ============================================
 // Types & Interfaces

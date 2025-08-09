@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 interface SiriSizeConfig {
   width: string;

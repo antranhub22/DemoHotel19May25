@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
@@ -15,7 +16,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 const COLORS = [
   '#0088FE',

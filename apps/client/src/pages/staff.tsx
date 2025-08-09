@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import StaffDashboard from '@/pages/StaffDashboard';
 import StaffLogin from '@/pages/StaffLogin';
 

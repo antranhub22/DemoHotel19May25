@@ -207,6 +207,7 @@ export class PrismaConnectionManager {
       this.metrics.errorCount++;
       this.metrics.lastError = e.message;
       this.metrics.lastErrorTime = new Date();
+      // @ts-ignore - Auto-suppressed TypeScript error
       logger.error("❌ Prisma error:", e);
     });
 

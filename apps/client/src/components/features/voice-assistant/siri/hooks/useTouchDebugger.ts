@@ -1,5 +1,5 @@
 import { isMobileDevice } from '@/utils/deviceDetection';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface TouchDebugInfo {

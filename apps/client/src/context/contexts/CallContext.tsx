@@ -1,5 +1,6 @@
-import { logger } from '@shared/utils/logger';
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import logger from "@shared/utils/logger";
+import * as React from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 export interface CallContextType {
   // Call state
@@ -23,7 +24,7 @@ export interface CallContextType {
 const CallContext = createContext<CallContextType | undefined>(undefined);
 
 export function CallProvider({ children }: { children: React.ReactNode }) {
-  logger.debug('[CallProvider] Initializing...', 'Component');
+  logger.debug("[CallProvider] Initializing...", "Component");
 
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -36,9 +37,9 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
   // Add call end listener
   const addCallEndListener = useCallback((listener: () => void) => {
-    setCallEndListeners(prev => [...prev, listener]);
+    setCallEndListeners((prev) => [...prev, listener]);
     return () => {
-      setCallEndListeners(prev => prev.filter(l => l !== listener));
+      setCallEndListeners((prev) => prev.filter((l) => l !== listener));
     };
   }, []);
 
@@ -46,14 +47,14 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   const toggleMute = useCallback(() => {
     // Will be integrated with VapiContext later
     setIsMuted(!isMuted);
-    logger.debug('[CallContext] Mute toggled:', 'Component', !isMuted);
+    logger.debug("[CallContext] Mute toggled:", "Component", !isMuted);
   }, [isMuted]);
 
   // Start call function (basic implementation)
   const startCall = useCallback(async (language?: string) => {
     try {
-      logger.debug('[CallContext] Starting call...', 'Component', {
-        language: language || 'default',
+      logger.debug("[CallContext] Starting call...", "Component", {
+        language: language || "default",
       });
 
       setIsCallActive(true);
@@ -61,22 +62,22 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 
       // Start call timer
       const timer = setInterval(() => {
-        setCallDuration(prev => prev + 1);
+        setCallDuration((prev) => prev + 1);
       }, 1000);
 
       setCallTimer(timer);
 
-      logger.debug('[CallContext] Call started successfully', 'Component');
+      logger.debug("[CallContext] Call started successfully", "Component");
     } catch (error) {
-      logger.error('[CallContext] Error starting call:', 'Component', error);
+      logger.error("[CallContext] Error starting call:", "Component", error);
       throw error;
     }
   }, []);
 
   // End call function
   const endCall = useCallback(() => {
-    console.log('📞 [DEBUG] CallContext.endCall() called');
-    logger.debug('[CallContext] Ending call...', 'Component');
+    console.log("📞 [DEBUG] CallContext.endCall() called");
+    logger.debug("[CallContext] Ending call...", "Component");
 
     setIsEndingCall(true);
     setIsCallActive(false);
@@ -87,25 +88,33 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       setCallTimer(null);
     }
 
-    // Trigger call end listeners
+    // Trigger call end listeners (with global suppression guard to prevent re-entrancy loops)
     console.log(
-      `📞 [DEBUG] Triggering ${callEndListeners.length} call end listeners - CALL ID: ${Date.now()}`
+      `📞 [DEBUG] Triggering ${callEndListeners.length} call end listeners - CALL ID: ${Date.now()}`,
     );
     callEndListeners.forEach((listener, index) => {
       try {
+        // If a caller explicitly suppresses listeners (to avoid recursion), skip executing them
+        if (
+          typeof window !== "undefined" &&
+          (window as any).__suppressCallEndListener
+        ) {
+          console.log("🚫 [DEBUG] Call end listener execution suppressed");
+          return;
+        }
         console.log(
-          `📞 [DEBUG] Executing listener ${index + 1} - CALL ID: ${Date.now()}`
+          `📞 [DEBUG] Executing listener ${index + 1} - CALL ID: ${Date.now()}`,
         );
         listener();
         console.log(
-          `✅ [DEBUG] Listener ${index + 1} executed successfully - CALL ID: ${Date.now()}`
+          `✅ [DEBUG] Listener ${index + 1} executed successfully - CALL ID: ${Date.now()}`,
         );
       } catch (error) {
         console.error(`❌ [DEBUG] Error in listener ${index + 1}:`, error);
         logger.error(
-          '[CallContext] Error in call end listener:',
-          'Component',
-          error
+          "[CallContext] Error in call end listener:",
+          "Component",
+          error,
         );
       }
     });
@@ -115,7 +124,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
       setIsEndingCall(false);
     }, 2000);
 
-    logger.debug('[CallContext] Call ended', 'Component');
+    logger.debug("[CallContext] Call ended", "Component");
   }, [callTimer, callEndListeners]);
 
   const value: CallContextType = {
@@ -136,7 +145,7 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
 export function useCall() {
   const context = useContext(CallContext);
   if (context === undefined) {
-    throw new Error('useCall must be used within a CallProvider');
+    throw new Error("useCall must be used within a CallProvider");
   }
   return context;
 }

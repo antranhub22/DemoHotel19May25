@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 interface UseTranscriptSocketProps {
   socketUrl: string;

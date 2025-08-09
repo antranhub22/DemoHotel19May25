@@ -17,7 +17,7 @@ export const ScrollToTopButton = ({
     <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
       {/* Scroll to Services button - visible when hero is not visible */}
       <button
-        className="bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20"
+        className="bg-white/10 p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20"
         onClick={onScrollToServices}
         aria-label="Scroll to services"
         title="View Services"
@@ -37,7 +37,7 @@ export const ScrollToTopButton = ({
 
       {/* Scroll to top button */}
       <button
-        className="bg-white/10 backdrop-blur-md p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20"
+        className="bg-white/10 p-3 rounded-full shadow-lg transition-all duration-300 hover:bg-white/20"
         onClick={onScrollToTop}
         aria-label="Scroll to top"
         title="Back to Top"

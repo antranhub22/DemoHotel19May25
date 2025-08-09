@@ -4,7 +4,7 @@
 
 /// <reference types="react" />
 import type { ReferenceItem } from '@/services/ReferenceService';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { BookOpen, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import 'swiper/css';

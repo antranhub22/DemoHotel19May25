@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { CallProvider, useCall } from '../CallContext';
-import React from 'react';
+import { act, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CallProvider, useCall } from "../CallContext";
 
 // Test component that uses CallContext
 const TestComponent = () => {
@@ -31,7 +31,7 @@ const TestComponent = () => {
       <button onClick={toggleMute} data-testid="toggle-mute">
         Toggle Mute
       </button>
-      <button onClick={startCall} data-testid="start-call">
+      <button onClick={() => startCall()} data-testid="start-call">
         Start Call
       </button>
       <button onClick={endCall} data-testid="end-call">
@@ -40,7 +40,7 @@ const TestComponent = () => {
       <button
         onClick={() => {
           const removeListener = addCallEndListener(() => {
-            console.log('Call ended');
+            console.log("Call ended");
           });
           removeListener(); // Test cleanup
         }}
@@ -57,88 +57,89 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <CallProvider>{children}</CallProvider>
 );
 
-describe('CallContext', () => {
-  const user = userEvent.setup();
+describe("CallContext", () => {
+  let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
+    user = userEvent.setup();
     vi.clearAllMocks();
   });
 
-  it('should provide default call state', () => {
+  it("should provide default call state", () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    expect(screen.getByTestId('call-duration')).toHaveTextContent('0');
-    expect(screen.getByTestId('is-muted')).toHaveTextContent('false');
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('false');
-    expect(screen.getByTestId('is-ending-call')).toHaveTextContent('false');
+    expect(screen.getByTestId("call-duration")).toHaveTextContent("0");
+    expect(screen.getByTestId("is-muted")).toHaveTextContent("false");
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("false");
+    expect(screen.getByTestId("is-ending-call")).toHaveTextContent("false");
   });
 
-  it('should update call duration', async () => {
+  it("should update call duration", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
-    await user.click(screen.getByTestId('set-duration'));
-    expect(screen.getByTestId('call-duration')).toHaveTextContent('120');
+    await user.click(screen.getByTestId("set-duration"));
+    expect(screen.getByTestId("call-duration")).toHaveTextContent("120");
   });
 
-  it('should toggle mute state', async () => {
+  it("should toggle mute state", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Initially not muted
-    expect(screen.getByTestId('is-muted')).toHaveTextContent('false');
+    expect(screen.getByTestId("is-muted")).toHaveTextContent("false");
 
     // Toggle mute
-    await user.click(screen.getByTestId('toggle-mute'));
-    expect(screen.getByTestId('is-muted')).toHaveTextContent('true');
+    await user.click(screen.getByTestId("toggle-mute"));
+    expect(screen.getByTestId("is-muted")).toHaveTextContent("true");
 
     // Toggle again
-    await user.click(screen.getByTestId('toggle-mute'));
-    expect(screen.getByTestId('is-muted')).toHaveTextContent('false');
+    await user.click(screen.getByTestId("toggle-mute"));
+    expect(screen.getByTestId("is-muted")).toHaveTextContent("false");
   });
 
-  it('should handle call lifecycle', async () => {
+  it("should handle call lifecycle", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Initially no call active
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('false');
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("false");
 
     // Start call
     await act(async () => {
-      await user.click(screen.getByTestId('start-call'));
+      await user.click(screen.getByTestId("start-call"));
     });
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('true');
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("true");
 
     // End call
-    await user.click(screen.getByTestId('end-call'));
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('false');
+    await user.click(screen.getByTestId("end-call"));
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("false");
   });
 
-  it('should handle call end listeners', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+  it("should handle call end listeners", async () => {
+    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Add listener (and immediately remove it in the test component)
-    await user.click(screen.getByTestId('add-listener'));
+    await user.click(screen.getByTestId("add-listener"));
 
     // Should not throw any errors
     expect(consoleSpy).not.toHaveBeenCalled();
@@ -146,33 +147,33 @@ describe('CallContext', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should throw error when used outside provider', () => {
+  it("should throw error when used outside provider", () => {
     // Mock console.error to prevent error output in test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() => {
       render(<TestComponent />);
-    }).toThrow('useCall must be used within a CallProvider');
+    }).toThrow("useCall must be used within a CallProvider");
 
     consoleSpy.mockRestore();
   });
 
-  it('should handle ending call state during async operations', async () => {
+  it("should handle ending call state during async operations", async () => {
     render(
       <TestWrapper>
         <TestComponent />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     // Start call first
     await act(async () => {
-      await user.click(screen.getByTestId('start-call'));
+      await user.click(screen.getByTestId("start-call"));
     });
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('true');
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("true");
 
     // End call should update call state
-    await user.click(screen.getByTestId('end-call'));
-    expect(screen.getByTestId('is-call-active')).toHaveTextContent('false');
+    await user.click(screen.getByTestId("end-call"));
+    expect(screen.getByTestId("is-call-active")).toHaveTextContent("false");
     // Note: isEndingCall state may vary based on timing, so we won't assert its specific value
   });
 });

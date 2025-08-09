@@ -1,24 +1,29 @@
-import VoiceAssistant from '@/components/business/VoiceAssistant';
-import { UnifiedDashboardLayout } from '@/components/features/dashboard/unified-dashboard';
-import ErrorBoundary from '@/components/layout/ErrorBoundary';
-import { Toaster } from '@/components/ui/toaster';
+import VoiceAssistant from "@/components/business/VoiceAssistant";
+import { UnifiedDashboardLayout } from "@/components/features/dashboard/unified-dashboard";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
+import { Toaster } from "@/components/ui/toaster";
 import {
   AuthProvider,
   useAuth,
   useTenantDetection,
-} from '@/context/AuthContext';
-import { HotelProvider } from '@/context/HotelContext';
-import { RefactoredAssistantProvider } from '@/context/RefactoredAssistantContext';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import NotFound from '@/pages/not-found';
-import StaffPage from '@/pages/staff';
-import VapiTest from '@/pages/VapiTest';
-import React, { Suspense, useEffect, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { Link, Route, Switch, useLocation } from 'wouter';
+} from "@/context/AuthContext";
+import { HotelProvider } from "@/context/HotelContext";
+import { RefactoredAssistantProvider } from "@/context/RefactoredAssistantContext";
+import * as React from 'react';
+
+import DummyTest from "@/debug/DummyTest";
+import ModuleTest from "@/debug/ModuleTest";
+import SimpleTest from "@/debug/SimpleTest";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import NotFound from "@/pages/not-found";
+import StaffPage from "@/pages/staff";
+import VapiTest from "@/pages/VapiTest";
+import { Suspense, useEffect, useState } from 'react';
+import { BrowserRouter } from "react-router-dom";
+import { Link, Route, Switch, useLocation } from "wouter";
 // Lazy load Analytics Dashboard to split charts bundle
 const AnalyticsDashboard = React.lazy(
-  () => import('./pages/AnalyticsDashboard')
+  () => import("./pages/AnalyticsDashboard"),
 );
 
 // Dashboard pages
@@ -29,29 +34,34 @@ import {
   DashboardLayout,
   Settings,
   SetupWizard,
-} from '@/pages/dashboard';
+} from "@/pages/dashboard";
 
 // Unified Dashboard (Phase 3)
-import StaffDashboard from '@/pages/StaffDashboard';
-import { UnifiedDashboardHome } from '@/pages/unified-dashboard';
-import { CustomerRequests } from '@/pages/unified-dashboard/CustomerRequests';
-import { GuestManagement } from '@/pages/unified-dashboard/GuestManagement';
-import { Integrations } from '@/pages/unified-dashboard/Integrations';
-import { SecuritySettings } from '@/pages/unified-dashboard/SecuritySettings';
-import { Settings as UnifiedSettings } from '@/pages/unified-dashboard/Settings';
-import { StaffManagement } from '@/pages/unified-dashboard/StaffManagement';
-import { SystemLogs } from '@/pages/unified-dashboard/SystemLogs';
-import { logger } from '@shared/utils/logger';
+import StaffDashboard from "@/pages/StaffDashboard";
+import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
+import BillingSubscriptionManagement from "@/pages/unified-dashboard/BillingSubscriptionManagement";
+import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
+// import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored"; // TEMPORARILY DISABLED
+import { GuestManagement } from "@/pages/unified-dashboard/GuestManagement";
+import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperationsRefactored";
+import { Integrations } from "@/pages/unified-dashboard/Integrations";
+import { SecuritySettings } from "@/pages/unified-dashboard/SecuritySettings";
+import { Settings as UnifiedSettings } from "@/pages/unified-dashboard/Settings";
+import { StaffManagement } from "@/pages/unified-dashboard/StaffManagement";
+import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
+import { SystemLogs } from "@/pages/unified-dashboard/SystemLogs";
+import { ReduxProvider } from "@/providers/ReduxProvider";
+import logger from '@shared/utils/logger';
 // Lazy load charts-heavy dashboard components
 const AdvancedAnalytics = React.lazy(() =>
-  import('@/pages/unified-dashboard/AdvancedAnalytics').then(module => ({
+  import("@/pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
     default: module.AdvancedAnalytics,
-  }))
+  })),
 );
 const SystemMonitoring = React.lazy(() =>
-  import('@/pages/unified-dashboard/SystemMonitoring').then(module => ({
+  import("@/pages/unified-dashboard/SystemMonitoring").then((module) => ({
     default: module.SystemMonitoring,
-  }))
+  })),
 );
 
 // ============================================
@@ -61,16 +71,11 @@ const SystemMonitoring = React.lazy(() =>
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  requiredRole?: 'admin' | 'manager' | 'staff';
+  requiredRole?: "admin" | "manager" | "staff";
   redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requireAuth = true,
-  requiredRole,
-  redirectTo = '/login',
-}) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -119,8 +124,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 // Lazy-loaded Components
 // ============================================
 
-const CallHistory = React.lazy(() => import('@/pages/CallHistory'));
-const CallDetails = React.lazy(() => import('@/pages/CallDetails'));
+const CallHistory = React.lazy(() => import("@/pages/CallHistory"));
+const CallDetails = React.lazy(() => import("@/pages/CallDetails"));
 
 // ============================================
 // Loading Fallback
@@ -166,21 +171,21 @@ const EmailTestPage = () => {
 const LoginPage = () => {
   const { login, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
       await login(email, password);
       // Redirect to modern hotel dashboard instead of legacy dashboard
-      setLocation('/hotel-dashboard');
+      setLocation("/hotel-dashboard");
     } catch (err: any) {
-      setError(err.message || 'Đăng nhập thất bại');
+      setError(err.message || "Đăng nhập thất bại");
     }
   };
 
@@ -192,7 +197,7 @@ const LoginPage = () => {
             Đăng nhập Dashboard
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Hoặc{' '}
+            Hoặc{" "}
             <Link
               href="/"
               className="font-medium text-indigo-600 hover:text-indigo-500"
@@ -213,20 +218,20 @@ const LoginPage = () => {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Tên đăng nhập hoặc email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="relative">
               <input
                 id="password"
                 name="password"
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                 placeholder="Mật khẩu"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -282,7 +287,7 @@ const LoginPage = () => {
               disabled={isLoading}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </div>
         </form>
@@ -318,7 +323,7 @@ const UnauthorizedPage = () => (
 function Router() {
   const tenantInfo = useTenantDetection();
   const { isAuthenticated } = useAuth();
-  logger.debug('[DEBUG] Router render', 'Component', {
+  logger.debug("[DEBUG] Router render", "Component", {
     tenantInfo,
     isAuthenticated,
   });
@@ -333,6 +338,9 @@ function Router() {
         <Route path="/" component={VoiceAssistant} />
         <Route path="/interface1" component={VoiceAssistant} />
         <Route path="/vapi-test" component={VapiTest} />
+        <Route path="/simple-test" component={SimpleTest} />
+        <Route path="/module-test" component={ModuleTest} />
+        <Route path="/dummy-test" component={DummyTest} />
         {/* DISABLED: Legacy interface routes - use / for Interface1 only
         <Route path="/interface3" component={VoiceAssistant} />
         <Route path="/interface4" component={VoiceAssistant} />
@@ -359,6 +367,42 @@ function Router() {
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
               <CustomerRequests />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Refactored Customer Requests with Redux Domain */}
+        <Route path="/hotel-dashboard/requests-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              {/* <CustomerRequestsRefactored /> TEMPORARILY DISABLED */}
+              <div>Component temporarily disabled for debugging</div>
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/hotel-dashboard/staff-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <StaffManagementRefactored />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Hotel Operations with Redux Domain */}
+        <Route path="/hotel-dashboard/operations-refactored">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <HotelOperationsRefactored />
+            </UnifiedDashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* ✅ NEW: Billing & Subscription Management with Redux Domain */}
+        <Route path="/hotel-dashboard/billing">
+          <ProtectedRoute requireAuth={true}>
+            <UnifiedDashboardLayout>
+              <BillingSubscriptionManagement />
             </UnifiedDashboardLayout>
           </ProtectedRoute>
         </Route>
@@ -507,11 +551,10 @@ function Router() {
 // ============================================
 
 function AppContent() {
-  logger.debug('[DEBUG] AppContent render', 'Component');
-  console.log('🔍 [DEBUG] ===== APPCONTENT RENDERING =====');
-  console.log('🔍 [DEBUG] About to call useWebSocket hook...');
+  logger.debug("[DEBUG] AppContent render", "Component");
+
   useWebSocket();
-  console.log('🔍 [DEBUG] useWebSocket hook called successfully');
+
   return (
     <ErrorBoundary>
       <Router />
@@ -525,17 +568,19 @@ function AppContent() {
 // ============================================
 
 function App() {
-  logger.debug('[DEBUG] App render', 'Component');
+  logger.debug("[DEBUG] App render", "Component");
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <HotelProvider>
-          <RefactoredAssistantProvider>
-            <AppContent />
-          </RefactoredAssistantProvider>
-        </HotelProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ReduxProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <HotelProvider>
+            <RefactoredAssistantProvider>
+              <AppContent />
+            </RefactoredAssistantProvider>
+          </HotelProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ReduxProvider>
   );
 }
 

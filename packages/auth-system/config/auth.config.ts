@@ -11,7 +11,7 @@ import { z } from "zod";
 // ============================================
 
 export type UserRole =
-  | "super-admin"
+  | "super_admin"
   | "hotel-manager"
   | "front-desk"
   | "it-manager"
@@ -135,7 +135,7 @@ export const AUTH_ENDPOINTS = {
 
 // ✅ FIXED: Add missing UserRole mappings to match global definition
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
-  "super-admin": 100,
+  "super_admin": 100,
   "hotel-manager": 70,
   "it-manager": 60,
   "front-desk": 40,
@@ -160,7 +160,7 @@ export const hasRolePrivilege = (
 // ============================================
 
 export const DEFAULT_PERMISSIONS = {
-  "super-admin": [
+  "super_admin": [
     { module: "system", action: "manage", allowed: true },
     { module: "analytics", action: "export", allowed: true },
     { module: "dashboard", action: "manage", allowed: true },
@@ -297,7 +297,7 @@ export const DEV_CONFIG = {
     {
       username: "admin",
       password: "admin123",
-      role: "super-admin" as UserRole,
+      role: "super_admin" as UserRole,
     },
     {
       username: "manager",
@@ -374,7 +374,7 @@ export const authValidationSchemas = {
       tenantId: z.string().optional(),
       role: z
         .enum([
-          "super-admin",
+          "super_admin",
           "hotel-manager",
           "front-desk",
           "it-manager",

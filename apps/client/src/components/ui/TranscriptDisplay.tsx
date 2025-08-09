@@ -24,3 +24,9 @@ const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ socketUrl }) => {
 };
 
 export default TranscriptDisplay;
+
+interface TranscriptDisplayProps {
+  transcript?: string;
+  isListening?: boolean;
+  className?: string;
+}

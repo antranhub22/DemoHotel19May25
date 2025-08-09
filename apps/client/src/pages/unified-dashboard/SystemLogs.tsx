@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Search,
   Filter,
@@ -22,7 +23,7 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +48,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 
 // Types
 interface LogEntry {

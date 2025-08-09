@@ -1,8 +1,10 @@
-import { useAssistant } from '@/context';
-import { designSystem } from '@/styles/designSystem';
-import { SERVICE_CATEGORIES, ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
-import { forwardRef, useCallback, useState } from 'react';
+import { useAssistant } from "@/context";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { designSystem } from "@/styles/designSystem";
+import { SERVICE_CATEGORIES, ServiceItem } from "@/types/interface1.types";
+import logger from "@shared/utils/logger";
+import { forwardRef, useCallback, useState } from "react";
 
 interface ServiceGridProps {
   className?: string;
@@ -11,17 +13,20 @@ interface ServiceGridProps {
 }
 
 export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
-  ({ className = '', onServiceSelect, onVoiceServiceRequest }, ref) => {
+  ({ className = "", onServiceSelect, onVoiceServiceRequest }, ref) => {
     const { startCall, language } = useAssistant();
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState<string | null>(null);
+    const isMobile = useIsMobile();
+
+    const prefersReducedMotion = useReducedMotion();
 
     // Handle service item click
     const handleServiceClick = useCallback(
       async (service: ServiceItem) => {
         logger.debug(
           `🎯 [ServiceGrid] Service clicked: ${service.name}`,
-          'Component'
+          "Component",
         );
 
         try {
@@ -37,30 +42,30 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           } else if (startCall) {
             // Fallback to direct voice assistant start
             logger.debug(
-              '🎤 [ServiceGrid] Starting voice call for service',
-              'Component',
-              service.name
+              "🎤 [ServiceGrid] Starting voice call for service",
+              "Component",
+              service.name,
             );
             await startCall();
           }
 
           logger.debug(
             `✅ [ServiceGrid] Service request processed: ${service.name}`,
-            'Component'
+            "Component",
           );
         } catch (error) {
           logger.error(
             `❌ [ServiceGrid] Error processing service: ${service.name}`,
-            'Component',
-            error
+            "Component",
+            error,
           );
 
           // Show user-friendly error
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             const errorMessage =
               error instanceof Error
                 ? (error as any)?.message || String(error)
-                : 'Unknown error';
+                : "Unknown error";
             alert(`Unable to process ${service.name} request: ${errorMessage}`);
           }
         } finally {
@@ -68,7 +73,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           setTimeout(() => setSelectedService(null), 2000); // Clear selection after 2s
         }
       },
-      [onServiceSelect, onVoiceServiceRequest, startCall, language]
+      [onServiceSelect, onVoiceServiceRequest, startCall, language],
     );
 
     // Generate service item component
@@ -78,27 +83,29 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         const isSelected = selectedService === service.name;
         const isLoading = isProcessing === service.name;
 
-        const baseStyles = {
-          background: isSelected
-            ? 'rgba(93, 182, 185, 0.3)'
-            : 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(10px)',
+        const enableBlur = !prefersReducedMotion && !isMobile;
+        const baseStyles: React.CSSProperties = {
+          background: "rgba(255,255,255,0.95)",
           border: isSelected
-            ? '2px solid rgba(93, 182, 185, 0.6)'
-            : '1px solid rgba(255, 255, 255, 0.2)',
-          transition: designSystem.transitions.normal,
-          cursor: isLoading ? 'wait' : 'pointer',
+            ? "2px solid rgba(59,130,246,0.5)"
+            : "1px solid rgba(229,231,235,1)",
+          transition: prefersReducedMotion
+            ? "none"
+            : designSystem.transitions.normal,
+          cursor: isLoading ? "wait" : "pointer",
           boxShadow: isSelected
-            ? '0 8px 25px rgba(93, 182, 185, 0.4)'
-            : designSystem.shadows.card,
-          transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+            ? "0 10px 24px rgba(0,0,0,0.18)"
+            : "0 4px 14px rgba(0,0,0,0.08)",
+          transform: isSelected ? "scale(1.03)" : "scale(1)",
+          willChange: enableBlur ? ("transform" as any) : undefined,
+          backfaceVisibility: "hidden",
         };
 
         if (isMobile) {
           return (
             <div
               key={index}
-              className="flex items-center space-x-4 p-4 rounded-xl active:scale-95"
+              className="flex items-center space-x-4 p-4 rounded-xl active:scale-95 min-h-[72px]"
               data-testid="service-item"
               style={baseStyles}
               onClick={() => handleServiceClick(service)}
@@ -111,18 +118,20 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
                 )}
                 <Icon
                   size={32}
-                  className={isLoading ? 'opacity-30' : 'opacity-100'}
+                  className={isLoading ? "opacity-30" : "opacity-100"}
                 />
               </div>
-              <div className="text-white">
-                <div className="font-medium text-lg">{service.name}</div>
+              <div className="text-gray-800">
+                <div className="font-medium text-base md:text-lg">
+                  {service.name}
+                </div>
                 {service.description && (
-                  <div className="text-sm text-gray-300 mt-1">
+                  <div className="text-xs text-gray-500 mt-1">
                     {service.description}
                   </div>
                 )}
                 {isSelected && (
-                  <div className="text-xs text-blue-200 mt-1 font-semibold">
+                  <div className="text-xs text-blue-600 mt-1 font-semibold">
                     🎤 Starting voice request...
                   </div>
                 )}
@@ -131,11 +140,11 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
           );
         }
 
-        // Desktop version
+        // Desktop version (use square aspect to avoid CLS)
         return (
           <div
             key={index}
-            className="relative group w-full h-32 flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95"
+            className={`relative group w-full aspect-square flex flex-col items-center justify-center p-4 rounded-xl cursor-pointer bg-white/95 ${prefersReducedMotion ? "" : "transition-transform duration-300 hover:scale-[1.02] active:scale-95"}`}
             data-testid="service-item"
             style={baseStyles}
             onClick={() => handleServiceClick(service)}
@@ -149,14 +158,14 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
 
             {/* Icon */}
             <div
-              className={`text-white mb-2 ${isLoading ? 'opacity-30' : 'opacity-100'}`}
+              className={`text-white mb-2 ${isLoading ? "opacity-30" : "opacity-100"}`}
             >
               <Icon size={28} />
             </div>
 
             {/* Text */}
             <div
-              className={`text-white text-center text-sm font-medium ${isLoading ? 'opacity-30' : 'opacity-100'}`}
+              className={`text-gray-800 text-center text-sm font-medium ${isLoading ? "opacity-50" : "opacity-100"}`}
             >
               {service.name}
             </div>
@@ -169,47 +178,60 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
             )}
 
             {/* Enhanced hover overlay with call-to-action */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-3 text-white text-center rounded-xl">
+            <div
+              className={`absolute inset-0 bg-gradient-to-t from-white/0 via-white/40 to-white/70 opacity-0 ${prefersReducedMotion ? "" : "group-hover:opacity-100 transition-opacity"} flex flex-col items-center justify-center p-3 text-gray-800 text-center rounded-xl`}
+            >
               <div className="text-xs font-medium mb-2">
                 {service.description}
               </div>
-              <div className="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">
-                🎤 Click to Request
+              <div className="text-xs bg-white px-2 py-1 rounded-full font-semibold border border-gray-200">
+                Click to Request
               </div>
             </div>
           </div>
         );
       },
-      [selectedService, isProcessing, handleServiceClick]
+      [selectedService, isProcessing, handleServiceClick],
     );
 
     return (
-      <div ref={ref} className={`w-full max-w-full ${className}`}>
-        {/* Mobile View - Vertical scroll list */}
-        <div className="block md:hidden space-y-4 px-4 py-6">
-          {SERVICE_CATEGORIES.map((service, index) =>
-            renderServiceItem(service, index, true)
-          )}
-        </div>
-
-        {/* Desktop View - Fixed grid layout */}
-        <div className="hidden md:block w-full max-w-6xl mx-auto px-6 py-8">
-          {/* First row - 5 items */}
-          <div className="grid grid-cols-5 gap-4 mb-4">
-            {SERVICE_CATEGORIES.slice(0, 5).map((service, index) =>
-              renderServiceItem(service, index, false)
+      <div
+        ref={ref}
+        className={`w-full max-w-full ${className}`}
+        style={{
+          contentVisibility: "auto" as any,
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          contain: "layout paint style" as any,
+        }}
+      >
+        {/* Mobile View - Force render only on mobile */}
+        {isMobile ? (
+          <div className="block md:hidden space-y-2 sm:space-y-3 md:space-y-4 px-2 sm:px-4 py-3 sm:py-4 md:py-6">
+            {SERVICE_CATEGORIES.map((service, index) =>
+              renderServiceItem(service, index, true),
             )}
           </div>
-
-          {/* Second row - remaining items */}
-          {SERVICE_CATEGORIES.length > 5 && (
-            <div className="grid grid-cols-5 gap-4">
-              {SERVICE_CATEGORIES.slice(5).map((service, index) =>
-                renderServiceItem(service, index + 5, false)
+        ) : (
+          /* Desktop View - Force render only on desktop */
+          <div className="hidden md:block container mx-auto max-w-7xl w-full px-4 md:px-6 py-6 md:py-8">
+            {/* First row - responsive columns */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-6">
+              {SERVICE_CATEGORIES.slice(0, 5).map((service, index) =>
+                renderServiceItem(service, index, false),
               )}
             </div>
-          )}
-        </div>
+
+            {/* Second row - remaining items */}
+            {SERVICE_CATEGORIES.length > 5 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                {SERVICE_CATEGORIES.slice(5).map((service, index) =>
+                  renderServiceItem(service, index + 5, false),
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Status message */}
         {selectedService && (
@@ -219,7 +241,7 @@ export const ServiceGrid = forwardRef<HTMLDivElement, ServiceGridProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-ServiceGrid.displayName = 'ServiceGrid';
+ServiceGrid.displayName = "ServiceGrid";

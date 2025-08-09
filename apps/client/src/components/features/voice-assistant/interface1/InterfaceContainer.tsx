@@ -1,4 +1,3 @@
-import * as React from "react";
 import { ReactNode } from "react";
 import { INTERFACE_CONSTANTS } from "@/constants/interface1Constants";
 import { designSystem } from "@/styles/designSystem";

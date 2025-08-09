@@ -1,17 +1,4 @@
-import {
-  Bot,
-  Settings,
-  Save,
-  RefreshCw,
-  Play,
-  AlertCircle,
-  Loader2,
-  MessageSquare,
-  Palette,
-  Headphones,
-  Languages,
-} from 'lucide-react';
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +23,21 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
+import {
+  AlertCircle,
+  Bot,
+  Headphones,
+  Languages,
+  Loader2,
+  MessageSquare,
+  Palette,
+  Play,
+  RefreshCw,
+  Save,
+  Settings,
+} from 'lucide-react';
+import { useState } from 'react';
 
 // Types
 interface AssistantConfig {
@@ -313,17 +314,7 @@ const LanguageSelector = ({
 };
 
 // Main Assistant Config Panel component
-export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({
-  config,
-  isLoading,
-  isSaving,
-  error,
-  onSave,
-  onTest,
-  onReset,
-  className,
-  disabled = false,
-}) => {
+export const AssistantConfigPanel: React.FC<AssistantConfigPanelProps> = ({ config, isLoading, isSaving, error, onSave, onTest, onReset, className = "", disabled = false }) => {
   const [editConfig, setEditConfig] = useState<AssistantConfig | null>(config);
   const [hasChanges, setHasChanges] = useState(false);
 

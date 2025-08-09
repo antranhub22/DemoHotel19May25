@@ -1,4 +1,5 @@
-import { logger } from '@shared/utils/logger';
+import * as React from 'react';
+import logger from '@shared/utils/logger';
 import { useCallback, useRef, useState } from 'react';
 
 interface UseSiriButtonStateProps {

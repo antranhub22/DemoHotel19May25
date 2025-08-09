@@ -2,31 +2,31 @@
 type Language = 'en' | 'vi' | 'fr' | 'zh' | 'ru' | 'ko';
 
 // Siri System Components
-export { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual';
-export { SiriButton } from './SiriButton';
-export { SiriButtonContainer } from './SiriButtonContainer';
-export { default as SiriCallButton } from './SiriCallButton';
+export { SimpleMobileSiriVisual } from './SimpleMobileSiriVisual.tsx';
+export { SiriButton } from './SiriButton.ts';
+export { SiriButtonContainer } from './SiriButtonContainer.tsx';
+export { default as SiriCallButton } from './SiriCallButton.tsx';
 
 // Debugging Components
-export { MobileTouchDebugger } from './MobileTouchDebugger';
+export { MobileTouchDebugger } from './MobileTouchDebugger.tsx';
 
 // Custom Hooks
-export { useCallProtection } from './hooks/useCallProtection';
-export { useLanguageColors } from './hooks/useLanguageColors';
-export { useSiriAnimation } from './hooks/useSiriAnimation';
-export { useSiriButtonEvents } from './hooks/useSiriButtonEvents';
-export { useSiriButtonState } from './hooks/useSiriButtonState';
-export { useSiriButtonVisual } from './hooks/useSiriButtonVisual';
-export { useTouchDebugger } from './hooks/useTouchDebugger';
+export { useCallProtection } from './hooks/useCallProtection.ts';
+export { useLanguageColors } from './hooks/useLanguageColors.ts';
+export { useSiriAnimation } from './hooks/useSiriAnimation.ts';
+export { useSiriButtonEvents } from './hooks/useSiriButtonEvents.ts';
+export { useSiriButtonState } from './hooks/useSiriButtonState.ts';
+export { useSiriButtonVisual } from './hooks/useSiriButtonVisual.ts';
+export { useTouchDebugger } from './hooks/useTouchDebugger.ts';
 
 // UI Components
-export { DebugPanel } from './components/DebugPanel';
-export { SiriButtonStatus } from './components/SiriButtonStatus';
-export { SiriButtonVisual } from './components/SiriButtonVisual';
+export { DebugPanel } from './components/DebugPanel.tsx';
+export { SiriButtonStatus } from './components/SiriButtonStatus.tsx';
+export { SiriButtonVisual } from './components/SiriButtonVisual.tsx';
 
 // Constants
-export { LANGUAGE_COLORS } from './constants/languageColors';
-export type { LanguageColorScheme } from './constants/languageColors';
+export { LANGUAGE_COLORS } from './constants/languageColors.ts';
+export type { LanguageColorScheme } from './constants/languageColors.ts';
 
 // 🚀 PHASE 2: Modular Architecture Components
 export * from './modules';
