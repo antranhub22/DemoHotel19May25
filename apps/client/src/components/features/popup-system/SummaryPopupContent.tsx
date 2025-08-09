@@ -1,9 +1,7 @@
-import * as React from "react";
-import type { Room } from "@/types/common.types";
 import { useAssistant } from "@/context";
-import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
 import { useSummaryProgression } from "@/hooks/useSummaryProgression";
 import logger from "@shared/utils/logger";
+import * as React from "react";
 import { useEffect } from "react";
 import { SummaryProgression } from "./SummaryProgression";
 
@@ -15,7 +13,13 @@ export interface SummaryPopupContentProps {
 }
 
 const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
-  const { serviceRequests, language, callDetails } = useAssistant();
+  const {
+    serviceRequests,
+    language,
+    callDetails,
+    translateToVietnamese,
+    vietnameseSummary,
+  } = useAssistant();
   const { progression, startProcessing, complete } = useSummaryProgression();
 
   // ✅ NEW: Add Send to FrontDesk functionality
@@ -109,6 +113,19 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
   }, [progression.status, serviceRequests, complete]);
 
   const summary = getSummaryData();
+
+  // Optional: Provide quick Vietnamese translation for staff view
+  useEffect(() => {
+    const maybeTranslate = async () => {
+      try {
+        if (summary.hasData && language !== "vi" && !vietnameseSummary) {
+          await translateToVietnamese(summary.content);
+        }
+      } catch {}
+    };
+    maybeTranslate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [summary.hasData, summary.content, language]);
 
   const formatTimestamp = (date: Date) => {
     try {
@@ -235,6 +252,36 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
           </div>
         )}
       </div>
+
+      {/* Vietnamese Translation for Staff (if available) */}
+      {summary.hasData && vietnameseSummary && (
+        <div style={{ marginBottom: "20px" }}>
+          <h4
+            style={{
+              color: "#374151",
+              fontSize: "16px",
+              marginBottom: "12px",
+              fontWeight: "500",
+            }}
+          >
+            Bản dịch tiếng Việt cho Lễ Tân
+          </h4>
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #E5E7EB",
+              borderRadius: "8px",
+              padding: "16px",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              color: "#374151",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {vietnameseSummary}
+          </div>
+        </div>
+      )}
 
       {/* Service Requests */}
       {summary.items && summary.items.length > 0 && (

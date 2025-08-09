@@ -85,13 +85,6 @@ async function processTranscriptWithOpenAI(
         ? roomNumberMatch[1] || roomNumberMatch[2]
         : null;
 
-      await storage.addCallSummary({
-        call_id: callId,
-        content: summary,
-        room_number: extractedRoomNumber,
-        duration: null, // Will be updated by end-of-call-report
-      });
-
       logger.success(
         "[Webhook] OpenAI summary saved to database",
         "Component",
@@ -234,7 +227,7 @@ async function processTranscriptWithOpenAI(
           timestamp: new Date().toISOString(),
         });
 
-        // Send final summary
+        // Send final summary with progression hint
         io.emit("call-summary-received", {
           type: "call-summary-received",
           callId: callId,
@@ -331,18 +324,20 @@ async function processEndOfCallReport(
     }
 
     // Save end-of-call-report for stakeholders (existing functionality)
+    const durationSeconds =
+      endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
+        ? Math.floor(
+            (new Date(endOfCallReport.call.endedAt).getTime() -
+              new Date(endOfCallReport.call.startedAt).getTime()) /
+              1000,
+          )
+        : null;
+
     await storage.addCallSummary({
       call_id: callId,
       content: JSON.stringify(endOfCallReport),
       room_number: endOfCallReport.call?.customer?.number || null,
-      duration:
-        endOfCallReport.call?.endedAt && endOfCallReport.call?.startedAt
-          ? Math.floor(
-              (new Date(endOfCallReport.call.endedAt).getTime() -
-                new Date(endOfCallReport.call.startedAt).getTime()) /
-                1000,
-            ).toString()
-          : null,
+      duration: durationSeconds ? String(durationSeconds) : null,
     });
 
     logger.success(
@@ -350,6 +345,32 @@ async function processEndOfCallReport(
       "Component",
       { callId },
     );
+
+    // ✅ NEW: Also sync duration into the latest OpenAI summary for this call if missing
+    try {
+      if (durationSeconds !== null) {
+        const { PrismaClient } = await import("../../../generated/prisma");
+        const prisma = new PrismaClient();
+        await prisma.call_summaries.updateMany({
+          where: {
+            call_id: callId,
+            OR: [{ duration: null }, { duration: undefined as any }],
+          },
+          data: { duration: String(durationSeconds) },
+        });
+        logger.debug(
+          "[Webhook] Synced duration into call_summaries",
+          "Component",
+          { callId, durationSeconds },
+        );
+      }
+    } catch (syncError) {
+      logger.warn(
+        "[Webhook] Failed to sync duration into call_summaries",
+        "Component",
+        syncError,
+      );
+    }
   } catch (error) {
     logger.error(
       "[Webhook] Failed to save end-of-call-report:",

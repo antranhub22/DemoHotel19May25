@@ -1,7 +1,7 @@
 // ✅ COMPLETED MIGRATION: Now using Prisma only
+import { PrismaClient } from "@prisma/client";
 import { AuthUserCamelCase, authUserMapper } from "@shared/db/transformers";
 import { logger } from "@shared/utils/logger";
-import { PrismaClient } from "@prisma/client";
 
 // ✅ PRISMA ONLY: Migration completed successfully
 const prisma = new PrismaClient();
@@ -419,33 +419,33 @@ export class DatabaseStorage {
       // Generate order ID
       const orderId = `REQ-${Date.now()}`;
 
-      // Map serviceRequest to request table fields - UPDATED to match DB schema
+      // Map serviceRequest to Prisma request schema fields
       const requestData = {
         tenant_id: tenantId,
         call_id: callId,
-        room_number: serviceRequest.details?.roomNumber || "N/A",
+        room: serviceRequest.details?.roomNumber || "N/A",
         order_id: orderId,
-        request_content: serviceRequest.requestText || "Service request",
-        status: "Đã ghi nhận",
         guest_name: guestName || "Guest",
-        phone_number: null, // Will be extracted later if available
+        content: serviceRequest.requestText || "Service request",
+        status: "Đã ghi nhận",
+        // Prisma: total_amount is Decimal?, convert numeric if present
         total_amount: serviceRequest.details?.amount
           ? parseFloat(
               serviceRequest.details.amount.toString().replace(/[^\d.]/g, ""),
             )
           : null,
-        currency: "VND",
         special_instructions: serviceRequest.details?.otherDetails || null,
         order_type: serviceRequest.serviceType || "service-request",
         delivery_time: serviceRequest.details?.time
           ? new Date(serviceRequest.details.time)
           : null,
-        items: serviceRequest.details || {}, // JSON object for jsonb
+        // items column is String? → store as JSON string for compatibility
+        items: JSON.stringify(serviceRequest.details || {}),
         priority: "medium",
         urgency: "normal",
         created_at: new Date(),
         updated_at: new Date(),
-      };
+      } as any;
 
       logger.debug(
         "💾 [DatabaseStorage] Adding service request to database",
@@ -462,9 +462,7 @@ export class DatabaseStorage {
 
       // ✅ PRISMA ONLY: Clean addServiceRequest implementation
       logger.debug("🔄 [STORAGE] Using Prisma for addServiceRequest");
-      const result = await prisma.request.create({
-        data: requestData,
-      });
+      const result = await prisma.request.create({ data: requestData });
 
       logger.success(
         "✅ [DatabaseStorage] Service request saved successfully",

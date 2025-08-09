@@ -1,8 +1,8 @@
-import { useAssistant } from '@/context';
-import { useCallback, useEffect, useState } from 'react';
+import { useAssistant } from "@/context";
+import { useCallback, useEffect, useState } from "react";
 
 export interface SummaryProgressionState {
-  status: 'idle' | 'processing' | 'completed' | 'error';
+  status: "idle" | "processing" | "completed" | "error";
   progress: number;
   currentStep: string;
   currentStepIndex: number;
@@ -24,22 +24,22 @@ export interface UseSummaryProgressionReturn {
 }
 
 const INITIAL_STATE: SummaryProgressionState = {
-  status: 'idle',
+  status: "idle",
   progress: 0,
-  currentStep: '',
+  currentStep: "",
   currentStepIndex: 0,
   totalSteps: 4,
   estimatedTime: 30,
-  errorMessage: '',
+  errorMessage: "",
   startTime: null,
   endTime: null,
 };
 
 const STEPS = [
-  'Receiving call data from Vapi.ai',
-  'Processing transcript with OpenAI',
-  'Generating comprehensive summary',
-  'Extracting service requests',
+  "Receiving call data from Vapi.ai",
+  "Processing transcript with OpenAI",
+  "Generating comprehensive summary",
+  "Extracting service requests",
 ];
 
 export const useSummaryProgression = (): UseSummaryProgressionReturn => {
@@ -50,7 +50,7 @@ export const useSummaryProgression = (): UseSummaryProgressionReturn => {
   // Auto-detect completion when data is available
   useEffect(() => {
     if (
-      progression.status === 'processing' &&
+      progression.status === "processing" &&
       (serviceRequests?.length > 0 || callSummary)
     ) {
       complete();
@@ -58,20 +58,20 @@ export const useSummaryProgression = (): UseSummaryProgressionReturn => {
   }, [serviceRequests, callSummary, progression.status]);
 
   const startProcessing = useCallback(() => {
-    setProgression(prev => ({
+    setProgression((prev) => ({
       ...prev,
-      status: 'processing',
+      status: "processing",
       progress: 0,
       currentStepIndex: 0,
       currentStep: STEPS[0],
       startTime: new Date(),
       endTime: null,
-      errorMessage: '',
+      errorMessage: "",
     }));
   }, []);
 
   const updateProgress = useCallback((progress: number, step?: string) => {
-    setProgression(prev => ({
+    setProgression((prev) => ({
       ...prev,
       progress,
       currentStep: step || prev.currentStep,
@@ -79,10 +79,10 @@ export const useSummaryProgression = (): UseSummaryProgressionReturn => {
   }, []);
 
   const completeStep = useCallback(() => {
-    setProgression(prev => {
+    setProgression((prev) => {
       const nextStepIndex = Math.min(
         prev.currentStepIndex + 1,
-        prev.totalSteps - 1
+        prev.totalSteps - 1,
       );
       const isLastStep = nextStepIndex >= prev.totalSteps - 1;
 
@@ -98,18 +98,18 @@ export const useSummaryProgression = (): UseSummaryProgressionReturn => {
   }, []);
 
   const setError = useCallback((message: string) => {
-    setProgression(prev => ({
+    setProgression((prev) => ({
       ...prev,
-      status: 'error',
+      status: "error",
       errorMessage: message,
       endTime: new Date(),
     }));
   }, []);
 
   const complete = useCallback(() => {
-    setProgression(prev => ({
+    setProgression((prev) => ({
       ...prev,
-      status: 'completed',
+      status: "completed",
       progress: 100,
       currentStepIndex: prev.totalSteps - 1,
       currentStep: STEPS[prev.totalSteps - 1],
@@ -120,6 +120,25 @@ export const useSummaryProgression = (): UseSummaryProgressionReturn => {
   const reset = useCallback(() => {
     setProgression(INITIAL_STATE);
   }, []);
+
+  // Expose a global updater so WebSocket handler can drive progression
+  // without tight coupling across components
+  // This is safe and optional; if not needed it remains unused
+  if (typeof window !== "undefined") {
+    (window as any).updateSummaryProgression = (data: any) => {
+      setProgression((prev) => ({
+        ...prev,
+        status: (data.status as any) || prev.status,
+        progress:
+          typeof data.progress === "number" ? data.progress : prev.progress,
+        currentStep: data.currentStep || prev.currentStep,
+        currentStepIndex:
+          typeof data.currentStepIndex === "number"
+            ? data.currentStepIndex
+            : prev.currentStepIndex,
+      }));
+    };
+  }
 
   return {
     progression,

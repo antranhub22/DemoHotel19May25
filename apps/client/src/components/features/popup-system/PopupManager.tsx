@@ -1,15 +1,7 @@
-import * as React from 'react';
-import { useEffect, Suspense } from 'react';
 import { usePopupContext } from "@/context/PopupContext";
-import { PopupStack } from './PopupStack';
-import { logger } from '@shared/utils/logger';
-
-// Lazy load SummaryPopupContent for code splitting
-const LazySummaryPopupContent = React.lazy(() =>
-  import("./SummaryPopupContent").then((module) => ({
-    default: module.SummaryPopupContent,
-  })),
-);
+import * as React from "react";
+import { Suspense, useEffect } from "react";
+import { PopupStack } from "./PopupStack";
 
 interface PopupManagerProps {
   position?: "top" | "bottom" | "center";
@@ -18,7 +10,11 @@ interface PopupManagerProps {
   isMobile?: boolean; // Filter popups based on mobile/desktop
 }
 
-export const PopupManager: React.FC<PopupManagerProps> = ({ position = "bottom", maxVisible = 4, autoCloseDelay }) => {
+export const PopupManager: React.FC<PopupManagerProps> = ({
+  position = "bottom",
+  maxVisible = 4,
+  autoCloseDelay,
+}) => {
   const { popups, activePopup, setActivePopup, removePopup } =
     usePopupContext();
 
@@ -211,16 +207,14 @@ export const usePopup = () => {
 
       // ✅ FIXED: Prevent multiple rapid calls with better logic
       const now = Date.now();
-      if (showSummary.lastCall && now - showSummary.lastCall < 10) {
+      // Increase debounce window to avoid double-trigger from multiple sources
+      const lastCall = (showSummary as any).lastCall as number | undefined;
+      if (lastCall && now - lastCall < 800) {
         console.log("🚫 [DEBUG] showSummary called too rapidly, skipping...");
-        console.log(
-          "🚫 [DEBUG] Time since last call:",
-          now - showSummary.lastCall,
-          "ms",
-        );
+        console.log("🚫 [DEBUG] Time since last call:", now - lastCall, "ms");
         return "";
       }
-      showSummary.lastCall = now;
+      (showSummary as any).lastCall = now;
 
       // ✅ FIXED: Remove isCallActive check - summary should show AFTER call ends
       // The summary popup is triggered when the call ends, so isCallActive will be false
@@ -254,15 +248,15 @@ export const usePopup = () => {
     }
   };
 
-  // ✅ NEW: Add static property to track last call time
-  showSummary.lastCall = 0;
+  // ✅ NEW: Add static property to track last call time (with explicit typing via any)
+  (showSummary as any).lastCall = (showSummary as any).lastCall || 0;
 
   // ✅ NEW: Emergency cleanup function - integrated with RefactoredAssistantContext
   const emergencyCleanup = () => {
     console.log("🚨 [DEBUG] Emergency cleanup triggered");
     const { clearAllPopups } = usePopupContext();
     clearAllPopups();
-    showSummary.lastCall = 0;
+    (showSummary as any).lastCall = 0;
 
     // ✅ NEW: Reset RefactoredAssistantContext summary state
     if (window.resetSummarySystem) {
@@ -288,7 +282,7 @@ export const usePopup = () => {
         removePopup(popup.id);
       });
 
-    showSummary.lastCall = 0;
+    (showSummary as any).lastCall = 0;
 
     // ✅ NEW: Reset RefactoredAssistantContext summary state
     if (window.resetSummarySystem) {

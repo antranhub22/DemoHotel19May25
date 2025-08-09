@@ -40,7 +40,7 @@ export interface OrderContextType {
 
   // Call summary state
   callSummary: CallSummary | null;
-  setCallSummary: (summary: CallSummary) => void;
+  setCallSummary: (summary: CallSummary | null) => void;
 
   // Service requests state
   serviceRequests: ServiceRequest[];
