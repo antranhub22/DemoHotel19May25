@@ -78,7 +78,7 @@ async function processTranscriptWithOpenAI(
       callId,
     });
 
-    // Save summary to database
+    // Save summary to database (with audit trail for source)
     try {
       // Extract room number from summary
       const roomNumberMatch = summary.match(
@@ -88,12 +88,23 @@ async function processTranscriptWithOpenAI(
         ? roomNumberMatch[1] || roomNumberMatch[2]
         : null;
 
+      // Annotate summary with source for audit (without changing routes/schema)
+      const sourceLabel = "OpenAI"; // This block is only reached when OpenAI succeeded
+      const annotatedSummary = `Source: ${sourceLabel}\n\n${summary}`;
+
+      await storage.addCallSummary({
+        call_id: callId,
+        content: annotatedSummary,
+        room_number: extractedRoomNumber,
+        duration: null, // Will be updated by end-of-call-report
+      });
+
       logger.success(
         "[Webhook] OpenAI summary saved to database",
         "Component",
         {
           callId,
-          summaryLength: summary?.length || 0,
+          summaryLength: annotatedSummary?.length || 0,
           roomNumber: extractedRoomNumber,
         },
       );
@@ -359,9 +370,11 @@ async function processEndOfCallReport(
           )
         : null;
 
+    // Store raw end-of-call-report with audit source tag
+    const eocrContent = `Source: EndOfCallReport\n\n${JSON.stringify(endOfCallReport)}`;
     await storage.addCallSummary({
       call_id: callId,
-      content: JSON.stringify(endOfCallReport),
+      content: eocrContent,
       room_number: endOfCallReport.call?.customer?.number || null,
       duration: durationSeconds ? String(durationSeconds) : null,
     });

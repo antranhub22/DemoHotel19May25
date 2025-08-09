@@ -45,7 +45,9 @@ const CallDetails: React.FC = () => {
     if (!dateObj) return "Unknown";
 
     const date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    return date.toLocaleString("en-US", {
+    const locale =
+      typeof navigator !== "undefined" ? navigator.language : "en-US";
+    return date.toLocaleString(locale, {
       year: "numeric",
       month: "numeric",
       day: "numeric",
