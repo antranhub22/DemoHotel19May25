@@ -309,7 +309,14 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
       // Step 2: End call timer and trigger listeners
       console.log("📞 [DEBUG] Calling call.endCall()");
+      // Prevent re-entrancy: suppress listener callbacks while we are inside endCall pipeline
+      if (typeof window !== "undefined") {
+        (window as any).__suppressCallEndListener = true;
+      }
       call.endCall();
+      if (typeof window !== "undefined") {
+        delete (window as any).__suppressCallEndListener;
+      }
       console.log("✅ [DEBUG] call.endCall() completed");
 
       // Step 3: Process summary if we have any transcripts (reduced from 2 to 1)
@@ -348,8 +355,15 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         }
 
         // ✅ NEW: Trigger summary popup via global function
-        if (window.triggerSummaryPopup) {
-          window.triggerSummaryPopup();
+        try {
+          if (window.triggerSummaryPopup) {
+            window.triggerSummaryPopup();
+          }
+        } catch (popupError) {
+          console.error(
+            "❌ [DEBUG] Failed to trigger summary popup:",
+            popupError,
+          );
         }
 
         console.log("✅ [DEBUG] Summary processing triggered");
@@ -379,16 +393,25 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         }
 
         // Trigger summary popup via global function
-        if (window.triggerSummaryPopup) {
-          console.log(
-            "🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()",
+        try {
+          if (window.triggerSummaryPopup) {
+            console.log(
+              "🎯 [DEBUG] FALLBACK: Calling window.triggerSummaryPopup()",
+            );
+            window.triggerSummaryPopup();
+            console.log(
+              "✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully",
+            );
+          } else {
+            console.error(
+              "❌ [DEBUG] window.triggerSummaryPopup not available!",
+            );
+          }
+        } catch (popupError) {
+          console.error(
+            "❌ [DEBUG] Failed to trigger summary popup (fallback):",
+            popupError,
           );
-          window.triggerSummaryPopup();
-          console.log(
-            "✅ [DEBUG] FALLBACK: window.triggerSummaryPopup() called successfully",
-          );
-        } else {
-          console.error("❌ [DEBUG] window.triggerSummaryPopup not available!");
         }
 
         console.log("✅ [DEBUG] FALLBACK Summary processing triggered");

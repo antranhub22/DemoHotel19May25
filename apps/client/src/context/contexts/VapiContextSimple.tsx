@@ -10,7 +10,7 @@ import {
   VapiOfficialConfig,
 } from "@/lib/vapiOfficial";
 import { CallDetails, Language } from "@/types";
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import React, {
   createContext,
   useContext,
@@ -18,7 +18,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useTranscript } from './TranscriptContext';
+import { useTranscript } from "./TranscriptContext";
 
 export interface VapiContextType {
   // Call state
@@ -222,14 +222,22 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
             );
 
             // ✅ NEW: Direct trigger Summary Popup when no external callback
-            if (window.triggerSummaryPopup) {
-              console.log(
-                "📞 [DEBUG] VapiProvider directly triggering Summary Popup",
-              );
-              window.triggerSummaryPopup();
-            } else {
-              console.log(
-                "📞 [DEBUG] window.triggerSummaryPopup not available",
+            try {
+              if (window.triggerSummaryPopup) {
+                console.log(
+                  "📞 [DEBUG] VapiProvider directly triggering Summary Popup",
+                );
+                window.triggerSummaryPopup();
+              } else {
+                console.log(
+                  "📞 [DEBUG] window.triggerSummaryPopup not available",
+                );
+              }
+            } catch (popupError) {
+              logger.warn(
+                "⚠️ [VapiProvider] Failed to trigger summary popup directly",
+                "VapiProvider",
+                popupError,
               );
             }
           }
