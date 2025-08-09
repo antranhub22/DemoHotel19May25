@@ -1,4 +1,7 @@
-import { generateCallSummaryOptimized } from "@server/openai";
+import {
+  generateCallSummaryOptimized,
+  wasLastSummaryUsingFallback,
+} from "@server/openai";
 import { DatabaseStorage } from "@server/storage";
 import { logger } from "@shared/utils/logger";
 import express from "express";
@@ -119,7 +122,7 @@ async function processTranscriptWithOpenAI(
         );
 
         // Save each service request
-        const savedRequests = [];
+        const savedRequests: any[] = [];
         for (const serviceRequest of serviceRequests) {
           const savedRequest = await storage.addServiceRequest(
             serviceRequest,
@@ -235,6 +238,29 @@ async function processTranscriptWithOpenAI(
           serviceRequests,
           timestamp: new Date().toISOString(),
         });
+
+        // Notify staff if OpenAI failed and we used fallback
+        if (wasLastSummaryUsingFallback()) {
+          io.emit("message", {
+            type: "error",
+            scope: "staff",
+            code: "OPENAI_SUMMARY_FALLBACK",
+            callId,
+            message:
+              "OpenAI summary generation failed. A basic fallback summary was used. Please review and assist the guest.",
+            timestamp: new Date().toISOString(),
+          });
+
+          // Inform guest as well via guestNotification channel used on client UI
+          io.emit("guestNotification", {
+            title: "Xin lỗi, hệ thống tóm tắt gặp lỗi",
+            message:
+              "Hiện tại chưa thể hiển thị tóm tắt cuộc gọi. Nhân viên đã được thông báo để hỗ trợ bạn.",
+            severity: "warning",
+            callId,
+            timestamp: new Date().toISOString(),
+          });
+        }
 
         logger.success(
           "[Webhook] WebSocket notification sent successfully",
