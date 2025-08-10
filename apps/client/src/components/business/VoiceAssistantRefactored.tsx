@@ -226,7 +226,7 @@ const VoiceAssistant: React.FC = () => {
             <div className="flex items-center justify-between px-4 py-2">
               {/* Logo/Title */}
               <div className="text-lg font-bold text-blue-900">
-                {isMobile ? "Hotel Assistant" : "Hotel Voice Assistant"}
+                {_isMobile ? "Hotel Assistant" : "Hotel Voice Assistant"}
               </div>
 
               {/* Language Switcher (Mobile-Optimized) - Domain Controlled */}
@@ -284,7 +284,7 @@ const VoiceAssistant: React.FC = () => {
           {/* Mobile-First Popup System */}
           <PopupManager
             position="bottom"
-            maxVisible={isMobile ? 2 : 4}
+            maxVisible={_isMobile ? 2 : 4}
             autoCloseDelay={_isMobile ? 8000 : 10000}
             isMobile={_isMobile}
           />

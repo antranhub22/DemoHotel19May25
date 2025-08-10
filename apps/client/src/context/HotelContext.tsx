@@ -4,7 +4,7 @@ import {
 } from "@/hooks/useHotelConfiguration";
 import logger from "@shared/utils/logger";
 // removed unused icons
-import React, { createContext } from "react";
+import React, { createContext, useContext } from "react";
 
 // Hotel context interfaces
 interface HotelContextValue {

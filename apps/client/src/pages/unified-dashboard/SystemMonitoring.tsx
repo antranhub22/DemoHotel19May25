@@ -1,47 +1,47 @@
-import * as React from 'react';
-import {
-  Monitor,
-  Cpu,
-  HardDrive,
-  Wifi,
-  Database,
-  Server,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  Download,
-  Bell,
-  AlertCircle,
-  Info,
-  Terminal,
-  Eye,
-  Settings,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "@shared/utils/logger";
+import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  Bell,
+  CheckCircle,
+  Cpu,
+  Database,
+  Download,
+  Eye,
+  HardDrive,
+  Info,
+  Monitor,
+  RefreshCw,
+  Server,
+  Settings,
+  Terminal,
+  Wifi,
+  XCircle,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // Types
 interface SystemMetrics {
@@ -77,7 +77,7 @@ interface SystemMetrics {
   };
   services: {
     name: string;
-    status: 'running' | 'stopped' | 'error';
+    status: "running" | "stopped" | "error";
     uptime: string;
     memory: number;
     cpu: number;
@@ -86,7 +86,7 @@ interface SystemMetrics {
 
 interface SystemAlert {
   id: string;
-  type: 'error' | 'warning' | 'info';
+  type: "error" | "warning" | "info";
   title: string;
   message: string;
   timestamp: string;
@@ -96,7 +96,7 @@ interface SystemAlert {
 interface LogEntry {
   id: string;
   timestamp: string;
-  level: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+  level: "ERROR" | "WARN" | "INFO" | "DEBUG";
   service: string;
   message: string;
   details?: string;
@@ -126,47 +126,47 @@ const mockMetrics: SystemMetrics = {
     downloadSpeed: 125.5,
     uploadSpeed: 25.2,
     latency: 12,
-    status: 'connected',
+    status: "connected",
   },
   database: {
     connections: 15,
     queries: 1250,
     responseTime: 45,
-    status: 'healthy',
+    status: "healthy",
   },
   services: [
     {
-      name: 'Hotel API',
-      status: 'running',
-      uptime: '15d 4h 23m',
+      name: "Hotel API",
+      status: "running",
+      uptime: "15d 4h 23m",
       memory: 256,
       cpu: 12.5,
     },
     {
-      name: 'Database',
-      status: 'running',
-      uptime: '15d 4h 23m',
+      name: "Database",
+      status: "running",
+      uptime: "15d 4h 23m",
       memory: 512,
       cpu: 8.2,
     },
     {
-      name: 'Web Server',
-      status: 'running',
-      uptime: '15d 4h 23m',
+      name: "Web Server",
+      status: "running",
+      uptime: "15d 4h 23m",
       memory: 128,
       cpu: 5.1,
     },
     {
-      name: 'Socket Server',
-      status: 'running',
-      uptime: '15d 4h 23m',
+      name: "Socket Server",
+      status: "running",
+      uptime: "15d 4h 23m",
       memory: 64,
       cpu: 3.8,
     },
     {
-      name: 'Email Service',
-      status: 'error',
-      uptime: '0d 0h 0m',
+      name: "Email Service",
+      status: "error",
+      uptime: "0d 0h 0m",
       memory: 0,
       cpu: 0,
     },
@@ -175,98 +175,98 @@ const mockMetrics: SystemMetrics = {
 
 const mockAlerts: SystemAlert[] = [
   {
-    id: '1',
-    type: 'error',
-    title: 'Email Service Down',
-    message: 'Email service has been down for 2 hours',
-    timestamp: '2024-01-15T10:30:00Z',
+    id: "1",
+    type: "error",
+    title: "Email Service Down",
+    message: "Email service has been down for 2 hours",
+    timestamp: "2024-01-15T10:30:00Z",
     resolved: false,
   },
   {
-    id: '2',
-    type: 'warning',
-    title: 'High Memory Usage',
-    message: 'System memory usage is above 80%',
-    timestamp: '2024-01-15T09:15:00Z',
+    id: "2",
+    type: "warning",
+    title: "High Memory Usage",
+    message: "System memory usage is above 80%",
+    timestamp: "2024-01-15T09:15:00Z",
     resolved: false,
   },
   {
-    id: '3',
-    type: 'info',
-    title: 'Database Backup Completed',
-    message: 'Daily database backup completed successfully',
-    timestamp: '2024-01-15T02:00:00Z',
+    id: "3",
+    type: "info",
+    title: "Database Backup Completed",
+    message: "Daily database backup completed successfully",
+    timestamp: "2024-01-15T02:00:00Z",
     resolved: true,
   },
 ];
 
 const mockLogs: LogEntry[] = [
   {
-    id: '1',
-    timestamp: '2024-01-15T10:35:22Z',
-    level: 'ERROR',
-    service: 'EmailService',
-    message: 'Failed to connect to SMTP server',
-    details: 'Connection timeout after 30 seconds',
+    id: "1",
+    timestamp: "2024-01-15T10:35:22Z",
+    level: "ERROR",
+    service: "EmailService",
+    message: "Failed to connect to SMTP server",
+    details: "Connection timeout after 30 seconds",
   },
   {
-    id: '2',
-    timestamp: '2024-01-15T10:30:15Z',
-    level: 'WARN',
-    service: 'HotelAPI',
-    message: 'High response time detected',
-    details: 'Average response time: 2.5s (threshold: 1s)',
+    id: "2",
+    timestamp: "2024-01-15T10:30:15Z",
+    level: "WARN",
+    service: "HotelAPI",
+    message: "High response time detected",
+    details: "Average response time: 2.5s (threshold: 1s)",
   },
   {
-    id: '3',
-    timestamp: '2024-01-15T10:25:08Z',
-    level: 'INFO',
-    service: 'Database',
-    message: 'Query executed successfully',
-    details: 'SELECT * FROM requests - 156 rows returned',
+    id: "3",
+    timestamp: "2024-01-15T10:25:08Z",
+    level: "INFO",
+    service: "Database",
+    message: "Query executed successfully",
+    details: "SELECT * FROM requests - 156 rows returned",
   },
   {
-    id: '4',
-    timestamp: '2024-01-15T10:20:03Z',
-    level: 'DEBUG',
-    service: 'WebServer',
-    message: 'Static file served',
-    details: 'GET /assets/logo.png - 200 OK',
+    id: "4",
+    timestamp: "2024-01-15T10:20:03Z",
+    level: "DEBUG",
+    service: "WebServer",
+    message: "Static file served",
+    details: "GET /assets/logo.png - 200 OK",
   },
 ];
 
 // Performance data for charts
 const performanceData = [
-  { time: '00:00', cpu: 35, memory: 40, disk: 15 },
-  { time: '04:00', cpu: 28, memory: 35, disk: 15 },
-  { time: '08:00', cpu: 45, memory: 50, disk: 18 },
-  { time: '12:00', cpu: 65, memory: 60, disk: 22 },
-  { time: '16:00', cpu: 55, memory: 58, disk: 20 },
-  { time: '20:00', cpu: 42, memory: 45, disk: 17 },
-  { time: '24:00', cpu: 35, memory: 40, disk: 15 },
+  { time: "00:00", cpu: 35, memory: 40, disk: 15 },
+  { time: "04:00", cpu: 28, memory: 35, disk: 15 },
+  { time: "08:00", cpu: 45, memory: 50, disk: 18 },
+  { time: "12:00", cpu: 65, memory: 60, disk: 22 },
+  { time: "16:00", cpu: 55, memory: 58, disk: 20 },
+  { time: "20:00", cpu: 42, memory: 45, disk: 17 },
+  { time: "24:00", cpu: 35, memory: 40, disk: 15 },
 ];
 
 // System status component
 const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
   const getStatusColor = (usage: number) => {
     if (usage < 50) {
-      return 'text-green-600';
+      return "text-green-600";
     }
     if (usage < 80) {
-      return 'text-yellow-600';
+      return "text-yellow-600";
     }
-    return 'text-red-600';
+    return "text-red-600";
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'running':
-      case 'connected':
-      case 'healthy':
+      case "running":
+      case "connected":
+      case "healthy":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'error':
+      case "error":
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'stopped':
+      case "stopped":
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
@@ -285,8 +285,8 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
             </div>
             <span
               className={cn(
-                'text-lg font-bold',
-                getStatusColor(metrics.cpu.usage)
+                "text-lg font-bold",
+                getStatusColor(metrics.cpu.usage),
               )}
             >
               {metrics.cpu.usage}%
@@ -310,8 +310,8 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
             </div>
             <span
               className={cn(
-                'text-lg font-bold',
-                getStatusColor(metrics.memory.usage)
+                "text-lg font-bold",
+                getStatusColor(metrics.memory.usage),
               )}
             >
               {metrics.memory.usage}%
@@ -335,8 +335,8 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
             </div>
             <span
               className={cn(
-                'text-lg font-bold',
-                getStatusColor(metrics.disk.usage)
+                "text-lg font-bold",
+                getStatusColor(metrics.disk.usage),
               )}
             >
               {metrics.disk.usage}%
@@ -395,21 +395,22 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
               <span className="font-medium">Services</span>
             </div>
             <span className="text-lg font-bold text-green-600">
-              {metrics.services.filter(s => s.status === 'running').length}/
+              {metrics.services.filter((s) => s.status === "running").length}/
               {metrics.services.length}
             </span>
           </div>
           <div className="text-sm text-gray-500 space-y-1">
             <div>
-              Running:{' '}
-              {metrics.services.filter(s => s.status === 'running').length}
+              Running:{" "}
+              {metrics.services.filter((s) => s.status === "running").length}
             </div>
             <div>
-              Stopped:{' '}
-              {metrics.services.filter(s => s.status === 'stopped').length}
+              Stopped:{" "}
+              {metrics.services.filter((s) => s.status === "stopped").length}
             </div>
             <div>
-              Error: {metrics.services.filter(s => s.status === 'error').length}
+              Error:{" "}
+              {metrics.services.filter((s) => s.status === "error").length}
             </div>
           </div>
         </CardContent>
@@ -422,11 +423,11 @@ const SystemStatus = ({ metrics }: { metrics: SystemMetrics }) => {
 const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'error':
+      case "error":
         return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'info':
+      case "info":
         return <Info className="h-4 w-4 text-blue-500" />;
       default:
         return <AlertCircle className="h-4 w-4 text-gray-500" />;
@@ -435,18 +436,18 @@ const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
 
   const getAlertColor = (type: string) => {
     switch (type) {
-      case 'error':
-        return 'border-red-200 bg-red-50';
-      case 'warning':
-        return 'border-yellow-200 bg-yellow-50';
-      case 'info':
-        return 'border-blue-200 bg-blue-50';
+      case "error":
+        return "border-red-200 bg-red-50";
+      case "warning":
+        return "border-yellow-200 bg-yellow-50";
+      case "info":
+        return "border-blue-200 bg-blue-50";
       default:
-        return 'border-gray-200 bg-gray-50';
+        return "border-gray-200 bg-gray-50";
     }
   };
 
-  const unresolvedAlerts = alerts.filter(alert => !alert.resolved);
+  const unresolvedAlerts = alerts.filter((alert) => !alert.resolved);
 
   return (
     <div className="space-y-3">
@@ -456,10 +457,10 @@ const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
           <p>Không có cảnh báo nào</p>
         </div>
       ) : (
-        unresolvedAlerts.map(alert => (
+        unresolvedAlerts.map((alert) => (
           <div
             key={alert.id}
-            className={cn('border rounded-lg p-4', getAlertColor(alert.type))}
+            className={cn("border rounded-lg p-4", getAlertColor(alert.type))}
           >
             <div className="flex items-start gap-3">
               {getAlertIcon(alert.type)}
@@ -484,15 +485,15 @@ const SystemAlerts = ({ alerts }: { alerts: SystemAlert[] }) => {
 const ServicesTable = ({
   services,
 }: {
-  services: SystemMetrics['services'];
+  services: SystemMetrics["services"];
 }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'running':
+      case "running":
         return <Badge className="bg-green-100 text-green-800">Running</Badge>;
-      case 'stopped':
+      case "stopped":
         return <Badge className="bg-gray-100 text-gray-800">Stopped</Badge>;
-      case 'error':
+      case "error":
         return <Badge className="bg-red-100 text-red-800">Error</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
@@ -543,31 +544,31 @@ const ServicesTable = ({
 
 // Logs component
 const SystemLogs = ({ logs }: { logs: LogEntry[] }) => {
-  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null);
+  const [_selectedLog, _setSelectedLog] = useState<LogEntry | null>(null);
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'ERROR':
-        return 'bg-red-100 text-red-800';
-      case 'WARN':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'INFO':
-        return 'bg-blue-100 text-blue-800';
-      case 'DEBUG':
-        return 'bg-gray-100 text-gray-800';
+      case "ERROR":
+        return "bg-red-100 text-red-800";
+      case "WARN":
+        return "bg-yellow-100 text-yellow-800";
+      case "INFO":
+        return "bg-blue-100 text-blue-800";
+      case "DEBUG":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
     <div className="space-y-2">
-      {logs.map(log => (
+      {logs.map((log) => (
         <div key={log.id} className="border rounded-lg p-3 hover:bg-gray-50">
           <div className="flex items-start gap-3">
             <Badge
               variant="outline"
-              className={cn('text-xs', getLevelColor(log.level))}
+              className={cn("text-xs", getLevelColor(log.level))}
             >
               {log.level}
             </Badge>
@@ -594,7 +595,7 @@ const SystemLogs = ({ logs }: { logs: LogEntry[] }) => {
 
 // Main System Monitoring component
 export const SystemMonitoring: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [metrics, setMetrics] = useState<SystemMetrics>(mockMetrics);
   const [alerts, setAlerts] = useState<SystemAlert[]>(mockAlerts);
   const [logs, setLogs] = useState<LogEntry[]>(mockLogs);
@@ -613,7 +614,7 @@ export const SystemMonitoring: React.FC = () => {
         setLoading(false);
       }, 1000);
     } catch (error) {
-      logger.error('Failed to fetch metrics:', 'Component', error);
+      logger.error("Failed to fetch metrics:", "Component", error);
       setLoading(false);
     }
   };
@@ -642,14 +643,14 @@ export const SystemMonitoring: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={autoRefresh ? 'bg-green-50' : ''}
+            className={autoRefresh ? "bg-green-50" : ""}
           >
             <Activity className="h-4 w-4 mr-2" />
-            {autoRefresh ? 'Auto ON' : 'Auto OFF'}
+            {autoRefresh ? "Auto ON" : "Auto OFF"}
           </Button>
           <Button variant="outline" onClick={fetchMetrics} disabled={loading}>
             <RefreshCw
-              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+              className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
             />
             Làm mới
           </Button>
@@ -719,7 +720,7 @@ export const SystemMonitoring: React.FC = () => {
                 Cảnh báo hệ thống
               </CardTitle>
               <CardDescription>
-                {alerts.filter(a => !a.resolved).length} cảnh báo chưa xử lý
+                {alerts.filter((a) => !a.resolved).length} cảnh báo chưa xử lý
               </CardDescription>
             </CardHeader>
             <CardContent>

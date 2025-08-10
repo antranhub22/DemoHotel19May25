@@ -189,12 +189,12 @@ router.get(
               systemTrend: systemTrend,
               lastUpdated: new Date().toISOString(),
             };
-          } catch (dbError) {
+          } catch {
             // Ultimate fallback if analytics service fails
             logger.warn(
               "⚠️ [Dashboard] Call analytics failed, using static fallback",
               "DashboardDataAPI",
-              dbError,
+              // suppressed error variable per lint rule
             );
 
             return {

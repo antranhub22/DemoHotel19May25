@@ -261,7 +261,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         ${isVisible ? `notification-${notification.type}` : "opacity-0 transform translate-x-full"}
         ${isExiting ? "notification-exit" : ""}
         ${isMobile ? "mobile" : ""}
-        ${getNotificationStyles(notification.type, prefersReducedMotion)}
+        ${getNotificationStyles(notification.type, _prefersReducedMotion)}
         ${getPriorityStyles()}
         ${isMobile ? "w-full" : "w-80"}
         rounded-lg p-4 max-w-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02]

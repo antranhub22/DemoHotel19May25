@@ -651,26 +651,28 @@ export const StaffManagementRefactored: React.FC = () => {
   // useStaffRealtime();
 
   // MOCK DATA FOR STAFF MANAGEMENT
-  const staff = [];
-  const _staffByDepartment = {};
-  const staffCounts = { total: 0, active: 0, onDuty: 0 };
-  const selectedStaff = null;
-  const filters = {};
+  const staff = [] as StaffMember[];
+  const _staffByDepartment: Record<string, any> = {};
+  const staffCounts = { total: 0, active: 0, onDuty: 0, available: 0 };
+  const selectedStaff = null as StaffMember | null;
+  const filters: Record<string, any> = {};
   const isLoading = false;
-  const error = null;
-  const _analytics = {};
-  const tasks = [];
-  const _onDutyStaff = [];
-  const _availableStaff = [];
-  const loadStaff = () => {};
-  const selectStaffMember = () => {};
-  const updateStaffFilters = () => {};
-  const clearStaffFilters = () => {};
-  const clearCurrentError = () => {};
-  const setupAutoRefresh = () => {};
-  const loadTasks = () => {};
-  const checkInStaffMember = () => {};
-  const checkOutStaffMember = () => {};
+  const error = null as any;
+  const _analytics: Record<string, any> = {};
+  const tasks: any[] = [];
+  const _onDutyStaff: any[] = [];
+  const _availableStaff: any[] = [];
+  const loadStaff = (..._args: any[]) => {};
+  const selectStaffMember = (..._args: any[]) => {};
+  const updateStaffFilters = (..._args: any[]) => {};
+  const clearStaffFilters = (..._args: any[]) => {};
+  const clearCurrentError = (..._args: any[]) => {};
+  const setupAutoRefresh =
+    (..._args: any[]) =>
+    () => {};
+  const loadTasks = (..._args: any[]) => {};
+  const checkInStaffMember = (..._args: any[]) => {};
+  const checkOutStaffMember = (..._args: any[]) => {};
 
   // ========================================
   // Local State for UI

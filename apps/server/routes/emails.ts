@@ -1,13 +1,13 @@
-import { sendCallSummary, sendServiceConfirmation } from '@server/gmail';
-import { sendMobileCallSummary, sendMobileEmail } from '@server/mobileMail';
+import { sendCallSummary, sendServiceConfirmation } from "@server/gmail";
+import { sendMobileCallSummary, sendMobileEmail } from "@server/mobileMail";
 import {
+  ErrorCodes,
   apiResponse,
   commonErrors,
-  ErrorCodes,
-} from '@server/utils/apiHelpers';
-import { parsePagination } from '@server/utils/pagination';
-import { logger } from '@shared/utils/logger';
-import { Request, Response, Router } from 'express';
+} from "@server/utils/apiHelpers";
+import { parsePagination } from "@server/utils/pagination";
+import { logger } from "@shared/utils/logger";
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
@@ -16,32 +16,32 @@ const router = Router();
 // ============================================
 
 // POST /api/emails/service - Send service confirmation email
-router.post('/service', async (req: Request, res: Response) => {
+router.post("/service", async (req: Request, res: Response) => {
   try {
     const {
-      to = 'staff@hotel.com',
+      to = "staff@hotel.com",
       orderNumber,
       customerRequest,
       customerInfo,
       details,
-      deliveryTime,
-      specialInstructions,
+      deliveryTime: _deliveryTime,
+      specialInstructions: _specialInstructions,
     } = req.body;
 
     if (!orderNumber || !customerRequest) {
       return commonErrors.missingFields(res, [
-        'orderNumber',
-        'customerRequest',
+        "orderNumber",
+        "customerRequest",
       ]);
     }
 
-    if (!to || typeof to !== 'string' || !to.includes('@')) {
-      return commonErrors.validation(res, 'Valid email address is required');
+    if (!to || typeof to !== "string" || !to.includes("@")) {
+      return commonErrors.validation(res, "Valid email address is required");
     }
 
     logger.debug(
       `📧 [EMAILS] Sending service email for order: ${orderNumber}`,
-      'Emails'
+      "Emails",
     );
 
     const result = await sendServiceConfirmation(to, {
@@ -55,7 +55,7 @@ router.post('/service', async (req: Request, res: Response) => {
     if (result.success) {
       logger.debug(
         `✅ [EMAILS] Service email sent successfully for order: ${orderNumber}`,
-        'Emails'
+        "Emails",
       );
 
       return apiResponse.success(
@@ -64,57 +64,56 @@ router.post('/service', async (req: Request, res: Response) => {
           messageId: result.messageId,
           orderNumber,
           recipient: to,
-          emailType: 'service-confirmation',
+          emailType: "service-confirmation",
           sentAt: new Date().toISOString(),
         },
-        'Service confirmation email sent successfully'
+        "Service confirmation email sent successfully",
       );
     } else {
       logger.error(
         `❌ [EMAILS] Failed to send service email for order: ${orderNumber}`,
-        'Emails',
-        result.error
+        "Emails",
+        result.error,
       );
 
       return apiResponse.error(
         res,
         500,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        result.error || 'Failed to send service email',
-        { orderNumber, recipient: to }
+        result.error || "Failed to send service email",
+        { orderNumber, recipient: to },
       );
     }
   } catch (error) {
-    logger.error('❌ [EMAILS] Failed to send service email:', 'Emails', error);
-    return commonErrors.internal(res, 'Failed to send service email', error);
+    logger.error("❌ [EMAILS] Failed to send service email:", "Emails", error);
+    return commonErrors.internal(res, "Failed to send service email", error);
   }
 });
 
 // POST /api/emails/call-summary - Send call summary email
-router.post('/call-summary', async (req: Request, res: Response) => {
+router.post("/call-summary", async (req: Request, res: Response) => {
   try {
     const {
-      to = 'staff@hotel.com',
+      to = "staff@hotel.com",
       callId,
       summary,
       duration,
       timestamp,
       guestRequests,
       roomNumber,
-      language,
     } = req.body;
 
     if (!callId || !summary) {
-      return commonErrors.missingFields(res, ['callId', 'summary']);
+      return commonErrors.missingFields(res, ["callId", "summary"]);
     }
 
-    if (!to || typeof to !== 'string' || !to.includes('@')) {
-      return commonErrors.validation(res, 'Valid email address is required');
+    if (!to || typeof to !== "string" || !to.includes("@")) {
+      return commonErrors.validation(res, "Valid email address is required");
     }
 
     logger.debug(
       `📧 [EMAILS] Sending call summary email for call: ${callId}`,
-      'Emails'
+      "Emails",
     );
 
     const result = await sendCallSummary(to, {
@@ -129,7 +128,7 @@ router.post('/call-summary', async (req: Request, res: Response) => {
     if (result.success) {
       logger.debug(
         `✅ [EMAILS] Call summary email sent successfully for call: ${callId}`,
-        'Emails'
+        "Emails",
       );
 
       return apiResponse.success(
@@ -138,61 +137,61 @@ router.post('/call-summary', async (req: Request, res: Response) => {
           messageId: result.messageId,
           callId,
           recipient: to,
-          emailType: 'call-summary',
+          emailType: "call-summary",
           duration,
           roomNumber,
           sentAt: new Date().toISOString(),
         },
-        'Call summary email sent successfully'
+        "Call summary email sent successfully",
       );
     } else {
       logger.error(
         `❌ [EMAILS] Failed to send call summary email for call: ${callId}`,
-        'Emails',
-        result.error
+        "Emails",
+        result.error,
       );
 
       return apiResponse.error(
         res,
         500,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        result.error || 'Failed to send call summary email',
-        { callId, recipient: to }
+        result.error || "Failed to send call summary email",
+        { callId, recipient: to },
       );
     }
   } catch (error) {
     logger.error(
-      '❌ [EMAILS] Failed to send call summary email:',
-      'Emails',
-      error
+      "❌ [EMAILS] Failed to send call summary email:",
+      "Emails",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to send call summary email',
-      error
+      "Failed to send call summary email",
+      error,
     );
   }
 });
 
 // POST /api/emails/test - Send test email
-router.post('/test', async (req: Request, res: Response) => {
+router.post("/test", async (req: Request, res: Response) => {
   try {
-    const { to = 'test@hotel.com' } = req.body;
+    const { to = "test@hotel.com" } = req.body;
 
-    if (!to || typeof to !== 'string' || !to.includes('@')) {
-      return commonErrors.validation(res, 'Valid email address is required');
+    if (!to || typeof to !== "string" || !to.includes("@")) {
+      return commonErrors.validation(res, "Valid email address is required");
     }
 
-    logger.debug(`🧪 [EMAILS] Sending test email to: ${to}`, 'Emails');
+    logger.debug(`🧪 [EMAILS] Sending test email to: ${to}`, "Emails");
 
     const testEmailData = {
       to,
-      orderNumber: 'TEST-' + Math.random().toString(36).substr(2, 9),
-      customerRequest: 'Test service request',
-      customerInfo: 'Test Customer',
-      details: [{ item: 'Test Item', quantity: 1 }],
-      deliveryTime: 'Test Time',
-      specialInstructions: 'This is a test email',
+      orderNumber: "TEST-" + Math.random().toString(36).substr(2, 9),
+      customerRequest: "Test service request",
+      customerInfo: "Test Customer",
+      details: [{ item: "Test Item", quantity: 1 }],
+      deliveryTime: "Test Time",
+      specialInstructions: "This is a test email",
     };
 
     const result = await sendServiceConfirmation(to, {
@@ -206,7 +205,7 @@ router.post('/test', async (req: Request, res: Response) => {
     if (result.success) {
       logger.debug(
         `✅ [EMAILS] Test email sent successfully to: ${to}`,
-        'Emails'
+        "Emails",
       );
 
       return apiResponse.success(
@@ -215,62 +214,62 @@ router.post('/test', async (req: Request, res: Response) => {
           messageId: result.messageId,
           testData: testEmailData,
           recipient: to,
-          emailType: 'test',
+          emailType: "test",
           sentAt: new Date().toISOString(),
         },
-        'Test email sent successfully'
+        "Test email sent successfully",
       );
     } else {
       logger.error(
         `❌ [EMAILS] Failed to send test email to: ${to}`,
-        'Emails',
-        result.error
+        "Emails",
+        result.error,
       );
 
       return apiResponse.error(
         res,
         500,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        result.error || 'Failed to send test email',
-        { recipient: to, testData: testEmailData }
+        result.error || "Failed to send test email",
+        { recipient: to, testData: testEmailData },
       );
     }
   } catch (error) {
-    logger.error('❌ [EMAILS] Failed to send test email:', 'Emails', error);
-    return commonErrors.internal(res, 'Failed to send test email', error);
+    logger.error("❌ [EMAILS] Failed to send test email:", "Emails", error);
+    return commonErrors.internal(res, "Failed to send test email", error);
   }
 });
 
 // POST /api/emails/mobile-test - Send mobile test email
-router.post('/mobile-test', async (req: Request, res: Response) => {
+router.post("/mobile-test", async (req: Request, res: Response) => {
   try {
-    const { to = 'mobile-test@hotel.com' } = req.body;
+    const { to = "mobile-test@hotel.com" } = req.body;
 
-    if (!to || typeof to !== 'string' || !to.includes('@')) {
-      return commonErrors.validation(res, 'Valid email address is required');
+    if (!to || typeof to !== "string" || !to.includes("@")) {
+      return commonErrors.validation(res, "Valid email address is required");
     }
 
-    logger.debug(`📱 [EMAILS] Sending mobile test email to: ${to}`, 'Emails');
+    logger.debug(`📱 [EMAILS] Sending mobile test email to: ${to}`, "Emails");
 
     const testData = {
       to,
-      subject: 'Mobile Test Email',
-      orderNumber: 'MOBILE-' + Math.random().toString(36).substr(2, 9),
-      customerRequest: 'Mobile test service request',
+      subject: "Mobile Test Email",
+      orderNumber: "MOBILE-" + Math.random().toString(36).substr(2, 9),
+      customerRequest: "Mobile test service request",
       details:
-        'This is a mobile test email from the hotel voice assistant system.',
+        "This is a mobile test email from the hotel voice assistant system.",
     };
 
     const result = await sendMobileEmail(
       to,
       testData.subject,
-      testData.details
+      testData.details,
     );
 
     if (result.success) {
       logger.debug(
         `✅ [EMAILS] Mobile test email sent successfully to: ${to}`,
-        'Emails'
+        "Emails",
       );
 
       return apiResponse.success(
@@ -279,45 +278,45 @@ router.post('/mobile-test', async (req: Request, res: Response) => {
           messageId: result.messageId,
           testData,
           recipient: to,
-          emailType: 'mobile-test',
+          emailType: "mobile-test",
           sentAt: new Date().toISOString(),
         },
-        'Mobile test email sent successfully'
+        "Mobile test email sent successfully",
       );
     } else {
       logger.error(
         `❌ [EMAILS] Failed to send mobile test email to: ${to}`,
-        'Emails',
-        result.error
+        "Emails",
+        result.error,
       );
 
       return apiResponse.error(
         res,
         500,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        result.error || 'Failed to send mobile test email',
-        { recipient: to, testData }
+        result.error || "Failed to send mobile test email",
+        { recipient: to, testData },
       );
     }
   } catch (error) {
     logger.error(
-      '❌ [EMAILS] Failed to send mobile test email:',
-      'Emails',
-      error
+      "❌ [EMAILS] Failed to send mobile test email:",
+      "Emails",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to send mobile test email',
-      error
+      "Failed to send mobile test email",
+      error,
     );
   }
 });
 
 // POST /api/emails/mobile-call-summary - Send mobile call summary email
-router.post('/mobile-call-summary', async (req: Request, res: Response) => {
+router.post("/mobile-call-summary", async (req: Request, res: Response) => {
   try {
     const {
-      to = 'staff@hotel.com',
+      to = "staff@hotel.com",
       callId,
       summary,
       roomNumber,
@@ -325,16 +324,16 @@ router.post('/mobile-call-summary', async (req: Request, res: Response) => {
     } = req.body;
 
     if (!callId || !summary) {
-      return commonErrors.missingFields(res, ['callId', 'summary']);
+      return commonErrors.missingFields(res, ["callId", "summary"]);
     }
 
-    if (!to || typeof to !== 'string' || !to.includes('@')) {
-      return commonErrors.validation(res, 'Valid email address is required');
+    if (!to || typeof to !== "string" || !to.includes("@")) {
+      return commonErrors.validation(res, "Valid email address is required");
     }
 
     logger.debug(
       `📱 [EMAILS] Sending mobile call summary email for call: ${callId}`,
-      'Emails'
+      "Emails",
     );
 
     const result = await sendMobileCallSummary(to, {
@@ -342,14 +341,14 @@ router.post('/mobile-call-summary', async (req: Request, res: Response) => {
       summary,
       roomNumber,
       timestamp: new Date(timestamp),
-      duration: '0:00',
+      duration: "0:00",
       serviceRequests: [],
     });
 
     if (result.success) {
       logger.debug(
         `✅ [EMAILS] Mobile call summary email sent successfully for call: ${callId}`,
-        'Emails'
+        "Emails",
       );
 
       return apiResponse.success(
@@ -358,56 +357,56 @@ router.post('/mobile-call-summary', async (req: Request, res: Response) => {
           messageId: result.messageId,
           callId,
           recipient: to,
-          emailType: 'mobile-call-summary',
+          emailType: "mobile-call-summary",
           roomNumber,
           sentAt: new Date().toISOString(),
         },
-        'Mobile call summary email sent successfully'
+        "Mobile call summary email sent successfully",
       );
     } else {
       logger.error(
         `❌ [EMAILS] Failed to send mobile call summary email for call: ${callId}`,
-        'Emails',
-        result.error
+        "Emails",
+        result.error,
       );
 
       return apiResponse.error(
         res,
         500,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        result.error || 'Failed to send mobile call summary email',
-        { callId, recipient: to }
+        result.error || "Failed to send mobile call summary email",
+        { callId, recipient: to },
       );
     }
   } catch (error) {
     logger.error(
-      '❌ [EMAILS] Failed to send mobile call summary email:',
-      'Emails',
-      error
+      "❌ [EMAILS] Failed to send mobile call summary email:",
+      "Emails",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to send mobile call summary email',
-      error
+      "Failed to send mobile call summary email",
+      error,
     );
   }
 });
 
 // GET /api/emails/status - Get email service status
-router.get('/status', async (req: Request, res: Response) => {
+router.get("/status", async (req: Request, res: Response) => {
   try {
-    logger.debug(`📧 [EMAILS] Checking email service status`, 'Emails');
+    logger.debug(`📧 [EMAILS] Checking email service status`, "Emails");
 
     // Basic Mailjet configuration check
     const mailjetConfig = {
       apiKey: process.env.MAILJET_API_KEY
-        ? '***configured***'
-        : 'not configured',
+        ? "***configured***"
+        : "not configured",
       secretKey: process.env.MAILJET_SECRET_KEY
-        ? '***configured***'
-        : 'not configured',
-      fromEmail: process.env.MAILJET_FROM_EMAIL || 'not configured',
-      fromName: process.env.MAILJET_FROM_NAME || 'not configured',
+        ? "***configured***"
+        : "not configured",
+      fromEmail: process.env.MAILJET_FROM_EMAIL || "not configured",
+      fromName: process.env.MAILJET_FROM_NAME || "not configured",
     };
 
     const isConfigured =
@@ -416,37 +415,37 @@ router.get('/status', async (req: Request, res: Response) => {
     return apiResponse.success(
       res,
       {
-        status: isConfigured ? 'configured' : 'not configured',
+        status: isConfigured ? "configured" : "not configured",
         config: mailjetConfig,
         isOperational: isConfigured,
         checkedAt: new Date().toISOString(),
       },
       isConfigured
-        ? 'Email service is properly configured'
-        : 'Email service configuration missing'
+        ? "Email service is properly configured"
+        : "Email service configuration missing",
     );
   } catch (error) {
     logger.error(
-      '❌ [EMAILS] Failed to check email service status:',
-      'Emails',
-      error
+      "❌ [EMAILS] Failed to check email service status:",
+      "Emails",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to check email service status',
-      error
+      "Failed to check email service status",
+      error,
     );
   }
 });
 
 // GET /api/emails/ - Get recent emails with pagination
-router.get('/', async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
     const { page, limit } = parsePagination(req.query, 10, 50);
 
     logger.debug(
       `📧 [EMAILS] Getting recent emails (page: ${page}, limit: ${limit})`,
-      'Emails'
+      "Emails",
     );
 
     // Note: This is a placeholder implementation
@@ -454,18 +453,18 @@ router.get('/', async (req: Request, res: Response) => {
     const recentEmails = [
       {
         id: 1,
-        to: 'staff@hotel.com',
-        subject: 'Service Request Confirmation',
-        type: 'service',
-        status: 'sent',
+        to: "staff@hotel.com",
+        subject: "Service Request Confirmation",
+        type: "service",
+        status: "sent",
         timestamp: new Date().toISOString(),
       },
       {
         id: 2,
-        to: 'manager@hotel.com',
-        subject: 'Call Summary',
-        type: 'call-summary',
-        status: 'sent',
+        to: "manager@hotel.com",
+        subject: "Call Summary",
+        type: "call-summary",
+        status: "sent",
         timestamp: new Date(Date.now() - 3600000).toISOString(),
       },
     ];
@@ -475,7 +474,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     logger.debug(
       `✅ [EMAILS] Found ${recentEmails.length} recent emails`,
-      'Emails'
+      "Emails",
     );
 
     return apiResponse.success(
@@ -491,11 +490,11 @@ router.get('/', async (req: Request, res: Response) => {
           hasNext: startIndex + limit < recentEmails.length,
           hasPrev: page > 1,
         },
-      }
+      },
     );
   } catch (error) {
-    logger.error('❌ [EMAILS] Failed to fetch recent emails:', 'Emails', error);
-    return commonErrors.database(res, 'Failed to fetch recent emails', error);
+    logger.error("❌ [EMAILS] Failed to fetch recent emails:", "Emails", error);
+    return commonErrors.database(res, "Failed to fetch recent emails", error);
   }
 });
 

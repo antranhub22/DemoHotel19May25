@@ -943,8 +943,8 @@ export class PlatformController {
   }
 
   private async getRevenueMetrics(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): Promise<any> {
     // Simplified revenue calculation based on subscription plans
     const result = await this.prisma.$queryRaw<any[]>`
@@ -1032,7 +1032,10 @@ export class PlatformController {
     };
   }
 
-  private async getTenantGrowth(startDate: Date, endDate: Date): Promise<any> {
+  private async getTenantGrowth(
+    _startDate: Date,
+    _endDate: Date,
+  ): Promise<any> {
     const result = await this.prisma.$queryRaw<any[]>`
       SELECT 
         DATE(created_at) as date,
@@ -1047,8 +1050,8 @@ export class PlatformController {
   }
 
   private async getFeatureAdoptionStats(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): Promise<any> {
     const result = await this.prisma.$queryRaw<any[]>`
       SELECT 
@@ -1070,8 +1073,8 @@ export class PlatformController {
   }
 
   private async getPerformanceMetrics(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): Promise<any> {
     const result = await this.prisma.$queryRaw<any[]>`
       SELECT 

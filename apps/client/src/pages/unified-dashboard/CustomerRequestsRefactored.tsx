@@ -87,6 +87,7 @@ const RequestDetailModal: React.FC<RequestDetailModal> = ({
 }) => {
   // const { updateStatus, isUpdating } = useRequestStatus();
   const isUpdating = false;
+  const updateStatus = async (..._args: any[]) => {};
   const [selectedStatus, setSelectedStatus] = useState(request.status);
 
   useEffect(() => {
@@ -393,9 +394,9 @@ export const CustomerRequestsRefactored: React.FC = () => {
   // } = useRequestManagement();
 
   // MOCK DATA FOR TESTING
-  const requests = [];
+  const requests = [] as any[];
   const requestCounts = { total: 0, pending: 0, inProgress: 0, completed: 0 };
-  const selectedRequest = null;
+  const selectedRequest = null as any;
   const filters = {
     status: "",
     startDate: "",
@@ -403,13 +404,15 @@ export const CustomerRequestsRefactored: React.FC = () => {
     searchQuery: "",
   };
   const isLoading = false;
-  const error = null;
-  const loadRequests = () => {};
-  const selectRequest = () => {};
-  const updateFilters = () => {};
-  const clearFilters = () => {};
-  const clearCurrentError = () => {};
-  const setupAutoRefresh = () => {};
+  const error = null as any;
+  const loadRequests = (..._args: any[]) => {};
+  const selectRequest = (..._args: any[]) => {};
+  const updateFilters = (..._args: any[]) => {};
+  const clearFilters = (..._args: any[]) => {};
+  const clearCurrentError = (..._args: any[]) => {};
+  const setupAutoRefresh =
+    (..._args: any[]) =>
+    () => {};
 
   // Set up real-time updates
   // useRequestRealtime(); // TEMPORARILY DISABLED
@@ -419,9 +422,9 @@ export const CustomerRequestsRefactored: React.FC = () => {
   // ========================================
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
-  const [deletePassword, setDeletePassword] = useState("");
-  const [deleteError, setDeleteError] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [_deletePassword, _setDeletePassword] = useState("");
+  const [_deleteError, _setDeleteError] = useState("");
+  const [_deleteLoading, _setDeleteLoading] = useState(false);
 
   // ========================================
   // Effects
@@ -646,7 +649,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
         </div>
         <div className="flex items-center gap-4 text-sm text-gray-500">
           <span>
-            Tổng: <strong>{requestCounts.all}</strong>
+            Tổng: <strong>{requestCounts.total}</strong>
           </span>
           <span>
             Đang chờ: <strong>{requestCounts.pending}</strong>

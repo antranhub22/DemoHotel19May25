@@ -473,8 +473,8 @@ const IntegrationModal = ({
       await new Promise((resolve) => setTimeout(resolve, 1000));
       onSave(formData);
       onClose();
-    } catch (error) {
-      logger.error("Failed to save integration:", "Component", error);
+    } catch {
+      logger.error("Failed to save integration:", "Component");
     } finally {
       setLoading(false);
     }
@@ -485,7 +485,7 @@ const IntegrationModal = ({
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
       alert("Integration test successful!");
-    } catch (error) {
+    } catch {
       alert("Integration test failed!");
     } finally {
       setLoading(false);
@@ -756,8 +756,8 @@ const AddIntegrationModal = ({
         retryCount: 3,
         rateLimitPerMinute: 100,
       });
-    } catch (error) {
-      logger.error("Failed to add integration:", "Component", error);
+    } catch {
+      logger.error("Failed to add integration:", "Component");
     } finally {
       setLoading(false);
     }
@@ -1007,8 +1007,8 @@ export const Integrations: React.FC = () => {
       setIntegrations(mockIntegrations);
       setWebhooks(mockWebhooks);
       setCredentials(mockCredentials);
-    } catch (error) {
-      logger.error("Failed to fetch integrations:", "Component", error);
+    } catch {
+      logger.error("Failed to fetch integrations:", "Component");
     } finally {
       setLoading(false);
     }

@@ -180,7 +180,7 @@ export const AdvancedAnalytics: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState("30d");
-  const [selectedService, setSelectedService] = useState("all");
+  const [_selectedService, _setSelectedService] = useState("all");
 
   // Mock data - replace with actual API call
   const mockAnalytics: AnalyticsData = {
@@ -435,7 +435,7 @@ export const AdvancedAnalytics: React.FC = () => {
                       fill="#8884d8"
                       dataKey="calls"
                     >
-                      {analytics.serviceDistribution.map((entry, index) => (
+                      {analytics.serviceDistribution.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -529,7 +529,7 @@ export const AdvancedAnalytics: React.FC = () => {
                       fill="#8884d8"
                       dataKey="calls"
                     >
-                      {analytics.languageDistribution.map((entry, index) => (
+                      {analytics.languageDistribution.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}

@@ -1,5 +1,4 @@
 import React from "react";
-import type { DashboardLayoutProps } from "../types/dashboard";
 
 // @ts-ignore - Auto-suppressed TypeScript error
 export const DashboardLayout: React.FC<DashboardLayout> = ({

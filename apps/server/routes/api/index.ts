@@ -22,7 +22,7 @@ router.use("/platform", platformRoutes);
 // Analytics routes (if exists)
 try {
   router.use("/analytics", analyticsRoutes);
-} catch (error) {
+} catch {
   logger.warn("[APIRoutes] Analytics routes not available");
 }
 

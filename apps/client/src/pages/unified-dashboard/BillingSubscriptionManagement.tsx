@@ -101,11 +101,11 @@ const BillingSubscriptionManagement: React.FC = () => {
     currentSubscription: null,
     isLoading: false,
     actions: {
-      fetchSubscriptions: () => {},
-      fetchPaymentMethods: () => {},
-      fetchInvoices: () => {},
-      fetchCurrentUsage: () => {},
-      fetchNotifications: () => {},
+      fetchSubscriptions: (..._args: any[]) => {},
+      fetchPaymentMethods: (..._args: any[]) => {},
+      fetchInvoices: (..._args: any[]) => {},
+      fetchCurrentUsage: (..._args: any[]) => {},
+      fetchNotifications: (..._args: any[]) => {},
     },
     isTrialing: false,
     hasActiveSubscription: false,
@@ -118,7 +118,10 @@ const BillingSubscriptionManagement: React.FC = () => {
     subscriptions: [],
   };
   const _paymentMgmt = { methods: [], addPaymentMethod: () => {} };
-  const _invoiceMgmt = { invoices: [], downloadInvoice: () => {} };
+  const _invoiceMgmt = {
+    invoices: [] as any[],
+    downloadInvoice: (..._args: any[]) => {},
+  };
   const usageAnalytics = {
     usage: {},
     limits: {},
@@ -133,10 +136,10 @@ const BillingSubscriptionManagement: React.FC = () => {
     plans: [],
     features: {},
     actions: {
-      fetchPricingConfig: () => {},
+      fetchPricingConfig: (..._args: any[]) => {},
     },
-    pricingConfig: {},
-    formatPrice: () => "$0",
+    pricingConfig: [] as any[],
+    formatPrice: (..._args: any[]) => "$0",
   };
   const notifications = {
     notifications: [],
@@ -144,7 +147,7 @@ const BillingSubscriptionManagement: React.FC = () => {
     unreadCount: 0,
   };
   const customerPortal = {
-    openPortal: () => {},
+    openPortal: (..._args: any[]) => {},
     loading: false,
   };
 
@@ -308,7 +311,7 @@ const BillingSubscriptionManagement: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {invoiceMgmt.invoices.slice(0, 3).map((invoice) => (
+              {_invoiceMgmt.invoices.slice(0, 3).map((invoice) => (
                 <div
                   key={invoice.id}
                   className="flex items-center justify-between py-2"
@@ -493,7 +496,7 @@ const BillingSubscriptionManagement: React.FC = () => {
   }) => {
     const isUnlimited = usage.limit === -1;
     const percentage = isUnlimited ? 0 : (usage.count / usage.limit) * 100;
-    const statusColor = BillingUtils.getUsageStatusColor(percentage);
+    const _statusColor = BillingUtils.getUsageStatusColor(percentage);
 
     return (
       <Card>
@@ -688,7 +691,7 @@ const BillingSubscriptionManagement: React.FC = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowCancelModal(true)}
+                    onClick={() => _setShowCancelModal(true)}
                   >
                     Cancel Subscription
                   </Button>

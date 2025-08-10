@@ -416,8 +416,8 @@ router.get(
 async function generateUsageReport(
   tenantId: string,
   period: string,
-  startDate?: string,
-  endDate?: string,
+  _startDate?: string,
+  _endDate?: string,
 ): Promise<any> {
   // Implementation for usage report generation
   const metrics = await getTenantUsageMetrics(tenantId, period);
@@ -433,8 +433,8 @@ async function generateUsageReport(
 async function generateFeatureReport(
   tenantId: string,
   period: string,
-  startDate?: string,
-  endDate?: string,
+  _startDate?: string,
+  _endDate?: string,
 ): Promise<any> {
   // Implementation for feature usage report
   return {
@@ -446,8 +446,8 @@ async function generateFeatureReport(
 async function generatePerformanceReport(
   tenantId: string,
   period: string,
-  startDate?: string,
-  endDate?: string,
+  _startDate?: string,
+  _endDate?: string,
 ): Promise<any> {
   // Implementation for performance report
   return {

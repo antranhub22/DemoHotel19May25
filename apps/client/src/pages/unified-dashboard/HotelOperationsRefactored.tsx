@@ -132,6 +132,12 @@ interface MaintenanceRequest {
   id: string;
   category: string;
   priority: string;
+  title?: string;
+  description?: string;
+  location?: string;
+  reportedAt?: Date | string;
+  assignedStaffName?: string;
+  status?: string;
 }
 interface CreateRoomPayload {
   number: string;
@@ -153,21 +159,15 @@ const formatDuration = (minutes: number) => `${minutes}m`;
 const getRoomDisplayName = (room: any) => `Room ${room?.number || "N/A"}`;
 const getRoomStatusColor = (status: string) =>
   status === "available" ? "green" : "yellow";
-const getTaskStatusColor = (status: string) => "blue";
-const getTaskPriorityColor = (priority: string) => "orange";
-const getFacilityStatusColor = (status: string) => "purple";
-const getMaintenancePriorityColor = (priority: string) => "red";
-const getTimeElapsed = (date: Date | string) => "1h ago";
+const getTaskStatusColor = (_status: string) => "blue";
+const getTaskPriorityColor = (_priority: string) => "orange";
+const getFacilityStatusColor = (_status: string) => "purple";
+const getMaintenancePriorityColor = (_priority: string) => "red";
+const getTimeElapsed = (_date?: Date | string | null) => "1h ago";
 const isMaintenanceUrgent = (request: any) => request?.priority === "urgent";
-const validateRoomData = (data: any) => ({ isValid: true, errors: [] });
-const validateHousekeepingTaskData = (data: any) => ({
-  isValid: true,
-  errors: [],
-});
-const validateMaintenanceRequestData = (data: any) => ({
-  isValid: true,
-  errors: [],
-});
+const validateRoomData = (_data: any) => [] as any[];
+const validateHousekeepingTaskData = (_data: any) => [] as any[];
+const validateMaintenanceRequestData = (_data: any) => [] as any[];
 
 // ========================================
 // Main Component
@@ -208,31 +208,23 @@ const HotelOperationsRefactored: React.FC = () => {
   // } = useHotelOperations();
 
   // MOCK DATA FOR TEMPORARY TESTING
-  const rooms = [];
-  const roomTypes = [];
+  const rooms = [] as Room[];
   const roomCounts = { total: 0, available: 0, occupied: 0, maintenance: 0 };
-  const availableRooms = [];
-  const occupiedRooms = [];
-  const roomsNeedingCleaning = [];
   const selectedRoom = null;
-  const roomFilters = {};
+  const roomFilters: Record<string, any> = {};
   const isLoading = false;
-  const error = null;
-  const hotelOperations = {};
-  const loadRooms = () => {};
-  const loadRoomById = () => {};
-  const createNewRoom = () => {};
-  const updateExistingRoom = () => {};
-  const changeRoomStatus = () => {};
-  const loadRoomTypes = () => {};
-  const updateRoomFilters = () => {};
-  const clearRoomFilters = () => {};
-  const selectRoom = () => {};
-  const changeTab = () => {};
-  const changeViewMode = () => {};
-  const toggleFilterPanel = () => {};
-  const clearCurrentError = () => {};
-  const loadAnalytics = () => {};
+  const error = null as any;
+  const loadRooms = (..._args: any[]) => {};
+  const createNewRoom = (..._args: any[]) => {};
+  const changeRoomStatus = (..._args: any[]) => {};
+  const loadRoomTypes = (..._args: any[]) => {};
+  const updateRoomFilters = (..._args: any[]) => {};
+  const clearRoomFilters = (..._args: any[]) => {};
+  const selectRoom = (..._args: any[]) => {};
+  const changeTab = (..._args: any[]) => {};
+  const changeViewMode = (..._args: any[]) => {};
+  const clearCurrentError = (..._args: any[]) => {};
+  const loadAnalytics = (..._args: any[]) => {};
 
   // Specialized hooks - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
   // const {
@@ -271,32 +263,23 @@ const HotelOperationsRefactored: React.FC = () => {
   // } = useFacilities();
 
   // MOCK DATA FOR SPECIALIZED HOOKS
-  const tasks = [];
+  const tasks = [] as HousekeepingTask[];
   const selectedTask = null;
   const urgentTasks = [];
-  const requests = [];
-  const selectedRequest = null;
+  const requests = [] as MaintenanceRequest[];
+  const selectedRequest = null as MaintenanceRequest | null;
   const urgentRequests = [];
-  const facilities = [];
-  const loadTasks = () => {};
-  const createNewTask = () => {};
-  const updateExistingTask = () => {};
-  const assignTaskToStaff = () => {};
-  const completeTask = () => {};
-  const selectTask = () => {};
-  const updateTaskFilters = () => {};
-  const clearTaskFilters = () => {};
-  const loadRequests = () => {};
-  const createNewRequest = () => {};
-  const updateExistingRequest = () => {};
-  const assignRequestToStaff = () => {};
-  const selectRequest = () => {};
-  const updateRequestFilters = () => {};
-  const clearRequestFilters = () => {};
-  const loadFacilities = () => {};
-  const changeFacilityStatus = () => {};
-  const selectFacility = () => {};
-  const updateFacilityFilters = () => {};
+  const facilities = [] as any[];
+  const loadTasks = (..._args: any[]) => {};
+  const createNewTask = (..._args: any[]) => {};
+  const completeTask = (..._args: any[]) => {};
+  const selectTask = (..._args: any[]) => {};
+  const clearTaskFilters = (..._args: any[]) => {};
+  const loadRequests = (..._args: any[]) => {};
+  const createNewRequest = (..._args: any[]) => {};
+  const selectRequest = (..._args: any[]) => {};
+  const clearRequestFilters = (..._args: any[]) => {};
+  const loadFacilities = (..._args: any[]) => {};
 
   // Additional hooks - TEMPORARILY DISABLED
   // const {
@@ -326,23 +309,13 @@ const HotelOperationsRefactored: React.FC = () => {
   // const { bulkUpdateRoomStatus, bulkAssignTasks } = useBulkOperations();
 
   // MOCK DATA FOR ADDITIONAL HOOKS
-  const inventoryItems = [];
+  const inventoryItems = [] as any[];
   const lowStockItems = [];
-  const analytics = {};
   const occupancyRate = 0;
   const housekeepingEfficiency = 0;
   const maintenanceBacklog = 0;
-  const loadInventoryItems = () => {};
-  const updateStock = () => {};
-  const selectItem = () => {};
-  const updateItemFilters = () => {};
-  const updateRoomStatusDirect = () => {};
-  const checkInGuest = () => {};
-  const checkOutGuest = () => {};
-  const markRoomReady = () => {};
-  const markRoomMaintenance = () => {};
-  const bulkUpdateRoomStatus = () => {};
-  const bulkAssignTasks = () => {};
+  const loadInventoryItems = (..._args: any[]) => {};
+  const bulkUpdateRoomStatus = (..._args: any[]) => {};
 
   // Real-time updates - TEMPORARILY DISABLED
   // useHotelOperationsRealtime();
@@ -361,19 +334,17 @@ const HotelOperationsRefactored: React.FC = () => {
   const [showRoomModal, setShowRoomModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
-  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
-  const [editingTask, setEditingTask] = useState<HousekeepingTask | null>(null);
+  const [editingRoom, _setEditingRoom] = useState<Room | null>(null);
+  const [_editingTask, _setEditingTask] = useState<HousekeepingTask | null>(
+    null,
+  );
   const [editingRequest, setEditingRequest] =
     useState<MaintenanceRequest | null>(null);
 
   // Form states
-  const [roomForm, setRoomForm] = useState<Partial<CreateRoomPayload>>({});
-  const [taskForm, setTaskForm] = useState<
-    Partial<CreateHousekeepingTaskPayload>
-  >({});
-  const [requestForm, setRequestForm] = useState<
-    Partial<CreateMaintenanceRequestPayload>
-  >({});
+  const [roomForm, setRoomForm] = useState<Record<string, any>>({});
+  const [taskForm, setTaskForm] = useState<Record<string, any>>({});
+  const [requestForm, setRequestForm] = useState<Record<string, any>>({});
 
   // Search states
   const [roomSearch, setRoomSearch] = useState("");
@@ -381,8 +352,8 @@ const HotelOperationsRefactored: React.FC = () => {
   const [requestSearch, setRequestSearch] = useState("");
 
   // Selection states
-  const [selectedRooms, setSelectedRooms] = useState<number[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [_selectedTasks, _setSelectedTasks] = useState<string[]>([]);
 
   // ========================================
   // Effects
@@ -473,18 +444,6 @@ const HotelOperationsRefactored: React.FC = () => {
     }
   }, [roomForm, createNewRoom]);
 
-  const handleRoomUpdate = useCallback(
-    async (roomId: number, updates: Partial<Room>) => {
-      try {
-        await updateExistingRoom(roomId, updates);
-        logger.info("Room updated successfully");
-      } catch (error) {
-        logger.error("Failed to update room", error);
-      }
-    },
-    [updateExistingRoom],
-  );
-
   const handleTaskCreate = useCallback(async () => {
     try {
       const errors = validateHousekeepingTaskData(taskForm);
@@ -531,18 +490,6 @@ const HotelOperationsRefactored: React.FC = () => {
       }
     },
     [changeRoomStatus],
-  );
-
-  const handleTaskAssign = useCallback(
-    async (taskId: string, staffId: number) => {
-      try {
-        await assignTaskToStaff(taskId, staffId);
-        logger.info("Task assigned successfully");
-      } catch (error) {
-        logger.error("Failed to assign task", error);
-      }
-    },
-    [assignTaskToStaff],
   );
 
   const handleBulkRoomUpdate = useCallback(
@@ -1444,7 +1391,7 @@ const HotelOperationsRefactored: React.FC = () => {
             <div>
               <Label>Phòng *</Label>
               <Select
-                value={taskForm.roomId?.toString() || ""}
+                value={(taskForm.roomId?.toString?.() as string) || ""}
                 onValueChange={(value) =>
                   // @ts-ignore - Auto-suppressed TypeScript error
                   setTaskForm((prev) => ({ ...prev, roomId: parseInt(value) }))
