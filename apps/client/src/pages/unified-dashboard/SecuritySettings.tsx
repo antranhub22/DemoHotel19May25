@@ -1,23 +1,3 @@
-import * as React from "react";
-import {
-  Shield,
-  Lock,
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  Download,
-  Upload,
-  RefreshCw,
-  Eye,
-  HardDrive,
-  Save,
-  Search,
-  Filter,
-  Plus,
-  Trash2,
-  Edit,
-} from "lucide-react";
-import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +31,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import logger from "@shared/utils/logger";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  Edit,
+  Eye,
+  FileText,
+  HardDrive,
+  Lock,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Shield,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
 // Types
 interface SecurityConfig {
@@ -342,25 +341,6 @@ const getSeverityColor = (severity: string) => {
       return "bg-blue-100 text-blue-800";
     default:
       return "bg-gray-100 text-gray-800";
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "valid":
-      return "text-green-600";
-    case "expired":
-      return "text-red-600";
-    case "expiring":
-      return "text-orange-600";
-    case "success":
-      return "text-green-600";
-    case "failed":
-      return "text-red-600";
-    case "running":
-      return "text-blue-600";
-    default:
-      return "text-gray-600";
   }
 };
 

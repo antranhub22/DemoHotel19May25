@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import React from "react";
-import type { MetricCardProps } from "../types/dashboard";
+// import type { MetricCardProps } from "../types/dashboard";
 
 // @ts-ignore - Auto-suppressed TypeScript error
 export const MetricCard: React.FC<MetricCard> = ({
