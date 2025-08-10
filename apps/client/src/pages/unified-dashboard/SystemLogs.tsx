@@ -1,29 +1,3 @@
-import * as React from "react";
-import {
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  AlertCircle,
-  Info,
-  AlertTriangle,
-  XCircle,
-  CheckCircle,
-  Server,
-  Database,
-  Globe,
-  Shield,
-  FileText,
-  Activity,
-  TrendingUp,
-  BarChart3,
-  Eye,
-  Monitor,
-  HardDrive,
-  Wifi,
-  Zap,
-} from "lucide-react";
-import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +23,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import logger from "@shared/utils/logger";
+import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Database,
+  Download,
+  Eye,
+  FileText,
+  Globe,
+  HardDrive,
+  Info,
+  Monitor,
+  RefreshCw,
+  Search,
+  Server,
+  Shield,
+  TrendingUp,
+  Wifi,
+  XCircle,
+  Zap,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
 // Types
 interface LogEntry {

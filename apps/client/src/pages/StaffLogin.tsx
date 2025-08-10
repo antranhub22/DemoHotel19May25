@@ -1,8 +1,5 @@
 import * as React from "react";
 import { useState } from "react";
-interface StaffLoginProps {
-  onLogin: () => void;
-}
 
 // @ts-ignore - Auto-suppressed TypeScript error
 const StaffLogin: React.FC<StaffLogin> = ({ onLogin }) => {
@@ -36,7 +33,7 @@ const StaffLogin: React.FC<StaffLogin> = ({ onLogin }) => {
       } else {
         setError("Login failed: No token received.");
       }
-    } catch (err) {
+    } catch {
       setError("Login failed: Network or server error.");
     }
   };
