@@ -23,7 +23,7 @@ import {
 import { RecentRequestCard } from "../features/voice-assistant/interface1/RecentRequestCard";
 import { ServiceGrid } from "../features/voice-assistant/interface1/ServiceGrid";
 import { VoiceCommandContext } from "../features/voice-assistant/interface1/VoiceCommandContext";
-import { VoiceLanguageSwitcher } from "../features/voice-assistant/interface1/VoiceLanguageSwitcher";
+// import { VoiceLanguageSwitcher } from "../features/voice-assistant/interface1/VoiceLanguageSwitcher";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // Import extracted components

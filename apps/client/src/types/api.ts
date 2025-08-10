@@ -2,7 +2,7 @@
    API TYPES - API-RELATED TYPE DEFINITIONS
    ======================================== */
 
-import type { ApiResponse } from "@/types/common.types";
+// Removed duplicate ApiResponse import to avoid conflicts
 import { Language } from "@/types/core";
 
 // ========================================

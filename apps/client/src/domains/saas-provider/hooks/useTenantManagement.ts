@@ -37,7 +37,16 @@ export const useTenantManagement = () => {
 
   // Service instance
   const tenantService = useMemo(() => {
-    return new TenantManagementService(dispatch, () => ({}));
+    // Provide minimal store shape to satisfy typings
+    const getState = () => ({
+      guestExperience: {} as any,
+      tenant: {} as any,
+      requestManagement: {} as any,
+      staffManagement: {} as any,
+      hotelOperations: {} as any,
+      billing: {} as any,
+    });
+    return new TenantManagementService(dispatch, getState);
   }, [dispatch]);
 
   // ============================================

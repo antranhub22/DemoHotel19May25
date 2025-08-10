@@ -646,7 +646,7 @@ const billingSlice = createSlice({
       const { type, data } = action.payload;
 
       switch (type) {
-        case "subscription_updated":
+        case "subscription_updated": {
           const subIndex = state.subscriptions.findIndex(
             (sub) => sub.id === data.id,
           );
@@ -657,13 +657,14 @@ const billingSlice = createSlice({
             }
           }
           break;
+        }
 
         case "invoice_created":
           state.invoices.unshift(data);
           state.pagination.invoices.total += 1;
           break;
 
-        case "payment_succeeded":
+        case "payment_succeeded": {
           const paymentIntent = state.paymentIntents.find(
             (pi) => pi.id === data.id,
           );
@@ -671,6 +672,7 @@ const billingSlice = createSlice({
             paymentIntent.status = "succeeded";
           }
           break;
+        }
 
         case "usage_updated":
           if (

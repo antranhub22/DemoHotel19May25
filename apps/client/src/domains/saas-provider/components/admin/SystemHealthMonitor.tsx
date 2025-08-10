@@ -158,16 +158,25 @@ export const SystemHealthMonitor: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div
             className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-              // @ts-ignore - Auto-suppressed TypeScript error
-              health.status === "operational"
+              (health.status === "healthy" ? "operational" : health.status) ===
+              "operational"
                 ? "bg-green-100 text-green-800"
-                : health.status === "degraded"
+                : (health.status === "healthy"
+                      ? "operational"
+                      : health.status) === "degraded"
                   ? "bg-yellow-100 text-yellow-800"
                   : "bg-red-100 text-red-800"
             }`}
           >
-            // @ts-ignore - Auto-suppressed TypeScript error
-            {getStatusIcon(health.status)} {health.status.toUpperCase()}
+            {getStatusIcon(
+              (health.status === "healthy"
+                ? "operational"
+                : health.status) as any,
+            )}{" "}
+            {(health.status === "healthy"
+              ? "operational"
+              : health.status
+            ).toUpperCase()}
           </div>
 
           <div className="text-sm text-gray-600">

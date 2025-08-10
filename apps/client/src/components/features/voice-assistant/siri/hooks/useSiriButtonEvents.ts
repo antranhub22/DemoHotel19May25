@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { isMobileDevice } from '@/utils/deviceDetection';
-import logger from '@shared/utils/logger';
-import { useCallback, useEffect, useRef } from 'react';
+import { isMobileDevice } from "@/utils/deviceDetection";
+import logger from "@shared/utils/logger";
+import * as React from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface UseSiriButtonEventsProps {
   containerId: string;
@@ -28,66 +28,63 @@ export const useSiriButtonEvents = ({
   const handleDirectTouch = useCallback(
     async (e: any) => {
       // Only handle touch end or click events
-      if (e.type !== 'touchend' && e.type !== 'click') {
+      if (e.type !== "touchend" && e.type !== "click") {
         return;
       }
 
       logger.debug(
-        '[useSiriButtonEvents] Direct touch/click event:',
-        'Component',
+        "[useSiriButtonEvents] Direct touch/click event:",
+        "Component",
         {
           eventType: e.type,
           target: e.target,
           isHandlingClick: isHandlingClick.current,
-        }
+        },
       );
 
       // Prevent if already handling
       if (isHandlingClick.current) {
         logger.debug(
-          '[useSiriButtonEvents] Already handling click, ignoring...',
-          'Component'
+          "[useSiriButtonEvents] Already handling click, ignoring...",
+          "Component",
         );
         return;
       }
 
       await handleCallAction();
     },
-    [handleCallAction, isHandlingClick]
+    [handleCallAction, isHandlingClick],
   );
 
   // Mouse event handlers for desktop hover effects
   const handleMouseDown = useCallback((e: MouseEvent) => {
-    logger.debug('[useSiriButtonEvents] Mouse down event:', 'Component', {
+    logger.debug("[useSiriButtonEvents] Mouse down event:", "Component", {
       target: e.target,
       coordinates: { x: e.clientX, y: e.clientY },
     });
 
-    if (elementRef.current) {
-      const rect = elementRef.current.getBoundingClientRect();
-      // Could add visual feedback here if needed
-    }
+    // no-op
   }, []);
 
   const handleMouseUp = useCallback(
     (e: MouseEvent) => {
-      logger.debug('[useSiriButtonEvents] Mouse up event:', 'Component', {
+      logger.debug("[useSiriButtonEvents] Mouse up event:", "Component", {
         target: e.target,
       });
 
       // For desktop, we'll use the unified handler
       handleDirectTouch(e);
     },
-    [handleDirectTouch]
+    [handleDirectTouch],
   );
 
   const handleMouseEnter = useCallback(() => {
-    logger.debug('[useSiriButtonEvents] Mouse enter', 'Component');
+    logger.debug("[useSiriButtonEvents] Mouse enter", "Component");
     // Could add hover visual effects here
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    logger.debug('[useSiriButtonEvents] Mouse leave', 'Component');
+    logger.debug("[useSiriButtonEvents] Mouse leave", "Component");
     // Could remove hover visual effects here
   }, []);
 
@@ -96,9 +93,9 @@ export const useSiriButtonEvents = ({
     const element = document.getElementById(containerId);
     if (!element) {
       logger.warn(
-        '[useSiriButtonEvents] Container element not found:',
-        'Component',
-        containerId
+        "[useSiriButtonEvents] Container element not found:",
+        "Component",
+        containerId,
       );
       return;
     }
@@ -109,29 +106,29 @@ export const useSiriButtonEvents = ({
     // For desktop, we add mouse event listeners for hover effects
     if (!isMobileDevice()) {
       logger.debug(
-        '[useSiriButtonEvents] Setting up desktop mouse events',
-        'Component'
+        "[useSiriButtonEvents] Setting up desktop mouse events",
+        "Component",
       );
 
-      element.addEventListener('mousedown', handleMouseDown);
-      element.addEventListener('mouseup', handleMouseUp);
-      element.addEventListener('mouseenter', handleMouseEnter);
-      element.addEventListener('mouseleave', handleMouseLeave);
+      element.addEventListener("mousedown", handleMouseDown);
+      element.addEventListener("mouseup", handleMouseUp);
+      element.addEventListener("mouseenter", handleMouseEnter);
+      element.addEventListener("mouseleave", handleMouseLeave);
 
       return () => {
         logger.debug(
-          '[useSiriButtonEvents] Cleaning up desktop mouse events',
-          'Component'
+          "[useSiriButtonEvents] Cleaning up desktop mouse events",
+          "Component",
         );
-        element.removeEventListener('mousedown', handleMouseDown);
-        element.removeEventListener('mouseup', handleMouseUp);
-        element.removeEventListener('mouseenter', handleMouseEnter);
-        element.removeEventListener('mouseleave', handleMouseLeave);
+        element.removeEventListener("mousedown", handleMouseDown);
+        element.removeEventListener("mouseup", handleMouseUp);
+        element.removeEventListener("mouseenter", handleMouseEnter);
+        element.removeEventListener("mouseleave", handleMouseLeave);
       };
     } else {
       logger.debug(
-        '[useSiriButtonEvents] Mobile device - using JSX event handlers',
-        'Component'
+        "[useSiriButtonEvents] Mobile device - using JSX event handlers",
+        "Component",
       );
     }
   }, [

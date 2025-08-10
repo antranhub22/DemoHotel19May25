@@ -207,7 +207,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
             })),
           );
         }
-      } catch (err) {
+      } catch {
         // Ignore polling errors to prevent spam
       }
     };

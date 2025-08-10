@@ -7,12 +7,36 @@
 // import { apiClient } from "@shared/utils/apiClient";
 import logger from "@shared/utils/logger";
 
-// Temporary mock apiClient
+// Temporary apiClient with axios-like shape
 const apiClient = {
-  get: async (url: string) => ({ data: {} }),
-  post: async (url: string, data: any) => ({ data: {} }),
-  put: async (url: string, data: any) => ({ data: {} }),
-  delete: async (url: string) => ({ data: {} }),
+  async get(url: string) {
+    const res = await fetch(url);
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, data };
+  },
+  async post(url: string, body?: any) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, data };
+  },
+  async put(url: string, body?: any) {
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, data };
+  },
+  async delete(url: string) {
+    const res = await fetch(url, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    return { status: res.status, data };
+  },
 };
 import {
   FeatureFlag,
@@ -44,14 +68,10 @@ export class PlatformAdminService {
       logger.debug("[PlatformAdminService] Fetching platform metrics");
 
       const response = await apiClient.get("/api/platform/metrics");
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch platform metrics: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch platform metrics: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug(
         "[PlatformAdminService] Platform metrics fetched successfully",
         data,
@@ -94,14 +114,10 @@ export class PlatformAdminService {
       const response = await apiClient.get(
         `/api/platform/growth-trends?period=${period}`,
       );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch growth trends: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch growth trends: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug("[PlatformAdminService] Growth trends fetched successfully");
 
       return data;
@@ -144,12 +160,10 @@ export class PlatformAdminService {
       const response = await apiClient.get(
         `/api/platform/tenants?${params.toString()}`,
       );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tenants: ${response.statusText}`);
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch tenants: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       // @ts-ignore - Auto-suppressed TypeScript error
       logger.debug("[PlatformAdminService] Tenants fetched successfully", {
         count: data.tenants?.length,
@@ -178,14 +192,10 @@ export class PlatformAdminService {
       );
 
       const response = await apiClient.get(`/api/platform/tenants/${tenantId}`);
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch tenant details: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch tenant details: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug(
         "[PlatformAdminService] Tenant details fetched successfully",
       );
@@ -230,11 +240,8 @@ export class PlatformAdminService {
           reason,
         },
       );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to update tenant status: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to update tenant status: ${response.status}`);
       }
 
       logger.debug("[PlatformAdminService] Tenant status updated successfully");
@@ -262,12 +269,10 @@ export class PlatformAdminService {
         "/api/platform/tenants",
         tenantData,
       );
-
-      if (!response.ok) {
-        throw new Error(`Failed to create tenant: ${response.statusText}`);
+      if (response.status >= 400) {
+        throw new Error(`Failed to create tenant: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug("[PlatformAdminService] Tenant created successfully");
 
       return data;
@@ -286,14 +291,10 @@ export class PlatformAdminService {
       logger.debug("[PlatformAdminService] Fetching system health");
 
       const response = await apiClient.get("/api/platform/health");
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch system health: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch system health: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug("[PlatformAdminService] System health fetched successfully");
 
       return {
@@ -332,9 +333,8 @@ export class PlatformAdminService {
       const response = await apiClient.post(
         `/api/platform/alerts/${alertId}/acknowledge`,
       );
-
-      if (!response.ok) {
-        throw new Error(`Failed to acknowledge alert: ${response.statusText}`);
+      if (response.status >= 400) {
+        throw new Error(`Failed to acknowledge alert: ${response.status}`);
       }
 
       logger.debug("[PlatformAdminService] Alert acknowledged successfully");
@@ -353,14 +353,10 @@ export class PlatformAdminService {
       logger.debug("[PlatformAdminService] Fetching feature flags");
 
       const response = await apiClient.get("/api/platform/feature-flags");
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch feature flags: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to fetch feature flags: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug("[PlatformAdminService] Feature flags fetched successfully");
 
       return data.map((flag: any) => ({
@@ -396,11 +392,8 @@ export class PlatformAdminService {
         `/api/platform/feature-flags/${flagId}`,
         updates,
       );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to update feature flag: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to update feature flag: ${response.status}`);
       }
 
       logger.debug("[PlatformAdminService] Feature flag updated successfully");
@@ -424,14 +417,10 @@ export class PlatformAdminService {
         "/api/platform/feature-flags",
         flag,
       );
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to create feature flag: ${response.statusText}`,
-        );
+      if (response.status >= 400) {
+        throw new Error(`Failed to create feature flag: ${response.status}`);
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug("[PlatformAdminService] Feature flag created successfully");
 
       return {
@@ -467,14 +456,12 @@ export class PlatformAdminService {
         startDate: period.start.toISOString(),
         endDate: period.end.toISOString(),
       });
-
-      if (!response.ok) {
+      if (response.status >= 400) {
         throw new Error(
-          `Failed to generate revenue report: ${response.statusText}`,
+          `Failed to generate revenue report: ${response.status}`,
         );
       }
-
-      const data = await response.json();
+      const data = response.data;
       logger.debug(
         "[PlatformAdminService] Revenue report generated successfully",
       );
@@ -503,14 +490,12 @@ export class PlatformAdminService {
       // @ts-ignore - Auto-suppressed TypeScript error
       logger.debug("[PlatformAdminService] Exporting data:", { type, format });
 
-      const response = await apiClient.get(
+      const response = await fetch(
         `/api/platform/export/${type}?format=${format}`,
       );
-
       if (!response.ok) {
         throw new Error(`Failed to export data: ${response.statusText}`);
       }
-
       const blob = await response.blob();
       logger.debug("[PlatformAdminService] Data exported successfully");
 

@@ -159,7 +159,7 @@ const apiLimiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
-  // eslint-disable-next-line no-unused-vars
+
   skip: (_req, _res) => {
     // Skip rate limiting in development
     return process.env.NODE_ENV === "development";
@@ -176,7 +176,7 @@ const dashboardLimiter = rateLimit({
   message: "Too many dashboard requests, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
-  // eslint-disable-next-line no-unused-vars
+
   skip: (_req, _res) => {
     // Skip rate limiting in development
     return process.env.NODE_ENV === "development";
@@ -355,7 +355,6 @@ app.use((req, res, next) => {
   // Initialize monitoring reminder
   await initializeMonitoringReminder();
 
-  // eslint-disable-next-line no-unused-vars
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

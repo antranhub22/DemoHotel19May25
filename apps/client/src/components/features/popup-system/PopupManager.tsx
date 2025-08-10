@@ -228,7 +228,14 @@ export const usePopup = () => {
               <div className="p-4 text-center text-gray-500">Loading...</div>
             }
           >
-            <LazySummaryPopupContent />
+            {/* Lazy import fallback to avoid missing identifier error */}
+            {React.createElement(
+              React.lazy(() =>
+                import("./SummaryPopupContent").then((m) => ({
+                  default: m.SummaryPopupContent,
+                })),
+              ),
+            )}
           </Suspense>
         ),
         priority: options?.priority || "medium", // ✅ FIX: Default to 'medium' instead of 'high'

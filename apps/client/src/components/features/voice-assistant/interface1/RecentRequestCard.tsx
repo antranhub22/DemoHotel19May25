@@ -1,4 +1,4 @@
-import type { Room } from '@/types/common.types';
+// removed unused Room type
 import {
   Calendar,
   CheckCircle,
@@ -6,8 +6,8 @@ import {
   MapPin,
   MessageSquare,
   User,
-} from 'lucide-react';
-import React from 'react';
+} from "lucide-react";
+import React from "react";
 
 interface RecentRequest {
   id: string | number;
@@ -16,7 +16,7 @@ interface RecentRequest {
   guestName: string;
   requestContent: string;
   orderType: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  status: "pending" | "in-progress" | "completed" | "cancelled";
   submittedAt: Date;
   estimatedTime?: string;
   items?: Array<{
@@ -35,44 +35,48 @@ interface RecentRequestCardProps {
 const statusConfig = {
   pending: {
     icon: Clock,
-    label: 'Đang xử lý',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
+    label: "Đang xử lý",
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-200",
   },
-  'in-progress': {
+  "in-progress": {
     icon: Clock,
-    label: 'Đang thực hiện',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
+    label: "Đang thực hiện",
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
   },
   completed: {
     icon: CheckCircle,
-    label: 'Hoàn thành',
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
+    label: "Hoàn thành",
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    borderColor: "border-green-200",
   },
   cancelled: {
     icon: CheckCircle,
-    label: 'Đã hủy',
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    borderColor: 'border-red-200',
+    label: "Đã hủy",
+    color: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
   },
 };
 
-export const RecentRequestCard: React.FC<RecentRequestCardProps> = ({ request, onViewDetails, onDismiss }) => {
+export const RecentRequestCard: React.FC<RecentRequestCardProps> = ({
+  request,
+  onViewDetails,
+  onDismiss,
+}) => {
   const config = statusConfig[request.status];
   const StatusIcon = config.icon;
 
   const formatTime = (date: Date) => {
-    return new Intl.DateTimeFormat('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: '2-digit',
+    return new Intl.DateTimeFormat("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
     }).format(date);
   };
 
@@ -171,7 +175,7 @@ export const RecentRequestCard: React.FC<RecentRequestCardProps> = ({ request, o
         {/* Estimated Time */}
         {request.estimatedTime && (
           <div className="text-xs text-gray-600">
-            <span className="font-medium">Thời gian dự kiến:</span>{' '}
+            <span className="font-medium">Thời gian dự kiến:</span>{" "}
             {request.estimatedTime}
           </div>
         )}

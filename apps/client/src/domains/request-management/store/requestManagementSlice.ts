@@ -81,7 +81,10 @@ const initialState: RequestManagementState = {
 // Fetch all requests
 export const fetchRequests = createAsyncThunk(
   "requestManagement/fetchRequests",
-  async (searchParams?: Partial<RequestSearchParams>, { rejectWithValue }) => {
+  async (
+    searchParams: Partial<RequestSearchParams> | undefined,
+    { rejectWithValue },
+  ) => {
     try {
       const response = await requestManagementService.getRequests(searchParams);
       return response;

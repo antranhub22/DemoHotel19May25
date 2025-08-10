@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 // TODO: Fix proper typing
 /**
  * App with Domain Architecture
@@ -22,8 +22,8 @@ import NotFound from "@/pages/not-found";
 import StaffPage from "@/pages/staff";
 import VapiTest from "@/pages/VapiTest";
 import { ReduxProvider } from "@/providers/ReduxProvider";
-import logger from '@shared/utils/logger';
-import { Suspense, useEffect, useState } from 'react';
+import logger from "@shared/utils/logger";
+import { Suspense, useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { Link, Route, Switch, useLocation } from "wouter";
 
@@ -50,12 +50,12 @@ import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperations
 import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 
 // Lazy load charts-heavy dashboard components
-const AdvancedAnalytics = (React as any).lazy(() =>
+const _AdvancedAnalytics = (React as any).lazy(() =>
   import("@/pages/unified-dashboard/AdvancedAnalytics").then((module) => ({
     default: (module as any).AdvancedAnalytics,
   })),
 );
-const SystemMonitoring = (React as any).lazy(() =>
+const _SystemMonitoring = (React as any).lazy(() =>
   import("@/pages/unified-dashboard/SystemMonitoring").then((module) => ({
     default: (module as any).SystemMonitoring,
   })),
@@ -72,7 +72,12 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAuth = true, requiredRole, redirectTo = "/login" }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireAuth = true,
+  requiredRole,
+  redirectTo = "/login",
+}) => {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -351,7 +356,8 @@ function Router() {
 // ============================================
 
 function AppContent() {
-  const { } = useWebSocket();
+  // Initialize WebSocket side effects
+  useWebSocket();
 
   return (
     <ErrorBoundary>

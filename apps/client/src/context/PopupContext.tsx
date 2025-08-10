@@ -1,5 +1,5 @@
-import type { Room } from '@/types/common.types';
-import logger from '@shared/utils/logger';
+// removed unused Room type
+import logger from "@shared/utils/logger";
 import React, {
   createContext,
   ReactNode,

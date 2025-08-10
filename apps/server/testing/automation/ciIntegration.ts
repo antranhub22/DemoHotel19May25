@@ -1,22 +1,22 @@
-import { logger } from '@shared/utils/logger';
-import { Express } from 'express';
-import fs from 'fs/promises';
-import path from 'path';
-import { ComprehensiveTestRunner, QuickTestRunner } from '../runAllTests';
-import { TestReport, TestResult } from '../testFramework';
-import { QualityGateEvaluator } from './qualityGate';
+import { logger } from "@shared/utils/logger";
+import { Express } from "express";
+import fs from "fs/promises";
+import path from "path";
+import { ComprehensiveTestRunner, QuickTestRunner } from "../runAllTests";
+import { TestReport, TestResult } from "../testFramework";
+import { QualityGateEvaluator } from "./qualityGate";
 
 // ============================================
 // CI INTEGRATION INTERFACES
 // ============================================
 
 export interface CITestConfig {
-  environment: 'development' | 'staging' | 'production';
-  testScope: 'smoke' | 'integration' | 'performance' | 'full';
+  environment: "development" | "staging" | "production";
+  testScope: "smoke" | "integration" | "performance" | "full";
   parallel: boolean;
   maxRetries: number;
   timeout: number;
-  outputFormats: Array<'json' | 'junit' | 'html' | 'markdown'>;
+  outputFormats: Array<"json" | "junit" | "html" | "markdown">;
   qualityGateEnabled: boolean;
   blockOnFailure: boolean;
   notifications: {
@@ -49,7 +49,7 @@ export interface CITestResult {
 }
 
 export interface GitHubStatus {
-  state: 'pending' | 'success' | 'failure' | 'error';
+  state: "pending" | "success" | "failure" | "error";
   description: string;
   context: string;
   target_url?: string;
@@ -69,9 +69,9 @@ export class CITestExecutor {
     this.config = config;
     this.outputDir = path.join(
       process.cwd(),
-      'test-results',
-      'ci',
-      Date.now().toString()
+      "test-results",
+      "ci",
+      Date.now().toString(),
     );
   }
 
@@ -80,7 +80,7 @@ export class CITestExecutor {
 
     logger.info(
       `🚀 [CI-EXECUTOR] Starting CI test execution - Scope: ${this.config.testScope}`,
-      'CIExecutor'
+      "CIExecutor",
     );
 
     try {
@@ -97,26 +97,26 @@ export class CITestExecutor {
         qualityGateResult = await evaluator.evaluateQualityGate(testResults);
         await evaluator.saveQualityGateReport(
           qualityGateResult,
-          this.outputDir
+          this.outputDir,
         );
       }
 
       // Generate reports in requested formats
       const reportPaths = await this.generateReports(
         testResults,
-        qualityGateResult
+        qualityGateResult,
       );
 
       // Calculate metrics
       const metrics = this.calculateMetrics(
         testResults,
-        Date.now() - startTime
+        Date.now() - startTime,
       );
 
       // Determine deployment status
       const deployment = this.determineDeploymentStatus(
         testResults,
-        qualityGateResult
+        qualityGateResult,
       );
 
       const result: CITestResult = {
@@ -138,22 +138,22 @@ export class CITestExecutor {
       await this.updateGitHubStatus(result);
 
       logger.info(
-        `${result.success ? '✅' : '❌'} [CI-EXECUTOR] CI test execution ${result.success ? 'completed successfully' : 'failed'}`,
-        'CIExecutor',
+        `${result.success ? "✅" : "❌"} [CI-EXECUTOR] CI test execution ${result.success ? "completed successfully" : "failed"}`,
+        "CIExecutor",
         {
           duration: `${metrics.duration}ms`,
           tests: metrics.testCount,
           passRate: `${metrics.passRate}%`,
-          deployment: deployment.allowed ? 'allowed' : 'blocked',
-        }
+          deployment: deployment.allowed ? "allowed" : "blocked",
+        },
       );
 
       return result;
     } catch (error) {
       logger.error(
-        '❌ [CI-EXECUTOR] CI test execution failed:',
-        'CIExecutor',
-        error
+        "❌ [CI-EXECUTOR] CI test execution failed:",
+        "CIExecutor",
+        error,
       );
 
       // Create minimal error result
@@ -170,7 +170,7 @@ export class CITestExecutor {
         deployment: {
           allowed: false,
           environment: this.config.environment,
-          blockers: ['Test execution failed'],
+          blockers: ["Test execution failed"],
         },
       };
 
@@ -181,13 +181,13 @@ export class CITestExecutor {
 
   private async runTestsByScope(): Promise<TestReport> {
     switch (this.config.testScope) {
-      case 'smoke':
+      case "smoke":
         return this.runSmokeTests();
-      case 'integration':
+      case "integration":
         return this.runIntegrationTests();
-      case 'performance':
+      case "performance":
         return this.runPerformanceTests();
-      case 'full':
+      case "full":
         return this.runFullTestSuite();
       default:
         throw new Error(`Unknown test scope: ${this.config.testScope}`);
@@ -195,7 +195,7 @@ export class CITestExecutor {
   }
 
   private async runSmokeTests(): Promise<TestReport> {
-    logger.info('🔥 [CI-EXECUTOR] Running smoke tests...', 'CIExecutor');
+    logger.info("🔥 [CI-EXECUTOR] Running smoke tests...", "CIExecutor");
 
     const quickRunner = new QuickTestRunner(this.app);
     const smokeResult = await quickRunner.runQuickSmokeTest();
@@ -204,8 +204,8 @@ export class CITestExecutor {
     return {
       summary: {
         total: smokeResult.results.length,
-        passed: smokeResult.results.filter(r => r.status === 'passed').length,
-        failed: smokeResult.results.filter(r => r.status === 'failed').length,
+        passed: smokeResult.results.filter((r) => r.status === "passed").length,
+        failed: smokeResult.results.filter((r) => r.status === "failed").length,
         skipped: 0,
         duration: smokeResult.results.reduce((sum, r) => sum + r.duration, 0),
         coverage: smokeResult.passed ? 100 : 0,
@@ -215,18 +215,20 @@ export class CITestExecutor {
         averageResponseTime:
           smokeResult.results.reduce((sum, r) => sum + r.duration, 0) /
           smokeResult.results.length,
-        slowestEndpoint: '',
-        fastestEndpoint: '',
+        slowestEndpoint: "",
+        fastestEndpoint: "",
         timeouts: 0,
       },
       versions: {
-        tested: ['v2.2'],
-        compatibility: { 'v2.2': smokeResult.passed },
+        tested: ["v2.2"],
+        compatibility: { "v2.2": smokeResult.passed },
       },
       categories: {
         smoke: {
-          passed: smokeResult.results.filter(r => r.status === 'passed').length,
-          failed: smokeResult.results.filter(r => r.status === 'failed').length,
+          passed: smokeResult.results.filter((r) => r.status === "passed")
+            .length,
+          failed: smokeResult.results.filter((r) => r.status === "failed")
+            .length,
           total: smokeResult.results.length,
         },
       },
@@ -234,13 +236,13 @@ export class CITestExecutor {
   }
 
   private async runIntegrationTests(): Promise<TestReport> {
-    logger.info('🔗 [CI-EXECUTOR] Running integration tests...', 'CIExecutor');
+    logger.info("🔗 [CI-EXECUTOR] Running integration tests...", "CIExecutor");
 
     const runner = new ComprehensiveTestRunner(this.app, {
-      includeCategories: ['integration'],
-      includeVersions: ['v2.1', 'v2.2'],
+      includeCategories: ["integration"],
+      includeVersions: ["v2.1", "v2.2"],
       includeTags: [],
-      excludeTags: ['slow', 'performance'],
+      excludeTags: ["slow", "performance"],
       parallel: this.config.parallel,
       maxConcurrency: 5,
       timeout: this.config.timeout,
@@ -254,12 +256,12 @@ export class CITestExecutor {
   }
 
   private async runPerformanceTests(): Promise<TestReport> {
-    logger.info('⚡ [CI-EXECUTOR] Running performance tests...', 'CIExecutor');
+    logger.info("⚡ [CI-EXECUTOR] Running performance tests...", "CIExecutor");
 
     const runner = new ComprehensiveTestRunner(this.app, {
-      includeCategories: ['performance'],
-      includeVersions: ['v2.2'],
-      includeTags: ['performance', 'load'],
+      includeCategories: ["performance"],
+      includeVersions: ["v2.2"],
+      includeTags: ["performance", "load"],
       excludeTags: [],
       parallel: false, // Performance tests run sequentially
       maxConcurrency: 1,
@@ -274,13 +276,13 @@ export class CITestExecutor {
   }
 
   private async runFullTestSuite(): Promise<TestReport> {
-    logger.info('🧪 [CI-EXECUTOR] Running full test suite...', 'CIExecutor');
+    logger.info("🧪 [CI-EXECUTOR] Running full test suite...", "CIExecutor");
 
     const runner = new ComprehensiveTestRunner(this.app, {
-      includeCategories: ['integration', 'performance'],
-      includeVersions: ['v2.0', 'v2.1', 'v2.2'],
+      includeCategories: ["integration", "performance"],
+      includeVersions: ["v2.0", "v2.1", "v2.2"],
       includeTags: [],
-      excludeTags: ['experimental'],
+      excludeTags: ["experimental"],
       parallel: this.config.parallel,
       maxConcurrency: 3,
       timeout: this.config.timeout,
@@ -295,45 +297,49 @@ export class CITestExecutor {
 
   private async generateReports(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): Promise<string[]> {
     const reportPaths: string[] = [];
 
     try {
       for (const format of this.config.outputFormats) {
         switch (format) {
-          case 'json':
+          case "json": {
             const jsonPath = await this.generateJSONReport(
               testResults,
-              qualityGateResult
+              qualityGateResult,
             );
             reportPaths.push(jsonPath);
             break;
-          case 'junit':
+          }
+          case "junit": {
             const junitPath = await this.generateJUnitReport(testResults);
             reportPaths.push(junitPath);
             break;
-          case 'html':
+          }
+          case "html": {
             const htmlPath = await this.generateHTMLReport(
               testResults,
-              qualityGateResult
+              qualityGateResult,
             );
             reportPaths.push(htmlPath);
             break;
-          case 'markdown':
+          }
+          case "markdown": {
             const mdPath = await this.generateMarkdownReport(
               testResults,
-              qualityGateResult
+              qualityGateResult,
             );
             reportPaths.push(mdPath);
             break;
+          }
         }
       }
     } catch (error) {
       logger.error(
-        '❌ [CI-EXECUTOR] Error generating reports:',
-        'CIExecutor',
-        error
+        "❌ [CI-EXECUTOR] Error generating reports:",
+        "CIExecutor",
+        error,
       );
     }
 
@@ -342,7 +348,7 @@ export class CITestExecutor {
 
   private async generateJSONReport(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): Promise<string> {
     const report = {
       timestamp: new Date().toISOString(),
@@ -356,7 +362,7 @@ export class CITestExecutor {
           commit: process.env.GITHUB_SHA,
           branch: process.env.GITHUB_REF_NAME,
           pr:
-            process.env.GITHUB_EVENT_NAME === 'pull_request'
+            process.env.GITHUB_EVENT_NAME === "pull_request"
               ? process.env.GITHUB_EVENT_NUMBER
               : null,
           workflow: process.env.GITHUB_WORKFLOW,
@@ -367,7 +373,7 @@ export class CITestExecutor {
 
     const filePath = path.join(
       this.outputDir,
-      `ci-test-report-${this.config.testScope}.json`
+      `ci-test-report-${this.config.testScope}.json`,
     );
     await fs.writeFile(filePath, JSON.stringify(report, null, 2));
     return filePath;
@@ -377,7 +383,7 @@ export class CITestExecutor {
     const xml = this.convertToJUnitXML(testResults);
     const filePath = path.join(
       this.outputDir,
-      `junit-test-results-${this.config.testScope}.xml`
+      `junit-test-results-${this.config.testScope}.xml`,
     );
     await fs.writeFile(filePath, xml);
     return filePath;
@@ -394,29 +400,29 @@ export class CITestExecutor {
     // Group tests by test suite
     const testsByClass = testResults.results.reduce(
       (acc, test) => {
-        const className = test.testSuite || 'Unknown';
+        const className = test.testSuite || "Unknown";
         if (!acc[className]) acc[className] = [];
         acc[className].push(test);
         return acc;
       },
-      {} as Record<string, TestResult[]>
+      {} as Record<string, TestResult[]>,
     );
 
     Object.entries(testsByClass).forEach(([className, tests]) => {
       const classTests = tests.length;
-      const classFailures = tests.filter(t => t.status === 'failed').length;
+      const classFailures = tests.filter((t) => t.status === "failed").length;
       const classTime = tests.reduce((sum, t) => sum + t.duration, 0) / 1000;
 
       xml += `
   <testsuite name="${className}" tests="${classTests}" failures="${classFailures}" time="${classTime}">`;
 
-      tests.forEach(test => {
+      tests.forEach((test) => {
         xml += `
     <testcase classname="${className}" name="${test.testCase}" time="${test.duration / 1000}">`;
 
-        if (test.status === 'failed') {
+        if (test.status === "failed") {
           xml += `
-      <failure message="${test.error || 'Test failed'}">${test.error || 'No error details available'}</failure>`;
+      <failure message="${test.error || "Test failed"}">${test.error || "No error details available"}</failure>`;
         }
 
         xml += `
@@ -435,7 +441,7 @@ export class CITestExecutor {
 
   private async generateHTMLReport(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): Promise<string> {
     const html = `<!DOCTYPE html>
 <html>
@@ -472,15 +478,15 @@ export class CITestExecutor {
         </div>
 
         <div class="summary">
-            <div class="metric ${testResults.summary.failed === 0 ? 'success' : 'danger'}">
+            <div class="metric ${testResults.summary.failed === 0 ? "success" : "danger"}">
                 <div class="metric-value">${testResults.summary.total}</div>
                 <div class="metric-label">Total Tests</div>
             </div>
-            <div class="metric ${testResults.summary.passed === testResults.summary.total ? 'success' : 'warning'}">
+            <div class="metric ${testResults.summary.passed === testResults.summary.total ? "success" : "warning"}">
                 <div class="metric-value">${testResults.summary.passed}</div>
                 <div class="metric-label">Passed</div>
             </div>
-            <div class="metric ${testResults.summary.failed === 0 ? 'success' : 'danger'}">
+            <div class="metric ${testResults.summary.failed === 0 ? "success" : "danger"}">
                 <div class="metric-value">${testResults.summary.failed}</div>
                 <div class="metric-label">Failed</div>
             </div>
@@ -497,14 +503,14 @@ export class CITestExecutor {
         ${
           qualityGateResult
             ? `
-        <div class="quality-gate ${qualityGateResult.passed ? 'passed' : 'failed'}">
-            <h3>🚪 Quality Gate: ${qualityGateResult.passed ? '✅ PASSED' : '❌ FAILED'}</h3>
+        <div class="quality-gate ${qualityGateResult.passed ? "passed" : "failed"}">
+            <h3>🚪 Quality Gate: ${qualityGateResult.passed ? "✅ PASSED" : "❌ FAILED"}</h3>
             <p><strong>Score:</strong> ${qualityGateResult.score}/100</p>
-            <p><strong>Deployment:</strong> ${qualityGateResult.deployment.allowed ? '✅ Allowed' : '🚫 Blocked'}</p>
-            ${!qualityGateResult.deployment.allowed ? `<p><strong>Reason:</strong> ${qualityGateResult.deployment.reason}</p>` : ''}
+            <p><strong>Deployment:</strong> ${qualityGateResult.deployment.allowed ? "✅ Allowed" : "🚫 Blocked"}</p>
+            ${!qualityGateResult.deployment.allowed ? `<p><strong>Reason:</strong> ${qualityGateResult.deployment.reason}</p>` : ""}
         </div>
         `
-            : ''
+            : ""
         }
 
         <h3>📋 Test Results</h3>
@@ -521,17 +527,17 @@ export class CITestExecutor {
             <tbody>
                 ${testResults.results
                   .map(
-                    result => `
+                    (result) => `
                 <tr>
                     <td>${result.testSuite}</td>
                     <td>${result.testCase}</td>
-                    <td class="status-${result.status}">${result.status === 'passed' ? '✅' : result.status === 'failed' ? '❌' : '⚠️'} ${result.status}</td>
+                    <td class="status-${result.status}">${result.status === "passed" ? "✅" : result.status === "failed" ? "❌" : "⚠️"} ${result.status}</td>
                     <td>${result.duration}ms</td>
-                    <td>${result.version || 'N/A'}</td>
+                    <td>${result.version || "N/A"}</td>
                 </tr>
-                `
+                `,
                   )
-                  .join('')}
+                  .join("")}
             </tbody>
         </table>
 
@@ -544,7 +550,7 @@ export class CITestExecutor {
 
     const filePath = path.join(
       this.outputDir,
-      `ci-test-report-${this.config.testScope}.html`
+      `ci-test-report-${this.config.testScope}.html`,
     );
     await fs.writeFile(filePath, html);
     return filePath;
@@ -552,7 +558,7 @@ export class CITestExecutor {
 
   private async generateMarkdownReport(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): Promise<string> {
     const md = `# 🧪 CI Test Report - ${this.config.environment.toUpperCase()}
 
@@ -566,7 +572,7 @@ export class CITestExecutor {
 |--------|-------|
 | **Total Tests** | ${testResults.summary.total} |
 | **Passed** | ${testResults.summary.passed} ✅ |
-| **Failed** | ${testResults.summary.failed} ${testResults.summary.failed > 0 ? '❌' : ''} |
+| **Failed** | ${testResults.summary.failed} ${testResults.summary.failed > 0 ? "❌" : ""} |
 | **Success Rate** | ${Math.round(testResults.summary.coverage)}% |
 | **Average Response Time** | ${Math.round(testResults.performance.averageResponseTime)}ms |
 | **Duration** | ${(testResults.summary.duration / 1000).toFixed(2)}s |
@@ -576,12 +582,12 @@ ${
     ? `
 ## 🚪 Quality Gate
 
-**Status**: ${qualityGateResult.passed ? '✅ PASSED' : '❌ FAILED'}  
+**Status**: ${qualityGateResult.passed ? "✅ PASSED" : "❌ FAILED"}  
 **Score**: ${qualityGateResult.score}/100  
-**Deployment**: ${qualityGateResult.deployment.allowed ? '✅ Allowed' : '🚫 Blocked'}  
-${!qualityGateResult.deployment.allowed ? `**Reason**: ${qualityGateResult.deployment.reason}` : ''}
+**Deployment**: ${qualityGateResult.deployment.allowed ? "✅ Allowed" : "🚫 Blocked"}  
+${!qualityGateResult.deployment.allowed ? `**Reason**: ${qualityGateResult.deployment.reason}` : ""}
 `
-    : ''
+    : ""
 }
 
 ## 📋 Test Results by Category
@@ -589,25 +595,25 @@ ${!qualityGateResult.deployment.allowed ? `**Reason**: ${qualityGateResult.deplo
 ${Object.entries(testResults.categories)
   .map(
     ([category, stats]) =>
-      `- **${category}**: ${stats.passed}/${stats.total} passed (${Math.round((stats.passed / stats.total) * 100)}%)`
+      `- **${category}**: ${stats.passed}/${stats.total} passed (${Math.round((stats.passed / stats.total) * 100)}%)`,
   )
-  .join('\n')}
+  .join("\n")}
 
 ## 🔄 Version Compatibility
 
 ${Object.entries(testResults.versions.compatibility)
   .map(
     ([version, compatible]) =>
-      `- **${version}**: ${compatible ? '✅ Compatible' : '❌ Issues detected'}`
+      `- **${version}**: ${compatible ? "✅ Compatible" : "❌ Issues detected"}`,
   )
-  .join('\n')}
+  .join("\n")}
 
 ---
 *Generated by Hotel Voice Assistant CI Pipeline*`;
 
     const filePath = path.join(
       this.outputDir,
-      `ci-test-summary-${this.config.testScope}.md`
+      `ci-test-summary-${this.config.testScope}.md`,
     );
     await fs.writeFile(filePath, md);
     return filePath;
@@ -620,7 +626,7 @@ ${Object.entries(testResults.versions.compatibility)
       passRate:
         testResults.summary.total > 0
           ? Math.round(
-              (testResults.summary.passed / testResults.summary.total) * 100
+              (testResults.summary.passed / testResults.summary.total) * 100,
             )
           : 0,
       performanceScore: Math.round(testResults.summary.coverage),
@@ -629,7 +635,7 @@ ${Object.entries(testResults.versions.compatibility)
 
   private determineDeploymentStatus(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): any {
     const blockers: string[] = [];
 
@@ -638,7 +644,7 @@ ${Object.entries(testResults.versions.compatibility)
     }
 
     if (qualityGateResult && !qualityGateResult.passed) {
-      blockers.push('Quality gate failed');
+      blockers.push("Quality gate failed");
       if (qualityGateResult.deployment.blockedBy) {
         blockers.push(...qualityGateResult.deployment.blockedBy);
       }
@@ -653,7 +659,7 @@ ${Object.entries(testResults.versions.compatibility)
 
   private isOverallSuccess(
     testResults: TestReport,
-    qualityGateResult?: any
+    qualityGateResult?: any,
   ): boolean {
     const testsPass = testResults.summary.failed === 0;
     const qualityGatePass = !qualityGateResult || qualityGateResult.passed;
@@ -678,8 +684,8 @@ ${Object.entries(testResults.versions.compatibility)
       results: [],
       performance: {
         averageResponseTime: 0,
-        slowestEndpoint: '',
-        fastestEndpoint: '',
+        slowestEndpoint: "",
+        fastestEndpoint: "",
         timeouts: 0,
       },
       versions: { tested: [], compatibility: {} },
@@ -687,14 +693,14 @@ ${Object.entries(testResults.versions.compatibility)
     };
   }
 
-  private async sendNotifications(result: CITestResult): Promise<void> {
+  private async sendNotifications(_result: CITestResult): Promise<void> {
     // Implementation for various notification channels
-    logger.info('📢 [CI-EXECUTOR] Sending notifications...', 'CIExecutor');
+    logger.info("📢 [CI-EXECUTOR] Sending notifications...", "CIExecutor");
   }
 
-  private async updateGitHubStatus(result: CITestResult): Promise<void> {
+  private async updateGitHubStatus(_result: CITestResult): Promise<void> {
     // Implementation for GitHub status updates
-    logger.info('📱 [CI-EXECUTOR] Updating GitHub status...', 'CIExecutor');
+    logger.info("📱 [CI-EXECUTOR] Updating GitHub status...", "CIExecutor");
   }
 }
 
@@ -704,15 +710,15 @@ ${Object.entries(testResults.versions.compatibility)
 
 export const createCITestExecutor = (
   app: Express,
-  config: Partial<CITestConfig> = {}
+  config: Partial<CITestConfig> = {},
 ) => {
   const defaultConfig: CITestConfig = {
-    environment: (process.env.NODE_ENV as any) || 'development',
-    testScope: (process.env.TEST_SCOPE as any) || 'full',
+    environment: (process.env.NODE_ENV as any) || "development",
+    testScope: (process.env.TEST_SCOPE as any) || "full",
     parallel: true,
     maxRetries: 2,
     timeout: 30000,
-    outputFormats: ['json', 'html', 'junit'],
+    outputFormats: ["json", "html", "junit"],
     qualityGateEnabled: true,
     blockOnFailure: true,
     notifications: {},

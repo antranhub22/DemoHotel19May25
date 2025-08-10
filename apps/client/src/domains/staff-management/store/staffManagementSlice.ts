@@ -90,7 +90,10 @@ const initialState: StaffManagementState = {
 // Staff Operations
 export const fetchStaff = createAsyncThunk(
   "staffManagement/fetchStaff",
-  async (searchParams?: Partial<StaffSearchParams>, { rejectWithValue }) => {
+  async (
+    searchParams: Partial<StaffSearchParams> | undefined,
+    { rejectWithValue },
+  ) => {
     try {
       const response = await staffManagementService.getStaff(searchParams);
       return response;
@@ -156,7 +159,7 @@ export const deactivateStaff = createAsyncThunk(
 // Task Operations
 export const fetchTasks = createAsyncThunk(
   "staffManagement/fetchTasks",
-  async (filters?: Partial<StaffTask>, { rejectWithValue }) => {
+  async (filters: Partial<StaffTask> | undefined, { rejectWithValue }) => {
     try {
       const tasks = await staffManagementService.getTasks(filters);
       return tasks;

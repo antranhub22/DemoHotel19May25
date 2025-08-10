@@ -1,8 +1,8 @@
-import * as React from 'react';
-import type { Room } from '@/types/common.types';
-import { useCallback, useEffect, useRef } from 'react';
+import * as React from "react";
+// removed unused Room type
 import { usePopup } from "@/components/features/popup-system/PopupManager";
 import { useAssistant } from "@/context";
+import { useCallback, useEffect, useRef } from "react";
 
 interface UseConfirmHandlerReturn {
   // ✅ SIMPLIFIED: Clean auto-trigger summary function
@@ -105,7 +105,7 @@ export const useConfirmHandler = (): UseConfirmHandlerReturn => {
 
   // ✅ FIX: Enhanced update summary popup function
   const updateSummaryPopup = useCallback(
-    (summary: string, serviceRequests: any[]) => {
+    (summary: string) => {
       try {
         // Remove existing summary popup
         if (summaryPopupIdRef.current) {

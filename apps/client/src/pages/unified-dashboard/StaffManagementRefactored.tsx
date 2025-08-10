@@ -122,7 +122,7 @@ const getTaskIcon = (status: string) => {
 // Staff Form Dialog
 // ========================================
 
-interface StaffFormDialogProps {
+interface _StaffFormDialogProps {
   isOpen: boolean;
   onClose: () => void;
   staff?: StaffMember | null;
@@ -652,16 +652,16 @@ export const StaffManagementRefactored: React.FC = () => {
 
   // MOCK DATA FOR STAFF MANAGEMENT
   const staff = [];
-  const staffByDepartment = {};
+  const _staffByDepartment = {};
   const staffCounts = { total: 0, active: 0, onDuty: 0 };
   const selectedStaff = null;
   const filters = {};
   const isLoading = false;
   const error = null;
-  const analytics = {};
+  const _analytics = {};
   const tasks = [];
-  const onDutyStaff = [];
-  const availableStaff = [];
+  const _onDutyStaff = [];
+  const _availableStaff = [];
   const loadStaff = () => {};
   const selectStaffMember = () => {};
   const updateStaffFilters = () => {};

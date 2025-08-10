@@ -30,11 +30,11 @@ import {
 } from "@/domains/guest-experience/hooks/useGuestExperience";
 import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
 import { useConfirmHandler } from "@/hooks/useConfirmHandler";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
 import logger from "@shared/utils/logger";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UI_CONSTANTS } from "@/lib/constants";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
 
@@ -117,7 +117,7 @@ const Interface1ErrorFallback: React.FC<{
 const LanguageSelectionModal: React.FC<{
   onLanguageSelect: (lang: Language) => void;
   isMobile: boolean;
-}> = ({ onLanguageSelect, isMobile }) => (
+}> = ({ onLanguageSelect, isMobile: _isMobile }) => (
   <LanguageSelectionModalInner onLanguageSelect={onLanguageSelect} />
 );
 
@@ -151,20 +151,19 @@ const LanguageSelectionModalInner: React.FC<{
 const VoiceAssistant: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const isMobile = useIsMobile();
+  const _isMobile = useIsMobile();
 
   // ✅ NEW: Use Guest Experience domain hooks instead of local state
   const {
     journey,
-    selectedLanguage,
+    // selectedLanguage,
     initializeJourney,
     completeWelcome,
     selectLanguage,
   } = useGuestExperience();
 
   // ✅ NEW: Simplified language selection hook
-  const { hasSelectedLanguage, getLanguageDisplayName } =
-    useLanguageSelection();
+  const { hasSelectedLanguage } = useLanguageSelection();
 
   // ✅ NEW: Initialize Guest Journey on component mount
   useEffect(() => {
@@ -212,7 +211,7 @@ const VoiceAssistant: React.FC = () => {
           {!journey.showWelcome && !hasSelectedLanguage && (
             <LanguageSelectionModal
               onLanguageSelect={handleLanguageSelection}
-              isMobile={isMobile}
+              isMobile={_isMobile}
             />
           )}
 
@@ -238,7 +237,7 @@ const VoiceAssistant: React.FC = () => {
                     showVoicePreview={false}
                     onLanguageChange={handleLanguageSelection}
                   />
-                  {!isMobile && (
+                  {!_isMobile && (
                     <button
                       onClick={handleLogout}
                       className="text-sm text-gray-600 hover:text-gray-900"
@@ -256,8 +255,8 @@ const VoiceAssistant: React.FC = () => {
             <div
               className="relative w-full h-full"
               style={{
-                marginTop: isMobile ? "50px" : "60px",
-                minHeight: isMobile
+                marginTop: _isMobile ? "50px" : "60px",
+                minHeight: _isMobile
                   ? "calc(100vh - 50px)"
                   : "calc(100vh - 60px)",
               }}
@@ -286,8 +285,8 @@ const VoiceAssistant: React.FC = () => {
           <PopupManager
             position="bottom"
             maxVisible={isMobile ? 2 : 4}
-            autoCloseDelay={isMobile ? 8000 : 10000}
-            isMobile={isMobile}
+            autoCloseDelay={_isMobile ? 8000 : 10000}
+            isMobile={_isMobile}
           />
         </div>
       </GlobalPopupSystemProvider>

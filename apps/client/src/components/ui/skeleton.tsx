@@ -1,11 +1,7 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
+import React from "react";
 
-
-interface SkeletonProps {
-  className?: any; // TODO: Define proper type for className
-   // TODO: Define proper type for ...props
-}
+// removed unused SkeletonProps interface
 
 function Skeleton({
   className,
@@ -13,7 +9,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('animate-pulse rounded-md bg-muted', className)}
+      className={cn("animate-pulse rounded-md bg-muted", className)}
       {...props}
     />
   );

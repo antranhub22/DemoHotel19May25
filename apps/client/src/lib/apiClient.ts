@@ -7,7 +7,6 @@
    ======================================== */
 
 // ✅ FIXED: Import all missing API types
-import type { ApiResponse } from '@/types/common.types';
 import type {
   AnalyticsResponse,
   ApiError,
@@ -36,7 +35,7 @@ import type {
   UpdateAssistantConfigResponse,
   UpdateOrderStatusRequest,
   UpdateOrderStatusResponse,
-} from '@/types/api';
+} from "@/types/api";
 
 // ✅ FIXED: Import utility types
 
@@ -52,7 +51,7 @@ export interface ApiClientConfig {
 }
 
 export interface ApiRequestConfig {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   url: string;
   data?: any;
   params?: Record<string, any>;
@@ -86,14 +85,14 @@ export class ApiClient {
 
   private getHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...this.config.headers,
     };
 
     // ✅ FIXED: Auto get token from localStorage if not set manually
-    const token = this.token || localStorage.getItem('token');
+    const token = this.token || localStorage.getItem("token");
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     return headers;
@@ -125,7 +124,7 @@ export class ApiClient {
           ...headers,
         },
         body: data ? JSON.stringify(data) : undefined,
-        credentials: this.config.withCredentials ? 'include' : 'omit',
+        credentials: this.config.withCredentials ? "include" : "omit",
         signal: timeout
           ? (window as any).AbortSignal?.timeout(timeout)
           : undefined,
@@ -145,15 +144,15 @@ export class ApiClient {
 
       return responseData;
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
+      if (error instanceof Error && error.name === "AbortError") {
         throw {
           status: 408,
-          message: 'Request timeout',
+          message: "Request timeout",
           timestamp: new Date(),
         } as ApiError;
       }
 
-      if (error && typeof error === 'object' && 'status' in error) {
+      if (error && typeof error === "object" && "status" in error) {
         throw error as ApiError;
       }
 
@@ -162,7 +161,7 @@ export class ApiClient {
         message:
           error instanceof Error
             ? (error as any)?.message || String(error)
-            : 'Unknown error',
+            : "Unknown error",
         timestamp: new Date(),
       } as ApiError;
     }
@@ -175,10 +174,10 @@ export class ApiClient {
   async get<T>(
     url: string,
     params?: Record<string, any>,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'GET',
+      method: "GET",
       url,
       params,
       ...config,
@@ -188,10 +187,10 @@ export class ApiClient {
   async post<T>(
     url: string,
     data?: any,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'POST',
+      method: "POST",
       url,
       data,
       ...config,
@@ -201,10 +200,10 @@ export class ApiClient {
   async put<T>(
     url: string,
     data?: any,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'PUT',
+      method: "PUT",
       url,
       data,
       ...config,
@@ -213,10 +212,10 @@ export class ApiClient {
 
   async delete<T>(
     url: string,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'DELETE',
+      method: "DELETE",
       url,
       ...config,
     });
@@ -225,10 +224,10 @@ export class ApiClient {
   async patch<T>(
     url: string,
     data?: any,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     return this.request<T>({
-      method: 'PATCH',
+      method: "PATCH",
       url,
       data,
       ...config,
@@ -240,17 +239,17 @@ export class ApiClient {
   // ========================================
 
   async login(request: LoginRequest): Promise<LoginResponse> {
-    const response = await this.post<LoginResponse['data']>(
-      '/auth/login',
-      request
+    const response = await this.post<LoginResponse["data"]>(
+      "/auth/login",
+      request,
     );
     return response as LoginResponse;
   }
 
   async refreshToken(
-    token: string
+    token: string,
   ): Promise<ApiResponse<{ token: string; expiresIn: number }>> {
-    return this.post<{ token: string; expiresIn: number }>('/auth/refresh', {
+    return this.post<{ token: string; expiresIn: number }>("/auth/refresh", {
       token,
     });
   }
@@ -260,27 +259,27 @@ export class ApiClient {
   // ========================================
 
   async startCall(request: StartCallRequest): Promise<StartCallResponse> {
-    const response = await this.post<StartCallResponse['data']>(
-      '/calls/start',
-      request
+    const response = await this.post<StartCallResponse["data"]>(
+      "/calls/start",
+      request,
     );
     return response as StartCallResponse;
   }
 
   async endCall(request: EndCallRequest): Promise<EndCallResponse> {
-    const response = await this.post<EndCallResponse['data']>(
-      '/calls/end',
-      request
+    const response = await this.post<EndCallResponse["data"]>(
+      "/calls/end",
+      request,
     );
     return response as EndCallResponse;
   }
 
   async saveTranscript(
-    request: SaveTranscriptRequest
+    request: SaveTranscriptRequest,
   ): Promise<SaveTranscriptResponse> {
-    const response = await this.post<SaveTranscriptResponse['data']>(
-      '/transcripts',
-      request
+    const response = await this.post<SaveTranscriptResponse["data"]>(
+      "/transcripts",
+      request,
     );
     return response as SaveTranscriptResponse;
   }
@@ -290,19 +289,19 @@ export class ApiClient {
   // ========================================
 
   async createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse> {
-    const response = await this.post<CreateOrderResponse['data']>(
-      '/orders',
-      request
+    const response = await this.post<CreateOrderResponse["data"]>(
+      "/orders",
+      request,
     );
     return response as CreateOrderResponse;
   }
 
   async updateOrderStatus(
-    request: UpdateOrderStatusRequest
+    request: UpdateOrderStatusRequest,
   ): Promise<UpdateOrderStatusResponse> {
-    const response = await this.patch<UpdateOrderStatusResponse['data']>(
+    const response = await this.patch<UpdateOrderStatusResponse["data"]>(
       `/orders/${request.orderId}/status`,
-      request
+      request,
     );
     return response as UpdateOrderStatusResponse;
   }
@@ -312,9 +311,9 @@ export class ApiClient {
   // ========================================
 
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
-    const response = await this.post<SendMessageResponse['data']>(
-      '/messages',
-      request
+    const response = await this.post<SendMessageResponse["data"]>(
+      "/messages",
+      request,
     );
     return response as SendMessageResponse;
   }
@@ -324,38 +323,38 @@ export class ApiClient {
   // ========================================
 
   async researchHotel(
-    request: HotelResearchRequest
+    request: HotelResearchRequest,
   ): Promise<HotelResearchResponse> {
-    const response = await this.post<HotelResearchResponse['data']>(
-      '/hotel/research',
-      request
+    const response = await this.post<HotelResearchResponse["data"]>(
+      "/hotel/research",
+      request,
     );
     return response as HotelResearchResponse;
   }
 
   async generateAssistant(
-    request: GenerateAssistantRequest
+    request: GenerateAssistantRequest,
   ): Promise<GenerateAssistantResponse> {
-    const response = await this.post<GenerateAssistantResponse['data']>(
-      '/hotel/generate-assistant',
-      request
+    const response = await this.post<GenerateAssistantResponse["data"]>(
+      "/hotel/generate-assistant",
+      request,
     );
     return response as GenerateAssistantResponse;
   }
 
   async getHotelProfile(tenantId: string): Promise<HotelProfileResponse> {
-    const response = await this.get<HotelProfileResponse['data']>(
-      `/hotel/profile/${tenantId}`
+    const response = await this.get<HotelProfileResponse["data"]>(
+      `/hotel/profile/${tenantId}`,
     );
     return response as HotelProfileResponse;
   }
 
   async updateAssistantConfig(
-    request: UpdateAssistantConfigRequest
+    request: UpdateAssistantConfigRequest,
   ): Promise<UpdateAssistantConfigResponse> {
-    const response = await this.put<UpdateAssistantConfigResponse['data']>(
+    const response = await this.put<UpdateAssistantConfigResponse["data"]>(
       `/hotel/config/${request.tenantId}`,
-      request
+      request,
     );
     return response as UpdateAssistantConfigResponse;
   }
@@ -366,32 +365,32 @@ export class ApiClient {
 
   async getAnalytics(
     tenantId: string,
-    params?: PaginationParams
+    params?: PaginationParams,
   ): Promise<AnalyticsResponse> {
-    const response = await this.get<AnalyticsResponse['data']>(
+    const response = await this.get<AnalyticsResponse["data"]>(
       `/analytics/${tenantId}`,
-      params
+      params,
     );
     return response as AnalyticsResponse;
   }
 
   async getServiceDistribution(
-    tenantId: string
+    tenantId: string,
   ): Promise<
     ApiResponse<Array<{ type: string; count: number; percentage: number }>>
   > {
     return this.get<Array<{ type: string; count: number; percentage: number }>>(
-      `/analytics/${tenantId}/service-distribution`
+      `/analytics/${tenantId}/service-distribution`,
     );
   }
 
   async getHourlyActivity(
-    tenantId: string
+    tenantId: string,
   ): Promise<
     ApiResponse<Array<{ hour: number; calls: number; orders: number }>>
   > {
     return this.get<Array<{ hour: number; calls: number; orders: number }>>(
-      `/analytics/${tenantId}/hourly-activity`
+      `/analytics/${tenantId}/hourly-activity`,
     );
   }
 
@@ -400,7 +399,7 @@ export class ApiClient {
   // ========================================
 
   async getServiceHealth(): Promise<ServiceHealthResponse> {
-    const response = await this.get<ServiceHealthResponse['data']>('/health');
+    const response = await this.get<ServiceHealthResponse["data"]>("/health");
     return response as ServiceHealthResponse;
   }
 
@@ -411,7 +410,7 @@ export class ApiClient {
   async getPaginated<T>(
     url: string,
     params?: PaginationParams,
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<PaginatedResponse<T>> {
     const response = await this.get<PaginatedResponse<T>>(url, params, config);
     return response.data!;
@@ -420,13 +419,13 @@ export class ApiClient {
   async uploadFile<T>(
     url: string,
     file: any, // File
-    config?: Partial<ApiRequestConfig>
+    config?: Partial<ApiRequestConfig>,
   ): Promise<ApiResponse<T>> {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     return this.request<T>({
-      method: 'POST',
+      method: "POST",
       url,
       data: formData,
       headers: {
@@ -448,18 +447,18 @@ export class ApiClient {
  */
 function normalizeApiUrl(url: string): string {
   // If URL is already absolute, return as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
 
   // Ensure URL starts with /api/ for relative URLs
-  if (!url.startsWith('/api/')) {
+  if (!url.startsWith("/api/")) {
     // If it starts with /, replace with /api
-    if (url.startsWith('/')) {
-      url = '/api' + url;
+    if (url.startsWith("/")) {
+      url = "/api" + url;
     } else {
       // Add /api/ prefix
-      url = '/api/' + url;
+      url = "/api/" + url;
     }
   }
 
@@ -469,17 +468,17 @@ function normalizeApiUrl(url: string): string {
 export const apiClient = new ApiClient({
   baseUrl:
     import.meta.env.VITE_API_URL ||
-    (typeof window !== 'undefined' &&
-    window.location.hostname.includes('talk2go.online')
+    (typeof window !== "undefined" &&
+    window.location.hostname.includes("talk2go.online")
       ? (() => {
           // ✅ FIX: Correct hostname typo minhonmune → minhonmuine
           const correctedHostname = window.location.hostname.replace(
-            'minhonmune',
-            'minhonmuine'
+            "minhonmune",
+            "minhonmuine",
           );
           return `https://${correctedHostname}`;
         })()
-      : 'http://localhost:3000'),
+      : "http://localhost:3000"),
   timeout: 30000,
   withCredentials: true,
 });
@@ -491,7 +490,7 @@ export const safeApiClient = {
   ...apiClient,
   async get<T>(
     url: string,
-    params?: Record<string, any>
+    params?: Record<string, any>,
   ): Promise<ApiResponse<T>> {
     return apiClient.get<T>(normalizeApiUrl(url), params);
   },

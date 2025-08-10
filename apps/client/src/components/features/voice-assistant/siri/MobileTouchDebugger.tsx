@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { DebugPanel } from './components/DebugPanel';
-import { useTouchDebugger } from './hooks/useTouchDebugger';
+import * as React from "react";
+import { useState } from "react";
+import { DebugPanel } from "./components/DebugPanel";
+import { useTouchDebugger } from "./hooks/useTouchDebugger";
 
 interface MobileTouchDebuggerProps {
   containerId: string;
@@ -11,7 +11,13 @@ interface MobileTouchDebuggerProps {
   enabled?: boolean;
 }
 
-export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({ containerId, onCallStart, onCallEnd, isListening, enabled = true }) => {
+export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({
+  containerId,
+  onCallStart,
+  onCallEnd,
+  isListening,
+  enabled = true,
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const { debugInfo, testCallStart, testCallEnd, isEnabled } = useTouchDebugger(
     {
@@ -20,7 +26,7 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({ contai
       onCallEnd,
       isListening,
       enabled,
-    }
+    },
   );
 
   if (!isEnabled || !debugInfo) {
@@ -33,19 +39,19 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({ contai
       <button
         onClick={() => setIsVisible(!isVisible)}
         style={{
-          position: 'fixed',
-          top: '10px',
-          right: '10px',
+          position: "fixed",
+          top: "10px",
+          right: "10px",
           zIndex: 99999,
-          background: '#FF6B6B',
-          color: 'white',
-          border: 'none',
-          borderRadius: '50%',
-          width: '50px',
-          height: '50px',
-          fontSize: '20px',
-          cursor: 'pointer',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          background: "#FF6B6B",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: "50px",
+          height: "50px",
+          fontSize: "20px",
+          cursor: "pointer",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
         }}
       >
         🔍
@@ -63,7 +69,4 @@ export const MobileTouchDebugger: React.FC<MobileTouchDebuggerProps> = ({ contai
   );
 };
 
-interface MobileTouchDebuggerProps {
-  enabled?: boolean;
-  className?: string;
-}
+// Removed duplicate interface declaration

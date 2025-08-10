@@ -78,7 +78,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           (window as any).__lastError,
         );
       }
-    } catch {}
+    } catch {
+      // swallow logging errors
+    }
 
     // ✅ IMPROVED: Smart auto-retry logic based on error type
     const maxRetries = this.props.maxRetries || 2;

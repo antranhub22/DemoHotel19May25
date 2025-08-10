@@ -70,8 +70,7 @@ import {
   updateRoom,
   updateRoomStatus,
 } from "../store/hotelOperationsSlice";
-import type { HousekeepingTask, Room } from "../types/hotelOperations.types";
-import {
+import type {
   CreateHousekeepingTaskPayload,
   CreateMaintenanceRequestPayload,
   CreateRoomPayload,
@@ -79,10 +78,12 @@ import {
   FacilityFilters,
   HotelOperationsUpdateEvent,
   HousekeepingFilters,
+  HousekeepingTask,
   InventoryFilters,
   InventoryItem,
   MaintenanceFilters,
   MaintenanceRequest,
+  Room,
   RoomFilters,
 } from "../types/hotelOperations.types";
 
@@ -764,31 +765,22 @@ export const useHotelAnalytics = () => {
 export const useBulkOperations = () => {
   const bulkUpdateRoomStatus = useCallback(
     async (roomIds: number[], status: string) => {
-      try {
-        const result = await hotelOperationsService.bulkUpdateRoomStatus(
-          roomIds,
-          status,
-        );
-        // Refresh rooms to get updated data
-        return result;
-      } catch (error) {
-        throw error;
-      }
+      const result = await hotelOperationsService.bulkUpdateRoomStatus(
+        roomIds,
+        status,
+      );
+      return result;
     },
     [],
   );
 
   const bulkAssignTasks = useCallback(
     async (taskIds: string[], staffId: number) => {
-      try {
-        const result = await hotelOperationsService.bulkAssignTasks(
-          taskIds,
-          staffId,
-        );
-        return result;
-      } catch (error) {
-        throw error;
-      }
+      const result = await hotelOperationsService.bulkAssignTasks(
+        taskIds,
+        staffId,
+      );
+      return result;
     },
     [],
   );

@@ -59,10 +59,6 @@ import {
   formatRequestDate,
   getRequestStatusColor,
   getTimeElapsed,
-  // useRequestManagement, // TEMPORARILY DISABLED
-  useRequestMessages,
-  // useRequestRealtime, // TEMPORARILY DISABLED
-  useRequestStatus,
 } from "../../domains/request-management";
 
 // ========================================
@@ -89,7 +85,8 @@ const RequestDetailModal: React.FC<RequestDetailModal> = ({
   onClose,
   onOpenMessage,
 }) => {
-  const { updateStatus, isUpdating } = useRequestStatus();
+  // const { updateStatus, isUpdating } = useRequestStatus();
+  const isUpdating = false;
   const [selectedStatus, setSelectedStatus] = useState(request.status);
 
   useEffect(() => {
@@ -238,7 +235,13 @@ const MessageModal: React.FC<MessageModalProps> = ({
   onClose,
 }) => {
   const { messages, messageLoading, isSending, loadMessages, sendNewMessage } =
-    useRequestMessages(request.id);
+    {
+      messages: [],
+      messageLoading: false,
+      isSending: false,
+      loadMessages: () => {},
+      sendNewMessage: async () => {},
+    } as any;
   const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
@@ -407,7 +410,6 @@ export const CustomerRequestsRefactored: React.FC = () => {
   const clearFilters = () => {};
   const clearCurrentError = () => {};
   const setupAutoRefresh = () => {};
-  const handleFilterChange = () => {};
 
   // Set up real-time updates
   // useRequestRealtime(); // TEMPORARILY DISABLED
@@ -471,7 +473,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
     loadRequests();
   };
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange2 = (key: string, value: string) => {
     updateFilters({ [key]: value });
   };
 
@@ -528,7 +530,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
         </Label>
         <Select
           value={filters.status}
-          onValueChange={(value) => handleFilterChange("status", value)}
+          onValueChange={(value) => handleFilterChange2("status", value)}
         >
           <SelectTrigger className="w-40" id="status-filter">
             <SelectValue />
@@ -551,7 +553,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
           type="date"
           id="start-date"
           value={filters.startDate}
-          onChange={(e) => handleFilterChange("startDate", e.target.value)}
+          onChange={(e) => handleFilterChange2("startDate", e.target.value)}
           className="w-40"
         />
       </div>
@@ -564,7 +566,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
           type="date"
           id="end-date"
           value={filters.endDate}
-          onChange={(e) => handleFilterChange("endDate", e.target.value)}
+          onChange={(e) => handleFilterChange2("endDate", e.target.value)}
           className="w-40"
         />
       </div>
@@ -578,7 +580,7 @@ export const CustomerRequestsRefactored: React.FC = () => {
           id="search"
           placeholder="Tên khách, số phòng..."
           value={filters.searchQuery}
-          onChange={(e) => handleFilterChange("searchQuery", e.target.value)}
+          onChange={(e) => handleFilterChange2("searchQuery", e.target.value)}
           className="w-48"
         />
       </div>

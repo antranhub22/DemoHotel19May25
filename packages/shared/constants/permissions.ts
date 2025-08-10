@@ -56,17 +56,6 @@ export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
     calls: ["view", "manage"],
     requests: ["view", "manage"],
   },
-  frontdesk: {
-    dashboard: ["view", "view_client_interface"], // ✅ Added view_client_interface
-    calls: ["view"],
-    requests: ["view", "manage"],
-  },
-  itmanager: {
-    dashboard: ["view"],
-    system: ["view", "debug"],
-    calls: ["view"],
-  },
-
   guest: {
     dashboard: ["view"], // Add missing guest permissions
   },
@@ -218,68 +207,6 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       icon: "📈",
       path: "/saas-dashboard/analytics",
       requiredPermission: "analytics.view",
-    },
-  ],
-  frontdesk: [
-    {
-      key: "dashboard",
-      label: "Tổng quan",
-      icon: "📊",
-      path: "/saas-dashboard",
-      requiredPermission: "dashboard.view",
-    },
-    {
-      key: "calls",
-      label: "Cuộc gọi",
-      icon: "📞",
-      path: "/saas-dashboard/calls",
-      requiredPermission: "calls.view",
-    },
-  ],
-  itmanager: [
-    {
-      key: "dashboard",
-      label: "System Dashboard",
-      icon: "🔧",
-      path: "/saas-dashboard",
-      requiredPermission: "dashboard.view",
-    },
-    {
-      key: "system",
-      label: "Hệ thống",
-      icon: "⚙️",
-      path: "/saas-dashboard/system",
-      requiredPermission: "system.view",
-    },
-  ],
-  super_admin: [
-    {
-      key: "dashboard",
-      label: "Tổng quan",
-      icon: "📊",
-      path: "/saas-dashboard",
-      requiredPermission: "dashboard.view",
-    },
-    {
-      key: "calls",
-      label: "Cuộc gọi",
-      icon: "📞",
-      path: "/saas-dashboard/calls",
-      requiredPermission: "calls.view",
-    },
-    {
-      key: "analytics",
-      label: "Phân tích",
-      icon: "📈",
-      path: "/saas-dashboard/analytics",
-      requiredPermission: "analytics.view",
-    },
-    {
-      key: "system",
-      label: "Hệ thống",
-      icon: "⚙️",
-      path: "/saas-dashboard/system",
-      requiredPermission: "system.view",
     },
   ],
   guest: [

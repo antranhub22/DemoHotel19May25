@@ -27,6 +27,7 @@ scripts/
 # Testing utilities  
 tests/
 **/ws_test_client.*
+**/.!*.tsx
 
 # Documentation
 docs/

@@ -1,4 +1,5 @@
 import { useAssistant } from "@/context";
+import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
 import { useSummaryProgression } from "@/hooks/useSummaryProgression";
 import logger from "@shared/utils/logger";
 import * as React from "react";
@@ -121,10 +122,12 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
         if (summary.hasData && language !== "vi" && !vietnameseSummary) {
           await translateToVietnamese(summary.content);
         }
-      } catch {}
+      } catch (e) {
+        logger.warn("[SummaryPopupContent] translate error", "Component", e);
+      }
     };
     maybeTranslate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // deps intentionally limited to avoid noisy re-translation
   }, [summary.hasData, summary.content, language]);
 
   const formatTimestamp = (date: Date) => {

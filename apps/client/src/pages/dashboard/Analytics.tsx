@@ -1,35 +1,27 @@
-import * as React from 'react';
-import type { Room } from '@/types/common.types';
-import {
-  TrendingUp,
-  Globe,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-  Phone,
-  Clock,
-  Activity,
-  Users,
-} from 'lucide-react';
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import * as React from "react";
+// removed unused Room type
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+  Calendar,
+  Clock,
+  Download,
+  Filter,
+  Globe,
+  Phone,
+  RefreshCw,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useState } from "react";
 
 // Mock analytics data
 const mockAnalytics = {
@@ -44,63 +36,63 @@ const mockAnalytics = {
     satisfactionGrowth: 2.1,
   },
   callsByHour: [
-    { hour: '00', calls: 12 },
-    { hour: '01', calls: 8 },
-    { hour: '02', calls: 5 },
-    { hour: '03', calls: 3 },
-    { hour: '04', calls: 2 },
-    { hour: '05', calls: 4 },
-    { hour: '06', calls: 15 },
-    { hour: '07', calls: 28 },
-    { hour: '08', calls: 45 },
-    { hour: '09', calls: 67 },
-    { hour: '10', calls: 89 },
-    { hour: '11', calls: 78 },
-    { hour: '12', calls: 95 },
-    { hour: '13', calls: 87 },
-    { hour: '14', calls: 92 },
-    { hour: '15', calls: 85 },
-    { hour: '16', calls: 78 },
-    { hour: '17', calls: 65 },
-    { hour: '18', calls: 82 },
-    { hour: '19', calls: 75 },
-    { hour: '20', calls: 58 },
-    { hour: '21', calls: 45 },
-    { hour: '22', calls: 32 },
-    { hour: '23', calls: 22 },
+    { hour: "00", calls: 12 },
+    { hour: "01", calls: 8 },
+    { hour: "02", calls: 5 },
+    { hour: "03", calls: 3 },
+    { hour: "04", calls: 2 },
+    { hour: "05", calls: 4 },
+    { hour: "06", calls: 15 },
+    { hour: "07", calls: 28 },
+    { hour: "08", calls: 45 },
+    { hour: "09", calls: 67 },
+    { hour: "10", calls: 89 },
+    { hour: "11", calls: 78 },
+    { hour: "12", calls: 95 },
+    { hour: "13", calls: 87 },
+    { hour: "14", calls: 92 },
+    { hour: "15", calls: 85 },
+    { hour: "16", calls: 78 },
+    { hour: "17", calls: 65 },
+    { hour: "18", calls: 82 },
+    { hour: "19", calls: 75 },
+    { hour: "20", calls: 58 },
+    { hour: "21", calls: 45 },
+    { hour: "22", calls: 32 },
+    { hour: "23", calls: 22 },
   ],
   languageDistribution: [
-    { language: 'Tiếng Việt', calls: 687, percentage: 55.1 },
-    { language: 'English', calls: 423, percentage: 33.9 },
-    { language: 'Français', calls: 137, percentage: 11.0 },
+    { language: "Tiếng Việt", calls: 687, percentage: 55.1 },
+    { language: "English", calls: 423, percentage: 33.9 },
+    { language: "Français", calls: 137, percentage: 11.0 },
   ],
   intentDistribution: [
-    { intent: 'Room Service', calls: 342, percentage: 27.4 },
-    { intent: 'Hotel Information', calls: 298, percentage: 23.9 },
-    { intent: 'Spa Booking', calls: 187, percentage: 15.0 },
-    { intent: 'Restaurant Reservation', calls: 156, percentage: 12.5 },
-    { intent: 'Housekeeping', calls: 98, percentage: 7.9 },
-    { intent: 'Concierge', calls: 87, percentage: 7.0 },
-    { intent: 'Complaints', calls: 45, percentage: 3.6 },
-    { intent: 'Other', calls: 34, percentage: 2.7 },
+    { intent: "Room Service", calls: 342, percentage: 27.4 },
+    { intent: "Hotel Information", calls: 298, percentage: 23.9 },
+    { intent: "Spa Booking", calls: 187, percentage: 15.0 },
+    { intent: "Restaurant Reservation", calls: 156, percentage: 12.5 },
+    { intent: "Housekeeping", calls: 98, percentage: 7.9 },
+    { intent: "Concierge", calls: 87, percentage: 7.0 },
+    { intent: "Complaints", calls: 45, percentage: 3.6 },
+    { intent: "Other", calls: 34, percentage: 2.7 },
   ],
   callsByDay: [
-    { day: 'Thứ 2', calls: 145 },
-    { day: 'Thứ 3', calls: 178 },
-    { day: 'Thứ 4', calls: 189 },
-    { day: 'Thứ 5', calls: 234 },
-    { day: 'Thứ 6', calls: 267 },
-    { day: 'Thứ 7', calls: 156 },
-    { day: 'Chủ nhật', calls: 78 },
+    { day: "Thứ 2", calls: 145 },
+    { day: "Thứ 3", calls: 178 },
+    { day: "Thứ 4", calls: 189 },
+    { day: "Thứ 5", calls: 234 },
+    { day: "Thứ 6", calls: 267 },
+    { day: "Thứ 7", calls: 156 },
+    { day: "Chủ nhật", calls: 78 },
   ],
   satisfactionByIntent: [
-    { intent: 'Room Service', rating: 4.8 },
-    { intent: 'Hotel Information', rating: 4.9 },
-    { intent: 'Spa Booking', rating: 4.6 },
-    { intent: 'Restaurant Reservation', rating: 4.7 },
-    { intent: 'Housekeeping', rating: 4.5 },
-    { intent: 'Concierge', rating: 4.8 },
-    { intent: 'Complaints', rating: 3.2 },
+    { intent: "Room Service", rating: 4.8 },
+    { intent: "Hotel Information", rating: 4.9 },
+    { intent: "Spa Booking", rating: 4.6 },
+    { intent: "Restaurant Reservation", rating: 4.7 },
+    { intent: "Housekeeping", rating: 4.5 },
+    { intent: "Concierge", rating: 4.8 },
+    { intent: "Complaints", rating: 3.2 },
   ],
 };
 
@@ -111,7 +103,7 @@ const MetricCard = ({
   change,
   icon: Icon,
   description,
-  suffix = '',
+  suffix = "",
 }: {
   title: string;
   value: number | string;
@@ -135,11 +127,11 @@ const MetricCard = ({
         {change !== undefined && (
           <div
             className={`ml-auto flex items-center text-xs ${
-              change > 0 ? 'text-green-600' : 'text-red-600'
+              change > 0 ? "text-green-600" : "text-red-600"
             }`}
           >
             <TrendingUp
-              className={`h-3 w-3 mr-1 ${change < 0 ? 'rotate-180' : ''}`}
+              className={`h-3 w-3 mr-1 ${change < 0 ? "rotate-180" : ""}`}
             />
             {Math.abs(change)}%
           </div>
@@ -161,7 +153,7 @@ const SimpleBarChart = ({
   nameKey: string;
   title: string;
 }) => {
-  const maxValue = Math.max(...data.map(item => item[dataKey]));
+  const maxValue = Math.max(...data.map((item) => item[dataKey]));
 
   return (
     <Card>
@@ -194,8 +186,8 @@ const SimpleBarChart = ({
 
 // Analytics filters
 const AnalyticsFilters = () => {
-  const [timeRange, setTimeRange] = useState('30d');
-  const [language, setLanguage] = useState('all');
+  const [timeRange, setTimeRange] = useState("30d");
+  const [language, setLanguage] = useState("all");
 
   return (
     <Card>
@@ -406,10 +398,10 @@ const SatisfactionTab = () => {
                     <Badge
                       variant={
                         item.rating >= 4.5
-                          ? 'default'
+                          ? "default"
                           : item.rating >= 4.0
-                            ? 'secondary'
-                            : 'destructive'
+                            ? "secondary"
+                            : "destructive"
                       }
                     >
                       {item.rating}/5
@@ -419,10 +411,10 @@ const SatisfactionTab = () => {
                     <div
                       className={`h-2 rounded-full ${
                         item.rating >= 4.5
-                          ? 'bg-green-500'
+                          ? "bg-green-500"
                           : item.rating >= 4.0
-                            ? 'bg-yellow-500'
-                            : 'bg-red-500'
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                       }`}
                       style={{ width: `${(item.rating / 5) * 100}%` }}
                     />
@@ -455,7 +447,7 @@ const SatisfactionTab = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full"
-                    style={{ width: '68%' }}
+                    style={{ width: "68%" }}
                   />
                 </div>
 
@@ -466,7 +458,7 @@ const SatisfactionTab = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full"
-                    style={{ width: '22%' }}
+                    style={{ width: "22%" }}
                   />
                 </div>
 
@@ -477,7 +469,7 @@ const SatisfactionTab = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-yellow-500 h-2 rounded-full"
-                    style={{ width: '7%' }}
+                    style={{ width: "7%" }}
                   />
                 </div>
 
@@ -488,7 +480,7 @@ const SatisfactionTab = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-orange-500 h-2 rounded-full"
-                    style={{ width: '2%' }}
+                    style={{ width: "2%" }}
                   />
                 </div>
 
@@ -499,7 +491,7 @@ const SatisfactionTab = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-red-500 h-2 rounded-full"
-                    style={{ width: '1%' }}
+                    style={{ width: "1%" }}
                   />
                 </div>
               </div>

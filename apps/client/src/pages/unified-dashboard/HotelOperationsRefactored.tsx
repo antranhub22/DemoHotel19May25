@@ -49,7 +49,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import type { HousekeepingTask, Room } from "../types/common.types";
+// import type { HousekeepingTask, Room } from "../types/common.types";
 
 // Hotel Operations Domain imports - TEMPORARILY DISABLED DUE TO CIRCULAR DEPENDENCY
 // import {
@@ -106,13 +106,27 @@ const TASK_PRIORITY_OPTIONS = ["low", "medium", "high"];
 // Mock types
 interface Room {
   id: string;
-  number: string;
+  roomNumber: string;
   status: string;
+  roomType: { name: string; code?: string };
+  floor?: number;
+  currentPrice?: number;
+  capacity?: number;
+  bedCount?: number;
+  bedType?: string;
+  currentGuest?: { guestName: string } | null;
+  lastCleaning?: Date | string | null;
 }
 interface HousekeepingTask {
   id: string;
-  type: string;
+  taskType: string;
   status: string;
+  roomNumber?: string;
+  description?: string;
+  estimatedDuration?: number;
+  assignedStaffName?: string;
+  scheduledStart?: Date | string | null;
+  priority?: string;
 }
 interface MaintenanceRequest {
   id: string;

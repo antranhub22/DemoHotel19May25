@@ -557,8 +557,4 @@ export const TenantManagementPanel: React.FC = () => {
 
 export default TenantManagementPanel;
 
-interface CreateTenantModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess?: () => void;
-}
+// Removed duplicate interface declaration

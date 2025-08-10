@@ -547,8 +547,4 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;
 };
 
-interface VapiProviderProps {
-  children: React.ReactNode;
-  publicKey?: string;
-  assistantId?: string;
-}
+// Removed duplicate interface declaration

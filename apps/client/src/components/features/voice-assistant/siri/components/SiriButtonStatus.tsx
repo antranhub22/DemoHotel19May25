@@ -1,6 +1,6 @@
-import { Language } from '@/types/interface1.types';
-import React from 'react';
-import { LanguageColorScheme } from '../constants/languageColors';
+import { Language } from "@/types/interface1.types";
+import React from "react";
+import { LanguageColorScheme } from "../constants/languageColors";
 
 interface SiriButtonStatusProps {
   isCallStarted: boolean;
@@ -9,7 +9,12 @@ interface SiriButtonStatusProps {
   colors: LanguageColorScheme;
 }
 
-export const SiriButtonStatus: React.FC<SiriButtonStatusProps> = ({ isCallStarted, isConfirming, language, colors }) => {
+export const SiriButtonStatus: React.FC<SiriButtonStatusProps> = ({
+  isCallStarted,
+  isConfirming,
+  language: _language,
+  colors,
+}) => {
   return (
     <>
       {/* Enhanced Status text with better accessibility */}
@@ -19,14 +24,14 @@ export const SiriButtonStatus: React.FC<SiriButtonStatusProps> = ({ isCallStarte
         role="status"
         aria-live="polite"
         style={{
-          fontSize: '1rem',
-          fontWeight: '600',
+          fontSize: "1rem",
+          fontWeight: "600",
         }}
       >
         {isConfirming ? (
           <div
             style={{
-              color: '#808080',
+              color: "#808080",
               textShadow: `0 2px 8px rgba(128, 128, 128, 0.3)`,
             }}
             aria-label="Processing call summary, please wait"
@@ -58,7 +63,7 @@ export const SiriButtonStatus: React.FC<SiriButtonStatusProps> = ({ isCallStarte
 
       {/* Keyboard Navigation Hint */}
       <div className="mt-2 text-xs text-gray-500 text-center opacity-70">
-        Press Space or Enter to {isCallStarted ? 'end' : 'start'} voice call
+        Press Space or Enter to {isCallStarted ? "end" : "start"} voice call
       </div>
     </>
   );

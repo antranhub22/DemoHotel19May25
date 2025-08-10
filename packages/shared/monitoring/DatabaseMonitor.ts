@@ -635,7 +635,7 @@ export class DatabaseMonitor {
       // In practice, you'd have a more sophisticated rule engine
 
       switch (rule.condition) {
-        case "slow_query_rate":
+        case "slow_query_rate": {
           const slowQueryRate =
             metrics.queries.totalQueries > 0
               ? (metrics.performance.slowQueryCount /
@@ -643,6 +643,7 @@ export class DatabaseMonitor {
                 100
               : 0;
           return slowQueryRate > rule.threshold;
+        }
 
         case "error_rate":
           return metrics.performance.errorRate > rule.threshold;
@@ -653,7 +654,7 @@ export class DatabaseMonitor {
         case "response_time":
           return metrics.performance.averageResponseTime > rule.threshold;
 
-        case "connection_pool_exhaustion":
+        case "connection_pool_exhaustion": {
           const poolUsage =
             metrics.connections.totalConnections > 0
               ? (metrics.connections.activeConnections /
@@ -661,6 +662,7 @@ export class DatabaseMonitor {
                 100
               : 0;
           return poolUsage > rule.threshold;
+        }
 
         default:
           return false;
@@ -709,7 +711,7 @@ export class DatabaseMonitor {
     metrics: DatabaseMetrics,
   ): string {
     switch (rule.condition) {
-      case "slow_query_rate":
+      case "slow_query_rate": {
         const rate =
           metrics.queries.totalQueries > 0
             ? (metrics.performance.slowQueryCount /
@@ -717,6 +719,7 @@ export class DatabaseMonitor {
               100
             : 0;
         return `Slow query rate is ${rate.toFixed(2)}%, threshold is ${rule.threshold}%`;
+      }
 
       case "error_rate":
         return `Error rate is ${metrics.performance.errorRate.toFixed(2)}%, threshold is ${rule.threshold}%`;

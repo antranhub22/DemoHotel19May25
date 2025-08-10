@@ -8,7 +8,6 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 // Import new unified types and config
-import type { AuthErrorCode, UserRole } from "@auth/config";
 import {
   AUTH_ERROR_MESSAGES,
   DEFAULT_PERMISSIONS,
@@ -17,6 +16,8 @@ import {
   SECURITY_CONFIG,
   TENANT_CONFIG,
   authValidationSchemas,
+  type AuthErrorCode,
+  type UserRole,
 } from "@auth/config";
 import type {
   AuthResult,
@@ -697,18 +698,6 @@ export class UnifiedAuthService {
       const hashedPassword = await this.hashPassword(password);
 
       // Create user in database
-      const newUser = await this.createUser({
-        username,
-        email,
-        password: hashedPassword,
-        displayName,
-        firstName,
-        lastName,
-        phone,
-        tenantId: tenantId || TENANT_CONFIG.DEFAULT_TENANT_ID,
-        role,
-        isActive: false, // Start inactive until email verified
-      });
 
       // Generate email verification token
       const verificationToken =

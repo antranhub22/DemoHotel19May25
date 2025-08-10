@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Search,
   Filter,
@@ -22,21 +22,21 @@ import {
   HardDrive,
   Wifi,
   Zap,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -44,17 +44,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "@shared/utils/logger";
 
 // Types
 interface LogEntry {
   id: string;
   timestamp: string;
-  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+  level: "debug" | "info" | "warn" | "error" | "fatal";
   module: string;
   message: string;
   details?: string;
@@ -90,107 +90,107 @@ interface LogFilter {
 // Mock data
 const mockLogs: LogEntry[] = [
   {
-    id: '1',
-    timestamp: '2024-01-15T15:30:25.123Z',
-    level: 'info',
-    module: 'auth',
-    message: 'User login successful',
-    details: 'User authenticated successfully with email',
-    requestId: 'req_123456',
-    userId: 'user_001',
-    ip: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    id: "1",
+    timestamp: "2024-01-15T15:30:25.123Z",
+    level: "info",
+    module: "auth",
+    message: "User login successful",
+    details: "User authenticated successfully with email",
+    requestId: "req_123456",
+    userId: "user_001",
+    ip: "192.168.1.100",
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
     duration: 125,
     statusCode: 200,
-    endpoint: '/api/auth/login',
+    endpoint: "/api/auth/login",
   },
   {
-    id: '2',
-    timestamp: '2024-01-15T15:29:45.456Z',
-    level: 'error',
-    module: 'database',
-    message: 'Connection timeout',
+    id: "2",
+    timestamp: "2024-01-15T15:29:45.456Z",
+    level: "error",
+    module: "database",
+    message: "Connection timeout",
     details:
-      'Database connection pool exhausted, unable to acquire connection within timeout',
-    requestId: 'req_123455',
-    ip: '192.168.1.101',
+      "Database connection pool exhausted, unable to acquire connection within timeout",
+    requestId: "req_123455",
+    ip: "192.168.1.101",
     duration: 5000,
     statusCode: 500,
-    endpoint: '/api/staff/requests',
+    endpoint: "/api/staff/requests",
   },
   {
-    id: '3',
-    timestamp: '2024-01-15T15:28:15.789Z',
-    level: 'warn',
-    module: 'api',
-    message: 'Rate limit exceeded',
-    details: 'Client has exceeded rate limit of 100 requests per minute',
-    requestId: 'req_123454',
-    ip: '192.168.1.102',
+    id: "3",
+    timestamp: "2024-01-15T15:28:15.789Z",
+    level: "warn",
+    module: "api",
+    message: "Rate limit exceeded",
+    details: "Client has exceeded rate limit of 100 requests per minute",
+    requestId: "req_123454",
+    ip: "192.168.1.102",
     duration: 1,
     statusCode: 429,
-    endpoint: '/api/staff/requests',
+    endpoint: "/api/staff/requests",
   },
   {
-    id: '4',
-    timestamp: '2024-01-15T15:27:30.012Z',
-    level: 'debug',
-    module: 'websocket',
-    message: 'WebSocket connection established',
-    details: 'New WebSocket connection from client',
-    requestId: 'ws_123453',
-    ip: '192.168.1.103',
+    id: "4",
+    timestamp: "2024-01-15T15:27:30.012Z",
+    level: "debug",
+    module: "websocket",
+    message: "WebSocket connection established",
+    details: "New WebSocket connection from client",
+    requestId: "ws_123453",
+    ip: "192.168.1.103",
     userAgent:
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
   },
   {
-    id: '5',
-    timestamp: '2024-01-15T15:26:45.345Z',
-    level: 'info',
-    module: 'email',
-    message: 'Email notification sent',
-    details: 'Daily report email sent to admin@hotel.com',
-    requestId: 'email_123452',
+    id: "5",
+    timestamp: "2024-01-15T15:26:45.345Z",
+    level: "info",
+    module: "email",
+    message: "Email notification sent",
+    details: "Daily report email sent to admin@hotel.com",
+    requestId: "email_123452",
     duration: 890,
     statusCode: 200,
   },
   {
-    id: '6',
-    timestamp: '2024-01-15T15:25:20.678Z',
-    level: 'error',
-    module: 'ai',
-    message: 'OpenAI API call failed',
-    details: 'OpenAI API returned 503 Service Unavailable',
-    requestId: 'req_123451',
-    ip: '192.168.1.100',
+    id: "6",
+    timestamp: "2024-01-15T15:25:20.678Z",
+    level: "error",
+    module: "ai",
+    message: "OpenAI API call failed",
+    details: "OpenAI API returned 503 Service Unavailable",
+    requestId: "req_123451",
+    ip: "192.168.1.100",
     duration: 2000,
     statusCode: 503,
-    endpoint: '/api/ai/chat',
+    endpoint: "/api/ai/chat",
   },
   {
-    id: '7',
-    timestamp: '2024-01-15T15:24:55.901Z',
-    level: 'info',
-    module: 'backup',
-    message: 'Backup completed successfully',
-    details: 'Database backup completed, size: 2.1GB',
+    id: "7",
+    timestamp: "2024-01-15T15:24:55.901Z",
+    level: "info",
+    module: "backup",
+    message: "Backup completed successfully",
+    details: "Database backup completed, size: 2.1GB",
     duration: 45000,
     statusCode: 200,
   },
   {
-    id: '8',
-    timestamp: '2024-01-15T15:23:10.234Z',
-    level: 'warn',
-    module: 'security',
-    message: 'Failed login attempt',
-    details: 'User attempted login with incorrect credentials',
-    requestId: 'req_123450',
-    userId: 'user_002',
-    ip: '192.168.1.104',
-    userAgent: 'curl/7.68.0',
+    id: "8",
+    timestamp: "2024-01-15T15:23:10.234Z",
+    level: "warn",
+    module: "security",
+    message: "Failed login attempt",
+    details: "User attempted login with incorrect credentials",
+    requestId: "req_123450",
+    userId: "user_002",
+    ip: "192.168.1.104",
+    userAgent: "curl/7.68.0",
     duration: 100,
     statusCode: 401,
-    endpoint: '/api/auth/login',
+    endpoint: "/api/auth/login",
   },
 ];
 
@@ -222,32 +222,32 @@ const mockStats: LogStats = {
 // Helper functions
 const getLevelColor = (level: string) => {
   switch (level) {
-    case 'debug':
-      return 'bg-blue-100 text-blue-800';
-    case 'info':
-      return 'bg-green-100 text-green-800';
-    case 'warn':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'error':
-      return 'bg-red-100 text-red-800';
-    case 'fatal':
-      return 'bg-purple-100 text-purple-800';
+    case "debug":
+      return "bg-blue-100 text-blue-800";
+    case "info":
+      return "bg-green-100 text-green-800";
+    case "warn":
+      return "bg-yellow-100 text-yellow-800";
+    case "error":
+      return "bg-red-100 text-red-800";
+    case "fatal":
+      return "bg-purple-100 text-purple-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getLevelIcon = (level: string) => {
   switch (level) {
-    case 'debug':
+    case "debug":
       return <Info className="h-4 w-4" />;
-    case 'info':
+    case "info":
       return <CheckCircle className="h-4 w-4" />;
-    case 'warn':
+    case "warn":
       return <AlertTriangle className="h-4 w-4" />;
-    case 'error':
+    case "error":
       return <XCircle className="h-4 w-4" />;
-    case 'fatal':
+    case "fatal":
       return <AlertCircle className="h-4 w-4" />;
     default:
       return <Info className="h-4 w-4" />;
@@ -256,23 +256,23 @@ const getLevelIcon = (level: string) => {
 
 const getModuleIcon = (module: string) => {
   switch (module) {
-    case 'auth':
+    case "auth":
       return <Shield className="h-4 w-4" />;
-    case 'api':
+    case "api":
       return <Globe className="h-4 w-4" />;
-    case 'database':
+    case "database":
       return <Database className="h-4 w-4" />;
-    case 'websocket':
+    case "websocket":
       return <Wifi className="h-4 w-4" />;
-    case 'email':
+    case "email":
       return <FileText className="h-4 w-4" />;
-    case 'ai':
+    case "ai":
       return <Zap className="h-4 w-4" />;
-    case 'backup':
+    case "backup":
       return <HardDrive className="h-4 w-4" />;
-    case 'security':
+    case "security":
       return <Shield className="h-4 w-4" />;
-    case 'system':
+    case "system":
       return <Server className="h-4 w-4" />;
     default:
       return <Monitor className="h-4 w-4" />;
@@ -280,13 +280,13 @@ const getModuleIcon = (module: string) => {
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  return new Date(dateString).toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     // ✅ FIXED: Remove fractionalSecondDigits as it's not supported in all browsers
     // fractionalSecondDigits: 3,
   } as any); // ✅ FIXED: Use any to bypass type conflicts
@@ -294,7 +294,7 @@ const formatDate = (dateString: string) => {
 
 const formatDuration = (duration?: number) => {
   if (!duration) {
-    return '-';
+    return "-";
   }
   if (duration < 1000) {
     return `${duration}ms`;
@@ -319,8 +319,8 @@ const LogDetailsModal = ({
   return (
     <div
       className={cn(
-        'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50',
-        isOpen ? 'block' : 'hidden'
+        "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50",
+        isOpen ? "block" : "hidden",
       )}
     >
       <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -355,15 +355,15 @@ const LogDetailsModal = ({
             </div>
             <div>
               <Label className="text-sm font-medium">Request ID</Label>
-              <p className="text-sm font-mono">{log.requestId || '-'}</p>
+              <p className="text-sm font-mono">{log.requestId || "-"}</p>
             </div>
             <div>
               <Label className="text-sm font-medium">User ID</Label>
-              <p className="text-sm font-mono">{log.userId || '-'}</p>
+              <p className="text-sm font-mono">{log.userId || "-"}</p>
             </div>
             <div>
               <Label className="text-sm font-medium">IP Address</Label>
-              <p className="text-sm font-mono">{log.ip || '-'}</p>
+              <p className="text-sm font-mono">{log.ip || "-"}</p>
             </div>
             <div>
               <Label className="text-sm font-medium">Duration</Label>
@@ -371,7 +371,7 @@ const LogDetailsModal = ({
             </div>
             <div>
               <Label className="text-sm font-medium">Status Code</Label>
-              <p className="text-sm">{log.statusCode || '-'}</p>
+              <p className="text-sm">{log.statusCode || "-"}</p>
             </div>
           </div>
 
@@ -416,7 +416,7 @@ const LogDetailsModal = ({
 
 // Main System Logs component
 export const SystemLogs: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [logs, setLogs] = useState<LogEntry[]>(mockLogs);
   const [stats, setStats] = useState<LogStats>(mockStats);
   const [loading, setLoading] = useState(false);
@@ -426,21 +426,21 @@ export const SystemLogs: React.FC = () => {
 
   // Filter states
   const [filter, setFilter] = useState<LogFilter>({
-    level: 'all',
-    module: 'all',
-    startTime: '',
-    endTime: '',
-    search: '',
-    requestId: '',
-    userId: '',
-    ip: '',
+    level: "all",
+    module: "all",
+    startTime: "",
+    endTime: "",
+    search: "",
+    requestId: "",
+    userId: "",
+    ip: "",
   });
 
   // Apply filters
-  const filteredLogs = logs.filter(log => {
-    const matchesLevel = filter.level === 'all' || log.level === filter.level;
+  const filteredLogs = logs.filter((log) => {
+    const matchesLevel = filter.level === "all" || log.level === filter.level;
     const matchesModule =
-      filter.module === 'all' || log.module === filter.module;
+      filter.module === "all" || log.module === filter.module;
     const matchesSearch =
       !filter.search ||
       log.message.toLowerCase().includes(filter.search.toLowerCase()) ||
@@ -481,26 +481,26 @@ export const SystemLogs: React.FC = () => {
     setLoading(true);
     try {
       // Simulate export
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Create CSV content
       const csvContent = filteredLogs
         .map(
-          log =>
-            `${log.timestamp},${log.level},${log.module},"${log.message}",${log.requestId || ''},${log.userId || ''},${log.ip || ''},${log.statusCode || ''}`
+          (log) =>
+            `${log.timestamp},${log.level},${log.module},"${log.message}",${log.requestId || ""},${log.userId || ""},${log.ip || ""},${log.statusCode || ""}`,
         )
-        .join('\n');
+        .join("\n");
 
       // Download CSV
-      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const blob = new Blob([csvContent], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `system_logs_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `system_logs_${new Date().toISOString().split("T")[0]}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      logger.error('Export failed:', 'Component', error);
+      logger.error("Export failed:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -510,11 +510,11 @@ export const SystemLogs: React.FC = () => {
     setLoading(true);
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setLogs(mockLogs);
       setStats(mockStats);
     } catch (error) {
-      logger.error('Failed to fetch logs:', 'Component', error);
+      logger.error("Failed to fetch logs:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -522,14 +522,14 @@ export const SystemLogs: React.FC = () => {
 
   const clearFilters = () => {
     setFilter({
-      level: 'all',
-      module: 'all',
-      startTime: '',
-      endTime: '',
-      search: '',
-      requestId: '',
-      userId: '',
-      ip: '',
+      level: "all",
+      module: "all",
+      startTime: "",
+      endTime: "",
+      search: "",
+      requestId: "",
+      userId: "",
+      ip: "",
     });
   };
 
@@ -549,19 +549,19 @@ export const SystemLogs: React.FC = () => {
       const newLog: LogEntry = {
         id: Date.now().toString(),
         timestamp: new Date().toISOString(),
-        level: ['debug', 'info', 'warn', 'error'][
+        level: ["debug", "info", "warn", "error"][
           Math.floor(Math.random() * 4)
         ] as any,
-        module: ['auth', 'api', 'database', 'websocket'][
+        module: ["auth", "api", "database", "websocket"][
           Math.floor(Math.random() * 4)
         ],
         message: `Real-time log entry ${Date.now()}`,
-        details: 'Generated for real-time demonstration',
+        details: "Generated for real-time demonstration",
         requestId: `req_${Date.now()}`,
         ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
       };
 
-      setLogs(prev => [newLog, ...prev.slice(0, 99)]);
+      setLogs((prev) => [newLog, ...prev.slice(0, 99)]);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -586,7 +586,7 @@ export const SystemLogs: React.FC = () => {
           </div>
           <Button onClick={fetchLogs} disabled={loading}>
             <RefreshCw
-              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+              className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
             />
             Refresh
           </Button>
@@ -676,7 +676,7 @@ export const SystemLogs: React.FC = () => {
                   <Label htmlFor="level">Log Level</Label>
                   <Select
                     value={filter.level}
-                    onValueChange={value =>
+                    onValueChange={(value) =>
                       setFilter({ ...filter, level: value })
                     }
                   >
@@ -698,7 +698,7 @@ export const SystemLogs: React.FC = () => {
                   <Label htmlFor="module">Module</Label>
                   <Select
                     value={filter.module}
-                    onValueChange={value =>
+                    onValueChange={(value) =>
                       setFilter({ ...filter, module: value })
                     }
                   >
@@ -728,7 +728,7 @@ export const SystemLogs: React.FC = () => {
                       id="search"
                       placeholder="Search logs..."
                       value={filter.search}
-                      onChange={e =>
+                      onChange={(e) =>
                         setFilter({ ...filter, search: e.target.value })
                       }
                       className="pl-10"
@@ -742,7 +742,7 @@ export const SystemLogs: React.FC = () => {
                     id="startTime"
                     type="datetime-local"
                     value={filter.startTime}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFilter({ ...filter, startTime: e.target.value })
                     }
                   />
@@ -754,7 +754,7 @@ export const SystemLogs: React.FC = () => {
                     id="endTime"
                     type="datetime-local"
                     value={filter.endTime}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFilter({ ...filter, endTime: e.target.value })
                     }
                   />
@@ -766,7 +766,7 @@ export const SystemLogs: React.FC = () => {
                     id="requestId"
                     placeholder="Filter by request ID..."
                     value={filter.requestId}
-                    onChange={e =>
+                    onChange={(e) =>
                       setFilter({ ...filter, requestId: e.target.value })
                     }
                   />
@@ -815,7 +815,7 @@ export const SystemLogs: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredLogs.map(log => (
+                    {filteredLogs.map((log) => (
                       <TableRow key={log.id}>
                         <TableCell className="font-mono text-sm">
                           {formatDate(log.timestamp)}
@@ -852,8 +852,8 @@ export const SystemLogs: React.FC = () => {
                             <Badge
                               variant={
                                 log.statusCode >= 400
-                                  ? 'destructive'
-                                  : 'default'
+                                  ? "destructive"
+                                  : "default"
                               }
                             >
                               {log.statusCode}

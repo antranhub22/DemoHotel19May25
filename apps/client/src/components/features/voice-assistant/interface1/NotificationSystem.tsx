@@ -181,12 +181,6 @@ const getPositionClasses = (
 // Individual notification component with enhanced animations
 
 interface NotificationItemProps {
-  className?: string;
-  children?: React.ReactNode;
-  // TODO: Add specific props for NotificationItem
-}
-
-interface NotificationItemProps {
   notification: Notification;
   onClose: (id: string) => void;
   isExiting?: boolean;
@@ -201,7 +195,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
   index = 0,
   isMobile = false,
 }) => {
-  const prefersReducedMotion = useReducedMotion();
+  const _prefersReducedMotion = useReducedMotion();
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState(100);
   const progressRef = useRef<NodeJS.Timeout | null>(null);
@@ -507,7 +501,7 @@ export const NotificationSystem: React.FC<NotificationSystemProps> = ({
     return null;
   }
 
-  const prefersReducedMotion = useReducedMotion();
+  const _prefersReducedMotion2 = useReducedMotion();
   return (
     <div
       className={`${getPositionClasses(position, isMobile)} ${className}`}

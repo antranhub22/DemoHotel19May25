@@ -472,7 +472,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {showSettings && (
         <div
           className={`fixed inset-0 ${prefersReducedMotion ? "bg-black/30" : "bg-black/20 backdrop-blur-sm"}`}
-          style={{ zIndex: UI_CONSTANTS.Z_INDEX.OVERLAY }}
+          style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
           onClick={toggleSettings}
         />
       )}

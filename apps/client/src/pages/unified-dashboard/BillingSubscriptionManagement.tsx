@@ -117,8 +117,8 @@ const BillingSubscriptionManagement: React.FC = () => {
     currentSubscription: null,
     subscriptions: [],
   };
-  const paymentMgmt = { methods: [], addPaymentMethod: () => {} };
-  const invoiceMgmt = { invoices: [], downloadInvoice: () => {} };
+  const _paymentMgmt = { methods: [], addPaymentMethod: () => {} };
+  const _invoiceMgmt = { invoices: [], downloadInvoice: () => {} };
   const usageAnalytics = {
     usage: {},
     limits: {},
@@ -151,9 +151,9 @@ const BillingSubscriptionManagement: React.FC = () => {
   // Local state
   const [activeTab, setActiveTab] = useState("overview");
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [_showPaymentModal, _setShowPaymentModal] = useState(false);
+  const [_showInvoiceModal, _setShowInvoiceModal] = useState(false);
+  const [_showCancelModal, _setShowCancelModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("basic");
   const [selectedCycle, setSelectedCycle] = useState<BillingCycle>("monthly");
 
@@ -172,7 +172,7 @@ const BillingSubscriptionManagement: React.FC = () => {
   // Computed values
   const currentPlan = subscriptionMgmt.currentPlan;
   const isTrialing = billing.isTrialing;
-  const hasActiveSubscription = billing.hasActiveSubscription;
+  const _hasActiveSubscription = billing.hasActiveSubscription;
 
   // ============================================
   // OVERVIEW TAB COMPONENT

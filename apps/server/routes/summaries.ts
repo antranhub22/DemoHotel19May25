@@ -398,6 +398,7 @@ router.delete("/:id", async (req, res) => {
 
     // ✅ DETAILED MIGRATION: Delete using Prisma with error handling
     try {
+      await prisma.callSummary.delete({ where: { id } });
     } catch (error: any) {
       if (error.code === "P2025") {
         return commonErrors.notFound(res, "Summary", id);

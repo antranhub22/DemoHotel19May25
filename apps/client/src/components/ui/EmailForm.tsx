@@ -1,6 +1,5 @@
-import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,13 +7,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import logger from '@shared/utils/logger';
-import { useState } from 'react';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import logger from "@shared/utils/logger";
+import React, { useState } from "react";
 
 interface EmailFormProps {
   summaryContent: string;
@@ -27,7 +26,7 @@ export function EmailForm({
   serviceRequests,
   roomNumber,
 }: EmailFormProps) {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -35,8 +34,8 @@ export function EmailForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !email.includes('@')) {
-      setError('Vui lòng nhập địa chỉ email hợp lệ');
+    if (!email || !email.includes("@")) {
+      setError("Vui lòng nhập địa chỉ email hợp lệ");
       return;
     }
 
@@ -47,40 +46,40 @@ export function EmailForm({
       const requestData = {
         toEmail: email,
         callDetails: {
-          roomNumber: roomNumber || 'Không xác định',
+          roomNumber: roomNumber || "Không xác định",
           timestamp: new Date(),
-          duration: '0:00', // Có thể cập nhật từ trạng thái cuộc gọi
+          duration: "0:00", // Có thể cập nhật từ trạng thái cuộc gọi
           summary: summaryContent,
           serviceRequests: serviceRequests.map(
-            req =>
-              `${req.serviceType}: ${req.requestText || 'Không có thông tin chi tiết'}`
+            (req) =>
+              `${req.serviceType}: ${req.requestText || "Không có thông tin chi tiết"}`,
           ),
         },
       };
 
       const response = (await apiRequest({
-        url: '/api/emails/call-summary',
-        method: 'POST',
+        url: "/api/emails/call-summary",
+        method: "POST",
         body: requestData,
       })) as any;
 
       if (response && response.success) {
         toast({
-          title: 'Gửi email thành công',
-          description: 'Tóm tắt cuộc gọi đã được gửi đến email của bạn.',
-          variant: 'default',
+          title: "Gửi email thành công",
+          description: "Tóm tắt cuộc gọi đã được gửi đến email của bạn.",
+          variant: "default",
         });
-        setEmail(''); // Clear input after success
+        setEmail(""); // Clear input after success
       } else {
-        throw new Error('Không gửi được email');
+        throw new Error("Không gửi được email");
       }
     } catch (err) {
-      logger.error('Lỗi khi gửi email:', 'Component', err);
-      setError('Không thể gửi email. Vui lòng thử lại sau.');
+      logger.error("Lỗi khi gửi email:", "Component", err);
+      setError("Không thể gửi email. Vui lòng thử lại sau.");
       toast({
-        title: 'Lỗi',
-        description: 'Không thể gửi email. Vui lòng thử lại sau.',
-        variant: 'destructive',
+        title: "Lỗi",
+        description: "Không thể gửi email. Vui lòng thử lại sau.",
+        variant: "destructive",
       });
     } finally {
       setIsSending(false);
@@ -104,7 +103,7 @@ export function EmailForm({
                 id="email"
                 placeholder="khachhang@example.com"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 required
               />
@@ -122,7 +121,7 @@ export function EmailForm({
             type="submit"
             disabled={isSending || !email}
           >
-            {isSending ? 'Đang gửi...' : 'Gửi email'}
+            {isSending ? "Đang gửi..." : "Gửi email"}
           </Button>
         </form>
       </CardContent>

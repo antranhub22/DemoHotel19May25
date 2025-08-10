@@ -1,8 +1,8 @@
-import type { Room } from "@/types/common.types";
-import React from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
+// removed unused Room type
 import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { UI_CONSTANTS } from "@/lib/constants";
+import React from "react";
 
 interface WelcomePopupProps {
   onClose: () => void;

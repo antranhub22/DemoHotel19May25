@@ -1,56 +1,30 @@
-import * as React from 'react';
-import {
-  Wrench,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  Globe,
-  Key,
-  Webhook,
-  Database,
-  TrendingUp,
-  Zap,
-  Link,
-  BarChart3,
-  Save,
-  Mail,
-  CreditCard,
-  Shield,
-  Search,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -58,29 +32,54 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "@shared/utils/logger";
+import {
+  BarChart3,
+  CheckCircle,
+  CreditCard,
+  Database,
+  Edit,
+  Eye,
+  EyeOff,
+  Globe,
+  Link,
+  Mail,
+  Plus,
+  RefreshCw,
+  Save,
+  Search,
+  Shield,
+  Trash2,
+  TrendingUp,
+  Webhook,
+  Wrench,
+  XCircle,
+  Zap,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
 // Types
 interface Integration {
   id: string;
   name: string;
   type:
-    | 'api'
-    | 'webhook'
-    | 'database'
-    | 'payment'
-    | 'notification'
-    | 'ai'
-    | 'analytics'
-    | 'security';
+    | "api"
+    | "webhook"
+    | "database"
+    | "payment"
+    | "notification"
+    | "ai"
+    | "analytics"
+    | "security";
   provider: string;
   description: string;
-  status: 'active' | 'inactive' | 'error' | 'testing';
+  status: "active" | "inactive" | "error" | "testing";
   enabled: boolean;
   config: {
     baseUrl?: string;
@@ -107,7 +106,7 @@ interface WebhookEndpoint {
   id: string;
   name: string;
   url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   events: string[];
   active: boolean;
   secret?: string;
@@ -135,8 +134,8 @@ interface APICredential {
   id: string;
   name: string;
   service: string;
-  type: 'api_key' | 'oauth' | 'bearer_token' | 'basic_auth';
-  environment: 'production' | 'staging' | 'development';
+  type: "api_key" | "oauth" | "bearer_token" | "basic_auth";
+  environment: "production" | "staging" | "development";
   credentials: {
     apiKey?: string;
     accessToken?: string;
@@ -155,16 +154,16 @@ interface APICredential {
 // Mock data
 const mockIntegrations: Integration[] = [
   {
-    id: '1',
-    name: 'OpenAI GPT',
-    type: 'ai',
-    provider: 'OpenAI',
-    description: 'AI-powered chatbot and content generation',
-    status: 'active',
+    id: "1",
+    name: "OpenAI GPT",
+    type: "ai",
+    provider: "OpenAI",
+    description: "AI-powered chatbot and content generation",
+    status: "active",
     enabled: true,
     config: {
-      baseUrl: 'https://api.openai.com/v1',
-      apiKey: 'sk-...',
+      baseUrl: "https://api.openai.com/v1",
+      apiKey: "sk-...",
       timeout: 30000,
       retryCount: 3,
       rateLimitPerMinute: 60,
@@ -173,24 +172,24 @@ const mockIntegrations: Integration[] = [
       totalRequests: 15420,
       successRate: 98.5,
       averageResponseTime: 1250,
-      lastRequest: '2024-01-15T15:30:00Z',
+      lastRequest: "2024-01-15T15:30:00Z",
       uptime: 99.8,
     },
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
-    lastSync: '2024-01-15T15:30:00Z',
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-15T10:00:00Z",
+    lastSync: "2024-01-15T15:30:00Z",
   },
   {
-    id: '2',
-    name: 'Stripe Payment',
-    type: 'payment',
-    provider: 'Stripe',
-    description: 'Payment processing and billing',
-    status: 'active',
+    id: "2",
+    name: "Stripe Payment",
+    type: "payment",
+    provider: "Stripe",
+    description: "Payment processing and billing",
+    status: "active",
     enabled: true,
     config: {
-      baseUrl: 'https://api.stripe.com/v1',
-      apiKey: 'sk_live_...',
+      baseUrl: "https://api.stripe.com/v1",
+      apiKey: "sk_live_...",
       timeout: 10000,
       retryCount: 2,
       rateLimitPerMinute: 100,
@@ -199,24 +198,24 @@ const mockIntegrations: Integration[] = [
       totalRequests: 8950,
       successRate: 99.9,
       averageResponseTime: 450,
-      lastRequest: '2024-01-15T15:25:00Z',
+      lastRequest: "2024-01-15T15:25:00Z",
       uptime: 99.9,
     },
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T12:00:00Z',
-    lastSync: '2024-01-15T15:25:00Z',
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-15T12:00:00Z",
+    lastSync: "2024-01-15T15:25:00Z",
   },
   {
-    id: '3',
-    name: 'Twilio SMS',
-    type: 'notification',
-    provider: 'Twilio',
-    description: 'SMS notifications and alerts',
-    status: 'active',
+    id: "3",
+    name: "Twilio SMS",
+    type: "notification",
+    provider: "Twilio",
+    description: "SMS notifications and alerts",
+    status: "active",
     enabled: true,
     config: {
-      baseUrl: 'https://api.twilio.com/2010-04-01',
-      apiKey: 'AC...',
+      baseUrl: "https://api.twilio.com/2010-04-01",
+      apiKey: "AC...",
       timeout: 5000,
       retryCount: 3,
       rateLimitPerMinute: 200,
@@ -225,24 +224,24 @@ const mockIntegrations: Integration[] = [
       totalRequests: 2340,
       successRate: 97.8,
       averageResponseTime: 890,
-      lastRequest: '2024-01-15T14:45:00Z',
+      lastRequest: "2024-01-15T14:45:00Z",
       uptime: 98.5,
     },
-    createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-15T09:00:00Z',
-    lastSync: '2024-01-15T14:45:00Z',
+    createdAt: "2024-01-05T00:00:00Z",
+    updatedAt: "2024-01-15T09:00:00Z",
+    lastSync: "2024-01-15T14:45:00Z",
   },
   {
-    id: '4',
-    name: 'Google Places',
-    type: 'api',
-    provider: 'Google',
-    description: 'Location data and place information',
-    status: 'error',
+    id: "4",
+    name: "Google Places",
+    type: "api",
+    provider: "Google",
+    description: "Location data and place information",
+    status: "error",
     enabled: false,
     config: {
-      baseUrl: 'https://maps.googleapis.com/maps/api/place',
-      apiKey: 'AIza...',
+      baseUrl: "https://maps.googleapis.com/maps/api/place",
+      apiKey: "AIza...",
       timeout: 8000,
       retryCount: 2,
       rateLimitPerMinute: 50,
@@ -251,23 +250,23 @@ const mockIntegrations: Integration[] = [
       totalRequests: 1250,
       successRate: 45.2,
       averageResponseTime: 2100,
-      lastRequest: '2024-01-15T13:20:00Z',
+      lastRequest: "2024-01-15T13:20:00Z",
       uptime: 78.3,
     },
-    createdAt: '2024-01-10T00:00:00Z',
-    updatedAt: '2024-01-15T13:20:00Z',
-    lastSync: '2024-01-15T13:20:00Z',
+    createdAt: "2024-01-10T00:00:00Z",
+    updatedAt: "2024-01-15T13:20:00Z",
+    lastSync: "2024-01-15T13:20:00Z",
   },
   {
-    id: '5',
-    name: 'Slack Notifications',
-    type: 'webhook',
-    provider: 'Slack',
-    description: 'Team notifications and alerts',
-    status: 'active',
+    id: "5",
+    name: "Slack Notifications",
+    type: "webhook",
+    provider: "Slack",
+    description: "Team notifications and alerts",
+    status: "active",
     enabled: true,
     config: {
-      webhookUrl: 'https://hooks.slack.com/services/...',
+      webhookUrl: "https://hooks.slack.com/services/...",
       timeout: 3000,
       retryCount: 2,
       rateLimitPerMinute: 1,
@@ -276,27 +275,27 @@ const mockIntegrations: Integration[] = [
       totalRequests: 450,
       successRate: 100,
       averageResponseTime: 320,
-      lastRequest: '2024-01-15T15:00:00Z',
+      lastRequest: "2024-01-15T15:00:00Z",
       uptime: 100,
     },
-    createdAt: '2024-01-08T00:00:00Z',
-    updatedAt: '2024-01-15T08:00:00Z',
-    lastSync: '2024-01-15T15:00:00Z',
+    createdAt: "2024-01-08T00:00:00Z",
+    updatedAt: "2024-01-15T08:00:00Z",
+    lastSync: "2024-01-15T15:00:00Z",
   },
 ];
 
 const mockWebhooks: WebhookEndpoint[] = [
   {
-    id: '1',
-    name: 'Payment Webhook',
-    url: 'https://api.hotel.com/webhooks/payment',
-    method: 'POST',
-    events: ['payment.completed', 'payment.failed', 'payment.refunded'],
+    id: "1",
+    name: "Payment Webhook",
+    url: "https://api.hotel.com/webhooks/payment",
+    method: "POST",
+    events: ["payment.completed", "payment.failed", "payment.refunded"],
     active: true,
-    secret: 'whsec_...',
+    secret: "whsec_...",
     headers: {
-      'Content-Type': 'application/json',
-      'X-Webhook-Source': 'hotel-system',
+      "Content-Type": "application/json",
+      "X-Webhook-Source": "hotel-system",
     },
     retryPolicy: {
       enabled: true,
@@ -305,34 +304,34 @@ const mockWebhooks: WebhookEndpoint[] = [
     },
     logs: [
       {
-        id: '1',
-        timestamp: '2024-01-15T15:30:00Z',
-        event: 'payment.completed',
+        id: "1",
+        timestamp: "2024-01-15T15:30:00Z",
+        event: "payment.completed",
         statusCode: 200,
         responseTime: 245,
         success: true,
       },
       {
-        id: '2',
-        timestamp: '2024-01-15T15:25:00Z',
-        event: 'payment.failed',
+        id: "2",
+        timestamp: "2024-01-15T15:25:00Z",
+        event: "payment.failed",
         statusCode: 500,
         responseTime: 1000,
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
     ],
   },
   {
-    id: '2',
-    name: 'Booking Webhook',
-    url: 'https://api.hotel.com/webhooks/booking',
-    method: 'POST',
-    events: ['booking.created', 'booking.updated', 'booking.cancelled'],
+    id: "2",
+    name: "Booking Webhook",
+    url: "https://api.hotel.com/webhooks/booking",
+    method: "POST",
+    events: ["booking.created", "booking.updated", "booking.cancelled"],
     active: true,
-    secret: 'whsec_...',
+    secret: "whsec_...",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     retryPolicy: {
       enabled: true,
@@ -345,83 +344,83 @@ const mockWebhooks: WebhookEndpoint[] = [
 
 const mockCredentials: APICredential[] = [
   {
-    id: '1',
-    name: 'OpenAI Production',
-    service: 'OpenAI',
-    type: 'api_key',
-    environment: 'production',
+    id: "1",
+    name: "OpenAI Production",
+    service: "OpenAI",
+    type: "api_key",
+    environment: "production",
     credentials: {
-      apiKey: 'sk-...',
+      apiKey: "sk-...",
     },
-    lastUsed: '2024-01-15T15:30:00Z',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:00:00Z',
+    lastUsed: "2024-01-15T15:30:00Z",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-15T10:00:00Z",
   },
   {
-    id: '2',
-    name: 'Stripe Live',
-    service: 'Stripe',
-    type: 'api_key',
-    environment: 'production',
+    id: "2",
+    name: "Stripe Live",
+    service: "Stripe",
+    type: "api_key",
+    environment: "production",
     credentials: {
-      apiKey: 'sk_live_...',
+      apiKey: "sk_live_...",
     },
-    lastUsed: '2024-01-15T15:25:00Z',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T12:00:00Z',
+    lastUsed: "2024-01-15T15:25:00Z",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-15T12:00:00Z",
   },
   {
-    id: '3',
-    name: 'Google OAuth',
-    service: 'Google',
-    type: 'oauth',
-    environment: 'production',
+    id: "3",
+    name: "Google OAuth",
+    service: "Google",
+    type: "oauth",
+    environment: "production",
     credentials: {
-      clientId: '123456789-...',
-      clientSecret: 'GOCSPX-...',
-      accessToken: 'ya29.a0A...',
-      refreshToken: '1//0G...',
+      clientId: "123456789-...",
+      clientSecret: "GOCSPX-...",
+      accessToken: "ya29.a0A...",
+      refreshToken: "1//0G...",
     },
-    expiresAt: '2024-01-16T15:30:00Z',
-    lastUsed: '2024-01-15T13:20:00Z',
-    createdAt: '2024-01-10T00:00:00Z',
-    updatedAt: '2024-01-15T13:20:00Z',
+    expiresAt: "2024-01-16T15:30:00Z",
+    lastUsed: "2024-01-15T13:20:00Z",
+    createdAt: "2024-01-10T00:00:00Z",
+    updatedAt: "2024-01-15T13:20:00Z",
   },
 ];
 
 // Helper functions
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'active':
-      return 'bg-green-100 text-green-800';
-    case 'inactive':
-      return 'bg-gray-100 text-gray-800';
-    case 'error':
-      return 'bg-red-100 text-red-800';
-    case 'testing':
-      return 'bg-blue-100 text-blue-800';
+    case "active":
+      return "bg-green-100 text-green-800";
+    case "inactive":
+      return "bg-gray-100 text-gray-800";
+    case "error":
+      return "bg-red-100 text-red-800";
+    case "testing":
+      return "bg-blue-100 text-blue-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getTypeIcon = (type: string) => {
   switch (type) {
-    case 'api':
+    case "api":
       return <Globe className="h-4 w-4" />;
-    case 'webhook':
+    case "webhook":
       return <Webhook className="h-4 w-4" />;
-    case 'database':
+    case "database":
       return <Database className="h-4 w-4" />;
-    case 'payment':
+    case "payment":
       return <CreditCard className="h-4 w-4" />;
-    case 'notification':
+    case "notification":
       return <Mail className="h-4 w-4" />;
-    case 'ai':
+    case "ai":
       return <Zap className="h-4 w-4" />;
-    case 'analytics':
+    case "analytics":
       return <BarChart3 className="h-4 w-4" />;
-    case 'security':
+    case "security":
       return <Shield className="h-4 w-4" />;
     default:
       return <Link className="h-4 w-4" />;
@@ -429,17 +428,17 @@ const getTypeIcon = (type: string) => {
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleString('vi-VN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(dateString).toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('vi-VN').format(num);
+  return new Intl.NumberFormat("vi-VN").format(num);
 };
 
 // Integration Details Modal
@@ -471,11 +470,11 @@ const IntegrationModal = ({
 
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       onSave(formData);
       onClose();
     } catch (error) {
-      logger.error('Failed to save integration:', 'Component', error);
+      logger.error("Failed to save integration:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -484,10 +483,10 @@ const IntegrationModal = ({
   const handleTest = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Integration test successful!');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      alert("Integration test successful!");
     } catch (error) {
-      alert('Integration test failed!');
+      alert("Integration test failed!");
     } finally {
       setLoading(false);
     }
@@ -517,7 +516,7 @@ const IntegrationModal = ({
               <Input
                 id="name"
                 value={formData.name}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
               />
@@ -527,7 +526,7 @@ const IntegrationModal = ({
               <Input
                 id="provider"
                 value={formData.provider}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, provider: e.target.value })
                 }
               />
@@ -539,7 +538,7 @@ const IntegrationModal = ({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={2}
@@ -551,8 +550,8 @@ const IntegrationModal = ({
               <Label htmlFor="baseUrl">Base URL</Label>
               <Input
                 id="baseUrl"
-                value={formData.config.baseUrl || ''}
-                onChange={e =>
+                value={formData.config.baseUrl || ""}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     config: { ...formData.config, baseUrl: e.target.value },
@@ -565,8 +564,8 @@ const IntegrationModal = ({
               <Input
                 id="timeout"
                 type="number"
-                value={formData.config.timeout || ''}
-                onChange={e =>
+                value={formData.config.timeout || ""}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     config: {
@@ -584,9 +583,9 @@ const IntegrationModal = ({
             <div className="flex gap-2">
               <Input
                 id="apiKey"
-                type={showApiKey ? 'text' : 'password'}
-                value={formData.config.apiKey || ''}
-                onChange={e =>
+                type={showApiKey ? "text" : "password"}
+                value={formData.config.apiKey || ""}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     config: { ...formData.config, apiKey: e.target.value },
@@ -614,8 +613,8 @@ const IntegrationModal = ({
               <Input
                 id="retryCount"
                 type="number"
-                value={formData.config.retryCount || ''}
-                onChange={e =>
+                value={formData.config.retryCount || ""}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     config: {
@@ -631,8 +630,8 @@ const IntegrationModal = ({
               <Input
                 id="rateLimit"
                 type="number"
-                value={formData.config.rateLimitPerMinute || ''}
-                onChange={e =>
+                value={formData.config.rateLimitPerMinute || ""}
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     config: {
@@ -654,7 +653,7 @@ const IntegrationModal = ({
             </div>
             <Switch
               checked={formData.enabled}
-              onCheckedChange={checked =>
+              onCheckedChange={(checked) =>
                 setFormData({ ...formData, enabled: checked })
               }
             />
@@ -696,12 +695,12 @@ const AddIntegrationModal = ({
   onAdd: (integration: Integration) => void;
 }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    type: 'api' as const,
-    provider: '',
-    description: '',
-    baseUrl: '',
-    apiKey: '',
+    name: "",
+    type: "api" as const,
+    provider: "",
+    description: "",
+    baseUrl: "",
+    apiKey: "",
     timeout: 30000,
     retryCount: 3,
     rateLimitPerMinute: 100,
@@ -713,7 +712,7 @@ const AddIntegrationModal = ({
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const newIntegration: Integration = {
         id: Date.now().toString(),
@@ -721,7 +720,7 @@ const AddIntegrationModal = ({
         type: formData.type,
         provider: formData.provider,
         description: formData.description,
-        status: 'inactive',
+        status: "inactive",
         enabled: false,
         config: {
           baseUrl: formData.baseUrl,
@@ -734,12 +733,12 @@ const AddIntegrationModal = ({
           totalRequests: 0,
           successRate: 0,
           averageResponseTime: 0,
-          lastRequest: '',
+          lastRequest: "",
           uptime: 0,
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        lastSync: '',
+        lastSync: "",
       };
 
       onAdd(newIntegration);
@@ -747,18 +746,18 @@ const AddIntegrationModal = ({
 
       // Reset form
       setFormData({
-        name: '',
-        type: 'api',
-        provider: '',
-        description: '',
-        baseUrl: '',
-        apiKey: '',
+        name: "",
+        type: "api",
+        provider: "",
+        description: "",
+        baseUrl: "",
+        apiKey: "",
         timeout: 30000,
         retryCount: 3,
         rateLimitPerMinute: 100,
       });
     } catch (error) {
-      logger.error('Failed to add integration:', 'Component', error);
+      logger.error("Failed to add integration:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -781,7 +780,7 @@ const AddIntegrationModal = ({
               <Input
                 id="name"
                 value={formData.name}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
@@ -817,7 +816,7 @@ const AddIntegrationModal = ({
             <Input
               id="provider"
               value={formData.provider}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, provider: e.target.value })
               }
               required
@@ -829,7 +828,7 @@ const AddIntegrationModal = ({
             <Textarea
               id="description"
               value={formData.description}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={2}
@@ -841,7 +840,7 @@ const AddIntegrationModal = ({
             <Input
               id="baseUrl"
               value={formData.baseUrl}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, baseUrl: e.target.value })
               }
               placeholder="https://api.example.com"
@@ -855,7 +854,7 @@ const AddIntegrationModal = ({
               id="apiKey"
               type="password"
               value={formData.apiKey}
-              onChange={e =>
+              onChange={(e) =>
                 setFormData({ ...formData, apiKey: e.target.value })
               }
               required
@@ -869,7 +868,7 @@ const AddIntegrationModal = ({
                 id="timeout"
                 type="number"
                 value={formData.timeout}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     timeout: parseInt(e.target.value),
@@ -883,7 +882,7 @@ const AddIntegrationModal = ({
                 id="retryCount"
                 type="number"
                 value={formData.retryCount}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     retryCount: parseInt(e.target.value),
@@ -897,7 +896,7 @@ const AddIntegrationModal = ({
                 id="rateLimit"
                 type="number"
                 value={formData.rateLimitPerMinute}
-                onChange={e =>
+                onChange={(e) =>
                   setFormData({
                     ...formData,
                     rateLimitPerMinute: parseInt(e.target.value),
@@ -933,7 +932,7 @@ const AddIntegrationModal = ({
 
 // Main Integrations component
 export const Integrations: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [integrations, setIntegrations] =
     useState<Integration[]>(mockIntegrations);
   const [webhooks, setWebhooks] = useState<WebhookEndpoint[]>(mockWebhooks);
@@ -946,15 +945,15 @@ export const Integrations: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
 
   // Filter states
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter integrations
-  const filteredIntegrations = integrations.filter(integration => {
+  const filteredIntegrations = integrations.filter((integration) => {
     const matchesStatus =
-      statusFilter === 'all' || integration.status === statusFilter;
-    const matchesType = typeFilter === 'all' || integration.type === typeFilter;
+      statusFilter === "all" || integration.status === statusFilter;
+    const matchesType = typeFilter === "all" || integration.type === typeFilter;
     const matchesSearch =
       !searchQuery ||
       integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -969,45 +968,47 @@ export const Integrations: React.FC = () => {
   };
 
   const handleSaveIntegration = (updatedIntegration: Integration) => {
-    setIntegrations(prev =>
-      prev.map(i => (i.id === updatedIntegration.id ? updatedIntegration : i))
+    setIntegrations((prev) =>
+      prev.map((i) =>
+        i.id === updatedIntegration.id ? updatedIntegration : i,
+      ),
     );
     setSelectedIntegration(null);
   };
 
   const handleAddIntegration = (newIntegration: Integration) => {
-    setIntegrations(prev => [...prev, newIntegration]);
+    setIntegrations((prev) => [...prev, newIntegration]);
   };
 
   const handleDeleteIntegration = (id: string) => {
-    if (confirm('Bạn có chắc muốn xóa integration này?')) {
-      setIntegrations(prev => prev.filter(i => i.id !== id));
+    if (confirm("Bạn có chắc muốn xóa integration này?")) {
+      setIntegrations((prev) => prev.filter((i) => i.id !== id));
     }
   };
 
   const handleToggleIntegration = (id: string) => {
-    setIntegrations(prev =>
-      prev.map(i =>
+    setIntegrations((prev) =>
+      prev.map((i) =>
         i.id === id
           ? {
               ...i,
               enabled: !i.enabled,
-              status: i.enabled ? 'inactive' : 'active',
+              status: i.enabled ? "inactive" : "active",
             }
-          : i
-      )
+          : i,
+      ),
     );
   };
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setIntegrations(mockIntegrations);
       setWebhooks(mockWebhooks);
       setCredentials(mockCredentials);
     } catch (error) {
-      logger.error('Failed to fetch integrations:', 'Component', error);
+      logger.error("Failed to fetch integrations:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -1065,7 +1066,7 @@ export const Integrations: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {integrations.filter(i => i.status === 'active').length}
+                  {integrations.filter((i) => i.status === "active").length}
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
@@ -1079,7 +1080,7 @@ export const Integrations: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Errors</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {integrations.filter(i => i.status === 'error').length}
+                  {integrations.filter((i) => i.status === "error").length}
                 </p>
               </div>
               <XCircle className="h-8 w-8 text-red-500" />
@@ -1098,7 +1099,7 @@ export const Integrations: React.FC = () => {
                   {(
                     integrations.reduce(
                       (sum, i) => sum + i.metrics.successRate,
-                      0
+                      0,
                     ) / integrations.length
                   ).toFixed(1)}
                   %
@@ -1131,7 +1132,7 @@ export const Integrations: React.FC = () => {
                     <Input
                       placeholder="Tìm kiếm integrations..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
                     />
                   </div>
@@ -1170,7 +1171,7 @@ export const Integrations: React.FC = () => {
 
           {/* Integrations List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredIntegrations.map(integration => (
+            {filteredIntegrations.map((integration) => (
               <Card key={integration.id}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -1236,10 +1237,10 @@ export const Integrations: React.FC = () => {
 
                   <div className="flex justify-between items-center pt-2 border-t">
                     <div className="text-xs text-muted-foreground">
-                      Last sync:{' '}
+                      Last sync:{" "}
                       {integration.lastSync
                         ? formatDate(integration.lastSync)
-                        : 'Never'}
+                        : "Never"}
                     </div>
                     <div className="flex gap-1">
                       <Button
@@ -1288,7 +1289,7 @@ export const Integrations: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {webhooks.map(webhook => (
+                  {webhooks.map((webhook) => (
                     <TableRow key={webhook.id}>
                       <TableCell className="font-medium">
                         {webhook.name}
@@ -1321,11 +1322,11 @@ export const Integrations: React.FC = () => {
                         <Badge
                           className={
                             webhook.active
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-gray-100 text-gray-800'
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
                           }
                         >
-                          {webhook.active ? 'Active' : 'Inactive'}
+                          {webhook.active ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -1374,7 +1375,7 @@ export const Integrations: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {credentials.map(credential => (
+                  {credentials.map((credential) => (
                     <TableRow key={credential.id}>
                       <TableCell className="font-medium">
                         {credential.name}
@@ -1386,11 +1387,11 @@ export const Integrations: React.FC = () => {
                       <TableCell>
                         <Badge
                           className={cn(
-                            credential.environment === 'production'
-                              ? 'bg-red-100 text-red-800'
-                              : credential.environment === 'staging'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-blue-100 text-blue-800'
+                            credential.environment === "production"
+                              ? "bg-red-100 text-red-800"
+                              : credential.environment === "staging"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800",
                           )}
                         >
                           {credential.environment}
@@ -1399,12 +1400,12 @@ export const Integrations: React.FC = () => {
                       <TableCell>
                         {credential.expiresAt
                           ? formatDate(credential.expiresAt)
-                          : 'Never'}
+                          : "Never"}
                       </TableCell>
                       <TableCell>
                         {credential.lastUsed
                           ? formatDate(credential.lastUsed)
-                          : 'Never'}
+                          : "Never"}
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">

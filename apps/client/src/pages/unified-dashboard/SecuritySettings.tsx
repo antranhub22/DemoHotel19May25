@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Shield,
   Lock,
@@ -16,28 +16,28 @@ import {
   Plus,
   Trash2,
   Edit,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -45,12 +45,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import logger from '@shared/utils/logger';
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "@shared/utils/logger";
 
 // Types
 interface SecurityConfig {
@@ -83,7 +83,7 @@ interface SecurityConfig {
     lockoutDuration: number;
   };
   monitoring: {
-    logLevel: 'debug' | 'info' | 'warning' | 'error';
+    logLevel: "debug" | "info" | "warning" | "error";
     alertsEnabled: boolean;
     alertThresholds: {
       failedLogins: number;
@@ -100,7 +100,7 @@ interface SecurityConfig {
     encryption: boolean;
     location: string;
     lastBackup: string;
-    status: 'success' | 'failed' | 'running';
+    status: "success" | "failed" | "running";
   };
   compliance: {
     gdprCompliant: boolean;
@@ -117,8 +117,8 @@ interface FirewallRule {
   source: string;
   destination: string;
   port: number;
-  protocol: 'tcp' | 'udp' | 'icmp';
-  action: 'allow' | 'deny';
+  protocol: "tcp" | "udp" | "icmp";
+  action: "allow" | "deny";
   enabled: boolean;
   createdAt: string;
 }
@@ -129,14 +129,14 @@ interface SSLCertificate {
   issuer: string;
   validFrom: string;
   validTo: string;
-  status: 'valid' | 'expired' | 'expiring';
-  type: 'ssl' | 'wildcard' | 'ev';
+  status: "valid" | "expired" | "expiring";
+  type: "ssl" | "wildcard" | "ev";
 }
 
 interface SecurityAlert {
   id: string;
-  type: 'authentication' | 'firewall' | 'ssl' | 'system' | 'intrusion';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "authentication" | "firewall" | "ssl" | "system" | "intrusion";
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   timestamp: string;
   resolved: boolean;
@@ -148,7 +148,7 @@ interface SecurityLog {
   timestamp: string;
   source: string;
   event: string;
-  severity: 'info' | 'warning' | 'error';
+  severity: "info" | "warning" | "error";
   details: string;
   ip: string;
   user?: string;
@@ -160,41 +160,41 @@ const mockSecurityConfig: SecurityConfig = {
     enabled: true,
     rules: [
       {
-        id: '1',
-        name: 'Allow HTTP',
-        source: 'any',
-        destination: 'server',
+        id: "1",
+        name: "Allow HTTP",
+        source: "any",
+        destination: "server",
         port: 80,
-        protocol: 'tcp',
-        action: 'allow',
+        protocol: "tcp",
+        action: "allow",
         enabled: true,
-        createdAt: '2024-01-01T00:00:00Z',
+        createdAt: "2024-01-01T00:00:00Z",
       },
       {
-        id: '2',
-        name: 'Allow HTTPS',
-        source: 'any',
-        destination: 'server',
+        id: "2",
+        name: "Allow HTTPS",
+        source: "any",
+        destination: "server",
         port: 443,
-        protocol: 'tcp',
-        action: 'allow',
+        protocol: "tcp",
+        action: "allow",
         enabled: true,
-        createdAt: '2024-01-01T00:00:00Z',
+        createdAt: "2024-01-01T00:00:00Z",
       },
       {
-        id: '3',
-        name: 'Block Suspicious IP',
-        source: '192.168.1.100',
-        destination: 'any',
+        id: "3",
+        name: "Block Suspicious IP",
+        source: "192.168.1.100",
+        destination: "any",
         port: 0,
-        protocol: 'tcp',
-        action: 'deny',
+        protocol: "tcp",
+        action: "deny",
         enabled: true,
-        createdAt: '2024-01-10T10:00:00Z',
+        createdAt: "2024-01-10T10:00:00Z",
       },
     ],
     allowedPorts: [80, 443, 22, 25, 587],
-    blockedIPs: ['192.168.1.100', '10.0.0.50'],
+    blockedIPs: ["192.168.1.100", "10.0.0.50"],
     ddosProtection: true,
     rateLimiting: true,
   },
@@ -202,27 +202,27 @@ const mockSecurityConfig: SecurityConfig = {
     enabled: true,
     certificates: [
       {
-        id: '1',
-        domain: 'minhhonghotel.com',
+        id: "1",
+        domain: "minhhonghotel.com",
         issuer: "Let's Encrypt",
-        validFrom: '2024-01-01T00:00:00Z',
-        validTo: '2024-04-01T00:00:00Z',
-        status: 'valid',
-        type: 'ssl',
+        validFrom: "2024-01-01T00:00:00Z",
+        validTo: "2024-04-01T00:00:00Z",
+        status: "valid",
+        type: "ssl",
       },
       {
-        id: '2',
-        domain: '*.minhhonghotel.com',
-        issuer: 'DigiCert',
-        validFrom: '2023-12-01T00:00:00Z',
-        validTo: '2024-12-01T00:00:00Z',
-        status: 'valid',
-        type: 'wildcard',
+        id: "2",
+        domain: "*.minhhonghotel.com",
+        issuer: "DigiCert",
+        validFrom: "2023-12-01T00:00:00Z",
+        validTo: "2024-12-01T00:00:00Z",
+        status: "valid",
+        type: "wildcard",
       },
     ],
     forceHttps: true,
     hstsEnabled: true,
-    cipherSuites: ['TLS_AES_256_GCM_SHA384', 'TLS_CHACHA20_POLY1305_SHA256'],
+    cipherSuites: ["TLS_AES_256_GCM_SHA384", "TLS_CHACHA20_POLY1305_SHA256"],
   },
   authentication: {
     mfaEnabled: true,
@@ -238,7 +238,7 @@ const mockSecurityConfig: SecurityConfig = {
     lockoutDuration: 15,
   },
   monitoring: {
-    logLevel: 'info',
+    logLevel: "info",
     alertsEnabled: true,
     alertThresholds: {
       failedLogins: 10,
@@ -250,12 +250,12 @@ const mockSecurityConfig: SecurityConfig = {
   },
   backup: {
     enabled: true,
-    schedule: '0 2 * * *',
+    schedule: "0 2 * * *",
     retention: 30,
     encryption: true,
-    location: 'AWS S3',
-    lastBackup: '2024-01-15T02:00:00Z',
-    status: 'success',
+    location: "AWS S3",
+    lastBackup: "2024-01-15T02:00:00Z",
+    status: "success",
   },
   compliance: {
     gdprCompliant: true,
@@ -268,109 +268,109 @@ const mockSecurityConfig: SecurityConfig = {
 
 const mockSecurityAlerts: SecurityAlert[] = [
   {
-    id: '1',
-    type: 'authentication',
-    severity: 'high',
-    message: 'Multiple failed login attempts detected',
-    timestamp: '2024-01-15T14:30:00Z',
+    id: "1",
+    type: "authentication",
+    severity: "high",
+    message: "Multiple failed login attempts detected",
+    timestamp: "2024-01-15T14:30:00Z",
     resolved: false,
     details:
-      'User attempted to login with incorrect credentials 8 times from IP 192.168.1.100',
+      "User attempted to login with incorrect credentials 8 times from IP 192.168.1.100",
   },
   {
-    id: '2',
-    type: 'ssl',
-    severity: 'medium',
-    message: 'SSL certificate expiring soon',
-    timestamp: '2024-01-15T10:00:00Z',
+    id: "2",
+    type: "ssl",
+    severity: "medium",
+    message: "SSL certificate expiring soon",
+    timestamp: "2024-01-15T10:00:00Z",
     resolved: false,
-    details: 'Certificate for minhhonghotel.com will expire in 30 days',
+    details: "Certificate for minhhonghotel.com will expire in 30 days",
   },
   {
-    id: '3',
-    type: 'firewall',
-    severity: 'low',
-    message: 'Port scan detected',
-    timestamp: '2024-01-15T08:15:00Z',
+    id: "3",
+    type: "firewall",
+    severity: "low",
+    message: "Port scan detected",
+    timestamp: "2024-01-15T08:15:00Z",
     resolved: true,
-    details: 'Port scan from 10.0.0.50 was blocked by firewall',
+    details: "Port scan from 10.0.0.50 was blocked by firewall",
   },
 ];
 
 const mockSecurityLogs: SecurityLog[] = [
   {
-    id: '1',
-    timestamp: '2024-01-15T15:00:00Z',
-    source: 'auth',
-    event: 'LOGIN_SUCCESS',
-    severity: 'info',
-    details: 'User logged in successfully',
-    ip: '192.168.1.50',
-    user: 'admin',
+    id: "1",
+    timestamp: "2024-01-15T15:00:00Z",
+    source: "auth",
+    event: "LOGIN_SUCCESS",
+    severity: "info",
+    details: "User logged in successfully",
+    ip: "192.168.1.50",
+    user: "admin",
   },
   {
-    id: '2',
-    timestamp: '2024-01-15T14:45:00Z',
-    source: 'firewall',
-    event: 'BLOCKED_IP',
-    severity: 'warning',
-    details: 'Blocked connection from suspicious IP',
-    ip: '192.168.1.100',
+    id: "2",
+    timestamp: "2024-01-15T14:45:00Z",
+    source: "firewall",
+    event: "BLOCKED_IP",
+    severity: "warning",
+    details: "Blocked connection from suspicious IP",
+    ip: "192.168.1.100",
   },
   {
-    id: '3',
-    timestamp: '2024-01-15T14:30:00Z',
-    source: 'auth',
-    event: 'LOGIN_FAILED',
-    severity: 'error',
-    details: 'Failed login attempt',
-    ip: '192.168.1.100',
-    user: 'admin',
+    id: "3",
+    timestamp: "2024-01-15T14:30:00Z",
+    source: "auth",
+    event: "LOGIN_FAILED",
+    severity: "error",
+    details: "Failed login attempt",
+    ip: "192.168.1.100",
+    user: "admin",
   },
 ];
 
 // Helper functions
 const getSeverityColor = (severity: string) => {
   switch (severity) {
-    case 'critical':
-      return 'bg-red-100 text-red-800';
-    case 'high':
-      return 'bg-orange-100 text-orange-800';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'low':
-      return 'bg-blue-100 text-blue-800';
+    case "critical":
+      return "bg-red-100 text-red-800";
+    case "high":
+      return "bg-orange-100 text-orange-800";
+    case "medium":
+      return "bg-yellow-100 text-yellow-800";
+    case "low":
+      return "bg-blue-100 text-blue-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'valid':
-      return 'text-green-600';
-    case 'expired':
-      return 'text-red-600';
-    case 'expiring':
-      return 'text-orange-600';
-    case 'success':
-      return 'text-green-600';
-    case 'failed':
-      return 'text-red-600';
-    case 'running':
-      return 'text-blue-600';
+    case "valid":
+      return "text-green-600";
+    case "expired":
+      return "text-red-600";
+    case "expiring":
+      return "text-orange-600";
+    case "success":
+      return "text-green-600";
+    case "failed":
+      return "text-red-600";
+    case "running":
+      return "text-blue-600";
     default:
-      return 'text-gray-600';
+      return "text-gray-600";
   }
 };
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('vi-VN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Date(dateString).toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -379,8 +379,8 @@ const FirewallTab = ({
   config,
   onUpdate,
 }: {
-  config: SecurityConfig['firewall'];
-  onUpdate: (updates: Partial<SecurityConfig['firewall']>) => void;
+  config: SecurityConfig["firewall"];
+  onUpdate: (updates: Partial<SecurityConfig["firewall"]>) => void;
 }) => {
   const [loading, setLoading] = useState(false);
   const [showAddRule, setShowAddRule] = useState(false);
@@ -388,10 +388,10 @@ const FirewallTab = ({
   const handleSave = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       // Save configuration
     } catch (error) {
-      logger.error('Failed to save firewall config:', 'Component', error);
+      logger.error("Failed to save firewall config:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -419,7 +419,7 @@ const FirewallTab = ({
             </div>
             <Switch
               checked={config.enabled}
-              onCheckedChange={checked => onUpdate({ enabled: checked })}
+              onCheckedChange={(checked) => onUpdate({ enabled: checked })}
             />
           </div>
 
@@ -428,7 +428,7 @@ const FirewallTab = ({
               <Label>DDoS Protection</Label>
               <Switch
                 checked={config.ddosProtection}
-                onCheckedChange={checked =>
+                onCheckedChange={(checked) =>
                   onUpdate({ ddosProtection: checked })
                 }
               />
@@ -437,7 +437,9 @@ const FirewallTab = ({
               <Label>Rate Limiting</Label>
               <Switch
                 checked={config.rateLimiting}
-                onCheckedChange={checked => onUpdate({ rateLimiting: checked })}
+                onCheckedChange={(checked) =>
+                  onUpdate({ rateLimiting: checked })
+                }
               />
             </div>
           </div>
@@ -445,12 +447,12 @@ const FirewallTab = ({
           <div>
             <Label>Blocked IPs</Label>
             <Textarea
-              value={config.blockedIPs.join('\n')}
-              onChange={e =>
+              value={config.blockedIPs.join("\n")}
+              onChange={(e) =>
                 onUpdate({
                   blockedIPs: e.target.value
-                    .split('\n')
-                    .filter(ip => ip.trim()),
+                    .split("\n")
+                    .filter((ip) => ip.trim()),
                 })
               }
               placeholder="192.168.1.100&#10;10.0.0.50"
@@ -501,7 +503,7 @@ const FirewallTab = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {config.rules.map(rule => (
+              {config.rules.map((rule) => (
                 <TableRow key={rule.id}>
                   <TableCell className="font-medium">{rule.name}</TableCell>
                   <TableCell>{rule.source}</TableCell>
@@ -511,15 +513,15 @@ const FirewallTab = ({
                   <TableCell>
                     <Badge
                       variant={
-                        rule.action === 'allow' ? 'default' : 'destructive'
+                        rule.action === "allow" ? "default" : "destructive"
                       }
                     >
                       {rule.action.toUpperCase()}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={rule.enabled ? 'default' : 'secondary'}>
-                      {rule.enabled ? 'Enabled' : 'Disabled'}
+                    <Badge variant={rule.enabled ? "default" : "secondary"}>
+                      {rule.enabled ? "Enabled" : "Disabled"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -547,18 +549,18 @@ const SSLTab = ({
   config,
   onUpdate,
 }: {
-  config: SecurityConfig['ssl'];
-  onUpdate: (updates: Partial<SecurityConfig['ssl']>) => void;
+  config: SecurityConfig["ssl"];
+  onUpdate: (updates: Partial<SecurityConfig["ssl"]>) => void;
 }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       // Save configuration
     } catch (error) {
-      logger.error('Failed to save SSL config:', 'Component', error);
+      logger.error("Failed to save SSL config:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -582,21 +584,23 @@ const SSLTab = ({
               <Label>Kích hoạt SSL</Label>
               <Switch
                 checked={config.enabled}
-                onCheckedChange={checked => onUpdate({ enabled: checked })}
+                onCheckedChange={(checked) => onUpdate({ enabled: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
               <Label>Force HTTPS</Label>
               <Switch
                 checked={config.forceHttps}
-                onCheckedChange={checked => onUpdate({ forceHttps: checked })}
+                onCheckedChange={(checked) => onUpdate({ forceHttps: checked })}
               />
             </div>
             <div className="flex items-center justify-between">
               <Label>HSTS Enabled</Label>
               <Switch
                 checked={config.hstsEnabled}
-                onCheckedChange={checked => onUpdate({ hstsEnabled: checked })}
+                onCheckedChange={(checked) =>
+                  onUpdate({ hstsEnabled: checked })
+                }
               />
             </div>
           </div>
@@ -643,7 +647,7 @@ const SSLTab = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {config.certificates.map(cert => (
+              {config.certificates.map((cert) => (
                 <TableRow key={cert.id}>
                   <TableCell className="font-medium">{cert.domain}</TableCell>
                   <TableCell>{cert.issuer}</TableCell>
@@ -655,11 +659,11 @@ const SSLTab = ({
                   <TableCell>
                     <Badge
                       className={cn(
-                        cert.status === 'valid'
-                          ? 'bg-green-100 text-green-800'
-                          : cert.status === 'expired'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-orange-100 text-orange-800'
+                        cert.status === "valid"
+                          ? "bg-green-100 text-green-800"
+                          : cert.status === "expired"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-orange-100 text-orange-800",
                       )}
                     >
                       {cert.status.toUpperCase()}
@@ -690,10 +694,10 @@ const SSLTab = ({
 
 // Security Alerts Tab
 const SecurityAlertsTab = ({ alerts }: { alerts: SecurityAlert[] }) => {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
 
   const filteredAlerts = alerts.filter(
-    alert => filter === 'all' || alert.severity === filter
+    (alert) => filter === "all" || alert.severity === filter,
   );
 
   return (
@@ -712,26 +716,26 @@ const SecurityAlertsTab = ({ alerts }: { alerts: SecurityAlert[] }) => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-2">
               <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
+                variant={filter === "all" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilter('all')}
+                onClick={() => setFilter("all")}
               >
                 Tất cả ({alerts.length})
               </Button>
               <Button
-                variant={filter === 'critical' ? 'default' : 'outline'}
+                variant={filter === "critical" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilter('critical')}
+                onClick={() => setFilter("critical")}
               >
-                Critical ({alerts.filter(a => a.severity === 'critical').length}
-                )
+                Critical (
+                {alerts.filter((a) => a.severity === "critical").length})
               </Button>
               <Button
-                variant={filter === 'high' ? 'default' : 'outline'}
+                variant={filter === "high" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilter('high')}
+                onClick={() => setFilter("high")}
               >
-                High ({alerts.filter(a => a.severity === 'high').length})
+                High ({alerts.filter((a) => a.severity === "high").length})
               </Button>
             </div>
             <Button size="sm">
@@ -741,18 +745,18 @@ const SecurityAlertsTab = ({ alerts }: { alerts: SecurityAlert[] }) => {
           </div>
 
           <div className="space-y-4">
-            {filteredAlerts.map(alert => (
+            {filteredAlerts.map((alert) => (
               <Card
                 key={alert.id}
                 className={cn(
-                  'border-l-4',
-                  alert.severity === 'critical'
-                    ? 'border-l-red-500'
-                    : alert.severity === 'high'
-                      ? 'border-l-orange-500'
-                      : alert.severity === 'medium'
-                        ? 'border-l-yellow-500'
-                        : 'border-l-blue-500'
+                  "border-l-4",
+                  alert.severity === "critical"
+                    ? "border-l-red-500"
+                    : alert.severity === "high"
+                      ? "border-l-orange-500"
+                      : alert.severity === "medium"
+                        ? "border-l-yellow-500"
+                        : "border-l-blue-500",
                 )}
               >
                 <CardContent className="p-4">
@@ -796,10 +800,10 @@ const SecurityAlertsTab = ({ alerts }: { alerts: SecurityAlert[] }) => {
 
 // Security Logs Tab
 const SecurityLogsTab = ({ logs }: { logs: SecurityLog[] }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [severityFilter, setSeverityFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("all");
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       !searchQuery ||
       log.event.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -807,7 +811,7 @@ const SecurityLogsTab = ({ logs }: { logs: SecurityLog[] }) => {
       log.ip.includes(searchQuery);
 
     const matchesSeverity =
-      severityFilter === 'all' || log.severity === severityFilter;
+      severityFilter === "all" || log.severity === severityFilter;
 
     return matchesSearch && matchesSeverity;
   });
@@ -832,7 +836,7 @@ const SecurityLogsTab = ({ logs }: { logs: SecurityLog[] }) => {
                 <Input
                   placeholder="Tìm kiếm logs..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -863,7 +867,7 @@ const SecurityLogsTab = ({ logs }: { logs: SecurityLog[] }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLogs.map(log => (
+              {filteredLogs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="font-mono text-sm">
                     {formatDate(log.timestamp)}
@@ -873,18 +877,18 @@ const SecurityLogsTab = ({ logs }: { logs: SecurityLog[] }) => {
                   <TableCell>
                     <Badge
                       className={cn(
-                        log.severity === 'error'
-                          ? 'bg-red-100 text-red-800'
-                          : log.severity === 'warning'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-blue-100 text-blue-800'
+                        log.severity === "error"
+                          ? "bg-red-100 text-red-800"
+                          : log.severity === "warning"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-blue-100 text-blue-800",
                       )}
                     >
                       {log.severity.toUpperCase()}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-mono text-sm">{log.ip}</TableCell>
-                  <TableCell>{log.user || '-'}</TableCell>
+                  <TableCell>{log.user || "-"}</TableCell>
                   <TableCell className="max-w-xs truncate">
                     {log.details}
                   </TableCell>
@@ -903,22 +907,22 @@ const BackupTab = ({
   config,
   onUpdate,
 }: {
-  config: SecurityConfig['backup'];
-  onUpdate: (updates: Partial<SecurityConfig['backup']>) => void;
+  config: SecurityConfig["backup"];
+  onUpdate: (updates: Partial<SecurityConfig["backup"]>) => void;
 }) => {
   const [loading, setLoading] = useState(false);
 
   const handleBackupNow = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       onUpdate({
         lastBackup: new Date().toISOString(),
-        status: 'success',
+        status: "success",
       });
     } catch (error) {
-      logger.error('Backup failed:', 'Component', error);
-      onUpdate({ status: 'failed' });
+      logger.error("Backup failed:", "Component", error);
+      onUpdate({ status: "failed" });
     } finally {
       setLoading(false);
     }
@@ -943,7 +947,7 @@ const BackupTab = ({
                 <Label>Kích hoạt backup tự động</Label>
                 <Switch
                   checked={config.enabled}
-                  onCheckedChange={checked => onUpdate({ enabled: checked })}
+                  onCheckedChange={(checked) => onUpdate({ enabled: checked })}
                 />
               </div>
 
@@ -952,7 +956,7 @@ const BackupTab = ({
                 <Input
                   id="schedule"
                   value={config.schedule}
-                  onChange={e => onUpdate({ schedule: e.target.value })}
+                  onChange={(e) => onUpdate({ schedule: e.target.value })}
                   placeholder="0 2 * * *"
                 />
               </div>
@@ -963,7 +967,7 @@ const BackupTab = ({
                   id="retention"
                   type="number"
                   value={config.retention}
-                  onChange={e =>
+                  onChange={(e) =>
                     onUpdate({ retention: parseInt(e.target.value) })
                   }
                 />
@@ -973,7 +977,7 @@ const BackupTab = ({
                 <Label htmlFor="location">Vị trí lưu trữ</Label>
                 <Select
                   value={config.location}
-                  onValueChange={value => onUpdate({ location: value })}
+                  onValueChange={(value) => onUpdate({ location: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -993,7 +997,9 @@ const BackupTab = ({
                 <Label>Mã hóa backup</Label>
                 <Switch
                   checked={config.encryption}
-                  onCheckedChange={checked => onUpdate({ encryption: checked })}
+                  onCheckedChange={(checked) =>
+                    onUpdate({ encryption: checked })
+                  }
                 />
               </div>
 
@@ -1003,16 +1009,16 @@ const BackupTab = ({
                   <span className="text-sm">
                     {config.lastBackup
                       ? formatDate(config.lastBackup)
-                      : 'Chưa có backup'}
+                      : "Chưa có backup"}
                   </span>
                   <Badge
                     className={cn(
-                      'ml-2',
-                      config.status === 'success'
-                        ? 'bg-green-100 text-green-800'
-                        : config.status === 'failed'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-blue-100 text-blue-800'
+                      "ml-2",
+                      config.status === "success"
+                        ? "bg-green-100 text-green-800"
+                        : config.status === "failed"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800",
                     )}
                   >
                     {config.status.toUpperCase()}
@@ -1059,14 +1065,14 @@ const BackupTab = ({
 
 // Main Security Settings component
 export const SecuritySettings: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [config, setConfig] = useState<SecurityConfig>(mockSecurityConfig);
   const [alerts, setAlerts] = useState<SecurityAlert[]>(mockSecurityAlerts);
   const [logs, setLogs] = useState<SecurityLog[]>(mockSecurityLogs);
   const [loading, setLoading] = useState(false);
 
   const updateConfig = (section: keyof SecurityConfig, updates: any) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
@@ -1079,12 +1085,12 @@ export const SecuritySettings: React.FC = () => {
     setLoading(true);
     try {
       // Simulate API calls
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setConfig(mockSecurityConfig);
       setAlerts(mockSecurityAlerts);
       setLogs(mockSecurityLogs);
     } catch (error) {
-      logger.error('Failed to fetch security data:', 'Component', error);
+      logger.error("Failed to fetch security data:", "Component", error);
     } finally {
       setLoading(false);
     }
@@ -1122,13 +1128,13 @@ export const SecuritySettings: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Firewall</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {config.firewall.enabled ? 'ON' : 'OFF'}
+                  {config.firewall.enabled ? "ON" : "OFF"}
                 </p>
               </div>
               <Shield
                 className={cn(
-                  'h-8 w-8',
-                  config.firewall.enabled ? 'text-green-500' : 'text-gray-400'
+                  "h-8 w-8",
+                  config.firewall.enabled ? "text-green-500" : "text-gray-400",
                 )}
               />
             </div>
@@ -1141,13 +1147,13 @@ export const SecuritySettings: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">SSL</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {config.ssl.enabled ? 'ACTIVE' : 'INACTIVE'}
+                  {config.ssl.enabled ? "ACTIVE" : "INACTIVE"}
                 </p>
               </div>
               <Lock
                 className={cn(
-                  'h-8 w-8',
-                  config.ssl.enabled ? 'text-green-500' : 'text-gray-400'
+                  "h-8 w-8",
+                  config.ssl.enabled ? "text-green-500" : "text-gray-400",
                 )}
               />
             </div>
@@ -1160,7 +1166,7 @@ export const SecuritySettings: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Cảnh báo</p>
                 <p className="text-2xl font-bold text-orange-600">
-                  {alerts.filter(a => !a.resolved).length}
+                  {alerts.filter((a) => !a.resolved).length}
                 </p>
               </div>
               <AlertTriangle className="h-8 w-8 text-orange-500" />
@@ -1174,15 +1180,15 @@ export const SecuritySettings: React.FC = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Backup</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {config.backup.status === 'success' ? 'OK' : 'FAILED'}
+                  {config.backup.status === "success" ? "OK" : "FAILED"}
                 </p>
               </div>
               <HardDrive
                 className={cn(
-                  'h-8 w-8',
-                  config.backup.status === 'success'
-                    ? 'text-blue-500'
-                    : 'text-red-500'
+                  "h-8 w-8",
+                  config.backup.status === "success"
+                    ? "text-blue-500"
+                    : "text-red-500",
                 )}
               />
             </div>
@@ -1217,14 +1223,14 @@ export const SecuritySettings: React.FC = () => {
         <TabsContent value="firewall">
           <FirewallTab
             config={config.firewall}
-            onUpdate={updates => updateConfig('firewall', updates)}
+            onUpdate={(updates) => updateConfig("firewall", updates)}
           />
         </TabsContent>
 
         <TabsContent value="ssl">
           <SSLTab
             config={config.ssl}
-            onUpdate={updates => updateConfig('ssl', updates)}
+            onUpdate={(updates) => updateConfig("ssl", updates)}
           />
         </TabsContent>
 
@@ -1239,7 +1245,7 @@ export const SecuritySettings: React.FC = () => {
         <TabsContent value="backup">
           <BackupTab
             config={config.backup}
-            onUpdate={updates => updateConfig('backup', updates)}
+            onUpdate={(updates) => updateConfig("backup", updates)}
           />
         </TabsContent>
       </Tabs>
