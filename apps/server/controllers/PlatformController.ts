@@ -1111,8 +1111,8 @@ export class PlatformController {
   }
 
   private async getDetailedRevenueAnalytics(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
   ): Promise<any> {
     // Implement detailed revenue analytics
     return {};
@@ -1124,42 +1124,42 @@ export class PlatformController {
   }
 
   private async generateRevenueReport(
-    period: string,
-    startDate?: string,
-    endDate?: string,
+    _period: string,
+    _startDate?: string,
+    _endDate?: string,
   ): Promise<any> {
     // Implement revenue report generation
     return {};
   }
 
   private async generateUsageReport(
-    period: string,
-    startDate?: string,
-    endDate?: string,
+    _period: string,
+    _startDate?: string,
+    _endDate?: string,
   ): Promise<any> {
     // Implement usage report generation
     return {};
   }
 
   private async generateTenantReport(
-    period: string,
-    startDate?: string,
-    endDate?: string,
+    _period: string,
+    _startDate?: string,
+    _endDate?: string,
   ): Promise<any> {
     // Implement tenant report generation
     return {};
   }
 
   private async generateFeatureReport(
-    period: string,
-    startDate?: string,
-    endDate?: string,
+    _period: string,
+    _startDate?: string,
+    _endDate?: string,
   ): Promise<any> {
     // Implement feature report generation
     return {};
   }
 
-  private async generateExportData(type: string): Promise<any> {
+  private async generateExportData(_type: string): Promise<any> {
     // Implement export data generation
     return {};
   }

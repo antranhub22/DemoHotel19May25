@@ -594,8 +594,8 @@ export class UsageTrackingService extends EventEmitter {
   }
 
   private async updateAggregatedUsage(
-    tenantId: string,
-    events: UsageEvent[],
+    _tenantId: string,
+    _events: UsageEvent[],
   ): Promise<void> {
     // Update aggregated usage statistics in a separate table for faster queries
     // This could be implemented based on specific requirements

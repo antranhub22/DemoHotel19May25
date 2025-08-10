@@ -5,20 +5,20 @@
 // module awareness, real-time monitoring, and comprehensive analytics
 // Full integration with ServiceContainer, FeatureFlags, and ModuleLifecycle
 
-import { logger as baseLogger } from '@shared/utils/logger';
+import { logger as baseLogger } from "@shared/utils/logger";
 
 // ============================================
 // TYPES AND INTERFACES
 // ============================================
 
 export type LogLevel =
-  | 'debug'
-  | 'info'
-  | 'warn'
-  | 'error'
-  | 'success'
-  | 'api'
-  | 'audit';
+  | "debug"
+  | "info"
+  | "warn"
+  | "error"
+  | "success"
+  | "api"
+  | "audit";
 
 export interface LogContext {
   module?: string;
@@ -116,7 +116,7 @@ export class EnhancedLogger {
   private static logs: LogEntry[] = [];
   private static maxLogs = 10000; // Keep last 10k logs in memory
   private static performanceTrackers = new Map<string, number>();
-  private static metrics: MetricsSnapshot['logs'] = {
+  private static metrics: MetricsSnapshot["logs"] = {
     total: 0,
     byLevel: {
       debug: 0,
@@ -131,7 +131,7 @@ export class EnhancedLogger {
     recentErrors: 0,
     averageResponseTime: 0,
   };
-  private static performanceMetrics: MetricsSnapshot['performance'] = {
+  private static performanceMetrics: MetricsSnapshot["performance"] = {
     averageMemoryUsage: 0,
     peakMemoryUsage: 0,
     averageCpuUsage: 0,
@@ -150,7 +150,7 @@ export class EnhancedLogger {
     level: LogLevel,
     message: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
     const logId = this.generateLogId();
     const timestamp = new Date();
@@ -166,8 +166,8 @@ export class EnhancedLogger {
       message,
       context: {
         ...context,
-        environment: process.env.NODE_ENV || 'development',
-        version: '2.0.0',
+        environment: process.env.NODE_ENV || "development",
+        version: "2.0.0",
       },
       metadata,
       performance,
@@ -184,12 +184,12 @@ export class EnhancedLogger {
     this.forwardToBaseLogger(
       level,
       message,
-      context.component || 'EnhancedLogger',
+      context.component || "EnhancedLogger",
       {
         ...context,
         metadata,
         logId,
-      }
+      },
     );
 
     // Check for alerts
@@ -204,9 +204,9 @@ export class EnhancedLogger {
   static debug(
     message: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
-    return this.log('debug', message, context, metadata);
+    return this.log("debug", message, context, metadata);
   }
 
   /**
@@ -215,9 +215,9 @@ export class EnhancedLogger {
   static info(
     message: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
-    return this.log('info', message, context, metadata);
+    return this.log("info", message, context, metadata);
   }
 
   /**
@@ -226,9 +226,9 @@ export class EnhancedLogger {
   static warn(
     message: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
-    return this.log('warn', message, context, metadata);
+    return this.log("warn", message, context, metadata);
   }
 
   /**
@@ -238,10 +238,10 @@ export class EnhancedLogger {
     message: string,
     context: LogContext = {},
     error?: Error | any,
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
     const errorInfo = this.extractErrorInfo(error);
-    const logEntry = this.log('error', message, context, {
+    const logEntry = this.log("error", message, context, {
       ...metadata,
       error: errorInfo,
     });
@@ -258,9 +258,9 @@ export class EnhancedLogger {
   static success(
     message: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
-    return this.log('success', message, context, metadata);
+    return this.log("success", message, context, metadata);
   }
 
   /**
@@ -270,9 +270,9 @@ export class EnhancedLogger {
     message: string,
     context: LogContext = {},
     metadata?: any,
-    duration?: number
+    duration?: number,
   ): LogEntry {
-    const logEntry = this.log('api', message, context, metadata);
+    const logEntry = this.log("api", message, context, metadata);
     if (duration) {
       logEntry.duration = duration;
     }
@@ -285,16 +285,16 @@ export class EnhancedLogger {
   static audit(
     action: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): LogEntry {
     return this.log(
-      'audit',
+      "audit",
       `AUDIT: ${action}`,
       {
         ...context,
-        operation: 'audit',
+        operation: "audit",
       },
-      metadata
+      metadata,
     );
   }
 
@@ -307,7 +307,7 @@ export class EnhancedLogger {
    */
   static startPerformanceTracking(
     operationId: string,
-    context: LogContext = {}
+    context: LogContext = {},
   ): void {
     const startTime = performance.now();
     this.performanceTrackers.set(operationId, startTime);
@@ -325,13 +325,13 @@ export class EnhancedLogger {
   static endPerformanceTracking(
     operationId: string,
     context: LogContext = {},
-    metadata?: any
+    metadata?: any,
   ): number {
     const startTime = this.performanceTrackers.get(operationId);
     if (!startTime) {
       this.warn(
         `Performance tracking not found for operation: ${operationId}`,
-        context
+        context,
       );
       return 0;
     }
@@ -342,8 +342,8 @@ export class EnhancedLogger {
     this.performanceTrackers.delete(operationId);
 
     // Determine log level based on duration
-    const level = duration > 1000 ? 'warn' : duration > 500 ? 'info' : 'debug';
-    const emoji = duration > 1000 ? '🐌' : duration > 500 ? '⚡' : '🚀';
+    const level = duration > 1000 ? "warn" : duration > 500 ? "info" : "debug";
+    const emoji = duration > 1000 ? "🐌" : duration > 500 ? "⚡" : "🚀";
 
     this.log(
       level,
@@ -359,7 +359,7 @@ export class EnhancedLogger {
           startTime,
           endTime,
         },
-      }
+      },
     );
 
     // Update performance metrics
@@ -377,7 +377,7 @@ export class EnhancedLogger {
   static async time<T>(
     operationId: string,
     operation: () => Promise<T>,
-    context: LogContext = {}
+    context: LogContext = {},
   ): Promise<T> {
     this.startPerformanceTracking(operationId, context);
 
@@ -399,7 +399,7 @@ export class EnhancedLogger {
   /**
    * Create a module-specific logger
    */
-  static createModuleLogger(moduleName: string, version: string = '1.0.0') {
+  static createModuleLogger(moduleName: string, version: string = "1.0.0") {
     return {
       debug: (message: string, metadata?: any) =>
         this.debug(message, { module: moduleName, version }, metadata),
@@ -432,7 +432,7 @@ export class EnhancedLogger {
         this.endPerformanceTracking(
           operationId,
           { module: moduleName, version },
-          metadata
+          metadata,
         ),
 
       time: <T>(operationId: string, operation: () => Promise<T>) =>
@@ -459,7 +459,7 @@ export class EnhancedLogger {
       limit?: number;
       offset?: number;
       search?: string;
-    } = {}
+    } = {},
   ): LogEntry[] {
     let filteredLogs = [...this.logs];
 
@@ -468,46 +468,46 @@ export class EnhancedLogger {
       const levels = Array.isArray(options.level)
         ? options.level
         : [options.level];
-      filteredLogs = filteredLogs.filter(log => levels.includes(log.level));
+      filteredLogs = filteredLogs.filter((log) => levels.includes(log.level));
     }
 
     // Filter by module
     if (options.module) {
       filteredLogs = filteredLogs.filter(
-        log => log.context.module === options.module
+        (log) => log.context.module === options.module,
       );
     }
 
     // Filter by component
     if (options.component) {
       filteredLogs = filteredLogs.filter(
-        log => log.context.component === options.component
+        (log) => log.context.component === options.component,
       );
     }
 
     // Filter by user
     if (options.userId) {
       filteredLogs = filteredLogs.filter(
-        log => log.context.userId === options.userId
+        (log) => log.context.userId === options.userId,
       );
     }
 
     // Filter by tenant
     if (options.tenantId) {
       filteredLogs = filteredLogs.filter(
-        log => log.context.tenantId === options.tenantId
+        (log) => log.context.tenantId === options.tenantId,
       );
     }
 
     // Filter by time range
     if (options.since) {
       filteredLogs = filteredLogs.filter(
-        log => log.timestamp >= options.since!
+        (log) => log.timestamp >= options.since!,
       );
     }
     if (options.until) {
       filteredLogs = filteredLogs.filter(
-        log => log.timestamp <= options.until!
+        (log) => log.timestamp <= options.until!,
       );
     }
 
@@ -515,9 +515,9 @@ export class EnhancedLogger {
     if (options.search) {
       const searchLower = options.search.toLowerCase();
       filteredLogs = filteredLogs.filter(
-        log =>
+        (log) =>
           log.message.toLowerCase().includes(searchLower) ||
-          JSON.stringify(log.context).toLowerCase().includes(searchLower)
+          JSON.stringify(log.context).toLowerCase().includes(searchLower),
       );
     }
 
@@ -541,21 +541,21 @@ export class EnhancedLogger {
    * Get recent errors
    */
   static getRecentErrors(limit: number = 50): LogEntry[] {
-    return this.getLogs({ level: 'error', limit });
+    return this.getLogs({ level: "error", limit });
   }
 
   /**
    * Get API logs
    */
   static getApiLogs(limit: number = 100): LogEntry[] {
-    return this.getLogs({ level: 'api', limit });
+    return this.getLogs({ level: "api", limit });
   }
 
   /**
    * Get audit logs
    */
   static getAuditLogs(limit: number = 100): LogEntry[] {
-    return this.getLogs({ level: 'audit', limit });
+    return this.getLogs({ level: "audit", limit });
   }
 
   // ============================================
@@ -569,12 +569,12 @@ export class EnhancedLogger {
     // Calculate recent errors (last hour)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentErrors = this.logs.filter(
-      log => log.level === 'error' && log.timestamp >= oneHourAgo
+      (log) => log.level === "error" && log.timestamp >= oneHourAgo,
     ).length;
 
     // Calculate average response time from API logs
     const apiLogs = this.logs.filter(
-      log => log.level === 'api' && log.duration
+      (log) => log.level === "api" && log.duration,
     );
     const averageResponseTime =
       apiLogs.length > 0
@@ -611,13 +611,13 @@ export class EnhancedLogger {
     const errorCounts: { [message: string]: number } = {};
 
     // Process logs for statistics
-    this.logs.forEach(log => {
+    this.logs.forEach((log) => {
       // Group by hour
       const hour = log.timestamp.toISOString().substring(0, 13);
       byHour[hour] = (byHour[hour] || 0) + 1;
 
       // Count error messages
-      if (log.level === 'error') {
+      if (log.level === "error") {
         errorCounts[log.message] = (errorCounts[log.message] || 0) + 1;
       }
     });
@@ -724,35 +724,35 @@ export class EnhancedLogger {
     level: LogLevel,
     message: string,
     component: string,
-    context: any
+    context: any,
   ): void {
     try {
       switch (level) {
-        case 'debug':
+        case "debug":
           baseLogger.debug(message, component, context);
           break;
-        case 'info':
+        case "info":
           baseLogger.info(message, component, context);
           break;
-        case 'warn':
+        case "warn":
           baseLogger.warn(message, component, context);
           break;
-        case 'error':
+        case "error":
           baseLogger.error(message, component, context);
           break;
-        case 'success':
+        case "success":
           baseLogger.success(message, component, context);
           break;
-        case 'api':
+        case "api":
           baseLogger.api(message, component, context);
           break;
-        case 'audit':
+        case "audit":
           baseLogger.info(`[AUDIT] ${message}`, component, context);
           break;
         default:
           baseLogger.info(message, component, context);
       }
-    } catch (error) {
+    } catch (_error) {
       // Fallback to console if base logger fails
       console.log(`[${level.toUpperCase()}] ${message}`, context);
     }
@@ -774,9 +774,9 @@ export class EnhancedLogger {
       };
     }
 
-    if (typeof error === 'object') {
+    if (typeof error === "object") {
       return {
-        name: error.name || 'Unknown',
+        name: error.name || "Unknown",
         message: error.message || String(error),
         stack: error.stack,
         code: error.code,
@@ -785,7 +785,7 @@ export class EnhancedLogger {
     }
 
     return {
-      name: 'Unknown',
+      name: "Unknown",
       message: String(error),
     };
   }
@@ -795,16 +795,16 @@ export class EnhancedLogger {
    */
   private static checkAlerts(logEntry: LogEntry): void {
     // Alert on multiple errors in short time
-    if (logEntry.level === 'error') {
+    if (logEntry.level === "error") {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       const recentErrors = this.logs.filter(
-        log => log.level === 'error' && log.timestamp >= fiveMinutesAgo
+        (log) => log.level === "error" && log.timestamp >= fiveMinutesAgo,
       ).length;
 
       if (recentErrors >= 10) {
         this.warn(`🚨 Alert: ${recentErrors} errors in the last 5 minutes`, {
-          component: 'AlertSystem',
-          operation: 'error-threshold-alert',
+          component: "AlertSystem",
+          operation: "error-threshold-alert",
         });
       }
     }
@@ -814,10 +814,10 @@ export class EnhancedLogger {
       this.warn(
         `🐌 Alert: Slow operation detected: ${logEntry.duration}ms`,
         {
-          component: 'AlertSystem',
-          operation: 'slow-operation-alert',
+          component: "AlertSystem",
+          operation: "slow-operation-alert",
         },
-        { originalLogId: logEntry.id }
+        { originalLogId: logEntry.id },
       );
     }
   }
@@ -825,7 +825,7 @@ export class EnhancedLogger {
   /**
    * Get system information
    */
-  private static getSystemInfo(): MetricsSnapshot['system'] {
+  private static getSystemInfo(): MetricsSnapshot["system"] {
     return {
       uptime: process.uptime(),
       activeModules: 0, // Will be populated by integration
@@ -864,61 +864,61 @@ export class EnhancedLogger {
   /**
    * Export logs for analysis
    */
-  static exportLogs(format: 'json' | 'csv' = 'json'): string {
-    if (format === 'json') {
+  static exportLogs(format: "json" | "csv" = "json"): string {
+    if (format === "json") {
       return JSON.stringify(this.logs, null, 2);
     }
 
     // CSV format
     const headers = [
-      'timestamp',
-      'level',
-      'message',
-      'module',
-      'component',
-      'duration',
+      "timestamp",
+      "level",
+      "message",
+      "module",
+      "component",
+      "duration",
     ];
-    const csvRows = [headers.join(',')];
+    const csvRows = [headers.join(",")];
 
-    this.logs.forEach(log => {
+    this.logs.forEach((log) => {
       const row = [
         log.timestamp.toISOString(),
         log.level,
         `"${log.message.replace(/"/g, '""')}"`,
-        log.context.module || '',
-        log.context.component || '',
-        log.duration || '',
+        log.context.module || "",
+        log.context.component || "",
+        log.duration || "",
       ];
-      csvRows.push(row.join(','));
+      csvRows.push(row.join(","));
     });
 
-    return csvRows.join('\n');
+    return csvRows.join("\n");
   }
 
   /**
    * Get logger health status
    */
   static getHealthStatus(): {
-    status: 'healthy' | 'degraded' | 'critical';
+    status: "healthy" | "degraded" | "critical";
     logsCount: number;
     memoryUsage: number;
     recentErrors: number;
-    performance: 'good' | 'slow' | 'critical';
+    performance: "good" | "slow" | "critical";
   } {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     const recentErrors = this.logs.filter(
-      log => log.level === 'error' && log.timestamp >= fiveMinutesAgo
+      (log) => log.level === "error" && log.timestamp >= fiveMinutesAgo,
     ).length;
 
     const memoryUsage = process.memoryUsage().heapUsed / 1024 / 1024; // MB
 
-    let status: 'healthy' | 'degraded' | 'critical' = 'healthy';
-    if (recentErrors > 20) status = 'critical';
-    else if (recentErrors > 5) status = 'degraded';
+    let status: "healthy" | "degraded" | "critical" = "healthy";
+    if (recentErrors > 20) status = "critical";
+    else if (recentErrors > 5) status = "degraded";
 
-    let performance: 'good' | 'slow' | 'critical' = 'good';
-    if (this.performanceMetrics.slowOperations > 10) performance = 'critical';
-    else if (this.performanceMetrics.slowOperations > 3) performance = 'slow';
+    let performance: "good" | "slow" | "critical" = "good";
+    if (this.performanceMetrics.slowOperations > 10) performance = "critical";
+    else if (this.performanceMetrics.slowOperations > 3) performance = "slow";
 
     return {
       status,

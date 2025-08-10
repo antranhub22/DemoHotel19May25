@@ -4,24 +4,24 @@
 // Central export hub for all cross-cutting concerns and utilities including
 // enhanced monitoring, modular architecture, and advanced health checking
 
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
 
 // ✅ v2.0: Enhanced Architecture Components
 export {
+  FeatureFlags,
   addFlagListener,
   createABTest,
   evaluateABTest,
-  FeatureFlags,
   isFeatureEnabled,
-  isModuleEnabled
-} from './FeatureFlags';
-export { ModuleLifecycleManager } from './ModuleLifecycleManager';
+  isModuleEnabled,
+} from "./FeatureFlags";
+export { ModuleLifecycleManager } from "./ModuleLifecycleManager";
 export {
+  ServiceContainer,
   getService,
   getServiceSync,
   initializeServiceContainer,
-  ServiceContainer
-} from './ServiceContainer';
+} from "./ServiceContainer";
 
 // ✅ v3.0: NEW Advanced Health Check System
 export {
@@ -37,8 +37,8 @@ export {
   type HealthRecommendation,
   type ModuleHealthStatus,
   type ModuleMetrics,
-  type SystemHealthSummary
-} from './AdvancedHealthCheck';
+  type SystemHealthSummary,
+} from "./AdvancedHealthCheck";
 
 // ✅ v3.0: NEW Advanced Metrics Collection System
 export {
@@ -53,14 +53,14 @@ export {
   type BusinessKPI,
   type MetricsConfig,
   type MetricsSnapshot,
-  type PerformanceMetrics
-} from './AdvancedMetricsCollector';
+  type PerformanceMetrics,
+} from "./AdvancedMetricsCollector";
 
 // ✅ v3.0: NEW Performance Auditor System
 export {
+  PerformanceAuditor,
   getPerformanceTrends,
   initializePerformanceAuditor,
-  PerformanceAuditor,
   performanceAuditor,
   runComprehensiveAudit,
   runQuickAudit,
@@ -68,8 +68,8 @@ export {
   type OptimizationRecommendation,
   type PerformanceAuditReport,
   type PerformanceBottleneck,
-  type PerformanceIssue
-} from './PerformanceAuditor';
+  type PerformanceIssue,
+} from "./PerformanceAuditor";
 
 // ✅ v3.0: NEW Cache Management System
 export {
@@ -85,15 +85,15 @@ export {
   type CacheEntry,
   type CacheNamespace,
   type CacheStats,
-  type CacheTag
-} from './CacheManager';
+  type CacheTag,
+} from "./CacheManager";
 
 // ✅ v3.0: NEW Load Testing System
 export {
+  LoadTestManager,
   getActiveTests,
   getTestResults,
   initializeLoadTesting,
-  LoadTestManager,
   loadTestManager,
   runLoadTest,
   runStressTest,
@@ -103,14 +103,14 @@ export {
   type LoadTestEndpointResult,
   type LoadTestResult,
   type LoadTestScenario,
-  type StressTestConfig
-} from './LoadTestManager';
+  type StressTestConfig,
+} from "./LoadTestManager";
 
 // ✅ v3.0: NEW Database Optimization System
 export {
+  DatabaseOptimizer,
   analyzeQuery,
   createDatabaseOptimizer,
-  DatabaseOptimizer,
   getDatabaseHealth,
   initializeDatabaseOptimizer,
   optimizeDatabase,
@@ -118,8 +118,8 @@ export {
   type DatabaseHealthStatus,
   type IndexSuggestion,
   type OptimizationReport,
-  type QueryAnalysis
-} from './DatabaseOptimizer';
+  type QueryAnalysis,
+} from "./DatabaseOptimizer";
 
 // ✅ v3.0: NEW Connection Pool Management System
 export {
@@ -132,16 +132,16 @@ export {
   type ConnectionInfo,
   type ConnectionLeak,
   type PoolConfiguration,
-  type PoolMetrics
-} from './ConnectionPoolManager';
+  type PoolMetrics,
+} from "./ConnectionPoolManager";
 
 // ✅ v3.0: NEW Real-time Monitoring Dashboard System
 export {
+  MonitoringDashboard,
   createDashboardAlert,
   createMonitoringDashboard,
   getCurrentDashboardMetrics,
   initializeMonitoringDashboard,
-  MonitoringDashboard,
   type AlertThresholds,
   type ApplicationMetrics,
   type BusinessMetrics,
@@ -151,21 +151,21 @@ export {
   type PerformanceMetrics as DashboardPerformanceMetrics,
   type DatabaseMetrics,
   type SystemMetrics,
-  type WebSocketConnection
-} from './MonitoringDashboard';
+  type WebSocketConnection,
+} from "./MonitoringDashboard";
 
 // ✅ v3.0: NEW WebSocket Dashboard Integration
 export {
+  WebSocketDashboard,
   broadcastDashboardUpdate,
   getWebSocketClientStats,
   initializeWebSocketDashboard,
-  WebSocketDashboard,
   webSocketDashboard,
   type WebSocketClient,
   type WebSocketMessage,
   type WebSocketResponse,
-  type WebSocketSubscription
-} from './WebSocketDashboard';
+  type WebSocketSubscription,
+} from "./WebSocketDashboard";
 
 // ✅ v3.0: NEW API Gateway System
 export {
@@ -183,13 +183,13 @@ export {
   type RequestContext,
   type RoutingConfig,
   type SecurityConfig,
-  type VersionConfig
-} from './APIGateway';
+  type VersionConfig,
+} from "./APIGateway";
 
 // ✅ v2.0: Enhanced Monitoring Components
-export { EnhancedLogger } from './EnhancedLogger';
-export { MetricsCollector } from './MetricsCollector';
-export { MonitoringIntegration } from './MonitoringIntegration';
+export { EnhancedLogger } from "./EnhancedLogger";
+export { MetricsCollector } from "./MetricsCollector";
+export { MonitoringIntegration } from "./MonitoringIntegration";
 
 // ============================================
 // v3.0: ENHANCED ARCHITECTURE HEALTH
@@ -202,16 +202,16 @@ export { MonitoringIntegration } from './MonitoringIntegration';
 export async function getArchitectureHealth() {
   try {
     logger.debug(
-      '🏗️ [Architecture] Getting comprehensive health status v3.0',
-      'Architecture'
+      "🏗️ [Architecture] Getting comprehensive health status v3.0",
+      "Architecture",
     );
 
     // Import dynamically to avoid circular dependencies
-    const { ServiceContainer } = await import('./ServiceContainer');
-    const { FeatureFlags } = await import('./FeatureFlags');
-    const { ModuleLifecycleManager } = await import('./ModuleLifecycleManager');
-    const { MonitoringIntegration } = await import('./MonitoringIntegration');
-    const { advancedHealthCheck } = await import('./AdvancedHealthCheck');
+    const { ServiceContainer } = await import("./ServiceContainer");
+    const { FeatureFlags } = await import("./FeatureFlags");
+    const { ModuleLifecycleManager } = await import("./ModuleLifecycleManager");
+    const { MonitoringIntegration } = await import("./MonitoringIntegration");
+    const { advancedHealthCheck } = await import("./AdvancedHealthCheck");
 
     // Get health from all systems
     const containerHealth = ServiceContainer.getHealthStatus();
@@ -226,38 +226,38 @@ export async function getArchitectureHealth() {
       systemHealthSummary = await advancedHealthCheck.getSystemHealth();
     } catch (error) {
       logger.warn(
-        '⚠️ [Architecture] Advanced health system not fully initialized',
-        'Architecture'
+        "⚠️ [Architecture] Advanced health system not fully initialized",
+        "Architecture",
       );
     }
 
     return {
-      version: '3.0.0',
+      version: "3.0.0",
       timestamp: new Date().toISOString(),
 
       // v2.0 Health Status (maintained for compatibility)
       services: {
         container: {
-          status: containerHealth.healthy ? 'healthy' : 'unhealthy',
+          status: containerHealth.healthy ? "healthy" : "unhealthy",
           registeredServices: containerHealth.registeredServices,
           instantiatedServices: containerHealth.instantiatedServices,
           errors: containerHealth.errors.length,
           metrics: containerHealth.metrics,
         },
         featureFlags: {
-          status: featureFlagsHealth.isInitialized ? 'healthy' : 'unhealthy',
+          status: featureFlagsHealth.isInitialized ? "healthy" : "unhealthy",
           totalFlags: featureFlagsHealth.totalFlags,
           enabledFlags: featureFlagsHealth.enabledFlags,
           abTests: featureFlagsHealth.abTests,
         },
         lifecycle: {
-          status: lifecycleHealth.isInitialized ? 'healthy' : 'unhealthy',
+          status: lifecycleHealth.isInitialized ? "healthy" : "unhealthy",
           totalModules: lifecycleHealth.registeredModules,
           runningModules: lifecycleHealth.runningModules,
           failedModules: lifecycleHealth.failedModules,
         },
         monitoring: {
-          status: monitoringHealth.initialized ? 'healthy' : 'unhealthy',
+          status: monitoringHealth.initialized ? "healthy" : "unhealthy",
           initialized: monitoringHealth.initialized,
           health: monitoringHealth.health,
         },
@@ -271,12 +271,12 @@ export async function getArchitectureHealth() {
         totalHistoryEntries: advancedHealthDiagnostics.totalHistoryEntries,
         systemSummary: systemHealthSummary
           ? {
-            overallStatus: systemHealthSummary.overallStatus,
-            totalModules: systemHealthSummary.systemMetrics.totalModules,
-            healthyModules: systemHealthSummary.systemMetrics.healthyModules,
-            cascadeFailures: systemHealthSummary.cascadeFailures.length,
-            recommendations: systemHealthSummary.recommendations.length,
-          }
+              overallStatus: systemHealthSummary.overallStatus,
+              totalModules: systemHealthSummary.systemMetrics.totalModules,
+              healthyModules: systemHealthSummary.systemMetrics.healthyModules,
+              cascadeFailures: systemHealthSummary.cascadeFailures.length,
+              recommendations: systemHealthSummary.recommendations.length,
+            }
           : null,
       },
 
@@ -284,12 +284,12 @@ export async function getArchitectureHealth() {
       overall: {
         status:
           containerHealth.healthy &&
-            featureFlagsHealth.isInitialized &&
-            lifecycleHealth.isInitialized &&
-            monitoringHealth.initialized
-            ? 'healthy'
-            : 'degraded',
-        readiness: 'ready',
+          featureFlagsHealth.isInitialized &&
+          lifecycleHealth.isInitialized &&
+          monitoringHealth.initialized
+            ? "healthy"
+            : "degraded",
+        readiness: "ready",
         features: {
           serviceContainer: true,
           featureFlags: true,
@@ -307,29 +307,29 @@ export async function getArchitectureHealth() {
         platform: process.platform,
       },
     };
-  } catch (error) {
+  } catch {
     logger.error(
-      '❌ [Architecture] Failed to get architecture health',
-      'Architecture',
-      error
+      "❌ [Architecture] Failed to get architecture health",
+      "Architecture",
+      error,
     );
 
     return {
-      version: '3.0.0',
+      version: "3.0.0",
       timestamp: new Date().toISOString(),
       overall: {
-        status: 'unhealthy',
+        status: "unhealthy",
         error: (error as Error).message,
       },
       services: {
-        container: { status: 'unknown' },
-        featureFlags: { status: 'unknown' },
-        lifecycle: { status: 'unknown' },
-        monitoring: { status: 'unknown' },
+        container: { status: "unknown" },
+        featureFlags: { status: "unknown" },
+        lifecycle: { status: "unknown" },
+        monitoring: { status: "unknown" },
       },
       advancedHealth: {
         initialized: false,
-        error: 'Failed to initialize advanced health monitoring',
+        error: "Failed to initialize advanced health monitoring",
       },
     };
   }
@@ -346,46 +346,50 @@ export async function getArchitectureHealth() {
 export async function initializeMonitoring() {
   try {
     logger.info(
-      '🚀 [Monitoring] Initializing complete monitoring system v3.0',
-      'Monitoring'
+      "🚀 [Monitoring] Initializing complete monitoring system v3.0",
+      "Monitoring",
     );
 
     // Import all monitoring components
-    const { EnhancedLogger } = await import('./EnhancedLogger');
-    const { MetricsCollector } = await import('./MetricsCollector');
-    const { MonitoringIntegration } = await import('./MonitoringIntegration');
+    const { EnhancedLogger: _EnhancedLogger } = await import(
+      "./EnhancedLogger"
+    );
+    const { MetricsCollector: _MetricsCollector } = await import(
+      "./MetricsCollector"
+    );
+    const { MonitoringIntegration } = await import("./MonitoringIntegration");
     const { initializeAdvancedHealthCheck } = await import(
-      './AdvancedHealthCheck'
+      "./AdvancedHealthCheck"
     );
     const { initializeAdvancedMetrics } = await import(
-      './AdvancedMetricsCollector'
+      "./AdvancedMetricsCollector"
     );
     const { initializePerformanceAuditor } = await import(
-      './PerformanceAuditor'
+      "./PerformanceAuditor"
     );
-    const { initializeCache } = await import('./CacheManager');
-    const { initializeLoadTesting } = await import('./LoadTestManager');
-    const { initializeDatabaseOptimizer } = await import('./DatabaseOptimizer');
+    const { initializeCache } = await import("./CacheManager");
+    const { initializeLoadTesting } = await import("./LoadTestManager");
+    const { initializeDatabaseOptimizer } = await import("./DatabaseOptimizer");
     const { initializeConnectionPool } = await import(
-      './ConnectionPoolManager'
+      "./ConnectionPoolManager"
     );
     const { initializeMonitoringDashboard } = await import(
-      './MonitoringDashboard'
+      "./MonitoringDashboard"
     );
-    const { initializeAPIGateway } = await import('./APIGateway');
+    const { initializeAPIGateway } = await import("./APIGateway");
 
     // Initialize components in order (using available methods)
     // Note: EnhancedLogger and MetricsCollector don't have initialize methods
-    logger.debug('📝 [Monitoring] EnhancedLogger ready', 'Monitoring');
-    logger.debug('📊 [Monitoring] MetricsCollector ready', 'Monitoring');
+    logger.debug("📝 [Monitoring] EnhancedLogger ready", "Monitoring");
+    logger.debug("📊 [Monitoring] MetricsCollector ready", "Monitoring");
 
     // Initialize MonitoringIntegration (this may have initialize method)
     try {
       await MonitoringIntegration.initialize();
     } catch (error) {
       logger.warn(
-        '⚠️ [Monitoring] MonitoringIntegration init failed, continuing',
-        'Monitoring'
+        "⚠️ [Monitoring] MonitoringIntegration init failed, continuing",
+        "Monitoring",
       );
     }
 
@@ -418,7 +422,7 @@ export async function initializeMonitoring() {
       enableRedis: false, // Memory only for now
       enableCompression: true,
       enableMetrics: true,
-      evictionPolicy: 'lru',
+      evictionPolicy: "lru",
     });
 
     // v3.0: Initialize load testing system
@@ -426,10 +430,10 @@ export async function initializeMonitoring() {
 
     // v3.0: Initialize database optimization system
     const databaseConfig = {
-      type: (process.env.DATABASE_URL?.includes('postgresql')
-        ? 'postgresql'
-        : 'sqlite') as 'postgresql' | 'sqlite',
-      url: process.env.DATABASE_URL || 'file:./dev.db',
+      type: (process.env.DATABASE_URL?.includes("postgresql")
+        ? "postgresql"
+        : "sqlite") as "postgresql" | "sqlite",
+      url: process.env.DATABASE_URL || "file:./dev.db",
       pool: {
         min: 5,
         max: 20,
@@ -472,7 +476,7 @@ export async function initializeMonitoring() {
       database: {
         type: databaseConfig.type,
         url: databaseConfig.url,
-        database: 'hotel_management',
+        database: "hotel_management",
       },
       pool: {
         min: 5,
@@ -491,7 +495,7 @@ export async function initializeMonitoring() {
       monitoring: {
         metricsInterval: 30000,
         healthCheckInterval: 60000,
-        enableDetailedLogging: process.env.NODE_ENV === 'development',
+        enableDetailedLogging: process.env.NODE_ENV === "development",
         alertThresholds: {
           highConnectionUsage: 80,
           longAcquireTime: 1000,
@@ -504,7 +508,7 @@ export async function initializeMonitoring() {
         enableQueryCache: true,
         enableConnectionReuse: true,
         maxQueryCacheSize: 1000,
-        connectionWarmupQueries: ['SELECT 1', 'SELECT NOW()'],
+        connectionWarmupQueries: ["SELECT 1", "SELECT NOW()"],
       },
     };
 
@@ -559,7 +563,7 @@ export async function initializeMonitoring() {
           enableAlertSummary: true,
         },
         themes: {
-          defaultTheme: 'dark' as const,
+          defaultTheme: "dark" as const,
           enableCustomThemes: true,
         },
       },
@@ -573,18 +577,18 @@ export async function initializeMonitoring() {
         enabled: true,
         strategies: [
           {
-            name: 'global_rate_limit',
-            type: 'fixed_window' as const,
+            name: "global_rate_limit",
+            type: "fixed_window" as const,
             windowSize: 60,
             maxRequests: 1000,
-            targets: [{ type: 'global' as const }],
+            targets: [{ type: "global" as const }],
             actions: [
-              { threshold: 80, action: 'warn' as const },
-              { threshold: 100, action: 'block' as const, duration: 60 },
+              { threshold: 80, action: "warn" as const },
+              { threshold: 100, action: "block" as const, duration: 60 },
             ],
           },
         ],
-        storage: 'memory' as const,
+        storage: "memory" as const,
         globalLimits: {
           requestsPerMinute: 1000,
           requestsPerHour: 50000,
@@ -598,35 +602,35 @@ export async function initializeMonitoring() {
           tenantId: true,
           custom: false,
         },
-        exemptions: ['127.0.0.1', '::1'],
+        exemptions: ["127.0.0.1", "::1"],
       },
       authentication: {
         strategies: [
           {
-            name: 'jwt_auth',
-            type: 'jwt' as const,
+            name: "jwt_auth",
+            type: "jwt" as const,
             priority: 1,
             config: {
               secretKey: process.env.JWT_SECRET_KEY || process.env.JWT_SECRET,
-              algorithms: ['HS256'],
-              issuer: 'hotel-management-system',
+              algorithms: ["HS256"],
+              issuer: "hotel-management-system",
             },
-            endpoints: ['^/api/(?!auth|health).*'],
+            endpoints: ["^/api/(?!auth|health).*"],
           },
         ],
         exemptions: [
-          '^/api/auth/.*',
-          '^/api/.*/health$',
-          '^/api/transcripts.*', // ✅ FIX: Allow transcript API for realtime voice data
-          '^/api/request.*', // ✅ FIX: Allow request API for voice assistant
-          '^/api/guest/.*', // ✅ FIX: Allow guest APIs for public voice features
-          '^/api/temp-public/.*', // ✅ FIX: Allow temp public APIs
+          "^/api/auth/.*",
+          "^/api/.*/health$",
+          "^/api/transcripts.*", // ✅ FIX: Allow transcript API for realtime voice data
+          "^/api/request.*", // ✅ FIX: Allow request API for voice assistant
+          "^/api/guest/.*", // ✅ FIX: Allow guest APIs for public voice features
+          "^/api/temp-public/.*", // ✅ FIX: Allow temp public APIs
         ],
         tokenValidation: {
           verifyExpiration: true,
           verifySignature: true,
           verifyIssuer: true,
-          allowedIssuers: ['hotel-management-system'],
+          allowedIssuers: ["hotel-management-system"],
         },
         sessionManagement: {
           enabled: true,
@@ -637,41 +641,41 @@ export async function initializeMonitoring() {
       versioning: {
         enabled: true,
         strategies: [
-          { type: 'header' as const, parameter: 'X-API-Version' },
-          { type: 'query' as const, parameter: 'version' },
+          { type: "header" as const, parameter: "X-API-Version" },
+          { type: "query" as const, parameter: "version" },
         ],
-        defaultVersion: 'v1',
-        supportedVersions: ['v1', 'v2'],
+        defaultVersion: "v1",
+        supportedVersions: ["v1", "v2"],
         deprecationWarnings: [],
       },
       routing: {
         rules: [
           {
-            id: 'hotel-api',
-            pattern: '^/api/hotel/.*',
-            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            id: "hotel-api",
+            pattern: "^/api/hotel/.*",
+            methods: ["GET", "POST", "PUT", "DELETE"],
             targets: [
               {
-                id: 'hotel-service',
-                url: 'http://localhost:10000',
+                id: "hotel-service",
+                url: "http://localhost:10000",
                 weight: 100,
-                health: 'healthy' as const,
+                health: "healthy" as const,
                 priority: 1,
                 timeout: 30000,
               },
             ],
-            middleware: ['auth', 'rate-limit'],
+            middleware: ["auth", "rate-limit"],
           },
         ],
         loadBalancing: {
-          strategy: 'round_robin' as const,
+          strategy: "round_robin" as const,
           healthCheckInterval: 30,
           maxRetries: 3,
           retryDelay: 1000,
         },
         healthChecks: {
           enabled: true,
-          endpoint: '/health',
+          endpoint: "/health",
           interval: 30,
           timeout: 5000,
           healthyThreshold: 2,
@@ -691,7 +695,7 @@ export async function initializeMonitoring() {
       caching: {
         enabled: true,
         strategies: [],
-        storage: 'memory' as const,
+        storage: "memory" as const,
         defaultTTL: 300,
         maxSize: 256,
       },
@@ -705,17 +709,17 @@ export async function initializeMonitoring() {
       security: {
         cors: {
           enabled: true,
-          origins: ['http://localhost:3000'],
-          methods: ['GET', 'POST', 'PUT', 'DELETE'],
-          headers: ['Content-Type', 'Authorization'],
+          origins: ["http://localhost:3000"],
+          methods: ["GET", "POST", "PUT", "DELETE"],
+          headers: ["Content-Type", "Authorization"],
           credentials: true,
           maxAge: 86400,
         },
         headers: {
           enabled: true,
           headers: {
-            'X-Frame-Options': 'DENY',
-            'X-Content-Type-Options': 'nosniff',
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
           },
         },
         validation: {
@@ -733,7 +737,7 @@ export async function initializeMonitoring() {
             enabled: false,
             allowedCountries: [],
             blockedCountries: [],
-            action: 'block' as const,
+            action: "block" as const,
           },
         },
       },
@@ -742,20 +746,20 @@ export async function initializeMonitoring() {
     await initializeAPIGateway(gatewayConfig);
 
     logger.success(
-      '✅ [Monitoring] Complete monitoring system v3.0 initialized with API Gateway',
-      'Monitoring'
+      "✅ [Monitoring] Complete monitoring system v3.0 initialized with API Gateway",
+      "Monitoring",
     );
-  } catch (error) {
+  } catch {
     logger.error(
-      '❌ [Monitoring] Failed to initialize monitoring system',
-      'Monitoring',
-      error
+      "❌ [Monitoring] Failed to initialize monitoring system",
+      "Monitoring",
+      error,
     );
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       // Graceful degradation in production
       logger.warn(
-        '⚠️ [Monitoring] Continuing without full monitoring capabilities',
-        'Monitoring'
+        "⚠️ [Monitoring] Continuing without full monitoring capabilities",
+        "Monitoring",
       );
     } else {
       throw error;

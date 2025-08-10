@@ -4,9 +4,9 @@
 // Comprehensive enterprise API Gateway with rate limiting, request routing, API versioning,
 // authentication middleware, request transformation, and comprehensive analytics
 
-import { EventEmitter } from 'events';
-import { NextFunction, Request, Response } from 'express';
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { EventEmitter } from "events";
+import { NextFunction, Request, Response } from "express";
 
 // API Gateway interfaces
 export interface GatewayConfig {
@@ -23,7 +23,7 @@ export interface GatewayConfig {
 export interface RateLimitConfig {
   enabled: boolean;
   strategies: RateLimitStrategy[];
-  storage: 'memory' | 'redis' | 'database';
+  storage: "memory" | "redis" | "database";
   globalLimits: {
     requestsPerMinute: number;
     requestsPerHour: number;
@@ -42,7 +42,7 @@ export interface RateLimitConfig {
 
 export interface RateLimitStrategy {
   name: string;
-  type: 'fixed_window' | 'sliding_window' | 'token_bucket' | 'leaky_bucket';
+  type: "fixed_window" | "sliding_window" | "token_bucket" | "leaky_bucket";
   windowSize: number; // seconds
   maxRequests: number;
   targets: RateLimitTarget[];
@@ -50,14 +50,14 @@ export interface RateLimitStrategy {
 }
 
 export interface RateLimitTarget {
-  type: 'global' | 'endpoint' | 'user' | 'tenant' | 'apikey';
+  type: "global" | "endpoint" | "user" | "tenant" | "apikey";
   pattern?: string; // Regex pattern for endpoints
   value?: string; // Specific value for user/tenant/apikey
 }
 
 export interface RateLimitAction {
   threshold: number; // percentage of limit
-  action: 'warn' | 'throttle' | 'block' | 'queue' | 'redirect';
+  action: "warn" | "throttle" | "block" | "queue" | "redirect";
   duration?: number; // seconds
   message?: string;
   redirectUrl?: string;
@@ -81,7 +81,7 @@ export interface AuthConfig {
 
 export interface AuthStrategy {
   name: string;
-  type: 'jwt' | 'apikey' | 'oauth' | 'basic' | 'custom';
+  type: "jwt" | "apikey" | "oauth" | "basic" | "custom";
   priority: number;
   config: any;
   endpoints: string[]; // Endpoint patterns this strategy applies to
@@ -96,7 +96,7 @@ export interface VersionConfig {
 }
 
 export interface VersionStrategy {
-  type: 'header' | 'query' | 'path' | 'subdomain';
+  type: "header" | "query" | "path" | "subdomain";
   parameter: string; // Header name, query param, or path prefix
   prefix?: string; // For path-based versioning
 }
@@ -130,18 +130,18 @@ export interface RouteTarget {
   id: string;
   url: string;
   weight: number; // For load balancing
-  health: 'healthy' | 'unhealthy' | 'unknown';
+  health: "healthy" | "unhealthy" | "unknown";
   priority: number;
   timeout: number; // milliseconds
 }
 
 export interface LoadBalancingConfig {
   strategy:
-  | 'round_robin'
-  | 'weighted'
-  | 'least_connections'
-  | 'ip_hash'
-  | 'random';
+    | "round_robin"
+    | "weighted"
+    | "least_connections"
+    | "ip_hash"
+    | "random";
   healthCheckInterval: number; // seconds
   maxRetries: number;
   retryDelay: number; // milliseconds
@@ -171,14 +171,14 @@ export interface TransformationConfig {
 export interface TransformationRule {
   id: string;
   name: string;
-  type: 'request' | 'response' | 'both';
+  type: "request" | "response" | "both";
   pattern: string; // Endpoint pattern
   transformations: Transformation[];
 }
 
 export interface Transformation {
-  type: 'header' | 'body' | 'query' | 'path';
-  action: 'add' | 'remove' | 'modify' | 'rename';
+  type: "header" | "body" | "query" | "path";
+  action: "add" | "remove" | "modify" | "rename";
   target: string;
   value?: string;
   condition?: string; // JavaScript expression
@@ -187,7 +187,7 @@ export interface Transformation {
 export interface CachingConfig {
   enabled: boolean;
   strategies: CachingStrategy[];
-  storage: 'memory' | 'redis' | 'hybrid';
+  storage: "memory" | "redis" | "hybrid";
   defaultTTL: number; // seconds
   maxSize: number; // MB
 }
@@ -202,9 +202,9 @@ export interface CachingStrategy {
 }
 
 export interface CacheCondition {
-  type: 'header' | 'query' | 'body' | 'custom';
+  type: "header" | "query" | "body" | "custom";
   field: string;
-  operator: 'equals' | 'contains' | 'regex' | 'exists';
+  operator: "equals" | "contains" | "regex" | "exists";
   value?: string;
 }
 
@@ -218,7 +218,7 @@ export interface AnalyticsConfig {
 
 export interface AnalyticsMetric {
   name: string;
-  type: 'counter' | 'histogram' | 'gauge' | 'summary';
+  type: "counter" | "histogram" | "gauge" | "summary";
   labels: string[];
   description: string;
 }
@@ -260,16 +260,16 @@ export interface RequestFiltering {
 }
 
 export interface FilterRule {
-  type: 'ip' | 'country' | 'user_agent' | 'header' | 'custom';
+  type: "ip" | "country" | "user_agent" | "header" | "custom";
   pattern: string;
-  action: 'allow' | 'block' | 'log';
+  action: "allow" | "block" | "log";
 }
 
 export interface GeoBlockingConfig {
   enabled: boolean;
   allowedCountries: string[];
   blockedCountries: string[];
-  action: 'block' | 'redirect' | 'log';
+  action: "block" | "redirect" | "log";
 }
 
 // Request context and analytics
@@ -384,8 +384,8 @@ export class APIGateway extends EventEmitter {
   async initialize(): Promise<void> {
     try {
       logger.info(
-        '🌐 [APIGateway] Initializing enterprise API Gateway',
-        'APIGateway'
+        "🌐 [APIGateway] Initializing enterprise API Gateway",
+        "APIGateway",
       );
 
       // Setup routing table
@@ -413,14 +413,14 @@ export class APIGateway extends EventEmitter {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [APIGateway] Enterprise API Gateway initialized',
-        'APIGateway'
+        "✅ [APIGateway] Enterprise API Gateway initialized",
+        "APIGateway",
       );
     } catch (error) {
       logger.error(
-        '❌ [APIGateway] Failed to initialize API Gateway',
-        'APIGateway',
-        error
+        "❌ [APIGateway] Failed to initialize API Gateway",
+        "APIGateway",
+        error,
       );
       throw error;
     }
@@ -447,8 +447,8 @@ export class APIGateway extends EventEmitter {
           return this.sendErrorResponse(
             res,
             401,
-            'Authentication failed',
-            authResult.error
+            "Authentication failed",
+            authResult.error,
           );
         }
 
@@ -463,7 +463,7 @@ export class APIGateway extends EventEmitter {
         // Route resolution
         const route = this.resolveRoute(req, context);
         if (!route) {
-          return this.sendErrorResponse(res, 404, 'Route not found');
+          return this.sendErrorResponse(res, 404, "Route not found");
         }
         context.route = route;
 
@@ -473,13 +473,13 @@ export class APIGateway extends EventEmitter {
           return this.sendErrorResponse(
             res,
             403,
-            'Security check failed',
-            securityResult.reason
+            "Security check failed",
+            securityResult.reason,
           );
         }
 
         // Cache check
-        if (this.config.caching.enabled && req.method === 'GET') {
+        if (this.config.caching.enabled && req.method === "GET") {
           const cachedResponse = await this.getCachedResponse(req, context);
           if (cachedResponse) {
             context.analytics.cacheHit = true;
@@ -498,9 +498,9 @@ export class APIGateway extends EventEmitter {
         // Continue to next middleware
         next();
       } catch (error) {
-        logger.error('❌ [APIGateway] Middleware error', 'APIGateway', error);
+        logger.error("❌ [APIGateway] Middleware error", "APIGateway", error);
         context.analytics.errors.push((error as Error).message);
-        this.sendErrorResponse(res, 500, 'Gateway error');
+        this.sendErrorResponse(res, 500, "Gateway error");
       } finally {
         // Update analytics
         this.updateRequestAnalytics(context);
@@ -518,32 +518,32 @@ export class APIGateway extends EventEmitter {
     // Calculate request metrics
     const totalRequests = activeRequestsArray.length;
     const successfulRequests = activeRequestsArray.filter(
-      r =>
+      (r) =>
         r.analytics.statusCode &&
         r.analytics.statusCode >= 200 &&
-        r.analytics.statusCode < 400
+        r.analytics.statusCode < 400,
     ).length;
     const failedRequests = activeRequestsArray.filter(
-      r => r.analytics.statusCode && r.analytics.statusCode >= 400
+      (r) => r.analytics.statusCode && r.analytics.statusCode >= 400,
     ).length;
     const rateLimitedRequests = activeRequestsArray.filter(
-      r => r.analytics.rateLimited
+      (r) => r.analytics.rateLimited,
     ).length;
     const cachedRequests = activeRequestsArray.filter(
-      r => r.analytics.cacheHit
+      (r) => r.analytics.cacheHit,
     ).length;
 
     // Calculate response times
     const completedRequests = activeRequestsArray.filter(
-      r => r.analytics.duration
+      (r) => r.analytics.duration,
     );
-    const responseTimes = completedRequests.map(r => r.analytics.duration!);
+    const responseTimes = completedRequests.map((r) => r.analytics.duration!);
     responseTimes.sort((a, b) => a - b);
 
     const averageResponseTime =
       responseTimes.length > 0
         ? responseTimes.reduce((sum, time) => sum + time, 0) /
-        responseTimes.length
+          responseTimes.length
         : 0;
     const p95ResponseTime =
       responseTimes.length > 0
@@ -553,7 +553,7 @@ export class APIGateway extends EventEmitter {
     // Calculate throughput (requests per second over last minute)
     const oneMinuteAgo = new Date(currentTime.getTime() - 60000);
     const recentRequests = activeRequestsArray.filter(
-      r => r.timestamp >= oneMinuteAgo
+      (r) => r.timestamp >= oneMinuteAgo,
     );
     const throughput = recentRequests.length / 60;
 
@@ -578,11 +578,11 @@ export class APIGateway extends EventEmitter {
       routing: {
         totalRoutes: this.routingTable.size,
         activeTargets: Array.from(this.routingTable.values())
-          .flatMap(r => r.targets)
-          .filter(t => t.health === 'healthy').length,
+          .flatMap((r) => r.targets)
+          .filter((t) => t.health === "healthy").length,
         healthyTargets: Array.from(this.routingTable.values())
-          .flatMap(r => r.targets)
-          .filter(t => t.health === 'healthy').length,
+          .flatMap((r) => r.targets)
+          .filter((t) => t.health === "healthy").length,
         circuitBreakerTrips: 0, // Would track circuit breaker state
       },
       caching: {
@@ -656,9 +656,9 @@ export class APIGateway extends EventEmitter {
       timestamp: new Date(),
       method: req.method,
       url: req.url,
-      version: '1.0', // Will be resolved later
-      clientIp: req.ip || req.connection.remoteAddress || 'unknown',
-      userAgent: req.get('User-Agent') || 'unknown',
+      version: "1.0", // Will be resolved later
+      clientIp: req.ip || req.connection.remoteAddress || "unknown",
+      userAgent: req.get("User-Agent") || "unknown",
       rateLimitKey: this.generateRateLimitKey(req),
       transformations: [],
       analytics: {
@@ -678,23 +678,23 @@ export class APIGateway extends EventEmitter {
       let version: string | undefined;
 
       switch (strategy.type) {
-        case 'header':
+        case "header":
           version = req.get(strategy.parameter);
           break;
-        case 'query':
+        case "query":
           version = req.query[strategy.parameter] as string;
           break;
-        case 'path': {
+        case "path": {
           const pathMatch = req.path.match(
-            new RegExp(`^${strategy.prefix}/(v\\d+(?:\\.\\d+)?)`)
+            new RegExp(`^${strategy.prefix}/(v\\d+(?:\\.\\d+)?)`),
           );
           version = pathMatch?.[1];
           break;
         }
-        case 'subdomain': {
-          const host = req.get('Host') || '';
+        case "subdomain": {
+          const host = req.get("Host") || "";
           const subdomainMatch = host.match(
-            new RegExp(`^(v\\d+(?:\\.\\d+)?)\\.`)
+            new RegExp(`^(v\\d+(?:\\.\\d+)?)\\.`),
           );
           version = subdomainMatch?.[1];
           break;
@@ -714,11 +714,11 @@ export class APIGateway extends EventEmitter {
 
   private async authenticateRequest(
     req: Request,
-    context: RequestContext
+    context: RequestContext,
   ): Promise<{ success: boolean; error?: string }> {
     // Check if endpoint is exempt from authentication
-    const isExempt = this.config.authentication.exemptions.some(pattern =>
-      new RegExp(pattern).test(req.path)
+    const isExempt = this.config.authentication.exemptions.some((pattern) =>
+      new RegExp(pattern).test(req.path),
     );
 
     if (isExempt) {
@@ -727,13 +727,13 @@ export class APIGateway extends EventEmitter {
 
     // Try authentication strategies in priority order
     const strategies = this.config.authentication.strategies.sort(
-      (a, b) => a.priority - b.priority
+      (a, b) => a.priority - b.priority,
     );
 
     for (const strategy of strategies) {
       // Check if this strategy applies to the current endpoint
-      const applies = strategy.endpoints.some(pattern =>
-        new RegExp(pattern).test(req.path)
+      const applies = strategy.endpoints.some((pattern) =>
+        new RegExp(pattern).test(req.path),
       );
 
       if (!applies) continue;
@@ -744,22 +744,22 @@ export class APIGateway extends EventEmitter {
       }
     }
 
-    return { success: false, error: 'No valid authentication found' };
+    return { success: false, error: "No valid authentication found" };
   }
 
   private async executeAuthStrategy(
     req: Request,
     strategy: AuthStrategy,
-    context: RequestContext
+    context: RequestContext,
   ): Promise<{ success: boolean; error?: string }> {
     switch (strategy.type) {
-      case 'jwt':
+      case "jwt":
         return this.validateJWT(req, strategy.config, context);
-      case 'apikey':
+      case "apikey":
         return this.validateAPIKey(req, strategy.config, context);
-      case 'oauth':
+      case "oauth":
         return this.validateOAuth(req, strategy.config, context);
-      case 'basic':
+      case "basic":
         return this.validateBasicAuth(req, strategy.config, context);
       default:
         return {
@@ -772,14 +772,14 @@ export class APIGateway extends EventEmitter {
   private validateJWT(
     req: Request,
     config: any,
-    context: RequestContext
+    context: RequestContext,
   ): { success: boolean; error?: string } {
     // Simplified JWT validation (would use proper JWT library)
-    const authHeader = req.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const authHeader = req.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return {
         success: false,
-        error: 'Missing or invalid authorization header',
+        error: "Missing or invalid authorization header",
       };
     }
 
@@ -787,62 +787,62 @@ export class APIGateway extends EventEmitter {
 
     // Mock JWT validation
     if (token && token.length > 10) {
-      context.userId = 'jwt_user';
+      context.userId = "jwt_user";
       return { success: true };
     }
 
-    return { success: false, error: 'Invalid JWT token' };
+    return { success: false, error: "Invalid JWT token" };
   }
 
   private validateAPIKey(
     req: Request,
     config: any,
-    context: RequestContext
+    context: RequestContext,
   ): { success: boolean; error?: string } {
-    const apiKey = req.get('X-API-Key') || (req.query.api_key as string);
+    const apiKey = req.get("X-API-Key") || (req.query.api_key as string);
 
     if (!apiKey) {
-      return { success: false, error: 'Missing API key' };
+      return { success: false, error: "Missing API key" };
     }
 
     // Mock API key validation
-    if (apiKey.startsWith('ak_') && apiKey.length > 10) {
+    if (apiKey.startsWith("ak_") && apiKey.length > 10) {
       context.apiKey = apiKey;
       return { success: true };
     }
 
-    return { success: false, error: 'Invalid API key' };
+    return { success: false, error: "Invalid API key" };
   }
 
   private validateOAuth(
     req: Request,
-    config: any,
-    context: RequestContext
+    _config: any,
+    _context: RequestContext,
   ): { success: boolean; error?: string } {
     // Mock OAuth validation
-    const authHeader = req.get('Authorization');
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    const authHeader = req.get("Authorization");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       return { success: true };
     }
-    return { success: false, error: 'Invalid OAuth token' };
+    return { success: false, error: "Invalid OAuth token" };
   }
 
   private validateBasicAuth(
     req: Request,
-    config: any,
-    context: RequestContext
+    _config: any,
+    _context: RequestContext,
   ): { success: boolean; error?: string } {
     // Mock Basic auth validation
-    const authHeader = req.get('Authorization');
-    if (authHeader && authHeader.startsWith('Basic ')) {
+    const authHeader = req.get("Authorization");
+    if (authHeader && authHeader.startsWith("Basic ")) {
       return { success: true };
     }
-    return { success: false, error: 'Invalid basic authentication' };
+    return { success: false, error: "Invalid basic authentication" };
   }
 
   private async checkRateLimit(
-    req: Request,
-    context: RequestContext
+    _req: Request,
+    context: RequestContext,
   ): Promise<RateLimitStatus> {
     const key = context.rateLimitKey;
     const now = Date.now();
@@ -855,7 +855,7 @@ export class APIGateway extends EventEmitter {
         count: 0,
         limit: this.config.rateLimiting.globalLimits.requestsPerMinute,
         resetTime: now + 60000, // 1 minute window
-        strategy: 'fixed_window',
+        strategy: "fixed_window",
       };
       this.rateLimitStore.set(key, limitEntry);
     }
@@ -889,11 +889,11 @@ export class APIGateway extends EventEmitter {
     const keyParts: string[] = [];
 
     if (this.config.rateLimiting.keyGenerators.ip) {
-      keyParts.push(`ip:${req.ip || 'unknown'}`);
+      keyParts.push(`ip:${req.ip || "unknown"}`);
     }
 
     if (this.config.rateLimiting.keyGenerators.apiKey) {
-      const apiKey = req.get('X-API-Key');
+      const apiKey = req.get("X-API-Key");
       if (apiKey) {
         keyParts.push(`key:${apiKey}`);
       }
@@ -901,25 +901,25 @@ export class APIGateway extends EventEmitter {
 
     if (this.config.rateLimiting.keyGenerators.userId) {
       // Would extract from JWT or session
-      keyParts.push('user:unknown');
+      keyParts.push("user:unknown");
     }
 
     if (this.config.rateLimiting.keyGenerators.tenantId) {
       // Would extract from request context
-      keyParts.push('tenant:unknown');
+      keyParts.push("tenant:unknown");
     }
 
-    return keyParts.join('|') || `ip:${req.ip || 'unknown'}`;
+    return keyParts.join("|") || `ip:${req.ip || "unknown"}`;
   }
 
   private resolveRoute(
     req: Request,
-    context: RequestContext
+    context: RequestContext,
   ): RoutingRule | null {
     for (const [, rule] of this.routingTable) {
       const patternMatch = new RegExp(rule.pattern).test(req.path);
       const methodMatch =
-        rule.methods.includes('*') || rule.methods.includes(req.method);
+        rule.methods.includes("*") || rule.methods.includes(req.method);
 
       if (patternMatch && methodMatch) {
         return rule;
@@ -931,25 +931,25 @@ export class APIGateway extends EventEmitter {
 
   private performSecurityChecks(
     req: Request,
-    context: RequestContext
+    context: RequestContext,
   ): { passed: boolean; reason?: string } {
     // CORS checks
     if (this.config.security.cors.enabled) {
-      const origin = req.get('Origin');
+      const origin = req.get("Origin");
       if (
         origin &&
-        !this.config.security.cors.origins.includes('*') &&
+        !this.config.security.cors.origins.includes("*") &&
         !this.config.security.cors.origins.includes(origin)
       ) {
-        return { passed: false, reason: 'CORS violation' };
+        return { passed: false, reason: "CORS violation" };
       }
     }
 
     // Request validation
     if (this.config.security.validation.enabled) {
-      const contentLength = parseInt(req.get('Content-Length') || '0');
+      const contentLength = parseInt(req.get("Content-Length") || "0");
       if (contentLength > this.config.security.validation.maxBodySize) {
-        return { passed: false, reason: 'Request body too large' };
+        return { passed: false, reason: "Request body too large" };
       }
     }
 
@@ -959,8 +959,8 @@ export class APIGateway extends EventEmitter {
 
       // Check blacklist
       for (const rule of this.config.security.filtering.blacklist) {
-        if (rule.type === 'ip' && new RegExp(rule.pattern).test(clientIp)) {
-          return { passed: false, reason: 'IP blacklisted' };
+        if (rule.type === "ip" && new RegExp(rule.pattern).test(clientIp)) {
+          return { passed: false, reason: "IP blacklisted" };
         }
       }
     }
@@ -970,7 +970,7 @@ export class APIGateway extends EventEmitter {
 
   private async getCachedResponse(
     req: Request,
-    context: RequestContext
+    context: RequestContext,
   ): Promise<any> {
     if (!this.config.caching.enabled) return null;
 
@@ -991,21 +991,21 @@ export class APIGateway extends EventEmitter {
     // Add query parameters
     const sortedQuery = Object.keys(req.query)
       .sort()
-      .map(key => `${key}=${req.query[key]}`);
+      .map((key) => `${key}=${req.query[key]}`);
     if (sortedQuery.length > 0) {
-      keyParts.push(sortedQuery.join('&'));
+      keyParts.push(sortedQuery.join("&"));
     }
 
-    return keyParts.join('|');
+    return keyParts.join("|");
   }
 
   private async transformRequest(
     req: Request,
-    context: RequestContext
+    context: RequestContext,
   ): Promise<void> {
     // Apply request transformations based on rules
     for (const rule of this.config.transformation.rules) {
-      if (rule.type === 'request' || rule.type === 'both') {
+      if (rule.type === "request" || rule.type === "both") {
         const patternMatch = new RegExp(rule.pattern).test(req.path);
         if (patternMatch) {
           for (const transformation of rule.transformations) {
@@ -1019,26 +1019,26 @@ export class APIGateway extends EventEmitter {
   private async applyTransformation(
     req: Request,
     transformation: Transformation,
-    context: RequestContext
+    context: RequestContext,
   ): Promise<void> {
     context.transformations.push(
-      `${transformation.type}:${transformation.action}:${transformation.target}`
+      `${transformation.type}:${transformation.action}:${transformation.target}`,
     );
 
     switch (transformation.type) {
-      case 'header':
-        if (transformation.action === 'add' && transformation.value) {
+      case "header":
+        if (transformation.action === "add" && transformation.value) {
           req.headers[transformation.target.toLowerCase()] =
             transformation.value;
-        } else if (transformation.action === 'remove') {
+        } else if (transformation.action === "remove") {
           delete req.headers[transformation.target.toLowerCase()];
         }
         break;
 
-      case 'query':
-        if (transformation.action === 'add' && transformation.value) {
+      case "query":
+        if (transformation.action === "add" && transformation.value) {
           (req.query as any)[transformation.target] = transformation.value;
-        } else if (transformation.action === 'remove') {
+        } else if (transformation.action === "remove") {
           delete (req.query as any)[transformation.target];
         }
         break;
@@ -1049,42 +1049,42 @@ export class APIGateway extends EventEmitter {
     res: Response,
     statusCode: number,
     message: string,
-    details?: string
+    details?: string,
   ): void {
     res.status(statusCode).json({
       error: {
         message,
         details,
         timestamp: new Date().toISOString(),
-        gateway: 'api-gateway-v1.0',
+        gateway: "api-gateway-v1.0",
       },
     });
   }
 
   private sendRateLimitResponse(
     res: Response,
-    rateLimitStatus: RateLimitStatus
+    rateLimitStatus: RateLimitStatus,
   ): void {
     res.set({
-      'X-RateLimit-Limit': rateLimitStatus.limit.toString(),
-      'X-RateLimit-Remaining': rateLimitStatus.remaining.toString(),
-      'X-RateLimit-Reset': rateLimitStatus.resetTime.toISOString(),
+      "X-RateLimit-Limit": rateLimitStatus.limit.toString(),
+      "X-RateLimit-Remaining": rateLimitStatus.remaining.toString(),
+      "X-RateLimit-Reset": rateLimitStatus.resetTime.toISOString(),
     });
 
     res.status(429).json({
       error: {
-        message: 'Rate limit exceeded',
+        message: "Rate limit exceeded",
         retryAfter: rateLimitStatus.resetTime.toISOString(),
         limit: rateLimitStatus.limit,
         remaining: rateLimitStatus.remaining,
         timestamp: new Date().toISOString(),
-        gateway: 'api-gateway-v1.0',
+        gateway: "api-gateway-v1.0",
       },
     });
   }
 
   private sendCachedResponse(res: Response, cachedData: any): void {
-    res.set('X-Cache', 'HIT');
+    res.set("X-Cache", "HIT");
     res.json(cachedData);
   }
 
@@ -1094,7 +1094,7 @@ export class APIGateway extends EventEmitter {
       context.analytics.endTime - context.analytics.startTime;
 
     // Emit analytics event
-    this.emit('requestCompleted', context);
+    this.emit("requestCompleted", context);
   }
 
   private setupRoutingTable(): void {
@@ -1104,40 +1104,40 @@ export class APIGateway extends EventEmitter {
 
     logger.debug(
       `🛣️ [APIGateway] Routing table setup with ${this.routingTable.size} rules`,
-      'APIGateway'
+      "APIGateway",
     );
   }
 
   private async initializeRateLimiting(): Promise<void> {
     // Initialize rate limiting storage
-    logger.debug('🚦 [APIGateway] Rate limiting initialized', 'APIGateway');
+    logger.debug("🚦 [APIGateway] Rate limiting initialized", "APIGateway");
   }
 
   private async initializeCaching(): Promise<void> {
     // Initialize caching system
-    logger.debug('💾 [APIGateway] Caching system initialized', 'APIGateway');
+    logger.debug("💾 [APIGateway] Caching system initialized", "APIGateway");
   }
 
   private startAnalytics(): void {
     this.metricsInterval = setInterval(async () => {
       try {
         const metrics = await this.getMetrics();
-        this.emit('metricsCollected', metrics);
+        this.emit("metricsCollected", metrics);
       } catch (error) {
         logger.error(
-          '❌ [APIGateway] Analytics collection failed',
-          'APIGateway',
-          error
+          "❌ [APIGateway] Analytics collection failed",
+          "APIGateway",
+          error,
         );
       }
     }, 60000); // Every minute
 
-    logger.debug('📊 [APIGateway] Analytics started', 'APIGateway');
+    logger.debug("📊 [APIGateway] Analytics started", "APIGateway");
   }
 
   private startHealthChecks(): void {
     // Implement health checks for route targets
-    logger.debug('🏥 [APIGateway] Health checks started', 'APIGateway');
+    logger.debug("🏥 [APIGateway] Health checks started", "APIGateway");
   }
 }
 

@@ -373,7 +373,7 @@ export class StripeService {
         throw new Error("No existing subscription found");
       }
 
-      const subscription = await this.stripe.subscriptions.retrieve(
+      const _subscription = await this.stripe.subscriptions.retrieve(
         subscriptionMapping.stripeSubscriptionId,
       );
 
@@ -760,7 +760,7 @@ export class StripeService {
   private async handleInvoicePaymentSucceeded(
     invoice: Stripe.Invoice,
   ): Promise<void> {
-    const subscription = invoice.subscription as string;
+    const _subscription = invoice.subscription as string;
     const tenantId = invoice.metadata?.tenantId;
 
     logger.info("[StripeService] Invoice payment succeeded", {

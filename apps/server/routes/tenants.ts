@@ -128,7 +128,7 @@ router.get("/health", TenantController.getServiceHealth);
 // ============================================
 
 // Global error handler for tenant routes
-router.use((error: any, req: any, res: any, next: any) => {
+router.use((error: any, req: any, res: any, _next: any) => {
   logger.error(
     "❌ [TenantRoutes] Unhandled error in tenant routes",
     "TenantRoutes",

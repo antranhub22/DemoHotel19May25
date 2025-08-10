@@ -425,7 +425,7 @@ const apiUsageTracker = new ApiUsageTracker();
  */
 export function logApiUsage() {
   return (req: Request, res: Response, next: NextFunction) => {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const startHrTime = process.hrtime();
 
     // Capture request data
@@ -445,7 +445,7 @@ export function logApiUsage() {
     let responseSize = 0;
 
     res.end = function (chunk?: any, encoding?: any) {
-      const endTime = Date.now();
+      const _endTime = Date.now();
       const hrTime = process.hrtime(startHrTime);
       const responseTime = hrTime[0] * 1000 + hrTime[1] / 1000000; // Convert to milliseconds
 

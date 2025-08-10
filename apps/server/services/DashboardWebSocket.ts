@@ -3,14 +3,14 @@
  * Real-time dashboard updates with automatic fallback to polling
  */
 
-import { CacheKeys, dashboardCache } from '@server/services/DashboardCache';
-import { errorTracking } from '@server/services/ErrorTracking';
-import { logger } from '@shared/utils/logger';
-import { Server as HttpServer } from 'http';
-import { Socket, Server as SocketIOServer } from 'socket.io';
+import { CacheKeys, dashboardCache } from "@server/services/DashboardCache";
+import { errorTracking } from "@server/services/ErrorTracking";
+import { logger } from "@shared/utils/logger";
+import { Server as HttpServer } from "http";
+import { Socket, Server as SocketIOServer } from "socket.io";
 
 export interface DashboardUpdate {
-  type: 'request_update' | 'call_update' | 'system_update' | 'cache_update';
+  type: "request_update" | "call_update" | "system_update" | "cache_update";
   tenantId?: string;
   data: any;
   timestamp: string;
@@ -41,22 +41,22 @@ class DashboardWebSocketService {
 
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
-      enableWebSocket: process.env.ENABLE_WEBSOCKET !== 'false', // Default enabled
+      enableWebSocket: process.env.ENABLE_WEBSOCKET !== "false", // Default enabled
       heartbeatInterval: 30000, // 30 seconds
       maxConnections: 1000,
-      corsOrigins: ['*'], // Configure properly in production
+      corsOrigins: ["*"], // Configure properly in production
       reconnectAttempts: 3,
       ...config,
     };
 
     logger.info(
-      '🔌 [WebSocket] Dashboard WebSocket service initialized',
-      'WebSocket',
+      "🔌 [WebSocket] Dashboard WebSocket service initialized",
+      "WebSocket",
       {
         enabled: this.config.enableWebSocket,
         heartbeatInterval: this.config.heartbeatInterval,
         maxConnections: this.config.maxConnections,
-      }
+      },
     );
   }
 
@@ -66,8 +66,8 @@ class DashboardWebSocketService {
   initialize(httpServer: HttpServer): void {
     if (!this.config.enableWebSocket) {
       logger.info(
-        '🚫 [WebSocket] WebSocket disabled, skipping initialization',
-        'WebSocket'
+        "🚫 [WebSocket] WebSocket disabled, skipping initialization",
+        "WebSocket",
       );
       return;
     }
@@ -76,9 +76,9 @@ class DashboardWebSocketService {
       this.io = new SocketIOServer(httpServer, {
         cors: {
           origin: this.config.corsOrigins,
-          methods: ['GET', 'POST'],
+          methods: ["GET", "POST"],
         },
-        transports: ['websocket', 'polling'], // Fallback to polling if WebSocket fails
+        transports: ["websocket", "polling"], // Fallback to polling if WebSocket fails
         pingTimeout: 60000,
         pingInterval: 25000,
       });
@@ -87,30 +87,30 @@ class DashboardWebSocketService {
       this.startHeartbeat();
 
       logger.info(
-        '✅ [WebSocket] Dashboard WebSocket server initialized',
-        'WebSocket'
+        "✅ [WebSocket] Dashboard WebSocket server initialized",
+        "WebSocket",
       );
     } catch (error) {
       this.stats.errors++;
       this.stats.lastError =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
 
       logger.error(
-        '❌ [WebSocket] Failed to initialize WebSocket server',
-        'WebSocket',
-        error
+        "❌ [WebSocket] Failed to initialize WebSocket server",
+        "WebSocket",
+        error,
       );
 
       // ✅ ENHANCEMENT: Report WebSocket initialization failure
       errorTracking.reportWebSocketError(
-        'initialize',
+        "initialize",
         error instanceof Error
           ? error
-          : new Error('WebSocket initialization failed'),
+          : new Error("WebSocket initialization failed"),
         {
           enabled: this.config.enableWebSocket,
           maxConnections: this.config.maxConnections,
-        }
+        },
       );
 
       // Continue without WebSocket - app will use polling fallback
@@ -123,8 +123,8 @@ class DashboardWebSocketService {
   setSocketIO(io: SocketIOServer): void {
     if (!this.config.enableWebSocket) {
       logger.info(
-        '🚫 [WebSocket] WebSocket disabled, skipping Socket.IO setup',
-        'WebSocket'
+        "🚫 [WebSocket] WebSocket disabled, skipping Socket.IO setup",
+        "WebSocket",
       );
       return;
     }
@@ -135,24 +135,24 @@ class DashboardWebSocketService {
       this.startHeartbeat();
 
       logger.info(
-        '✅ [WebSocket] Dashboard WebSocket service connected to shared Socket.IO',
-        'WebSocket'
+        "✅ [WebSocket] Dashboard WebSocket service connected to shared Socket.IO",
+        "WebSocket",
       );
     } catch (error) {
       this.stats.errors++;
       this.stats.lastError =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
 
       logger.error(
-        '❌ [WebSocket] Failed to connect to shared Socket.IO',
-        'WebSocket',
-        error
+        "❌ [WebSocket] Failed to connect to shared Socket.IO",
+        "WebSocket",
+        error,
       );
 
       // ✅ ENHANCEMENT: Continue without WebSocket - app will use polling fallback
       logger.info(
-        '🔄 [WebSocket] Continuing with polling fallback mode',
-        'WebSocket'
+        "🔄 [WebSocket] Continuing with polling fallback mode",
+        "WebSocket",
       );
     }
   }
@@ -163,22 +163,22 @@ class DashboardWebSocketService {
   private setupEventHandlers(): void {
     if (!this.io) return;
 
-    this.io.on('connection', (socket: Socket) => {
+    this.io.on("connection", (socket: Socket) => {
       try {
         this.handleConnection(socket);
       } catch (error) {
         this.stats.errors++;
         logger.error(
-          '❌ [WebSocket] Connection handler error',
-          'WebSocket',
-          error
+          "❌ [WebSocket] Connection handler error",
+          "WebSocket",
+          error,
         );
       }
     });
 
     // Handle server shutdown gracefully
-    process.on('SIGTERM', () => this.shutdown());
-    process.on('SIGINT', () => this.shutdown());
+    process.on("SIGTERM", () => this.shutdown());
+    process.on("SIGINT", () => this.shutdown());
   }
 
   /**
@@ -190,12 +190,12 @@ class DashboardWebSocketService {
     // Check connection limits
     if (this.stats.activeConnections >= this.config.maxConnections) {
       logger.warn(
-        '⚠️ [WebSocket] Connection limit reached, rejecting connection',
-        'WebSocket',
+        "⚠️ [WebSocket] Connection limit reached, rejecting connection",
+        "WebSocket",
         {
           activeConnections: this.stats.activeConnections,
           maxConnections: this.config.maxConnections,
-        }
+        },
       );
       socket.disconnect(true);
       return;
@@ -210,18 +210,18 @@ class DashboardWebSocketService {
     this.stats.totalConnections++;
     this.stats.activeConnections++;
 
-    logger.debug('🔌 [WebSocket] New dashboard connection', 'WebSocket', {
+    logger.debug("🔌 [WebSocket] New dashboard connection", "WebSocket", {
       socketId: socket.id,
       tenantId,
       activeConnections: this.stats.activeConnections,
     });
 
     // Send initial connection success
-    socket.emit('dashboard:connected', {
+    socket.emit("dashboard:connected", {
       success: true,
       tenantId,
       timestamp: new Date().toISOString(),
-      features: ['real-time-updates', 'fallback-polling'],
+      features: ["real-time-updates", "fallback-polling"],
     });
 
     // Setup socket event handlers
@@ -236,16 +236,16 @@ class DashboardWebSocketService {
     socket.join(`tenant:${tenantId}`);
 
     // Handle client requesting initial data
-    socket.on('dashboard:subscribe', data => {
+    socket.on("dashboard:subscribe", (data) => {
       try {
         logger.debug(
-          '📊 [WebSocket] Client subscribed to dashboard updates',
-          'WebSocket',
+          "📊 [WebSocket] Client subscribed to dashboard updates",
+          "WebSocket",
           {
             socketId: socket.id,
             tenantId,
             data,
-          }
+          },
         );
 
         // Send current cached data immediately
@@ -253,28 +253,28 @@ class DashboardWebSocketService {
       } catch (error) {
         this.stats.errors++;
         logger.error(
-          '❌ [WebSocket] Subscribe handler error',
-          'WebSocket',
-          error
+          "❌ [WebSocket] Subscribe handler error",
+          "WebSocket",
+          error,
         );
       }
     });
 
     // Handle ping/pong for connection health
-    socket.on('dashboard:ping', () => {
-      socket.emit('dashboard:pong', { timestamp: new Date().toISOString() });
+    socket.on("dashboard:ping", () => {
+      socket.emit("dashboard:pong", { timestamp: new Date().toISOString() });
     });
 
     // Handle disconnection
-    socket.on('disconnect', reason => {
+    socket.on("disconnect", (reason) => {
       this.handleDisconnection(socket, tenantId, reason);
     });
 
     // Handle client errors
-    socket.on('error', error => {
+    socket.on("error", (error) => {
       this.stats.errors++;
       this.stats.lastError = error.message;
-      logger.error('❌ [WebSocket] Socket error', 'WebSocket', {
+      logger.error("❌ [WebSocket] Socket error", "WebSocket", {
         socketId: socket.id,
         tenantId,
         error: error.message,
@@ -288,7 +288,7 @@ class DashboardWebSocketService {
   private handleDisconnection(
     socket: Socket,
     tenantId: string,
-    reason: string
+    reason: string,
   ): void {
     try {
       // Remove from connections tracking
@@ -302,10 +302,10 @@ class DashboardWebSocketService {
 
       this.stats.activeConnections = Math.max(
         0,
-        this.stats.activeConnections - 1
+        this.stats.activeConnections - 1,
       );
 
-      logger.debug('🔌 [WebSocket] Dashboard connection closed', 'WebSocket', {
+      logger.debug("🔌 [WebSocket] Dashboard connection closed", "WebSocket", {
         socketId: socket.id,
         tenantId,
         reason,
@@ -314,9 +314,9 @@ class DashboardWebSocketService {
     } catch (error) {
       this.stats.errors++;
       logger.error(
-        '❌ [WebSocket] Disconnection handler error',
-        'WebSocket',
-        error
+        "❌ [WebSocket] Disconnection handler error",
+        "WebSocket",
+        error,
       );
     }
   }
@@ -326,42 +326,42 @@ class DashboardWebSocketService {
    */
   private async sendCachedDashboardData(
     socket: Socket,
-    tenantId: string
+    tenantId: string,
   ): Promise<void> {
     try {
       // Try to get cached data
       const cachedRequests = await dashboardCache.get(
-        CacheKeys.dashboardMetrics(tenantId, 'requests'),
-        async () => ({ note: 'No cached data available' })
+        CacheKeys.dashboardMetrics(tenantId, "requests"),
+        async () => ({ note: "No cached data available" }),
       );
 
       const cachedCalls = await dashboardCache.get(
         CacheKeys.callsSummary(tenantId),
-        async () => ({ note: 'No cached data available' })
+        async () => ({ note: "No cached data available" }),
       );
 
       const cachedSystem = await dashboardCache.get(
         CacheKeys.systemMetrics(),
-        async () => ({ note: 'No cached data available' })
+        async () => ({ note: "No cached data available" }),
       );
 
-      socket.emit('dashboard:initial_data', {
+      socket.emit("dashboard:initial_data", {
         requests: cachedRequests,
         calls: cachedCalls,
         system: cachedSystem,
         timestamp: new Date().toISOString(),
-        source: 'cached',
+        source: "cached",
       });
     } catch (error) {
       logger.warn(
-        '⚠️ [WebSocket] Failed to send cached data',
-        'WebSocket',
-        error
+        "⚠️ [WebSocket] Failed to send cached data",
+        "WebSocket",
+        error,
       );
 
       // Send fallback message
-      socket.emit('dashboard:fallback', {
-        message: 'WebSocket data unavailable, using polling fallback',
+      socket.emit("dashboard:fallback", {
+        message: "WebSocket data unavailable, using polling fallback",
         timestamp: new Date().toISOString(),
       });
     }
@@ -376,18 +376,18 @@ class DashboardWebSocketService {
     }
 
     try {
-      const targetRoom = update.tenantId ? `tenant:${update.tenantId}` : 'all';
+      const targetRoom = update.tenantId ? `tenant:${update.tenantId}` : "all";
 
       // Emit dashboard:update for dashboard clients
-      this.io.to(targetRoom).emit('dashboard:update', {
+      this.io.to(targetRoom).emit("dashboard:update", {
         ...update,
         timestamp: new Date().toISOString(),
       });
 
       // ✅ ENHANCEMENT: Also emit requestStatusUpdate for CustomerRequests component
-      if (update.type === 'request_update' && update.data) {
-        this.io.emit('requestStatusUpdate', {
-          type: 'new-request',
+      if (update.type === "request_update" && update.data) {
+        this.io.emit("requestStatusUpdate", {
+          type: "new-request",
           requestId: update.data.requestId,
           status: update.data.status,
           roomNumber: update.data.roomNumber,
@@ -398,12 +398,12 @@ class DashboardWebSocketService {
         });
 
         logger.debug(
-          '📡 [WebSocket] requestStatusUpdate emitted',
-          'WebSocket',
+          "📡 [WebSocket] requestStatusUpdate emitted",
+          "WebSocket",
           {
             requestId: update.data.requestId,
             roomNumber: update.data.roomNumber,
-          }
+          },
         );
       }
 
@@ -416,7 +416,7 @@ class DashboardWebSocketService {
 
       this.stats.messagesSent += roomConnections;
 
-      logger.debug('📡 [WebSocket] Dashboard update published', 'WebSocket', {
+      logger.debug("📡 [WebSocket] Dashboard update published", "WebSocket", {
         type: update.type,
         tenantId: update.tenantId,
         targetRoom,
@@ -425,12 +425,12 @@ class DashboardWebSocketService {
     } catch (error) {
       this.stats.errors++;
       this.stats.lastError =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
 
       logger.error(
-        '❌ [WebSocket] Failed to publish dashboard update',
-        'WebSocket',
-        error
+        "❌ [WebSocket] Failed to publish dashboard update",
+        "WebSocket",
+        error,
       );
     }
   }
@@ -445,13 +445,13 @@ class DashboardWebSocketService {
       try {
         if (this.io) {
           // Send heartbeat to all connected clients
-          this.io.emit('dashboard:heartbeat', {
+          this.io.emit("dashboard:heartbeat", {
             timestamp: new Date().toISOString(),
             activeConnections: this.stats.activeConnections,
           });
         }
       } catch (error) {
-        logger.error('❌ [WebSocket] Heartbeat error', 'WebSocket', error);
+        logger.error("❌ [WebSocket] Heartbeat error", "WebSocket", error);
       }
     }, this.config.heartbeatInterval);
   }
@@ -462,26 +462,26 @@ class DashboardWebSocketService {
   private extractTenantFromSocket(socket: Socket): string {
     try {
       // Try to get from auth token or handshake
-      const token =
+      const _token =
         socket.handshake.auth?.token || socket.handshake.query?.token;
 
       // Try to get from referer header
-      const referer = socket.handshake.headers.referer || '';
+      const referer = socket.handshake.headers.referer || "";
       const urlMatch = referer.match(/\/\/([^\.]+)\./);
 
-      if (urlMatch && urlMatch[1] !== 'localhost' && urlMatch[1] !== 'www') {
+      if (urlMatch && urlMatch[1] !== "localhost" && urlMatch[1] !== "www") {
         return urlMatch[1];
       }
 
       // Fallback to default tenant
-      return 'mi-nhon-hotel';
+      return "mi-nhon-hotel";
     } catch (error) {
       logger.warn(
-        '⚠️ [WebSocket] Failed to extract tenant from socket',
-        'WebSocket',
-        error
+        "⚠️ [WebSocket] Failed to extract tenant from socket",
+        "WebSocket",
+        error,
       );
-      return 'mi-nhon-hotel';
+      return "mi-nhon-hotel";
     }
   }
 
@@ -496,7 +496,7 @@ class DashboardWebSocketService {
         Array.from(this.connections.entries()).map(([tenant, sockets]) => [
           tenant,
           sockets.size,
-        ])
+        ]),
       ),
       timestamp: new Date().toISOString(),
     };
@@ -513,8 +513,8 @@ class DashboardWebSocketService {
 
       if (this.io) {
         // Notify all clients about shutdown
-        this.io.emit('dashboard:shutdown', {
-          message: 'Server shutting down, switching to polling mode',
+        this.io.emit("dashboard:shutdown", {
+          message: "Server shutting down, switching to polling mode",
           timestamp: new Date().toISOString(),
         });
 
@@ -523,11 +523,11 @@ class DashboardWebSocketService {
       }
 
       logger.info(
-        '🛑 [WebSocket] Dashboard WebSocket service shutdown completed',
-        'WebSocket'
+        "🛑 [WebSocket] Dashboard WebSocket service shutdown completed",
+        "WebSocket",
       );
     } catch (error) {
-      logger.error('❌ [WebSocket] Shutdown error', 'WebSocket', error);
+      logger.error("❌ [WebSocket] Shutdown error", "WebSocket", error);
     }
   }
 }
@@ -536,7 +536,7 @@ class DashboardWebSocketService {
 export const dashboardWebSocket = new DashboardWebSocketService();
 
 // Export for debugging in development
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   (global as any).dashboardWebSocket = dashboardWebSocket;
 }
 

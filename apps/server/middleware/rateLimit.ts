@@ -245,7 +245,7 @@ export function rateLimitBySubscription(
         return createRateLimit({
           maxRequests,
           windowMs,
-          keyGenerator: (req: Request) => `user:${user.id}:${limitType}`,
+          keyGenerator: (_req: Request) => `user:${user.id}:${limitType}`,
           message: `Rate limit exceeded for ${limitType} operations`,
         })(req, res, next);
       }
@@ -254,7 +254,7 @@ export function rateLimitBySubscription(
       return createRateLimit({
         maxRequests,
         windowMs,
-        keyGenerator: (req: Request) => `user:${user.id}:${limitType}`,
+        keyGenerator: (_req: Request) => `user:${user.id}:${limitType}`,
         message: `Rate limit exceeded for ${limitType} operations. Upgrade your plan for higher limits.`,
       })(req, res, next);
     } catch (error: any) {
@@ -365,7 +365,7 @@ export function rateLimitForFeature(
       return createRateLimit({
         maxRequests: featureLimit,
         windowMs,
-        keyGenerator: (req: Request) => `user:${user.id}:feature:${feature}`,
+        keyGenerator: (_req: Request) => `user:${user.id}:feature:${feature}`,
         message: `Rate limit exceeded for ${feature}. Current plan allows ${featureLimit} requests per minute.`,
       })(req, res, next);
     } catch (error: any) {

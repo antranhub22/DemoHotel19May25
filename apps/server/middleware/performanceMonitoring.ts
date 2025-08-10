@@ -168,7 +168,7 @@ export const performanceMiddleware = (
   res.json = function (body: any) {
     try {
       responseSize = JSON.stringify(body).length;
-    } catch (error) {
+    } catch {
       responseSize = 0;
     }
     return originalJson.call(this, body);

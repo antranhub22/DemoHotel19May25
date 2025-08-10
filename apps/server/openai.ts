@@ -572,10 +572,11 @@ export async function translateToVietnamese(text: string): Promise<string> {
 }
 
 // Prompt templates cho từng ngôn ngữ
-const PROMPT_TEMPLATES: Record<string, (conversationText: string) => string> = {
-  en: (
-    conversationText,
-  ) => `You are a hotel service summarization specialist for Mi Nhon Hotel. 
+const _PROMPT_TEMPLATES: Record<string, (conversationText: string) => string> =
+  {
+    en: (
+      conversationText,
+    ) => `You are a hotel service summarization specialist for Mi Nhon Hotel. 
 Summarize the following conversation between a Hotel Assistant and a Guest in a concise, professional manner.
 
 IMPORTANT: For EACH separate request from the guest, structure your summary in the following format (repeat for as many requests as needed, do NOT limit the number of requests):
@@ -632,9 +633,9 @@ Conversation transcript:
 ${conversationText}
 
 Summary:`,
-  fr: (
-    conversationText,
-  ) => `Vous êtes un spécialiste de la synthèse des services hôteliers pour l'hôtel Mi Nhon. 
+    fr: (
+      conversationText,
+    ) => `Vous êtes un spécialiste de la synthèse des services hôteliers pour l'hôtel Mi Nhon. 
 Résumez la conversation suivante entre un assistant hôtelier et un client de manière concise et professionnelle.
 
 IMPORTANT : Pour CHAQUE demande distincte du client, structurez votre résumé selon le format suivant (répétez pour autant de demandes que nécessaire, ne limitez PAS le nombre de demandes) :
@@ -689,9 +690,9 @@ Transcription de la conversation :
 ${conversationText}
 
 Résumé :`,
-  ru: (
-    conversationText,
-  ) => `Вы — специалист по составлению сводок для отеля Mi Nhon. 
+    ru: (
+      conversationText,
+    ) => `Вы — специалист по составлению сводок для отеля Mi Nhon. 
 Сделайте краткое и профессиональное резюме следующего разговора между гостиничным ассистентом и гостем.
 
 ВАЖНО: Для КАЖДОГО отдельного запроса гостя структурируйте резюме по следующему формату (повторяйте для всех запросов, не ограничивайте их количество):
@@ -746,7 +747,7 @@ Résumé :`,
 ${conversationText}
 
 Резюме:`,
-  ko: (conversationText) => `당신은 미년 호텔의 서비스 요약 전문가입니다. 
+    ko: (conversationText) => `당신은 미년 호텔의 서비스 요약 전문가입니다. 
 호텔 어시스턴트와 고객 간의 다음 대화를 간결하고 전문적으로 요약하세요.
 
 중요: 고객의 각 요청마다 아래 형식으로 요약을 작성하세요 (요청 수에 제한 없이 반복).
@@ -801,7 +802,7 @@ ${conversationText}
 ${conversationText}
 
 요약:`,
-  zh: (conversationText) => `您是美年酒店的服务总结专家。
+    zh: (conversationText) => `您是美年酒店的服务总结专家。
 请将以下酒店助理与客人的对话进行简明、专业的总结。
 
 重要：对于客人的每一项请求，请按照以下格式进行总结（根据需要重复，不要限制请求数量）：
@@ -856,7 +857,7 @@ ${conversationText}
 ${conversationText}
 
 总结：`,
-};
+  };
 
 // ✅ COST OPTIMIZATION: Simple cache for recent summaries (5 minutes TTL)
 const summaryCache = new Map<
