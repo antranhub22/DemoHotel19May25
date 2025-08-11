@@ -91,37 +91,44 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     return "tenant-default";
   };
 
+  // Resolve Vapi credentials for a language from server API, with env fallback
+  const resolveVapiCredentials = async (
+    language: string,
+  ): Promise<{ publicKey: string; assistantId: string }> => {
+    // 1) Try server endpoint which already maps per-language env vars
+    try {
+      const res = await fetch(`/api/vapi/config/${language}`);
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data || {};
+        if (data?.publicKey && data?.assistantId) {
+          return { publicKey: data.publicKey, assistantId: data.assistantId };
+        }
+      }
+    } catch {
+      // Ignore and fallback to env below
+    }
+
+    // 2) Fallback to build-time envs per language, then default EN
+    const upper = language.toUpperCase();
+    const publicKeyLang =
+      (import.meta.env as any)[`VITE_VAPI_PUBLIC_KEY_${upper}`] ||
+      import.meta.env.VITE_VAPI_PUBLIC_KEY ||
+      "";
+    const assistantIdLang =
+      (import.meta.env as any)[`VITE_VAPI_ASSISTANT_ID_${upper}`] ||
+      import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+      "";
+
+    return { publicKey: publicKeyLang, assistantId: assistantIdLang };
+  };
+
   // ✅ UPDATED: Using VapiOfficial instead of deprecated VapiSimple
-  const initializeVapi = (language: string): VapiOfficial => {
-    // Get environment variables with proper validation
-    const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-
-    // Language-specific assistant IDs
-    const assistantIds: Record<string, string> = {
-      en: import.meta.env.VITE_VAPI_ASSISTANT_ID || "",
-      vi:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_VI ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        "",
-      fr:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_FR ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        "",
-      zh:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        "",
-      ru:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_RU ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        "",
-      ko:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_KO ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        "",
-    };
-
-    const assistantId = assistantIds[language] || assistantIds.en;
+  const initializeVapi = (
+    language: string,
+    creds: { publicKey: string; assistantId: string },
+  ): VapiOfficial => {
+    const { publicKey, assistantId } = creds;
 
     if (!publicKey || !assistantId) {
       throw new Error(
@@ -418,7 +425,8 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       });
 
       // Initialize new client
-      vapiClientRef.current = initializeVapi(language);
+      const creds = await resolveVapiCredentials(language);
+      vapiClientRef.current = initializeVapi(language, creds);
 
       if (!vapiClientRef.current) {
         throw new Error("Failed to initialize Vapi client");
@@ -482,7 +490,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   };
 
   // Reinitialize for language change
-  const reinitializeForLanguage = (language: string): void => {
+  const reinitializeForLanguage = async (language: string): Promise<void> => {
     if (isCallActive) {
       logger.warn("⚠️ Cannot reinitialize during active call", "VapiProvider");
       return;
@@ -495,7 +503,8 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       }
 
       // Initialize for new language
-      vapiClientRef.current = initializeVapi(language);
+      const creds = await resolveVapiCredentials(language);
+      vapiClientRef.current = initializeVapi(language, creds);
       setCurrentLanguage(language);
 
       logger.debug("🔄 Reinitialized for language:", "VapiProvider", language);
@@ -511,15 +520,19 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // Initialize on mount
   useEffect(() => {
     if (!vapiClientRef.current) {
-      try {
-        vapiClientRef.current = initializeVapi(currentLanguage);
-      } catch (error) {
-        logger.error(
-          "❌ Failed to initialize Vapi on mount:",
-          "VapiProvider",
-          error,
-        );
-      }
+      // Wrap in void IIFE to avoid linter complaining about top-level await inside effect
+      void (async () => {
+        try {
+          const creds = await resolveVapiCredentials(currentLanguage);
+          vapiClientRef.current = initializeVapi(currentLanguage, creds);
+        } catch (error) {
+          logger.error(
+            "❌ Failed to initialize Vapi on mount:",
+            "VapiProvider",
+            error,
+          );
+        }
+      })();
     }
 
     // Cleanup on unmount
