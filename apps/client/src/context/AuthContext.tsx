@@ -199,25 +199,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // ✅ FIXED: Use proper API base URL - detect production
+      // ✅ FIX: Robust API base URL resolution
+      // - Prefer explicit env var
+      // - In development, default to local API server
+      // - In production (Render/on custom domain), use same-origin
+      const isDev =
+        import.meta.env.DEV ||
+        import.meta.env.MODE === "development" ||
+        ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
       const API_BASE_URL =
         import.meta.env.VITE_API_URL ||
-        (window.location.hostname.includes("talk2go.online")
-          ? (() => {
-              // ✅ FIX: Correct hostname typo minhonmune → minhonmuine
-              const correctedHostname = window.location.hostname.replace(
-                "minhonmune",
-                "minhonmuine",
-              );
-              return `https://${correctedHostname}`;
-            })()
-          : "http://localhost:3000");
+        (isDev ? "http://localhost:10000" : window.location.origin);
       const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email, password }),
       });
       if (!res.ok) {
+        // Surface validation error if available
+        try {
+          const errData = await (res as any).json();
+          if (
+            errData?.code === "VALIDATION_ERROR" &&
+            errData?.details?.[0]?.path?.includes("password")
+          ) {
+            throw new Error(
+              "Mật khẩu phải có tối thiểu 12 ký tự (yêu cầu bảo mật production)",
+            );
+          }
+        } catch {}
         throw new Error("Sai tài khoản hoặc mật khẩu");
       }
       const data = await (res as any).json();
@@ -228,7 +239,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Sử dụng user data từ unified auth response
       const userFromResponse: any = {
-        // ✅ FIXED: Use any to bypass type conflicts
         id: data.user.id,
         username: data.user.username,
         email: data.user.email,
