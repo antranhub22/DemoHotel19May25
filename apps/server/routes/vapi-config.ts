@@ -2,9 +2,9 @@ import {
   apiResponse,
   commonErrors,
   ErrorCodes,
-} from '@server/utils/apiHelpers';
-import { logger } from '@shared/utils/logger';
-import express from 'express';
+} from "@server/utils/apiHelpers";
+import { logger } from "@shared/utils/logger";
+import express from "express";
 
 const router = express.Router();
 
@@ -16,17 +16,17 @@ const router = express.Router();
  * Get Vapi configuration for specific language
  * GET /api/vapi/config/:language
  */
-router.get('/config/:language', async (req, res) => {
+router.get("/config/:language", async (req, res) => {
   try {
     const { language } = req.params;
 
     if (!language) {
-      return commonErrors.validation(res, 'Language parameter is required');
+      return commonErrors.validation(res, "Language parameter is required");
     }
 
     logger.debug(
       `🔧 [VapiConfig] Getting configuration for language: ${language}`,
-      'VapiConfig'
+      "VapiConfig",
     );
 
     // Get Vapi configuration based on language
@@ -37,30 +37,30 @@ router.get('/config/:language', async (req, res) => {
 
     const responseData = {
       language,
-      publicKey: config.publicKey || '',
-      assistantId: config.assistantId || '',
+      publicKey: config.publicKey || "",
+      assistantId: config.assistantId || "",
       fallback: !hasValidConfig,
-      availableLanguages: ['en', 'vi', 'fr', 'zh', 'ru', 'ko'],
+      availableLanguages: ["en", "vi", "fr", "zh", "ru", "ko"],
     };
 
     logger.debug(
       `✅ [VapiConfig] Configuration for ${language}:`,
-      'VapiConfig',
+      "VapiConfig",
       {
         publicKey: config.publicKey
           ? `${config.publicKey.substring(0, 15)}...`
-          : 'MISSING',
+          : "MISSING",
         assistantId: config.assistantId
           ? `${config.assistantId.substring(0, 15)}...`
-          : 'MISSING',
+          : "MISSING",
         fallback: responseData.fallback,
-      }
+      },
     );
 
     if (!hasValidConfig) {
       logger.warn(
         `⚠️ [VapiConfig] Incomplete configuration for ${language}, falling back to default`,
-        'VapiConfig'
+        "VapiConfig",
       );
     }
 
@@ -69,26 +69,26 @@ router.get('/config/:language', async (req, res) => {
       responseData,
       `Vapi configuration retrieved for ${language}`,
       {
-        configurationStatus: hasValidConfig ? 'complete' : 'fallback',
+        configurationStatus: hasValidConfig ? "complete" : "fallback",
         requestedLanguage: language,
-      }
+      },
     );
   } catch (error) {
     logger.error(
       `❌ [VapiConfig] Error getting configuration for ${req.params.language}:`,
-      'VapiConfig',
-      error
+      "VapiConfig",
+      error,
     );
 
     return apiResponse.error(
       res,
       500,
       ErrorCodes.VAPI_ERROR,
-      'Failed to get Vapi configuration',
+      "Failed to get Vapi configuration",
       {
         language: req.params.language,
         fallbackApplied: true,
-      }
+      },
     );
   }
 });
@@ -104,56 +104,32 @@ function getVapiConfigByLanguage(language: string): {
   publicKey: string;
   assistantId: string;
 } {
-  // Language-specific environment variable mapping
-  const languageMapping: Record<
-    string,
-    { publicKeyEnv: string; assistantIdEnv: string }
-  > = {
-    en: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID',
-    },
-    vi: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY_VI',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID_VI',
-    },
-    fr: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY_FR',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID_FR',
-    },
-    zh: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY_ZH',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID_ZH',
-    },
-    ru: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY_RU',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID_RU',
-    },
-    ko: {
-      publicKeyEnv: 'VITE_VAPI_PUBLIC_KEY_KO',
-      assistantIdEnv: 'VITE_VAPI_ASSISTANT_ID_KO',
-    },
+  // Use ONE shared public key for all languages (as agreed)
+  const sharedPublicKey = process.env.VITE_VAPI_PUBLIC_KEY || "";
+
+  // Language-specific assistant IDs
+  const assistantIdMapping: Record<string, string> = {
+    en: process.env.VITE_VAPI_ASSISTANT_ID || "",
+    vi: process.env.VITE_VAPI_ASSISTANT_ID_VI || "",
+    fr: process.env.VITE_VAPI_ASSISTANT_ID_FR || "",
+    zh: process.env.VITE_VAPI_ASSISTANT_ID_ZH || "",
+    ru: process.env.VITE_VAPI_ASSISTANT_ID_RU || "",
+    ko: process.env.VITE_VAPI_ASSISTANT_ID_KO || "",
   };
 
-  // Get language-specific configuration
-  const langConfig = languageMapping[language.toLowerCase()];
+  const code = (language || "en").toLowerCase();
+  const assistantId = assistantIdMapping[code] ?? assistantIdMapping.en;
 
-  if (langConfig) {
-    return {
-      publicKey: process.env[langConfig.publicKeyEnv] || '',
-      assistantId: process.env[langConfig.assistantIdEnv] || '',
-    };
+  if (!assistantId) {
+    logger.warn(
+      `⚠️ [VapiConfig] Missing assistantId for ${code}. Falling back to default assistantId`,
+      "VapiConfig",
+    );
   }
 
-  // Fallback to default English configuration
-  logger.warn(
-    `⚠️ [VapiConfig] Unknown language ${language}, falling back to English`,
-    'VapiConfig'
-  );
-
   return {
-    publicKey: process.env.VITE_VAPI_PUBLIC_KEY || '',
-    assistantId: process.env.VITE_VAPI_ASSISTANT_ID || '',
+    publicKey: sharedPublicKey,
+    assistantId: assistantId || assistantIdMapping.en || "",
   };
 }
 
