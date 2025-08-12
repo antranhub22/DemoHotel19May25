@@ -169,20 +169,19 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       "Component",
       {
         newLanguage: language.language,
-        currentVapiLanguage: vapi.currentLanguage,
+        // Note: VapiContext no longer exposes currentLanguage (uses LanguageContext)
       },
     );
 
-    // Reinitialize Vapi for the new language (only if language actually changed)
-    if (language.language !== vapi.currentLanguage) {
-      vapi.reinitializeForLanguage(language.language);
+    // Reinitialize Vapi for the new language
+    // Note: Language change detection now handled by LanguageContext
+    vapi.reinitializeForLanguage(language.language);
 
-      logger.debug(
-        "[RefactoredAssistant] Vapi reinitialized for language:",
-        "Component",
-        language.language,
-      );
-    }
+    logger.debug(
+      "[RefactoredAssistant] Vapi reinitialized for language:",
+      "Component",
+      language.language,
+    );
   }, [language.language, vapi]); // Depend on language changes
 
   // Enhanced startCall that integrates with VapiContext
