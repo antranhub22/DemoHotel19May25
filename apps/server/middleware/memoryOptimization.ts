@@ -76,17 +76,49 @@ class MemoryManager {
 
   private performOptimization(): void {
     try {
+      // 🚨 BUG FIX: Check if GC is available and warn if not
+      if (!global.gc) {
+        logger.warn(
+          "⚠️ [MEMORY] Garbage collection not available! Node.js needs --expose-gc flag",
+          "MemoryManager",
+        );
+
+        // 🔧 EMERGENCY: Alternative memory cleanup without GC
+        const currentStats = this.getMemoryStats();
+        if (currentStats.usage > 90) {
+          logger.error(
+            "🚨 [MEMORY] CRITICAL: Memory >90% but GC unavailable! Performing emergency cleanup",
+            "MemoryManager",
+            { usage: `${currentStats.usage.toFixed(2)}%` },
+          );
+
+          // Force process restart recommendation
+          process.emit("SIGTERM", "SIGTERM");
+        }
+        return;
+      }
+
       // 🔥 AGGRESSIVE GC: More frequent and lower threshold
-      if (global.gc && Date.now() - this.lastGC > 60000) {
+      if (Date.now() - this.lastGC > 60000) {
         // 60 second interval for responsive memory management
         const beforeStats = this.getMemoryStats();
         if (beforeStats.usage > 70) {
           // GC at 70% to prevent critical situations
+          logger.info(
+            "🗑️ [MEMORY] Starting garbage collection...",
+            "MemoryManager",
+            {
+              before: `${beforeStats.usage.toFixed(2)}%`,
+              heapUsed: `${beforeStats.heapUsed}MB`,
+            },
+          );
+
           global.gc();
           this.lastGC = Date.now();
+
           const afterStats = this.getMemoryStats();
           logger.info(
-            "🗑️ [MEMORY] Garbage collection performed",
+            "✅ [MEMORY] Garbage collection completed",
             "MemoryManager",
             {
               before: `${beforeStats.usage.toFixed(2)}%`,
