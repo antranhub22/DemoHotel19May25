@@ -3,8 +3,8 @@
  * Giảm memory usage và prevent OOM errors
  */
 
-import { Request, Response, NextFunction } from "express";
 import { logger } from "@shared/utils/logger";
+import { NextFunction, Request, Response } from "express";
 
 interface MemoryStats {
   heapUsed: number;
@@ -16,9 +16,9 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.85; // 85% usage threshold
-  private readonly CRITICAL_THRESHOLD = 0.95; // 95% critical threshold
-  private readonly CHECK_INTERVAL = 30000; // 30 seconds
+  private readonly MEMORY_THRESHOLD = 0.8; // ✅ REDUCED: 80% threshold (was 85%)
+  private readonly CRITICAL_THRESHOLD = 0.9; // ✅ REDUCED: 90% critical (was 95%)
+  private readonly CHECK_INTERVAL = 60000; // ✅ INCREASED: 60 seconds (was 30s) to reduce overhead
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
 
@@ -76,34 +76,32 @@ class MemoryManager {
 
   private performOptimization(): void {
     try {
-      // Force garbage collection if available and enough time has passed
-      if (global.gc && Date.now() - this.lastGC > 60000) {
-        // 1 minute interval
-        global.gc();
-        this.lastGC = Date.now();
-        logger.info("🗑️ [MEMORY] Garbage collection performed");
-      }
-
-      // Clear Node.js caches
-      if (require.cache) {
-        const beforeCount = Object.keys(require.cache).length;
-        // Only clear non-essential modules
-        Object.keys(require.cache).forEach((key) => {
-          if (
-            key.includes("node_modules") &&
-            !key.includes("prisma") &&
-            !key.includes("express")
-          ) {
-            delete require.cache[key];
-          }
-        });
-        const afterCount = Object.keys(require.cache).length;
-        if (beforeCount > afterCount) {
+      // ✅ SAFER: Only use garbage collection if available and memory is critically high
+      if (global.gc && Date.now() - this.lastGC > 120000) {
+        // Increased to 2 minute interval to reduce overhead
+        const beforeStats = this.getMemoryStats();
+        if (beforeStats.usage > 85) {
+          // Only GC if really needed
+          global.gc();
+          this.lastGC = Date.now();
+          const afterStats = this.getMemoryStats();
           logger.info(
-            `🧹 [MEMORY] Cleared ${beforeCount - afterCount} cached modules`,
+            "🗑️ [MEMORY] Garbage collection performed",
+            "MemoryManager",
+            {
+              before: `${beforeStats.usage.toFixed(2)}%`,
+              after: `${afterStats.usage.toFixed(2)}%`,
+              freed: `${(beforeStats.heapUsed - afterStats.heapUsed).toFixed(2)}MB`,
+            },
           );
         }
       }
+
+      // ✅ REMOVED: require.cache clearing (causes memory leaks and module reload issues)
+      // require.cache clearing is dangerous and can cause memory leaks
+      // Let Node.js handle module caching naturally
+
+      logger.debug("🔧 [MEMORY] Memory optimization check completed");
     } catch (error) {
       logger.warn(
         "Failed to perform memory optimization",
@@ -115,18 +113,39 @@ class MemoryManager {
 
   private performEmergencyCleanup(): void {
     try {
-      this.performOptimization();
-
-      // Additional emergency measures
+      // ✅ EMERGENCY: More aggressive but safe cleanup
       if (global.gc) {
+        const beforeStats = this.getMemoryStats();
+
+        // Force garbage collection twice for emergency cleanup
         global.gc();
-        global.gc(); // Force twice for better cleanup
-        logger.info("🚨 [MEMORY] Emergency garbage collection performed");
+        setTimeout(() => global.gc(), 100); // Small delay then second GC
+
+        this.lastGC = Date.now();
+        const afterStats = this.getMemoryStats();
+
+        logger.error(
+          "🚨 [MEMORY] Emergency garbage collection performed",
+          "MemoryManager",
+          {
+            before: `${beforeStats.usage.toFixed(2)}%`,
+            after: `${afterStats.usage.toFixed(2)}%`,
+            heapBefore: `${beforeStats.heapUsed}MB`,
+            heapAfter: `${afterStats.heapUsed}MB`,
+            rssBefore: `${beforeStats.rss}MB`,
+            rssAfter: `${afterStats.rss}MB`,
+          },
+        );
       }
 
-      // Log current state after cleanup
-      const stats = this.getMemoryStats();
-      logger.info("📊 [MEMORY] Post-cleanup stats", "MemoryManager", stats);
+      // ✅ SAFE: Log current state after cleanup
+      const finalStats = this.getMemoryStats();
+      logger.info("📊 [MEMORY] Post-cleanup stats", "MemoryManager", {
+        usage: `${finalStats.usage.toFixed(2)}%`,
+        heapUsed: `${finalStats.heapUsed}MB`,
+        heapTotal: `${finalStats.heapTotal}MB`,
+        rss: `${finalStats.rss}MB`,
+      });
     } catch (error) {
       logger.error("Emergency memory cleanup failed", "MemoryManager", error);
     }
@@ -144,29 +163,41 @@ class MemoryManager {
   }
 }
 
-// Memory optimization middleware
+// ✅ OPTIMIZED: Memory optimization middleware with reduced overhead
 export const memoryOptimizationMiddleware = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): void => {
   const memoryManager = MemoryManager.getInstance();
 
-  // Add memory stats to request for debugging
-  (req as any).memoryStats = memoryManager.getMemoryReport();
+  // ✅ OPTIMIZATION: Only check memory for heavy endpoints to reduce overhead
+  const isHeavyEndpoint =
+    req.path.includes("/api/transcripts") ||
+    req.path.includes("/api/dashboard") ||
+    req.path.includes("/api/requests") ||
+    req.method === "POST";
 
-  // Check memory before processing heavy requests
-  const stats = memoryManager.getMemoryReport();
-  if (stats.usage > 90) {
-    logger.warn(
-      "⚠️ [MEMORY] High memory usage before request processing",
-      "MemoryOptimizationMiddleware",
-      {
-        endpoint: req.path,
-        method: req.method,
-        memoryUsage: `${stats.usage.toFixed(2)}%`,
-      },
-    );
+  if (isHeavyEndpoint) {
+    // Add memory stats to request for debugging heavy operations only
+    const stats = memoryManager.getMemoryReport();
+    (req as any).memoryStats = stats;
+
+    // Warn if memory is high before heavy processing
+    if (stats.usage > 75) {
+      // ✅ EARLIER WARNING: 75% instead of 90%
+      logger.warn(
+        "⚠️ [MEMORY] High memory usage before request processing",
+        "MemoryOptimizationMiddleware",
+        {
+          endpoint: req.path,
+          method: req.method,
+          memoryUsage: `${stats.usage.toFixed(2)}%`,
+          heapUsed: `${stats.heapUsed}MB`,
+          rss: `${stats.rss}MB`,
+        },
+      );
+    }
   }
 
   next();
@@ -174,7 +205,7 @@ export const memoryOptimizationMiddleware = (
 
 // Response compression middleware to reduce memory usage
 export const responseCompressionMiddleware = (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction,
 ): void => {
