@@ -340,9 +340,9 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         fullTranscriptObject: transcript,
       });
 
-      if (transcript.transcripts.length >= 1) {
+      if (transcript.transcripts.length >= 2) {
         console.log(
-          "📞 [DEBUG] Processing call summary with transcripts:",
+          "📞 [DEBUG] Processing call summary with transcripts (≥2 required):",
           transcript.transcripts.length,
         );
 
@@ -382,7 +382,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
         console.log("✅ [DEBUG] Summary processing triggered");
       } else {
         console.log(
-          "📞 [DEBUG] No transcripts to process:",
+          "📞 [DEBUG] Insufficient transcripts for summary (<2 required):",
           transcript.transcripts.length,
         );
 
