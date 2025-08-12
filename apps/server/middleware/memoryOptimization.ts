@@ -16,9 +16,9 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.8; // ✅ REDUCED: 80% threshold (was 85%)
-  private readonly CRITICAL_THRESHOLD = 0.9; // ✅ REDUCED: 90% critical (was 95%)
-  private readonly CHECK_INTERVAL = 60000; // ✅ INCREASED: 60 seconds (was 30s) to reduce overhead
+  private readonly MEMORY_THRESHOLD = 0.7; // 🔥 AGGRESSIVE: 70% threshold for early intervention
+  private readonly CRITICAL_THRESHOLD = 0.8; // 🔥 AGGRESSIVE: 80% critical for immediate action
+  private readonly CHECK_INTERVAL = 30000; // 🔥 FREQUENT: 30 seconds for active monitoring
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
 
@@ -76,12 +76,12 @@ class MemoryManager {
 
   private performOptimization(): void {
     try {
-      // ✅ SAFER: Only use garbage collection if available and memory is critically high
-      if (global.gc && Date.now() - this.lastGC > 120000) {
-        // Increased to 2 minute interval to reduce overhead
+      // 🔥 AGGRESSIVE GC: More frequent and lower threshold
+      if (global.gc && Date.now() - this.lastGC > 60000) {
+        // 60 second interval for responsive memory management
         const beforeStats = this.getMemoryStats();
-        if (beforeStats.usage > 85) {
-          // Only GC if really needed
+        if (beforeStats.usage > 70) {
+          // GC at 70% to prevent critical situations
           global.gc();
           this.lastGC = Date.now();
           const afterStats = this.getMemoryStats();
