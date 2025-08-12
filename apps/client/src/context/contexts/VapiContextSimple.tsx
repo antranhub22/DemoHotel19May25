@@ -56,6 +56,23 @@ interface VapiProviderProps {
 }
 
 export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
+  // DEV/runtime toggle for noisy logs to reduce latency in production
+  const debugEnabled = (() => {
+    try {
+      return (
+        import.meta.env.DEV ||
+        (typeof window !== "undefined" &&
+          localStorage.getItem("DEBUG_VOICE") === "true")
+      );
+    } catch {
+      return false;
+    }
+  })();
+  const debugLog = (...args: any[]) => {
+    if (debugEnabled) {
+      console.log(...args);
+    }
+  };
   // State management
   const [isCallActive, setIsCallActive] = useState(false);
   const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(
@@ -165,7 +182,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         );
       },
       onCallEnd: () => {
-        console.log(
+        debugLog(
           "📞 [DEBUG] VapiProvider onCallEnd triggered, checking call history...",
         );
         logger.debug("📞 [VapiProvider] Call ended", "VapiProvider");
@@ -175,7 +192,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         const callDuration = callStartTime ? Date.now() - callStartTime : 0;
         const minCallDuration = 2000; // 2 seconds minimum
 
-        console.log("📞 [DEBUG] VapiProvider call timing:", {
+        debugLog("📞 [DEBUG] VapiProvider call timing:", {
           callStartTime,
           callDuration,
           minCallDuration,
@@ -183,21 +200,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         });
 
         if (!callStartTime) {
-          console.log(
+          debugLog(
             "📞 [DEBUG] VapiProvider: No call history found, skipping onCallEnd processing",
           );
           return;
         }
 
         if (callDuration < minCallDuration) {
-          console.log(
+          debugLog(
             "📞 [DEBUG] VapiProvider: Call too short (race condition), skipping onCallEnd processing",
           );
           return;
         }
 
         // ✅ NEW: Check Vapi SDK state directly instead of using delay
-        console.log(
+        debugLog(
           "📞 [DEBUG] VapiProvider: Checking Vapi SDK internal state...",
         );
 
@@ -205,7 +222,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         const vapiSdkActive = vapi?.isCallActive?.() || false;
 
         // ✅ ENHANCED DEBUG: More detailed state info
-        console.log("📞 [DEBUG] VapiProvider DETAILED state:", {
+        debugLog("📞 [DEBUG] VapiProvider DETAILED state:", {
           vapiSdkActive,
           contextActive: isCallActive,
           hadActiveCallRef: hadActiveCallRef.current,
@@ -215,30 +232,28 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         });
 
         if (!vapiSdkActive) {
-          console.log(
+          debugLog(
             "📞 [DEBUG] VapiProvider: Vapi SDK confirms call ended, processing...",
           );
 
           // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
           if (callEndCallback) {
-            console.log("📞 [DEBUG] VapiProvider calling external callback");
+            debugLog("📞 [DEBUG] VapiProvider calling external callback");
             callEndCallback();
           } else {
-            console.log(
+            debugLog(
               "📞 [DEBUG] VapiProvider no external callback available - using direct trigger",
             );
 
             // ✅ NEW: Direct trigger Summary Popup when no external callback
             try {
               if (window.triggerSummaryPopup) {
-                console.log(
+                debugLog(
                   "📞 [DEBUG] VapiProvider directly triggering Summary Popup",
                 );
                 window.triggerSummaryPopup();
               } else {
-                console.log(
-                  "📞 [DEBUG] window.triggerSummaryPopup not available",
-                );
+                debugLog("📞 [DEBUG] window.triggerSummaryPopup not available");
               }
             } catch (popupError) {
               logger.warn(
@@ -254,7 +269,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           setMicLevel(0);
           hadActiveCallRef.current = 0; // ✅ Reset call history after processing
         } else {
-          console.log(
+          debugLog(
             "📞 [DEBUG] VapiProvider: Vapi SDK still active, ignoring onCallEnd (race condition)",
           );
         }
@@ -284,7 +299,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           }
 
           // ✅ DEBUG: Enhanced logging for transcript handling
-          console.log("📝 [VapiProvider] Received transcript message:", {
+          debugLog("📝 [VapiProvider] Received transcript message:", {
             type: message.type,
             role: message.role,
             transcript: message.transcript?.substring(0, 50) + "...",
@@ -318,7 +333,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           );
 
           // ✅ FIX: Use consistent call ID and proper tenant ID
-          console.log("📝 [VapiProvider] About to call addTranscript:", {
+          debugLog("📝 [VapiProvider] About to call addTranscript:", {
             callId,
             content: message.transcript?.substring(0, 50) + "...",
             role: message.role,
@@ -332,7 +347,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
             tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
           });
 
-          console.log("✅ [VapiProvider] addTranscript called successfully");
+          debugLog("✅ [VapiProvider] addTranscript called successfully");
         }
 
         if (message.type === "function-call") {
@@ -399,7 +414,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   ): Promise<void> => {
     try {
       // ✅ NEW: Enhanced debug logging for VapiContextSimple
-      console.log("🎨 [DEBUG] VapiContextSimple.startCall called:", {
+      debugLog("🎨 [DEBUG] VapiContextSimple.startCall called:", {
         language,
         assistantId,
         timestamp: new Date().toISOString(),
@@ -413,13 +428,13 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
       // End any existing call first
       if (vapiClientRef.current && isCallActive) {
-        console.log("🔄 [DEBUG] Ending existing call before starting new one");
+        debugLog("🔄 [DEBUG] Ending existing call before starting new one");
         await vapiClientRef.current.endCall();
         vapiClientRef.current.destroy();
       }
 
       // ✅ NEW: Debug before initializing client
-      console.log("🚀 [DEBUG] Initializing new Vapi client:", {
+      debugLog("🚀 [DEBUG] Initializing new Vapi client:", {
         language,
         timestamp: new Date().toISOString(),
       });
@@ -433,7 +448,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       }
 
       // ✅ NEW: Debug after client initialization
-      console.log("✅ [DEBUG] Vapi client initialized successfully:", {
+      debugLog("✅ [DEBUG] Vapi client initialized successfully:", {
         language,
         clientExists: !!vapiClientRef.current,
         timestamp: new Date().toISOString(),
@@ -455,7 +470,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         options.assistantId = assistantId;
       }
 
-      console.log("🚀 [DEBUG] Starting call with options:", {
+      debugLog("🚀 [DEBUG] Starting call with options:", {
         options: {
           ...options,
           assistantId: options.assistantId?.substring(0, 15) + "...",
@@ -466,7 +481,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       // ✅ UPDATED: Start call using VapiOfficial
       await vapiClientRef.current.startCall(options);
 
-      console.log("✅ [DEBUG] Call started successfully");
+      debugLog("✅ [DEBUG] Call started successfully");
     } catch (error) {
       console.error("❌ [DEBUG] Error starting call:", error);
       logger.error("❌ Failed to start call", "VapiProvider", error);
@@ -478,9 +493,9 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   const endCall = async (): Promise<void> => {
     try {
       if (vapiClientRef.current) {
-        console.log("🛑 [DEBUG] Ending call via VapiOfficial");
+        debugLog("🛑 [DEBUG] Ending call via VapiOfficial");
         await vapiClientRef.current.endCall();
-        console.log("✅ [DEBUG] Call ended successfully");
+        debugLog("✅ [DEBUG] Call ended successfully");
       }
     } catch (error) {
       console.error("❌ [DEBUG] Error ending call:", error);
