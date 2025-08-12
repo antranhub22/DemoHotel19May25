@@ -16,9 +16,9 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.7; // 🔥 AGGRESSIVE: 70% threshold for early intervention
-  private readonly CRITICAL_THRESHOLD = 0.8; // 🔥 AGGRESSIVE: 80% critical for immediate action
-  private readonly CHECK_INTERVAL = 30000; // 🔥 FREQUENT: 30 seconds for active monitoring
+  private readonly MEMORY_THRESHOLD = 0.7; // 🚀 STANDARD: 70% threshold for Render Standard plan (2GB)
+  private readonly CRITICAL_THRESHOLD = 0.85; // 🚀 STANDARD: 85% critical for 1536MB limit
+  private readonly CHECK_INTERVAL = 60000; // 🚀 STANDARD: 60 seconds optimal for 2GB plan
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
 
@@ -102,8 +102,8 @@ class MemoryManager {
       if (Date.now() - this.lastGC > 60000) {
         // 60 second interval for responsive memory management
         const beforeStats = this.getMemoryStats();
-        if (beforeStats.usage > 70) {
-          // GC at 70% to prevent critical situations
+        if (beforeStats.usage > 75) {
+          // GC at 75% to prevent critical situations (Standard plan optimization)
           logger.info(
             "🗑️ [MEMORY] Starting garbage collection...",
             "MemoryManager",
@@ -216,8 +216,8 @@ export const memoryOptimizationMiddleware = (
     (req as any).memoryStats = stats;
 
     // Warn if memory is high before heavy processing
-    if (stats.usage > 75) {
-      // ✅ EARLIER WARNING: 75% instead of 90%
+    if (stats.usage > 80) {
+      // ✅ STANDARD PLAN: 80% warning for 2GB plan
       logger.warn(
         "⚠️ [MEMORY] High memory usage before request processing",
         "MemoryOptimizationMiddleware",
