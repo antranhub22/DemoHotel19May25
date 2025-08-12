@@ -28,6 +28,10 @@ export interface SummaryManagerReturn {
   // Action Handlers
   handleSendToFrontDesk: () => void;
   isSubmitting: boolean;
+
+  // ✅ NEW: Modification support
+  updateSummaryContent: (newContent: string) => void;
+  updateServiceItems: (newItems: any[]) => void;
 }
 
 /**
@@ -94,6 +98,27 @@ export const useSummaryManager = (): SummaryManagerReturn => {
       logger.error(`❌ ${error}`, "SummaryManager");
     },
   });
+
+  // ✅ NEW: Modification functions
+  const updateSummaryContent = useCallback(
+    (newContent: string) => {
+      setCallSummary(newContent);
+      logger.debug("📝 Summary content updated", "SummaryManager", {
+        length: newContent.length,
+      });
+    },
+    [setCallSummary],
+  );
+
+  const updateServiceItems = useCallback(
+    (newItems: any[]) => {
+      setServiceRequests(newItems);
+      logger.debug("🛎️ Service items updated", "SummaryManager", {
+        itemCount: newItems.length,
+      });
+    },
+    [setServiceRequests],
+  );
 
   // ✅ UNIFIED: Generate summary data with enhanced logic
   const getSummaryData = useCallback(() => {
@@ -356,5 +381,9 @@ export const useSummaryManager = (): SummaryManagerReturn => {
     progressionState: progression,
     handleSendToFrontDesk,
     isSubmitting,
+
+    // ✅ NEW: Modification support
+    updateSummaryContent,
+    updateServiceItems,
   };
 };

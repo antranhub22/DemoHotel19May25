@@ -2,7 +2,7 @@ import { usePopupContext } from "@/context/PopupContext";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useSummaryManager } from "@/hooks/useSummaryManager";
 import logger from "@shared/utils/logger";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { DebugLog } from "../debug/DebugWrapper";
 import { SummaryProgression } from "./SummaryProgression";
 
@@ -29,7 +29,68 @@ export const UnifiedSummaryPopup: React.FC<UnifiedSummaryPopupProps> = ({
     progressionState,
     handleSendToFrontDesk,
     isSubmitting,
+    updateSummaryContent,
+    updateServiceItems,
   } = useSummaryManager();
+
+  // ✅ NEW: Order modification state
+  const [isModifying, setIsModifying] = useState(false);
+  const [modifiedText, setModifiedText] = useState("");
+  const [modifiedItems, setModifiedItems] = useState<any[]>([]);
+
+  // Initialize modification data when summary data changes
+  useEffect(() => {
+    if (summaryData.hasData && !isModifying) {
+      setModifiedText(summaryData.content || "");
+      setModifiedItems(summaryData.items || []);
+    }
+  }, [
+    summaryData.hasData,
+    summaryData.content,
+    summaryData.items,
+    isModifying,
+  ]);
+
+  // ✅ NEW: Modification handlers
+  const handleStartModification = () => {
+    setIsModifying(true);
+    logger.debug("📝 Started order modification", "UnifiedSummaryPopup");
+  };
+
+  const handleCancelModification = () => {
+    setIsModifying(false);
+    setModifiedText(summaryData.content || "");
+    setModifiedItems(summaryData.items || []);
+    logger.debug("❌ Cancelled order modification", "UnifiedSummaryPopup");
+  };
+
+  const handleSaveModification = () => {
+    // ✅ Apply modifications to summary data via useSummaryManager
+    updateSummaryContent(modifiedText);
+    updateServiceItems(modifiedItems);
+    setIsModifying(false);
+
+    logger.debug("✅ Saved order modifications", "UnifiedSummaryPopup", {
+      modifiedText: modifiedText.length,
+      modifiedItems: modifiedItems.length,
+    });
+  };
+
+  const handleItemQuantityChange = (index: number, newQuantity: number) => {
+    const updated = [...modifiedItems];
+    if (updated[index]) {
+      updated[index] = {
+        ...updated[index],
+        quantity: Math.max(1, newQuantity),
+      };
+      setModifiedItems(updated);
+    }
+  };
+
+  const handleRemoveItem = (index: number) => {
+    const updated = modifiedItems.filter((_, i) => i !== index);
+    setModifiedItems(updated);
+  };
 
   // Find active summary popup
   const summaryPopup = popups.find((popup) => popup.type === "summary");
@@ -114,13 +175,46 @@ export const UnifiedSummaryPopup: React.FC<UnifiedSummaryPopupProps> = ({
       {/* Content Section */}
       <div className="space-y-4">
         <div>
-          <h4 className="font-medium text-gray-900 mb-2">
-            Conversation Summary
-          </h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-gray-900">Conversation Summary</h4>
+            {summaryData.hasData && !isModifying && (
+              <button
+                onClick={handleStartModification}
+                className="text-xs px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-full transition-colors"
+              >
+                ✏️ Edit
+              </button>
+            )}
+          </div>
           {summaryData.hasData ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
-              {summaryData.content}
-            </div>
+            isModifying ? (
+              <div className="space-y-3">
+                <textarea
+                  value={modifiedText}
+                  onChange={(e) => setModifiedText(e.target.value)}
+                  className="w-full min-h-[100px] p-3 border border-gray-300 rounded-lg text-sm resize-vertical focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Edit your order details..."
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveModification}
+                    className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md transition-colors"
+                  >
+                    ✅ Save
+                  </button>
+                  <button
+                    onClick={handleCancelModification}
+                    className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded-md transition-colors"
+                  >
+                    ❌ Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm leading-relaxed text-gray-700 whitespace-pre-wrap">
+                {summaryData.content}
+              </div>
+            )
           ) : (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-800 text-center">
               ⏳ Call summary is being generated...
@@ -129,36 +223,89 @@ export const UnifiedSummaryPopup: React.FC<UnifiedSummaryPopupProps> = ({
         </div>
 
         {/* Service Requests */}
-        {summaryData.items && summaryData.items.length > 0 && (
-          <div>
-            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-1">
-              🛎️ Service Requests
-            </h4>
-            <div className="space-y-2">
-              {summaryData.items.map((item: any, index: number) => (
-                <div
-                  key={index}
-                  className="bg-white border border-gray-200 rounded-lg p-3 flex justify-between items-center"
-                >
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900 text-sm">
-                      {item.name}
+        {(summaryData.items && summaryData.items.length > 0) ||
+          (modifiedItems.length > 0 && (
+            <div>
+              <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-1">
+                🛎️ Service Requests
+                {isModifying && (
+                  <span className="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    Editing Mode
+                  </span>
+                )}
+              </h4>
+              <div className="space-y-2">
+                {(isModifying ? modifiedItems : summaryData.items).map(
+                  (item: any, index: number) => (
+                    <div
+                      key={index}
+                      className={`bg-white border border-gray-200 rounded-lg p-3 ${
+                        isModifying ? "border-blue-200 bg-blue-50" : ""
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 text-sm">
+                            {item.name}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {item.description}
+                          </div>
+                        </div>
+
+                        {isModifying ? (
+                          <div className="flex items-center gap-2 ml-3">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() =>
+                                  handleItemQuantityChange(
+                                    index,
+                                    item.quantity - 1,
+                                  )
+                                }
+                                className="w-6 h-6 text-xs bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
+                                disabled={item.quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <span className="text-sm text-gray-600 font-medium min-w-[20px] text-center">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  handleItemQuantityChange(
+                                    index,
+                                    item.quantity + 1,
+                                  )
+                                }
+                                className="w-6 h-6 text-xs bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => handleRemoveItem(index)}
+                              className="w-6 h-6 text-xs bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center"
+                              title="Remove item"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-600 font-medium ml-3">
+                            Qty: {item.quantity}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {item.description}
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-600 font-medium ml-3">
-                    Qty: {item.quantity}
-                  </div>
-                </div>
-              ))}
+                  ),
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          ))}
 
         {/* Action Buttons */}
-        {summaryData.hasData && (
+        {summaryData.hasData && !isModifying && (
           <div className="border-t border-gray-200 pt-4">
             <div className="text-xs text-gray-500 text-center mb-3">
               ✅ Summary generated successfully
@@ -185,6 +332,15 @@ export const UnifiedSummaryPopup: React.FC<UnifiedSummaryPopupProps> = ({
                   "Send to FrontDesk"
                 )}
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modification Mode Notice */}
+        {isModifying && (
+          <div className="border-t border-blue-200 pt-4">
+            <div className="text-xs text-blue-600 text-center mb-3 bg-blue-50 p-2 rounded-lg">
+              📝 Editing mode active - Save or cancel changes to continue
             </div>
           </div>
         )}
