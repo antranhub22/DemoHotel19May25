@@ -1,24 +1,25 @@
-import { useAssistant } from '@/context';
-import { usePopupContext } from '@/context/PopupContext';
-import { logger } from '@shared/utils/logger';
-import { useCallback, useMemo, useState } from 'react';
+// removed unused Room type
+import { useAssistant } from "@/context";
+import { usePopupContext } from "@/context/PopupContext";
+import logger from "@shared/utils/logger";
+import { useCallback, useMemo, useState } from "react";
 // ✅ CONSTANTS - Moved to top level
 const CONSTANTS = {
-  ORDER_TYPE_DEFAULT: 'Room Service',
-  DELIVERY_TIME_DEFAULT: 'asap',
-  SERVICE_NAME_DEFAULT: 'General Service',
-  ROOM_NUMBER_FALLBACK: 'unknown',
-  ORDER_PREFIX: 'ORD',
+  ORDER_TYPE_DEFAULT: "Room Service",
+  DELIVERY_TIME_DEFAULT: "asap",
+  SERVICE_NAME_DEFAULT: "General Service",
+  ROOM_NUMBER_FALLBACK: "unknown",
+  ORDER_PREFIX: "ORD",
   ORDER_MIN: 10000,
   ORDER_RANGE: 90000,
-  STATUS_PENDING: 'pending',
+  STATUS_PENDING: "pending",
 } as const;
 
 const ERROR_MESSAGES = {
-  NO_ORDER_DATA: 'No order information available to send!',
-  REQUEST_FAILED: 'Failed to send request to Front Desk!',
-  NETWORK_ERROR: 'Network error occurred while sending request',
-  SERVER_ERROR: 'Server error occurred while processing request',
+  NO_ORDER_DATA: "No order information available to send!",
+  REQUEST_FAILED: "Failed to send request to Front Desk!",
+  NETWORK_ERROR: "Network error occurred while sending request",
+  SERVER_ERROR: "Server error occurred while processing request",
 } as const;
 
 interface UseSendToFrontDeskHandlerProps {
@@ -72,13 +73,13 @@ export const useSendToFrontDeskHandler = ({
   // ✅ MEMOIZED: Default item template to prevent recreation
   const defaultServiceItem = useMemo(
     () => ({
-      id: '1',
+      id: "1",
       name: CONSTANTS.SERVICE_NAME_DEFAULT,
-      description: 'Service request from voice call',
+      description: "Service request from voice call",
       quantity: 1,
       price: 0,
     }),
-    []
+    [],
   );
 
   // ✅ MEMOIZED: Generated order summary from context data
@@ -94,15 +95,15 @@ export const useSendToFrontDeskHandler = ({
     return {
       orderType: CONSTANTS.ORDER_TYPE_DEFAULT,
       deliveryTime: CONSTANTS.DELIVERY_TIME_DEFAULT,
-      roomNumber: '',
-      guestName: '',
-      guestEmail: '',
-      guestPhone: '',
-      specialInstructions: '',
+      roomNumber: "",
+      guestName: "",
+      guestEmail: "",
+      guestPhone: "",
+      specialInstructions: "",
       items: serviceRequests?.map((req, index) => ({
         id: (index + 1).toString(),
         name: req.serviceType || CONSTANTS.SERVICE_NAME_DEFAULT,
-        description: req.requestText || 'No details provided',
+        description: req.requestText || "No details provided",
         quantity: 1,
         price: 0,
       })) || [defaultServiceItem],
@@ -133,13 +134,13 @@ export const useSendToFrontDeskHandler = ({
       // Priority 3: Fallback
       return CONSTANTS.ROOM_NUMBER_FALLBACK;
     },
-    []
+    [],
   );
 
   // ✅ EXTRACTED: Order reference generation
   const generateOrderReference = useCallback((): string => {
     const randomNumber = Math.floor(
-      CONSTANTS.ORDER_MIN + Math.random() * CONSTANTS.ORDER_RANGE
+      CONSTANTS.ORDER_MIN + Math.random() * CONSTANTS.ORDER_RANGE,
     );
     return `${CONSTANTS.ORDER_PREFIX}-${randomNumber}`;
   }, []);
@@ -157,7 +158,7 @@ export const useSendToFrontDeskHandler = ({
         callId: orderReference,
         roomNumber: extractRoomNumber(
           orderData,
-          serviceRequests?.[0]?.details?.roomNumber || ''
+          serviceRequests?.[0]?.details?.roomNumber || "",
         ),
         orderType: orderData.orderType || CONSTANTS.ORDER_TYPE_DEFAULT,
         deliveryTime: orderData.deliveryTime || CONSTANTS.DELIVERY_TIME_DEFAULT,
@@ -173,23 +174,23 @@ export const useSendToFrontDeskHandler = ({
       generateOrderReference,
       defaultServiceItem,
       serviceRequests,
-    ]
+    ],
   );
 
   // ✅ EXTRACTED: Submit request to server
   const submitRequest = useCallback(async (payload: any) => {
     logger.debug(
-      '🔐 [useSendToFrontDeskHandler] Using guest authentication with tenant context',
-      'Component'
+      "🔐 [useSendToFrontDeskHandler] Using guest authentication with tenant context",
+      "Component",
     );
 
     // ✅ STEP 1: Get guest session token
-    let guestToken = localStorage.getItem('guest_token');
+    let guestToken = localStorage.getItem("guest_token");
 
     // ✅ STEP 2: Submit request with guest token
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      "Content-Type": "application/json",
+      "X-Guest-Session": `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     };
 
     // Add authorization header if we have a guest token
@@ -197,8 +198,8 @@ export const useSendToFrontDeskHandler = ({
       headers.Authorization = `Bearer ${guestToken}`;
     }
 
-    const response = await fetch('/api/guest/requests', {
-      method: 'POST',
+    const response = await fetch("/api/guest/requests", {
+      method: "POST",
       headers,
       body: JSON.stringify(payload),
     });
@@ -227,8 +228,8 @@ export const useSendToFrontDeskHandler = ({
   const handleSuccess = useCallback(
     (requestData: any, orderData: any) => {
       logger.debug(
-        '✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully',
-        'Component'
+        "✅ [useSendToFrontDeskHandler] Request sent to Front Desk successfully",
+        "Component",
       );
 
       // Update global order state
@@ -248,14 +249,14 @@ export const useSendToFrontDeskHandler = ({
         // Helper function to build detailed request content
         const buildDetailedRequestContent = (
           orderData: any,
-          serviceReqs: any[]
+          serviceReqs: any[],
         ) => {
           if (serviceReqs && serviceReqs.length > 0) {
             // Use detailed service requests from voice call
             const details = serviceReqs
-              .map(req => req.requestText || req.serviceType)
-              .join(', ');
-            return `${orderData.orderType || 'Room Service'}: ${details}`;
+              .map((req) => req.requestText || req.serviceType)
+              .join(", ");
+            return `${orderData.orderType || "Room Service"}: ${details}`;
           }
 
           if (orderData.items && orderData.items.length > 0) {
@@ -263,27 +264,27 @@ export const useSendToFrontDeskHandler = ({
             const itemDetails = orderData.items
               .map(
                 (item: any) =>
-                  `${item.quantity || 1}x ${item.name || item.description || 'item'}`
+                  `${item.quantity || 1}x ${item.name || item.description || "item"}`,
               )
-              .join(', ');
-            return `${orderData.orderType || 'Room Service'}: ${itemDetails}`;
+              .join(", ");
+            return `${orderData.orderType || "Room Service"}: ${itemDetails}`;
           }
 
           // Fallback to database content or generic
-          return dbData.request_content || 'Yêu cầu dịch vụ từ voice assistant';
+          return dbData.request_content || "Yêu cầu dịch vụ từ voice assistant";
         };
 
         // Helper function to extract room number with priority
         const extractBestRoomNumber = (
           orderData: any,
           serviceReqs: any[],
-          dbRoomNumber: string
+          dbRoomNumber: string,
         ) => {
           // Priority 1: Room number from order data
           if (
             orderData.roomNumber &&
-            orderData.roomNumber !== 'TBD' &&
-            orderData.roomNumber !== 'unknown'
+            orderData.roomNumber !== "TBD" &&
+            orderData.roomNumber !== "unknown"
           ) {
             return orderData.roomNumber;
           }
@@ -292,8 +293,8 @@ export const useSendToFrontDeskHandler = ({
           for (const req of serviceReqs || []) {
             if (
               req.roomNumber &&
-              req.roomNumber !== 'TBD' &&
-              req.roomNumber !== 'unknown'
+              req.roomNumber !== "TBD" &&
+              req.roomNumber !== "unknown"
             ) {
               return req.roomNumber;
             }
@@ -303,10 +304,10 @@ export const useSendToFrontDeskHandler = ({
           const contentToSearch = [
             orderData.specialInstructions,
             orderData.requestText,
-            ...(serviceReqs || []).map(req => req.requestText),
+            ...(serviceReqs || []).map((req) => req.requestText),
           ]
             .filter(Boolean)
-            .join(' ');
+            .join(" ");
 
           const roomMatch = contentToSearch.match(/(?:room|phòng)\s*#?(\d+)/i);
           if (roomMatch && roomMatch[1]) {
@@ -314,7 +315,7 @@ export const useSendToFrontDeskHandler = ({
           }
 
           // Priority 4: Database value (might be TBD)
-          return dbRoomNumber || 'TBD';
+          return dbRoomNumber || "TBD";
         };
 
         const enhancedRequestData = {
@@ -322,28 +323,28 @@ export const useSendToFrontDeskHandler = ({
           id: dbData.id,
           reference: `REQ-${dbData.id}`,
           status: dbData.status as
-            | 'pending'
-            | 'in-progress'
-            | 'completed'
-            | 'cancelled',
+            | "pending"
+            | "in-progress"
+            | "completed"
+            | "cancelled",
           submittedAt: new Date(dbData.created_at),
 
           // ✅ Enhanced with voice call details
           roomNumber: extractBestRoomNumber(
             orderData,
             serviceRequests,
-            dbData.room_number
+            dbData.room_number,
           ),
-          guestName: orderData.guestName || dbData.guest_name || 'Khách',
+          guestName: orderData.guestName || dbData.guest_name || "Khách",
           requestContent: buildDetailedRequestContent(
             orderData,
-            serviceRequests
+            serviceRequests,
           ),
           orderType:
             orderData.orderType ||
             dbData.order_type ||
             dbData.type ||
-            'Room Service',
+            "Room Service",
           estimatedTime:
             orderData.deliveryTime ||
             dbData.delivery_time ||
@@ -352,44 +353,44 @@ export const useSendToFrontDeskHandler = ({
           // ✅ Voice call items with fallback to database
           items:
             orderData.items?.map((item: any) => ({
-              name: item.name || item.description || 'Dịch vụ',
+              name: item.name || item.description || "Dịch vụ",
               quantity: item.quantity || 1,
               description: item.description,
             })) || (dbData.items ? JSON.parse(dbData.items) : []),
         };
 
         logger.debug(
-          '💎 [useSendToFrontDeskHandler] Saving ENHANCED data (DB + Voice)...',
-          'Component',
+          "💎 [useSendToFrontDeskHandler] Saving ENHANCED data (DB + Voice)...",
+          "Component",
           {
             id: enhancedRequestData.id,
             reference: enhancedRequestData.reference,
             roomNumber: enhancedRequestData.roomNumber,
             hasItems: enhancedRequestData.items.length,
             contentPreview: enhancedRequestData.requestContent.substring(0, 50),
-          }
+          },
         );
 
         // Save enhanced request data
         setRecentRequest(enhancedRequestData);
       } else {
         logger.warn(
-          '⚠️ [useSendToFrontDeskHandler] No database data in response, using voice call data',
-          'Component'
+          "⚠️ [useSendToFrontDeskHandler] No database data in response, using voice call data",
+          "Component",
         );
 
         // Fallback to voice call data only
         const voiceCallData = {
           id: Date.now(),
           reference: `REQ-${Date.now()}`,
-          roomNumber: orderData.roomNumber || 'TBD',
-          guestName: orderData.guestName || 'Khách',
+          roomNumber: orderData.roomNumber || "TBD",
+          guestName: orderData.guestName || "Khách",
           requestContent:
             serviceRequests?.length > 0
-              ? `${orderData.orderType}: ${serviceRequests.map(req => req.requestText).join(', ')}`
+              ? `${orderData.orderType}: ${serviceRequests.map((req) => req.requestText).join(", ")}`
               : `${orderData.orderType}: Yêu cầu từ voice assistant`,
-          orderType: orderData.orderType || 'Room Service',
-          status: 'pending' as const,
+          orderType: orderData.orderType || "Room Service",
+          status: "pending" as const,
           submittedAt: new Date(),
           estimatedTime:
             orderData.deliveryTime || CONSTANTS.DELIVERY_TIME_DEFAULT,
@@ -403,8 +404,8 @@ export const useSendToFrontDeskHandler = ({
       // Add small delay to let user see success message
       setTimeout(() => {
         logger.debug(
-          '🔄 [useSendToFrontDeskHandler] Resetting UI to initial state...',
-          'Component'
+          "🔄 [useSendToFrontDeskHandler] Resetting UI to initial state...",
+          "Component",
         );
 
         // Clear all conversation and order data (but keep recentRequest)
@@ -421,19 +422,19 @@ export const useSendToFrontDeskHandler = ({
         clearAllPopups();
 
         logger.debug(
-          '🗑️ [useSendToFrontDeskHandler] Cleared summary popups and call state',
-          'Component'
+          "🗑️ [useSendToFrontDeskHandler] Cleared summary popups and call state",
+          "Component",
         );
 
         logger.debug(
-          '✅ [useSendToFrontDeskHandler] UI reset completed - ready for new call',
-          'Component'
+          "✅ [useSendToFrontDeskHandler] UI reset completed - ready for new call",
+          "Component",
         );
 
         // Show notification that UI is ready for new call
         logger.success(
-          '🎤 Ready for new voice call! Interface has been reset.',
-          'Component'
+          "🎤 Ready for new voice call! Interface has been reset.",
+          "Component",
         );
       }, 2000); // 2 second delay to show success message first
 
@@ -443,8 +444,8 @@ export const useSendToFrontDeskHandler = ({
       } else {
         // Use logger instead of alert for better UX
         logger.success(
-          '✅ Request sent to front desk successfully! UI reset for new call.',
-          'Component'
+          "✅ Request sent to front desk successfully! UI reset for new call.",
+          "Component",
         );
       }
     },
@@ -462,16 +463,16 @@ export const useSendToFrontDeskHandler = ({
       setRecentRequest,
       clearAllPopups,
       serviceRequests, // Include serviceRequests for enhanced data combination
-    ]
+    ],
   );
 
   // ✅ EXTRACTED: Error handling
   const handleError = useCallback(
     (error: Error) => {
       logger.error(
-        '❌ [useSendToFrontDeskHandler] Failed to send request:',
-        'Component',
-        error
+        "❌ [useSendToFrontDeskHandler] Failed to send request:",
+        "Component",
+        error,
       );
 
       const errorMessage =
@@ -483,31 +484,31 @@ export const useSendToFrontDeskHandler = ({
         onError(errorMessage);
       } else {
         // Use logger instead of alert for better UX
-        logger.error(`❌ Failed to send request: ${errorMessage}`, 'Component');
+        logger.error(`❌ Failed to send request: ${errorMessage}`, "Component");
       }
     },
-    [onError]
+    [onError],
   );
 
   // ✅ MAIN HANDLER: Clean and focused
   const handleSendToFrontDesk = useCallback(async () => {
     logger.debug(
-      '🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated',
-      'Component'
+      "🏨 [useSendToFrontDeskHandler] Send to FrontDesk initiated",
+      "Component",
     );
 
     // Validate order data availability
     if (!generatedOrderSummary) {
       logger.warn(
-        '⚠️ [useSendToFrontDeskHandler] No order summary available',
-        'Component'
+        "⚠️ [useSendToFrontDeskHandler] No order summary available",
+        "Component",
       );
       const errorMsg = ERROR_MESSAGES.NO_ORDER_DATA;
 
       if (onError) {
         onError(errorMsg);
       } else {
-        logger.error(`❌ No order summary available: ${errorMsg}`, 'Component');
+        logger.error(`❌ No order summary available: ${errorMsg}`, "Component");
       }
       return;
     }
@@ -522,27 +523,27 @@ export const useSendToFrontDeskHandler = ({
       const backendPayload = {
         ...requestPayload,
         // Optional: Override with any specific fields if needed
-        tenantId: 'mi-nhon-hotel',
+        tenantId: "mi-nhon-hotel",
       };
 
       logger.debug(
-        '📤 [useSendToFrontDeskHandler] Submitting request to guest endpoint:',
-        'Component',
+        "📤 [useSendToFrontDeskHandler] Submitting request to guest endpoint:",
+        "Component",
         {
           orderType: backendPayload.orderType,
           roomNumber: backendPayload.roomNumber,
           items: backendPayload.items?.length || 0,
           tenantId: backendPayload.tenantId,
-        }
+        },
       );
 
       // ✅ FIXED: Use guest endpoint for voice assistant requests (no auth required)
-      const response = await fetch('/api/guest/requests', {
-        method: 'POST',
+      const response = await fetch("/api/guest/requests", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           // Add guest session ID for tracking
-          'X-Guest-Session': `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          "X-Guest-Session": `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         },
         body: JSON.stringify(backendPayload),
       });

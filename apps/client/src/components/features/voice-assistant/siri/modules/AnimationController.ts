@@ -1,7 +1,7 @@
 // ✅ FIXED: Import missing types from local modules
-import type { CanvasRenderer, CanvasRenderState } from './CanvasRenderer';
-import type { DebugManager } from './DebugManager';
-import type { EmergencyStopManager } from './EmergencyStopManager';
+import type { CanvasRenderer, CanvasRenderState } from "./CanvasRenderer";
+import type { DebugManager } from "./DebugManager";
+import type { EmergencyStopManager } from "./EmergencyStopManager";
 
 export interface AnimationState {
   pulsePhase: number;
@@ -26,7 +26,7 @@ export class AnimationController {
   constructor(
     debug: DebugManager,
     emergency: EmergencyStopManager,
-    renderer: CanvasRenderer
+    renderer: CanvasRenderer,
   ) {
     this.debug = debug;
     this.emergency = emergency;
@@ -51,11 +51,11 @@ export class AnimationController {
    */
   public start(): void {
     if (this.isRunning) {
-      this.debug.warn('Animation already running');
+      this.debug.warn("Animation already running");
       return;
     }
 
-    this.debug.log('Starting animation loop');
+    this.debug.log("Starting animation loop");
     this.isRunning = true;
     this.emergency.clearEmergencyStop();
     this.animate();
@@ -66,11 +66,11 @@ export class AnimationController {
    */
   public stop(): void {
     if (!this.isRunning) {
-      this.debug.warn('Animation already stopped');
+      this.debug.warn("Animation already stopped");
       return;
     }
 
-    this.debug.log('Stopping animation loop');
+    this.debug.log("Stopping animation loop");
     this.isRunning = false;
 
     if (this.state.animationFrameId) {
@@ -85,17 +85,17 @@ export class AnimationController {
   private animate = (): void => {
     // Emergency stop check
     if (this.emergency.shouldSkipAnimation()) {
-      this.debug.warn('Animation stopped due to emergency stop');
+      this.debug.warn("Animation stopped due to emergency stop");
       this.stop();
       return;
     }
 
     if (!this.isRunning) {
-      this.debug.log('Animation stopped by external request');
+      this.debug.log("Animation stopped by external request");
       return;
     }
 
-    this.debug.debug('🔍 [AnimationController] Animation frame start');
+    this.debug.debug("🔍 [AnimationController] Animation frame start");
 
     // Update animation phases
     this.updateAnimationPhases();
@@ -165,7 +165,7 @@ export class AnimationController {
         this.renderer.drawFallbackCircle(completeState);
         return false;
       },
-      'render'
+      "render",
     );
   }
 
@@ -175,7 +175,7 @@ export class AnimationController {
   public addRipple(
     ripples: Array<{ radius: number; alpha: number; speed: number }>,
     radius: number,
-    volumeLevel: number
+    volumeLevel: number,
   ): void {
     if (Math.random() < 0.1) {
       // 10% chance per frame when listening
@@ -200,7 +200,7 @@ export class AnimationController {
     }>,
     centerX: number,
     centerY: number,
-    radius: number
+    radius: number,
   ): void {
     if (Math.random() < 0.05) {
       // 5% chance per frame
@@ -220,9 +220,8 @@ export class AnimationController {
   /**
    * Update volume level for visual effects
    */
-  public setVolumeLevel(level: number): void {
+  public setVolumeLevel(_level: number): void {
     // Smooth volume level changes
-    const targetLevel = Math.max(0, Math.min(1, level));
     // Implement smooth interpolation if needed
   }
 
@@ -231,7 +230,7 @@ export class AnimationController {
    */
   public markActivity(): void {
     this.state.lastActiveTime = Date.now();
-    this.debug.debug('User activity marked');
+    this.debug.debug("User activity marked");
   }
 
   /**
@@ -241,7 +240,7 @@ export class AnimationController {
     if (isListening) {
       this.markActivity();
     }
-    this.debug.debug('Animation listening state:', isListening);
+    this.debug.debug("Animation listening state:", isListening);
   }
 
   /**
@@ -250,7 +249,7 @@ export class AnimationController {
   public resetTime(): void {
     this.state.elapsedTime = 0;
     this.state.displayedTime = 0;
-    this.debug.log('Animation time reset');
+    this.debug.log("Animation time reset");
   }
 
   /**
@@ -265,7 +264,7 @@ export class AnimationController {
    */
   public setTimeTarget(target: number): void {
     this.state.timeTarget = target;
-    this.debug.log('Animation time target set to:', target);
+    this.debug.log("Animation time target set to:", target);
   }
 
   /**
@@ -286,7 +285,7 @@ export class AnimationController {
    * Force restart animation (use with caution)
    */
   public forceRestart(): void {
-    this.debug.warn('🔧 Force restarting animation');
+    this.debug.warn("🔧 Force restarting animation");
     this.stop();
 
     // Small delay to ensure cleanup
@@ -299,7 +298,7 @@ export class AnimationController {
    * Cleanup animation resources
    */
   public cleanup(): void {
-    this.debug.log('Cleaning up animation controller');
+    this.debug.log("Cleaning up animation controller");
     this.stop();
 
     // Reset all state

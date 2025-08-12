@@ -4,8 +4,8 @@
 // Comprehensive real-time monitoring dashboard with WebSocket integration, metrics aggregation,
 // alert management, performance analytics, and system health visualization
 
-import { EventEmitter } from 'events';
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { EventEmitter } from "events";
 
 // Dashboard interfaces
 export interface DashboardConfig {
@@ -61,7 +61,7 @@ export interface VisualizationConfig {
     enableAlertSummary: boolean;
   };
   themes: {
-    defaultTheme: 'light' | 'dark' | 'auto';
+    defaultTheme: "light" | "dark" | "auto";
     enableCustomThemes: boolean;
   };
 }
@@ -130,7 +130,7 @@ export interface DatabaseMetrics {
   };
   health: {
     score: number; // 0-100
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
     issues: string[];
   };
 }
@@ -146,7 +146,7 @@ export interface ApplicationMetrics {
   };
   modules: {
     [moduleName: string]: {
-      status: 'active' | 'inactive' | 'error';
+      status: "active" | "inactive" | "error";
       requests: number;
       errors: number;
       averageResponseTime: number;
@@ -195,7 +195,7 @@ export interface BusinessMetrics {
   satisfaction: {
     score: number; // 1-10
     responses: number;
-    trend: 'up' | 'down' | 'stable';
+    trend: "up" | "down" | "stable";
   };
 }
 
@@ -220,8 +220,8 @@ export interface AlertMetrics {
 export interface PerformanceMetrics {
   overall: {
     score: number; // 0-100
-    grade: 'A' | 'B' | 'C' | 'D' | 'F';
-    trend: 'improving' | 'declining' | 'stable';
+    grade: "A" | "B" | "C" | "D" | "F";
+    trend: "improving" | "declining" | "stable";
   };
   categories: {
     system: number;
@@ -236,8 +236,8 @@ export interface PerformanceMetrics {
 export interface Alert {
   id: string;
   timestamp: Date;
-  severity: 'critical' | 'warning' | 'info';
-  category: 'system' | 'database' | 'application' | 'business';
+  severity: "critical" | "warning" | "info";
+  category: "system" | "database" | "application" | "business";
   title: string;
   message: string;
   source: string;
@@ -248,8 +248,8 @@ export interface Alert {
 }
 
 export interface Bottleneck {
-  type: 'cpu' | 'memory' | 'disk' | 'network' | 'database' | 'cache' | 'custom';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "cpu" | "memory" | "disk" | "network" | "database" | "cache" | "custom";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   impact: string;
   recommendations: string[];
@@ -257,7 +257,7 @@ export interface Bottleneck {
 }
 
 export interface DashboardUpdate {
-  type: 'metrics' | 'alert' | 'status' | 'config';
+  type: "metrics" | "alert" | "status" | "config";
   timestamp: Date;
   data: any;
 }
@@ -303,8 +303,8 @@ export class MonitoringDashboard extends EventEmitter {
   async initialize(): Promise<void> {
     try {
       logger.info(
-        '📊 [MonitoringDashboard] Initializing real-time monitoring dashboard',
-        'MonitoringDashboard'
+        "📊 [MonitoringDashboard] Initializing real-time monitoring dashboard",
+        "MonitoringDashboard",
       );
 
       // Setup metrics collection
@@ -325,14 +325,14 @@ export class MonitoringDashboard extends EventEmitter {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [MonitoringDashboard] Real-time monitoring dashboard initialized',
-        'MonitoringDashboard'
+        "✅ [MonitoringDashboard] Real-time monitoring dashboard initialized",
+        "MonitoringDashboard",
       );
     } catch (error) {
       logger.error(
-        '❌ [MonitoringDashboard] Failed to initialize monitoring dashboard',
-        'MonitoringDashboard',
-        error
+        "❌ [MonitoringDashboard] Failed to initialize monitoring dashboard",
+        "MonitoringDashboard",
+        error,
       );
       throw error;
     }
@@ -359,7 +359,7 @@ export class MonitoringDashboard extends EventEmitter {
       // Keep only recent history
       const maxHistory = Math.floor(
         (this.config.retentionPeriod * 60) /
-          (this.config.updateInterval / 1000 / 60)
+          (this.config.updateInterval / 1000 / 60),
       );
       if (this.metricsHistory.length > maxHistory) {
         this.metricsHistory = this.metricsHistory.slice(-maxHistory);
@@ -368,9 +368,9 @@ export class MonitoringDashboard extends EventEmitter {
       return metrics;
     } catch (error) {
       logger.error(
-        '❌ [MonitoringDashboard] Failed to collect metrics',
-        'MonitoringDashboard',
-        error
+        "❌ [MonitoringDashboard] Failed to collect metrics",
+        "MonitoringDashboard",
+        error,
       );
       throw error;
     }
@@ -387,7 +387,7 @@ export class MonitoringDashboard extends EventEmitter {
 
     if (timeRange) {
       history = history.filter(
-        m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end
+        (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
       );
     }
 
@@ -398,7 +398,7 @@ export class MonitoringDashboard extends EventEmitter {
    * Create alert
    */
   createAlert(
-    alert: Omit<Alert, 'id' | 'timestamp' | 'acknowledged' | 'resolved'>
+    alert: Omit<Alert, "id" | "timestamp" | "acknowledged" | "resolved">,
   ): Alert {
     const fullAlert: Alert = {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -411,23 +411,23 @@ export class MonitoringDashboard extends EventEmitter {
     this.activeAlerts.set(fullAlert.id, fullAlert);
 
     // Emit alert event
-    this.emit('alert', fullAlert);
+    this.emit("alert", fullAlert);
 
     // Broadcast to WebSocket clients
     this.broadcastUpdate({
-      type: 'alert',
+      type: "alert",
       timestamp: new Date(),
       data: fullAlert,
     });
 
     logger.warn(
       `🚨 [MonitoringDashboard] Alert created: ${fullAlert.title}`,
-      'MonitoringDashboard',
+      "MonitoringDashboard",
       {
         alertId: fullAlert.id,
         severity: fullAlert.severity,
         category: fullAlert.category,
-      }
+      },
     );
 
     return fullAlert;
@@ -447,11 +447,11 @@ export class MonitoringDashboard extends EventEmitter {
       acknowledgedAt: new Date(),
     };
 
-    this.emit('alertAcknowledged', alert);
+    this.emit("alertAcknowledged", alert);
     this.broadcastUpdate({
-      type: 'alert',
+      type: "alert",
       timestamp: new Date(),
-      data: { action: 'acknowledged', alert },
+      data: { action: "acknowledged", alert },
     });
 
     return true;
@@ -468,11 +468,11 @@ export class MonitoringDashboard extends EventEmitter {
     alert.resolvedAt = new Date();
     alert.metadata = { ...alert.metadata, resolvedBy: userId };
 
-    this.emit('alertResolved', alert);
+    this.emit("alertResolved", alert);
     this.broadcastUpdate({
-      type: 'alert',
+      type: "alert",
       timestamp: new Date(),
-      data: { action: 'resolved', alert },
+      data: { action: "resolved", alert },
     });
 
     return true;
@@ -483,15 +483,15 @@ export class MonitoringDashboard extends EventEmitter {
    */
   getActiveAlerts(category?: string, severity?: string): Alert[] {
     let alerts = Array.from(this.activeAlerts.values()).filter(
-      a => !a.resolved
+      (a) => !a.resolved,
     );
 
     if (category) {
-      alerts = alerts.filter(a => a.category === category);
+      alerts = alerts.filter((a) => a.category === category);
     }
 
     if (severity) {
-      alerts = alerts.filter(a => a.severity === severity);
+      alerts = alerts.filter((a) => a.severity === severity);
     }
 
     return alerts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -501,7 +501,7 @@ export class MonitoringDashboard extends EventEmitter {
    * Register WebSocket connection
    */
   registerWebSocketConnection(
-    connection: Omit<WebSocketConnection, 'connected' | 'lastActivity'>
+    connection: Omit<WebSocketConnection, "connected" | "lastActivity">,
   ): void {
     const wsConnection: WebSocketConnection = {
       ...connection,
@@ -512,13 +512,13 @@ export class MonitoringDashboard extends EventEmitter {
     this.wsConnections.set(connection.id, wsConnection);
 
     logger.debug(
-      '🔌 [MonitoringDashboard] WebSocket connection registered',
-      'MonitoringDashboard',
+      "🔌 [MonitoringDashboard] WebSocket connection registered",
+      "MonitoringDashboard",
       {
         connectionId: connection.id,
         userId: connection.userId,
         subscriptions: connection.subscriptions,
-      }
+      },
     );
   }
 
@@ -529,11 +529,11 @@ export class MonitoringDashboard extends EventEmitter {
     this.wsConnections.delete(connectionId);
 
     logger.debug(
-      '🔌 [MonitoringDashboard] WebSocket connection unregistered',
-      'MonitoringDashboard',
+      "🔌 [MonitoringDashboard] WebSocket connection unregistered",
+      "MonitoringDashboard",
       {
         connectionId,
-      }
+      },
     );
   }
 
@@ -581,8 +581,9 @@ export class MonitoringDashboard extends EventEmitter {
       alerts: {
         total: this.activeAlerts.size,
         active: this.getActiveAlerts().length,
-        resolved: Array.from(this.activeAlerts.values()).filter(a => a.resolved)
-          .length,
+        resolved: Array.from(this.activeAlerts.values()).filter(
+          (a) => a.resolved,
+        ).length,
       },
       connections: {
         active: this.wsConnections.size,
@@ -590,7 +591,7 @@ export class MonitoringDashboard extends EventEmitter {
       },
       performance: {
         score: recentMetrics?.performance.overall.score || 0,
-        status: recentMetrics?.performance.overall.grade || 'Unknown',
+        status: recentMetrics?.performance.overall.grade || "Unknown",
       },
     };
   }
@@ -618,8 +619,8 @@ export class MonitoringDashboard extends EventEmitter {
   private async setupMetricsCollection(): Promise<void> {
     // Initialize metrics collectors
     logger.debug(
-      '📊 [MonitoringDashboard] Metrics collection setup',
-      'MonitoringDashboard'
+      "📊 [MonitoringDashboard] Metrics collection setup",
+      "MonitoringDashboard",
     );
   }
 
@@ -630,16 +631,16 @@ export class MonitoringDashboard extends EventEmitter {
         await this.checkAlertConditions();
       } catch (error) {
         logger.error(
-          '❌ [MonitoringDashboard] Alert check failed',
-          'MonitoringDashboard',
-          error
+          "❌ [MonitoringDashboard] Alert check failed",
+          "MonitoringDashboard",
+          error,
         );
       }
     }, 30000); // Check every 30 seconds
 
     logger.debug(
-      '🚨 [MonitoringDashboard] Alert system setup',
-      'MonitoringDashboard'
+      "🚨 [MonitoringDashboard] Alert system setup",
+      "MonitoringDashboard",
     );
   }
 
@@ -649,40 +650,40 @@ export class MonitoringDashboard extends EventEmitter {
         const metrics = await this.getCurrentMetrics();
 
         this.broadcastUpdate({
-          type: 'metrics',
+          type: "metrics",
           timestamp: new Date(),
           data: metrics,
         });
       } catch (error) {
         logger.error(
-          '❌ [MonitoringDashboard] Real-time update failed',
-          'MonitoringDashboard',
-          error
+          "❌ [MonitoringDashboard] Real-time update failed",
+          "MonitoringDashboard",
+          error,
         );
       }
     }, this.config.updateInterval);
 
     logger.debug(
-      '🔄 [MonitoringDashboard] Real-time updates started',
-      'MonitoringDashboard'
+      "🔄 [MonitoringDashboard] Real-time updates started",
+      "MonitoringDashboard",
     );
   }
 
   private setupEventHandlers(): void {
-    this.on('alert', (alert: Alert) => {
+    this.on("alert", (alert: Alert) => {
       // Handle alert logic
       logger.debug(
-        '🚨 [MonitoringDashboard] Alert event handled',
-        'MonitoringDashboard',
-        { alertId: alert.id }
+        "🚨 [MonitoringDashboard] Alert event handled",
+        "MonitoringDashboard",
+        { alertId: alert.id },
       );
     });
 
-    this.on('metricsUpdate', () => {
+    this.on("metricsUpdate", () => {
       // Handle metrics update
       logger.debug(
-        '📊 [MonitoringDashboard] Metrics update event handled',
-        'MonitoringDashboard'
+        "📊 [MonitoringDashboard] Metrics update event handled",
+        "MonitoringDashboard",
       );
     });
   }
@@ -693,17 +694,17 @@ export class MonitoringDashboard extends EventEmitter {
     return {
       cpu: {
         usage: Math.random() * 50 + 20, // Simulated 20-70%
-        cores: require('os').cpus().length,
-        loadAverage: require('os').loadavg(),
+        cores: require("os").cpus().length,
+        loadAverage: require("os").loadavg(),
       },
       memory: {
-        total: Math.round(require('os').totalmem() / 1024 / 1024), // MB
+        total: Math.round(require("os").totalmem() / 1024 / 1024), // MB
         used: Math.round(
-          (require('os').totalmem() - require('os').freemem()) / 1024 / 1024
+          (require("os").totalmem() - require("os").freemem()) / 1024 / 1024,
         ), // MB
-        free: Math.round(require('os').freemem() / 1024 / 1024), // MB
+        free: Math.round(require("os").freemem() / 1024 / 1024), // MB
         usage: Math.round(
-          (1 - require('os').freemem() / require('os').totalmem()) * 100
+          (1 - require("os").freemem() / require("os").totalmem()) * 100,
         ),
         heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
         heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024), // MB
@@ -730,8 +731,8 @@ export class MonitoringDashboard extends EventEmitter {
   private async collectDatabaseMetrics(): Promise<DatabaseMetrics> {
     // Import database systems
     try {
-      const { DatabaseOptimizer } = await import('./DatabaseOptimizer');
-      const { ConnectionPoolManager } = await import('./ConnectionPoolManager');
+      const { DatabaseOptimizer } = await import("./DatabaseOptimizer");
+      const { ConnectionPoolManager } = await import("./ConnectionPoolManager");
 
       const dbOptimizer = DatabaseOptimizer.getInstance();
       const poolManager = ConnectionPoolManager.getInstance();
@@ -767,10 +768,10 @@ export class MonitoringDashboard extends EventEmitter {
         health: {
           score: health.score,
           status: health.status,
-          issues: health.issues.map(issue => issue.description), // Convert DatabaseIssue[] to string[]
+          issues: health.issues.map((issue) => issue.description), // Convert DatabaseIssue[] to string[]
         },
       };
-    } catch (error) {
+    } catch (_error) {
       // Fallback if systems not available
       return {
         connections: { active: 0, idle: 0, total: 0, usage: 0, leaks: 0 },
@@ -778,8 +779,8 @@ export class MonitoringDashboard extends EventEmitter {
         cache: { hitRate: 0, missRate: 0, size: 0, entries: 0 },
         health: {
           score: 0,
-          status: 'critical',
-          issues: ['Database systems not available'],
+          status: "critical",
+          issues: ["Database systems not available"],
         },
       };
     }
@@ -796,22 +797,22 @@ export class MonitoringDashboard extends EventEmitter {
         p95ResponseTime: Math.random() * 1000 + 300,
       },
       modules: {
-        'hotel-module': {
-          status: 'active',
+        "hotel-module": {
+          status: "active",
           requests: Math.floor(Math.random() * 1000),
           errors: Math.floor(Math.random() * 10),
           averageResponseTime: Math.random() * 200 + 100,
           memoryUsage: Math.random() * 50 + 20,
         },
-        'voice-module': {
-          status: 'active',
+        "voice-module": {
+          status: "active",
           requests: Math.floor(Math.random() * 500),
           errors: Math.floor(Math.random() * 5),
           averageResponseTime: Math.random() * 300 + 150,
           memoryUsage: Math.random() * 30 + 15,
         },
-        'analytics-module': {
-          status: 'active',
+        "analytics-module": {
+          status: "active",
           requests: Math.floor(Math.random() * 2000),
           errors: Math.floor(Math.random() * 20),
           averageResponseTime: Math.random() * 400 + 200,
@@ -863,28 +864,28 @@ export class MonitoringDashboard extends EventEmitter {
         score: Math.random() * 2 + 8, // 8-10
         responses: Math.floor(Math.random() * 100) + 20,
         trend:
-          Math.random() > 0.6 ? 'up' : Math.random() > 0.3 ? 'stable' : 'down',
+          Math.random() > 0.6 ? "up" : Math.random() > 0.3 ? "stable" : "down",
       },
     };
   }
 
   private collectAlertMetrics(): AlertMetrics {
     const alerts = Array.from(this.activeAlerts.values());
-    const activeAlerts = alerts.filter(a => !a.resolved);
-    const resolvedAlerts = alerts.filter(a => a.resolved);
+    const activeAlerts = alerts.filter((a) => !a.resolved);
+    const resolvedAlerts = alerts.filter((a) => a.resolved);
 
     const bySeverity = {
-      critical: activeAlerts.filter(a => a.severity === 'critical').length,
-      warning: activeAlerts.filter(a => a.severity === 'warning').length,
-      info: activeAlerts.filter(a => a.severity === 'info').length,
+      critical: activeAlerts.filter((a) => a.severity === "critical").length,
+      warning: activeAlerts.filter((a) => a.severity === "warning").length,
+      info: activeAlerts.filter((a) => a.severity === "info").length,
     };
 
     const byCategory = {
-      system: activeAlerts.filter(a => a.category === 'system').length,
-      database: activeAlerts.filter(a => a.category === 'database').length,
-      application: activeAlerts.filter(a => a.category === 'application')
+      system: activeAlerts.filter((a) => a.category === "system").length,
+      database: activeAlerts.filter((a) => a.category === "database").length,
+      application: activeAlerts.filter((a) => a.category === "application")
         .length,
-      business: activeAlerts.filter(a => a.category === 'business').length,
+      business: activeAlerts.filter((a) => a.category === "business").length,
     };
 
     return {
@@ -905,27 +906,28 @@ export class MonitoringDashboard extends EventEmitter {
     const userExperienceScore = Math.random() * 15 + 85; // 85-100
 
     const overallScore = Math.round(
-      (systemScore + databaseScore + applicationScore + userExperienceScore) / 4
+      (systemScore + databaseScore + applicationScore + userExperienceScore) /
+        4,
     );
 
-    let grade: 'A' | 'B' | 'C' | 'D' | 'F' = 'A';
-    if (overallScore < 90) grade = 'B';
-    if (overallScore < 80) grade = 'C';
-    if (overallScore < 70) grade = 'D';
-    if (overallScore < 60) grade = 'F';
+    let grade: "A" | "B" | "C" | "D" | "F" = "A";
+    if (overallScore < 90) grade = "B";
+    if (overallScore < 80) grade = "C";
+    if (overallScore < 70) grade = "D";
+    if (overallScore < 60) grade = "F";
 
     const bottlenecks: Bottleneck[] = [];
 
     // Identify potential bottlenecks
     if (systemScore < 80) {
       bottlenecks.push({
-        type: 'cpu',
-        severity: 'medium',
-        description: 'High CPU usage detected',
-        impact: 'May cause slower response times',
+        type: "cpu",
+        severity: "medium",
+        description: "High CPU usage detected",
+        impact: "May cause slower response times",
         recommendations: [
-          'Scale horizontally',
-          'Optimize CPU-intensive operations',
+          "Scale horizontally",
+          "Optimize CPU-intensive operations",
         ],
         metrics: { cpuUsage: Math.random() * 30 + 70 },
       });
@@ -933,14 +935,14 @@ export class MonitoringDashboard extends EventEmitter {
 
     if (databaseScore < 75) {
       bottlenecks.push({
-        type: 'database',
-        severity: 'high',
-        description: 'Database performance issues',
-        impact: 'Slow query execution affecting user experience',
+        type: "database",
+        severity: "high",
+        description: "Database performance issues",
+        impact: "Slow query execution affecting user experience",
         recommendations: [
-          'Add missing indexes',
-          'Optimize slow queries',
-          'Scale database',
+          "Add missing indexes",
+          "Optimize slow queries",
+          "Scale database",
         ],
         metrics: { queryTime: Math.random() * 1000 + 500 },
       });
@@ -952,10 +954,10 @@ export class MonitoringDashboard extends EventEmitter {
         grade,
         trend:
           Math.random() > 0.5
-            ? 'improving'
+            ? "improving"
             : Math.random() > 0.25
-              ? 'stable'
-              : 'declining',
+              ? "stable"
+              : "declining",
       },
       categories: {
         system: Math.round(systemScore),
@@ -965,10 +967,10 @@ export class MonitoringDashboard extends EventEmitter {
       },
       bottlenecks,
       recommendations: [
-        'Monitor CPU usage trends',
-        'Optimize database queries',
-        'Implement caching strategies',
-        'Scale infrastructure as needed',
+        "Monitor CPU usage trends",
+        "Optimize database queries",
+        "Implement caching strategies",
+        "Scale infrastructure as needed",
       ],
     };
   }
@@ -981,11 +983,11 @@ export class MonitoringDashboard extends EventEmitter {
       // Check system alerts
       if (metrics.system.cpu.usage > thresholds.system.cpuUsage) {
         this.createAlert({
-          severity: 'warning',
-          category: 'system',
-          title: 'High CPU Usage',
+          severity: "warning",
+          category: "system",
+          title: "High CPU Usage",
           message: `CPU usage is ${metrics.system.cpu.usage.toFixed(1)}%, exceeding threshold of ${thresholds.system.cpuUsage}%`,
-          source: 'system-monitor',
+          source: "system-monitor",
           metadata: {
             cpuUsage: metrics.system.cpu.usage,
             threshold: thresholds.system.cpuUsage,
@@ -995,11 +997,11 @@ export class MonitoringDashboard extends EventEmitter {
 
       if (metrics.system.memory.usage > thresholds.system.memoryUsage) {
         this.createAlert({
-          severity: 'warning',
-          category: 'system',
-          title: 'High Memory Usage',
+          severity: "warning",
+          category: "system",
+          title: "High Memory Usage",
           message: `Memory usage is ${metrics.system.memory.usage}%, exceeding threshold of ${thresholds.system.memoryUsage}%`,
-          source: 'system-monitor',
+          source: "system-monitor",
           metadata: {
             memoryUsage: metrics.system.memory.usage,
             threshold: thresholds.system.memoryUsage,
@@ -1012,11 +1014,11 @@ export class MonitoringDashboard extends EventEmitter {
         metrics.database.connections.usage > thresholds.database.connectionUsage
       ) {
         this.createAlert({
-          severity: 'critical',
-          category: 'database',
-          title: 'High Database Connection Usage',
+          severity: "critical",
+          category: "database",
+          title: "High Database Connection Usage",
           message: `Database connection usage is ${metrics.database.connections.usage.toFixed(1)}%, exceeding threshold of ${thresholds.database.connectionUsage}%`,
-          source: 'database-monitor',
+          source: "database-monitor",
           metadata: {
             connectionUsage: metrics.database.connections.usage,
             threshold: thresholds.database.connectionUsage,
@@ -1029,11 +1031,11 @@ export class MonitoringDashboard extends EventEmitter {
         metrics.application.requests.rate > thresholds.application.requestRate
       ) {
         this.createAlert({
-          severity: 'info',
-          category: 'application',
-          title: 'High Request Rate',
+          severity: "info",
+          category: "application",
+          title: "High Request Rate",
           message: `Request rate is ${metrics.application.requests.rate.toFixed(1)} req/s, exceeding threshold of ${thresholds.application.requestRate} req/s`,
-          source: 'application-monitor',
+          source: "application-monitor",
           metadata: {
             requestRate: metrics.application.requests.rate,
             threshold: thresholds.application.requestRate,
@@ -1042,9 +1044,9 @@ export class MonitoringDashboard extends EventEmitter {
       }
     } catch (error) {
       logger.error(
-        '❌ [MonitoringDashboard] Alert condition check failed',
-        'MonitoringDashboard',
-        error
+        "❌ [MonitoringDashboard] Alert condition check failed",
+        "MonitoringDashboard",
+        error,
       );
     }
   }
@@ -1054,18 +1056,18 @@ export class MonitoringDashboard extends EventEmitter {
     for (const [connectionId, connection] of this.wsConnections) {
       // Check if connection is subscribed to this update type
       if (
-        connection.subscriptions.includes('all') ||
+        connection.subscriptions.includes("all") ||
         connection.subscriptions.includes(update.type)
       ) {
         // In a real implementation, this would send to the actual WebSocket
         logger.debug(
-          '📡 [MonitoringDashboard] Broadcasting update',
-          'MonitoringDashboard',
+          "📡 [MonitoringDashboard] Broadcasting update",
+          "MonitoringDashboard",
           {
             connectionId,
             updateType: update.type,
             timestamp: update.timestamp,
-          }
+          },
         );
       }
     }
@@ -1088,7 +1090,7 @@ export const getCurrentDashboardMetrics = () => {
 };
 
 export const createDashboardAlert = (
-  alert: Omit<Alert, 'id' | 'timestamp' | 'acknowledged' | 'resolved'>
+  alert: Omit<Alert, "id" | "timestamp" | "acknowledged" | "resolved">,
 ) => {
   const dashboard = MonitoringDashboard.getInstance();
   return dashboard.createAlert(alert);

@@ -1,6 +1,8 @@
-import { createElement } from 'react';
-import { usePopup } from '../popup-system/PopupManager';
-import { DebugWrapper } from './DebugWrapper';
+import { createElement } from "react";
+import { usePopup } from "../popup-system/PopupManager";
+import { DebugWrapper } from "./DebugWrapper";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { UI_CONSTANTS } from "@/lib/constants";
 
 // Debug Buttons Component - Extracted from Interface1.tsx
 export const DebugButtons = () => {
@@ -11,56 +13,58 @@ export const DebugButtons = () => {
     forceShowSummary,
   } = usePopup();
 
+  const isMobile = useIsMobile();
+
   // Test Summary Popup Button
   const handleTestSummary = () => {
-    console.log('🧪 Test Summary button clicked!');
+    console.log("🧪 Test Summary button clicked!");
     const testSummaryElement = createElement(
-      'div',
+      "div",
       {
         style: {
-          padding: '20px',
-          textAlign: 'center',
-          maxWidth: '400px',
+          padding: "20px",
+          textAlign: "center",
+          maxWidth: "400px",
         },
       },
       [
         createElement(
-          'h3',
+          "h3",
           {
-            key: 'title',
+            key: "title",
             style: {
-              marginBottom: '16px',
-              color: '#333',
-              fontSize: '18px',
-              fontWeight: '600',
+              marginBottom: "16px",
+              color: "#333",
+              fontSize: "18px",
+              fontWeight: "600",
             },
           },
-          '🧪 Test Summary'
+          "🧪 Test Summary",
         ),
         createElement(
-          'p',
+          "p",
           {
-            key: 'message',
+            key: "message",
             style: {
-              marginBottom: '16px',
-              lineHeight: '1.5',
-              color: '#333',
-              fontSize: '16px',
+              marginBottom: "16px",
+              lineHeight: "1.5",
+              color: "#333",
+              fontSize: "16px",
             },
           },
-          'This is a test summary popup!'
+          "This is a test summary popup!",
         ),
-      ]
+      ],
     );
     showSummary(testSummaryElement, {
-      title: 'Test Summary',
-      priority: 'medium' as const,
+      title: "Test Summary",
+      priority: "medium" as const,
     });
   };
 
   // Emergency Cleanup Button
   const handleEmergencyCleanup = () => {
-    console.log('🚨 Emergency cleanup button clicked!');
+    console.log("🚨 Emergency cleanup button clicked!");
 
     // First reset summary system
     resetSummarySystem();
@@ -70,17 +74,17 @@ export const DebugButtons = () => {
       emergencyCleanup();
     }, 100);
 
-    alert('🧹 Emergency cleanup completed! Check console for details.');
+    alert("🧹 Emergency cleanup completed! Check console for details.");
   };
 
   // Force Display Summary Button
   const handleForceSummary = () => {
-    console.log('🚀 Force display summary button clicked!');
+    console.log("🚀 Force display summary button clicked!");
 
     // Force display summary popup
     forceShowSummary();
 
-    alert('🚀 Force summary popup triggered! Check console for details.');
+    alert("🚀 Force summary popup triggered! Check console for details.");
   };
 
   return (
@@ -88,34 +92,34 @@ export const DebugButtons = () => {
       <>
         {/* Test Summary Popup Button */}
         <div
-          className="fixed bottom-4 right-4 z-[9999]"
+          className={`fixed ${isMobile ? "bottom-20 right-4" : "bottom-4 right-4"}`}
           style={{
-            position: 'fixed',
-            bottom: '16px',
-            right: '16px',
-            zIndex: 9999,
-            backgroundColor: '#10b981',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            border: 'none',
-            outline: 'none',
+            position: "fixed",
+            bottom: isMobile ? "80px" : "16px",
+            right: "16px",
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
+            backgroundColor: "#10b981",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: "pointer",
+            border: "none",
+            outline: "none",
           }}
         >
           <button
             onClick={handleTestSummary}
             style={{
-              backgroundColor: 'transparent',
-              color: 'white',
-              border: 'none',
-              outline: 'none',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
+              backgroundColor: "transparent",
+              color: "white",
+              border: "none",
+              outline: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
             🧪 Test Summary
@@ -124,34 +128,34 @@ export const DebugButtons = () => {
 
         {/* Emergency Cleanup Button */}
         <div
-          className="fixed bottom-4 right-32 z-[9999]"
+          className={`fixed ${isMobile ? "bottom-20 right-20" : "bottom-4 right-32"}`}
           style={{
-            position: 'fixed',
-            bottom: '16px',
-            right: '128px',
-            zIndex: 9999,
-            backgroundColor: '#ef4444',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            border: 'none',
-            outline: 'none',
+            position: "fixed",
+            bottom: isMobile ? "80px" : "16px",
+            right: isMobile ? "80px" : "128px",
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
+            backgroundColor: "#ef4444",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: "pointer",
+            border: "none",
+            outline: "none",
           }}
         >
           <button
             onClick={handleEmergencyCleanup}
             style={{
-              backgroundColor: 'transparent',
-              color: 'white',
-              border: 'none',
-              outline: 'none',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
+              backgroundColor: "transparent",
+              color: "white",
+              border: "none",
+              outline: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
             🚨 Cleanup
@@ -160,34 +164,34 @@ export const DebugButtons = () => {
 
         {/* Force Display Summary Button */}
         <div
-          className="fixed bottom-4 right-48 z-[9999]"
+          className={`fixed ${isMobile ? "bottom-20 right-36" : "bottom-4 right-48"}`}
           style={{
-            position: 'fixed',
-            bottom: '16px',
-            right: '192px',
-            zIndex: 9999,
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            border: 'none',
-            outline: 'none',
+            position: "fixed",
+            bottom: isMobile ? "80px" : "16px",
+            right: isMobile ? "144px" : "192px",
+            zIndex: UI_CONSTANTS?.Z_INDEX?.TOOLTIP ?? 1070,
+            backgroundColor: "#3b82f6",
+            color: "white",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: "pointer",
+            border: "none",
+            outline: "none",
           }}
         >
           <button
             onClick={handleForceSummary}
             style={{
-              backgroundColor: 'transparent',
-              color: 'white',
-              border: 'none',
-              outline: 'none',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600',
+              backgroundColor: "transparent",
+              color: "white",
+              border: "none",
+              outline: "none",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "600",
             }}
           >
             🚀 Force Summary

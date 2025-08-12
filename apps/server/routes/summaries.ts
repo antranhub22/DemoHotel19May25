@@ -70,7 +70,7 @@ router.get("/:callId", async (req, res) => {
     orderBy[sortField] = order || "desc";
 
     // Execute Prisma queries with proper error handling
-    const [summaries, total] = await Promise.all([
+    const [summaries, totalCount] = await Promise.all([
       prisma.call_summaries.findMany({
         where: whereConditions,
         orderBy,
@@ -87,25 +87,27 @@ router.get("/:callId", async (req, res) => {
       "Summaries",
     );
 
-    // ✅ FRONTEND COMPATIBILITY: Return single summary object if only requesting without pagination params
-    // This matches what CallDetails.tsx expects
-    if (
-      summaries.length === 1 &&
-      !search &&
-      Object.keys(filters).length === 0
-    ) {
-      const summary = summaries[0];
+    // ✅ FRONTEND COMPATIBILITY: Return the MOST RECENT summary object if no filters/search
+    if (!search && Object.keys(filters).length === 0) {
+      const latest = summaries[0];
+      if (latest) {
+        return apiResponse.success(
+          res,
+          {
+            id: latest.id,
+            callId: latest.call_id,
+            content: latest.content,
+            timestamp: latest.timestamp,
+            roomNumber: latest.room_number,
+            duration: latest.duration,
+          },
+          `Retrieved latest summary for call ${callId}`,
+        );
+      }
       return apiResponse.success(
         res,
-        {
-          id: summary.id,
-          callId: summary.call_id,
-          content: summary.content,
-          timestamp: summary.timestamp,
-          roomNumber: summary.room_number,
-          duration: summary.duration,
-        },
-        `Retrieved summary for call ${callId}`,
+        null,
+        `No summaries found for call ${callId}`,
       );
     }
 
@@ -285,7 +287,6 @@ router.get("/", async (req, res) => {
     );
 
     // Build WHERE conditions
-    const whereConditions = [];
 
     // Add tenant filtering if provided
     if (tenantId) {
@@ -397,11 +398,7 @@ router.delete("/:id", async (req, res) => {
 
     // ✅ DETAILED MIGRATION: Delete using Prisma with error handling
     try {
-      const deletedSummary = await prisma.call_summaries.delete({
-        where: {
-          id: parseInt(id),
-        },
-      });
+      await prisma.callSummary.delete({ where: { id } });
     } catch (error: any) {
       if (error.code === "P2025") {
         return commonErrors.notFound(res, "Summary", id);

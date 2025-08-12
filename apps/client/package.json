@@ -1,0 +1,23 @@
+{
+  "name": "hotel-voice-assistant-client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "e2e:install": "npx playwright install --with-deps || true",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.7.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

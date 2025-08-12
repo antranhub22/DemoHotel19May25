@@ -107,7 +107,7 @@ export const PERMISSION_MATRIX: PermissionMatrix = {
     security: ['view', 'manage'],
     notifications: ['view'],
   },
-  'super-admin': {
+  'super_admin': {
     dashboard: ['view', 'edit', 'view_client_interface'],
     analytics: ['view', 'export', 'advanced', 'view_advanced'],
     billing: ['view', 'edit'],
@@ -505,7 +505,7 @@ export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
       requiredPermission: 'analytics.technical',
     },
   ],
-  'super-admin': [
+  'super_admin': [
     {
       key: 'dashboard',
       label: 'Tổng quan',
@@ -673,7 +673,7 @@ export const DASHBOARD_COMPONENTS: Record<UserRole, string[]> = {
     'IntegrationStatus',
     'SecurityAlerts',
   ],
-  'super-admin': [
+  'super_admin': [
     'RevenueChart',
     'CallsOverview',
     'OperationalMetrics',

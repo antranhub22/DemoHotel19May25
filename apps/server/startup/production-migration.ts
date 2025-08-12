@@ -28,7 +28,7 @@ export async function runProductionMigration() {
     // @ts-ignore - Dynamic import for optional dependency
     const postgresModule = await import("postgres");
     postgres = postgresModule.default;
-  } catch (error) {
+  } catch (_error) {
     logger.warn(
       "⚠️ postgres package not available - skipping production migration",
       "Component",

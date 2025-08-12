@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 
 // ✅ DETAILED MIGRATION: Removed Drizzle imports - using Prisma instead

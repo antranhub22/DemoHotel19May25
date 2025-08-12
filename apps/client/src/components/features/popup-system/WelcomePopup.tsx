@@ -1,16 +1,26 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+// removed unused Room type
+import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
+import React from "react";
 
 interface WelcomePopupProps {
   onClose: () => void;
 }
 
 const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
+  const prefersReducedMotion = useReducedMotion();
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm font-sans">
+    <div
+      className={`fixed inset-0 flex items-center justify-center font-sans ${prefersReducedMotion ? "bg-black/40" : "bg-black/40 backdrop-blur-sm"}`}
+      style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
+    >
       <div
         className="bg-gradient-to-br from-[rgba(255,255,255,0.7)] to-[rgba(255,255,255,0.5)] dark:from-[rgba(30,30,30,0.7)] dark:to-[rgba(30,30,30,0.5)] text-gray-800 dark:text-gray-200 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto border border-white/30"
-        style={{ transformStyle: 'preserve-3d' }}
+        style={{
+          transformStyle: "preserve-3d",
+          contain: "layout paint style" as any,
+        }}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
           {/* Vietnamese Content */}
@@ -23,7 +33,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="target">
                   🎯
-                </span>{' '}
+                </span>{" "}
                 MỤC ĐÍCH:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -36,7 +46,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="money">
                   💰
-                </span>{' '}
+                </span>{" "}
                 GIÁ TRỊ MANG LẠI:
               </h3>
               <ul className="list-inside list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
@@ -51,7 +61,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="speech bubble">
                   🗣️
-                </span>{' '}
+                </span>{" "}
                 ĐẶC ĐIỂM NỔI BẬT:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -63,7 +73,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="bell">
                   🔔
-                </span>{' '}
+                </span>{" "}
                 CHỨC NĂNG CỦA AI VOICE BOT:
               </h3>
               <ul className="list-inside list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
@@ -81,7 +91,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="microphone">
                   🎤
-                </span>{' '}
+                </span>{" "}
                 CÁCH SỬ DỤNG:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -93,7 +103,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="light bulb">
                   💡
-                </span>{' '}
+                </span>{" "}
                 THỬ NGAY (6 ngôn ngữ để trải nghiệm):
               </h3>
               <div className="pl-6 text-gray-700 dark:text-gray-300 italic">
@@ -113,7 +123,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="target">
                   🎯
-                </span>{' '}
+                </span>{" "}
                 PURPOSE:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -126,7 +136,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="money">
                   💰
-                </span>{' '}
+                </span>{" "}
                 VALUE PROPOSITION:
               </h3>
               <ul className="list-inside list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
@@ -141,7 +151,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="speech bubble">
                   🗣️
-                </span>{' '}
+                </span>{" "}
                 HIGHLIGHT:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -153,7 +163,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="bell">
                   🔔
-                </span>{' '}
+                </span>{" "}
                 AI VOICE BOT FEATURES:
               </h3>
               <ul className="list-inside list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
@@ -172,7 +182,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="microphone">
                   🎤
-                </span>{' '}
+                </span>{" "}
                 HOW TO USE:
               </h3>
               <p className="pl-6 text-gray-700 dark:text-gray-300">
@@ -184,7 +194,7 @@ const WelcomePopup: React.FC<WelcomePopupProps> = ({ onClose }) => {
               <h3 className="font-semibold text-lg flex items-center gap-2 text-gray-800 dark:text-white">
                 <span role="img" aria-label="light bulb">
                   💡
-                </span>{' '}
+                </span>{" "}
                 TRY NOW (6 languages to experience):
               </h3>
               <div className="pl-6 text-gray-700 dark:text-gray-300 italic">

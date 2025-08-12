@@ -7,55 +7,82 @@
 
 import express from "express";
 
-// ✅ NEW v3.0: MODULAR ROUTE IMPORTS - Business Domain Aligned
+// ========================================
+// Authentication Routes
+// ========================================
 import unifiedAuthRoutes from "@auth/routes/auth.routes";
-import analyticsRoutes from "@server/routes/analytics";
-import apiRoutes from "@server/routes/api"; // ⚠️ TO BE DEPRECATED - endpoints moved to specific routes
-import callsRoutes from "@server/routes/calls";
-import dashboardRoutes from "@server/routes/dashboard";
-import emailsRoutes from "@server/routes/emails"; // ✅ RENAMED: email.ts → emails.ts (RESTful)
-import featureFlagsRoutes from "@server/routes/feature-flags";
-import healthRoutes from "@server/routes/health";
-import moduleLifecycleRoutes from "@server/routes/module-lifecycle";
+
+// ========================================
+// Core Business Domain Modules
+// ========================================
 import adminModuleRoutes from "@server/routes/modules/admin-module";
 import analyticsModuleRoutes from "@server/routes/modules/analytics-module";
 import coreModuleRoutes from "@server/routes/modules/core-module";
 import hotelModuleRoutes from "@server/routes/modules/hotel-module";
 import voiceModuleRoutes from "@server/routes/modules/voice-module";
-import summariesRoutes from "@server/routes/summaries"; // ✅ NEW: RESTful summaries
-import translationsRoutes from "@server/routes/translations"; // ✅ NEW: RESTful translations
 
-// ✅ ADMIN TOOLS (temporary)
-import adminToolsRoutes from "@server/routes/admin-tools";
-
-// ✅ NEW: DASHBOARD PERFORMANCE ENHANCEMENTS - PHASE 1 & 2
-import cacheMonitoringRoutes from "@server/routes/cache-monitoring"; // ✅ NEW: Cache management
-import dashboardDataRoutes from "@server/routes/dashboard-data"; // ✅ NEW: Optimized dashboard APIs
-import errorMonitoringRoutes from "@server/routes/error-monitoring"; // ✅ NEW: Error tracking
-import performanceMetricsRoutes from "@server/routes/performance-metrics"; // ✅ NEW: Performance monitoring
-import websocketMonitoringRoutes from "@server/routes/websocket-monitoring"; // ✅ NEW: WebSocket monitoring
-
-// ✅ NEW v2.2: ADVANCED FILTERING & SORTING API
-import advancedCallsRoutes from "./advanced-calls"; // ✅ NEW: Advanced filtering API
-
-// ✅ NEW v2.3: API VERSIONING SYSTEM
-import versionedApiRoutes from "./versioned-api"; // ✅ NEW: API versioning & migration
-
-// ✅ LEGACY: Keep existing imports for backward compatibility
-import debugRoutes from "@server/routes/debug"; // ✅ NEW: Debug endpoints for production testing
-import guestPublicRoutes from "@server/routes/guest-public"; // ✅ NEW: GUEST VOICE ASSISTANT
-import monitoringRoutes from "@server/routes/monitoring";
-
+// ========================================
+// API & Data Routes
+// ========================================
+import apiRoutes from "@server/routes/api"; // ⚠️ TO BE DEPRECATED
+import callsRoutes from "@server/routes/calls";
+import advancedCallsRoutes from "./advanced-calls";
 import requestRoutes from "@server/routes/request";
 import staffRoutes from "@server/routes/staff";
-import tempPublicRoutes from "@server/routes/temp-public"; // TEST DEPLOYMENT
-import tenantRoutes from "@server/routes/tenants"; // ✅ NEW: Tenant management
-import testOpenaiRoutes from "@server/routes/test-openai"; // ✅ DEBUG: Test OpenAI endpoints
-import testWebhookRoutes from "@server/routes/test-webhook"; // ✅ DEBUG: Test webhook endpoints
-import transcriptRoutes from "@server/routes/transcripts"; // ✅ FIX: Add transcript routes
-import vapiConfigRoutes from "@server/routes/vapi-config"; // ✅ NEW: VAPI Configuration for language-specific settings
-import vapiProxyRoutes from "@server/routes/vapi-proxy"; // ✅ NEW: VAPI CORS BYPASS
-import webhookRoutes from "@server/routes/webhook"; // ✅ NEW: VAPI Webhook endpoints
+import tenantRoutes from "@server/routes/tenants";
+import transcriptRoutes from "@server/routes/transcripts";
+
+// ========================================
+// Dashboard & Analytics Routes
+// ========================================
+import analyticsRoutes from "@server/routes/analytics";
+import dashboardRoutes from "@server/routes/dashboard";
+import dashboardDataRoutes from "@server/routes/dashboard-data";
+
+// ========================================
+// Monitoring & Performance Routes
+// ========================================
+import monitoringRoutes from "@server/routes/monitoring";
+import cacheMonitoringRoutes from "@server/routes/cache-monitoring";
+import errorMonitoringRoutes from "@server/routes/error-monitoring";
+import performanceMetricsRoutes from "@server/routes/performance-metrics";
+import websocketMonitoringRoutes from "@server/routes/websocket-monitoring";
+
+// ========================================
+// Voice Assistant & Integration Routes
+// ========================================
+import guestPublicRoutes from "@server/routes/guest-public";
+import vapiConfigRoutes from "@server/routes/vapi-config";
+import vapiProxyRoutes from "@server/routes/vapi-proxy";
+import webhookRoutes from "@server/routes/webhook";
+
+// ========================================
+// Communication & Content Routes
+// ========================================
+import emailsRoutes from "@server/routes/emails";
+import summariesRoutes from "@server/routes/summaries";
+import translationsRoutes from "@server/routes/translations";
+
+// ========================================
+// System & Configuration Routes
+// ========================================
+import featureFlagsRoutes from "@server/routes/feature-flags";
+import healthRoutes from "@server/routes/health";
+import moduleLifecycleRoutes from "@server/routes/module-lifecycle";
+import versionedApiRoutes from "./versioned-api";
+
+// ========================================
+// Development & Testing Routes
+// ========================================
+import debugRoutes from "@server/routes/debug";
+import testOpenaiRoutes from "@server/routes/test-openai";
+import testWebhookRoutes from "@server/routes/test-webhook";
+import tempPublicRoutes from "@server/routes/temp-public";
+
+// ========================================
+// Admin Tools (Temporary)
+// ========================================
+import adminToolsRoutes from "@server/routes/admin-tools";
 
 // ✅ v2.0 routes now integrated into admin module, but kept for direct access
 import { logger } from "@shared/utils/logger";

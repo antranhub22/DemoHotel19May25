@@ -1,11 +1,11 @@
-import { translateToVietnamese } from '@server/openai';
+import { translateToVietnamese } from "@server/openai";
 import {
   apiResponse,
   commonErrors,
   ErrorCodes,
-} from '@server/utils/apiHelpers';
-import { logger } from '@shared/utils/logger';
-import express from 'express';
+} from "@server/utils/apiHelpers";
+import { logger } from "@shared/utils/logger";
+import express from "express";
 
 const router = express.Router();
 
@@ -14,37 +14,37 @@ const router = express.Router();
 // ============================================
 
 // POST /api/translations/ - Translate text to target language
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { text, targetLanguage = 'vi', sourceLanguage = 'auto' } = req.body;
+    const { text, targetLanguage = "vi", sourceLanguage = "auto" } = req.body;
 
     if (!text) {
-      return commonErrors.missingFields(res, ['text']);
+      return commonErrors.missingFields(res, ["text"]);
     }
 
-    if (typeof text !== 'string' || text.length === 0) {
-      return commonErrors.validation(res, 'Text must be a non-empty string');
+    if (typeof text !== "string" || text.length === 0) {
+      return commonErrors.validation(res, "Text must be a non-empty string");
     }
 
     if (text.length > 5000) {
       return commonErrors.validation(
         res,
-        'Text must be less than 5000 characters'
+        "Text must be less than 5000 characters",
       );
     }
 
-    const supportedLanguages = ['vi', 'en', 'fr', 'zh', 'ru', 'ko'];
+    const supportedLanguages = ["vi", "en", "fr", "zh", "ru", "ko"];
     if (!supportedLanguages.includes(targetLanguage)) {
       return commonErrors.validation(
         res,
-        `Target language must be one of: ${supportedLanguages.join(', ')}`,
-        { supportedLanguages }
+        `Target language must be one of: ${supportedLanguages.join(", ")}`,
+        { supportedLanguages },
       );
     }
 
     logger.debug(
       `🌐 [TRANSLATIONS] Translating text to ${targetLanguage}: ${text.substring(0, 50)}...`,
-      'Translations'
+      "Translations",
     );
 
     let translatedText: string;
@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
     try {
       // For now, we only support Vietnamese translation
       // TODO: Extend to support other languages
-      if (targetLanguage === 'vi') {
+      if (targetLanguage === "vi") {
         translatedText = await translateToVietnamese(text);
       } else {
         // Placeholder for other languages
@@ -62,15 +62,15 @@ router.post('/', async (req, res) => {
           ErrorCodes.EXTERNAL_SERVICE_ERROR,
           `Translation to ${targetLanguage} is not yet supported`,
           {
-            supportedTargetLanguages: ['vi'],
+            supportedTargetLanguages: ["vi"],
             requestedLanguage: targetLanguage,
-          }
+          },
         );
       }
 
       logger.debug(
         `✅ [TRANSLATIONS] Translation completed: ${translatedText.substring(0, 50)}...`,
-        'Translations'
+        "Translations",
       );
 
       return apiResponse.success(
@@ -83,80 +83,80 @@ router.post('/', async (req, res) => {
           characterCount: text.length,
           translatedAt: new Date().toISOString(),
         },
-        'Text translated successfully'
+        "Text translated successfully",
       );
     } catch (translationError) {
       logger.error(
         `❌ [TRANSLATIONS] Translation service error:`,
-        'Translations',
-        translationError
+        "Translations",
+        translationError,
       );
 
       return apiResponse.error(
         res,
         503,
         ErrorCodes.EXTERNAL_SERVICE_ERROR,
-        'Translation service temporarily unavailable',
+        "Translation service temporarily unavailable",
         {
           targetLanguage,
           textLength: text.length,
           error: translationError,
-        }
+        },
       );
     }
   } catch (error) {
     logger.error(
-      '❌ [TRANSLATIONS] Error processing translation:',
-      'Translations',
-      error
+      "❌ [TRANSLATIONS] Error processing translation:",
+      "Translations",
+      error,
     );
-    return commonErrors.internal(res, 'Failed to process translation', error);
+    return commonErrors.internal(res, "Failed to process translation", error);
   }
 });
 
 // GET /api/translations/languages - Get supported languages
-router.get('/languages', async (req, res) => {
+router.get("/languages", async (_req, res) => {
   try {
     logger.debug(
-      '🌐 [TRANSLATIONS] Getting supported languages',
-      'Translations'
+      "🌐 [TRANSLATIONS] Getting supported languages",
+      "Translations",
     );
 
     const languages = [
       {
-        code: 'en',
-        name: 'English',
-        nativeName: 'English',
+        code: "en",
+        name: "English",
+        nativeName: "English",
         supported: { source: true, target: false },
       },
       {
-        code: 'vi',
-        name: 'Vietnamese',
-        nativeName: 'Tiếng Việt',
+        code: "vi",
+        name: "Vietnamese",
+        nativeName: "Tiếng Việt",
         supported: { source: true, target: true },
       },
       {
-        code: 'fr',
-        name: 'French',
-        nativeName: 'Français',
+        code: "fr",
+        name: "French",
+        nativeName: "Français",
         supported: { source: true, target: false },
       },
       {
-        code: 'zh',
-        name: 'Chinese',
-        nativeName: '中文',
+        code: "zh",
+        name: "Chinese",
+        nativeName: "中文",
         supported: { source: true, target: false },
       },
       {
-        code: 'ru',
-        name: 'Russian',
-        nativeName: 'Русский',
+        code: "ru",
+        name: "Russian",
+        nativeName: "Русский",
         supported: { source: true, target: false },
       },
       {
-        code: 'ko',
-        name: 'Korean',
-        nativeName: '한국어',
+        code: "ko",
+        name: "Korean",
+        nativeName: "한국어",
         supported: { source: true, target: false },
       },
     ];
@@ -166,64 +166,64 @@ router.get('/languages', async (req, res) => {
       {
         languages,
         totalLanguages: languages.length,
-        supportedTargetLanguages: languages.filter(l => l.supported.target)
+        supportedTargetLanguages: languages.filter((l) => l.supported.target)
           .length,
-        supportedSourceLanguages: languages.filter(l => l.supported.source)
+        supportedSourceLanguages: languages.filter((l) => l.supported.source)
           .length,
       },
-      'Supported languages retrieved successfully'
+      "Supported languages retrieved successfully",
     );
   } catch (error) {
     logger.error(
-      '❌ [TRANSLATIONS] Error getting languages:',
-      'Translations',
-      error
+      "❌ [TRANSLATIONS] Error getting languages:",
+      "Translations",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to get supported languages',
-      error
+      "Failed to get supported languages",
+      error,
     );
   }
 });
 
 // POST /api/translations/batch - Translate multiple texts at once
-router.post('/batch', async (req, res) => {
+router.post("/batch", async (req, res) => {
   try {
-    const { texts, targetLanguage = 'vi', sourceLanguage = 'auto' } = req.body;
+    const { texts, targetLanguage = "vi", sourceLanguage = "auto" } = req.body;
 
     if (!texts || !Array.isArray(texts)) {
-      return commonErrors.validation(res, 'texts must be an array');
+      return commonErrors.validation(res, "texts must be an array");
     }
 
     if (texts.length === 0) {
-      return commonErrors.validation(res, 'texts array cannot be empty');
+      return commonErrors.validation(res, "texts array cannot be empty");
     }
 
     if (texts.length > 10) {
-      return commonErrors.validation(res, 'Maximum 10 texts per batch');
+      return commonErrors.validation(res, "Maximum 10 texts per batch");
     }
 
     // Validate each text
     for (let i = 0; i < texts.length; i++) {
       const text = texts[i];
-      if (!text || typeof text !== 'string' || text.length === 0) {
+      if (!text || typeof text !== "string" || text.length === 0) {
         return commonErrors.validation(
           res,
-          `Text at index ${i} must be a non-empty string`
+          `Text at index ${i} must be a non-empty string`,
         );
       }
       if (text.length > 1000) {
         return commonErrors.validation(
           res,
-          `Text at index ${i} must be less than 1000 characters for batch processing`
+          `Text at index ${i} must be less than 1000 characters for batch processing`,
         );
       }
     }
 
     logger.debug(
       `🌐 [TRANSLATIONS] Batch translating ${texts.length} texts to ${targetLanguage}`,
-      'Translations'
+      "Translations",
     );
 
     const results = [];
@@ -233,7 +233,7 @@ router.post('/batch', async (req, res) => {
     for (let i = 0; i < texts.length; i++) {
       const text = texts[i];
       try {
-        if (targetLanguage === 'vi') {
+        if (targetLanguage === "vi") {
           const translatedText = await translateToVietnamese(text);
           results.push({
             index: i,
@@ -255,12 +255,12 @@ router.post('/batch', async (req, res) => {
           });
           errorCount++;
         }
-      } catch (translationError) {
+      } catch {
         results.push({
           index: i,
           success: false,
           originalText: text,
-          error: 'Translation service error',
+          error: "Translation service error",
           sourceLanguage,
           targetLanguage,
         });
@@ -270,7 +270,7 @@ router.post('/batch', async (req, res) => {
 
     logger.debug(
       `✅ [TRANSLATIONS] Batch translation completed: ${successCount} success, ${errorCount} errors`,
-      'Translations'
+      "Translations",
     );
 
     return apiResponse.success(
@@ -286,18 +286,18 @@ router.post('/batch', async (req, res) => {
         },
         translatedAt: new Date().toISOString(),
       },
-      `Batch translation completed: ${successCount}/${texts.length} successful`
+      `Batch translation completed: ${successCount}/${texts.length} successful`,
     );
   } catch (error) {
     logger.error(
-      '❌ [TRANSLATIONS] Error processing batch translation:',
-      'Translations',
-      error
+      "❌ [TRANSLATIONS] Error processing batch translation:",
+      "Translations",
+      error,
     );
     return commonErrors.internal(
       res,
-      'Failed to process batch translation',
-      error
+      "Failed to process batch translation",
+      error,
     );
   }
 });

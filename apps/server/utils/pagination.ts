@@ -98,7 +98,7 @@ export const parseAdvancedSorting = (
 
 export const buildAdvancedWhereConditions = (
   filter: AdvancedFilterQuery,
-  tableColumns: Record<string, any>,
+  _tableColumns: Record<string, any>,
 ): any => {
   return buildPrismaWhere({
     conditions: filter.conditions || [],
@@ -107,7 +107,7 @@ export const buildAdvancedWhereConditions = (
 
 export const buildOrderByClause = (
   sortRules: SortRule[],
-  tableColumns: Record<string, any>,
+  _tableColumns: Record<string, any>,
 ): any => {
   if (sortRules.length === 0) {
     return { created_at: "desc" };

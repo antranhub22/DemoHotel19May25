@@ -9,20 +9,20 @@
 import type { Prisma } from "@prisma/client";
 
 // Define types using Prisma
-export type Tenant = Prisma.TenantGetPayload<{}>;
-export type InsertTenant = Prisma.TenantCreateInput;
-export type Staff = Prisma.StaffGetPayload<{}>;
-export type InsertStaff = Prisma.StaffCreateInput;
-export type Call = Prisma.CallGetPayload<{}>;
-export type InsertCall = Prisma.CallCreateInput;
-export type Transcript = Prisma.TranscriptGetPayload<{}>;
-export type InsertTranscript = Prisma.TranscriptCreateInput;
-export type RequestRecord = Prisma.RequestGetPayload<{}>;
-export type InsertRequestRecord = Prisma.RequestCreateInput;
-export type Message = Prisma.MessageGetPayload<{}>;
-export type InsertMessage = Prisma.MessageCreateInput;
-export type CallSummary = Prisma.CallSummaryGetPayload<{}>;
-export type InsertCallSummary = Prisma.CallSummaryCreateInput;
+export type Tenant = Prisma.tenantsGetPayload<{}>;
+export type InsertTenant = Prisma.tenantsCreateInput;
+export type Staff = Prisma.staffGetPayload<{}>;
+export type InsertStaff = Prisma.staffCreateInput;
+export type Call = Prisma.callGetPayload<{}>;
+export type InsertCall = Prisma.callCreateInput;
+export type Transcript = Prisma.transcriptGetPayload<{}>;
+export type InsertTranscript = Prisma.transcriptCreateInput;
+export type RequestRecord = Prisma.requestGetPayload<{}>;
+export type InsertRequestRecord = Prisma.requestCreateInput;
+export type Message = Prisma.messageGetPayload<{}>;
+export type InsertMessage = Prisma.messageCreateInput;
+export type CallSummary = Prisma.call_summariesGetPayload<{}>;
+export type InsertCallSummary = Prisma.call_summariesCreateInput;
 
 // ============================================
 // CORE TRANSFORMATION FUNCTIONS
@@ -240,7 +240,7 @@ export interface AuthUserCamelCase {
 
 export const authUserMapper = {
   toFrontend: (user: Staff): AuthUserCamelCase => ({
-    id: user.id,
+    id: String(user.id),
     tenantId: user.tenant_id,
     username: user.username,
     firstName: user.first_name,
@@ -302,24 +302,25 @@ export const requestMapper = {
     id: request.id,
     tenantId: request.tenant_id,
     callId: request.call_id,
-    roomNumber: request.room_number,
+    roomNumber: (request as any).room_number || (request as any).room || null,
     orderId: request.order_id,
-    requestContent: request.request_content,
+    requestContent:
+      (request as any).request_content || (request as any).content || null,
     status: request.status,
-    createdAt: request.created_at,
-    updatedAt: request.updated_at,
-    description: request.description,
-    priority: request.priority,
-    assignedTo: request.assigned_to,
+    createdAt: (request as any).created_at,
+    updatedAt: (request as any).updated_at,
+    description: (request as any).description,
+    priority: (request as any).priority,
+    assignedTo: (request as any).assigned_to,
   }),
 
   toDatabase: (request: Partial<RequestCamelCase>): any => ({
     id: request.id,
     tenant_id: request.tenantId,
     call_id: request.callId,
-    room_number: request.roomNumber,
+    room: request.roomNumber,
     order_id: request.orderId,
-    request_content: request.requestContent,
+    content: request.requestContent,
     status: request.status,
     created_at: request.createdAt,
     updated_at: request.updatedAt,

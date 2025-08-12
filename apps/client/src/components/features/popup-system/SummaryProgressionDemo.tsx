@@ -1,27 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { SummaryProgression } from './SummaryProgression';
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { SummaryProgression } from "./SummaryProgression";
 
-export const SummaryProgressionDemo: React.FC = () => {
+export interface SummaryProgressionDemoProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for SummaryProgressionDemo
+}
+
+export const SummaryProgressionDemo: React.FC<
+  SummaryProgressionDemoProps
+> = () => {
   const [status, setStatus] = useState<
-    'idle' | 'processing' | 'completed' | 'error'
-  >('idle');
+    "idle" | "processing" | "completed" | "error"
+  >("idle");
   const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState('');
+  const [currentStep, setCurrentStep] = useState("");
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const steps = [
-    'Receiving call data from Vapi.ai',
-    'Processing transcript with OpenAI',
-    'Generating comprehensive summary',
-    'Extracting service requests',
+    "Receiving call data from Vapi.ai",
+    "Processing transcript with OpenAI",
+    "Generating comprehensive summary",
+    "Extracting service requests",
   ];
 
   useEffect(() => {
-    if (status === 'processing') {
+    if (status === "processing") {
       const interval = setInterval(() => {
-        setProgress(prev => {
+        setProgress((prev) => {
           if (prev >= 100) {
-            setStatus('completed');
+            setStatus("completed");
             return 100;
           }
           return prev + 10;
@@ -29,7 +38,7 @@ export const SummaryProgressionDemo: React.FC = () => {
       }, 1000);
 
       const stepInterval = setInterval(() => {
-        setCurrentStepIndex(prev => {
+        setCurrentStepIndex((prev) => {
           if (prev >= steps.length - 1) {
             return prev;
           }
@@ -46,17 +55,17 @@ export const SummaryProgressionDemo: React.FC = () => {
   }, [status, steps]);
 
   const startDemo = () => {
-    setStatus('processing');
+    setStatus("processing");
     setProgress(0);
     setCurrentStepIndex(0);
     setCurrentStep(steps[0]);
   };
 
   const resetDemo = () => {
-    setStatus('idle');
+    setStatus("idle");
     setProgress(0);
     setCurrentStepIndex(0);
-    setCurrentStep('');
+    setCurrentStep("");
   };
 
   return (
@@ -66,7 +75,7 @@ export const SummaryProgressionDemo: React.FC = () => {
         <div className="flex gap-2">
           <button
             onClick={startDemo}
-            disabled={status === 'processing'}
+            disabled={status === "processing"}
             className="px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50"
           >
             Start Processing

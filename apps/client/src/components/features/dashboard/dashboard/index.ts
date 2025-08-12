@@ -1,6 +1,6 @@
 // Navigation components
-export { default as Sidebar } from './Sidebar';
-export { default as TopBar } from './TopBar';
+export { default as Sidebar } from './Sidebar.tsx';
+export { default as TopBar } from './TopBar.tsx';
 
 // Display components
 export {
@@ -10,12 +10,12 @@ export {
   PercentageMetricCard,
   DurationMetricCard,
   MetricCardsGrid,
-} from './MetricCard';
+} from './MetricCard.tsx';
 
 // Feature-specific components
-export { default as HotelResearchPanel } from './HotelResearchPanel';
-export { default as AssistantConfigPanel } from './AssistantConfigPanel';
-export { default as FeatureToggle, useFeatureToggle } from './FeatureToggle';
+export { default as HotelResearchPanel } from './HotelResearchPanel.tsx';
+export { default as AssistantConfigPanel } from './AssistantConfigPanel.tsx';
+export { default as FeatureToggle, useFeatureToggle } from './FeatureToggle.tsx';
 
 // Analytics components
 export {
@@ -24,13 +24,13 @@ export {
   LanguageDistributionChart,
   UsageProgressChart,
   MetricsOverview,
-} from './UsageChart';
+} from './UsageChart.tsx';
 
 // Re-export all named exports
-export * from './Sidebar';
-export * from './TopBar';
-export * from './MetricCard';
-export * from './HotelResearchPanel';
-export * from './AssistantConfigPanel';
-export * from './UsageChart';
-export * from './FeatureToggle';
+export * from './Sidebar.tsx';
+export * from './TopBar.tsx';
+export * from './MetricCard.tsx';
+export * from './HotelResearchPanel.tsx';
+export * from './AssistantConfigPanel.tsx';
+export * from './UsageChart.tsx';
+export * from './FeatureToggle.tsx';

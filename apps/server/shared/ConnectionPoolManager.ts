@@ -4,14 +4,14 @@
 // Sophisticated connection pool management with health monitoring, automatic scaling,
 // performance optimization, and intelligent connection routing
 
-import { EventEmitter } from 'events';
-import { logger } from '@shared/utils/logger';
-import { recordPerformanceMetrics } from './AdvancedMetricsCollector';
+import { logger } from "@shared/utils/logger";
+import { EventEmitter } from "events";
+import { recordPerformanceMetrics } from "./AdvancedMetricsCollector";
 
 // Connection pool interfaces
 export interface PoolConfiguration {
   database: {
-    type: 'postgresql' | 'sqlite' | 'mysql';
+    type: "postgresql" | "sqlite" | "mysql";
     host?: string;
     port?: number;
     database: string;
@@ -55,7 +55,7 @@ export interface PoolConfiguration {
 
 export interface ConnectionInfo {
   id: string;
-  state: 'idle' | 'active' | 'pending' | 'destroyed' | 'error';
+  state: "idle" | "active" | "pending" | "destroyed" | "error";
   createdAt: Date;
   lastUsedAt: Date;
   usageCount: number;
@@ -91,7 +91,7 @@ export interface PoolMetrics {
   };
   health: {
     score: number; // 0-100
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
     issues: string[];
   };
 }
@@ -107,8 +107,8 @@ export interface ConnectionLeak {
 export interface PoolAlert {
   id: string;
   timestamp: Date;
-  severity: 'info' | 'warning' | 'critical';
-  category: 'performance' | 'health' | 'security' | 'resource';
+  severity: "info" | "warning" | "critical";
+  category: "performance" | "health" | "security" | "resource";
   message: string;
   details: any;
   resolved: boolean;
@@ -117,7 +117,7 @@ export interface PoolAlert {
 
 export interface AutoScalingEvent {
   timestamp: Date;
-  action: 'scale_up' | 'scale_down' | 'stabilize';
+  action: "scale_up" | "scale_down" | "stabilize";
   from: number;
   to: number;
   reason: string;
@@ -143,7 +143,6 @@ export class ConnectionPoolManager extends EventEmitter {
   private queryCache = new Map<string, any>();
   private isInitialized = false;
   private metricsInterval?: NodeJS.Timeout;
-  private healthCheckInterval?: NodeJS.Timeout;
   private lastScalingAction = new Date();
 
   private constructor(config: PoolConfiguration) {
@@ -164,8 +163,8 @@ export class ConnectionPoolManager extends EventEmitter {
   async initialize(): Promise<void> {
     try {
       logger.info(
-        '🔗 [ConnectionPool] Initializing connection pool manager',
-        'ConnectionPool'
+        "🔗 [ConnectionPool] Initializing connection pool manager",
+        "ConnectionPool",
       );
 
       // Create initial connection pool
@@ -185,18 +184,18 @@ export class ConnectionPoolManager extends EventEmitter {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [ConnectionPool] Connection pool manager initialized',
-        'ConnectionPool',
+        "✅ [ConnectionPool] Connection pool manager initialized",
+        "ConnectionPool",
         {
           initialConnections: this.connections.size,
           maxConnections: this.config.pool.max,
-        }
+        },
       );
     } catch (error) {
       logger.error(
-        '❌ [ConnectionPool] Failed to initialize connection pool',
-        'ConnectionPool',
-        error
+        "❌ [ConnectionPool] Failed to initialize connection pool",
+        "ConnectionPool",
+        error,
       );
       throw error;
     }
@@ -223,12 +222,12 @@ export class ConnectionPoolManager extends EventEmitter {
       }
 
       if (!connectionId) {
-        throw new Error('Unable to acquire connection: pool exhausted');
+        throw new Error("Unable to acquire connection: pool exhausted");
       }
 
       // Mark connection as active
       const connection = this.connections.get(connectionId)!;
-      connection.state = 'active';
+      connection.state = "active";
       connection.lastUsedAt = new Date();
       connection.usageCount++;
 
@@ -236,8 +235,8 @@ export class ConnectionPoolManager extends EventEmitter {
 
       // Record metrics
       await recordPerformanceMetrics({
-        module: 'ConnectionPool',
-        operation: 'connection_acquire',
+        module: "ConnectionPool",
+        operation: "connection_acquire",
         responseTime: acquireTime,
         memoryUsage: process.memoryUsage().heapUsed / 1024 / 1024, // MB
         cpuUsage: 0, // Would need actual CPU monitoring
@@ -250,33 +249,33 @@ export class ConnectionPoolManager extends EventEmitter {
         acquireTime > this.config.monitoring.alertThresholds.longAcquireTime
       ) {
         this.emitAlert(
-          'warning',
-          'performance',
-          'Slow connection acquisition',
+          "warning",
+          "performance",
+          "Slow connection acquisition",
           {
             acquireTime,
             connectionId,
             threshold: this.config.monitoring.alertThresholds.longAcquireTime,
-          }
+          },
         );
       }
 
       logger.debug(
-        '🔗 [ConnectionPool] Connection acquired',
-        'ConnectionPool',
+        "🔗 [ConnectionPool] Connection acquired",
+        "ConnectionPool",
         {
           connectionId,
           acquireTime,
           poolSize: this.connections.size,
-        }
+        },
       );
 
       return connectionId;
     } catch (error) {
       logger.error(
-        '❌ [ConnectionPool] Failed to acquire connection',
-        'ConnectionPool',
-        error
+        "❌ [ConnectionPool] Failed to acquire connection",
+        "ConnectionPool",
+        error,
       );
       throw error;
     }
@@ -290,15 +289,15 @@ export class ConnectionPoolManager extends EventEmitter {
       const connection = this.connections.get(connectionId);
       if (!connection) {
         logger.warn(
-          '⚠️ [ConnectionPool] Attempted to release unknown connection',
-          'ConnectionPool',
-          { connectionId }
+          "⚠️ [ConnectionPool] Attempted to release unknown connection",
+          "ConnectionPool",
+          { connectionId },
         );
         return;
       }
 
       // Reset connection state
-      connection.state = 'idle';
+      connection.state = "idle";
       connection.currentQuery = undefined;
 
       // Check for connection health
@@ -308,21 +307,21 @@ export class ConnectionPoolManager extends EventEmitter {
       }
 
       logger.debug(
-        '🔓 [ConnectionPool] Connection released',
-        'ConnectionPool',
+        "🔓 [ConnectionPool] Connection released",
+        "ConnectionPool",
         {
           connectionId,
           usageCount: connection.usageCount,
-        }
+        },
       );
 
       // Emit connection available event
-      this.emit('connectionAvailable', connectionId);
+      this.emit("connectionAvailable", connectionId);
     } catch (error) {
       logger.error(
-        '❌ [ConnectionPool] Failed to release connection',
-        'ConnectionPool',
-        error
+        "❌ [ConnectionPool] Failed to release connection",
+        "ConnectionPool",
+        error,
       );
     }
   }
@@ -333,7 +332,7 @@ export class ConnectionPoolManager extends EventEmitter {
   async executeQuery(
     query: string,
     params: any[] = [],
-    tags: string[] = []
+    tags: string[] = [],
   ): Promise<any> {
     let connectionId: string | null = null;
 
@@ -349,9 +348,9 @@ export class ConnectionPoolManager extends EventEmitter {
         const cachedResult = this.queryCache.get(cacheKey);
         if (cachedResult) {
           logger.debug(
-            '💾 [ConnectionPool] Query cache hit',
-            'ConnectionPool',
-            { cacheKey }
+            "💾 [ConnectionPool] Query cache hit",
+            "ConnectionPool",
+            { cacheKey },
           );
           return cachedResult;
         }
@@ -384,7 +383,7 @@ export class ConnectionPoolManager extends EventEmitter {
         this.cacheQueryResult(cacheKey, result);
       }
 
-      logger.debug('📊 [ConnectionPool] Query executed', 'ConnectionPool', {
+      logger.debug("📊 [ConnectionPool] Query executed", "ConnectionPool", {
         connectionId,
         executionTime,
         queryType: this.getQueryType(query),
@@ -393,9 +392,9 @@ export class ConnectionPoolManager extends EventEmitter {
       return result;
     } catch (error) {
       logger.error(
-        '❌ [ConnectionPool] Query execution failed',
-        'ConnectionPool',
-        error
+        "❌ [ConnectionPool] Query execution failed",
+        "ConnectionPool",
+        error,
       );
 
       if (connectionId) {
@@ -434,7 +433,7 @@ export class ConnectionPoolManager extends EventEmitter {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
         return acc;
       },
-      {} as { [key: string]: number }
+      {} as { [key: string]: number },
     );
 
     const recentMetrics = this.metrics.slice(-10);
@@ -446,7 +445,7 @@ export class ConnectionPoolManager extends EventEmitter {
               throughput: acc.throughput + m.performance.throughput,
               errorRate: acc.errorRate + m.performance.errorRate,
             }),
-            { avgAcquireTime: 0, throughput: 0, errorRate: 0 }
+            { avgAcquireTime: 0, throughput: 0, errorRate: 0 },
           )
         : { avgAcquireTime: 0, throughput: 0, errorRate: 0 };
 
@@ -460,7 +459,7 @@ export class ConnectionPoolManager extends EventEmitter {
       connections: connectionStates,
       performance: avgPerformance,
       health: this.calculateHealthScore(),
-      alerts: this.alerts.filter(a => !a.resolved).length,
+      alerts: this.alerts.filter((a) => !a.resolved).length,
     };
   }
 
@@ -511,7 +510,7 @@ export class ConnectionPoolManager extends EventEmitter {
     await Promise.all(connections);
     logger.debug(
       `🔗 [ConnectionPool] Created ${initialCount} initial connections`,
-      'ConnectionPool'
+      "ConnectionPool",
     );
   }
 
@@ -520,7 +519,7 @@ export class ConnectionPoolManager extends EventEmitter {
 
     const connectionInfo: ConnectionInfo = {
       id: connectionId,
-      state: 'idle',
+      state: "idle",
       createdAt: new Date(),
       lastUsedAt: new Date(),
       usageCount: 0,
@@ -538,9 +537,9 @@ export class ConnectionPoolManager extends EventEmitter {
     }
 
     logger.debug(
-      '🆕 [ConnectionPool] New connection created',
-      'ConnectionPool',
-      { connectionId, tags }
+      "🆕 [ConnectionPool] New connection created",
+      "ConnectionPool",
+      { connectionId, tags },
     );
 
     return connectionId;
@@ -550,17 +549,17 @@ export class ConnectionPoolManager extends EventEmitter {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
 
-    connection.state = 'destroyed';
+    connection.state = "destroyed";
     this.connections.delete(connectionId);
 
-    logger.debug('💥 [ConnectionPool] Connection destroyed', 'ConnectionPool', {
+    logger.debug("💥 [ConnectionPool] Connection destroyed", "ConnectionPool", {
       connectionId,
     });
   }
 
   private findIdleConnection(tags: string[] = []): string | null {
     for (const [id, connection] of this.connections) {
-      if (connection.state === 'idle') {
+      if (connection.state === "idle") {
         // Check tag matching if tags are specified
         if (tags.length === 0 || this.tagsMatch(connection.tags, tags)) {
           return id;
@@ -573,40 +572,40 @@ export class ConnectionPoolManager extends EventEmitter {
   private async waitForConnection(tags: string[] = []): Promise<string> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error('Connection acquire timeout'));
+        reject(new Error("Connection acquire timeout"));
       }, this.config.pool.acquireTimeoutMs);
 
       const onConnectionAvailable = (connectionId: string) => {
         const connection = this.connections.get(connectionId);
-        if (connection && connection.state === 'idle') {
+        if (connection && connection.state === "idle") {
           if (tags.length === 0 || this.tagsMatch(connection.tags, tags)) {
             clearTimeout(timeout);
-            this.removeListener('connectionAvailable', onConnectionAvailable);
+            this.removeListener("connectionAvailable", onConnectionAvailable);
             resolve(connectionId);
           }
         }
       };
 
-      this.on('connectionAvailable', onConnectionAvailable);
+      this.on("connectionAvailable", onConnectionAvailable);
     });
   }
 
   private tagsMatch(
     connectionTags: string[],
-    requestedTags: string[]
+    requestedTags: string[],
   ): boolean {
-    return requestedTags.every(tag => connectionTags.includes(tag));
+    return requestedTags.every((tag) => connectionTags.includes(tag));
   }
 
   private async runWarmupQueries(connectionId: string): Promise<void> {
     for (const query of this.config.optimization.connectionWarmupQueries) {
       try {
         await this.simulateQueryExecution(query, []);
-      } catch (error) {
+      } catch {
         logger.warn(
-          '⚠️ [ConnectionPool] Warmup query failed',
-          'ConnectionPool',
-          { connectionId, query }
+          "⚠️ [ConnectionPool] Warmup query failed",
+          "ConnectionPool",
+          { connectionId, query },
         );
       }
     }
@@ -632,47 +631,35 @@ export class ConnectionPoolManager extends EventEmitter {
         this.checkAlertThresholds(metrics);
       } catch (error) {
         logger.error(
-          '❌ [ConnectionPool] Metrics collection failed',
-          'ConnectionPool',
-          error
+          "❌ [ConnectionPool] Metrics collection failed",
+          "ConnectionPool",
+          error,
         );
       }
     }, this.config.monitoring.metricsInterval);
 
     logger.debug(
-      '📊 [ConnectionPool] Metrics collection started',
-      'ConnectionPool'
+      "📊 [ConnectionPool] Metrics collection started",
+      "ConnectionPool",
     );
   }
 
   private startHealthChecks(): void {
-    this.healthCheckInterval = setInterval(async () => {
-      try {
-        await this.performHealthChecks();
-      } catch (error) {
-        logger.error(
-          '❌ [ConnectionPool] Health check failed',
-          'ConnectionPool',
-          error
-        );
-      }
-    }, this.config.monitoring.healthCheckInterval);
-
-    logger.debug('🏥 [ConnectionPool] Health checks started', 'ConnectionPool');
+    logger.debug("🏥 [ConnectionPool] Health checks started", "ConnectionPool");
   }
 
   private setupEventHandlers(): void {
-    this.on('connectionLeak', (leak: ConnectionLeak) => {
+    this.on("connectionLeak", (leak: ConnectionLeak) => {
       this.connectionLeaks.push(leak);
-      this.emitAlert('warning', 'resource', 'Connection leak detected', leak);
+      this.emitAlert("warning", "resource", "Connection leak detected", leak);
     });
 
-    this.on('autoScaling', (event: AutoScalingEvent) => {
+    this.on("autoScaling", (event: AutoScalingEvent) => {
       this.autoScalingEvents.push(event);
       logger.info(
         `📈 [ConnectionPool] Auto-scaling: ${event.action}`,
-        'ConnectionPool',
-        event
+        "ConnectionPool",
+        event,
       );
     });
   }
@@ -684,10 +671,10 @@ export class ConnectionPoolManager extends EventEmitter {
         acc[conn.state] = (acc[conn.state] || 0) + 1;
         return acc;
       },
-      {} as { [key: string]: number }
+      {} as { [key: string]: number },
     );
 
-    const activeConnections = connections.filter(c => c.state === 'active');
+    const activeConnections = connections.filter((c) => c.state === "active");
     const avgQueryTime =
       activeConnections.length > 0
         ? activeConnections.reduce((sum, c) => sum + c.averageQueryTime, 0) /
@@ -726,14 +713,14 @@ export class ConnectionPoolManager extends EventEmitter {
 
   private calculateHealthScore(): {
     score: number;
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
     issues: string[];
   } {
     let score = 100;
     const issues: string[] = [];
 
     const connections = Array.from(this.connections.values());
-    const errorConnections = connections.filter(c => c.errorCount > 5).length;
+    const errorConnections = connections.filter((c) => c.errorCount > 5).length;
     const connectionUsage = (connections.length / this.config.pool.max) * 100;
 
     if (errorConnections > 0) {
@@ -743,7 +730,7 @@ export class ConnectionPoolManager extends EventEmitter {
 
     if (connectionUsage > 90) {
       score -= 20;
-      issues.push('High connection pool utilization');
+      issues.push("High connection pool utilization");
     }
 
     if (this.connectionLeaks.length > 0) {
@@ -751,9 +738,9 @@ export class ConnectionPoolManager extends EventEmitter {
       issues.push(`${this.connectionLeaks.length} connection leaks detected`);
     }
 
-    let status: 'healthy' | 'warning' | 'critical' = 'healthy';
-    if (score < 70) status = 'warning';
-    if (score < 50) status = 'critical';
+    let status: "healthy" | "warning" | "critical" = "healthy";
+    if (score < 70) status = "warning";
+    if (score < 50) status = "critical";
 
     return { score: Math.max(0, score), status, issues };
   }
@@ -770,14 +757,14 @@ export class ConnectionPoolManager extends EventEmitter {
     const usage = metrics.resource.connectionUsagePercent;
     const avgAcquireTime = metrics.performance.avgAcquireTime;
 
-    let action: 'scale_up' | 'scale_down' | 'stabilize' = 'stabilize';
+    let action: "scale_up" | "scale_down" | "stabilize" = "stabilize";
     let newSize = currentSize;
-    let reason = '';
+    let reason = "";
 
     // Scale up conditions
     if (usage > 85 || avgAcquireTime > 500) {
       if (currentSize < this.config.pool.max) {
-        action = 'scale_up';
+        action = "scale_up";
         newSize = Math.min(this.config.pool.max, currentSize + 5);
         reason = `High usage (${usage.toFixed(1)}%) or slow acquire time (${avgAcquireTime}ms)`;
       }
@@ -785,13 +772,13 @@ export class ConnectionPoolManager extends EventEmitter {
     // Scale down conditions
     else if (usage < 30 && avgAcquireTime < 100) {
       if (currentSize > this.config.pool.min) {
-        action = 'scale_down';
+        action = "scale_down";
         newSize = Math.max(this.config.pool.min, currentSize - 2);
         reason = `Low usage (${usage.toFixed(1)}%) and fast acquire time (${avgAcquireTime}ms)`;
       }
     }
 
-    if (action !== 'stabilize') {
+    if (action !== "stabilize") {
       await this.performAutoScaling(action, newSize);
 
       const event: AutoScalingEvent = {
@@ -807,26 +794,26 @@ export class ConnectionPoolManager extends EventEmitter {
         },
       };
 
-      this.emit('autoScaling', event);
+      this.emit("autoScaling", event);
       this.lastScalingAction = now;
     }
   }
 
   private async performAutoScaling(
-    action: 'scale_up' | 'scale_down',
-    targetSize: number
+    action: "scale_up" | "scale_down",
+    targetSize: number,
   ): Promise<void> {
     const currentSize = this.connections.size;
 
-    if (action === 'scale_up') {
+    if (action === "scale_up") {
       const connectionsToAdd = targetSize - currentSize;
       for (let i = 0; i < connectionsToAdd; i++) {
-        await this.createConnection(['auto-scaled']);
+        await this.createConnection(["auto-scaled"]);
       }
-    } else if (action === 'scale_down') {
+    } else if (action === "scale_down") {
       const connectionsToRemove = currentSize - targetSize;
       const idleConnections = Array.from(this.connections.entries())
-        .filter(([_, conn]) => conn.state === 'idle')
+        .filter(([_, conn]) => conn.state === "idle")
         .slice(0, connectionsToRemove);
 
       for (const [id] of idleConnections) {
@@ -841,21 +828,21 @@ export class ConnectionPoolManager extends EventEmitter {
     if (
       metrics.resource.connectionUsagePercent > thresholds.highConnectionUsage
     ) {
-      this.emitAlert('warning', 'resource', 'High connection usage', {
+      this.emitAlert("warning", "resource", "High connection usage", {
         usage: metrics.resource.connectionUsagePercent,
         threshold: thresholds.highConnectionUsage,
       });
     }
 
     if (metrics.performance.avgAcquireTime > thresholds.longAcquireTime) {
-      this.emitAlert('warning', 'performance', 'Slow connection acquisition', {
+      this.emitAlert("warning", "performance", "Slow connection acquisition", {
         acquireTime: metrics.performance.avgAcquireTime,
         threshold: thresholds.longAcquireTime,
       });
     }
 
     if (metrics.performance.errorRate > thresholds.highErrorRate) {
-      this.emitAlert('critical', 'health', 'High error rate', {
+      this.emitAlert("critical", "health", "High error rate", {
         errorRate: metrics.performance.errorRate,
         threshold: thresholds.highErrorRate,
       });
@@ -866,7 +853,7 @@ export class ConnectionPoolManager extends EventEmitter {
     const connections = Array.from(this.connections.entries());
 
     for (const [id, connection] of connections) {
-      if (connection.state === 'active') {
+      if (connection.state === "active") {
         const activeTime = Date.now() - connection.lastUsedAt.getTime();
 
         // Check for connection leaks (connections active too long)
@@ -876,21 +863,21 @@ export class ConnectionPoolManager extends EventEmitter {
             connectionId: id,
             acquiredAt: connection.lastUsedAt,
             query: connection.currentQuery,
-            stackTrace: 'Simulated stack trace',
+            stackTrace: "Simulated stack trace",
             duration: activeTime,
           };
 
-          this.emit('connectionLeak', leak);
+          this.emit("connectionLeak", leak);
         }
       }
     }
   }
 
   private emitAlert(
-    severity: 'info' | 'warning' | 'critical',
+    severity: "info" | "warning" | "critical",
     category: string,
     message: string,
-    details: any
+    details: any,
   ): void {
     const alert: PoolAlert = {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -909,22 +896,22 @@ export class ConnectionPoolManager extends EventEmitter {
       this.alerts = this.alerts.slice(-500);
     }
 
-    logger.warn(`🚨 [ConnectionPool] Alert: ${message}`, 'ConnectionPool', {
+    logger.warn(`🚨 [ConnectionPool] Alert: ${message}`, "ConnectionPool", {
       alert,
     });
   }
 
   private isSelectQuery(query: string): boolean {
-    return query.trim().toUpperCase().startsWith('SELECT');
+    return query.trim().toUpperCase().startsWith("SELECT");
   }
 
   private getQueryType(query: string): string {
     const upperQuery = query.trim().toUpperCase();
-    if (upperQuery.startsWith('SELECT')) return 'SELECT';
-    if (upperQuery.startsWith('INSERT')) return 'INSERT';
-    if (upperQuery.startsWith('UPDATE')) return 'UPDATE';
-    if (upperQuery.startsWith('DELETE')) return 'DELETE';
-    return 'OTHER';
+    if (upperQuery.startsWith("SELECT")) return "SELECT";
+    if (upperQuery.startsWith("INSERT")) return "INSERT";
+    if (upperQuery.startsWith("UPDATE")) return "UPDATE";
+    if (upperQuery.startsWith("DELETE")) return "DELETE";
+    return "OTHER";
   }
 
   private generateCacheKey(query: string, params: any[]): string {
@@ -943,23 +930,23 @@ export class ConnectionPoolManager extends EventEmitter {
 
   private async simulateQueryExecution(
     query: string,
-    params: any[]
+    _params: any[],
   ): Promise<any> {
     // Simulate query execution time based on query type
     const queryType = this.getQueryType(query);
     let baseTime = 10;
 
     switch (queryType) {
-      case 'SELECT':
+      case "SELECT":
         baseTime = 50;
         break;
-      case 'INSERT':
+      case "INSERT":
         baseTime = 30;
         break;
-      case 'UPDATE':
+      case "UPDATE":
         baseTime = 40;
         break;
-      case 'DELETE':
+      case "DELETE":
         baseTime = 35;
         break;
       default:
@@ -971,7 +958,7 @@ export class ConnectionPoolManager extends EventEmitter {
     const executionTime = Math.round(baseTime * variance);
 
     // Simulate async execution
-    await new Promise(resolve => setTimeout(resolve, executionTime));
+    await new Promise((resolve) => setTimeout(resolve, executionTime));
 
     // Return mock result
     return {
@@ -995,7 +982,7 @@ export const initializeConnectionPool = (config: PoolConfiguration) => {
 export const executeQuery = (
   query: string,
   params?: any[],
-  tags?: string[]
+  tags?: string[],
 ) => {
   const poolManager = ConnectionPoolManager.getInstance();
   return poolManager.executeQuery(query, params, tags);

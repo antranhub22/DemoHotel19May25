@@ -1,9 +1,9 @@
-import { spawn } from 'child_process';
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { BackupManager } from './BackupManager';
+import { spawn } from "child_process";
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { BackupManager } from "./BackupManager";
 
 // ============================================
 // Types & Interfaces
@@ -64,34 +64,34 @@ export interface DisasterRecoveryConfig {
 export interface SiteConfig {
   id: string;
   name: string;
-  type: 'primary' | 'secondary' | 'backup';
+  type: "primary" | "secondary" | "backup";
   location: string;
   endpoint: string;
   healthCheckUrl: string;
   priority: number;
   capacity: number; // percentage
-  status: 'active' | 'standby' | 'failed' | 'maintenance';
+  status: "active" | "standby" | "failed" | "maintenance";
   services: ServiceConfig[];
 }
 
 export interface ServiceConfig {
   id: string;
   name: string;
-  type: 'database' | 'api' | 'web' | 'cache' | 'storage';
+  type: "database" | "api" | "web" | "cache" | "storage";
   endpoint: string;
   healthCheckPath: string;
   recoveryTime: number; // minutes
   dependencies: string[];
-  criticalityLevel: 'low' | 'medium' | 'high' | 'critical';
+  criticalityLevel: "low" | "medium" | "high" | "critical";
 }
 
 export interface RecoveryStrategy {
   id: string;
   name: string;
-  type: 'full_restore' | 'selective_restore' | 'point_in_time' | 'hot_standby';
+  type: "full_restore" | "selective_restore" | "point_in_time" | "hot_standby";
   applicableFor: string[]; // service types
   estimatedTime: number; // minutes
-  automation: 'manual' | 'semi_automatic' | 'automatic';
+  automation: "manual" | "semi_automatic" | "automatic";
   prerequisites: string[];
   steps: RecoveryStep[];
 }
@@ -99,7 +99,7 @@ export interface RecoveryStrategy {
 export interface RecoveryStep {
   id: string;
   name: string;
-  type: 'command' | 'script' | 'manual' | 'api_call' | 'database_restore';
+  type: "command" | "script" | "manual" | "api_call" | "database_restore";
   order: number;
   timeout: number; // minutes
   retryCount: number;
@@ -114,12 +114,12 @@ export interface RecoveryStep {
 export interface DisasterEvent {
   id: string;
   type:
-    | 'outage'
-    | 'data_loss'
-    | 'security_breach'
-    | 'natural_disaster'
-    | 'human_error';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+    | "outage"
+    | "data_loss"
+    | "security_breach"
+    | "natural_disaster"
+    | "human_error";
+  severity: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   detectedTime: Date;
@@ -134,32 +134,32 @@ export interface DisasterEvent {
     financialImpact: number;
   };
   status:
-    | 'detected'
-    | 'confirmed'
-    | 'recovery_initiated'
-    | 'recovery_in_progress'
-    | 'resolved'
-    | 'post_mortem';
+    | "detected"
+    | "confirmed"
+    | "recovery_initiated"
+    | "recovery_in_progress"
+    | "resolved"
+    | "post_mortem";
 }
 
 export interface RecoveryPlan {
   id: string;
   eventId: string;
   name: string;
-  type: 'automatic' | 'manual' | 'hybrid';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type: "automatic" | "manual" | "hybrid";
+  priority: "low" | "medium" | "high" | "critical";
   estimatedRTO: number; // minutes
   estimatedRPO: number; // minutes
   strategies: string[]; // strategy IDs
   steps: RecoveryStep[];
   approvals: ApprovalStep[];
   status:
-    | 'draft'
-    | 'approved'
-    | 'executing'
-    | 'completed'
-    | 'failed'
-    | 'cancelled';
+    | "draft"
+    | "approved"
+    | "executing"
+    | "completed"
+    | "failed"
+    | "cancelled";
   progress: number; // 0-100
   timeline: {
     created: Date;
@@ -185,7 +185,7 @@ export interface Stakeholder {
   role: string;
   email: string;
   phone: string;
-  notificationLevel: 'critical' | 'high' | 'medium' | 'all';
+  notificationLevel: "critical" | "high" | "medium" | "all";
   escalationDelay: number; // minutes
 }
 
@@ -199,12 +199,12 @@ export interface EscalationLevel {
 export interface RecoveryTest {
   id: string;
   name: string;
-  type: 'tabletop' | 'simulation' | 'full_test' | 'component_test';
+  type: "tabletop" | "simulation" | "full_test" | "component_test";
   scheduleDate: Date;
   duration: number; // minutes
   scope: string[];
   objectives: string[];
-  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  status: "scheduled" | "in_progress" | "completed" | "cancelled";
   results?: TestResults;
 }
 
@@ -220,11 +220,11 @@ export interface TestResults {
 
 export interface Issue {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   impact: string;
   recommendation: string;
-  status: 'open' | 'in_progress' | 'resolved';
+  status: "open" | "in_progress" | "resolved";
 }
 
 // ============================================
@@ -244,15 +244,15 @@ const defaultDisasterRecoveryConfig: DisasterRecoveryConfig = {
   failover: {
     enabled: true,
     primarySite: {
-      id: 'primary',
-      name: 'Primary Site',
-      type: 'primary',
-      location: 'US-East-1',
-      endpoint: 'https://api.hotel.com',
-      healthCheckUrl: 'https://api.hotel.com/health',
+      id: "primary",
+      name: "Primary Site",
+      type: "primary",
+      location: "US-East-1",
+      endpoint: "https://api.hotel.com",
+      healthCheckUrl: "https://api.hotel.com/health",
       priority: 1,
       capacity: 100,
-      status: 'active',
+      status: "active",
       services: [],
     },
     secondarySites: [],
@@ -285,20 +285,20 @@ const defaultDisasterRecoveryConfig: DisasterRecoveryConfig = {
       {
         level: 1,
         timeDelay: 15,
-        stakeholders: ['ops_team'],
-        actions: ['notify_ops', 'start_investigation'],
+        stakeholders: ["ops_team"],
+        actions: ["notify_ops", "start_investigation"],
       },
       {
         level: 2,
         timeDelay: 30,
-        stakeholders: ['engineering_manager'],
-        actions: ['escalate_to_management', 'assess_impact'],
+        stakeholders: ["engineering_manager"],
+        actions: ["escalate_to_management", "assess_impact"],
       },
       {
         level: 3,
         timeDelay: 60,
-        stakeholders: ['cto', 'ceo'],
-        actions: ['executive_notification', 'public_communication'],
+        stakeholders: ["cto", "ceo"],
+        actions: ["executive_notification", "public_communication"],
       },
     ],
     statusPageUpdates: true,
@@ -328,7 +328,7 @@ export class DisasterRecovery extends EventEmitter {
 
   constructor(
     config: Partial<DisasterRecoveryConfig> = {},
-    backupManager?: BackupManager
+    backupManager?: BackupManager,
   ) {
     super();
     this.config = { ...defaultDisasterRecoveryConfig, ...config };
@@ -337,8 +337,8 @@ export class DisasterRecovery extends EventEmitter {
     this.initializeDisasterRecovery();
 
     console.log(
-      '🆘 DisasterRecovery initialized with comprehensive recovery capabilities',
-      'DisasterRecovery'
+      "🆘 DisasterRecovery initialized with comprehensive recovery capabilities",
+      "DisasterRecovery",
     );
   }
 
@@ -372,20 +372,20 @@ export class DisasterRecovery extends EventEmitter {
         this.scheduleRecoveryTests();
       }
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      console.error('Failed to initialize disaster recovery:', error);
+      console.error("Failed to initialize disaster recovery:", error);
       throw error;
     }
   }
 
   private async createDirectories() {
     const dirs = [
-      './disaster-recovery/events',
-      './disaster-recovery/plans',
-      './disaster-recovery/tests',
-      './disaster-recovery/reports',
-      './disaster-recovery/logs',
+      "./disaster-recovery/events",
+      "./disaster-recovery/plans",
+      "./disaster-recovery/tests",
+      "./disaster-recovery/reports",
+      "./disaster-recovery/logs",
     ];
 
     for (const dir of dirs) {
@@ -400,94 +400,94 @@ export class DisasterRecovery extends EventEmitter {
   private setupDefaultRecoveryStrategies() {
     const strategies: RecoveryStrategy[] = [
       {
-        id: 'database-full-restore',
-        name: 'Database Full Restore',
-        type: 'full_restore',
-        applicableFor: ['database'],
+        id: "database-full-restore",
+        name: "Database Full Restore",
+        type: "full_restore",
+        applicableFor: ["database"],
         estimatedTime: 30,
-        automation: 'semi_automatic',
-        prerequisites: ['backup_available', 'database_offline'],
+        automation: "semi_automatic",
+        prerequisites: ["backup_available", "database_offline"],
         steps: [
           {
-            id: 'stop-services',
-            name: 'Stop Database Services',
-            type: 'command',
+            id: "stop-services",
+            name: "Stop Database Services",
+            type: "command",
             order: 1,
             timeout: 5,
             retryCount: 2,
             retryDelay: 10,
             rollbackSupported: false,
-            command: 'systemctl stop postgresql',
-            description: 'Stop PostgreSQL service before restore',
+            command: "systemctl stop postgresql",
+            description: "Stop PostgreSQL service before restore",
           },
           {
-            id: 'restore-database',
-            name: 'Restore Database',
-            type: 'database_restore',
+            id: "restore-database",
+            name: "Restore Database",
+            type: "database_restore",
             order: 2,
             timeout: 25,
             retryCount: 1,
             retryDelay: 0,
             rollbackSupported: true,
-            description: 'Restore database from latest backup',
+            description: "Restore database from latest backup",
           },
           {
-            id: 'start-services',
-            name: 'Start Database Services',
-            type: 'command',
+            id: "start-services",
+            name: "Start Database Services",
+            type: "command",
             order: 3,
             timeout: 5,
             retryCount: 3,
             retryDelay: 5,
             rollbackSupported: false,
-            command: 'systemctl start postgresql',
-            description: 'Start PostgreSQL service after restore',
+            command: "systemctl start postgresql",
+            description: "Start PostgreSQL service after restore",
           },
           {
-            id: 'verify-integrity',
-            name: 'Verify Database Integrity',
-            type: 'script',
+            id: "verify-integrity",
+            name: "Verify Database Integrity",
+            type: "script",
             order: 4,
             timeout: 10,
             retryCount: 1,
             retryDelay: 0,
             rollbackSupported: false,
-            validationScript: './scripts/verify-db-integrity.sh',
-            description: 'Verify database integrity after restore',
+            validationScript: "./scripts/verify-db-integrity.sh",
+            description: "Verify database integrity after restore",
           },
         ],
       },
       {
-        id: 'application-failover',
-        name: 'Application Failover',
-        type: 'hot_standby',
-        applicableFor: ['api', 'web'],
+        id: "application-failover",
+        name: "Application Failover",
+        type: "hot_standby",
+        applicableFor: ["api", "web"],
         estimatedTime: 5,
-        automation: 'automatic',
-        prerequisites: ['secondary_site_healthy'],
+        automation: "automatic",
+        prerequisites: ["secondary_site_healthy"],
         steps: [
           {
-            id: 'dns-switch',
-            name: 'Switch DNS to Secondary',
-            type: 'api_call',
+            id: "dns-switch",
+            name: "Switch DNS to Secondary",
+            type: "api_call",
             order: 1,
             timeout: 2,
             retryCount: 3,
             retryDelay: 5,
             rollbackSupported: true,
-            description: 'Switch DNS records to secondary site',
+            description: "Switch DNS records to secondary site",
           },
           {
-            id: 'verify-failover',
-            name: 'Verify Failover',
-            type: 'script',
+            id: "verify-failover",
+            name: "Verify Failover",
+            type: "script",
             order: 2,
             timeout: 3,
             retryCount: 2,
             retryDelay: 10,
             rollbackSupported: false,
-            validationScript: './scripts/verify-failover.sh',
-            description: 'Verify application is responding from secondary site',
+            validationScript: "./scripts/verify-failover.sh",
+            description: "Verify application is responding from secondary site",
           },
         ],
       },
@@ -501,7 +501,7 @@ export class DisasterRecovery extends EventEmitter {
   // ============================================
 
   async declareDisaster(
-    event: Omit<DisasterEvent, 'id' | 'detectedTime' | 'status'>
+    event: Omit<DisasterEvent, "id" | "detectedTime" | "status">,
   ): Promise<string> {
     const eventId = crypto.randomUUID();
 
@@ -509,17 +509,17 @@ export class DisasterRecovery extends EventEmitter {
       ...event,
       id: eventId,
       detectedTime: new Date(),
-      status: 'detected',
+      status: "detected",
     };
 
     this.activeEvents.set(eventId, disasterEvent);
     await this.saveDisasterEvent(disasterEvent);
 
     console.warn(`🚨 Disaster declared: ${event.title} (${event.severity})`);
-    this.emit('disasterDeclared', disasterEvent);
+    this.emit("disasterDeclared", disasterEvent);
 
     // Auto-confirm critical events
-    if (event.severity === 'critical') {
+    if (event.severity === "critical") {
       await this.confirmDisaster(eventId);
     }
 
@@ -533,18 +533,18 @@ export class DisasterRecovery extends EventEmitter {
     const event = this.activeEvents.get(eventId);
     if (!event) return false;
 
-    event.status = 'confirmed';
+    event.status = "confirmed";
     event.confirmedTime = new Date();
 
     await this.saveDisasterEvent(event);
 
     console.error(`🔥 Disaster confirmed: ${event.title}`);
-    this.emit('disasterConfirmed', event);
+    this.emit("disasterConfirmed", event);
 
     // Automatically create recovery plan
     if (
       this.config.general.automaticFailover ||
-      event.severity === 'critical'
+      event.severity === "critical"
     ) {
       await this.createRecoveryPlan(eventId);
     }
@@ -556,13 +556,13 @@ export class DisasterRecovery extends EventEmitter {
     const event = this.activeEvents.get(eventId);
     if (!event) return false;
 
-    event.status = 'resolved';
+    event.status = "resolved";
     event.resolvedTime = new Date();
 
     await this.saveDisasterEvent(event);
 
     console.log(`✅ Disaster resolved: ${event.title}`);
-    this.emit('disasterResolved', { event, resolution });
+    this.emit("disasterResolved", { event, resolution });
 
     // Schedule post-mortem
     this.schedulePostMortem(event);
@@ -576,10 +576,10 @@ export class DisasterRecovery extends EventEmitter {
 
   async createRecoveryPlan(
     eventId: string,
-    strategies?: string[]
+    strategies?: string[],
   ): Promise<string> {
     const event = this.activeEvents.get(eventId);
-    if (!event) throw new Error('Event not found');
+    if (!event) throw new Error("Event not found");
 
     const planId = crypto.randomUUID();
 
@@ -591,14 +591,14 @@ export class DisasterRecovery extends EventEmitter {
       id: planId,
       eventId,
       name: `Recovery Plan for ${event.title}`,
-      type: this.config.general.automaticFailover ? 'automatic' : 'manual',
+      type: this.config.general.automaticFailover ? "automatic" : "manual",
       priority: event.severity as any,
       estimatedRTO: this.config.general.recoveryTimeObjective,
       estimatedRPO: this.config.general.recoveryPointObjective,
       strategies: applicableStrategies,
       steps: this.generateRecoverySteps(applicableStrategies),
       approvals: this.generateApprovalSteps(event.severity),
-      status: 'draft',
+      status: "draft",
       progress: 0,
       timeline: {
         created: new Date(),
@@ -609,17 +609,17 @@ export class DisasterRecovery extends EventEmitter {
     await this.saveRecoveryPlan(recoveryPlan);
 
     console.log(`📋 Recovery plan created: ${recoveryPlan.name}`);
-    this.emit('recoveryPlanCreated', recoveryPlan);
+    this.emit("recoveryPlanCreated", recoveryPlan);
 
     // Auto-approve for critical events if configured
     if (
       !this.config.general.manualApprovalRequired &&
-      event.severity === 'critical'
+      event.severity === "critical"
     ) {
       await this.approveRecoveryPlan(
         planId,
-        'system',
-        'Auto-approved for critical event'
+        "system",
+        "Auto-approved for critical event",
       );
     }
 
@@ -629,7 +629,7 @@ export class DisasterRecovery extends EventEmitter {
   async approveRecoveryPlan(
     planId: string,
     _approver: string,
-    comments?: string
+    comments?: string,
   ): Promise<boolean> {
     const plan = this.recoveryPlans.get(planId);
     if (!plan) return false;
@@ -646,15 +646,15 @@ export class DisasterRecovery extends EventEmitter {
 
     // Check if all required approvals are completed
     const allApproved = plan.approvals
-      .filter(a => a.required)
-      .every(a => a.approved);
+      .filter((a) => a.required)
+      .every((a) => a.approved);
 
     if (allApproved) {
-      plan.status = 'approved';
+      plan.status = "approved";
       plan.timeline.approved = new Date();
 
       console.log(`✅ Recovery plan approved: ${plan.name}`);
-      this.emit('recoveryPlanApproved', plan);
+      this.emit("recoveryPlanApproved", plan);
 
       // Auto-execute if configured
       if (this.config.general.automaticFailover) {
@@ -668,14 +668,14 @@ export class DisasterRecovery extends EventEmitter {
 
   async executeRecoveryPlan(planId: string): Promise<boolean> {
     const plan = this.recoveryPlans.get(planId);
-    if (!plan || plan.status !== 'approved') return false;
+    if (!plan || plan.status !== "approved") return false;
 
-    plan.status = 'executing';
+    plan.status = "executing";
     plan.timeline.started = new Date();
     plan.progress = 0;
 
     console.log(`🔄 Executing recovery plan: ${plan.name}`);
-    this.emit('recoveryPlanStarted', plan);
+    this.emit("recoveryPlanStarted", plan);
 
     try {
       // Execute steps in order
@@ -690,21 +690,21 @@ export class DisasterRecovery extends EventEmitter {
         }
 
         plan.progress = Math.round(((i + 1) / plan.steps.length) * 100);
-        this.emit('recoveryPlanProgress', { plan, progress: plan.progress });
+        this.emit("recoveryPlanProgress", { plan, progress: plan.progress });
       }
 
-      plan.status = 'completed';
+      plan.status = "completed";
       plan.timeline.completed = new Date();
       plan.progress = 100;
 
       console.log(`✅ Recovery plan completed: ${plan.name}`);
-      this.emit('recoveryPlanCompleted', plan);
+      this.emit("recoveryPlanCompleted", plan);
 
       return true;
     } catch (error) {
-      plan.status = 'failed';
+      plan.status = "failed";
       console.error(`❌ Recovery plan failed: ${plan.name}`, error);
-      this.emit('recoveryPlanFailed', { plan, error: error.message });
+      this.emit("recoveryPlanFailed", { plan, error: error.message });
       return false;
     } finally {
       await this.saveRecoveryPlan(plan);
@@ -720,19 +720,19 @@ export class DisasterRecovery extends EventEmitter {
         attempts++;
 
         switch (step.type) {
-          case 'command':
+          case "command":
             await this.executeCommand(step.command!, step.timeout);
             break;
-          case 'script':
+          case "script":
             await this.executeScript(step.validationScript!, step.timeout);
             break;
-          case 'database_restore':
+          case "database_restore":
             await this.executeDatabaseRestore(step);
             break;
-          case 'api_call':
+          case "api_call":
             await this.executeApiCall(step);
             break;
-          case 'manual':
+          case "manual":
             await this.executeManualStep(step);
             break;
           default:
@@ -743,7 +743,7 @@ export class DisasterRecovery extends EventEmitter {
       } catch (error) {
         console.warn(
           `Step ${step.name} failed (attempt ${attempts}/${maxAttempts}):`,
-          error
+          error,
         );
 
         if (attempts < maxAttempts) {
@@ -759,21 +759,21 @@ export class DisasterRecovery extends EventEmitter {
 
   private async executeCommand(
     command: string,
-    timeout: number
+    timeout: number,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const [cmd, ...args] = command.split(' ');
+      const [cmd, ...args] = command.split(" ");
       const process = spawn(cmd, args);
 
-      let output = '';
-      let errorOutput = '';
+      let _output = "";
+      let _errorOutput = "";
 
-      process.stdout.on('data', data => {
-        output += data.toString();
+      process.stdout.on("data", (data) => {
+        _output += data.toString();
       });
 
-      process.stderr.on('data', data => {
-        errorOutput += data.toString();
+      process.stderr.on("data", (data) => {
+        _errorOutput += data.toString();
       });
 
       const timeoutId = setTimeout(
@@ -781,20 +781,22 @@ export class DisasterRecovery extends EventEmitter {
           process.kill();
           reject(new Error(`Command timeout after ${timeout} minutes`));
         },
-        timeout * 60 * 1000
+        timeout * 60 * 1000,
       );
 
-      process.on('close', code => {
+      process.on("close", (code) => {
         clearTimeout(timeoutId);
 
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error(`Command failed with code ${code}: ${errorOutput}`));
+          reject(
+            new Error(`Command failed with code ${code}: ${_errorOutput}`),
+          );
         }
       });
 
-      process.on('error', error => {
+      process.on("error", (error) => {
         clearTimeout(timeoutId);
         reject(error);
       });
@@ -803,7 +805,7 @@ export class DisasterRecovery extends EventEmitter {
 
   private async executeScript(
     scriptPath: string,
-    timeout: number
+    timeout: number,
   ): Promise<void> {
     return this.executeCommand(`bash ${scriptPath}`, timeout);
   }
@@ -811,14 +813,14 @@ export class DisasterRecovery extends EventEmitter {
   private async executeDatabaseRestore(_step: RecoveryStep): Promise<void> {
     // Get latest backup
     const backups = this.backupManager.getBackupHistory(10);
-    const latestDbBackup = backups.find(backup => backup.type === 'database');
+    const latestDbBackup = backups.find((backup) => backup.type === "database");
 
     if (!latestDbBackup) {
-      throw new Error('No database backup available for restore');
+      throw new Error("No database backup available for restore");
     }
 
     console.log(
-      `🔄 Restoring database from backup: ${latestDbBackup.location}`
+      `🔄 Restoring database from backup: ${latestDbBackup.location}`,
     );
 
     // Implementation would depend on database type
@@ -826,7 +828,7 @@ export class DisasterRecovery extends EventEmitter {
     await this.sleep(5000); // Simulate restore time
 
     console.log(
-      `✅ Database restore completed from backup: ${latestDbBackup.id}`
+      `✅ Database restore completed from backup: ${latestDbBackup.id}`,
     );
   }
 
@@ -842,7 +844,7 @@ export class DisasterRecovery extends EventEmitter {
     console.log(`📝 Description: ${step.description}`);
 
     // In a real implementation, this would wait for manual confirmation
-    this.emit('manualStepRequired', step);
+    this.emit("manualStepRequired", step);
 
     // For demo purposes, auto-complete after delay
     await this.sleep(step.timeout * 60 * 1000);
@@ -872,20 +874,20 @@ export class DisasterRecovery extends EventEmitter {
 
         if (isHealthy) {
           failedChecks = 0;
-          if (site.status === 'failed') {
-            site.status = 'active';
-            this.emit('siteRecovered', site);
+          if (site.status === "failed") {
+            site.status = "active";
+            this.emit("siteRecovered", site);
           }
         } else {
           failedChecks++;
 
           if (failedChecks >= this.config.failover.failoverThreshold) {
-            if (site.status === 'active') {
-              site.status = 'failed';
-              this.emit('siteFailure', site);
+            if (site.status === "active") {
+              site.status = "failed";
+              this.emit("siteFailure", site);
 
               // Trigger failover for primary site
-              if (site.type === 'primary' && this.config.failover.enabled) {
+              if (site.type === "primary" && this.config.failover.enabled) {
                 await this.triggerFailover(site);
               }
             }
@@ -903,7 +905,7 @@ export class DisasterRecovery extends EventEmitter {
     try {
       // Simulate health check - in real implementation, make HTTP request
       const response = await fetch(site.healthCheckUrl, {
-        method: 'GET',
+        method: "GET",
         timeout: 5000,
       } as any);
 
@@ -920,17 +922,17 @@ export class DisasterRecovery extends EventEmitter {
     const secondarySite = this.findBestSecondarySite();
 
     if (!secondarySite) {
-      console.error('❌ No healthy secondary site available for failover');
+      console.error("❌ No healthy secondary site available for failover");
       return;
     }
 
     // Declare disaster event
     const eventId = await this.declareDisaster({
-      type: 'outage',
-      severity: 'critical',
+      type: "outage",
+      severity: "critical",
       title: `Primary Site Failure - ${failedSite.name}`,
       description: `Primary site ${failedSite.name} has failed health checks and requires failover`,
-      affectedServices: failedSite.services.map(s => s.id),
+      affectedServices: failedSite.services.map((s) => s.id),
       affectedSites: [failedSite.id],
       impactAssessment: {
         usersAffected: 10000,
@@ -942,7 +944,7 @@ export class DisasterRecovery extends EventEmitter {
 
     // Create and execute failover plan
     const planId = await this.createRecoveryPlan(eventId, [
-      'application-failover',
+      "application-failover",
     ]);
 
     if (
@@ -951,15 +953,15 @@ export class DisasterRecovery extends EventEmitter {
     ) {
       await this.approveRecoveryPlan(
         planId,
-        'system',
-        'Auto-approved for critical failover'
+        "system",
+        "Auto-approved for critical failover",
       );
     }
   }
 
   private findBestSecondarySite(): SiteConfig | null {
     const healthySecondaries = this.config.failover.secondarySites
-      .filter(site => site.status === 'active' || site.status === 'standby')
+      .filter((site) => site.status === "active" || site.status === "standby")
       .sort((a, b) => a.priority - b.priority);
 
     return healthySecondaries[0] || null;
@@ -970,39 +972,37 @@ export class DisasterRecovery extends EventEmitter {
   // ============================================
 
   async scheduleRecoveryTest(
-    test: Omit<RecoveryTest, 'id' | 'status'>
+    test: Omit<RecoveryTest, "id" | "status">,
   ): Promise<string> {
     const testId = crypto.randomUUID();
 
     const recoveryTest: RecoveryTest = {
       ...test,
       id: testId,
-      status: 'scheduled',
+      status: "scheduled",
     };
 
     this.recoveryTests.set(testId, recoveryTest);
     await this.saveRecoveryTest(recoveryTest);
 
     console.log(
-      `📅 Recovery test scheduled: ${test.name} for ${test.scheduleDate}`
+      `📅 Recovery test scheduled: ${test.name} for ${test.scheduleDate}`,
     );
-    this.emit('recoveryTestScheduled', recoveryTest);
+    this.emit("recoveryTestScheduled", recoveryTest);
 
     return testId;
   }
 
   async executeRecoveryTest(testId: string): Promise<TestResults> {
     const test = this.recoveryTests.get(testId);
-    if (!test) throw new Error('Test not found');
+    if (!test) throw new Error("Test not found");
 
-    test.status = 'in_progress';
+    test.status = "in_progress";
 
     console.log(`🧪 Executing recovery test: ${test.name}`);
-    this.emit('recoveryTestStarted', test);
+    this.emit("recoveryTestStarted", test);
 
     try {
-      const startTime = Date.now();
-
       // Simulate test execution
       const results: TestResults = {
         success: true,
@@ -1010,9 +1010,9 @@ export class DisasterRecovery extends EventEmitter {
         rpoAchieved: Math.floor(Math.random() * 30) + 5, // 5-35 minutes
         issuesFound: [],
         improvements: [
-          'Consider additional automation in database restore process',
-          'Improve monitoring granularity for faster issue detection',
-          'Update documentation for new recovery procedures',
+          "Consider additional automation in database restore process",
+          "Improve monitoring granularity for faster issue detection",
+          "Update documentation for new recovery procedures",
         ],
         completionPercentage: 95,
       };
@@ -1021,40 +1021,40 @@ export class DisasterRecovery extends EventEmitter {
       if (results.rtoAchieved > this.config.general.recoveryTimeObjective) {
         results.issuesFound.push({
           id: crypto.randomUUID(),
-          severity: 'high',
+          severity: "high",
           description: `RTO objective not met: ${results.rtoAchieved}min vs ${this.config.general.recoveryTimeObjective}min target`,
-          impact: 'May not meet SLA requirements during actual disaster',
+          impact: "May not meet SLA requirements during actual disaster",
           recommendation:
-            'Optimize recovery procedures and increase automation',
-          status: 'open',
+            "Optimize recovery procedures and increase automation",
+          status: "open",
         });
       }
 
       if (results.rpoAchieved > this.config.general.recoveryPointObjective) {
         results.issuesFound.push({
           id: crypto.randomUUID(),
-          severity: 'medium',
+          severity: "medium",
           description: `RPO objective not met: ${results.rpoAchieved}min vs ${this.config.general.recoveryPointObjective}min target`,
-          impact: 'Potential data loss exceeds acceptable limits',
+          impact: "Potential data loss exceeds acceptable limits",
           recommendation:
-            'Increase backup frequency or implement real-time replication',
-          status: 'open',
+            "Increase backup frequency or implement real-time replication",
+          status: "open",
         });
       }
 
-      test.status = 'completed';
+      test.status = "completed";
       test.results = results;
 
       await this.saveRecoveryTest(test);
 
       console.log(`✅ Recovery test completed: ${test.name}`);
-      this.emit('recoveryTestCompleted', { test, results });
+      this.emit("recoveryTestCompleted", { test, results });
 
       return results;
     } catch (error) {
-      test.status = 'cancelled';
+      test.status = "cancelled";
       console.error(`❌ Recovery test failed: ${test.name}`, error);
-      this.emit('recoveryTestFailed', { test, error: error.message });
+      this.emit("recoveryTestFailed", { test, error: error.message });
       throw error;
     }
   }
@@ -1065,7 +1065,7 @@ export class DisasterRecovery extends EventEmitter {
       () => {
         this.scheduleAutomaticTest();
       },
-      this.config.general.testingFrequency * 24 * 60 * 60 * 1000
+      this.config.general.testingFrequency * 24 * 60 * 60 * 1000,
     );
   }
 
@@ -1073,16 +1073,16 @@ export class DisasterRecovery extends EventEmitter {
     const testDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Next week
 
     await this.scheduleRecoveryTest({
-      name: `Automated DR Test - ${testDate.toISOString().split('T')[0]}`,
-      type: 'simulation',
+      name: `Automated DR Test - ${testDate.toISOString().split("T")[0]}`,
+      type: "simulation",
       scheduleDate: testDate,
       duration: 120,
-      scope: ['database', 'application'],
+      scope: ["database", "application"],
       objectives: [
-        'Verify backup restoration procedures',
-        'Test failover mechanisms',
-        'Validate communication procedures',
-        'Measure RTO and RPO achievement',
+        "Verify backup restoration procedures",
+        "Test failover mechanisms",
+        "Validate communication procedures",
+        "Measure RTO and RPO achievement",
       ],
     });
   }
@@ -1095,15 +1095,15 @@ export class DisasterRecovery extends EventEmitter {
     // Simple strategy selection based on affected services
     const strategies: string[] = [];
 
-    if (event.affectedServices.includes('database')) {
-      strategies.push('database-full-restore');
+    if (event.affectedServices.includes("database")) {
+      strategies.push("database-full-restore");
     }
 
     if (
-      event.affectedServices.includes('api') ||
-      event.affectedServices.includes('web')
+      event.affectedServices.includes("api") ||
+      event.affectedServices.includes("web")
     ) {
-      strategies.push('application-failover');
+      strategies.push("application-failover");
     }
 
     return strategies;
@@ -1114,7 +1114,7 @@ export class DisasterRecovery extends EventEmitter {
 
     for (const strategyId of strategyIds) {
       const strategy = this.config.dataRecovery.recoveryStrategies.find(
-        s => s.id === strategyId
+        (s) => s.id === strategyId,
       );
       if (strategy) {
         steps.push(...strategy.steps);
@@ -1128,18 +1128,18 @@ export class DisasterRecovery extends EventEmitter {
   private generateApprovalSteps(severity: string): ApprovalStep[] {
     const approvals: ApprovalStep[] = [];
 
-    if (severity === 'critical') {
+    if (severity === "critical") {
       approvals.push({
         id: crypto.randomUUID(),
-        approver: 'cto',
-        role: 'CTO',
+        approver: "cto",
+        role: "CTO",
         required: true,
       });
     } else {
       approvals.push({
         id: crypto.randomUUID(),
-        approver: 'ops_manager',
-        role: 'Operations Manager',
+        approver: "ops_manager",
+        role: "Operations Manager",
         required: true,
       });
     }
@@ -1153,18 +1153,18 @@ export class DisasterRecovery extends EventEmitter {
         () => {
           this.escalateToLevel(event, level);
         },
-        level.timeDelay * 60 * 1000
+        level.timeDelay * 60 * 1000,
       );
     }
   }
 
   private escalateToLevel(event: DisasterEvent, level: EscalationLevel) {
-    if (event.status === 'resolved') return;
+    if (event.status === "resolved") return;
 
     console.warn(
-      `📢 Escalating to level ${level.level} for event: ${event.title}`
+      `📢 Escalating to level ${level.level} for event: ${event.title}`,
     );
-    this.emit('escalation', { event, level });
+    this.emit("escalation", { event, level });
 
     // Execute escalation actions
     for (const action of level.actions) {
@@ -1174,17 +1174,17 @@ export class DisasterRecovery extends EventEmitter {
 
   private executeEscalationAction(action: string, _event: DisasterEvent) {
     switch (action) {
-      case 'notify_ops':
-        console.log('📧 Notifying operations team');
+      case "notify_ops":
+        console.log("📧 Notifying operations team");
         break;
-      case 'escalate_to_management':
-        console.log('📞 Escalating to management');
+      case "escalate_to_management":
+        console.log("📞 Escalating to management");
         break;
-      case 'executive_notification':
-        console.log('🔔 Notifying executives');
+      case "executive_notification":
+        console.log("🔔 Notifying executives");
         break;
-      case 'public_communication':
-        console.log('📢 Preparing public communication');
+      case "public_communication":
+        console.log("📢 Preparing public communication");
         break;
       default:
         console.log(`🔧 Executing action: ${action}`);
@@ -1196,9 +1196,9 @@ export class DisasterRecovery extends EventEmitter {
     setTimeout(
       () => {
         console.log(`📝 Post-mortem scheduled for event: ${event.title}`);
-        this.emit('postMortemScheduled', event);
+        this.emit("postMortemScheduled", event);
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000,
     ); // 24 hours after resolution
   }
 
@@ -1212,25 +1212,25 @@ export class DisasterRecovery extends EventEmitter {
       this.monitorRTORPO();
     }, 60 * 1000); // Every minute
 
-    console.log('📊 Disaster recovery monitoring started');
+    console.log("📊 Disaster recovery monitoring started");
   }
 
   private monitorRTORPO() {
     // Monitor active recovery plans
     for (const plan of this.recoveryPlans.values()) {
-      if (plan.status === 'executing') {
+      if (plan.status === "executing") {
         const elapsedTime = Date.now() - plan.timeline.started!.getTime();
         const elapsedMinutes = elapsedTime / (60 * 1000);
 
         if (elapsedMinutes > plan.estimatedRTO) {
-          this.emit('rtoBreached', { plan, elapsedMinutes });
+          this.emit("rtoBreached", { plan, elapsedMinutes });
         }
       }
     }
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // ============================================
@@ -1239,25 +1239,25 @@ export class DisasterRecovery extends EventEmitter {
 
   private async saveDisasterEvent(event: DisasterEvent) {
     const filepath = path.join(
-      './disaster-recovery/events',
-      `${event.id}.json`
+      "./disaster-recovery/events",
+      `${event.id}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(event, null, 2));
   }
 
   private async saveRecoveryPlan(plan: RecoveryPlan) {
-    const filepath = path.join('./disaster-recovery/plans', `${plan.id}.json`);
+    const filepath = path.join("./disaster-recovery/plans", `${plan.id}.json`);
     await fs.writeFile(filepath, JSON.stringify(plan, null, 2));
   }
 
   private async saveRecoveryTest(test: RecoveryTest) {
-    const filepath = path.join('./disaster-recovery/tests', `${test.id}.json`);
+    const filepath = path.join("./disaster-recovery/tests", `${test.id}.json`);
     await fs.writeFile(filepath, JSON.stringify(test, null, 2));
   }
 
   private async loadRecoveryData() {
     // Implementation to load existing events, plans, and tests
-    console.log('📂 Loaded disaster recovery data');
+    console.log("📂 Loaded disaster recovery data");
   }
 
   // ============================================
@@ -1266,13 +1266,13 @@ export class DisasterRecovery extends EventEmitter {
 
   getActiveEvents(): DisasterEvent[] {
     return Array.from(this.activeEvents.values()).filter(
-      event => event.status !== 'resolved'
+      (event) => event.status !== "resolved",
     );
   }
 
   getRecoveryPlans(eventId?: string): RecoveryPlan[] {
     const plans = Array.from(this.recoveryPlans.values());
-    return eventId ? plans.filter(plan => plan.eventId === eventId) : plans;
+    return eventId ? plans.filter((plan) => plan.eventId === eventId) : plans;
   }
 
   getRecoveryTests(): RecoveryTest[] {
@@ -1287,7 +1287,7 @@ export class DisasterRecovery extends EventEmitter {
     return {
       events: {
         total: events.length,
-        active: events.filter(e => e.status !== 'resolved').length,
+        active: events.filter((e) => e.status !== "resolved").length,
         bySeverity: events.reduce((acc: Record<string, number>, event) => {
           acc[event.severity] = (acc[event.severity] || 0) + 1;
           return acc;
@@ -1295,13 +1295,13 @@ export class DisasterRecovery extends EventEmitter {
       },
       plans: {
         total: plans.length,
-        executing: plans.filter(p => p.status === 'executing').length,
-        completed: plans.filter(p => p.status === 'completed').length,
+        executing: plans.filter((p) => p.status === "executing").length,
+        completed: plans.filter((p) => p.status === "completed").length,
         averageRTO: this.calculateAverageRTO(plans),
       },
       tests: {
         total: tests.length,
-        completed: tests.filter(t => t.status === 'completed').length,
+        completed: tests.filter((t) => t.status === "completed").length,
         successRate: this.calculateTestSuccessRate(tests),
       },
       monitoring: {
@@ -1314,7 +1314,7 @@ export class DisasterRecovery extends EventEmitter {
 
   private calculateAverageRTO(plans: RecoveryPlan[]): number {
     const completedPlans = plans.filter(
-      p => p.status === 'completed' && p.timeline.completed
+      (p) => p.status === "completed" && p.timeline.completed,
     );
     if (completedPlans.length === 0) return 0;
 
@@ -1329,18 +1329,18 @@ export class DisasterRecovery extends EventEmitter {
 
   private calculateTestSuccessRate(tests: RecoveryTest[]): number {
     const completedTests = tests.filter(
-      t => t.status === 'completed' && t.results
+      (t) => t.status === "completed" && t.results,
     );
     if (completedTests.length === 0) return 0;
 
-    const successfulTests = completedTests.filter(t => t.results!.success);
+    const successfulTests = completedTests.filter((t) => t.results!.success);
     return Math.round((successfulTests.length / completedTests.length) * 100);
   }
 
   updateConfig(newConfig: Partial<DisasterRecoveryConfig>) {
     this.config = { ...this.config, ...newConfig };
-    console.log('🔧 DisasterRecovery configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 DisasterRecovery configuration updated");
+    this.emit("configUpdated", this.config);
   }
 }
 

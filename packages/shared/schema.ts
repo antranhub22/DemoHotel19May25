@@ -2,22 +2,22 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
 // Type exports - Using Prisma types
-export type Tenant = Prisma.TenantGetPayload<{}>;
-export type InsertTenant = Prisma.TenantCreateInput;
-export type HotelProfile = Prisma.HotelProfileGetPayload<{}>;
-export type InsertHotelProfile = Prisma.HotelProfileCreateInput;
-export type Staff = Prisma.StaffGetPayload<{}>;
-export type InsertStaff = Prisma.StaffCreateInput;
-export type Call = Prisma.CallGetPayload<{}>;
-export type InsertCall = Prisma.CallCreateInput;
-export type Transcript = Prisma.TranscriptGetPayload<{}>;
-export type InsertTranscript = Prisma.TranscriptCreateInput;
-export type Request = Prisma.RequestGetPayload<{}>;
-export type InsertRequest = Prisma.RequestCreateInput;
-export type Message = Prisma.MessageGetPayload<{}>;
-export type InsertMessage = Prisma.MessageCreateInput;
-export type CallSummary = Prisma.CallSummaryGetPayload<{}>;
-export type InsertCallSummary = Prisma.CallSummaryCreateInput;
+export type Tenant = Prisma.tenantsGetPayload<{}>;
+export type InsertTenant = Prisma.tenantsCreateInput;
+export type HotelProfile = Prisma.hotel_profilesGetPayload<{}>;
+export type InsertHotelProfile = Prisma.hotel_profilesCreateInput;
+export type Staff = Prisma.staffGetPayload<{}>;
+export type InsertStaff = Prisma.staffCreateInput;
+export type Call = Prisma.callGetPayload<{}>;
+export type InsertCall = Prisma.callCreateInput;
+export type Transcript = Prisma.transcriptGetPayload<{}>;
+export type InsertTranscript = Prisma.transcriptCreateInput;
+export type Request = Prisma.requestGetPayload<{}>;
+export type InsertRequest = Prisma.requestCreateInput;
+export type Message = Prisma.messageGetPayload<{}>;
+export type InsertMessage = Prisma.messageCreateInput;
+export type CallSummary = Prisma.call_summariesGetPayload<{}>;
+export type InsertCallSummary = Prisma.call_summariesCreateInput;
 
 // Zod Validation Schemas
 export const insertTenantSchema = z.object({

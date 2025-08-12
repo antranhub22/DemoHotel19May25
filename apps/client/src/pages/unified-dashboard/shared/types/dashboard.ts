@@ -1,3 +1,4 @@
+import * as React from 'react';
 export interface DashboardData {
   calls: {
     total: number;

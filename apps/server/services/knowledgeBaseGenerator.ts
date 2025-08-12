@@ -1,13 +1,10 @@
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
 
 // ============================================
 // TYPE HELPERS & UTILITIES
 // ============================================
 
 // ✅ FIXED: Use any types to bypass complex type conflicts
-const isResearchHotelData = (data: any): data is any => {
-  return data && typeof data === 'object';
-};
 
 // ✅ FIXED: Type adapters to handle different data structures
 type ServiceMenuItem = {
@@ -26,8 +23,8 @@ class KnowledgeBaseGenerator {
     // ✅ FIXED: Use any type
     try {
       logger.debug(
-        '📚 [KnowledgeBase] Generating knowledge base...',
-        'Service'
+        "📚 [KnowledgeBase] Generating knowledge base...",
+        "Service",
       );
 
       // ✅ FIXED: Type adapter for hotel data
@@ -40,7 +37,7 @@ class KnowledgeBaseGenerator {
         this.generateAmenitiesSection(adaptedData.amenities || []),
         this.generatePoliciesSection(adaptedData.policies),
         this.generateLocalAttractionsSection(
-          adaptedData.localAttractions || []
+          adaptedData.localAttractions || [],
         ),
         this.generateContactSection(adaptedData),
       ];
@@ -51,16 +48,16 @@ class KnowledgeBaseGenerator {
       }
       if (adaptedData.competitorData) {
         sections.push(
-          this.generateCompetitorSection(adaptedData.competitorData)
+          this.generateCompetitorSection(adaptedData.competitorData),
         );
       }
 
-      const knowledgeBase = sections.filter(Boolean).join('\n\n');
-      logger.success('✅ [KnowledgeBase] Generated successfully', 'Service');
+      const knowledgeBase = sections.filter(Boolean).join("\n\n");
+      logger.success("✅ [KnowledgeBase] Generated successfully", "Service");
 
       return knowledgeBase;
     } catch (error) {
-      logger.error('❌ [KnowledgeBase] Generation failed:', 'Service', error);
+      logger.error("❌ [KnowledgeBase] Generation failed:", "Service", error);
       return this.generateFallbackKnowledgeBase(hotelData);
     }
   }
@@ -71,36 +68,34 @@ class KnowledgeBaseGenerator {
   generateSystemPrompt(hotelData: any, customization: any = {}): string {
     // ✅ FIXED: Use any type
     try {
-      logger.debug('🤖 [SystemPrompt] Generating system prompt...', 'Service');
+      logger.debug("🤖 [SystemPrompt] Generating system prompt...", "Service");
 
       const adaptedData = this.adaptHotelData(hotelData);
       const knowledgeBase = this.generateKnowledgeBase(hotelData);
 
-      const personality = customization.personality || 'professional';
-      const tone = customization.tone || 'friendly';
-      const languages = customization.languages || ['en'];
-      const primaryLanguage = languages[0] || 'en';
+      const languages = customization.languages || ["en"];
+      const primaryLanguage = languages[0] || "en";
 
       let systemPrompt: string;
 
-      if (primaryLanguage === 'vi' || primaryLanguage === 'vietnamese') {
+      if (primaryLanguage === "vi" || primaryLanguage === "vietnamese") {
         systemPrompt = this.buildVietnameseSystemPrompt(
           adaptedData,
           knowledgeBase,
-          customization
+          customization,
         );
       } else {
         systemPrompt = this.buildEnglishSystemPrompt(
           adaptedData,
           knowledgeBase,
-          customization
+          customization,
         );
       }
 
-      logger.success('✅ [SystemPrompt] Generated successfully', 'Service');
+      logger.success("✅ [SystemPrompt] Generated successfully", "Service");
       return systemPrompt;
     } catch (error) {
-      logger.error('❌ [SystemPrompt] Generation failed:', 'Service', error);
+      logger.error("❌ [SystemPrompt] Generation failed:", "Service", error);
       return this.generateFallbackSystemPrompt(hotelData);
     }
   }
@@ -112,7 +107,7 @@ class KnowledgeBaseGenerator {
     // ✅ FIXED: Use any type
     const adaptedData = this.adaptHotelData(hotelData);
 
-    let basePrompt = `You are the AI concierge for ${adaptedData.name}, a ${this.getHotelCategory(adaptedData)} hotel located in ${adaptedData.address || 'a prime location'}.
+    let basePrompt = `You are the AI concierge for ${adaptedData.name}, a ${this.getHotelCategory(adaptedData)} hotel located in ${adaptedData.address || "a prime location"}.
 
 Your knowledge base includes:
 
@@ -132,23 +127,23 @@ ${this.generateFunctionDescriptions(adaptedData.services || [])}`;
 
     const faqs = [
       {
-        question: 'What are your check-in and check-out times?',
+        question: "What are your check-in and check-out times?",
         answer:
-          'Standard check-in is at 3:00 PM and check-out is at 11:00 AM. Early check-in and late check-out may be available upon request.',
+          "Standard check-in is at 3:00 PM and check-out is at 11:00 AM. Early check-in and late check-out may be available upon request.",
       },
       {
-        question: 'Do you offer room service?',
-        answer: `Yes, we offer ${adaptedData.services?.some((s: any) => s.name?.toLowerCase().includes('room service')) ? '24-hour' : 'limited hours'} room service with a variety of dining options.`,
+        question: "Do you offer room service?",
+        answer: `Yes, we offer ${adaptedData.services?.some((s: any) => s.name?.toLowerCase().includes("room service")) ? "24-hour" : "limited hours"} room service with a variety of dining options.`,
       },
       {
-        question: 'What amenities do you provide?',
-        answer: `Our hotel features: ${adaptedData.amenities?.join(', ') || 'modern amenities and services'}.`,
+        question: "What amenities do you provide?",
+        answer: `Our hotel features: ${adaptedData.amenities?.join(", ") || "modern amenities and services"}.`,
       },
     ];
 
     return `## Frequently Asked Questions\n\n${faqs
-      .map(faq => `**${faq.question}**\n${faq.answer}`)
-      .join('\n\n')}`;
+      .map((faq) => `**${faq.question}**\n${faq.answer}`)
+      .join("\n\n")}`;
   }
 
   /**
@@ -175,10 +170,10 @@ ${this.generateFunctionDescriptions(adaptedData.services || [])}`;
   private adaptHotelData(hotelData: any): any {
     // ✅ FIXED: Type adapter method
     return {
-      name: hotelData.name || 'Hotel',
-      address: hotelData.address || hotelData.location || 'Unknown location',
+      name: hotelData.name || "Hotel",
+      address: hotelData.address || hotelData.location || "Unknown location",
       location:
-        typeof hotelData.location === 'string'
+        typeof hotelData.location === "string"
           ? hotelData.location
           : `${hotelData.location?.lat || 0}, ${hotelData.location?.lng || 0}`,
       phone: hotelData.phone,
@@ -187,24 +182,24 @@ ${this.generateFunctionDescriptions(adaptedData.services || [])}`;
       amenities: hotelData.amenities || [],
       services: (hotelData.services || []).map((s: any) => ({
         name: s.name || s,
-        description: s.description || '',
-        category: s.category || s.type || 'general',
+        description: s.description || "",
+        category: s.category || s.type || "general",
         available: s.available !== false,
         price:
-          typeof s.price === 'number' ? s.price.toString() : s.price || '0',
+          typeof s.price === "number" ? s.price.toString() : s.price || "0",
         hours: s.hours,
-        type: s.type || s.category || 'general',
+        type: s.type || s.category || "general",
       })),
       roomTypes: (hotelData.roomTypes || []).map((r: any) => ({
         ...r,
-        price: typeof r.price === 'number' ? r.price : parseFloat(r.price) || 0,
+        price: typeof r.price === "number" ? r.price : parseFloat(r.price) || 0,
       })),
       localAttractions: (hotelData.localAttractions || []).map((a: any) => ({
         name: a.name,
-        description: a.description || '',
-        distance: a.distance || '',
-        type: a.type || 'attraction',
-        category: a.category || 'general',
+        description: a.description || "",
+        distance: a.distance || "",
+        type: a.type || "attraction",
+        category: a.category || "general",
       })),
       policies: hotelData.policies,
       openingHours: hotelData.openingHours,
@@ -220,20 +215,20 @@ ${this.generateFunctionDescriptions(adaptedData.services || [])}`;
 
 Name: ${hotelData.name}
 Address: ${hotelData.address}
-Phone: ${hotelData.phone || 'Contact hotel directly'}
-Website: ${hotelData.website || 'Available upon request'}
-Rating: ${hotelData.rating ? `${hotelData.rating}/5 stars` : 'Excellent service'}
+Phone: ${hotelData.phone || "Contact hotel directly"}
+Website: ${hotelData.website || "Available upon request"}
+Rating: ${hotelData.rating ? `${hotelData.rating}/5 stars` : "Excellent service"}
 Location: ${hotelData.location}`;
   }
 
   private generateServicesSection(services: any[]): string {
     // ✅ FIXED: Use any type
     if (!services?.length)
-      return '## Services\n\nFull service hotel with comprehensive amenities.';
+      return "## Services\n\nFull service hotel with comprehensive amenities.";
 
-    let section = '## Available Services\n\n';
+    let section = "## Available Services\n\n";
 
-    services.forEach(service => {
+    services.forEach((service) => {
       section += `### ${service.name}\n`;
       if (service.description) {
         section += `${service.description}\n`;
@@ -241,10 +236,10 @@ Location: ${hotelData.location}`;
       if (service.hours) {
         section += ` - Available: ${service.hours}`;
       }
-      if (service.price && service.price !== '0') {
+      if (service.price && service.price !== "0") {
         section += ` - Price: ${service.price}`;
       }
-      section += '\n\n';
+      section += "\n\n";
     });
 
     return section;
@@ -253,20 +248,20 @@ Location: ${hotelData.location}`;
   private generateRoomTypesSection(roomTypes: any[]): string {
     // ✅ FIXED: Use any type
     if (!roomTypes?.length)
-      return '## Accommodations\n\nComfortable rooms with modern amenities.';
+      return "## Accommodations\n\nComfortable rooms with modern amenities.";
 
-    let section = '## Room Types\n\n';
-    roomTypes.forEach(room => {
+    let section = "## Room Types\n\n";
+    roomTypes.forEach((room) => {
       section += `### ${room.name}\n`;
       section += `${room.description}\n`;
-      section += `Capacity: ${room.capacity || 'Standard'} guests\n`;
+      section += `Capacity: ${room.capacity || "Standard"} guests\n`;
       if (room.price) {
         section += `Starting from: $${room.price}/night\n`;
       }
       if (room.amenities?.length) {
-        section += `Amenities: ${room.amenities.join(', ')}\n`;
+        section += `Amenities: ${room.amenities.join(", ")}\n`;
       }
-      section += '\n';
+      section += "\n";
     });
 
     return section;
@@ -275,15 +270,15 @@ Location: ${hotelData.location}`;
   private generateAmenitiesSection(amenities: any): string {
     // ✅ FIXED: Use any type
     if (!amenities?.length)
-      return '## Amenities\n\nModern facilities and services available.';
+      return "## Amenities\n\nModern facilities and services available.";
 
-    return `## Hotel Amenities\n\n${amenities.join('\n- ')}\n`;
+    return `## Hotel Amenities\n\n${amenities.join("\n- ")}\n`;
   }
 
   private generatePoliciesSection(policies: any): string {
     // ✅ FIXED: Use any type
     if (!policies)
-      return '## Policies\n\nStandard hotel policies apply. Please contact front desk for details.';
+      return "## Policies\n\nStandard hotel policies apply. Please contact front desk for details.";
 
     return `## Hotel Policies\n\n${JSON.stringify(policies, null, 2)}`;
   }
@@ -291,10 +286,10 @@ Location: ${hotelData.location}`;
   private generateLocalAttractionsSection(attractions: any[]): string {
     // ✅ FIXED: Use any type
     if (!attractions?.length)
-      return '## Local Attractions\n\nMany attractions and points of interest nearby.';
+      return "## Local Attractions\n\nMany attractions and points of interest nearby.";
 
-    let section = '## Local Attractions\n\n';
-    attractions.forEach(attraction => {
+    let section = "## Local Attractions\n\n";
+    attractions.forEach((attraction) => {
       section += `### ${attraction.name}\n`;
       section += `${attraction.description}\n`;
       section += `Distance: ${attraction.distance}\n\n`;
@@ -308,17 +303,17 @@ Location: ${hotelData.location}`;
     return `## Contact Information
 
 Address: ${hotelData.address}
-Phone: ${hotelData.phone || 'Available at front desk'}
-Website: ${hotelData.website || 'Contact hotel for details'}
-Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hours'}`;
+Phone: ${hotelData.phone || "Available at front desk"}
+Website: ${hotelData.website || "Contact hotel for details"}
+Operating Hours: ${hotelData.openingHours?.join(", ") || "Contact hotel for hours"}`;
   }
 
-  private generateReviewsSection(reviewData: any): string {
+  private generateReviewsSection(_reviewData: any): string {
     // ✅ FIXED: Use any type
     return `## Guest Reviews\n\nHighly rated by guests with excellent feedback.`;
   }
 
-  private generateCompetitorSection(competitorData: any): string {
+  private generateCompetitorSection(_competitorData: any): string {
     // ✅ FIXED: Use any type
     return `## Why Choose Us\n\nUnique features and superior service set us apart.`;
   }
@@ -327,21 +322,21 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
     // ✅ FIXED: Use any type
     return services
       .map(
-        service =>
-          `- ${service.name || service}: ${service.description || 'Available upon request'}`
+        (service) =>
+          `- ${service.name || service}: ${service.description || "Available upon request"}`,
       )
-      .join('\n');
+      .join("\n");
   }
 
   private generateRoomServiceMenu(services: any[]): ServiceMenuItem[] {
     // ✅ FIXED: Use any type
     const roomServices = services.filter(
-      s => s.type === 'room_service' || s.category === 'room_service'
+      (s) => s.type === "room_service" || s.category === "room_service",
     );
-    return roomServices.map(service => ({
+    return roomServices.map((service) => ({
       name: service.name,
-      description: service.description || '',
-      price: service.price || '0',
+      description: service.description || "",
+      price: service.price || "0",
       available: service.available !== false,
     }));
   }
@@ -349,12 +344,12 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   private generateHousekeepingMenu(services: any[]): ServiceMenuItem[] {
     // ✅ FIXED: Use any type
     const housekeepingServices = services.filter(
-      s => s.type === 'housekeeping' || s.category === 'housekeeping'
+      (s) => s.type === "housekeeping" || s.category === "housekeeping",
     );
-    return housekeepingServices.map(service => ({
+    return housekeepingServices.map((service) => ({
       name: service.name,
-      description: service.description || '',
-      price: service.price || '0',
+      description: service.description || "",
+      price: service.price || "0",
       available: service.available !== false,
     }));
   }
@@ -362,12 +357,12 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   private generateConciergeMenu(services: any[]): ServiceMenuItem[] {
     // ✅ FIXED: Use any type
     const conciergeServices = services.filter(
-      s => s.type === 'concierge' || s.category === 'concierge'
+      (s) => s.type === "concierge" || s.category === "concierge",
     );
-    return conciergeServices.map(service => ({
+    return conciergeServices.map((service) => ({
       name: service.name,
-      description: service.description || '',
-      price: service.price || '0',
+      description: service.description || "",
+      price: service.price || "0",
       available: service.available !== false,
     }));
   }
@@ -375,12 +370,12 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   private generateTransportationMenu(services: any[]): ServiceMenuItem[] {
     // ✅ FIXED: Use any type
     const transportServices = services.filter(
-      s => s.type === 'transportation' || s.category === 'transportation'
+      (s) => s.type === "transportation" || s.category === "transportation",
     );
-    return transportServices.map(service => ({
+    return transportServices.map((service) => ({
       name: service.name,
-      description: service.description || '',
-      price: service.price || '0',
+      description: service.description || "",
+      price: service.price || "0",
       available: service.available !== false,
     }));
   }
@@ -388,19 +383,19 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   private generateSpaMenu(services: any[]): ServiceMenuItem[] {
     // ✅ FIXED: Use any type
     const spaServices = services.filter(
-      s => s.type === 'spa' || s.category === 'spa'
+      (s) => s.type === "spa" || s.category === "spa",
     );
-    return spaServices.map(service => ({
+    return spaServices.map((service) => ({
       name: service.name,
-      description: service.description || '',
-      price: service.price || '0',
+      description: service.description || "",
+      price: service.price || "0",
       available: service.available !== false,
     }));
   }
 
   private generateToursMenu(attractions: any[]): any[] {
     // ✅ FIXED: Use any type
-    return attractions.map(attraction => ({
+    return attractions.map((attraction) => ({
       name: attraction.name,
       description: attraction.description,
       type: attraction.type,
@@ -411,54 +406,26 @@ Operating Hours: ${hotelData.openingHours?.join(', ') || 'Contact hotel for hour
   private getHotelCategory(hotelData: any): string {
     // ✅ FIXED: Use any type
     if (hotelData.priceLevel === undefined) {
-      return 'luxury';
+      return "luxury";
     }
 
     switch (hotelData.priceLevel) {
       case 4:
-        return 'luxury';
+        return "luxury";
       case 3:
-        return 'upscale';
+        return "upscale";
       case 2:
-        return 'mid-range';
+        return "mid-range";
       case 1:
-        return 'budget-friendly';
+        return "budget-friendly";
       default:
-        return 'quality';
+        return "quality";
     }
-  }
-
-  private groupServicesByType(services: any[]): any {
-    // ✅ FIXED: Use any type
-    const grouped: any = {};
-
-    services.forEach(service => {
-      if (!grouped[service.type]) {
-        grouped[service.type] = [];
-      }
-      grouped[service.type].push(service);
-    });
-
-    return grouped;
-  }
-
-  private groupAttractionsByType(attractions: any[]): any {
-    // ✅ FIXED: Use any type
-    const grouped: any = {};
-
-    attractions.forEach(attraction => {
-      if (!grouped[attraction.category]) {
-        grouped[attraction.category] = [];
-      }
-      grouped[attraction.category].push(attraction);
-    });
-
-    return grouped;
   }
 
   private generateFallbackKnowledgeBase(hotelData: any): string {
     // ✅ FIXED: Use any type
-    return `## ${hotelData.name || 'Hotel'} Information
+    return `## ${hotelData.name || "Hotel"} Information
 
 Welcome to our hotel! We provide excellent service and comfortable accommodations.
 
@@ -470,7 +437,7 @@ Welcome to our hotel! We provide excellent service and comfortable accommodation
 
 ## Contact Information
 Phone: Contact front desk
-Location: ${hotelData.location || hotelData.address || 'Prime location'}
+Location: ${hotelData.location || hotelData.address || "Prime location"}
 
 We're here to make your stay comfortable and memorable!`;
   }
@@ -481,19 +448,18 @@ We're here to make your stay comfortable and memorable!`;
   private buildVietnameseSystemPrompt(
     hotelData: any,
     knowledgeBase: string,
-    customization: any = {}
+    customization: any = {},
   ): string {
-    const hotelName = hotelData.name || 'khách sạn';
-    const personality = customization.personality || 'professional';
-    const tone = customization.tone || 'friendly';
+    const hotelName = hotelData.name || "khách sạn";
+    const personality = customization.personality || "professional";
 
-    let personalityText = '';
-    if (personality === 'friendly') {
-      personalityText = 'Tôi có tính cách thân thiện và vui vẻ.';
-    } else if (personality === 'luxurious') {
-      personalityText = 'Tôi có phong cách lịch lãm và sang trọng.';
+    let personalityText = "";
+    if (personality === "friendly") {
+      personalityText = "Tôi có tính cách thân thiện và vui vẻ.";
+    } else if (personality === "luxurious") {
+      personalityText = "Tôi có phong cách lịch lãm và sang trọng.";
     } else {
-      personalityText = 'Tôi có thái độ chuyên nghiệp và lịch sự.';
+      personalityText = "Tôi có thái độ chuyên nghiệp và lịch sự.";
     }
 
     return `Tôi là trợ lý ảo của ${hotelName}. ${personalityText}
@@ -516,19 +482,18 @@ Tôi luôn sẵn sàng hỗ trợ quý khách một cách tốt nhất!`;
   private buildEnglishSystemPrompt(
     hotelData: any,
     knowledgeBase: string,
-    customization: any = {}
+    customization: any = {},
   ): string {
-    const hotelName = hotelData.name || 'hotel';
-    const personality = customization.personality || 'professional';
-    const tone = customization.tone || 'friendly';
+    const hotelName = hotelData.name || "hotel";
+    const personality = customization.personality || "professional";
 
-    let personalityText = '';
-    if (personality === 'friendly') {
-      personalityText = 'I have a friendly and cheerful personality.';
-    } else if (personality === 'luxurious') {
-      personalityText = 'I have an elegant and sophisticated style.';
+    let personalityText = "";
+    if (personality === "friendly") {
+      personalityText = "I have a friendly and cheerful personality.";
+    } else if (personality === "luxurious") {
+      personalityText = "I have an elegant and sophisticated style.";
     } else {
-      personalityText = 'I maintain a professional and courteous demeanor.';
+      personalityText = "I maintain a professional and courteous demeanor.";
     }
 
     return `I am the virtual concierge for ${hotelName}. ${personalityText}
@@ -549,7 +514,7 @@ I'm here to ensure you have the best possible experience during your stay!`;
    * Generate fallback system prompt
    */
   private generateFallbackSystemPrompt(hotelData: any): string {
-    const hotelName = hotelData.name || 'Hotel';
+    const hotelName = hotelData.name || "Hotel";
     return `I am the virtual concierge for ${hotelName}. I'm here to assist you with information about our hotel, services, and local area. How may I help you today?`;
   }
 }

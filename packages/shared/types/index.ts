@@ -17,7 +17,6 @@ export type {
   Language,
   Permission,
   RoomType,
-  ServiceCategory,
   Timestamp,
   UserRole,
 } from "../../types/core";
@@ -79,6 +78,10 @@ export interface ServicePanel {
   icon: any; // IconType from react-icons
   description?: string;
 }
+
+// Service category types (re-export from core to avoid conflicts)
+import type { ServiceCategory as CoreServiceCategory } from "../../types/core";
+export type ServiceCategory = CoreServiceCategory;
 
 // Service Category UI Configuration with ID mapping (for backend integration)
 export interface ServiceCategoryConfig {

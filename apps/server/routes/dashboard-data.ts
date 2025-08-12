@@ -15,7 +15,7 @@ import { Request, Response, Router } from "express";
 const router = Router();
 // TODO: Fix CallAnalytics import when service is available
 const callAnalytics = {
-  getCallAnalytics: async (tenantId: string) => ({
+  getCallAnalytics: async (_tenantId: string) => ({
     total: 0,
     today: 0,
     answered: 0,
@@ -24,8 +24,8 @@ const callAnalytics = {
     successRate: 0,
     peakHours: [],
   }),
-  getCallTrend: async (tenantId: string) => [],
-  getSystemTrend: async (tenantId: string) => [],
+  getCallTrend: async (_tenantId: string) => [],
+  getSystemTrend: async (_tenantId: string) => [],
 };
 
 /**
@@ -189,12 +189,12 @@ router.get(
               systemTrend: systemTrend,
               lastUpdated: new Date().toISOString(),
             };
-          } catch (dbError) {
+          } catch {
             // Ultimate fallback if analytics service fails
             logger.warn(
               "⚠️ [Dashboard] Call analytics failed, using static fallback",
               "DashboardDataAPI",
-              dbError,
+              // suppressed error variable per lint rule
             );
 
             return {

@@ -1,0 +1,105 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    /* Linting - LOOSENED FOR BETTER DX */
+    "strict": false, // ✅ Disabled strict mode
+    "noUnusedLocals": false, // ✅ Allow unused variables
+    "noUnusedParameters": false, // ✅ Allow unused parameters  
+    "noFallthroughCasesInSwitch": false, // ✅ Allow fallthrough
+    "noImplicitReturns": false, // ✅ Allow missing returns
+    "noImplicitOverride": true,
+    /* Practical Settings for Large Codebase */
+    "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false, // ✅ Allow loose optional types
+    "noUncheckedIndexedAccess": false, // ✅ Allow unchecked access
+    "noImplicitAny": false, // ✅ Allow implicit any
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "alwaysStrict": true,
+    /* Development Experience */
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    /* Performance Optimizations */
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    /* Path mapping */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "apps/client/src/*"
+      ],
+      "@shared/*": [
+        "packages/shared/*"
+      ],
+      "@server/*": [
+        "apps/server/*"
+      ],
+      "@types/*": [
+        "packages/types/*"
+      ],
+      "@config/*": [
+        "packages/config/*"
+      ],
+      "@tools/*": [
+        "tools/*"
+      ],
+      "@tests/*": [
+        "tests/*"
+      ],
+      "@auth/*": [
+        "packages/auth-system/*"
+      ]
+    }
+  },
+  "include": [
+    "apps/client/src",
+    "apps/server",
+    "packages",
+    "tools",
+    "global.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "tests/integration",
+    "tests/e2e",
+    "tests/integration-test-suite.ts",
+    "tests/test-hotel-research-flow.ts",
+    "tools/scripts/maintenance/test-*.ts",
+    "tools/migrations/test-*.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "tailwind.config.ts",
+    "postcss.config.ts",
+    "**/*.config.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

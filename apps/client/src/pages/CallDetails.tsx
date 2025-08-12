@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
-import { useParams, Link } from 'wouter';
-import type { Transcript } from '@/types'; // ✅ FIXED: Add missing Transcript import
-import { logger } from '@shared/utils/logger';
+import { TranscriptItem } from "@/components/ui/TranscriptItem";
+import logger from "@shared/utils/logger";
+import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
+import { useState } from "react";
+import { Link, useParams } from "wouter";
 
 const CallDetails: React.FC = () => {
   const params = useParams() as { callId: string };
@@ -15,11 +16,11 @@ const CallDetails: React.FC = () => {
     isLoading: summaryLoading,
     isError: summaryError,
   } = useQuery({
-    queryKey: ['summary', callId],
+    queryKey: ["summary", callId],
     queryFn: async () => {
       const response = await fetch(`/api/summaries/${callId}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch call summary');
+        throw new Error("Failed to fetch call summary");
       }
       return response.json();
     },
@@ -31,11 +32,11 @@ const CallDetails: React.FC = () => {
     isLoading: transcriptsLoading,
     isError: transcriptsError,
   } = useQuery({
-    queryKey: ['transcripts', callId],
+    queryKey: ["transcripts", callId],
     queryFn: async () => {
       const response = await fetch(`/api/transcripts/${callId}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch call transcripts');
+        throw new Error("Failed to fetch call transcripts");
       }
       return response.json();
     },
@@ -43,23 +44,25 @@ const CallDetails: React.FC = () => {
 
   // Format date for display - ✅ FIXED: Accept Date or string or number
   const formatDate = (dateObj: Date | string | number | undefined) => {
-    if (!dateObj) return 'Unknown';
+    if (!dateObj) return "Unknown";
 
     const date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+    const locale =
+      typeof navigator !== "undefined" ? navigator.language : "en-US";
+    return date.toLocaleString(locale, {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
   };
 
   // Format duration for display
   const formatDuration = (duration: string | undefined) => {
     if (!duration) {
-      return '00:00';
+      return "00:00";
     }
     return duration;
   };
@@ -73,11 +76,11 @@ const CallDetails: React.FC = () => {
       const transcriptText = transcripts
         .map(
           (
-            t: any // ✅ FIXED: Use any to bypass type conflict
+            t: any, // ✅ FIXED: Use any to bypass type conflict
           ) =>
-            `${t.role === 'assistant' ? 'Assistant' : 'Guest'}: ${t.content || t.message || ''}`
+            `${t.role === "assistant" ? "Assistant" : "Guest"}: ${t.content || t.message || ""}`,
         )
-        .join('\n\n');
+        .join("\n\n");
 
       await navigator.clipboard.writeText(transcriptText);
 
@@ -86,7 +89,7 @@ const CallDetails: React.FC = () => {
         setCopying(false);
       }, 1500);
     } catch (error) {
-      logger.error('Could not copy text: ', 'Component', error);
+      logger.error("Could not copy text: ", "Component", error);
       setCopying(false);
     }
   };
@@ -169,7 +172,7 @@ const CallDetails: React.FC = () => {
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-500 mb-1">Room</p>
                     <p className="text-sm font-medium">
-                      {summary?.roomNumber || 'Unknown'}
+                      {summary?.roomNumber || "Unknown"}
                     </p>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
@@ -200,48 +203,26 @@ const CallDetails: React.FC = () => {
                     disabled={copying || !transcripts?.length}
                     className={`px-3 py-1 rounded-md text-sm flex items-center ${
                       copying
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? "bg-green-100 text-green-700"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     <span className="material-icons text-sm mr-1">
-                      {copying ? 'check' : 'content_copy'}
+                      {copying ? "check" : "content_copy"}
                     </span>
-                    {copying ? 'Copied' : 'Copy'}
+                    {copying ? "Copied" : "Copy"}
                   </button>
                 </div>
 
                 {transcripts?.length ? (
                   <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
-                    {transcripts.map(
-                      (
-                        transcript: any // ✅ FIXED: Use any to bypass type conflict
-                      ) => (
-                        <div
-                          key={transcript.id}
-                          className={`flex ${transcript.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
-                        >
-                          <div
-                            className={`max-w-[75%] p-3 rounded-lg relative ${
-                              transcript.role === 'assistant'
-                                ? 'bg-blue-50 text-blue-900'
-                                : 'bg-gray-100 text-gray-900'
-                            }`}
-                          >
-                            <div className="text-xs text-gray-500 mb-1">
-                              {transcript.role === 'assistant'
-                                ? 'Assistant'
-                                : 'Guest'}{' '}
-                              • {formatDate(transcript.timestamp)}
-                            </div>
-                            <p className="text-sm">
-                              {transcript.content || transcript.message || ''}
-                            </p>{' '}
-                            {/* ✅ FIXED: Handle both content and message properties */}
-                          </div>
-                        </div>
-                      )
-                    )}
+                    {transcripts.map((transcript: any) => (
+                      <TranscriptItem
+                        key={transcript.id}
+                        transcript={transcript}
+                        formatDate={formatDate}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -268,7 +249,7 @@ const CallDetails: React.FC = () => {
                 {summary?.content ? (
                   <div
                     className="p-4 bg-blue-50 rounded-lg overflow-y-auto"
-                    style={{ maxHeight: '500px' }}
+                    style={{ maxHeight: "500px" }}
                   >
                     <div className="text-sm text-blue-900 whitespace-pre-line">
                       {summary.content}
@@ -284,7 +265,7 @@ const CallDetails: React.FC = () => {
                     <span className="material-icons text-gray-300 text-4xl mb-2">
                       summarize
                     </span>
-                    <p className="text-gray-500">No summary available</p>
+                    <p className="text-gray-500">Không có summary</p>
                     <p className="text-gray-400 text-sm">
                       Call summary could not be generated.
                     </p>

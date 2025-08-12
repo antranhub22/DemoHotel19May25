@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 // ============================================
 // Types & Interfaces
@@ -9,10 +9,10 @@ import * as path from 'path';
 
 export interface EncryptionConfig {
   algorithms: {
-    symmetric: 'aes-256-gcm' | 'aes-256-cbc' | 'chacha20-poly1305';
-    asymmetric: 'rsa' | 'ed25519' | 'secp256k1';
-    hashing: 'sha256' | 'sha512' | 'blake2b512';
-    keyDerivation: 'pbkdf2' | 'scrypt' | 'argon2';
+    symmetric: "aes-256-gcm" | "aes-256-cbc" | "chacha20-poly1305";
+    asymmetric: "rsa" | "ed25519" | "secp256k1";
+    hashing: "sha256" | "sha512" | "blake2b512";
+    keyDerivation: "pbkdf2" | "scrypt" | "argon2";
   };
   keyManagement: {
     masterKeyLocation: string;
@@ -30,7 +30,7 @@ export interface EncryptionConfig {
   };
   dataInTransit: {
     enabled: boolean;
-    tlsVersion: 'TLSv1.2' | 'TLSv1.3';
+    tlsVersion: "TLSv1.2" | "TLSv1.3";
     certificateManagement: boolean;
     pinning: boolean;
     hsts: boolean;
@@ -51,7 +51,7 @@ export interface EncryptionConfig {
 
 export interface EncryptionKey {
   id: string;
-  type: 'master' | 'data' | 'session' | 'backup';
+  type: "master" | "data" | "session" | "backup";
   algorithm: string;
   keyMaterial: Buffer;
   metadata: {
@@ -86,7 +86,7 @@ export interface EncryptedData {
 
 export interface Certificate {
   id: string;
-  type: 'ssl' | 'client' | 'signing' | 'encryption';
+  type: "ssl" | "client" | "signing" | "encryption";
   subject: string;
   issuer: string;
   serialNumber: string;
@@ -103,7 +103,7 @@ export interface Certificate {
 export interface KeyRotationLog {
   timestamp: Date;
   keyId: string;
-  operation: 'create' | 'rotate' | 'revoke' | 'backup';
+  operation: "create" | "rotate" | "revoke" | "backup";
   reason: string;
   success: boolean;
   metadata: Record<string, any>;
@@ -115,15 +115,15 @@ export interface KeyRotationLog {
 
 const defaultEncryptionConfig: EncryptionConfig = {
   algorithms: {
-    symmetric: 'aes-256-gcm',
-    asymmetric: 'rsa',
-    hashing: 'sha256',
-    keyDerivation: 'pbkdf2',
+    symmetric: "aes-256-gcm",
+    asymmetric: "rsa",
+    hashing: "sha256",
+    keyDerivation: "pbkdf2",
   },
   keyManagement: {
-    masterKeyLocation: './keys/master.key',
+    masterKeyLocation: "./keys/master.key",
     keyRotationInterval: 30, // 30 days
-    backupLocation: './keys/backup',
+    backupLocation: "./keys/backup",
     keyEscrow: false,
     hardwareSecurityModule: false,
   },
@@ -136,7 +136,7 @@ const defaultEncryptionConfig: EncryptionConfig = {
   },
   dataInTransit: {
     enabled: true,
-    tlsVersion: 'TLSv1.3',
+    tlsVersion: "TLSv1.3",
     certificateManagement: true,
     pinning: false,
     hsts: true,
@@ -174,8 +174,8 @@ export class EncryptionManager extends EventEmitter {
     this.initializeEncryption();
 
     console.log(
-      '🔐 EncryptionManager initialized with enterprise-grade encryption',
-      'EncryptionManager'
+      "🔐 EncryptionManager initialized with enterprise-grade encryption",
+      "EncryptionManager",
     );
   }
 
@@ -199,9 +199,9 @@ export class EncryptionManager extends EventEmitter {
       this.startKeyRotationScheduler();
       this.startCacheCleanup();
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      console.error('Failed to initialize encryption:', error);
+      console.error("Failed to initialize encryption:", error);
       throw error;
     }
   }
@@ -210,8 +210,8 @@ export class EncryptionManager extends EventEmitter {
     const dirs = [
       path.dirname(this.config.keyManagement.masterKeyLocation),
       this.config.keyManagement.backupLocation,
-      './keys/data',
-      './certificates',
+      "./keys/data",
+      "./certificates",
     ];
 
     for (const dir of dirs) {
@@ -229,17 +229,17 @@ export class EncryptionManager extends EventEmitter {
     try {
       const keyData = await fs.readFile(masterKeyPath);
       this.masterKey = keyData;
-      console.log('🔑 Master key loaded');
-    } catch (error) {
+      console.log("🔑 Master key loaded");
+    } catch (_error) {
       // Create new master key
       this.masterKey = crypto.randomBytes(32);
       await fs.writeFile(masterKeyPath, this.masterKey, { mode: 0o600 });
-      console.log('🔑 New master key created');
+      console.log("🔑 New master key created");
 
       // Create backup
       const backupPath = path.join(
         this.config.keyManagement.backupLocation,
-        'master.key.backup'
+        "master.key.backup",
       );
       await fs.writeFile(backupPath, this.masterKey, { mode: 0o600 });
     }
@@ -247,11 +247,11 @@ export class EncryptionManager extends EventEmitter {
 
   private async loadKeys() {
     try {
-      const keysDir = './keys/data';
+      const keysDir = "./keys/data";
       const files = await fs.readdir(keysDir).catch(() => []);
 
       for (const file of files) {
-        if (file.endsWith('.key')) {
+        if (file.endsWith(".key")) {
           const keyData = await fs.readFile(path.join(keysDir, file));
           const key = JSON.parse(keyData.toString());
           this.keyStore.set(key.id, key);
@@ -260,17 +260,17 @@ export class EncryptionManager extends EventEmitter {
 
       console.log(`🔑 Loaded ${this.keyStore.size} encryption keys`);
     } catch (error) {
-      console.warn('Failed to load keys:', error);
+      console.warn("Failed to load keys:", error);
     }
   }
 
   private async loadCertificates() {
     try {
-      const certsDir = './certificates';
+      const certsDir = "./certificates";
       const files = await fs.readdir(certsDir).catch(() => []);
 
       for (const file of files) {
-        if (file.endsWith('.cert')) {
+        if (file.endsWith(".cert")) {
           const certData = await fs.readFile(path.join(certsDir, file));
           const cert = JSON.parse(certData.toString());
           this.certificateStore.set(cert.id, cert);
@@ -279,7 +279,7 @@ export class EncryptionManager extends EventEmitter {
 
       console.log(`📜 Loaded ${this.certificateStore.size} certificates`);
     } catch (error) {
-      console.warn('Failed to load certificates:', error);
+      console.warn("Failed to load certificates:", error);
     }
   }
 
@@ -288,8 +288,8 @@ export class EncryptionManager extends EventEmitter {
   // ============================================
 
   async generateDataKey(
-    type: 'data' | 'session' | 'backup' = 'data',
-    owner: string = 'system'
+    type: "data" | "session" | "backup" = "data",
+    owner: string = "system",
   ): Promise<string> {
     const keyId = crypto.randomUUID();
     const keyMaterial = crypto.randomBytes(32);
@@ -304,9 +304,9 @@ export class EncryptionManager extends EventEmitter {
         lastUsed: new Date(),
         rotationSchedule: new Date(
           Date.now() +
-            this.config.keyManagement.keyRotationInterval * 24 * 60 * 60 * 1000
+            this.config.keyManagement.keyRotationInterval * 24 * 60 * 60 * 1000,
         ),
-        usage: ['encryption', 'decryption'],
+        usage: ["encryption", "decryption"],
         owner,
       },
     };
@@ -322,21 +322,21 @@ export class EncryptionManager extends EventEmitter {
     this.logKeyRotation({
       timestamp: new Date(),
       keyId,
-      operation: 'create',
-      reason: 'New key generation',
+      operation: "create",
+      reason: "New key generation",
       success: true,
       metadata: { type, owner },
     });
 
-    this.emit('keyGenerated', { keyId, type, owner });
+    this.emit("keyGenerated", { keyId, type, owner });
     return keyId;
   }
 
   private encryptKeyMaterial(key: EncryptionKey): EncryptionKey {
-    if (!this.masterKey) throw new Error('Master key not available');
+    if (!this.masterKey) throw new Error("Master key not available");
 
     const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipher('aes-256-cbc', this.masterKey);
+    const cipher = crypto.createCipher("aes-256-cbc", this.masterKey);
 
     let encrypted = cipher.update(key.keyMaterial);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -348,11 +348,11 @@ export class EncryptionManager extends EventEmitter {
   }
 
   private decryptKeyMaterial(encryptedKey: EncryptionKey): Buffer {
-    if (!this.masterKey) throw new Error('Master key not available');
+    if (!this.masterKey) throw new Error("Master key not available");
 
     const encrypted = encryptedKey.keyMaterial.slice(16);
 
-    const decipher = crypto.createDecipher('aes-256-cbc', this.masterKey);
+    const decipher = crypto.createDecipher("aes-256-cbc", this.masterKey);
 
     let decrypted = decipher.update(encrypted);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -390,10 +390,10 @@ export class EncryptionManager extends EventEmitter {
 
   async rotateKey(
     keyId: string,
-    reason: string = 'Scheduled rotation'
+    reason: string = "Scheduled rotation",
   ): Promise<string> {
     const oldKey = this.keyStore.get(keyId);
-    if (!oldKey) throw new Error('Key not found');
+    if (!oldKey) throw new Error("Key not found");
 
     // Generate new key with same metadata
     const newKeyId = crypto.randomUUID();
@@ -409,7 +409,7 @@ export class EncryptionManager extends EventEmitter {
         lastUsed: new Date(),
         rotationSchedule: new Date(
           Date.now() +
-            this.config.keyManagement.keyRotationInterval * 24 * 60 * 60 * 1000
+            this.config.keyManagement.keyRotationInterval * 24 * 60 * 60 * 1000,
         ),
       },
     };
@@ -430,13 +430,13 @@ export class EncryptionManager extends EventEmitter {
     this.logKeyRotation({
       timestamp: new Date(),
       keyId: newKeyId,
-      operation: 'rotate',
+      operation: "rotate",
       reason,
       success: true,
       metadata: { oldKeyId: keyId },
     });
 
-    this.emit('keyRotated', { oldKeyId: keyId, newKeyId, reason });
+    this.emit("keyRotated", { oldKeyId: keyId, newKeyId, reason });
     return newKeyId;
   }
 
@@ -446,16 +446,16 @@ export class EncryptionManager extends EventEmitter {
 
   async encryptData(
     data: Buffer | string,
-    keyId?: string
+    keyId?: string,
   ): Promise<EncryptedData> {
     if (!keyId) {
-      keyId = await this.generateDataKey('data', 'auto');
+      keyId = await this.generateDataKey("data", "auto");
     }
 
     const key = await this.getKey(keyId);
-    if (!key) throw new Error('Encryption key not found');
+    if (!key) throw new Error("Encryption key not found");
 
-    const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+    const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, "utf8");
 
     // Compress if enabled
     let processedData = dataBuffer;
@@ -464,7 +464,7 @@ export class EncryptionManager extends EventEmitter {
       this.config.performance.compressionBeforeEncryption &&
       dataBuffer.length > 1024
     ) {
-      const zlib = require('zlib');
+      const zlib = require("zlib");
       processedData = zlib.gzipSync(dataBuffer);
       compressed = true;
     }
@@ -473,7 +473,7 @@ export class EncryptionManager extends EventEmitter {
     const iv = crypto.randomBytes(16);
 
     // Encrypt using AES-256-GCM
-    const cipher = crypto.createCipher('aes-256-gcm', key);
+    const cipher = crypto.createCipher("aes-256-gcm", key);
 
     let encrypted = cipher.update(processedData);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -491,7 +491,7 @@ export class EncryptionManager extends EventEmitter {
         originalSize: dataBuffer.length,
         compressed,
         timestamp: new Date(),
-        integrity: crypto.createHash('sha256').update(dataBuffer).digest('hex'),
+        integrity: crypto.createHash("sha256").update(dataBuffer).digest("hex"),
       },
     };
 
@@ -500,7 +500,7 @@ export class EncryptionManager extends EventEmitter {
 
   async decryptData(encryptedData: EncryptedData): Promise<Buffer> {
     const key = await this.getKey(encryptedData.keyId);
-    if (!key) throw new Error('Decryption key not found');
+    if (!key) throw new Error("Decryption key not found");
 
     // Decrypt using AES-256-GCM
     const decipher = crypto.createDecipher(encryptedData.algorithm as any, key);
@@ -514,17 +514,17 @@ export class EncryptionManager extends EventEmitter {
 
     // Decompress if needed
     if (encryptedData.metadata.compressed) {
-      const zlib = require('zlib');
+      const zlib = require("zlib");
       decrypted = zlib.gunzipSync(decrypted);
     }
 
     // Verify integrity
     const integrity = crypto
-      .createHash('sha256')
+      .createHash("sha256")
       .update(decrypted)
-      .digest('hex');
+      .digest("hex");
     if (integrity !== encryptedData.metadata.integrity) {
-      throw new Error('Data integrity check failed');
+      throw new Error("Data integrity check failed");
     }
 
     return decrypted;
@@ -536,7 +536,7 @@ export class EncryptionManager extends EventEmitter {
 
   async encryptFile(filePath: string, outputPath?: string): Promise<string> {
     if (!this.config.dataAtRest.encryptFiles) {
-      throw new Error('File encryption is disabled');
+      throw new Error("File encryption is disabled");
     }
 
     const data = await fs.readFile(filePath);
@@ -551,14 +551,14 @@ export class EncryptionManager extends EventEmitter {
 
   async decryptFile(
     encryptedFilePath: string,
-    outputPath?: string
+    outputPath?: string,
   ): Promise<string> {
     const encryptedData = JSON.parse(
-      await fs.readFile(encryptedFilePath, 'utf8')
+      await fs.readFile(encryptedFilePath, "utf8"),
     );
     const decrypted = await this.decryptData(encryptedData);
 
-    const output = outputPath || encryptedFilePath.replace('.encrypted', '');
+    const output = outputPath || encryptedFilePath.replace(".encrypted", "");
     await fs.writeFile(output, decrypted);
 
     console.log(`🔓 File decrypted: ${encryptedFilePath} -> ${output}`);
@@ -571,12 +571,12 @@ export class EncryptionManager extends EventEmitter {
 
   async generateSelfSignedCertificate(
     subject: string,
-    keyUsage: string[] = ['digitalSignature', 'keyEncipherment']
+    keyUsage: string[] = ["digitalSignature", "keyEncipherment"],
   ): Promise<string> {
-    const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+    const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
       modulusLength: 2048,
-      publicKeyEncoding: { type: 'spki', format: 'pem' },
-      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      publicKeyEncoding: { type: "spki", format: "pem" },
+      privateKeyEncoding: { type: "pkcs8", format: "pem" },
     });
 
     const certId = crypto.randomUUID();
@@ -586,15 +586,15 @@ export class EncryptionManager extends EventEmitter {
     // Create certificate (simplified - in production use a proper X.509 library)
     const certificate: Certificate = {
       id: certId,
-      type: 'ssl',
+      type: "ssl",
       subject,
       issuer: subject, // Self-signed
-      serialNumber: crypto.randomBytes(16).toString('hex'),
+      serialNumber: crypto.randomBytes(16).toString("hex"),
       validFrom: now,
       validTo,
-      fingerprint: crypto.createHash('sha256').update(publicKey).digest('hex'),
+      fingerprint: crypto.createHash("sha256").update(publicKey).digest("hex"),
       keyUsage,
-      extendedKeyUsage: ['serverAuth', 'clientAuth'],
+      extendedKeyUsage: ["serverAuth", "clientAuth"],
       certificate: Buffer.from(publicKey),
       privateKey: Buffer.from(privateKey),
       chain: [],
@@ -624,17 +624,17 @@ export class EncryptionManager extends EventEmitter {
   // ============================================
 
   private async saveKey(key: EncryptionKey) {
-    const keyPath = path.join('./keys/data', `${key.id}.key`);
+    const keyPath = path.join("./keys/data", `${key.id}.key`);
     await fs.writeFile(keyPath, JSON.stringify(key, null, 2), { mode: 0o600 });
   }
 
   private async saveCertificate(cert: Certificate) {
-    const certPath = path.join('./certificates', `${cert.id}.cert`);
+    const certPath = path.join("./certificates", `${cert.id}.cert`);
     const certData = {
       ...cert,
-      certificate: cert.certificate.toString('base64'),
-      privateKey: cert.privateKey?.toString('base64'),
-      chain: cert.chain?.map(c => c.toString('base64')),
+      certificate: cert.certificate.toString("base64"),
+      privateKey: cert.privateKey?.toString("base64"),
+      chain: cert.chain?.map((c) => c.toString("base64")),
     };
     await fs.writeFile(certPath, JSON.stringify(certData, null, 2), {
       mode: 0o600,
@@ -644,7 +644,7 @@ export class EncryptionManager extends EventEmitter {
   private async backupKey(key: EncryptionKey) {
     const backupPath = path.join(
       this.config.keyManagement.backupLocation,
-      `${key.id}.backup`
+      `${key.id}.backup`,
     );
     await fs.writeFile(backupPath, JSON.stringify(key, null, 2), {
       mode: 0o600,
@@ -660,7 +660,7 @@ export class EncryptionManager extends EventEmitter {
       () => {
         this.checkKeyRotation();
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000,
     ); // Check daily
   }
 
@@ -681,7 +681,7 @@ export class EncryptionManager extends EventEmitter {
     for (const [keyId, key] of this.keyStore.entries()) {
       if (key.metadata.rotationSchedule <= now) {
         try {
-          await this.rotateKey(keyId, 'Scheduled rotation');
+          await this.rotateKey(keyId, "Scheduled rotation");
         } catch (error) {
           console.error(`Failed to rotate key ${keyId}:`, error);
         }
@@ -703,7 +703,7 @@ export class EncryptionManager extends EventEmitter {
 
     console.log(
       `🔄 Key rotation: ${log.operation} - ${log.keyId}`,
-      'EncryptionManager'
+      "EncryptionManager",
     );
   }
 
@@ -728,20 +728,21 @@ export class EncryptionManager extends EventEmitter {
             acc[cert.type] = (acc[cert.type] || 0) + 1;
             return acc;
           },
-          {}
+          {},
         ),
         expiringSoon: Array.from(this.certificateStore.values()).filter(
-          cert => {
+          (cert) => {
             const daysUntilExpiry =
               (cert.validTo.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
             return daysUntilExpiry <= 30;
-          }
+          },
         ).length,
       },
       rotations: {
         total: this.rotationLogs.length,
         recent: this.rotationLogs.filter(
-          log => log.timestamp.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000
+          (log) =>
+            log.timestamp.getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000,
         ).length,
       },
       config: {
@@ -758,7 +759,7 @@ export class EncryptionManager extends EventEmitter {
       timestamp: new Date().toISOString(),
       metrics: this.getMetrics(),
       rotationLogs: this.rotationLogs.slice(-50), // Last 50 rotations
-      certificates: Array.from(this.certificateStore.values()).map(cert => ({
+      certificates: Array.from(this.certificateStore.values()).map((cert) => ({
         id: cert.id,
         subject: cert.subject,
         validFrom: cert.validFrom,
@@ -769,7 +770,7 @@ export class EncryptionManager extends EventEmitter {
         masterKeyLoaded: !!this.masterKey,
         keysLoaded: this.keyStore.size,
         certificatesLoaded: this.certificateStore.size,
-        cacheHitRate: this.keyCache.size > 0 ? '85%' : '0%',
+        cacheHitRate: this.keyCache.size > 0 ? "85%" : "0%",
       },
       recommendations: this.generateRecommendations(),
     };
@@ -782,28 +783,29 @@ export class EncryptionManager extends EventEmitter {
 
     if (metrics.certificates.expiringSoon > 0) {
       recommendations.push(
-        `${metrics.certificates.expiringSoon} certificates expiring within 30 days`
+        `${metrics.certificates.expiringSoon} certificates expiring within 30 days`,
       );
     }
 
     if (
       this.rotationLogs.filter(
-        log => log.timestamp.getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
+        (log) =>
+          log.timestamp.getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
       ).length === 0
     ) {
       recommendations.push(
-        'No key rotations in the past 30 days - consider reviewing rotation schedule'
+        "No key rotations in the past 30 days - consider reviewing rotation schedule",
       );
     }
 
     if (!this.config.dataAtRest.enabled) {
       recommendations.push(
-        'Data-at-rest encryption is disabled - consider enabling for compliance'
+        "Data-at-rest encryption is disabled - consider enabling for compliance",
       );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Encryption system is operating optimally');
+      recommendations.push("Encryption system is operating optimally");
     }
 
     return recommendations;
@@ -811,8 +813,8 @@ export class EncryptionManager extends EventEmitter {
 
   updateConfig(newConfig: Partial<EncryptionConfig>) {
     this.config = { ...this.config, ...newConfig };
-    console.log('🔧 EncryptionManager configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 EncryptionManager configuration updated");
+    this.emit("configUpdated", this.config);
   }
 }
 

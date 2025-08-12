@@ -4,8 +4,8 @@
 // Multi-tier caching system with memory cache, Redis support, TTL management,
 // cache invalidation, and comprehensive cache analytics
 
-import { logger } from '@shared/utils/logger';
-import { recordPerformanceMetrics } from './AdvancedMetricsCollector';
+import { logger } from "@shared/utils/logger";
+import { recordPerformanceMetrics } from "./AdvancedMetricsCollector";
 
 // Cache interfaces
 export interface CacheEntry<T = any> {
@@ -40,7 +40,7 @@ export interface CacheConfig {
   redisUrl?: string;
   enableCompression: boolean;
   enableMetrics: boolean;
-  evictionPolicy: 'lru' | 'lfu' | 'ttl' | 'random';
+  evictionPolicy: "lru" | "lfu" | "ttl" | "random";
 }
 
 export interface CacheKeyPattern {
@@ -52,13 +52,13 @@ export interface CacheKeyPattern {
 
 export type CacheTag = string;
 export type CacheNamespace =
-  | 'api'
-  | 'database'
-  | 'analytics'
-  | 'hotel'
-  | 'voice'
-  | 'auth'
-  | 'static';
+  | "api"
+  | "database"
+  | "analytics"
+  | "hotel"
+  | "voice"
+  | "auth"
+  | "static";
 
 /**
  * Advanced Cache Manager
@@ -92,7 +92,7 @@ export class CacheManager {
       enableRedis: false, // Start with memory only
       enableCompression: true,
       enableMetrics: true,
-      evictionPolicy: 'lru',
+      evictionPolicy: "lru",
     };
   }
 
@@ -109,8 +109,8 @@ export class CacheManager {
   async initialize(config?: Partial<CacheConfig>): Promise<void> {
     try {
       logger.info(
-        '🗄️ [CacheManager] Initializing advanced caching system',
-        'CacheManager'
+        "🗄️ [CacheManager] Initializing advanced caching system",
+        "CacheManager",
       );
 
       if (config) {
@@ -130,20 +130,20 @@ export class CacheManager {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [CacheManager] Advanced caching system initialized',
-        'CacheManager',
+        "✅ [CacheManager] Advanced caching system initialized",
+        "CacheManager",
         {
           maxSize: this.config.maxSize,
           maxMemorySize: this.config.maxMemorySize,
           redisEnabled: !!this.redisClient,
           evictionPolicy: this.config.evictionPolicy,
-        }
+        },
       );
     } catch (error) {
       logger.error(
-        '❌ [CacheManager] Failed to initialize cache manager',
-        'CacheManager',
-        error
+        "❌ [CacheManager] Failed to initialize cache manager",
+        "CacheManager",
+        error,
       );
       throw error;
     }
@@ -154,7 +154,7 @@ export class CacheManager {
    */
   async get<T = any>(
     key: string,
-    namespace: CacheNamespace = 'api'
+    namespace: CacheNamespace = "api",
   ): Promise<T | null> {
     const startTime = Date.now();
     const fullKey = this.buildKey(key, namespace);
@@ -168,11 +168,11 @@ export class CacheManager {
         memoryEntry.accessCount++;
 
         this.stats.hits++;
-        this.recordCacheMetrics('hit', 'memory', Date.now() - startTime);
+        this.recordCacheMetrics("hit", "memory", Date.now() - startTime);
 
         logger.debug(
           `🎯 [CacheManager] Memory cache hit: ${fullKey}`,
-          'CacheManager'
+          "CacheManager",
         );
         return memoryEntry.value as T;
       }
@@ -185,11 +185,11 @@ export class CacheManager {
           await this.setInMemory(fullKey, redisValue, this.config.defaultTTL);
 
           this.stats.hits++;
-          this.recordCacheMetrics('hit', 'redis', Date.now() - startTime);
+          this.recordCacheMetrics("hit", "redis", Date.now() - startTime);
 
           logger.debug(
             `🎯 [CacheManager] Redis cache hit: ${fullKey}`,
-            'CacheManager'
+            "CacheManager",
           );
           return redisValue;
         }
@@ -197,12 +197,12 @@ export class CacheManager {
 
       // Cache miss
       this.stats.misses++;
-      this.recordCacheMetrics('miss', 'none', Date.now() - startTime);
+      this.recordCacheMetrics("miss", "none", Date.now() - startTime);
 
-      logger.debug(`❌ [CacheManager] Cache miss: ${fullKey}`, 'CacheManager');
+      logger.debug(`❌ [CacheManager] Cache miss: ${fullKey}`, "CacheManager");
       return null;
     } catch (error) {
-      logger.error('❌ [CacheManager] Cache get failed', 'CacheManager', error);
+      logger.error("❌ [CacheManager] Cache get failed", "CacheManager", error);
       this.stats.misses++;
       return null;
     }
@@ -215,8 +215,8 @@ export class CacheManager {
     key: string,
     value: T,
     ttl: number = this.config.defaultTTL,
-    namespace: CacheNamespace = 'api',
-    tags: CacheTag[] = []
+    namespace: CacheNamespace = "api",
+    tags: CacheTag[] = [],
   ): Promise<void> {
     const startTime = Date.now();
     const fullKey = this.buildKey(key, namespace);
@@ -232,17 +232,17 @@ export class CacheManager {
 
       this.stats.sets++;
       this.recordCacheMetrics(
-        'set',
-        this.redisClient ? 'redis' : 'memory',
-        Date.now() - startTime
+        "set",
+        this.redisClient ? "redis" : "memory",
+        Date.now() - startTime,
       );
 
       logger.debug(
         `✅ [CacheManager] Cache set: ${fullKey} (TTL: ${ttl}s)`,
-        'CacheManager'
+        "CacheManager",
       );
     } catch (error) {
-      logger.error('❌ [CacheManager] Cache set failed', 'CacheManager', error);
+      logger.error("❌ [CacheManager] Cache set failed", "CacheManager", error);
       throw error;
     }
   }
@@ -250,7 +250,7 @@ export class CacheManager {
   /**
    * Delete from cache
    */
-  async delete(key: string, namespace: CacheNamespace = 'api'): Promise<void> {
+  async delete(key: string, namespace: CacheNamespace = "api"): Promise<void> {
     const fullKey = this.buildKey(key, namespace);
 
     try {
@@ -267,13 +267,13 @@ export class CacheManager {
 
       logger.debug(
         `🗑️ [CacheManager] Cache deleted: ${fullKey}`,
-        'CacheManager'
+        "CacheManager",
       );
     } catch (error) {
       logger.error(
-        '❌ [CacheManager] Cache delete failed',
-        'CacheManager',
-        error
+        "❌ [CacheManager] Cache delete failed",
+        "CacheManager",
+        error,
       );
     }
   }
@@ -283,7 +283,7 @@ export class CacheManager {
    */
   async clearNamespace(namespace: CacheNamespace): Promise<void> {
     try {
-      const prefix = this.buildKey('', namespace);
+      const prefix = this.buildKey("", namespace);
 
       // Clear from memory
       const keysToDelete: string[] = [];
@@ -293,7 +293,7 @@ export class CacheManager {
         }
       }
 
-      keysToDelete.forEach(key => this.memoryCache.delete(key));
+      keysToDelete.forEach((key) => this.memoryCache.delete(key));
       this.stats.deletes += keysToDelete.length;
 
       // Clear from Redis
@@ -306,13 +306,13 @@ export class CacheManager {
 
       logger.info(
         `🧹 [CacheManager] Cleared namespace: ${namespace} (${keysToDelete.length} keys)`,
-        'CacheManager'
+        "CacheManager",
       );
     } catch (error) {
       logger.error(
-        '❌ [CacheManager] Namespace clear failed',
-        'CacheManager',
-        error
+        "❌ [CacheManager] Namespace clear failed",
+        "CacheManager",
+        error,
       );
     }
   }
@@ -326,30 +326,30 @@ export class CacheManager {
 
       // Find keys with matching tags in memory
       for (const [key, entry] of this.memoryCache.entries()) {
-        if (entry.tags && entry.tags.some(tag => tags.includes(tag))) {
+        if (entry.tags && entry.tags.some((tag) => tags.includes(tag))) {
           keysToDelete.push(key);
         }
       }
 
       // Delete from memory
-      keysToDelete.forEach(key => this.memoryCache.delete(key));
+      keysToDelete.forEach((key) => this.memoryCache.delete(key));
       this.stats.deletes += keysToDelete.length;
 
       // Clear from Redis (would need tag tracking in Redis for full implementation)
       if (this.redisClient) {
         // Simplified: clear all keys (in production, implement proper tag tracking)
         logger.warn(
-          '⚠️ [CacheManager] Redis tag clearing not fully implemented',
-          'CacheManager'
+          "⚠️ [CacheManager] Redis tag clearing not fully implemented",
+          "CacheManager",
         );
       }
 
       logger.info(
-        `🏷️ [CacheManager] Cleared by tags: ${tags.join(', ')} (${keysToDelete.length} keys)`,
-        'CacheManager'
+        `🏷️ [CacheManager] Cleared by tags: ${tags.join(", ")} (${keysToDelete.length} keys)`,
+        "CacheManager",
       );
     } catch (error) {
-      logger.error('❌ [CacheManager] Tag clear failed', 'CacheManager', error);
+      logger.error("❌ [CacheManager] Tag clear failed", "CacheManager", error);
     }
   }
 
@@ -360,8 +360,8 @@ export class CacheManager {
     key: string,
     valueFactory: () => Promise<T> | T,
     ttl: number = this.config.defaultTTL,
-    namespace: CacheNamespace = 'api',
-    tags: CacheTag[] = []
+    namespace: CacheNamespace = "api",
+    tags: CacheTag[] = [],
   ): Promise<T> {
     // Try to get from cache first
     const cachedValue = await this.get<T>(key, namespace);
@@ -378,15 +378,15 @@ export class CacheManager {
       const generationTime = Date.now() - startTime;
       logger.debug(
         `🏭 [CacheManager] Generated and cached: ${key} (${generationTime}ms)`,
-        'CacheManager'
+        "CacheManager",
       );
 
       return value;
     } catch (error) {
       logger.error(
-        '❌ [CacheManager] Value generation failed',
-        'CacheManager',
-        error
+        "❌ [CacheManager] Value generation failed",
+        "CacheManager",
+        error,
       );
       throw error;
     }
@@ -399,8 +399,8 @@ export class CacheManager {
     key: string,
     valueFactory: () => Promise<T> | T,
     ttl: number = this.config.defaultTTL,
-    namespace: CacheNamespace = 'api',
-    tags: CacheTag[] = []
+    namespace: CacheNamespace = "api",
+    tags: CacheTag[] = [],
   ): Promise<T> {
     const startTime = Date.now();
 
@@ -411,15 +411,15 @@ export class CacheManager {
       const refreshTime = Date.now() - startTime;
       logger.debug(
         `🔄 [CacheManager] Refreshed cache: ${key} (${refreshTime}ms)`,
-        'CacheManager'
+        "CacheManager",
       );
 
       return value;
     } catch (error) {
       logger.error(
-        '❌ [CacheManager] Cache refresh failed',
-        'CacheManager',
-        error
+        "❌ [CacheManager] Cache refresh failed",
+        "CacheManager",
+        error,
       );
       throw error;
     }
@@ -458,12 +458,12 @@ export class CacheManager {
       health: {
         status:
           stats.hitRate > 80
-            ? 'excellent'
+            ? "excellent"
             : stats.hitRate > 60
-              ? 'good'
+              ? "good"
               : stats.hitRate > 40
-                ? 'fair'
-                : 'poor',
+                ? "fair"
+                : "poor",
         memoryUsage:
           (stats.totalSize / (this.config.maxMemorySize * 1024 * 1024)) * 100,
         utilization: (stats.entryCount / this.config.maxSize) * 100,
@@ -484,19 +484,19 @@ export class CacheManager {
   private buildKey(
     key: string,
     namespace: CacheNamespace,
-    tenant?: string
+    tenant?: string,
   ): string {
-    const parts = ['cache', namespace];
+    const parts = ["cache", namespace];
     if (tenant) parts.push(tenant);
     if (key) parts.push(key);
-    return parts.join(':');
+    return parts.join(":");
   }
 
   private async setInMemory<T>(
     fullKey: string,
     value: T,
     ttl: number,
-    tags: CacheTag[] = []
+    tags: CacheTag[] = [],
   ): Promise<void> {
     // Check size limits before adding
     if (this.memoryCache.size >= this.config.maxSize) {
@@ -521,7 +521,7 @@ export class CacheManager {
     fullKey: string,
     value: T,
     ttl: number,
-    tags: CacheTag[] = []
+    tags: CacheTag[] = [],
   ): Promise<void> {
     if (!this.redisClient) return;
 
@@ -534,7 +534,7 @@ export class CacheManager {
 
       await this.redisClient.setex(fullKey, ttl, serialized);
     } catch (error) {
-      logger.error('❌ [CacheManager] Redis set failed', 'CacheManager', error);
+      logger.error("❌ [CacheManager] Redis set failed", "CacheManager", error);
     }
   }
 
@@ -548,7 +548,7 @@ export class CacheManager {
       const parsed = JSON.parse(serialized);
       return parsed.value as T;
     } catch (error) {
-      logger.error('❌ [CacheManager] Redis get failed', 'CacheManager', error);
+      logger.error("❌ [CacheManager] Redis get failed", "CacheManager", error);
       return null;
     }
   }
@@ -565,31 +565,31 @@ export class CacheManager {
     let toEvict: string[] = [];
 
     switch (this.config.evictionPolicy) {
-      case 'lru':
+      case "lru":
         toEvict = entries
           .sort(
             ([, a], [, b]) =>
-              a.lastAccessed.getTime() - b.lastAccessed.getTime()
+              a.lastAccessed.getTime() - b.lastAccessed.getTime(),
           )
           .slice(0, count)
           .map(([key]) => key);
         break;
 
-      case 'lfu':
+      case "lfu":
         toEvict = entries
           .sort(([, a], [, b]) => a.accessCount - b.accessCount)
           .slice(0, count)
           .map(([key]) => key);
         break;
 
-      case 'ttl':
+      case "ttl":
         toEvict = entries
           .filter(([, entry]) => !this.isEntryValid(entry))
           .slice(0, count)
           .map(([key]) => key);
         break;
 
-      case 'random':
+      case "random":
         toEvict = entries
           .sort(() => Math.random() - 0.5)
           .slice(0, count)
@@ -597,12 +597,12 @@ export class CacheManager {
         break;
     }
 
-    toEvict.forEach(key => this.memoryCache.delete(key));
+    toEvict.forEach((key) => this.memoryCache.delete(key));
     this.stats.evictions += toEvict.length;
 
     logger.debug(
       `🧹 [CacheManager] Evicted ${toEvict.length} entries (${this.config.evictionPolicy})`,
-      'CacheManager'
+      "CacheManager",
     );
   }
 
@@ -611,11 +611,10 @@ export class CacheManager {
       this.cleanup();
     }, this.config.cleanupInterval);
 
-    logger.debug('🔄 [CacheManager] Started cleanup interval', 'CacheManager');
+    logger.debug("🔄 [CacheManager] Started cleanup interval", "CacheManager");
   }
 
   private cleanup(): void {
-    const beforeCount = this.memoryCache.size;
     const expiredKeys: string[] = [];
 
     for (const [key, entry] of this.memoryCache.entries()) {
@@ -624,12 +623,12 @@ export class CacheManager {
       }
     }
 
-    expiredKeys.forEach(key => this.memoryCache.delete(key));
+    expiredKeys.forEach((key) => this.memoryCache.delete(key));
 
     if (expiredKeys.length > 0) {
       logger.debug(
         `🧹 [CacheManager] Cleaned up ${expiredKeys.length} expired entries`,
-        'CacheManager'
+        "CacheManager",
       );
     }
   }
@@ -639,25 +638,25 @@ export class CacheManager {
       // Redis initialization would go here
       // For now, we'll skip Redis and use memory only
       logger.info(
-        'ℹ️ [CacheManager] Redis support planned for future implementation',
-        'CacheManager'
+        "ℹ️ [CacheManager] Redis support planned for future implementation",
+        "CacheManager",
       );
     } catch (error) {
       logger.warn(
-        '⚠️ [CacheManager] Redis initialization failed, using memory cache only',
-        'CacheManager',
-        error
+        "⚠️ [CacheManager] Redis initialization failed, using memory cache only",
+        "CacheManager",
+        error,
       );
     }
   }
 
   private async warmCache(): Promise<void> {
-    logger.debug('🔥 [CacheManager] Starting cache warming', 'CacheManager');
+    logger.debug("🔥 [CacheManager] Starting cache warming", "CacheManager");
 
     // Cache warming logic would go here
     // For now, just log that warming is ready
 
-    logger.debug('✅ [CacheManager] Cache warming completed', 'CacheManager');
+    logger.debug("✅ [CacheManager] Cache warming completed", "CacheManager");
   }
 
   private estimateSize(value: any): number {
@@ -671,11 +670,11 @@ export class CacheManager {
   private recordCacheMetrics(
     operation: string,
     tier: string,
-    duration: number
+    duration: number,
   ): void {
     if (this.config.enableMetrics) {
       recordPerformanceMetrics({
-        module: 'cache-manager',
+        module: "cache-manager",
         operation: `cache-${operation}`,
         responseTime: duration,
         memoryUsage: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
@@ -700,7 +699,7 @@ export class CacheManager {
       this.redisClient = null;
     }
 
-    logger.info('⏹️ [CacheManager] Cache manager stopped', 'CacheManager');
+    logger.info("⏹️ [CacheManager] Cache manager stopped", "CacheManager");
   }
 }
 
@@ -717,14 +716,14 @@ export const setInCache = <T>(
   value: T,
   ttl?: number,
   namespace?: CacheNamespace,
-  tags?: CacheTag[]
+  tags?: CacheTag[],
 ) => cacheManager.set(key, value, ttl, namespace, tags);
 export const getOrSetCache = <T>(
   key: string,
   factory: () => Promise<T> | T,
   ttl?: number,
   namespace?: CacheNamespace,
-  tags?: CacheTag[]
+  tags?: CacheTag[],
 ) => cacheManager.getOrSet(key, factory, ttl, namespace, tags);
 export const clearCacheNamespace = (namespace: CacheNamespace) =>
   cacheManager.clearNamespace(namespace);

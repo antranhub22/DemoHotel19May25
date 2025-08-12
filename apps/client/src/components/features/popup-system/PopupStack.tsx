@@ -1,7 +1,7 @@
-import React from 'react';
-import { PopupState } from '@/context/PopupContext';
-import { PopupCard } from './PopupCard';
-import styles from './PopupStack.module.css';
+import { PopupState } from "@/context/PopupContext";
+import React from "react";
+import { PopupCard } from "./PopupCard";
+import styles from "./PopupStack.module.css";
 
 interface PopupStackProps {
   popups: PopupState[];
@@ -9,7 +9,7 @@ interface PopupStackProps {
   maxVisible?: number;
   onPopupSelect: (id: string) => void;
   onPopupDismiss: (id: string) => void;
-  position?: 'top' | 'bottom' | 'center';
+  position?: "top" | "bottom" | "center";
 }
 
 export const PopupStack: React.FC<PopupStackProps> = ({
@@ -18,7 +18,7 @@ export const PopupStack: React.FC<PopupStackProps> = ({
   maxVisible = 4,
   onPopupSelect,
   onPopupDismiss,
-  position = 'bottom',
+  position = "bottom",
 }) => {
   if (popups.length === 0) {
     return null;
@@ -41,31 +41,31 @@ export const PopupStack: React.FC<PopupStackProps> = ({
     <div
       className={styles.popupStack}
       style={{
-        position: 'fixed',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '100%',
-        maxWidth: '400px',
+        position: "fixed",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "100%",
+        maxWidth: "400px",
         zIndex: 1000,
-        pointerEvents: 'none',
-        ...(position === 'top' && { top: '20px' }),
-        ...(position === 'bottom' && { bottom: '260px' }),
-        ...(position === 'center' && {
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          maxWidth: '90vw', // Better mobile support
-          width: 'auto', // Let content determine width
+        pointerEvents: "none",
+        ...(position === "top" && { top: "20px" }),
+        ...(position === "bottom" && { bottom: "260px" }),
+        ...(position === "center" && {
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          maxWidth: "90vw", // Better mobile support
+          width: "auto", // Let content determine width
         }),
       }}
     >
       <div
         className={styles.popupStackContainer}
         style={{
-          display: 'flex',
-          flexDirection: position === 'bottom' ? 'column-reverse' : 'column',
-          gap: '4px',
-          padding: position === 'center' ? '0' : '0 16px', // No padding for center modal
-          pointerEvents: 'auto',
+          display: "flex",
+          flexDirection: position === "bottom" ? "column-reverse" : "column",
+          gap: "4px",
+          padding: position === "center" ? "0" : "0 16px", // No padding for center modal
+          pointerEvents: "auto",
         }}
       >
         {/* Title when multiple popups */}
@@ -73,12 +73,12 @@ export const PopupStack: React.FC<PopupStackProps> = ({
           <div
             className={styles.popupStackHeader}
             style={{
-              textAlign: 'center',
-              padding: '8px 0',
-              color: '#8E8E93',
-              fontSize: '14px',
-              fontWeight: '600',
-              order: position === 'bottom' ? 1 : -1,
+              textAlign: "center",
+              padding: "8px 0",
+              color: "#8E8E93",
+              fontSize: "14px",
+              fontWeight: "600",
+              order: position === "bottom" ? 1 : -1,
             }}
           >
             Notification Centre
@@ -90,12 +90,12 @@ export const PopupStack: React.FC<PopupStackProps> = ({
           <div
             className={styles.popupStackActive}
             style={{
-              order: position === 'bottom' ? 0 : 0,
+              order: position === "bottom" ? 0 : 0,
             }}
           >
             {sortedPopups
-              .filter(popup => popup.id === activePopup)
-              .map((popup, index) => (
+              .filter((popup) => popup.id === activePopup)
+              .map((popup) => (
                 <PopupCard
                   key={popup.id}
                   popup={popup}
@@ -113,11 +113,11 @@ export const PopupStack: React.FC<PopupStackProps> = ({
         <div
           className={styles.popupStackInactive}
           style={{
-            order: position === 'bottom' ? 2 : 1,
+            order: position === "bottom" ? 2 : 1,
           }}
         >
           {sortedPopups
-            .filter(popup => popup.id !== activePopup)
+            .filter((popup) => popup.id !== activePopup)
             .slice(0, maxVisible - 1)
             .map((popup, index) => (
               <PopupCard
@@ -133,22 +133,22 @@ export const PopupStack: React.FC<PopupStackProps> = ({
         </div>
 
         {/* More indicator if there are hidden popups */}
-        {sortedPopups.filter(p => p.id !== activePopup).length >
+        {sortedPopups.filter((p) => p.id !== activePopup).length >
           maxVisible - 1 && (
           <div
             className={styles.popupStackMore}
             style={{
-              textAlign: 'center',
-              padding: '8px 0',
-              color: '#8E8E93',
-              fontSize: '12px',
-              fontWeight: '500',
-              order: position === 'bottom' ? 3 : 2,
+              textAlign: "center",
+              padding: "8px 0",
+              color: "#8E8E93",
+              fontSize: "12px",
+              fontWeight: "500",
+              order: position === "bottom" ? 3 : 2,
             }}
           >
             +
-            {sortedPopups.filter(p => p.id !== activePopup).length -
-              (maxVisible - 1)}{' '}
+            {sortedPopups.filter((p) => p.id !== activePopup).length -
+              (maxVisible - 1)}{" "}
             more
           </div>
         )}

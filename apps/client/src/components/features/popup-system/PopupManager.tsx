@@ -1,23 +1,17 @@
-import React, { useEffect, Suspense } from 'react';
-import { usePopupContext } from '@/context/PopupContext';
-import { PopupStack } from './PopupStack';
-
-// Lazy load SummaryPopupContent for code splitting
-const LazySummaryPopupContent = React.lazy(() =>
-  import('./SummaryPopupContent').then(module => ({
-    default: module.SummaryPopupContent,
-  }))
-);
+import { usePopupContext } from "@/context/PopupContext";
+import * as React from "react";
+import { useEffect } from "react";
+import { PopupStack } from "./PopupStack";
 
 interface PopupManagerProps {
-  position?: 'top' | 'bottom' | 'center';
+  position?: "top" | "bottom" | "center";
   maxVisible?: number;
   autoCloseDelay?: number; // Auto close after X milliseconds
   isMobile?: boolean; // Filter popups based on mobile/desktop
 }
 
 export const PopupManager: React.FC<PopupManagerProps> = ({
-  position = 'bottom',
+  position = "bottom",
   maxVisible = 4,
   autoCloseDelay,
 }) => {
@@ -32,9 +26,9 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 
     const timers: NodeJS.Timeout[] = [];
 
-    popups.forEach(popup => {
+    popups.forEach((popup) => {
       // Only auto-close low priority popups
-      if (popup.priority === 'low') {
+      if (popup.priority === "low") {
         const timer = setTimeout(() => {
           removePopup(popup.id);
         }, autoCloseDelay);
@@ -43,7 +37,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
     });
 
     return () => {
-      timers.forEach(timer => clearTimeout(timer));
+      timers.forEach((timer) => clearTimeout(timer));
     };
   }, [popups, autoCloseDelay, removePopup]);
 
@@ -56,7 +50,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
 
     // If we're dismissing the active popup, set the next one as active
     if (activePopup === id && popups.length > 1) {
-      const remainingPopups = popups.filter(p => p.id !== id);
+      const remainingPopups = popups.filter((p) => p.id !== id);
       if (remainingPopups.length > 0) {
         setActivePopup(remainingPopups[0].id);
       }
@@ -64,7 +58,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
   };
 
   // Filter popups - Remove summary popups since they're handled by unified SummaryPopup components
-  const regularPopups = popups.filter(popup => popup.type !== 'summary');
+  const regularPopups = popups.filter((popup) => popup.type !== "summary");
 
   return (
     <>
@@ -80,9 +74,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
         />
       )}
 
-      {/* Summary popups are now handled by unified SummaryPopup components:
-          - Desktop: SummaryPopup with layout="grid" in Interface1
-          - Mobile: MobileSummaryPopup with layout="center-modal" in Interface1
+      {/* Summary popups are now handled by UnifiedSummaryPopup component:
           This ensures consistent behavior and maintainability across platforms.
       */}
 
@@ -111,15 +103,15 @@ export const usePopup = () => {
     content: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: "high" | "medium" | "low";
       badge?: number;
-    }
+    },
   ) => {
     return addPopup({
-      type: 'conversation',
-      title: options?.title || 'Realtime Conversation',
+      type: "conversation",
+      title: options?.title || "Realtime Conversation",
       content,
-      priority: options?.priority || 'high',
+      priority: options?.priority || "high",
       isActive: true,
       badge: options?.badge,
     });
@@ -129,15 +121,15 @@ export const usePopup = () => {
     content: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: "high" | "medium" | "low";
       badge?: number;
-    }
+    },
   ) => {
     return addPopup({
-      type: 'staff',
-      title: options?.title || 'Staff Message',
+      type: "staff",
+      title: options?.title || "Staff Message",
       content,
-      priority: options?.priority || 'medium',
+      priority: options?.priority || "medium",
       isActive: false,
       badge: options?.badge,
     });
@@ -147,15 +139,15 @@ export const usePopup = () => {
     content: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: "high" | "medium" | "low";
       badge?: number;
-    }
+    },
   ) => {
     return addPopup({
-      type: 'notification',
-      title: options?.title || 'Hotel Notification',
+      type: "notification",
+      title: options?.title || "Hotel Notification",
       content,
-      priority: options?.priority || 'low',
+      priority: options?.priority || "low",
       isActive: false,
       badge: options?.badge,
     });
@@ -165,15 +157,15 @@ export const usePopup = () => {
     content: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: "high" | "medium" | "low";
       badge?: number;
-    }
+    },
   ) => {
     return addPopup({
-      type: 'alert',
-      title: options?.title || 'System Alert',
+      type: "alert",
+      title: options?.title || "System Alert",
       content,
-      priority: options?.priority || 'high',
+      priority: options?.priority || "high",
       isActive: true,
       badge: options?.badge,
     });
@@ -183,128 +175,94 @@ export const usePopup = () => {
     content: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: "high" | "medium" | "low";
       badge?: number;
-    }
+    },
   ) => {
     return addPopup({
-      type: 'order',
-      title: options?.title || 'Order Update',
+      type: "order",
+      title: options?.title || "Order Update",
       content,
-      priority: options?.priority || 'medium',
+      priority: options?.priority || "medium",
       isActive: false,
       badge: options?.badge,
     });
   };
 
+  // ✅ LEGACY: showSummary function replaced by UnifiedSummaryPopup component
+  // This function is kept for backward compatibility but will be deprecated
   const showSummary = (
     content?: React.ReactNode,
     options?: {
       title?: string;
-      priority?: 'high' | 'medium' | 'low';
-    }
+      priority?: "high" | "medium" | "low";
+    },
   ) => {
-    try {
-      console.log('📋 [DEBUG] showSummary called with options:', {
-        title: options?.title,
-        priority: options?.priority || 'medium',
-        hasContent: !!content,
-      });
-      console.log('📋 [DEBUG] showSummary call stack:', new Error().stack);
+    console.warn(
+      "⚠️ [DEPRECATED] PopupManager.showSummary is deprecated. Use UnifiedSummaryPopup component instead.",
+    );
 
-      // ✅ FIXED: Prevent multiple rapid calls with better logic
-      const now = Date.now();
-      if (showSummary.lastCall && now - showSummary.lastCall < 10) {
-        console.log('🚫 [DEBUG] showSummary called too rapidly, skipping...');
-        console.log(
-          '🚫 [DEBUG] Time since last call:',
-          now - showSummary.lastCall,
-          'ms'
-        );
-        return '';
-      }
-      showSummary.lastCall = now;
+    // Create basic popup for backward compatibility
+    const popupId = addPopup({
+      type: "summary",
+      title: options?.title || "Call Summary",
+      content: content || (
+        <div className="p-4 text-center">Summary content unavailable</div>
+      ),
+      priority: options?.priority || "medium",
+      isActive: false,
+    });
 
-      // ✅ FIXED: Remove isCallActive check - summary should show AFTER call ends
-      // The summary popup is triggered when the call ends, so isCallActive will be false
-      console.log('📋 [DEBUG] Creating summary popup (call may have ended)');
-
-      const popupId = addPopup({
-        type: 'summary',
-        title: options?.title || 'Call Summary',
-        content: content || (
-          <Suspense
-            fallback={
-              <div className="p-4 text-center text-gray-500">Loading...</div>
-            }
-          >
-            <LazySummaryPopupContent />
-          </Suspense>
-        ),
-        priority: options?.priority || 'medium', // ✅ FIX: Default to 'medium' instead of 'high'
-        isActive: false,
-      });
-
-      console.log(
-        '✅ [DEBUG] Summary popup created successfully, ID:',
-        popupId
-      );
-      return popupId;
-    } catch (error) {
-      console.error('❌ [DEBUG] Error in showSummary:', error);
-      // Assuming logger is defined elsewhere or needs to be imported
-      // logger.error('Error creating summary popup', 'PopupManager', error);
-      return '';
-    }
+    return popupId;
   };
 
-  // ✅ NEW: Add static property to track last call time
-  showSummary.lastCall = 0;
+  // ✅ NEW: Add static property to track last call time (with explicit typing via any)
+  (showSummary as any).lastCall = (showSummary as any).lastCall || 0;
 
   // ✅ NEW: Emergency cleanup function - integrated with RefactoredAssistantContext
   const emergencyCleanup = () => {
-    console.log('🚨 [DEBUG] Emergency cleanup triggered');
+    console.log("🚨 [DEBUG] Emergency cleanup triggered");
     const { clearAllPopups } = usePopupContext();
     clearAllPopups();
-    showSummary.lastCall = 0;
+    (showSummary as any).lastCall = 0;
 
     // ✅ NEW: Reset RefactoredAssistantContext summary state
     if (window.resetSummarySystem) {
       window.resetSummarySystem();
     }
 
-    console.log('✅ [DEBUG] Emergency cleanup completed');
+    console.log("✅ [DEBUG] Emergency cleanup completed");
   };
 
   // ✅ NEW: Reset summary system - integrated with RefactoredAssistantContext
   const resetSummarySystem = () => {
-    console.log('🔄 [DEBUG] Resetting summary system');
+    console.log("🔄 [DEBUG] Resetting summary system");
     const { popups, removePopup } = usePopupContext();
 
     // Remove all summary popups
     popups
-      .filter(popup => popup.type === 'summary')
-      .forEach(popup => {
+      .filter((popup) => popup.type === "summary")
+      .forEach((popup) => {
         console.log(
-          '🗑️ [DEBUG] Removing summary popup during reset:',
-          popup.id
+          "🗑️ [DEBUG] Removing summary popup during reset:",
+          popup.id,
         );
         removePopup(popup.id);
       });
 
-    showSummary.lastCall = 0;
+    (showSummary as any).lastCall = 0;
 
     // ✅ NEW: Reset RefactoredAssistantContext summary state
     if (window.resetSummarySystem) {
       window.resetSummarySystem();
     }
 
-    console.log('✅ [DEBUG] Summary system reset completed');
+    console.log("✅ [DEBUG] Summary system reset completed");
   };
 
   // ✅ NEW: Force display summary popup - integrated with RefactoredAssistantContext
   const forceShowSummary = (content?: React.ReactNode) => {
-    console.log('🚀 [DEBUG] Force showing summary popup');
+    console.log("🚀 [DEBUG] Force showing summary popup");
 
     // First cleanup all existing popups
     emergencyCleanup();
@@ -312,29 +270,29 @@ export const usePopup = () => {
     // Then create new summary popup
     setTimeout(() => {
       const summaryContent = content || (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ padding: "20px", textAlign: "center" }}>
           <h3
             style={{
-              marginBottom: '16px',
-              fontSize: '18px',
-              fontWeight: '600',
+              marginBottom: "16px",
+              fontSize: "18px",
+              fontWeight: "600",
             }}
           >
             📋 Call Summary
           </h3>
-          <p style={{ marginBottom: '16px', lineHeight: '1.5' }}>
+          <p style={{ marginBottom: "16px", lineHeight: "1.5" }}>
             Your call has been completed successfully!
           </p>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>✅</div>
         </div>
       );
 
       const popupId = showSummary(summaryContent, {
-        title: 'Call Complete',
-        priority: 'medium',
+        title: "Call Complete",
+        priority: "medium",
       });
 
-      console.log('✅ [DEBUG] Force summary popup created, ID:', popupId);
+      console.log("✅ [DEBUG] Force summary popup created, ID:", popupId);
     }, 100);
   };
 
@@ -342,28 +300,28 @@ export const usePopup = () => {
   const showQuickNotification = (
     message: string,
     options?: {
-      type?: 'success' | 'error' | 'warning' | 'info' | 'call' | 'service';
+      type?: "success" | "error" | "warning" | "info" | "call" | "service";
       title?: string;
       duration?: number;
-      priority?: 'high' | 'medium' | 'low';
-      position?: 'top-right' | 'top-center' | 'bottom';
-    }
+      priority?: "high" | "medium" | "low";
+      position?: "top-right" | "top-center" | "bottom";
+    },
   ) => {
     const notificationTypes = {
-      success: { icon: '✅', title: 'Success', color: '#34C759' },
-      error: { icon: '❌', title: 'Error', color: '#FF3B30' },
-      warning: { icon: '⚠️', title: 'Warning', color: '#FF9500' },
-      info: { icon: 'ℹ️', title: 'Info', color: '#007AFF' },
-      call: { icon: '📞', title: 'Call', color: '#5856D6' },
-      service: { icon: '🛎️', title: 'Service', color: '#5856D6' },
+      success: { icon: "✅", title: "Success", color: "#34C759" },
+      error: { icon: "❌", title: "Error", color: "#FF3B30" },
+      warning: { icon: "⚠️", title: "Warning", color: "#FF9500" },
+      info: { icon: "ℹ️", title: "Info", color: "#007AFF" },
+      call: { icon: "📞", title: "Call", color: "#5856D6" },
+      service: { icon: "🛎️", title: "Service", color: "#5856D6" },
     };
 
-    const type = options?.type || 'info';
+    const type = options?.type || "info";
     const config = notificationTypes[type];
     const duration = options?.duration || 3000;
 
     const popupId = addPopup({
-      type: 'notification',
+      type: "notification",
       title: options?.title || config.title,
       content: (
         <div className="flex items-center space-x-3">
@@ -371,13 +329,13 @@ export const usePopup = () => {
           <span className="text-sm text-gray-700">{message}</span>
         </div>
       ),
-      priority: options?.priority || 'low',
+      priority: options?.priority || "low",
       isActive: false,
       metadata: {
         notificationType: type,
         autoDismiss: true,
         duration,
-        position: options?.position || 'top-right',
+        position: options?.position || "top-right",
       },
     });
 
@@ -397,15 +355,15 @@ export const usePopup = () => {
     language: string,
     _variables: Record<string, string> = {},
     options?: {
-      type?: 'success' | 'error' | 'warning' | 'info' | 'call' | 'service';
+      type?: "success" | "error" | "warning" | "info" | "call" | "service";
       duration?: number;
       metadata?: Record<string, any>;
-    }
+    },
   ) => {
     // For now, simplified version - can be enhanced later
     const message = `${template} (${language})`;
     return showQuickNotification(message, {
-      type: options?.type || 'info',
+      type: options?.type || "info",
       duration: options?.duration || 3000,
     });
   };

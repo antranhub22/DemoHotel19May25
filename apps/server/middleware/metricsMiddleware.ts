@@ -4,9 +4,9 @@
 // Middleware for automatic collection of performance metrics from all API requests
 // Integrated with Advanced Metrics Collection system
 
-import { recordPerformanceMetrics } from '@server/shared/AdvancedMetricsCollector';
-import { logger } from '@shared/utils/logger';
-import { NextFunction, Request, Response } from 'express';
+import { recordPerformanceMetrics } from "@server/shared/AdvancedMetricsCollector";
+import { logger } from "@shared/utils/logger";
+import { NextFunction, Request, Response } from "express";
 
 interface MetricsRequest extends Request {
   startTime?: number;
@@ -20,7 +20,7 @@ interface MetricsRequest extends Request {
 export const metricsMiddleware = (
   req: MetricsRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Record start time
   req.startTime = Date.now();
@@ -33,20 +33,20 @@ export const metricsMiddleware = (
   res.send = function (data) {
     const responseTime = Date.now() - (req.startTime || Date.now());
     const memoryUsage = Math.round(
-      process.memoryUsage().heapUsed / 1024 / 1024
+      process.memoryUsage().heapUsed / 1024 / 1024,
     );
     const isError = res.statusCode >= 400;
 
     // ✅ FIX: Skip metrics for 404 errors to prevent false alerts
     const is404Error = res.statusCode === 404;
     const shouldSkipMetrics =
-      is404Error && (req.path === '/' || req.path === '/api');
+      is404Error && (req.path === "/" || req.path === "/api");
 
     if (!shouldSkipMetrics) {
       // Record performance metrics
       try {
         recordPerformanceMetrics({
-          module: req.module || 'unknown',
+          module: req.module || "unknown",
           endpoint: req.path,
           operation: `${req.method}:${req.path}`,
           responseTime,
@@ -60,12 +60,12 @@ export const metricsMiddleware = (
         if (responseTime > 2000) {
           logger.warn(
             `🐌 [Metrics] Slow request detected: ${req.method} ${req.path} (${responseTime}ms)`,
-            'MetricsMiddleware',
+            "MetricsMiddleware",
             {
               module: req.module,
               responseTime,
               statusCode: res.statusCode,
-            }
+            },
           );
         }
 
@@ -73,19 +73,19 @@ export const metricsMiddleware = (
         if (isError && !is404Error) {
           logger.warn(
             `❌ [Metrics] Error response: ${req.method} ${req.path} (${res.statusCode})`,
-            'MetricsMiddleware',
+            "MetricsMiddleware",
             {
               module: req.module,
               responseTime,
               statusCode: res.statusCode,
-            }
+            },
           );
         }
       } catch (error) {
         logger.error(
-          '❌ [Metrics] Failed to record performance metrics',
-          'MetricsMiddleware',
-          error
+          "❌ [Metrics] Failed to record performance metrics",
+          "MetricsMiddleware",
+          error,
         );
       }
     }
@@ -100,23 +100,23 @@ export const metricsMiddleware = (
  * Determine module name from request path
  */
 function determineModule(path: string): string {
-  if (path.startsWith('/api/core/')) return 'core-module';
-  if (path.startsWith('/api/hotel/')) return 'hotel-module';
-  if (path.startsWith('/api/voice/')) return 'voice-module';
-  if (path.startsWith('/api/analytics-module/')) return 'analytics-module';
-  if (path.startsWith('/api/analytics/')) return 'analytics-module';
-  if (path.startsWith('/api/admin/')) return 'admin-module';
-  if (path.startsWith('/api/health')) return 'core-module';
-  if (path.startsWith('/api/request')) return 'hotel-module';
-  if (path.startsWith('/api/staff')) return 'hotel-module';
-  if (path.startsWith('/api/saas-dashboard')) return 'saas-module';
-  if (path.startsWith('/api/hotel-dashboard')) return 'hotel-module';
-  if (path.startsWith('/api/email')) return 'hotel-module';
-  if (path.startsWith('/api/calls')) return 'voice-module';
-  if (path.startsWith('/auth')) return 'auth-module';
-  if (path.startsWith('/public')) return 'public-module';
+  if (path.startsWith("/api/core/")) return "core-module";
+  if (path.startsWith("/api/hotel/")) return "hotel-module";
+  if (path.startsWith("/api/voice/")) return "voice-module";
+  if (path.startsWith("/api/analytics-module/")) return "analytics-module";
+  if (path.startsWith("/api/analytics/")) return "analytics-module";
+  if (path.startsWith("/api/admin/")) return "admin-module";
+  if (path.startsWith("/api/health")) return "core-module";
+  if (path.startsWith("/api/request")) return "hotel-module";
+  if (path.startsWith("/api/staff")) return "hotel-module";
+  if (path.startsWith("/api/saas-dashboard")) return "saas-module";
+  if (path.startsWith("/api/hotel-dashboard")) return "hotel-module";
+  if (path.startsWith("/api/email")) return "hotel-module";
+  if (path.startsWith("/api/calls")) return "voice-module";
+  if (path.startsWith("/auth")) return "auth-module";
+  if (path.startsWith("/public")) return "public-module";
 
-  return 'unknown-module';
+  return "unknown-module";
 }
 
 /**
@@ -133,37 +133,38 @@ export const businessMetricsMiddleware = (kpiName: string) => {
           // const { recordBusinessKPI } = require('@server/shared/AdvancedMetricsCollector');
           // TODO: Refactor to use dynamic import in async context
 
-          let value = 1; // Default: count successful operations
-          let unit = 'operations';
+          let _value = 1; // Default: count successful operations
+          let _unit = "operations";
 
           // Customize based on KPI type
           switch (kpiName) {
-            case 'booking-conversion':
-              value = 1;
-              unit = 'conversions';
+            case "booking-conversion":
+              _value = 1;
+              _unit = "conversions";
               break;
-            case 'customer-satisfaction':
+            case "customer-satisfaction":
               // Extract rating from response if available
               try {
                 const responseData = JSON.parse(data);
                 if (responseData.rating) {
-                  value = responseData.rating;
-                  unit = 'rating';
+                  _value = responseData.rating;
+                  _unit = "rating";
                 }
               } catch {
-                value = 5; // Default good rating
-                unit = 'rating';
+                _value = 5; // Default good rating
+                _unit = "rating";
               }
               break;
-            case 'response-efficiency': {
+            case "response-efficiency": {
               const responseTime = Date.now() - (req.startTime || Date.now());
-              value = responseTime < 1000 ? 100 : responseTime < 2000 ? 80 : 60;
-              unit = '%';
+              _value =
+                responseTime < 1000 ? 100 : responseTime < 2000 ? 80 : 60;
+              _unit = "%";
               break;
             }
             default:
-              value = 1;
-              unit = 'count';
+              _value = 1;
+              _unit = "count";
           }
 
           // ✅ FIXED: Temporarily skip KPI recording to avoid ES modules error
@@ -177,9 +178,9 @@ export const businessMetricsMiddleware = (kpiName: string) => {
           // });
         } catch (error) {
           logger.error(
-            '❌ [Metrics] Failed to record business KPI',
-            'MetricsMiddleware',
-            error
+            "❌ [Metrics] Failed to record business KPI",
+            "MetricsMiddleware",
+            error,
           );
         }
       }
@@ -207,25 +208,25 @@ export const moduleMetricsMiddleware = (moduleName: string) => {
 export const criticalEndpointMiddleware = (
   req: MetricsRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const criticalPaths = [
-    '/api/health',
-    '/api/core/health',
-    '/api/hotel/requests',
-    '/api/voice/calls',
-    '/auth/login',
-    '/auth/verify',
+    "/api/health",
+    "/api/core/health",
+    "/api/hotel/requests",
+    "/api/voice/calls",
+    "/auth/login",
+    "/auth/verify",
   ];
 
-  if (criticalPaths.some(path => req.path.startsWith(path))) {
+  if (criticalPaths.some((path) => req.path.startsWith(path))) {
     const originalSend = res.send;
     res.send = function (data: any) {
       const responseTime = Date.now() - (req.startTime || Date.now());
 
       // ✅ FIX: Disable alert creation in production to prevent false alerts
       const shouldCreateAlert =
-        process.env.NODE_ENV !== 'production' &&
+        process.env.NODE_ENV !== "production" &&
         (res.statusCode >= 500 || responseTime > 5000);
 
       if (shouldCreateAlert) {
@@ -249,9 +250,9 @@ export const criticalEndpointMiddleware = (
           // });
         } catch (error) {
           logger.error(
-            '❌ [Metrics] Failed to create critical endpoint alert',
-            'MetricsMiddleware',
-            error
+            "❌ [Metrics] Failed to create critical endpoint alert",
+            "MetricsMiddleware",
+            error,
           );
         }
       }

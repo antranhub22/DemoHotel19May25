@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   Settings,
   Bell,
@@ -20,7 +21,7 @@ import {
   Database,
   Shield,
 } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from 'react';
 import { Link, useLocation } from "wouter";
 import type { UserRole } from "@/types/auth";
 import {
@@ -458,9 +459,7 @@ const DynamicSidebar = ({
 };
 
 // Main unified dashboard layout component
-export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({
-  children,
-}) => {
+export const UnifiedDashboardLayout: React.FC<UnifiedDashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const role = user?.role || "front-desk";

@@ -1,32 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import StaffRequestDetailModal from '@/components/features/dashboard/StaffRequestDetailModal';
-import StaffMessagePopup from '@/components/features/popup-system/StaffMessagePopup';
-import { logger } from '@shared/utils/logger';
+import * as React from "react";
+// removed unused Room type
+import StaffRequestDetailModal from "@/components/features/dashboard/StaffRequestDetailModal";
+import StaffMessagePopup from "@/components/features/popup-system/StaffMessagePopup";
+import logger from "@shared/utils/logger";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const statusOptions = [
-  'Tất cả',
-  'Đã ghi nhận',
-  'Đang thực hiện',
-  'Đã thực hiện và đang bàn giao cho khách',
-  'Hoàn thiện',
-  'Lưu ý khác',
+  "Tất cả",
+  "Đã ghi nhận",
+  "Đang thực hiện",
+  "Đã thực hiện và đang bàn giao cho khách",
+  "Hoàn thiện",
+  "Lưu ý khác",
 ];
 
 const statusColor = (status: string) => {
   switch (status) {
-    case 'Đã ghi nhận':
-      return 'bg-gray-300 text-gray-800';
-    case 'Đang thực hiện':
-      return 'bg-yellow-200 text-yellow-800';
-    case 'Đã thực hiện và đang bàn giao cho khách':
-      return 'bg-blue-200 text-blue-800';
-    case 'Hoàn thiện':
-      return 'bg-green-200 text-green-800';
-    case 'Lưu ý khác':
-      return 'bg-red-200 text-red-800';
+    case "Đã ghi nhận":
+      return "bg-gray-300 text-gray-800";
+    case "Đang thực hiện":
+      return "bg-yellow-200 text-yellow-800";
+    case "Đã thực hiện và đang bàn giao cho khách":
+      return "bg-blue-200 text-blue-800";
+    case "Hoàn thiện":
+      return "bg-green-200 text-green-800";
+    case "Lưu ý khác":
+      return "bg-red-200 text-red-800";
     default:
-      return 'bg-gray-100 text-gray-700';
+      return "bg-gray-100 text-gray-700";
   }
 };
 
@@ -37,40 +39,40 @@ const StaffDashboard: React.FC = () => {
   const [showMessagePopup, setShowMessagePopup] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [loadingMsg, setLoadingMsg] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('Tất cả');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [expandedContent, setExpandedContent] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<{ [id: number]: string }>(
-    {}
+    {},
   );
   const navigate = useNavigate();
 
   // Lấy token từ localStorage
-  const getToken = () => localStorage.getItem('staff_token');
+  const getToken = () => localStorage.getItem("staff_token");
 
   // Hàm lấy danh sách requests
   const fetchRequests = useCallback(async () => {
     const token = getToken();
     if (!token) {
-      return navigate('/staff');
+      return navigate("/staff");
     }
     try {
-      const res = await fetch('/api/request', {
+      const res = await fetch("/api/request", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
-        return navigate('/staff');
+        return navigate("/staff");
       }
       const data = await (res as any).json();
-      logger.debug('Fetched requests data:', 'Component', data); // Debug log
+      logger.debug("Fetched requests data:", "Component", data);
       setRequests(data);
     } catch (_error) {
-      logger.error('Failed to fetch requests:', 'Component');
+      logger.error("Failed to fetch requests:", "Component");
     }
   }, [navigate]);
 
@@ -90,27 +92,27 @@ const StaffDashboard: React.FC = () => {
   const handleStatusChange = async (status: string, reqId: number) => {
     const token = getToken();
     if (!token) {
-      return navigate('/staff');
+      return navigate("/staff");
     }
     try {
       await fetch(`/api/staff/requests/${reqId}/status`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
       // Cập nhật local state ngay
-      setRequests(reqs =>
-        reqs.map(r => (r.id === reqId ? { ...r, status } : r))
+      setRequests((reqs) =>
+        reqs.map((r) => (r.id === reqId ? { ...r, status } : r)),
       );
       if (selectedRequest && selectedRequest.id === reqId) {
         setSelectedRequest({ ...selectedRequest, status });
       }
     } catch (err) {
-      logger.error('Failed to update status:', 'Component', err);
+      logger.error("Failed to update status:", "Component", err);
     }
   };
   // Mở popup nhắn tin
@@ -121,15 +123,15 @@ const StaffDashboard: React.FC = () => {
     }
     const token = getToken();
     if (!token) {
-      return navigate('/staff');
+      return navigate("/staff");
     }
     try {
       const res = await fetch(
         `/api/staff/requests/${selectedRequest.id}/messages`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include',
-        }
+          credentials: "include",
+        },
       );
       const data = await (res as any).json();
       setMessages(data);
@@ -144,23 +146,23 @@ const StaffDashboard: React.FC = () => {
     setLoadingMsg(true);
     const token = getToken();
     if (!token) {
-      return navigate('/staff');
+      return navigate("/staff");
     }
     try {
       await fetch(`/api/staff/requests/${selectedRequest.id}/message`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify({ content: msg }),
       });
-      setMessages(msgs => [
+      setMessages((msgs) => [
         ...msgs,
         {
           id: (msgs.length + 1).toString(),
-          sender: 'staff',
+          sender: "staff",
           content: msg,
           time: new Date().toLocaleTimeString().slice(0, 5),
         },
@@ -174,14 +176,14 @@ const StaffDashboard: React.FC = () => {
   // Xóa tất cả requests
   const handleDeleteAllRequests = async () => {
     setShowPasswordDialog(true);
-    setPasswordInput('');
+    setPasswordInput("");
   };
 
   // Xác nhận xóa sau khi nhập mật khẩu
   const confirmDelete = async () => {
     // Kiểm tra mật khẩu
-    if (passwordInput !== '2208') {
-      setPasswordError('Mật khẩu không đúng');
+    if (passwordInput !== "2208") {
+      setPasswordError("Mật khẩu không đúng");
       return;
     }
 
@@ -191,15 +193,15 @@ const StaffDashboard: React.FC = () => {
       const token = getToken();
       if (!token) {
         setShowPasswordDialog(false);
-        return navigate('/staff');
+        return navigate("/staff");
       }
 
-      const response = await fetch('/api/staff/requests/all', {
-        method: 'DELETE',
+      const response = await fetch("/api/staff/requests/all", {
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        credentials: 'include',
+        credentials: "include",
       });
 
       const result = await response.json();
@@ -207,29 +209,29 @@ const StaffDashboard: React.FC = () => {
       setShowPasswordDialog(false);
 
       if (result.success) {
-        logger.success(`${result.message}`, 'Component');
+        logger.success(`${result.message}`, "Component");
         // Cập nhật state để hiển thị danh sách trống
         setRequests([]);
       } else {
         logger.error(
-          `Lỗi: ${result.error || 'Không thể xóa requests'}`,
-          'Component'
+          `Lỗi: ${result.error || "Không thể xóa requests"}`,
+          "Component",
         );
       }
     } catch (error) {
-      logger.error('Error deleting all requests:', 'Component', error);
-      logger.error('Đã xảy ra lỗi khi xóa requests', 'Component');
+      logger.error("Error deleting all requests:", "Component", error);
+      logger.error("Đã xảy ra lỗi khi xóa requests", "Component");
       setShowPasswordDialog(false);
     } finally {
       setIsDeleting(false);
-      setPasswordInput('');
+      setPasswordInput("");
     }
   };
 
   // Filter requests theo status và thời gian
-  const filteredRequests = requests.filter(r => {
+  const filteredRequests = requests.filter((r) => {
     // Filter theo status
-    if (statusFilter !== 'Tất cả' && r.status !== statusFilter) {
+    if (statusFilter !== "Tất cả" && r.status !== statusFilter) {
       return false;
     }
 
@@ -259,12 +261,12 @@ const StaffDashboard: React.FC = () => {
 
   // Xử lý khi nhấn Enter trong hộp mật khẩu
   const handlePasswordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       confirmDelete();
     }
     // Xóa thông báo lỗi khi người dùng bắt đầu nhập lại
     if (passwordError) {
-      setPasswordError('');
+      setPasswordError("");
     }
   };
 
@@ -291,7 +293,7 @@ const StaffDashboard: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex justify-between items-center mb-4">
           <button
-            onClick={() => navigate('/analytics')}
+            onClick={() => navigate("/analytics")}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition"
           >
             View Analytics
@@ -300,9 +302,9 @@ const StaffDashboard: React.FC = () => {
             <button
               onClick={handleDeleteAllRequests}
               disabled={isDeleting || requests.length === 0}
-              className={`bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition ${isDeleting || requests.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold shadow transition ${isDeleting || requests.length === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              {isDeleting ? 'Deleting...' : 'Delete All Requests'}
+              {isDeleting ? "Deleting..." : "Delete All Requests"}
             </button>
             <button
               onClick={fetchRequests}
@@ -323,9 +325,9 @@ const StaffDashboard: React.FC = () => {
             <select
               className="w-full sm:w-auto border rounded px-3 py-1 text-sm"
               value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value)}
             >
-              {statusOptions.map(opt => (
+              {statusOptions.map((opt) => (
                 <option key={opt} value={opt}>
                   {opt}
                 </option>
@@ -345,7 +347,7 @@ const StaffDashboard: React.FC = () => {
                   type="date"
                   className="border rounded px-2 py-1 text-sm w-full"
                   value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
+                  onChange={(e) => setStartDate(e.target.value)}
                 />
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -354,14 +356,14 @@ const StaffDashboard: React.FC = () => {
                   type="date"
                   className="border rounded px-2 py-1 text-sm w-full"
                   value={endDate}
-                  onChange={e => setEndDate(e.target.value)}
+                  onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
               {(startDate || endDate) && (
                 <button
                   onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
+                    setStartDate("");
+                    setEndDate("");
                   }}
                   className="text-blue-600 hover:text-blue-800 text-sm mt-2 sm:mt-0"
                 >
@@ -378,9 +380,9 @@ const StaffDashboard: React.FC = () => {
             {/* Debug log */}
             {(() => {
               logger.debug(
-                'Mobile rendering - filteredRequests:',
-                'Component',
-                filteredRequests
+                "Mobile rendering - filteredRequests:",
+                "Component",
+                filteredRequests,
               );
               return null;
             })()}
@@ -389,34 +391,34 @@ const StaffDashboard: React.FC = () => {
                 .sort(
                   (a, b) =>
                     new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
+                    new Date(a.created_at).getTime(),
                 )
-                .map(req => (
+                .map((req) => (
                   <div
                     key={req.id}
                     className="border rounded-lg p-3 bg-white shadow-sm"
                   >
                     <div className="flex justify-between mb-2">
                       <div className="font-semibold">
-                        Phòng: {req.room_number || 'N/A'}
+                        Phòng: {req.room_number || "N/A"}
                       </div>
                       <div
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColor(req.status)}`}
                       >
-                        {req.status || 'Chưa xác định'}
+                        {req.status || "Chưa xác định"}
                       </div>
                     </div>
                     <div className="text-sm text-gray-500 mb-2">
-                      Order ID: {req.orderId || req.id || 'N/A'}
+                      Order ID: {req.orderId || req.id || "N/A"}
                     </div>
                     <div className="text-xs text-gray-500 mb-3">
                       {req.created_at ? (
                         <>
-                          {new Date(req.created_at).toLocaleDateString()}{' '}
+                          {new Date(req.created_at).toLocaleDateString()}{" "}
                           {new Date(req.created_at).toLocaleTimeString()}
                         </>
                       ) : (
-                        'Thời gian không xác định'
+                        "Thời gian không xác định"
                       )}
                     </div>
 
@@ -425,18 +427,18 @@ const StaffDashboard: React.FC = () => {
                       <button
                         onClick={() =>
                           setExpandedContent(
-                            expandedContent === req.id ? null : req.id
+                            expandedContent === req.id ? null : req.id,
                           )
                         }
                         className="w-full flex justify-between items-center py-1 px-2 border rounded bg-gray-50 hover:bg-gray-100"
                       >
                         <span className="text-sm font-medium text-blue-700">
                           {expandedContent === req.id
-                            ? 'Ẩn nội dung'
-                            : 'Xem nội dung'}
+                            ? "Ẩn nội dung"
+                            : "Xem nội dung"}
                         </span>
                         <svg
-                          className={`w-4 h-4 text-blue-700 transition-transform ${expandedContent === req.id ? 'rotate-180' : ''}`}
+                          className={`w-4 h-4 text-blue-700 transition-transform ${expandedContent === req.id ? "rotate-180" : ""}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -452,7 +454,7 @@ const StaffDashboard: React.FC = () => {
 
                       {expandedContent === req.id && (
                         <div className="mt-2 p-2 bg-gray-50 rounded-md whitespace-pre-line break-words text-sm">
-                          {req.request_content || 'Không có nội dung'}
+                          {req.request_content || "Không có nội dung"}
                         </div>
                       )}
                     </div>
@@ -461,16 +463,16 @@ const StaffDashboard: React.FC = () => {
                       <select
                         className="border rounded px-2 py-2 text-sm w-full"
                         value={pendingStatus[req.id] ?? req.status}
-                        onChange={e =>
-                          setPendingStatus(s => ({
+                        onChange={(e) =>
+                          setPendingStatus((s) => ({
                             ...s,
                             [req.id]: e.target.value,
                           }))
                         }
                       >
                         {statusOptions
-                          .filter(opt => opt !== 'Tất cả')
-                          .map(opt => (
+                          .filter((opt) => opt !== "Tất cả")
+                          .map((opt) => (
                             <option key={opt} value={opt}>
                               {opt}
                             </option>
@@ -483,7 +485,7 @@ const StaffDashboard: React.FC = () => {
                             const newStatus = pendingStatus[req.id];
                             if (newStatus && newStatus !== req.status) {
                               await handleStatusChange(newStatus, req.id);
-                              setPendingStatus(s => {
+                              setPendingStatus((s) => {
                                 const { [req.id]: _removed, ...rest } = s;
                                 return rest;
                               });
@@ -532,10 +534,10 @@ const StaffDashboard: React.FC = () => {
                 ? [...filteredRequests].sort(
                     (a, b) =>
                       new Date(b.created_at).getTime() -
-                      new Date(a.created_at).getTime()
+                      new Date(a.created_at).getTime(),
                   )
                 : []
-              ).map(req => (
+              ).map((req) => (
                 <tr key={req.id} className="border-b hover:bg-blue-50">
                   <td className="py-2 px-3 font-semibold">{req.room_number}</td>
                   <td className="py-2 px-3">{req.orderId || req.id}</td>
@@ -565,16 +567,16 @@ const StaffDashboard: React.FC = () => {
                     <select
                       className="border rounded px-2 py-1 text-xs"
                       value={pendingStatus[req.id] ?? req.status}
-                      onChange={e =>
-                        setPendingStatus(s => ({
+                      onChange={(e) =>
+                        setPendingStatus((s) => ({
                           ...s,
                           [req.id]: e.target.value,
                         }))
                       }
                     >
                       {statusOptions
-                        .filter(opt => opt !== 'Tất cả')
-                        .map(opt => (
+                        .filter((opt) => opt !== "Tất cả")
+                        .map((opt) => (
                           <option key={opt} value={opt}>
                             {opt}
                           </option>
@@ -586,7 +588,7 @@ const StaffDashboard: React.FC = () => {
                         const newStatus = pendingStatus[req.id];
                         if (newStatus && newStatus !== req.status) {
                           await handleStatusChange(newStatus, req.id);
-                          setPendingStatus(s => {
+                          setPendingStatus((s) => {
                             const { [req.id]: _removed, ...rest } = s;
                             return rest;
                           });
@@ -623,7 +625,7 @@ const StaffDashboard: React.FC = () => {
         <StaffRequestDetailModal
           request={selectedRequest}
           onClose={handleCloseDetail}
-          onStatusChange={status =>
+          onStatusChange={(status) =>
             handleStatusChange(status, selectedRequest.id)
           }
           onOpenMessage={handleOpenMessage}
@@ -657,9 +659,9 @@ const StaffDashboard: React.FC = () => {
               <input
                 type="password"
                 value={passwordInput}
-                onChange={e => setPasswordInput(e.target.value)}
+                onChange={(e) => setPasswordInput(e.target.value)}
                 onKeyDown={handlePasswordKeyDown}
-                className={`w-full px-3 py-2 border rounded ${passwordError ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-red-500`}
+                className={`w-full px-3 py-2 border rounded ${passwordError ? "border-red-500" : "border-gray-300"} focus:outline-none focus:ring-2 focus:ring-red-500`}
                 placeholder="Nhập mật khẩu xác nhận"
                 autoFocus
               />

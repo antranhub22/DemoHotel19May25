@@ -1,21 +1,22 @@
-import React from 'react';
-export const InterfaceHeader: React.FC = () => {
+import React from "react";
+export interface InterfaceHeaderProps {
+  className?: string;
+  children?: React.ReactNode;
+  // TODO: Add specific props for InterfaceHeader
+}
+
+const InterfaceHeader: React.FC<InterfaceHeaderProps> = () => {
   return (
-    <div
-      className="w-full flex justify-center items-center py-8"
-      data-testid="interface1-header"
-    >
-      <h1
-        className="hidden sm:block text-3xl md:text-4xl font-bold text-white text-center"
-        style={{
-          position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-        }}
-      >
-        Speak in Multiple Languages
-      </h1>
+    <div className="w-full" data-testid="interface1-header">
+      <div className="container mx-auto max-w-7xl px-4 md:px-6">
+        <div className="rounded-xl bg-white/80 dark:bg-neutral-900/70 border border-gray-200 shadow-sm p-3 md:p-4 text-center">
+          <h2 className="text-gray-800 text-sm md:text-base font-medium">
+            Voice assistant ready. Press Space or Enter to start speaking.
+          </h2>
+        </div>
+      </div>
     </div>
   );
 };
+
+export { InterfaceHeader };

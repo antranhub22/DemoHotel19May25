@@ -1,5 +1,6 @@
-import React, { Component, ReactNode, ErrorInfo } from 'react';
-import { logger } from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
+import * as React from "react";
+import { Component, ErrorInfo, ReactNode } from "react";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -38,22 +39,22 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   override componentDidCatch(error: Error, info: ErrorInfo) {
     logger.error(
-      '🚨 [ErrorBoundary] Uncaught error in component tree:',
-      'Component',
-      error
+      "🚨 [ErrorBoundary] Uncaught error in component tree:",
+      "Component",
+      error,
     );
     logger.error(
-      '🚨 [ErrorBoundary] Component stack:',
-      'Component',
-      info.componentStack
+      "🚨 [ErrorBoundary] Component stack:",
+      "Component",
+      info.componentStack,
     );
 
     // ✅ IMPROVED: Better error categorization
     const errorCategory = this.categorizeError(error);
     logger.debug(
-      '🔍 [ErrorBoundary] Error category:',
-      'Component',
-      errorCategory
+      "🔍 [ErrorBoundary] Error category:",
+      "Component",
+      errorCategory,
     );
 
     // Call custom error handler if provided
@@ -63,6 +64,24 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
     this.setState({ errorInfo: info });
 
+    // ✅ EXTRA: Expose last error globally for quick inspection in DevTools
+    try {
+      if (typeof window !== "undefined") {
+        (window as any).__lastError = {
+          message: (error as any)?.message || String(error),
+          stack: (error as any)?.stack,
+          componentStack: info?.componentStack,
+          time: new Date().toISOString(),
+        };
+        console.error(
+          "[ErrorBoundary] __lastError set:",
+          (window as any).__lastError,
+        );
+      }
+    } catch {
+      // swallow logging errors
+    }
+
     // ✅ IMPROVED: Smart auto-retry logic based on error type
     const maxRetries = this.props.maxRetries || 2;
     if (
@@ -70,9 +89,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       this.state.retryCount < maxRetries
     ) {
       logger.debug(
-        '🔄 [ErrorBoundary] Attempting auto-recovery for:',
-        'Component',
-        errorCategory
+        "🔄 [ErrorBoundary] Attempting auto-recovery for:",
+        "Component",
+        errorCategory,
       );
       this.setState({ isRecovering: true });
 
@@ -86,53 +105,53 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   // ✅ IMPROVED: Better error categorization
   private categorizeError(error: Error): string {
     const message = (error as any)?.message || String(error).toLowerCase();
-    const stack = (error as any)?.stack?.toLowerCase() || '';
+    const stack = (error as any)?.stack?.toLowerCase() || "";
 
-    if (message.includes('chunk') || message.includes('loading chunk')) {
-      return 'chunk-loading';
+    if (message.includes("chunk") || message.includes("loading chunk")) {
+      return "chunk-loading";
     }
-    if (message.includes('network') || message.includes('fetch')) {
-      return 'network';
+    if (message.includes("network") || message.includes("fetch")) {
+      return "network";
     }
-    if (message.includes('vapi') || message.includes('webCallUrl')) {
-      return 'vapi';
+    if (message.includes("vapi") || message.includes("webCallUrl")) {
+      return "vapi";
     }
     if (
-      message.includes('hook') ||
-      stack.includes('useeffect') ||
-      stack.includes('usestate')
+      message.includes("hook") ||
+      stack.includes("useeffect") ||
+      stack.includes("usestate")
     ) {
-      return 'react-hooks';
+      return "react-hooks";
     }
-    if (message.includes('render') || stack.includes('render')) {
-      return 'react-render';
+    if (message.includes("render") || stack.includes("render")) {
+      return "react-render";
     }
-    if (message.includes('canvas') || message.includes('siri')) {
-      return 'canvas-siri';
+    if (message.includes("canvas") || message.includes("siri")) {
+      return "canvas-siri";
     }
 
-    return 'unknown';
+    return "unknown";
   }
 
   // ✅ IMPROVED: Smart retry logic based on error category
-  private shouldAutoRetry(error: Error, category: string): boolean {
+  private shouldAutoRetry(_error: Error, category: string): boolean {
     // Don't retry certain types of errors
-    const nonRetryableCategories = ['react-hooks', 'canvas-siri'];
+    const nonRetryableCategories = ["react-hooks", "canvas-siri"];
     if (nonRetryableCategories.includes(category)) {
       logger.debug(
-        '🚫 [ErrorBoundary] Non-retryable error category:',
-        'Component',
-        category
+        "🚫 [ErrorBoundary] Non-retryable error category:",
+        "Component",
+        category,
       );
       return false;
     }
 
     // Retry transient errors
     const retryableCategories = [
-      'chunk-loading',
-      'network',
-      'vapi',
-      'react-render',
+      "chunk-loading",
+      "network",
+      "vapi",
+      "react-render",
     ];
     return retryableCategories.includes(category);
   }
@@ -140,10 +159,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   // ✅ IMPROVED: Different retry delays for different error types
   private getRetryDelay(category: string): number {
     const delays = {
-      'chunk-loading': 1000,
+      "chunk-loading": 1000,
       network: 2000,
       vapi: 1500,
-      'react-render': 500,
+      "react-render": 500,
       unknown: 1000,
     };
 
@@ -152,34 +171,34 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   private handleRetry = () => {
     logger.debug(
-      '🔄 [ErrorBoundary] Executing retry attempt:',
-      'Component',
-      this.state.retryCount + 1
+      "🔄 [ErrorBoundary] Executing retry attempt:",
+      "Component",
+      this.state.retryCount + 1,
     );
 
     // ✅ IMPROVED: Clear problematic state before retry
     try {
       // Clear localStorage items that might cause issues
       const problematicKeys = [
-        'conversationState',
-        'interface1State',
-        'vapiState',
+        "conversationState",
+        "interface1State",
+        "vapiState",
       ];
-      problematicKeys.forEach(key => {
+      problematicKeys.forEach((key) => {
         localStorage.removeItem(key);
         sessionStorage.removeItem(key);
       });
 
-      logger.debug('🧹 [ErrorBoundary] Cleared problematic state', 'Component');
+      logger.debug("🧹 [ErrorBoundary] Cleared problematic state", "Component");
     } catch (cleanupError) {
       logger.warn(
-        '⚠️ [ErrorBoundary] Error during state cleanup:',
-        'Component',
-        cleanupError
+        "⚠️ [ErrorBoundary] Error during state cleanup:",
+        "Component",
+        cleanupError,
       );
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       hasError: false,
       error: undefined,
       errorInfo: undefined,
@@ -239,6 +258,12 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               Trợ lý gặp sự cố tạm thời. Chúng tôi sẽ thử khôi phục tự động.
             </p>
 
+            {this.state.error && (
+              <p className="text-xs text-red-500 mb-4 break-all">
+                {(this.state.error as any)?.message || String(this.state.error)}
+              </p>
+            )}
+
             <div className="space-y-3">
               <button
                 onClick={this.handleRetry}
@@ -265,7 +290,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack && (
                     <>
-                      {'\n\nComponent Stack:'}
+                      {"\n\nComponent Stack:"}
                       {this.state.errorInfo.componentStack}
                     </>
                   )}

@@ -2201,28 +2201,4 @@ export class RequestService implements IRequestService {
     // Implementation for delete permission check
     return { success: true };
   }
-
-  // ✅ NEW: Phase 4 - Cache invalidation methods
-  private invalidateCacheOnChange(operation: string): void {
-    const patterns = [
-      "getAllRequests",
-      "getRequestStatistics",
-      "getRequestsByRoom",
-      "getRequestsByGuest",
-      "getRequestsByStatus",
-      "getRequestsByPriority",
-      "getUrgentRequests",
-      "getPendingRequests",
-      "getCompletedRequests",
-    ];
-
-    patterns.forEach((pattern) => {
-      this.clearCache(pattern);
-    });
-
-    logger.debug(
-      `🗑️ [RequestService] Invalidated cache after ${operation}`,
-      "RequestService",
-    );
-  }
 }

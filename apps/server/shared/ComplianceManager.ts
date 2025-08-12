@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 // ============================================
 // Types & Interfaces
@@ -20,7 +20,7 @@ export interface ComplianceConfig {
   };
   soc2: {
     enabled: boolean;
-    type: 'Type I' | 'Type II';
+    type: "Type I" | "Type II";
     securityPrinciples: string[];
     controlFrameworks: string[];
     auditFrequency: number; // months
@@ -28,7 +28,7 @@ export interface ComplianceConfig {
   };
   iso27001: {
     enabled: boolean;
-    version: '2013' | '2022';
+    version: "2013" | "2022";
     informationSecurityControls: string[];
     riskManagement: boolean;
     incidentManagement: boolean;
@@ -61,7 +61,7 @@ export interface RetentionSchedule {
   dataType: string;
   retentionPeriod: number; // days
   legalRequirement: string;
-  deletionMethod: 'soft' | 'hard' | 'anonymize';
+  deletionMethod: "soft" | "hard" | "anonymize";
   approvalRequired: boolean;
   exceptions: string[];
 }
@@ -91,28 +91,28 @@ export interface ConsentRecord {
   withdrawalDate?: Date;
   ipAddress: string;
   userAgent: string;
-  consentMethod: 'explicit' | 'implied' | 'opt-in' | 'opt-out';
+  consentMethod: "explicit" | "implied" | "opt-in" | "opt-out";
   metadata: Record<string, any>;
 }
 
 export interface DataSubjectRequest {
   id: string;
   type:
-    | 'access'
-    | 'rectification'
-    | 'erasure'
-    | 'portability'
-    | 'restriction'
-    | 'objection';
+    | "access"
+    | "rectification"
+    | "erasure"
+    | "portability"
+    | "restriction"
+    | "objection";
   userId: string;
   tenantId?: string;
   requestDate: Date;
   status:
-    | 'pending'
-    | 'in_progress'
-    | 'completed'
-    | 'rejected'
-    | 'partially_completed';
+    | "pending"
+    | "in_progress"
+    | "completed"
+    | "rejected"
+    | "partially_completed";
   dueDate: Date;
   description: string;
   supportingDocuments: string[];
@@ -128,27 +128,27 @@ export interface DataSubjectRequest {
 
 export interface ComplianceViolation {
   id: string;
-  type: 'gdpr' | 'soc2' | 'iso27001' | 'privacy' | 'retention';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "gdpr" | "soc2" | "iso27001" | "privacy" | "retention";
+  severity: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   detectedDate: Date;
   affectedData: string[];
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   remediation: {
     required: boolean;
     actions: string[];
     deadline?: Date;
     assignee?: string;
   };
-  status: 'open' | 'in_progress' | 'resolved' | 'accepted_risk';
+  status: "open" | "in_progress" | "resolved" | "accepted_risk";
   metadata: Record<string, any>;
 }
 
 export interface ComplianceAudit {
   id: string;
-  type: 'internal' | 'external' | 'regulatory' | 'certification';
-  framework: 'gdpr' | 'soc2' | 'iso27001' | 'combined';
+  type: "internal" | "external" | "regulatory" | "certification";
+  framework: "gdpr" | "soc2" | "iso27001" | "combined";
   startDate: Date;
   endDate?: Date;
   auditor: string;
@@ -159,7 +159,7 @@ export interface ComplianceAudit {
     recommendations: number;
     critical: number;
   };
-  status: 'planned' | 'in_progress' | 'completed' | 'report_pending';
+  status: "planned" | "in_progress" | "completed" | "report_pending";
   reportPath?: string;
   metadata: Record<string, any>;
 }
@@ -172,19 +172,19 @@ const defaultComplianceConfig: ComplianceConfig = {
   gdpr: {
     enabled: true,
     dataProcessingPurposes: [
-      'service_provision',
-      'customer_support',
-      'analytics',
-      'marketing',
-      'legal_compliance',
+      "service_provision",
+      "customer_support",
+      "analytics",
+      "marketing",
+      "legal_compliance",
     ],
     legalBases: [
-      'consent',
-      'contract',
-      'legal_obligation',
-      'vital_interests',
-      'public_task',
-      'legitimate_interests',
+      "consent",
+      "contract",
+      "legal_obligation",
+      "vital_interests",
+      "public_task",
+      "legitimate_interests",
     ],
     retentionPeriods: {
       user_data: 2555, // 7 years
@@ -200,33 +200,33 @@ const defaultComplianceConfig: ComplianceConfig = {
   },
   soc2: {
     enabled: true,
-    type: 'Type II',
+    type: "Type II",
     securityPrinciples: [
-      'security',
-      'availability',
-      'processing_integrity',
-      'confidentiality',
-      'privacy',
+      "security",
+      "availability",
+      "processing_integrity",
+      "confidentiality",
+      "privacy",
     ],
-    controlFrameworks: ['COSO', 'COBIT'],
+    controlFrameworks: ["COSO", "COBIT"],
     auditFrequency: 12, // annually
     riskAssessment: true,
   },
   iso27001: {
     enabled: true,
-    version: '2022',
+    version: "2022",
     informationSecurityControls: [
-      'A.5.1',
-      'A.5.2',
-      'A.5.3', // Information security policies
-      'A.6.1',
-      'A.6.2', // Organization of information security
-      'A.7.1',
-      'A.7.2',
-      'A.7.3', // Human resource security
-      'A.8.1',
-      'A.8.2',
-      'A.8.3', // Asset management
+      "A.5.1",
+      "A.5.2",
+      "A.5.3", // Information security policies
+      "A.6.1",
+      "A.6.2", // Organization of information security
+      "A.7.1",
+      "A.7.2",
+      "A.7.3", // Human resource security
+      "A.8.1",
+      "A.8.2",
+      "A.8.3", // Asset management
     ],
     riskManagement: true,
     incidentManagement: true,
@@ -237,7 +237,7 @@ const defaultComplianceConfig: ComplianceConfig = {
     cookieConsent: true,
     dataMapping: true,
     privacyByDesign: true,
-    dataProtectionOfficer: 'dpo@hotel.com',
+    dataProtectionOfficer: "dpo@hotel.com",
   },
   dataRetention: {
     enabled: true,
@@ -276,8 +276,8 @@ export class ComplianceManager extends EventEmitter {
     this.initializeCompliance();
 
     console.log(
-      '⚖️ ComplianceManager initialized with comprehensive compliance management',
-      'ComplianceManager'
+      "⚖️ ComplianceManager initialized with comprehensive compliance management",
+      "ComplianceManager",
     );
   }
 
@@ -300,20 +300,20 @@ export class ComplianceManager extends EventEmitter {
       this.startComplianceMonitoring();
       this.startRetentionEnforcement();
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      console.error('Failed to initialize compliance:', error);
+      console.error("Failed to initialize compliance:", error);
       throw error;
     }
   }
 
   private async createDirectories() {
     const dirs = [
-      './compliance/policies',
-      './compliance/audits',
-      './compliance/reports',
-      './compliance/data-subject-requests',
-      './compliance/consent-records',
+      "./compliance/policies",
+      "./compliance/audits",
+      "./compliance/reports",
+      "./compliance/data-subject-requests",
+      "./compliance/consent-records",
     ];
 
     for (const dir of dirs) {
@@ -339,28 +339,28 @@ export class ComplianceManager extends EventEmitter {
   private setupDefaultRetentionSchedules() {
     const schedules = [
       {
-        dataType: 'user_personal_data',
+        dataType: "user_personal_data",
         retentionPeriod: this.config.gdpr.retentionPeriods.user_data,
-        legalRequirement: 'GDPR Article 5(1)(e)',
-        deletionMethod: 'hard' as const,
+        legalRequirement: "GDPR Article 5(1)(e)",
+        deletionMethod: "hard" as const,
         approvalRequired: true,
-        exceptions: ['legal_hold', 'active_contract'],
+        exceptions: ["legal_hold", "active_contract"],
       },
       {
-        dataType: 'transaction_records',
+        dataType: "transaction_records",
         retentionPeriod: this.config.gdpr.retentionPeriods.transaction_data,
-        legalRequirement: 'Financial regulations',
-        deletionMethod: 'hard' as const,
+        legalRequirement: "Financial regulations",
+        deletionMethod: "hard" as const,
         approvalRequired: true,
-        exceptions: ['audit_requirement', 'dispute_resolution'],
+        exceptions: ["audit_requirement", "dispute_resolution"],
       },
       {
-        dataType: 'audit_logs',
+        dataType: "audit_logs",
         retentionPeriod: this.config.gdpr.retentionPeriods.log_data,
-        legalRequirement: 'SOC 2 requirements',
-        deletionMethod: 'anonymize' as const,
+        legalRequirement: "SOC 2 requirements",
+        deletionMethod: "anonymize" as const,
         approvalRequired: false,
-        exceptions: ['security_incident'],
+        exceptions: ["security_incident"],
       },
     ];
 
@@ -374,7 +374,7 @@ export class ComplianceManager extends EventEmitter {
   // ============================================
 
   async registerDataProcessingActivity(
-    activity: Omit<DataProcessingActivity, 'id' | 'created' | 'lastUpdated'>
+    activity: Omit<DataProcessingActivity, "id" | "created" | "lastUpdated">,
   ): Promise<string> {
     const id = crypto.randomUUID();
     const now = new Date();
@@ -390,13 +390,13 @@ export class ComplianceManager extends EventEmitter {
     await this.saveDataProcessingActivity(dataProcessingActivity);
 
     console.log(`📋 Registered data processing activity: ${activity.name}`);
-    this.emit('dataProcessingActivityRegistered', dataProcessingActivity);
+    this.emit("dataProcessingActivityRegistered", dataProcessingActivity);
 
     return id;
   }
 
   async recordConsent(
-    consent: Omit<ConsentRecord, 'id' | 'consentDate'>
+    consent: Omit<ConsentRecord, "id" | "consentDate">,
   ): Promise<string> {
     const id = crypto.randomUUID();
 
@@ -410,16 +410,16 @@ export class ComplianceManager extends EventEmitter {
     await this.saveConsentRecord(consentRecord);
 
     console.log(
-      `✅ Recorded consent: ${consent.purpose} for user ${consent.userId}`
+      `✅ Recorded consent: ${consent.purpose} for user ${consent.userId}`,
     );
-    this.emit('consentRecorded', consentRecord);
+    this.emit("consentRecorded", consentRecord);
 
     return id;
   }
 
   async withdrawConsent(
     consentId: string,
-    withdrawalReason?: string
+    withdrawalReason?: string,
   ): Promise<boolean> {
     const consent = this.consentRecords.get(consentId);
     if (!consent) return false;
@@ -431,9 +431,9 @@ export class ComplianceManager extends EventEmitter {
     await this.saveConsentRecord(consent);
 
     console.log(
-      `🚫 Consent withdrawn: ${consent.purpose} for user ${consent.userId}`
+      `🚫 Consent withdrawn: ${consent.purpose} for user ${consent.userId}`,
     );
-    this.emit('consentWithdrawn', consent);
+    this.emit("consentWithdrawn", consent);
 
     return true;
   }
@@ -441,8 +441,8 @@ export class ComplianceManager extends EventEmitter {
   async createDataSubjectRequest(
     request: Omit<
       DataSubjectRequest,
-      'id' | 'requestDate' | 'status' | 'dueDate'
-    >
+      "id" | "requestDate" | "status" | "dueDate"
+    >,
   ): Promise<string> {
     const id = crypto.randomUUID();
     const requestDate = new Date();
@@ -453,16 +453,16 @@ export class ComplianceManager extends EventEmitter {
       id,
       requestDate,
       dueDate,
-      status: 'pending',
+      status: "pending",
     };
 
     this.dataSubjectRequests.set(id, dataSubjectRequest);
     await this.saveDataSubjectRequest(dataSubjectRequest);
 
     console.log(
-      `📥 Data subject request created: ${request.type} for user ${request.userId}`
+      `📥 Data subject request created: ${request.type} for user ${request.userId}`,
     );
-    this.emit('dataSubjectRequestCreated', dataSubjectRequest);
+    this.emit("dataSubjectRequestCreated", dataSubjectRequest);
 
     return id;
   }
@@ -471,12 +471,12 @@ export class ComplianceManager extends EventEmitter {
     requestId: string,
     action: string,
     details: string,
-    processedBy: string
+    processedBy: string,
   ): Promise<boolean> {
     const request = this.dataSubjectRequests.get(requestId);
     if (!request) return false;
 
-    request.status = 'completed';
+    request.status = "completed";
     request.response = {
       date: new Date(),
       action,
@@ -487,7 +487,7 @@ export class ComplianceManager extends EventEmitter {
     await this.saveDataSubjectRequest(request);
 
     console.log(`✅ Data subject request processed: ${requestId}`);
-    this.emit('dataSubjectRequestProcessed', request);
+    this.emit("dataSubjectRequestProcessed", request);
 
     return true;
   }
@@ -501,7 +501,7 @@ export class ComplianceManager extends EventEmitter {
     await this.saveRetentionSchedule(schedule);
 
     console.log(`🗓️ Added retention schedule for: ${schedule.dataType}`);
-    this.emit('retentionScheduleAdded', schedule);
+    this.emit("retentionScheduleAdded", schedule);
   }
 
   async checkRetentionCompliance(): Promise<{
@@ -513,10 +513,6 @@ export class ComplianceManager extends EventEmitter {
     const toReview: string[] = [];
 
     for (const [dataType, schedule] of this.retentionSchedules) {
-      const cutoffDate = new Date(
-        now.getTime() - schedule.retentionPeriod * 24 * 60 * 60 * 1000
-      );
-
       // In a real implementation, this would query the database
       // For now, we'll simulate checking against our records
 
@@ -546,22 +542,22 @@ export class ComplianceManager extends EventEmitter {
         if (!schedule) continue;
 
         switch (schedule.deletionMethod) {
-          case 'hard':
+          case "hard":
             // Implement hard deletion
             deleted++;
             break;
-          case 'soft':
+          case "soft":
             // Implement soft deletion
             deleted++;
             break;
-          case 'anonymize':
+          case "anonymize":
             // Implement anonymization
             anonymized++;
             break;
         }
 
         console.log(
-          `🗑️ Enforced retention for: ${dataType} (${schedule.deletionMethod})`
+          `🗑️ Enforced retention for: ${dataType} (${schedule.deletionMethod})`,
         );
       } catch (error) {
         console.error(`Failed to enforce retention for ${dataType}:`, error);
@@ -569,7 +565,7 @@ export class ComplianceManager extends EventEmitter {
       }
     }
 
-    this.emit('retentionEnforced', { deleted, anonymized, errors });
+    this.emit("retentionEnforced", { deleted, anonymized, errors });
     return { deleted, anonymized, errors };
   }
 
@@ -578,7 +574,7 @@ export class ComplianceManager extends EventEmitter {
   // ============================================
 
   async reportViolation(
-    violation: Omit<ComplianceViolation, 'id' | 'detectedDate' | 'status'>
+    violation: Omit<ComplianceViolation, "id" | "detectedDate" | "status">,
   ): Promise<string> {
     const id = crypto.randomUUID();
 
@@ -586,18 +582,18 @@ export class ComplianceManager extends EventEmitter {
       ...violation,
       id,
       detectedDate: new Date(),
-      status: 'open',
+      status: "open",
     };
 
     this.violations.set(id, complianceViolation);
     await this.saveViolation(complianceViolation);
 
     console.warn(`⚠️ Compliance violation reported: ${violation.title}`);
-    this.emit('violationReported', complianceViolation);
+    this.emit("violationReported", complianceViolation);
 
     // Auto-alert for critical violations
-    if (violation.severity === 'critical') {
-      this.emit('criticalViolation', complianceViolation);
+    if (violation.severity === "critical") {
+      this.emit("criticalViolation", complianceViolation);
     }
 
     return id;
@@ -606,12 +602,12 @@ export class ComplianceManager extends EventEmitter {
   async resolveViolation(
     violationId: string,
     resolution: string,
-    resolvedBy: string
+    resolvedBy: string,
   ): Promise<boolean> {
     const violation = this.violations.get(violationId);
     if (!violation) return false;
 
-    violation.status = 'resolved';
+    violation.status = "resolved";
     violation.metadata.resolution = resolution;
     violation.metadata.resolvedBy = resolvedBy;
     violation.metadata.resolvedDate = new Date();
@@ -619,7 +615,7 @@ export class ComplianceManager extends EventEmitter {
     await this.saveViolation(violation);
 
     console.log(`✅ Violation resolved: ${violationId}`);
-    this.emit('violationResolved', violation);
+    this.emit("violationResolved", violation);
 
     return true;
   }
@@ -629,14 +625,14 @@ export class ComplianceManager extends EventEmitter {
   // ============================================
 
   async scheduleAudit(
-    audit: Omit<ComplianceAudit, 'id' | 'status' | 'findings'>
+    audit: Omit<ComplianceAudit, "id" | "status" | "findings">,
   ): Promise<string> {
     const id = crypto.randomUUID();
 
     const complianceAudit: ComplianceAudit = {
       ...audit,
       id,
-      status: 'planned',
+      status: "planned",
       findings: {
         compliant: 0,
         nonCompliant: 0,
@@ -649,22 +645,22 @@ export class ComplianceManager extends EventEmitter {
     await this.saveAudit(complianceAudit);
 
     console.log(
-      `📅 Audit scheduled: ${audit.framework} audit by ${audit.auditor}`
+      `📅 Audit scheduled: ${audit.framework} audit by ${audit.auditor}`,
     );
-    this.emit('auditScheduled', complianceAudit);
+    this.emit("auditScheduled", complianceAudit);
 
     return id;
   }
 
   async completeAudit(
     auditId: string,
-    findings: ComplianceAudit['findings'],
-    reportPath?: string
+    findings: ComplianceAudit["findings"],
+    reportPath?: string,
   ): Promise<boolean> {
     const audit = this.audits.get(auditId);
     if (!audit) return false;
 
-    audit.status = 'completed';
+    audit.status = "completed";
     audit.endDate = new Date();
     audit.findings = findings;
     audit.reportPath = reportPath;
@@ -672,7 +668,7 @@ export class ComplianceManager extends EventEmitter {
     await this.saveAudit(audit);
 
     console.log(`✅ Audit completed: ${auditId}`);
-    this.emit('auditCompleted', audit);
+    this.emit("auditCompleted", audit);
 
     return true;
   }
@@ -682,30 +678,30 @@ export class ComplianceManager extends EventEmitter {
   // ============================================
 
   async generateComplianceReport(
-    framework: 'gdpr' | 'soc2' | 'iso27001' | 'all' = 'all'
+    framework: "gdpr" | "soc2" | "iso27001" | "all" = "all",
   ): Promise<any> {
     const report = {
       timestamp: new Date().toISOString(),
       framework,
       summary: {
-        overallCompliance: 'compliant',
-        riskLevel: 'low',
+        overallCompliance: "compliant",
+        riskLevel: "low",
         lastAudit: this.getLastAuditDate(),
         violations: this.violations.size,
         openViolations: Array.from(this.violations.values()).filter(
-          v => v.status === 'open'
+          (v) => v.status === "open",
         ).length,
       },
       gdpr:
-        framework === 'gdpr' || framework === 'all'
+        framework === "gdpr" || framework === "all"
           ? await this.generateGDPRReport()
           : null,
       soc2:
-        framework === 'soc2' || framework === 'all'
+        framework === "soc2" || framework === "all"
           ? await this.generateSOC2Report()
           : null,
       iso27001:
-        framework === 'iso27001' || framework === 'all'
+        framework === "iso27001" || framework === "all"
           ? await this.generateISO27001Report()
           : null,
       dataRetention: await this.generateRetentionReport(),
@@ -719,28 +715,28 @@ export class ComplianceManager extends EventEmitter {
     const consentRecords = Array.from(this.consentRecords.values());
     const dataSubjectRequests = Array.from(this.dataSubjectRequests.values());
     const dataProcessingActivities = Array.from(
-      this.dataProcessingActivities.values()
+      this.dataProcessingActivities.values(),
     );
 
     return {
       dataProcessingActivities: {
         total: dataProcessingActivities.length,
-        byPurpose: this.groupBy(dataProcessingActivities, 'purpose'),
-        byLegalBasis: this.groupBy(dataProcessingActivities, 'legalBasis'),
+        byPurpose: this.groupBy(dataProcessingActivities, "purpose"),
+        byLegalBasis: this.groupBy(dataProcessingActivities, "legalBasis"),
       },
       consentManagement: {
         totalConsents: consentRecords.length,
-        activeConsents: consentRecords.filter(c => c.consentGiven).length,
-        withdrawnConsents: consentRecords.filter(c => !c.consentGiven).length,
+        activeConsents: consentRecords.filter((c) => c.consentGiven).length,
+        withdrawnConsents: consentRecords.filter((c) => !c.consentGiven).length,
       },
       dataSubjectRights: {
         totalRequests: dataSubjectRequests.length,
-        byType: this.groupBy(dataSubjectRequests, 'type'),
+        byType: this.groupBy(dataSubjectRequests, "type"),
         completedOnTime: dataSubjectRequests.filter(
-          r =>
-            r.status === 'completed' &&
+          (r) =>
+            r.status === "completed" &&
             r.response &&
-            r.response.date <= r.dueDate
+            r.response.date <= r.dueDate,
         ).length,
       },
       compliance: {
@@ -754,10 +750,10 @@ export class ComplianceManager extends EventEmitter {
 
   private async generateSOC2Report(): Promise<any> {
     const audits = Array.from(this.audits.values()).filter(
-      a => a.framework === 'soc2'
+      (a) => a.framework === "soc2",
     );
     const violations = Array.from(this.violations.values()).filter(
-      v => v.type === 'soc2'
+      (v) => v.type === "soc2",
     );
 
     return {
@@ -772,8 +768,8 @@ export class ComplianceManager extends EventEmitter {
       },
       violations: {
         total: violations.length,
-        open: violations.filter(v => v.status === 'open').length,
-        critical: violations.filter(v => v.severity === 'critical').length,
+        open: violations.filter((v) => v.status === "open").length,
+        critical: violations.filter((v) => v.severity === "critical").length,
       },
       compliance: {
         type: this.config.soc2.type,
@@ -785,7 +781,7 @@ export class ComplianceManager extends EventEmitter {
 
   private async generateISO27001Report(): Promise<any> {
     const violations = Array.from(this.violations.values()).filter(
-      v => v.type === 'iso27001'
+      (v) => v.type === "iso27001",
     );
 
     return {
@@ -800,8 +796,8 @@ export class ComplianceManager extends EventEmitter {
       },
       violations: {
         total: violations.length,
-        open: violations.filter(v => v.status === 'open').length,
-        critical: violations.filter(v => v.severity === 'critical').length,
+        open: violations.filter((v) => v.status === "open").length,
+        critical: violations.filter((v) => v.severity === "critical").length,
       },
       version: this.config.iso27001.version,
     };
@@ -835,7 +831,7 @@ export class ComplianceManager extends EventEmitter {
       () => {
         this.checkComplianceStatus();
       },
-      60 * 60 * 1000
+      60 * 60 * 1000,
     );
   }
 
@@ -847,31 +843,31 @@ export class ComplianceManager extends EventEmitter {
           this.enforceDataRetention();
         }
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000,
     );
   }
 
   private async checkComplianceStatus() {
     // Check for overdue data subject requests
     const overdueRequests = Array.from(
-      this.dataSubjectRequests.values()
+      this.dataSubjectRequests.values(),
     ).filter(
-      request => request.status === 'pending' && new Date() > request.dueDate
+      (request) => request.status === "pending" && new Date() > request.dueDate,
     );
 
     for (const request of overdueRequests) {
       await this.reportViolation({
-        type: 'gdpr',
-        severity: 'high',
-        title: 'Overdue Data Subject Request',
+        type: "gdpr",
+        severity: "high",
+        title: "Overdue Data Subject Request",
         description: `Data subject request ${request.id} is overdue`,
         affectedData: [request.userId],
-        riskLevel: 'high',
+        riskLevel: "high",
         remediation: {
           required: true,
           actions: [
-            'Process the request immediately',
-            'Contact the data subject',
+            "Process the request immediately",
+            "Contact the data subject",
           ],
           deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
@@ -886,45 +882,45 @@ export class ComplianceManager extends EventEmitter {
 
   private async saveDataProcessingActivity(activity: DataProcessingActivity) {
     const filepath = path.join(
-      './compliance/data-processing-activities',
-      `${activity.id}.json`
+      "./compliance/data-processing-activities",
+      `${activity.id}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(activity, null, 2));
   }
 
   private async saveConsentRecord(consent: ConsentRecord) {
     const filepath = path.join(
-      './compliance/consent-records',
-      `${consent.id}.json`
+      "./compliance/consent-records",
+      `${consent.id}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(consent, null, 2));
   }
 
   private async saveDataSubjectRequest(request: DataSubjectRequest) {
     const filepath = path.join(
-      './compliance/data-subject-requests',
-      `${request.id}.json`
+      "./compliance/data-subject-requests",
+      `${request.id}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(request, null, 2));
   }
 
   private async saveViolation(violation: ComplianceViolation) {
     const filepath = path.join(
-      './compliance/violations',
-      `${violation.id}.json`
+      "./compliance/violations",
+      `${violation.id}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(violation, null, 2));
   }
 
   private async saveAudit(audit: ComplianceAudit) {
-    const filepath = path.join('./compliance/audits', `${audit.id}.json`);
+    const filepath = path.join("./compliance/audits", `${audit.id}.json`);
     await fs.writeFile(filepath, JSON.stringify(audit, null, 2));
   }
 
   private async saveRetentionSchedule(schedule: RetentionSchedule) {
     const filepath = path.join(
-      './compliance/retention-schedules',
-      `${schedule.dataType}.json`
+      "./compliance/retention-schedules",
+      `${schedule.dataType}.json`,
     );
     await fs.writeFile(filepath, JSON.stringify(schedule, null, 2));
   }
@@ -955,9 +951,9 @@ export class ComplianceManager extends EventEmitter {
 
   private getLastAuditDate(): Date | null {
     const audits = Array.from(this.audits.values())
-      .filter(a => a.status === 'completed')
+      .filter((a) => a.status === "completed")
       .sort(
-        (a, b) => (b.endDate?.getTime() || 0) - (a.endDate?.getTime() || 0)
+        (a, b) => (b.endDate?.getTime() || 0) - (a.endDate?.getTime() || 0),
       );
 
     return audits[0]?.endDate || null;
@@ -968,7 +964,7 @@ export class ComplianceManager extends EventEmitter {
     const baseDate = lastAudit || new Date();
     return new Date(
       baseDate.getTime() +
-        this.config.soc2.auditFrequency * 30 * 24 * 60 * 60 * 1000
+        this.config.soc2.auditFrequency * 30 * 24 * 60 * 60 * 1000,
     );
   }
 
@@ -976,20 +972,20 @@ export class ComplianceManager extends EventEmitter {
     const recommendations: string[] = [];
 
     const openViolations = Array.from(this.violations.values()).filter(
-      v => v.status === 'open'
+      (v) => v.status === "open",
     );
     if (openViolations.length > 0) {
       recommendations.push(
-        `${openViolations.length} open compliance violations require attention`
+        `${openViolations.length} open compliance violations require attention`,
       );
     }
 
     const overdueRequests = Array.from(
-      this.dataSubjectRequests.values()
-    ).filter(r => r.status === 'pending' && new Date() > r.dueDate);
+      this.dataSubjectRequests.values(),
+    ).filter((r) => r.status === "pending" && new Date() > r.dueDate);
     if (overdueRequests.length > 0) {
       recommendations.push(
-        `${overdueRequests.length} data subject requests are overdue`
+        `${overdueRequests.length} data subject requests are overdue`,
       );
     }
 
@@ -998,11 +994,11 @@ export class ComplianceManager extends EventEmitter {
       !lastAudit ||
       new Date().getTime() - lastAudit.getTime() > 365 * 24 * 60 * 60 * 1000
     ) {
-      recommendations.push('Annual compliance audit is due');
+      recommendations.push("Annual compliance audit is due");
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('All compliance requirements are being met');
+      recommendations.push("All compliance requirements are being met");
     }
 
     return recommendations;
@@ -1019,25 +1015,25 @@ export class ComplianceManager extends EventEmitter {
         consentRecords: this.consentRecords.size,
         dataSubjectRequests: this.dataSubjectRequests.size,
         pendingRequests: Array.from(this.dataSubjectRequests.values()).filter(
-          r => r.status === 'pending'
+          (r) => r.status === "pending",
         ).length,
       },
       violations: {
         total: this.violations.size,
         open: Array.from(this.violations.values()).filter(
-          v => v.status === 'open'
+          (v) => v.status === "open",
         ).length,
         critical: Array.from(this.violations.values()).filter(
-          v => v.severity === 'critical'
+          (v) => v.severity === "critical",
         ).length,
       },
       audits: {
         total: this.audits.size,
         completed: Array.from(this.audits.values()).filter(
-          a => a.status === 'completed'
+          (a) => a.status === "completed",
         ).length,
         planned: Array.from(this.audits.values()).filter(
-          a => a.status === 'planned'
+          (a) => a.status === "planned",
         ).length,
       },
       retention: {
@@ -1049,8 +1045,8 @@ export class ComplianceManager extends EventEmitter {
 
   updateConfig(newConfig: Partial<ComplianceConfig>) {
     this.config = { ...this.config, ...newConfig };
-    console.log('🔧 ComplianceManager configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 ComplianceManager configuration updated");
+    this.emit("configUpdated", this.config);
   }
 }
 

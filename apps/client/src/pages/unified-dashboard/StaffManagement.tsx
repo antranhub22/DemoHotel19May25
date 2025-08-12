@@ -1,22 +1,22 @@
 import {
-  Users,
-  UserPlus,
   Edit,
-  Trash2,
-  Shield,
   Eye,
   EyeOff,
-  Search,
   Filter,
-  RefreshCw,
-  Settings,
-  Lock,
-  Unlock,
   Key,
-} from 'lucide-react';
-import React, { useState, useEffect } from 'react';
-// ✅ FIXED: Use global UserRole type instead of shared constants export
-// import type { UserRole } from '@shared/constants/permissions';
+  Lock,
+  RefreshCw,
+  Search,
+  Settings,
+  Shield,
+  Trash2,
+  Unlock,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import * as React from "react";
+import { useEffect, useState } from "react";
+// ✅ FIXED: Use global UserRole type from common types
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,32 +27,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -60,10 +60,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+} from "@/components/ui/table";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import type { UserRole } from "@/types/common.types";
+import logger from "@shared/utils/logger";
 
 // Types
 interface StaffMember {
@@ -92,23 +93,23 @@ interface StaffFormData {
 
 // Role configurations
 const roleConfigs = {
-  'hotel-manager': {
-    label: 'Quản lý khách sạn',
-    color: 'bg-blue-100 text-blue-800 border-blue-300',
+  "hotel-manager": {
+    label: "Quản lý khách sạn",
+    color: "bg-blue-100 text-blue-800 border-blue-300",
     icon: <Shield className="h-3 w-3" />,
-    description: 'Quyền truy cập đầy đủ',
+    description: "Quyền truy cập đầy đủ",
   },
-  'front-desk': {
-    label: 'Lễ tân',
-    color: 'bg-green-100 text-green-800 border-green-300',
+  "front-desk": {
+    label: "Lễ tân",
+    color: "bg-green-100 text-green-800 border-green-300",
     icon: <Users className="h-3 w-3" />,
-    description: 'Quản lý yêu cầu khách hàng',
+    description: "Quản lý yêu cầu khách hàng",
   },
-  'it-manager': {
-    label: 'Quản lý IT',
-    color: 'bg-purple-100 text-purple-800 border-purple-300',
+  "it-manager": {
+    label: "Quản lý IT",
+    color: "bg-purple-100 text-purple-800 border-purple-300",
     icon: <Settings className="h-3 w-3" />,
-    description: 'Quản lý hệ thống kỹ thuật',
+    description: "Quản lý hệ thống kỹ thuật",
   },
 };
 
@@ -128,12 +129,12 @@ const StaffFormDialog = ({
 }) => {
   const isEdit = !!staff;
   const [formData, setFormData] = useState<StaffFormData>({
-    username: staff?.username || '',
-    email: staff?.email || '',
-    displayName: staff?.displayName || '',
-    role: staff?.role || 'front-desk',
-    password: '',
-    confirmPassword: '',
+    username: staff?.username || "",
+    email: staff?.email || "",
+    displayName: staff?.displayName || "",
+    role: (staff?.role || "front-desk") as UserRole,
+    password: "",
+    confirmPassword: "",
     isActive: staff?.isActive ?? true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -143,12 +144,12 @@ const StaffFormDialog = ({
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        username: staff?.username || '',
-        email: staff?.email || '',
-        displayName: staff?.displayName || '',
-        role: staff?.role || 'front-desk',
-        password: '',
-        confirmPassword: '',
+        username: staff?.username || "",
+        email: staff?.email || "",
+        displayName: staff?.displayName || "",
+        role: (staff?.role || "front-desk") as UserRole,
+        password: "",
+        confirmPassword: "",
         isActive: staff?.isActive ?? true,
       });
       setErrors({});
@@ -159,30 +160,30 @@ const StaffFormDialog = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.username.trim()) {
-      newErrors.username = 'Tên đăng nhập là bắt buộc';
+      newErrors.username = "Tên đăng nhập là bắt buộc";
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Tên đăng nhập phải có ít nhất 3 ký tự';
+      newErrors.username = "Tên đăng nhập phải có ít nhất 3 ký tự";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email là bắt buộc';
+      newErrors.email = "Email là bắt buộc";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = "Email không hợp lệ";
     }
 
     if (!formData.displayName.trim()) {
-      newErrors.displayName = 'Tên hiển thị là bắt buộc';
+      newErrors.displayName = "Tên hiển thị là bắt buộc";
     }
 
     if (!isEdit) {
       if (!formData.password) {
-        newErrors.password = 'Mật khẩu là bắt buộc';
+        newErrors.password = "Mật khẩu là bắt buộc";
       } else if (formData.password.length < 6) {
-        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        newErrors.password = "Mật khẩu phải có ít nhất 6 ký tự";
       }
 
       if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+        newErrors.confirmPassword = "Mật khẩu xác nhận không khớp";
       }
     }
 
@@ -202,12 +203,12 @@ const StaffFormDialog = ({
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {isEdit ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới'}
+            {isEdit ? "Chỉnh sửa nhân viên" : "Thêm nhân viên mới"}
           </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Cập nhật thông tin nhân viên'
-              : 'Tạo tài khoản nhân viên mới'}
+              ? "Cập nhật thông tin nhân viên"
+              : "Tạo tài khoản nhân viên mới"}
           </DialogDescription>
         </DialogHeader>
 
@@ -217,10 +218,10 @@ const StaffFormDialog = ({
             <Input
               id="username"
               value={formData.username}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, username: e.target.value }))
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, username: e.target.value }))
               }
-              className={errors.username ? 'border-red-500' : ''}
+              className={errors.username ? "border-red-500" : ""}
               disabled={isEdit} // Cannot change username after creation
             />
             {errors.username && (
@@ -234,10 +235,10 @@ const StaffFormDialog = ({
               id="email"
               type="email"
               value={formData.email}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, email: e.target.value }))
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
               }
-              className={errors.email ? 'border-red-500' : ''}
+              className={errors.email ? "border-red-500" : ""}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -249,10 +250,13 @@ const StaffFormDialog = ({
             <Input
               id="displayName"
               value={formData.displayName}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, displayName: e.target.value }))
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  displayName: e.target.value,
+                }))
               }
-              className={errors.displayName ? 'border-red-500' : ''}
+              className={errors.displayName ? "border-red-500" : ""}
             />
             {errors.displayName && (
               <p className="text-red-500 text-sm mt-1">{errors.displayName}</p>
@@ -264,7 +268,7 @@ const StaffFormDialog = ({
             <Select
               value={formData.role}
               onValueChange={(value: UserRole) =>
-                setFormData(prev => ({ ...prev, role: value }))
+                setFormData((prev) => ({ ...prev, role: value }))
               }
             >
               <SelectTrigger>
@@ -290,15 +294,15 @@ const StaffFormDialog = ({
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={e =>
-                      setFormData(prev => ({
+                    onChange={(e) =>
+                      setFormData((prev) => ({
                         ...prev,
                         password: e.target.value,
                       }))
                     }
-                    className={errors.password ? 'border-red-500' : ''}
+                    className={errors.password ? "border-red-500" : ""}
                   />
                   <Button
                     type="button"
@@ -325,13 +329,13 @@ const StaffFormDialog = ({
                   id="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={e =>
-                    setFormData(prev => ({
+                  onChange={(e) =>
+                    setFormData((prev) => ({
                       ...prev,
                       confirmPassword: e.target.value,
                     }))
                   }
-                  className={errors.confirmPassword ? 'border-red-500' : ''}
+                  className={errors.confirmPassword ? "border-red-500" : ""}
                 />
                 {errors.confirmPassword && (
                   <p className="text-red-500 text-sm mt-1">
@@ -347,8 +351,8 @@ const StaffFormDialog = ({
               type="checkbox"
               id="isActive"
               checked={formData.isActive}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, isActive: e.target.checked }))
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isActive: e.target.checked }))
               }
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
@@ -365,7 +369,7 @@ const StaffFormDialog = ({
               ) : (
                 <UserPlus className="h-4 w-4 mr-2" />
               )}
-              {isEdit ? 'Cập nhật' : 'Tạo tài khoản'}
+              {isEdit ? "Cập nhật" : "Tạo tài khoản"}
             </Button>
           </div>
         </form>
@@ -406,7 +410,7 @@ const StaffPermissionsModal = ({
         <div className="space-y-4">
           <div>
             <Label>Vai trò</Label>
-            <Badge variant="outline" className={cn('mt-1', roleConfig.color)}>
+            <Badge variant="outline" className={cn("mt-1", roleConfig.color)}>
               {roleConfig.icon}
               <span className="ml-1">{roleConfig.label}</span>
             </Badge>
@@ -419,7 +423,7 @@ const StaffPermissionsModal = ({
             <Label>Quyền hạn ({staff.permissions.length})</Label>
             <div className="mt-2 max-h-48 overflow-y-auto border rounded-lg p-3">
               <div className="grid grid-cols-1 gap-1">
-                {staff.permissions.map(permission => (
+                {staff.permissions.map((permission) => (
                   <div
                     key={permission}
                     className="flex items-center gap-2 text-sm"
@@ -443,12 +447,12 @@ const StaffPermissionsModal = ({
 
 // Main Staff Management component
 export const StaffManagement: React.FC = () => {
-  const { user } = useAuth();
+  useAuth();
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Dialog states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -460,67 +464,67 @@ export const StaffManagement: React.FC = () => {
   // Mock data - replace with actual API call
   const mockStaffList: StaffMember[] = [
     {
-      id: '1',
-      username: 'manager',
-      email: 'manager@hotel.com',
-      displayName: 'Hotel Manager',
-      role: 'hotel-manager',
+      id: "1",
+      username: "manager",
+      email: "manager@hotel.com",
+      displayName: "Hotel Manager",
+      role: "hotel-manager" as UserRole,
       permissions: [
-        'dashboard:view',
-        'analytics:view_advanced',
-        'staff:manage',
-        'settings:manage',
+        "dashboard:view",
+        "analytics:view_advanced",
+        "staff:manage",
+        "settings:manage",
       ],
       isActive: true,
-      lastLogin: '2024-01-15T10:30:00Z',
-      createdAt: '2024-01-01T09:00:00Z',
-      updatedAt: '2024-01-15T10:30:00Z',
+      lastLogin: "2024-01-15T10:30:00Z",
+      createdAt: "2024-01-01T09:00:00Z",
+      updatedAt: "2024-01-15T10:30:00Z",
     },
     {
-      id: '2',
-      username: 'frontdesk',
-      email: 'frontdesk@hotel.com',
-      displayName: 'Front Desk Staff',
-      role: 'front-desk',
+      id: "2",
+      username: "frontdesk",
+      email: "frontdesk@hotel.com",
+      displayName: "Front Desk Staff",
+      role: "front-desk" as UserRole,
       permissions: [
-        'dashboard:view',
-        'requests:view',
-        'calls:view',
-        'guests:manage',
+        "dashboard:view",
+        "requests:view",
+        "calls:view",
+        "guests:manage",
       ],
       isActive: true,
-      lastLogin: '2024-01-15T09:15:00Z',
-      createdAt: '2024-01-02T10:00:00Z',
-      updatedAt: '2024-01-15T09:15:00Z',
+      lastLogin: "2024-01-15T09:15:00Z",
+      createdAt: "2024-01-02T10:00:00Z",
+      updatedAt: "2024-01-15T09:15:00Z",
     },
     {
-      id: '3',
-      username: 'itmanager',
-      email: 'it@hotel.com',
-      displayName: 'IT Manager',
-      role: 'it-manager',
+      id: "3",
+      username: "itmanager",
+      email: "it@hotel.com",
+      displayName: "IT Manager",
+      role: "it-manager" as UserRole,
       permissions: [
-        'dashboard:view',
-        'system:monitor',
-        'logs:view',
-        'security:manage',
+        "dashboard:view",
+        "system:monitor",
+        "logs:view",
+        "security:manage",
       ],
       isActive: true,
-      lastLogin: '2024-01-14T16:45:00Z',
-      createdAt: '2024-01-03T11:00:00Z',
-      updatedAt: '2024-01-14T16:45:00Z',
+      lastLogin: "2024-01-14T16:45:00Z",
+      createdAt: "2024-01-03T11:00:00Z",
+      updatedAt: "2024-01-14T16:45:00Z",
     },
     {
-      id: '4',
-      username: 'receptionist2',
-      email: 'receptionist2@hotel.com',
-      displayName: 'Receptionist 2',
-      role: 'front-desk',
-      permissions: ['dashboard:view', 'requests:view', 'calls:view'],
+      id: "4",
+      username: "receptionist2",
+      email: "receptionist2@hotel.com",
+      displayName: "Receptionist 2",
+      role: "front-desk" as UserRole,
+      permissions: ["dashboard:view", "requests:view", "calls:view"],
       isActive: false,
-      lastLogin: '2024-01-10T14:20:00Z',
-      createdAt: '2024-01-05T08:30:00Z',
-      updatedAt: '2024-01-10T14:20:00Z',
+      lastLogin: "2024-01-10T14:20:00Z",
+      createdAt: "2024-01-05T08:30:00Z",
+      updatedAt: "2024-01-10T14:20:00Z",
     },
   ];
 
@@ -534,7 +538,7 @@ export const StaffManagement: React.FC = () => {
         setLoading(false);
       }, 1000);
     } catch (error) {
-      logger.error('Failed to fetch staff:', 'Component', error);
+      logger.error("Failed to fetch staff:", "Component", error);
       setLoading(false);
     }
   };
@@ -545,16 +549,16 @@ export const StaffManagement: React.FC = () => {
       setFormLoading(true);
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (selectedStaff) {
         // Update existing staff
-        setStaffList(prev =>
-          prev.map(staff =>
+        setStaffList((prev) =>
+          prev.map((staff) =>
             staff.id === selectedStaff.id
               ? { ...staff, ...data, updatedAt: new Date().toISOString() }
-              : staff
-          )
+              : staff,
+          ),
         );
         setShowEditModal(false);
       } else {
@@ -566,13 +570,13 @@ export const StaffManagement: React.FC = () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        setStaffList(prev => [...prev, newStaff]);
+        setStaffList((prev) => [...prev, newStaff]);
         setShowAddModal(false);
       }
 
       setSelectedStaff(null);
     } catch (error) {
-      logger.error('Failed to save staff:', 'Component', error);
+      logger.error("Failed to save staff:", "Component", error);
     } finally {
       setFormLoading(false);
     }
@@ -582,45 +586,45 @@ export const StaffManagement: React.FC = () => {
   const handleDeleteStaff = async (staffId: string) => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      setStaffList(prev => prev.filter(staff => staff.id !== staffId));
+      setStaffList((prev) => prev.filter((staff) => staff.id !== staffId));
     } catch (error) {
-      logger.error('Failed to delete staff:', 'Component', error);
+      logger.error("Failed to delete staff:", "Component", error);
     }
   };
 
   // Toggle staff status
   const toggleStaffStatus = async (staffId: string) => {
     try {
-      setStaffList(prev =>
-        prev.map(staff =>
+      setStaffList((prev) =>
+        prev.map((staff) =>
           staff.id === staffId
             ? {
                 ...staff,
                 isActive: !staff.isActive,
                 updatedAt: new Date().toISOString(),
               }
-            : staff
-        )
+            : staff,
+        ),
       );
     } catch (error) {
-      logger.error('Failed to toggle staff status:', 'Component', error);
+      logger.error("Failed to toggle staff status:", "Component", error);
     }
   };
 
   // Filter staff
-  const filteredStaff = staffList.filter(staff => {
+  const filteredStaff = staffList.filter((staff) => {
     const matchesSearch =
       staff.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       staff.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       staff.email.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesRole = roleFilter === 'all' || staff.role === roleFilter;
+    const matchesRole = roleFilter === "all" || staff.role === roleFilter;
     const matchesStatus =
-      statusFilter === 'all' ||
-      (statusFilter === 'active' && staff.isActive) ||
-      (statusFilter === 'inactive' && !staff.isActive);
+      statusFilter === "all" ||
+      (statusFilter === "active" && staff.isActive) ||
+      (statusFilter === "inactive" && !staff.isActive);
 
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -645,7 +649,7 @@ export const StaffManagement: React.FC = () => {
         <div className="flex gap-2">
           <Button variant="outline" onClick={fetchStaffList} disabled={loading}>
             <RefreshCw
-              className={cn('h-4 w-4 mr-2', loading && 'animate-spin')}
+              className={cn("h-4 w-4 mr-2", loading && "animate-spin")}
             />
             Làm mới
           </Button>
@@ -677,7 +681,7 @@ export const StaffManagement: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Đang hoạt động</p>
                 <p className="text-2xl font-bold">
-                  {staffList.filter(s => s.isActive).length}
+                  {staffList.filter((s) => s.isActive).length}
                 </p>
               </div>
             </div>
@@ -691,7 +695,7 @@ export const StaffManagement: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Quản lý</p>
                 <p className="text-2xl font-bold">
-                  {staffList.filter(s => s.role === 'hotel-manager').length}
+                  {staffList.filter((s) => s.role === "hotel-manager").length}
                 </p>
               </div>
             </div>
@@ -705,7 +709,7 @@ export const StaffManagement: React.FC = () => {
               <div>
                 <p className="text-sm font-medium">Lễ tân</p>
                 <p className="text-2xl font-bold">
-                  {staffList.filter(s => s.role === 'front-desk').length}
+                  {staffList.filter((s) => s.role === "front-desk").length}
                 </p>
               </div>
             </div>
@@ -730,7 +734,7 @@ export const StaffManagement: React.FC = () => {
                 <Input
                   placeholder="Tên, username, email..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
@@ -797,7 +801,7 @@ export const StaffManagement: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStaff.map(staff => {
+                  {filteredStaff.map((staff) => {
                     const roleConfig = roleConfigs[staff.role];
                     return (
                       <TableRow key={staff.id}>
@@ -824,7 +828,7 @@ export const StaffManagement: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={staff.isActive ? 'default' : 'secondary'}
+                            variant={staff.isActive ? "default" : "secondary"}
                           >
                             {staff.isActive ? (
                               <>
@@ -845,12 +849,12 @@ export const StaffManagement: React.FC = () => {
                               <>
                                 <div>
                                   {new Date(
-                                    staff.lastLogin
+                                    staff.lastLogin,
                                   ).toLocaleDateString()}
                                 </div>
                                 <div className="text-gray-500">
                                   {new Date(
-                                    staff.lastLogin
+                                    staff.lastLogin,
                                   ).toLocaleTimeString()}
                                 </div>
                               </>

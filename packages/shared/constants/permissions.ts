@@ -13,7 +13,7 @@
 // ============================================
 
 // ✅ FIXED: Use global UserRole type to prevent conflicts
-// export type UserRole - removed to prevent conflicts
+import type { UserRole } from "../../types/core";
 
 export interface Permission {
   module: string;
@@ -24,57 +24,40 @@ export interface Permission {
 // Simple permission matrix for frontend
 // ✅ FIXED: Add all missing UserRole entries to match global definition
 export const PERMISSION_MATRIX: Record<UserRole, Record<string, string[]>> = {
-  'hotel-manager': {
-    dashboard: ['view', 'edit'],
-    analytics: ['view', 'export'],
-    calls: ['view', 'manage'],
-    requests: ['view', 'manage'],
+  "hotel-manager": {
+    dashboard: ["view", "edit"],
+    analytics: ["view", "export"],
+    calls: ["view", "manage"],
+    requests: ["view", "manage"],
   },
-  'front-desk': {
-    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
-    calls: ['view'],
-    requests: ['view', 'manage'],
+  "front-desk": {
+    dashboard: ["view", "view_client_interface"], // ✅ Added view_client_interface
+    calls: ["view"],
+    requests: ["view", "manage"],
   },
-  'it-manager': {
-    dashboard: ['view'],
-    system: ['view', 'debug'],
-    calls: ['view'],
+  "it-manager": {
+    dashboard: ["view"],
+    system: ["view", "debug"],
+    calls: ["view"],
   },
-  admin: {
-    dashboard: ['view', 'edit'],
-    analytics: ['view', 'export'],
-    calls: ['view', 'manage'],
-    requests: ['view', 'manage'],
+  super_admin: {
+    dashboard: ["view", "edit"],
+    analytics: ["view", "export"],
+    calls: ["view", "manage"],
+    requests: ["view", "manage"],
   },
   staff: {
-    dashboard: ['view'],
-    requests: ['view'],
+    dashboard: ["view"],
+    requests: ["view"],
   },
   manager: {
-    dashboard: ['view', 'edit'],
-    analytics: ['view', 'export'],
-    calls: ['view', 'manage'],
-    requests: ['view', 'manage'],
-  },
-  frontdesk: {
-    dashboard: ['view', 'view_client_interface'], // ✅ Added view_client_interface
-    calls: ['view'],
-    requests: ['view', 'manage'],
-  },
-  itmanager: {
-    dashboard: ['view'],
-    system: ['view', 'debug'],
-    calls: ['view'],
-  },
-  'super-admin': {
-    dashboard: ['view', 'edit'],
-    analytics: ['view', 'export'],
-    calls: ['view', 'manage'],
-    requests: ['view', 'manage'],
-    system: ['view', 'debug', 'manage'],
+    dashboard: ["view", "edit"],
+    analytics: ["view", "export"],
+    calls: ["view", "manage"],
+    requests: ["view", "manage"],
   },
   guest: {
-    dashboard: ['view'], // Add missing guest permissions
+    dashboard: ["view"], // Add missing guest permissions
   },
 };
 
@@ -98,7 +81,7 @@ export const getPermissionsForRole = (role: UserRole): Permission[] => {
 export const hasRolePermission = (
   role: UserRole,
   module: string,
-  action: string
+  action: string,
 ): boolean => {
   const rolePermissions = PERMISSION_MATRIX[role] || {};
   return rolePermissions[module]?.includes(action) || false;
@@ -116,185 +99,123 @@ export interface MenuItemConfig {
 
 // Simple menu configuration for frontend
 export const ROLE_MENU_CONFIG: Record<UserRole, MenuItemConfig[]> = {
-  'hotel-manager': [
+  "hotel-manager": [
     {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
     {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
+      key: "calls",
+      label: "Cuộc gọi",
+      icon: "📞",
+      path: "/saas-dashboard/calls",
+      requiredPermission: "calls.view",
     },
     {
-      key: 'analytics',
-      label: 'Phân tích',
-      icon: '📈',
-      path: '/saas-dashboard/analytics',
-      requiredPermission: 'analytics.view',
-    },
-  ],
-  'front-desk': [
-    {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
-    },
-    {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
+      key: "analytics",
+      label: "Phân tích",
+      icon: "📈",
+      path: "/saas-dashboard/analytics",
+      requiredPermission: "analytics.view",
     },
   ],
-  'it-manager': [
+  "front-desk": [
     {
-      key: 'dashboard',
-      label: 'System Dashboard',
-      icon: '🔧',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
     {
-      key: 'system',
-      label: 'Hệ thống',
-      icon: '⚙️',
-      path: '/saas-dashboard/system',
-      requiredPermission: 'system.view',
+      key: "calls",
+      label: "Cuộc gọi",
+      icon: "📞",
+      path: "/saas-dashboard/calls",
+      requiredPermission: "calls.view",
     },
   ],
-  admin: [
+  "it-manager": [
     {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "System Dashboard",
+      icon: "🔧",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
     {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
+      key: "system",
+      label: "Hệ thống",
+      icon: "⚙️",
+      path: "/saas-dashboard/system",
+      requiredPermission: "system.view",
+    },
+  ],
+  super_admin: [
+    {
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
     {
-      key: 'analytics',
-      label: 'Phân tích',
-      icon: '📈',
-      path: '/saas-dashboard/analytics',
-      requiredPermission: 'analytics.view',
+      key: "calls",
+      label: "Cuộc gọi",
+      icon: "📞",
+      path: "/saas-dashboard/calls",
+      requiredPermission: "calls.view",
+    },
+    {
+      key: "analytics",
+      label: "Phân tích",
+      icon: "📈",
+      path: "/saas-dashboard/analytics",
+      requiredPermission: "analytics.view",
     },
   ],
   staff: [
     {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
   ],
   manager: [
     {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
     {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
+      key: "calls",
+      label: "Cuộc gọi",
+      icon: "📞",
+      path: "/saas-dashboard/calls",
+      requiredPermission: "calls.view",
     },
     {
-      key: 'analytics',
-      label: 'Phân tích',
-      icon: '📈',
-      path: '/saas-dashboard/analytics',
-      requiredPermission: 'analytics.view',
-    },
-  ],
-  frontdesk: [
-    {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
-    },
-    {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
-    },
-  ],
-  itmanager: [
-    {
-      key: 'dashboard',
-      label: 'System Dashboard',
-      icon: '🔧',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
-    },
-    {
-      key: 'system',
-      label: 'Hệ thống',
-      icon: '⚙️',
-      path: '/saas-dashboard/system',
-      requiredPermission: 'system.view',
-    },
-  ],
-  'super-admin': [
-    {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
-    },
-    {
-      key: 'calls',
-      label: 'Cuộc gọi',
-      icon: '📞',
-      path: '/saas-dashboard/calls',
-      requiredPermission: 'calls.view',
-    },
-    {
-      key: 'analytics',
-      label: 'Phân tích',
-      icon: '📈',
-      path: '/saas-dashboard/analytics',
-      requiredPermission: 'analytics.view',
-    },
-    {
-      key: 'system',
-      label: 'Hệ thống',
-      icon: '⚙️',
-      path: '/saas-dashboard/system',
-      requiredPermission: 'system.view',
+      key: "analytics",
+      label: "Phân tích",
+      icon: "📈",
+      path: "/saas-dashboard/analytics",
+      requiredPermission: "analytics.view",
     },
   ],
   guest: [
     {
-      key: 'dashboard',
-      label: 'Tổng quan',
-      icon: '📊',
-      path: '/saas-dashboard',
-      requiredPermission: 'dashboard.view',
+      key: "dashboard",
+      label: "Tổng quan",
+      icon: "📊",
+      path: "/saas-dashboard",
+      requiredPermission: "dashboard.view",
     },
   ],
 };

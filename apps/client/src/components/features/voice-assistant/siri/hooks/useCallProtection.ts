@@ -1,5 +1,5 @@
 import { Language } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import logger from '@shared/utils/logger';
 import { useCallback, useEffect, useState } from 'react';
 
 interface UseCallProtectionProps {

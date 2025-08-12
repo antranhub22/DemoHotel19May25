@@ -2,11 +2,12 @@
  * Utility to extract service details from AI-generated summary
  */
 
+// removed unused Room type
 import {
   extractRoomNumber as extractRoomNumberShared,
   removeSimilarItems,
-} from '@/lib/sharedUtils';
-import { OrderSummary, OrderItem } from '@/types';
+} from "@/lib/sharedUtils";
+import { OrderItem, OrderSummary } from "@/types";
 
 /**
  * Defines regex patterns to extract service information from summary text
@@ -78,29 +79,29 @@ const PATTERNS = {
  * Service category mapping from detected keywords to form values
  */
 const serviceCategoryMapping: Record<string, string> = {
-  roomService: 'room-service',
-  food: 'food-beverage',
-  housekeeping: 'housekeeping',
-  transportation: 'transportation',
-  spa: 'spa',
-  tours: 'tours-activities',
-  technical: 'technical-support',
-  concierge: 'concierge',
-  wellness: 'wellness-fitness',
-  security: 'security',
-  specialOccasion: 'special-occasions',
+  roomService: "room-service",
+  food: "food-beverage",
+  housekeeping: "housekeeping",
+  transportation: "transportation",
+  spa: "spa",
+  tours: "tours-activities",
+  technical: "technical-support",
+  concierge: "concierge",
+  wellness: "wellness-fitness",
+  security: "security",
+  specialOccasion: "special-occasions",
 
   // Support categories
-  wifi: 'wifi-faq',
-  checkIn: 'check-in-out',
-  checkOut: 'check-in-out',
-  information: 'hotel-info',
-  tourism: 'attractions',
-  feedback: 'feedback',
-  support: 'support',
+  wifi: "wifi-faq",
+  checkIn: "check-in-out",
+  checkOut: "check-in-out",
+  information: "hotel-info",
+  tourism: "attractions",
+  feedback: "feedback",
+  support: "support",
 
   // Category for miscellaneous services
-  other: 'other',
+  other: "other",
 };
 
 /**
@@ -117,7 +118,7 @@ export function extractRoomNumber(summary: string): string | null {
 
   // Also try to find room numbers in "details" or "room number" sections
   const roomDetails = summary.match(
-    /(?:room details|room number|phòng số)(?:\s*[:#-]?\s*)([0-9]{1,4}[A-Za-z]?)/i
+    /(?:room details|room number|phòng số)(?:\s*[:#-]?\s*)([0-9]{1,4}[A-Za-z]?)/i,
   );
   if (roomDetails && roomDetails[1]) {
     return roomDetails[1];
@@ -125,7 +126,7 @@ export function extractRoomNumber(summary: string): string | null {
 
   // Extract room number from specific details format
   const detailsMatch = summary.match(
-    /(?:details[\s\S]*?room(?:\s+number)?[\s\S]*?)([0-9]{1,4}[A-Za-z]?)/i
+    /(?:details[\s\S]*?room(?:\s+number)?[\s\S]*?)([0-9]{1,4}[A-Za-z]?)/i,
   );
   if (detailsMatch && detailsMatch[1]) {
     return detailsMatch[1];
@@ -143,49 +144,49 @@ function determineOrderTypes(summary: string): string[] {
 
   // Check for each service type pattern and add to the array if found
   if (PATTERNS.food.test(summary)) {
-    serviceTypes.push('food');
+    serviceTypes.push("food");
   }
   if (PATTERNS.housekeeping.test(summary)) {
-    serviceTypes.push('housekeeping');
+    serviceTypes.push("housekeeping");
   }
   if (PATTERNS.transportation.test(summary)) {
-    serviceTypes.push('transportation');
+    serviceTypes.push("transportation");
   }
   if (PATTERNS.roomService.test(summary)) {
-    serviceTypes.push('roomService');
+    serviceTypes.push("roomService");
   }
   if (PATTERNS.spa.test(summary)) {
-    serviceTypes.push('spa');
+    serviceTypes.push("spa");
   }
   if (PATTERNS.tours.test(summary)) {
-    serviceTypes.push('tours');
+    serviceTypes.push("tours");
   }
   if (PATTERNS.technical.test(summary)) {
-    serviceTypes.push('technical');
+    serviceTypes.push("technical");
   }
   if (PATTERNS.concierge.test(summary)) {
-    serviceTypes.push('concierge');
+    serviceTypes.push("concierge");
   }
   if (PATTERNS.wellness.test(summary)) {
-    serviceTypes.push('wellness');
+    serviceTypes.push("wellness");
   }
   if (PATTERNS.security.test(summary)) {
-    serviceTypes.push('security');
+    serviceTypes.push("security");
   }
   if (PATTERNS.specialOccasion.test(summary)) {
-    serviceTypes.push('specialOccasion');
+    serviceTypes.push("specialOccasion");
   }
   if (PATTERNS.other.test(summary)) {
-    serviceTypes.push('other');
+    serviceTypes.push("other");
   }
 
   // Map the detected types to form values
   const mappedTypes = serviceTypes.map(
-    type => serviceCategoryMapping[type] || 'other'
+    (type) => serviceCategoryMapping[type] || "other",
   );
 
   // Default to "other" if nothing matches
-  return mappedTypes.length > 0 ? mappedTypes : ['other'];
+  return mappedTypes.length > 0 ? mappedTypes : ["other"];
 }
 
 /**
@@ -193,7 +194,7 @@ function determineOrderTypes(summary: string): string[] {
  */
 function determineOrderType(summary: string): string {
   const types = determineOrderTypes(summary);
-  return types.join(',');
+  return types.join(",");
 }
 
 /**
@@ -209,10 +210,10 @@ function extractItems(summary: string): OrderItem[] {
     const parsedItems = bulletItems
       .map((item, index) => {
         // Remove the bullet and trim
-        const cleanItem = item.replace(/^[-•*]\s*/, '').trim();
+        const cleanItem = item.replace(/^[-•*]\s*/, "").trim();
         return createOrderItem(cleanItem, index);
       })
-      .filter(item => item.name.length > 0);
+      .filter((item) => item.name.length > 0);
 
     allItems = [...allItems, ...parsedItems];
   }
@@ -227,12 +228,12 @@ function extractItems(summary: string): OrderItem[] {
           const cleanItem = item
             .replace(
               /(?:requested|asked for|ordered|booking|reservation for|inquired about)\s+/i,
-              ''
+              "",
             )
             .trim();
           return createOrderItem(cleanItem, index);
         })
-        .filter(item => item.name.length > 0);
+        .filter((item) => item.name.length > 0);
 
       allItems = [...allItems, ...parsedItems];
     }
@@ -247,7 +248,7 @@ function extractItems(summary: string): OrderItem[] {
     // Convert text items to OrderItem objects with default values
     const parsedItems = itemList
       .map((item, index) => createOrderItem(item, index))
-      .filter(item => item.name.length > 0);
+      .filter((item) => item.name.length > 0);
 
     allItems = [...allItems, ...parsedItems];
   }
@@ -259,11 +260,11 @@ function extractItems(summary: string): OrderItem[] {
       const sentence = sentences[i].trim();
       // Only process sentences that look like they might contain a request
       if (
-        sentence.toLowerCase().includes('request') ||
-        sentence.toLowerCase().includes('book') ||
-        sentence.toLowerCase().includes('order') ||
-        sentence.toLowerCase().includes('exchange') ||
-        sentence.toLowerCase().includes('inquired')
+        sentence.toLowerCase().includes("request") ||
+        sentence.toLowerCase().includes("book") ||
+        sentence.toLowerCase().includes("order") ||
+        sentence.toLowerCase().includes("exchange") ||
+        sentence.toLowerCase().includes("inquired")
       ) {
         allItems.push(createOrderItem(sentence, allItems.length));
       }
@@ -286,8 +287,8 @@ function extractItems(summary: string): OrderItem[] {
 function createOrderItem(itemText: string, index: number): OrderItem {
   const trimmedItem = itemText
     .trim()
-    .replace(/^[-•*]\s+/, '') // Remove bullet point if present
-    .replace(/^- /, ''); // Remove dash if present
+    .replace(/^[-•*]\s+/, "") // Remove bullet point if present
+    .replace(/^- /, ""); // Remove dash if present
 
   // Try to extract quantity if it's at the start of the item (e.g., "2 towels")
   const quantityMatch = trimmedItem.match(/^([0-9]+)\s+(.+)$/);
@@ -295,39 +296,39 @@ function createOrderItem(itemText: string, index: number): OrderItem {
   const name = quantityMatch ? quantityMatch[2] : trimmedItem;
 
   // Generate a more descriptive content for the details field
-  let description = '';
+  let description = "";
 
   // Check for date-related details
   const dateMatch = trimmedItem.match(
-    /(?:on|for)\s+((?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i
+    /(?:on|for)\s+((?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i,
   );
-  const dateInfo = dateMatch ? `Date: ${dateMatch[1]}` : '';
+  const dateInfo = dateMatch ? `Date: ${dateMatch[1]}` : "";
 
   // Check for people/quantity information
   const peopleMatch = trimmedItem.match(
-    /(\d+)\s+(?:people|person|pax|guest|adult|child|passenger)/i
+    /(\d+)\s+(?:people|person|pax|guest|adult|child|passenger)/i,
   );
-  const peopleInfo = peopleMatch ? `Guests: ${peopleMatch[1]} people` : '';
+  const peopleInfo = peopleMatch ? `Guests: ${peopleMatch[1]} people` : "";
 
   // Check for location/destination information
   const locationMatch = trimmedItem.match(
-    /(?:to|in|at|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*|[A-Z][A-Z]+|[A-Z][a-z]+)/
+    /(?:to|in|at|for)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*|[A-Z][A-Z]+|[A-Z][a-z]+)/,
   );
-  const locationInfo = locationMatch ? `Location: ${locationMatch[1]}` : '';
+  const locationInfo = locationMatch ? `Location: ${locationMatch[1]}` : "";
 
   // Check for time information
   const timeMatch = trimmedItem.match(
-    /(?:at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))/i
+    /(?:at|from)\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))/i,
   );
-  const timeInfo = timeMatch ? `Time: ${timeMatch[1]}` : '';
+  const timeInfo = timeMatch ? `Time: ${timeMatch[1]}` : "";
 
   // Check for price or amount information
   const amountMatch = trimmedItem.match(
-    /(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:USD|US dollars|\$|VND|dong)/i
+    /(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:USD|US dollars|\$|VND|dong)/i,
   );
   const amountInfo = amountMatch
-    ? `Amount: ${amountMatch[1]} ${amountMatch[0].includes('USD') || amountMatch[0].includes('US') || amountMatch[0].includes('$') ? 'USD' : 'VND'}`
-    : '';
+    ? `Amount: ${amountMatch[1]} ${amountMatch[0].includes("USD") || amountMatch[0].includes("US") || amountMatch[0].includes("$") ? "USD" : "VND"}`
+    : "";
 
   // Combine the detailed information with line breaks
   const detailParts = [
@@ -336,11 +337,11 @@ function createOrderItem(itemText: string, index: number): OrderItem {
     locationInfo,
     timeInfo,
     amountInfo,
-  ].filter(part => part.length > 0);
+  ].filter((part) => part.length > 0);
 
   // If we extracted specific details, use them; otherwise use a generic description
   if (detailParts.length > 0) {
-    description = detailParts.join('\n');
+    description = detailParts.join("\n");
   } else {
     description = `Details for ${name.charAt(0).toLowerCase() + name.slice(1)}`;
   }
@@ -363,7 +364,7 @@ function estimatePrice(itemName: string): number {
   // Food items
   if (
     /sandwich|burger|pasta|steak|fish|chicken|breakfast|lunch|dinner/.test(
-      lowerItem
+      lowerItem,
     )
   ) {
     return 15.0;
@@ -398,38 +399,38 @@ function estimatePrice(itemName: string): number {
  * Returns an OrderSummary object with extracted information
  */
 export function parseSummaryToOrderDetails(
-  summary: string
+  summary: string,
 ): Partial<OrderSummary> {
   if (!summary) {
     return {};
   }
 
   // Extract individual components using shared utilities
-  const roomNumber = extractRoomNumberShared(summary) || '';
+  const roomNumber = extractRoomNumberShared(summary) || "";
   const orderType = determineOrderType(summary);
   // ✅ FIXED: Use inline extraction instead of missing shared functions
   const deliveryTime =
-    summary.match(/delivery.*?time:?\s*([^.\n]+)/i)?.[1]?.trim() || '';
+    summary.match(/delivery.*?time:?\s*([^.\n]+)/i)?.[1]?.trim() || "";
   const specialInstructions =
-    summary.match(/special.*?instructions?:?\s*([^.\n]+)/i)?.[1]?.trim() || '';
+    summary.match(/special.*?instructions?:?\s*([^.\n]+)/i)?.[1]?.trim() || "";
   const items = extractItems(summary);
   const totalAmount =
     parseFloat(
-      summary.match(/total.*?amount?:?\s*(\d+(?:\.\d+)?)/i)?.[1] || '0'
+      summary.match(/total.*?amount?:?\s*(\d+(?:\.\d+)?)/i)?.[1] || "0",
     ) || 0;
 
   return {
     roomNumber,
     orderType,
     deliveryTime: deliveryTime as
-      | 'asap'
-      | '30min'
-      | '1hour'
-      | 'specific'
+      | "asap"
+      | "30min"
+      | "1hour"
+      | "specific"
       | undefined,
-    guestName: '',
-    guestEmail: '',
-    guestPhone: '',
+    guestName: "",
+    guestEmail: "",
+    guestPhone: "",
     specialInstructions,
     items,
     totalAmount,

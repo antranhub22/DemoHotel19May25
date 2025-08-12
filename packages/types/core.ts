@@ -1,63 +1,65 @@
 // Core type definitions for the hotel management system
 
-export type Language = 'en' | 'vi' | 'fr' | 'zh' | 'ru' | 'ko';
+export type Language = "en" | "vi" | "fr" | "zh" | "ru" | "ko";
 
 export type ServiceCategory =
-  | 'room_service'
-  | 'housekeeping'
-  | 'maintenance'
-  | 'concierge'
-  | 'spa_wellness'
-  | 'dining'
-  | 'transportation'
-  | 'business_center'
-  | 'laundry'
-  | 'wake_up_call'
-  | 'other';
+  | "room_service"
+  | "housekeeping"
+  | "maintenance"
+  | "concierge"
+  | "spa_wellness"
+  | "dining"
+  | "transportation"
+  | "business_center"
+  | "laundry"
+  | "wake_up_call"
+  | "other";
 
 export type UserRole =
-  | 'super-admin'
-  | 'hotel-manager'
-  | 'front-desk'
-  | 'it-manager'
-  | 'guest';
+  | "super_admin"
+  | "hotel-manager"
+  | "front-desk"
+  | "it-manager"
+  | "manager"
+  | "staff"
+  | "guest";
 
 export type Permission =
-  | 'read'
-  | 'write'
-  | 'delete'
-  | 'admin'
-  | 'manage_users'
-  | 'manage_settings'
-  | 'view_analytics'
-  | 'manage_calls'
-  | 'manage_requests';
+  | "read"
+  | "write"
+  | "delete"
+  | "admin"
+  | "manage_users"
+  | "manage_settings"
+  | "view_analytics"
+  | "manage_calls"
+  | "manage_requests";
 
 export type AuthErrorCode =
-  | 'INVALID_CREDENTIALS'
-  | 'TOKEN_EXPIRED'
-  | 'TOKEN_INVALID'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'USER_NOT_FOUND'
-  | 'USER_INACTIVE'
-  | 'ACCOUNT_LOCKED';
+  | "INVALID_CREDENTIALS"
+  | "TOKEN_EXPIRED"
+  | "TOKEN_INVALID"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "USER_NOT_FOUND"
+  | "USER_INACTIVE"
+  | "ACCOUNT_LOCKED";
 
 // Database types - re-export from schema
 export type {
-  Staff,
-  InsertStaff,
   Call,
-  InsertCall,
-  Transcript,
-  InsertTranscript,
-  RequestRecord,
-  InsertRequestRecord,
-  Message,
-  InsertMessage,
   CallSummary,
+  InsertCall,
   InsertCallSummary,
-} from '@shared/db';
+  InsertMessage,
+  InsertRequestRecord,
+  InsertStaff,
+  InsertTranscript,
+  Message,
+  RequestRecord,
+  Staff,
+  Transcript,
+} from "@shared/db";
 
 // UI types
 export interface BasicHotelData {
@@ -152,7 +154,7 @@ export interface AssistantConfig {
 
 export interface VapiCall {
   id: string;
-  status: 'active' | 'ended' | 'failed';
+  status: "active" | "ended" | "failed";
   duration?: number;
   transcript?: string;
 }
@@ -218,38 +220,38 @@ export type JSONValue =
   | { [key: string]: JSONValue };
 
 // Environment types
-export type NodeEnv = 'development' | 'production' | 'test';
+export type NodeEnv = "development" | "production" | "test";
 
 // HTTP types
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 export type HttpStatus = 200 | 201 | 400 | 401 | 403 | 404 | 500;
 
 // Database types
-export type SortOrder = 'asc' | 'desc';
+export type SortOrder = "asc" | "desc";
 export type FilterOperator =
-  | 'eq'
-  | 'ne'
-  | 'gt'
-  | 'gte'
-  | 'lt'
-  | 'lte'
-  | 'like'
-  | 'in';
+  | "eq"
+  | "ne"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "like"
+  | "in";
 
 // UI state types
-export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
-export type Theme = 'light' | 'dark' | 'auto';
+export type LoadingState = "idle" | "loading" | "success" | "error";
+export type Theme = "light" | "dark" | "auto";
 export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'danger'
-  | 'success'
-  | 'warning';
-export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "success"
+  | "warning";
+export type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 // Animation types
-export type AnimationDuration = 'fast' | 'normal' | 'slow';
-export type AnimationType = 'fade' | 'slide' | 'bounce' | 'zoom';
+export type AnimationDuration = "fast" | "normal" | "slow";
+export type AnimationType = "fade" | "slide" | "bounce" | "zoom";
 
 // Error types
 export interface ErrorResponse {

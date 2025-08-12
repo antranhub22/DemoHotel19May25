@@ -30,6 +30,23 @@ case "$ENV_TYPE" in
       echo "⚠️  Please update .env.local with your local development values"
     fi
     ;;
+
+  "prod-local"|"production-local")
+    echo "🧪 Setting up production-local testing environment..."
+    if [ -f ".env.production-local" ]; then
+      cp .env.production-local .env
+      echo "✅ Copied .env.production-local to .env"
+      echo "🔥 WARNING: Running in production mode locally!"
+      echo "📋 This will:"
+      echo "   - Use NODE_ENV=production"
+      echo "   - Enable production security settings"
+      echo "   - Disable debug logging"
+      echo "   - Use production database schema"
+    else
+      echo "❌ .env.production-local not found!"
+      echo "💡 Create it first with production-like settings"
+    fi
+    ;;
     
   "production"|"prod")
     echo "🚀 Setting up production environment..."
@@ -57,10 +74,12 @@ case "$ENV_TYPE" in
     echo "❌ Invalid environment type: $ENV_TYPE"
     echo "📋 Available options:"
     echo "   - local (or dev) - for local development"
+    echo "   - prod-local (or production-local) - test production mode locally"
     echo "   - production (or prod) - for production deployment"
     echo ""
     echo "📖 Usage:"
     echo "   ./scripts/switch-env.sh local"
+    echo "   ./scripts/switch-env.sh prod-local"
     echo "   ./scripts/switch-env.sh production"
     exit 1
     ;;

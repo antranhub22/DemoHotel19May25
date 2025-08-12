@@ -12,9 +12,9 @@ const securityMiddleware = {
   getSecurityReport: () => ({
     securityHealth: { riskLevel: "low" },
   }),
-  getRecentThreats: (hours: number) => [],
+  getRecentThreats: (_hours: number) => [],
   getAuditLogs: () => [],
-  updateSecurityConfig: (config: any) => ({ success: true }),
+  updateSecurityConfig: (_config: any) => ({ success: true }),
 };
 
 // ============================================

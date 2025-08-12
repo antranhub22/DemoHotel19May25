@@ -1,11 +1,11 @@
-import { logger } from '@shared/utils/logger';
-import { Express } from 'express';
-import request from 'supertest';
+import { logger } from "@shared/utils/logger";
+import { Express } from "express";
+import request from "supertest";
 
 export interface TestCase {
   name: string;
   description: string;
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   endpoint: string;
   headers?: Record<string, string>;
   body?: any;
@@ -21,7 +21,7 @@ export interface TestCase {
 export interface TestResult {
   testSuite: string;
   testCase: string;
-  status: 'passed' | 'failed' | 'skipped' | 'timeout';
+  status: "passed" | "failed" | "skipped" | "timeout";
   duration: number;
   response?: any;
   error?: string;
@@ -72,10 +72,10 @@ export class TestDataManager {
   async createTestTenant(): Promise<any> {
     const tenantData = {
       id: `test-tenant-${Date.now()}`,
-      hotel_name: 'Test Hotel',
-      contact_email: 'test@hotel.com',
-      phone: '+1234567890',
-      address: '123 Test Street',
+      hotel_name: "Test Hotel",
+      contact_email: "test@hotel.com",
+      phone: "+1234567890",
+      address: "123 Test Street",
       created_at: new Date(),
       updated_at: new Date(),
     };
@@ -96,13 +96,13 @@ export class TestDataManager {
       id: `call-${Date.now()}`,
       tenant_id: tenantId,
       call_id_vapi: `vapi-${Date.now()}`,
-      room_number: '101',
-      language: 'en',
-      service_type: 'room_service',
+      room_number: "101",
+      language: "en",
+      service_type: "room_service",
       start_time: new Date(),
       end_time: new Date(Date.now() + 300000), // 5 minutes later
       duration: 300,
-      status: 'completed',
+      status: "completed",
       created_at: new Date(),
     };
 
@@ -119,8 +119,8 @@ export class TestDataManager {
     const transcriptData = {
       id: `transcript-${Date.now()}`,
       call_id: callId,
-      role: 'user',
-      content: 'I would like to order room service',
+      role: "user",
+      content: "I would like to order room service",
       timestamp: new Date(),
       created_at: new Date(),
     };
@@ -138,8 +138,8 @@ export class TestDataManager {
     const summaryData = {
       id: `summary-${Date.now()}`,
       call_id: callId,
-      content: 'Guest requested room service - 2 sandwiches and coffee',
-      room_number: '101',
+      content: "Guest requested room service - 2 sandwiches and coffee",
+      room_number: "101",
       duration: 300,
       timestamp: new Date(),
     };
@@ -159,8 +159,8 @@ export class TestDataManager {
 
   async cleanup(): Promise<void> {
     logger.debug(
-      '🧹 [TEST-FRAMEWORK] Cleaning up test data...',
-      'TestFramework'
+      "🧹 [TEST-FRAMEWORK] Cleaning up test data...",
+      "TestFramework",
     );
 
     for (const cleanupTask of this.cleanupTasks) {
@@ -168,9 +168,9 @@ export class TestDataManager {
         await cleanupTask();
       } catch (error) {
         logger.error(
-          '❌ [TEST-FRAMEWORK] Error during cleanup:',
-          'TestFramework',
-          error
+          "❌ [TEST-FRAMEWORK] Error during cleanup:",
+          "TestFramework",
+          error,
         );
       }
     }
@@ -179,8 +179,8 @@ export class TestDataManager {
     this.testData.clear();
 
     logger.debug(
-      '✅ [TEST-FRAMEWORK] Test data cleanup completed',
-      'TestFramework'
+      "✅ [TEST-FRAMEWORK] Test data cleanup completed",
+      "TestFramework",
     );
   }
 }
@@ -191,18 +191,16 @@ export class TestDataManager {
 
 export class ApiTestRunner {
   private app: Express;
-  private testDataManager: TestDataManager;
   private results: TestResult[] = [];
 
   constructor(app: Express) {
     this.app = app;
-    this.testDataManager = TestDataManager.getInstance();
   }
 
   async runTestSuite(testSuite: TestSuite): Promise<TestResult[]> {
     logger.debug(
       `🧪 [TEST-FRAMEWORK] Running test suite: ${testSuite.name}`,
-      'TestFramework'
+      "TestFramework",
     );
 
     const suiteResults: TestResult[] = [];
@@ -214,8 +212,8 @@ export class ApiTestRunner {
       } catch (error) {
         logger.error(
           `❌ [TEST-FRAMEWORK] Setup failed for ${testSuite.name}:`,
-          'TestFramework',
-          error
+          "TestFramework",
+          error,
         );
         return suiteResults;
       }
@@ -235,8 +233,8 @@ export class ApiTestRunner {
       } catch (error) {
         logger.error(
           `❌ [TEST-FRAMEWORK] Teardown failed for ${testSuite.name}:`,
-          'TestFramework',
-          error
+          "TestFramework",
+          error,
         );
       }
     }
@@ -246,13 +244,13 @@ export class ApiTestRunner {
 
   private async runTestCase(
     testSuite: TestSuite,
-    testCase: TestCase
+    testCase: TestCase,
   ): Promise<TestResult> {
     const startTime = Date.now();
 
     logger.debug(
       `🔍 [TEST-FRAMEWORK] Running: ${testCase.name}`,
-      'TestFramework'
+      "TestFramework",
     );
 
     try {
@@ -275,7 +273,7 @@ export class ApiTestRunner {
       }
 
       // Add body for POST/PUT/PATCH
-      if (testCase.body && ['POST', 'PUT', 'PATCH'].includes(testCase.method)) {
+      if (testCase.body && ["POST", "PUT", "PATCH"].includes(testCase.method)) {
         apiRequest = apiRequest.send(testCase.body);
       }
 
@@ -302,7 +300,7 @@ export class ApiTestRunner {
       if (testCase.expectedResponse) {
         responseMatch = this.deepCompare(
           response.body,
-          testCase.expectedResponse
+          testCase.expectedResponse,
         );
       }
 
@@ -311,7 +309,7 @@ export class ApiTestRunner {
       const result: TestResult = {
         testSuite: testSuite.name,
         testCase: testCase.name,
-        status: passed ? 'passed' : 'failed',
+        status: passed ? "passed" : "failed",
         duration,
         response: response.body,
         timestamp: new Date(),
@@ -329,12 +327,12 @@ export class ApiTestRunner {
       };
 
       if (!passed) {
-        result.error = `Status: ${statusMatch ? '✅' : '❌'}, Custom: ${customValidationResult ? '✅' : '❌'}, Response: ${responseMatch ? '✅' : '❌'}`;
+        result.error = `Status: ${statusMatch ? "✅" : "❌"}, Custom: ${customValidationResult ? "✅" : "❌"}, Response: ${responseMatch ? "✅" : "❌"}`;
       }
 
       logger.debug(
-        `${passed ? '✅' : '❌'} [TEST-FRAMEWORK] ${testCase.name}: ${passed ? 'PASSED' : 'FAILED'} (${duration}ms)`,
-        'TestFramework'
+        `${passed ? "✅" : "❌"} [TEST-FRAMEWORK] ${testCase.name}: ${passed ? "PASSED" : "FAILED"} (${duration}ms)`,
+        "TestFramework",
       );
 
       return result;
@@ -343,14 +341,14 @@ export class ApiTestRunner {
 
       logger.error(
         `❌ [TEST-FRAMEWORK] ${testCase.name} failed:`,
-        'TestFramework',
-        error
+        "TestFramework",
+        error,
       );
 
       return {
         testSuite: testSuite.name,
         testCase: testCase.name,
-        status: 'failed',
+        status: "failed",
         duration,
         error: error instanceof Error ? error.message : String(error),
         timestamp: new Date(),
@@ -366,7 +364,7 @@ export class ApiTestRunner {
   }
 
   private deepCompare(actual: any, expected: any): boolean {
-    if (typeof expected !== 'object' || expected === null) {
+    if (typeof expected !== "object" || expected === null) {
       return actual === expected;
     }
 
@@ -375,7 +373,7 @@ export class ApiTestRunner {
         return false;
       }
       return expected.every((item, index) =>
-        this.deepCompare(actual[index], item)
+        this.deepCompare(actual[index], item),
       );
     }
 
@@ -390,13 +388,13 @@ export class ApiTestRunner {
 
   generateReport(): TestReport {
     const total = this.results.length;
-    const passed = this.results.filter(r => r.status === 'passed').length;
-    const failed = this.results.filter(r => r.status === 'failed').length;
-    const skipped = this.results.filter(r => r.status === 'skipped').length;
+    const passed = this.results.filter((r) => r.status === "passed").length;
+    const failed = this.results.filter((r) => r.status === "failed").length;
+    const skipped = this.results.filter((r) => r.status === "skipped").length;
     const totalDuration = this.results.reduce((sum, r) => sum + r.duration, 0);
 
     // Performance metrics
-    const responseTimes = this.results.map(r => r.duration);
+    const responseTimes = this.results.map((r) => r.duration);
     const averageResponseTime =
       responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
 
@@ -407,46 +405,50 @@ export class ApiTestRunner {
         acc[endpoint].push(r.duration);
         return acc;
       },
-      {} as Record<string, number[]>
+      {} as Record<string, number[]>,
     );
 
     const avgEndpointTimes = Object.entries(endpointTimes).map(
       ([endpoint, times]) => ({
         endpoint,
         avgTime: times.reduce((sum, time) => sum + time, 0) / times.length,
-      })
+      }),
     );
 
     const slowestEndpoint =
-      avgEndpointTimes.sort((a, b) => b.avgTime - a.avgTime)[0]?.endpoint || '';
+      avgEndpointTimes.sort((a, b) => b.avgTime - a.avgTime)[0]?.endpoint || "";
     const fastestEndpoint =
-      avgEndpointTimes.sort((a, b) => a.avgTime - b.avgTime)[0]?.endpoint || '';
+      avgEndpointTimes.sort((a, b) => a.avgTime - b.avgTime)[0]?.endpoint || "";
 
     // Version compatibility
     const testedVersions = [
-      ...new Set(this.results.map(r => r.version).filter(Boolean)),
+      ...new Set(this.results.map((r) => r.version).filter(Boolean)),
     ];
     const versionCompatibility = testedVersions.reduce(
       (acc, version) => {
-        const versionResults = this.results.filter(r => r.version === version);
-        const versionPassed = versionResults.every(r => r.status === 'passed');
+        const versionResults = this.results.filter(
+          (r) => r.version === version,
+        );
+        const versionPassed = versionResults.every(
+          (r) => r.status === "passed",
+        );
         acc[version!] = versionPassed;
         return acc;
       },
-      {} as Record<string, boolean>
+      {} as Record<string, boolean>,
     );
 
     // Category breakdown
     const categories = this.results.reduce(
       (acc, r) => {
-        const category = r.metadata.category || 'uncategorized';
+        const category = r.metadata.category || "uncategorized";
         if (!acc[category]) acc[category] = { passed: 0, failed: 0, total: 0 };
         acc[category].total++;
-        if (r.status === 'passed') acc[category].passed++;
-        if (r.status === 'failed') acc[category].failed++;
+        if (r.status === "passed") acc[category].passed++;
+        if (r.status === "failed") acc[category].failed++;
         return acc;
       },
-      {} as Record<string, { passed: number; failed: number; total: number }>
+      {} as Record<string, { passed: number; failed: number; total: number }>,
     );
 
     return {
@@ -463,7 +465,8 @@ export class ApiTestRunner {
         averageResponseTime,
         slowestEndpoint,
         fastestEndpoint,
-        timeouts: this.results.filter(r => r.error?.includes('timeout')).length,
+        timeouts: this.results.filter((r) => r.error?.includes("timeout"))
+          .length,
       },
       versions: {
         tested: testedVersions,
@@ -491,7 +494,7 @@ export class VersionTestRunner {
 
   async testVersionCompatibility(
     endpoint: string,
-    versions: string[]
+    versions: string[],
   ): Promise<Record<string, TestResult>> {
     const results: Record<string, TestResult> = {};
 
@@ -499,21 +502,21 @@ export class VersionTestRunner {
       const testSuite: TestSuite = {
         name: `Version Compatibility - ${version}`,
         description: `Test ${endpoint} compatibility with version ${version}`,
-        category: 'integration',
+        category: "integration",
         version,
-        tags: ['version', 'compatibility'],
+        tags: ["version", "compatibility"],
         tests: [
           {
             name: `${endpoint} - ${version}`,
             description: `Test ${endpoint} with version ${version}`,
-            method: 'GET',
-            endpoint: endpoint.replace('{version}', version),
+            method: "GET",
+            endpoint: endpoint.replace("{version}", version),
             headers: {
-              'API-Version': version,
+              "API-Version": version,
               Accept: `application/vnd.hotel.${version}+json`,
             },
             expectedStatus: 200,
-            tags: ['compatibility', version],
+            tags: ["compatibility", version],
           },
         ],
       };
@@ -529,47 +532,48 @@ export class VersionTestRunner {
 
   async testVersionMigration(
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<TestResult[]> {
     const testSuite: TestSuite = {
       name: `Version Migration - ${fromVersion} to ${toVersion}`,
       description: `Test migration path from ${fromVersion} to ${toVersion}`,
-      category: 'integration',
+      category: "integration",
       version: toVersion,
-      tags: ['migration', 'version'],
+      tags: ["migration", "version"],
       tests: [
         {
-          name: 'Migration Guide Available',
-          description: 'Check if migration guide exists',
-          method: 'GET',
+          name: "Migration Guide Available",
+          description: "Check if migration guide exists",
+          method: "GET",
           endpoint: `/api/migration/${fromVersion}/${toVersion}`,
           expectedStatus: 200,
-          customValidation: response => {
+          customValidation: (response) => {
             return (
               response.success &&
               response.data.migration &&
               response.data.migration.guide
             );
           },
-          tags: ['migration'],
+          tags: ["migration"],
         },
         {
-          name: 'Migration Validation',
-          description: 'Validate migration compatibility',
-          method: 'POST',
-          endpoint: '/api/migration/validate',
+          name: "Migration Validation",
+          description: "Validate migration compatibility",
+          method: "POST",
+          endpoint: "/api/migration/validate",
           body: {
             fromVersion,
             toVersion,
             clientCode: 'fetch("/api/calls")',
           },
           expectedStatus: 200,
-          customValidation: response => {
+          customValidation: (response) => {
             return (
-              response.success && response.data.hasOwnProperty('compatible')
+              response.success &&
+              Object.prototype.hasOwnProperty.call(response.data, "compatible")
             );
           },
-          tags: ['migration', 'validation'],
+          tags: ["migration", "validation"],
         },
       ],
     };
@@ -596,7 +600,7 @@ export class PerformanceTestRunner {
       concurrency: number;
       timeout?: number;
       headers?: Record<string, string>;
-    }
+    },
   ): Promise<{
     totalRequests: number;
     successfulRequests: number;
@@ -613,7 +617,7 @@ export class PerformanceTestRunner {
 
     logger.debug(
       `🏋️ [PERF-TEST] Load testing ${endpoint} - ${requests} requests, ${concurrency} concurrent`,
-      'PerformanceTest'
+      "PerformanceTest",
     );
 
     const startTime = Date.now();
@@ -636,10 +640,10 @@ export class PerformanceTestRunner {
     }
 
     const totalTime = Date.now() - startTime;
-    const successfulRequests = results.filter(r => r.success).length;
-    const failedRequests = results.filter(r => !r.success).length;
-    const responseTimes = results.filter(r => r.success).map(r => r.time);
-    const errors = results.filter(r => !r.success).map(r => r.error!);
+    const successfulRequests = results.filter((r) => r.success).length;
+    const failedRequests = results.filter((r) => !r.success).length;
+    const responseTimes = results.filter((r) => r.success).map((r) => r.time);
+    const errors = results.filter((r) => !r.success).map((r) => r.error!);
 
     return {
       totalRequests: requests,
@@ -663,7 +667,7 @@ export class PerformanceTestRunner {
   private async singleRequest(
     endpoint: string,
     headers: Record<string, string>,
-    timeout: number
+    timeout: number,
   ): Promise<{ success: boolean; time: number; error?: string }> {
     const startTime = Date.now();
 

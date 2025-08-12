@@ -1,8 +1,8 @@
-import fetch from 'node-fetch';
-import { z } from 'zod';
-import {} from './hotelResearch';
-import { logger } from '@shared/utils/logger';
-import { KnowledgeBaseGenerator } from './knowledgeBaseGenerator';
+import fetch from "node-fetch";
+import { z } from "zod";
+import {} from "./hotelResearch";
+import { logger } from "@shared/utils/logger";
+import { KnowledgeBaseGenerator } from "./knowledgeBaseGenerator";
 
 // ============================================
 // Types & Interfaces for Vapi Integration
@@ -14,7 +14,7 @@ export interface VapiAssistantConfig {
   systemPrompt: string;
   voiceId?: string;
   model?: {
-    provider: 'openai' | 'anthropic';
+    provider: "openai" | "anthropic";
     model: string;
     temperature?: number;
   };
@@ -22,14 +22,14 @@ export interface VapiAssistantConfig {
   firstMessage?: string;
   silenceTimeoutSeconds?: number;
   maxDurationSeconds?: number;
-  backgroundSound?: 'office' | 'off' | 'hotel-lobby';
+  backgroundSound?: "office" | "off" | "hotel-lobby";
 }
 
 export interface VapiFunction {
   name: string;
   description: string;
   parameters: {
-    type: 'object';
+    type: "object";
     properties: Record<
       string,
       {
@@ -45,12 +45,12 @@ export interface VapiFunction {
 }
 
 export interface AssistantCustomization {
-  personality: 'professional' | 'friendly' | 'luxurious' | 'casual';
-  tone: 'formal' | 'friendly' | 'enthusiastic' | 'calm';
+  personality: "professional" | "friendly" | "luxurious" | "casual";
+  tone: "formal" | "friendly" | "enthusiastic" | "calm";
   languages: string[];
   voiceId?: string;
   specialInstructions?: string;
-  backgroundSound?: 'office' | 'off' | 'hotel-lobby';
+  backgroundSound?: "office" | "off" | "hotel-lobby";
   silenceTimeout?: number;
   maxDuration?: number;
 }
@@ -82,10 +82,10 @@ export class VapiIntegrationError extends Error {
     message: string,
     public code: string,
     public statusCode?: number,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
-    this.name = 'VapiIntegrationError';
+    this.name = "VapiIntegrationError";
   }
 }
 
@@ -94,16 +94,16 @@ export class VapiIntegrationError extends Error {
 // ============================================
 
 export class VapiIntegrationService {
-  private baseURL = 'https://api.vapi.ai';
+  private baseURL = "https://api.vapi.ai";
   private apiKey: string;
 
   constructor() {
-    this.apiKey = process.env.VAPI_API_KEY || '';
+    this.apiKey = process.env.VAPI_API_KEY || "";
 
     if (!this.apiKey) {
       logger.warn(
-        'Vapi API key not found. Assistant creation will fail.',
-        'Component'
+        "Vapi API key not found. Assistant creation will fail.",
+        "Component",
       );
     }
   }
@@ -118,31 +118,31 @@ export class VapiIntegrationService {
   async createAssistant(config: VapiAssistantConfig): Promise<string> {
     if (!this.apiKey) {
       throw new VapiIntegrationError(
-        'Vapi API key not configured',
-        'API_KEY_MISSING',
-        500
+        "Vapi API key not configured",
+        "API_KEY_MISSING",
+        500,
       );
     }
 
     try {
-      logger.debug('🤖 Creating Vapi assistant: ${config.name}', 'Component');
+      logger.debug("🤖 Creating Vapi assistant: ${config.name}", "Component");
 
       const response = await fetch(`${this.baseURL}/assistant`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: config.name,
           model: config.model || {
-            provider: 'openai',
-            model: 'gpt-4',
+            provider: "openai",
+            model: "gpt-4",
             temperature: 0.7,
           },
           voice: {
-            provider: 'playht',
-            voiceId: config.voiceId || 'jennifer',
+            provider: "playht",
+            voiceId: config.voiceId || "jennifer",
           },
           systemMessage: config.systemPrompt,
           firstMessage:
@@ -151,7 +151,7 @@ export class VapiIntegrationService {
           functions: config.functions,
           silenceTimeoutSeconds: config.silenceTimeoutSeconds || 30,
           maxDurationSeconds: config.maxDurationSeconds || 1800, // 30 minutes
-          backgroundSound: config.backgroundSound || 'hotel-lobby',
+          backgroundSound: config.backgroundSound || "hotel-lobby",
         }),
       });
 
@@ -161,16 +161,16 @@ export class VapiIntegrationService {
         const errorData: VapiError = JSON.parse(responseText) as VapiError;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
-          errorData.error.type || 'API_ERROR',
+          errorData.error.type || "API_ERROR",
           response.status,
-          errorData
+          errorData,
         );
       }
 
       const assistant: VapiResponse = JSON.parse(responseText);
       logger.debug(
-        '✅ Vapi assistant created successfully: ${assistant.id}',
-        'Component'
+        "✅ Vapi assistant created successfully: ${assistant.id}",
+        "Component",
       );
 
       return assistant.id;
@@ -179,11 +179,11 @@ export class VapiIntegrationService {
         throw error;
       }
 
-      logger.error('Failed to create Vapi assistant:', 'Component', error);
+      logger.error("Failed to create Vapi assistant:", "Component", error);
       throw new VapiIntegrationError(
-        `Failed to create assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'CREATION_FAILED',
-        500
+        `Failed to create assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "CREATION_FAILED",
+        500,
       );
     }
   }
@@ -193,18 +193,18 @@ export class VapiIntegrationService {
    */
   async updateAssistant(
     assistantId: string,
-    config: Partial<VapiAssistantConfig>
+    config: Partial<VapiAssistantConfig>,
   ): Promise<void> {
     if (!this.apiKey) {
       throw new VapiIntegrationError(
-        'Vapi API key not configured',
-        'API_KEY_MISSING',
-        500
+        "Vapi API key not configured",
+        "API_KEY_MISSING",
+        500,
       );
     }
 
     try {
-      logger.debug('🔄 Updating Vapi assistant: ${assistantId}', 'Component');
+      logger.debug("🔄 Updating Vapi assistant: ${assistantId}", "Component");
 
       const updateData: any = {};
 
@@ -221,7 +221,7 @@ export class VapiIntegrationService {
         updateData.firstMessage = config.firstMessage;
       }
       if (config.voiceId) {
-        updateData.voice = { provider: 'playht', voiceId: config.voiceId };
+        updateData.voice = { provider: "playht", voiceId: config.voiceId };
       }
       if (config.model) {
         updateData.model = config.model;
@@ -237,10 +237,10 @@ export class VapiIntegrationService {
       }
 
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updateData),
       });
@@ -249,25 +249,25 @@ export class VapiIntegrationService {
         const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
-          errorData.error.type || 'API_ERROR',
-          response.status
+          errorData.error.type || "API_ERROR",
+          response.status,
         );
       }
 
       logger.debug(
-        '✅ Vapi assistant updated successfully: ${assistantId}',
-        'Component'
+        "✅ Vapi assistant updated successfully: ${assistantId}",
+        "Component",
       );
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
 
-      logger.error('Failed to update Vapi assistant:', 'Component', error);
+      logger.error("Failed to update Vapi assistant:", "Component", error);
       throw new VapiIntegrationError(
-        `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'UPDATE_FAILED',
-        500
+        `Failed to update assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "UPDATE_FAILED",
+        500,
       );
     }
   }
@@ -278,17 +278,17 @@ export class VapiIntegrationService {
   async deleteAssistant(assistantId: string): Promise<void> {
     if (!this.apiKey) {
       throw new VapiIntegrationError(
-        'Vapi API key not configured',
-        'API_KEY_MISSING',
-        500
+        "Vapi API key not configured",
+        "API_KEY_MISSING",
+        500,
       );
     }
 
     try {
-      logger.debug('🗑️ Deleting Vapi assistant: ${assistantId}', 'Component');
+      logger.debug("🗑️ Deleting Vapi assistant: ${assistantId}", "Component");
 
       const response = await fetch(`${this.baseURL}/assistant/${assistantId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
         },
@@ -298,25 +298,25 @@ export class VapiIntegrationService {
         const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
-          errorData.error.type || 'API_ERROR',
-          response.status
+          errorData.error.type || "API_ERROR",
+          response.status,
         );
       }
 
       logger.debug(
-        '✅ Vapi assistant deleted successfully: ${assistantId}',
-        'Component'
+        "✅ Vapi assistant deleted successfully: ${assistantId}",
+        "Component",
       );
     } catch (error) {
       if (error instanceof VapiIntegrationError) {
         throw error;
       }
 
-      logger.error('Failed to delete Vapi assistant:', 'Component', error);
+      logger.error("Failed to delete Vapi assistant:", "Component", error);
       throw new VapiIntegrationError(
-        `Failed to delete assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'DELETION_FAILED',
-        500
+        `Failed to delete assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "DELETION_FAILED",
+        500,
       );
     }
   }
@@ -327,9 +327,9 @@ export class VapiIntegrationService {
   async getAssistant(assistantId: string): Promise<VapiResponse> {
     if (!this.apiKey) {
       throw new VapiIntegrationError(
-        'Vapi API key not configured',
-        'API_KEY_MISSING',
-        500
+        "Vapi API key not configured",
+        "API_KEY_MISSING",
+        500,
       );
     }
 
@@ -344,8 +344,8 @@ export class VapiIntegrationService {
         const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
-          errorData.error.type || 'API_ERROR',
-          response.status
+          errorData.error.type || "API_ERROR",
+          response.status,
         );
       }
 
@@ -356,9 +356,9 @@ export class VapiIntegrationService {
       }
 
       throw new VapiIntegrationError(
-        `Failed to get assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'GET_FAILED',
-        500
+        `Failed to get assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "GET_FAILED",
+        500,
       );
     }
   }
@@ -369,9 +369,9 @@ export class VapiIntegrationService {
   async listAssistants(): Promise<VapiResponse[]> {
     if (!this.apiKey) {
       throw new VapiIntegrationError(
-        'Vapi API key not configured',
-        'API_KEY_MISSING',
-        500
+        "Vapi API key not configured",
+        "API_KEY_MISSING",
+        500,
       );
     }
 
@@ -386,8 +386,8 @@ export class VapiIntegrationService {
         const errorData: VapiError = (await response.json()) as any;
         throw new VapiIntegrationError(
           `Vapi API error: ${errorData.error.message}`,
-          errorData.error.type || 'API_ERROR',
-          response.status
+          errorData.error.type || "API_ERROR",
+          response.status,
         );
       }
 
@@ -398,9 +398,9 @@ export class VapiIntegrationService {
       }
 
       throw new VapiIntegrationError(
-        `Failed to list assistants: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'LIST_FAILED',
-        500
+        `Failed to list assistants: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "LIST_FAILED",
+        500,
       );
     }
   }
@@ -417,7 +417,7 @@ export class VapiIntegrationService {
       await this.listAssistants();
       return true;
     } catch (error) {
-      logger.error('Vapi API connection test failed:', 'Component', error);
+      logger.error("Vapi API connection test failed:", "Component", error);
       return false;
     }
   }
@@ -438,7 +438,7 @@ export class VapiIntegrationService {
     }
 
     return {
-      status: hasApiKey && connectionStatus ? 'healthy' : 'degraded',
+      status: hasApiKey && connectionStatus ? "healthy" : "degraded",
       apiKey: hasApiKey,
       connection: connectionStatus,
     };
@@ -463,24 +463,24 @@ export class AssistantGeneratorService {
    */
   async generateAssistant(
     hotelData: any,
-    customization: any = {}
+    customization: any = {},
   ): Promise<string> {
     try {
-      logger.debug('🤖 [Vapi] Generating assistant...', 'Service');
+      logger.debug("🤖 [Vapi] Generating assistant...", "Service");
 
       // Generate assistant configuration based on language preference
-      const primaryLanguage = customization.languages?.[0] || 'en';
+      const primaryLanguage = customization.languages?.[0] || "en";
       let assistantConfig: any;
 
-      if (primaryLanguage === 'vi' || primaryLanguage === 'vietnamese') {
+      if (primaryLanguage === "vi" || primaryLanguage === "vietnamese") {
         assistantConfig = await this.generateVietnameseAssistant(
           hotelData,
-          customization
+          customization,
         );
       } else {
         assistantConfig = await this.generateEnglishAssistant(
           hotelData,
-          customization
+          customization,
         );
       }
 
@@ -489,17 +489,17 @@ export class AssistantGeneratorService {
         await this.vapiService.createAssistant(assistantConfig);
 
       logger.success(
-        '✅ [Vapi] Assistant generated successfully:',
-        'Service',
-        assistantId
+        "✅ [Vapi] Assistant generated successfully:",
+        "Service",
+        assistantId,
       );
       return assistantId;
     } catch (error) {
-      logger.error('❌ [Vapi] Assistant generation failed:', 'Service', error);
+      logger.error("❌ [Vapi] Assistant generation failed:", "Service", error);
       throw new VapiIntegrationError(
-        `Failed to generate assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'GENERATION_FAILED',
-        500
+        `Failed to generate assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "GENERATION_FAILED",
+        500,
       );
     }
   }
@@ -509,29 +509,29 @@ export class AssistantGeneratorService {
    */
   async generateVietnameseAssistant(
     hotelData: any, // ✅ FIXED: Use any type to bypass complex type conflicts
-    customization: any = {} // ✅ FIXED: Use any type
+    customization: any = {}, // ✅ FIXED: Use any type
   ): Promise<any> {
     try {
-      logger.debug('🇻🇳 [Vapi] Generating Vietnamese assistant...', 'Service');
+      logger.debug("🇻🇳 [Vapi] Generating Vietnamese assistant...", "Service");
 
       const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(
-        hotelData as any // ✅ FIXED: Cast to any to bypass type conflicts
+        hotelData as any, // ✅ FIXED: Cast to any to bypass type conflicts
       );
 
       const functions = this.generateFunctions(
-        (hotelData.services || []) as any[]
+        (hotelData.services || []) as any[],
       ); // ✅ FIXED: Cast services to any[]
 
       const assistantConfig = {
         model: {
-          provider: 'openai',
-          model: 'gpt-4o-mini',
+          provider: "openai",
+          model: "gpt-4o-mini",
           messages: [
             {
-              role: 'system',
+              role: "system",
               content: this.buildVietnameseSystemPrompt(
                 hotelData,
-                knowledgeBase
+                knowledgeBase,
               ),
             },
           ],
@@ -540,30 +540,30 @@ export class AssistantGeneratorService {
           maxTokens: 1000,
         },
         voice: {
-          provider: 'azure',
-          voiceId: 'vi-VN-HoaiMyNeural', // Vietnamese female voice
+          provider: "azure",
+          voiceId: "vi-VN-HoaiMyNeural", // Vietnamese female voice
           speed: 1.0,
           stability: 0.8,
         },
         transcriber: {
-          provider: 'deepgram',
-          model: 'nova-2',
-          language: 'vi',
+          provider: "deepgram",
+          model: "nova-2",
+          language: "vi",
           smartFormat: true,
         },
-        firstMessage: `Xin chào! Tôi là trợ lý ảo của ${hotelData.name || 'khách sạn'}. Tôi có thể giúp gì cho quý khách hôm nay?`,
+        firstMessage: `Xin chào! Tôi là trợ lý ảo của ${hotelData.name || "khách sạn"}. Tôi có thể giúp gì cho quý khách hôm nay?`,
         endCallMessage:
-          'Cảm ơn quý khách đã liên hệ. Chúc quý khách có một ngày tốt lành!',
+          "Cảm ơn quý khách đã liên hệ. Chúc quý khách có một ngày tốt lành!",
         ...customization,
       };
 
-      logger.success('✅ [Vapi] Vietnamese assistant generated', 'Service');
+      logger.success("✅ [Vapi] Vietnamese assistant generated", "Service");
       return assistantConfig;
     } catch (error) {
       logger.error(
-        '❌ [Vapi] Vietnamese assistant generation failed:',
-        'Service',
-        error
+        "❌ [Vapi] Vietnamese assistant generation failed:",
+        "Service",
+        error,
       );
       throw error;
     }
@@ -574,24 +574,24 @@ export class AssistantGeneratorService {
    */
   async generateEnglishAssistant(
     hotelData: any, // ✅ FIXED: Use any type to bypass complex type conflicts
-    customization: any = {} // ✅ FIXED: Use any type
+    customization: any = {}, // ✅ FIXED: Use any type
   ): Promise<any> {
     try {
-      logger.debug('🇺🇸 [Vapi] Generating English assistant...', 'Service');
+      logger.debug("🇺🇸 [Vapi] Generating English assistant...", "Service");
 
       const knowledgeBase = this.knowledgeGenerator.generateKnowledgeBase(
-        hotelData as any // ✅ FIXED: Cast to any to bypass type conflicts
+        hotelData as any, // ✅ FIXED: Cast to any to bypass type conflicts
       );
 
       // Build system prompt using our custom method
       const systemPrompt = this.buildEnglishSystemPrompt(
         hotelData,
-        knowledgeBase
+        knowledgeBase,
       ); // ✅ FIXED: Use our own method
 
       // Generate functions based on hotel services
       const functions = this.generateFunctions(
-        (hotelData.services || []) as any[]
+        (hotelData.services || []) as any[],
       );
 
       // Build assistant configuration
@@ -600,26 +600,26 @@ export class AssistantGeneratorService {
         name: `${hotelData.name} AI Concierge`,
         hotelName: hotelData.name,
         systemPrompt,
-        voiceId: customization.voiceId || 'jennifer',
+        voiceId: customization.voiceId || "jennifer",
         model: {
-          provider: 'openai',
-          model: 'gpt-4',
-          temperature: customization.personality === 'friendly' ? 0.8 : 0.7,
+          provider: "openai",
+          model: "gpt-4",
+          temperature: customization.personality === "friendly" ? 0.8 : 0.7,
         },
         functions,
         firstMessage: this.generateFirstMessage(hotelData, customization),
         silenceTimeoutSeconds: customization.silenceTimeout || 30,
         maxDurationSeconds: customization.maxDuration || 1800,
-        backgroundSound: customization.backgroundSound || 'hotel-lobby',
+        backgroundSound: customization.backgroundSound || "hotel-lobby",
       };
 
-      logger.success('✅ [Vapi] English assistant generated', 'Service');
+      logger.success("✅ [Vapi] English assistant generated", "Service");
       return assistantConfig;
     } catch (error) {
       logger.error(
-        '❌ [Vapi] English assistant generation failed:',
-        'Service',
-        error
+        "❌ [Vapi] English assistant generation failed:",
+        "Service",
+        error,
       );
       throw error;
     }
@@ -631,12 +631,12 @@ export class AssistantGeneratorService {
   async updateAssistant(
     assistantId: string,
     hotelData: BasicHotelData | AdvancedHotelData,
-    customization: AssistantCustomization
+    customization: AssistantCustomization,
   ): Promise<void> {
     try {
       logger.debug(
-        '🔄 Updating assistant ${assistantId} for: ${hotelData.name}',
-        'Component'
+        "🔄 Updating assistant ${assistantId} for: ${hotelData.name}",
+        "Component",
       );
 
       // const _knowledgeBase =
@@ -645,7 +645,7 @@ export class AssistantGeneratorService {
         this.knowledgeGenerator.generateKnowledgeBase(hotelData);
       const systemPrompt = this.buildEnglishSystemPrompt(
         hotelData,
-        knowledgeBase
+        knowledgeBase,
       ); // ✅ FIXED: Use our own method instead of missing generateSystemPrompt
       const functions = this.generateFunctions(hotelData.services);
 
@@ -661,19 +661,19 @@ export class AssistantGeneratorService {
 
       await this.vapiService.updateAssistant(assistantId, updateConfig);
       logger.debug(
-        '✅ Assistant updated successfully: ${assistantId}',
-        'Component'
+        "✅ Assistant updated successfully: ${assistantId}",
+        "Component",
       );
     } catch (error) {
       logger.error(
-        'Failed to update assistant ${assistantId}:',
-        'Component',
-        error
+        "Failed to update assistant ${assistantId}:",
+        "Component",
+        error,
       );
       throw new VapiIntegrationError(
-        `Failed to update assistant: ${(error as any)?.message || String(error) || 'Unknown error'}`,
-        'UPDATE_FAILED',
-        500
+        `Failed to update assistant: ${(error as any)?.message || String(error) || "Unknown error"}`,
+        "UPDATE_FAILED",
+        500,
       );
     }
   }
@@ -691,54 +691,54 @@ export class AssistantGeneratorService {
 
     // ✅ FIXED: Handle both string arrays and object arrays
     const processedServices = services.map((service: any) => {
-      if (typeof service === 'string') {
-        return { name: service, type: 'general', description: service };
+      if (typeof service === "string") {
+        return { name: service, type: "general", description: service };
       }
       return service;
     });
 
     const serviceTypes = processedServices.map(
-      s => s.type || s.category || 'general'
+      (s) => s.type || s.category || "general",
     ); // ✅ FIXED: Use safe property access
 
     const functions = [
       {
-        name: 'get_hotel_info',
-        description: 'Get basic hotel information',
+        name: "get_hotel_info",
+        description: "Get basic hotel information",
         parameters: {
-          type: 'object',
+          type: "object",
           properties: {
             info_type: {
-              type: 'string',
-              enum: ['address', 'phone', 'hours', 'amenities'],
-              description: 'Type of information requested',
+              type: "string",
+              enum: ["address", "phone", "hours", "amenities"],
+              description: "Type of information requested",
             },
           },
-          required: ['info_type'],
+          required: ["info_type"],
         },
       },
     ];
 
     // Add service-specific functions
-    if (serviceTypes.includes('room_service')) {
+    if (serviceTypes.includes("room_service")) {
       functions.push({
-        name: 'order_room_service',
-        description: 'Place a room service order',
+        name: "order_room_service",
+        description: "Place a room service order",
         parameters: {
-          type: 'object',
+          type: "object",
           properties: {
-            room_number: { type: 'string', description: 'Guest room number' },
+            room_number: { type: "string", description: "Guest room number" },
             items: {
-              type: 'array',
-              items: { type: 'string' },
-              description: 'Items to order',
+              type: "array",
+              items: { type: "string" },
+              description: "Items to order",
             },
             special_requests: {
-              type: 'string',
-              description: 'Special requests or instructions',
+              type: "string",
+              description: "Special requests or instructions",
             },
           },
-          required: ['room_number', 'items'],
+          required: ["room_number", "items"],
         },
       } as any); // ✅ FIXED: Cast to any to bypass strict typing
     }
@@ -751,11 +751,11 @@ export class AssistantGeneratorService {
    */
   private generateFirstMessage(
     hotelData: BasicHotelData,
-    customization: AssistantCustomization
+    customization: AssistantCustomization,
   ): string {
     const timeGreeting = this.getTimeBasedGreeting();
     const personalityTouch = this.getPersonalityTouch(
-      customization.personality
+      customization.personality,
     );
 
     return `${timeGreeting} Welcome to ${hotelData.name}! ${personalityTouch} How may I assist you today?`;
@@ -767,12 +767,12 @@ export class AssistantGeneratorService {
   private getTimeBasedGreeting(): string {
     const hour = new Date().getHours();
     if (hour < 12) {
-      return 'Good morning!';
+      return "Good morning!";
     }
     if (hour < 18) {
-      return 'Good afternoon!';
+      return "Good afternoon!";
     }
-    return 'Good evening!';
+    return "Good evening!";
   }
 
   /**
@@ -780,16 +780,16 @@ export class AssistantGeneratorService {
    */
   private getPersonalityTouch(personality: string): string {
     switch (personality) {
-      case 'luxurious':
-        return 'It would be my absolute pleasure to provide you with exceptional service.';
-      case 'friendly':
+      case "luxurious":
+        return "It would be my absolute pleasure to provide you with exceptional service.";
+      case "friendly":
         return "I'm here to make your stay wonderful!";
-      case 'professional':
-        return 'I am here to assist you with any inquiries or requests.';
-      case 'casual':
+      case "professional":
+        return "I am here to assist you with any inquiries or requests.";
+      case "casual":
         return "I'm here to help make your stay awesome!";
       default:
-        return 'I am here to assist you with any inquiries or requests.';
+        return "I am here to assist you with any inquiries or requests.";
     }
   }
 
@@ -798,14 +798,14 @@ export class AssistantGeneratorService {
    */
   private buildVietnameseSystemPrompt(
     hotelData: any,
-    knowledgeBase: any
+    _knowledgeBase: any,
   ): string {
-    const hotelName = hotelData.name || 'khách sạn';
-    const hotelAddress = hotelData.address || 'địa chỉ không rõ';
-    const hotelContact = hotelData.contact || 'thông tin liên hệ không rõ';
-    const hotelHours = hotelData.hours || 'thời gian hoạt động không rõ';
-    const hotelAmenities = hotelData.amenities || 'tiện nghi không rõ';
-    const hotelPolicies = hotelData.policies || 'chính sách không rõ';
+    const hotelName = hotelData.name || "khách sạn";
+    const hotelAddress = hotelData.address || "địa chỉ không rõ";
+    const hotelContact = hotelData.contact || "thông tin liên hệ không rõ";
+    const hotelHours = hotelData.hours || "thời gian hoạt động không rõ";
+    const hotelAmenities = hotelData.amenities || "tiện nghi không rõ";
+    const hotelPolicies = hotelData.policies || "chính sách không rõ";
 
     return `Tôi là trợ lý ảo của ${hotelName}. Tôi được thiết kế để giúp quý khách có trải nghiệm tuyệt vời nhất tại ${hotelName}.
 
@@ -822,13 +822,16 @@ Quý khách có thể yêu cầu tôi giúp đỡ với bất kỳ yêu cầu n�
   /**
    * Build English system prompt
    */
-  private buildEnglishSystemPrompt(hotelData: any, knowledgeBase: any): string {
-    const hotelName = hotelData.name || 'hotel';
-    const hotelAddress = hotelData.address || 'unknown address';
-    const hotelContact = hotelData.contact || 'unknown contact';
-    const hotelHours = hotelData.hours || 'unknown hours';
-    const hotelAmenities = hotelData.amenities || 'unknown amenities';
-    const hotelPolicies = hotelData.policies || 'unknown policies';
+  private buildEnglishSystemPrompt(
+    hotelData: any,
+    _knowledgeBase: any,
+  ): string {
+    const hotelName = hotelData.name || "hotel";
+    const hotelAddress = hotelData.address || "unknown address";
+    const hotelContact = hotelData.contact || "unknown contact";
+    const hotelHours = hotelData.hours || "unknown hours";
+    const hotelAmenities = hotelData.amenities || "unknown amenities";
+    const hotelPolicies = hotelData.policies || "unknown policies";
 
     return `I am the virtual concierge of ${hotelName}. I am designed to help you have the best experience at ${hotelName}.
 

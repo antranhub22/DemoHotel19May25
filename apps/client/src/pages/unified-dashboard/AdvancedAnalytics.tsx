@@ -1,51 +1,52 @@
-import {
-  TrendingUp,
-  TrendingDown,
-  Download,
-  RefreshCw,
-  PieChart as PieChartIcon,
-  TrendingUp as TrendIcon,
-  Phone,
-  Clock,
-  Activity,
-} from 'lucide-react';
-import React, { useState, useEffect } from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  Area,
-  AreaChart,
-} from 'recharts';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import * as React from "react";
+// removed unused Room type
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import { logger } from '@shared/utils/logger';
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import logger from "@shared/utils/logger";
+import {
+  Activity,
+  Clock,
+  Download,
+  Phone,
+  RefreshCw,
+  TrendingUp as TrendIcon,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // Types
 interface AnalyticsData {
@@ -81,12 +82,12 @@ interface AnalyticsData {
 
 // Colors for charts
 const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#AF19FF',
-  '#FF4560',
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#AF19FF",
+  "#FF4560",
 ];
 
 // Custom metric card component
@@ -101,26 +102,26 @@ const MetricCard = ({
   title: string;
   value: string | number;
   change?: string;
-  changeType?: 'positive' | 'negative' | 'neutral';
+  changeType?: "positive" | "negative" | "neutral";
   icon: React.ComponentType<{ className?: string }>;
   description?: string;
 }) => {
   const getChangeColor = () => {
     switch (changeType) {
-      case 'positive':
-        return 'text-green-600';
-      case 'negative':
-        return 'text-red-600';
+      case "positive":
+        return "text-green-600";
+      case "negative":
+        return "text-red-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
   const getChangeIcon = () => {
     switch (changeType) {
-      case 'positive':
+      case "positive":
         return <TrendingUp className="h-3 w-3" />;
-      case 'negative':
+      case "negative":
         return <TrendingDown className="h-3 w-3" />;
       default:
         return <TrendIcon className="h-3 w-3" />;
@@ -137,8 +138,8 @@ const MetricCard = ({
             {change && (
               <div
                 className={cn(
-                  'flex items-center gap-1 text-sm mt-1',
-                  getChangeColor()
+                  "flex items-center gap-1 text-sm mt-1",
+                  getChangeColor(),
                 )}
               >
                 {getChangeIcon()}
@@ -175,63 +176,63 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // Main Advanced Analytics component
 export const AdvancedAnalytics: React.FC = () => {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('30d');
-  const [selectedService, setSelectedService] = useState('all');
+  const [dateRange, setDateRange] = useState("30d");
+  const [_selectedService, _setSelectedService] = useState("all");
 
   // Mock data - replace with actual API call
   const mockAnalytics: AnalyticsData = {
     overview: {
       totalCalls: 1247,
-      averageCallDuration: '2:34',
+      averageCallDuration: "2:34",
       successRate: 94.2,
-      topLanguages: ['Vietnamese', 'English', 'Korean'],
+      topLanguages: ["Vietnamese", "English", "Korean"],
       callsThisMonth: 423,
       growthRate: 15.3,
     },
     serviceDistribution: [
-      { service: 'Room Service', calls: 450, percentage: 36.1 },
-      { service: 'Concierge', calls: 300, percentage: 24.1 },
-      { service: 'Housekeeping', calls: 250, percentage: 20.1 },
-      { service: 'Front Desk', calls: 150, percentage: 12.0 },
-      { service: 'Spa & Wellness', calls: 97, percentage: 7.8 },
+      { service: "Room Service", calls: 450, percentage: 36.1 },
+      { service: "Concierge", calls: 300, percentage: 24.1 },
+      { service: "Housekeeping", calls: 250, percentage: 20.1 },
+      { service: "Front Desk", calls: 150, percentage: 12.0 },
+      { service: "Spa & Wellness", calls: 97, percentage: 7.8 },
     ],
     hourlyActivity: [
-      { hour: '06:00', calls: 5 },
-      { hour: '07:00', calls: 12 },
-      { hour: '08:00', calls: 25 },
-      { hour: '09:00', calls: 35 },
-      { hour: '10:00', calls: 45 },
-      { hour: '11:00', calls: 40 },
-      { hour: '12:00', calls: 55 },
-      { hour: '13:00', calls: 48 },
-      { hour: '14:00', calls: 52 },
-      { hour: '15:00', calls: 38 },
-      { hour: '16:00', calls: 42 },
-      { hour: '17:00', calls: 35 },
-      { hour: '18:00', calls: 45 },
-      { hour: '19:00', calls: 52 },
-      { hour: '20:00', calls: 38 },
-      { hour: '21:00', calls: 25 },
-      { hour: '22:00', calls: 15 },
-      { hour: '23:00', calls: 8 },
+      { hour: "06:00", calls: 5 },
+      { hour: "07:00", calls: 12 },
+      { hour: "08:00", calls: 25 },
+      { hour: "09:00", calls: 35 },
+      { hour: "10:00", calls: 45 },
+      { hour: "11:00", calls: 40 },
+      { hour: "12:00", calls: 55 },
+      { hour: "13:00", calls: 48 },
+      { hour: "14:00", calls: 52 },
+      { hour: "15:00", calls: 38 },
+      { hour: "16:00", calls: 42 },
+      { hour: "17:00", calls: 35 },
+      { hour: "18:00", calls: 45 },
+      { hour: "19:00", calls: 52 },
+      { hour: "20:00", calls: 38 },
+      { hour: "21:00", calls: 25 },
+      { hour: "22:00", calls: 15 },
+      { hour: "23:00", calls: 8 },
     ],
     dailyTrends: [
-      { date: '2024-01-01', calls: 45, duration: 154, satisfaction: 4.5 },
-      { date: '2024-01-02', calls: 52, duration: 162, satisfaction: 4.6 },
-      { date: '2024-01-03', calls: 38, duration: 148, satisfaction: 4.4 },
-      { date: '2024-01-04', calls: 41, duration: 156, satisfaction: 4.7 },
-      { date: '2024-01-05', calls: 48, duration: 159, satisfaction: 4.5 },
-      { date: '2024-01-06', calls: 55, duration: 165, satisfaction: 4.8 },
-      { date: '2024-01-07', calls: 42, duration: 151, satisfaction: 4.6 },
+      { date: "2024-01-01", calls: 45, duration: 154, satisfaction: 4.5 },
+      { date: "2024-01-02", calls: 52, duration: 162, satisfaction: 4.6 },
+      { date: "2024-01-03", calls: 38, duration: 148, satisfaction: 4.4 },
+      { date: "2024-01-04", calls: 41, duration: 156, satisfaction: 4.7 },
+      { date: "2024-01-05", calls: 48, duration: 159, satisfaction: 4.5 },
+      { date: "2024-01-06", calls: 55, duration: 165, satisfaction: 4.8 },
+      { date: "2024-01-07", calls: 42, duration: 151, satisfaction: 4.6 },
     ],
     languageDistribution: [
-      { language: 'Vietnamese', calls: 687, percentage: 55.1 },
-      { language: 'English', calls: 423, percentage: 33.9 },
-      { language: 'Korean', calls: 87, percentage: 7.0 },
-      { language: 'Chinese', calls: 50, percentage: 4.0 },
+      { language: "Vietnamese", calls: 687, percentage: 55.1 },
+      { language: "English", calls: 423, percentage: 33.9 },
+      { language: "Korean", calls: 87, percentage: 7.0 },
+      { language: "Chinese", calls: 50, percentage: 4.0 },
     ],
   };
 
@@ -253,7 +254,7 @@ export const AdvancedAnalytics: React.FC = () => {
       // const data = await response.json();
       // setAnalytics(data.analytics);
     } catch (error) {
-      logger.error('Failed to fetch analytics:', 'Component', error);
+      logger.error("Failed to fetch analytics:", "Component", error);
       setLoading(false);
     }
   };
@@ -434,7 +435,7 @@ export const AdvancedAnalytics: React.FC = () => {
                       fill="#8884d8"
                       dataKey="calls"
                     >
-                      {analytics.serviceDistribution.map((entry, index) => (
+                      {analytics.serviceDistribution.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -528,7 +529,7 @@ export const AdvancedAnalytics: React.FC = () => {
                       fill="#8884d8"
                       dataKey="calls"
                     >
-                      {analytics.languageDistribution.map((entry, index) => (
+                      {analytics.languageDistribution.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -582,7 +583,7 @@ export const AdvancedAnalytics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {analytics.overview.topLanguages.map((lang, index) => (
+              {analytics.overview.topLanguages.map((lang) => (
                 <Badge key={lang} variant="secondary">
                   {lang}
                 </Badge>

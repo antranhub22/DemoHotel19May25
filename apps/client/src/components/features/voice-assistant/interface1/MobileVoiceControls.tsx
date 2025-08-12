@@ -1,7 +1,9 @@
-import { useAssistant } from '@/context';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Language, ServiceItem } from '@/types/interface1.types';
-import { logger } from '@shared/utils/logger';
+import { useAssistant } from "@/context";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
+import { Language, ServiceItem } from "@/types/interface1.types";
+import logger from "@shared/utils/logger";
 import {
   ChevronDown,
   ChevronUp,
@@ -11,9 +13,10 @@ import {
   Smartphone,
   Volume2,
   VolumeX,
-} from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { VoiceLanguageSwitcher } from './VoiceLanguageSwitcher';
+} from "lucide-react";
+import * as React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { VoiceLanguageSwitcher } from "./VoiceLanguageSwitcher";
 
 interface MobileVoiceControlsProps {
   selectedService?: ServiceItem | null;
@@ -32,7 +35,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
   selectedService,
   isCallActive = false,
   onLanguageChange,
-  className = '',
+  className = "",
 }) => {
   const { language } = useAssistant();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -49,17 +52,18 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
     haptic: false,
   });
   const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
 
   // Haptic feedback for mobile interactions
   const triggerHaptic = useCallback(
-    (type: 'light' | 'medium' | 'heavy' = 'light') => {
+    (type: "light" | "medium" | "heavy" = "light") => {
       if (!isMobile || !voiceSettings.haptics) {
         return;
       }
 
       try {
         // Use Vibration API for haptic feedback
-        if ('vibrate' in navigator) {
+        if ("vibrate" in navigator) {
           const patterns = {
             light: [10],
             medium: [20],
@@ -68,10 +72,10 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
           navigator.vibrate(patterns[type]);
         }
       } catch {
-        logger.debug('Haptic feedback not available', 'Component');
+        logger.debug("Haptic feedback not available", "Component");
       }
     },
-    [isMobile, voiceSettings.haptics]
+    [isMobile, voiceSettings.haptics],
   );
 
   // Enhanced touch interactions
@@ -82,13 +86,13 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
         scale: 0.95,
         haptic: true,
       });
-      triggerHaptic('light');
+      triggerHaptic("light");
       logger.debug(
         `🖱️ [MobileVoiceControls] Touch start: ${action}`,
-        'Component'
+        "Component",
       );
     },
-    [triggerHaptic]
+    [triggerHaptic],
   );
 
   const handleTouchEnd = useCallback((action: string) => {
@@ -97,36 +101,36 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       scale: 1,
       haptic: false,
     });
-    logger.debug(`🖱️ [MobileVoiceControls] Touch end: ${action}`, 'Component');
+    logger.debug(`🖱️ [MobileVoiceControls] Touch end: ${action}`, "Component");
   }, []);
 
   // Toggle expanded state
   const toggleExpanded = useCallback(() => {
     setIsExpanded(!isExpanded);
-    triggerHaptic('medium');
+    triggerHaptic("medium");
     logger.debug(
       `📱 [MobileVoiceControls] Expanded: ${!isExpanded}`,
-      'Component'
+      "Component",
     );
   }, [isExpanded, triggerHaptic]);
 
   // Toggle settings panel
   const toggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
-    triggerHaptic('light');
+    triggerHaptic("light");
   }, [showSettings, triggerHaptic]);
 
   // Update voice setting
   const updateVoiceSetting = useCallback(
     (key: keyof typeof voiceSettings, value: boolean) => {
-      setVoiceSettings(prev => ({ ...prev, [key]: value }));
-      triggerHaptic('light');
+      setVoiceSettings((prev) => ({ ...prev, [key]: value }));
+      triggerHaptic("light");
       logger.debug(
         `⚙️ [MobileVoiceControls] Setting ${key}: ${value}`,
-        'Component'
+        "Component",
       );
     },
-    [triggerHaptic]
+    [triggerHaptic],
   );
 
   // Auto-collapse when call ends
@@ -143,20 +147,20 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
   const handleLanguageChange = useCallback(
     (newLanguage: Language) => {
       onLanguageChange?.(newLanguage);
-      triggerHaptic('medium');
+      triggerHaptic("medium");
 
       // Show success feedback
-      if (typeof window !== 'undefined' && (window as any).addNotification) {
+      if (typeof window !== "undefined" && (window as any).addNotification) {
         (window as any).addNotification({
-          type: 'success',
-          title: 'Language Changed',
+          type: "success",
+          title: "Language Changed",
           message: `Voice assistant switched to ${newLanguage}`,
           duration: 2000,
-          priority: 'low',
+          priority: "low",
         });
       }
     },
-    [onLanguageChange, triggerHaptic]
+    [onLanguageChange, triggerHaptic],
   );
 
   // Don't render on desktop
@@ -169,13 +173,20 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {/* Floating Control Panel */}
       <div
         className={`
-        fixed bottom-4 left-4 right-4 z-[9990] 
+        fixed bottom-4 left-4 right-4 
         bg-white/95 backdrop-blur-lg border border-gray-200/50 rounded-2xl shadow-2xl
-        transition-all duration-300 ease-out
-        ${isExpanded ? 'pb-4' : 'pb-2'}
-        ${touchFeedback.isPressed ? 'scale-95' : 'scale-100'}
+        ${prefersReducedMotion ? "" : "transition-all duration-300 ease-out"}
+        ${isExpanded ? "pb-4" : "pb-2"}
+        ${prefersReducedMotion ? "" : touchFeedback.isPressed ? "scale-95" : "scale-100"}
         voice-particles
       `}
+        style={{
+          zIndex: UI_CONSTANTS.Z_INDEX.FIXED,
+          willChange: prefersReducedMotion ? undefined : "transform",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
+          contain: "layout paint style" as any,
+        }}
       >
         {/* Main Control Bar */}
         <div className="flex items-center justify-between p-4">
@@ -184,17 +195,17 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
             <div
               className={`
               w-3 h-3 rounded-full transition-all duration-300
-              ${isCallActive ? 'bg-red-500 animate-pulse' : selectedService ? 'bg-green-500' : 'bg-gray-400'}
+              ${isCallActive ? "bg-red-500 animate-pulse" : selectedService ? "bg-green-500" : "bg-gray-400"}
             `}
             />
 
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-gray-800 truncate">
                 {isCallActive
-                  ? '🎤 Voice Call Active'
+                  ? "🎤 Voice Call Active"
                   : selectedService
                     ? selectedService.name
-                    : 'Voice Assistant'}
+                    : "Voice Assistant"}
               </div>
               <div className="text-xs text-gray-500">
                 {language.toUpperCase()} • Touch controls
@@ -206,17 +217,17 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
           <div className="flex items-center gap-2">
             {/* Voice Settings Toggle */}
             <button
-              onTouchStart={() => handleTouchStart('voice-toggle')}
-              onTouchEnd={() => handleTouchEnd('voice-toggle')}
+              onTouchStart={() => handleTouchStart("voice-toggle")}
+              onTouchEnd={() => handleTouchEnd("voice-toggle")}
               onClick={() =>
-                updateVoiceSetting('guidance', !voiceSettings.guidance)
+                updateVoiceSetting("guidance", !voiceSettings.guidance)
               }
               className={`
                 p-2 rounded-full transition-all duration-200 voice-control
                 ${
                   voiceSettings.guidance
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-400'
+                    ? "bg-green-100 text-green-600"
+                    : "bg-gray-100 text-gray-400"
                 }
                 active:scale-90
               `}
@@ -231,12 +242,12 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
 
             {/* Settings Toggle */}
             <button
-              onTouchStart={() => handleTouchStart('settings')}
-              onTouchEnd={() => handleTouchEnd('settings')}
+              onTouchStart={() => handleTouchStart("settings")}
+              onTouchEnd={() => handleTouchEnd("settings")}
               onClick={toggleSettings}
               className={`
                 p-2 rounded-full transition-all duration-200 voice-control
-                ${showSettings ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}
+                ${showSettings ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"}
                 active:scale-90
               `}
               aria-label="Settings"
@@ -246,11 +257,11 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
 
             {/* Expand/Collapse Toggle */}
             <button
-              onTouchStart={() => handleTouchStart('expand')}
-              onTouchEnd={() => handleTouchEnd('expand')}
+              onTouchStart={() => handleTouchStart("expand")}
+              onTouchEnd={() => handleTouchEnd("expand")}
               onClick={toggleExpanded}
-              className="p-2 rounded-full bg-blue-100 text-blue-600 transition-all duration-200 voice-control active:scale-90"
-              aria-label={isExpanded ? 'Collapse controls' : 'Expand controls'}
+              className={`p-2 rounded-full bg-blue-100 text-blue-600 ${prefersReducedMotion ? "" : "transition-all duration-200 active:scale-90"} voice-control`}
+              aria-label={isExpanded ? "Collapse controls" : "Expand controls"}
             >
               {isExpanded ? (
                 <ChevronDown className="w-4 h-4" />
@@ -263,7 +274,9 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
 
         {/* Expanded Content */}
         {isExpanded && (
-          <div className="px-4 space-y-4 animate-in slide-in-from-bottom duration-300">
+          <div
+            className={`px-4 space-y-4 ${prefersReducedMotion ? "" : "animate-in slide-in-from-bottom duration-300"}`}
+          >
             {/* Language Switcher */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -290,7 +303,7 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
                     {selectedService.name}
                   </div>
                   <div className="text-xs text-gray-600 mt-1">
-                    Voice assistant optimized for{' '}
+                    Voice assistant optimized for{" "}
                     {selectedService.name.toLowerCase()} requests
                   </div>
                   {isCallActive && (
@@ -322,17 +335,17 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
                     </div>
                     <button
                       onClick={() =>
-                        updateVoiceSetting('guidance', !voiceSettings.guidance)
+                        updateVoiceSetting("guidance", !voiceSettings.guidance)
                       }
                       className={`
                         relative w-12 h-6 rounded-full transition-all duration-200 voice-control
-                        ${voiceSettings.guidance ? 'bg-green-500' : 'bg-gray-300'}
+                        ${voiceSettings.guidance ? "bg-green-500" : "bg-gray-300"}
                       `}
                     >
                       <div
                         className={`
                         absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200
-                        ${voiceSettings.guidance ? 'left-7' : 'left-1'}
+                        ${voiceSettings.guidance ? "left-7" : "left-1"}
                       `}
                       />
                     </button>
@@ -348,17 +361,17 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
                     </div>
                     <button
                       onClick={() =>
-                        updateVoiceSetting('feedback', !voiceSettings.feedback)
+                        updateVoiceSetting("feedback", !voiceSettings.feedback)
                       }
                       className={`
                         relative w-12 h-6 rounded-full transition-all duration-200 voice-control
-                        ${voiceSettings.feedback ? 'bg-green-500' : 'bg-gray-300'}
+                        ${voiceSettings.feedback ? "bg-green-500" : "bg-gray-300"}
                       `}
                     >
                       <div
                         className={`
                         absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200
-                        ${voiceSettings.feedback ? 'left-7' : 'left-1'}
+                        ${voiceSettings.feedback ? "left-7" : "left-1"}
                       `}
                       />
                     </button>
@@ -374,17 +387,17 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
                     </div>
                     <button
                       onClick={() =>
-                        updateVoiceSetting('haptics', !voiceSettings.haptics)
+                        updateVoiceSetting("haptics", !voiceSettings.haptics)
                       }
                       className={`
                         relative w-12 h-6 rounded-full transition-all duration-200 voice-control
-                        ${voiceSettings.haptics ? 'bg-green-500' : 'bg-gray-300'}
+                        ${voiceSettings.haptics ? "bg-green-500" : "bg-gray-300"}
                       `}
                     >
                       <div
                         className={`
                         absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200
-                        ${voiceSettings.haptics ? 'left-7' : 'left-1'}
+                        ${voiceSettings.haptics ? "left-7" : "left-1"}
                       `}
                       />
                     </button>
@@ -401,19 +414,19 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
                     <button
                       onClick={() =>
                         updateVoiceSetting(
-                          'autoClose',
-                          !voiceSettings.autoClose
+                          "autoClose",
+                          !voiceSettings.autoClose,
                         )
                       }
                       className={`
                         relative w-12 h-6 rounded-full transition-all duration-200 voice-control
-                        ${voiceSettings.autoClose ? 'bg-green-500' : 'bg-gray-300'}
+                        ${voiceSettings.autoClose ? "bg-green-500" : "bg-gray-300"}
                       `}
                     >
                       <div
                         className={`
                         absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200
-                        ${voiceSettings.autoClose ? 'left-7' : 'left-1'}
+                        ${voiceSettings.autoClose ? "left-7" : "left-1"}
                       `}
                       />
                     </button>
@@ -440,10 +453,10 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
             <div className="flex items-center gap-2">
               <div
                 className={`w-1.5 h-1.5 rounded-full ${
-                  isCallActive ? 'bg-red-500' : 'bg-gray-400'
+                  isCallActive ? "bg-red-500" : "bg-gray-400"
                 }`}
               />
-              {isCallActive ? 'Call Active' : 'Ready'}
+              {isCallActive ? "Call Active" : "Ready"}
             </div>
 
             <div className="flex items-center gap-1">
@@ -458,7 +471,8 @@ export const MobileVoiceControls: React.FC<MobileVoiceControlsProps> = ({
       {/* Backdrop for settings */}
       {showSettings && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9989]"
+          className={`fixed inset-0 ${prefersReducedMotion ? "bg-black/30" : "bg-black/20 backdrop-blur-sm"}`}
+          style={{ zIndex: UI_CONSTANTS.Z_INDEX.MODAL_BACKDROP }}
           onClick={toggleSettings}
         />
       )}

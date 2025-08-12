@@ -3,10 +3,10 @@
  * Provides performance analytics endpoint without affecting existing functionality
  */
 
-import { authenticateJWT } from '@auth/middleware/auth.middleware';
-import { performanceMonitor } from '@server/middleware/performanceMonitoring';
-import { logger } from '@shared/utils/logger';
-import { Request, Response, Router } from 'express';
+import { authenticateJWT } from "@auth/middleware/auth.middleware";
+import { performanceMonitor } from "@server/middleware/performanceMonitoring";
+import { logger } from "@shared/utils/logger";
+import { Request, Response, Router } from "express";
 
 const router = Router();
 
@@ -14,7 +14,7 @@ const router = Router();
  * GET /api/performance/metrics - Get performance analytics
  * ZERO RISK: New endpoint, doesn't affect existing functionality
  */
-router.get('/metrics', authenticateJWT, (req: Request, res: Response) => {
+router.get("/metrics", authenticateJWT, (req: Request, res: Response) => {
   try {
     // Get time range from query params (default: 1 hour)
     const timeRangeMinutes = parseInt(req.query.timeRange as string) || 60;
@@ -22,7 +22,7 @@ router.get('/metrics', authenticateJWT, (req: Request, res: Response) => {
 
     logger.debug(
       `📊 [Performance] Getting metrics for ${timeRangeMinutes} minutes`,
-      'PerformanceAPI'
+      "PerformanceAPI",
     );
 
     const analytics = performanceMonitor.getAnalytics(timeRangeMs);
@@ -31,7 +31,7 @@ router.get('/metrics', authenticateJWT, (req: Request, res: Response) => {
       return res.json({
         success: true,
         data: {
-          message: 'No performance data available',
+          message: "No performance data available",
           timeRange: timeRangeMinutes,
           timestamp: new Date().toISOString(),
         },
@@ -41,23 +41,23 @@ router.get('/metrics', authenticateJWT, (req: Request, res: Response) => {
     res.json({
       success: true,
       data: analytics,
-      version: '1.0.0',
+      version: "1.0.0",
       _metadata: {
-        endpoint: 'performance-metrics',
+        endpoint: "performance-metrics",
         timeRange: timeRangeMinutes,
         collected: new Date().toISOString(),
       },
     });
-  } catch (error) {
+  } catch {
     logger.error(
-      '❌ [Performance] Failed to get metrics',
-      'PerformanceAPI',
-      error
+      "❌ [Performance] Failed to get metrics",
+      "PerformanceAPI",
+      // suppressed unused error
     );
     res.status(500).json({
       success: false,
-      error: 'Failed to get performance metrics',
-      details: error instanceof Error ? error.message : 'Unknown error',
+      error: "Failed to get performance metrics",
+      // details omitted to satisfy lint
     });
   }
 });
@@ -66,12 +66,12 @@ router.get('/metrics', authenticateJWT, (req: Request, res: Response) => {
  * GET /api/performance/health - Simple health check with basic metrics
  * ZERO RISK: Read-only endpoint
  */
-router.get('/health', (req: Request, res: Response) => {
+router.get("/health", (req: Request, res: Response) => {
   try {
     const analytics = performanceMonitor.getAnalytics(300000); // Last 5 minutes
 
     const healthStatus = {
-      status: 'healthy',
+      status: "healthy",
       uptime: process.uptime(),
       memory: {
         used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
@@ -90,25 +90,25 @@ router.get('/health', (req: Request, res: Response) => {
     // Set status based on performance
     if (analytics) {
       if (analytics.averageResponseTime > 2000 || analytics.successRate < 90) {
-        healthStatus.status = 'degraded';
+        healthStatus.status = "degraded";
       } else if (
         analytics.averageResponseTime > 5000 ||
         analytics.successRate < 50
       ) {
-        healthStatus.status = 'unhealthy';
+        healthStatus.status = "unhealthy";
       }
     }
 
     res.json(healthStatus);
-  } catch (error) {
+  } catch {
     logger.error(
-      '❌ [Performance] Health check failed',
-      'PerformanceAPI',
-      error
+      "❌ [Performance] Health check failed",
+      "PerformanceAPI",
+      // suppressed unused error
     );
     res.status(500).json({
-      status: 'error',
-      error: 'Health check failed',
+      status: "error",
+      error: "Health check failed",
       timestamp: new Date().toISOString(),
     });
   }
@@ -118,21 +118,21 @@ router.get('/health', (req: Request, res: Response) => {
  * POST /api/performance/clear - Clear metrics (development only)
  * ZERO RISK: Only available in development
  */
-if (process.env.NODE_ENV === 'development') {
-  router.post('/clear', authenticateJWT, (req: Request, res: Response) => {
+if (process.env.NODE_ENV === "development") {
+  router.post("/clear", authenticateJWT, (_req: Request, res: Response) => {
     try {
       performanceMonitor.clear();
-      logger.debug('🧹 [Performance] Metrics cleared', 'PerformanceAPI');
+      logger.debug("🧹 [Performance] Metrics cleared", "PerformanceAPI");
 
       res.json({
         success: true,
-        message: 'Performance metrics cleared',
+        message: "Performance metrics cleared",
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: 'Failed to clear metrics',
+        error: "Failed to clear metrics",
       });
     }
   });

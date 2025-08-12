@@ -1,19 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
-import { Link } from 'wouter';
-import type { CallSummary } from '@/types'; // ✅ FIXED: Add missing CallSummary import
+import { useQuery } from "@tanstack/react-query";
+import * as React from "react";
+import { Link } from "wouter";
+// removed unused type imports to reduce warnings
 
 const CallHistory: React.FC = () => {
-  const [timeframe, setTimeframe] = useState<number>(24);
-  const [roomFilter, setRoomFilter] = useState<string>('');
+  const [timeframe, setTimeframe] = React.useState<number>(24);
+  const [roomFilter, setRoomFilter] = React.useState<string>("");
 
   // Query to fetch call summaries from the last 24 hours
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['summaries', 'recent', timeframe],
+    queryKey: ["summaries", "recent", timeframe],
     queryFn: async () => {
       const response = await fetch(`/api/summaries/recent/${timeframe}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch recent call summaries');
+        throw new Error("Failed to fetch recent call summaries");
       }
       return response.json();
     },
@@ -22,27 +22,27 @@ const CallHistory: React.FC = () => {
   // Format date for display - ✅ FIXED: Accept Date, string, or number
   const formatDate = (dateObj: Date | string | number) => {
     const date = dateObj instanceof Date ? dateObj : new Date(dateObj);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   // Format call duration for display (accepts "mm:ss" or numeric seconds)
   const formatDuration = (duration: string | undefined) => {
     if (!duration) {
-      return '00:00';
+      return "00:00";
     }
     // If duration is pure seconds number, format to mm:ss
     const seconds = parseInt(duration, 10);
     if (!isNaN(seconds) && /^\d+$/.test(duration)) {
       const mins = Math.floor(seconds / 60)
         .toString()
-        .padStart(2, '0');
-      const secs = (seconds % 60).toString().padStart(2, '0');
+        .padStart(2, "0");
+      const secs = (seconds % 60).toString().padStart(2, "0");
       return `${mins}:${secs}`;
     }
     // If already mm:ss or other format, return as-is
@@ -97,19 +97,19 @@ const CallHistory: React.FC = () => {
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleTimeframeChange(24)}
-                  className={`px-3 py-1 rounded-md ${timeframe === 24 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  className={`px-3 py-1 rounded-md ${timeframe === 24 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
                   24 hours
                 </button>
                 <button
                   onClick={() => handleTimeframeChange(48)}
-                  className={`px-3 py-1 rounded-md ${timeframe === 48 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  className={`px-3 py-1 rounded-md ${timeframe === 48 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
                   48 hours
                 </button>
                 <button
                   onClick={() => handleTimeframeChange(72)}
-                  className={`px-3 py-1 rounded-md ${timeframe === 72 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                  className={`px-3 py-1 rounded-md ${timeframe === 72 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
                 >
                   72 hours
                 </button>
@@ -122,7 +122,7 @@ const CallHistory: React.FC = () => {
                 type="text"
                 placeholder="Enter room number..."
                 value={roomFilter}
-                onChange={e => setRoomFilter(e.target.value)}
+                onChange={(e) => setRoomFilter(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -182,7 +182,7 @@ const CallHistory: React.FC = () => {
                 <tbody>
                   {filteredSummaries.map(
                     (
-                      summary: any // ✅ FIXED: Use any to bypass type conflicts
+                      summary: any, // ✅ FIXED: Use any to bypass type conflicts
                     ) => (
                       <tr
                         key={summary.id}
@@ -192,15 +192,15 @@ const CallHistory: React.FC = () => {
                           {formatDate(summary.timestamp)}
                         </td>
                         <td className="p-3 text-sm text-gray-700">
-                          {summary.roomNumber || 'Unknown'}
+                          {summary.roomNumber || "Unknown"}
                         </td>
                         <td className="p-3 text-sm text-gray-700">
                           {formatDuration(summary.duration)}
                         </td>
                         <td className="p-3 text-sm text-gray-700 max-w-md">
                           <div className="truncate">
-                            {summary.content || summary.message || 'No summary'}
-                          </div>{' '}
+                            {summary.content || summary.message || "No summary"}
+                          </div>{" "}
                           {/* ✅ FIXED: Handle missing content */}
                         </td>
                         <td className="p-3 text-center">
@@ -214,7 +214,7 @@ const CallHistory: React.FC = () => {
                           </Link>
                         </td>
                       </tr>
-                    )
+                    ),
                   )}
                 </tbody>
               </table>
@@ -239,7 +239,7 @@ const CallHistory: React.FC = () => {
 
       <div className="mt-6 text-center text-gray-500 text-sm">
         <p>
-          Showing call history from the last {timeframe} hours • Total:{' '}
+          Showing call history from the last {timeframe} hours • Total:{" "}
           {data?.count || 0} calls
         </p>
       </div>

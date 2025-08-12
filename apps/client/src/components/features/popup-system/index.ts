@@ -1,7 +1,7 @@
 // Main components
-export { PopupManager, usePopup } from './PopupManager';
-export { PopupStack } from './PopupStack';
-export { PopupCard } from './PopupCard';
+export { PopupManager, usePopup } from './PopupManager.tsx';
+export { PopupStack } from './PopupStack.tsx';
+export { PopupCard } from './PopupCard.tsx';
 
 // Context
 export {

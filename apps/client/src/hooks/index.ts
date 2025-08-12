@@ -1,19 +1,43 @@
 /**
- * Barrel exports for hooks directory
+ * Hooks - Public API
+ * Custom React hooks for DemoHotel application
  */
 
-export * from './use-mobile';
-export * from './use-toast';
-export * from './useCallHandler';
-export * from './useConversationState';
-export * from './useHotelConfiguration';
-export * from './useInterface1';
-export * from './useScrollBehavior';
-export * from './useTranscriptSocket';
-export * from './useWebSocket';
-// Export only the main hook to avoid conflicts with existing useIsMobile
-export { useSiriResponsiveSize } from './useSiriResponsiveSize';
-export { useSimplifiedMobileTouch } from './useSimplifiedMobileTouch';
-export { useCancelHandler } from './useCancelHandler';
-export { useConfirmHandler } from './useConfirmHandler';
-export { useSendToFrontDeskHandler } from './useSendToFrontDeskHandler';
+// ========================================
+// Responsive & Mobile Hooks
+// ========================================
+export * from "./use-mobile.tsx";
+export { useSimplifiedMobileTouch } from "./useSimplifiedMobileTouch.ts";
+export { useSiriResponsiveSize } from "./useSiriResponsiveSize.ts";
+
+// ========================================
+// UI & Behavior Hooks
+// ========================================
+export * from "./use-toast.ts";
+export * from "./useScrollBehavior.ts";
+
+// ========================================
+// Voice Assistant Hooks
+// ========================================
+// export * from "./useCallHandler"; // removed: file not found
+export * from "./useConversationState.ts";
+export * from "./useInterface1.ts";
+
+// ========================================
+// Button Handler Hooks
+// ========================================
+// export { useCancelHandler } from "./useCancelHandler"; // removed: file not found
+// ✅ UNIFIED: useConfirmHandler replaced by useSummaryManager
+// export { useConfirmHandler } from "./useConfirmHandler.ts";
+export { useSendToFrontDeskHandler } from "./useSendToFrontDeskHandler.ts";
+
+// ========================================
+// Communication Hooks
+// ========================================
+export * from "./useTranscriptSocket.ts";
+export * from "./useWebSocket.ts";
+
+// ========================================
+// Configuration Hooks
+// ========================================
+export * from "./useHotelConfiguration.ts";

@@ -1,29 +1,30 @@
-import {
-  TrendingUp,
-  Phone,
-  MessageSquare,
-  Clock,
-  Globe,
-  Bot,
-  AlertCircle,
-  CheckCircle2,
-  Settings,
-  BarChart3,
-  Activity,
-  Users,
-} from 'lucide-react';
-import React from 'react';
-import { Link } from 'wouter';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+// removed unused Language type
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import {
+  Activity,
+  AlertCircle,
+  BarChart3,
+  Bot,
+  CheckCircle2,
+  Clock,
+  Globe,
+  MessageSquare,
+  Phone,
+  Settings,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import React from "react";
+import { Link } from "wouter";
 
 // Mock data - will be replaced with actual API calls
 const mockMetrics = {
@@ -36,31 +37,31 @@ const mockMetrics = {
   satisfactionScore: 4.7,
   satisfactionGrowth: 2.1,
   languageDistribution: [
-    { language: 'Tiếng Việt', count: 687, percentage: 55.1 },
-    { language: 'English', count: 423, percentage: 33.9 },
-    { language: 'Français', count: 137, percentage: 11.0 },
+    { language: "Tiếng Việt", count: 687, percentage: 55.1 },
+    { language: "English", count: 423, percentage: 33.9 },
+    { language: "Français", count: 137, percentage: 11.0 },
   ],
   recentActivity: [
-    { time: '2 phút trước', action: 'Cuộc gọi từ phòng 205', type: 'call' },
+    { time: "2 phút trước", action: "Cuộc gọi từ phòng 205", type: "call" },
     {
-      time: '5 phút trước',
-      action: 'Đặt room service từ phòng 301',
-      type: 'service',
+      time: "5 phút trước",
+      action: "Đặt room service từ phòng 301",
+      type: "service",
     },
-    { time: '12 phút trước', action: 'Hỏi thông tin về spa', type: 'inquiry' },
+    { time: "12 phút trước", action: "Hỏi thông tin về spa", type: "inquiry" },
     {
-      time: '18 phút trước',
-      action: 'Phàn nàn về tiếng ồn',
-      type: 'complaint',
+      time: "18 phút trước",
+      action: "Phàn nàn về tiếng ồn",
+      type: "complaint",
     },
   ],
 };
 
 const mockSubscription = {
-  plan: 'premium',
+  plan: "premium",
   usageLimit: 5000,
   currentUsage: 1247,
-  resetDate: '2024-01-01',
+  resetDate: "2024-01-01",
 };
 
 // Metric card component
@@ -70,7 +71,7 @@ const MetricCard = ({
   change,
   icon: Icon,
   description,
-  suffix = '',
+  suffix = "",
 }: {
   title: string;
   value: number | string;
@@ -94,11 +95,11 @@ const MetricCard = ({
         {change !== undefined && (
           <div
             className={`ml-auto flex items-center text-xs ${
-              change > 0 ? 'text-green-600' : 'text-red-600'
+              change > 0 ? "text-green-600" : "text-red-600"
             }`}
           >
             <TrendingUp
-              className={`h-3 w-3 mr-1 ${change < 0 ? 'rotate-180' : ''}`}
+              className={`h-3 w-3 mr-1 ${change < 0 ? "rotate-180" : ""}`}
             />
             {Math.abs(change)}%
           </div>
@@ -116,17 +117,17 @@ const ActivityItem = ({
 }: {
   time: string;
   action: string;
-  type: 'call' | 'service' | 'inquiry' | 'complaint';
+  type: "call" | "service" | "inquiry" | "complaint";
 }) => {
   const getIcon = () => {
     switch (type) {
-      case 'call':
+      case "call":
         return <Phone className="h-4 w-4 text-blue-500" />;
-      case 'service':
+      case "service":
         return <Bot className="h-4 w-4 text-green-500" />;
-      case 'inquiry':
+      case "inquiry":
         return <MessageSquare className="h-4 w-4 text-purple-500" />;
-      case 'complaint':
+      case "complaint":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Activity className="h-4 w-4 text-gray-500" />;
@@ -198,7 +199,7 @@ const UsageOverview = () => {
           <div className="flex justify-between text-sm">
             <span>Cuộc gọi</span>
             <span>
-              {mockSubscription.currentUsage.toLocaleString()} /{' '}
+              {mockSubscription.currentUsage.toLocaleString()} /{" "}
               {mockSubscription.usageLimit.toLocaleString()}
             </span>
           </div>
@@ -210,7 +211,7 @@ const UsageOverview = () => {
           <span className="font-medium">
             {(
               mockSubscription.usageLimit - mockSubscription.currentUsage
-            ).toLocaleString()}{' '}
+            ).toLocaleString()}{" "}
             cuộc gọi
           </span>
         </div>
@@ -330,7 +331,7 @@ export const DashboardHome: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockMetrics.languageDistribution.map(lang => (
+              {mockMetrics.languageDistribution.map((lang) => (
                 <div key={lang.language} className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{lang.language}</span>
@@ -374,10 +375,10 @@ export const DashboardHome: React.FC = () => {
                   action={activity.action}
                   type={
                     activity.type as
-                      | 'call'
-                      | 'service'
-                      | 'inquiry'
-                      | 'complaint'
+                      | "call"
+                      | "service"
+                      | "inquiry"
+                      | "complaint"
                   }
                 />
               ))}

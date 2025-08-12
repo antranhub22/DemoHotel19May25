@@ -85,10 +85,7 @@ export interface TenantEntity {
   white_label: boolean | null;
   data_retention_days: number | null;
   monthly_call_limit: number | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  domain: string | null;
+  // Note: email, phone, address, domain fields removed from current schema
 }
 
 export interface TenantWithRelations extends TenantEntity {
@@ -319,10 +316,9 @@ export class PrismaTenantService {
     const endTimer = this.startPerformanceTimer("createTenant");
 
     try {
-      logger.info("🏨 [PrismaTenantService] Creating new tenant", {
-        hotelName: config.hotelName,
-        subdomain: config.subdomain,
-      });
+      logger.info(
+        `🏨 [PrismaTenantService] Creating new tenant - Hotel: ${config.hotelName}, Subdomain: ${config.subdomain}`,
+      );
 
       // Validate subdomain availability
       await this.validateSubdomain(config.subdomain);
@@ -385,10 +381,9 @@ export class PrismaTenantService {
       // Clear caches
       this.clearTenantCaches();
 
-      logger.success("✅ [PrismaTenantService] Tenant created successfully", {
-        tenantId: result.id,
-        hotelName: result.hotel_name,
-      });
+      logger.success(
+        `✅ [PrismaTenantService] Tenant created successfully - ID: ${result.id}, Hotel: ${result.hotel_name}`,
+      );
 
       endTimer();
       return result.id;
@@ -465,10 +460,7 @@ export class PrismaTenantService {
         white_label: tenant.white_label,
         data_retention_days: tenant.data_retention_days,
         monthly_call_limit: tenant.monthly_call_limit,
-        email: tenant.email,
-        phone: tenant.phone,
-        address: tenant.address,
-        domain: tenant.domain,
+        // Note: email, phone, address, domain fields not available in current schema
         ...(includeRelations && {
           hotel_profiles: (tenant as any).hotel_profiles || [],
           requestCount: 0, // TODO: Add proper count when request relations are added
@@ -536,10 +528,7 @@ export class PrismaTenantService {
         white_label: tenant.white_label,
         data_retention_days: tenant.data_retention_days,
         monthly_call_limit: tenant.monthly_call_limit,
-        email: tenant.email,
-        phone: tenant.phone,
-        address: tenant.address,
-        domain: tenant.domain,
+        // Note: email, phone, address, domain fields not available in current schema
       };
 
       this.setCache(cacheKey, mappedTenant);
@@ -652,20 +641,15 @@ export class PrismaTenantService {
         white_label: tenant.white_label,
         data_retention_days: tenant.data_retention_days,
         monthly_call_limit: tenant.monthly_call_limit,
-        email: tenant.email,
-        phone: tenant.phone,
-        address: tenant.address,
-        domain: tenant.domain,
+        // Note: email, phone, address, domain fields not available in current schema
       }));
 
       const result = { tenants: mappedTenants, total };
       this.setCache(cacheKey, result);
 
-      logger.info("✅ [PrismaTenantService] Retrieved tenants successfully", {
-        count: tenants.length,
-        total,
-        filters,
-      });
+      logger.info(
+        `✅ [PrismaTenantService] Retrieved tenants successfully - Count: ${tenants.length}, Total: ${total}`,
+      );
 
       endTimer();
       return result;
@@ -735,10 +719,9 @@ export class PrismaTenantService {
     const endTimer = this.startPerformanceTimer("updateTenant");
 
     try {
-      logger.info("🔄 [PrismaTenantService] Updating tenant", {
-        tenantId,
-        updates: Object.keys(updates),
-      });
+      logger.info(
+        `🔄 [PrismaTenantService] Updating tenant - ID: ${tenantId}, Updates: ${Object.keys(updates).join(", ")}`,
+      );
 
       const updateData: any = { updated_at: new Date() };
 
@@ -800,15 +783,12 @@ export class PrismaTenantService {
         white_label: updatedTenant.white_label,
         data_retention_days: updatedTenant.data_retention_days,
         monthly_call_limit: updatedTenant.monthly_call_limit,
-        email: updatedTenant.email,
-        phone: updatedTenant.phone,
-        address: updatedTenant.address,
-        domain: updatedTenant.domain,
+        // Note: email, phone, address, domain fields not available in current schema
       };
 
-      logger.success("✅ [PrismaTenantService] Tenant updated successfully", {
-        tenantId,
-      });
+      logger.success(
+        `✅ [PrismaTenantService] Tenant updated successfully - ID: ${tenantId}`,
+      );
 
       endTimer();
       return mappedTenant;
@@ -831,7 +811,7 @@ export class PrismaTenantService {
     const endTimer = this.startPerformanceTimer("deleteTenant");
 
     try {
-      logger.info("🗑️ [PrismaTenantService] Deleting tenant", { tenantId });
+      logger.info(`🗑️ [PrismaTenantService] Deleting tenant - ID: ${tenantId}`);
 
       // Use transaction to ensure data consistency
       await this.prisma.$transaction(async (tx) => {
@@ -859,9 +839,9 @@ export class PrismaTenantService {
       // Clear caches
       this.clearTenantCaches(tenantId);
 
-      logger.success("✅ [PrismaTenantService] Tenant deleted successfully", {
-        tenantId,
-      });
+      logger.success(
+        `✅ [PrismaTenantService] Tenant deleted successfully - ID: ${tenantId}`,
+      );
 
       endTimer();
       return true;
@@ -1116,9 +1096,6 @@ export class PrismaTenantService {
       });
 
       // Get total transcript count
-      const totalTranscripts = await this.prisma.transcript.count({
-        where: { tenant_id: tenantId },
-      });
 
       // Calculate storage usage (approximate)
       const storageAggregate = await this.prisma.transcript.aggregate({
@@ -1315,11 +1292,7 @@ export class PrismaTenantService {
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
 
       logger.info(
-        `🧹 [PrismaTenantService] Cleaning up data older than ${retentionDays} days`,
-        {
-          tenantId,
-          cutoffDate,
-        },
+        `🧹 [PrismaTenantService] Cleaning up data older than ${retentionDays} days - Tenant: ${tenantId}, Cutoff: ${cutoffDate.toISOString()}`,
       );
 
       // Delete old transcripts
@@ -1334,10 +1307,9 @@ export class PrismaTenantService {
 
       // TODO: Add cleanup for other tenant-related data when models are enhanced
 
-      logger.success("✅ [PrismaTenantService] Data cleanup completed", {
-        tenantId,
-        deletedTranscripts: deletedTranscripts.count,
-      });
+      logger.success(
+        `✅ [PrismaTenantService] Data cleanup completed - Tenant: ${tenantId}, Deleted transcripts: ${deletedTranscripts.count}`,
+      );
 
       endTimer();
     } catch (error) {

@@ -2,30 +2,47 @@
 // Replaces complex VapiContext with simple, official implementation
 // ✅ UPDATED: Now uses vapiOfficial.ts instead of deprecated vapiSimple.ts
 
-import { useTenantDetection } from '@/context/AuthContext';
-import { HotelConfiguration } from '@/hooks/useHotelConfiguration';
+/**
+ * RESPONSIBILITY CLARIFICATION:
+ * ================================
+ * PRIMARY: Handle Vapi SDK integration and raw message processing
+ * SHOULD: Forward transcript messages to TranscriptContext for processing
+ * SHOULD NOT: Duplicate transcript processing logic
+ *
+ * OVERLAP AWARENESS:
+ * - Currently duplicates some transcript processing with TranscriptContext
+ * - Future: Should focus only on SDK integration, not data management
+ *
+ * INTEGRATION POINTS:
+ * - Forwards messages to addTranscript() from TranscriptContext
+ * - Updates callDetails with language sync (temporary until Call state consolidation)
+ */
+
+import { useTenantDetection } from "@/context/AuthContext";
+import { useLanguage } from "@/context/contexts/LanguageContext";
+import { HotelConfiguration } from "@/hooks/useHotelConfiguration";
 import {
   CallOptions,
   VapiOfficial,
   VapiOfficialConfig,
-} from '@/lib/vapiOfficial';
-import { CallDetails, Language } from '@/types';
-import { logger } from '@shared/utils/logger';
+} from "@/lib/vapiOfficial";
+import { CallDetails, Language } from "@/types";
+import logger from "@shared/utils/logger";
 import React, {
   createContext,
   useContext,
   useEffect,
   useRef,
   useState,
-} from 'react';
-import { useTranscript } from './TranscriptContext';
+} from "react";
+import { useTranscript } from "./TranscriptContext";
 
 export interface VapiContextType {
   // Call state
   isCallActive: boolean;
   micLevel: number;
   callDetails: CallDetails | null;
-  currentLanguage: string; // Add current language tracking
+  // ✅ REMOVED: currentLanguage - use LanguageContext instead
 
   // Actions
   startCall: (language?: string, assistantId?: string) => Promise<void>;
@@ -45,7 +62,7 @@ const VapiContext = createContext<VapiContextType | undefined>(undefined);
 export const useVapi = (): VapiContextType => {
   const context = useContext(VapiContext);
   if (!context) {
-    throw new Error('useVapi must be used within a VapiProvider');
+    throw new Error("useVapi must be used within a VapiProvider");
   }
   return context;
 };
@@ -56,10 +73,27 @@ interface VapiProviderProps {
 }
 
 export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
+  // DEV/runtime toggle for noisy logs to reduce latency in production
+  const debugEnabled = (() => {
+    try {
+      return (
+        import.meta.env.DEV ||
+        (typeof window !== "undefined" &&
+          localStorage.getItem("DEBUG_VOICE") === "true")
+      );
+    } catch {
+      return false;
+    }
+  })();
+  const debugLog = (...args: any[]) => {
+    if (debugEnabled) {
+      console.log(...args);
+    }
+  };
   // State management
   const [isCallActive, setIsCallActive] = useState(false);
   const [callEndCallback, setCallEndCallback] = useState<(() => void) | null>(
-    null
+    null,
   );
   // ✅ REMOVED: Call summary callback - now using OpenAI only
   // const [callSummaryCallback, setCallSummaryCallback] = useState<((summary: any) => void) | null>(
@@ -67,7 +101,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // );
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState('en');
+  // ✅ REMOVED: Duplicate language state - use LanguageContext instead
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
 
   // ✅ NEW: Track if we had an active call (to detect genuine call ends)
@@ -78,6 +112,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
   // Context dependencies
   const { addTranscript } = useTranscript();
+  const { language } = useLanguage(); // ✅ Use LanguageContext instead of local state
   const tenantInfo = useTenantDetection();
 
   // Get tenant ID function
@@ -86,57 +121,64 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       return `tenant-${tenantInfo.subdomain}`;
     }
     if (tenantInfo?.customDomain) {
-      return `tenant-${tenantInfo.customDomain.replace(/\./g, '-')}`;
+      return `tenant-${tenantInfo.customDomain.replace(/\./g, "-")}`;
     }
-    return 'tenant-default';
+    return "tenant-default";
+  };
+
+  // Resolve Vapi credentials for a language from server API, with env fallback
+  const resolveVapiCredentials = async (
+    language: string,
+  ): Promise<{ publicKey: string; assistantId: string }> => {
+    // 1) Try server endpoint which already maps per-language env vars
+    try {
+      const res = await fetch(`/api/vapi/config/${language}`);
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data || {};
+        if (data?.publicKey && data?.assistantId) {
+          return { publicKey: data.publicKey, assistantId: data.assistantId };
+        }
+      }
+    } catch {
+      // Ignore and fallback to env below
+    }
+
+    // 2) Fallback to build-time envs per language, then default EN
+    const upper = language.toUpperCase();
+    const publicKeyLang =
+      (import.meta.env as any)[`VITE_VAPI_PUBLIC_KEY_${upper}`] ||
+      import.meta.env.VITE_VAPI_PUBLIC_KEY ||
+      "";
+    const assistantIdLang =
+      (import.meta.env as any)[`VITE_VAPI_ASSISTANT_ID_${upper}`] ||
+      import.meta.env.VITE_VAPI_ASSISTANT_ID ||
+      "";
+
+    return { publicKey: publicKeyLang, assistantId: assistantIdLang };
   };
 
   // ✅ UPDATED: Using VapiOfficial instead of deprecated VapiSimple
-  const initializeVapi = (language: string): VapiOfficial => {
-    // Get environment variables with proper validation
-    const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-
-    // Language-specific assistant IDs
-    const assistantIds: Record<string, string> = {
-      en: import.meta.env.VITE_VAPI_ASSISTANT_ID || '',
-      vi:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_VI ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        '',
-      fr:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_FR ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        '',
-      zh:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_ZH ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        '',
-      ru:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_RU ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        '',
-      ko:
-        import.meta.env.VITE_VAPI_ASSISTANT_ID_KO ||
-        import.meta.env.VITE_VAPI_ASSISTANT_ID ||
-        '',
-    };
-
-    const assistantId = assistantIds[language] || assistantIds.en;
+  const initializeVapi = (
+    language: string,
+    creds: { publicKey: string; assistantId: string },
+  ): VapiOfficial => {
+    const { publicKey, assistantId } = creds;
 
     if (!publicKey || !assistantId) {
       throw new Error(
-        `Missing Vapi credentials for language ${language}: publicKey=${!!publicKey}, assistantId=${!!assistantId}`
+        `Missing Vapi credentials for language ${language}: publicKey=${!!publicKey}, assistantId=${!!assistantId}`,
       );
     }
 
     logger.debug(
-      '🔧 [VapiProvider] Initializing VapiOfficial:',
-      'VapiProvider',
+      "🔧 [VapiProvider] Initializing VapiOfficial:",
+      "VapiProvider",
       {
         language,
-        publicKey: publicKey.substring(0, 10) + '...',
-        assistantId: assistantId.substring(0, 15) + '...',
-      }
+        publicKey: publicKey.substring(0, 10) + "...",
+        assistantId: assistantId.substring(0, 15) + "...",
+      },
     );
 
     // ✅ UPDATED: Create VapiOfficial config with error handling
@@ -144,31 +186,41 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       publicKey,
       assistantId,
       onCallStart: () => {
-        logger.debug('📞 [VapiProvider] Call started', 'VapiProvider');
+        logger.debug("📞 [VapiProvider] Call started", "VapiProvider");
         setIsCallActive(true);
         hadActiveCallRef.current = Date.now(); // ✅ Track WHEN call started (timestamp)
         setMicLevel(0);
         // ✅ NEW: Use temporary call ID, will be updated when Vapi provides real callId
         const tempCallId = `temp-call-${Date.now()}`;
         setCurrentCallId(tempCallId);
+
+        // ✅ INITIALIZE: Call details metadata (separate from transcript processing)
+        setCallDetails({
+          id: tempCallId,
+          roomNumber: "Unknown",
+          duration: "0:00",
+          category: "voice-assistant",
+          language: language as Language,
+        });
+
         logger.debug(
-          '🆔 [VapiProvider] Call started with temporary call ID:',
-          'VapiProvider',
-          tempCallId
+          "🆔 [VapiProvider] Call started with temporary call ID:",
+          "VapiProvider",
+          tempCallId,
         );
       },
       onCallEnd: () => {
-        console.log(
-          '📞 [DEBUG] VapiProvider onCallEnd triggered, checking call history...'
+        debugLog(
+          "📞 [DEBUG] VapiProvider onCallEnd triggered, checking call history...",
         );
-        logger.debug('📞 [VapiProvider] Call ended', 'VapiProvider');
+        logger.debug("📞 [VapiProvider] Call ended", "VapiProvider");
 
         // ✅ FIX: Check if we ever had an active call AND minimum duration
         const callStartTime = hadActiveCallRef.current;
         const callDuration = callStartTime ? Date.now() - callStartTime : 0;
         const minCallDuration = 2000; // 2 seconds minimum
 
-        console.log('📞 [DEBUG] VapiProvider call timing:', {
+        debugLog("📞 [DEBUG] VapiProvider call timing:", {
           callStartTime,
           callDuration,
           minCallDuration,
@@ -176,29 +228,29 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         });
 
         if (!callStartTime) {
-          console.log(
-            '📞 [DEBUG] VapiProvider: No call history found, skipping onCallEnd processing'
+          debugLog(
+            "📞 [DEBUG] VapiProvider: No call history found, skipping onCallEnd processing",
           );
           return;
         }
 
         if (callDuration < minCallDuration) {
-          console.log(
-            '📞 [DEBUG] VapiProvider: Call too short (race condition), skipping onCallEnd processing'
+          debugLog(
+            "📞 [DEBUG] VapiProvider: Call too short (race condition), skipping onCallEnd processing",
           );
           return;
         }
 
         // ✅ NEW: Check Vapi SDK state directly instead of using delay
-        console.log(
-          '📞 [DEBUG] VapiProvider: Checking Vapi SDK internal state...'
+        debugLog(
+          "📞 [DEBUG] VapiProvider: Checking Vapi SDK internal state...",
         );
 
         // Use Vapi SDK's own state instead of our context state to avoid race conditions
         const vapiSdkActive = vapi?.isCallActive?.() || false;
 
         // ✅ ENHANCED DEBUG: More detailed state info
-        console.log('📞 [DEBUG] VapiProvider DETAILED state:', {
+        debugLog("📞 [DEBUG] VapiProvider DETAILED state:", {
           vapiSdkActive,
           contextActive: isCallActive,
           hadActiveCallRef: hadActiveCallRef.current,
@@ -208,28 +260,34 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         });
 
         if (!vapiSdkActive) {
-          console.log(
-            '📞 [DEBUG] VapiProvider: Vapi SDK confirms call ended, processing...'
+          debugLog(
+            "📞 [DEBUG] VapiProvider: Vapi SDK confirms call ended, processing...",
           );
 
           // ✅ FIX: Trigger external callback BEFORE state changes to prevent race condition
           if (callEndCallback) {
-            console.log('📞 [DEBUG] VapiProvider calling external callback');
+            debugLog("📞 [DEBUG] VapiProvider calling external callback");
             callEndCallback();
           } else {
-            console.log(
-              '📞 [DEBUG] VapiProvider no external callback available - using direct trigger'
+            debugLog(
+              "📞 [DEBUG] VapiProvider no external callback available - using direct trigger",
             );
 
             // ✅ NEW: Direct trigger Summary Popup when no external callback
-            if (window.triggerSummaryPopup) {
-              console.log(
-                '📞 [DEBUG] VapiProvider directly triggering Summary Popup'
-              );
-              window.triggerSummaryPopup();
-            } else {
-              console.log(
-                '📞 [DEBUG] window.triggerSummaryPopup not available'
+            try {
+              if (window.triggerSummaryPopup) {
+                debugLog(
+                  "📞 [DEBUG] VapiProvider directly triggering Summary Popup",
+                );
+                window.triggerSummaryPopup();
+              } else {
+                debugLog("📞 [DEBUG] window.triggerSummaryPopup not available");
+              }
+            } catch (popupError) {
+              logger.warn(
+                "⚠️ [VapiProvider] Failed to trigger summary popup directly",
+                "VapiProvider",
+                popupError,
               );
             }
           }
@@ -239,22 +297,22 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           setMicLevel(0);
           hadActiveCallRef.current = 0; // ✅ Reset call history after processing
         } else {
-          console.log(
-            '📞 [DEBUG] VapiProvider: Vapi SDK still active, ignoring onCallEnd (race condition)'
+          debugLog(
+            "📞 [DEBUG] VapiProvider: Vapi SDK still active, ignoring onCallEnd (race condition)",
           );
         }
 
         // Keep call ID for a bit to allow final transcripts, then reset
         setTimeout(() => {
           logger.debug(
-            '🆔 [VapiProvider] Resetting call ID after call end',
-            'VapiProvider'
+            "🆔 [VapiProvider] Resetting call ID after call end",
+            "VapiProvider",
           );
           setCurrentCallId(null);
         }, 2000); // 2 second delay to allow final transcripts
       },
-      onMessage: message => {
-        if (message.type === 'transcript') {
+      onMessage: (message) => {
+        if (message.type === "transcript") {
           // ✅ FIX: Use consistent call ID throughout the call session
           const callId = currentCallId || `temp-call-${Date.now()}`;
 
@@ -262,67 +320,48 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
           if (message.call?.id && message.call.id !== currentCallId) {
             setCurrentCallId(message.call.id);
             logger.debug(
-              '🆔 [VapiProvider] Updated with real Vapi call ID:',
-              'VapiProvider',
-              message.call.id
+              "🆔 [VapiProvider] Updated with real Vapi call ID:",
+              "VapiProvider",
+              message.call.id,
             );
           }
 
           // ✅ DEBUG: Enhanced logging for transcript handling
-          console.log('📝 [VapiProvider] Received transcript message:', {
+          debugLog("📝 [VapiProvider] Received transcript message:", {
             type: message.type,
             role: message.role,
-            transcript: message.transcript?.substring(0, 50) + '...',
+            transcript: message.transcript?.substring(0, 50) + "...",
             callId,
             timestamp: new Date().toISOString(),
           });
 
-          // Update call details with transcript
-          setCallDetails(
-            prev =>
-              ({
-                id: callId, // ✅ FIXED: Use consistent call ID
-                roomNumber: prev?.roomNumber || 'Unknown',
-                duration: prev?.duration || '0:00',
-                category: prev?.category || 'voice-assistant',
-                language: language as Language,
-                transcript: message.transcript,
-                role: message.role,
-              }) as CallDetails
-          );
-
-          logger.debug(
-            '📝 [VapiProvider] Adding transcript with consistent call ID:',
-            'VapiProvider',
+          // ✅ SIMPLIFIED: Only forward to TranscriptContext (single responsibility)
+          // TranscriptContext handles all transcript processing and storage
+          debugLog(
+            "📝 [VapiProvider] Forwarding transcript to TranscriptContext:",
             {
               callId,
+              content: message.transcript?.substring(0, 50) + "...",
               role: message.role,
-              content: message.transcript.substring(0, 50) + '...',
               tenantId: getTenantId(),
-            }
+            },
           );
 
-          // ✅ FIX: Use consistent call ID and proper tenant ID
-          console.log('📝 [VapiProvider] About to call addTranscript:', {
-            callId,
-            content: message.transcript?.substring(0, 50) + '...',
-            role: message.role,
-            tenantId: getTenantId(),
-          });
-
           addTranscript({
-            callId: callId, // ✅ FIXED: Use consistent call ID
+            callId: callId, // ✅ Consistent call ID
             content: message.transcript,
-            role: message.role as 'user' | 'assistant',
-            tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
+            role: message.role as "user" | "assistant",
+            tenantId: getTenantId(), // ✅ Dynamic tenant ID
           });
 
-          console.log('✅ [VapiProvider] addTranscript called successfully');
+          debugLog(
+            "✅ [VapiProvider] Transcript forwarded to TranscriptContext successfully",
+          );
         }
 
-        if (message.type === 'function-call') {
+        if (message.type === "function-call") {
           // Handle function calls (room service, etc.)
-          logger.debug('🔧 Function call', 'VapiProvider', message);
+          logger.debug("🔧 Function call", "VapiProvider", message);
         }
 
         // ✅ REMOVED: Call summary handling - now using OpenAI only
@@ -339,32 +378,32 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
         //   // Trigger call summary callback
         //   if (callSummaryCallback) {
-        //     console.log('📋 [DEBUG] VapiProvider calling call summary callback');
+        //
         //     callSummaryCallback(callSummaryData);
         //   } else {
-        //     console.log('📋 [DEBUG] VapiProvider no call summary callback available');
+        //
         //   }
 
         //   // Also update assistant context directly
         //   if (callSummaryData.content) {
-        //     console.log('📋 [DEBUG] VapiProvider updating assistant context with call summary');
+        //
         //     // TODO: Update assistant context with call summary
         //   }
         // }
       },
-      onError: error => {
-        logger.error('❌ Vapi error', 'VapiProvider', error);
+      onError: (error) => {
+        logger.error("❌ Vapi error", "VapiProvider", error);
         setIsCallActive(false);
         setMicLevel(0);
         // Reset call ID on error
         setCurrentCallId(null);
       },
       onSpeechStart: () => {
-        logger.debug('🗣️ Speech started', 'VapiProvider');
+        logger.debug("🗣️ Speech started", "VapiProvider");
         setMicLevel(0.8); // Simulate mic level
       },
       onSpeechEnd: () => {
-        logger.debug('🔇 Speech ended', 'VapiProvider');
+        logger.debug("🔇 Speech ended", "VapiProvider");
         setMicLevel(0);
       },
     };
@@ -373,51 +412,51 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     const vapi = new VapiOfficial(config);
 
     vapiClientRef.current = vapi;
-    setCurrentLanguage(language);
+    // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
     return vapi;
   };
 
   // Start call function
   const startCall = async (
-    language: string = 'en',
-    assistantId?: string
+    language: string = "en",
+    assistantId?: string,
   ): Promise<void> => {
     try {
       // ✅ NEW: Enhanced debug logging for VapiContextSimple
-      console.log('🎨 [DEBUG] VapiContextSimple.startCall called:', {
+      debugLog("🎨 [DEBUG] VapiContextSimple.startCall called:", {
         language,
         assistantId,
         timestamp: new Date().toISOString(),
         isCallActive,
-        currentLanguage,
+        contextLanguage: language, // ✅ Use parameter instead of state
         vapiClientExists: !!vapiClientRef.current,
       });
 
-      // Update current language
-      setCurrentLanguage(language);
+      // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
 
       // End any existing call first
       if (vapiClientRef.current && isCallActive) {
-        console.log('🔄 [DEBUG] Ending existing call before starting new one');
+        debugLog("🔄 [DEBUG] Ending existing call before starting new one");
         await vapiClientRef.current.endCall();
         vapiClientRef.current.destroy();
       }
 
       // ✅ NEW: Debug before initializing client
-      console.log('🚀 [DEBUG] Initializing new Vapi client:', {
+      debugLog("🚀 [DEBUG] Initializing new Vapi client:", {
         language,
         timestamp: new Date().toISOString(),
       });
 
       // Initialize new client
-      vapiClientRef.current = initializeVapi(language);
+      const creds = await resolveVapiCredentials(language);
+      vapiClientRef.current = initializeVapi(language, creds);
 
       if (!vapiClientRef.current) {
-        throw new Error('Failed to initialize Vapi client');
+        throw new Error("Failed to initialize Vapi client");
       }
 
       // ✅ NEW: Debug after client initialization
-      console.log('✅ [DEBUG] Vapi client initialized successfully:', {
+      debugLog("✅ [DEBUG] Vapi client initialized successfully:", {
         language,
         clientExists: !!vapiClientRef.current,
         timestamp: new Date().toISOString(),
@@ -430,7 +469,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         metadata: {
           language,
           timestamp: new Date().toISOString(),
-          source: 'hotel-voice-assistant',
+          source: "hotel-voice-assistant",
         },
       };
 
@@ -439,10 +478,10 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         options.assistantId = assistantId;
       }
 
-      console.log('🚀 [DEBUG] Starting call with options:', {
+      debugLog("🚀 [DEBUG] Starting call with options:", {
         options: {
           ...options,
-          assistantId: options.assistantId?.substring(0, 15) + '...',
+          assistantId: options.assistantId?.substring(0, 15) + "...",
         },
         timestamp: new Date().toISOString(),
       });
@@ -450,10 +489,10 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       // ✅ UPDATED: Start call using VapiOfficial
       await vapiClientRef.current.startCall(options);
 
-      console.log('✅ [DEBUG] Call started successfully');
+      debugLog("✅ [DEBUG] Call started successfully");
     } catch (error) {
-      console.error('❌ [DEBUG] Error starting call:', error);
-      logger.error('❌ Failed to start call', 'VapiProvider', error);
+      console.error("❌ [DEBUG] Error starting call:", error);
+      logger.error("❌ Failed to start call", "VapiProvider", error);
       throw error;
     }
   };
@@ -462,21 +501,21 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   const endCall = async (): Promise<void> => {
     try {
       if (vapiClientRef.current) {
-        console.log('🛑 [DEBUG] Ending call via VapiOfficial');
+        debugLog("🛑 [DEBUG] Ending call via VapiOfficial");
         await vapiClientRef.current.endCall();
-        console.log('✅ [DEBUG] Call ended successfully');
+        debugLog("✅ [DEBUG] Call ended successfully");
       }
     } catch (error) {
-      console.error('❌ [DEBUG] Error ending call:', error);
-      logger.error('❌ Failed to end call', 'VapiProvider', error);
+      console.error("❌ [DEBUG] Error ending call:", error);
+      logger.error("❌ Failed to end call", "VapiProvider", error);
       throw error;
     }
   };
 
   // Reinitialize for language change
-  const reinitializeForLanguage = (language: string): void => {
+  const reinitializeForLanguage = async (language: string): Promise<void> => {
     if (isCallActive) {
-      logger.warn('⚠️ Cannot reinitialize during active call', 'VapiProvider');
+      logger.warn("⚠️ Cannot reinitialize during active call", "VapiProvider");
       return;
     }
 
@@ -487,15 +526,16 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       }
 
       // Initialize for new language
-      vapiClientRef.current = initializeVapi(language);
-      setCurrentLanguage(language);
+      const creds = await resolveVapiCredentials(language);
+      vapiClientRef.current = initializeVapi(language, creds);
+      // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
 
-      logger.debug('🔄 Reinitialized for language:', 'VapiProvider', language);
+      logger.debug("🔄 Reinitialized for language:", "VapiProvider", language);
     } catch (error) {
       logger.error(
-        '❌ Failed to reinitialize for language:',
-        'VapiProvider',
-        error
+        "❌ Failed to reinitialize for language:",
+        "VapiProvider",
+        error,
       );
     }
   };
@@ -503,15 +543,19 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // Initialize on mount
   useEffect(() => {
     if (!vapiClientRef.current) {
-      try {
-        vapiClientRef.current = initializeVapi(currentLanguage);
-      } catch (error) {
-        logger.error(
-          '❌ Failed to initialize Vapi on mount:',
-          'VapiProvider',
-          error
-        );
-      }
+      // Wrap in void IIFE to avoid linter complaining about top-level await inside effect
+      void (async () => {
+        try {
+          const creds = await resolveVapiCredentials(language);
+          vapiClientRef.current = initializeVapi(language, creds);
+        } catch (error) {
+          logger.error(
+            "❌ Failed to initialize Vapi on mount:",
+            "VapiProvider",
+            error,
+          );
+        }
+      })();
     }
 
     // Cleanup on unmount
@@ -527,7 +571,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     isCallActive,
     micLevel,
     callDetails,
-    currentLanguage,
+    // ✅ REMOVED: currentLanguage - use LanguageContext instead
     startCall,
     endCall,
     setCallDetails,
@@ -538,3 +582,5 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
   return <VapiContext.Provider value={value}>{children}</VapiContext.Provider>;
 };
+
+// Removed duplicate interface declaration

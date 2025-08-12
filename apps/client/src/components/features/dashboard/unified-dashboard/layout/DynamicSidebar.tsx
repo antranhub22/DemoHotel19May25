@@ -1,12 +1,13 @@
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { usePermissionCheck } from '@/components/features/dashboard/unified-dashboard/guards/PermissionGuard';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import { getMenuForRole } from '@shared/constants/permissions';
+import { usePermissionCheck } from "@/components/features/dashboard/unified-dashboard/guards/PermissionGuard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
+import { getMenuForRole } from "@shared/constants/permissions";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 
 interface DynamicSidebarProps {
   isOpen: boolean;
@@ -30,14 +31,24 @@ const getIconComponent = (iconStr: string) => {
 };
 
 // Menu item component with permission checking
-const MenuItemComponent: React.FC<{
+
+interface MenuItemComponentProps {
   item: MenuItem;
   isActive: boolean;
   hasChildren: boolean;
   isExpanded: boolean;
   onToggle: () => void;
   depth: number;
-}> = ({ item, isActive, hasChildren, isExpanded, onToggle, depth }) => {
+}
+
+const MenuItemComponent: React.FC<MenuItemComponentProps> = ({
+  item,
+  isActive,
+  hasChildren,
+  isExpanded,
+  onToggle,
+  depth,
+}) => {
   const { canAccess } = usePermissionCheck();
 
   // Check if user has permission for this menu item
@@ -48,11 +59,11 @@ const MenuItemComponent: React.FC<{
   const itemContent = (
     <div
       className={cn(
-        'flex items-center justify-between w-full px-3 py-2 text-left transition-colors',
-        'hover:bg-gray-100 dark:hover:bg-gray-700',
+        "flex items-center justify-between w-full px-3 py-2 text-left transition-colors",
+        "hover:bg-gray-100 dark:hover:bg-gray-700",
         isActive &&
-          'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-        depth > 0 && 'ml-4 text-sm'
+          "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
+        depth > 0 && "ml-4 text-sm",
       )}
     >
       <div className="flex items-center gap-3">
@@ -95,21 +106,21 @@ const MenuItemComponent: React.FC<{
 // Role badge component
 const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
   const roleConfig = {
-    'hotel-manager': {
-      label: 'Hotel Manager',
-      color: 'bg-purple-100 text-purple-800',
+    "hotel-manager": {
+      label: "Hotel Manager",
+      color: "bg-purple-100 text-purple-800",
     },
-    'front-desk': { label: 'Front Desk', color: 'bg-blue-100 text-blue-800' },
-    'it-manager': { label: 'IT Manager', color: 'bg-green-100 text-green-800' },
+    "front-desk": { label: "Front Desk", color: "bg-blue-100 text-blue-800" },
+    "it-manager": { label: "IT Manager", color: "bg-green-100 text-green-800" },
   };
 
   const config = roleConfig[role as keyof typeof roleConfig] || {
-    label: 'Unknown',
-    color: 'bg-gray-100 text-gray-800',
+    label: "Unknown",
+    color: "bg-gray-100 text-gray-800",
   };
 
   return (
-    <Badge className={cn('text-xs font-medium', config.color)}>
+    <Badge className={cn("text-xs font-medium", config.color)}>
       {config.label}
     </Badge>
   );
@@ -127,7 +138,7 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
 export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
   isOpen,
   onClose,
-  className,
+  className = "",
 }) => {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -149,10 +160,10 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
   // Check if a path is active
   const isActivePath = (path: string) => {
-    if (path === '/hotel-dashboard' && location === '/hotel-dashboard') {
+    if (path === "/hotel-dashboard" && location === "/hotel-dashboard") {
       return true;
     }
-    if (path !== '/hotel-dashboard' && location.startsWith(path)) {
+    if (path !== "/hotel-dashboard" && location.startsWith(path)) {
       return true;
     }
     return false;
@@ -160,7 +171,7 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
 
   // Render menu items recursively
   const renderMenuItems = (items: any[], depth = 0): React.ReactNode => {
-    return items.map(item => {
+    return items.map((item) => {
       const isActive = isActivePath(item.path);
       const hasChildren = item.children && item.children.length > 0;
       const isExpanded = expandedItems.has(item.key);
@@ -198,9 +209,9 @@ export const DynamicSidebar: React.FC<DynamicSidebarProps> = ({
   return (
     <aside
       className={cn(
-        'fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
-        isOpen ? 'translate-x-0' : '-translate-x-full',
-        className
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        className,
       )}
     >
       {/* Sidebar Header */}

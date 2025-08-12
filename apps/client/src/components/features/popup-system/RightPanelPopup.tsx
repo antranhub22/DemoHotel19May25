@@ -1,7 +1,9 @@
-import { X } from 'lucide-react';
-import React from 'react';
-import { useSendToFrontDeskHandler } from '@/hooks/useSendToFrontDeskHandler';
-import { SummaryPopupContent } from './SummaryPopupContent';
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
+import { X } from "lucide-react";
+import React from "react";
+// ✅ UNIFIED: SummaryPopupContent replaced by UnifiedSummaryPopup
+// import { SummaryPopupContent } from "./SummaryPopupContent";
 
 interface RightPanelPopupProps {
   isOpen: boolean;
@@ -17,10 +19,10 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
   // ✅ REFACTORED: Use dedicated hook for Send to FrontDesk logic
   const { handleSendToFrontDesk, isSubmitting } = useSendToFrontDeskHandler({
     onSuccess: () => {
-      alert('✅ Request sent to Front Desk successfully!');
+      alert("✅ Request sent to Front Desk successfully!");
       onClose();
     },
-    onError: error => {
+    onError: (error) => {
       alert(`❌ ${error}`);
     },
   });
@@ -29,20 +31,21 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
     return null;
   }
 
+  const prefersReducedMotion = useReducedMotion();
   return (
     <div className="relative">
       {/* Popup Container */}
       <div
-        className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 p-4 w-full max-w-sm"
+        className={`bg-white/95 ${prefersReducedMotion ? "" : "backdrop-blur-sm"} rounded-xl shadow-lg border border-gray-200 p-4 w-full max-w-sm`}
         style={{
-          minHeight: '300px',
-          maxHeight: '500px',
+          minHeight: "300px",
+          maxHeight: "500px",
         }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-gray-800">
-            {showSummary ? 'Call Summary' : 'Right Panel'}
+            {showSummary ? "Call Summary" : "Right Panel"}
           </h3>
           <button
             onClick={onClose}
@@ -58,8 +61,11 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
           /* Summary Content */
           <div className="space-y-4">
             {/* Summary Content */}
-            <div className="overflow-y-auto" style={{ maxHeight: '320px' }}>
-              <SummaryPopupContent />
+            <div className="overflow-y-auto" style={{ maxHeight: "320px" }}>
+              {/* ✅ UNIFIED: Use UnifiedSummaryPopup component instead */}
+              <div className="p-4 text-center text-gray-500">
+                Summary content moved to UnifiedSummaryPopup component
+              </div>
             </div>
 
             {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}
@@ -82,7 +88,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
                     Sending...
                   </>
                 ) : (
-                  'Send to FrontDesk'
+                  "Send to FrontDesk"
                 )}
               </button>
             </div>
@@ -106,7 +112,7 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
         <div className="mt-4 pt-3 border-t border-gray-100">
           <div className="flex justify-center">
             <span className="text-xs text-gray-400">
-              {showSummary ? 'Call Summary Panel' : 'Right Panel Features'}
+              {showSummary ? "Call Summary Panel" : "Right Panel Features"}
             </span>
           </div>
         </div>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTranscriptSocket } from '@/hooks/useTranscriptSocket';
+import { useTranscriptSocket } from "@/hooks/useTranscriptSocket";
+import React from "react";
 // Transcript styles are now imported in the main CSS file
 
 interface TranscriptDisplayProps {
@@ -15,8 +15,8 @@ const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ socketUrl }) => {
     <div className="transcriptContainer">
       <div className="transcriptStatus">
         {isAssistantSpeaking
-          ? 'Assistant is speaking...'
-          : 'User is speaking...'}
+          ? "Assistant is speaking..."
+          : "User is speaking..."}
       </div>
       <div className="transcriptText">{transcript}</div>
     </div>
@@ -24,3 +24,4 @@ const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ socketUrl }) => {
 };
 
 export default TranscriptDisplay;
+// Removed duplicate interface declaration

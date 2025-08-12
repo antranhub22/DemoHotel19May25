@@ -1,7 +1,7 @@
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 // ============================================
 // Types & Interfaces
@@ -9,7 +9,7 @@ import * as path from 'path';
 
 export interface MigrationConfig {
   database: {
-    type: 'postgresql' | 'sqlite' | 'mysql';
+    type: "postgresql" | "sqlite" | "mysql";
     connectionString: string;
     migrationTableName: string;
     lockTableName: string;
@@ -27,7 +27,7 @@ export interface MigrationConfig {
   };
   zeroDowntime: {
     enabled: boolean;
-    strategy: 'blue_green' | 'rolling' | 'shadow' | 'canary';
+    strategy: "blue_green" | "rolling" | "shadow" | "canary";
     healthCheckPath: string;
     warmupTime: number; // seconds
     trafficShiftPercentage: number;
@@ -61,8 +61,8 @@ export interface Migration {
   name: string;
   version: string;
   description: string;
-  type: 'schema' | 'data' | 'combined';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type: "schema" | "data" | "combined";
+  priority: "low" | "medium" | "high" | "critical";
   dependencies: string[];
   upScript: string;
   downScript: string;
@@ -116,14 +116,14 @@ export interface PerformanceCheck {
 export interface MigrationJob {
   id: string;
   migrationId: string;
-  type: 'up' | 'down' | 'data_transform' | 'rollback';
+  type: "up" | "down" | "data_transform" | "rollback";
   status:
-    | 'pending'
-    | 'running'
-    | 'completed'
-    | 'failed'
-    | 'cancelled'
-    | 'rollback_required';
+    | "pending"
+    | "running"
+    | "completed"
+    | "failed"
+    | "cancelled"
+    | "rollback_required";
   startTime: Date;
   endTime?: Date;
   duration?: number; // milliseconds
@@ -142,8 +142,8 @@ export interface MigrationJob {
 
 export interface MigrationError {
   id: string;
-  type: 'schema' | 'data' | 'validation' | 'performance' | 'timeout';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "schema" | "data" | "validation" | "performance" | "timeout";
+  severity: "low" | "medium" | "high" | "critical";
   message: string;
   details: string;
   query?: string;
@@ -158,17 +158,17 @@ export interface MigrationPlan {
   version: string;
   description: string;
   migrations: string[]; // migration IDs in order
-  strategy: 'sequential' | 'parallel' | 'conditional';
+  strategy: "sequential" | "parallel" | "conditional";
   estimatedDuration: number; // minutes
   rollbackPlan: RollbackPlan;
   approvals: ApprovalStep[];
   status:
-    | 'draft'
-    | 'approved'
-    | 'executing'
-    | 'completed'
-    | 'failed'
-    | 'rolled_back';
+    | "draft"
+    | "approved"
+    | "executing"
+    | "completed"
+    | "failed"
+    | "rolled_back";
   timeline: {
     created: Date;
     approved?: Date;
@@ -188,7 +188,7 @@ export interface RollbackPlan {
 export interface RollbackStep {
   id: string;
   order: number;
-  type: 'schema' | 'data' | 'cleanup';
+  type: "schema" | "data" | "cleanup";
   description: string;
   script: string;
   timeout: number; // minutes
@@ -222,13 +222,13 @@ export interface MigrationStats {
 
 const defaultMigrationConfig: MigrationConfig = {
   database: {
-    type: 'postgresql',
+    type: "postgresql",
     connectionString:
-      process.env.DATABASE_URL || 'postgresql://localhost:5432/hotel_db',
-    migrationTableName: 'schema_migrations',
-    lockTableName: 'migration_locks',
-    migrationsPath: './migrations',
-    seedsPath: './seeds',
+      process.env.DATABASE_URL || "postgresql://localhost:5432/hotel_db",
+    migrationTableName: "schema_migrations",
+    lockTableName: "migration_locks",
+    migrationsPath: "./migrations",
+    seedsPath: "./seeds",
   },
   migration: {
     batchSize: 1000,
@@ -241,8 +241,8 @@ const defaultMigrationConfig: MigrationConfig = {
   },
   zeroDowntime: {
     enabled: true,
-    strategy: 'blue_green',
-    healthCheckPath: '/health',
+    strategy: "blue_green",
+    healthCheckPath: "/health",
     warmupTime: 30,
     trafficShiftPercentage: 10,
     maxErrorRate: 1.0,
@@ -251,8 +251,8 @@ const defaultMigrationConfig: MigrationConfig = {
     enabled: true,
     parallelProcessing: true,
     chunkSize: 10000,
-    memoryLimit: '512MB',
-    tempStoragePath: './temp/migrations',
+    memoryLimit: "512MB",
+    tempStoragePath: "./temp/migrations",
   },
   validation: {
     enabled: true,
@@ -280,7 +280,6 @@ export class DataMigration extends EventEmitter {
   private migrationJobs: Map<string, MigrationJob> = new Map();
   private migrationPlans: Map<string, MigrationPlan> = new Map();
   private activeLocks: Set<string> = new Set();
-  private dbConnection: any; // Database connection
 
   constructor(config: Partial<MigrationConfig> = {}) {
     super();
@@ -289,8 +288,8 @@ export class DataMigration extends EventEmitter {
     this.initializeDataMigration();
 
     console.log(
-      '🔄 DataMigration initialized with zero-downtime migration capabilities',
-      'DataMigration'
+      "🔄 DataMigration initialized with zero-downtime migration capabilities",
+      "DataMigration",
     );
   }
 
@@ -314,9 +313,9 @@ export class DataMigration extends EventEmitter {
         this.startMonitoring();
       }
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      console.error('Failed to initialize data migration:', error);
+      console.error("Failed to initialize data migration:", error);
       throw error;
     }
   }
@@ -326,9 +325,9 @@ export class DataMigration extends EventEmitter {
       this.config.database.migrationsPath,
       this.config.database.seedsPath,
       this.config.dataTransformation.tempStoragePath,
-      './migrations/completed',
-      './migrations/failed',
-      './migrations/rollbacks',
+      "./migrations/completed",
+      "./migrations/failed",
+      "./migrations/rollbacks",
     ];
 
     for (const dir of dirs) {
@@ -342,29 +341,9 @@ export class DataMigration extends EventEmitter {
 
   private async initializeDatabaseTables() {
     // Create migration tracking tables
-    const migrationTableSQL = `
-      CREATE TABLE IF NOT EXISTS ${this.config.database.migrationTableName} (
-        id VARCHAR(255) PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        version VARCHAR(255) NOT NULL,
-        executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        execution_time INTEGER,
-        checksum VARCHAR(255),
-        success BOOLEAN DEFAULT true
-      );
-    `;
-
-    const lockTableSQL = `
-      CREATE TABLE IF NOT EXISTS ${this.config.database.lockTableName} (
-        lock_key VARCHAR(255) PRIMARY KEY,
-        locked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        locked_by VARCHAR(255),
-        expires_at TIMESTAMP
-      );
-    `;
 
     // Execute table creation (implementation would depend on database type)
-    console.log('📊 Migration tracking tables initialized');
+    console.log("📊 Migration tracking tables initialized");
   }
 
   // ============================================
@@ -372,9 +351,9 @@ export class DataMigration extends EventEmitter {
   // ============================================
 
   async createMigration(
-    migration: Omit<Migration, 'id' | 'metadata'> & {
-      metadata?: Partial<Migration['metadata']>;
-    }
+    migration: Omit<Migration, "id" | "metadata"> & {
+      metadata?: Partial<Migration["metadata"]>;
+    },
   ): Promise<string> {
     const migrationId = crypto.randomUUID();
 
@@ -382,7 +361,7 @@ export class DataMigration extends EventEmitter {
       ...migration,
       id: migrationId,
       metadata: {
-        author: 'system',
+        author: "system",
         createdAt: new Date(),
         estimatedDuration: 15,
         affectedTables: [],
@@ -395,32 +374,32 @@ export class DataMigration extends EventEmitter {
     await this.saveMigrationToFile(newMigration);
 
     console.log(`📝 Migration created: ${migration.name} (${migrationId})`);
-    this.emit('migrationCreated', newMigration);
+    this.emit("migrationCreated", newMigration);
 
     return migrationId;
   }
 
   async executeMigration(
     migrationId: string,
-    options: { dryRun?: boolean; force?: boolean } = {}
+    options: { dryRun?: boolean; force?: boolean } = {},
   ): Promise<string> {
     const migration = this.migrations.get(migrationId);
     if (!migration) {
-      throw new Error('Migration not found');
+      throw new Error("Migration not found");
     }
 
     // Check for existing lock
     const lockKey = `migration_${migrationId}`;
     if (this.activeLocks.has(lockKey) && !options.force) {
-      throw new Error('Migration is already running');
+      throw new Error("Migration is already running");
     }
 
     const jobId = crypto.randomUUID();
     const job: MigrationJob = {
       id: jobId,
       migrationId,
-      type: 'up',
-      status: 'pending',
+      type: "up",
+      status: "pending",
       startTime: new Date(),
       progress: 0,
       recordsProcessed: 0,
@@ -438,9 +417,9 @@ export class DataMigration extends EventEmitter {
     this.activeLocks.add(lockKey);
 
     console.log(
-      `🚀 Starting migration: ${migration.name} (${options.dryRun ? 'DRY RUN' : 'LIVE'})`
+      `🚀 Starting migration: ${migration.name} (${options.dryRun ? "DRY RUN" : "LIVE"})`,
     );
-    this.emit('migrationStarted', job);
+    this.emit("migrationStarted", job);
 
     try {
       // Create backup if enabled
@@ -449,17 +428,17 @@ export class DataMigration extends EventEmitter {
         job.metadata.backupCreated = true;
       }
 
-      job.status = 'running';
+      job.status = "running";
 
       // Execute migration based on type
       switch (migration.type) {
-        case 'schema':
+        case "schema":
           await this.executeSchemaChanges(job, migration);
           break;
-        case 'data':
+        case "data":
           await this.executeDataMigration(job, migration);
           break;
-        case 'combined':
+        case "combined":
           await this.executeSchemaChanges(job, migration);
           await this.executeDataMigration(job, migration);
           break;
@@ -470,7 +449,7 @@ export class DataMigration extends EventEmitter {
         await this.validateMigration(job, migration);
       }
 
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.progress = 100;
@@ -481,35 +460,35 @@ export class DataMigration extends EventEmitter {
       }
 
       console.log(
-        `✅ Migration completed: ${migration.name} (${job.duration}ms)`
+        `✅ Migration completed: ${migration.name} (${job.duration}ms)`,
       );
-      this.emit('migrationCompleted', job);
+      this.emit("migrationCompleted", job);
 
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime!.getTime() - job.startTime.getTime();
 
       const migrationError: MigrationError = {
         id: crypto.randomUUID(),
-        type: 'schema',
-        severity: 'critical',
+        type: "schema",
+        severity: "critical",
         message: error.message,
-        details: error.stack || '',
+        details: error.stack || "",
         timestamp: new Date(),
       };
 
       job.errors.push(migrationError);
 
       console.error(`❌ Migration failed: ${migration.name}`, error);
-      this.emit('migrationFailed', { job, error });
+      this.emit("migrationFailed", { job, error });
 
       // Auto-rollback if configured
       if (this.config.migration.rollbackEnabled && !options.dryRun) {
         await this.rollbackMigration(
           migrationId,
-          'Auto-rollback due to failure'
+          "Auto-rollback due to failure",
         );
       }
 
@@ -525,7 +504,7 @@ export class DataMigration extends EventEmitter {
 
   private async executeSchemaChanges(
     job: MigrationJob,
-    migration: Migration
+    migration: Migration,
   ): Promise<void> {
     console.log(`🏗️ Executing schema changes for: ${migration.name}`);
 
@@ -542,10 +521,10 @@ export class DataMigration extends EventEmitter {
 
         // Update progress
         job.progress = Math.round(((i + 1) / totalStatements) * 50); // 50% for schema
-        this.emit('migrationProgress', { job, progress: job.progress });
+        this.emit("migrationProgress", { job, progress: job.progress });
 
         console.log(
-          `📊 Schema progress: ${job.progress}% - Executed statement ${i + 1}/${totalStatements}`
+          `📊 Schema progress: ${job.progress}% - Executed statement ${i + 1}/${totalStatements}`,
         );
       }
     } catch (error) {
@@ -559,7 +538,7 @@ export class DataMigration extends EventEmitter {
 
   private async executeDataMigration(
     job: MigrationJob,
-    migration: Migration
+    migration: Migration,
   ): Promise<void> {
     if (!migration.dataTransformation) return;
 
@@ -570,7 +549,7 @@ export class DataMigration extends EventEmitter {
 
       // Get total record count
       const totalRecords = await this.getRecordCount(
-        transformation.sourceTable
+        transformation.sourceTable,
       );
       job.recordsTotal = totalRecords;
 
@@ -585,13 +564,13 @@ export class DataMigration extends EventEmitter {
         : this.config.migration.batchSize;
 
       let offset = 0;
-      const baseProgress = migration.type === 'combined' ? 50 : 0; // If combined, schema took 50%
+      const baseProgress = migration.type === "combined" ? 50 : 0; // If combined, schema took 50%
 
       while (offset < totalRecords) {
         const batch = await this.getDataBatch(
           transformation.sourceTable,
           offset,
-          batchSize
+          batchSize,
         );
 
         if (
@@ -610,10 +589,10 @@ export class DataMigration extends EventEmitter {
         const dataProgress = (job.recordsProcessed / totalRecords) * 50;
         job.progress = baseProgress + dataProgress;
 
-        this.emit('migrationProgress', { job, progress: job.progress });
+        this.emit("migrationProgress", { job, progress: job.progress });
 
         console.log(
-          `📈 Data progress: ${job.progress.toFixed(1)}% - Processed ${job.recordsProcessed}/${totalRecords} records`
+          `📈 Data progress: ${job.progress.toFixed(1)}% - Processed ${job.recordsProcessed}/${totalRecords} records`,
         );
       }
     } catch (error) {
@@ -624,26 +603,26 @@ export class DataMigration extends EventEmitter {
   private async processDataBatchSequential(
     batch: any[],
     transformation: DataTransformation,
-    job: MigrationJob
+    job: MigrationJob,
   ): Promise<void> {
     for (const record of batch) {
       try {
         const transformedRecord = await this.transformRecord(
           record,
-          transformation
+          transformation,
         );
 
         if (!job.metadata.dryRun) {
           await this.insertTransformedRecord(
             transformedRecord,
-            transformation.targetTable
+            transformation.targetTable,
           );
         }
       } catch (error) {
         const migrationError: MigrationError = {
           id: crypto.randomUUID(),
-          type: 'data',
-          severity: 'medium',
+          type: "data",
+          severity: "medium",
           message: `Record transformation failed: ${error.message}`,
           details: JSON.stringify(record),
           affectedRecords: 1,
@@ -658,7 +637,7 @@ export class DataMigration extends EventEmitter {
           (job.recordsTotal * this.config.validation.rollbackThreshold) / 100
         ) {
           throw new Error(
-            'Too many transformation errors - aborting migration'
+            "Too many transformation errors - aborting migration",
           );
         }
       }
@@ -668,19 +647,19 @@ export class DataMigration extends EventEmitter {
   private async processDataBatchParallel(
     batch: any[],
     transformation: DataTransformation,
-    job: MigrationJob
+    job: MigrationJob,
   ): Promise<void> {
     const concurrency = Math.min(
       transformation.batchProcessing.parallelBatches,
-      this.config.migration.maxConcurrency
+      this.config.migration.maxConcurrency,
     );
     const chunks = this.chunkArray(
       batch,
-      Math.ceil(batch.length / concurrency)
+      Math.ceil(batch.length / concurrency),
     );
 
-    const promises = chunks.map(chunk =>
-      this.processDataBatchSequential(chunk, transformation, job)
+    const promises = chunks.map((chunk) =>
+      this.processDataBatchSequential(chunk, transformation, job),
     );
 
     await Promise.all(promises);
@@ -688,7 +667,7 @@ export class DataMigration extends EventEmitter {
 
   private async transformRecord(
     record: any,
-    transformation: DataTransformation
+    transformation: DataTransformation,
   ): Promise<any> {
     const transformedRecord: any = {};
 
@@ -706,7 +685,7 @@ export class DataMigration extends EventEmitter {
           const isValid = await this.validateValue(value, rule.validation);
           if (!isValid && rule.required) {
             throw new Error(
-              `Validation failed for ${rule.sourceColumn}: ${rule.validation}`
+              `Validation failed for ${rule.sourceColumn}: ${rule.validation}`,
             );
           }
         }
@@ -718,7 +697,7 @@ export class DataMigration extends EventEmitter {
         } else {
           console.warn(
             `Optional transformation failed for ${rule.sourceColumn}:`,
-            error.message
+            error.message,
           );
         }
       }
@@ -729,21 +708,21 @@ export class DataMigration extends EventEmitter {
 
   private async applyTransformation(
     value: any,
-    transformation: string
+    transformation: string,
   ): Promise<any> {
     // Simple transformation examples
     switch (transformation.toLowerCase()) {
-      case 'uppercase':
-        return typeof value === 'string' ? value.toUpperCase() : value;
-      case 'lowercase':
-        return typeof value === 'string' ? value.toLowerCase() : value;
-      case 'trim':
-        return typeof value === 'string' ? value.trim() : value;
-      case 'hash':
-        return crypto.createHash('sha256').update(String(value)).digest('hex');
-      case 'encrypt':
+      case "uppercase":
+        return typeof value === "string" ? value.toUpperCase() : value;
+      case "lowercase":
+        return typeof value === "string" ? value.toLowerCase() : value;
+      case "trim":
+        return typeof value === "string" ? value.trim() : value;
+      case "hash":
+        return crypto.createHash("sha256").update(String(value)).digest("hex");
+      case "encrypt":
         // Simple encryption (in production, use proper encryption)
-        return Buffer.from(String(value)).toString('base64');
+        return Buffer.from(String(value)).toString("base64");
       default:
         // For complex transformations, evaluate as function
         return value;
@@ -752,17 +731,17 @@ export class DataMigration extends EventEmitter {
 
   private async validateValue(
     value: any,
-    validation: string
+    validation: string,
   ): Promise<boolean> {
     // Simple validation examples
     switch (validation.toLowerCase()) {
-      case 'not_null':
+      case "not_null":
         return value != null;
-      case 'not_empty':
+      case "not_empty":
         return value != null && String(value).trim().length > 0;
-      case 'email':
+      case "email":
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value));
-      case 'numeric':
+      case "numeric":
         return !isNaN(Number(value));
       default:
         return true;
@@ -776,78 +755,78 @@ export class DataMigration extends EventEmitter {
   async executeZeroDowntimeMigration(planId: string): Promise<string> {
     const plan = this.migrationPlans.get(planId);
     if (!plan) {
-      throw new Error('Migration plan not found');
+      throw new Error("Migration plan not found");
     }
 
     console.log(`🔄 Starting zero-downtime migration: ${plan.name}`);
-    this.emit('zeroDowntimeMigrationStarted', plan);
+    this.emit("zeroDowntimeMigrationStarted", plan);
 
     try {
       switch (this.config.zeroDowntime.strategy) {
-        case 'blue_green':
+        case "blue_green":
           return await this.executeBlueGreenMigration(plan);
-        case 'rolling':
+        case "rolling":
           return await this.executeRollingMigration(plan);
-        case 'shadow':
+        case "shadow":
           return await this.executeShadowMigration(plan);
-        case 'canary':
+        case "canary":
           return await this.executeCanaryMigration(plan);
         default:
           throw new Error(
-            `Unsupported zero-downtime strategy: ${this.config.zeroDowntime.strategy}`
+            `Unsupported zero-downtime strategy: ${this.config.zeroDowntime.strategy}`,
           );
       }
     } catch (error) {
       console.error(`❌ Zero-downtime migration failed: ${plan.name}`, error);
-      this.emit('zeroDowntimeMigrationFailed', { plan, error });
+      this.emit("zeroDowntimeMigrationFailed", { plan, error });
       throw error;
     }
   }
 
   private async executeBlueGreenMigration(
-    plan: MigrationPlan
+    plan: MigrationPlan,
   ): Promise<string> {
-    console.log('🔵🟢 Executing Blue-Green migration strategy');
+    console.log("🔵🟢 Executing Blue-Green migration strategy");
 
     // 1. Setup green environment
-    console.log('🟢 Setting up green environment');
+    console.log("🟢 Setting up green environment");
     await this.sleep(2000);
 
     // 2. Run migrations on green
-    console.log('🔄 Running migrations on green environment');
+    console.log("🔄 Running migrations on green environment");
     for (const migrationId of plan.migrations) {
       await this.executeMigration(migrationId, { dryRun: false });
     }
 
     // 3. Warm up green environment
-    console.log('🔥 Warming up green environment');
+    console.log("🔥 Warming up green environment");
     await this.sleep(this.config.zeroDowntime.warmupTime * 1000);
 
     // 4. Health check green environment
     const isHealthy = await this.performHealthCheck();
     if (!isHealthy) {
-      throw new Error('Green environment health check failed');
+      throw new Error("Green environment health check failed");
     }
 
     // 5. Switch traffic to green
-    console.log('🔀 Switching traffic to green environment');
-    await this.switchTraffic('green');
+    console.log("🔀 Switching traffic to green environment");
+    await this.switchTraffic("green");
 
     // 6. Monitor for issues
     await this.monitorTrafficSwitch();
 
     // 7. Cleanup blue environment
-    console.log('🧹 Cleaning up blue environment');
+    console.log("🧹 Cleaning up blue environment");
     await this.sleep(1000);
 
-    console.log('✅ Blue-Green migration completed successfully');
-    return 'green_deployment_complete';
+    console.log("✅ Blue-Green migration completed successfully");
+    return "green_deployment_complete";
   }
 
   private async executeRollingMigration(plan: MigrationPlan): Promise<string> {
-    console.log('🔄 Executing Rolling migration strategy');
+    console.log("🔄 Executing Rolling migration strategy");
 
-    const instances = ['instance-1', 'instance-2', 'instance-3'];
+    const instances = ["instance-1", "instance-2", "instance-3"];
 
     for (const instance of instances) {
       console.log(`🔄 Migrating instance: ${instance}`);
@@ -873,19 +852,19 @@ export class DataMigration extends EventEmitter {
       await this.sleep(5000);
     }
 
-    console.log('✅ Rolling migration completed successfully');
-    return 'rolling_migration_complete';
+    console.log("✅ Rolling migration completed successfully");
+    return "rolling_migration_complete";
   }
 
   private async executeShadowMigration(plan: MigrationPlan): Promise<string> {
-    console.log('👥 Executing Shadow migration strategy');
+    console.log("👥 Executing Shadow migration strategy");
 
     // 1. Setup shadow environment
-    console.log('👤 Setting up shadow environment');
+    console.log("👤 Setting up shadow environment");
     await this.sleep(2000);
 
     // 2. Start shadow traffic
-    console.log('🔀 Starting shadow traffic');
+    console.log("🔀 Starting shadow traffic");
     await this.startShadowTraffic();
 
     // 3. Run migrations on shadow
@@ -894,40 +873,40 @@ export class DataMigration extends EventEmitter {
     }
 
     // 4. Compare results
-    console.log('📊 Comparing shadow vs production results');
+    console.log("📊 Comparing shadow vs production results");
     const comparisonResult = await this.compareShadowResults();
 
     if (!comparisonResult.passed) {
-      throw new Error('Shadow comparison failed');
+      throw new Error("Shadow comparison failed");
     }
 
     // 5. Promote shadow to production
-    console.log('⬆️ Promoting shadow to production');
+    console.log("⬆️ Promoting shadow to production");
     await this.promoteShadowToProduction();
 
-    console.log('✅ Shadow migration completed successfully');
-    return 'shadow_migration_complete';
+    console.log("✅ Shadow migration completed successfully");
+    return "shadow_migration_complete";
   }
 
   private async executeCanaryMigration(plan: MigrationPlan): Promise<string> {
-    console.log('🐤 Executing Canary migration strategy');
+    console.log("🐤 Executing Canary migration strategy");
 
     // 1. Deploy canary with migrations
-    console.log('🐤 Deploying canary environment');
+    console.log("🐤 Deploying canary environment");
     for (const migrationId of plan.migrations) {
       await this.executeMigration(migrationId, { dryRun: false });
     }
 
     // 2. Route small percentage of traffic to canary
     console.log(
-      `🔀 Routing ${this.config.zeroDowntime.trafficShiftPercentage}% traffic to canary`
+      `🔀 Routing ${this.config.zeroDowntime.trafficShiftPercentage}% traffic to canary`,
     );
     await this.routeTrafficToCanary(
-      this.config.zeroDowntime.trafficShiftPercentage
+      this.config.zeroDowntime.trafficShiftPercentage,
     );
 
     // 3. Monitor metrics
-    console.log('📊 Monitoring canary metrics');
+    console.log("📊 Monitoring canary metrics");
     const metrics = await this.monitorCanaryMetrics();
 
     if (metrics.errorRate > this.config.zeroDowntime.maxErrorRate) {
@@ -944,13 +923,13 @@ export class DataMigration extends EventEmitter {
       const stepMetrics = await this.monitorCanaryMetrics();
       if (stepMetrics.errorRate > this.config.zeroDowntime.maxErrorRate) {
         throw new Error(
-          `Canary error rate too high at ${percentage}%: ${stepMetrics.errorRate}%`
+          `Canary error rate too high at ${percentage}%: ${stepMetrics.errorRate}%`,
         );
       }
     }
 
-    console.log('✅ Canary migration completed successfully');
-    return 'canary_migration_complete';
+    console.log("✅ Canary migration completed successfully");
+    return "canary_migration_complete";
   }
 
   // ============================================
@@ -959,19 +938,19 @@ export class DataMigration extends EventEmitter {
 
   async rollbackMigration(
     migrationId: string,
-    reason: string
+    reason: string,
   ): Promise<string> {
     const migration = this.migrations.get(migrationId);
     if (!migration) {
-      throw new Error('Migration not found');
+      throw new Error("Migration not found");
     }
 
     const jobId = crypto.randomUUID();
     const job: MigrationJob = {
       id: jobId,
       migrationId,
-      type: 'rollback',
-      status: 'pending',
+      type: "rollback",
+      status: "pending",
       startTime: new Date(),
       progress: 0,
       recordsProcessed: 0,
@@ -989,10 +968,10 @@ export class DataMigration extends EventEmitter {
     this.migrationJobs.set(jobId, job);
 
     console.log(`⏪ Starting rollback: ${migration.name} - Reason: ${reason}`);
-    this.emit('rollbackStarted', { job, reason });
+    this.emit("rollbackStarted", { job, reason });
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Execute down script
       if (migration.downScript) {
@@ -1004,11 +983,11 @@ export class DataMigration extends EventEmitter {
           await this.executeSQL(statement, false);
 
           job.progress = Math.round(((i + 1) / totalStatements) * 100);
-          this.emit('rollbackProgress', { job, progress: job.progress });
+          this.emit("rollbackProgress", { job, progress: job.progress });
         }
       }
 
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.progress = 100;
@@ -1017,27 +996,27 @@ export class DataMigration extends EventEmitter {
       await this.removeMigrationRecord(migration);
 
       console.log(`✅ Rollback completed: ${migration.name}`);
-      this.emit('rollbackCompleted', job);
+      this.emit("rollbackCompleted", job);
 
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime!.getTime() - job.startTime.getTime();
 
       const rollbackError: MigrationError = {
         id: crypto.randomUUID(),
-        type: 'schema',
-        severity: 'critical',
+        type: "schema",
+        severity: "critical",
         message: error.message,
-        details: error.stack || '',
+        details: error.stack || "",
         timestamp: new Date(),
       };
 
       job.errors.push(rollbackError);
 
       console.error(`❌ Rollback failed: ${migration.name}`, error);
-      this.emit('rollbackFailed', { job, error });
+      this.emit("rollbackFailed", { job, error });
 
       throw error;
     }
@@ -1049,7 +1028,7 @@ export class DataMigration extends EventEmitter {
 
   private async validateMigration(
     job: MigrationJob,
-    migration: Migration
+    migration: Migration,
   ): Promise<void> {
     if (!migration.validation) return;
 
@@ -1060,15 +1039,15 @@ export class DataMigration extends EventEmitter {
     // Record count validation
     if (validation.recordCount && migration.dataTransformation) {
       const sourceCount = await this.getRecordCount(
-        migration.dataTransformation.sourceTable
+        migration.dataTransformation.sourceTable,
       );
       const targetCount = await this.getRecordCount(
-        migration.dataTransformation.targetTable
+        migration.dataTransformation.targetTable,
       );
 
       if (sourceCount !== targetCount) {
         job.warnings.push(
-          `Record count mismatch: source=${sourceCount}, target=${targetCount}`
+          `Record count mismatch: source=${sourceCount}, target=${targetCount}`,
         );
       }
     }
@@ -1083,8 +1062,8 @@ export class DataMigration extends EventEmitter {
       } catch (error) {
         const validationError: MigrationError = {
           id: crypto.randomUUID(),
-          type: 'validation',
-          severity: 'high',
+          type: "validation",
+          severity: "high",
           message: `Data integrity validation failed: ${error.message}`,
           details: integrityCheck,
           timestamp: new Date(),
@@ -1104,14 +1083,14 @@ export class DataMigration extends EventEmitter {
 
         if (executionTime > perfCheck.maxExecutionTime) {
           job.warnings.push(
-            `Performance check slow: ${perfCheck.name} took ${executionTime}ms (max: ${perfCheck.maxExecutionTime}ms)`
+            `Performance check slow: ${perfCheck.name} took ${executionTime}ms (max: ${perfCheck.maxExecutionTime}ms)`,
           );
         }
       } catch (error) {
         const perfError: MigrationError = {
           id: crypto.randomUUID(),
-          type: 'performance',
-          severity: 'medium',
+          type: "performance",
+          severity: "medium",
           message: `Performance check failed: ${perfCheck.name}`,
           details: error.message,
           timestamp: new Date(),
@@ -1122,7 +1101,7 @@ export class DataMigration extends EventEmitter {
     }
 
     console.log(
-      `✅ Migration validation completed: ${job.errors.length} errors, ${job.warnings.length} warnings`
+      `✅ Migration validation completed: ${job.errors.length} errors, ${job.warnings.length} warnings`,
     );
   }
 
@@ -1132,9 +1111,9 @@ export class DataMigration extends EventEmitter {
 
   private parseSQLScript(script: string): string[] {
     return script
-      .split(';')
-      .map(statement => statement.trim())
-      .filter(statement => statement.length > 0);
+      .split(";")
+      .map((statement) => statement.trim())
+      .filter((statement) => statement.length > 0);
   }
 
   private async executeSQL(statement: string, dryRun: boolean): Promise<any> {
@@ -1149,15 +1128,15 @@ export class DataMigration extends EventEmitter {
     return Promise.resolve();
   }
 
-  private async getRecordCount(tableName: string): Promise<number> {
+  private async getRecordCount(_tableName: string): Promise<number> {
     // Simulate getting record count
     return Math.floor(Math.random() * 100000) + 1000;
   }
 
   private async getDataBatch(
-    tableName: string,
+    _tableName: string,
     offset: number,
-    limit: number
+    limit: number,
   ): Promise<any[]> {
     // Simulate getting data batch
     const batch = [];
@@ -1173,14 +1152,14 @@ export class DataMigration extends EventEmitter {
   }
 
   private async insertTransformedRecord(
-    record: any,
-    tableName: string
+    _record: any,
+    _tableName: string,
   ): Promise<void> {
     // Simulate inserting transformed record
     await this.sleep(Math.random() * 10 + 5);
   }
 
-  private async executeValidationQuery(query: string): Promise<boolean> {
+  private async executeValidationQuery(_query: string): Promise<boolean> {
     // Simulate validation query execution
     await this.sleep(Math.random() * 100 + 50);
     return Math.random() > 0.1; // 90% success rate
@@ -1195,7 +1174,7 @@ export class DataMigration extends EventEmitter {
   }
 
   private async sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // ============================================
@@ -1204,7 +1183,7 @@ export class DataMigration extends EventEmitter {
 
   private async performHealthCheck(instance?: string): Promise<boolean> {
     console.log(
-      `🔍 Performing health check${instance ? ` on ${instance}` : ''}`
+      `🔍 Performing health check${instance ? ` on ${instance}` : ""}`,
     );
     await this.sleep(1000);
     return Math.random() > 0.1; // 90% success rate
@@ -1216,7 +1195,7 @@ export class DataMigration extends EventEmitter {
   }
 
   private async monitorTrafficSwitch(): Promise<void> {
-    console.log('📊 Monitoring traffic switch');
+    console.log("📊 Monitoring traffic switch");
     await this.sleep(5000);
   }
 
@@ -1231,7 +1210,7 @@ export class DataMigration extends EventEmitter {
   }
 
   private async startShadowTraffic(): Promise<void> {
-    console.log('👥 Starting shadow traffic');
+    console.log("👥 Starting shadow traffic");
     await this.sleep(2000);
   }
 
@@ -1239,13 +1218,13 @@ export class DataMigration extends EventEmitter {
     passed: boolean;
     differences: number;
   }> {
-    console.log('📊 Comparing shadow results');
+    console.log("📊 Comparing shadow results");
     await this.sleep(3000);
     return { passed: true, differences: 0 };
   }
 
   private async promoteShadowToProduction(): Promise<void> {
-    console.log('⬆️ Promoting shadow to production');
+    console.log("⬆️ Promoting shadow to production");
     await this.sleep(2000);
   }
 
@@ -1270,7 +1249,7 @@ export class DataMigration extends EventEmitter {
   // ============================================
 
   private async saveMigrationToFile(migration: Migration): Promise<void> {
-    const filename = `${migration.version}_${migration.name.replace(/\s+/g, '_').toLowerCase()}.json`;
+    const filename = `${migration.version}_${migration.name.replace(/\s+/g, "_").toLowerCase()}.json`;
     const filepath = path.join(this.config.database.migrationsPath, filename);
     await fs.writeFile(filepath, JSON.stringify(migration, null, 2));
   }
@@ -1280,13 +1259,13 @@ export class DataMigration extends EventEmitter {
       const files = await fs.readdir(this.config.database.migrationsPath);
 
       for (const file of files) {
-        if (file.endsWith('.json')) {
+        if (file.endsWith(".json")) {
           try {
             const filepath = path.join(
               this.config.database.migrationsPath,
-              file
+              file,
             );
-            const data = await fs.readFile(filepath, 'utf8');
+            const data = await fs.readFile(filepath, "utf8");
             const migration: Migration = JSON.parse(data);
             this.migrations.set(migration.id, migration);
           } catch (error) {
@@ -1297,7 +1276,7 @@ export class DataMigration extends EventEmitter {
 
       console.log(`📂 Loaded ${this.migrations.size} migrations`);
     } catch (error) {
-      console.warn('Failed to load migrations:', error);
+      console.warn("Failed to load migrations:", error);
     }
   }
 
@@ -1308,7 +1287,7 @@ export class DataMigration extends EventEmitter {
 
   private async recordMigrationExecution(
     migration: Migration,
-    job: MigrationJob
+    job: MigrationJob,
   ): Promise<void> {
     // Record in database migration table
     console.log(`📝 Recording migration execution: ${migration.name}`);
@@ -1321,7 +1300,7 @@ export class DataMigration extends EventEmitter {
 
   private startMonitoring(): Promise<void> {
     // Start monitoring migration progress
-    console.log('📊 Migration monitoring started');
+    console.log("📊 Migration monitoring started");
     return Promise.resolve();
   }
 
@@ -1345,8 +1324,8 @@ export class DataMigration extends EventEmitter {
     const migrations = Array.from(this.migrations.values());
     const jobs = Array.from(this.migrationJobs.values());
 
-    const completedJobs = jobs.filter(job => job.status === 'completed');
-    const failedJobs = jobs.filter(job => job.status === 'failed');
+    const completedJobs = jobs.filter((job) => job.status === "completed");
+    const failedJobs = jobs.filter((job) => job.status === "failed");
 
     return {
       totalMigrations: migrations.length,
@@ -1361,26 +1340,26 @@ export class DataMigration extends EventEmitter {
           : 0,
       totalDataMigrated: jobs.reduce(
         (sum, job) => sum + job.recordsProcessed,
-        0
+        0,
       ),
       lastMigrationDate:
         jobs.length > 0
-          ? new Date(Math.max(...jobs.map(job => job.startTime.getTime())))
+          ? new Date(Math.max(...jobs.map((job) => job.startTime.getTime())))
           : undefined,
       upcomingMigrations: migrations.filter(
-        migration =>
+        (migration) =>
           !jobs.some(
-            job =>
-              job.migrationId === migration.id && job.status === 'completed'
-          )
+            (job) =>
+              job.migrationId === migration.id && job.status === "completed",
+          ),
       ).length,
     };
   }
 
   updateConfig(newConfig: Partial<MigrationConfig>) {
     this.config = { ...this.config, ...newConfig };
-    console.log('🔧 DataMigration configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 DataMigration configuration updated");
+    this.emit("configUpdated", this.config);
   }
 }
 

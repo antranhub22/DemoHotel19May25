@@ -2,8 +2,8 @@
 // Based on: https://docs.vapi.ai/quickstart/web
 // Enhanced for compatibility with existing codebase
 
-import { logger } from '@shared/utils/logger';
-import Vapi from '@vapi-ai/web';
+import logger from "@shared/utils/logger";
+import Vapi from "@vapi-ai/web";
 
 export interface VapiOfficialConfig {
   publicKey: string;
@@ -31,6 +31,16 @@ export class VapiOfficial {
   private callTimeout: NodeJS.Timeout | null = null;
   private _isCallActive = false;
 
+  // ✅ NEW: Debug logging utility
+  private debugLog = (message: string, ...args: any[]) => {
+    if (
+      typeof window !== "undefined" &&
+      (import.meta.env.DEV || localStorage.getItem("DEBUG_VOICE") === "true")
+    ) {
+      console.log(message, ...args);
+    }
+  };
+
   constructor(config: VapiOfficialConfig) {
     this.config = config;
 
@@ -39,21 +49,21 @@ export class VapiOfficial {
       this.vapi = new Vapi(config.publicKey);
       this.setupEventListeners();
 
-      logger.debug('✅ VapiOfficial initialized', 'VapiOfficial', {
-        publicKey: config.publicKey.substring(0, 10) + '...',
+      logger.debug("✅ VapiOfficial initialized", "VapiOfficial", {
+        publicKey: config.publicKey.substring(0, 10) + "...",
         hasAssistantId: !!config.assistantId,
       });
     } catch (error) {
       // ✅ FIX: Handle KrispSDK errors gracefully
       if (
         error instanceof Error &&
-        (error.message.includes('KrispSDK') ||
-          error.message.includes('worklet'))
+        (error.message.includes("KrispSDK") ||
+          error.message.includes("worklet"))
       ) {
         logger.warn(
-          '⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering',
-          'VapiOfficial',
-          error
+          "⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering",
+          "VapiOfficial",
+          error,
         );
 
         // Retry without KrispSDK features
@@ -61,50 +71,48 @@ export class VapiOfficial {
           this.vapi = new Vapi(config.publicKey);
           this.setupEventListeners();
           logger.debug(
-            '✅ VapiOfficial initialized without KrispSDK',
-            'VapiOfficial'
+            "✅ VapiOfficial initialized without KrispSDK",
+            "VapiOfficial",
           );
         } catch (retryError) {
           logger.error(
-            '❌ Failed to initialize Vapi even without KrispSDK',
-            'VapiOfficial',
-            retryError
+            "❌ Failed to initialize Vapi even without KrispSDK",
+            "VapiOfficial",
+            retryError,
           );
           throw retryError;
         }
       } else {
-        logger.error('❌ Vapi initialization error', 'VapiOfficial', error);
+        logger.error("❌ Vapi initialization error", "VapiOfficial", error);
         throw error;
       }
     }
   }
 
   private setupEventListeners() {
-    console.log('🔧 [DEBUG] Setting up Vapi event listeners...');
-
     // Call start event
-    this.vapi.on('call-start', (callData?: any) => {
-      console.log('🎙️ [DEBUG] === VAPI CALL-START EVENT ===', callData);
-      logger.debug('🎙️ Call started', 'VapiOfficial', callData);
+    this.vapi.on("call-start", (callData?: any) => {
+      this.debugLog("🎙️ [DEBUG] === VAPI CALL-START EVENT ===", callData);
+      logger.debug("🎙️ Call started", "VapiOfficial", callData);
       this._isCallActive = true;
       this.config.onCallStart?.();
     });
 
     // Call end event
-    this.vapi.on('call-end', (callData?: any) => {
-      console.log('📞 [DEBUG] === VAPI CALL-END EVENT ===', callData);
-      logger.debug('📞 Call ended', 'VapiOfficial', callData);
+    this.vapi.on("call-end", (callData?: any) => {
+      this.debugLog("📞 [DEBUG] === VAPI CALL-END EVENT ===", callData);
+      logger.debug("📞 Call ended", "VapiOfficial", callData);
       this._isCallActive = false;
       this.clearCallTimeout();
       this.config.onCallEnd?.();
     });
 
     // Message events (transcripts, etc.)
-    this.vapi.on('message', (message: any) => {
-      if (message.type === 'transcript') {
+    this.vapi.on("message", (message: any) => {
+      if (message.type === "transcript") {
         logger.debug(
           `💬 ${message.role}: ${message.transcript}`,
-          'VapiOfficial'
+          "VapiOfficial",
         );
       }
 
@@ -121,27 +129,27 @@ export class VapiOfficial {
     });
 
     // Error handling
-    this.vapi.on('error', (error: any) => {
+    this.vapi.on("error", (error: any) => {
       // ✅ FIX: Handle KrispSDK errors specifically
       if (
         error &&
-        typeof error === 'object' &&
-        (error.message?.includes('KrispSDK') ||
-          error.name?.includes('Krisp') ||
-          error.message?.includes('worklet') ||
-          error.message?.includes('AbortError'))
+        typeof error === "object" &&
+        (error.message?.includes("KrispSDK") ||
+          error.name?.includes("Krisp") ||
+          error.message?.includes("worklet") ||
+          error.message?.includes("AbortError"))
       ) {
         logger.warn(
-          '⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering',
-          'VapiOfficial',
-          error
+          "⚠️ KrispSDK/Audio worklet error detected, continuing without noise filtering",
+          "VapiOfficial",
+          error,
         );
         // Don't end call for KrispSDK errors, just log and continue
         return;
       }
 
-      logger.error('❌ Vapi error:', 'VapiOfficial', error);
-      console.error('🔍 [DEBUG] Vapi error details:', {
+      logger.error("❌ Vapi error:", "VapiOfficial", error);
+      this.debugLog("🔍 [DEBUG] Vapi error details:", {
         error,
         message: error?.message,
         type: error?.type,
@@ -154,13 +162,13 @@ export class VapiOfficial {
     });
 
     // Speech start/end for UI feedback
-    this.vapi.on('speech-start', () => {
-      logger.debug('🗣️ Speech started', 'VapiOfficial');
+    this.vapi.on("speech-start", () => {
+      logger.debug("🗣️ Speech started", "VapiOfficial");
       this.config.onSpeechStart?.();
     });
 
-    this.vapi.on('speech-end', () => {
-      logger.debug('🤐 Speech ended', 'VapiOfficial');
+    this.vapi.on("speech-end", () => {
+      logger.debug("🤐 Speech ended", "VapiOfficial");
       this.config.onSpeechEnd?.();
     });
   }
@@ -180,14 +188,31 @@ export class VapiOfficial {
             autoGainControl: true,
           },
         });
-        stream.getTracks().forEach(track => track.stop()); // Clean up test stream
-        logger.debug('✅ Microphone access verified', 'VapiOfficial');
+        stream.getTracks().forEach((track) => track.stop()); // Clean up test stream
+        logger.debug("✅ Microphone access verified", "VapiOfficial");
       } catch (micError) {
-        logger.warn(
-          '⚠️ Microphone access issue, continuing anyway',
-          'VapiOfficial',
-          micError
-        );
+        const micErrorMessage =
+          micError instanceof Error ? micError.message : String(micError);
+        if (
+          micErrorMessage.includes("Permission denied") ||
+          micErrorMessage.includes("NotAllowedError")
+        ) {
+          logger.warn(
+            "⚠️ Microphone permission denied. Please enable microphone access and refresh the page.",
+            "VapiOfficial",
+            micError,
+          );
+          // ✅ IMPROVED: Throw more specific error for permission issues
+          throw new Error(
+            "Microphone permission required. Please enable microphone access and try again.",
+          );
+        } else {
+          logger.warn(
+            "⚠️ Microphone access issue, continuing anyway",
+            "VapiOfficial",
+            micError,
+          );
+        }
       }
 
       // ✅ FIX: Test audio context for worklet support
@@ -195,47 +220,47 @@ export class VapiOfficial {
         const audioContext = new (window.AudioContext ||
           (window as any).webkitAudioContext)();
         if (audioContext.audioWorklet) {
-          logger.debug('✅ Audio worklet support available', 'VapiOfficial');
+          logger.debug("✅ Audio worklet support available", "VapiOfficial");
         } else {
           logger.warn(
-            '⚠️ Audio worklet not supported, KrispSDK may fail',
-            'VapiOfficial'
+            "⚠️ Audio worklet not supported, KrispSDK may fail",
+            "VapiOfficial",
           );
         }
         audioContext.close();
       } catch (audioError) {
         logger.warn(
-          '⚠️ Audio context test failed, continuing anyway',
-          'VapiOfficial',
-          audioError
+          "⚠️ Audio context test failed, continuing anyway",
+          "VapiOfficial",
+          audioError,
         );
       }
 
       const assistantId = options.assistantId || this.config.assistantId;
 
       if (!assistantId) {
-        throw new Error('Assistant ID is required to start a call');
+        throw new Error("Assistant ID is required to start a call");
       }
 
       if (this._isCallActive) {
         logger.warn(
-          '⚠️ Call already active, ending previous call first',
-          'VapiOfficial'
+          "⚠️ Call already active, ending previous call first",
+          "VapiOfficial",
         );
         await this.endCall();
-        // Wait a moment before starting new call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // ✅ OPTIMIZED: Reduced delay from 1000ms to 500ms for better UX
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      console.log('🚀 [DEBUG] === STARTING VAPI CALL ===', {
-        assistantId: assistantId.substring(0, 15) + '...',
+      this.debugLog("🚀 [DEBUG] === STARTING VAPI CALL ===", {
+        assistantId: assistantId.substring(0, 15) + "...",
         timeout: options.timeout,
         metadata: options.metadata,
         currentState: this._isCallActive,
       });
 
-      logger.debug('🚀 Starting Vapi call', 'VapiOfficial', {
-        assistantId: assistantId.substring(0, 15) + '...',
+      logger.debug("🚀 Starting Vapi call", "VapiOfficial", {
+        assistantId: assistantId.substring(0, 15) + "...",
         timeout: options.timeout,
         metadata: options.metadata,
       });
@@ -245,17 +270,17 @@ export class VapiOfficial {
         metadata: options.metadata,
       });
 
-      console.log('✅ [DEBUG] === VAPI.START COMPLETED ===');
+      this.debugLog("✅ [DEBUG] === VAPI.START COMPLETED ===");
 
       // Set auto-timeout if specified
       if (options.timeout) {
         this.setCallTimeout(options.timeout);
-        console.log('⏰ [DEBUG] Auto-timeout set for', options.timeout, 'ms');
+        this.debugLog("⏰ [DEBUG] Auto-timeout set for", options.timeout, "ms");
       }
 
-      logger.debug('✅ Call started successfully', 'VapiOfficial');
+      logger.debug("✅ Call started successfully", "VapiOfficial");
     } catch (error) {
-      logger.error('❌ Failed to start call', 'VapiOfficial', error);
+      logger.error("❌ Failed to start call", "VapiOfficial", error);
       this._isCallActive = false;
       this.config.onError?.(error);
       throw error;
@@ -276,11 +301,11 @@ export class VapiOfficial {
   async endCall(): Promise<void> {
     try {
       if (!this._isCallActive) {
-        logger.debug('⚠️ No active call to end', 'VapiOfficial');
+        logger.debug("⚠️ No active call to end", "VapiOfficial");
         return;
       }
 
-      logger.debug('⏹️ Ending Vapi call', 'VapiOfficial');
+      logger.debug("⏹️ Ending Vapi call", "VapiOfficial");
 
       this.clearCallTimeout();
       await this.vapi.stop();
@@ -288,9 +313,9 @@ export class VapiOfficial {
       // Reset state
       this._isCallActive = false;
 
-      logger.debug('✅ Call ended successfully', 'VapiOfficial');
+      logger.debug("✅ Call ended successfully", "VapiOfficial");
     } catch (error) {
-      logger.error('❌ Failed to end call', 'VapiOfficial', error);
+      logger.error("❌ Failed to end call", "VapiOfficial", error);
       // Reset state even on error
       this._isCallActive = false;
       this.clearCallTimeout();
@@ -310,12 +335,12 @@ export class VapiOfficial {
    */
   sendMessage(message: string): void {
     if (!this.isCallActive()) {
-      logger.warn('⚠️ Cannot send message: no active call', 'VapiOfficial');
+      logger.warn("⚠️ Cannot send message: no active call", "VapiOfficial");
       return;
     }
 
     this.vapi.send(message);
-    logger.debug('📤 Message sent', 'VapiOfficial', { message });
+    logger.debug("📤 Message sent", "VapiOfficial", { message });
   }
 
   /**
@@ -325,19 +350,19 @@ export class VapiOfficial {
     this.clearCallTimeout();
 
     this.callTimeout = setTimeout(async () => {
-      logger.debug('⏰ Call timeout reached, ending call', 'VapiOfficial');
+      logger.debug("⏰ Call timeout reached, ending call", "VapiOfficial");
       try {
         await this.endCall();
       } catch (error) {
         logger.error(
-          '❌ Error during timeout call end:',
-          'VapiOfficial',
-          error
+          "❌ Error during timeout call end:",
+          "VapiOfficial",
+          error,
         );
       }
     }, timeoutMs);
 
-    logger.debug(`⏰ Call timeout set for ${timeoutMs}ms`, 'VapiOfficial');
+    logger.debug(`⏰ Call timeout set for ${timeoutMs}ms`, "VapiOfficial");
   }
 
   /**
@@ -347,7 +372,7 @@ export class VapiOfficial {
     if (this.callTimeout) {
       clearTimeout(this.callTimeout);
       this.callTimeout = null;
-      logger.debug('⏰ Call timeout cleared', 'VapiOfficial');
+      logger.debug("⏰ Call timeout cleared", "VapiOfficial");
     }
   }
 
@@ -362,8 +387,8 @@ export class VapiOfficial {
       this.vapi = new Vapi(newConfig.publicKey);
       this.setupEventListeners();
 
-      logger.debug('🔄 Vapi config updated', 'VapiOfficial', {
-        publicKey: newConfig.publicKey.substring(0, 10) + '...',
+      logger.debug("🔄 Vapi config updated", "VapiOfficial", {
+        publicKey: newConfig.publicKey.substring(0, 10) + "...",
       });
     }
   }
@@ -377,7 +402,7 @@ export class VapiOfficial {
       this.vapi.stop();
       this.vapi = null;
       this._isCallActive = false;
-      logger.debug('🗑️ Vapi instance destroyed', 'VapiOfficial');
+      logger.debug("🗑️ Vapi instance destroyed", "VapiOfficial");
     }
   }
 }

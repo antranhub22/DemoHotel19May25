@@ -33,7 +33,7 @@ import { logger } from "../utils/logger";
 // Import specialized services
 import { PrismaAnalyticsService } from "./PrismaAnalyticsService";
 import { PrismaRequestService } from "./PrismaRequestService";
-import { PrismaTenantService } from "./PrismaTenantService";
+import PrismaTenantService from "./PrismaTenantService";
 
 /**
  * Unified Database Service using Prisma ORM

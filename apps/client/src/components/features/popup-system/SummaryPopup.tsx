@@ -1,6 +1,7 @@
 import { usePopup } from "@/components/features/popup-system";
-import { logger } from "@shared/utils/logger";
-import React, { createElement, useEffect, useState } from "react";
+import logger from "@shared/utils/logger";
+import * as React from "react";
+import { createElement, useEffect, useState } from "react";
 
 interface SummaryPopupProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ export const SummaryPopup: React.FC<SummaryPopupProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { showSummary, removePopup } = usePopup();
+  const { showSummary } = usePopup();
   const [isVisible, setIsVisible] = useState(false);
 
   // ✅ NEW: Test function to trigger summary popup
