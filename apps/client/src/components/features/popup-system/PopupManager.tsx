@@ -1,5 +1,6 @@
 import { usePopupContext } from "@/context/PopupContext";
 import * as React from "react";
+import { useEffect } from "react";
 import { PopupStack } from "./PopupStack";
 
 interface PopupManagerProps {
