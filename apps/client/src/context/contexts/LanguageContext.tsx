@@ -1,3 +1,21 @@
+/**
+ * LANGUAGE CONTEXT - Single Source of Truth for Language State
+ * =============================================================
+ * RESPONSIBILITY: Primary language selection and translation management
+ * SHOULD: Be the authoritative source for current language across the app
+ * SHOULD: Handle all language-related state and translations
+ *
+ * OVERLAP AWARENESS:
+ * - VapiContextSimple maintains currentLanguage state (duplicated)
+ * - RefactoredAssistantContext also manages language state changes
+ * - Future: All language state should be managed exclusively here
+ *
+ * INTEGRATION POINTS:
+ * - Other contexts should subscribe via useLanguage() hook
+ * - Should trigger Vapi reinitialization when language changes
+ * - Controls language-specific assistant configuration
+ */
+
 import logger from "@shared/utils/logger";
 import * as React from "react";
 import { createContext, useCallback, useContext, useState } from "react";

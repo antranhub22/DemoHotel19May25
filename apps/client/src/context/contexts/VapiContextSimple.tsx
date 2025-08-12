@@ -2,7 +2,24 @@
 // Replaces complex VapiContext with simple, official implementation
 // ✅ UPDATED: Now uses vapiOfficial.ts instead of deprecated vapiSimple.ts
 
+/**
+ * RESPONSIBILITY CLARIFICATION:
+ * ================================
+ * PRIMARY: Handle Vapi SDK integration and raw message processing
+ * SHOULD: Forward transcript messages to TranscriptContext for processing
+ * SHOULD NOT: Duplicate transcript processing logic
+ *
+ * OVERLAP AWARENESS:
+ * - Currently duplicates some transcript processing with TranscriptContext
+ * - Future: Should focus only on SDK integration, not data management
+ *
+ * INTEGRATION POINTS:
+ * - Forwards messages to addTranscript() from TranscriptContext
+ * - Updates callDetails with language sync (temporary until Call state consolidation)
+ */
+
 import { useTenantDetection } from "@/context/AuthContext";
+import { useLanguage } from "@/context/contexts/LanguageContext";
 import { HotelConfiguration } from "@/hooks/useHotelConfiguration";
 import {
   CallOptions,
@@ -25,7 +42,7 @@ export interface VapiContextType {
   isCallActive: boolean;
   micLevel: number;
   callDetails: CallDetails | null;
-  currentLanguage: string; // Add current language tracking
+  // ✅ REMOVED: currentLanguage - use LanguageContext instead
 
   // Actions
   startCall: (language?: string, assistantId?: string) => Promise<void>;
@@ -84,7 +101,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
   // );
   const [micLevel, setMicLevel] = useState(0);
   const [callDetails, setCallDetails] = useState<CallDetails | null>(null);
-  const [currentLanguage, setCurrentLanguage] = useState("en");
+  // ✅ REMOVED: Duplicate language state - use LanguageContext instead
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
 
   // ✅ NEW: Track if we had an active call (to detect genuine call ends)
@@ -95,6 +112,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
 
   // Context dependencies
   const { addTranscript } = useTranscript();
+  const { language } = useLanguage(); // ✅ Use LanguageContext instead of local state
   const tenantInfo = useTenantDetection();
 
   // Get tenant ID function
@@ -175,6 +193,16 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         // ✅ NEW: Use temporary call ID, will be updated when Vapi provides real callId
         const tempCallId = `temp-call-${Date.now()}`;
         setCurrentCallId(tempCallId);
+
+        // ✅ INITIALIZE: Call details metadata (separate from transcript processing)
+        setCallDetails({
+          id: tempCallId,
+          roomNumber: "Unknown",
+          duration: "0:00",
+          category: "voice-assistant",
+          language: language as Language,
+        });
+
         logger.debug(
           "🆔 [VapiProvider] Call started with temporary call ID:",
           "VapiProvider",
@@ -307,47 +335,28 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
             timestamp: new Date().toISOString(),
           });
 
-          // Update call details with transcript
-          setCallDetails(
-            (prev) =>
-              ({
-                id: callId, // ✅ FIXED: Use consistent call ID
-                roomNumber: prev?.roomNumber || "Unknown",
-                duration: prev?.duration || "0:00",
-                category: prev?.category || "voice-assistant",
-                language: language as Language,
-                transcript: message.transcript,
-                role: message.role,
-              }) as CallDetails,
-          );
-
-          logger.debug(
-            "📝 [VapiProvider] Adding transcript with consistent call ID:",
-            "VapiProvider",
+          // ✅ SIMPLIFIED: Only forward to TranscriptContext (single responsibility)
+          // TranscriptContext handles all transcript processing and storage
+          debugLog(
+            "📝 [VapiProvider] Forwarding transcript to TranscriptContext:",
             {
               callId,
+              content: message.transcript?.substring(0, 50) + "...",
               role: message.role,
-              content: message.transcript.substring(0, 50) + "...",
               tenantId: getTenantId(),
             },
           );
 
-          // ✅ FIX: Use consistent call ID and proper tenant ID
-          debugLog("📝 [VapiProvider] About to call addTranscript:", {
-            callId,
-            content: message.transcript?.substring(0, 50) + "...",
-            role: message.role,
-            tenantId: getTenantId(),
-          });
-
           addTranscript({
-            callId: callId, // ✅ FIXED: Use consistent call ID
+            callId: callId, // ✅ Consistent call ID
             content: message.transcript,
             role: message.role as "user" | "assistant",
-            tenantId: getTenantId(), // ✅ FIXED: Use dynamic tenant ID
+            tenantId: getTenantId(), // ✅ Dynamic tenant ID
           });
 
-          debugLog("✅ [VapiProvider] addTranscript called successfully");
+          debugLog(
+            "✅ [VapiProvider] Transcript forwarded to TranscriptContext successfully",
+          );
         }
 
         if (message.type === "function-call") {
@@ -403,7 +412,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     const vapi = new VapiOfficial(config);
 
     vapiClientRef.current = vapi;
-    setCurrentLanguage(language);
+    // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
     return vapi;
   };
 
@@ -419,12 +428,11 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
         assistantId,
         timestamp: new Date().toISOString(),
         isCallActive,
-        currentLanguage,
+        contextLanguage: language, // ✅ Use parameter instead of state
         vapiClientExists: !!vapiClientRef.current,
       });
 
-      // Update current language
-      setCurrentLanguage(language);
+      // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
 
       // End any existing call first
       if (vapiClientRef.current && isCallActive) {
@@ -520,7 +528,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       // Initialize for new language
       const creds = await resolveVapiCredentials(language);
       vapiClientRef.current = initializeVapi(language, creds);
-      setCurrentLanguage(language);
+      // ✅ REMOVED: setCurrentLanguage - language managed by LanguageContext
 
       logger.debug("🔄 Reinitialized for language:", "VapiProvider", language);
     } catch (error) {
@@ -538,8 +546,8 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
       // Wrap in void IIFE to avoid linter complaining about top-level await inside effect
       void (async () => {
         try {
-          const creds = await resolveVapiCredentials(currentLanguage);
-          vapiClientRef.current = initializeVapi(currentLanguage, creds);
+          const creds = await resolveVapiCredentials(language);
+          vapiClientRef.current = initializeVapi(language, creds);
         } catch (error) {
           logger.error(
             "❌ Failed to initialize Vapi on mount:",
@@ -563,7 +571,7 @@ export const VapiProvider: React.FC<VapiProviderProps> = ({ children }) => {
     isCallActive,
     micLevel,
     callDetails,
-    currentLanguage,
+    // ✅ REMOVED: currentLanguage - use LanguageContext instead
     startCall,
     endCall,
     setCallDetails,

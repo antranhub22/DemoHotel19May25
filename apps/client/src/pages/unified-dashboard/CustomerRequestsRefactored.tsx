@@ -377,34 +377,25 @@ export const CustomerRequestsRefactored: React.FC = () => {
   // ========================================
   // Redux Domain Hooks - NEW Architecture
   // ========================================
-  // TEMPORARILY DISABLED - useRequestManagement causing build errors
+  // NOTE: useRequestManagement integration pending due to circular dependency
+  // TODO: Enable when dependency issues are resolved
   // const {
-  //   requests,
-  //   requestCounts,
-  //   selectedRequest,
-  //   filters,
-  //   isLoading,
-  //   error,
-  //   loadRequests,
-  //   selectRequest,
-  //   updateFilters,
-  //   clearFilters,
-  //   clearCurrentError,
-  //   setupAutoRefresh,
+  //   requests, requestCounts, selectedRequest, filters, isLoading, error,
+  //   loadRequests, selectRequest, updateFilters, clearFilters,
+  //   clearCurrentError, setupAutoRefresh
   // } = useRequestManagement();
 
-  // MOCK DATA FOR TESTING
+  // ========================================
+  // Fallback Data (until hooks are enabled)
+  // ========================================
   const requests = [] as any[];
   const requestCounts = { total: 0, pending: 0, inProgress: 0, completed: 0 };
   const selectedRequest = null as any;
-  const filters = {
-    status: "",
-    startDate: "",
-    endDate: "",
-    searchQuery: "",
-  };
+  const filters = { status: "", startDate: "", endDate: "", searchQuery: "" };
   const isLoading = false;
   const error = null as any;
+
+  // Stub functions for component compatibility
   const loadRequests = (..._args: any[]) => {};
   const selectRequest = (..._args: any[]) => {};
   const updateFilters = (..._args: any[]) => {};
@@ -414,8 +405,8 @@ export const CustomerRequestsRefactored: React.FC = () => {
     (..._args: any[]) =>
     () => {};
 
-  // Set up real-time updates
-  // useRequestRealtime(); // TEMPORARILY DISABLED
+  // Set up real-time updates (pending hook availability)
+  // useRequestRealtime(); // TODO: Enable when hooks are ready
 
   // ========================================
   // Local State for UI

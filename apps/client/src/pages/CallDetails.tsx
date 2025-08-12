@@ -1,3 +1,4 @@
+import { TranscriptItem } from "@/components/ui/TranscriptItem";
 import logger from "@shared/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import * as React from "react";
@@ -215,35 +216,13 @@ const CallDetails: React.FC = () => {
 
                 {transcripts?.length ? (
                   <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
-                    {transcripts.map(
-                      (
-                        transcript: any, // ✅ FIXED: Use any to bypass type conflict
-                      ) => (
-                        <div
-                          key={transcript.id}
-                          className={`flex ${transcript.role === "assistant" ? "justify-start" : "justify-end"}`}
-                        >
-                          <div
-                            className={`max-w-[75%] p-3 rounded-lg relative ${
-                              transcript.role === "assistant"
-                                ? "bg-blue-50 text-blue-900"
-                                : "bg-gray-100 text-gray-900"
-                            }`}
-                          >
-                            <div className="text-xs text-gray-500 mb-1">
-                              {transcript.role === "assistant"
-                                ? "Assistant"
-                                : "Guest"}{" "}
-                              • {formatDate(transcript.timestamp)}
-                            </div>
-                            <p className="text-sm">
-                              {transcript.content || transcript.message || ""}
-                            </p>{" "}
-                            {/* ✅ FIXED: Handle both content and message properties */}
-                          </div>
-                        </div>
-                      ),
-                    )}
+                    {transcripts.map((transcript: any) => (
+                      <TranscriptItem
+                        key={transcript.id}
+                        transcript={transcript}
+                        formatDate={formatDate}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-center">

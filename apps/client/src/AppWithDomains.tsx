@@ -45,7 +45,7 @@ import StaffDashboard from "@/pages/StaffDashboard";
 import { UnifiedDashboardHome } from "@/pages/unified-dashboard";
 import BillingSubscriptionManagement from "@/pages/unified-dashboard/BillingSubscriptionManagement";
 import { CustomerRequests } from "@/pages/unified-dashboard/CustomerRequests";
-// import { CustomerRequestsRefactored } from "@/pages/unified-dashboard/CustomerRequestsRefactored"; // TEMPORARILY DISABLED
+// Note: CustomerRequestsRefactored available but not used in current routes
 import HotelOperationsRefactored from "@/pages/unified-dashboard/HotelOperationsRefactored";
 import { StaffManagementRefactored } from "@/pages/unified-dashboard/StaffManagementRefactored";
 
@@ -304,8 +304,20 @@ function Router() {
         <Route path="/hotel-dashboard/requests-refactored">
           <ProtectedRoute requireAuth={true}>
             <UnifiedDashboardLayout>
-              {/* <CustomerRequestsRefactored /> TEMPORARILY DISABLED */}
-              <div>Component temporarily disabled for debugging</div>
+              {/* CustomerRequestsRefactored component available but route currently disabled */}
+              <div className="p-4 text-center text-gray-500">
+                <p>This page is currently under maintenance.</p>
+                <p>
+                  Please use the{" "}
+                  <Link
+                    href="/hotel-dashboard/requests"
+                    className="text-blue-500 underline"
+                  >
+                    standard requests page
+                  </Link>{" "}
+                  instead.
+                </p>
+              </div>
             </UnifiedDashboardLayout>
           </ProtectedRoute>
         </Route>
