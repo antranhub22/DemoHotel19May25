@@ -162,8 +162,22 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
 
   // ✅ NOTE: endCall registration moved after endCall definition
 
-  // ✅ NEW: Listen for language changes and reinitialize Vapi
+  // ✅ FIXED: Listen for language changes and reinitialize Vapi (only when no active call)
   useEffect(() => {
+    // ✅ CRITICAL FIX: Only reinitialize if no call is active
+    if (vapi.isCallActive || call.isCallActive) {
+      logger.debug(
+        "[RefactoredAssistant] ⚠️ Skipping Vapi reinitialization - call is active",
+        "Component",
+        {
+          newLanguage: language.language,
+          vapiCallActive: vapi.isCallActive,
+          callActive: call.isCallActive,
+        },
+      );
+      return;
+    }
+
     logger.debug(
       "[RefactoredAssistant] Language changed, reinitializing Vapi...",
       "Component",
@@ -182,7 +196,7 @@ function useRefactoredAssistantProvider(): RefactoredAssistantContextType {
       "Component",
       language.language,
     );
-  }, [language.language, vapi]); // Depend on language changes
+  }, [language.language, vapi, call.isCallActive, vapi.isCallActive]); // Depend on language changes and call state
 
   // Enhanced startCall that integrates with VapiContext
   const enhancedStartCall = useCallback(
