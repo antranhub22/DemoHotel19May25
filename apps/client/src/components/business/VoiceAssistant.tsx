@@ -29,12 +29,13 @@ import {
   useLanguageSelection,
 } from "@/domains/guest-experience/hooks/useGuestExperience";
 import type { Language } from "@/domains/guest-experience/types/guestExperience.types";
-import { useConfirmHandler } from "@/hooks/useConfirmHandler";
+// ✅ UNIFIED: useConfirmHandler replaced by useSummaryManager
+// import { useConfirmHandler } from "@/hooks/useConfirmHandler";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { UI_CONSTANTS } from "@/lib/constants";
 import logger from "@shared/utils/logger";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UI_CONSTANTS } from "@/lib/constants";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // ✅ NEW: Component to expose PopupSystem globally for migration
 
@@ -49,13 +50,9 @@ const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({
 }) => {
   const popupSystem = usePopup();
 
-  // ✅ FIX: Move useConfirmHandler inside PopupProvider to avoid context error
-  const {
-    autoTriggerSummary,
-    updateSummaryPopup,
-    resetSummarySystem,
-    storeCallId,
-  } = useConfirmHandler();
+  // ✅ UNIFIED: Use new summary manager instead of legacy useConfirmHandler
+  // Legacy useConfirmHandler replaced by useSummaryManager for better architecture
+  // const summaryManager = useSummaryManager(); // Will be initialized by UnifiedSummaryPopup
 
   // Expose PopupSystem globally for migration from NotificationSystem
   useEffect(() => {
@@ -74,18 +71,12 @@ const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({
     };
   }, [popupSystem]);
 
-  // ✅ NEW: Debug logging for useConfirmHandler
+  // ✅ UNIFIED: Summary manager now handled by UnifiedSummaryPopup component
   useEffect(() => {
     console.log(
-      "🔗 [VoiceAssistant] useConfirmHandler mounted with functions:",
-      {
-        hasAutoTriggerSummary: typeof autoTriggerSummary === "function",
-        hasUpdateSummaryPopup: typeof updateSummaryPopup === "function",
-        hasResetSummarySystem: typeof resetSummarySystem === "function",
-        hasStoreCallId: typeof storeCallId === "function",
-      },
+      "🔗 [VoiceAssistant] Summary system unified - legacy handlers removed",
     );
-  }, [autoTriggerSummary, updateSummaryPopup, resetSummarySystem, storeCallId]);
+  }, []);
 
   return <>{children}</>;
 };

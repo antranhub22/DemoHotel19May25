@@ -26,9 +26,8 @@ import { VoiceCommandContext } from "../features/voice-assistant/interface1/Voic
 // import { VoiceLanguageSwitcher } from "../features/voice-assistant/interface1/VoiceLanguageSwitcher";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
-// Import extracted components
-import { Interface1Desktop } from "./Interface1Desktop";
-import { Interface1Mobile } from "./Interface1Mobile";
+// Import unified component
+import { UnifiedInterface1 } from "./UnifiedInterface1";
 
 interface Interface1Props {
   isActive: boolean;
@@ -48,8 +47,6 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
     handleCallStart,
     handleCallEnd,
     showingSummary,
-    showRightPanel,
-    handleRightPanelClose,
     handleShowConversationPopup: _handleShowConversationPopup,
   } = useInterface1({ isActive });
 
@@ -270,22 +267,9 @@ export const Interface1 = ({ isActive }: Interface1Props): JSX.Element => {
       >
         <InterfaceHeader />
 
-        {/* 4-Position Layout: Desktop = 3-column + center bottom, Mobile = overlay */}
+        {/* ✅ UNIFIED: Single responsive layout component */}
         <div className="relative min-h-[300px] sm:min-h-[350px] md:min-h-[400px]">
-          {/* Desktop Layout */}
-          <Interface1Desktop
-            isCallStarted={isCallStarted}
-            micLevel={micLevel}
-            showConversation={showConversation}
-            showRightPanel={showRightPanel}
-            showingSummary={showingSummary}
-            handleCallStart={handleCallStart}
-            handleCallEnd={handleCallEnd}
-            handleRightPanelClose={handleRightPanelClose}
-          />
-
-          {/* Mobile Layout */}
-          <Interface1Mobile
+          <UnifiedInterface1
             isCallStarted={isCallStarted}
             micLevel={micLevel}
             showConversation={showConversation}
