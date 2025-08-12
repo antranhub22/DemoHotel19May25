@@ -23,6 +23,7 @@ import { VoiceLanguageSwitcher } from "@/components/features/voice-assistant/int
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSummaryManager } from "@/hooks/useSummaryManager";
 // ✅ NEW: Import Guest Experience domain hooks
 import {
   useGuestExperience,
@@ -52,7 +53,7 @@ const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({
 
   // ✅ UNIFIED: Use new summary manager instead of legacy useConfirmHandler
   // Legacy useConfirmHandler replaced by useSummaryManager for better architecture
-  // const summaryManager = useSummaryManager(); // Will be initialized by UnifiedSummaryPopup
+  const summaryManager = useSummaryManager(); // ✅ CRITICAL: Must be active for window.triggerSummaryPopup
 
   // Expose PopupSystem globally for migration from NotificationSystem
   useEffect(() => {
