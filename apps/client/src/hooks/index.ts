@@ -7,8 +7,8 @@
 // Responsive & Mobile Hooks
 // ========================================
 export * from "./use-mobile.tsx";
-export { useSiriResponsiveSize } from "./useSiriResponsiveSize.ts";
 export { useSimplifiedMobileTouch } from "./useSimplifiedMobileTouch.ts";
+export { useSiriResponsiveSize } from "./useSiriResponsiveSize.ts";
 
 // ========================================
 // UI & Behavior Hooks
@@ -27,7 +27,8 @@ export * from "./useInterface1.ts";
 // Button Handler Hooks
 // ========================================
 // export { useCancelHandler } from "./useCancelHandler"; // removed: file not found
-export { useConfirmHandler } from "./useConfirmHandler.ts";
+// ✅ UNIFIED: useConfirmHandler replaced by useSummaryManager
+// export { useConfirmHandler } from "./useConfirmHandler.ts";
 export { useSendToFrontDeskHandler } from "./useSendToFrontDeskHandler.ts";
 
 // ========================================

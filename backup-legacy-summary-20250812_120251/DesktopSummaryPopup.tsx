@@ -1,7 +1,7 @@
-import { useAssistant } from '@/context';
-import { usePopupContext } from '@/context/PopupContext';
-import { DebugLog } from '../debug/DebugWrapper';
-import { SummaryPopupContent } from './SummaryPopupContent';
+import { useAssistant } from "@/context";
+import { usePopupContext } from "@/context/PopupContext";
+import { DebugLog } from "../debug/DebugWrapper";
+import { SummaryPopupContent } from "./SummaryPopupContent";
 
 // Desktop Summary Popup Component - Similar to MobileSummaryPopup but for desktop layout
 export const DesktopSummaryPopup = () => {
@@ -9,7 +9,7 @@ export const DesktopSummaryPopup = () => {
   const { isCallActive } = useAssistant();
 
   // ✅ FIX: Calculate showSummary directly from popups to avoid race condition
-  const summaryPopup = popups.find(popup => popup.type === 'summary');
+  const summaryPopup = popups.find((popup) => popup.type === "summary");
   const showSummary = !!summaryPopup;
 
   // ✅ REMOVED: Cleanup logic moved to useConfirmHandler for centralized management
@@ -17,14 +17,14 @@ export const DesktopSummaryPopup = () => {
   const handleClose = () => {
     // Remove all summary popups
     popups
-      .filter(popup => popup.type === 'summary')
-      .forEach(popup => {
+      .filter((popup) => popup.type === "summary")
+      .forEach((popup) => {
         removePopup(popup.id);
       });
   };
 
   // ✅ DEBUG: Log render state
-  console.log('🖥️ [DesktopSummaryPopup] Render check:', {
+  console.log("🖥️ [DesktopSummaryPopup] Render check:", {
     showSummary,
     popupsCount: popups.length,
     summaryPopupFound: !!summaryPopup,
@@ -35,7 +35,7 @@ export const DesktopSummaryPopup = () => {
   // ✅ SIMPLIFIED: Only show if there's a summary popup
   if (!showSummary) {
     console.log(
-      '🖥️ [DesktopSummaryPopup] Not showing - no summary popup found'
+      "🖥️ [DesktopSummaryPopup] Not showing - no summary popup found",
     );
     return null;
   }

@@ -13,10 +13,7 @@ export interface UnifiedSummaryPopupProps {
 /**
  * UNIFIED SUMMARY POPUP COMPONENT
  *
- * Replaces:
- * - MobileSummaryPopup
- * - DesktopSummaryPopup
- * - SummaryPopupContent (logic parts)
+ * Replaces legacy summary components with unified responsive design
  *
  * Responsive design that adapts to device type
  */

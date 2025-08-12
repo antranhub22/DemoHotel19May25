@@ -1,8 +1,9 @@
-import { X } from "lucide-react";
-import React from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSendToFrontDeskHandler } from "@/hooks/useSendToFrontDeskHandler";
-import { SummaryPopupContent } from "./SummaryPopupContent";
+import { X } from "lucide-react";
+import React from "react";
+// ✅ UNIFIED: SummaryPopupContent replaced by UnifiedSummaryPopup
+// import { SummaryPopupContent } from "./SummaryPopupContent";
 
 interface RightPanelPopupProps {
   isOpen: boolean;
@@ -61,7 +62,10 @@ const RightPanelPopup: React.FC<RightPanelPopupProps> = ({
           <div className="space-y-4">
             {/* Summary Content */}
             <div className="overflow-y-auto" style={{ maxHeight: "320px" }}>
-              <SummaryPopupContent />
+              {/* ✅ UNIFIED: Use UnifiedSummaryPopup component instead */}
+              <div className="p-4 text-center text-gray-500">
+                Summary content moved to UnifiedSummaryPopup component
+              </div>
             </div>
 
             {/* ✅ SIMPLIFIED: Action Buttons using dedicated hook */}

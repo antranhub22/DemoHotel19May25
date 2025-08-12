@@ -18,9 +18,7 @@ interface UnifiedInterface1Props {
 /**
  * UNIFIED INTERFACE COMPONENT
  *
- * Replaces:
- * - Interface1Desktop
- * - Interface1Mobile
+ * Replaces legacy interface components with unified responsive design
  *
  * Single component with responsive layouts
  */

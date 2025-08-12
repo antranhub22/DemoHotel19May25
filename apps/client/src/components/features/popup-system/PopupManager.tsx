@@ -1,6 +1,5 @@
 import { usePopupContext } from "@/context/PopupContext";
 import * as React from "react";
-import { Suspense, useEffect } from "react";
 import { PopupStack } from "./PopupStack";
 
 interface PopupManagerProps {
@@ -74,9 +73,7 @@ export const PopupManager: React.FC<PopupManagerProps> = ({
         />
       )}
 
-      {/* Summary popups are now handled by unified SummaryPopup components:
-          - Desktop: SummaryPopup with layout="grid" in Interface1
-          - Mobile: MobileSummaryPopup with layout="center-modal" in Interface1
+      {/* Summary popups are now handled by UnifiedSummaryPopup component:
           This ensures consistent behavior and maintainability across platforms.
       */}
 
@@ -191,6 +188,8 @@ export const usePopup = () => {
     });
   };
 
+  // ✅ LEGACY: showSummary function replaced by UnifiedSummaryPopup component
+  // This function is kept for backward compatibility but will be deprecated
   const showSummary = (
     content?: React.ReactNode,
     options?: {
@@ -198,61 +197,22 @@ export const usePopup = () => {
       priority?: "high" | "medium" | "low";
     },
   ) => {
-    try {
-      console.log("📋 [DEBUG] showSummary called with options:", {
-        title: options?.title,
-        priority: options?.priority || "medium",
-        hasContent: !!content,
-      });
+    console.warn(
+      "⚠️ [DEPRECATED] PopupManager.showSummary is deprecated. Use UnifiedSummaryPopup component instead.",
+    );
 
-      // ✅ FIXED: Prevent multiple rapid calls with better logic
-      const now = Date.now();
-      // Increase debounce window to avoid double-trigger from multiple sources
-      const lastCall = (showSummary as any).lastCall as number | undefined;
-      if (lastCall && now - lastCall < 800) {
-        console.log("🚫 [DEBUG] showSummary called too rapidly, skipping...");
-        console.log("🚫 [DEBUG] Time since last call:", now - lastCall, "ms");
-        return "";
-      }
-      (showSummary as any).lastCall = now;
+    // Create basic popup for backward compatibility
+    const popupId = addPopup({
+      type: "summary",
+      title: options?.title || "Call Summary",
+      content: content || (
+        <div className="p-4 text-center">Summary content unavailable</div>
+      ),
+      priority: options?.priority || "medium",
+      isActive: false,
+    });
 
-      // ✅ FIXED: Remove isCallActive check - summary should show AFTER call ends
-      // The summary popup is triggered when the call ends, so isCallActive will be false
-
-      const popupId = addPopup({
-        type: "summary",
-        title: options?.title || "Call Summary",
-        content: content || (
-          <Suspense
-            fallback={
-              <div className="p-4 text-center text-gray-500">Loading...</div>
-            }
-          >
-            {/* Lazy import fallback to avoid missing identifier error */}
-            {React.createElement(
-              React.lazy(() =>
-                import("./SummaryPopupContent").then((m) => ({
-                  default: m.SummaryPopupContent,
-                })),
-              ),
-            )}
-          </Suspense>
-        ),
-        priority: options?.priority || "medium", // ✅ FIX: Default to 'medium' instead of 'high'
-        isActive: false,
-      });
-
-      console.log(
-        "✅ [DEBUG] Summary popup created successfully, ID:",
-        popupId,
-      );
-      return popupId;
-    } catch (error) {
-      console.error("❌ [DEBUG] Error in showSummary:", error);
-      // Assuming logger is defined elsewhere or needs to be imported
-      // logger.error('Error creating summary popup', 'PopupManager', error);
-      return "";
-    }
+    return popupId;
   };
 
   // ✅ NEW: Add static property to track last call time (with explicit typing via any)
