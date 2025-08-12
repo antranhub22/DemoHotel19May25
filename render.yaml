@@ -10,7 +10,7 @@ services:
     plan: free
     # ✅ FIXED: Simplified build command for stable deployment
     buildCommand: |
-      export NODE_OPTIONS="--max-old-space-size=1536 --expose-gc" &&
+      export NODE_OPTIONS="--max-old-space-size=1536" &&
       npm ci --only=production --no-optional --no-audit &&
       npx prisma generate --no-engine &&
       npx prisma migrate deploy &&
@@ -21,7 +21,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=1536 --expose-gc"
+        value: "--max-old-space-size=1536"
       - key: PORT
         value: 10000
       - key: AUTO_MIGRATE

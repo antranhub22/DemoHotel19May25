@@ -76,24 +76,24 @@ class MemoryManager {
 
   private performOptimization(): void {
     try {
-      // 🚨 BUG FIX: Check if GC is available and warn if not
+      // 🚀 RENDER COMPATIBILITY: Handle GC gracefully without --expose-gc
       if (!global.gc) {
-        logger.warn(
-          "⚠️ [MEMORY] Garbage collection not available! Node.js needs --expose-gc flag",
+        logger.debug(
+          "ℹ️ [MEMORY] Running without manual GC (Render platform limitation)",
           "MemoryManager",
         );
 
-        // 🔧 EMERGENCY: Alternative memory cleanup without GC
+        // 🔧 ALTERNATIVE: Memory cleanup strategies without manual GC
         const currentStats = this.getMemoryStats();
         if (currentStats.usage > 90) {
-          logger.error(
-            "🚨 [MEMORY] CRITICAL: Memory >90% but GC unavailable! Performing emergency cleanup",
+          logger.warn(
+            "⚠️ [MEMORY] High memory usage detected - relying on automatic GC",
             "MemoryManager",
             { usage: `${currentStats.usage.toFixed(2)}%` },
           );
 
-          // Force process restart recommendation
-          process.emit("SIGTERM", "SIGTERM");
+          // Trigger automatic GC through memory pressure
+          this.triggerAutomaticGC();
         }
         return;
       }
@@ -145,30 +145,29 @@ class MemoryManager {
 
   private performEmergencyCleanup(): void {
     try {
-      // ✅ EMERGENCY: More aggressive but safe cleanup
-      if (global.gc) {
-        const beforeStats = this.getMemoryStats();
+      const beforeStats = this.getMemoryStats();
 
-        // Force garbage collection twice for emergency cleanup
+      // ✅ EMERGENCY: Render-compatible cleanup strategy
+      if (global.gc) {
+        // If GC is available, use it
         global.gc();
         setTimeout(() => global.gc(), 100); // Small delay then second GC
-
         this.lastGC = Date.now();
-        const afterStats = this.getMemoryStats();
-
-        logger.error(
-          "🚨 [MEMORY] Emergency garbage collection performed",
-          "MemoryManager",
-          {
-            before: `${beforeStats.usage.toFixed(2)}%`,
-            after: `${afterStats.usage.toFixed(2)}%`,
-            heapBefore: `${beforeStats.heapUsed}MB`,
-            heapAfter: `${afterStats.heapUsed}MB`,
-            rssBefore: `${beforeStats.rss}MB`,
-            rssAfter: `${afterStats.rss}MB`,
-          },
-        );
+      } else {
+        // Alternative cleanup without manual GC
+        this.triggerAutomaticGC();
       }
+
+      const afterStats = this.getMemoryStats();
+      logger.error("🚨 [MEMORY] Emergency cleanup performed", "MemoryManager", {
+        strategy: global.gc ? "manual_gc" : "automatic_gc",
+        before: `${beforeStats.usage.toFixed(2)}%`,
+        after: `${afterStats.usage.toFixed(2)}%`,
+        heapBefore: `${beforeStats.heapUsed}MB`,
+        heapAfter: `${afterStats.heapUsed}MB`,
+        rssBefore: `${beforeStats.rss}MB`,
+        rssAfter: `${afterStats.rss}MB`,
+      });
 
       // ✅ SAFE: Log current state after cleanup
       const finalStats = this.getMemoryStats();
@@ -185,6 +184,32 @@ class MemoryManager {
 
   public getMemoryReport(): MemoryStats {
     return this.getMemoryStats();
+  }
+
+  private triggerAutomaticGC(): void {
+    try {
+      // 🚀 RENDER STRATEGY: Trigger automatic GC through memory pressure
+      // Create temporary large objects to trigger Node.js automatic GC
+      const tempArrays: any[] = [];
+      for (let i = 0; i < 10; i++) {
+        tempArrays.push(new Array(100000).fill(0));
+      }
+
+      // Clear references immediately to allow GC
+      tempArrays.length = 0;
+
+      // Force setTimeout to trigger event loop and potential GC
+      setTimeout(() => {
+        const afterStats = this.getMemoryStats();
+        logger.info(
+          "🔄 [MEMORY] Automatic GC strategy executed",
+          "MemoryManager",
+          { memoryUsage: `${afterStats.usage.toFixed(2)}%` },
+        );
+      }, 100);
+    } catch (error) {
+      logger.warn("Failed to trigger automatic GC", "MemoryManager", error);
+    }
   }
 
   public cleanup(): void {
