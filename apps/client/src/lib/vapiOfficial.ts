@@ -2,7 +2,7 @@
 // Based on: https://docs.vapi.ai/quickstart/web
 // Enhanced for compatibility with existing codebase
 
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 import Vapi from "@vapi-ai/web";
 
 export interface VapiOfficialConfig {
@@ -30,6 +30,16 @@ export class VapiOfficial {
   private config: VapiOfficialConfig;
   private callTimeout: NodeJS.Timeout | null = null;
   private _isCallActive = false;
+
+  // ✅ NEW: Debug logging utility
+  private debugLog = (message: string, ...args: any[]) => {
+    if (
+      typeof window !== "undefined" &&
+      (import.meta.env.DEV || localStorage.getItem("DEBUG_VOICE") === "true")
+    ) {
+      console.log(message, ...args);
+    }
+  };
 
   constructor(config: VapiOfficialConfig) {
     this.config = config;
@@ -82,7 +92,7 @@ export class VapiOfficial {
   private setupEventListeners() {
     // Call start event
     this.vapi.on("call-start", (callData?: any) => {
-      console.log("🎙️ [DEBUG] === VAPI CALL-START EVENT ===", callData);
+      this.debugLog("🎙️ [DEBUG] === VAPI CALL-START EVENT ===", callData);
       logger.debug("🎙️ Call started", "VapiOfficial", callData);
       this._isCallActive = true;
       this.config.onCallStart?.();
@@ -90,7 +100,7 @@ export class VapiOfficial {
 
     // Call end event
     this.vapi.on("call-end", (callData?: any) => {
-      console.log("📞 [DEBUG] === VAPI CALL-END EVENT ===", callData);
+      this.debugLog("📞 [DEBUG] === VAPI CALL-END EVENT ===", callData);
       logger.debug("📞 Call ended", "VapiOfficial", callData);
       this._isCallActive = false;
       this.clearCallTimeout();
@@ -139,7 +149,7 @@ export class VapiOfficial {
       }
 
       logger.error("❌ Vapi error:", "VapiOfficial", error);
-      console.error("🔍 [DEBUG] Vapi error details:", {
+      this.debugLog("🔍 [DEBUG] Vapi error details:", {
         error,
         message: error?.message,
         type: error?.type,
@@ -181,11 +191,28 @@ export class VapiOfficial {
         stream.getTracks().forEach((track) => track.stop()); // Clean up test stream
         logger.debug("✅ Microphone access verified", "VapiOfficial");
       } catch (micError) {
-        logger.warn(
-          "⚠️ Microphone access issue, continuing anyway",
-          "VapiOfficial",
-          micError,
-        );
+        const micErrorMessage =
+          micError instanceof Error ? micError.message : String(micError);
+        if (
+          micErrorMessage.includes("Permission denied") ||
+          micErrorMessage.includes("NotAllowedError")
+        ) {
+          logger.warn(
+            "⚠️ Microphone permission denied. Please enable microphone access and refresh the page.",
+            "VapiOfficial",
+            micError,
+          );
+          // ✅ IMPROVED: Throw more specific error for permission issues
+          throw new Error(
+            "Microphone permission required. Please enable microphone access and try again.",
+          );
+        } else {
+          logger.warn(
+            "⚠️ Microphone access issue, continuing anyway",
+            "VapiOfficial",
+            micError,
+          );
+        }
       }
 
       // ✅ FIX: Test audio context for worklet support
@@ -221,11 +248,11 @@ export class VapiOfficial {
           "VapiOfficial",
         );
         await this.endCall();
-        // Wait a moment before starting new call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // ✅ OPTIMIZED: Reduced delay from 1000ms to 500ms for better UX
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      console.log("🚀 [DEBUG] === STARTING VAPI CALL ===", {
+      this.debugLog("🚀 [DEBUG] === STARTING VAPI CALL ===", {
         assistantId: assistantId.substring(0, 15) + "...",
         timeout: options.timeout,
         metadata: options.metadata,
@@ -243,12 +270,12 @@ export class VapiOfficial {
         metadata: options.metadata,
       });
 
-      console.log("✅ [DEBUG] === VAPI.START COMPLETED ===");
+      this.debugLog("✅ [DEBUG] === VAPI.START COMPLETED ===");
 
       // Set auto-timeout if specified
       if (options.timeout) {
         this.setCallTimeout(options.timeout);
-        console.log("⏰ [DEBUG] Auto-timeout set for", options.timeout, "ms");
+        this.debugLog("⏰ [DEBUG] Auto-timeout set for", options.timeout, "ms");
       }
 
       logger.debug("✅ Call started successfully", "VapiOfficial");
