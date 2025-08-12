@@ -35,25 +35,26 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
 
   // OpenAI-Only Summary Logic: Only use OpenAI serviceRequests
   const getSummaryData = () => {
-    console.log("🔍 [DEBUG] SummaryPopupContent.getSummaryData called:", {
-      hasServiceRequests: !!serviceRequests,
-      serviceRequestsCount: serviceRequests?.length || 0,
-      hasCallDetails: !!callDetails,
-      language,
-    });
+    if (import.meta.env.DEV) {
+      console.log("🔍 [DEBUG] SummaryPopupContent.getSummaryData called:", {
+        hasServiceRequests: !!serviceRequests,
+        serviceRequestsCount: serviceRequests?.length || 0,
+        hasCallDetails: !!callDetails,
+        language,
+      });
+    }
 
     // OpenAI serviceRequests (enhanced processing)
     if (serviceRequests && serviceRequests.length > 0) {
       const roomNumber = serviceRequests[0]?.details?.roomNumber || "Unknown";
 
-      console.log("📋 [DEBUG] Found service requests:", {
-        count: serviceRequests.length,
-        roomNumber,
-        requests: serviceRequests.map((req) => ({
-          serviceType: req.serviceType,
-          requestText: req.requestText?.substring(0, 50) + "...",
-        })),
-      });
+      if (import.meta.env.DEV) {
+        console.log("📋 [DEBUG] Found service requests:", {
+          count: serviceRequests.length,
+          roomNumber,
+          // requests: serviceRequests.map(req => req.serviceType), // ✅ REDUCED verbosity
+        });
+      }
 
       return {
         source: "OpenAI Analysis",
@@ -72,7 +73,9 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
       };
     }
 
-    console.log("⚠️ [DEBUG] No service requests found, using fallback");
+    if (import.meta.env.DEV) {
+      console.log("⚠️ [DEBUG] No service requests found, using fallback");
+    }
 
     // Fallback: No summary available
     return {
@@ -88,7 +91,9 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
   // Auto-start processing when popup opens
   useEffect(() => {
     if (progression.status === "idle") {
-      console.log("🚀 [DEBUG] Starting summary processing...");
+      if (import.meta.env.DEV) {
+        console.log("🚀 [DEBUG] Starting summary processing...");
+      }
       startProcessing();
     }
   }, [progression.status, startProcessing]);
@@ -98,16 +103,21 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
     if (progression.status === "processing") {
       // Complete immediately if we have data
       if (serviceRequests?.length > 0) {
-        console.log("✅ [DEBUG] Completing with service requests data");
+        if (import.meta.env.DEV) {
+          console.log("✅ [DEBUG] Completing with service requests data");
+        }
         complete();
         return;
       }
 
-      // ✅ FIX: Timeout fallback - complete after 10 seconds even without data
+      // ✅ OPTIMIZED: Smart timeout based on environment
+      const timeoutMs = import.meta.env.DEV ? 15000 : 8000; // Dev: 15s, Prod: 8s
       const timeout = setTimeout(() => {
-        console.log("⏰ [DEBUG] Completing with fallback data after timeout");
+        if (import.meta.env.DEV) {
+          console.log("⏰ [DEBUG] Completing with fallback data after timeout");
+        }
         complete();
-      }, 10000); // 10 seconds timeout
+      }, timeoutMs);
 
       return () => clearTimeout(timeout);
     }
@@ -115,20 +125,34 @@ const SummaryPopupContent: React.FC<SummaryPopupContentProps> = () => {
 
   const summary = getSummaryData();
 
-  // Optional: Provide quick Vietnamese translation for staff view
+  // ✅ OPTIMIZED: Vietnamese translation for staff view (debounced)
   useEffect(() => {
     const maybeTranslate = async () => {
       try {
-        if (summary.hasData && language !== "vi" && !vietnameseSummary) {
+        // Only translate if we have substantial content and it's not Vietnamese
+        if (
+          summary.hasData &&
+          language !== "vi" &&
+          !vietnameseSummary &&
+          summary.content.length > 20 // ✅ Avoid translating trivial content
+        ) {
           await translateToVietnamese(summary.content);
         }
       } catch (e) {
         logger.warn("[SummaryPopupContent] translate error", "Component", e);
       }
     };
-    maybeTranslate();
-    // deps intentionally limited to avoid noisy re-translation
-  }, [summary.hasData, summary.content, language]);
+
+    // ✅ Debounce translation to avoid rapid re-translations
+    const timeoutId = setTimeout(maybeTranslate, 500);
+    return () => clearTimeout(timeoutId);
+  }, [
+    summary.hasData,
+    summary.content,
+    language,
+    vietnameseSummary,
+    translateToVietnamese,
+  ]);
 
   const formatTimestamp = (date: Date) => {
     try {

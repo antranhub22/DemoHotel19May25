@@ -6,7 +6,17 @@ import { useAssistant } from "@/context";
 import { ActiveOrder } from "@/types/core";
 import logger from "@shared/utils/logger";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket, io } from "socket.io-client";
+
+// ✅ PRODUCTION OPTIMIZATION: Conditional debug logging
+const debugLog = (...args: any[]) => {
+  if (
+    import.meta.env.DEV ||
+    localStorage.getItem("DEBUG_WEBSOCKET") === "true"
+  ) {
+    console.log(...args);
+  }
+};
 
 // ✅ NEW: Type declarations for global window functions
 declare global {
@@ -253,17 +263,15 @@ export function useWebSocket() {
           data,
         );
 
-        console.log(
-          "🎉 [DEBUG] ===== WEBSOCKET SUMMARY RECEIVED (DIRECT) =====",
-        );
-        console.log("🎉 [DEBUG] WebSocket received call-summary-received:", {
+        debugLog("🎉 [DEBUG] ===== WEBSOCKET SUMMARY RECEIVED (DIRECT) =====");
+        debugLog("🎉 [DEBUG] WebSocket received call-summary-received:", {
           callId: data.callId,
           hasSummary: !!data.summary,
           summaryLength: data.summary?.length || 0,
           hasServiceRequests: !!data.serviceRequests,
           serviceRequestsCount: data.serviceRequests?.length || 0,
           timestamp: data.timestamp,
-          fullData: data,
+          // fullData: data, // ✅ REMOVED: Reduce log verbosity
         });
 
         // ✅ Update assistant context directly
@@ -272,7 +280,7 @@ export function useWebSocket() {
           const storedCallId = (window as any).currentCallId;
           const finalCallId = serverCallId || storedCallId || "unknown";
 
-          console.log("🔗 [DEBUG] Using callId for summary update:", {
+          debugLog("🔗 [DEBUG] Using callId for summary update:", {
             serverCallId,
             storedCallId,
             finalCallId,
@@ -287,14 +295,15 @@ export function useWebSocket() {
         }
 
         if (data.serviceRequests && Array.isArray(data.serviceRequests)) {
-          console.log(
+          debugLog(
             "🔄 [DEBUG] Setting service requests to assistant context:",
-            data.serviceRequests,
+            data.serviceRequests.length,
+            "requests",
           );
           assistant.setServiceRequests(data.serviceRequests);
         }
 
-        console.log(
+        debugLog(
           "✅ [DEBUG] Direct call-summary-received processing completed",
         );
       } catch (error) {
@@ -314,7 +323,11 @@ export function useWebSocket() {
           "Component",
           data,
         );
-        console.log("📊 [DEBUG] Summary progression (direct):", data);
+        debugLog("📊 [DEBUG] Summary progression (direct):", {
+          status: data.status,
+          progress: data.progress,
+          currentStep: data.currentStep,
+        });
 
         // Bridge progression updates into UI progression hook if available
         if (window.updateSummaryProgression) {
@@ -397,12 +410,11 @@ export function useWebSocket() {
             data,
           );
 
-          console.log("📊 [DEBUG] WebSocket received summary-progression:", {
+          debugLog("📊 [DEBUG] WebSocket received summary-progression:", {
             callId: data.callId,
             status: data.status,
             progress: data.progress,
             currentStep: data.currentStep,
-            currentStepIndex: data.currentStepIndex,
           });
 
           // Update progression state if available
