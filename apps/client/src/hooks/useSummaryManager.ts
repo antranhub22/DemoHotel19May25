@@ -49,6 +49,7 @@ export const useSummaryManager = (): SummaryManagerReturn => {
     serviceRequests,
     language,
     callDetails,
+    callSummary,
     translateToVietnamese,
     vietnameseSummary,
     setCallSummary,
@@ -102,12 +103,27 @@ export const useSummaryManager = (): SummaryManagerReturn => {
   // ✅ NEW: Modification functions
   const updateSummaryContent = useCallback(
     (newContent: string) => {
-      setCallSummary(newContent);
+      // ✅ FIX: Update existing CallSummary object with new content
+      const currentSummary = callSummary;
+      if (currentSummary) {
+        setCallSummary({
+          ...currentSummary,
+          content: newContent,
+        });
+      } else {
+        // Create new CallSummary if none exists
+        setCallSummary({
+          callId: callDetails?.id || `temp-call-${Date.now()}`,
+          content: newContent,
+          timestamp: new Date(),
+          tenantId: "default",
+        });
+      }
       logger.debug("📝 Summary content updated", "SummaryManager", {
         length: newContent.length,
       });
     },
-    [setCallSummary],
+    [setCallSummary, callSummary, callDetails],
   );
 
   const updateServiceItems = useCallback(

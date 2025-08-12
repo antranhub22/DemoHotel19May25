@@ -339,7 +339,17 @@ export class PrismaConnectionManager {
    * Begin transaction with error handling
    */
   async beginTransaction<T>(
-    callback: (prisma: PrismaClient) => Promise<T>,
+    callback: (
+      prisma: Omit<
+        PrismaClient,
+        | "$connect"
+        | "$disconnect"
+        | "$on"
+        | "$transaction"
+        | "$use"
+        | "$extends"
+      >,
+    ) => Promise<T>,
   ): Promise<T> {
     const client = this.getClient();
 

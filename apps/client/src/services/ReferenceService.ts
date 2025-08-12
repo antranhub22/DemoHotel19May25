@@ -1,4 +1,4 @@
-import logger from '@shared/utils/logger';
+import logger from "@shared/utils/logger";
 
 export interface ReferenceItem {
   url: string;
@@ -16,11 +16,11 @@ class ReferenceService {
 
   async initialize() {
     try {
-      const response = await fetch('/assets/references/reference-map.json');
+      const response = await fetch("/assets/references/reference-map.json");
       this.referenceMap = await response.json();
-      logger.debug('Loaded referenceMap:', 'Component', this.referenceMap);
+      logger.debug("Loaded referenceMap:", "Component", this.referenceMap);
     } catch (error) {
-      logger.error('Error loading reference map:', 'Component', error);
+      logger.error("Error loading reference map:", "Component", error);
     }
   }
 
@@ -29,12 +29,12 @@ class ReferenceService {
     const matches: ReferenceItem[] = [];
 
     // Check each reference item for matching keywords
-    Object.values(this.referenceMap).forEach(item => {
-      const hasMatch = item.keywords.some(keyword =>
-        normalizedContent.includes(keyword.toLowerCase())
+    Object.values(this.referenceMap).forEach((item) => {
+      const hasMatch = item.keywords.some((keyword) =>
+        normalizedContent.includes(keyword.toLowerCase()),
       );
 
-      if (hasMatch && !matches.find(m => m.url === item.url)) {
+      if (hasMatch && !matches.find((m) => m.url === item.url)) {
         matches.push(item);
       }
     });
@@ -46,10 +46,10 @@ class ReferenceService {
     this.referenceMap[key] = reference;
     // Optionally save to backend
     try {
-      await fetch('/api/references', {
-        method: 'POST',
+      await fetch("/api/references", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...reference,
@@ -57,10 +57,12 @@ class ReferenceService {
         }),
       });
     } catch (error) {
-      logger.error('Error saving reference:', 'Component', error);
+      logger.error("Error saving reference:", "Component", error);
     }
   }
 }
 
-export const referenceService = new ReferenceService();
-export { ReferenceService };
+// ✅ TEMP FIX: Temporarily disable export to fix redeclaration error
+// export const referenceService = new ReferenceService();
+const referenceService = new ReferenceService();
+export { ReferenceService, referenceService };
