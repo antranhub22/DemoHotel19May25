@@ -85,8 +85,8 @@ export class CacheManager {
 
   private constructor() {
     this.config = {
-      maxSize: 10000, // 10k entries
-      maxMemorySize: 256, // 256MB
+      maxSize: 5000, // 5k entries (reduced for Standard plan)
+      maxMemorySize: 128, // 128MB (reduced for memory optimization)
       defaultTTL: 3600, // 1 hour
       cleanupInterval: 300000, // 5 minutes
       enableRedis: false, // Start with memory only
@@ -669,7 +669,7 @@ export class CacheManager {
 
   private recordCacheMetrics(
     operation: string,
-    tier: string,
+    _tier: string,
     duration: number,
   ): void {
     if (this.config.enableMetrics) {

@@ -2,8 +2,8 @@
 // PERFORMANCE OPTIMIZATION UTILITIES
 // ============================================================================
 
-import { performance } from 'perf_hooks';
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { performance } from "perf_hooks";
 
 // ============================================================================
 // CACHING SYSTEM
@@ -20,8 +20,8 @@ class MemoryCache {
   private readonly maxSize: number;
   private readonly defaultTTL: number;
 
-  constructor(maxSize: number = 1000, defaultTTL: number = 300000) {
-    // 5 minutes default
+  constructor(maxSize: number = 500, defaultTTL: number = 180000) {
+    // 3 minutes default (reduced for memory optimization)
     this.maxSize = maxSize;
     this.defaultTTL = defaultTTL;
   }
@@ -110,7 +110,7 @@ export class QueryOptimizer {
   static async withCache<T>(
     key: string,
     queryFn: () => Promise<T>,
-    ttl: number = this.CACHE_TTL
+    ttl: number = this.CACHE_TTL,
   ): Promise<T> {
     const cached = this.queryCache.get(key);
     if (cached && Date.now() - cached.timestamp < ttl) {
@@ -129,8 +129,8 @@ export class QueryOptimizer {
   static generateCacheKey(prefix: string, params: Record<string, any>): string {
     const sortedParams = Object.keys(params)
       .sort()
-      .map(key => `${key}:${params[key]}`)
-      .join('|');
+      .map((key) => `${key}:${params[key]}`)
+      .join("|");
     return `${prefix}:${sortedParams}`;
   }
 }
@@ -142,17 +142,15 @@ export class QueryOptimizer {
 export class ConnectionPool {
   private connections: any[] = [];
   private readonly maxConnections: number;
-  private readonly minConnections: number;
   private inUse = new Set<any>();
 
   constructor(maxConnections: number = 10, minConnections: number = 2) {
     this.maxConnections = maxConnections;
-    this.minConnections = minConnections;
   }
 
   async getConnection(): Promise<any> {
     // Return available connection
-    const available = this.connections.find(conn => !this.inUse.has(conn));
+    const available = this.connections.find((conn) => !this.inUse.has(conn));
     if (available) {
       this.inUse.add(available);
       return available;
@@ -167,9 +165,11 @@ export class ConnectionPool {
     }
 
     // Wait for available connection
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const checkForConnection = () => {
-        const available = this.connections.find(conn => !this.inUse.has(conn));
+        const available = this.connections.find(
+          (conn) => !this.inUse.has(conn),
+        );
         if (available) {
           this.inUse.add(available);
           resolve(available);
@@ -244,7 +244,7 @@ export class PerformanceMonitor {
     if (duration > 1000) {
       // 1 second threshold
       logger.warn(
-        `Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`
+        `Slow operation detected: ${operation} took ${duration.toFixed(2)}ms`,
       );
     }
   }
@@ -269,14 +269,14 @@ export class AsyncOptimizer {
   static async withConcurrencyLimit<T>(
     key: string,
     limit: number,
-    task: () => Promise<T>
+    task: () => Promise<T>,
   ): Promise<T> {
     this.concurrencyLimits.set(key, limit);
     const current = this.runningTasks.get(key) || 0;
 
     if (current >= limit) {
       // Wait for slot to become available
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         const checkLimit = () => {
           const running = this.runningTasks.get(key) || 0;
           if (running < limit) {
@@ -301,16 +301,18 @@ export class AsyncOptimizer {
     items: T[],
     processor: (item: T) => Promise<R>,
     batchSize: number = 10,
-    concurrency: number = 5
+    concurrency: number = 5,
   ): Promise<R[]> {
     const results: R[] = [];
     const batches = this.chunkArray(items, batchSize);
 
     for (const batch of batches as any[]) {
       const batchResults = await Promise.all(
-        batch.map(item =>
-          this.withConcurrencyLimit('batch', concurrency, () => processor(item))
-        )
+        batch.map((item) =>
+          this.withConcurrencyLimit("batch", concurrency, () =>
+            processor(item),
+          ),
+        ),
       );
       results.push(...batchResults);
     }
@@ -342,14 +344,14 @@ export class MemoryOptimizer {
 
     if (heapUsed > this.memoryThreshold) {
       logger.warn(
-        `High memory usage detected: ${(heapUsed * 100).toFixed(2)}% (${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB)`
+        `High memory usage detected: ${(heapUsed * 100).toFixed(2)}% (${Math.round(usage.heapUsed / 1024 / 1024)}MB/${Math.round(usage.heapTotal / 1024 / 1024)}MB)`,
       );
 
       // Force garbage collection if available
       if (global.gc && Date.now() - this.lastGC > this.GC_INTERVAL) {
         global.gc();
         this.lastGC = Date.now();
-        logger.info('Garbage collection performed');
+        logger.info("Garbage collection performed");
       }
 
       // Clear caches
@@ -394,11 +396,11 @@ export class ResponseOptimizer {
 
     if (Array.isArray(obj)) {
       return obj
-        .map(item => this.removeNullValues(item))
-        .filter(item => item !== undefined);
+        .map((item) => this.removeNullValues(item))
+        .filter((item) => item !== undefined);
     }
 
-    if (typeof obj === 'object') {
+    if (typeof obj === "object") {
       const cleaned: any = {};
       for (const [key, value] of Object.entries(obj)) {
         const cleanedValue = this.removeNullValues(value);
@@ -415,7 +417,7 @@ export class ResponseOptimizer {
   static paginateResults<T>(
     data: T[],
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
   ): { data: T[]; pagination: any } {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
@@ -442,14 +444,14 @@ export class ResponseOptimizer {
 export const performanceMiddleware = (req: any, res: any, next: any) => {
   const endTimer = PerformanceMonitor.startTimer(`${req.method} ${req.path}`);
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     endTimer();
 
     // Log slow requests
     const duration = performance.now();
     if (duration > 1000) {
       logger.warn(
-        `Slow request detected: ${req.method} ${req.path} took ${duration.toFixed(2)}ms (${res.statusCode})`
+        `Slow request detected: ${req.method} ${req.path} took ${duration.toFixed(2)}ms (${res.statusCode})`,
       );
     }
   });
@@ -459,7 +461,7 @@ export const performanceMiddleware = (req: any, res: any, next: any) => {
 
 export const cacheMiddleware = (ttl: number = 300000) => {
   return (req: any, res: any, next: any) => {
-    if (req.method !== 'GET') {
+    if (req.method !== "GET") {
       return next();
     }
 
@@ -486,7 +488,7 @@ export const cacheMiddleware = (ttl: number = 300000) => {
 
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
-  wait: number
+  wait: number,
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
@@ -497,7 +499,7 @@ export const debounce = <T extends (...args: any[]) => any>(
 
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
-  limit: number
+  limit: number,
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
   return (...args: Parameters<T>) => {
@@ -511,7 +513,7 @@ export const throttle = <T extends (...args: any[]) => any>(
 
 export const memoize = <T extends (...args: any[]) => any>(
   func: T,
-  keyGenerator?: (...args: Parameters<T>) => string
+  keyGenerator?: (...args: Parameters<T>) => string,
 ): T => {
   const cache = new Map<string, ReturnType<T>>();
 

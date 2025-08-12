@@ -5,6 +5,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
+import { emergencyCleanup } from "./emergencyCleanup";
 
 interface MemoryStats {
   heapUsed: number;
@@ -16,9 +17,9 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.7; // 🚀 STANDARD: 70% threshold for Render Standard plan (2GB)
-  private readonly CRITICAL_THRESHOLD = 0.85; // 🚀 STANDARD: 85% critical for 1536MB limit
-  private readonly CHECK_INTERVAL = 60000; // 🚀 STANDARD: 60 seconds optimal for 2GB plan
+  private readonly MEMORY_THRESHOLD = 0.6; // 🔥 AGGRESSIVE: 60% threshold for early intervention
+  private readonly CRITICAL_THRESHOLD = 0.75; // 🔥 AGGRESSIVE: 75% critical to prevent 96% situations
+  private readonly CHECK_INTERVAL = 30000; // 🔥 AGGRESSIVE: 30 seconds for faster response
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
 
@@ -87,12 +88,15 @@ class MemoryManager {
         const currentStats = this.getMemoryStats();
         if (currentStats.usage > 90) {
           logger.warn(
-            "⚠️ [MEMORY] High memory usage detected - relying on automatic GC",
+            "⚠️ [MEMORY] High memory usage detected - triggering emergency cleanup",
             "MemoryManager",
             { usage: `${currentStats.usage.toFixed(2)}%` },
           );
 
-          // Trigger automatic GC through memory pressure
+          // Use emergency cleanup for critical situations
+          emergencyCleanup.forceMemoryCleanup();
+        } else if (currentStats.usage > 80) {
+          // Trigger automatic GC for moderate usage
           this.triggerAutomaticGC();
         }
         return;
@@ -102,8 +106,8 @@ class MemoryManager {
       if (Date.now() - this.lastGC > 60000) {
         // 60 second interval for responsive memory management
         const beforeStats = this.getMemoryStats();
-        if (beforeStats.usage > 75) {
-          // GC at 75% to prevent critical situations (Standard plan optimization)
+        if (beforeStats.usage > 65) {
+          // GC at 65% to prevent 96% critical situations
           logger.info(
             "🗑️ [MEMORY] Starting garbage collection...",
             "MemoryManager",
@@ -154,8 +158,12 @@ class MemoryManager {
         setTimeout(() => global.gc(), 100); // Small delay then second GC
         this.lastGC = Date.now();
       } else {
-        // Alternative cleanup without manual GC
-        this.triggerAutomaticGC();
+        // Alternative cleanup - use emergency cleanup for critical situations
+        if (beforeStats.usage > 90) {
+          await emergencyCleanup.forceMemoryCleanup();
+        } else {
+          this.triggerAutomaticGC();
+        }
       }
 
       const afterStats = this.getMemoryStats();
@@ -188,25 +196,42 @@ class MemoryManager {
 
   private triggerAutomaticGC(): void {
     try {
-      // 🚀 RENDER STRATEGY: Trigger automatic GC through memory pressure
-      // Create temporary large objects to trigger Node.js automatic GC
+      // 🔥 ENHANCED RENDER STRATEGY: Multiple techniques to trigger GC
+
+      // 1. Create memory pressure with larger arrays
       const tempArrays: any[] = [];
-      for (let i = 0; i < 10; i++) {
-        tempArrays.push(new Array(100000).fill(0));
+      for (let i = 0; i < 50; i++) {
+        tempArrays.push(new Array(200000).fill(Math.random()));
       }
 
-      // Clear references immediately to allow GC
-      tempArrays.length = 0;
+      // 2. Create nested objects to increase heap pressure
+      const tempObjects: any[] = [];
+      for (let i = 0; i < 1000; i++) {
+        tempObjects.push({
+          data: new Array(1000).fill(i),
+          nested: { more: new Array(100).fill(i) },
+        });
+      }
 
-      // Force setTimeout to trigger event loop and potential GC
+      // 3. Clear all references immediately
+      tempArrays.length = 0;
+      tempObjects.length = 0;
+
+      // 4. Force multiple event loop cycles
       setTimeout(() => {
-        const afterStats = this.getMemoryStats();
-        logger.info(
-          "🔄 [MEMORY] Automatic GC strategy executed",
-          "MemoryManager",
-          { memoryUsage: `${afterStats.usage.toFixed(2)}%` },
-        );
-      }, 100);
+        // Second wave of memory pressure
+        const temp2 = new Array(100000).fill(0);
+        temp2.length = 0;
+
+        setTimeout(() => {
+          const afterStats = this.getMemoryStats();
+          logger.info(
+            "🔄 [MEMORY] Enhanced automatic GC strategy executed",
+            "MemoryManager",
+            { memoryUsage: `${afterStats.usage.toFixed(2)}%` },
+          );
+        }, 50);
+      }, 50);
     } catch (error) {
       logger.warn("Failed to trigger automatic GC", "MemoryManager", error);
     }
@@ -241,8 +266,8 @@ export const memoryOptimizationMiddleware = (
     (req as any).memoryStats = stats;
 
     // Warn if memory is high before heavy processing
-    if (stats.usage > 80) {
-      // ✅ STANDARD PLAN: 80% warning for 2GB plan
+    if (stats.usage > 70) {
+      // 🔥 AGGRESSIVE: 70% warning to prevent critical situations
       logger.warn(
         "⚠️ [MEMORY] High memory usage before request processing",
         "MemoryOptimizationMiddleware",
