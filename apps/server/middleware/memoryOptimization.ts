@@ -147,15 +147,16 @@ class MemoryManager {
     }
   }
 
-  private performEmergencyCleanup(): void {
+  private async performEmergencyCleanup(): Promise<void> {
     try {
       const beforeStats = this.getMemoryStats();
 
       // ✅ EMERGENCY: Render-compatible cleanup strategy
       if (global.gc) {
         // If GC is available, use it
-        global.gc();
-        setTimeout(() => global.gc(), 100); // Small delay then second GC
+        const manualGc = global.gc;
+        manualGc();
+        setTimeout(() => manualGc(), 100); // Small delay then second GC
         this.lastGC = Date.now();
       } else {
         // Alternative cleanup - use emergency cleanup for critical situations
