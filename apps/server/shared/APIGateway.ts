@@ -600,10 +600,10 @@ export class APIGateway extends EventEmitter {
       },
     };
 
-    // Store metrics history
+    // ✅ MEMORY FIX: Store limited metrics history - reduce from 1000 to 100 entries
     this.metricsHistory.push(metrics);
-    if (this.metricsHistory.length > 1000) {
-      this.metricsHistory = this.metricsHistory.slice(-1000);
+    if (this.metricsHistory.length > 100) {
+      this.metricsHistory = this.metricsHistory.slice(-50); // Keep only last 50 entries
     }
 
     return metrics;
@@ -1123,6 +1123,25 @@ export class APIGateway extends EventEmitter {
       try {
         const metrics = await this.getMetrics();
         this.emit("metricsCollected", metrics);
+
+        // ✅ MEMORY FIX: Cleanup old active requests periodically
+        const now = Date.now();
+        for (const [requestId, context] of this.activeRequests.entries()) {
+          // Remove requests older than 5 minutes
+          if (now - context.timestamp > 300000) {
+            this.activeRequests.delete(requestId);
+          }
+        }
+
+        // ✅ MEMORY FIX: Cleanup cache store if it gets too large
+        if (this.cacheStore.size > 1000) {
+          const entries = Array.from(this.cacheStore.entries());
+          // Keep only the most recent 500 entries
+          this.cacheStore.clear();
+          entries.slice(-500).forEach(([key, value]) => {
+            this.cacheStore.set(key, value);
+          });
+        }
       } catch (error) {
         logger.error(
           "❌ [APIGateway] Analytics collection failed",
@@ -1130,7 +1149,7 @@ export class APIGateway extends EventEmitter {
           error,
         );
       }
-    }, 60000); // Every minute
+    }, 120000); // ✅ Reduced frequency from 60s to 120s (2 minutes)
 
     logger.debug("📊 [APIGateway] Analytics started", "APIGateway");
   }

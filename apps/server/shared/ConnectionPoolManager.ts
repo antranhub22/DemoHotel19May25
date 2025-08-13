@@ -613,31 +613,44 @@ export class ConnectionPoolManager extends EventEmitter {
   }
 
   private startMetricsCollection(): void {
-    this.metricsInterval = setInterval(async () => {
-      try {
-        const metrics = await this.collectMetrics();
-        this.metrics.push(metrics);
+    this.metricsInterval = setInterval(
+      async () => {
+        try {
+          const metrics = await this.collectMetrics();
+          this.metrics.push(metrics);
 
-        // Keep only recent metrics
-        if (this.metrics.length > 1000) {
-          this.metrics = this.metrics.slice(-1000);
+          // ✅ MEMORY FIX: More aggressive cleanup - reduce from 1000 to 500 entries
+          if (this.metrics.length > 500) {
+            this.metrics = this.metrics.slice(-250); // Keep only last 250 entries
+          }
+
+          // ✅ MEMORY FIX: Cleanup old auto-scaling events
+          if (this.autoScalingEvents.length > 100) {
+            this.autoScalingEvents = this.autoScalingEvents.slice(-50);
+          }
+
+          // ✅ MEMORY FIX: Cleanup old alerts
+          if (this.alerts.length > 50) {
+            this.alerts = this.alerts.slice(-25);
+          }
+
+          // Check for auto-scaling opportunities
+          if (this.config.pool.enableAutoScaling) {
+            await this.checkAutoScaling(metrics);
+          }
+
+          // Check alert thresholds
+          this.checkAlertThresholds(metrics);
+        } catch (error) {
+          logger.error(
+            "❌ [ConnectionPool] Metrics collection failed",
+            "ConnectionPool",
+            error,
+          );
         }
-
-        // Check for auto-scaling opportunities
-        if (this.config.pool.enableAutoScaling) {
-          await this.checkAutoScaling(metrics);
-        }
-
-        // Check alert thresholds
-        this.checkAlertThresholds(metrics);
-      } catch (error) {
-        logger.error(
-          "❌ [ConnectionPool] Metrics collection failed",
-          "ConnectionPool",
-          error,
-        );
-      }
-    }, this.config.monitoring.metricsInterval);
+      },
+      Math.max(this.config.monitoring.metricsInterval, 60000),
+    ); // ✅ Minimum 60s interval
 
     logger.debug(
       "📊 [ConnectionPool] Metrics collection started",

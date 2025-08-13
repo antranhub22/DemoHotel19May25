@@ -54,7 +54,7 @@ class ApiUsageTracker {
   private prisma: PrismaClient;
   private usageQueue: ApiUsageData[] = [];
   private batchSize = 100;
-  private flushInterval = 30000; // 30 seconds
+  private flushInterval = 60000; // ✅ MEMORY FIX: Increased from 30s to 60s
   private processingInterval: NodeJS.Timeout;
 
   constructor() {

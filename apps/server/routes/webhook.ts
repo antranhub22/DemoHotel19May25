@@ -430,13 +430,45 @@ router.post("/vapi", express.json(), async (req, res) => {
     // ✅ FIX: Parse Vapi.ai payload structure correctly
     const message = req.body.message || req.body;
 
+    // ✅ MEMORY FIX: Check payload size before processing
+    const transcriptData = message?.transcript || message?.messages || [];
+    const transcriptLength = Array.isArray(transcriptData)
+      ? transcriptData.length
+      : 0;
+    const payloadSize = JSON.stringify(req.body).length;
+
+    // Reject if payload or transcript is too large
+    if (payloadSize > 1024 * 1024) {
+      // 1MB limit
+      logger.warn("[Webhook] Payload too large", "Component", {
+        payloadSizeMB: (payloadSize / 1024 / 1024).toFixed(2),
+        limit: "1MB",
+      });
+      return res.status(413).json({
+        success: false,
+        error: "Payload too large",
+      });
+    }
+
+    if (transcriptLength > 10000) {
+      // Max 10k transcript entries
+      logger.warn("[Webhook] Transcript too long", "Component", {
+        transcriptLength,
+        limit: 10000,
+      });
+      return res.status(413).json({
+        success: false,
+        error: "Transcript too long",
+      });
+    }
+
     logger.debug("[Webhook] Received data from Vapi.ai:", "Component", {
-      fullPayload: req.body,
       messageType: message?.type,
       hasCall: !!message?.call,
       hasTranscript: !!message?.transcript,
       hasMessages: !!message?.messages,
-      transcriptLength: (message?.transcript || message?.messages || []).length,
+      transcriptLength,
+      payloadSizeKB: (payloadSize / 1024).toFixed(1),
       payloadKeys: Object.keys(message || {}),
     });
 

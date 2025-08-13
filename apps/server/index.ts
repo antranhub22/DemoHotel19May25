@@ -1,19 +1,33 @@
 // 🚨 EMERGENCY MEMORY CONFIGURATION - MUST BE FIRST
 process.env.NODE_OPTIONS = "--max-old-space-size=768 --expose-gc";
 
-// Force aggressive garbage collection every 30 seconds
+// ✅ MEMORY FIX: Smart conditional GC - only when memory is high
 if (global.gc) {
   const manualGc = global.gc;
+  let lastGC = 0;
+
   setInterval(() => {
     try {
-      manualGc();
-      console.log(
-        `🔄 [EMERGENCY] Forced GC - Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
-      );
+      const memUsage = process.memoryUsage();
+      const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
+      const memoryThreshold = 300; // 300MB threshold
+
+      // Only GC if memory usage is high AND enough time has passed
+      if (heapUsedMB > memoryThreshold && Date.now() - lastGC > 120000) {
+        manualGc();
+        lastGC = Date.now();
+
+        // Log only when GC actually happens (reduce console spam)
+        const afterMemUsage = process.memoryUsage();
+        const afterMB = afterMemUsage.heapUsed / 1024 / 1024;
+        console.log(
+          `🔄 [MEMORY] Smart GC triggered - Before: ${heapUsedMB.toFixed(1)}MB → After: ${afterMB.toFixed(1)}MB`,
+        );
+      }
     } catch (error) {
-      console.warn("Emergency GC failed:", error);
+      // Silent error handling to reduce console spam
     }
-  }, 30000);
+  }, 60000); // Check every 60 seconds instead of 30
 } else {
   console.warn(
     "🚨 [EMERGENCY] global.gc not available - start with --expose-gc flag",

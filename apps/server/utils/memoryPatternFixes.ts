@@ -278,14 +278,15 @@ function startGlobalMemoryMonitoring() {
     clearInterval(memoryCheckInterval);
   }
 
+  // ✅ MEMORY FIX: Reduce monitoring frequency and adjust thresholds
   memoryCheckInterval = setInterval(() => {
     const memUsage = process.memoryUsage();
     const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
     const heapTotalMB = memUsage.heapTotal / 1024 / 1024;
     const utilization = (memUsage.heapUsed / memUsage.heapTotal) * 100;
 
-    if (heapUsedMB > 200) {
-      // 200MB threshold
+    // ✅ Raised threshold from 200MB to 350MB to reduce noise
+    if (heapUsedMB > 350) {
       logger.warn("⚠️ High memory usage detected", "MemoryPatternFixes", {
         heapUsed: `${heapUsedMB.toFixed(1)}MB`,
         heapTotal: `${heapTotalMB.toFixed(1)}MB`,
@@ -293,13 +294,19 @@ function startGlobalMemoryMonitoring() {
         rss: `${(memUsage.rss / 1024 / 1024).toFixed(1)}MB`,
       });
 
-      // Force GC if available and memory is very high
-      if (global.gc && heapUsedMB > 400) {
+      // Force GC if available and memory is critically high
+      if (global.gc && heapUsedMB > 450) {
         logger.warn("🗑️ Forcing garbage collection", "MemoryPatternFixes");
         global.gc();
       }
+    } else if (heapUsedMB > 250) {
+      // ✅ Add debug-level logging for moderate usage
+      logger.debug("📊 Memory status check", "MemoryPatternFixes", {
+        heapUsed: `${heapUsedMB.toFixed(1)}MB`,
+        utilization: `${utilization.toFixed(1)}%`,
+      });
     }
-  }, 60000); // Check every minute
+  }, 120000); // ✅ Reduced frequency from 60s to 120s (2 minutes)
 
   logger.info("🛡️ Global memory monitoring started", "MemoryPatternFixes");
 }
