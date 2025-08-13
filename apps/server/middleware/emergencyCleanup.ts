@@ -125,30 +125,13 @@ class EmergencyCleanup {
   }
 
   private cleanupRequireCache(): void {
-    const safeModules = [
-      "prisma",
-      "express",
-      "jsonwebtoken",
-      "bcrypt",
-      "cors",
-      "helmet",
-      "compression",
-      "dotenv",
-    ];
-
-    let cleaned = 0;
-    for (const key of Object.keys(require.cache)) {
-      // Only clean user modules, not node_modules or core modules
-      if (key.includes("/apps/") || key.includes("/packages/")) {
-        const isSafe = safeModules.some((module) => key.includes(module));
-        if (!isSafe) {
-          delete require.cache[key];
-          cleaned++;
-        }
-      }
-    }
-
-    logger.debug(`Cleaned ${cleaned} require cache entries`);
+    // ✅ CRITICAL FIX: Disable require.cache cleanup - causes memory leaks!
+    // Deleting require.cache entries can cause modules to be reloaded multiple times
+    // which leads to memory accumulation and potential circular reference issues
+    logger.debug(
+      "Skipping require.cache cleanup to prevent memory leaks",
+      "EmergencyCleanup",
+    );
   }
 
   private async forceGarbageCollection(): Promise<void> {
