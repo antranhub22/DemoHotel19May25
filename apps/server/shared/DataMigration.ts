@@ -558,15 +558,50 @@ export class DataMigration extends EventEmitter {
         return;
       }
 
-      // Process in batches
-      const batchSize = transformation.batchProcessing.enabled
+      // ✅ MEMORY-AWARE BATCH PROCESSING: Adjust batch size based on memory usage
+      const memoryUsage = process.memoryUsage();
+      const memoryUsedMB = memoryUsage.heapUsed / 1024 / 1024;
+      const memoryLimitMB = 400; // Conservative limit for batch processing
+
+      let baseBatchSize = transformation.batchProcessing.enabled
         ? transformation.batchProcessing.batchSize
         : this.config.migration.batchSize;
+
+      // Reduce batch size if memory usage is high
+      if (memoryUsedMB > memoryLimitMB * 0.7) {
+        // 70% of limit
+        baseBatchSize = Math.max(10, Math.floor(baseBatchSize / 4)); // Reduce to 25%
+        console.log(
+          `⚠️ High memory usage (${memoryUsedMB.toFixed(1)}MB) - reducing batch size to ${baseBatchSize}`,
+        );
+      } else if (memoryUsedMB > memoryLimitMB * 0.5) {
+        // 50% of limit
+        baseBatchSize = Math.max(20, Math.floor(baseBatchSize / 2)); // Reduce to 50%
+        console.log(
+          `⚠️ Moderate memory usage (${memoryUsedMB.toFixed(1)}MB) - reducing batch size to ${baseBatchSize}`,
+        );
+      }
+
+      const batchSize = baseBatchSize;
 
       let offset = 0;
       const baseProgress = migration.type === "combined" ? 50 : 0; // If combined, schema took 50%
 
       while (offset < totalRecords) {
+        // ✅ MEMORY CHECK: Monitor memory before each batch
+        const preBatchMemory = process.memoryUsage();
+        const preMemoryMB = preBatchMemory.heapUsed / 1024 / 1024;
+
+        if (preMemoryMB > memoryLimitMB * 0.8) {
+          console.log(
+            `⚠️ Memory approaching limit (${preMemoryMB.toFixed(1)}MB) - forcing GC`,
+          );
+          if (global.gc) {
+            global.gc();
+            await new Promise((resolve) => setTimeout(resolve, 100)); // Allow GC to complete
+          }
+        }
+
         const batch = await this.getDataBatch(
           transformation.sourceTable,
           offset,
@@ -582,6 +617,10 @@ export class DataMigration extends EventEmitter {
           await this.processDataBatchSequential(batch, transformation, job);
         }
 
+        // ✅ MEMORY CLEANUP: Clear batch reference and check memory after processing
+        const postBatchMemory = process.memoryUsage();
+        const postMemoryMB = postBatchMemory.heapUsed / 1024 / 1024;
+
         offset += batchSize;
         job.recordsProcessed = Math.min(offset, totalRecords);
 
@@ -592,8 +631,13 @@ export class DataMigration extends EventEmitter {
         this.emit("migrationProgress", { job, progress: job.progress });
 
         console.log(
-          `📈 Data progress: ${job.progress.toFixed(1)}% - Processed ${job.recordsProcessed}/${totalRecords} records`,
+          `📈 Data progress: ${job.progress.toFixed(1)}% - Processed ${job.recordsProcessed}/${totalRecords} records (Memory: ${postMemoryMB.toFixed(1)}MB)`,
         );
+
+        // ✅ MEMORY SAFETY: Small delay between batches to allow memory cleanup
+        if (postMemoryMB > memoryLimitMB * 0.6) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
       }
     } catch (error) {
       throw new Error(`Data migration failed: ${error.message}`);
@@ -1287,7 +1331,7 @@ export class DataMigration extends EventEmitter {
 
   private async recordMigrationExecution(
     migration: Migration,
-    job: MigrationJob,
+    _job: MigrationJob,
   ): Promise<void> {
     // Record in database migration table
     console.log(`📝 Recording migration execution: ${migration.name}`);

@@ -215,8 +215,9 @@ const dashboardLimiter = rateLimit({
 app.use("/api/saas-dashboard", dashboardLimiter);
 
 // Body parsing middleware
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: false, limit: "10mb" }));
+// ✅ MEMORY FIX: Reduced from 10MB to 1MB to prevent memory spikes
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
 // ✅ NEW v3.0: Advanced Metrics Collection Middleware
 // Track performance metrics for all API requests
@@ -246,11 +247,23 @@ import {
 } from "./middleware/memoryOptimization.js";
 // ✅ RESPONSE OPTIMIZATION: Add performance middleware
 import responseOptimization from "./middleware/responseOptimization.js";
+// ✅ UPLOAD LIMITER: Prevent memory spikes from concurrent uploads
+import uploadLimiter from "./middleware/uploadLimiter";
+// ✅ STREAMING OPTIMIZATION: Handle large payloads efficiently
+import streamingOptimization from "./middleware/streamingOptimization";
 
 // ✅ MEMORY OPTIMIZATION: Use new unified memory management system
 app.use(memoryOptimizationMiddleware);
 app.use(responseCompressionMiddleware);
 app.use(responseOptimization.fullStack);
+
+// ✅ STREAMING OPTIMIZATION: Handle large payloads with streaming
+app.use("/api/webhook", streamingOptimization);
+app.use("/api/vapi", streamingOptimization);
+
+// ✅ UPLOAD PROTECTION: Apply upload limits to file upload routes
+app.use("/api/upload", uploadLimiter);
+app.use("/api/files", uploadLimiter);
 
 // ✅ Enable process-level memory protection
 import "@tools/process/manager";
