@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Summary Popup</title>
+    <script src="http://localhost:3000/@vite/client" type="module"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #5DB6B9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background: #4a9ca0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #5DB6B9;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Summary Popup Test Suite</h1>
+        <p>Test suite để kiểm tra Summary popup hoạt động đúng sau khi kết thúc cuộc gọi</p>
+        
+        <div class="test-section">
+            <h3>📋 Bước 1: Kiểm tra Global Functions</h3>
+            <button class="test-button" onclick="testGlobalFunctions()">Test Global Functions</button>
+            <div id="global-functions-result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 Bước 2: Trigger Summary Popup Manually</h3>
+            <button class="test-button" onclick="triggerSummaryManually()">Trigger Summary Popup</button>
+            <div id="manual-trigger-result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Bước 3: Simulate Call End</h3>
+            <button class="test-button" onclick="simulateCallEnd()">Simulate Call End</button>
+            <div id="call-end-result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Bước 4: Check WebSocket</h3>
+            <button class="test-button" onclick="testWebSocket()">Test WebSocket</button>
+            <div id="websocket-result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🗂️ Bước 5: Check DOM</h3>
+            <button class="test-button" onclick="checkDOM()">Check DOM Elements</button>
+            <div id="dom-result" class="test-result"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(elementId, message, isError = false, isSuccess = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <div class="${isError ? 'error' : isSuccess ? 'success' : ''}">
+                    <strong>${new Date().toLocaleTimeString()}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testGlobalFunctions() {
+            const results = [];
+            
+            // Check if window.triggerSummaryPopup exists
+            if (typeof window.triggerSummaryPopup === 'function') {
+                results.push('✅ window.triggerSummaryPopup: EXISTS');
+            } else {
+                results.push('❌ window.triggerSummaryPopup: MISSING');
+            }
+
+            // Check if window.updateSummaryPopup exists
+            if (typeof window.updateSummaryPopup === 'function') {
+                results.push('✅ window.updateSummaryPopup: EXISTS');
+            } else {
+                results.push('❌ window.updateSummaryPopup: MISSING');
+            }
+
+            // Check if window.storeCallId exists
+            if (typeof window.storeCallId === 'function') {
+                results.push('✅ window.storeCallId: EXISTS');
+            } else {
+                results.push('❌ window.storeCallId: MISSING');
+            }
+
+            // Check for other global objects
+            if (window.unifiedPopupSystem) {
+                results.push('✅ window.unifiedPopupSystem: EXISTS');
+            } else {
+                results.push('❌ window.unifiedPopupSystem: MISSING');
+            }
+
+            const hasErrors = results.some(r => r.includes('❌'));
+            log('global-functions-result', results.join('<br>'), hasErrors, !hasErrors);
+        }
+
+        function triggerSummaryManually() {
+            try {
+                if (typeof window.triggerSummaryPopup === 'function') {
+                    console.log('🎯 Calling window.triggerSummaryPopup()');
+                    window.triggerSummaryPopup();
+                    log('manual-trigger-result', '✅ window.triggerSummaryPopup() called successfully!<br>Check if popup appeared on screen.', false, true);
+                } else {
+                    log('manual-trigger-result', '❌ window.triggerSummaryPopup is not available!<br>Summary manager may not be initialized.', true);
+                }
+            } catch (error) {
+                log('manual-trigger-result', `❌ Error calling window.triggerSummaryPopup(): ${error.message}`, true);
+            }
+        }
+
+        function simulateCallEnd() {
+            try {
+                // Simulate complete call end flow
+                const callId = `test-call-${Date.now()}`;
+                
+                // Step 1: Store call ID
+                if (window.storeCallId) {
+                    window.storeCallId(callId);
+                    console.log('📞 Call ID stored:', callId);
+                }
+
+                // Step 2: Trigger summary after delay
+                setTimeout(() => {
+                    if (window.triggerSummaryPopup) {
+                        console.log('📋 Triggering summary popup...');
+                        window.triggerSummaryPopup();
+                        log('call-end-result', `✅ Simulated call end complete!<br>Call ID: ${callId}<br>Summary popup should appear.`, false, true);
+                    } else {
+                        log('call-end-result', '❌ Cannot trigger summary - function not available', true);
+                    }
+                }, 1000);
+
+                log('call-end-result', '🔄 Simulating call end process...<br>Will trigger summary in 1 second.');
+            } catch (error) {
+                log('call-end-result', `❌ Error during call end simulation: ${error.message}`, true);
+            }
+        }
+
+        function testWebSocket() {
+            try {
+                // Check if WebSocket URL is accessible
+                const wsUrl = 'ws://localhost:10000/socket.io/';
+                log('websocket-result', `🔗 Testing WebSocket connection to: ${wsUrl}<br>🔄 Attempting connection...`);
+
+                const testSocket = new WebSocket('ws://localhost:10000');
+                
+                testSocket.onopen = () => {
+                    log('websocket-result', '✅ WebSocket connection successful!<br>Server is running and WebSocket is working.', false, true);
+                    testSocket.close();
+                };
+
+                testSocket.onerror = (error) => {
+                    log('websocket-result', '❌ WebSocket connection failed!<br>Server may not be running or WebSocket is not available.', true);
+                };
+
+                testSocket.onclose = () => {
+                    console.log('WebSocket test connection closed');
+                };
+
+                // Timeout after 5 seconds
+                setTimeout(() => {
+                    if (testSocket.readyState === WebSocket.CONNECTING) {
+                        testSocket.close();
+                        log('websocket-result', '⏰ WebSocket connection timeout!<br>Server may be slow to respond.', true);
+                    }
+                }, 5000);
+
+            } catch (error) {
+                log('websocket-result', `❌ WebSocket test error: ${error.message}`, true);
+            }
+        }
+
+        function checkDOM() {
+            const results = [];
+            
+            // Check for popup containers
+            const popupContainers = document.querySelectorAll('[class*="popup"], [id*="popup"]');
+            results.push(`📦 Popup containers found: ${popupContainers.length}`);
+
+            // Check for summary-related elements
+            const summaryElements = document.querySelectorAll('[class*="summary"], [id*="summary"]');
+            results.push(`📋 Summary elements found: ${summaryElements.length}`);
+
+            // Check for voice assistant elements
+            const voiceElements = document.querySelectorAll('[class*="voice"], [class*="siri"]');
+            results.push(`🎤 Voice assistant elements found: ${voiceElements.length}`);
+
+            // Check for React root
+            const reactRoot = document.getElementById('root');
+            if (reactRoot) {
+                results.push('✅ React root element: EXISTS');
+                results.push(`📊 React root children: ${reactRoot.children.length}`);
+            } else {
+                results.push('❌ React root element: MISSING');
+            }
+
+            // Check current URL
+            results.push(`🌐 Current URL: ${window.location.href}`);
+
+            log('dom-result', results.join('<br>'));
+        }
+
+        // Auto-run basic checks on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🧪 Auto-running basic tests...');
+                testGlobalFunctions();
+            }, 2000);
+        });
+
+        // Helper function to inspect the page
+        window.inspectSummarySystem = () => {
+            console.log('🔍 Summary System Inspection:');
+            console.log('window.triggerSummaryPopup:', window.triggerSummaryPopup);
+            console.log('window.updateSummaryPopup:', window.updateSummaryPopup);
+            console.log('window.storeCallId:', window.storeCallId);
+            console.log('window.unifiedPopupSystem:', window.unifiedPopupSystem);
+            
+            // Check for React components
+            const reactRoot = document.getElementById('root');
+            if (reactRoot) {
+                console.log('React root:', reactRoot);
+                console.log('React root children:', reactRoot.children);
+            }
+        };
+
+        console.log('🧪 Summary Popup Test Suite loaded');
+        console.log('💡 Use inspectSummarySystem() to inspect the current state');
+    </script>
+</body>
+</html>

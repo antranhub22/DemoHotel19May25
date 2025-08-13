@@ -24,6 +24,8 @@ import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import { useAuth } from "@/context/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSummaryManager } from "@/hooks/useSummaryManager";
+// ✅ EMERGENCY FIX: Import SummaryPopupFix component
+import SummaryPopupFix from "@/components/debug/SummaryPopupFix";
 // ✅ NEW: Import Guest Experience domain hooks
 import {
   useGuestExperience,
@@ -79,7 +81,13 @@ const GlobalPopupSystemProvider: React.FC<GlobalPopupSystemProviderProps> = ({
     );
   }, []);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {/* ✅ EMERGENCY FIX: Ensure Summary popup functions are available */}
+      <SummaryPopupFix />
+    </>
+  );
 };
 
 // Error fallback component for Interface1
