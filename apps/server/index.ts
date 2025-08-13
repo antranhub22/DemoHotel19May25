@@ -22,6 +22,9 @@ FeatureFlags.initialize();
 // 🔥 RADICAL MEMORY FIX: Import process kill switch for emergency protection
 import "./middleware/processKillSwitch";
 
+// 🚨 NUCLEAR MEMORY FIX: Ultimate memory protection (replaces processKillSwitch)
+import "./middleware/nuclearMemoryFix";
+
 // ✅ Import middleware
 
 // ✅ Import metrics middleware for automatic performance tracking
