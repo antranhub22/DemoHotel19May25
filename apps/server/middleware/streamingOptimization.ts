@@ -174,13 +174,82 @@ class StreamingOptimization {
   }
 
   /**
-   * Stream file uploads
+   * Stream file uploads - MEMORY SAFE VERSION
+   * Returns a stream instead of accumulating chunks in memory
+   */
+  createUploadStream(req: Request): NodeJS.ReadableStream {
+    let totalSize = 0;
+    const maxSize = this.config.maxPayloadSize;
+
+    this.stats.streamsCreated++;
+
+    // Create a pass-through stream for safe piping
+    const passThrough = new Transform({
+      transform(chunk: Buffer, encoding, callback) {
+        totalSize += chunk.length;
+
+        if (totalSize > maxSize) {
+          const error = new Error(
+            `Upload exceeds ${maxSize} bytes - current: ${totalSize} bytes`,
+          );
+          this.emit("error", error);
+          return callback(error);
+        }
+
+        // Log progress for large uploads (every 1MB)
+        if (totalSize % (1024 * 1024) === 0) {
+          logger.debug("📤 Upload progress", "Streaming", {
+            totalSize: `${(totalSize / 1024 / 1024).toFixed(1)}MB`,
+            maxSize: `${(maxSize / 1024 / 1024).toFixed(1)}MB`,
+          });
+        }
+
+        callback(null, chunk);
+      },
+    });
+
+    // Set timeout for upload
+    const timeout = setTimeout(() => {
+      passThrough.destroy(new Error("Upload timeout"));
+    }, this.config.timeoutMs);
+
+    passThrough.on("end", () => {
+      clearTimeout(timeout);
+      this.stats.bytesProcessed += totalSize;
+
+      logger.debug("✅ Upload stream completed", "Streaming", {
+        totalSize: `${(totalSize / 1024).toFixed(1)}KB`,
+      });
+    });
+
+    passThrough.on("error", (error) => {
+      clearTimeout(timeout);
+      this.stats.errors++;
+      logger.error("⚠️ Upload stream error", "Streaming", { error });
+    });
+
+    // Pipe request to pass-through stream
+    req.pipe(passThrough);
+
+    return passThrough;
+  }
+
+  /**
+   * DEPRECATED: streamFileUpload - use createUploadStream instead
+   * This method accumulates all chunks in memory (dangerous for large files)
    */
   async streamFileUpload(req: Request): Promise<Buffer[]> {
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      let totalSize = 0;
+    logger.warn(
+      "⚠️ DEPRECATED: streamFileUpload accumulates memory - use createUploadStream instead",
+      "Streaming",
+    );
 
+    // For backward compatibility, but with strict limits
+    const chunks: Buffer[] = [];
+    let totalSize = 0;
+    const SAFE_LIMIT = 10 * 1024 * 1024; // 10MB hard limit for memory accumulation
+
+    return new Promise((resolve, reject) => {
       this.stats.streamsCreated++;
 
       const timeout = setTimeout(() => {
@@ -190,6 +259,18 @@ class StreamingOptimization {
 
       req.on("data", (chunk: Buffer) => {
         totalSize += chunk.length;
+
+        // ✅ MEMORY PROTECTION: Hard limit for memory accumulation
+        if (totalSize > SAFE_LIMIT) {
+          clearTimeout(timeout);
+          req.destroy(new Error("Upload too large for memory accumulation"));
+          reject(
+            new Error(
+              `Upload exceeds safe memory limit ${SAFE_LIMIT} bytes - use streaming instead`,
+            ),
+          );
+          return;
+        }
 
         if (totalSize > this.config.maxPayloadSize) {
           clearTimeout(timeout);
@@ -202,11 +283,12 @@ class StreamingOptimization {
 
         chunks.push(chunk);
 
-        // Log progress for large uploads
-        if (chunks.length % 100 === 0) {
+        // Log progress less frequently to reduce overhead
+        if (chunks.length % 50 === 0) {
           logger.debug("📤 Upload progress", "Streaming", {
             chunks: chunks.length,
             totalSize: `${(totalSize / 1024).toFixed(1)}KB`,
+            memoryUsed: `${(totalSize / 1024 / 1024).toFixed(1)}MB`,
           });
         }
       });
@@ -215,9 +297,10 @@ class StreamingOptimization {
         clearTimeout(timeout);
         this.stats.bytesProcessed += totalSize;
 
-        logger.debug("✅ Upload stream completed", "Streaming", {
+        logger.debug("✅ Upload stream completed (memory mode)", "Streaming", {
           chunks: chunks.length,
           totalSize: `${(totalSize / 1024).toFixed(1)}KB`,
+          memoryUsed: `${(totalSize / 1024 / 1024).toFixed(1)}MB`,
         });
 
         resolve(chunks);
@@ -357,3 +440,23 @@ export {
   streamingOptimization,
 };
 export type { StreamingConfig, StreamingStats };
+
+// ============================================================================
+// MEMORY-SAFE UPLOAD HELPERS
+// ============================================================================
+
+/**
+ * Create memory-safe upload stream
+ */
+export function createSafeUploadStream(req: Request): NodeJS.ReadableStream {
+  const streamer = new StreamingOptimization();
+  return streamer.createUploadStream(req);
+}
+
+/**
+ * Check if upload should use streaming vs memory accumulation
+ */
+export function shouldStreamUpload(contentLength: number): boolean {
+  const MEMORY_SAFE_LIMIT = 5 * 1024 * 1024; // 5MB
+  return contentLength > MEMORY_SAFE_LIMIT;
+}

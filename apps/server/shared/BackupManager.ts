@@ -516,10 +516,23 @@ export class BackupManager extends EventEmitter {
 
       const pgDump = spawn("pg_dump", args, { env });
 
-      let errorOutput = "";
+      // ✅ MEMORY SAFE: Use bounded error buffer instead of string concatenation
+      const errorChunks: Buffer[] = [];
+      let errorSize = 0;
+      const MAX_ERROR_SIZE = 1024 * 1024; // 1MB max error output
 
       pgDump.stderr.on("data", (data) => {
-        errorOutput += data.toString();
+        errorSize += data.length;
+
+        if (errorSize > MAX_ERROR_SIZE) {
+          // Keep only the last part of error output
+          errorChunks.length = 0;
+          errorChunks.push(Buffer.from("...[error output truncated]...\n"));
+          errorChunks.push(data.slice(-1024)); // Keep last 1KB
+          errorSize = errorChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        } else {
+          errorChunks.push(data);
+        }
       });
 
       pgDump.on("close", async (code) => {
@@ -531,6 +544,7 @@ export class BackupManager extends EventEmitter {
             reject(error);
           }
         } else {
+          const errorOutput = Buffer.concat(errorChunks).toString("utf-8");
           reject(new Error(`pg_dump failed with code ${code}: ${errorOutput}`));
         }
       });
@@ -581,10 +595,23 @@ export class BackupManager extends EventEmitter {
 
       mysqldump.stdout.pipe(writeStream);
 
-      let errorOutput = "";
+      // ✅ MEMORY SAFE: Use bounded error buffer for MySQL dump
+      const errorChunks: Buffer[] = [];
+      let errorSize = 0;
+      const MAX_ERROR_SIZE = 1024 * 1024; // 1MB max error output
 
       mysqldump.stderr.on("data", (data) => {
-        errorOutput += data.toString();
+        errorSize += data.length;
+
+        if (errorSize > MAX_ERROR_SIZE) {
+          // Keep only the last part of error output
+          errorChunks.length = 0;
+          errorChunks.push(Buffer.from("...[error output truncated]...\n"));
+          errorChunks.push(data.slice(-1024)); // Keep last 1KB
+          errorSize = errorChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        } else {
+          errorChunks.push(data);
+        }
       });
 
       mysqldump.on("close", async (code) => {
@@ -598,6 +625,7 @@ export class BackupManager extends EventEmitter {
             reject(error);
           }
         } else {
+          const errorOutput = Buffer.concat(errorChunks).toString("utf-8");
           reject(
             new Error(`mysqldump failed with code ${code}: ${errorOutput}`),
           );
@@ -1039,16 +1067,30 @@ export class BackupManager extends EventEmitter {
 
       const tar = spawn("tar", args);
 
-      let errorOutput = "";
+      // ✅ MEMORY SAFE: Use bounded error buffer for tar
+      const errorChunks: Buffer[] = [];
+      let errorSize = 0;
+      const MAX_ERROR_SIZE = 1024 * 1024; // 1MB max error output
 
       tar.stderr.on("data", (data) => {
-        errorOutput += data.toString();
+        errorSize += data.length;
+
+        if (errorSize > MAX_ERROR_SIZE) {
+          // Keep only the last part of error output
+          errorChunks.length = 0;
+          errorChunks.push(Buffer.from("...[error output truncated]...\n"));
+          errorChunks.push(data.slice(-1024)); // Keep last 1KB
+          errorSize = errorChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+        } else {
+          errorChunks.push(data);
+        }
       });
 
       tar.on("close", (code) => {
         if (code === 0) {
           resolve();
         } else {
+          const errorOutput = Buffer.concat(errorChunks).toString("utf-8");
           reject(new Error(`tar failed with code ${code}: ${errorOutput}`));
         }
       });

@@ -268,6 +268,10 @@ app.use("/api/files", uploadLimiter);
 // ✅ Enable process-level memory protection
 import "@tools/process/manager";
 
+// ✅ MEMORY PATTERN FIXES: Apply global memory safety fixes
+import { applyAllMemoryFixes } from "./utils/memoryPatternFixes";
+applyAllMemoryFixes();
+
 // ✅ NEW v3.0: Advanced Caching Middleware
 // Automatic cache invalidation on data mutations
 app.use(cacheInvalidationMiddleware());
