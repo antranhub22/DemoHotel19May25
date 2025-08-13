@@ -17,9 +17,9 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.6; // 🔥 AGGRESSIVE: 60% threshold for early intervention
-  private readonly CRITICAL_THRESHOLD = 0.75; // 🔥 AGGRESSIVE: 75% critical to prevent 96% situations
-  private readonly CHECK_INTERVAL = 30000; // 🔥 AGGRESSIVE: 30 seconds for faster response
+  private readonly MEMORY_THRESHOLD = 0.5; // 🔥 RADICAL: 50% threshold for much earlier intervention
+  private readonly CRITICAL_THRESHOLD = 0.65; // 🔥 RADICAL: 65% critical to prevent 94% situations
+  private readonly CHECK_INTERVAL = 60000; // 🔥 OPTIMIZED: 60 seconds to reduce overhead
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
 
@@ -197,44 +197,30 @@ class MemoryManager {
 
   private triggerAutomaticGC(): void {
     try {
-      // 🔥 ENHANCED RENDER STRATEGY: Multiple techniques to trigger GC
+      // 🔥 RADICAL FIX: Eliminated dangerous memory pressure creation
+      // ❌ REMOVED: Creating 10+ MILLION objects was causing the memory leak!
+      // Old code was creating: 50 * 200,000 + 1,000 * 1,000 + 100,000 = ~11M objects
 
-      // 1. Create memory pressure with larger arrays
-      const tempArrays: any[] = [];
-      for (let i = 0; i < 50; i++) {
-        tempArrays.push(new Array(200000).fill(Math.random()));
-      }
+      // ✅ SAFE: Simple forced GC if available
+      if (global.gc) {
+        const beforeStats = this.getMemoryStats();
+        global.gc();
+        const afterStats = this.getMemoryStats();
 
-      // 2. Create nested objects to increase heap pressure
-      const tempObjects: any[] = [];
-      for (let i = 0; i < 1000; i++) {
-        tempObjects.push({
-          data: new Array(1000).fill(i),
-          nested: { more: new Array(100).fill(i) },
+        logger.info("🔄 [MEMORY] Safe GC executed", "MemoryManager", {
+          before: `${beforeStats.usage.toFixed(2)}%`,
+          after: `${afterStats.usage.toFixed(2)}%`,
+          freed: `${(beforeStats.heapUsed - afterStats.heapUsed).toFixed(2)}MB`,
         });
+      } else {
+        // ✅ SAFE: Let Node.js handle GC naturally
+        logger.debug(
+          "🔄 [MEMORY] Letting Node.js handle GC naturally",
+          "MemoryManager",
+        );
       }
-
-      // 3. Clear all references immediately
-      tempArrays.length = 0;
-      tempObjects.length = 0;
-
-      // 4. Force multiple event loop cycles
-      setTimeout(() => {
-        // Second wave of memory pressure
-        const temp2 = new Array(100000).fill(0);
-        temp2.length = 0;
-
-        setTimeout(() => {
-          const afterStats = this.getMemoryStats();
-          logger.info(
-            "🔄 [MEMORY] Enhanced automatic GC strategy executed",
-            "MemoryManager",
-            { memoryUsage: `${afterStats.usage.toFixed(2)}%` },
-          );
-        }, 50);
-      }, 50);
     } catch (error) {
-      logger.warn("Failed to trigger automatic GC", "MemoryManager", error);
+      logger.warn("Safe GC execution failed", "MemoryManager", error);
     }
   }
 

@@ -19,6 +19,9 @@ import http from "http";
 import { FeatureFlags } from "@server/shared/FeatureFlags";
 FeatureFlags.initialize();
 
+// 🔥 RADICAL MEMORY FIX: Import process kill switch for emergency protection
+import "./middleware/processKillSwitch";
+
 // ✅ Import middleware
 
 // ✅ Import metrics middleware for automatic performance tracking
