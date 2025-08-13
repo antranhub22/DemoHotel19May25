@@ -310,7 +310,7 @@ class StreamingOptimization {
 /**
  * Check if request should use streaming
  */
-export function shouldUseStreaming(req: Request): boolean {
+function shouldUseStreaming(req: Request): boolean {
   const contentLength = parseInt(req.headers["content-length"] || "0", 10);
   const contentType = req.headers["content-type"] || "";
 
@@ -325,10 +325,7 @@ export function shouldUseStreaming(req: Request): boolean {
 /**
  * Create streaming response wrapper
  */
-export function createStreamingResponse(
-  res: Response,
-  data: any,
-): Promise<void> {
+function createStreamingResponse(res: Response, data: any): Promise<void> {
   const streamer = new StreamingOptimization();
   return streamer.streamJSONResponse(res, data);
 }

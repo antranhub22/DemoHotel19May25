@@ -7,7 +7,7 @@ import React, { useEffect, useRef } from "react";
 declare global {
   interface Window {
     triggerSummaryPopup?: () => void;
-    updateSummaryPopup?: () => void;
+    updateSummaryPopup?: (summary: string, serviceRequests: any[]) => void;
     storeCallId?: (callId: string) => void;
     resetSummarySystem?: () => void;
     testSummaryFix?: () => void;
@@ -102,7 +102,17 @@ export const SummaryPopupFix: React.FC = () => {
         };
 
         // Setup updateSummaryPopup for backward compatibility
-        window.updateSummaryPopup = window.triggerSummaryPopup;
+        window.updateSummaryPopup = (
+          summary: string,
+          serviceRequests: any[],
+        ) => {
+          console.log("🔄 [SummaryPopupFix] updateSummaryPopup called with:", {
+            summary,
+            serviceRequests,
+          });
+          // Call the main trigger function
+          window.triggerSummaryPopup?.();
+        };
 
         console.log("✅ [SummaryPopupFix] All global functions setup complete");
 
