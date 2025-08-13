@@ -551,11 +551,12 @@ router.post("/vapi", express.json(), async (req, res) => {
     }
 
     // ✅ FALLBACK: Handle ANY event with transcript data for OpenAI processing
-    const transcriptData = message?.transcript || message?.messages || [];
+    const fallbackTranscriptData =
+      message?.transcript || message?.messages || [];
     if (
-      transcriptData &&
-      Array.isArray(transcriptData) &&
-      transcriptData.length > 0
+      fallbackTranscriptData &&
+      Array.isArray(fallbackTranscriptData) &&
+      fallbackTranscriptData.length > 0
     ) {
       logger.debug(
         "[Webhook] FALLBACK: Processing transcript from unknown event type",
@@ -563,13 +564,13 @@ router.post("/vapi", express.json(), async (req, res) => {
         {
           callId,
           eventType: message?.type || "unknown",
-          transcriptLength: transcriptData.length,
+          transcriptLength: fallbackTranscriptData.length,
         },
       );
 
       try {
         // Process with OpenAI even if event type is unknown
-        await processTranscriptWithOpenAI(transcriptData, callId, req);
+        await processTranscriptWithOpenAI(fallbackTranscriptData, callId, req);
 
         return res.status(200).json({
           success: true,
